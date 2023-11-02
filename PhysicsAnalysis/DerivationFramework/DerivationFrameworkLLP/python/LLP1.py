@@ -48,36 +48,23 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                     CreateViewCollection   = True))
 
     # Max Cell sum decoration tool
-    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-    acc.merge(LArOnOffIdMappingCfg(flags))
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
+        MaxCellDecoratorCfg, MaxCellDecoratorKernelCfg)
 
-    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import MaxCellDecoratorCfg
+    # Default configuration
+    acc.merge(MaxCellDecoratorKernelCfg(flags))
 
-    LLP1MaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
+    # Specific for LRTElectrons
+    LLP1LRTMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
         flags,
-        name = "LLP1MaxCellDecoratorTool",
-        SGKey_electrons = "Electrons",
-        SGKey_photons   = "Photons"))
-    acc.addPublicTool(LLP1MaxCellDecoratorTool)
-
-
-    if flags.GeoModel.Run == LHCPeriod.Run3:
-        LLP1LRTMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
-            flags,
-            name = "LLP1LRTMaxCellDecoratorTool",
-            SGKey_electrons = "LRTElectrons",
-            SGKey_photons = ''))
-    else:
-        LLP1LRTMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
-            flags,
-            name = "LLP1LRTMaxCellDecoratorTool",
-            SGKey_electrons = "LRTElectrons",
-            SGKey_egammaClusters   = "egammaClusters",
-            SGKey_photons = ''))
+        name = "LLP1LRTMaxCellDecoratorTool",
+        SGKey_electrons = "LRTElectrons",
+        SGKey_egammaClusters = ("" if flags.GeoModel.Run == LHCPeriod.Run3
+                                else "egammaClusters"),
+        SGKey_photons = ''))
     acc.addPublicTool(LLP1LRTMaxCellDecoratorTool)
 
-    augmentationTools = [ LLP1MaxCellDecoratorTool,
-                          LLP1LRTMaxCellDecoratorTool ]
+    augmentationTools = [ LLP1LRTMaxCellDecoratorTool ]
 
     # Reclustered jets definitions
     from JetRecConfig.JetRecConfig import registerAsInputConstit, JetRecCfg

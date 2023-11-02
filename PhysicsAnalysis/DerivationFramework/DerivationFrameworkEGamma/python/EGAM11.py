@@ -201,7 +201,7 @@ def EGAM11ZegMassToolCfg(flags):
 
 
 # Main algorithm config
-def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
+def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
     """Configure the derivation framework driving algorithm (kernel)
     for EGAM11"""
     acc = ComponentAccumulator()
@@ -214,7 +214,7 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
     jetList = [AntiKt4PV0Track, AntiKt4EMTopo]
     jetInternalFlags.isRecoJob = True
     for jd in jetList:
-        acc.merge(JetRecCfg(ConfigFlags, jd))
+        acc.merge(JetRecCfg(flags, jd))
 
     # Common augmentations
     # cannot use PhysCommon sequence because
@@ -225,20 +225,20 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
     from DerivationFrameworkMuons.MuonsCommonConfig import MuonsCommonCfg
     from DerivationFrameworkEGamma.EGammaCommonConfig import EGammaCommonCfg
 
-    TrackingFlags = ConfigFlags.Tracking
+    TrackingFlags = flags.Tracking
     acc.merge(
         InDetCommonCfg(
-            ConfigFlags,
+            flags,
             DoVertexFinding=TrackingFlags.doVertexFinding,
             AddPseudoTracks=TrackingFlags.doPseudoTracking,
             DecoLRTTTVA=False,
-            DoR3LargeD0=ConfigFlags.Tracking.doLargeD0,
+            DoR3LargeD0=flags.Tracking.doLargeD0,
             StoreSeparateLargeD0Container=TrackingFlags.storeSeparateLargeD0Container,
             MergeLRT=False,
         )
     )
-    acc.merge(MuonsCommonCfg(ConfigFlags))
-    acc.merge(EGammaCommonCfg(ConfigFlags))
+    acc.merge(MuonsCommonCfg(flags))
+    acc.merge(EGammaCommonCfg(flags))
 
     # jet cleaning
     # standard way in PhysCommon is
@@ -251,7 +251,7 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
     from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtEffToolCfg
 
     algName = "DFJet_EventCleaning_passJvtAlg"
-    passJvtTool = acc.popToolsAndMerge(getJvtEffToolCfg(ConfigFlags, "AntiKt4EMTopo"))
+    passJvtTool = acc.popToolsAndMerge(getJvtEffToolCfg(flags, "AntiKt4EMTopo"))
     passJvtTool.PassJVTKey = "AntiKt4EMTopoJets.DFCommonJets_passJvt"
     acc.addEventAlgo(
         CompFactory.JetDecorationAlg(
@@ -269,7 +269,7 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
     tauKey = ""  # workaround for missing taus
     orTool = acc.popToolsAndMerge(
         OverlapRemovalToolCfg(
-            ConfigFlags, outputLabel=outputLabel, bJetLabel=bJetLabel, doTaus=False
+            flags, outputLabel=outputLabel, bJetLabel=bJetLabel, doTaus=False
         )
     )
     algOR = CompFactory.OverlapRemovalGenUseAlg(
@@ -299,7 +299,7 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
 
         jetCleaningTool = acc.popToolsAndMerge(
             JetCleaningToolCfg(
-                ConfigFlags,
+                flags,
                 "JetCleaningTool_" + cleaningLevel,
                 "AntiKt4EMTopoJets",
                 cleaningLevel,
@@ -309,7 +309,7 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
         acc.addPublicTool(jetCleaningTool)
 
         ecTool = acc.popToolsAndMerge(
-            EventCleaningToolCfg(ConfigFlags, "EventCleaningTool_" + wp, cleaningLevel)
+            EventCleaningToolCfg(flags, "EventCleaningTool_" + wp, cleaningLevel)
         )
         ecTool.JetCleanPrefix = prefix
         ecTool.JetContainer = "AntiKt4EMTopoJets"
@@ -334,19 +334,19 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
     # ====================================================================
     # ee and egamma invariant masses
     # ====================================================================
-    EGAM11ZeeMassTool1 = acc.popToolsAndMerge(EGAM11ZeeMassTool1Cfg(ConfigFlags))
+    EGAM11ZeeMassTool1 = acc.popToolsAndMerge(EGAM11ZeeMassTool1Cfg(flags))
     acc.addPublicTool(EGAM11ZeeMassTool1)
     augmentationTools.append(EGAM11ZeeMassTool1)
 
-    EGAM11ZeeMassTool2 = acc.popToolsAndMerge(EGAM11ZeeMassTool2Cfg(ConfigFlags))
+    EGAM11ZeeMassTool2 = acc.popToolsAndMerge(EGAM11ZeeMassTool2Cfg(flags))
     acc.addPublicTool(EGAM11ZeeMassTool2)
     augmentationTools.append(EGAM11ZeeMassTool2)
 
-    EGAM11ZeeMassTool3 = acc.popToolsAndMerge(EGAM11ZeeMassTool3Cfg(ConfigFlags))
+    EGAM11ZeeMassTool3 = acc.popToolsAndMerge(EGAM11ZeeMassTool3Cfg(flags))
     acc.addPublicTool(EGAM11ZeeMassTool3)
     augmentationTools.append(EGAM11ZeeMassTool3)
 
-    EGAM11ZegMassTool = acc.popToolsAndMerge(EGAM11ZegMassToolCfg(ConfigFlags))
+    EGAM11ZegMassTool = acc.popToolsAndMerge(EGAM11ZegMassToolCfg(flags))
     acc.addPublicTool(EGAM11ZegMassTool)
     augmentationTools.append(EGAM11ZegMassTool)
 
@@ -355,7 +355,7 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
     streamName = kwargs["StreamName"]
 
     # Track thinning
-    if ConfigFlags.Derivation.Egamma.doTrackThinning:
+    if flags.Derivation.Egamma.doTrackThinning:
         from DerivationFrameworkInDet.InDetToolsConfig import (
             TrackParticleThinningCfg,
             MuonTrackParticleThinningCfg,
@@ -440,7 +440,7 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
         if TrackThinningKeepMuonTracks:
             EGAM11MuonTPThinningTool = acc.getPrimaryAndMerge(
                 MuonTrackParticleThinningCfg(
-                    ConfigFlags,
+                    flags,
                     name="EGAM11MuonTPThinningTool",
                     StreamName=streamName,
                     MuonKey="Muons",
@@ -453,7 +453,7 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
         if TrackThinningKeepTauTracks:
             EGAM11TauTPThinningTool = acc.getPrimaryAndMerge(
                 TauTrackParticleThinningCfg(
-                    ConfigFlags,
+                    flags,
                     name="EGAM11TauTPThinningTool",
                     StreamName=streamName,
                     TauKey="TauJets",
@@ -476,7 +476,7 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
         if TrackThinningKeepPVTracks:
             EGAM11TPThinningTool = acc.getPrimaryAndMerge(
                 TrackParticleThinningCfg(
-                    ConfigFlags,
+                    flags,
                     name="EGAM11TPThinningTool",
                     StreamName=streamName,
                     SelectionString=thinning_expression,
@@ -492,7 +492,7 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
 
     EGAM11CCTCThinningTool = acc.getPrimaryAndMerge(
         CaloClusterThinningCfg(
-            ConfigFlags,
+            flags,
             name="EGAM11CCTCThinningTool",
             StreamName=streamName,
             SGKey="Electrons",
@@ -504,7 +504,7 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
     thinningTools.append(EGAM11CCTCThinningTool)
 
     # truth thinning
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         # W, Z and Higgs
         truth_cond_WZH = " && ".join(
             ["(abs(TruthParticles.pdgId) >= 23)", "(abs(TruthParticles.pdgId) <= 25)"]
@@ -554,7 +554,7 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
         thinningTools.append(EGAM11TruthThinningTool)
 
     # skimming
-    skimmingTool = acc.popToolsAndMerge(EGAM11SkimmingToolCfg(ConfigFlags))
+    skimmingTool = acc.popToolsAndMerge(EGAM11SkimmingToolCfg(flags))
     acc.addPublicTool(skimmingTool)
 
     # setup the kernel
@@ -570,13 +570,13 @@ def EGAM11KernelCfg(ConfigFlags, name="EGAM11Kernel", **kwargs):
     return acc
 
 
-def EGAM11Cfg(ConfigFlags):
+def EGAM11Cfg(flags):
     acc = ComponentAccumulator()
 
     # configure skimming/thinning/augmentation tools
     acc.merge(
         EGAM11KernelCfg(
-            ConfigFlags,
+            flags,
             name="EGAM11Kernel",
             StreamName="StreamDAOD_EGAM11",
             TriggerListsHelper=None,
@@ -590,8 +590,8 @@ def EGAM11Cfg(ConfigFlags):
 
     EGAM11SlimmingHelper = SlimmingHelper(
         "EGAM11SlimmingHelper",
-        NamesAndTypes=ConfigFlags.Input.TypedCollections,
-        ConfigFlags=ConfigFlags,
+        NamesAndTypes=flags.Input.TypedCollections,
+        ConfigFlags=flags,
     )
 
     # ------------------------------------------
@@ -607,7 +607,7 @@ def EGAM11Cfg(ConfigFlags):
     ]
 
     # on MC we also add:
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM11SlimmingHelper.AllVariables += [
             "TruthEvents",
             "TruthParticles",
@@ -632,7 +632,7 @@ def EGAM11Cfg(ConfigFlags):
         "InDetTrackParticles",
         "AntiKt4EMTopoJets",
     ]
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM11SlimmingHelper.SmartCollections += [
             "AntiKt4TruthJets",
             "AntiKt4TruthDressedWZJets",
@@ -669,7 +669,7 @@ def EGAM11Cfg(ConfigFlags):
     EGAM11SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
 
     # truth
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM11SlimmingHelper.ExtraVariables += [
             "MuonTruthParticles.e.px.py.pz.status.pdgId.truthOrigin.truthType"
         ]
@@ -679,7 +679,7 @@ def EGAM11Cfg(ConfigFlags):
         ]
 
     # Add event info
-    if ConfigFlags.Derivation.Egamma.doEventInfoSlimming:
+    if flags.Derivation.Egamma.doEventInfoSlimming:
         EGAM11SlimmingHelper.SmartCollections.append("EventInfo")
     else:
         EGAM11SlimmingHelper.AllVariables += ["EventInfo"]
@@ -697,7 +697,7 @@ def EGAM11Cfg(ConfigFlags):
     EGAM11ItemList = EGAM11SlimmingHelper.GetItemList()
     acc.merge(
         OutputStreamCfg(
-            ConfigFlags,
+            flags,
             "DAOD_EGAM11",
             ItemList=EGAM11ItemList,
             AcceptAlgs=["EGAM11Kernel"],
@@ -705,7 +705,7 @@ def EGAM11Cfg(ConfigFlags):
     )
     acc.merge(
         SetupMetaDataForStreamCfg(
-            ConfigFlags,
+            flags,
             "DAOD_EGAM11",
             AcceptAlgs=["EGAM11Kernel"],
             createMetadata=[

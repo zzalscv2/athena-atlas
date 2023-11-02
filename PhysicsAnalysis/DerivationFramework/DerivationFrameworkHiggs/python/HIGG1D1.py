@@ -147,28 +147,18 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
                       HIGG1D1DiTauLowPtThinningTool,
                       HIGG1D1DiTauLowPtTPThinningTool]
     
-    #====================================================================
-    # Max Cell sum decoration tool
-    #====================================================================
-    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-    acc.merge(LArOnOffIdMappingCfg(flags))
-    
     augmentationTools = [] 
-    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import MaxCellDecoratorCfg
-    MaxCellDecorator = acc.popToolsAndMerge(MaxCellDecoratorCfg(flags))
-    acc.addPublicTool(MaxCellDecorator)
-    augmentationTools.append(MaxCellDecorator)
+
     #====================================================================
-    # Gain and cluster energies per layer decoration tool
+    # Common calo decoration tools
     #====================================================================
 
-    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import GainDecoratorCfg, ClusterEnergyPerLayerDecoratorCfg
-    GainDecoratorTool = acc.popToolsAndMerge(GainDecoratorCfg(flags))
-    acc.addPublicTool(GainDecoratorTool)
-    augmentationTools.append(GainDecoratorTool)
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
+        CaloDecoratorKernelCfg, ClusterEnergyPerLayerDecoratorCfg)
+    acc.merge(CaloDecoratorKernelCfg(flags))
 
-
-    cluster_sizes = (3,5), (5,7), (7,7), (7,11)
+    # Adding missing cluster energy decorators
+    cluster_sizes = (3,5), (5,7), (7,7)
     for neta, nphi in cluster_sizes:
         cename = "ClusterEnergyPerLayerDecorator_%sx%s" % (neta, nphi)
         ClusterEnergyPerLayerDecorator = acc.popToolsAndMerge( ClusterEnergyPerLayerDecoratorCfg(flags, neta = neta, nphi=nphi, name=cename ))

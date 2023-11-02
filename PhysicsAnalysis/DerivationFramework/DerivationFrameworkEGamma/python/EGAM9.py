@@ -93,7 +93,7 @@ def EGAM9SkimmingToolCfg(flags):
     return acc
 
 
-def EGAM9KernelCfg(ConfigFlags, name="EGAM9Kernel", **kwargs):
+def EGAM9KernelCfg(flags, name="EGAM9Kernel", **kwargs):
     """Configure the derivation framework driving algorithm (kernel)
     for EGAM9"""
     acc = ComponentAccumulator()
@@ -103,7 +103,7 @@ def EGAM9KernelCfg(ConfigFlags, name="EGAM9Kernel", **kwargs):
 
     acc.merge(
         PhysCommonAugmentationsCfg(
-            ConfigFlags, TriggerListsHelper=kwargs["TriggerListsHelper"]
+            flags, TriggerListsHelper=kwargs["TriggerListsHelper"]
         )
     )
 
@@ -111,49 +111,18 @@ def EGAM9KernelCfg(ConfigFlags, name="EGAM9Kernel", **kwargs):
     augmentationTools = []
 
     # ====================================================================
-    # Max Cell energy and time
+    # Common calo decoration tools
     # ====================================================================
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        MaxCellDecoratorCfg,
-    )
-
-    MaxCellDecorator = acc.popToolsAndMerge(MaxCellDecoratorCfg(ConfigFlags))
-    acc.addPublicTool(MaxCellDecorator)
-    augmentationTools.append(MaxCellDecorator)
-
-    # ====================================================================
-    # Gain and cluster energies per layer decoration tool
-    # ====================================================================
-    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        GainDecoratorCfg,
-        ClusterEnergyPerLayerDecoratorCfg,
-    )
-
-    EGAM9_GainDecoratorTool = acc.popToolsAndMerge(
-        GainDecoratorCfg(ConfigFlags, name="EGAM9_GainDecoratorTool")
-    )
-    acc.addPublicTool(EGAM9_GainDecoratorTool)
-    augmentationTools.append(EGAM9_GainDecoratorTool)
-
-    # might need some modification if cell-level reweighting is implemented
-    # (see share/EGAM9.py)
-    cluster_sizes = (3, 7), (5, 5), (7, 11)
-    for neta, nphi in cluster_sizes:
-        cename = "EGAM9_ClusterEnergyPerLayerDecorator_%sx%s" % (neta, nphi)
-        EGAM9_ClusterEnergyPerLayerDecorator = acc.popToolsAndMerge(
-            ClusterEnergyPerLayerDecoratorCfg(
-                ConfigFlags, neta=neta, nphi=nphi, name=cename
-            )
-        )
-        acc.addPublicTool(EGAM9_ClusterEnergyPerLayerDecorator)
-        augmentationTools.append(EGAM9_ClusterEnergyPerLayerDecorator)
+        CaloDecoratorKernelCfg)
+    acc.merge(CaloDecoratorKernelCfg(flags))
 
     # thinning tools
     thinningTools = []
     streamName = kwargs["StreamName"]
 
     # Track thinning
-    if ConfigFlags.Derivation.Egamma.doTrackThinning:
+    if flags.Derivation.Egamma.doTrackThinning:
         TrackThinningKeepElectronTracks = False
         TrackThinningKeepPhotonTracks = True
         TrackThinningKeepPVTracks = False
@@ -208,7 +177,7 @@ def EGAM9KernelCfg(ConfigFlags, name="EGAM9Kernel", **kwargs):
 
             EGAM9TPThinningTool = acc.getPrimaryAndMerge(
                 TrackParticleThinningCfg(
-                    ConfigFlags,
+                    flags,
                     name="EGAM9TPThinningTool",
                     StreamName=streamName,
                     SelectionString=thinning_expression,
@@ -218,7 +187,7 @@ def EGAM9KernelCfg(ConfigFlags, name="EGAM9Kernel", **kwargs):
             thinningTools.append(EGAM9TPThinningTool)
 
     # truth thinning
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         # W, Z and Higgs
         truth_cond_WZH = " && ".join(
             ["(abs(TruthParticles.pdgId) >= 23)", "(abs(TruthParticles.pdgId) <= 25)"]
@@ -273,7 +242,7 @@ def EGAM9KernelCfg(ConfigFlags, name="EGAM9Kernel", **kwargs):
 
         acc.merge(
             thinCaloCellsForDFCfg(
-                ConfigFlags,
+                flags,
                 inputClusterKeys=["egammaClusters"],
                 streamName="StreamDAOD_EGAM9",
                 inputCellKey="AllCalo",
@@ -282,7 +251,7 @@ def EGAM9KernelCfg(ConfigFlags, name="EGAM9Kernel", **kwargs):
         )
 
     # skimming
-    skimmingTool = acc.getPrimaryAndMerge(EGAM9SkimmingToolCfg(ConfigFlags))
+    skimmingTool = acc.getPrimaryAndMerge(EGAM9SkimmingToolCfg(flags))
 
     # setup the kernel
     acc.addEventAlgo(
@@ -297,7 +266,7 @@ def EGAM9KernelCfg(ConfigFlags, name="EGAM9Kernel", **kwargs):
     return acc
 
 
-def EGAM9Cfg(ConfigFlags):
+def EGAM9Cfg(flags):
     acc = ComponentAccumulator()
 
     # Get the lists of triggers needed for trigger matching.
@@ -309,12 +278,12 @@ def EGAM9Cfg(ConfigFlags):
     # TODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
 
-    EGAM9TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    EGAM9TriggerListsHelper = TriggerListsHelper(flags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(
         EGAM9KernelCfg(
-            ConfigFlags,
+            flags,
             name="EGAM9Kernel",
             StreamName="StreamDAOD_EGAM9",
             TriggerListsHelper=EGAM9TriggerListsHelper,
@@ -328,8 +297,8 @@ def EGAM9Cfg(ConfigFlags):
 
     EGAM9SlimmingHelper = SlimmingHelper(
         "EGAM9SlimmingHelper",
-        NamesAndTypes=ConfigFlags.Input.TypedCollections,
-        ConfigFlags=ConfigFlags,
+        NamesAndTypes=flags.Input.TypedCollections,
+        ConfigFlags=flags,
     )
 
     # ------------------------------------------
@@ -346,19 +315,19 @@ def EGAM9Cfg(ConfigFlags):
 
     # for trigger studies we also add:
     MenuType = None
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         MenuType = "Run2"
-    elif ConfigFlags.Trigger.EDMVersion == 3:
+    elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
     else:
         MenuType = ""
     EGAM9SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
     EGAM9SlimmingHelper.AllVariables += ExtraContainersPhotonTrigger[MenuType]
-    if not ConfigFlags.Input.isMC:
+    if not flags.Input.isMC:
         EGAM9SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
 
     # and on MC we also add:
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM9SlimmingHelper.AllVariables += [
             "TruthEvents",
             "TruthParticles",
@@ -382,7 +351,7 @@ def EGAM9Cfg(ConfigFlags):
     ]
     if saveJets:
         EGAM9SlimmingHelper.SmartCollections += ["AntiKt4EMPFlowJets"]
-        if ConfigFlags.Input.isMC:
+        if flags.Input.isMC:
             EGAM9SlimmingHelper.SmartCollections += [
                 "AntiKt4TruthJets",
                 "AntiKt4TruthDressedWZJets",
@@ -435,13 +404,13 @@ def EGAM9Cfg(ConfigFlags):
     ]
 
     # truth
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM9SlimmingHelper.ExtraVariables += [
             "Photons.truthOrigin.truthType.truthParticleLink"
         ]
 
     # Add event info
-    if ConfigFlags.Derivation.Egamma.doEventInfoSlimming:
+    if flags.Derivation.Egamma.doEventInfoSlimming:
         EGAM9SlimmingHelper.SmartCollections.append("EventInfo")
     else:
         EGAM9SlimmingHelper.AllVariables += ["EventInfo"]
@@ -451,7 +420,7 @@ def EGAM9Cfg(ConfigFlags):
 
     # Add trigger matching info
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper,
         )
@@ -462,7 +431,7 @@ def EGAM9Cfg(ConfigFlags):
             TriggerList=EGAM9TriggerListsHelper.Run2TriggerNamesNoTau,
         )
     # Run 3
-    if ConfigFlags.Trigger.EDMVersion == 3:
+    if flags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import (
             AddRun3TrigNavSlimmingCollectionsToSlimmingHelper,
         )
@@ -495,7 +464,7 @@ def EGAM9Cfg(ConfigFlags):
     EGAM9ItemList = EGAM9SlimmingHelper.GetItemList()
     acc.merge(
         OutputStreamCfg(
-            ConfigFlags,
+            flags,
             "DAOD_EGAM9",
             ItemList=EGAM9ItemList,
             AcceptAlgs=["EGAM9Kernel"],
@@ -503,7 +472,7 @@ def EGAM9Cfg(ConfigFlags):
     )
     acc.merge(
         SetupMetaDataForStreamCfg(
-            ConfigFlags,
+            flags,
             "DAOD_EGAM9",
             AcceptAlgs=["EGAM9Kernel"],
             createMetadata=[

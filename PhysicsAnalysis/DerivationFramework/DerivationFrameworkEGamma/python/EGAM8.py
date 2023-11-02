@@ -121,7 +121,7 @@ def EGAM8ZmueMassToolCfg(flags):
 
 
 # Main algorithm config
-def EGAM8KernelCfg(ConfigFlags, name="EGAM8Kernel", **kwargs):
+def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
     """Configure the derivation framework driving algorithm (kernel)
     for EGAM8"""
     acc = ComponentAccumulator()
@@ -131,7 +131,7 @@ def EGAM8KernelCfg(ConfigFlags, name="EGAM8Kernel", **kwargs):
 
     acc.merge(
         PhysCommonAugmentationsCfg(
-            ConfigFlags, TriggerListsHelper=kwargs["TriggerListsHelper"]
+            flags, TriggerListsHelper=kwargs["TriggerListsHelper"]
         )
     )
 
@@ -141,54 +141,27 @@ def EGAM8KernelCfg(ConfigFlags, name="EGAM8Kernel", **kwargs):
     # ====================================================================
     # ee and mue invariant masses
     # ====================================================================
-    EGAM8ZeeMassTool = acc.popToolsAndMerge(EGAM8ZeeMassToolCfg(ConfigFlags))
+    EGAM8ZeeMassTool = acc.popToolsAndMerge(EGAM8ZeeMassToolCfg(flags))
     acc.addPublicTool(EGAM8ZeeMassTool)
     augmentationTools.append(EGAM8ZeeMassTool)
 
-    EGAM8ZmueMassTool = acc.popToolsAndMerge(EGAM8ZmueMassToolCfg(ConfigFlags))
+    EGAM8ZmueMassTool = acc.popToolsAndMerge(EGAM8ZmueMassToolCfg(flags))
     acc.addPublicTool(EGAM8ZmueMassTool)
     augmentationTools.append(EGAM8ZmueMassTool)
 
     # ====================================================================
-    # Max Cell energy and time
+    # Common calo decoration tools
     # ====================================================================
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        MaxCellDecoratorCfg,
-    )
-
-    MaxCellDecorator = acc.popToolsAndMerge(MaxCellDecoratorCfg(ConfigFlags))
-    acc.addPublicTool(MaxCellDecorator)
-    augmentationTools.append(MaxCellDecorator)
-
-    # ====================================================================
-    # Gain and cluster energies per layer decoration tool
-    # ====================================================================
-    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        GainDecoratorCfg,
-        ClusterEnergyPerLayerDecoratorCfg,
-    )
-
-    GainDecoratorTool = acc.popToolsAndMerge(GainDecoratorCfg(ConfigFlags))
-    acc.addPublicTool(GainDecoratorTool)
-    augmentationTools.append(GainDecoratorTool)
-
-    cluster_sizes = (3, 7), (5, 5), (7, 11)
-    for neta, nphi in cluster_sizes:
-        cename = "ClusterEnergyPerLayerDecorator_%sx%s" % (neta, nphi)
-        ClusterEnergyPerLayerDecorator = acc.popToolsAndMerge(
-            ClusterEnergyPerLayerDecoratorCfg(
-                ConfigFlags, neta=neta, nphi=nphi, name=cename
-            )
-        )
-        acc.addPublicTool(ClusterEnergyPerLayerDecorator)
-        augmentationTools.append(ClusterEnergyPerLayerDecorator)
+        CaloDecoratorKernelCfg)
+    acc.merge(CaloDecoratorKernelCfg(flags))
 
     # thinning tools
     thinningTools = []
     streamName = kwargs["StreamName"]
 
     # Track thinning
-    if ConfigFlags.Derivation.Egamma.doTrackThinning:
+    if flags.Derivation.Egamma.doTrackThinning:
         from DerivationFrameworkInDet.InDetToolsConfig import (
             TrackParticleThinningCfg,
             MuonTrackParticleThinningCfg,
@@ -273,7 +246,7 @@ def EGAM8KernelCfg(ConfigFlags, name="EGAM8Kernel", **kwargs):
         if TrackThinningKeepMuonTracks:
             EGAM8MuonTPThinningTool = acc.getPrimaryAndMerge(
                 MuonTrackParticleThinningCfg(
-                    ConfigFlags,
+                    flags,
                     name="EGAM8MuonTPThinningTool",
                     StreamName=streamName,
                     MuonKey="Muons",
@@ -286,7 +259,7 @@ def EGAM8KernelCfg(ConfigFlags, name="EGAM8Kernel", **kwargs):
         if TrackThinningKeepTauTracks:
             EGAM8TauTPThinningTool = acc.getPrimaryAndMerge(
                 TauTrackParticleThinningCfg(
-                    ConfigFlags,
+                    flags,
                     name="EGAM8TauTPThinningTool",
                     StreamName=streamName,
                     TauKey="TauJets",
@@ -309,7 +282,7 @@ def EGAM8KernelCfg(ConfigFlags, name="EGAM8Kernel", **kwargs):
         if TrackThinningKeepPVTracks:
             EGAM8TPThinningTool = acc.getPrimaryAndMerge(
                 TrackParticleThinningCfg(
-                    ConfigFlags,
+                    flags,
                     name="EGAM8TPThinningTool",
                     StreamName=streamName,
                     SelectionString=thinning_expression,
@@ -319,7 +292,7 @@ def EGAM8KernelCfg(ConfigFlags, name="EGAM8Kernel", **kwargs):
             thinningTools.append(EGAM8TPThinningTool)
 
     # truth thinning
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         # W, Z and Higgs
         truth_cond_WZH = " && ".join(
             ["(abs(TruthParticles.pdgId) >= 23)", "(abs(TruthParticles.pdgId) <= 25)"]
@@ -369,7 +342,7 @@ def EGAM8KernelCfg(ConfigFlags, name="EGAM8Kernel", **kwargs):
         thinningTools.append(EGAM8TruthThinningTool)
 
     # skimming
-    skimmingTool = acc.popToolsAndMerge(EGAM8SkimmingToolCfg(ConfigFlags))
+    skimmingTool = acc.popToolsAndMerge(EGAM8SkimmingToolCfg(flags))
     acc.addPublicTool(skimmingTool)
 
     # setup the kernel
@@ -385,7 +358,7 @@ def EGAM8KernelCfg(ConfigFlags, name="EGAM8Kernel", **kwargs):
     return acc
 
 
-def EGAM8Cfg(ConfigFlags):
+def EGAM8Cfg(flags):
     acc = ComponentAccumulator()
 
     # Get the lists of triggers needed for trigger matching.
@@ -397,12 +370,12 @@ def EGAM8Cfg(ConfigFlags):
 
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
 
-    EGAM8TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    EGAM8TriggerListsHelper = TriggerListsHelper(flags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(
         EGAM8KernelCfg(
-            ConfigFlags,
+            flags,
             name="EGAM8Kernel",
             StreamName="StreamDAOD_EGAM8",
             TriggerListsHelper=EGAM8TriggerListsHelper,
@@ -416,8 +389,8 @@ def EGAM8Cfg(ConfigFlags):
 
     EGAM8SlimmingHelper = SlimmingHelper(
         "EGAM8SlimmingHelper",
-        NamesAndTypes=ConfigFlags.Input.TypedCollections,
-        ConfigFlags=ConfigFlags,
+        NamesAndTypes=flags.Input.TypedCollections,
+        ConfigFlags=flags,
     )
 
     # ------------------------------------------
@@ -437,7 +410,7 @@ def EGAM8Cfg(ConfigFlags):
     # EGAM8SlimmingHelper.AllVariables += [ ]
 
     # and on MC we also add:
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM8SlimmingHelper.AllVariables += [
             "TruthEvents",
             "TruthParticles",
@@ -464,7 +437,7 @@ def EGAM8Cfg(ConfigFlags):
         "BTagging_AntiKt4EMPFlow",
         "MET_Baseline_AntiKt4EMPFlow",
     ]
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM8SlimmingHelper.SmartCollections += [
             "AntiKt4TruthJets",
             "AntiKt4TruthDressedWZJets",
@@ -516,7 +489,7 @@ def EGAM8Cfg(ConfigFlags):
     EGAM8SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
 
     # truth
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM8SlimmingHelper.ExtraVariables += [
             "MuonTruthParticles.e.px.py.pz.status.pdgId.truthOrigin.truthType"
         ]
@@ -526,7 +499,7 @@ def EGAM8Cfg(ConfigFlags):
         ]
 
     # Add event info
-    if ConfigFlags.Derivation.Egamma.doEventInfoSlimming:
+    if flags.Derivation.Egamma.doEventInfoSlimming:
         EGAM8SlimmingHelper.SmartCollections.append("EventInfo")
     else:
         EGAM8SlimmingHelper.AllVariables += ["EventInfo"]
@@ -537,7 +510,7 @@ def EGAM8Cfg(ConfigFlags):
 
     # Add trigger matching info
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper,
         )
@@ -548,7 +521,7 @@ def EGAM8Cfg(ConfigFlags):
             TriggerList=EGAM8TriggerListsHelper.Run2TriggerNamesNoTau,
         )
     # Run 3
-    if ConfigFlags.Trigger.EDMVersion == 3:
+    if flags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import (
             AddRun3TrigNavSlimmingCollectionsToSlimmingHelper,
         )
@@ -575,7 +548,7 @@ def EGAM8Cfg(ConfigFlags):
     EGAM8ItemList = EGAM8SlimmingHelper.GetItemList()
     acc.merge(
         OutputStreamCfg(
-            ConfigFlags,
+            flags,
             "DAOD_EGAM8",
             ItemList=EGAM8ItemList,
             AcceptAlgs=["EGAM8Kernel"],
@@ -583,7 +556,7 @@ def EGAM8Cfg(ConfigFlags):
     )
     acc.merge(
         SetupMetaDataForStreamCfg(
-            ConfigFlags,
+            flags,
             "DAOD_EGAM8",
             AcceptAlgs=["EGAM8Kernel"],
             createMetadata=[

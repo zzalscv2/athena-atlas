@@ -34,20 +34,20 @@ photonRequirements = " && ".join(
 )
 
 
-def PhotonPointingToolCfg(ConfigFlags):
+def PhotonPointingToolCfg(flags):
     acc = ComponentAccumulator()
     acc.setPrivateTools(
         CompFactory.CP.PhotonPointingTool(
-            name="EGAM10_PhotonPointingTool", isSimulation=ConfigFlags.Input.isMC
+            name="EGAM10_PhotonPointingTool", isSimulation=flags.Input.isMC
         )
     )
     return acc
 
 
-def PhotonVertexSelectionWrapperCfg(ConfigFlags, **kwargs):
+def PhotonVertexSelectionWrapperCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     if "PhotonPointingTool" not in kwargs:
-        photonPointingTool = acc.popToolsAndMerge(PhotonPointingToolCfg(ConfigFlags))
+        photonPointingTool = acc.popToolsAndMerge(PhotonPointingToolCfg(flags))
         kwargs.setdefault("PhotonPointingTool", photonPointingTool)
     acc.setPrivateTools(
         CompFactory.DerivationFramework.PhotonVertexSelectionWrapper(**kwargs)
@@ -102,7 +102,7 @@ def EGAM10SkimmingToolCfg(flags):
     return acc
 
 
-def EGAM10KernelCfg(ConfigFlags, name="EGAM10Kernel", **kwargs):
+def EGAM10KernelCfg(flags, name="EGAM10Kernel", **kwargs):
     """Configure the derivation framework driving algorithm (kernel)
     for EGAM10"""
     acc = ComponentAccumulator()
@@ -112,7 +112,7 @@ def EGAM10KernelCfg(ConfigFlags, name="EGAM10Kernel", **kwargs):
 
     acc.merge(
         PhysCommonAugmentationsCfg(
-            ConfigFlags, TriggerListsHelper=kwargs["TriggerListsHelper"]
+            flags, TriggerListsHelper=kwargs["TriggerListsHelper"]
         )
     )
 
@@ -120,24 +120,13 @@ def EGAM10KernelCfg(ConfigFlags, name="EGAM10Kernel", **kwargs):
     augmentationTools = []
 
     # ====================================================================
-    # Max Cell energy and time
-    # ====================================================================
-    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        MaxCellDecoratorCfg,
-    )
-
-    MaxCellDecorator = acc.popToolsAndMerge(MaxCellDecoratorCfg(ConfigFlags))
-    acc.addPublicTool(MaxCellDecorator)
-    augmentationTools.append(MaxCellDecorator)
-
-    # ====================================================================
     # PhotonVertexSelectionWrapper decoration tool - needs PhotonPointing tool
     # ====================================================================
-    EGAM10_PhotonPointingTool = acc.popToolsAndMerge(PhotonPointingToolCfg(ConfigFlags))
+    EGAM10_PhotonPointingTool = acc.popToolsAndMerge(PhotonPointingToolCfg(flags))
 
     EGAM10_PhotonVertexSelectionWrapper = acc.popToolsAndMerge(
         PhotonVertexSelectionWrapperCfg(
-            ConfigFlags,
+            flags,
             name="EGAM10_PhotonVertexSelectionWrapper",
             PhotonPointingTool=EGAM10_PhotonPointingTool,
             DecorationPrefix="EGAM10",
@@ -149,34 +138,18 @@ def EGAM10KernelCfg(ConfigFlags, name="EGAM10Kernel", **kwargs):
     augmentationTools += [EGAM10_PhotonVertexSelectionWrapper]
 
     # ====================================================================
-    # Gain and cluster energies per layer decoration tool
+    # Common calo decoration tools
     # ====================================================================
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        GainDecoratorCfg,
-        ClusterEnergyPerLayerDecoratorCfg,
-    )
-
-    GainDecoratorTool = acc.popToolsAndMerge(GainDecoratorCfg(ConfigFlags))
-    acc.addPublicTool(GainDecoratorTool)
-    augmentationTools.append(GainDecoratorTool)
-
-    cluster_sizes = (3, 7), (5, 5), (7, 11)
-    for neta, nphi in cluster_sizes:
-        cename = "ClusterEnergyPerLayerDecorator_%sx%s" % (neta, nphi)
-        ClusterEnergyPerLayerDecorator = acc.popToolsAndMerge(
-            ClusterEnergyPerLayerDecoratorCfg(
-                ConfigFlags, neta=neta, nphi=nphi, name=cename
-            )
-        )
-        acc.addPublicTool(ClusterEnergyPerLayerDecorator)
-        augmentationTools.append(ClusterEnergyPerLayerDecorator)
+        CaloDecoratorKernelCfg)
+    acc.merge(CaloDecoratorKernelCfg(flags))
 
     # thinning tools
     thinningTools = []
     streamName = kwargs["StreamName"]
 
     # Track thinning
-    if ConfigFlags.Derivation.Egamma.doTrackThinning:
+    if flags.Derivation.Egamma.doTrackThinning:
         TrackThinningKeepElectronTracks = True
         TrackThinningKeepPhotonTracks = True
         TrackThinningKeepAllElectronTracks = True
@@ -233,7 +206,7 @@ def EGAM10KernelCfg(ConfigFlags, name="EGAM10Kernel", **kwargs):
             thinningTools.append(EGAM10ElectronTPThinningToolAR)
 
     # skimming
-    skimmingTool = acc.getPrimaryAndMerge(EGAM10SkimmingToolCfg(ConfigFlags))
+    skimmingTool = acc.getPrimaryAndMerge(EGAM10SkimmingToolCfg(flags))
 
     # setup the kernel
     acc.addEventAlgo(
@@ -248,7 +221,7 @@ def EGAM10KernelCfg(ConfigFlags, name="EGAM10Kernel", **kwargs):
     return acc
 
 
-def EGAM10Cfg(ConfigFlags):
+def EGAM10Cfg(flags):
     acc = ComponentAccumulator()
 
     # Get the lists of triggers needed for trigger matching.
@@ -260,12 +233,12 @@ def EGAM10Cfg(ConfigFlags):
     # TODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
 
-    EGAM10TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    EGAM10TriggerListsHelper = TriggerListsHelper(flags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(
         EGAM10KernelCfg(
-            ConfigFlags,
+            flags,
             name="EGAM10Kernel",
             StreamName="StreamDAOD_EGAM10",
             TriggerListsHelper=EGAM10TriggerListsHelper,
@@ -279,8 +252,8 @@ def EGAM10Cfg(ConfigFlags):
 
     EGAM10SlimmingHelper = SlimmingHelper(
         "EGAM10SlimmingHelper",
-        NamesAndTypes=ConfigFlags.Input.TypedCollections,
-        ConfigFlags=ConfigFlags,
+        NamesAndTypes=flags.Input.TypedCollections,
+        ConfigFlags=flags,
     )
 
     # ------------------------------------------
@@ -291,7 +264,7 @@ def EGAM10Cfg(ConfigFlags):
     EGAM10SlimmingHelper.AllVariables = ["CaloCalTopoClusters"]
 
     # and on MC we also add:
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM10SlimmingHelper.AppendToDictionary.update(
             {
                 "TruthIsoCentralEventShape": "xAOD::EventShape",
@@ -334,7 +307,7 @@ def EGAM10Cfg(ConfigFlags):
         "AntiKt4EMPFlowJets",
     ]
 
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM10SlimmingHelper.SmartCollections += [
             "AntiKt4TruthJets",
             "AntiKt4TruthDressedWZJets",
@@ -406,7 +379,7 @@ def EGAM10Cfg(ConfigFlags):
         densityList,
         densityDict,
         acc1,
-    ) = EGammaIsoConfig.makeEGammaCommonIsoCfg(ConfigFlags)
+    ) = EGammaIsoConfig.makeEGammaCommonIsoCfg(flags)
     acc.merge(acc1)
     EGAM10SlimmingHelper.AppendToDictionary.update(densityDict)
     EGAM10SlimmingHelper.ExtraVariables += densityList + [f"Photons{pflowIsoVar}"]
@@ -416,12 +389,12 @@ def EGAM10Cfg(ConfigFlags):
 
     acc.merge(
         DerivationTrackIsoCfg(
-            ConfigFlags, object_types=("Photons",), ptCuts=(500, 1000), postfix="Extra"
+            flags, object_types=("Photons",), ptCuts=(500, 1000), postfix="Extra"
         )
     )
 
     # truth
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM10SlimmingHelper.ExtraVariables += [
             "Electrons.truthOrigin.truthType.truthParticleLink.truthPdgId",
             "Electrons.lastEgMotherTruthType.lastEgMotherTruthOrigin",
@@ -440,7 +413,7 @@ def EGAM10Cfg(ConfigFlags):
         ]
 
     # Add event info
-    if ConfigFlags.Derivation.Egamma.doEventInfoSlimming:
+    if flags.Derivation.Egamma.doEventInfoSlimming:
         EGAM10SlimmingHelper.SmartCollections.append("EventInfo")
     else:
         EGAM10SlimmingHelper.AllVariables += ["EventInfo"]
@@ -450,7 +423,7 @@ def EGAM10Cfg(ConfigFlags):
 
     # Add trigger matching info
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper,
         )
@@ -461,7 +434,7 @@ def EGAM10Cfg(ConfigFlags):
             TriggerList=EGAM10TriggerListsHelper.Run2TriggerNamesNoTau,
         )
     # Run 3
-    if ConfigFlags.Trigger.EDMVersion == 3:
+    if flags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import (
             AddRun3TrigNavSlimmingCollectionsToSlimmingHelper,
         )
@@ -471,7 +444,7 @@ def EGAM10Cfg(ConfigFlags):
     EGAM10ItemList = EGAM10SlimmingHelper.GetItemList()
     acc.merge(
         OutputStreamCfg(
-            ConfigFlags,
+            flags,
             "DAOD_EGAM10",
             ItemList=EGAM10ItemList,
             AcceptAlgs=["EGAM10Kernel"],
@@ -479,7 +452,7 @@ def EGAM10Cfg(ConfigFlags):
     )
     acc.merge(
         SetupMetaDataForStreamCfg(
-            ConfigFlags,
+            flags,
             "DAOD_EGAM10",
             AcceptAlgs=["EGAM10Kernel"],
             createMetadata=[
