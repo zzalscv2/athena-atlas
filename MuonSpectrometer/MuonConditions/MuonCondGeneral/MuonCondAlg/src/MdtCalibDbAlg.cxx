@@ -310,7 +310,7 @@ StatusCode MdtCalibDbAlg::legacyRtPayloadToJSON(const coral::AttributeList& attr
     } else {
         data = *(static_cast<const std::string *>((attr["data"]).addressOfData()));
         delim = " ";
-    }
+    }    
     const std::vector<std::string> tokens = tokenize(data, delim);
     if (tokens.size() < 2) {
         ATH_MSG_FATAL("The line "<<data<<" cannot be resolved into header & payload");
@@ -318,6 +318,7 @@ StatusCode MdtCalibDbAlg::legacyRtPayloadToJSON(const coral::AttributeList& attr
     }
     const std::string& header = tokens[0];
     const std::string& payload = tokens[1];
+    ATH_MSG_DEBUG("Header: '"<<header<<"'  payload: '"<<payload<<"'");
     /// Extract first the number of points and the Calib identifier
     unsigned int numPoints{0};
     nlohmann::json channel{};
@@ -325,7 +326,8 @@ StatusCode MdtCalibDbAlg::legacyRtPayloadToJSON(const coral::AttributeList& attr
     channel["appliedRT"] = rt_ts_applied;
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
     {       
-       std::vector<int> tokensHeader = tokenizeInt(data, ",");
+
+       std::vector<int> tokensHeader = tokenizeInt(header, ",");
        if(tokensHeader.size()< 2){
             ATH_MSG_FATAL("Failed to deduce extract number of points & calib Identifier from "<<header);
             return StatusCode::FAILURE;
@@ -548,7 +550,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
         if (!(m_create_b_field_function || m_createWireSagFunction|| m_createSlewingFunction)) continue;
         loadedRtRel[athenaId] = rt_rel;
         
-    }  // end loop over itr (strings read from COOL)
+    }  // end loop over itr (strings read from COOL)        
     ATH_CHECK(defaultRt(writeCdo, loadedRtRel));
 
     if (loadedRtRel.empty()) {
@@ -559,7 +561,12 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
     const MdtCondDbData* condDbData{nullptr};
     if (!m_readKeyDCS.empty()) {
         SG::ReadCondHandle<MdtCondDbData> readCondHandleDb{m_readKeyDCS, ctx};
-        condDbData = readCondHandleDb.cptr();
+        /// The Mdt conditions data is only of value if it's also DCS constants
+        if (readCondHandleDb->hasDCS()) {
+            condDbData = readCondHandleDb.cptr();
+        } else {
+            ATH_MSG_INFO("Do not retrieve the HV from DCS. Fall back to 2730 & 3080");
+        }
     }
   
   

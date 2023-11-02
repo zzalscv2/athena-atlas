@@ -70,6 +70,7 @@ public:
                     const float standByVolt,
                     const float readyVolt);
     
+    bool hasDCS() const;
     const DcsConstants& getHvState(const Identifier& multiLayerID) const;
 
     const std::vector<DcsConstants>& getAllHvStates() const;
