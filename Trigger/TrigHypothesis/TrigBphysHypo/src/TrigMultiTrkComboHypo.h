@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -279,6 +279,8 @@ class TrigMultiTrkComboHypo: public ::ComboHypo {
     "trigger Level to set for created TrigBphys objects: L2, L2IO, L2MT or EF"};
   Gaudi::Property<std::vector<std::string>> m_mergedElectronChains {this, "mergedElectronChains", {"BPH-0DR3-EM7J15"},
     "patterns for BPH-0DR3-EM7J15 like chains"};
+  Gaudi::Property<double> m_caloClusterEtThreshold {this, "caloClusterEtThreshold", 5.,
+    "minimum transverse energy of the cluster, associated with close-by electron"};
 
   ToolHandle<InDet::VertexPointEstimator> m_vertexPointEstimator {this, "VertexPointEstimator", "", "tool to find starting point for the vertex fitter"};
   ToolHandle<Trk::TrkVKalVrtFitter> m_vertexFitter {this, "VertexFitter", "", "VKalVrtFitter tool to fit tracks into the common vertex"};

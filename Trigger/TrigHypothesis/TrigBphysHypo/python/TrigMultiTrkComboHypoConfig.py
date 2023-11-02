@@ -241,6 +241,7 @@ def ConfigurationComboHypo(flags, trigSequenceName = 'Dimu', **kwargs):
        kwargs.setdefault("trackPtThresholds",  [ [ 4000., 4000. ] ])
        kwargs.setdefault("massRange",   [ (100., 20000.) ])
        kwargs.setdefault("mergedElectronChains", [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000', 'HLT_e5_lhvloose_noringer_bBeeM6000' ])
+       kwargs.setdefault("caloClusterEtThreshold", 5.)
        alg = CompFactory.TrigMultiTrkComboHypo(
          name = baseName+'ComboHypo',
          VertexFitter = acc.popToolsAndMerge(TrigBPHY_TrkVKalVrtFitterCfg(flags, baseName)),
