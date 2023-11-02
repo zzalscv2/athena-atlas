@@ -118,6 +118,21 @@ namespace FlavorTagDiscriminants {
     return GNNConfig::OutputNodeType::UNKNOWN;
   }
 
+  GNNConfig::OutputNodeTarget OnnxUtil::getOutputNodeTarget(int rank) const {
+    
+    // Currently it decides the target based on the output data type and shape.
+    // It should be replaced with a better implementation in future, 
+    // where the `target` can be obtained from the model metadata.
+
+    if (rank == 0) {
+      return GNNConfig::OutputNodeTarget::JET;
+    }
+    else if (rank == 1) {
+      return GNNConfig::OutputNodeTarget::TRACK;
+    }
+    return GNNConfig::OutputNodeTarget::UNKNOWN;
+  }
+
   GNNConfig::Config OnnxUtil::get_config() const {
 
     GNNConfig::Config config;
@@ -130,6 +145,10 @@ namespace FlavorTagDiscriminants {
 
       GNNConfig::OutputNodeType type = getOutputNodeType(output.type, output.rank);
       output_config.type = type;
+
+      GNNConfig::OutputNodeTarget target = getOutputNodeTarget(output.rank);
+      output_config.target = target;
+
       config.outputs.push_back(output_config);
     }
 

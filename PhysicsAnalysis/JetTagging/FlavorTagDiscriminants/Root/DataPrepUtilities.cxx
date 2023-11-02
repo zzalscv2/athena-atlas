@@ -901,7 +901,7 @@ namespace FlavorTagDiscriminants {
     // This returns the "decorators" that we use to save outputs to
     // the EDM.
     std::tuple<
-      std::map<std::string, internal::OutNode>,
+      std::map<std::string, internal::OutNodeFloat>,
       FTagDataDependencyNames,
       std::set<std::string>>
     createDecorators(
@@ -909,14 +909,14 @@ namespace FlavorTagDiscriminants {
       const FTagOptions& options)
     {
       FTagDataDependencyNames deps;
-      std::map<std::string, internal::OutNode> decorators;
+      std::map<std::string, internal::OutNodeFloat> decorators;
       std::map<std::string, std::string> remap = options.remap_scalar;
       std::set<std::string> used_remap;
 
       for (const auto& out_node: config.outputs) {
         std::string node_name = out_node.first;
 
-        internal::OutNode node;
+        internal::OutNodeFloat node;
         for (const std::string& element: out_node.second.labels) {
           std::string name = node_name + "_" + element;
 
@@ -937,18 +937,21 @@ namespace FlavorTagDiscriminants {
     }
 
     std::tuple<
-      internal::OutNode, internal::OutNodeVecChar,
+      internal::OutNodeFloat, internal::OutNodeVecChar,
       internal::OutNodeVecFloat, internal::OutNodeTrackLinks,
+      internal::OutNodeChar, internal::OutNodeFloat,
       FTagDataDependencyNames, std::set<std::string>>
     createGNDecorators(
       const GNNConfig::Config& config,
       const FTagOptions& options)
     {
       FTagDataDependencyNames deps;
-      internal::OutNode decorators_f;
+      internal::OutNodeFloat decorators_f;
       internal::OutNodeVecChar decorators_vc;
       internal::OutNodeVecFloat decorators_vf;
       internal::OutNodeTrackLinks decorators_tl;
+      internal::OutNodeChar decorators_track_c;
+      internal::OutNodeFloat decorators_track_f;
 
       std::map<std::string, std::string> remap = options.remap_scalar;
       std::set<std::string> used_remap;
@@ -980,17 +983,35 @@ namespace FlavorTagDiscriminants {
             break;
           }
           case GNNConfig::OutputNodeType::VECCHAR: {
-            SG::AuxElement::Decorator<std::vector<char>> vc(name);
-            decorators_vc.emplace_back(out_node.label, vc);
+            if (out_node.target == GNNConfig::OutputNodeTarget::JET) {
+              SG::AuxElement::Decorator<std::vector<char>> vc(name);
+              decorators_vc.emplace_back(out_node.label, vc);
+            } 
+            else if (out_node.target == GNNConfig::OutputNodeTarget::TRACK) {
+              SG::AuxElement::Decorator<char> c(name);
+              decorators_track_c.emplace_back(out_node.label, c);
+            }
+            else {
+              throw std::logic_error("unknown outputnode target");
+            }
             break;
           }
           case GNNConfig::OutputNodeType::VECFLOAT: {
-            SG::AuxElement::Decorator<std::vector<float>> vf(name);
-            decorators_vf.emplace_back(out_node.label, vf);
+            if (out_node.target == GNNConfig::OutputNodeTarget::JET) {
+              SG::AuxElement::Decorator<std::vector<float>> vf(name);
+              decorators_vf.emplace_back(out_node.label, vf);
+            } 
+            else if (out_node.target == GNNConfig::OutputNodeTarget::TRACK) {
+              SG::AuxElement::Decorator<float> f(name);
+              decorators_track_f.emplace_back(out_node.label, f);
+            }
+            else {
+              throw std::logic_error("unknown outputnode target");
+            }
             break;
           }
           default:
-            throw std::logic_error("uknown outputnode type");
+            throw std::logic_error("unknown outputnode type");
         }
       }
 
@@ -1007,7 +1028,7 @@ namespace FlavorTagDiscriminants {
         decorators_tl.emplace_back("TrackLinks", tl);
       }
 
-      return std::make_tuple(decorators_f, decorators_vc, decorators_vf, decorators_tl, deps, used_remap);
+      return std::make_tuple(decorators_f, decorators_vc, decorators_vf, decorators_tl, decorators_track_c, decorators_track_f, deps, used_remap);
     }
 
     // return a function to check IP validity

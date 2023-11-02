@@ -62,6 +62,7 @@ namespace FlavorTagDiscriminants {
       GNNConfig::Config get_config() const;
       GNNConfig::OutputNodeType getOutputNodeType(
         const ONNXTensorElementDataType& type, int rank) const;
+      GNNConfig::OutputNodeTarget getOutputNodeTarget(int rank) const;
 
       std::vector<ONNXOutputNode> getOutputNodeInfo() const;
 

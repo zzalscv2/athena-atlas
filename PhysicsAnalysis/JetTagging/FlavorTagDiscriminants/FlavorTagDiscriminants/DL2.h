@@ -38,7 +38,7 @@ namespace FlavorTagDiscriminants {
     std::vector<internal::VarFromBTag> m_varsFromBTag;
     std::vector<internal::VarFromJet> m_varsFromJet;
     std::vector<internal::TrackSequenceBuilder> m_trackSequenceBuilders;
-    std::map<std::string, internal::OutNode> m_decorators;
+    std::map<std::string, internal::OutNodeFloat> m_decorators;
     float m_defaultValue;
     std::function<char(const internal::Tracks&)> m_invalid_track_checker;
     std::vector<SG::AuxElement::Decorator<char>> m_is_defaults;
