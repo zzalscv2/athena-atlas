@@ -15,6 +15,7 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('containers', {}, type=None)
         self.addOption ('treeName', 'analysis', type=str)
         self.addOption ('metTermName', 'Final', type=str)
+        self.addOption ('systematicsHistogram', None , type=str)
 
 
     def makeAlgs (self, config) :
@@ -71,3 +72,7 @@ class OutputAnalysisConfig (ConfigBlock):
 
         treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' + postfix )
         treeFiller.TreeName = self.treeName
+
+        if self.systematicsHistogram is not None:
+            sysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'SystematicsPrinter' )
+            sysDumper.histogramName = self.systematicsHistogram
