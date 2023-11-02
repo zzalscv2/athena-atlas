@@ -12,10 +12,18 @@ atlas_add_library( ZdcAnalysisLib
                    PUBLIC_HEADERS ZdcAnalysis
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgDataHandlesLib AsgTools CxxUtils xAODEventInfo xAODForward xAODTrigL1Calo TrigDecisionInterface TrigDecisionToolLib ZdcUtilsLib
-		                   PRIVATE_LINK_LIBRARIES PathResolver )
+                   PRIVATE_LINK_LIBRARIES PathResolver )
 
-atlas_add_component( ZdcAnalysis
-		     src/components/*.cxx
-		     LINK_LIBRARIES ZdcAnalysisLib )
+atlas_add_dictionary (ZdcAnalysisDict
+		     	ZdcAnalysis/ZdcAnalysisDict.h
+			ZdcAnalysis/selection.xml
+			LINK_LIBRARIES ZdcAnalysisLib)
+
+if (NOT XAOD_STANDALONE)
+   atlas_add_component( ZdcAnalysis
+      src/components/*.cxx
+      INCLUDE_DIRS
+      LINK_LIBRARIES ZdcAnalysisLib )
+endif()
 
 atlas_install_data( data/* )
