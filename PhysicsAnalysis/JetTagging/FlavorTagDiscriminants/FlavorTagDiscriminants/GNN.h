@@ -33,7 +33,8 @@ namespace FlavorTagDiscriminants {
         const FlipTagConfig& flip_config = FlipTagConfig::STANDARD,
         const std::map<std::string, std::string>& variableRemapping = {},
         const TrackLinkType trackLinkType = TrackLinkType::TRACK_PARTICLE,
-        float defaultOutputValue = NAN);
+        float defaultOutputValue = NAN,
+        bool decorate_tracks = false);
     GNN(GNN&&);
     GNN(const GNN&);
     virtual ~GNN();
@@ -58,11 +59,14 @@ namespace FlavorTagDiscriminants {
     std::vector<internal::VarFromBTag> m_varsFromBTag;
     std::vector<internal::VarFromJet> m_varsFromJet;
     std::vector<internal::TrackSequenceBuilder> m_trackSequenceBuilders;
-    internal::OutNode m_decorators_float;
+    internal::OutNodeFloat m_decorators_float;
     internal::OutNodeVecChar m_decorators_vecchar;
     internal::OutNodeVecFloat m_decorators_vecfloat;
     internal::OutNodeTrackLinks m_decorators_tracklinks;
+    internal::OutNodeChar m_decorators_track_char;
+    internal::OutNodeFloat m_decorators_track_float;
     float m_defaultValue;
+    bool m_decorate_tracks;
 
     FTagDataDependencyNames m_dataDependencyNames;
   };

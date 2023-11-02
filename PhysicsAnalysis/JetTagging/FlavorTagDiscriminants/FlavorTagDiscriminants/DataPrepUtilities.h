@@ -224,8 +224,11 @@ namespace FlavorTagDiscriminants {
     }
 
 
-    typedef SG::AuxElement::Decorator<float> OutputSetter;
-    typedef std::vector<std::pair<std::string, OutputSetter > > OutNode;
+    typedef SG::AuxElement::Decorator<float> OutputSetterFloat;
+    typedef std::vector<std::pair<std::string, OutputSetterFloat > > OutNodeFloat;
+
+    typedef SG::AuxElement::Decorator<char> OutputSetterChar;
+    typedef std::vector<std::pair<std::string, OutputSetterChar > > OutNodeChar;
 
     typedef SG::AuxElement::Decorator<std::vector<char>> OutputSetterVecChar;
     typedef std::vector<std::pair<std::string, OutputSetterVecChar > > OutNodeVecChar;
@@ -283,7 +286,7 @@ namespace FlavorTagDiscriminants {
 
     // return the decorators for the NNs
     std::tuple<
-      std::map<std::string, internal::OutNode>,
+      std::map<std::string, internal::OutNodeFloat>,
       FTagDataDependencyNames,
       std::set<std::string>>
     createDecorators(
@@ -291,8 +294,9 @@ namespace FlavorTagDiscriminants {
       const FTagOptions& options);
 
     std::tuple<
-      internal::OutNode, internal::OutNodeVecChar,
+      internal::OutNodeFloat, internal::OutNodeVecChar,
       internal::OutNodeVecFloat, internal::OutNodeTrackLinks,
+      internal::OutNodeChar, internal::OutNodeFloat,
       FTagDataDependencyNames, std::set<std::string>>
     createGNDecorators(
       const GNNConfig::Config& config,

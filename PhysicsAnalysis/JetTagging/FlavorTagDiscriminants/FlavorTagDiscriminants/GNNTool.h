@@ -31,6 +31,7 @@ namespace FlavorTagDiscriminants {
     std::map<std::string,std::string> variableRemapping;
     std::string trackLinkType;
     float default_output_value = NAN;
+    bool decorate_tracks = false;
   };
 
   //

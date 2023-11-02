@@ -17,9 +17,16 @@ namespace GNNConfig {
     VECFLOAT
   };
 
+  enum class OutputNodeTarget {
+    UNKNOWN,
+    JET,
+    TRACK
+  };
+
   struct OutputNodeConfig {
     std::string label;
     OutputNodeType type;
+    OutputNodeTarget target;
   };
 
   struct Config {

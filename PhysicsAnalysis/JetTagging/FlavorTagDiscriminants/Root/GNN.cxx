@@ -24,11 +24,20 @@ namespace FlavorTagDiscriminants {
            const FlipTagConfig& flip_config,
            const std::map<std::string, std::string>& variableRemapping,
            const TrackLinkType trackLinkType,
-           float defaultOutputValue):
+           float defaultOutputValue,
+           bool decorate_tracks):
     m_onnxUtil(nullptr),
     m_jetLink(jetLinkName),
-    m_defaultValue(defaultOutputValue)
+    m_defaultValue(defaultOutputValue),
+    m_decorate_tracks(decorate_tracks)
   {
+    // track decoration is allowed only for AnalysisBase or AthAnalysis or internal FTAG
+    #if !(defined(XAOD_ANALYSIS) || defined(FTAG_ALLOW_BREAK_EDM))
+    if (m_decorate_tracks) {
+      throw std::runtime_error("This can not run in Athena Production or Derivation. It mangles the xAOD ouput via conditional decorations and will cause issues with the scheduler.");
+    }
+    #endif  
+
     std::string fullPathToOnnxFile = PathResolverFindCalibFile(nnFile);
     m_onnxUtil = std::make_shared<OnnxUtil>(fullPathToOnnxFile);
 
@@ -62,12 +71,12 @@ namespace FlavorTagDiscriminants {
     m_trackSequenceBuilders = tsb;
     m_dataDependencyNames += td;
 
-    auto [dec_f, dec_vc, dec_vf, dec_tl, dd, rd] = dataprep::createGNDecorators(
+    FlavorTagDiscriminants::FTagDataDependencyNames dd;
+    std::set<std::string> rd;
+
+    std::tie(m_decorators_float, m_decorators_vecchar, m_decorators_vecfloat, m_decorators_tracklinks, m_decorators_track_char, m_decorators_track_float, dd, rd) = dataprep::createGNDecorators(
       m_config_gnn, options);
-    m_decorators_float = dec_f;
-    m_decorators_vecchar = dec_vc;
-    m_decorators_vecfloat = dec_vf;
-    m_decorators_tracklinks = dec_tl;
+    
     m_dataDependencyNames += dd;
 
     rd.merge(rt);
@@ -98,7 +107,7 @@ namespace FlavorTagDiscriminants {
   void GNN::decorate(const xAOD::Jet& jet, const SG::AuxElement& btag) const {
 
     using namespace internal;
-
+    
     std::map<std::string, input_pair> gnn_input;
 
     std::vector<float> jet_feat;
@@ -120,18 +129,18 @@ namespace FlavorTagDiscriminants {
     if (m_trackSequenceBuilders.size() > 1) {
       throw std::runtime_error("Only one track sequence is supported");
     }
-    Tracks flipped_tracks;
+    Tracks input_tracks;
     for (const auto& builder: m_trackSequenceBuilders) {
       std::vector<float> track_feat; // (#tracks, #feats).flatten
       int num_track_vars = static_cast<int>(builder.sequencesFromTracks.size());
       int num_tracks = 0;
 
       Tracks sorted_tracks = builder.tracksFromJet(jet, btag);
-      flipped_tracks = builder.flipFilter(sorted_tracks, jet);
+      input_tracks = builder.flipFilter(sorted_tracks, jet);
 
       int track_var_idx=0;
       for (const auto& seq_builder: builder.sequencesFromTracks) {
-        auto double_vec = seq_builder(jet, flipped_tracks).second;
+        auto double_vec = seq_builder(jet, input_tracks).second;
 
         if (track_var_idx==0){
           num_tracks = static_cast<int>(double_vec.size());
@@ -180,7 +189,7 @@ namespace FlavorTagDiscriminants {
 
       for (const auto& dec: m_decorators_tracklinks) {
         internal::TrackLinks links;
-        for (const xAOD::TrackParticle* it: flipped_tracks) {
+        for (const xAOD::TrackParticle* it: input_tracks) {
           TrackLinks::value_type link;
 
           const auto* itc = dynamic_cast<const xAOD::TrackParticleContainer*>(
@@ -189,6 +198,32 @@ namespace FlavorTagDiscriminants {
           links.push_back(link);
         }
         dec.second(btag) = links;
+      }
+
+      if (m_decorate_tracks) {
+        for (const auto& dec: m_decorators_track_char) {
+          std::vector<char>& values = out_vc.at(dec.first);
+          if (values.size() != input_tracks.size()) {
+            throw std::logic_error("Track aux task output size doesn't match the size of track list");
+          }
+          Tracks::const_iterator it = input_tracks.begin();
+          std::vector<char>::const_iterator ival = values.begin();
+          for (; it != input_tracks.end() && ival != values.end(); it++, ival++) {
+            dec.second(**it) = *ival;
+          }
+        }
+
+        for (const auto& dec: m_decorators_track_float) {
+          std::vector<float>& values = out_vf.at(dec.first);
+          if (values.size() != input_tracks.size()) {
+            throw std::logic_error("Track aux task output size doesn't match the size of track list");
+          }
+          Tracks::const_iterator it = input_tracks.begin();
+          std::vector<float>::const_iterator ival = values.begin();
+          for (; it != input_tracks.end() && ival != values.end(); it++, ival++) {
+            dec.second(**it) = *ival;
+          }
+        }
       }
     }
   } // end of decorate()

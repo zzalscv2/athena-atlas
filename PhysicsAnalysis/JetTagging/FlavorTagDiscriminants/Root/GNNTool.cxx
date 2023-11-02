@@ -20,6 +20,7 @@ namespace FlavorTagDiscriminants {
     declareProperty("trackLinkType", m_props.trackLinkType,
       "access tracks as IParticleContainer or as TrackParticleContainer");
     declareProperty("defaultOutputValue", m_props.default_output_value);
+    declareProperty("decorateTracks", m_props.decorate_tracks);
   }
 
   GNNTool::~GNNTool() {}
@@ -42,7 +43,8 @@ namespace FlavorTagDiscriminants {
         flip_config,
         m_props.variableRemapping,
         trackLinkType,
-        m_props.default_output_value));
+        m_props.default_output_value,
+        m_props.decorate_tracks));
 
     return StatusCode::SUCCESS;
   }
