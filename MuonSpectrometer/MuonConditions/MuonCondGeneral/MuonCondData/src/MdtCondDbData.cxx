@@ -59,7 +59,15 @@ const std::vector<DcsConstants>& MdtCondDbData::getAllHvStates() const { return 
 const DcsConstants& MdtCondDbData::getHvState(const Identifier& multiLayerID) const {
   IdentifierHash hash{};
   m_id_helper.get_detectorElement_hash(multiLayerID, hash);
-  return m_dcsStates.at(static_cast<unsigned int>(hash));
+  unsigned int hashIdx =static_cast<unsigned int>(hash);
+  if (hashIdx >= m_dcsStates.size()) {
+     throw std::runtime_error("MdtCondDbData::getHvState() - Out of bound access "+
+                          std::to_string(hashIdx) + " vs. "+std::to_string(m_dcsStates.size()));
+  } 
+  return m_dcsStates[hashIdx];
+}
+bool MdtCondDbData::hasDCS() const {
+  return m_dcsStates.size();
 }
 
 

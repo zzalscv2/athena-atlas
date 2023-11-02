@@ -51,6 +51,15 @@ int main() {
                  <<CxxUtils::atoi(emptyStr)<<" & "<<CxxUtils::atof(emptyStr)<<std::endl;
         return 1;
     }
+    /// Check the scientific notation
+    std::string scientNote{"42.e-3"};
+    if ( std::abs(CxxUtils::atof(scientNote) - 42.e-3) > std::numeric_limits<float>::epsilon()) {
+         std::cerr<<"String conversion of "<<scientNote<<" failed. Expected 42.e-3 but got "<<CxxUtils::atoi(scientNote)<<std::endl;   
+    }
+    std::string scientNote1{"43.2e-3"};
+    if ( std::abs(CxxUtils::atof(scientNote1) - 43.2e-3) > std::numeric_limits<float>::epsilon()) {
+         std::cerr<<"String conversion of "<<scientNote1<<" failed. Expected 43.2e-3 but got "<<CxxUtils::atoi(scientNote1)<<std::endl;   
+    }
     /// Let's check the string list
     std::vector<std::string> items{"Forklift","RitterKokusnuss", "Train","Cake", "Tortoise", "PolarBear"};
     std::string itemStr{};

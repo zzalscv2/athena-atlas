@@ -8,20 +8,7 @@
 #include <functional>
 #include <iostream>
 #include <sstream>
-
-namespace {
-    static constexpr std::array<char, 3> allowedChars{'.', '+', '-'};
-}
-
-#define TEST_STRING(THE_STR)                                                                             \
-    for (const char ch : THE_STR){                                                                       \
-        if (std::isdigit(ch)|| std::isspace(ch)  ||                                                      \
-            std::find(allowedChars.begin(), allowedChars.end(), ch)!= allowedChars.end()) continue;      \
-        std::stringstream except_str{};                                                                  \
-        except_str<<"CxxUtils::"<<__func__<<"()  "<<__LINE__<<": ";                                      \
-        except_str<<"Invalid character detected in "<<THE_STR;                                           \
-        throw std::runtime_error(except_str.str());                                                      \
-    }                                                                                                    \
+#include <charconv>
 
 namespace CxxUtils {
     std::vector<std::string> tokenize(const std::string& str,
@@ -53,7 +40,17 @@ namespace CxxUtils {
                     });
         return toReturn;
     }
-
+    std::string_view eraseWhiteSpaces(std::string_view str) {
+        if (str.empty()) return str;
+        size_t begin{0}, end{str.size() -1};
+        while (std::isspace(str[begin])){
+            ++begin;
+        }
+        while (end > 0 && std::isspace(str[end])){
+            --end;
+        }
+        return str.substr(begin, end + 1);        
+    }
     std::vector<int> tokenizeInt(const std::string& the_str,
                                  const std::string& delimiter) {
         const std::vector<std::string> strTokens = tokenize(the_str, delimiter);
@@ -64,25 +61,35 @@ namespace CxxUtils {
                         });
         return toReturn;
     }
-
-    int atoi(std::string_view str) {
-        TEST_STRING(str);
-        if (str.empty()) return 0;
+    template <class dType> void convertToNumber(std::string_view str, dType& number) {
+        /// Allow for trailing & leading white spaces
+        if (str.empty()) {
+            number = 0;
+            return;   
+        }
+        if (std::find_if(str.begin(), str.end(), [](const char c){ return std::isspace(c);}) != str.end()) {
+            std::string_view spaceFreeStr = eraseWhiteSpaces(str);
+            /// To avoid infinite recursion because of string like '42 24' check that white spaces have been indeed removed
+            if (spaceFreeStr.size() != str.size()) {
+                convertToNumber(spaceFreeStr, number);
+                return;
+            }
+        }
+        if (std::from_chars(str.data(), str.data() + str.size(), number).ec !=  std::errc{}) {
+            std::stringstream err_except{};
+            err_except<<"CxxUtils::convertToNumber() - The string '"<<str<<"'. Contains unallowed chars";
+            throw std::runtime_error(err_except.str());
+        }
+    }
+    int atoi(std::string_view str) { 
         int result{std::numeric_limits<int>::max()};
-        std::stringstream sstr{};
-        sstr<<str;
-        sstr>>result;
+       convertToNumber(str, result);       
         return result;
     }
 
-    double atof(std::string_view str) {
-        TEST_STRING(str);
-        if (str.empty()) return 0.;
+    double atof(std::string_view str) {       
         double result{std::numeric_limits<double>::max()};
-        std::stringstream sstr{};
-        sstr<<str;
-        sstr>>result;       
+        convertToNumber(str, result);
         return result;
     }
 }
-#undef TEST_STRING

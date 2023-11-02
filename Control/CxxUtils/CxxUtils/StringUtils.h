@@ -21,6 +21,8 @@ namespace CxxUtils {
     int atoi(std::string_view str);
     /// Converts a string into a double / float
     double atof(std::string_view str);
+    /// Removes all trailing and starting whitespaces from a string
+    std::string_view eraseWhiteSpaces(std::string_view str);
 
     /// Splits the string into smaller substrings
     std::vector<std::string> tokenize(const std::string& the_str,
