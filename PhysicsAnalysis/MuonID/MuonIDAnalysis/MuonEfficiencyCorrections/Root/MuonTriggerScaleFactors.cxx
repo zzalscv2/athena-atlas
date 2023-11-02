@@ -42,8 +42,6 @@ namespace CP {
         m_binning("fine"),
         m_allowZeroSF(false),
         m_experimental(false),
-        m_useRel207(false),
-        m_useMC16c(false),
         m_forceYear(-1),
         m_forcePeriod(""),
         m_replicaTriggerList(),
@@ -58,8 +56,6 @@ namespace CP {
         declareProperty("CustomInputFolder", m_custom_dir);
         declareProperty("Binning", m_binning); // fine or coarse
         declareProperty("UseExperimental", m_experimental); // enable experimental features like single muon SF
-        declareProperty("MC16c", m_useMC16c); // enable if MC16c scale factors should be used for 2017
-        declareProperty("useRel207", m_useRel207); // fine or coarse	
         //Properties needed for TOY setup for a given trigger: No replicas if m_replicaTriggerList is empty
         declareProperty("ReplicaTriggerList", m_replicaTriggerList, "List of triggers on which we want to generate stat. uncertainty toy replicas.");
         declareProperty("NReplicas", m_nReplicas, "Number of generated toy replicas, if replicas are required.");
@@ -73,30 +69,18 @@ namespace CP {
 
   StatusCode MuonTriggerScaleFactors::LoadTriggerMap(unsigned int year) {
         std::string fileName = m_fileName;
-        if (fileName.empty() && !m_useRel207) {
-          if (year == 2015) fileName = "muontrigger_sf_2015_mc16a_v04.root";
-          else if (year == 2016) fileName = "muontrigger_sf_2016_mc16a_v05.root";
-          else if (year == 2017){
-            if(m_useMC16c)
-              fileName = "muontrigger_sf_2017_mc16c_v02.root";
-            else
-              fileName = "muontrigger_sf_2017_mc16d_v03.root";
-          }
-          else if (year == 2018) fileName = "muontrigger_sf_2018_mc16e_v02.root";
-            else if (year == 2022) fileName = "muontrigger_sf_2022_mc21_v04.root";
+        if (fileName.empty()) {
+          if (year == 2015) fileName = "muontrigger_sf_2015_mc20a_v1.root";
+          else if (year == 2016) fileName = "muontrigger_sf_2016_mc20a_v1.root";
+          else if (year == 2017) fileName = "muontrigger_sf_2017_mc20d_v1.root";
+          else if (year == 2018) fileName = "muontrigger_sf_2018_mc20e_v1.root";
+          else if (year == 2022) fileName = "muontrigger_sf_2022_mc21_v05.root";
           else{
             ATH_MSG_WARNING("There is no SF file for year " << year << " yet");
             return StatusCode::SUCCESS;
           }
         }
-        else if (fileName.empty()) {
-          if (year == 2015) fileName = "muontrigger_sf_2015_mc15c_v01.root";
-          else if (year == 2016) fileName = "muontrigger_sf_2016_mc15c_v02.root";
-          else {
-            ATH_MSG_WARNING("There is no SF file for year " << year << " yet");
-            return StatusCode::SUCCESS;
-          }  
-        }
+    
         TDirectory* origDir = gDirectory;
 
         std::string filePath;
@@ -211,7 +195,6 @@ namespace CP {
         ATH_MSG_INFO("CustomInputFolder = '" << m_custom_dir << "'");
         ATH_MSG_INFO("AllowZeroSF = " << m_allowZeroSF);
         ATH_MSG_INFO("experimental = " << m_experimental);
-        ATH_MSG_INFO("useRel27 = " << m_useRel207);
 
         ATH_CHECK(m_eventInfo.initialize());
 
