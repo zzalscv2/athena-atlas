@@ -100,3 +100,10 @@ try:
     from PrimaryDPDMaker.PrimaryDPDFlags import primDPD
 except Exception:
     printfunc ("WARNING could not load primDPD")
+
+
+try:
+   from AthenaConfiguration.AllConfigFlags import ConfigFlags
+   flags=ConfigFlags
+except Exception:
+    printfunc ("WARNING could not load CA-style ConfigFlags")
