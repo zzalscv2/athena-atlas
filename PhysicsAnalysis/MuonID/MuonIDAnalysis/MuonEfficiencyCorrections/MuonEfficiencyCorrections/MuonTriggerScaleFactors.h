@@ -125,8 +125,6 @@ namespace CP {
             std::string m_binning;
             bool m_allowZeroSF;
             bool m_experimental;
-            bool m_useRel207;
-            bool m_useMC16c;
       int m_forceYear;
       std::string m_forcePeriod;
             //Variables for toy replicas setup
