@@ -89,6 +89,8 @@ def addAthenaArguments(parser, maxEventsDefaultSubstep='first', addValgrind=True
                         help='Number of events to skip over in the first processing step (skipping substep can be overridden)')
     parser.add_argument('--asetup', group='Athena', type=argFactory(trfArgClasses.argSubstep, runarg=False), nargs='+', metavar='substep:ASETUP',
                         help='asetup command string to be run before this substep is executed')
+    parser.add_argument('--runInContainer', group='Athena', type=argFactory(trfArgClasses.argSubstep, runarg=False), nargs='+', metavar='substep:CONTAINER_OS',
+                        help='Set the substep to run in a container with the specified OS. Requires the --athena flag')
     parser.add_argument('--eventAcceptanceEfficiency', type=trfArgClasses.argFactory(trfArgClasses.argSubstepFloat, min=0.0, max=1.0, runarg=False),
                         help='Allowed "efficiency" for processing events - used to ensure output file has enough events (default 1.0)')
     parser.add_argument('--athenaMPMergeTargetSize', '--mts', type=trfArgClasses.argFactory(trfArgClasses.argKeyFloatValueList, runarg=False),

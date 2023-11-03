@@ -1003,6 +1003,11 @@ class athenaExecutor(scriptExecutor):
             expectedEvents = 0
         
         ## Do we need to run asetup first?
+        # For a certain substep (e.g. trigger), might need to run in a container using a legacy release
+        # Container run will only work if asetup is executed
+        OSSetupString = None
+
+        # Extract the asetup string
         asetupString = None
         legacyThreadingRelease = False
         if 'asetup' in self.conf.argdict:
@@ -1010,6 +1015,22 @@ class athenaExecutor(scriptExecutor):
             legacyThreadingRelease = asetupReleaseIsOlderThan(asetupString, 22)
         else:
             msg.info('Asetup report: {0}'.format(asetupReport()))
+
+        if asetupString is not None:
+            legacyOSRelease = asetupReleaseIsOlderThan(asetupString, 24)
+            currentOS = os.environ['ALRB_USER_PLATFORM']
+            if legacyOSRelease and currentOS!="centos7":
+                OSSetupString = "centos7"
+                msg.info('Legacy release required for the substep {}, will setup a container running {}'.format(self._substep, OSSetupString))
+
+
+        # allow overriding the container OS using a flag
+        if 'runInContainer' in self.conf.argdict:
+            OSSetupString = self.conf.argdict['runInContainer'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor)
+            msg.info('The step {} will be performed in a container running {}, as explicitly requested'.format(self._substep, OSSetupString))
+            if OSSetupString is not None and asetupString is None:
+                raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_SETUP_FAIL'),
+                                                                '--asetup must be used for the substep which requires --runInContainer')
 
         # Conditional MP based on runtime arguments
         if self._onlyMPWithRunargs:
@@ -1191,7 +1212,7 @@ class athenaExecutor(scriptExecutor):
         # This will have asetup and/or DB release setups in it
         # Do this last in this preExecute as the _cmd needs to be finalised
         msg.info('Now writing wrapper for substep executor {0}'.format(self._name))
-        self._writeAthenaWrapper(asetup=asetupString, dbsetup=dbsetup)
+        self._writeAthenaWrapper(asetup=asetupString, dbsetup=dbsetup, ossetup=OSSetupString)
         msg.info('Athena will be executed in a subshell via {0}'.format(self._cmd))
         
                 
@@ -1509,12 +1530,15 @@ class athenaExecutor(scriptExecutor):
     def _writeAthenaWrapper(
         self,
         asetup = None,
-        dbsetup = None
+        dbsetup = None,
+        ossetup = None
         ):
         self._originalCmd = self._cmd
         self._asetup      = asetup
         self._dbsetup     = dbsetup
+        self._ossetup     = ossetup
         self._wrapperFile = 'runwrapper.{name}.sh'.format(name = self._name)
+        container_cmd = None
         msg.debug(
             'Preparing wrapper file {wrapperFileName} with '
             'asetup={asetupStatus} and dbsetup={dbsetupStatus}'.format(
@@ -1526,6 +1550,18 @@ class athenaExecutor(scriptExecutor):
         try:
             with open(self._wrapperFile, 'w') as wrapper:
                 print('#! /bin/sh', file=wrapper)
+                if ossetup is not None:
+                    container_cmd = ["{AtlasLRBDirectory}/container/startContainer.sh".format(AtlasLRBDirectory=os.environ['ATLAS_LOCAL_ROOT_BASE']),
+                                     "-c",
+                                     ossetup,
+                                     "--pwd",
+                                     os.getcwd(),
+                                     "-r"]
+                    print('echo This wrapper is executed within a container', file=wrapper)
+                    print('echo For a local re-run, please do:', file=wrapper)
+                    print('echo '+ " ".join(container_cmd) + " " + path.join('.', self._wrapperFile), file=wrapper)
+                    print('echo (or with --pwd=`pwd`)')
+
                 if asetup:
                     print("# asetup", file=wrapper)
                     print('echo Sourcing {AtlasSetupDirectory}/scripts/asetup.sh {asetupStatus}'.format(
@@ -1639,7 +1675,9 @@ class athenaExecutor(scriptExecutor):
                 trfExit.nameToCode('TRF_EXEC_SETUP_WRAPPER'),
                 errMsg
             )
-        self._cmd = [path.join('.', self._wrapperFile)]
+        self._cmd = [ path.join('.', self._wrapperFile) ]
+        if container_cmd is not None:
+            self._cmd = container_cmd + self._cmd
 
 
     ## @brief Manage smart merging of output files
