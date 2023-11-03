@@ -15,8 +15,11 @@
 #include "RPC_Digitization/RpcDigitizationTool.h"
 
 // Inputs
+#include "GaudiKernel/SystemOfUnits.h"
+#include "GaudiKernel/PhysicalConstants.h"
 #include "MuonSimEvent/RPCSimHit.h"
 #include "MuonSimEvent/RPCSimHitCollection.h"
+
 // Geometry
 #include "MuonIdHelpers/RpcIdHelper.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -47,7 +50,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <string>
 #include <utility>
 
 #include "EventInfoMgt/ITagInfoMgr.h"
@@ -79,8 +81,10 @@ namespace {
 }  // namespace
 
 using namespace MuonGM;
-#define SIG_VEL 4.8  // ns/m
-static double time_correction(double, double, double);
+namespace {
+    constexpr double SIG_VEL = 4.8;
+}
+
 
 RpcDigitizationTool::RpcDigitizationTool(const std::string& type, const std::string& name, const IInterface* pIID) :
     PileUpToolBase(type, name, pIID) {}
@@ -127,13 +131,9 @@ StatusCode RpcDigitizationTool::initialize() {
     ATH_MSG_DEBUG("IncludePileUpTruth     " << m_includePileUpTruth);
     ATH_MSG_DEBUG("VetoPileUpTruthLinks   " << m_vetoPileUpTruthLinks);
 
-    ATH_CHECK(detStore()->retrieve(m_GMmgr, "Muon"));
-    ATH_MSG_DEBUG("Retrieved GeoModel from DetectorStore.");
-
+    ATH_CHECK(m_detMgrKey.initialize());
     if (m_onlyUseContainerName) { ATH_CHECK(m_mergeSvc.retrieve()); }
-
-    m_idHelper = m_GMmgr->rpcIdHelper();
-    if (!m_idHelper) { return StatusCode::FAILURE; }
+    ATH_CHECK(detStore()->retrieve(m_idHelper));
     // check the identifiers
 
     ATH_MSG_INFO("Max Number of RPC Gas Gaps for these Identifiers = " << m_idHelper->gasGapMax());
@@ -147,7 +147,7 @@ StatusCode RpcDigitizationTool::initialize() {
     ATH_MSG_DEBUG("Input objects in container : '" << m_inputHitCollectionName << "'");
 
     // Initialize ReadHandleKey
-    ATH_CHECK(m_hitsContainerKey.initialize(true));
+    ATH_CHECK(m_hitsContainerKey.initialize());
 
     // initialize the output WriteHandleKeys
     ATH_CHECK(m_outputDigitCollectionKey.initialize());
@@ -174,32 +174,26 @@ StatusCode RpcDigitizationTool::initialize() {
     } else {
         configVal = (*atlasCommonRec)[0]->getString("CONFIG");
         ATH_MSG_INFO("From DD Database, Configuration is " << configVal);
-        std::string MSgeoVersion = m_GMmgr->geometryVersion().substr(0, 4);
-        ATH_MSG_INFO("From DD Database, MuonSpectrometer geometry version is " << MSgeoVersion);
-        if (configVal == "RUN1" || MSgeoVersion == "R.06") {
+        if (configVal == "RUN1") {
             run = Run1;
         } 
-        if (configVal == "RUN2" || MSgeoVersion == "R.07") {
+        if (configVal == "RUN2") {
             run = Run2;
         }
-        if (configVal == "RUN3" || MSgeoVersion == "R.09") {
+        if (configVal == "RUN3") {
             run = Run3;
         }
-        if (configVal == "RUN4" || MSgeoVersion == "R.10") {
+        if (configVal == "RUN4") {
             run = Run4;
         } 
         if (run == DataPeriod::Unknown) {
-            ATH_MSG_FATAL("Unexpected value for geometry config read from the database: " << configVal
-                                                                                          << " Geometry version=" << MSgeoVersion);
+            ATH_MSG_FATAL("Unexpected value for geometry config read from the database: " << configVal);
             return StatusCode::FAILURE;
         }
     }
     if (run == Run3 && m_idHelper->gasGapMax() < 3)
         ATH_MSG_WARNING("Run3,  configVal = " << configVal << " and GasGapMax =" << m_idHelper->gasGapMax());
-    // if ( configVal!="RUN3" && m_idHelper->gasGapMax()==3) ATH_MSG_WARNING("configVal = " <<configVal<<" and GasGapMax ="
-    // <<m_idHelper->gasGapMax());
-    //
-
+    
     if (run == Run1)
         ATH_MSG_INFO("From Geometry DB: MuonSpectrometer configuration is: RUN1 or MuonGeometry = R.06");
     else if (run == Run2)
@@ -290,10 +284,28 @@ StatusCode RpcDigitizationTool::initialize() {
     m_BOS_id = m_idHelper->stationNameIndex("BOS");
     m_BIL_id = m_idHelper->stationNameIndex("BIL");
     m_BIS_id = m_idHelper->stationNameIndex("BIS");
-    m_CSS_id = m_idHelper->stationNameIndex("CSS");
     return StatusCode::SUCCESS;
 }
 
+template <class CondType> 
+StatusCode RpcDigitizationTool::retrieveCondData(const EventContext& ctx,
+                                                 const SG::ReadCondHandleKey<CondType>& key,
+                                                 const CondType* & condPtr) const {
+
+    if (key.empty()) {
+       ATH_MSG_DEBUG("No key has been configured for object "<<typeid(CondType).name()<<". Clear pointer");
+       condPtr = nullptr;
+       return StatusCode::SUCCESS;
+    }
+    SG::ReadCondHandle<CondType> readHandle{key, ctx};
+    if (!readHandle.isValid()){
+        ATH_MSG_FATAL("Failed to load conditions object "<<key.fullKey()<<".");
+        return StatusCode::FAILURE;
+    }
+    condPtr = readHandle.cptr();
+    return StatusCode::SUCCESS;
+
+}
 //--------------------------------------------
 StatusCode RpcDigitizationTool::prepareEvent(const EventContext& /*ctx*/, unsigned int) {
     ATH_MSG_DEBUG("RpcDigitizationTool::in prepareEvent()");
@@ -491,6 +503,10 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
     rngWrapper->setSeed(name(), ctx);
     CLHEP::HepRandomEngine* rndmEngine = rngWrapper->getEngine(ctx);
 
+    const MuonGM::MuonDetectorManager* detMgr{nullptr};
+    ATH_CHECK(retrieveCondData(ctx, m_detMgrKey, detMgr));
+
+
     // StatusCode status = StatusCode::SUCCESS;
     // status.ignore();
 
@@ -620,7 +636,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                                 << gasGap);
                 continue;
             }
-            const RpcReadoutElement* ele = m_GMmgr->getRpcReadoutElement(atlasRpcIdeta);  // first add time jitter to the time:
+            const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(atlasRpcIdeta);  // first add time jitter to the time:
             const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
             const HepMcParticleLink::PositionFlag idxFlag =
                 (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_INDEX;
@@ -640,19 +656,19 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                                                     << " gasGap " << gasGap << " measphi " << imeasphi);
 
                 // pcs contains the cluster size, the first strip number and the last strip number of the cluster
-                pcs = TurnOnStrips(pcs, atlasId, rndmEngine);
+                pcs = TurnOnStrips(ctx, pcs, atlasId, rndmEngine);
                 if (pcs[2] < 0) return StatusCode::FAILURE;
 
                 ATH_MSG_DEBUG("Simulated cluster1: size/first/last= " << pcs[0] << "/" << pcs[1] << "/" << pcs[2]);
 
                 // Adjuststd::absolute position and local position
                 Amg::Vector3D pos = hit.localPosition();
-                pos = adjustPosition(atlasId, pos);  //
-                pos = posInPanel(atlasId, pos);      // This is what we want to save in deposit?
+                pos = adjustPosition(ctx, atlasId, pos);  //
+                pos = posInPanel(ctx, atlasId, pos);      // This is what we want to save in deposit?
 
                 // Calculate propagation time along readout strip in seconds
                 Amg::Vector3D gpos = ele->localToGlobalCoords(pos, atlasId);
-                double proptime = PropagationTimeNew(atlasId, gpos);
+                double proptime = PropagationTimeNew(ctx, atlasId, gpos);
 
                 double tns = G4Time + proptime + corrtimejitter;  // the time is in nanoseconds
                 ATH_MSG_VERBOSE("TOF+propagation time  " << tns << " /s where proptime " << proptime << "/s");
@@ -711,8 +727,8 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                     }
                     // here count and maybe kill dead strips if using COOL input for the detector status
                     if (m_Efficiency_fromCOOL) {
-                        SG::ReadCondHandle<RpcCondDbData> readHandle{m_readKey, ctx};
-                        const RpcCondDbData* readCdo{*readHandle};
+                        const RpcCondDbData* readCdo{nullptr};                        
+                        ATH_CHECK(retrieveCondData(ctx, m_readKey, readCdo));
                         if (!(undefPhiStripStat && imeasphi == 1)) {
                             if (readCdo->getDeadStripIntMap().find(newId) != readCdo->getDeadStripIntMap().end()) {
                                 ATH_MSG_DEBUG("After DetectionEfficiency: strip " << m_idHelper->show_to_string(newId)
@@ -836,11 +852,11 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                 // Now we subtract TOF from IP to assume full time calibrated detector (t=0 for particle from IP at light speed)
                 // We add a time shift to emulate FE global offset
 
-                const RpcReadoutElement* ele = m_GMmgr->getRpcReadoutElement(theId);
+                const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(theId);
                 Amg::Vector3D posi = ele->stripPos(theId);
-                double tp = m_patch_for_rpc_time ? time_correction(posi.x(), posi.y(), posi.z()) : 0.;
+                double tp = m_patch_for_rpc_time ? posi.mag() / Gaudi::Units::c_light : 0.;
                 // Calculate propagation time for a hit at the center of the strip, to be subtructed as well as the nominal TOF
-                double propTimeFromStripCenter = PropagationTimeNew(theId, posi);
+                double propTimeFromStripCenter = PropagationTimeNew(ctx, theId, posi);
                 double newDigit_time = currTime + uncorrjitter + m_rpc_time_shift - tp - propTimeFromStripCenter;
 		
 		double digi_ToT = -1.;  // Time over threshold, for Narrow-gap RPCs only
@@ -923,19 +939,17 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
 //--------------------------------------------
 std::vector<int> RpcDigitizationTool::PhysicalClusterSize(const EventContext& ctx, const Identifier& id, const RPCSimHit* theHit,
                                                           CLHEP::HepRandomEngine* rndmEngine) {
+    
+    const MuonGM::MuonDetectorManager* detMgr{nullptr};
+    retrieveCondData(ctx, m_detMgrKey, detMgr).ignore();
+
     int stationName = m_idHelper->stationName(id);
     int stationEta = m_idHelper->stationEta(id);
     float pitch;
     int measuresPhi = m_idHelper->measuresPhi(id);
     std::vector<int> result(3, 0);
-    const RpcReadoutElement* ele = m_GMmgr->getRpcReadoutElement(id);
-    if (!ele)
-        throw std::runtime_error(
-            Form("File: %s, Line: %d\nRpcDigitizationTool::PhysicalClusterSize() - Could not retrieve RpcReadoutElement for stationName=%d "
-                 "(%s), stationEta=%d, stationPhi=%d, doubletZ=%d, doubletR=%d, doubletPhi=%d, gasGap=%d",
-                 __FILE__, __LINE__, m_idHelper->stationName(id), m_idHelper->stationNameString(m_idHelper->stationName(id)).c_str(),
-                 m_idHelper->stationEta(id), m_idHelper->stationPhi(id), m_idHelper->doubletZ(id), m_idHelper->doubletR(id),
-                 m_idHelper->doubletPhi(id), m_idHelper->gasGap(id)));
+    const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(id);
+    
     pitch = ele->StripPitch(measuresPhi);
 
     int nstrip;
@@ -944,9 +958,9 @@ std::vector<int> RpcDigitizationTool::PhysicalClusterSize(const EventContext& ct
     std::vector<double> cs = m_csPara;       // read from file
     std::array<double, 5> cs1{0.}, cs2{0.};  // the contributions to the observed cluster size due to physical cluster size 1 and 2
 
-    Amg::Vector3D position = adjustPosition(id, theHit->localPosition());
+    Amg::Vector3D position = adjustPosition(ctx, id, theHit->localPosition());
 
-    nstrip = findStripNumber(position, id, xstrip);
+    nstrip = findStripNumber(ctx, position, id, xstrip);
 
     xstrip = xstrip * 30. / pitch;
 
@@ -969,7 +983,7 @@ std::vector<int> RpcDigitizationTool::PhysicalClusterSize(const EventContext& ct
         }
     }
 
-    if (measuresPhi) nstrip = adjustStripNumber(id, nstrip);
+    if (measuresPhi) nstrip = adjustStripNumber(ctx, id, nstrip);
 
     result[1] = nstrip;
     result[2] = nstrip;
@@ -1074,12 +1088,19 @@ std::vector<int> RpcDigitizationTool::PhysicalClusterSize(const EventContext& ct
 }
 
 //--------------------------------------------
-std::vector<int> RpcDigitizationTool::TurnOnStrips(std::vector<int> pcs, const Identifier& id, CLHEP::HepRandomEngine* rndmEngine) {
+std::vector<int> RpcDigitizationTool::TurnOnStrips(const EventContext& ctx, 
+                                                   std::vector<int> pcs, 
+                                                   const Identifier& id, 
+                                                   CLHEP::HepRandomEngine* rndmEngine) {
+
+    const MuonGM::MuonDetectorManager* detMgr{nullptr};
+    retrieveCondData(ctx, m_detMgrKey, detMgr).ignore();
+
     int nstrips{0};
     int measuresPhi = m_idHelper->measuresPhi(id);
     int stationName = m_idHelper->stationName(id);
 
-    const RpcReadoutElement* ele = m_GMmgr->getRpcReadoutElement(id);
+    const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(id);
 
     nstrips = ele->Nstrips(measuresPhi);
 
@@ -1192,48 +1213,15 @@ std::vector<int> RpcDigitizationTool::TurnOnStrips(std::vector<int> pcs, const I
 }
 
 //--------------------------------------------
-double RpcDigitizationTool::PropagationTime(const Identifier& id, const Amg::Vector3D& pos) const {
-    float length{0.}, impact{0.}, distance{0.};
-    int doubletZ = m_idHelper->doubletZ(id);
-    int doubletPhi = m_idHelper->doubletPhi(id);
+double RpcDigitizationTool::PropagationTimeNew(const EventContext& ctx, 
+                                               const Identifier& id, 
+                                               const Amg::Vector3D& globPos) const {
+
+    const MuonGM::MuonDetectorManager* detMgr{nullptr};
+    retrieveCondData(ctx, m_detMgrKey, detMgr).ignore();
+    double distance{0.};
     int measuresPhi = m_idHelper->measuresPhi(id);
-    int stEta = m_idHelper->stationEta(id);
-
-    const RpcReadoutElement* ele = m_GMmgr->getRpcReadoutElement(id);
-
-    // length of the strip
-    length = ele->StripLength(measuresPhi);
-
-    if (measuresPhi) {
-        // position along the strip
-        // offset necessary because pos is given wrt the center of the strip panel
-
-        double offset = ele->stripPanelZsize(measuresPhi);
-        impact = pos.z() + 0.5 * offset;
-
-        if (stEta >= 0) {
-            if (doubletZ == 1) distance = impact;
-            if (doubletZ == 2 || doubletZ == 3) distance = length - impact;  // dZ=3 for rib chambers. probably not correct...
-        } else {
-            if (doubletZ == 2 || doubletZ == 3) distance = impact;
-            if (doubletZ == 1) distance = length - impact;
-        }
-    } else {
-        double offset = ele->stripPanelSsize(measuresPhi);
-        impact = pos.y() + 0.5 * offset;
-        if (doubletPhi == 1) distance = impact;
-        if (doubletPhi == 2) distance = length - impact;
-    }
-
-    // distance in mm, SIG_VEL in ns/m
-    return distance * SIG_VEL * 1.e-3;
-}
-
-//--------------------------------------------
-double RpcDigitizationTool::PropagationTimeNew(const Identifier& id, const Amg::Vector3D& globPos) const {
-    float distance{0.};
-    int measuresPhi = m_idHelper->measuresPhi(id);
-    const RpcReadoutElement* ele = m_GMmgr->getRpcReadoutElement(id);
+    const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(id);
     if (measuresPhi) {
         distance = ele->distanceToPhiReadout(globPos, id);
     } else {
@@ -1245,10 +1233,14 @@ double RpcDigitizationTool::PropagationTimeNew(const Identifier& id, const Amg::
 }
 
 //--------------------------------------------
-Amg::Vector3D RpcDigitizationTool::adjustPosition(const Identifier& id, const Amg::Vector3D& hitPos) const {
+Amg::Vector3D RpcDigitizationTool::adjustPosition(const EventContext& ctx, 
+                                                  const Identifier& id, 
+                                                  const Amg::Vector3D& hitPos) const {
     // code to change local axis orientation taking into account geometrical rotations
+    const MuonGM::MuonDetectorManager* detMgr{nullptr};
+    retrieveCondData(ctx, m_detMgrKey, detMgr).ignore();
 
-    const RpcReadoutElement* ele = m_GMmgr->getRpcReadoutElement(id);
+    const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(id);
     // calculate flipEta
     bool flipEta =
         ele->rotatedRpcModule() || ele->isMirrored();  // both are false if MuonDetDescr is used, because axis re-oriented in RPCSD
@@ -1258,10 +1250,15 @@ Amg::Vector3D RpcDigitizationTool::adjustPosition(const Identifier& id, const Am
 }
 
 //--------------------------------------------
-int RpcDigitizationTool::adjustStripNumber(const Identifier& id, int nstrip) const {
+int RpcDigitizationTool::adjustStripNumber(const EventContext& ctx, 
+                                           const Identifier& id, 
+                                           int nstrip) const {
+    
     // code to change local axis orientation taking into account geometrical rotations
+    const MuonGM::MuonDetectorManager* detMgr{nullptr};
+    retrieveCondData(ctx, m_detMgrKey, detMgr).ignore();
 
-    const RpcReadoutElement* ele = m_GMmgr->getRpcReadoutElement(id);
+    const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(id);
     int result = nstrip;
     bool flipPhi = ele->isMirrored();
 
@@ -1274,14 +1271,18 @@ int RpcDigitizationTool::adjustStripNumber(const Identifier& id, int nstrip) con
 }
 
 //--------------------------------------------
-Amg::Vector3D RpcDigitizationTool::posInPanel(
-    const Identifier& id, const Amg::Vector3D& posInGap) const {  // the hit has the position in the gap. we need the position in the panel
+Amg::Vector3D RpcDigitizationTool::posInPanel(const EventContext& ctx, 
+                                              const Identifier& id, 
+                                              const Amg::Vector3D& posInGap) const {  // the hit has the position in the gap. we need the position in the panel
+
+    const MuonGM::MuonDetectorManager* detMgr{nullptr};
+    retrieveCondData(ctx, m_detMgrKey, detMgr).ignore();
 
     int stationName = m_idHelper->stationName(id);
     int measuresPhi = m_idHelper->measuresPhi(id);
     std::string namestring = m_idHelper->stationNameString(stationName);
 
-    const RpcReadoutElement* ele = m_GMmgr->getRpcReadoutElement(id);
+    const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(id);
 
     float gaplength = ele->gasGapSsize();
     // correction needed only in X direction
@@ -1301,8 +1302,15 @@ Amg::Vector3D RpcDigitizationTool::posInPanel(
 }
 
 //--------------------------------------------
-int RpcDigitizationTool::findStripNumber(const Amg::Vector3D& posInGap, const Identifier& digitId, double& posinstrip) const {
-    const RpcReadoutElement* ele = m_GMmgr->getRpcReadoutElement(digitId);
+int RpcDigitizationTool::findStripNumber(const EventContext& ctx, 
+                                         const Amg::Vector3D& posInGap, 
+                                         const Identifier& digitId, 
+                                         double& posinstrip) const {
+    
+    const MuonGM::MuonDetectorManager* detMgr{nullptr};
+    retrieveCondData(ctx, m_detMgrKey, detMgr).ignore();
+
+    const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(digitId);
 
     Amg::Vector3D posInElement = ele->SDtoModuleCoords(posInGap, digitId);
 
@@ -1608,8 +1616,8 @@ StatusCode RpcDigitizationTool::DetectionEfficiency(const EventContext& ctx, con
         OnlyPhiEff = m_OnlyPhiEff_BIS78;
     } else {  // Efficiency from Cool
 
-        SG::ReadCondHandle<RpcCondDbData> readHandle{m_readKey, ctx};
-        const RpcCondDbData* readCdo{*readHandle};
+        const RpcCondDbData* readCdo{nullptr};                        
+        ATH_CHECK(retrieveCondData(ctx, m_readKey, readCdo));
 
         ATH_MSG_DEBUG("Efficiencies and cluster size + dead strips will be extracted from COOL");
 
@@ -1934,8 +1942,8 @@ int RpcDigitizationTool::ClusterSizeEvaluation(const EventContext& ctx, const Id
         FracClusterSizeTail = m_FracClusterSizeTail_BIS78;
         MeanClusterSizeTail = m_MeanClusterSizeTail_BIS78;
     } else {  // Cluster size from COOL
-        SG::ReadCondHandle<RpcCondDbData> readHandle{m_readKey, ctx};
-        const RpcCondDbData* readCdo{*readHandle};
+        const RpcCondDbData* readCdo{nullptr};                        
+        retrieveCondData(ctx, m_readKey, readCdo).ignore();
 
         Identifier Id = m_idHelper->panelID(idRpcStrip);
 
@@ -2141,8 +2149,11 @@ StatusCode RpcDigitizationTool::PrintCalibrationVector() {
 StatusCode RpcDigitizationTool::DumpRPCCalibFromCoolDB(const EventContext& ctx) {
     ATH_MSG_DEBUG("RpcDigitizationTool::in DumpRPCCalibFromCoolDB");
 
-    SG::ReadCondHandle<RpcCondDbData> readHandle{m_readKey, ctx};
-    const RpcCondDbData* readCdo{*readHandle};
+    const RpcCondDbData* readCdo{nullptr};
+    ATH_CHECK(retrieveCondData(ctx, m_readKey, readCdo));
+
+    const MuonGM::MuonDetectorManager* detMgr{nullptr};
+    ATH_CHECK(retrieveCondData(ctx, m_detMgrKey, detMgr));
 
     StatusCode sc = StatusCode::SUCCESS;
 
@@ -2363,7 +2374,7 @@ StatusCode RpcDigitizationTool::DumpRPCCalibFromCoolDB(const EventContext& ctx) 
                                                                  isValid);  // last 5 arguments are: int doubletPhi, int gasGap, int
                                                                             // measuresPhi, int strip, bool& isValid
                                 if (!isValid) continue;
-                                const RpcReadoutElement* rpc = m_GMmgr->getRpcReadoutElement(rpcId);
+                                const RpcReadoutElement* rpc = detMgr->getRpcReadoutElement(rpcId);
 
                                 if (!rpc) continue;
                                 Identifier idr = rpc->identify();
@@ -2665,7 +2676,7 @@ StatusCode RpcDigitizationTool::DumpRPCCalibFromCoolDB(const EventContext& ctx) 
                                                                     isValid);  // last 5 arguments are: int doubletPhi, int gasGap, int
                                                                                 // measuresPhi, int strip, bool& isValid
                                     if (!isValid) continue;
-                                    const RpcReadoutElement* rpc = m_GMmgr->getRpcReadoutElement(rpcId);
+                                    const RpcReadoutElement* rpc = detMgr->getRpcReadoutElement(rpcId);
                                     if (!rpc) continue;
                                     Identifier idr = rpc->identify();
                                     if (idr == 0) continue;
@@ -2742,7 +2753,7 @@ StatusCode RpcDigitizationTool::DumpRPCCalibFromCoolDB(const EventContext& ctx) 
                                                               isValid);  // last 5 arguments are: int doubletPhi, int gasGap, int
                                                                                 // measuresPhi, int strip, bool& isValid
                                     if (!isValid) continue;
-                                    const RpcReadoutElement* rpc = m_GMmgr->getRpcReadoutElement(rpcId);
+                                    const RpcReadoutElement* rpc = detMgr->getRpcReadoutElement(rpcId);
                                     if (!rpc) continue;
                                     Identifier idr = rpc->identify();
                                     if (idr == 0) continue;
@@ -2850,7 +2861,7 @@ StatusCode RpcDigitizationTool::DumpRPCCalibFromCoolDB(const EventContext& ctx) 
                                             isValid);  // last 5 arguments are: int doubletPhi, int gasGap, int measuresPhi, int strip,
                                                         // bool& isValid
                                         if (!isValid) continue;
-                                        const RpcReadoutElement* rpc = m_GMmgr->getRpcReadoutElement(rpcId);
+                                        const RpcReadoutElement* rpc = detMgr->getRpcReadoutElement(rpcId);
                                         if (!rpc) continue;
                                         Identifier idr = rpc->identify();
                                         if (idr == 0) continue;
@@ -2874,10 +2885,6 @@ StatusCode RpcDigitizationTool::DumpRPCCalibFromCoolDB(const EventContext& ctx) 
     return sc;
 }
 
-double time_correction(double x, double y, double z) {
-    double speed_of_light = 299.792458;                   // mm/ns
-    return sqrt(x * x + y * y + z * z) / speed_of_light;  // FIXME use CLHEP::c_light
-}
 double RpcDigitizationTool::FCPEfficiency(HepMC::ConstGenParticlePtr genParticle) {
     double qcharge = 1.;
     double qbetagamma = -1.;
@@ -2892,7 +2899,7 @@ double RpcDigitizationTool::FCPEfficiency(HepMC::ConstGenParticlePtr genParticle
     const double QPz = genParticle->momentum().pz();
     const double QE = genParticle->momentum().e();
     const double QM2 = std::pow(QE, 2) - std::pow(QPx, 2) - std::pow(QPy, 2) - std::pow(QPz, 2);
-    const double QP = std::sqrt(std::pow(QPx, 2) + std::pow(QPy, 2) + std::pow(QPz, 2));
+    const double QP = std::hypot(QPx, QPy, QPz);
     double QM;
     if (QM2 >= 0.) {
         QM = std::sqrt(QM2);

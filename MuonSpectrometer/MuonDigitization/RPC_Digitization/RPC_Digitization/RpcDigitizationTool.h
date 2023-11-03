@@ -37,31 +37,26 @@
 */
 
 #include "AthenaKernel/IAthRNGSvc.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "HitManagement/TimedHitCollection.h"
 #include "MuonCondData/RpcCondDbData.h"
 #include "MuonSimEvent/RPCSimHit.h"
 #include "MuonSimEvent/RPCSimHitCollection.h"
 #include "PileUpTools/PileUpMergeSvc.h"
 #include "PileUpTools/PileUpToolBase.h"
-#include "xAODEventInfo/EventAuxInfo.h"  // NEW EDM
 #include "xAODEventInfo/EventInfo.h"     // NEW EDM
 
-// Outputs
-#include <map>
-#include <vector>
 
 #include "MuonDigitContainer/RpcDigitContainer.h"
 #include "MuonSimData/MuonSimDataCollection.h"
 
 class RpcHitIdHelper;
-class RpcCondDbData;
+
 
 class RpcIdHelper;
 class ITagInfoMgr;
 
-namespace MuonGM {
-    class MuonDetectorManager;
-}
 namespace CLHEP {
     class HepRandomEngine;
 }
@@ -91,6 +86,9 @@ public:
     virtual StatusCode processAllSubEvents(const EventContext& ctx) override final;
 
 private:
+    template <class CondType> StatusCode retrieveCondData(const EventContext& ctx,
+                                                          const SG::ReadCondHandleKey<CondType>& key,
+                                                          const CondType* & condPtr) const;
     using Collections_t = std::vector<std::unique_ptr<RpcDigitCollection> >;
     /** Get next event and extract collection of hit collections: */
     StatusCode getNextEvent(const EventContext& ctx);
@@ -115,10 +113,14 @@ private:
     /** Cluster simulation: second step.
         Additional strips are turned on in order to reproduce the
         observed cluster size distribution */
-    std::vector<int> TurnOnStrips(std::vector<int> pcs, const Identifier& id, CLHEP::HepRandomEngine* rndmEngine);
+    std::vector<int> TurnOnStrips(const EventContext& ctx,
+                                  std::vector<int> pcs, 
+                                  const Identifier& id, 
+                                  CLHEP::HepRandomEngine* rndmEngine);
     /** Calculates the propagation time along the strip */
-    double PropagationTime(const Identifier& id, const Amg::Vector3D& pos) const;
-    double PropagationTimeNew(const Identifier& id, const Amg::Vector3D& globPos) const;
+    double PropagationTimeNew(const EventContext& ctx,
+                              const Identifier& id, 
+                              const Amg::Vector3D& globPos) const;
     /** Calculates the position of the hit wrt to the strip panel
         this transformation is needed since the impact point comes from the SD
         int he gas gap's reference frame. */
@@ -128,17 +130,22 @@ private:
     Gaudi::Property<double> m_UncorrJitter_BIS78{this, "UncorrJitter_BIS78", 0.3, "jitter uncorrelated between eta and phi BIS78"};
     Gaudi::Property<double> m_CorrJitter_BIS78{this, "CorrJitter_BIS78", 0.0, "jitter correlated between eta and phi BIS78"};
 
-    Amg::Vector3D posInPanel(const Identifier& id, const Amg::Vector3D& posInGap) const;
+    Amg::Vector3D posInPanel(const EventContext& ctx, 
+                             const Identifier& id, 
+                             const Amg::Vector3D& posInGap) const;
     /** adjust strip numbering according to standard OIDs **/
-    int adjustStripNumber(const Identifier& id, int nstrip) const;
+    int adjustStripNumber(const EventContext& ctx, const Identifier& id, int nstrip) const;
     /** Accounts for rotation of chambers.
         The impact point's coordinates are given by the RPCSensitiveDetector wrt
         the gas gap reference system but RPC chambers are placed in the spectrometer
         after a certain number of rotations. This method applies the necessary
         modifications to axis orientation, in order to obtain the correct strip number */
-    Amg::Vector3D adjustPosition(const Identifier& id, const Amg::Vector3D& hitPos) const;
+    Amg::Vector3D adjustPosition(const EventContext& ctx, const Identifier& id, const Amg::Vector3D& hitPos) const;
     /** calculates the strip number and returns the position along the strip*/
-    int findStripNumber(const Amg::Vector3D& gasGapPos, const Identifier& stripPanelId, double& posinstrip) const;
+    int findStripNumber(const EventContext& ctx, 
+                        const Amg::Vector3D& gasGapPos, 
+                        const Identifier& stripPanelId, 
+                        double& posinstrip) const;
 
     // pile-up
     bool outsideWindow(double time) const;
@@ -156,7 +163,8 @@ private:
     /** CoolDB */
     StatusCode DumpRPCCalibFromCoolDB(const EventContext& ctx);
 
-    const MuonGM::MuonDetectorManager* m_GMmgr{};
+    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey {this, "DetectorManagerKey",  "MuonDetectorManager", 
+                                                            "Key of input MuonDetectorManager condition data"};
     const RpcIdHelper* m_idHelper{};
     const RpcHitIdHelper* m_muonHelper{};
     std::vector<std::unique_ptr<RPCSimHitCollection>> m_RPCHitCollList;
@@ -272,7 +280,6 @@ protected:
     int m_BIL_id{-1};
     int m_BIS_id{-1};
 
-    int m_CSS_id{-1};
 };
 
 inline bool RpcDigitizationTool::outsideWindow(double time) const {
