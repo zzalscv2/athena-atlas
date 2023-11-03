@@ -34,7 +34,6 @@
 #include "StoreGate/WriteCondHandleKey.h"
 
 // for the conditions data
-#include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 #include "MagFieldElements/AtlasFieldCache.h"
 
 void assertVec3D (const Amg::Vector3D& a, const Amg::Vector3D& b)

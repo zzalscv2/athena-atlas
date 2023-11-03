@@ -26,17 +26,16 @@
 
 //++ new one
 
-#include "TrkTrack/TrackCollection.h"
-#include "TrkTrack/Track.h"
-#include "TrkTrackSummary/TrackSummary.h"
-#include "TrkTrack/LinkToTrack.h"
-#include "TrkParticleBase/LinkToTrackParticleBase.h"
-#include "TrkTrackSummary/TrackSummary.h"
-#include "TrkParticleBase/TrackParticleBase.h"
-#include "TrkSurfaces/PerigeeSurface.h"
-#include "TrkParameters/TrackParameters.h"
 #include "TrkAlignInterfaces/IAlignModuleTool.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
+#include "TrkParameters/TrackParameters.h"
+#include "TrkParticleBase/LinkToTrackParticleBase.h"
+#include "TrkParticleBase/TrackParticleBase.h"
+#include "TrkSurfaces/PerigeeSurface.h"
+#include "TrkTrack/LinkToTrack.h"
+#include "TrkTrack/Track.h"
+#include "TrkTrack/TrackCollection.h"
+#include "TrkTrackSummary/TrackSummary.h"
 
 #include <ext/algorithm>
 #include <functional>

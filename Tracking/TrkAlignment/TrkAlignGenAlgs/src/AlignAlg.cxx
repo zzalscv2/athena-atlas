@@ -13,7 +13,6 @@
 #include "TrkAlignInterfaces/ITrackCollectionProvider.h"
 
 #include "TrkAlignEvent/AlignTrack.h"
-#include "TrkTrack/TrackCollection.h"
 #include "TrkAlignEvent/AlignVertex.h"
 
 #include "TFile.h"

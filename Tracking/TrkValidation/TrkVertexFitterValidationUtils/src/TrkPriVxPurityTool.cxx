@@ -140,7 +140,7 @@ namespace Trk {
                 for ( ;vt!=ve;++vt ) {
 //original element link
 //ugly so far, we'll correct the EDM later
-                    if ( ( *vt ) !=0 ) {
+                    if ( ( *vt ) !=nullptr ) {
 
                         ITrackLink * origLink = ( **vt ).trackOrParticleLink();
 

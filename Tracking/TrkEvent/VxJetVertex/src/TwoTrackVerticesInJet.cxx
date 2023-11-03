@@ -57,7 +57,7 @@ namespace Trk
     for (std::vector<const xAOD::Vertex*>::const_iterator vxIter=vxBegin;
          vxIter!=vxEnd;++vxIter) 
     {
-      if (*vxIter!=0)
+      if (*vxIter!=nullptr)
       {
         const xAOD::Vertex* thisPtr=*vxIter;
         //const xAOD::Vertex* newVertex=thisPtr->clone();
@@ -69,7 +69,7 @@ namespace Trk
     for (std::vector<const TrackParticleBase*>::const_iterator neuIter=neuBegin;
          neuIter!=neuEnd;++neuIter)
     {
-      if (*neuIter!=0)
+      if (*neuIter!=nullptr)
       {
         m_neutralTrackOfVertex.push_back(new TrackParticleBase(**neuIter));
       }
@@ -96,7 +96,7 @@ namespace Trk
       for (std::vector<const xAOD::Vertex*>::const_iterator vxIter=vxBegin;
            vxIter!=vxEnd;++vxIter) 
       {
-        if (*vxIter!=0)
+        if (*vxIter!=nullptr)
         {
           const xAOD::Vertex* thisPtr=*vxIter;
           //const xAOD::Vertex* newVertex=thisPtr->clone();
@@ -108,7 +108,7 @@ namespace Trk
       for (std::vector<const TrackParticleBase*>::const_iterator neuIter=neuBegin;
                neuIter!=neuEnd;++neuIter)
       {
-        if (*neuIter!=0)
+        if (*neuIter!=nullptr)
         {
           m_neutralTrackOfVertex.push_back(new TrackParticleBase(**neuIter));
         }

@@ -174,7 +174,7 @@ public:
    void addSharedHitInformation(const Track *track, xAOD::TrackParticle& tp) const;
 
    /** Add dummy endcap shared hit info as AuxDyn variable in case nominal shared hit info not computed (for ITk fast tracking) */
-   void addDummyEndcapSharedHitInformation(xAOD::TrackParticle& tp) const;
+   static void addDummyEndcapSharedHitInformation(xAOD::TrackParticle& tp) ;
 
 
   /** Method to set Defining parameters of a xAOD::TrackParticle */

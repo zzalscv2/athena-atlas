@@ -871,7 +871,7 @@ Trk::GaussianSumFitter::smootherFit(
   }
 
   if(!foundMeasurement){
-    return GSFTrajectory();
+    return {};
   }
   // This is the 1st track state on surface for a measurement
   // in the reverse direction. Our starting point for the smoother

@@ -45,7 +45,7 @@ public:
 
   double maxExpValue;
 
-  Test2(unsigned int input=4, std::vector<unsigned int> hidden_layer_sizes = {8,3,1})
+  explicit Test2(unsigned int input=4, std::vector<unsigned int> hidden_layer_sizes = {8,3,1})
     : mnInput(input),
       mnHiddenLayerSize(std::move(hidden_layer_sizes))
   {

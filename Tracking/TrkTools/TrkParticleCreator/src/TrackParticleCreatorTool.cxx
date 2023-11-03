@@ -1271,7 +1271,7 @@ TrackParticleCreatorTool::addSharedHitInformation(const Track *track, xAOD::Trac
 
 
 void
-TrackParticleCreatorTool::addDummyEndcapSharedHitInformation(xAOD::TrackParticle& tp) const
+TrackParticleCreatorTool::addDummyEndcapSharedHitInformation(xAOD::TrackParticle& tp) 
 {
 
   uint8_t nInPixSharedEndcapHits = 0, nNInPixSharedEndcapHits = 0;

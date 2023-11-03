@@ -63,7 +63,7 @@ namespace Trk
 	 tracksIter!=tracksEnd;
 	 ++tracksIter) {
       
-      if (*tracksIter!=0) {
+      if (*tracksIter!=nullptr) {
 	
 	tracksOfSecondVertex.push_back(*tracksIter);
 
