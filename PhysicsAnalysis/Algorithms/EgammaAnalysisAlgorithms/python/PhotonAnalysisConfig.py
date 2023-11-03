@@ -91,6 +91,15 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', alg.selectionDecoration)
 
+        # Change the origin of Photons from (0,0,0) to (0,0,z)
+        # where z comes from the position of a vertex
+        # Default the one tagged as Primary
+        alg = config.createAlgorithm( 'CP::PhotonOriginCorrectionAlg',
+                                      'PhotonOriginCorrectionAlg' + postfix )
+        alg.photons = config.readName (self.containerName)
+        alg.photonsOut = config.copyName (self.containerName)
+        alg.preselection = config.getPreselection (self.containerName, '')
+
         # Do calibration
         alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg',
                                       'PhotonCalibrationAndSmearingAlg' + postfix )
