@@ -179,7 +179,7 @@ def createSimConfigFlags():
                     simulator = SimulationFlavour.AtlasG4
                 elif simFlavour in ['MC12G4', 'FullG4']:
                     simulator = SimulationFlavour.FullG4MT
-                elif simFlavour in ['FullG4_QS', 'FullG4_Longlived']:
+                elif simFlavour in ['FullG4_QS', 'FullG4_LongLived']:
                     simulator = SimulationFlavour.FullG4MT_QS
                 elif simFlavour in ['PassBackG4']:
                     simulator = SimulationFlavour.PassBackG4MT
