@@ -51,6 +51,9 @@ StatusCode LArSuperCellMonAlg::initialize() {
   ATH_CHECK( m_superCellContainerRefKey.initialize() );
   ATH_CHECK( m_noiseCDOKey.initialize() );
   ATH_CHECK( m_bcDataKey.initialize() );
+ 
+  if(m_superCellContainerRecoKey.empty()) m_doSCReco=false;
+  ATH_CHECK(m_superCellContainerRecoKey.initialize(m_doSCReco));  
 
   ATH_MSG_DEBUG("LArSuperCellMonAlg::initialize() is done!");
 
@@ -72,15 +75,34 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
 
   SG::ReadHandle<CaloCellContainer> superCellHdl{m_superCellContainerKey, ctx};
   const CaloCellContainer* superCellCont = superCellHdl.cptr();
+  if(!superCellCont){
+     ATH_MSG_ERROR("The requested SC container key " << m_superCellContainerKey.key() << " could not be retrieved. !!!");
+     return StatusCode::SUCCESS;
+  }
   
   SG::ReadHandle<CaloCellContainer> superCellRefHdl{m_superCellContainerRefKey, ctx};
   const CaloCellContainer* superCellRefCont = superCellRefHdl.cptr();
+  if(!superCellRefCont){
+     ATH_MSG_ERROR("The requested SC ref container key " << m_superCellContainerRefKey.key() << " could not be retrieved. !!!");
+     return StatusCode::SUCCESS;
+  }
   
   SG::ReadCondHandle<CaloNoise> noiseHdl{m_noiseCDOKey, ctx};
   const CaloNoise *noisep = *noiseHdl;
 
   SG::ReadCondHandle<BunchCrossingCondData> bccd (m_bcDataKey,ctx);
 
+  const CaloCellContainer *superCellRecoCont = nullptr;
+  if(m_doSCReco){
+     SG::ReadHandle<CaloCellContainer > hSCetRecoContainer{m_superCellContainerRecoKey,ctx}; 
+     if (!hSCetRecoContainer.isValid()) {
+        ATH_MSG_ERROR("The requested SC ET reco container key could not be retrieved. !!!");
+     }else{
+        superCellRecoCont = hSCetRecoContainer.cptr(); 
+        ATH_MSG_DEBUG("SCetRecoContainer.size() " << hSCetRecoContainer->size());
+     }
+  }
+     
   if (ctx.evt()==0) {
     ATH_CHECK(createPerJobHistograms(superCellCont, noisep));
   }
@@ -150,7 +172,7 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     variables.push_back(MSCetRef);
     // let us put conditional to force building the linearity plot
     // only when the new signal passes BCID
-    if ( SCpassTime || SCpassPF ) variables.push_back(MSCtRef);
+    variables.push_back(MSCtRef);
     variables.push_back(MSCprovRef);
 
     // per layer
@@ -179,6 +201,22 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     variables.push_back(LMSCprovRef);
     variables.push_back(MBCIDFFB);
 
+    auto MSCtReco = Monitored::Scalar<float>("superCelltimeReco",0.);
+    auto MSCetReco = Monitored::Scalar<float>("superCellEtReco",0.);
+    auto LMSCtReco = Monitored::Scalar<float>("superCelltimeReco_"+layerName,0.);
+    if(m_doSCReco){
+       const CaloCell* superCellReco = superCellRecoCont->findCell( SCcaloDDE->identifyHash() );
+       if(superCellReco) {
+          float SCetReco = superCellReco->et();
+          float SCtimeReco = superCellReco->time();
+          MSCtReco = SCtimeReco;
+          MSCetReco = SCetReco;
+          LMSCtReco = SCtimeReco;
+          variables.push_back(MSCtReco);
+          variables.push_back(LMSCtReco);
+          variables.push_back(MSCetReco);
+       }
+    } 
     fill(m_MonGroupName,variables);
 
   }	// end loop over SC
@@ -194,6 +232,12 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
 StatusCode LArSuperCellMonAlg::createPerJobHistograms(const CaloCellContainer* cellCont, const CaloNoise *noisep ) const {
 
   ATH_MSG_INFO("Creating the once-per-job histograms");
+
+  if(!noisep){
+    ATH_MSG_ERROR("Do not have DB noise, doing nothing !!!");
+    return StatusCode::SUCCESS;
+  }
+
   //The following histograms can be considered constants for one job
   //(in fact, they are constant for an entire run or even run-periode)
   //ActiveCells in eta/phi (to normalize 1D occupancy plots)

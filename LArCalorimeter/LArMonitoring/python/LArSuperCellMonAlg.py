@@ -68,8 +68,8 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
     if inputFlags.Common.isOnline:
        cfg.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg('CaloSuperCellAlignCondAlg'))       
 
-    from LArCellRec.LArCollisionTimeConfig import LArCollisionTimeCfg
-    cfg.merge(LArCollisionTimeCfg(inputFlags))
+    from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
+    cfg.merge(BunchCrossingCondAlgCfg(inputFlags))
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     cfg.merge(CaloNoiseCondAlgCfg(inputFlags))
@@ -85,8 +85,43 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
     from LArCellRec.LArRAWtoSuperCellConfig import LArRAWtoSuperCellCfg
     cfg.merge(LArRAWtoSuperCellCfg(inputFlags,mask=mask) )
 
+    # Reco SC:
+    #get SC onl-offl mapping from DB    
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
+    cfg.merge(LArOnOffIdMappingSCCfg(inputFlags))
+    
+    # and elec. calib. coeffs
+    from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
+
+    larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg")
+    from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+    try:
+        runinfo=getLArDTInfoForRun(inputFlags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
+        streamTypes=runinfo.streamTypes()
+    except Exception as e:
+        mlog.warning("Could not get DT run info, using defaults !")
+        mlog.warning(e)
+        streamTypes=["RawADC"]
+    
+    for i in range(0,len(streamTypes)):
+        mlog.info("runinfo.streamTypes()[i]: "+str(streamTypes[i]))
+        if streamTypes[i] ==  "RawADC":
+            larLATOMEBuilderAlg.LArDigitKey = "SC"
+            larLATOMEBuilderAlg.isADCBas = False
+        if streamTypes[i] ==  "ADC":
+            larLATOMEBuilderAlg.isADCBas = True
+            larLATOMEBuilderAlg.LArDigitKey = "SC_ADC_BAS"
+
+    cfg.addEventAlgo(larLATOMEBuilderAlg)
+    cfg.merge(LArRAWtoSuperCellCfg(inputFlags,name="LArRAWRecotoSuperCell",mask=mask,doReco=True,SCIn="SC_ET_RECO",SCellContainerOut="SCell_ET_RECO") )
+
+
+    cfg.merge(LArElecCalibDBSCCfg(inputFlags, condObjs=["Ramp","DAC2uA", "Pedestal", "uA2MeV", "MphysOverMcal", "OFC", "Shape", "HVScaleCorr"]))
+
+    
     #return cfg
-    lArCellMonAlg=CompFactory.LArSuperCellMonAlg
+    algname='LArSuperCellMonAlg'
+    lArCellMonAlg=CompFactory.LArSuperCellMonAlg(algname,CaloCellContainerReco="SCell_ET_RECO",doSCReco=True)
 
 
     if inputFlags.Input.isMC is False and not inputFlags.Common.isOnline:
@@ -96,19 +131,13 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
        cfg.merge(LBDurationCondAlgCfg(inputFlags))
 
 
-    algname='LArSuperCellMonAlg'
     from AthenaConfiguration.Enums import BeamType
     if inputFlags.Beam.Type is BeamType.Cosmics:
         algname=algname+'Cosmics'
 
-    algo = LArSuperCellMonConfigCore(helper, lArCellMonAlg, inputFlags,
+    LArSuperCellMonConfigCore(helper, lArCellMonAlg, inputFlags,
                                      inputFlags.Beam.Type is BeamType.Cosmics,
                                      inputFlags.Input.isMC, algname, RemoveMasked=mask)
-
-    if not inputFlags.Input.isMC and not inputFlags.Common.isOnline:
-       from AthenaMonitoring.BadLBFilterToolConfig import LArBadLBFilterToolCfg
-       algo.BadLBTool=cfg.popToolsAndMerge(LArBadLBFilterToolCfg(inputFlags))
-    #mlog.info("Check the Algorithm properties",algo)
 
     cfg.merge(helper.result())
 
@@ -125,7 +154,7 @@ def LArSuperCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, isM
     LArSuperCellMonAlg.MonGroupName = GroupName
 
     LArSuperCellMonAlg.EnableLumi = False
-    LArSuperCellMonAlg.CaloCellContainer = "SCell_ET"
+    LArSuperCellMonAlg.CaloCellContainer = inputFlags.LAr.DT.ET_IDKey
     LArSuperCellMonAlg.CaloCellContainerRef = inputFlags.Trigger.L1.L1CaloSuperCellContainerName
     LArSuperCellMonAlg.RemoveMasked = RemoveMasked
     
@@ -158,6 +187,10 @@ def LArSuperCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, isM
                                  xbins =  100,xmin=-5,xmax=5)
     cellMonGroup.defineHistogram('superCelltime;h_SuperCelltime',
                                  title='Super Cell time [ns]; ns; # entries',
+                                 type='TH1F', path=sc_hist_path,
+                                 xbins = 100, xmin=-400,xmax=400)
+    cellMonGroup.defineHistogram('superCelltimeReco;h_SuperCelltimeReco',
+                                 title='Reco Super Cell time [ns]; ns; # entries',
                                  type='TH1F', path=sc_hist_path,
                                  xbins = 100, xmin=-400,xmax=400)
     cellMonGroup.defineHistogram('superCellprovenance;h_SuperCellprovenance',
@@ -204,8 +237,8 @@ def LArSuperCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, isM
                                  type='TH2F', path=sc_hist_path,
                                  xbins =  100,xmin=0,xmax=50000,
                                  ybins =  100,ymin=0,ymax=50000)
-    cellMonGroup.defineHistogram('superCelltimeRef,superCelltime;h_SuperCelltimeLin',
-                                 title='Super Cell time Linearity; Ref SC time [ns]; SC time [ns]',
+    cellMonGroup.defineHistogram('superCelltimeRef,superCelltimeReco;h_SuperCelltimeLin',
+                                 title='Super Cell time Linearity; Ref SC time [ns]; Reco SC time [ns]',
                                  type='TH2F', path=sc_hist_path,
                                  xbins = 100, xmin=-200,xmax=200,
                                  ybins = 100, ymin=-200,ymax=200)
@@ -232,6 +265,10 @@ def LArSuperCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, isM
                                         xbins =  100,xmin=-5,xmax=5)
            cellMonGroup.defineHistogram('superCelltime_'+part+';h_SuperCelltime'+part,
                                         title='Super Cell time [ns] '+partp+'; ns; # entries',
+                                        type='TH1F', path=sc_hist_path,
+                                        xbins = 100, xmin=-400,xmax=400)
+           cellMonGroup.defineHistogram('superCelltimeReco_'+part+';h_SuperCelltimeReco'+part,
+                                        title='Reco Super Cell time [ns] '+partp+'; ns; # entries',
                                         type='TH1F', path=sc_hist_path,
                                         xbins = 100, xmin=-400,xmax=400)
            cellMonGroup.defineHistogram('superCellprovenance_'+part+';h_SuperCellprovenance'+part,
@@ -278,8 +315,8 @@ def LArSuperCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, isM
                                         type='TH2F', path=sc_hist_path,
                                         xbins =  100,xmin=0,xmax=50000,
                                         ybins =  100,ymin=0,ymax=50000)
-           cellMonGroup.defineHistogram('superCelltimeRef_'+part+',superCelltime_'+part+';h_SuperCelltimeLin'+part,
-                                        title='Super Cell time Linearity '+partp+'; Ref SC time [ns]; SC time [ns]',
+           cellMonGroup.defineHistogram('superCelltimeRef_'+part+',superCelltimeReco_'+part+';h_SuperCelltimeLin'+part,
+                                        title='Super Cell time Linearity '+partp+'; Ref SC time [ns]; Reco SC time [ns]',
                                         type='TH2F', path=sc_hist_path,
                                         xbins = 100, xmin=-200,xmax=200,
                                         ybins = 100, ymin=-200,ymax=200)

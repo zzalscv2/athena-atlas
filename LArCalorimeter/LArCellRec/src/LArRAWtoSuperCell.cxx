@@ -93,18 +93,30 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
                   cell->setGain (CaloGain::LARMEDIUMGAIN);
                 else
                   cell->setGain (CaloGain::LARHIGHGAIN);
-		const std::vector< unsigned short >& bcids = sc->bcids();
-		const std::vector< int >& energies = sc->energies();
-		const std::vector< bool>& satur = sc->satur();
+
 		float energy(0.);
 		bool saturation(false);
-		for(unsigned int i=0;i<bcids.size();++i){ 
-                   if ( bcids[i]==bcid+m_bcidOffset ) {
-                      energy=energies[i]; 
-                      saturation = satur[i];
-                      break;
-                   }
-                }
+
+                if(m_isReco) {
+                        energy=sc->energies().at(0);       
+                        if(energy != 0. && sc->passTauSelection().at(0)) {
+                          int Etau=sc->tauEnergies().at(0); 
+                          cell->setTime((float)Etau / energy); 
+		          cell->setProvenance(cell->provenance()|0x200);
+                        }
+                } else {
+			const std::vector< unsigned short >& bcids = sc->bcids();
+			const std::vector< int >& energies = sc->energies();
+			const std::vector< bool>& satur = sc->satur();
+			for(unsigned int i=0;i<bcids.size();i++) {
+                           if ( bcids[i]==bcid+m_bcidOffset) {
+                              energy=energies[i]; 
+                              saturation = satur[i];
+                              break;
+                           }
+                        }
+		}
+
 		// convert ET (coming from LATOMEs) into Energy and
 		// apply magic 12.5 factor
                 cell->setEnergy( 12.5*energy*cosh(cell->eta()) );

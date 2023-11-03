@@ -23,7 +23,7 @@ class LArLATOMEHeader
   LArLATOMEHeader(const uint32_t lid);
 
   /** @brief Constructor with all numbers*/
-  LArLATOMEHeader(const uint32_t sourceid, const uint32_t latomeId, const uint16_t nchan, const uint16_t bcid, const uint32_t l1Id);
+  LArLATOMEHeader(const uint32_t sourceid, const uint32_t latomeId, const uint16_t nchan, const uint16_t bcid, const uint32_t l1Id, const uint32_t robfragsize=0);
 
   /** @brief Destructor */
   ~LArLATOMEHeader(){ }
@@ -43,6 +43,9 @@ class LArLATOMEHeader
   /** @brief get the L1 Id */
   inline uint32_t L1Id() const {return m_l1Id;}
 
+  /** @brief get the ROB frag size*/
+  inline uint32_t ROBFragSize() const {return m_ROBFragSize;}
+ 
   /** @brief set the LATOME Bunch Crossing ID*/
   inline void SetBCId(const uint16_t bcid)
     { m_BCId=bcid; return; }
@@ -63,6 +66,11 @@ class LArLATOMEHeader
   inline void SetL1Id(const uint32_t source)
     { m_l1Id=source; return; }
 
+
+  /** @brief set the ROB frag size*/
+  inline void SetROBFragSize(const uint32_t robfragsize)
+    { m_ROBFragSize=robfragsize; return; }
+
  private:
 
   /** @brief LATOME sourceId */
@@ -80,6 +88,8 @@ class LArLATOMEHeader
   /** @brief extended LVL1 Id */
   uint32_t m_l1Id; 
 
+  /** @brief ROB frag size */
+  uint32_t m_ROBFragSize; 
 };
 
 #endif

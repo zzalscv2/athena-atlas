@@ -20,6 +20,9 @@ def LArDTMonitoringConfig(ConfigFlags,STREAM):
     acc.merge(TileGMCfg(ConfigFlags))
     acc.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg('CaloSuperCellAlignCondAlg')) 
 
+    from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
+    acc.merge(LArBadChannelCfg(ConfigFlags, isSC=True))
+
     larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg",LArDigitKey="SC", isADCBas=False)
     acc.addEventAlgo(larLATOMEBuilderAlg)
 
@@ -32,10 +35,11 @@ def LArDTMonitoringConfig(ConfigFlags,STREAM):
     try:
         runinfo=getLArDTInfoForRun(ConfigFlags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
         streams=runinfo.streamTypes()
-        nsamples=int(runinfo.recipe().split("_bc")[1].split("-")[0])
-    except Exception:
-        mlog.warning("Could not get DT run info, using defaults !")
-        streams=["SelectedEnergy","ADC"]
+        nsamples=int(runinfo.streamLengths()[0])
+    except Exception as e:
+        mlog.warning("Could not get DT run info")
+        mlog(e)
+        streams=[]
         nsamples=32
 
     from LArMonitoring.LArDigitalTriggMonAlg import LArDigitalTriggMonConfig

@@ -148,6 +148,7 @@ LArLATOMEDecoder::EventProcess::EventProcess(const LArLATOMEDecoder* decoderInpu
 {
   m_latomeID=0;
   m_l1ID=0;
+  m_ROBFragSize=0;
   m_nPackets=0;
   m_iPacket=0;
   m_nWordsPerPacket=0;
@@ -444,6 +445,7 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
   // const unsigned int rod_status_position = robFrag->rod_status_position();
   // const uint32_t* rod_start = robFrag->rod_start();
   m_l1ID = robFrag->rod_lvl1_id();
+  m_ROBFragSize = robFrag->rod_ndata();
   const uint32_t* p = robFrag->rod_data();
   const unsigned int n = robFrag->rod_ndata();
   if(0==n){
@@ -1111,7 +1113,7 @@ void LArLATOMEDecoder::EventProcess::fillRaw(const LArLATOMEMapping *map) {
 void LArLATOMEDecoder::EventProcess::fillHeader() {
 
   if(m_header_coll){
-    LArLATOMEHeader* latome = new LArLATOMEHeader(m_nthLATOME, m_latomeID,  m_activeSC, m_latomeBCID, m_l1ID);
+    LArLATOMEHeader* latome = new LArLATOMEHeader(m_nthLATOME, m_latomeID,  m_activeSC, m_latomeBCID, m_l1ID, m_ROBFragSize);
     m_header_coll->push_back(latome);
   }
   

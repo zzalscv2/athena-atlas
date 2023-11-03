@@ -21,7 +21,7 @@ if __name__=='__main__':
    #some defaults
    CONFIG = 'LArMon'
    STREAM = "NONE"
-   RUNN   = 435946
+   RUNN   = 448285
    if len(sys.argv)>1:
       for ii in range(1,len(sys.argv)):
          print(ii," ",sys.argv[ii])
@@ -88,7 +88,7 @@ if __name__=='__main__':
    try:
       x = ISObject(p, 'LArParams.LAr.RunLogger.GlobalParams', 'GlobalParamsInfo')
    except:
-      print("Couldn not find IS Parameters - Set default flag")
+      print("Could not find IS Parameters - Set default flag")
       ReadDigits = False
       FirstSample = 3
       NSamples = 4
@@ -135,7 +135,7 @@ if __name__=='__main__':
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
    flags = initConfigFlags()
    from AthenaMonitoring.DQConfigFlags import allSteeringFlagsOff
-   allSteeringFlagsOff()
+   allSteeringFlagsOff(flags)
 
    ### Set Beam Type
    flags.Beam.Type=beamType 
@@ -146,16 +146,19 @@ if __name__=='__main__':
    flags.Input.Format=Format.BS
    flags.Input.isMC=False
 
-   flags.IOVDb.DatabaseInstance="CONDBR2"
-   flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2016-03"
 
-   flags.GeoModel.Layout="atlas"
-   flags.GeoModel.AtlasVersion="ATLAS-R2-2015-04-00-00"
-
+   from AthenaCommon.Constants import WARNING
    flags.Exec.MaxEvents=-1
 
    from AthenaConfiguration.AutoConfigOnlineRecoFlags import autoConfigOnlineRecoFlags
    autoConfigOnlineRecoFlags(flags,partition)
+
+   flags.IOVDb.DatabaseInstance="CONDBR2"
+   flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2023-01"
+
+   flags.GeoModel.Layout="atlas"
+   flags.GeoModel.AtlasVersion="ATLAS-R2-2015-04-00-00"
+
    #overwrite the run number 
    flags.Input.RunNumber=[runnumber]
    # overwrite LB number for playback partition if needed....
@@ -184,6 +187,11 @@ if __name__=='__main__':
    flags.LAr.doAlign=False
    flags.LAr.doHVCorr=False
 
+   # in case to debug FPE:
+   #flags.Exec.FPE=3
+   #if 'DTMon' in CONFIG:
+   #   flags.Exec.FPE=5
+
    if RunType == 0:
       flags.LAr.ROD.forceIter=True
 
@@ -202,6 +210,7 @@ if __name__=='__main__':
       flags.DQ.enableLumiAccess=False
    else:
       flags.DQ.enableLumiAccess=True
+
 
    flags.lock()
 
@@ -409,20 +418,23 @@ if __name__=='__main__':
       acc.getEventAlgo("LArRawDataReadingAlg").LArRawChannelKey="" 
 
    #example for blocking the folder not filled during cosmics
-   #cil=acc.getCondAlgo('CondInputLoader')
-   #iovdbsvc=acc.getService('IOVDbSvc') 
-   #folder='/TRIGGER/LUMI/LBLB'
-   #for i in range(0,len(iovdbsvc.Folders)):
-   #         if (iovdbsvc.Folders[i].find(folder)>=0):
-   #             del iovdbsvc.Folders[i]
-   #             break
-   #for i in range(0, len(cil.Load)):
-   #         if (cil.Load[i][-1] == folder):
-   #             del cil.Load[i]
-   #             break
+   cil=acc.getCondAlgo('CondInputLoader')
+   iovdbsvc=acc.getService('IOVDbSvc') 
+   folder='/TRIGGER/LUMI/LBLB'
+   for i in range(0,len(iovdbsvc.Folders)):
+      if (iovdbsvc.Folders[i].find(folder)>=0):
+         del iovdbsvc.Folders[i]
+         break
+   for i in range(0, len(cil.Load)):
+      if (cil.Load[i][-1] == folder):
+         del cil.Load[i]
+         break
+   if flags.DQ.enableLumiAccess:
+      lbd = acc.getCondAlgo('LBDurationCondAlg')
+      lbd.LBLBFolderInputKey=""
+      print('lbd ',lbd)
 
    # somehow needs to add postprocessing
-   from AthenaCommon.Constants import WARNING
    from DataQualityUtils.DQPostProcessingAlg import DQPostProcessingAlg
    ppa = DQPostProcessingAlg("DQPostProcessingAlg")
    ppa.ExtraInputs = [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]

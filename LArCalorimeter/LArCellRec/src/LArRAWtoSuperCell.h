@@ -65,7 +65,10 @@ private:
   SG::ReadCondHandleKey<LArBadChannelCont> m_maskedContKey
           {this, "LArMaskedChannelKey", "", "Key of the OTF-Masked SC" };
 
+  BooleanProperty m_isReco{this, "isReco", false, "is input container reconstructed cells ?"};
+
   IntegerProperty m_bcidOffset {this, "BCIDOffset", 0, "offset from bcid'ed energy"};
+
   //Identifier helper
   const LArOnline_SuperCellID* m_laronline_id = nullptr;
 

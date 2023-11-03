@@ -7,14 +7,14 @@
 //const float LArHVScaleCorrSC::errorcode=ILArHVScaleCorr::ERRORCODE;
 
 LArHVScaleCorrSC::LArHVScaleCorrSC()
-  : LArCondSuperCellBase ("LArAutoCorrSC")
+  : LArCondSuperCellBase ("LArHVScaleCorrSC")
 {}
 
 LArHVScaleCorrSC::~LArHVScaleCorrSC() {}
 
 
 LArHVScaleCorrSC::LArHVScaleCorrSC(const CondAttrListCollection* attrList)
-  : LArCondSuperCellBase ("LArAutoCorrSC")
+  : LArCondSuperCellBase ("LArHVScaleCorrSC")
 {
   if (initializeBase().isFailure()) return;
  

@@ -10,6 +10,8 @@
 
 //LAr services:
 #include "LArElecCalib/ILArPedestal.h"
+#include "LArRecConditions/LArBadChannelMask.h"
+#include "LArRecConditions/LArBadChannelCont.h"
 
 //STL:
 #include <string>
@@ -24,6 +26,7 @@
 #include "LumiBlockComps/ILumiBlockMuTool.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArRawSCContainer.h"
+#include "LArRawEvent/LArLATOMEHeaderContainer.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LumiBlockData/LuminosityCondData.h"
 #include <mutex>
@@ -89,6 +92,13 @@ private:
 
   SG::ReadHandleKey<LArRawSCContainer> m_rawSCEtRecoContainerKey{this,"LArRawSCEtRecoContainerKey","SC_ET_RECO","SG key of LArRawSCContainer read from Bytestream"};
   
+  /** Handle to bad-channel mask */
+  LArBadChannelMask m_bcMask;
+  SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey {this, "BadChanKey", "LArBadChannelSC", "SG key for LArBadChan object"};
+  Gaudi::Property<std::vector<std::string> > m_problemsToMask{this,"ProblemsToMask",{}, "Bad-Channel categories to mask"};
+
+  SG::ReadHandleKey<LArLATOMEHeaderContainer> m_LATOMEHeaderContainerKey{this,"LArLATOMEHeaderContainerKey","SC_LATOME_HEADER","SG key of LArLATOMEHeaderContainer read from Bytestream"};
+
   /** Handle to pedestal */
   SG::ReadCondHandleKey<ILArPedestal>    m_keyPedestalSC{this,"LArPedestalKeySC","LArPedestalSC","SG key of LArPedestal CDO"};
 
@@ -130,11 +140,7 @@ private:
 	"FCAL1A", "FCAL1C", "FCAL2A", "FCAL2C", "FCAL3A", "FCAL3C"},
         "Names of individual layers to monitor"};
 
-
-  //From: https://gitlab.cern.ch/atlas-lar-online/atlas-moncfg/-/blob/master/tools/LATOMEMonitoring.py#L82
-  std::set<std::string> m_badSCs;
-
-  std::map <std::string, std::pair<std::string, int> > m_LatomeDetBinMapping = {
+  const std::map <std::string, std::pair<std::string, int> > m_LatomeDetBinMapping = {
     {"0x48",{"FCALC",1}},
     {"0x4c",{"EMEC/HECC",3}},
   {"0x44",{"EMECC",11}},
@@ -146,7 +152,7 @@ private:
     {"0x4b",{"EMEC/HECA",107}},
     {"0x47",{"FCALA",115}}
   };
-  std::map <std::string, std::pair<std::string, int> > m_LatomeDetBinMappingPerSide = { 
+  const std::map <std::string, std::pair<std::string, int> > m_LatomeDetBinMappingPerSide = { 
     {"0x48",{"FCAL",57}},
     {"0x4c",{"EMEC_HEC",49}},
     {"0x44",{"EMEC",33}},
@@ -159,8 +165,8 @@ private:
     {"0x47",{"FCAL",57}}
   };				     
 
-
-
+  std::map<std::string,int> m_toolmapLayerNames_digi;
+  std::map<std::string,int> m_toolmapLayerNames_sc;
 
 };
 #endif

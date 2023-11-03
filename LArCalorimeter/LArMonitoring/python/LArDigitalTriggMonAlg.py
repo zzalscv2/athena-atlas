@@ -3,11 +3,24 @@
 #
 
 # Define some handy strings for plot labels
-RMScut = "with ADC_max-pedestal > 10*RMS(DB)"
-badSCcut = "(excluding bad SC)"
-taucut = "with abs(#tau) > 3"
 
-from ROOT import TMath
+
+# TO DO  - add defined cut names for selections, add them to plot names
+
+# selections from the digi (ADC) loop
+selStr = {}
+selStr["passDigiNom"] ="for unmasked SCs with ADC_max-pedestal > 10*RMS(DB) & good quality bits"
+selStr["badNotMasked"] = "for unmasked SCs which have bad quality bits"
+# selections from the sc (ET) loop
+selStr["passSCNom"] = "for unmasked SCs which pass #tau selection with non-zero ET"
+selStr["passSCNom1"] = "for unmasked SCs which pass #tau selection with ET > 1 GeV"
+selStr["passSCNom10"] = "for unmasked SCs which pass tau selection with ET > 10 GeV"
+selStr["passSCNom10tauGt3"] = "for unmasked SCs which pass tau selection with ET > 10 GeV and #tau > 3"
+selStr["saturNotMasked"] = "for unmasked SCs which are saturated"
+selStr["OFCbOFNotMasked"] = "for unmasked SCs with OFCb in overflow"
+selStr["onlofflEmismatch"] = "for unmasked SCs which pass #tau selection where online & offline energies are different"
+
+
 
 def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, streamTypes=[]):
     '''Function to configures some algorithms in the monitoring system.'''
@@ -36,7 +49,7 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
     helper.resobj.merge(LArElecCalibDBSCCfg(inputFlags, condObjs=["Ramp","DAC2uA", "Pedestal", "uA2MeV", "MphysOverMcal", "OFC", "Shape", "HVScaleCorr"]))
 
     larDigitalTriggMonAlg = helper.addAlgorithm(CompFactory.LArDigitalTriggMonAlg('larDigitalTriggMonAlg'))
-
+    larDigitalTriggMonAlg.ProblemsToMask=["maskedOSUM"] #highNoiseHG","highNoiseMG","highNoiseLG","deadReadout","deadPhys"]
          
     hasEtId = False
     hasEt = False
@@ -66,12 +79,10 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
             larLATOMEBuilderAlg.LArDigitKey = "SC_ADC_BAS"
 
     if (hasEtId and hasEt): #prefer EtId if both in recipe
-
         hasEt = False
         larDigitalTriggMonAlg.EtName = "SC_ET_ID"
 
     if (hasAdc and hasAdcBas): #prefer Raw Adc if both in recipe
-
         hasAdc = False
         larDigitalTriggMonAlg.AdcName = "SC"
 
@@ -130,10 +141,12 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
 
         BinLabel+=[Label+str(phi)]
         phi+=1
-
-
-    SCGroup.defineHistogram('Mmaxpos,Mpartition;Partition_maxSamplePosition', 
-                            title='Partition vs. position of max sample',
+        
+    
+    #### Plots from Digi (ADC) loop
+    SCGroup.defineHistogram('Digi_maxpos,Digi_partition;Partition_maxSamplePosition', 
+                            title='Partition vs. position of max sample '+selStr["passDigiNom"],
+                            cutmask='passDigiNom',
                             type='TH2F',
                             path=sc_hist_path,
                             xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
@@ -141,24 +154,27 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
                             xlabels = [str(x) for x in range(1,nsamples+1)],      
                             ylabels=lArDQGlobals.Partitions)
 
-    SCGroup.defineHistogram('Msampos,MADC;ADCZoom_samplePosition',
-                            title='ADC (zoom) vs sample position',
+    SCGroup.defineHistogram('Digi_sampos,Digi_ADC;ADCZoom_samplePosition',
+                            title='ADC (zoom) vs sample position '+selStr["passDigiNom"],
+                            cutmask='passDigiNom',
                             type='TH2F',
                             path=sc_hist_path,
                             xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
                             xlabels = [str(x) for x in range(1,nsamples+1)],
                             ybins=750, ymin=0, ymax=1300) #start from 0 otherwise miss endcap pedestals
     
-    SCGroup.defineHistogram('Msampos,MADC;ADCFullRange_samplePosition', 
-                            title='ADC vs sample position',
+    SCGroup.defineHistogram('Digi_sampos,Digi_ADC;ADCFullRange_samplePosition', 
+                            title='ADC vs sample position '+selStr["passDigiNom"],
+                            cutmask='passDigiNom',
                             type='TH2F',
                             path=sc_hist_path,
                             xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
                             xlabels = [str(x) for x in range(1,nsamples+1)],
                             ybins=500, ymin=0, ymax=5000) #raw ADC is 12 bit
 
-    SCGroup.defineHistogram('Msampos,Pedestal;PedestalFullRange_samplePosition',
-                            title='Pedestal vs sample position',
+    SCGroup.defineHistogram('Digi_sampos,Pedestal;PedestalFullRange_samplePosition',
+                            title='Pedestal vs sample position '+selStr["passDigiNom"],
+                            cutmask='passDigiNom',
                             type='TH2F',
                             path=sc_hist_path,
                             xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
@@ -166,143 +182,197 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
                             ybins=500, ymin=0, ymax=5000) #raw ADC is 12 bit 
 
 
-    SCGroup.defineHistogram('MlatomeSourceIdBIN,MADC;ADCFullRange_LATOME',
-                            title='ADC vs LATOME name; ; ADC',
+    SCGroup.defineHistogram('Digi_latomeSourceIdBIN,Digi_ADC;ADCFullRange_LATOME',
+                            title='ADC vs LATOME name '+selStr["passDigiNom"]+'; ; ADC',
+                            cutmask='passDigiNom',
                             type='TH2F',
                             path=sc_hist_path,
                             xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
                             ybins=500, ymin=-2, ymax=2500, #raw ADC is 12 bit
                             xlabels=BinLabel)
 
-    SCGroup.defineHistogram('MlatomeSourceIdBIN,Pedestal;Pedestal_LATOME',
-                            title='Pedestal vs LATOME name; ; Pedestal',
+    SCGroup.defineHistogram('Digi_latomeSourceIdBIN,Pedestal;Pedestal_LATOME',
+                            title='Pedestal vs LATOME name '+selStr["passDigiNom"]+'; ; Pedestal',
+                            cutmask='passDigiNom',
                             type='TH2F',
                             path=sc_hist_path,
                             xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
                             ybins=500, ymin=-2, ymax=2500, #raw ADC is 12 bit
                             xlabels=BinLabel)
 
-
-    #have to make plots per sampling and per subdetector, as in LArCoverageAlg, also update GlobalVariables.py
-    SCGroup.defineHistogram('MSCetaEcomp,MSCphiEcomp;EtaPhiMap_EnergyMismatch', 
-                            title='SCs where E_{T} offline != E_{T} online: #phi vs #eta;#eta;#phi',
+    SCGroup.defineHistogram('Digi_latomeSourceIdBIN,Digi_maxpos;MaxSamplePosition_LATOME',
+                            title='Position of max sample vs. LATOME '+selStr["passDigiNom"],
                             type='TH2F',
-                            path=sc_hist_path,
-                            xbins=400, xmin=-5, xmax=5, #smallest eta bin size 0.025
-                            ybins=64, ymin=-TMath.Pi(), ymax=TMath.Pi()) #at most 64 phi bins of 0.1 size
-    
-    SCGroup.defineHistogram('MSCeta,MSCphi;Coverage_eta_phi', 
-                            title='SC coverage: #phi vs #eta;#eta;#phi',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=400, xmin=-5, xmax=5, #smallest eta bin size 0.025
-                            ybins=64, ymin=-TMath.Pi(), ymax=TMath.Pi()) #at most 64 phi bins of 0.1 size
-
-    
-    SCGroup.defineHistogram('superCellEta_Satur_all,superCellPhi_Satur_all;Coverage_phi_eta_Saturation_all',
-                            title='SC saturation coverage: #phi vs #eta;#eta;#phi',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=400, xmin=-5, xmax=5, #smallest eta bin size 0.025
-                            ybins=64, ymin=-TMath.Pi(), ymax=TMath.Pi()) #at most 64 phi bins of 0.1 size      
-
-    SCGroup.defineHistogram('superCellEta_Satur,superCellPhi_Satur;Coverage_phi_eta_Saturation',
-                            title='SC saturation coverage (Bad SCs excluded): #phi vs #eta;#eta;#phi',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=400, xmin=-5, xmax=5, #smallest eta bin size 0.025
-                            ybins=64, ymin=-TMath.Pi(), ymax=TMath.Pi()) #at most 64 phi bins of 0.1 size      
-
-    SCGroup.defineHistogram('OFCb_overflow_eta_all,OFCb_overflow_phi_all;Coverage_OFCb_overflow_all',
-                            title='SC OFCb overflow coverage: #phi vs #eta;#eta;#phi',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=400, xmin=-5, xmax=5, #smallest eta bin size 0.025 
-                            ybins=64, ymin=-TMath.Pi(), ymax=TMath.Pi()) #at most 64 phi bins of 0.1 size      
-    
-    SCGroup.defineHistogram('OFCa_overflow_eta_all,OFCa_overflow_phi_all;Coverage_OFCa_overflow_all',
-                            title='SC OFCa overflow coverage: #phi vs #eta;#eta;#phi',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=400, xmin=-5, xmax=5, #smallest eta bin size 0.025
-                            ybins=64, ymin=-TMath.Pi(), ymax=TMath.Pi()) #at most 64 phi bins of 0.1 size      
-
-    SCGroup.defineHistogram('OFCb_overflow_eta,OFCb_overflow_phi;Coverage_OFCb_overflow',
-                            title='SC OFCb overflow coverage '+badSCcut+': #phi vs #eta;#eta;#phi',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=400, xmin=-5, xmax=5, #smallest eta bin size 0.025
-                            ybins=64, ymin=-TMath.Pi(), ymax=TMath.Pi()) #at most 64 phi bins of 0.1 size      
-
-    SCGroup.defineHistogram('OFCa_overflow_eta,OFCa_overflow_phi;Coverage_OFCa_overflow',
-                            title='SC OFCa overflow coverage '+badSCcut+': #phi vs #eta;#eta;#phi',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=400, xmin=-5, xmax=5, #smallest eta bin size 0.025
-                            ybins=64, ymin=-TMath.Pi(), ymax=TMath.Pi()) #at most 64 phi bins of 0.1 size      
-
-    ### END OFC TESTS
-
-
-    SCGroup.defineHistogram('badQualBit_eta,badQualBit_phi;CoveragePhiEta_BadQualityBit',
-                            title='SC coverage: #phi vs #eta for bad quality bits;#eta;#phi',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=400, xmin=-5, xmax=5, #smallest eta bin size 0.025 
-                            ybins=64, ymin=-TMath.Pi(), ymax=TMath.Pi()) #at most 64 phi bins of 0.1 size 
-
-
-    SCGroup.defineHistogram('eta_rms_fromDB_all,phi_rms_fromDB_all;CoveragePhiEta_Cut5RMS',
-                            title='SC coverage: #phi vs #eta '+RMScut+';#eta;#phi',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=400, xmin=-5, xmax=5, #smallest eta bin size 0.025
-                            ybins=64, ymin=-TMath.Pi(), ymax=TMath.Pi()) #at most 64 phi bins of 0.1 size 
-
-    SCGroup.defineHistogram('eta_rms_fromDB_all,phi_rms_fromDB_all;CoveragePhiEta_Cut5RMS',
-                            title='SC coverage: #phi vs #eta '+RMScut+';#eta;#phi',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=400, xmin=-5, xmax=5, #smallest eta bin size 0.025
-                            ybins=64, ymin=-TMath.Pi(), ymax=TMath.Pi()) #at most 64 phi bins of 0.1 size                                                                                               
-    SCGroup.defineHistogram('MlatomeSourceIdBIN,Mmaxpos;MaxSamplePosition_LATOME',
-                            title='Position of max sample vs. LATOME '+RMScut+'',
-                            type='TH2F',
+                            cutmask='passDigiNom',
                             path=sc_hist_path,
                             xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
                             ybins=nsamples,ymin=0.5,ymax=nsamples+0.5,
                             xlabels=BinLabel,
                             ylabels = [str(x) for x in range(1,nsamples+1)])  
-        
 
-    SCGroup.defineHistogram('Menergy_onl,Menergy_ofl;OnlOfl_Et_2D',
-                            title='LATOME E_{T} vs Offline Computation; E_{T} Onl;E_{T} Offl[MeV]',
+    SCGroup.defineHistogram('Digi_latomeSourceIdBIN,Digi_Diff_ADC_Ped;Diff_ADC_Ped_LATOME',
+                            title='ADC - Pedestal vs LATOME name '+selStr["passDigiNom"]+'; ; ADC - Pedestal',
                             type='TH2F',
+                            cutmask='passDigiNom',
                             path=sc_hist_path,
-                            xbins=100,xmin=0,xmax=20000,
-                            ybins=100,ymin=0,ymax=20000)
+                            xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
+                            ybins=64, ymin=-32, ymax=32,
+                            xlabels=BinLabel)
+
+    SCGroup.defineHistogram('Digi_Diff_ADC_Ped;Diff_ADC_Ped',
+                            title='LATOME (ADC-ped) '+selStr["passDigiNom"]+'; (ADC - pedestal)',
+                            type='TH1F',
+                            cutmask='passDigiNom',
+                            path=sc_hist_path,
+                            xbins=50,xmin=-25,xmax=25)
+
+    SCGroup.defineHistogram('Digi_sampos,Digi_Diff_ADC_Ped_Norm;Diff_ADC_Ped_Norm_SamplePos',
+                            title='(ADC-ped)/fabs(ADC_max-ped) '+selStr["passDigiNom"]+'; Sample position; (ADC - pedestal) / fabs(ADC_max - pedestal)',
+                            type='TH2F',
+                            cutmask='passDigiNom',
+                            path=sc_hist_path,
+                            ybins=40,ymin=-1,ymax=1,
+                            xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
+                            xlabels = [str(x) for x in range(1,nsamples+1)])
+
+    SCGroup.defineHistogram('Digi_latomeSourceIdBIN,Digi_Diff_ADC_Ped_Norm;Diff_ADC_Ped_Norm_LATOME',
+                            title='(ADC-ped)/fabs(ADC_max-ped) '+selStr["passDigiNom"]+'; LATOME Name; (ADC - pedestal) / fabs(ADC_max - pedestal)',
+                            type='TH2F',
+                            cutmask='passDigiNom',
+                            path=sc_hist_path,
+                            xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
+                            ybins=64, ymin=-32, ymax=32,
+                            xlabels=BinLabel)
+
+
+    # Plotting for SCs which are NOT masked but have bad quality bits
+    SCGroup.defineHistogram('Digi_eta,Digi_phi;Coverage_eta_phi_BadQualityBit',
+                            title='SC coverage '+selStr["badNotMasked"]+': #phi vs #eta;#eta;#phi',
+                            type='TH2F',
+                            cutmask='badNotMasked',
+                            path=sc_hist_path,
+                            xbins=lArDQGlobals.SuperCell_Variables["etaRange"]["All"]["All"],
+                            ybins=lArDQGlobals.SuperCell_Variables["phiRange"]["All"]["All"])    
+
+
+
+
+
+    #### Plots from the SC ET loop
+    for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10", "passSCNom10tauGt3", "onlofflEmismatch", "saturNotMasked", "OFCbOFNotMasked" ]:        
+        SCGroup.defineHistogram('SC_eta,SC_phi;Coverage_eta_phi_'+thisSel, 
+                                title='SC coverage '+selStr[thisSel]+': #phi vs #eta;#eta;#phi',
+                                type='TH2F',
+                                cutmask=thisSel,
+                                path=sc_hist_path,
+                                xbins=lArDQGlobals.SuperCell_Variables["etaRange"]["All"]["All"],
+                                ybins=lArDQGlobals.SuperCell_Variables["phiRange"]["All"]["All"])    
+
+    SCGroup.defineHistogram('SC_ET_onl,SC_ET_ofl;OnlOfl_ET_2D',
+                            title='LATOME E_{T} vs Offline Computation '+selStr["passSCNom"]+'; E_{T} Onl;E_{T} Offl [GeV]',
+                            type='TH2F',
+                            cutmask='passSCNom',
+                            path=sc_hist_path,
+                            xbins=0,xmin=0,xmax=20,
+                            ybins=0,ymin=0,ymax=20)
     
-    SCGroup.defineHistogram('MSCEt_diff;OnlOfl_Etdiff',
-                            title='LATOME E_{T} vs Offline Computation; E_{T} Onl - E_{T} Offl[MeV]; Evts;',
+    SCGroup.defineHistogram('SC_ET_diff;OnlOfl_Etdiff',
+                            title='LATOME E_{T} vs Offline Computation '+selStr["passSCNom"]+'; E_{T} Onl - E_{T} Offl [GeV]; Evts;',
                             type='TH1F',
+                            cutmask='passSCNom',
                             path=sc_hist_path,
-                            xbins=200,xmin=-100,xmax=100)
+                            xbins=200,xmin=-10,xmax=10)
 
-    SCGroup.defineHistogram('MSCtime;OfflineLATOMEtime',
-                            title='LATOME #tau from Offline Computation;#tau [ns]; Evts;',
+
+    for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10", "passSCNom10tauGt3" ]:
+        SCGroup.defineHistogram('SC_time;OfflineLATOMEtime_'+thisSel,
+                                title='LATOME #tau from Offline Computation '+selStr[thisSel]+';#tau [ns]; Evts;',
+                                type='TH1F',
+                                cutmask=thisSel,
+                                path=sc_hist_path,
+                                xbins=100,xmin=-25,xmax=25)
+
+        SCGroup.defineHistogram('SC_eta,SC_phi,SC_ET_onl;Coverage_Et_onl_'+thisSel,
+                                title='SC Energy '+selStr[thisSel]+': #phi vs #eta;#eta;#phi',
+                                type='TProfile2D',
+                                cutmask=thisSel,
+                                path=sc_hist_path,
+                                xbins=lArDQGlobals.SuperCell_Variables["etaRange"]["All"]["All"],
+                                ybins=lArDQGlobals.SuperCell_Variables["phiRange"]["All"]["All"])
+
+
+    SCGroup.defineHistogram('lumi_block,SC_time;MeanOfflineLATOMEtime_perLB',
+                            title='Average LATOME #tau from Offline computation per LB '+selStr["passSCNom"]+'; LumiBloc; #tau [ns]',
+                            type='TProfile',
+                            cutmask='passSCNom',
+                            path=sc_hist_path,
+                            xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max)
+
+    SCGroup.defineHistogram('SC_ET_onl;SCeT', 
+                            title='SC eT [GeV] '+selStr["passSCNom"],
                             type='TH1F',
+                            cutmask='passSCNom',
                             path=sc_hist_path,
-                            xbins=100,xmin=-25,xmax=25)
+                            xbins=500, xmin=-100, xmax=400)
 
-    SCGroup.defineHistogram('LB,MSCtime;MeanOfflineLATOMEtime_perLB',
-                            title='Average LATOME #tau from Offline computation per LB; LumiBloc; #tau [ns]',
+    SCGroup.defineHistogram('SC_latomeSourceIdBIN,SC_ET_onl;SCeT_LATOME',
+                            title='SC ET [GeV] vs LATOME name '+selStr["passSCNom"]+'; ; E_{T}^{SC} [GeV]',
+                            type='TH2F',
+                            cutmask='passSCNom',
+                            path=sc_hist_path,
+                            xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
+                            ybins=200, ymin=-10, ymax=200,
+                            xlabels=BinLabel)
+
+
+    SCGroup.defineHistogram('SC_latomeSourceIdBIN,SC_time;MeanOfflineLATOMEtime_perLATOME', 
+                            title='Average LATOME #tau from Offline computation per LATOME'+selStr["passSCNom"]+'; LATOME ; #tau [ns]',
+                            type='TH2F',
+                            cutmask='passSCNom',
+                            path=sc_hist_path,
+                            xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
+                            ybins=200, ymin=-50, ymax=50,
+                            xlabels=BinLabel)
+    SCGroup.defineHistogram('lumi_block,SC_latomeSourceIdBIN,SC_time;MeanOfflineLATOMEtime_perLB_perLATOME',
+                            title='SC #tau '+selStr["passSCNom"]+': LATOME vs LB;LB;LATOME',
+                            type='TProfile2D',
+                            cutmask='passSCNom',
+                            path=sc_hist_path,                            
+                            xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
+                            ybins=NLatomeBins,ymin=1,ymax=NLatomeBins+1,
+                            ylabels=BinLabel)
+
+
+    SCGroup.defineHistogram('SC_eta,SC_phi,SC_time;Coverage_offlineLATOMEtime_passSCNom',
+                            title='LATOME #tau from Offline Computation '+selStr["passSCNom"]+': #phi vs #eta;#eta;#phi',
+                            type='TProfile2D',
+                            cutmask='passSCNom',
+                            path=sc_hist_path,
+                            xbins=lArDQGlobals.SuperCell_Variables["etaRange"]["All"]["All"],
+                            ybins=lArDQGlobals.SuperCell_Variables["phiRange"]["All"]["All"])
+
+
+    #### Plots from LATOME header loop
+    SCGroup.defineHistogram('lumi_block,event_size;EventSizeLB',
+                            title='Digital trigger event size per LB; LumiBlock; Event size [MB]',
                             type='TProfile',
                             path=sc_hist_path,
                             xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max)
 
 
-    #for part in LArDigitalTriggMonAlg.LayerNames:
-    for part in ["EMBPA", "EMBPC", "EMB1A", "EMB1C", "EMB2A", "EMB2C", "EMB3A", "EMB3C", "HEC0A", "HEC0C", "HEC1A", "HEC1C", "HEC2A", "HEC2C", "HEC3A", "HEC3C", "EMECPA", "EMECPC", "EMEC1A", "EMEC1C", "EMEC2A", "EMEC2C", "EMEC3A", "EMEC3C", "FCAL1A", "FCAL1C", "FCAL2A", "FCAL2C", "FCAL3A", "FCAL3C"]:
+
+    #### Per-subdetector/layer plots
+    layerList = ["EMBPA", "EMBPC", "EMB1A", "EMB1C", "EMB2A", "EMB2C", "EMB3A", "EMB3C", "HEC0A", "HEC0C", "HEC1A", "HEC1C", "HEC2A", "HEC2C", "HEC3A", "HEC3C", "EMECPA", "EMECPC", "EMEC1A", "EMEC1C", "EMEC2A", "EMEC2C", "EMEC3A", "EMEC3C", "FCAL1A", "FCAL1C", "FCAL2A", "FCAL2C", "FCAL3A", "FCAL3C"]
+
+    partGroup_digi = helper.addArray([layerList], larDigitalTriggMonAlg, 'LArDigitalTriggerMon_digi', topPath='/LArDigitalTrigger/PerPartition/')
+    partGroup_sc = helper.addArray([layerList], larDigitalTriggMonAlg, 'LArDigitalTriggerMon_sc', topPath='/LArDigitalTrigger/PerPartition/')
+
+    
+    for part in larDigitalTriggMonAlg.LayerNames:
+        selStrPart = {}
+        for sel in selStr.keys():
+            selStrPart[sel] = "in "+part+" "+selStr[sel]
+
         Part = part[:-2]
         if Part == "FCAL": 
             Part = "FCal"
@@ -311,210 +381,130 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
         if Sampling == "P": 
             Sampling = "0"
 
-        
-        SCGroup.defineHistogram('MSCtime_'+part+';OfflineLATOMEtime_'+part,
-                                title='LATOME #tau from Offline Computation;#tau [ns]; Evts;',
-                                type='TH1F',
-                                path=sc_hist_path + 'OfflineLATOMETiming',
-                                xbins=100,xmin=-25,xmax=25)
 
-        SCGroup.defineHistogram('MSCtimeNoZero_'+part+';OfflineLATOMEtime_Nonzero_'+part,
-                                title='LATOME #tau from Offline Computation (exclude zero);#tau [ns]; Evts;',
-                                type='TH1F',
-                                path=sc_hist_path + 'OfflineLATOMETiming',
-                                xbins=100,xmin=-25,xmax=25)
+        #### Plots from Digi (ADC) loop
+        partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi;Coverage_eta_phi_digi',
+                                       title='SC coverage '+selStrPart["passDigiNom"]+': #phi vs #eta;#eta;#phi',
+                                       type='TH2F', 
+                                       path='Coverage/passDigiNom',
+                                       cutmask='Digi_part_passDigiNom',
+                                       xbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling],
+                                       ybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling],
+                                       pattern=[(part)])
 
-        SCGroup.defineHistogram('tau_above_cut_eta_'+part+',tau_above_cut_phi_'+part+';Tau_above_cut_'+part,
-                                title='SC where '+taucut+' '+part+' '+badSCcut+': #phi vs #eta;#eta;#phi',
-                                type='TH2F',
-                                path=sc_hist_path+'CoveragePerPartition/tauCut',
-                                xbins=lArDQGlobals.Cell_Variables["etaRange"][Part][Side][Sampling],
-                                ybins=lArDQGlobals.Cell_Variables["phiRange"][Part][Side][Sampling])    
-
-
-        SCGroup.defineHistogram('BCID,AvEnergy_'+part+';AvEnergyVsBCID_'+part, 
-                                title='Average Energy vs BCID '+part+'; BCID; Energy per SC [MeV]',
-                                type='TProfile',
-                                path=sc_hist_path + 'BaselineCorrection',
-                                xbins=3564,xmin=-0.5,xmax=3563.5,
-                                ybins=10, ymin=-20, ymax=20)
-        
-        SCGroup.defineHistogram('BCID,ADC_'+part+';ADCvsBCID_'+part, 
-                                title='ADC value vs BCID '+part+'; BCID; ADC Value',
-                                type='TProfile',
-                                path=sc_hist_path + 'BaselineCorrection/Raw_ADC',
-                                xbins=3564,xmin=-0.5,xmax=3563.5,
-                                ybins=500, ymin=0, ymax=5000)
-
-        SCGroup.defineHistogram('superCellEta_'+part+',superCellPhi_'+part+';CoveragePhiEta_'+part,
-                                title='SC coverage '+part+': #phi vs #eta;#eta;#phi',
-                                type='TH2F',
-                                path=sc_hist_path+'CoveragePerPartition/NoCut',
-                                xbins=lArDQGlobals.Cell_Variables["etaRange"][Part][Side][Sampling],
-                                ybins=lArDQGlobals.Cell_Variables["phiRange"][Part][Side][Sampling])    
-        
-        SCGroup.defineHistogram('eta_rms_fromDB_'+part+',phi_rms_fromDB_'+part+';CoveragePhiEta_CutRMSfromDB_'+part,
-                                title='SC coverage '+part+': #phi vs #eta '+RMScut+';#eta;#phi',
-                                type='TH2F',
-                                path=sc_hist_path+'CoveragePerPartition/RMSCut',
-                                xbins=lArDQGlobals.Cell_Variables["etaRange"][Part][Side][Sampling],
-                                ybins=lArDQGlobals.Cell_Variables["phiRange"][Part][Side][Sampling])
-        
-        SCGroup.defineHistogram('badQualBit_eta_'+part+',badQualBit_phi_'+part+';CoveragePhiEta_BadQualityBit_'+part,
-                                title='SC coverage '+part+': #phi vs #eta for bad quality bits;#eta;#phi',
-                                type='TH2F',
-                                path=sc_hist_path+'CoveragePerPartition/BadQualityBit',
-                                xbins=lArDQGlobals.Cell_Variables["etaRange"][Part][Side][Sampling],
-                                ybins=lArDQGlobals.Cell_Variables["phiRange"][Part][Side][Sampling])
-        
-        SCGroup.defineHistogram('Msampos, Diff_ADC_Pedesdal_Norm_'+part+'; Diff_ADC_Pedestal_vs_SamplePos'+part,
-                                title='(ADC-ped)/fabs(ADC_max-ped) '+RMScut+' in '+part+'; Sample position; (ADC - pedestal) / fabs(ADC_max - pedestal)',
-                                type='TH2F',
-                                path=sc_hist_path+'Diff_ADC_Pedestal',
-                                ybins=40,ymin=-1,ymax=1,
-                                xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
-                                xlabels = [str(x) for x in range(1,nsamples+1)])
-
-        
-        # --> IT SEEMS TH3 IS NOT IMPLEMENTED YET...
-        #SCGroup.defineHistogram('superCellEta_Et10_'+part+',superCellPhi_Et10_'+part+',superCellEt_Et10_'+part+';CoveragePhiEta_Et10_'+part,
-        #                          title='SC Energy $E_T>10$ coverage'+part+': #phi vs #eta;#eta;#phi;$E_T$',
-        #                          type='TH3F',
-        #                          path=sc_hist_path,
-        #                          xbins=lArDQGlobals.Cell_Variables["etaRange"][Part][Side][Sampling],
-        #                          ybins=lArDQGlobals.Cell_Variables["phiRange"][Part][Side][Sampling])
-        
-        #SCGroup.defineHistogram('superCellEta_'+part+',superCellPhi_'+part+',superCellEt_'+part+';CoveragePhiEta_'+part,
-        #                          title='SC Energy coverage'+part+': #phi vs #eta;#eta;#phi;$E_T$',
-        #                          type='TH3F',
-        #                          path=sc_hist_path,
-        #                          xbins=lArDQGlobals.Cell_Variables["etaRange"][Part][Side][Sampling],
-        #                          ybins=lArDQGlobals.Cell_Variables["phiRange"][Part][Side][Sampling])
-        
-        SCGroup.defineHistogram('superCellEta_EtCut_'+part+',superCellPhi_EtCut_'+part+';CoveragePhiEta_EtCut_'+part,
-                                title='SC coverage E_T>1GeV '+part+' '+badSCcut+': #phi vs #eta;#eta;#phi',
-                                type='TH2F',
-                                path=sc_hist_path+'CoveragePerPartition/CutET_1GeV',
-                                xbins=lArDQGlobals.Cell_Variables["etaRange"][Part][Side][Sampling],
-                                ybins=lArDQGlobals.Cell_Variables["phiRange"][Part][Side][Sampling])
-        
-        SCGroup.defineHistogram('superCellEta_EtCut_'+part+',superCellPhi_EtCut10_'+part+';CoveragePhiEta_EtCut10_'+part,
-                                title='SC coverage E_T>10GeV '+part+' '+badSCcut+': #phi vs #eta;#eta;#phi',
-                                type='TH2F',
-                                path=sc_hist_path+'CoveragePerPartition/CutET_10GeV',
-                                xbins=lArDQGlobals.Cell_Variables["etaRange"][Part][Side][Sampling],
-                                ybins=lArDQGlobals.Cell_Variables["phiRange"][Part][Side][Sampling])
-
-        SCGroup.defineHistogram('LB,MSCtime_'+part+';MeanOfflineLATOMEtime_perLB_'+part,
-                                title='Average LATOME #tau from Offline computation per LB in '+part+'; LumiBloc; #tau [ns]',
-                                type='TProfile',
-                                path=sc_hist_path + 'OfflineLATOMETiming/perLB',
-                                xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max)
+        partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi;Coverage_eta_phi_bad',
+                                       title='SC coverage '+selStrPart["badNotMasked"]+': #phi vs #eta;#eta;#phi',
+                                       type='TH2F', 
+                                       path='Coverage/BadNotMasked',
+                                       cutmask='Digi_part_badNotMasked',
+                                       xbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling],
+                                       ybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling],
+                                       pattern=[(part)])
 
 
+        partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi,Digi_part_diff_adc_ped;Coverage_diff_adc_ped',
+                                       title='ADC - Pedestal'+selStrPart["passDigiNom"]+': #phi vs #eta;#eta;#phi',
+                                       type='TProfile2D',
+                                       cutmask='Digi_part_passDigiNom',
+                                       path='Diff_ADC_Ped',
+                                       xbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling],
+                                       ybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling],
+                                       pattern=[(part)])
 
-    for layer in ["0","1","2","3"]: 
+        partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_adc;ADCvsBCID', 
+                                       title='ADC value vs BCID '+selStrPart["passDigiNom"]+'; BCID; ADC Value',
+                                       type='TProfile',
+                                       cutmask='Digi_part_passDigiNom',
+                                       path='BaselineCorrection/Raw_ADC',
+                                       xbins=3564,xmin=-0.5,xmax=3563.5,
+                                       ybins=500, ymin=0, ymax=5000,
+                                       pattern=[(part)])
 
-        SCGroup.defineHistogram('Mmaxpos_'+layer+';MaxSamplePosition_Layer_'+layer,
-                                title='Position of max sample in layer '+layer+' '+RMScut, 
-                                type='TH1F',
-                                path=sc_hist_path,
-                                xbins=nsamples,xmin=0.5,xmax=nsamples+0.5)
-
-
-
-    SCGroup.defineHistogram('Diff_ADC_Pedesdal;Diff_ADC_Ped',
-                            title='LATOME (ADC-ped); (ADC - pedestal)',
-                            type='TH1F',
-                            path=sc_hist_path,
-                            xbins=50,xmin=-25,xmax=25)
-
-    SCGroup.defineHistogram('Msampos,Diff_ADC_Pedesdal_Norm;Diff_ADC_Pedestal_vs_SamplePos',
-                            title='(ADC-ped)/fabs(ADC_max-ped) '+RMScut+'; Sample position; (ADC - pedestal) / fabs(ADC_max - pedestal)',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            ybins=40,ymin=-1,ymax=1,
-                            xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
-                            xlabels = [str(x) for x in range(1,nsamples+1)])
-    
-    SCGroup.defineHistogram('Menergy_onl,Menergy_ofl;OnlOfl_Et_2D',
-                            title='LATOME E_{T} vs Offline Computation; E_{T} Onl [MeV*12.5];E_{T} Offl[MeV*12.5]',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=100,xmin=-1000,xmax=20000,
-                            ybins=100,ymin=-1000,ymax=20000)
-    
-    SCGroup.defineHistogram('MSCEt_diff;OnlOfl_Etdiff',
-                            title='LATOME E_{T} vs Offline Computation; E_{T} Onl - E_{T} Offl[MeV*12.5]; Evts;',
-                            type='TH1F',
-                            path=sc_hist_path,
-                            xbins=200,xmin=-100,xmax=100)
-    
-    SCGroup.defineHistogram('Monl_energy_tauSelFail;OnlEt_failTauSelOffline',
-                            title='LATOME E_{T} when the tau selection is failed offline; E_{T} Onl [MeV*12.5]; Evts;',
-                            type='TH1F',
-                            path=sc_hist_path,
-                            xbins=200,xmin=-100,xmax=100)
-    
-    SCGroup.defineHistogram('MSCtime;OfflineLATOMEtime',
-                            title='LATOME #tau from Offline Computation  '+badSCcut+' ;#tau [ns]; Evts;',
-                            type='TH1F',
-                            path=sc_hist_path + 'OfflineLATOMETiming',
-                            xbins=100,xmin=-25,xmax=25)
-
-    SCGroup.defineHistogram('MSCtimeNoZero;OfflineLATOMEtime_Nonzero',
-                            title='LATOME #tau from Offline Computation (exclude zero, excluding bad SC);#tau [ns]; Evts;',
-                            type='TH1F',
-                            path=sc_hist_path + 'OfflineLATOMETiming',
-                            xbins=100,xmin=-25,xmax=25)
-    
-    SCGroup.defineHistogram('MlatomeSourceIdBIN,MSCeT;SCeT_LATOME',
-                            title='SC eT [MeV] vs LATOME name; ; E_{T}^{SC} [MeV]',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
-                            ybins=200, ymin=-1000, ymax=200000,
-                            xlabels=BinLabel)
+        partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_diff_adc_ped;Diff_ADC_Ped_vs_BCID', 
+                                       title='ADC - Ped value vs BCID '+selStrPart["passDigiNom"]+'; BCID; ADC Value',
+                                       type='TProfile',
+                                       cutmask='Digi_part_passDigiNom',
+                                       path='BaselineCorrection/Diff_ADC_Ped',
+                                       xbins=3564,xmin=-0.5,xmax=3563.5,
+                                       ybins=500, ymin=-5, ymax=5,
+                                       pattern=[(part)])
 
 
-    SCGroup.defineHistogram('MSCsatur;SCsaturation', 
-                            title='SC saturation',
-                            type='TH1F',
-                            path=sc_hist_path,
-                            xbins=3, xmin=0, xmax=3)
+        #### Plots from SC ET loop 
 
-    SCGroup.defineHistogram('MSCeT;SCeT', 
-                            title='SC eT [MeV]',
-                            type='TH1F',
-                            path=sc_hist_path,
-                            xbins=500, xmin=-100, xmax=400)
+        for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10", "passSCNom10tauGt3", "saturNotMasked", "OFCbOFNotMasked" ]:
+            partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi;Coverage_eta_phi_'+thisSel,
+                                         title='SC coverage '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
+                                         type='TH2F', 
+                                         path='Coverage/'+thisSel,
+                                         cutmask='SC_part_'+thisSel,
+                                         xbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling],
+                                         ybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling],
+                                         pattern=[(part)])
 
-    SCGroup.defineHistogram('MSCeT_Nonzero;SCeT_Nonzero', 
-                            title='SC eT [MeV]',
-                            type='TH1F',
-                            path=sc_hist_path,
-                            xbins=500, xmin=-100, xmax=400)
+        for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10" ]:
+            partGroup_sc.defineHistogram('SC_part_time;OfflineLATOMEtime_'+thisSel,
+                                         title='LATOME #tau from Offline Computation '+selStrPart[thisSel]+':#tau [ns]; Evts',
+                                         type='TH1F', 
+                                         path='OfflineLATOMETime/'+thisSel,
+                                         cutmask='SC_part_'+thisSel,
+                                         xbins=100,xmin=-25,xmax=25,
+                                         pattern=[(part)])
+
+            partGroup_sc.defineHistogram('SC_part_BCID,SC_part_time;MeanOfflineLATOMEtime_perBCID_'+thisSel,
+                                         title='Average LATOME #tau from Offline computation per BCID '+selStrPart[thisSel]+'; BCID; #tau [ns]',
+                                         type='TProfile',
+                                         cutmask='SC_part_'+thisSel,
+                                         path='OfflineLATOMETime_perBCID/'+thisSel,
+                                         xbins=3564,xmin=-0.5,xmax=3563.5, 
+                                         pattern=[(part)])
+
+            partGroup_sc.defineHistogram('SC_part_LB,SC_part_time;MeanOfflineLATOMEtime_perLB_'+thisSel,
+                                         title='Average LATOME #tau from Offline computation per LB '+selStrPart[thisSel]+'; LumiBlock; #tau [ns]',
+                                         type='TProfile',
+                                         cutmask='SC_part_'+thisSel,
+                                         path='OfflineLATOMETime_perLB/'+thisSel,
+                                         xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
+                                         pattern=[(part)])
+
+            partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi,SC_part_time;Coverage_offlineLATOMEtime_'+thisSel,
+                                         title='LATOME #tau from Offline Computation '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
+                                         type='TProfile2D',
+                                         cutmask='SC_part_'+thisSel,
+                                         path='OfflineLATOMETimeProfile/'+thisSel,
+                                         xbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling],
+                                         ybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling],
+                                         pattern=[(part)])
 
 
-    SCGroup.defineHistogram('MNsamples;SCNsamples', 
-                            title='Nsamples',
-                            type='TH1F',
-                            path=sc_hist_path,
-                            xbins=40,xmin=1,xmax=40)
+            partGroup_sc.defineHistogram('SC_part_ET_onl;SCeT_'+thisSel,
+                                         title='SC Energy '+selStrPart[thisSel]+';',
+                                         type='TH1F',
+                                         path='ET_TH1/'+thisSel,
+                                         cutmask='SC_part_'+thisSel,
+                                         xbins=500, xmin=-100, xmax=400,
+                                         pattern=[(part)])
 
-    SCGroup.defineHistogram('MSCChannel;SCchannel', 
-                            title='SC Channel number',
-                            type='TH1F',
-                            path=sc_hist_path,                                  
-                            xbins=360,xmin=1,xmax=360)
+            partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi,SC_part_ET_onl;Coverage_Et_onl_'+thisSel,
+                                         title='SC Energy '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
+                                         type='TProfile2D',
+                                         cutmask='SC_part_'+thisSel,
+                                         path='ETProfile/'+thisSel,
+                                         xbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling],
+                                         ybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling],
+                                         pattern=[(part)])
 
-    SCGroup.defineHistogram('MlatomeSourceId;LATOMEsourceID', 
-                            title='LATOME sourceID',
-                            type='TH1F',
-                            path=sc_hist_path,                                  
-                            xbins=1000,xmin=4000000,xmax=6000000)
 
-    
+        partGroup_sc.defineHistogram('SC_part_BCID,SC_part_ET_onl_muscaled;AvEnergyVsBCID',
+                                     title='Average Energy vs BCID '+selStrPart["passSCNom"]+'; BCID; Energy per SC [MeV]',
+                                     type='TProfile',
+                                     cutmask='SC_part_passSCNom',
+                                     path='BaselineCorrection/AvEnergyVsBCID',
+                                     xbins=3564,xmin=-0.5,xmax=3563.5,
+                                     ybins=10, ymin=-20, ymax=20,
+                                     pattern=[(part)])
+
+
     return helper.result()
 
 

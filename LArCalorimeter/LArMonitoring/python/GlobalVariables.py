@@ -37,7 +37,7 @@ class LArDQGlobals(object):
                    'Cell_Time_Min','Cell_Time_Max','Emin','Emax','DEmin','DEmax','Qmin','Qmax','DQmin','DQmax',
                    'Tmin','Tmax','DTmin','DTmax','OnlineOffline','TTriggerTypeMax','MaxCellThresholdADC',
                    'CorruptionSource','Streams',
-                   'Partitions','Sides','Variables','Layers','Cell_Variables',
+                   'Partitions','Sides','Variables','Layers','Cell_Variables','SuperCell_Variables',
                    'febsBarrelA','febsEndcapA','febsBarrelC','febsEndcapC',
                    'CNFN_tot','CNFXmin_tot','CNFXmax_tot','CNFN_ncoh','CNFXmin_ncoh','CNFXmax_ncoh')
       
@@ -362,6 +362,118 @@ for sdet in lArDQGlobals.SubDet:
                   lArDQGlobals.Cell_Variables["etaRange"][sdet]["A"][Lay]=currange
                   #The C side is just the symmeteric of the A side
                   lArDQGlobals.Cell_Variables["etaRange"][sdet]["C"][Lay] =list(map(lambda x: x*-1,lArDQGlobals.Cell_Variables["etaRange"][sdet]["A"][Lay]))[::-1]
+
+###################
+# Now do the same for SuperCells
+#Creation of the dictionnary
+lArDQGlobals.SuperCell_Variables={}
+lArDQGlobals.Variables=["etaRange","phiRange","etaNbin", "phiNbin","etasize","etaCellSize","etaMin","phiMin"]
+lArDQGlobals.Layers=["0","1","2","3"]
+for Variable in lArDQGlobals.Variables :
+    lArDQGlobals.SuperCell_Variables[Variable]={}
+    for sdet in lArDQGlobals.SubDet :
+        lArDQGlobals.SuperCell_Variables[Variable][sdet]={}
+        for Side in lArDQGlobals.Sides :
+            lArDQGlobals.SuperCell_Variables[Variable][sdet][Side]={}
+            for Layer in lArDQGlobals.Layers:
+                lArDQGlobals.SuperCell_Variables[Variable][sdet][Side][Layer]=list()
+for Variable in ["etaRange","phiRange","phiNbin", "phiMin"]:
+    lArDQGlobals.SuperCell_Variables[Variable]["All"] = {}
+    lArDQGlobals.SuperCell_Variables[Variable]["All"]["All"]=list()
+    for Layer in lArDQGlobals.Layers:
+        lArDQGlobals.SuperCell_Variables[Variable]["All"][Layer]=list()
+
+
+#Number of Bins in phi
+lArDQGlobals.SuperCell_Variables["phiNbin"]["EMB"]["A"]= {"0":64,"1":64,"2":64,"3":64}
+lArDQGlobals.SuperCell_Variables["phiNbin"]["EMB"]["C"]= lArDQGlobals.SuperCell_Variables["phiNbin"]["EMB"]["A"]
+
+lArDQGlobals.SuperCell_Variables["phiNbin"]["EMEC"]["A"]= {"0":64,"1":64,"2":64,"3":64}
+lArDQGlobals.SuperCell_Variables["phiNbin"]["EMEC"]["C"]= lArDQGlobals.SuperCell_Variables["phiNbin"]["EMEC"]["A"]
+
+lArDQGlobals.SuperCell_Variables["phiNbin"]["HEC"]["A"]= {"0":64,"1":64,"2":64,"3":64}
+lArDQGlobals.SuperCell_Variables["phiNbin"]["HEC"]["C"]= lArDQGlobals.SuperCell_Variables["phiNbin"]["HEC"]["A"]
+
+lArDQGlobals.SuperCell_Variables["phiNbin"]["FCal"]["A"]= {"1":16,"2":16,"3":16}
+lArDQGlobals.SuperCell_Variables["phiNbin"]["FCal"]["C"]= lArDQGlobals.SuperCell_Variables["phiNbin"]["FCal"]["A"]
+
+lArDQGlobals.SuperCell_Variables["phiNbin"]["All"]= {"0":64,"1":64,"2":64,"3":64, "All":16}
+lArDQGlobals.SuperCell_Variables["phiMin"]["All"] = {"0": -3.094550609588623, "1": -3.0960847139358521, "2": -3.0960847139358521, "3": -TMath.Pi(), "All": -TMath.Pi()}
+
+#Number of bins in eta in each range of cells (defining only for A side since C side is symmetric)
+# https://edms.cern.ch/ui/file/1257047/1/OffMappingNote.pdf
+# Table 2.1 
+lArDQGlobals.SuperCell_Variables["etaNbin"]["EMB"]["A"]= {"0":[0,14,15],"1":[0,59],"2":[0,56,57],"3":[0, 14]}
+lArDQGlobals.SuperCell_Variables["etaMin" ]["EMB"]["A"]= {"0":0.0,"1":0.0,"2":0.0,"3":0.0}
+lArDQGlobals.SuperCell_Variables["etaCellSize"]["EMB"]["A"]={"0":[0.1,0.12],"1":[0.025],"2":[0.025,0.075],"3":[0.1]}
+
+# Table 3.1 -- Updated to assume IW layers are 2/3 rather than 1/2
+lArDQGlobals.SuperCell_Variables["etaNbin"]["EMEC"]["A"]= {"0":[0,3],"1":[0,1,13,25,41,42],"2":[0,1,44,47,48],"3":[0,10,13,14]}
+lArDQGlobals.SuperCell_Variables["etaMin" ]["EMEC"]["A"]= {"0":1.5,"1":1.375,"2":1.375,"3":1.5}
+lArDQGlobals.SuperCell_Variables["etaCellSize"]["EMEC"]["A"]={"0":[0.1],"1":[0.125,0.025,0.1/6,0.025,0.1],"2":[0.05,0.025,0.2,0.1],"3":[0.1,0.2,0.1]}
+
+# Table 4.1
+lArDQGlobals.SuperCell_Variables["etaNbin"]["HEC"]["A"]= {"0":[0,10,14],"1":[0,10,14],"2":[0,10,14],"3":[0,10,14]}
+lArDQGlobals.SuperCell_Variables["etaMin" ]["HEC"]["A"]=  {"0":1.5, "1":1.5, "2":1.5, "3":1.5}
+lArDQGlobals.SuperCell_Variables["etaCellSize"]["HEC"]["A"]= {"0":[0.1,0.2],"1":[0.1,0.2],"2":[0.1,0.2],"3":[0.1,0.2]}
+
+# Defined using Sven's binning manually
+lArDQGlobals.SuperCell_Variables["etaRange"]["FCal"]["A"]["1"]=[3.10,3.20,3.30,3.37,3.45,3.55,3.6,3.65,3.80,3.9,3.972,4.30,4.50,4.66,4.90]  ## Added a few more to remove overlap
+lArDQGlobals.SuperCell_Variables["etaRange"]["FCal"]["A"]["2"]=[3.20,3.25,3.35,3.45,3.55,3.75,4.00,4.40,4.90] #Original
+lArDQGlobals.SuperCell_Variables["etaRange"]["FCal"]["A"]["2"]=[3.20,3.24,3.25,3.35,3.45,3.55,3.65,3.75,4.00,4.40,4.90] #Adding more bins to remove overlap
+lArDQGlobals.SuperCell_Variables["etaRange"]["FCal"]["A"]["3"]=[3.30,3.40,3.60,4.00,4.90]
+
+#Filling Phi ranges
+for Layer in lArDQGlobals.Layers :
+    for sdet in lArDQGlobals.SubDet:
+        if sdet=="FCal" and Layer == "0": #there's only fcal1, fcal2 and fcal3
+            continue
+        else: 
+            phi_range=range(lArDQGlobals.SuperCell_Variables["phiNbin"][sdet]["A"][Layer]+1)
+            lArDQGlobals.SuperCell_Variables["phiRange"][sdet]["A"][Layer]=[-TMath.Pi()+ x*2*TMath.Pi()/lArDQGlobals.SuperCell_Variables["phiNbin"][sdet]["A"][Layer] for x in phi_range]
+        lArDQGlobals.SuperCell_Variables["phiRange"][sdet]["C"]=lArDQGlobals.SuperCell_Variables["phiRange"][sdet]["A"]
+        pass #partition loop
+    pass #layer loop
+
+# Phi binning for Layer plots
+for Layer in ["0","1","2","3","All"] :
+     if Layer == "3" or Layer == "All": 
+         phi_range=range(lArDQGlobals.SuperCell_Variables["phiNbin"]["All"][Layer]+1)
+         lArDQGlobals.SuperCell_Variables["phiRange"]["All"][Layer]=[lArDQGlobals.SuperCell_Variables["phiMin"]["All"][Layer] + x*2*TMath.Pi()/lArDQGlobals.SuperCell_Variables["phiNbin"]["All"][Layer] for x in phi_range]
+     else:  
+         phi_range=range(lArDQGlobals.SuperCell_Variables["phiNbin"]["All"][Layer])
+         phi_range1 = lArDQGlobals.SuperCell_Variables["phiRange"]["All"][Layer]=[lArDQGlobals.SuperCell_Variables["phiMin"]["All"][Layer] + x*2*TMath.Pi()/lArDQGlobals.SuperCell_Variables["phiNbin"]["All"][Layer] for x in phi_range]
+         phi_range2 = [-1*x for x in phi_range1]
+         lArDQGlobals.SuperCell_Variables["phiRange"]["All"][Layer] = sorted(phi_range1 + phi_range2)
+
+#Filling Eta range with Sven's new binning 3/14/23
+for sdet in lArDQGlobals.SubDet:
+      for Lay in lArDQGlobals.Layers:
+          if Lay not in lArDQGlobals.SuperCell_Variables["etaNbin"][sdet]["A"].keys(): continue
+          if sdet=="FCal":
+            lArDQGlobals.SuperCell_Variables["etaRange"][sdet]["C"][Lay] =list(map(lambda x: x*-1,lArDQGlobals.SuperCell_Variables["etaRange"][sdet]["A"][Lay]))[::-1]
+          else:
+            Ranges=lArDQGlobals.SuperCell_Variables["etaNbin"][sdet]["A"][Lay]
+            Sizes=lArDQGlobals.SuperCell_Variables["etaCellSize"][sdet]["A"][Lay]
+            if not len(Ranges)-len(Sizes)==1 :
+                  print("Bad list of ranges and size please check")
+                  continue
+                  
+            etamin=lArDQGlobals.SuperCell_Variables["etaMin"][sdet]["A"][Lay]
+            currange=[etamin]
+            for k in range(len(Ranges)-1) :
+                  eta_range = range(1,Ranges[k+1]-Ranges[k]+1)
+                  currange+=[round(currange[-1] + x * Sizes[k],5) for x in eta_range]
+                  
+                  lArDQGlobals.SuperCell_Variables["etaRange"][sdet]["A"][Lay]=currange
+                  lArDQGlobals.SuperCell_Variables["etaRange"][sdet]["C"][Lay] =list(map(lambda x: x*-1,lArDQGlobals.SuperCell_Variables["etaRange"][sdet]["A"][Lay]))[::-1]
+
+for layer in ["0","1","2","3"]:
+    lArDQGlobals.SuperCell_Variables["etaRange"]["All"][layer] = sorted(list(set([item for sublist in [lArDQGlobals.SuperCell_Variables["etaRange"][det][side][layer] for det in ["EMB","EMEC","HEC","FCal"] for side in ["A","C"] if layer in lArDQGlobals.SuperCell_Variables["etaRange"][det][side].keys()] for item in sublist ])))
+
+#Custom global eta bins
+eta_range = sorted(list(set([item for sublist in [lArDQGlobals.SuperCell_Variables["etaRange"]["EMB"]["A"]["1"], lArDQGlobals.SuperCell_Variables["etaRange"]["EMEC"]["A"]["2"],lArDQGlobals.SuperCell_Variables["etaRange"]["HEC"]["A"]["0"],lArDQGlobals.SuperCell_Variables["etaRange"]["FCal"]["A"]["2"]] for item in sublist ])))
+lArDQGlobals.SuperCell_Variables["etaRange"]["All"]["All"] = sorted(list(set(eta_range + [-1*x for x in eta_range])))
 
 #CNF
 lArDQGlobals.CNFN_tot = 80

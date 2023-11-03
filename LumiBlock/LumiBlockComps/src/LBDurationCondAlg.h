@@ -49,6 +49,8 @@ private:
   /// Output conditions object.
   SG::WriteCondHandleKey<LBDurationCondData> m_lbDurationOutputKey
   {this, "LBDurationOutputKey", "LBDurationCondData", "" };
+
+  const float m_default=120.;//seconds
 };
 
 
