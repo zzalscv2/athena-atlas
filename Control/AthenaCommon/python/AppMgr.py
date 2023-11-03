@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/share/AppMgr.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -159,8 +159,6 @@ class AthAppMgr( AppMgr ):
       if 'JobOptionsPath' not in kw: kw['JobOptionsPath'] = ""
       if 'JobOptionsType' not in kw: kw['JobOptionsType'] = "NONE"
       if 'EventLoop' not in kw:      kw['EventLoop']="AthenaEventLoopMgr"
-      if 'OutStreamType' not in kw:
-         kw['OutStreamType'] = "AthenaOutputStream"
       if 'StatusCodeCheck' not in kw: kw['StatusCodeCheck'] = False
 
     # always the case in ATLAS (need early or ExtSvc should be a no-op, too)

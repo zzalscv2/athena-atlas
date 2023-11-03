@@ -210,7 +210,6 @@ if CosmicMonitorFlags.doWriteESD:
         # WriteAthenaPool is inconsistent with ReadAthenaPool
         # there should be a specific file for that
         theApp.OutStream += [ "Stream1" ]
-        theApp.OutStreamType = "AthenaOutputStream"
         Stream1 = Algorithm( "Stream1" )
         Stream1.EvtConversionSvc = "AthenaPoolCnvSvc"
 

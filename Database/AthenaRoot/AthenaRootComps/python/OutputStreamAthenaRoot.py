@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## @file OutputStreamAthenaRoot.py
 ## @brief Helper methods to create output streams
@@ -13,12 +13,7 @@ def createNtupleOutputStream(streamName, fileName, tupleName="physics", asAlg = 
     if asAlg:
         from AthenaCommon.AlgSequence import AlgSequence
         topSequence = AlgSequence()
-        pass
-    else:
-        theApp.OutStreamType = "Athena::RootNtupleOutputStream"
-        theApp.OutStreamType = "AthenaOutputStream"
-        pass
-    
+
     # Now do standard output stream
     writingTool1 = AthenaRootOutputStreamTool( streamName + "Tool" )
     writingTool1.TreeName = tupleName
@@ -45,7 +40,6 @@ def createNtupleOutputStream(streamName, fileName, tupleName="physics", asAlg = 
         
 def createOutputStream( streamName, fileName = "", asAlg = False ):
     from AthenaServices.AthenaServicesConf import AthenaOutputStream
-    theApp.OutStreamType = "AthenaOutputStream"
     if asAlg:
         from AthenaCommon.AlgSequence import AlgSequence
         topSequence = AlgSequence()

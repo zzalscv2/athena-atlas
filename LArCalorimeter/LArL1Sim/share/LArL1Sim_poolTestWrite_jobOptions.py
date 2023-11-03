@@ -30,7 +30,6 @@ include( "LArL1Sim/LArL1Sim_G4_jobOptions.py" )
 # Pool Output
 Stream1 = Algorithm( "Stream1" )
 theApp.OutStream     +=["Stream1"]
-theApp.OutStreamType ="AthenaOutputStream"
 Stream1.EvtConversionSvc     ="AthenaPoolCnvSvc"
 Stream1.OutputFile =   "TTL1PoolFile2.root"
 Stream1.ItemList+=["xAOD::EventInfo#*"]

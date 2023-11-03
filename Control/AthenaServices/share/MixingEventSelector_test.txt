@@ -59,7 +59,6 @@ G4MinBiasSelector.InputCollection ="/afs/cern.ch/atlas/offline/data/testfile/dc2
 //---   Secondary Write portion  ----- Don't change it !!!
 //--------------------------------------------------------------
 ApplicationMgr.OutStream     ={"Stream1"};
-ApplicationMgr.OutStreamType ="AthenaOutputStream";
 Stream1.EvtConversionSvc     ="AthenaPoolCnvSvc";
 
 ////PoolSvc.DbType        = "dummy";

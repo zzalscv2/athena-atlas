@@ -55,7 +55,6 @@ include( "AthenaPoolCnvSvc/AthenaPool_jobOptions.py" )
 
 # Exercise writing the objects to NOVA (no IOV).
 theApp.OutStream     =["StreamDet"]
-theApp.OutStreamType ="AthenaOutputStream"
 StreamDet = Algorithm("StreamDet")
 
 theApp.EvtMax=1
