@@ -81,11 +81,11 @@ class FTagConfig (ConfigBlock):
         if result is None:
             dsid = config.dsid()
             # we need to loop up the DSID
-            if dsid is None:
-                raise ValueError("The value of the DSID for this sample is None! Your metadata may be broken, or something else has gone wrong! Aborting.")
-            elif dsid == 0:
-                print("WARNING: Unable to get sample DSID from the metadata, can't figure out appropraite generator settings for FTAG MC-MC corrections. Defaulting.")
-                result = "default"
+            if dsid is None or dsid == 0:
+                raise ValueError(
+                    f"The value of the DSID for this sample is {dsid}! "
+                    "Your metadata may be broken, or something else"
+                    " has gone wrong!")
             else:
                 if config.geometry() is LHCPeriod.Run2:
                     tdpFile = 'dev/AnalysisTop/TopDataPreparation/XSection-MC16-13TeV_JESinfo.data'
