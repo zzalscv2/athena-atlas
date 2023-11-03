@@ -14,8 +14,11 @@
 #include "SiSPSeededTrackFinderData/SiDetElementBoundaryLink_xk.h"
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
-#include "TrkSurfaces/AnnulusBounds.h" 
+#include "TrkSurfaces/AnnulusBounds.h"
 #include "TrkSurfaces/PlaneSurface.h"
+
+#include <array>
+#include <utility>
 
 ///////////////////////////////////////////////////////////////////
 // Constructor
@@ -138,12 +141,13 @@ InDet::SiDetElementBoundaryLink_xk::SiDetElementBoundaryLink_xk
   // NB: Inner and outer radial bounds are assumed to be
   // straight lines for annulus surfaces.
 
-  std::vector < std::pair<int, int> > combinations = { {0,1}, {1,2}, {2,3}, {3,0} };
-  for(unsigned int bound = 0; bound < combinations.size(); bound++) {
+  constexpr std::array<std::pair<int, int>, 4> combinations = {
+      {{0, 1}, {1, 2}, {2, 3}, {3, 0}}};
+  for (unsigned int bound = 0; bound < combinations.size(); bound++) {
 
     // Combining 4 corners (p0, p1), (p1, p2), (p2, p3), (p3, p0)
-    int firstCornerIndex  = combinations.at(bound).first;
-    int secondCornerIndex = combinations.at(bound).second;
+    int firstCornerIndex  = combinations[bound].first;
+    int secondCornerIndex = combinations[bound].second;
 
     // Evaluation of 4 corners in local frame as shown above in the drawing
     double x1     =  x[firstCornerIndex]*Ax[0]+y[firstCornerIndex]*Ax[1]+z[firstCornerIndex]*Ax[2];
@@ -165,7 +169,6 @@ InDet::SiDetElementBoundaryLink_xk::SiDetElementBoundaryLink_xk
     m_bound[bound][0] = ax/m_bound[bound][2];
     m_bound[bound][1] = ay/m_bound[bound][2];
   }
-
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -193,9 +196,10 @@ int InDet::SiDetElementBoundaryLink_xk::intersect(const Trk::PatternTrackParamet
   distance = m_bound[direction][0]*x+m_bound[direction][1]*y-m_bound[direction][2];
 
   // Then testing other directions (local frame)
-  std::vector <int> otherDirections = { InDet::SiDetElementBoundaryLink_xk::AxisDirection::NegativeY,
-                                        InDet::SiDetElementBoundaryLink_xk::AxisDirection::NegativeX,
-                                        InDet::SiDetElementBoundaryLink_xk::AxisDirection::PositiveY };
+  constexpr std::array<int, 3> otherDirections = {
+      InDet::SiDetElementBoundaryLink_xk::AxisDirection::NegativeY,
+      InDet::SiDetElementBoundaryLink_xk::AxisDirection::NegativeX,
+      InDet::SiDetElementBoundaryLink_xk::AxisDirection::PositiveY};
 
   for (auto& testDirection : otherDirections) {
     double testDistance = m_bound[testDirection][0]*x+m_bound[testDirection][1]*y-m_bound[testDirection][2];
