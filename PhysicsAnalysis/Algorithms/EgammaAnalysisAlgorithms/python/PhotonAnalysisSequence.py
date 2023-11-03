@@ -177,6 +177,15 @@ def makePhotonCalibrationSequence( seq, dataType,
                                 'selectionDecorCount' : [1]},
                     dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )
 
+    # Change the origin of Photons from (0,0,0) to (0,0,z)
+    # where z comes from the position of a vertex
+    # Default the one tagged as Primary
+    alg = createAlgorithm( 'CP::PhotonOriginCorrectionAlg',
+                            'PhotonOriginCorrectionAlg' + postfix)
+    seq.append( alg, inputPropName = 'photons', outputPropName = 'photonsOut',
+                stageName = 'calibration',
+                dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )
+
     # Do calibration
     alg = createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg',
                            'PhotonCalibrationAndSmearingAlg' + postfix )

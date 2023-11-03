@@ -11,7 +11,7 @@ atlas_add_library( EgammaAnalysisAlgorithmsLib
    PUBLIC_HEADERS EgammaAnalysisAlgorithms
    LINK_LIBRARIES xAODEgamma SelectionHelpersLib SystematicsHandlesLib
    IsolationSelectionLib AnaAlgorithmLib IsolationCorrectionsLib
-   EgammaAnalysisInterfacesLib CxxUtils )
+   EgammaAnalysisInterfacesLib egammaUtils CxxUtils )
 
 atlas_add_dictionary( EgammaAnalysisAlgorithmsDict
    EgammaAnalysisAlgorithms/EgammaAnalysisAlgorithmsDict.h
