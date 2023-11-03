@@ -35,7 +35,6 @@
 #include "StoreGate/WriteCondHandleKey.h"
 
 // for the conditions data
-#include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 #include "MagFieldElements/AtlasFieldCache.h"
 
 std::ostream& printVec3D (const Amg::Vector3D& a)

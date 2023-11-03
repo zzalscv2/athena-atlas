@@ -517,7 +517,7 @@ private:
   /** Random Generator service */
   ServiceHandle<IAthRNGSvc> m_rndGenSvc;
   /** Random engine */
-  ATHRNG::RNGWrapper*                   m_rngWrapper;
+  ATHRNG::RNGWrapper*                   m_rngWrapper = nullptr;
   std::string m_randomEngineName;
 
   // Read handle for conditions object to get the field cache

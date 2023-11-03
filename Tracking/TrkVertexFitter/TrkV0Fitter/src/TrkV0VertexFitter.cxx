@@ -6,16 +6,15 @@
                         TrkV0VertexFitter.cxx  -  Description
  ***************************************************************************/
 #include "TrkV0Fitter/TrkV0VertexFitter.h"
-#include "VxVertex/VxTrackAtVertex.h"
-#include "TrkSurfaces/PerigeeSurface.h"
-#include "TrkSurfaces/CylinderSurface.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
+#include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkParameters/TrackParameters.h"
-#include "xAODTracking/TrackParticleContainer.h"
-#include "TrkParameters/TrackParameters.h"
-#include "xAODTracking/Vertex.h"
+#include "TrkSurfaces/CylinderSurface.h"
+#include "TrkSurfaces/PerigeeSurface.h"
+#include "VxVertex/VxTrackAtVertex.h"
 #include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/Vertex.h"
 
 #include "StoreGate/ReadCondHandle.h"
 

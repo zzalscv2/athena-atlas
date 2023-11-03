@@ -69,7 +69,7 @@ namespace Trk {
     for (std::vector<const ITrackLink*>::const_iterator trackIter=trackBegin;
          trackIter!=trackEnd;++trackIter) 
     {
-      if (*trackIter!=0)
+      if (*trackIter!=nullptr)
       {
         m_primaryTrackLinks.push_back((*trackIter)->clone());
       }
@@ -81,7 +81,7 @@ namespace Trk {
     for (std::vector<const ITrackLink*>::const_iterator trackIter=trackBegin;
          trackIter!=trackEnd;++trackIter) 
     {
-      if (*trackIter!=0)
+      if (*trackIter!=nullptr)
       {
         m_secondaryTrackLinks.push_back((*trackIter)->clone());
       }

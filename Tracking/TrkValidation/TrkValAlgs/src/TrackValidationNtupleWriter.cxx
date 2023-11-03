@@ -368,7 +368,7 @@ StatusCode Trk::TrackValidationNtupleWriter::execute() {
               m_trackTruthClassifiers[toolIndex]->initClassification(*mcEventColl, selecParticles);
             }
 	    
-            for ( auto genParticle: *selecParticles) 
+            for ( const auto& genParticle: *selecParticles) 
               {
                 //truthData.genParticle = (*selecParticles);
                 Trk::ValidationTrackTruthData partData;

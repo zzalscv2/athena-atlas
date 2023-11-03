@@ -40,7 +40,6 @@
 #include "EventPrimitives/EventPrimitives.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
-#include "GaudiKernel/PhysicalConstants.h"
 //
 #include <cmath>
 

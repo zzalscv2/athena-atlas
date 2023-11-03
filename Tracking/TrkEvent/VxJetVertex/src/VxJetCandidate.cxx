@@ -92,7 +92,7 @@ VxJetCandidate::VxJetCandidate(const std::vector<const Trk::TrackParticleBase*> 
 
     for (std::vector<const Trk::TrackParticleBase*>::const_iterator vTPIter=vTPBegin;vTPIter!=vTPEnd;++vTPIter) {
 
-      if (*vTPIter!=0) {
+      if (*vTPIter!=nullptr) {
         ElementLink<TrackParticleBaseCollection> link;
         link.setElement(*vTPIter);
         LinkToTrackParticleBase * linkTT = new LinkToTrackParticleBase(link);
@@ -163,7 +163,7 @@ VxJetCandidate::VxJetCandidate(const std::vector<const Track*> & vectorOfTracks)
     for (std::vector<const Trk::Track*>::const_iterator
          vTIter=vTBegin;vTIter!=vTEnd;++vTIter) {
 
-      if (*vTIter!=0) {
+      if (*vTIter!=nullptr) {
         ElementLink<TrackCollection> link;
         link.setElement(*vTIter);
         LinkToTrack * linkTT = new LinkToTrack(link);
@@ -240,7 +240,7 @@ VxJetCandidate::VxJetCandidate(const VxJetCandidate& rhs)
   std::vector<Trk::VxTrackAtVertex*>::const_iterator RhsVxTracksEnd=rhs.m_vxTrackAtVertex.end();
   for (std::vector<Trk::VxTrackAtVertex*>::const_iterator itr = rhs.m_vxTrackAtVertex.begin();
        itr != RhsVxTracksEnd; ++itr) {
-    if (*itr==0) {
+    if (*itr==nullptr) {
       std::cout << " Pointer of one of the tracks of the object to copy is zero. PROBLEM! Skipping track " << std::endl;
       continue;
     }
@@ -284,7 +284,7 @@ VxJetCandidate::VxJetCandidate(const VxJetCandidate& rhs)
   for (std::vector<VxVertexOnJetAxis*>::const_iterator VtxIter=VtxBegin;VtxIter!=VtxEnd;
        ++VtxIter) {
 
-    if (*VtxIter!=0) {
+    if (*VtxIter!=nullptr) {
 
       VxVertexOnJetAxis* newVertexOnJetAxis=new VxVertexOnJetAxis(**VtxIter);
 
@@ -357,7 +357,7 @@ VxJetCandidate& VxJetCandidate::operator= (const VxJetCandidate& rhs)
     for (std::vector<VxVertexOnJetAxis*>::const_iterator DelVtxIter=DelVtxBegin;DelVtxIter!=DelVtxEnd;
          ++DelVtxIter) {
 
-      if (*DelVtxIter!=0) {
+      if (*DelVtxIter!=nullptr) {
         delete *DelVtxIter;
       } else {
         std::cout << "************************************ ---------------------------- ***********************************************" << std::endl;
@@ -376,7 +376,7 @@ VxJetCandidate& VxJetCandidate::operator= (const VxJetCandidate& rhs)
     std::vector<Trk::VxTrackAtVertex*>::const_iterator RhsVxTracksEnd=rhs.m_vxTrackAtVertex.end();
     for (std::vector<Trk::VxTrackAtVertex*>::const_iterator itr = rhs.m_vxTrackAtVertex.begin();
          itr != RhsVxTracksEnd; ++itr) {
-      if (*itr==0) {
+      if (*itr==nullptr) {
         std::cout << " Pointer of one of the tracks of the object to copy is zero. PROBLEM! Skipping track " << std::endl;
         continue;
       }
@@ -420,7 +420,7 @@ VxJetCandidate& VxJetCandidate::operator= (const VxJetCandidate& rhs)
     for (std::vector<VxVertexOnJetAxis*>::const_iterator VtxIter=VtxBegin;VtxIter!=VtxEnd;
          ++VtxIter) {
 
-      if (*VtxIter!=0) {
+      if (*VtxIter!=nullptr) {
 
         VxVertexOnJetAxis* newVertexOnJetAxis=new VxVertexOnJetAxis(**VtxIter);
 
@@ -486,7 +486,7 @@ VxJetCandidate::~VxJetCandidate()
   for (std::vector<VxVertexOnJetAxis*>::const_iterator VtxIter=VtxBegin;VtxIter!=VtxEnd;
        ++VtxIter) {
 
-    if (*VtxIter!=0) {
+    if (*VtxIter!=nullptr) {
       delete *VtxIter;
     } else {
       std::cout << "************************************ ------------- ***********************************************" << std::endl;

@@ -22,7 +22,7 @@ namespace {
     class RestoreIOSFlags 
     {
     public:
-      RestoreIOSFlags (std::ostream &os) 
+      explicit RestoreIOSFlags (std::ostream &os) 
         : m_os(&os), 
           m_precision(m_os->precision())
       {}

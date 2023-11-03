@@ -83,7 +83,7 @@ prepareStateForAssembly(Cache& cache)
   double den = cache.validWeightSum + cache.invalidWeightSum;
   double validWeightFraction = den > 0 ? cache.validWeightSum / den : 0;
   if (cache.invalidWeightSum > 0. &&
-      validWeightFraction < cache.minimumValidFraction) {
+      validWeightFraction < Trk::MultiComponentStateAssembler::Cache::minimumValidFraction) {
     return false;
   }
   // Sort Multi-Component State by weights
@@ -97,7 +97,7 @@ prepareStateForAssembly(Cache& cache)
     // ordered in descending order
     // return the 1st element where (element<value)
     const double minimumWeight =
-      std::max(cache.minimumFractionalWeight * totalWeight,
+      std::max(Trk::MultiComponentStateAssembler::Cache::minimumFractionalWeight * totalWeight,
                std::numeric_limits<double>::min());
 
     const Trk::ComponentParameters dummySmallestWeight(nullptr, minimumWeight);

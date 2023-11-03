@@ -86,7 +86,7 @@ namespace Trk{
     bool found = false;
     const std::vector<Trk::VxTrackAtVertex*> & tracksAtVertex(vertexToUpdate->getTracksAtVertex());
     for (const auto& track : tracksAtVertex){
-      if (track==0) {
+      if (track==nullptr) {
 	ATH_MSG_WARNING (" Empty pointer in vector of VxTrackAtVertex of the VxVertexOnJetAxis which is being fitted. No fit will be done...");
 	return;
       } 
@@ -374,7 +374,7 @@ namespace Trk{
     const std::vector<Trk::VxTrackAtVertex*> & tracksAtVertex(vertexToUpdate->getTracksAtVertex());
 
     for (const auto& track : tracksAtVertex) {
-      if (track==0) {
+      if (track==nullptr) {
 	ATH_MSG_WARNING( " Empty pointer in vector of VxTrackAtVertex of the VxVertexOnJetAxis whose chi2 is being updated. No update will be done..." );
 	return;
       } 

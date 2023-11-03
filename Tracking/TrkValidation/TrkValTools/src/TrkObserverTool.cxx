@@ -285,7 +285,7 @@ int Trk::TrkObserverTool::saveTracksToStore(const EventContext& ctx, const Obser
 	else {
 		ATH_MSG_INFO ("saveTracksToStore: Recording "<<trk_map->size() << " observed track candidates to event store");
 	}
-	for (auto& itrMap : *trk_map) {
+	for (const auto& itrMap : *trk_map) {
 		ATH_MSG_DEBUG("saveTracksToStore: Writing track with id "<<itrMap.first<<", rejection step "<<std::get<xAOD::ObserverToolIndex::rejectStep>(itrMap.second)<<", rejection reason "<<std::get<xAOD::ObserverToolIndex::rejectReason>(itrMap.second));
 		wh_tracks->push_back(std::get<xAOD::ObserverToolIndex::track>(itrMap.second));
 		wh_tracksMap->insert(std::make_pair(itrMap.first, itrMap.second));
