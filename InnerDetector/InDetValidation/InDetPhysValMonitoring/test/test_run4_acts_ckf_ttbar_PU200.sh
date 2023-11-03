@@ -8,7 +8,7 @@
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_ambi_last
-# art-memory: 4096
+# art-athena-mt: 4
 
 lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
@@ -38,6 +38,8 @@ run () {
 
 ignore_pattern="ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:3.+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,ActsTrackFindingAlg.+ERROR.+Step.+size.+adjustment.+exceeds.+maximum.+trials,ActsTrackFindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters,ActsTrackFindingAlg.Acts.+ERROR.+SurfaceError:1"
 
+export ATHENA_CORE_NUMBER=4
+
 # Run w/o ambi. resolution
 run "Reconstruction-ckf" \
     Reco_tf.py --CA \
@@ -46,7 +48,8 @@ run "Reconstruction-ckf" \
     --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${ArtInFile} \
     --outputAODFile AOD.ckf.root \
-    --maxEvents ${n_events}
+    --maxEvents ${n_events} \
+    --multithreaded
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
@@ -72,7 +75,8 @@ run "Reconstruction-ambi" \
     --inputRDOFile ${ArtInFile} \
     --outputAODFile AOD.ambi.root \
     --perfmon fullmonmt \
-    --maxEvents ${n_events}
+    --maxEvents ${n_events} \
+    --multithreaded
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
