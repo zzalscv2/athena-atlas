@@ -89,6 +89,8 @@ def EndcapRD53SimTool(name="EndcapRD53SimTool", **kwargs):
 def BarrelFEI4SimTool(name="BarrelFEI4SimTool", **kwargs):
     kwargs.setdefault("BarrelEC", 0)
     kwargs.setdefault("DoNoise", digitizationFlags.doInDetNoise.get_Value())
+    from AthenaCommon.BeamFlags import beamFlags
+    kwargs.setdefault("Cosmics", beamFlags.beamType == 'cosmics')
     from PixelConditionsTools.PixelConditionsToolsConf import PixelConditionsSummaryTool
     pixelConditionsSummaryToolSetup = PixelConditionsSummaryTool("PixelConditionsSummaryTool",
                                                                  UseByteStreamFEI4=False,
@@ -99,6 +101,8 @@ def BarrelFEI4SimTool(name="BarrelFEI4SimTool", **kwargs):
 def DBMFEI4SimTool(name="DBMFEI4SimTool", **kwargs):
     kwargs.setdefault("BarrelEC", 4)
     kwargs.setdefault("DoNoise", digitizationFlags.doInDetNoise.get_Value())
+    from AthenaCommon.BeamFlags import beamFlags
+    kwargs.setdefault("Cosmics", beamFlags.beamType == 'cosmics')
     from PixelConditionsTools.PixelConditionsToolsConf import PixelConditionsSummaryTool
     pixelConditionsSummaryToolSetup = PixelConditionsSummaryTool("PixelConditionsSummaryTool",
                                                                  UseByteStreamFEI4=False,
@@ -109,6 +113,8 @@ def DBMFEI4SimTool(name="DBMFEI4SimTool", **kwargs):
 def BarrelFEI3SimTool(name="BarrelFEI3SimTool", **kwargs):
     from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as commonGeoFlags
     kwargs.setdefault("BarrelEC", 0)
+    from AthenaCommon.BeamFlags import beamFlags
+    kwargs.setdefault("Cosmics", beamFlags.beamType == 'cosmics')
     kwargs.setdefault("HitDuplication", (commonGeoFlags.Run() == "RUN1"))
     from PixelConditionsTools.PixelConditionsToolsConf import PixelConditionsSummaryTool
     pixelConditionsSummaryToolSetup = PixelConditionsSummaryTool("PixelConditionsSummaryTool",
@@ -120,6 +126,8 @@ def BarrelFEI3SimTool(name="BarrelFEI3SimTool", **kwargs):
 def EndcapFEI3SimTool(name="EndcapFEI3SimTool", **kwargs):
     from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as commonGeoFlags
     kwargs.setdefault("BarrelEC", 2)
+    from AthenaCommon.BeamFlags import beamFlags
+    kwargs.setdefault("Cosmics", beamFlags.beamType == 'cosmics')
     kwargs.setdefault("HitDuplication", (commonGeoFlags.Run() == "RUN1"))
     from PixelConditionsTools.PixelConditionsToolsConf import PixelConditionsSummaryTool
     pixelConditionsSummaryToolSetup = PixelConditionsSummaryTool("PixelConditionsSummaryTool",
