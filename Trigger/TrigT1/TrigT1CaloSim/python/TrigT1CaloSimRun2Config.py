@@ -54,7 +54,7 @@ def L1CaloCondFoldersCfg(flags):
         #L1CaloFolderList += ['/TRIGGER/Receivers/Conditions/Strategy']
 
         from IOVDbSvc.IOVDbSvcConfig import addFolders
-        db = 'TRIGGER_ONL' if flags.Common.isOnline else 'TRIGGER_OFL'
+        db = 'TRIGGER_ONL' if not flags.Input.isMC else 'TRIGGER_OFL'
         return addFolders(flags, list(L1CaloFolders.values()), db), L1CaloFolders
 
 
