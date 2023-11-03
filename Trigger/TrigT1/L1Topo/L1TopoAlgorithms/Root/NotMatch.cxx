@@ -96,6 +96,14 @@ TCS::NotMatch::processBitCorrect( const std::vector<TCS::TOBArray const *> & inp
            tob1 != input[0]->end() && distance(input[0]->begin(), tob1) < p_NumberLeading1;
            ++tob1)
          {
+            if (p_NumberLeading1 < input[0]->size()) { 
+               TCS::TOBArray::const_iterator tob1_plus1 = tob1; ++tob1_plus1;
+               if ((*tob1)->Et() == (*tob1_plus1)->Et() && distance(input[0]->begin(), tob1) == p_NumberLeading1 - 1) { 
+                  for(unsigned int i=0; i<numberOutputBits(); ++i) {
+                     output[i]->setAmbiguityFlag(true); 
+                  }
+               }
+            }
             if( parType_t((*tob1)->Et()) <= p_MinET1[i]) continue; // ET cut
             if( parType_t(std::abs((*tob1)->eta())) > p_EtaMax1[i] ) continue; // Eta cut
             if( parType_t(std::abs((*tob1)->eta())) < p_EtaMin1[i] ) continue; // Eta cut
