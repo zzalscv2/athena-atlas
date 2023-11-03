@@ -87,7 +87,7 @@ def triggerTransBSCfg_Calo(flags, seqName="AthAlgSeq"):
 
     # LAr
     from LArByteStream.LArByteStreamConfig import LArRawDataContByteStreamToolCfg
-    acc, larExtraInputs = LArRawDataContByteStreamToolCfg(flags, InitializeForWriting=True)
+    acc, larExtraInputs = LArRawDataContByteStreamToolCfg(flags, InitializeForWriting=True,DSPRunMode = 4, RodBlockVersion = 10)
     itemList += ["LArRawChannelContainer#*"]
     extraInputs += larExtraInputs
     # Tile

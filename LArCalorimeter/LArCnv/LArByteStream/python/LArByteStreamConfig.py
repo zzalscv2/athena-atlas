@@ -31,11 +31,15 @@ def LArRawDataContByteStreamToolConfig (name="LArRawDataContByteStreamTool",
 def LArRawDataContByteStreamToolCfg (flags,
                                      name="LArRawDataContByteStreamTool",
                                      InitializeForWriting = False,
+                                     DSPRunMode = 4,
+                                     RodBlockVersion = 0,
                                      **kwargs):
       from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
       acc = ComponentAccumulator()
       tool = CompFactory.LArRawDataContByteStreamTool(name, **kwargs)
       tool.InitializeForWriting = InitializeForWriting
+      tool.DSPRunMode=DSPRunMode
+      tool.RodBlockVersion=RodBlockVersion
       acc.addPublicTool(tool)
 
       extraOutputs = []
