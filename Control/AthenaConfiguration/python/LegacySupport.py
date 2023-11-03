@@ -24,12 +24,16 @@ def _isOldConfigurable(c):
     return isinstance(c, Configurable)
 
 
+# Tuple of semantics helpers that need special treatment to retrieve their value
+_semanticsHelpers = (GaudiConfig2.semantics._ListHelper,
+                     GaudiConfig2.semantics._DictHelper)
+
 def _conf2HelperToBuiltin(value):
-    """Recursively convert GaudiConfig2 ListHelper to list and DictHelper to dict"""
+    """Recursively convert GaudiConfig2 semantics helpers to builtin values"""
     if isinstance(value, GaudiConfig2.semantics._ListHelper):
         return [_conf2HelperToBuiltin(item) for item in value.data]
     if isinstance(value, GaudiConfig2.semantics._DictHelper):
-        return dict([(k,_conf2HelperToBuiltin(v)) for k,v in value.data.items()])
+        return dict((k,_conf2HelperToBuiltin(v)) for k,v in value.data.items())
     return value
 
 
@@ -68,7 +72,7 @@ def _setProperties( dest, src, indent="" ):
                 setattr( dest, pname, pvalue )
 
         else: # plain data
-            if isinstance(pvalue,(GaudiConfig2.semantics._ListHelper,GaudiConfig2.semantics._DictHelper)):
+            if isinstance(pvalue, _semanticsHelpers):
                 pvalue = _conf2HelperToBuiltin(pvalue)
             try: # sometimes values are not printable
                 _log.debug( "%sSetting property %s to value %s", indent, pname, pvalue )
@@ -178,7 +182,7 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
                 if instance:
                     setattr( dest, prop, _configurableToConf2(instance, _indent(indent)) )
             else:
-                if isinstance(value,(GaudiConfig2.semantics._ListHelper,GaudiConfig2.semantics._DictHelper)):
+                if isinstance(value, _semanticsHelpers):
                     value=value.data
                 setattr( dest, prop, value )
 
@@ -198,14 +202,6 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
             raise ConfigurationError(f"CAtoGlobalWrapper could not find the component of type {name}")
 
         return classObj
-
-    def _listHelperToList(listOrDictHelper):
-        if isinstance(listOrDictHelper, GaudiConfig2.semantics._ListHelper):
-            return [ _listHelperToList(l) for l in listOrDictHelper.data]
-        elif isinstance(listOrDictHelper, GaudiConfig2.semantics._DictHelper):
-            return listOrDictHelper.data
-        else:
-            return listOrDictHelper
 
     def _areSettingsSame( conf1, conf2, indent="",servicesOfThisCA=[] ):
         """Are the properties the same between old-style conf1 and new-style conf2 instance?"""
@@ -334,12 +330,8 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
                                 indent, type(pvalue), type(existingVal) )
                     _areSettingsSame( existingVal, pvalue, indent,servicesOfThisCA)
             else:
-                if isinstance(pvalue, (GaudiConfig2.semantics._ListHelper, GaudiConfig2.semantics._DictHelper)):
-                    pvalue = pvalue.data
-                if isinstance(pvalue, list):
-                    pvalue = [item.data if isinstance(item, (GaudiConfig2.semantics._ListHelper,
-                                                             GaudiConfig2.semantics._DictHelper))
-                              else item for item in pvalue]
+                if isinstance(pvalue, _semanticsHelpers):
+                    pvalue = _conf2HelperToBuiltin(pvalue)
 
                 if pname not in alreadySetProperties:
                     _log.debug( "%sAdding property: %s for %s", indent, pname, conf2.getName() )
@@ -380,7 +372,8 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
                         clone = conf2.getInstance("Clone")
                         setattr(clone, pname, alreadySetProperties[pname])
                         try:
-                            updatedPropValue = _listHelperToList(conf2._descriptors[pname].semantics.merge( getattr(conf2, pname), getattr(clone, pname)))
+                            updatedPropValue = _conf2HelperToBuiltin( conf2._descriptors[pname].semantics.merge(
+                                getattr(conf2, pname), getattr(clone, pname)) )
                         except (TypeError, ValueError):
                             err_message = f"Failed merging new config value ({getattr(conf2, pname)}) and old config value ({getattr(clone, pname)}) for the ({pname}) property of {conf1.getFullJobOptName() } ({conf2.getFullJobOptName()}) old (new)."
                             _log.fatal( err_message )
