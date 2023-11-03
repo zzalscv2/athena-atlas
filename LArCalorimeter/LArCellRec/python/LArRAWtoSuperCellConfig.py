@@ -5,13 +5,15 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
 from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg, LArMaskedSCCfg
 
-def LArRAWtoSuperCellCfg(configFlags,name='LArRAWtoSuperCell', mask=True,SCellContainerOut="SCell_ET",bcidShift=0):
+def LArRAWtoSuperCellCfg(configFlags,name="LArRAWtoSuperCell",mask=True,SCellContainerOut="",SCIn="",doReco=False, bcidShift=0):
     result=ComponentAccumulator()
     from AthenaCommon.Logging import logging
     mlog = logging.getLogger( 'LArRAWtoSuperCellCfg:' )
     result.merge(LArOnOffIdMappingSCCfg(configFlags))
     SCInput=""
-    if ( len(configFlags.Input.RunNumber) > 0 ):
+    if (SCIn != ""):
+       SCInput = SCIn
+    elif ( len(configFlags.Input.RunNumber) > 0 ):
        from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
        runinfo=getLArDTInfoForRun(configFlags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
        for i in range(0,len(runinfo.streamTypes())):
@@ -23,7 +25,9 @@ def LArRAWtoSuperCellCfg(configFlags,name='LArRAWtoSuperCell', mask=True,SCellCo
        LArBadChannelKey="LArBadChannelSC"
     else :
        LArBadChannelKey=""
-    result.merge(LArBadChannelCfg(configFlags,isSC=True,tag="LARBadChannelsBadChannelsSC-RUN3-UPD1-00") )
+    result.merge(LArBadChannelCfg(configFlags,isSC=True) )
+
+    if SCellContainerOut=="": SCellContainerOut=configFlags.LAr.DT.ET_IDKey 
 
     algo = CompFactory.LArRAWtoSuperCell(name,SCellContainerOut=SCellContainerOut,LArBadChannelKey=LArBadChannelKey,BCIDOffset=bcidShift)
 
@@ -32,11 +36,13 @@ def LArRAWtoSuperCellCfg(configFlags,name='LArRAWtoSuperCell', mask=True,SCellCo
         result.merge(LArMaskedSCCfg(configFlags))
         algo.LArMaskedChannelKey="LArMaskedSC"
 
+    algo = CompFactory.LArRAWtoSuperCell(name,isReco=doReco,SCellContainerOut=SCellContainerOut,LArBadChannelKey=LArBadChannelKey)
     if ( SCInput == ""):
        mlog.info("Not setting SCInput container name")
     else :
        mlog.info("Setting SCInput container name to %s",SCInput)
        algo.SCellContainerIn = SCInput
+
     result.addEventAlgo(algo)
        
     return result

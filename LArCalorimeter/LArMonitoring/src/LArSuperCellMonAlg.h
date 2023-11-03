@@ -53,6 +53,7 @@ private:
   // Job properties
   SG::ReadHandleKey<CaloCellContainer>  m_superCellContainerKey{this,"CaloCellContainer","SCell","SG key of the input super cell container"};
   SG::ReadHandleKey<CaloCellContainer>  m_superCellContainerRefKey{this,"CaloCellContainerRef","SCellEm","SG key of the reference super cell container"};
+  SG::ReadHandleKey<CaloCellContainer>  m_superCellContainerRecoKey{this,"CaloCellContainerReco","","SG key of reconstructed SC"};
 
   /// Property: Bunch crossing data (MC only) (conditions input).
   SG::ReadCondHandleKey<BunchCrossingCondData> m_bcDataKey
@@ -92,6 +93,7 @@ private:
 
   BooleanProperty m_doDatabaseNoiseVsEtaPhi{this, "doDatabaseNoiseVsEtaPhi", true};
 
+  BooleanProperty m_doSCReco{this, "doSCReco", false};
     
   //enums to help with the conversion of Layer, partitions and such:
   //Enumerate layers 

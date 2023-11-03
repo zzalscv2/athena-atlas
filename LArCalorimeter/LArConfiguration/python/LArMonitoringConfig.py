@@ -14,6 +14,9 @@ def LArMonitoringConfig(inputFlags):
     from LArMonitoring.LArHVCorrMonAlg import LArHVCorrMonConfig
     from LArMonitoring.LArCoverageAlg import LArCoverageConfig
     from LArMonitoring.LArNoiseCorrelationMonAlg import LArNoiseCorrelationMonConfig
+    #FIXME: not working yet
+    #from LArMonitoring.LArSuperCellMonAlg import  LArSuperCellMonConfig
+    from LArMonitoring.RecoPT_Phase1NewConfig import LArDTMonitoringConfig
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
@@ -41,6 +44,11 @@ def LArMonitoringConfig(inputFlags):
               acc.merge(LArRODMonConfig(inputFlags))
           acc.merge(LArCoverageConfig(inputFlags))
           acc.merge(LArNoiseCorrelationMonConfig(inputFlags))
+          from AthenaConfiguration.Enums import LHCPeriod
+          if inputFlags.GeoModel.Run > LHCPeriod.Run2:
+             #FIXME: not working yet
+             #acc.merge(LArSuperCellMonConfig(inputFlags))
+             acc.merge(LArDTMonitoringConfig(inputFlags,''))
 
     return acc
 

@@ -125,7 +125,7 @@ def LArElecCalibDBRun2Cfg(flags,condObjs):
 
 def LArElecCalibDBSCCfg(flags,condObjs,sqlite=None):
 
-    sqliteFolders=getSqliteContent(flags.IOVDb.sqliteInput,tuple(flags.IOVDb.sqliteFolders),flags.IOVDb.DatabaseInstance)
+    sqliteFolders=getSqliteContent(flags.IOVDb.SqliteInput,tuple(flags.IOVDb.SqliteFolders),flags.IOVDb.DatabaseInstance)
 
     _larCondDBFoldersDataSC = {"Ramp":("LArRampSC","/LAR/ElecCalibFlatSC/Ramp", LArRampSCCondAlg ),
                                "DAC2uA":("LArDAC2uASC","/LAR/ElecCalibFlatSC/DAC2uA",LArDAC2uASCCondAlg),

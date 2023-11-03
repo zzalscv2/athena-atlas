@@ -188,6 +188,7 @@ private:
     //// mon header
     Word m_latomeID{};
     Word m_l1ID{};
+    Word m_ROBFragSize{};
     Word m_nPackets{};
     Word m_iPacket{};
     Word m_nWordsPerPacket{};
