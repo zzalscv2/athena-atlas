@@ -54,7 +54,7 @@ namespace {
     const TypeRegexes& type_regexes,
     const SortRegexes& sort_regexes,
     const TrkSelRegexes& select_regexes,
-    const std::regex& re,
+    const std::regex& flip_re,
     const FlipTagConfig& flip_config);
 
   // replace strings for flip taggers
@@ -153,7 +153,7 @@ namespace {
     const TypeRegexes& type_regexes,
     const SortRegexes& sort_regexes,
     const TrkSelRegexes& select_regexes,
-    const std::regex& re,
+    const std::regex& flip_re,
     const FlipTagConfig& flip_config) {
     std::vector<FTagTrackSequenceConfig> nodes;
     for (const auto& name_node: names) {
@@ -170,7 +170,7 @@ namespace {
                                  "track type matching");
 
         input.flip_sign=false;
-        if ((flip_config != FlipTagConfig::STANDARD) && std::regex_match(varname, re)){
+        if ((flip_config != FlipTagConfig::STANDARD) && std::regex_match(varname, flip_re)){
           input.flip_sign=true;
         }
         
@@ -212,6 +212,9 @@ namespace {
     }
     if (flip_config == FlipTagConfig::NEGATIVE_IP_ONLY) {
       flip_name = "Neg";
+    }
+    if (flip_config == FlipTagConfig::SIMPLE_FLIP) {
+      flip_name = "Simple";
     }
 
     // we rewrite the inputs if we're using flip taggers
@@ -627,6 +630,13 @@ namespace FlavorTagDiscriminants {
               return Tracks(tr.crbegin(), tr.crend());},
             {}
           };
+        case FlipTagConfig::SIMPLE_FLIP:
+          // Just flips the order
+          return {
+            [](const Tracks& tr, const xAOD::Jet& ) {
+              return Tracks(tr.crbegin(), tr.crend());},
+            {}
+          };
         case FlipTagConfig::STANDARD:
           return {[](const Tracks& tr, const xAOD::Jet& ) { return tr; }, {}};
         default: {
@@ -669,7 +679,13 @@ namespace FlavorTagDiscriminants {
 
       // some sequences also need to be sign-flipped. We apply this by
       // changing the input scaling and normalizations
-      std::regex flip_sequences(".*signed_[dz]0.*");
+      std::regex flip_sequences;
+      if (flip_config == FlipTagConfig::FLIP_SIGN || flip_config == FlipTagConfig::NEGATIVE_IP_ONLY){
+        flip_sequences=std::regex(".*signed_[dz]0.*");
+      }
+      if (flip_config == FlipTagConfig::SIMPLE_FLIP){
+        flip_sequences=std::regex("(.*signed_[dz]0.*)|d0|z0SinTheta");
+      }
 
       if (flip_config != FlipTagConfig::STANDARD) {
         rewriteFlipConfig(config, flip_converters);
