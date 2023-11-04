@@ -354,6 +354,9 @@ GenericElementLinkBase<INDEXING_POLICY>::GenericElementLinkBase
       m_proxy (dlink.m_proxy),
       m_element()
 {
+  if (dlink.isDefault()) {
+    INDEXING_POLICY::reset (m_index);
+  }
 }
 
 

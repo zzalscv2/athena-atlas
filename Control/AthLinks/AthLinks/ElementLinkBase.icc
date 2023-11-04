@@ -373,7 +373,7 @@ inline
 ElementLinkBase::ElementLinkBase (const DataLinkBase& dlink,
                                   index_type index)
   : m_persKey (dlink.key()),
-    m_persIndex (static_cast<stored_index_type>(index)),
+    m_persIndex (dlink.isDefault() ? INVALID : static_cast<stored_index_type>(index)),
     m_proxy (dlink.m_proxy)
 {
 }

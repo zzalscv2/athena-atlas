@@ -167,6 +167,7 @@ class DataLinkBase_test
 {
 public:
   using DataLinkBase::DataLinkBase;
+  DataLinkBase_test() {}
   DataLinkBase_test (sgkey_t key, CLID link_clid, IProxyDict* sg)
     : DataLinkBase (key, link_clid, sg) {}
 };
@@ -394,6 +395,10 @@ void test1 (SGTest::TestStore& store)
   assert (el14.key() == sgkey);
   assert (el14.source() == &store);
   assert (el14.storableBase (0, clid, true) == cont);
+
+  DataLinkBase_test dl14a;
+  Link el14a (dl14a, index1);
+  assert (el14a.isDefault());
 
   el12.reset();
   assert (el12.isDefault());
