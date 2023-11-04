@@ -397,7 +397,7 @@ def _get_flip_config(nn_path):
     if 'rnnip' in nn_path or 'dips' in nn_path:
         return ['NEGATIVE_IP_ONLY']
     if 'gn1' in nn_path or 'gn2' in nn_path:
-        return ['FLIP_SIGN', 'NEGATIVE_IP_ONLY']
+        return ['FLIP_SIGN', 'NEGATIVE_IP_ONLY','SIMPLE_FLIP']
     else:
         return []
 

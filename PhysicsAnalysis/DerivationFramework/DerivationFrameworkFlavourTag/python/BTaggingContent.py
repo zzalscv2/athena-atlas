@@ -72,6 +72,13 @@ BTaggingStandardRun3Aux = \
     , "GN2v00Neg_pb"
     , "GN2v00Neg_pc"
     , "GN2v00Neg_pu"
+
+    , "GN120220509Simple_pb"
+    , "GN120220509Simple_pc"
+    , "GN120220509Simple_pu"
+    , "GN2v00Simple_pb"
+    , "GN2v00Simple_pc"
+    , "GN2v00Simple_pu"
     ]
 
 BTaggingStandardRun4Aux = [

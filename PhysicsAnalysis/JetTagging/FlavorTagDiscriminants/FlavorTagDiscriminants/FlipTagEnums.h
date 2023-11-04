@@ -14,7 +14,8 @@ namespace FlavorTagDiscriminants {
   enum class FlipTagConfig {
     STANDARD,                   // use all tracks
     NEGATIVE_IP_ONLY,           // use only negative IP, flip sign
-    FLIP_SIGN,                  // just flip the sign, use all tracks
+    FLIP_SIGN,                  // just flip the sign of IP3D_signed_d0_significance, IP3D_signed_z0_significance, use all tracks
+    SIMPLE_FLIP,                // flip the sign of d0, z0SinTheta, IP3D_signed_d0_significance, IP3D_signed_z0_significance, use all tracks
   };
   FlipTagConfig flipTagConfigFromString(const std::string&);
 }
