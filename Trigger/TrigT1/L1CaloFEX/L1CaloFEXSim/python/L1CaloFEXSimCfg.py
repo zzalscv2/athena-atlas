@@ -63,30 +63,34 @@ def eFEXTOBEtToolCfg(flags):
 
 def TriggerTowersInputCfg(flags):
     '''Configuration to provide TriggerTowers as input to the Fex simulation'''
-    if flags.Input.isMC:
-        # For MC produce TT with R2TTMaker
+    from AthenaConfiguration.Enums import Format
+    if flags.Input.Format is Format.POOL:
+        # For POOL files produce TT with R2TTMaker
         from TrigT1CaloSim.TrigT1CaloSimRun2Config import Run2TriggerTowerMakerCfg
         return Run2TriggerTowerMakerCfg(flags)
     else:
-        # For data decode TT from ByteStream
+        # For RAW decode TT from ByteStream
         from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
         return LVL1CaloRun2ReadBSCfg(flags)
 
 
 def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulatedTowers"],deadMaterialCorrections=True, eFEXDebug=False):
+    from AthenaConfiguration.Enums import Format
+
     acc = ComponentAccumulator()
 
     log = logging.getLogger('L1CaloFEXSimCfg')
 
     # Configure SCell inputs
     sCellType = flags.Trigger.L1.L1CaloSuperCellContainerName
-    if flags.Input.isMC:
+    if flags.Input.Format is Format.POOL:
         # Read SCell directly from input RDO file
         acc.merge(ReadSCellFromPoolFileCfg(flags,sCellType))
-        # wont have eFexDataTowers available so remove that if it appears in input list
-        eFexTowerInputs = [l for l in eFexTowerInputs if l != "L1_eFexDataTowers"]
-        # also no DM corrections for MC yet ...
-        deadMaterialCorrections = False
+        if flags.Input.isMC:
+            # wont have eFexDataTowers available so remove that if it appears in input list
+            eFexTowerInputs = [l for l in eFexTowerInputs if l != "L1_eFexDataTowers"]
+            # also no DM corrections for MC yet ...
+            deadMaterialCorrections = False
     else:
         from AthenaConfiguration.Enums import LHCPeriod
         if flags.GeoModel.Run is LHCPeriod.Run2:
@@ -97,8 +101,9 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
             # Run-3+ data inputs, decode SCells from ByteStream
             acc.merge(ReadSCellFromByteStreamCfg(flags,key=sCellType))
 
-    # Need also TriggerTowers as input
-    acc.merge(TriggerTowersInputCfg(flags))
+    # Need also TriggerTowers as input .. so reconstruct if not in input collections already
+    if "xAODTriggerTowers" not in flags.Input.Collections:
+        acc.merge(TriggerTowersInputCfg(flags))
 
     if 'L1_eFexEmulatedTowers' in eFexTowerInputs:
         acc.addEventAlgo( CompFactory.LVL1.eFexTowerBuilder("L1_eFexEmulatedTowers",CaloCellContainerReadKey=sCellType) ) # builds the emulated towers to use as secondary input to eTowerMaker - name has to match what it gets called in other places to avoid conflict
@@ -149,7 +154,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
 
     if flags.Trigger.L1.dojFex:
         
-        if not flags.Input.isMC:
+        if flags.Input.Format is not Format.POOL:
             from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
             inputjFexTool = acc.popToolsAndMerge(jFexInputByteStreamToolCfg(flags, 'jFexInputBSDecoderTool'))
             
@@ -180,7 +185,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
 
     if flags.Trigger.L1.dogFex:
 
-        if not flags.Input.isMC:
+        if flags.Input.Format is not Format.POOL:
             from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexInputByteStreamToolCfg
             inputgFexTool = acc.popToolsAndMerge(gFexInputByteStreamToolCfg(flags, 'gFexInputBSDecoderTool'))
             
@@ -304,11 +309,11 @@ if __name__ == '__main__':
     ##################################################
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from TrigValTools.TrigValSteering import Input
+    import os
 
     flags = initConfigFlags()
-    flags.Input.Files = Input.get_input(args.input).paths
+    flags.Input.Files = [args.input] if os.path.isfile(args.input) else Input.get_input(args.input).paths
     flags.Output.AODFileName = 'AOD.pool.root'
-    flags.Common.isOnline = not flags.Input.isMC
     flags.Exec.MaxEvents = args.nevents
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents = 1
@@ -345,9 +350,9 @@ if __name__ == '__main__':
         acc.merge(ByteStreamReadCfg(flags))
 
     from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg, generateL1Menu, createL1PrescalesFileFromMenu
-    acc.merge(L1ConfigSvcCfg(flags))
     generateL1Menu(flags)
     createL1PrescalesFileFromMenu(flags)
+    acc.merge(L1ConfigSvcCfg(flags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     FexEDMList = [
