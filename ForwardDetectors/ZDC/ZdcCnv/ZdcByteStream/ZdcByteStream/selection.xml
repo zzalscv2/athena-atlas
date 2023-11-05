@@ -1,3 +1,7 @@
 <lcgdict>
    <class name="IZdcDataAccessV2" />
- </lcgdict>
+   <class name="ZdcLucrodChannelType" />
+   <class name="ZdcLucrodData" />
+   <class name="ZdcLucrodDataContainer" />
+   <class name="DataVector<ZdcLucrodData>" />
+</lcgdict>
