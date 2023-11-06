@@ -138,7 +138,6 @@ def BPHY3Cfg(ConfigFlags):
     
     ## Vertex candidates 
     StaticContent += ["xAOD::VertexContainer#%s"        % BPHY3_Reco_diTrk.OutputVtxContainerName]
-    StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY3_Reco_diTrk.OutputVtxContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY3_Reco_diTrk.OutputVtxContainerName]
     BPHY3SlimmingHelper.AllVariables = AllVariables

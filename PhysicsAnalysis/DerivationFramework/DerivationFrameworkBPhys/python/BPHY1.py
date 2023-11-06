@@ -178,7 +178,6 @@ def BPHY1Cfg(flags):
     
     ## Jpsi candidates 
     StaticContent += ["xAOD::VertexContainer#%s"        % OniaContainerName]
-    StaticContent += ["xAOD::VertexAuxContainer#%sAux." % OniaContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % OniaContainerName]
     

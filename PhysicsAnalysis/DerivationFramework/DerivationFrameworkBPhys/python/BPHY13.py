@@ -444,37 +444,30 @@ def BPHY13Cfg(ConfigFlags):
     
     
     BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13FourTrackSelectAndWrite.OutputVtxContainerName]
-    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY13FourTrackSelectAndWrite.OutputVtxContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13FourTrackSelectAndWrite.OutputVtxContainerName]
     
     BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2mu.OutputVtxContainerName]
-    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY13_Revertex_2mu.OutputVtxContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2mu.OutputVtxContainerName]
     
     BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2trk.OutputVtxContainerName]
-    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY13_Revertex_2trk.OutputVtxContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2trk.OutputVtxContainerName]
     
     BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2muHi.OutputVtxContainerName]
-    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY13_Revertex_2muHi.OutputVtxContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2muHi.OutputVtxContainerName]
     
     BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2trkHi.OutputVtxContainerName]
-    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY13_Revertex_2trkHi.OutputVtxContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2trkHi.OutputVtxContainerName]
     
     BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2muMed.OutputVtxContainerName]
-    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY13_Revertex_2muMed.OutputVtxContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2muMed.OutputVtxContainerName]
     
     BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2trkMed.OutputVtxContainerName]
-    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY13_Revertex_2trkMed.OutputVtxContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2trkMed.OutputVtxContainerName]
     

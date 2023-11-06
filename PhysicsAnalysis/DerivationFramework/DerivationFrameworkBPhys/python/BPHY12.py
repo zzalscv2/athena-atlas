@@ -258,13 +258,10 @@ def BPHY12Cfg(ConfigFlags):
 
     ## Jpsi candidates
     StaticContent += ["xAOD::VertexContainer#%s"        % BPHY12_SelectAndWrite_DiMuon.OutputVtxContainerName]
-    StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY12_SelectAndWrite_DiMuon.OutputVtxContainerName]
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY12_SelectAndWrite_DiMuon.OutputVtxContainerName]
     StaticContent += ["xAOD::VertexContainer#%s"        % BPHY12_SelectAndWrite_BdKstarKpiMuMu.OutputVtxContainerName]
-    StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY12_SelectAndWrite_BdKstarKpiMuMu.OutputVtxContainerName]
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY12_SelectAndWrite_BdKstarKpiMuMu.OutputVtxContainerName]
     StaticContent += ["xAOD::VertexContainer#%s"        % BPHY12_ReVertex_Kstar.OutputVtxContainerName]
-    StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY12_ReVertex_Kstar.OutputVtxContainerName]
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY12_ReVertex_Kstar.OutputVtxContainerName]
     
     # Added by ASC
