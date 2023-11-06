@@ -554,8 +554,6 @@ def BPHY24Cfg(flags):
     for i in outVtxList:
       StaticContent += [ "xAOD::VertexContainer#%s"                        % i ]
       StaticContent += [ "xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % i ]
-      if [ "ReVertex" in i ]:
-        StaticContent += [ "xAOD::VertexAuxContainer#%sAux." % i ]
     
     print("BPHY24: Full list of B-augmentation: ", StaticContent)
     

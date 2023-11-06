@@ -177,17 +177,14 @@ def BPHY16Cfg(ConfigFlags):
     
     
     StaticContent += ["xAOD::VertexContainer#%s"        % BPHY16_Reco_mumu.OutputVtxContainerName]
-    StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY16_Reco_mumu.OutputVtxContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY16_Reco_mumu.OutputVtxContainerName]
     
     StaticContent += ["xAOD::VertexContainer#%s"        % BPHY16FourTrackSelectAndWrite.OutputVtxContainerName]
-    StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY16FourTrackSelectAndWrite.OutputVtxContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY16FourTrackSelectAndWrite.OutputVtxContainerName]
     
     StaticContent += ["xAOD::VertexContainer#%s"        % BPHY16_Revertex.OutputVtxContainerName]
-    StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY16_Revertex.OutputVtxContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY16_Revertex.OutputVtxContainerName]
     
