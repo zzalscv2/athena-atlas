@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONNSWASBUILT_ELEMENTMODELSTGC_H
@@ -78,7 +78,6 @@ namespace NswAsBuilt {
       Amg::Vector3D stgcNonPar(double npar, const Amg::Vector3D& d0) const;
       
       // Properties and scales needed for the calculation
-      double m_lenX{0.};
       double m_lenY{0.};
       Amg::Vector3D m_defo0 {Amg::Vector3D::Zero()};
 
