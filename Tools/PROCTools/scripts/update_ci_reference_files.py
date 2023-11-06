@@ -1,0 +1,443 @@
+#!/bin/env python3
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+
+
+"""Updates reference files for a given MR, as well as related files (digest ref files, References.py)
+
+This script should be run in the root directory of the athena repository, 
+and you should pass in the URL of "CI Builds Summary" page for the MR you are interested in.
+i.e. the link that you get from the MR under "Full details available on <this CI monitor view>"
+
+So, for example, if you are interested in MR 66303, you would run this script as follows:
+Tools/PROCTools/scripts/update_ci_reference_files.py https://bigpanda.cern.ch/ciview/?rel=MR-63410-2023-10-09-12-27
+
+Running with --test-run will modify local files (so you can test that the changes make sense), and will also print out the commands which would have been executed. Nothing remote is changed! 
+This is a good way to check that the proposed changes look rational before actually making in earnest.
+"""
+
+from collections import defaultdict
+from datetime import datetime
+import subprocess
+import re
+import os
+import argparse
+try:
+    import requests 
+except ImportError:
+    print('FATAL: this script needs the requests module. Either install it yourself, or run "lsetup gitlab"')
+
+class CITest:
+    def __init__(self, name, tag, mr, date, existing_ref, existing_version, new_version, new_version_directory, copied_file_path, diffDigest, type):
+        self.name = name
+        self.tag = tag
+        self.mr = mr
+        self.date = date
+        self.existing_ref = existing_ref
+        self.existing_version = existing_version
+        self.new_version = new_version
+        self.new_version_directory = new_version_directory
+        self.copied_file_path = copied_file_path
+        self.diffDigest = diffDigest
+        self.type = type
+    
+    def __repr__(self):
+        return f'<CI Test: {self.name} tag: {self.tag} MR: {self.mr} date: {self.date} type: {self.type}>'
+
+    def __str__(self):
+        extra = ''
+        if self.type == 'DiffPool':
+            extra = f' Data file change :  {self.existing_version} -> {self.new_version}'
+        elif self.type == 'Digest':
+            extra = f' Digest change: {self.existing_ref}'
+        return f'{self.name}:{self.tag} MR: {self.mr}'+extra
+
+failing_tests = defaultdict(list) # Key is branch, value is list of CITest objects
+dirs_created=[] #Used later to ensure we don't try to create the same directory twice
+
+def process_log_file(url, branch, test_name):
+    """So now we have a URL to a failing test.
+    We need to check that the test is failing for the correct reason - namely a reference file which needs updating
+    The information we need to collect is:
+    - the AMI tag of the failing tests
+    - the merge request number
+    - the location of the reference file
+    - the location of the copied file
+    - the name of the test
+    - the new version number
+    - the new version directory
+    """
+    page = requests.get(url)
+    text = page.text
+
+    # First check that this looks like a test whose ref files need updating, bail otherwise
+    # INFO     All q442 athena steps completed successfully
+    test_match = re.search(r'All (?P<ami_tag>\w+) athena steps completed successfully', text)
+    if not test_match:
+        print('FATAL: Did not find an athena job completing successfully in this test. Aborting.')
+        exit(1)
+
+    # We have two types of tests, but lets try to extract some common information
+    ami_tag = test_match.group('ami_tag') if test_match else None
+    if not ami_tag:
+        problems.append("No AMI tag")
+
+    mr_match = re.search(r'NICOS_TestLog_MR-(?P<mr_number>\d+)-(?P<date>\d{4}-\d{2}-\d{2}-\d{2}-\d{2})', url)
+    if not mr_match:
+        print('FATAL: Could not process the URL as expected. Aborting.')
+        print(url)
+        exit(1)
+
+    mr_number = mr_match.group('mr_number')
+    date = mr_match.group('date')
+    human_readable_date = ':'.join(date.split('-')[0:3]) + " at " + ':'.join(date.split('-')[3:])
+
+    test_type = None
+    if "Your change breaks the digest in test" in text:
+        # Okay, we have a digest change
+        failing_tests[branch].append(process_digest_change(text, ami_tag, mr_number, human_readable_date, test_name))
+        test_type='digest'
+
+    if 'ERROR    Your change breaks the frozen tier0 policy in test' in text:
+        failing_tests[branch].append(process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_name))
+        if test_type=='digest':
+            print('FATAL: Test is both a digest and diffpool change. This is not supported.')
+            exit(1)
+    return
+
+def process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_name):
+    eos_path_root = '/eos/atlas/atlascerngroupdisk/data-art/grid-input/WorkflowReferences/'
+
+    # Copied file path
+    # e.g. from ERROR    Copied '../SimulationRun3FullSim/run_s4006/myHITS.pool.root' to '/eos/atlas/atlascerngroupdisk/proj-sit/gitlabci/MR63410_a84345c776e93f0d7f25d00c9e91e35bcb965d09/SimulationRun3FullSimChecks'
+    copied_file_match = re.search(r'^ERROR    Copied.*', text, flags=re.MULTILINE)
+    if not copied_file_match:
+        print("FATAL: Could not find matching copied file")
+        exit(1)
+    copied_file_path = copied_file_match.group().split('to')[1].strip().strip("'")+'/'
+
+    # Reference file paths
+    ref_file_match = re.search(r'INFO     Reading the reference file from location.*', text)
+    if not ref_file_match:
+        print("FATAL: Could not find matching reference file")
+        exit(1)
+
+    ref_file_path = ref_file_match.group().split('location')[1].strip()
+    existing_version_number= ref_file_path.split('/')[-1]
+    branch = ref_file_path.split('/')[-3]
+    new_version_number = 'v'+str(int(existing_version_number[1:])+1)
+    new_version_directory = eos_path_root+branch+'/'+ami_tag+'/'+new_version_number 
+    old_version_directory = eos_path_root+branch+'/'+ami_tag+'/'+existing_version_number 
+    # Copied file path
+    # e.g. from ERROR    Copied '../SimulationRun3FullSim/run_s4006/myHITS.pool.root' to '/eos/atlas/atlascerngroupdisk/proj-sit/gitlabci/MR63410_a84345c776e93f0d7f25d00c9e91e35bcb965d09/SimulationRun3FullSimChecks'
+    copied_file_match = re.search(r'^ERROR    Copied.*', text, flags=re.MULTILINE)
+    if not copied_file_match:
+        print("FATAL: Could not find matching copied file")
+        exit(1)
+    
+    # Sanity checks
+    ami_tag_check = ref_file_path.split('/')[-2].strip()
+    if ami_tag_check!=ami_tag:
+        print('FATAL: Sanity check: "{}" from reference file path "{}" does not match ami tag "{}" extracted previously.'.format(ami_tag_check, ref_file_path, ami_tag))
+        exit(1)
+
+
+    test = CITest(name=test_name, tag=ami_tag, mr=mr_number, date=human_readable_date, existing_ref = old_version_directory, existing_version = existing_version_number, new_version = new_version_number, new_version_directory = new_version_directory, copied_file_path = copied_file_path, diffDigest=None, type='DiffPool')
+    return test
+
+def process_digest_change(text, ami_tag, mr_number, human_readable_date, test_name):    
+    # Some things aren't so relevant for digest changes
+    existing_version_number = None
+    new_version_directory = None
+    copied_file_path = None
+    new_version_number=None
+
+    #  differs from the reference 'q447_AOD_digest.ref' (<):
+    ref_file_match = re.search(r'(.*differs from the reference \')(.*)(\')', text)
+    if not ref_file_match:
+        print("FATAL: Could not find matching reference file")
+        exit(1)
+    ref_file_path = ref_file_match.groups()[1]
+
+    diff_lines = []
+    diff_started = False # Once we hit the beginning of the diff, we start recording
+    new_diff_started = False
+
+    for lines in text.split('\n'):
+        if 'differs from the reference' in lines:
+            # Start of the diff
+            diff_started = True
+        elif diff_started:
+          if 'INFO' in lines:
+            # End of the diff
+            break
+          if diff_started:
+            diff_lines.append(lines)
+
+    test = CITest(name=test_name, tag=ami_tag, mr=mr_number, date=human_readable_date, existing_ref = ref_file_path, existing_version = existing_version_number, new_version = new_version_number, new_version_directory = new_version_directory, copied_file_path = copied_file_path, diffDigest=diff_lines, type='Digest')
+    return test
+
+def update_reference_files(actually_update=True, update_local_files=False):
+    print
+    print('Updating reference files')
+    print('========================')
+    problem = False # Set to true if we find a problem which does not require an immediate exit
+    commands = []
+    for branch, tests in failing_tests.items():
+        for test in tests:
+            print('Processing test: {} on branch {}'.format(test.name, branch))
+            if test.type == 'DiffPool':
+                print(' * This is a DiffPool test, and currently has version {} of {}. Will update References.py with new version.'.format(test.existing_version, test.tag))
+                if actually_update:
+                    print(' -> The new version is: {}. Creating directory now.'.format(test.new_version))
+                    create_dir_and_copy_refs(test, True)
+                else:
+                    # We will print these later, so we can sanity check them when in test mode
+                    commands.extend(create_dir_and_copy_refs(test, False))
+
+                # Now, update local References.py file
+                if update_local_files:
+                    data = []
+
+                    with open('Tools/WorkflowTestRunner/python/References.py', 'r') as f:
+                        lines = f.readlines()
+                        for line in lines:
+                            if test.tag in line:
+                                old_line = line
+                                line = line.replace(test.existing_version, test.new_version)
+                            data.append(line)
+                    with open('Tools/WorkflowTestRunner/python/References.py', 'w') as f:
+                        f.writelines(data)
+            elif test.type == 'Digest' and update_local_files:
+                print(' * This is a Digest test. Need to update reference file {}.'.format(test.existing_ref))
+                data = []
+
+                # First, let's sanity check the diff
+                index_of_diff_middle = None
+                index_of_diff_start = None
+                index_of_diff_start2 = None
+                for line in test.diffDigest:
+                    if not index_of_diff_start and line.startswith('&lt;'):
+                        index_of_diff_start = test.diffDigest.index(line)
+                    if not index_of_diff_start2 and line.startswith('&gt;'):
+                        index_of_diff_start2 = test.diffDigest.index(line)
+                    if line.startswith('---'):
+                        if index_of_diff_middle:
+                            print('FATAL: Found more than one line with --- in it. Aborting.')
+                            exit(1)
+                        index_of_diff_middle = test.diffDigest.index(line)
+                
+                if not index_of_diff_middle or not index_of_diff_start or not index_of_diff_start2 or index_of_diff_start > index_of_diff_middle or index_of_diff_start2 < index_of_diff_middle or index_of_diff_start2!=index_of_diff_middle+1:
+                    print('FATAL: Malformed diff. Aborting.')
+                    print('index_of_diff_middle: {}'.format(index_of_diff_middle))
+                    print('index_of_diff_start: {}'.format(index_of_diff_start))
+                    print('index_of_diff_start2: {}'.format(index_of_diff_start2))
+                    exit(1)
+                
+                length_of_diff = index_of_diff_middle - index_of_diff_start
+                if not len(test.diffDigest)> (index_of_diff_middle + length_of_diff):
+                    print('FATAL: Malformed diff (not long enough). Aborting.')
+                    exit(1)
+
+                current_diff_line = 0 #The line in the diff which matches the current line in the digest
+                with open('Tools/PROCTools/data/'+test.existing_ref, 'r') as f:
+                    lines = f.readlines()
+                    for line in lines:
+                        # Sanity check
+                        split_curr_line = line.split()
+                        if (split_curr_line[0] == 'run'): # Skip header line
+                            data.append(line)
+                            continue
+                        
+                        # So, we expect first two numbers to be run/event respectively
+                        if (not split_curr_line[0].isnumeric()) or (not split_curr_line[1].isnumeric()):
+                            print('FATAL: Found a line in current digest which does not start with run/event numbers: {}'.format(line))
+                            exit(1)
+                        
+                        if current_diff_line+index_of_diff_start >= index_of_diff_middle:
+                            # Diff is over so just copy the rest of the lines
+                            data.append(line)
+                            continue
+
+                        split_diff_line_before = test.diffDigest[index_of_diff_start+current_diff_line].split()
+                        # Can we compare to diff yet?
+                        if not current_diff_line:
+                            # Check to see if this line matches the first relevant line in the diff
+                            if (split_diff_line_before[1] == split_curr_line[0]) and (split_diff_line_before[2] == split_curr_line[1]):
+                                current_diff_line = 0
+                            else:
+                                # Okay, still before the diff starts so just copy the line and continue
+                                data.append(line)
+                                continue
+                        
+                        # Let's check that the before lines in the diff match with what is there now
+                        line_changed=False
+                        for i in range(2,len(split_curr_line)):
+                            if split_diff_line_before[i+1] != split_curr_line[i]:
+                                line_changed=True
+                        if line_changed:
+                            print('ERROR: It seems like this line was already changed compared to the test {}'.format(line))
+                            problem=True
+
+                        #Replace the existing line with the new one, removing > character, making sure we right align within 12 characters
+                        split_curr_line = test.diffDigest[index_of_diff_start2+current_diff_line].split()
+                        del split_curr_line[0]
+                        data.append("".join(["{:>12}".format(x) for x in split_curr_line])+ '\n')
+                        
+                        current_diff_line += 1
+                        
+                print(' -> Updating PROCTools digest file')
+                with open('Tools/PROCTools/data/'+test.existing_ref, 'w') as f:
+                    f.writelines(data)
+    return commands
+                
+
+def create_dir_and_copy_refs(test, actually_update=False):
+    """
+    If called with actually_update=False, this function will return a list of commands which would have been executed.
+    """
+    commands = []
+    if actually_update and (test.new_version_directory not in dirs_created):
+        try:
+            os.mkdir(test.new_version_directory)
+        except Exception as e:
+            print('Unable to create directory due to:', e)
+            print('Do you have EOS available on this machine?') 
+            print('If so, maybe the problem is the path: {}'.format(test.new_version_directory))
+        dirs_created.append(test.new_version_directory)
+                
+    # Create a file with some information about the test
+    if actually_update:
+        f = open(test.new_version_directory+'/info.txt', 'w')
+        f.write('Merge URL: https://gitlab.cern.ch/atlas/athena/-/merge_requests/{}\n'.format(test.mr))
+        f.write('Date: {}\n'.format(test.date))
+        f.write('AMI: {}\n'.format(test.tag))
+        f.write('Test name: {}\n'.format(test.name)) 
+        f.write('Files copied from: {}\n'.format(test.copied_file_path))
+        f.close()
+
+    # Copy new directory first, then copy old (in case the new MR did not touch all files)
+    # Important! Use no-clobber for second copy or we will overwrite the new data with old!
+    commands.append("cp " + test.copied_file_path + "* "+ test.new_version_directory)
+    commands.append("cp -n " + test.existing_ref + "/* "+ test.new_version_directory)
+    if actually_update:
+        print(' -> Copying files from {} to {}'.format(test.copied_file_path, test.new_version_directory))
+        try:
+            for command in commands:
+                subprocess.call( command, shell=True)
+        except Exception as e:
+            print('FATAL: Unable to copy files due to:', e)
+            exit(1)
+    return commands
+
+def process_CI_Tests_json(data):
+    # Each list entry is one column in the table.
+    for row in data:
+        if ('ERROR' in row[0]):
+            process_log_file(strip_url(row[2]), branch = row[1], test_name=strip_href(row[2]))
+
+def strip_url(href):
+    url = href[href.find('"')+1:] # Strip everything up to first quotation mark
+    url = url[:url.find('"')]
+    return url
+
+def strip_href(href):
+    value = href[href.find('>')+1:] # Strip everything up to first >
+    value = value[:value.find('<')]
+    return value
+
+def process_CI_Builds_Summary(project):
+    # Each entry is one column in the table. 11th is the tests column.
+    # URL to tests page is in form: 
+    # <a href="/testsview/?nightly=MR-CI-builds&rel=MR-66303-2023-10-10-19-08&ar=x86_64-centos7-gcc112-opt&proj=AthGeneration">0 (0)</a>
+    test_counts = strip_href(project[11])
+    # This is e.g. '0 (0)'
+    test_error_counts = int(test_counts.split(' ')[0])
+    if test_error_counts > 0:
+        # Okay, we have an error!
+        project_url = 'https://bigpanda.cern.ch'+strip_url(project[11])
+        headers = {'Accept': 'application/json'} 
+        r = requests.get(project_url+'&json', headers=headers)
+        data = r.json()["rows_s"]
+        process_CI_Tests_json(data[1:])
+
+def extract_links_from_json(url):
+    headers = {'Accept': 'application/json'} 
+    r = requests.get(url+'&json', headers=headers)
+    data = r.json()["rows_s"]
+    # First row is header. 
+    # Currently this is: 'Release', 'Platform', 'Project', 'git branch<BR>(link to MR)', 'Job time stamp', 'git clone', 'Externals build', 'CMake config', 'Build time', 'Comp. Errors (w/warnings)', 'Test time', 'CI tests errors (w/warnings)', 'Host'
+    for project in data[1:]:
+        process_CI_Builds_Summary(project)
+
+def summarise_failing_tests(check_for_duplicates = True):
+    print('Summary of tests which need work:')
+
+    if not failing_tests:
+        print(" -> None found. Aborting.")
+        return None
+
+    mr = None
+    reference_folders = []
+    for branch,tests in failing_tests.items():
+        print (' * Branch: {}'.format(branch))
+        for test in tests:
+            print('   - ', test)
+            if (test.existing_ref not in reference_folders):
+                reference_folders.append(test.existing_ref)
+            elif check_for_duplicates:
+                print('FATAL: Found two tests which both change the same reference file: {}, which is not supported.'.format(test.existing_ref))
+                print('Consider running again in --test-run mode, to get a copy of the copy commands that could be run.')
+                print('The general advice is to take the largest file (since it will have the most events), and/or take the non-legacy one.')
+                exit(1)
+            mr = test.mr
+    return 'https://gitlab.cern.ch/atlas/athena/-/merge_requests/'+mr
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('url', help='URL to CITest (put in quotes))')
+    parser.add_argument('--test-run',help='Update local text files, but do not actually touch EOS.', action='store_true')
+    args = parser.parse_args()
+    print('Update reference files for URL: {}'.format(args.url))
+ 
+    if not args.url.startswith(('http://', 'https://')):
+        print('invalid url - should start with http:// or https://')
+        print(args.url)
+        print('Aborting.')
+        exit(1)
+ 
+    if args.test_run:
+        print(' -> Running in test mode so will not touch EOS, but will only modify files locally (these changes can easily be reverted).')
+    
+    print('========================')
+    extract_links_from_json(args.url)
+    mr_url = summarise_failing_tests(not args.test_run)
+    if not mr_url:
+        exit(1)
+    print('========================')
+    print("The next step is to update the MR with the new content i.e. the References.py file and the digest files.")
+    print(" IMPORTANT: before you do this, you must first make sure that the local repository is on same branch as the MR!")
+    print("i.e. you would go to the MR: "+mr_url)
+    print(" and then copy the branch name and do:")
+    print(" $ git remote add <MR_AUTHOR> <URL_TO_FORK>") # TODO - automate this?
+    print(" $ git fetch <MR_AUTHOR>")
+    print(" $ git switch -c <MR_BRANCH> <MR_AUTHOR>/<MR_BRANCH>")
+    print(" $ git rebase upstream/main") # In case there have been any changes since the MR was created
+    print()
+
+    msg = f'Would you like to (locally) update digest ref files and/or versions in References.py?'
+    update_local_files = False
+    if input("%s (y/N) " % msg).lower() == 'y':
+        not_in_athena_dir = subprocess.call("git rev-parse --is-inside-work-tree", shell=True)
+        if not_in_athena_dir:
+            print('FATAL: You must run this script from within the athena directory.')
+            exit(1)
+        update_local_files = True
+        
+    commands = update_reference_files(not args.test_run, update_local_files)
+    if commands and args.test_run:
+        print(' -> In test-run mode. In normal mode we would also have executed:')
+        for command in commands:
+            print('    ', command)
+    if not args.test_run:
+        print("Finished! Before pushing, you might want to manually trigger an EOS to cvmfs copy here: https://atlas-jenkins.cern.ch/view/Install%20(Boeriu)/job/ART_data_eos2cvmfs/")
