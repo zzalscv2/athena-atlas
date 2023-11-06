@@ -3,7 +3,7 @@
 # art-description: MC+MC Overlay without reco for Run 4, ttbar, mu=60
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-include: main/Athena
 
 # art-output: *.root
