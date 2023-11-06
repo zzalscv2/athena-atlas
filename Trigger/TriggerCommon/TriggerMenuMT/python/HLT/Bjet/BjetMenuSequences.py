@@ -2,12 +2,10 @@
 #
 
 # menu components
-from AthenaCommon.CFElements import seqAND
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
-from ..Config.MenuComponents import MenuSequence,algorithmCAToGlobalWrapper
-from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
+from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 # ====================================================================================================
 #    Get MenuSequences
@@ -23,9 +21,9 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 # ====================================================================================================
 
 # todo: pass in more information, i.e. jet collection name
-def getBJetSequence(flags, jc_name=None):
+def getBJetSequenceCfg(flags, jc_name=None):
     if not jc_name:
-        raise ValueError("jet collection name is empty - pass the full HLT jet collection name to getBJetSequence().")
+        raise ValueError("jet collection name is empty - pass the full HLT jet collection name to getBJetSequenceCfg().")
 
     config=getInDetTrigConfig('fullScan')
     prmVtxKey = config.vertex
@@ -37,62 +35,51 @@ def getBJetSequence(flags, jc_name=None):
     # Output container names as defined in TriggerEDMRun3
     BTagName = recordable(f'{jc_key}BTagging')
 
-    from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-    from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnJetWithPVConstraintROITool
-    InputMakerAlg = EventViewCreatorAlgorithm(
-        f"IMBJet_{jc_name}_step2",
-        mergeUsingFeature = True,
-        RoITool = ViewCreatorCentredOnJetWithPVConstraintROITool(
-            RoisWriteHandleKey  = recordable( outputRoIName ),
-            VertexReadHandleKey = prmVtxKey,
-            PrmVtxLink  = prmVtxKey.replace( "HLT_","" ),
-            RoIEtaWidth = bjetconfig.etaHalfWidth,
-            RoIPhiWidth = bjetconfig.phiHalfWidth,
-            RoIZWidth   = bjetconfig.zedHalfWidth,
-        ),
-        Views = f"BTagViews_{jc_name}",
-        InViewRoIs = "InViewRoIs",
-        RequireParentView = False,
-        ViewFallThrough = True,
-        InViewJets = recordable( f'{jc_key}bJets' ),
-        # BJet specific
-        PlaceJetInView = True
+    roiTool = CompFactory.ViewCreatorCentredOnJetWithPVConstraintROITool(
+        RoisWriteHandleKey  = recordable( outputRoIName ),
+        VertexReadHandleKey = prmVtxKey,
+        PrmVtxLink  = prmVtxKey.replace( "HLT_","" ),
+        RoIEtaWidth = bjetconfig.etaHalfWidth,
+        RoIPhiWidth = bjetconfig.phiHalfWidth,
+        RoIZWidth   = bjetconfig.zedHalfWidth,
     )
 
     # Second stage of Fast Tracking and Precision Tracking
+    bJetBtagSequence = InViewRecoCA(f"BTagViews_{jc_name}", RoITool = roiTool,
+                                    InViewRoIs = "InViewRoIs",
+                                    mergeUsingFeature = True,
+                                    RequireParentView = False,
+                                    ViewFallThrough = True,
+                                    InViewJets = recordable( f'{jc_key}bJets' ),
+                                    # BJet specific
+                                    PlaceJetInView = True)
+    InputMakerAlg = bJetBtagSequence.inputMaker()
+    
     from TriggerMenuMT.HLT.Bjet.BjetTrackingConfig import secondStageBjetTrackingCfg
-    secondStageAlgs = algorithmCAToGlobalWrapper(
-        secondStageBjetTrackingCfg,
-        flags,
-        inputRoI=InputMakerAlg.InViewRoIs,
-        inputVertex=prmVtxKey,
-        inputJets=str(InputMakerAlg.InViewJets)
-    )
+    secondStageAlgs = secondStageBjetTrackingCfg(flags,
+                                                 inputRoI=InputMakerAlg.InViewRoIs,
+                                                 inputVertex=prmVtxKey,
+                                                 inputJets=InputMakerAlg.InViewJets)
 
     PTTrackParticles = bjetconfig.tracks_IDTrig() # Final output xAOD::TrackParticle collection
 
     from TriggerMenuMT.HLT.Bjet.BjetFlavourTaggingConfig import flavourTaggingCfg
-    flavourTaggingAlgs = algorithmCAToGlobalWrapper(
-        flavourTaggingCfg,
-        flags,
-        inputJets=str(InputMakerAlg.InViewJets),
-        inputVertex=prmVtxKey,
-        inputTracks=PTTrackParticles,
-        BTagName=BTagName,
-        inputMuons=None
-    )
-    bJetBtagSequence = seqAND( f"bJetBtagSequence_{jc_name}", secondStageAlgs + flavourTaggingAlgs )
-
-
-    InputMakerAlg.ViewNodeName = f"bJetBtagSequence_{jc_name}"
+    flavourTaggingAlgs = flavourTaggingCfg(flags,
+                                           inputJets=str(InputMakerAlg.InViewJets),
+                                           inputVertex=prmVtxKey,
+                                           inputTracks=PTTrackParticles,
+                                           BTagName=BTagName,
+                                           inputMuons=None)
+    bJetBtagSequence.mergeReco(secondStageAlgs)
+    bJetBtagSequence.mergeReco(flavourTaggingAlgs)
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=InputMakerAlg.name())[0]
+    robPrefetch = ROBPrefetchingAlgCfg_Si(flags, nameSuffix=InputMakerAlg.name)
 
-    # Sequence
-    BjetAthSequence = seqAND( f"BjetAthSequence_{jc_name}_step2",[InputMakerAlg,robPrefetchAlg,bJetBtagSequence] )
+    BjetAthSequence = SelectionCA( f"BjetAthSequence_{jc_name}_step2", )
+    BjetAthSequence.mergeReco(bJetBtagSequence, robPrefetchCA=robPrefetch)
 
-    hypo = conf2toConfigurable(CompFactory.TrigBjetBtagHypoAlg(
+    hypo = CompFactory.TrigBjetBtagHypoAlg(
         f"TrigBjetBtagHypoAlg_{jc_name}",
         # keys
         BTaggedJetKey = InputMakerAlg.InViewJets,
@@ -102,11 +89,11 @@ def getBJetSequence(flags, jc_name=None):
         # links for navigation
         BTaggingLink = BTagName.replace( "HLT_","" ),
         PrmVtxLink = InputMakerAlg.RoITool.PrmVtxLink,
-    ))
+    )
+    BjetAthSequence.addHypoAlgo(hypo)
 
     from TrigBjetHypo.TrigBjetBtagHypoTool import TrigBjetBtagHypoToolFromDict
-    return MenuSequence( flags,
-                         Sequence    = BjetAthSequence,
-                         Maker       = InputMakerAlg,
-                         Hypo        = hypo,
-                         HypoToolGen = TrigBjetBtagHypoToolFromDict)
+    return MenuSequenceCA(flags,
+                          BjetAthSequence,
+                          HypoToolGen = TrigBjetBtagHypoToolFromDict)
+

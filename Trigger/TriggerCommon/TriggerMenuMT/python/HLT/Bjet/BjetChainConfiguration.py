@@ -6,14 +6,14 @@ log = logging.getLogger(__name__)
 
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-if isComponentAccumulatorCfg():
-    pass
-else:
-    from .BjetMenuSequences import getBJetSequence
+from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
+from .BjetMenuSequences import getBJetSequenceCfg
 
-
-def getBJetSequenceCfg(flags, jc_name=None):
-    return getBJetSequence(flags, jc_name=jc_name)
+def getBJetSequence( flags, jc_name ):
+        if isComponentAccumulatorCfg():
+            return getBJetSequenceCfg(flags, jc_name)
+        else:
+            return menuSequenceCAToGlobalWrapper(getBJetSequenceCfg, flags, jc_name)
 
 #----------------------------------------------------------------
 # Class to configure chain
@@ -32,16 +32,8 @@ class BjetChainConfiguration(ChainConfigurationBase):
         log.debug("Assembling chain for %s", self.chainName)
 
         stepName = f"Step2_{self.jc_name}_bjet"
-        chainSteps = [self.getStep(flags,2, stepName, [getBJetSequenceCfg], jc_name=self.jc_name)]
+        chainSteps = [self.getStep(flags,2, stepName, [getBJetSequence], jc_name=self.jc_name)]
 
         myChain = self.buildChain(chainSteps)
         return myChain
-
-
-
-
-
-
-
-
 
