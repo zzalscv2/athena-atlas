@@ -112,13 +112,11 @@ AntiKt4EMPFlowCSSK = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
 )
 
 # *********************************************************
-# UFO CSSK jets (no jet calibration available yet,
-# thus applying only low pT filter)
+# UFO CSSK jets
 # *********************************************************
 AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods_noCut+("Filter:1","EMScaleMom","JetPtAssociation","CaloEnergiesClus",)+truthmods+standardmods,
-                               ptmin = 2000,
+                               modifiers = calibmods+("Filter_calibThreshold:10000","EMScaleMom","JetPtAssociation","CaloEnergiesClus",)+truthmods+standardmods,
                                lock = True
 )
 
