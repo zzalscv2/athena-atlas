@@ -2,6 +2,7 @@
 
 import re
 from TrigBjetHypo.TrigBjetMonitoringConfig import TrigBjetBtagHypoToolMonitoring
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigBjetBtagHypoTool')
@@ -111,11 +112,7 @@ def decodeThreshold( threshold_btag ):
 
 def getBjetBtagHypoConfiguration( name,conf_dict, MonTool ):
 
-    from TrigBjetHypo.TrigBjetHypoConf import TrigBjetBtagHypoTool
-    from TrigBjetHypo.TrigBjetHypoConf import BJetThreeValueCheck
-    from TrigBjetHypo.TrigBjetHypoConf import BJetTwoValueCheck
-
-    tool = TrigBjetBtagHypoTool( name )
+    tool = CompFactory.TrigBjetBtagHypoTool( name )
     if MonTool is not None:
         tool.MonTool = MonTool
 
@@ -128,7 +125,7 @@ def getBjetBtagHypoConfiguration( name,conf_dict, MonTool ):
         tool.vetoBadBeamspot = False
         return tool
 
-    btagTool = BJetThreeValueCheck(
+    btagTool = CompFactory.BJetThreeValueCheck(
         f'{name}_btag',
         b=f'{btagger}_pb',
         c=f'{btagger}_pc',
@@ -140,7 +137,7 @@ def getBjetBtagHypoConfiguration( name,conf_dict, MonTool ):
     tool.checks.append(btagTool)
 
     if bbcut is not None:
-        bbTool = BJetTwoValueCheck(
+        bbTool = CompFactory.BJetTwoValueCheck(
             f'{name}_bbtag',
             numerator=f'{bbtagger}_pb',
             denominator=f'{bbtagger}_pbb',
@@ -148,7 +145,7 @@ def getBjetBtagHypoConfiguration( name,conf_dict, MonTool ):
         if MonTool is not None:
             bbTool.MonTool = MonTool
         tool.checks.append(bbTool)
-        tool.monitoredFloats |= {
-            f'{bbtagger}_p{x}':f'bbtag_p{x}' for x in ['b','bb']}
+        tool.monitoredFloats.update({
+            f'{bbtagger}_p{x}':f'bbtag_p{x}' for x in ['b','bb']})
 
     return tool

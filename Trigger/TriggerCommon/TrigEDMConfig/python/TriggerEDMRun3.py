@@ -160,7 +160,7 @@ PhVars = '.'.join(PhToKeep)
 # =============
 # === BJETS ===
 def getBTagViewName(jetType, jetDetailStr="subresjesgscIS_ftf"):
-    return f"BTagViews_HLT_{jetType}_{jetDetailStr}"
+    return f"BTagViews_HLT_{jetType}_{jetDetailStr}Views"
 
 BTagViewsEMTopo = getBTagViewName("AntiKt4EMTopoJets")
 BTagViewsEMPFlow = getBTagViewName("AntiKt4EMPFlowJets")

@@ -190,7 +190,7 @@ def generateCFChains(flags, opt):
     # bjet chains
     ##################################################################
     if opt.doBjetSlice is True:
-        from TriggerMenuMT.HLT.Bjet.BjetMenuSequences import getBJetSequence
+        from TriggerMenuMT.HLT.Bjet.BjetChainConfiguration import getBJetSequence
 
         jetSeq_a4_tc_em_presel, jetDef, emclusters = jetCaloPreselMenuSequenceFromString("a4_tc_em_subjesIS")
         jetSeq_a4_tc_em_gsc_ftf, jetDef = jetTrackingHypoMenuSequenceFromString("a4_tc_em_subjesgscIS_ftf",emclusters)
