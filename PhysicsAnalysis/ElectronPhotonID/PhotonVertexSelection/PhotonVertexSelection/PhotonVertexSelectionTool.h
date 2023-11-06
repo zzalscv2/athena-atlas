@@ -20,7 +20,6 @@
 
 // Forward declarations
 namespace TMVA { class Reader; }
-namespace CP { class IPhotonPointingTool; }
 
 namespace CP {
 
@@ -46,10 +45,6 @@ namespace CP {
     bool        m_updatePointing;
     std::string m_vertexContainerName;
     std::string m_derivationPrefix;
-
-    /// PhotonPointingTool
-    ToolHandle<CP::IPhotonPointingTool> m_pointingTool {this, "PhotonPointingTool","CP::PhotonPointingTool/PhotonVertexSelection",""};
-
 
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer {this, "VertexContainer", "PrimaryVertices", "Vertex container name"};  
@@ -101,9 +96,6 @@ namespace CP {
     
     /// Get possible vertex directly associated with photon conversions
     const xAOD::Vertex* getPrimaryVertexFromConv(const xAOD::PhotonContainer *photons) const;
-
-    /// Get access to the photon pointing tool
-    const CP::IPhotonPointingTool* photonPointingTool() const;
 
     /// @}
 
