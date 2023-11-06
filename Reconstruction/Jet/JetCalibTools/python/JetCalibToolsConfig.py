@@ -42,7 +42,7 @@ topocontexts = {
 }
 
 ufocontexts = {
-    "T0":("Consolidated_R22_CSSKUFO_ResPU_EtaJES_GNNC_20230811.config", "00-04-83", "Residual_EtaJES_GNNC"),
+    "T0":("Consolidated_R22_CSSKUFO_ResPU_EtaJES_GNNC_20231103.config", "00-04-83", "Residual_EtaJES_GNNC"),
 }
 
 rscanlc2 = {
@@ -203,7 +203,7 @@ def getJetCalibToolPrereqs(modspec,jetdef):
             prereqs += ["mod:TrackMoments",
                         "ghost:MuonSegment"]
     if "GNNC" in calibseq:
-        prereqs += ["mod:CaloQuality"]
+        prereqs += ["mod:CaloQuality","mod:TrackMoments"]
     if "CombinedMass" in calibcontext:
         prereqs += ["mod:TrackSumMoments"]
     if "LargeRDNN" in calibseq:
