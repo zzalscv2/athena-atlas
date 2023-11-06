@@ -524,6 +524,7 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
 	  if(du==0.0) continue;
 	  const double A = (vo - vi)/du;
 	  const double B = vi - A*ui;
+	  if(B==0.0) continue;
 	  const double R_squ = (1 + A*A)/(B*B);
 	  
 	  if(R_squ < m_minR_squ) {

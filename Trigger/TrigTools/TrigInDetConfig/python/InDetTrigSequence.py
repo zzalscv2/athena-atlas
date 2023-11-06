@@ -28,7 +28,10 @@ class InDetTrigSequence:
       ca = ComponentAccumulator()
     
       if self.__inView:
-        ca.merge(self.viewDataVerifier(self.__inView))
+        if self.__flags.Detector.GeometryITk:
+          ca.merge(self.viewDataVerifierITk(self.__inView))
+        else:
+          ca.merge(self.viewDataVerifier(self.__inView))
 
       if recoType == "dataPreparation":
         ca.merge(self.dataPreparation())
@@ -40,8 +43,13 @@ class InDetTrigSequence:
         return ca
 
       if recoType =="FastTrackFinder":
-        ca.merge(self.dataPreparation())
-        ca.merge(self.spacePointFormation())
+
+        if self.__flags.Detector.GeometryITk:
+          ca.merge(self.dataPreparationITk())
+          ca.merge(self.spacePointFormationITk())
+        else:
+          ca.merge(self.dataPreparation())
+          ca.merge(self.spacePointFormation())
         ca.merge(self.fastTrackFinder())
         return ca
 
@@ -68,12 +76,14 @@ class InDetTrigSequence:
         if self.__lastRois != self.__rois:
           self.__log.info(f"Sequence after patternReco for signature: {self.__signature} RoIs: {self.__rois} inview: {self.__inView} with new RoIs {self.__lastRois} - they must be a subvolume.")
           
-      ca.merge(self.ambiguitySolver())
-
-      if self.__flags.Tracking.ActiveConfig.doTRT:
-        ca.merge(self.trtExtensions())
-
-      ca.merge(self.xAODParticleCreation())
+      if self.__flags.Detector.GeometryITk:
+        ca.merge(self.ambiguitySolverITk())
+        ca.merge(self.xAODParticleCreationITk())
+      else:
+        ca.merge(self.ambiguitySolver())
+        if self.__flags.Tracking.ActiveConfig.doTRT:
+          ca.merge(self.trtExtensions())
+        ca.merge(self.xAODParticleCreation())
     
       return ca
     
@@ -96,10 +106,10 @@ class InDetTrigSequence:
     
     with ConfigurableCABehavior():
       acc = ComponentAccumulator()
-    
+
       ViewDataVerifier = \
         CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.__signature,
-                                               DataObjects = [( 'InDet::PixelClusterContainerCache' , InDetCacheNames.Pixel_ClusterKey ),
+                                              DataObjects = [( 'InDet::PixelClusterContainerCache' , InDetCacheNames.Pixel_ClusterKey ),
                                                               ( 'PixelRDO_Cache' , InDetCacheNames.PixRDOCacheKey ),
                                                               ( 'InDet::SCT_ClusterContainerCache' , InDetCacheNames.SCT_ClusterKey ),
                                                               ( 'SCT_RDO_Cache' , InDetCacheNames.SCTRDOCacheKey ),
@@ -114,10 +124,44 @@ class InDetTrigSequence:
       isByteStream = self.__flags.Input.Format == Format.BS
       if not isByteStream:
         ViewDataVerifier.DataObjects +=   [( 'PixelRDO_Container' , 'PixelRDOs' ),
-                                           ( 'SCT_RDO_Container' , 'SCT_RDOs' )]
+                                          ( 'SCT_RDO_Container' , 'SCT_RDOs' )]
 
       ViewDataVerifier.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % self.__rois )]
 
+      acc.addEventAlgo(ViewDataVerifier)
+      return acc
+
+
+  def viewDataVerifierITk(self, viewVerifier='IDViewDataVerifier') -> ComponentAccumulator:
+
+    with ConfigurableCABehavior():
+      acc = ComponentAccumulator()
+
+      ViewDataVerifier = CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.__signature,
+                                                      DataObjects= [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
+                                                                      ('InDet::PixelClusterContainerCache', 'PixelTrigClustersCache'),
+                                                                      ('PixelRDO_Cache', 'PixRDOCache'),
+                                                                      ('InDet::SCT_ClusterContainerCache', 'SCT_ClustersCache'),
+                                                                      ('SCT_RDO_Cache', 'SctRDOCache'),
+                                                                      ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.PixBSErrCacheKey ),
+                                                                      ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTBSErrCacheKey ),
+                                                                      ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTFlaggedCondCacheKey ),
+                                                                      ('SpacePointCache', 'PixelSpacePointCache'),
+                                                                      ('SpacePointCache', 'SctSpacePointCache'),
+                                                                      ('xAOD::EventInfo', 'EventInfo'),
+                                                                      ('TrigRoiDescriptorCollection', str(self.__rois)),
+                                                                      ( 'TagInfo' , 'DetectorStore+ProcessingTags' )] )
+
+      if self.__flags.Input.isMC:
+          ViewDataVerifier.DataObjects += [( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
+                                  ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),
+                                  ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map') ]
+          from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+          sgil_load = [( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
+                      ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),
+                      ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map')]
+          acc.merge(SGInputLoaderCfg(self.__flags, Load=sgil_load))
+          
       acc.addEventAlgo(ViewDataVerifier)
       return acc
 
@@ -190,6 +234,23 @@ class InDetTrigSequence:
       acc.addEventAlgo(ViewDataVerifier)
       return acc
 
+  def viewDataVerifierAfterPatternITk(self, viewVerifier='IDViewDataVerifierForAmbi') -> ComponentAccumulator:
+    
+    with ConfigurableCABehavior():
+
+      acc = ComponentAccumulator()
+
+      ViewDataVerifier = \
+        CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.__signature,
+                                               DataObjects = [
+                                                 ( 'InDet::PixelGangedClusterAmbiguities' , 'ITkPixelClusterAmbiguitiesMap'),
+                                                 ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map'),
+                                                 ]
+                                              )
+      
+      acc.addEventAlgo(ViewDataVerifier)
+      return acc
+
   def dataPreparation(self) -> ComponentAccumulator:
     
     signature = self.__flags.Tracking.ActiveConfig.input_name
@@ -224,9 +285,32 @@ class InDetTrigSequence:
                                          name=f"InDetSCTClusterization_{signature}"))
                                          
       return acc
+  
+  def dataPreparationITk(self) -> ComponentAccumulator:
+    
+    signature = self.__flags.Tracking.ActiveConfig.input_name
+    
+    with ConfigurableCABehavior():
+      acc = ComponentAccumulator()
+
+      self.__log.info(f"DataPrep signature: {self.__signature} rois: {self.__rois} inview: {self.__inView}")
+
+      if not self.__inView:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        loadRDOs = [( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
+                    ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),
+                    ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map') ]
+        acc.merge(SGInputLoaderCfg(self.__flags, Load=loadRDOs))
+
+      #Clusterisation
+      from InDetConfig.InDetPrepRawDataFormationConfig import ITkTrigPixelClusterizationCfg, ITkTrigStripClusterizationCfg
+      acc.merge(ITkTrigPixelClusterizationCfg(self.__flags, roisKey=self.__rois, signature=signature))
+      acc.merge(ITkTrigStripClusterizationCfg(self.__flags, roisKey=self.__rois, signature=signature))
+
+      return acc
 
   def dataPreparationTRT(self) ->ComponentAccumulator:
-
+  
     with ConfigurableCABehavior():
       acc = ComponentAccumulator()
 
@@ -261,6 +345,16 @@ class InDetTrigSequence:
       acc.merge(TrigSiTrackerSpacePointFinderCfg(self.__flags, name="TrigSpacePointFinder"+signature))
       return acc
 
+  def spacePointFormationITk(self) -> ComponentAccumulator:
+    
+    signature = self.__flags.Tracking.ActiveConfig.input_name
+    with ConfigurableCABehavior():
+      acc = ComponentAccumulator()
+
+      from InDetConfig.SiSpacePointFormationConfig import ITkTrigSiTrackerSpacePointFinderCfg
+      acc.merge(ITkTrigSiTrackerSpacePointFinderCfg(self.__flags, signature=signature))
+      return acc
+
   def fastTrackFinder(self, extraFlags : AthConfigFlags = None, inputTracksName : str = None) -> ComponentAccumulator:
     """
     return ComponentAccumulator of the FTF instance
@@ -289,12 +383,20 @@ class InDetTrigSequence:
                                        self.__rois, **ftfargs))
       
       if not flags.Tracking.ActiveConfig.doZFinderOnly:
-        from TrigInDetConfig.TrigInDetConfig import trackFTFConverterCfg
-        acc.merge(trackFTFConverterCfg(flags, signature))
+        if self.__flags.Detector.GeometryITk:
+          from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
+          acc.merge(ITkTrackParticleCnvAlgCfg(self.__flags,
+                                              name = "ITkTrigTrackParticleCnvAlg"+signature,
+                                              TrackContainerName = self.__flags.Tracking.ActiveConfig.trkTracks_FTF,
+                                              xAODTrackParticlesFromTracksContainerName = self.__flags.Tracking.ActiveConfig.tracks_FTF))
+        else:
+          from TrigInDetConfig.TrigInDetConfig import trackFTFConverterCfg
+          acc.merge(trackFTFConverterCfg(flags, signature))
 
       return acc
 
-  def ambiguitySolver(self) -> ComponentAccumulator:
+
+  def ambiguitySolver(self) -> ComponentAccumulator:  
     with ConfigurableCABehavior():
       acc = ComponentAccumulator()
 
@@ -319,6 +421,34 @@ class InDetTrigSequence:
         )
       )
     
+      self.__lastTrkCollection = self.__flags.Tracking.ActiveConfig.trkTracks_IDTrig+"_Amb"
+      return acc
+
+  def ambiguitySolverITk(self) -> ComponentAccumulator:
+    with ConfigurableCABehavior():
+      acc = ComponentAccumulator()
+
+      if self.__inView:
+        acc.merge(self.viewDataVerifierAfterPatternITk())
+
+      from TrkConfig.TrkAmbiguitySolverConfig import ITkTrkAmbiguityScoreCfg
+      acc.merge(
+        ITkTrkAmbiguityScoreCfg(
+          self.__flags, 
+          name = "TrkAmbiguityScore_", 
+          SiSPSeededTrackCollectionKey=self.__flags.Tracking.ActiveConfig.trkTracks_FTF
+        )
+      )
+
+      from TrkConfig.TrkAmbiguitySolverConfig import ITkTrkAmbiguitySolverCfg            
+      acc.merge(
+        ITkTrkAmbiguitySolverCfg(
+          self.__flags, 
+          name  = "TrkAmbiguitySolver_", 
+          ResolvedTrackCollectionKey=self.__flags.Tracking.ActiveConfig.trkTracks_IDTrig+"_Amb"
+        )
+      )
+      
       self.__lastTrkCollection = self.__flags.Tracking.ActiveConfig.trkTracks_IDTrig+"_Amb"
       return acc
 
@@ -352,4 +482,18 @@ class InDetTrigSequence:
           TrackContainerName = self.__lastTrkCollection,
           xAODTrackParticlesFromTracksContainerName = self.__flags.Tracking.ActiveConfig.tracks_IDTrig,
         ))
+      return acc
+
+  def xAODParticleCreationITk(self) -> ComponentAccumulator:
+    with ConfigurableCABehavior():
+      acc = ComponentAccumulator()
+
+      from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
+      prefix = "ITk"
+      acc.merge(ITkTrackParticleCnvAlgCfg(
+        self.__flags,
+        name = prefix+'xAODParticleCreatorAlg'+self.__flags.Tracking.ActiveConfig.input_name+'_IDTrig',
+        TrackContainerName = self.__lastTrkCollection,
+        xAODTrackParticlesFromTracksContainerName = self.__flags.Tracking.ActiveConfig.tracks_IDTrig
+      ))
       return acc

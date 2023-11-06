@@ -432,6 +432,10 @@ def createITkTrackingPassFlags():
     icf.addFlag("doBremRecoverySi", lambda pcf: pcf.Tracking.doBremRecovery)
     icf.addFlag("minPTBrem"               , [1. * Units.GeV])
 
+    # -- use of calo information
+    icf.addFlag("doCaloSeededBremSi", lambda pcf: pcf.Tracking.doCaloSeededBrem)
+    icf.addFlag("doCaloSeededAmbiSi", lambda pcf: pcf.Tracking.doCaloSeededAmbi)
+
     # --- handle ACTS workflow coexistence
     # Athena components
     icf.addFlag("doAthenaCluster", True)

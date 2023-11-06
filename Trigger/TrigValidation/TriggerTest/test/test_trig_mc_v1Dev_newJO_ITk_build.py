@@ -21,7 +21,8 @@ run.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
              'Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
-             'Trigger.enableL1CaloPhase1=False']
+             'Trigger.enableL1CaloPhase1=False',
+             'Trigger.enabledSignatures=["Muon"]']
 
 # The full test configuration
 test = Test.Test()

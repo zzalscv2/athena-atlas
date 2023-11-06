@@ -67,10 +67,6 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
   log = logging.getLogger("trigInDetFastTrackingCfg")
   from TrigInDetConfig.utils import getFlagsForActiveConfig
   flags = getFlagsForActiveConfig(inflags, signatureName, log)
-
-  if flags.Detector.GeometryITk:
-    from TrigInDetConfig.TrigInDetConfigITk import ITktrigInDetFastTrackingCfg
-    return  ITktrigInDetFastTrackingCfg( flags, roisKey, signatureName, in_view )
  
   """ Generates precision fast tracking config, it is a primary config function """
 
@@ -118,9 +114,6 @@ def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inpu
 ############################################################################################################################
 
 def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
-  if inflags.Detector.GeometryITk:
-    from TrigInDetConfig.TrigInDetConfigITk import ITktrigInDetPrecisionTrackingCfg
-    return  ITktrigInDetPrecisionTrackingCfg(inflags, signatureName, in_view=True)
  
   """ Generates precision tracking config, it is a primary config function """
 
