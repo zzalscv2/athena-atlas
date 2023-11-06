@@ -10,7 +10,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 # PhotonsDirectionTool
-def PhotonsDirectionToolCfg(ConfigFlags, name, **kwargs):
+def PhotonsDirectionToolCfg(flags, name, **kwargs):
     """Configure the PhotonsDirectionTool"""
     acc = ComponentAccumulator()
     PhotonsDirectionTool = CompFactory.DerivationFramework.PhotonsDirectionTool
@@ -19,7 +19,7 @@ def PhotonsDirectionToolCfg(ConfigFlags, name, **kwargs):
 
 
 # E-gamma selection tool wrapper
-def EGSelectionToolWrapperCfg(ConfigFlags, name, **kwargs):
+def EGSelectionToolWrapperCfg(flags, name, **kwargs):
     """Configure the E-gamma selection tool wrapper"""
     acc = ComponentAccumulator()
     EGSelectionToolWrapper = CompFactory.DerivationFramework.EGSelectionToolWrapper
@@ -28,7 +28,7 @@ def EGSelectionToolWrapperCfg(ConfigFlags, name, **kwargs):
 
 
 # Electron likelihood tool wrapper
-def EGElectronLikelihoodToolWrapperCfg(ConfigFlags, name, **kwargs):
+def EGElectronLikelihoodToolWrapperCfg(flags, name, **kwargs):
     """Configure the electron likelihood tool wrapper"""
     acc = ComponentAccumulator()
     EGElectronLikelihoodToolWrapper = (
@@ -39,7 +39,7 @@ def EGElectronLikelihoodToolWrapperCfg(ConfigFlags, name, **kwargs):
 
 
 # Photon cleaning tool wrapper
-def EGPhotonCleaningWrapperCfg(ConfigFlags, name, **kwargs):
+def EGPhotonCleaningWrapperCfg(flags, name, **kwargs):
     """Configure the photon cleaning tool wrapper"""
     acc = ComponentAccumulator()
     EGPhotonCleaningWrapper = CompFactory.DerivationFramework.EGPhotonCleaningWrapper
@@ -48,7 +48,7 @@ def EGPhotonCleaningWrapperCfg(ConfigFlags, name, **kwargs):
 
 
 # Crack veto cleaning tool
-def EGCrackVetoCleaningToolCfg(ConfigFlags, name, **kwargs):
+def EGCrackVetoCleaningToolCfg(flags, name, **kwargs):
     """Configure the crack veto cleaning tool"""
     acc = ComponentAccumulator()
     EGCrackVetoCleaningTool = CompFactory.DerivationFramework.EGCrackVetoCleaningTool
@@ -57,7 +57,7 @@ def EGCrackVetoCleaningToolCfg(ConfigFlags, name, **kwargs):
 
 
 # Electron ambiguity tool
-def EGElectronAmbiguityToolCfg(ConfigFlags, name, **kwargs):
+def EGElectronAmbiguityToolCfg(flags, name, **kwargs):
     """Configure the electron ambiguity tool"""
     acc = ComponentAccumulator()
     EGElectronAmbiguityTool = CompFactory.DerivationFramework.EGElectronAmbiguityTool
@@ -66,7 +66,7 @@ def EGElectronAmbiguityToolCfg(ConfigFlags, name, **kwargs):
 
 
 # Background electron classification tool
-def BkgElectronClassificationCfg(ConfigFlags, name, **kwargs):
+def BkgElectronClassificationCfg(flags, name, **kwargs):
     """Configure the background electron classification tool"""
     acc = ComponentAccumulator()
     BkgElectronClassification = (
@@ -77,9 +77,39 @@ def BkgElectronClassificationCfg(ConfigFlags, name, **kwargs):
 
 
 # Standard + LRT electron collection merger
-def ElectronMergerCfg(ConfigFlags, name, **kwargs):
+def ElectronMergerCfg(flags, name, **kwargs):
     """Configure the track particle merger tool"""
     acc = ComponentAccumulator()
     ElectronMerger = CompFactory.DerivationFramework.ElectronMergerTool
     acc.addPublicTool(ElectronMerger(name, **kwargs), primary=True)
+    return acc
+
+
+def PhotonVertexSelectionWrapperCfg(
+        flags, name="PhotonVertexSelectionWrapper", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "PhotonPointingTool" not in kwargs:
+        from PhotonVertexSelection.PhotonVertexSelectionConfig import (
+            PhotonPointingToolCfg)
+        kwargs.setdefault("PhotonPointingTool", acc.popToolsAndMerge(
+            PhotonPointingToolCfg(flags)))
+
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.PhotonVertexSelectionWrapper(
+            name, **kwargs))
+    return acc
+
+
+def PhotonVertexSelectionWrapperKernelCfg(
+        flags, name="PhotonVertexSelectionWrapperKernel", **kwargs):
+    acc = ComponentAccumulator()
+
+    augmentationTools = [
+        acc.addPublicTool(acc.popToolsAndMerge(PhotonVertexSelectionWrapperCfg(flags)))
+    ]
+    kwargs.setdefault("AugmentationTools", augmentationTools)
+
+    acc.addEventAlgo(
+        CompFactory.DerivationFramework.DerivationKernel(name, **kwargs))
     return acc

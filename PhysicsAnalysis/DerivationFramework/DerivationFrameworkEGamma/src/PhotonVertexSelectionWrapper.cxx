@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkEGamma/PhotonVertexSelectionWrapper.h"
@@ -29,18 +29,14 @@ PhotonVertexSelectionWrapper::initialize()
   ATH_CHECK(m_photonContainer.initialize());
   ATH_CHECK(m_vertexContainer.initialize());
 
-  if (m_decPrefix.empty()) {
-    ATH_MSG_ERROR("No decoration prefix name provided for the output of "
-                  "PhotonVertexSelectionWrapper!");
-    return StatusCode::FAILURE;
-  }
-
   const std::string baseName = m_vertexContainer.key();
-  m_vtxPt = baseName + "." + m_decPrefix + "_" + "pt";
-  m_vtxEta = baseName + "." + m_decPrefix + "_" + "eta";
-  m_vtxPhi = baseName + "." + m_decPrefix + "_" + "phi";
-  m_vtxSumPt = baseName + "." + m_decPrefix + "_" + "sumPt";
-  m_vtxSumPt2 = baseName + "." + m_decPrefix + "_" + "sumPt2";
+  std::string prefix = "";
+  if(!m_decPrefix.empty()) prefix = m_decPrefix + "_";
+  m_vtxPt = baseName + "." + prefix + "pt";
+  m_vtxEta = baseName + "." + prefix + "eta";
+  m_vtxPhi = baseName + "." + prefix + "phi";
+  m_vtxSumPt = baseName + "." + prefix + "sumPt";
+  m_vtxSumPt2 = baseName + "." + prefix + "sumPt2";
 
   ATH_CHECK(m_vtxPt.initialize());
   ATH_CHECK(m_vtxEta.initialize());
@@ -74,44 +70,41 @@ PhotonVertexSelectionWrapper::addBranches() const
   SG::WriteDecorHandle<xAOD::VertexContainer, float> vtxSumPt(m_vtxSumPt, ctx);
   SG::WriteDecorHandle<xAOD::VertexContainer, float> vtxSumPt2(m_vtxSumPt2,
                                                                ctx);
+  bool isMomentum_available = vtxPt.isAvailable();
+  bool isSumPt_available = vtxSumPt.isAvailable();
+  bool isSumPt2_available = vtxSumPt2.isAvailable();
 
   // Loop over vertices and update auxdata
   for (const auto *vertex : *vertices) {
 
-    // initialize decorations to some default value
-    vtxPt(*vertex) = -999.;
-    vtxEta(*vertex) = -999.;
-    vtxPhi(*vertex) = -999.;
-    vtxSumPt(*vertex) = -999.;
-    vtxSumPt2(*vertex) = -999.;
+    float pt = -999.;
+    float eta = -999.;
+    float phi = -999.;
+    float sumPt = -999.;
+    float sumPt2 = -999.;
 
-    // Skip dummy vertices
-    if (vertex->vertexType() != xAOD::VxType::VertexType::PriVtx and
-        vertex->vertexType() != xAOD::VxType::VertexType::PileUp)
-      continue;
+    if(vertex->vertexType() == xAOD::VxType::VertexType::PriVtx or
+       vertex->vertexType() == xAOD::VxType::VertexType::PileUp){
 
-    // Get momentum vector of vertex and add it as a decoration
-    TLorentzVector vmom = xAOD::PVHelpers::getVertexMomentum(vertex);
-    float pt = sqrt(vmom.Px() * vmom.Px() + vmom.Py() * vmom.Py());
-    float eta = 0;
-    float phi = 0;
-    if (pt == 0.) {
-      eta = -999.;
-      phi = -999.;
-    } else {
-      eta = asinh(vmom.Pz() / pt);
-      phi = acos(vmom.Px() / pt); // in [0,Pi]
+      // Get momentum vector of vertex and add it as a decoration
+      TLorentzVector vmom = xAOD::PVHelpers::getVertexMomentum(vertex, isMomentum_available);
+      pt = sqrt(vmom.Px() * vmom.Px() + vmom.Py() * vmom.Py());
+      if(pt>0.){
+	eta = asinh(vmom.Pz() / pt);
+	phi = acos(vmom.Px() / pt); // in [0,Pi]
+      }
+      // Calculate additional quantities
+      sumPt = xAOD::PVHelpers::getVertexSumPt(vertex, 1, isSumPt_available);
+      sumPt2 = xAOD::PVHelpers::getVertexSumPt(vertex, 2, isSumPt2_available);
+
     }
-    // Calculate additional quantities
-    float sumPt = xAOD::PVHelpers::getVertexSumPt(vertex);
-    float sumPt2 = xAOD::PVHelpers::getVertexSumPt(vertex, 2);
 
     // write decorations
     vtxPt(*vertex) = pt;
     vtxEta(*vertex) = eta;
     vtxPhi(*vertex) = phi;
     vtxSumPt(*vertex) = sumPt;
-    vtxSumPt2(*vertex) = sumPt2;
+    if(!isSumPt2_available) vtxSumPt2(*vertex) = sumPt2;
 
   } // end loop o vertices
 

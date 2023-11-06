@@ -67,9 +67,6 @@ namespace CP {
     /// Get possible vertex directly associated with photon conversions
     virtual const xAOD::Vertex* getPrimaryVertexFromConv(const xAOD::PhotonContainer *photons) const = 0;
 
-    /// Get access to the photon pointing tool
-    virtual const CP::IPhotonPointingTool* photonPointingTool() const = 0;
-
   }; // class IPhotonVertexSelectionTool
 
 } // namespace CP

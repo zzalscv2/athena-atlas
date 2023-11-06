@@ -1,91 +1,86 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-
-def PrimaryVertexRefittingToolCfg(ConfigFlags, **kwargs):
-
+def PrimaryVertexRefittingToolCfg(flags, **kwargs):
     """ PV refitting tool """
-
     acc = ComponentAccumulator() 
 
-    from TrkConfig.TrkVertexFitterUtilsConfig import TrackToVertexIPEstimatorCfg
-    trkToIP = acc.popToolsAndMerge( TrackToVertexIPEstimatorCfg(ConfigFlags,**kwargs) )
-    kwargs.setdefault( "TrackToVertexIPEstimator", trkToIP )
-    acc.setPrivateTools( CompFactory.Analysis.PrimaryVertexRefitter( **kwargs) ) 
+    if "TrackToVertexIPEstimator" not in kwargs:
+        from TrkConfig.TrkVertexFitterUtilsConfig import (
+            TrackToVertexIPEstimatorCfg)
+        kwargs.setdefault("TrackToVertexIPEstimator", acc.popToolsAndMerge(
+            TrackToVertexIPEstimatorCfg(flags)))
 
+    acc.setPrivateTools(CompFactory.Analysis.PrimaryVertexRefitter(**kwargs))
     return acc
 
-def ZeeVertexRefittingToolCfg(ConfigFlags, **kwargs):
-    
+def ZeeVertexRefittingToolCfg(
+        flags, name="HIGG1D1_ZeeVertexRefitterTool", **kwargs):
     """ PV refitting after removing Z->ee tracks, for vertex studies """
-
     acc = ComponentAccumulator()
 
     import AthenaCommon.SystemOfUnits as Units
 
-    pvRefitter = acc.popToolsAndMerge( PrimaryVertexRefittingToolCfg(ConfigFlags, **kwargs) )
-    MCSamples = [361106, 601189]
-    acc.setPrivateTools( CompFactory.DerivationFramework.ZeeVertexRefittingTool( name = "HIGG1D1_ZeeVertexRefitterTool",
-                                              ObjectRequirements="(Electrons.DFCommonElectronsLHMedium) && (Electrons.pt > 19.*GeV)",
-                                              LowMassCut=50*Units.GeV,
-                                              RefittedPVContainerName="ZeeRefittedPrimaryVertices",                                    
-                                              ElectronContainerName="Electrons",
-                                              PVContainerName="PrimaryVertices",
-                                              MCSamples=MCSamples,
-                                              PrimaryVertexRefitterTool=pvRefitter ) ) 
-    
+    if "PrimaryVertexRefitterTool" not in kwargs:
+        kwargs.setdefault("PrimaryVertexRefitterTool", acc.popToolsAndMerge(
+            PrimaryVertexRefittingToolCfg(flags)))
+
+    kwargs.setdefault("ObjectRequirements", (
+        "(Electrons.DFCommonElectronsLHMedium) && (Electrons.pt > 19.*GeV)"))
+    kwargs.setdefault("LowMassCut", 50*Units.GeV)
+    kwargs.setdefault("RefittedPVContainerName", "ZeeRefittedPrimaryVertices")
+    kwargs.setdefault("MCSamples", [361106, 601189])
+
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.ZeeVertexRefittingTool(name, **kwargs))
     return acc
-  
 
-
-def ZeeVertexRefitterCfg(ConfigFlags):
-
+def ZeeVertexRefitterCfg(flags, name="ZeeVertexRefitKernel"):
     """ PV refitting after removing Z->ee tracks, for vertex studies """
-
 
     # Creates a vertex container (ZeeRefittedPrimaryVertices) where the type=1 vertex is refitted
     # after removing tracks that are associated with Z->ee decay candidates
     # Tool runs only for data and Zee MC samples (must be defined in the MCSamples list)
 
     acc = ComponentAccumulator()
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    ZeeVertexRefittingTool = acc.popToolsAndMerge(ZeeVertexRefittingToolCfg(ConfigFlags))
+    ZeeVertexRefittingTool = acc.popToolsAndMerge(
+        ZeeVertexRefittingToolCfg(flags))
     acc.addPublicTool(ZeeVertexRefittingTool)
-    acc.addEventAlgo(CommonAugmentation("ZeeVertexRefitKernel",AugmentationTools=[ZeeVertexRefittingTool])) 
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
+        name, AugmentationTools=[ZeeVertexRefittingTool]))
     return acc
 
-
-def PhotonPointingToolCfg(ConfigFlags):
-    acc = ComponentAccumulator()
-    acc.setPrivateTools( CompFactory.CP.PhotonPointingTool( isSimulation = ConfigFlags.Input.isMC  ) )
-    return acc
-
-def PhotonVertexSelectionToolCfg(ConfigFlags, **kwargs):
-    acc = ComponentAccumulator()
-    if "PhotonPointingTool" not in kwargs:
-        photonPointingTool = acc.popToolsAndMerge( PhotonPointingToolCfg(ConfigFlags) )
-        kwargs.setdefault("PhotonPointingTool", photonPointingTool)
-    acc.setPrivateTools( CompFactory.CP.PhotonVertexSelectionTool( **kwargs ) )
-    return acc
-
-def DiphotonVertexDecoratorCfg(ConfigFlags, **kwargs):
+def DiphotonVertexDecoratorCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     if "PhotonVertexSelectionTool" not in kwargs:
-        photonVertexSelectionTool = acc.popToolsAndMerge( PhotonVertexSelectionToolCfg(ConfigFlags) )
-        kwargs.setdefault("PhotonVertexSelectionTool", photonVertexSelectionTool)
-    acc.setPrivateTools( CompFactory.DerivationFramework.DiphotonVertexDecorator( **kwargs ) )
+        from PhotonVertexSelection.PhotonVertexSelectionConfig import (
+            PhotonVertexSelectionToolCfg)
+        kwargs.setdefault("PhotonVertexSelectionTool", acc.popToolsAndMerge(
+            PhotonVertexSelectionToolCfg(flags)))
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.DiphotonVertexDecorator(**kwargs))
     return acc
 
-def DiPhotonVertexCfg(ConfigFlags):
+def DiPhotonVertexDecoratorKernelCfg(flags, name="DiphotonVertexKernel"):
     """ Diphoton vertex decoration tool """
+
     # Decorator creates a shallow copy of PrimaryVertices (HggPrimaryVertices) for diphoton events
     # Must be created before the jetalg in the sequence as it is input to the modified PFlow jets
+
     acc = ComponentAccumulator()
-    DiphotonVertexDecorator =  acc.popToolsAndMerge( DiphotonVertexDecoratorCfg(ConfigFlags) )
+    DiphotonVertexDecorator = acc.popToolsAndMerge(
+        DiphotonVertexDecoratorCfg(flags))
     acc.addPublicTool(DiphotonVertexDecorator)
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation("DiphotonVertexKernel",AugmentationTools=[DiphotonVertexDecorator]))
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
+        name,AugmentationTools=[DiphotonVertexDecorator]))
+    return acc
+
+def DiPhotonVertexCfg(flags):
+    from DerivationFrameworkEGamma.EGammaToolsConfig import (
+        PhotonVertexSelectionWrapperKernelCfg)
+    acc = PhotonVertexSelectionWrapperKernelCfg(flags)
+    acc.merge(DiPhotonVertexDecoratorKernelCfg(flags))
     return acc

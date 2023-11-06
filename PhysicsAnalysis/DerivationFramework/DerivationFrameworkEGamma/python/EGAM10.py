@@ -34,27 +34,6 @@ photonRequirements = " && ".join(
 )
 
 
-def PhotonPointingToolCfg(flags):
-    acc = ComponentAccumulator()
-    acc.setPrivateTools(
-        CompFactory.CP.PhotonPointingTool(
-            name="EGAM10_PhotonPointingTool", isSimulation=flags.Input.isMC
-        )
-    )
-    return acc
-
-
-def PhotonVertexSelectionWrapperCfg(flags, **kwargs):
-    acc = ComponentAccumulator()
-    if "PhotonPointingTool" not in kwargs:
-        photonPointingTool = acc.popToolsAndMerge(PhotonPointingToolCfg(flags))
-        kwargs.setdefault("PhotonPointingTool", photonPointingTool)
-    acc.setPrivateTools(
-        CompFactory.DerivationFramework.PhotonVertexSelectionWrapper(**kwargs)
-    )
-    return acc
-
-
 def EGAM10SkimmingToolCfg(flags):
     """Configure the EGAM10 skimming tool"""
     acc = ComponentAccumulator()
@@ -122,20 +101,9 @@ def EGAM10KernelCfg(flags, name="EGAM10Kernel", **kwargs):
     # ====================================================================
     # PhotonVertexSelectionWrapper decoration tool - needs PhotonPointing tool
     # ====================================================================
-    EGAM10_PhotonPointingTool = acc.popToolsAndMerge(PhotonPointingToolCfg(flags))
-
-    EGAM10_PhotonVertexSelectionWrapper = acc.popToolsAndMerge(
-        PhotonVertexSelectionWrapperCfg(
-            flags,
-            name="EGAM10_PhotonVertexSelectionWrapper",
-            PhotonPointingTool=EGAM10_PhotonPointingTool,
-            DecorationPrefix="EGAM10",
-            PhotonContainer="Photons",
-            VertexContainer="PrimaryVertices",
-        )
-    )
-    acc.addPublicTool(EGAM10_PhotonVertexSelectionWrapper)
-    augmentationTools += [EGAM10_PhotonVertexSelectionWrapper]
+    from DerivationFrameworkEGamma.EGammaToolsConfig import (
+        PhotonVertexSelectionWrapperKernelCfg)
+    acc.merge(PhotonVertexSelectionWrapperKernelCfg(flags))
 
     # ====================================================================
     # Common calo decoration tools
@@ -341,8 +309,8 @@ def EGAM10Cfg(flags):
 
     # primary vertices
     EGAM10SlimmingHelper.ExtraVariables += [
-        "PrimaryVertices.covariance.trackWeights.sumPt2.EGAM10_sumPt",
-        "PrimaryVertices.EGAM10_sumPt2.EGAM10_pt.EGAM10_eta.EGAM10_phi",
+        "PrimaryVertices.covariance.trackWeights.sumPt2.sumPt",
+        "PrimaryVertices.pt.eta.phi",
     ]
 
     # tracks

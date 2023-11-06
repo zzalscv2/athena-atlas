@@ -4,7 +4,6 @@
 
 // Local includes
 #include "PhotonVertexSelection/PhotonVertexSelectionTool.h"
-#include "PhotonVertexSelection/PhotonPointingTool.h"
 #include "PhotonVertexSelection/PhotonVertexHelpers.h"
 
 // EDM includes
@@ -17,6 +16,7 @@
 // Framework includes
 #include "PathResolver/PathResolver.h"
 #include "egammaUtils/ShowerDepthTool.h"
+#include "AsgDataHandles/ReadHandle.h"
 
 // ROOT includes
 #include "TMVA/Reader.h"
@@ -58,8 +58,7 @@ namespace CP {
         m_configFileCase1 = "PhotonVertexSelection/v1/DiphotonVertex_case1.weights.xml");
     declareProperty("ConfigFileCase2",
         m_configFileCase2 = "PhotonVertexSelection/v1/DiphotonVertex_case2.weights.xml");
-    declareProperty("conversionPtCut"      , m_convPtCut       = 2e3 );
-    declareProperty("updatePointing", m_updatePointing=true, "Update pointing data?");
+    declareProperty("conversionPtCut", m_convPtCut = 2e3);
     declareProperty("derivationPrefix", m_derivationPrefix = "");
   }
 
@@ -71,12 +70,6 @@ namespace CP {
   StatusCode PhotonVertexSelectionTool::initialize()
   {
     ATH_MSG_INFO("Initializing PhotonVertexSelectionTool...");
-
-    // Retrieve PhotonPointingTool
-    if (m_pointingTool.retrieve().isFailure()) {
-      ATH_MSG_ERROR("Couldn't retrieve PhotonPointingTool.");
-      return StatusCode::FAILURE;
-    }
 
     // Get full path of configuration files for MVA
     m_configFileCase1  = PathResolverFindCalibFile( m_configFileCase1 );
@@ -106,13 +99,6 @@ namespace CP {
   StatusCode PhotonVertexSelectionTool::decorateInputs(const xAOD::EgammaContainer &egammas, FailType* failType) const{
     auto fail = FailType::NoFail;
 
-    // Update calo pointing auxdata for photons
-    // FIXME: Remove once variables properly included in derivations
-    if (m_updatePointing and m_pointingTool->updatePointingAuxdata(egammas).isFailure()) {
-      ATH_MSG_INFO("Couldn't update photon calo pointing auxdata");
-      fail = FailType::FailPointing;
-    }
-
     static const SG::AuxElement::Decorator<float> sumPt2(m_derivationPrefix + "sumPt2");
     static const SG::AuxElement::Decorator<float> sumPt(m_derivationPrefix + "sumPt");
     static const SG::AuxElement::Decorator<float> deltaPhi(m_derivationPrefix + "deltaPhi");
@@ -136,7 +122,10 @@ namespace CP {
         vertex->vertexType() != xAOD::VxType::VertexType::PileUp) continue;
 
       // Set input variables for MVA
-      sumPt(*vertex) = xAOD::PVHelpers::getVertexSumPt(vertex, 1, false);
+
+      if (not sumPt.isAvailable(*vertex)) {
+	sumPt(*vertex) = xAOD::PVHelpers::getVertexSumPt(vertex, 1, false);
+      }
 
       if (not sumPt2.isAvailable(*vertex)) {
         sumPt2(*vertex) = xAOD::PVHelpers::getVertexSumPt(vertex, 2);
@@ -365,12 +354,6 @@ namespace CP {
     }
 
     return nullptr;
-  }
-
-  //____________________________________________________________________________
-  const CP::IPhotonPointingTool* PhotonVertexSelectionTool::photonPointingTool() const
-  {
-    return &*m_pointingTool;
   }
 
   //____________________________________________________________________________
