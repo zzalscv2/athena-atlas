@@ -131,7 +131,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
              'EventInfo.eventNumber   -> eventNumber', ]
     if dataType != 'data':
         vars += [ 'EventInfo.mcChannelNumber -> mcChannelNumber' ]
-    if not isPhyslite and dataType == 'mc':
+    if not isPhyslite and dataType in ['mc', 'afii']:
         vars += [ 'EventInfo.PileupWeight_%SYS% -> weight_pileup_%SYS%' ]
     if not isPhyslite and dataType in ['mc', 'afii']:
         vars += [ 'EventInfo.beamSpotWeight -> weight_beamspot' ]
