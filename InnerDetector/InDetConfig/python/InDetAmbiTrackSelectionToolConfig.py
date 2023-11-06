@@ -206,17 +206,17 @@ def ITkAmbiTrackSelectionToolCfg(
     kwargs.setdefault("etaWidth", 0.05)
 
     # Only split in cluster in region of interest
-    kwargs.setdefault("doEmCaloSeed", flags.Tracking.doCaloSeededAmbi)
+    kwargs.setdefault("doEmCaloSeed", flags.Tracking.ActiveConfig.doCaloSeededAmbiSi)
     kwargs.setdefault("EMROIPhiRZContainer", "ITkCaloClusterROIPhiRZ10GeV")
-    if flags.Tracking.doCaloSeededAmbi:
+    if flags.Tracking.ActiveConfig.doCaloSeededAmbiSi:
         from InDetConfig.InDetCaloClusterROISelectorConfig import (
             ITkCaloClusterROIPhiRZContainerMakerCfg)
         acc.merge(ITkCaloClusterROIPhiRZContainerMakerCfg(flags))
 
     # Do special cuts in region of interest
-    kwargs.setdefault("doHadCaloSeed", flags.Tracking.doCaloSeededAmbi)
+    kwargs.setdefault("doHadCaloSeed", flags.Tracking.ActiveConfig.doCaloSeededAmbiSi)
     kwargs.setdefault("HadROIPhiRZContainer", "ITkHadCaloClusterROIPhiRZBjet")
-    if flags.Tracking.doCaloSeededAmbi:
+    if flags.Tracking.ActiveConfig.doCaloSeededAmbiSi:
         from InDetConfig.InDetCaloClusterROISelectorConfig import (
             ITkHadCaloClusterROIPhiRZContainerMakerCfg)
         acc.merge(ITkHadCaloClusterROIPhiRZContainerMakerCfg(flags))
@@ -239,3 +239,4 @@ def ITkAmbiTrackSelectionToolCfg(
     acc.setPrivateTools(CompFactory.InDet.InDetDenseEnvAmbiTrackSelectionTool(
         name=name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
+    

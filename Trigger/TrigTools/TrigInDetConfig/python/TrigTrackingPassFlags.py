@@ -42,6 +42,17 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.nHolesMax           = [2]
     flags.nHolesGapMax        = [2]
     flags.nWeightedClustersMin= [6]
+    flags.maxDoubleHoles      = [2]
+    flags.maxPixelHoles       = [5]
+    flags.maxZImpact          = [250.0]
+    flags.doTRT               = False
+    flags.extension           = flags.input_name
+    flags.doZFinder           = False
+    flags.DoPhiFiltering      = True
+    flags.UsePixelSpacePoints = True # In LRT cases they use only SCT SP, but for ITk we want pixel SP
+    flags.doDisappearingTrk   = False # Not working yet for ITk
+    flags.doCaloSeededBremSi  = False
+    flags.doCaloSeededAmbiSi  = False
   
   flags.useSeedFilter         = False
 

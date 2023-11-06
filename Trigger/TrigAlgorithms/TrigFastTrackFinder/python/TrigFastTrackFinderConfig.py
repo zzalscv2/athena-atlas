@@ -250,6 +250,12 @@ def TrigL2LayerNumberToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccumu
   kwargs.setdefault("UseNewLayerScheme", True)
   acc.setPrivateTools(CompFactory.TrigL2LayerNumberTool(**kwargs))
   return acc
+
+def ITkTrigL2LayerNumberToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccumulator:
+  acc = ComponentAccumulator()
+  kwargs.setdefault("UseNewLayerScheme", True)
+  acc.setPrivateTools(CompFactory.TrigL2LayerNumberToolITk(**kwargs))
+  return acc
   
 def TrigSpacePointConversionToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccumulator:
   acc = ComponentAccumulator()
@@ -279,7 +285,54 @@ def TrigSpacePointConversionToolCfg(flags: AthConfigFlags, **kwargs) -> Componen
 
   return acc
 
+def ITkTrigSpacePointConversionToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccumulator:
+  acc = ComponentAccumulator()
+
+  kwargs.setdefault("UseNewLayerScheme", True)
   
+  if "layerNumberTool" not in kwargs:
+    ntargs = {"UseNewLayerScheme" : kwargs.get("UseNewLayerScheme")}
+    kwargs.setdefault("layerNumberTool",acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags,**ntargs)))
+
+  kwargs.setdefault("DoPhiFiltering", flags.Tracking.ActiveConfig.DoPhiFiltering)
+  kwargs.setdefault("UseBeamTilt", False)
+  kwargs.setdefault("PixelSP_ContainerName", "ITkPixelTrigSpacePoints")
+  kwargs.setdefault("UsePixelSpacePoints",flags.Tracking.ActiveConfig.UsePixelSpacePoints)
+  kwargs.setdefault("UseSctSpacePoints",False)
+
+  from RegionSelector.RegSelToolConfig import (regSelTool_ITkStrip_Cfg, regSelTool_ITkPixel_Cfg)
+  
+  if "RegSelTool_Pixel" not in kwargs:
+    kwargs.setdefault("RegSelTool_Pixel", acc.popToolsAndMerge( regSelTool_ITkPixel_Cfg( flags) ))
+
+  if "RegSelTool_SCT" not in kwargs:
+    kwargs.setdefault("RegSelTool_SCT", acc.popToolsAndMerge( regSelTool_ITkStrip_Cfg( flags) ))
+
+  # Spacepoint conversion
+  acc.setPrivateTools(CompFactory.TrigSpacePointConversionTool(**kwargs))
+
+  return acc
+
+def ITkTrigSiTrackMaker_FTF_Cfg(flags, signature) -> ComponentAccumulator:
+  acc = ComponentAccumulator()
+  
+  from InDetConfig.SiCombinatorialTrackFinderToolConfig import ITkSiCombinatorialTrackFinder_xkCfg
+  CombinatorialTrackFinderTool = acc.popToolsAndMerge(ITkSiCombinatorialTrackFinder_xkCfg(flags,
+                                                                                          name="ITkTrigSiComTrackFinder_"+signature,
+                                                                                          PixelClusterContainer='ITkTrigPixelClusters',
+                                                                                          SCT_ClusterContainer='ITkTrigStripClusters')
+  )
+  from InDetConfig.SiTrackMakerConfig import ITkSiTrackMaker_xkCfg
+  trackMaker = acc.popToolsAndMerge(ITkSiTrackMaker_xkCfg(flags,
+                                  name = "ITkTrigSiTrackMaker_FTF_",
+                                  useBremModel = flags.Tracking.ActiveConfig.doBremRecoverySi,
+                                  CombinatorialTrackFinder = CombinatorialTrackFinderTool)
+  )
+  
+  acc.addPublicTool(trackMaker)
+  return acc
+
+
 @AccumulatorCache
 def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTracksName:str = None) -> ComponentAccumulator:
   acc = ComponentAccumulator()
@@ -294,27 +347,41 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
   # GPU offloading config ends
 
   useNewLayerNumberScheme = True
-  spTool = acc.popToolsAndMerge(TrigSpacePointConversionToolCfg(flags,UseNewLayerScheme=useNewLayerNumberScheme))
-  numberingTool = acc.popToolsAndMerge(TrigL2LayerNumberToolCfg(flags,UseNewLayerScheme=useNewLayerNumberScheme))
 
-  from InDetConfig.SiTrackMakerConfig import TrigSiTrackMaker_xkCfg
-  TrackMaker_FTF = acc.popToolsAndMerge(
-      TrigSiTrackMaker_xkCfg(flags, name = 'InDetTrigSiTrackMaker_FTF_'+signature)
-  )
+  if flags.Detector.GeometryITk:
+
+    spTool = acc.popToolsAndMerge(ITkTrigSpacePointConversionToolCfg(flags))
+    numberingTool = acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags))
+
+    acc.merge(ITkTrigSiTrackMaker_FTF_Cfg(flags, signature))
+    TrackMaker_FTF = acc.getPublicTool("ITkTrigSiTrackMaker_FTF_"+signature)
+
+    acc.addPublicTool( CompFactory.TrigInDetTrackFitter( "TrigInDetTrackFitter_"+signature ) )
+  
+  else:
+  
+    spTool = acc.popToolsAndMerge(TrigSpacePointConversionToolCfg(flags,UseNewLayerScheme=useNewLayerNumberScheme))
+    numberingTool = acc.popToolsAndMerge(TrigL2LayerNumberToolCfg(flags,UseNewLayerScheme=useNewLayerNumberScheme))
+
+    from InDetConfig.SiTrackMakerConfig import TrigSiTrackMaker_xkCfg
+    TrackMaker_FTF = acc.popToolsAndMerge(
+        TrigSiTrackMaker_xkCfg(flags, name = 'InDetTrigSiTrackMaker_FTF_'+signature)
+    )
+    from TrkConfig.TrkRIO_OnTrackCreatorConfig import TrigRotCreatorCfg
+    TrigRotCreator = acc.popToolsAndMerge(TrigRotCreatorCfg(flags))
+    acc.addPublicTool(TrigRotCreator)
+
+    acc.addPublicTool(
+        CompFactory.TrigInDetTrackFitter(
+            name = "TrigInDetTrackFitter_"+signature,
+            doBremmCorrection = flags.Tracking.ActiveConfig.doBremRecoverySi,
+            correctClusterPos = True,  #improved err(z0) estimates in Run 2
+            ROTcreator = TrigRotCreator,
+        )
+    )
+  
   acc.addPublicTool(TrackMaker_FTF)
 
-  from TrkConfig.TrkRIO_OnTrackCreatorConfig import TrigRotCreatorCfg
-  TrigRotCreator = acc.popToolsAndMerge(TrigRotCreatorCfg(flags))
-  acc.addPublicTool(TrigRotCreator)
-  
-  acc.addPublicTool(
-      CompFactory.TrigInDetTrackFitter(
-          name = "TrigInDetTrackFitter_"+signature,
-          doBremmCorrection = flags.Tracking.ActiveConfig.doBremRecoverySi,
-          correctClusterPos = True,  #improved err(z0) estimates in Run 2
-          ROTcreator = TrigRotCreator,
-      )
-  )
   theTrigInDetTrackFitter = acc.getPublicTool("TrigInDetTrackFitter_"+signature)
   
   if (flags.Tracking.ActiveConfig.doZFinder):
@@ -322,11 +389,17 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
   
   if not flags.Tracking.ActiveConfig.doZFinderOnly:
     
-    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg, InDetTrigFastTrackSummaryToolCfg
-    if flags.Tracking.ActiveConfig.holeSearch_FTF :
-      trackSummaryTool = acc.popToolsAndMerge(InDetTrigTrackSummaryToolCfg(flags,name="InDetTrigTrackSummaryTool"))
+    if flags.Detector.GeometryITk:
+      monTool = TrigFastTrackFinderMonitoringArg(flags, name = "trigfasttrackfinder_" + signature, doResMon=False)
+      from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolCfg
+      trackSummaryTool = acc.popToolsAndMerge(ITkTrackSummaryToolCfg(flags))
     else:
-      trackSummaryTool = acc.popToolsAndMerge(InDetTrigFastTrackSummaryToolCfg(flags,name="InDetTrigFastTrackSummaryTool"))
+      monTool = TrigFastTrackFinderMonitoring(flags)
+      from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg, InDetTrigFastTrackSummaryToolCfg
+      if flags.Tracking.ActiveConfig.holeSearch_FTF :
+        trackSummaryTool = acc.popToolsAndMerge(InDetTrigTrackSummaryToolCfg(flags,name="InDetTrigTrackSummaryTool"))
+      else:
+        trackSummaryTool = acc.popToolsAndMerge(InDetTrigFastTrackSummaryToolCfg(flags,name="InDetTrigFastTrackSummaryTool"))
 
     acc.addPublicTool(trackSummaryTool)
 
@@ -352,7 +425,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
         TrackZ0Max            = flags.Tracking.ActiveConfig.TrackZ0Max,
         TripletDoPPS    = flags.Tracking.ActiveConfig.TripletDoPPS,
         TripletDoPSS    = False,
-        pTmin           = flags.Tracking.ActiveConfig.pTmin,
+        pTmin           = flags.Tracking.ActiveConfig.minPT[0] if flags.Detector.GeometryITk else flags.Tracking.ActiveConfig.minPT,
         DoubletDR_Max   = flags.Tracking.ActiveConfig.DoubletDR_Max,
         SeedRadBinWidth = flags.Tracking.ActiveConfig.SeedRadBinWidth,
         initialTrackMaker = TrackMaker_FTF,
@@ -362,10 +435,11 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
         doCloneRemoval = flags.Tracking.ActiveConfig.doCloneRemoval,
         TracksName     = flags.Tracking.ActiveConfig.trkTracks_FTF,
         doResMon = flags.Tracking.ActiveConfig.doResMon,
-        MonTool = TrigFastTrackFinderMonitoring(flags),
+        MonTool = monTool,
         Extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
         RoIs = RoIs,
-        FixSeedPhi = flags.Trigger.InDetTracking.fixSeedPhi
+        FixSeedPhi = flags.Trigger.InDetTracking.fixSeedPhi,
+        ITkMode = True if flags.Detector.GeometryITk else False,
     )
     
   ftf.LRT_D0Min = flags.Tracking.ActiveConfig.LRT_D0Min
@@ -400,6 +474,5 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
     
   acc.addEventAlgo(ftf)
   return acc
-
     
 

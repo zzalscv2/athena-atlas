@@ -543,7 +543,7 @@ def ITkDenseEnvironmentsAmbiguityProcessorToolCfg(
     # Disabled for second passes in reco
     kwargs.setdefault("tryBremFit",
                       flags.Tracking.ActiveConfig.doBremRecoverySi)
-    kwargs.setdefault("caloSeededBrem", flags.Tracking.doCaloSeededBrem)
+    kwargs.setdefault("caloSeededBrem", flags.Tracking.ActiveConfig.doCaloSeededBremSi)
     kwargs.setdefault("pTminBrem", flags.Tracking.ActiveConfig.minPTBrem[0])
     kwargs.setdefault("RefitPrds", True)
     kwargs.setdefault("KeepHolesFromBeforeRefit", False)
@@ -554,3 +554,4 @@ def ITkDenseEnvironmentsAmbiguityProcessorToolCfg(
         CompFactory.Trk.DenseEnvironmentsAmbiguityProcessorTool(
             name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
+    

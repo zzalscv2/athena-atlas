@@ -302,7 +302,7 @@ def ITkAmbiScoringToolCfg(flags, name='ITkAmbiScoringTool', **kwargs):
         kwargs.setdefault("InDetEtaDependentCutsSvc", acc.getService(
             "ITkEtaDependentCutsSvc"+flags.Tracking.ActiveConfig.extension))
 
-    if flags.Tracking.doCaloSeededBrem:
+    if flags.Tracking.ActiveConfig.doCaloSeededBremSi:
         from InDetConfig.InDetCaloClusterROISelectorConfig import (
             ITkCaloClusterROIPhiRZContainerMakerCfg)
         acc.merge(ITkCaloClusterROIPhiRZContainerMakerCfg(flags))
@@ -314,7 +314,7 @@ def ITkAmbiScoringToolCfg(flags, name='ITkAmbiScoringTool', **kwargs):
     kwargs.setdefault("maxEta", flags.Tracking.ActiveConfig.maxEta)
     kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.useITkPixel)
     kwargs.setdefault("useSCT", flags.Tracking.ActiveConfig.useITkStrip)
-    kwargs.setdefault("doEmCaloSeed", flags.Tracking.doCaloSeededBrem)
+    kwargs.setdefault("doEmCaloSeed", flags.Tracking.ActiveConfig.doCaloSeededBremSi)
     kwargs.setdefault("useITkAmbigFcn", True)
     kwargs.setdefault("minTRTonTrk", 0)
     kwargs.setdefault("minTRTPrecisionFraction", 0)
