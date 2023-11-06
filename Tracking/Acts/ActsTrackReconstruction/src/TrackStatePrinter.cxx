@@ -320,59 +320,64 @@ namespace ActsTrk
   void
   TrackStatePrinter::printMeasurementAssociatedSpacePoint(const Acts::GeometryContext &tgContext,
                                                           const xAOD::UncalibratedMeasurement *measurement,
-                                                          const std::vector< TrackStatePrinter::small_vector<const xAOD::SpacePoint *> > &measToSp,
+                                                          const std::vector<TrackStatePrinter::small_vector<const xAOD::SpacePoint *>> &measToSp,
                                                           const InDetDD::SiDetectorElementCollection *detectorElements,
                                                           const ActsTrk::IActsToTrkConverterTool &converterTool,
                                                           size_t offset)
   {
-    if (!measurement || !detectorElements) return;
+    if (!measurement || !detectorElements)
+      return;
 
-    std::cout << std::setw(5) << (measurement->index()+offset) << ' '
+    std::cout << std::setw(5) << (measurement->index() + offset) << ' '
               << std::setw(3) << measurement->numDimensions() << "D ";
 
-    const InDetDD::SiDetectorElement *detElem =
-       detectorElements->getDetectorElement(measurement->identifierHash());
+    const InDetDD::SiDetectorElement *detElem = detectorElements->getDetectorElement(measurement->identifierHash());
     const Acts::Surface *surface_ptr = nullptr;
     if (!detElem)
     {
-      std::cout << std::setw(20+22+20+2) << "** no DetElem **" ;
+      std::cout << std::setw(20 + 22 + 20 + 2) << "** no DetElem **";
     }
-    else {
-       const Acts::Surface &surface = converterTool.trkSurfaceToActsSurface(detElem->surface());
-       surface_ptr = &surface;
-       std::cout << std::left;
-       std::cout << std::setw(21) << actsSurfaceName(surface) << ' '
-                 << std::setw(22) << to_string(surface.geometryId()) << ' ';
-       std::cout << std::setw(20) << atlasSurfaceName(*detElem);
-       std::cout << std::right;
+    else
+    {
+      const Acts::Surface &surface = converterTool.trkSurfaceToActsSurface(detElem->surface());
+      surface_ptr = &surface;
+      std::cout << std::left;
+      std::cout << std::setw(21) << actsSurfaceName(surface) << ' '
+                << std::setw(22) << to_string(surface.geometryId()) << ' ';
+      std::cout << std::setw(20) << atlasSurfaceName(*detElem);
+      std::cout << std::right;
     }
-
 
     if (measurement->type() == xAOD::UncalibMeasType::PixelClusterType)
     {
       const auto loc = measurement->localPosition<2>().cast<double>();
       printMeasurement(tgContext, surface_ptr, detElem, {loc, loc, -1, -1});
     }
-    else if (measurement->type() == xAOD::UncalibMeasType::StripClusterType) {
-       const small_vector<const xAOD::SpacePoint *> &
-          spvec =  measToSp.at(measurement->index());
-       if (spvec.empty() ) {
-          printMeasurement(tgContext, surface_ptr, detElem,
-                           localPositionStrip2D(tgContext, *measurement, surface_ptr, nullptr));
-       }
-       else {
-          size_t isp = 0;
-          for (auto *sp : spvec) {
-             if (isp++) {
-                std::cout << '\n'
-                          << std::left
-                          << std::setw(76) << to_string("** Spacepoint ", isp, " **")
-                          << std::right;
-             }
-             printMeasurement(tgContext, surface_ptr, detElem,
-                              localPositionStrip2D(tgContext, *measurement, surface_ptr, sp));
+    else if (measurement->type() == xAOD::UncalibMeasType::StripClusterType)
+    {
+      const small_vector<const xAOD::SpacePoint *> &
+          spvec = measToSp.at(measurement->index());
+      if (spvec.empty())
+      {
+        printMeasurement(tgContext, surface_ptr, detElem,
+                         localPositionStrip2D(tgContext, *measurement, surface_ptr, nullptr));
+      }
+      else
+      {
+        size_t isp = 0;
+        for (auto *sp : spvec)
+        {
+          if (isp++)
+          {
+            std::cout << '\n'
+                      << std::left
+                      << std::setw(76) << to_string("** Spacepoint ", isp, " **")
+                      << std::right;
           }
-       }
+          printMeasurement(tgContext, surface_ptr, detElem,
+                           localPositionStrip2D(tgContext, *measurement, surface_ptr, sp));
+        }
+      }
     }
     std::cout << '\n';
   }
@@ -395,7 +400,7 @@ namespace ActsTrk
   static void
   printTrackState(const Acts::GeometryContext &tgContext,
                   const ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy &state,
-                  const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t> > &container_offset)
+                  const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset)
   {
     ptrdiff_t index = -1;
 
@@ -403,11 +408,13 @@ namespace ActsTrk
     {
       ATLASUncalibSourceLink sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
       index = (*sl)->index();
-      for (const std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t> &a_offset : container_offset ) {
-         if ((*sl)->container() == a_offset.first) {
-            index += a_offset.second;
-            break;
-         }
+      for (const std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t> &a_offset : container_offset)
+      {
+        if ((*sl)->container() == a_offset.first)
+        {
+          index += a_offset.second;
+          break;
+        }
       }
     }
 
@@ -483,10 +490,10 @@ namespace ActsTrk
     for (const auto *sp : seed.sp())
     {
       size_t nom = 0;
-      const auto& els = sp->measurements();
-      for (std::size_t i(0ul); i<els.size(); ++i) 
+      const auto &els = sp->measurements();
+      for (std::size_t i(0ul); i < els.size(); ++i)
       {
-	std::size_t index = (*els[i])->index();
+        std::size_t index = (*els[i])->index();
         if (nom > 0)
           os << '+';
         else if (nos > 0)
@@ -512,7 +519,7 @@ namespace ActsTrk
   TrackStatePrinter::printTracks(const Acts::GeometryContext &tgContext,
                                  const ActsTrk::MutableTrackContainer &tracks,
                                  const std::vector<ActsTrk::MutableTrackContainer::TrackProxy> &fitResult,
-                                 const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t> > &container_offset) const
+                                 const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset) const
   {
     for (auto &track : fitResult)
     {
@@ -566,26 +573,26 @@ namespace ActsTrk
     auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
     Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
 
-    std::vector<small_vector<const xAOD::SpacePoint *> > measToSp;
+    std::vector<small_vector<const xAOD::SpacePoint *>> measToSp;
     measToSp.resize(clusterContainer.size());
     addSpacePoints(ctx, measToSp, typeIndex, offset);
 
-    if (offset==0) {
-       ATH_MSG_INFO("CKF input measurements:");
-       printHeader(0);
+    if (offset == 0)
+    {
+      ATH_MSG_INFO("CKF input measurements:");
+      printHeader(0);
     }
 
     for (const auto *measurement : clusterContainer)
     {
-       printMeasurementAssociatedSpacePoint(tgContext, measurement, measToSp, detectorElements, *m_ATLASConverterTool, offset);
+      printMeasurementAssociatedSpacePoint(tgContext, measurement, measToSp, detectorElements, *m_ATLASConverterTool, offset);
     }
     std::cout << std::flush;
   }
 
-
   void
   TrackStatePrinter::addSpacePoints(const EventContext &ctx,
-                                    std::vector<  TrackStatePrinter::small_vector<const xAOD::SpacePoint *> > &measToSp,
+                                    std::vector<TrackStatePrinter::small_vector<const xAOD::SpacePoint *>> &measToSp,
                                     size_t typeIndex,
                                     size_t offset) const
   {
@@ -610,17 +617,18 @@ namespace ActsTrk
       ATH_MSG_DEBUG("    \\__ " << handle->size() << " elements!");
       for (const auto *sp : *handle)
       {
-	const auto& els = sp->measurements();
-	for (std::size_t i(0ul); i<els.size(); ++i) 
-	{
-          if (!els[i].isValid()) continue;
+        const auto &els = sp->measurements();
+        for (std::size_t i(0ul); i < els.size(); ++i)
+        {
+          if (!els[i].isValid())
+            continue;
           const xAOD::UncalibratedMeasurement *meas = *(els[i]);
           assert(meas);
-          small_vector<const xAOD::SpacePoint *>  &measSp  = measToSp.at(meas->index());
+          small_vector<const xAOD::SpacePoint *> &measSp = measToSp.at(meas->index());
           if (!measSp.empty())
           {
             ATH_MSG_INFO("Cluster "
-                         << (meas->index()+offset)
+                         << (meas->index() + offset)
                          << " used by SpacePoints at ("
                          << sp->globalPosition()[0] << ',' << sp->globalPosition()[1] << ',' << sp->globalPosition()[2]
                          << ") and ("

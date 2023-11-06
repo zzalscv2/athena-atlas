@@ -27,13 +27,14 @@
 #include <tuple>
 #include <boost/container/small_vector.hpp>
 
-namespace InDetDD {
-   class SiDetectorElementCollection;
+namespace InDetDD
+{
+  class SiDetectorElementCollection;
 }
 
 namespace ActsTrk
 {
-class TrackStatePrinter : public extends<AthAlgTool, ActsTrk::ITrackStatePrinter>
+  class TrackStatePrinter : public extends<AthAlgTool, ActsTrk::ITrackStatePrinter>
   {
   public:
     TrackStatePrinter(const std::string &type, const std::string &name,
@@ -61,7 +62,7 @@ class TrackStatePrinter : public extends<AthAlgTool, ActsTrk::ITrackStatePrinter
     printTracks(const Acts::GeometryContext &tgContext,
                 const ActsTrk::MutableTrackContainer &tracks,
                 const std::vector<ActsTrk::MutableTrackContainer::TrackProxy> &fitResult,
-                const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t> > &offset) const override;
+                const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset) const override;
 
     using MeasurementInfo = std::tuple<size_t,
                                        const ATLASUncalibSourceLink *,
@@ -81,17 +82,16 @@ class TrackStatePrinter : public extends<AthAlgTool, ActsTrk::ITrackStatePrinter
     // most measurements are associated to only one SP, but allow some headroom to reduce number of allocations
     static constexpr unsigned int N_SP_PER_MEAS = 2;
     template <class T>
-    using small_vector = boost::container::small_vector<T,N_SP_PER_MEAS>;
-    void addSpacePoints(const EventContext &ctx, std::vector<small_vector<const xAOD::SpacePoint *> > &measToSp, size_t type, size_t offset) const;
+    using small_vector = boost::container::small_vector<T, N_SP_PER_MEAS>;
+    void addSpacePoints(const EventContext &ctx, std::vector<small_vector<const xAOD::SpacePoint *>> &measToSp, size_t type, size_t offset) const;
 
     static void
     printMeasurementAssociatedSpacePoint(const Acts::GeometryContext &tgContext,
                                          const xAOD::UncalibratedMeasurement *measurement,
-                                         const std::vector<small_vector<const xAOD::SpacePoint *> > &measToSp,
+                                         const std::vector<small_vector<const xAOD::SpacePoint *>> &measToSp,
                                          const InDetDD::SiDetectorElementCollection *detectorElements,
                                          const ActsTrk::IActsToTrkConverterTool &converterTool,
                                          size_t offset);
-
   };
 
 } // namespace
