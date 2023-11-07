@@ -20,12 +20,18 @@ using PixelChargeCalib::numChipsAndTechnology;
 namespace PixelChargeCalib{
 
   ChargeCalibrationBundle
-  LUTChargeCalibParser::parseImpl(unsigned int moduleHash, const nlohmann::json & data){
+  LUTChargeCalibParser::parseImpl(unsigned int moduleHash, const nlohmann::json & data, int inputSource){
     IdentifierHash wafer_hash = IdentifierHash(moduleHash);
     const InDetDD::SiDetectorElement *element = m_elements->getDetectorElement(wafer_hash);
     const auto & [numFE, technology] = numChipsAndTechnology(element);
+    bool isLUTEnabled;
+    if (inputSource == 0){
+      isLUTEnabled = false;
+    } else {
+      isLUTEnabled = true;
+    }
     //
-    ChargeCalibrationBundle b(numFE);
+    ChargeCalibrationBundle b(numFE,isLUTEnabled);
     //
     for (unsigned int j{}; j < numFE; j++) {
       const auto &calibArray = data.at(j);
