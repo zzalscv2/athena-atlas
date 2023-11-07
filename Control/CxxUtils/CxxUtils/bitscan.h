@@ -168,5 +168,9 @@ namespace CxxUtils {
     return detail::popcount_portable(x);
 #endif
   }
+  /// Returns the position (counting from the left hand side) of the last set bit
+  template<typename T> int maxSetBit(const T x) {
+      return x != 0 ? sizeof(T) * 8 - count_leading_zeros(x) : -1;
+  }
 }
 #endif // CXXUTILS_BITSCAN_H
