@@ -13,13 +13,6 @@
 namespace Trk {
 
 int vtcfit(VKVertex* vk);
-double setLimitedFitVrt(VKVertex* vk, double alf, double bet, double dCoefNorm,
-                        double newVrt[3]);
-double calcChi2Addition(VKVertex* vk, const double wgtvrtd[6],
-                        const double xyzf[3]);
-void makeNoPostFit(VKVertex* vk, double wgtvrtd[], double& dCoefNorm);
-bool makePostFit(VKVertex* vk, double wgtvrtd[], double& dCoefNorm);
-}  // namespace Trk
-
+}
 #endif
 

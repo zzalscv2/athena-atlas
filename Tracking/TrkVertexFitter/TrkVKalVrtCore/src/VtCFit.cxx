@@ -15,6 +15,244 @@
 #include <algorithm>
 #include <cmath>
 
+namespace {
+//internal methods
+
+using namespace Trk;
+double setLimitedFitVrt(VKVertex* vk, double alf, double bet, double dCoefNorm,
+                        double newVrt[3]) {
+  int NTRK = vk->TrackList.size();
+  double chi2t = 0.;
+  for (int ii = 0; ii < 3; ++ii) {  // Intermediate vertex.
+    newVrt[ii] = vk->iniV[ii] + (alf + bet) * (vk->fitV[ii] - vk->iniV[ii]) +
+                 bet * dCoefNorm * vk->dxyz0[ii];
+  }
+
+  for (int ii = 0; ii < NTRK;
+       ++ii) {  // track parameters at intermediate vertex. Also save to cnstP
+                // for constraint
+    VKTrack* trk = vk->TrackList[ii].get();
+    TWRK* t_trk = vk->tmpArr[ii].get();
+    t_trk->part[0] = trk->cnstP[0] =
+        trk->iniP[0] + (alf + bet) * (trk->fitP[0] - trk->iniP[0]) +
+        bet * dCoefNorm * t_trk->parf0[0];
+    t_trk->part[1] = trk->cnstP[1] =
+        trk->iniP[1] + (alf + bet) * (trk->fitP[1] - trk->iniP[1]) +
+        bet * dCoefNorm * t_trk->parf0[1];
+    t_trk->part[2] = trk->cnstP[2] =
+        trk->iniP[2] + (alf + bet) * (trk->fitP[2] - trk->iniP[2]) +
+        bet * dCoefNorm * t_trk->parf0[2];
+    // Limit momentum change if too big
+    if (bet != 0. && std::abs(t_trk->part[2]) < 1.e-7)
+      t_trk->part[2] = trk->cnstP[2] =
+          trk->iniP[2] + (alf + bet) * (trk->fitP[2] - trk->iniP[2]);
+    trk->Chi2 = cfchi2(newVrt, t_trk->part, trk);
+    chi2t += trk->Chi2;
+  }
+  return chi2t;
+}
+
+//  Calculates Chi2 due "apriory vertex" and/or "pass near" constraints
+//--------------------------------------------------------------------------
+double calcChi2Addition(VKVertex* vk, const double wgtvrtd[6],
+                        const double xyzf[3]) {
+
+  double Chi2t = 0., signif;
+  if (vk->useApriorVertex) {
+    double d1 = vk->apriorV[0] - vk->refIterV[0] - xyzf[0];
+    double d2 = vk->apriorV[1] - vk->refIterV[1] - xyzf[1];
+    double d3 = vk->apriorV[2] - vk->refIterV[2] - xyzf[2];
+    Chi2t +=
+        wgtvrtd[0] * d1 * d1 + wgtvrtd[2] * d2 * d2 + wgtvrtd[5] * d3 * d3 +
+        2. * (d2 * d1 * wgtvrtd[1] + d3 * (d1 * wgtvrtd[3] + d2 * wgtvrtd[4]));
+  }
+  if (vk->passNearVertex) {
+    signif = cfVrtDstSig(vk, vk->passWithTrkCov);
+    Chi2t += signif * signif;
+  }
+  return Chi2t;
+}
+
+[[maybe_unused]]
+void makeNoPostFit(VKVertex* vk, double wgtvrtd[], double& dCoefNorm) {
+  double xyzt[3] = {0.};
+  vk->Chi2 = setLimitedFitVrt(
+      vk, 1., 0., dCoefNorm, xyzt);  // track parameters at intermediate vertex.
+  vk->setCnstV(xyzt);                // Also save to cnstP for constraint
+  vk->Chi2 += calcChi2Addition(vk, wgtvrtd, xyzt);  // Constraints of Chi2 type
+  if (!vk->ConstraintList.empty()) {  // Restore initial derivatives
+    int NTRK = vk->TrackList.size();
+    vk->setCnstV(vk->iniV);
+    for (int i = 0; i < NTRK; ++i) {
+      VKTrack* trk = vk->TrackList[i].get();
+      for (int j = 0; j < 3; j++) {
+        trk->cnstP[j] = trk->iniP[j];
+      }
+    }
+    applyConstraints(vk);
+  }
+}
+
+bool makePostFit(VKVertex* vk, double wgtvrtd[], double& dCoefNorm) {
+
+  int NTRK = vk->TrackList.size();
+  double dScale = 1.e8, dScaleMax = 1.e10;
+  double alfLowLim = 0.1;
+  double alfUppLim = 1.1;  // Should be compatible with vkalAllowedPtChange -
+                           // not causing 1/p shift up to zero.
+  double xyzt[3], chi2t[10] = {0.};
+  double alf = 1., bet = 0.;
+  int ii, j;
+  double ContribC[10] = {0.};
+  //
+  int NCNST = vk->ConstraintList.size();
+  int PostFitIteration = 4;
+  if (NCNST)
+    PostFitIteration = 4;
+  double ValForChk;  // Now PostFit=4 works better than default PostFit=7.
+  // Reason is unclear
+
+  for (j = 1; j <= PostFitIteration; ++j) {
+    int jm1 = j - 1;
+    chi2t[jm1] = 0.;
+    ContribC[jm1] = 0.;
+    //--
+    if (j < 4) {
+      alf = jm1 * .5;
+      bet = 0.;
+    }
+    // else{ if(j==4)bet=0.; if(j==5)bet=-0.02; if(j==6)bet= 0.02;}
+    //
+    //--vk->fitV and trk->fitP stay untouched during these iterations
+    //
+    chi2t[jm1] =
+        setLimitedFitVrt(vk, alf, bet, dCoefNorm,
+                         xyzt);  // track parameters at intermediate vertex.
+    vk->setCnstV(xyzt);          // Also save to cnstP for constraint
+    chi2t[jm1] +=
+        calcChi2Addition(vk, wgtvrtd, xyzt);  // Constraints of Chi2 type
+    //
+    // Addition of constraints
+    if (NCNST) {  // VK 25.10.2006 new mechanism for constraint treatment
+      applyConstraints(vk);
+      double dCnstContrib = getCnstValues2(vk);
+      if (j == 1) {
+        dScale = std::max(chi2t[0], 5. * NTRK) / (dCnstContrib + 1 / dScaleMax);
+        if (dScale > dScaleMax)
+          dScale = dScaleMax;
+        if (dScale < 0.01)
+          dScale = 0.01;
+      }
+      ContribC[jm1] = dCnstContrib * dScale;
+      if (j != PostFitIteration) {
+        chi2t[jm1] += 5. * ContribC[jm1];
+      }  // Last cycle is ALWAYS without constraints
+    }
+    // Having 3 points (0,0.5,1.) find a pabolic minimum
+    if (j == 3) {
+      alf = finter(chi2t[0], chi2t[1], chi2t[2], 0., 0.5, 1.);
+      if (chi2t[0] == chi2t[1] && chi2t[1] == chi2t[2])
+        alf = 1.;
+      if (alf > alfUppLim)
+        alf = alfUppLim;
+      if (alf < alfLowLim) {
+        alf = alfLowLim;
+        PostFitIteration =
+            4;  // Something is wrong. Don't make second optimisation
+      }
+    }
+
+    // The commented piece of code below worked well before Rel.22 but now
+    // (22.0+) results in performance degradation. The reason is not clear and
+    // is being investigated. This part will be either retuned of rewritten
+    // (WIP).
+    // ------
+    // Having 3 points (0,-0.02,0.02) find a pabolic minimum
+    /*	if (j == 6) {  bet = finter(chi2t[4], chi2t[3], chi2t[5], -0.02, 0.,
+    0.02); if (chi2t[3] == chi2t[4] && chi2t[4] == chi2t[5])  bet = 0.; if (bet
+    > 0.2)bet =  0.2; if (bet <-0.2)bet = -0.2;
+        }
+    //Check if minimum is really a minimum. Otherwise use bet=0. point
+    if (j == 7 &&  ContribC[6]>ContribC[3]) {
+    //std::cout<<__func__<<": step7 no improvement. Revert back bet=0"<<'\n';
+    bet = 0.;
+    chi2t[jm1]= setLimitedFitVrt(vk,alf,bet,dCoefNorm,xyzt);// track parameters
+    at intermediate vertex. vk->setCnstV(xyzt); // Also save to cnstP for
+    constraint chi2t[jm1] += calcChi2Addition( vk, wgtvrtd, xyzt);     //
+    Constraints of Chi2 type if (NCNST) {         //VK 25.10.2006 new mechanism
+    for constraint treatment applyConstraints(vk); ContribC[jm1]
+    = 2.*dScale*getCnstValues2(vk);
+    }
+    }
+    */
+    // Trick to cut step in case of divergence and wrong ALFA. Step==4!!!
+    // Check if minimum is really a minimum. Otherwise use alf=0.02 or alf=0.5
+    // or alf=1. points
+    if (j == 4 && alf != alfLowLim) {
+      ValForChk = chi2t[3];
+      if ((PostFitIteration == 4) && NCNST)
+        ValForChk += ContribC[3];
+      int notImproved = false;
+      if (ValForChk > chi2t[0] * 1.0001) {
+        alf = alfLowLim;
+        ValForChk = chi2t[0];
+        notImproved = true;
+      }
+      if (ValForChk > chi2t[1] * 1.0001) {
+        alf = 0.5;
+        ValForChk = chi2t[1];
+        notImproved = true;
+      }
+      if (ValForChk > chi2t[2] * 1.0001) {
+        alf = 1.0;
+        ValForChk = chi2t[2];
+        notImproved = true;
+      }
+      if (notImproved) {  // Recalculate all with reverted alf
+        // std::cout<<__func__<<": step4 no improvement. Revert back
+        // alf="<<alf<<'\n';
+        chi2t[jm1] =
+            setLimitedFitVrt(vk, alf, bet, dCoefNorm,
+                             xyzt);  // track parameters at intermediate vertex.
+        vk->setCnstV(xyzt);          // Also save to cnstP for constraint
+        chi2t[jm1] +=
+            calcChi2Addition(vk, wgtvrtd, xyzt);  // Constraints of Chi2 type
+        if (NCNST) {  // VK 25.10.2006 new mechanism for constraint treatment
+          applyConstraints(vk);
+          ContribC[jm1] = 5. * dScale * getCnstValues2(vk);
+          if (j != PostFitIteration) {
+            chi2t[jm1] += ContribC[jm1];
+          }  // Last cycle is ALWAYS without constraints
+        }
+      }
+    }
+  }
+  /* -- Saving of final j=PostFitIteration step as output */
+  /*------------------------------------------------------*/
+  std::copy_n(xyzt, 3, vk->fitV);
+  for (ii = 0; ii < NTRK; ++ii) {
+    std::copy_n(vk->tmpArr[ii]->part, 3, vk->TrackList[ii]->fitP);
+  }
+  vk->Chi2 = chi2t[PostFitIteration - 1];  // Chi2 from last try.
+  //-----------------------------------------------------------
+  if (NCNST) { /* Restore initial derivatives */
+    vk->setCnstV(vk->iniV);
+    for (ii = 0; ii < NTRK; ++ii) {
+      VKTrack* trk = vk->TrackList[ii].get();
+      for (j = 0; j < 3; j++) {
+        trk->cnstP[j] = trk->iniP[j];
+      }
+    }
+    applyConstraints(vk);
+  }
+
+  if (alf == alfLowLim)
+    return false;  // Truncated step
+  return true;
+}
+
+}  // namespace
+
 namespace Trk {
 
 
@@ -640,185 +878,6 @@ int vtcfit( VKVertex * vk) {
 
   return 0;
 
-}
-
-double setLimitedFitVrt(VKVertex * vk, double alf, double bet, double dCoefNorm, double newVrt[3])
-{
-  int NTRK = vk->TrackList.size();
-  double chi2t=0.;
-  for (int ii=0; ii<3; ++ii) {     // Intermediate vertex.
-    newVrt[ii]   = vk->iniV[ii] +   (alf+bet) * (vk->fitV[ii] - vk->iniV[ii])  +  bet * dCoefNorm*vk->dxyz0[ii];
-  }
-
-  for(int ii = 0; ii < NTRK; ++ii) {         // track parameters at intermediate vertex. Also save to cnstP for constraint
-    VKTrack*  trk=vk->TrackList[ii].get();
-    TWRK*   t_trk=vk->tmpArr[ii].get();
-    t_trk->part[0]=trk->cnstP[0]= trk->iniP[0] + (alf+bet)*(trk->fitP[0] - trk->iniP[0]) + bet*dCoefNorm * t_trk->parf0[0];
-    t_trk->part[1]=trk->cnstP[1]= trk->iniP[1] + (alf+bet)*(trk->fitP[1] - trk->iniP[1]) + bet*dCoefNorm * t_trk->parf0[1];
-    t_trk->part[2]=trk->cnstP[2]= trk->iniP[2] + (alf+bet)*(trk->fitP[2] - trk->iniP[2]) + bet*dCoefNorm * t_trk->parf0[2];
-    //Limit momentum change if too big
-    if(bet!=0. && std::abs(t_trk->part[2])<1.e-7)t_trk->part[2]=trk->cnstP[2]= trk->iniP[2] + (alf+bet)*(trk->fitP[2]-trk->iniP[2]);
-    trk->Chi2 = cfchi2(newVrt, t_trk->part, trk );
-    chi2t += trk->Chi2 ;
-  }
-  return chi2t;
-}
-
-//  Calculates Chi2 due "apriory vertex" and/or "pass near" constraints
-//--------------------------------------------------------------------------
-double calcChi2Addition(VKVertex * vk, const double wgtvrtd[6], const double xyzf[3])
-{
-
-  double Chi2t=0., signif;
-  if ( vk->useApriorVertex) {
-    double d1 = vk->apriorV[0] - vk->refIterV[0] - xyzf[0];
-    double d2 = vk->apriorV[1] - vk->refIterV[1] - xyzf[1];
-    double d3 = vk->apriorV[2] - vk->refIterV[2] - xyzf[2];
-    Chi2t  +=  wgtvrtd[0]*d1*d1 + wgtvrtd[2]*d2*d2 + wgtvrtd[5]*d3*d3
-      + 2.*(d2*d1*wgtvrtd[1] + d3*(d1*wgtvrtd[3] + d2*wgtvrtd[4]));
-  }
-  if (vk->passNearVertex){
-    signif = cfVrtDstSig( vk, vk->passWithTrkCov);
-    Chi2t += signif*signif;
-  }
-  return Chi2t;
-}
-
-
-
-void makeNoPostFit( VKVertex * vk, double wgtvrtd[], double & dCoefNorm)
-{
-  double xyzt[3]={0.};
-  vk->Chi2 = setLimitedFitVrt(vk,1.,0.,dCoefNorm,xyzt);// track parameters at intermediate vertex.
-  vk->setCnstV(xyzt);                                  // Also save to cnstP for constraint
-  vk->Chi2 += calcChi2Addition( vk, wgtvrtd, xyzt);    // Constraints of Chi2 type
-  if (!vk->ConstraintList.empty()) {                     // Restore initial derivatives
-    int NTRK=vk->TrackList.size();
-    vk->setCnstV(vk->iniV);
-    for(int i=0; i<NTRK; ++i){ VKTrack* trk=vk->TrackList[i].get(); for (int j=0;j<3;j++){trk->cnstP[j]=trk->iniP[j];}}
-    applyConstraints(vk);
-  }
-}
-
-
-bool makePostFit( VKVertex * vk, double wgtvrtd[], double & dCoefNorm)
-{
-
-  int NTRK=vk->TrackList.size();
-  double dScale=1.e8, dScaleMax=1.e10;
-  double alfLowLim=0.1;
-  double alfUppLim=1.1;  //Should be compatible with vkalAllowedPtChange - not causing 1/p shift up to zero.
-  double xyzt[3],chi2t[10]={0.};
-  double alf=1.,bet=0.;
-  int ii,j;
-  double ContribC[10]={0.};
-  //
-  int NCNST = vk->ConstraintList.size();
-  int PostFitIteration=4; if (NCNST) PostFitIteration=4; double ValForChk; // Now PostFit=4 works better than default PostFit=7.
-  // Reason is unclear
-
-  for (j = 1; j <= PostFitIteration; ++j) {
-    int jm1=j-1;
-    chi2t[jm1] = 0.; ContribC[jm1]=0.;
-    //--
-    if (j < 4){ alf = jm1 * .5;  bet = 0.;}
-    //else{ if(j==4)bet=0.; if(j==5)bet=-0.02; if(j==6)bet= 0.02;}
-    //
-    //--vk->fitV and trk->fitP stay untouched during these iterations
-    //
-    chi2t[jm1]= setLimitedFitVrt(vk,alf,bet,dCoefNorm,xyzt);// track parameters at intermediate vertex.
-    vk->setCnstV(xyzt);                                     // Also save to cnstP for constraint
-    chi2t[jm1] += calcChi2Addition( vk, wgtvrtd, xyzt); // Constraints of Chi2 type
-    //
-    // Addition of constraints
-    if (NCNST) {         //VK 25.10.2006 new mechanism for constraint treatment
-      applyConstraints(vk);
-      double dCnstContrib=getCnstValues2(vk);
-      if(j == 1 ) { dScale = std::max(chi2t[0],5.*NTRK) / (dCnstContrib + 1/dScaleMax);
-        if(dScale > dScaleMax)  dScale=dScaleMax;
-        if(dScale < 0.01)       dScale=0.01;
-      }
-      ContribC[jm1] = dCnstContrib*dScale;
-      if ( j != PostFitIteration) {  chi2t[jm1] += 5.*ContribC[jm1]; }  // Last cycle is ALWAYS without constraints
-    }
-    //Having 3 points (0,0.5,1.) find a pabolic minimum
-    if (j == 3) {  alf = finter(chi2t[0], chi2t[1], chi2t[2], 0., 0.5, 1.);
-      if (chi2t[0] == chi2t[1] && chi2t[1] == chi2t[2])  alf = 1.;
-      if (alf > alfUppLim )alf = alfUppLim;
-      if (alf < alfLowLim){
-        alf = alfLowLim;
-        PostFitIteration=4;  //Something is wrong. Don't make second optimisation
-      }
-    }
-
-    // The commented piece of code below worked well before Rel.22 but now (22.0+) results in performance
-    // degradation. The reason is not clear and is being investigated.
-    // This part will be either retuned of rewritten (WIP).
-    // ------
-    //Having 3 points (0,-0.02,0.02) find a pabolic minimum
-    /*	if (j == 6) {  bet = finter(chi2t[4], chi2t[3], chi2t[5], -0.02, 0., 0.02);
-        if (chi2t[3] == chi2t[4] && chi2t[4] == chi2t[5])  bet = 0.;
-        if (bet > 0.2)bet =  0.2;
-        if (bet <-0.2)bet = -0.2;
-        }
-    //Check if minimum is really a minimum. Otherwise use bet=0. point
-    if (j == 7 &&  ContribC[6]>ContribC[3]) {
-    //std::cout<<__func__<<": step7 no improvement. Revert back bet=0"<<'\n';
-    bet = 0.;
-    chi2t[jm1]= setLimitedFitVrt(vk,alf,bet,dCoefNorm,xyzt);// track parameters at intermediate vertex.
-    vk->setCnstV(xyzt);                                     // Also save to cnstP for constraint
-    chi2t[jm1] += calcChi2Addition( vk, wgtvrtd, xyzt);     // Constraints of Chi2 type
-    if (NCNST) {         //VK 25.10.2006 new mechanism for constraint treatment
-    applyConstraints(vk);
-    ContribC[jm1] = 2.*dScale*getCnstValues2(vk);
-    }
-    }
-    */
-    // Trick to cut step in case of divergence and wrong ALFA. Step==4!!!
-    // Check if minimum is really a minimum. Otherwise use alf=0.02 or alf=0.5 or alf=1. points
-    if(j==4 && alf!=alfLowLim ){
-      ValForChk=chi2t[3]; if((PostFitIteration==4) && NCNST) ValForChk+=ContribC[3];
-      int notImproved=false;
-      if(ValForChk>chi2t[0]*1.0001) { alf = alfLowLim; ValForChk=chi2t[0]; notImproved=true; }
-      if(ValForChk>chi2t[1]*1.0001) { alf = 0.5;       ValForChk=chi2t[1]; notImproved=true; }
-      if(ValForChk>chi2t[2]*1.0001) { alf = 1.0;       ValForChk=chi2t[2]; notImproved=true; }
-      if(notImproved){  //Recalculate all with reverted alf
-        //std::cout<<__func__<<": step4 no improvement. Revert back alf="<<alf<<'\n';
-        chi2t[jm1]= setLimitedFitVrt(vk,alf,bet,dCoefNorm,xyzt);// track parameters at intermediate vertex.
-        vk->setCnstV(xyzt);                                     // Also save to cnstP for constraint
-        chi2t[jm1] += calcChi2Addition( vk, wgtvrtd, xyzt);     // Constraints of Chi2 type
-        if (NCNST) {         //VK 25.10.2006 new mechanism for constraint treatment
-          applyConstraints(vk);
-          ContribC[jm1] = 5.*dScale*getCnstValues2(vk);
-          if ( j != PostFitIteration) {  chi2t[jm1] += ContribC[jm1]; }  // Last cycle is ALWAYS without constraints
-        }
-      }
-    }
-  }
-  /* -- Saving of final j=PostFitIteration step as output */
-  /*------------------------------------------------------*/
-  std::copy_n(xyzt,3,vk->fitV);
-  for (ii=0; ii<NTRK; ++ii) {  std::copy_n( vk->tmpArr[ii]->part, 3, vk->TrackList[ii]->fitP);   }
-  vk->Chi2 = chi2t[PostFitIteration-1]; // Chi2 from last try.
-  //--------------------------------------------------------------------------------------------------------
-  if (NCNST) {                  /* Restore initial derivatives */
-    vk->setCnstV(vk->iniV);
-    for (ii=0; ii<NTRK; ++ii){ VKTrack* trk=vk->TrackList[ii].get(); for (j=0;j<3;j++){trk->cnstP[j]=trk->iniP[j];}}
-    applyConstraints(vk);
-  }
-
-  //    if (PostFitIteration == 7) {
-  //std::cout<<" NBETA="<<ContribC[4]<<", "<<ContribC[5]<<", "<<ContribC[6]<<
-  //                                  " aa="<<vk->ConstraintList[0]->aa[0]<<", "<<vk->ConstraintList[0]->aa[1]<<'\n';
-  //std::cout<<"NDCOEF="<<chi2t[0]<<", "<<chi2t[1]<<", "<<chi2t[2]<<", "<<chi2t[3]<<", "
-  //                    <<chi2t[4]<<", "<<chi2t[5]<<", "<<chi2t[6]<<" alf="<<alf<<" bet="<<bet<<'\n';
-  //std::cout<<"CNSTCN="<<ContribC[0]<<", "<<ContribC[1]<<", "<<ContribC[2]<<", "<<ContribC[3]<<", "
-  //                    <<ContribC[4]<<", "<<ContribC[5]<<", "<<ContribC[6]<<" dScale="<<dScale<<'\n';
-  //    }
-
-
-  if(alf==alfLowLim) return false;  //Truncated step
-  return true;
 }
 
 } //End of namespace Trk
