@@ -4,7 +4,6 @@
 from AsgAnalysisAlgorithms.AnalysisObjectSharedSequence import makeSharedObjectSequence
 from AnaAlgorithm.AnaAlgSequence import AnaAlgSequence
 from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
-import ROOT
 
 def makeMuonAnalysisSequence( dataType, workingPoint,
                               deepCopyOutput = False,
@@ -177,17 +176,18 @@ def makeMuonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
         raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
 
     sfWorkingPoint = splitWP[0]
+    from xAODMuon.xAODMuonEnums import xAODMuonEnums
     if splitWP[0] == 'Tight' :
-        quality = ROOT.xAOD.Muon.Tight
+        quality = xAODMuonEnums.Quality.Tight
         pass
     elif splitWP[0] == 'Medium' :
-        quality = ROOT.xAOD.Muon.Medium
+        quality = xAODMuonEnums.Quality.Medium
         pass
     elif splitWP[0] == 'Loose' :
-        quality = ROOT.xAOD.Muon.Loose
+        quality = xAODMuonEnums.Quality.Loose
         pass
     elif splitWP[0] == 'VeryLoose' :
-        quality = ROOT.xAOD.Muon.VeryLoose
+        quality = xAODMuonEnums.Quality.VeryLoose
         pass
     elif splitWP[0] == 'HighPt' :
         quality = 4

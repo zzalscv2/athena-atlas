@@ -2,7 +2,6 @@
 
 import re
 import math
-import ROOT
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigMuonEfficiencyMonConfig.py')
@@ -134,11 +133,11 @@ def TrigMuonEfficiencyMonZTPConfig(helper):
 
 
 def PlotConfig(monAlg, chain):
-
+     from xAODMuon.xAODMuonEnums import xAODMuonEnums
      if "msonly" in chain:
-         monAlg.MuonType = ROOT.xAOD.Muon_v1.MuonStandAlone
+         monAlg.MuonType = xAODMuonEnums.MuonStandAlone
      else:
-         monAlg.MuonType = ROOT.xAOD.Muon_v1.Combined
+         monAlg.MuonType = xAODMuonEnums.Combined
 
      if "msonly" in chain:
          monAlg.doL2CB = False

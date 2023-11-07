@@ -34,7 +34,19 @@ atlas_add_dictionary( xAODMuonDict
    LINK_LIBRARIES xAODCore xAODMuon
    EXTRA_FILES Root/dict/*.cxx )
 
+atlas_add_dictionary( xAODMuonEnumsDict
+   xAODMuon/xAODMuonEnumsDict.h
+   xAODMuon/selectionEnums.xml)
+
+# Install files from the package.
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8})
+
+#
 # Test(s) in the package.
 atlas_add_test( xAODMuon_Muon_test
    SOURCES test/xAODMuon_Muon_test.cxx
    LINK_LIBRARIES xAODMuon )
+
+atlas_add_test( ut_xAODOMuonEnums_pytest
+    SCRIPT test/ut_xAODMuonEnums_pytest.py )
+
