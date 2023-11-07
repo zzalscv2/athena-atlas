@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef IMUONLRTOVERLAPREMOVALTOOL__H
@@ -47,14 +47,17 @@ namespace CP {
                                                    const xAOD::Muon* lrtMuon) const = 0;
 
         /// checks for overlap between a pair of muons, one from the prompt and one from the LRT pass.
-        /// using the same set of rules as resolveOverlap, decorates the muons with a variable `MuonLRTOverlapDecision` which is
+        /// using the same set of rules as resolveOverlap, it returns a tuple for the prompt and LRT muon resp. with value
         /// 0 for muons which don't overlap, 1 if they overlap and are discareded, and 2 if they overlap and are retained.
-        virtual void checkOverlapAndDecor(const xAOD::Muon* promptMuon,
+        virtual std::tuple<int, int> checkOverlapForDecor(const xAOD::Muon* promptMuon,
                                                            const xAOD::Muon* lrtMuon) const = 0;
 
         /// check the overlap between the prompt and LRT muon collections.
         /// Will populate the two vectors passed by ref with a decision for each muon in 
         /// each collection. "true" entries are to be kept, "false" to be discarded. 
+        /// If the strategy `passThroughAndDecorate` is selected, muons are decorated with a variable `MuonLRTOverlapDecision`
+        /// which is 0 for muons which don't overlap, 1 if they overlap and are discareded, and 2 if they overlap and are retained.
+        /// In this strategy, the two vectors will be returned with all elements "true" i.e. no muons should be discarded.
         virtual void checkOverlap(const xAOD::MuonContainer & promptCollection,
                                   const xAOD::MuonContainer & lrtCollection,
                                   std::vector<bool>& promptMuonsSelectedToKeep,
