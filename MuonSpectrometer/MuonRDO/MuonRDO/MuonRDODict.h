@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -14,10 +14,12 @@
 // container
 #include "MuonRDO/MdtCsmContainer.h"
 #include "MuonRDO/RpcPadContainer.h"
+#include "MuonRDO/RpcSectorLogicContainer.h"
 #include "MuonRDO/TgcRdoContainer.h"
 #include "MuonRDO/CscRawDataContainer.h"
 #include "MuonRDO/STGC_RawDataContainer.h"
 #include "MuonRDO/MM_RawDataContainer.h"
+#include "MuonRDO/NSW_PadTriggerDataContainer.h"
 
 // collection
 #include "MuonRDO/MdtCsm.h"

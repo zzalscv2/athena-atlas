@@ -27,6 +27,13 @@
   <class name="LArTTL1" >
     <field name="m_onlineId" transient="true" />
   </class>
+
+  <class name="LArFebHeaderContainer" />
+  <class name="DataVector<LArFebHeader>" />
+  <class name="LArFebHeader" />
+  <class name="LArRawChannelContainer" />
+  <class name="std::vector<LArRawChannel>" />
+  <class name="LArRawChannel" />
  
   
 <!--

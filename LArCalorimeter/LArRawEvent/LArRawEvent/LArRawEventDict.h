@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -15,3 +15,5 @@
 #include "LArRawEvent/LArSCDigitContainer.h" 
 #include "LArRawEvent/LArRawSC.h" 
 #include "LArRawEvent/LArRawSCContainer.h" 
+#include "LArRawEvent/LArFebHeaderContainer.h" 
+#include "LArRawEvent/LArRawChannelContainer.h" 
