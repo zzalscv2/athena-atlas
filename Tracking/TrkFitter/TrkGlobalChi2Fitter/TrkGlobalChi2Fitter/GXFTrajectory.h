@@ -83,7 +83,7 @@ namespace Trk {
     std::vector < std::pair < double, double >>&scatteringAngles();
     std::vector < std::pair < double, double >>&scatteringSigmas();
     std::vector<double> & brems();
-    
+
     const TrackParameters * referenceParameters();
     bool converged() const;
     int prefit() const;
@@ -91,7 +91,7 @@ namespace Trk {
     double chi2() const;
     double prevchi2() const;
     int nDOF() const;
-  
+
     Amg::VectorX & residuals();
     Amg::VectorX & errors();
     Amg::MatrixX & weightedResidualDerivatives();
