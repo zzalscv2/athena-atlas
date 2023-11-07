@@ -173,6 +173,8 @@ def doSpecialConfiguration(f):
             ## Now that we've looked at and stored all the evgen metadata keys, we should do any requested preIncludes
             from AthenaCommon.Include import include
             for incfile in preIncludes:
+                if incfile == 'SimulationJobOptions/preInclude.RhadronsPythia8.py':
+                    incfile = 'SimulationJobOptions/preInclude.RHadronsPythia8.py' # ATLASSIM-6687 Fixup for older EVNT files
                 logDigitizationReadMetadata.info("Including %s as instructed by specialConfiguration metadata" , incfile)
                 include(incfile)
             del preIncludes
