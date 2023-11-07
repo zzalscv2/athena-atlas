@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EfexInputMonitorAlgorithm.h"
@@ -248,7 +248,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                           s = itr->second.second;
                       }
                       SlotSCID = s;
-                      s = lbnString;
+                      s = static_cast<std::string> (lbnString);
 
                       // only fill first 20 mismatches with detailed evtInfo, to avoid overpopulating debug histograms
                       if( (predictableMismatch && (m_debugEvtCount++) < 20) || (!predictableMismatch && (m_debugEvtCount2++) < 20) ) {
