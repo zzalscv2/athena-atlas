@@ -59,15 +59,19 @@ namespace InDet {
     void setCaloClusterROIHad(const ROIPhiRZContainer &rois)  { m_caloClusterROIHad = &rois; }
     std::array<double, 2>& xybeam();
 
-    std::array<std::array<std::array<int,SiCombinatorialTrackFinderData_xk::kNRapidityRanges>,SiCombinatorialTrackFinderData_xk::kNSeedTypes>,SiCombinatorialTrackFinderData_xk::kNStatEtaTypes>& summaryStatUsedInTrack();
-    std::array<std::array<int,SiCombinatorialTrackFinderData_xk::kNSeedTypes>,SiCombinatorialTrackFinderData_xk::kNStatAllTypes>& summaryStatAll();
+    std::array<std::array<std::array<int,
+      SiCombinatorialTrackFinderData_xk::kNRapidityRanges>,
+      SiCombinatorialTrackFinderData_xk::kNSeedTypes>,
+      SiCombinatorialTrackFinderData_xk::kNStatEtaTypes>& summaryStatUsedInTrack();
+    std::array<std::array<int,
+      SiCombinatorialTrackFinderData_xk::kNSeedTypes>,
+      SiCombinatorialTrackFinderData_xk::kNStatAllTypes>& summaryStatAll();
 
     SeedToTrackConversionData& conversionData();
     SiCombinatorialTrackFinderData_xk& combinatorialData();
     SiDetElementRoadMakerData_xk& roadMakerData();
 
   protected:
-    virtual void dummy() = 0; //!< make sure this cannot be instantiated (for testing)
     void setPRDtoTrackMap(const Trk::PRDtoTrackMap* prd_to_track_map) { m_combinatorialData.setPRDtoTrackMap(prd_to_track_map); }
 
   private:
@@ -94,8 +98,13 @@ namespace InDet {
     //@}
 
     /// Counters
-    std::array<std::array<std::array<int,SiCombinatorialTrackFinderData_xk::kNRapidityRanges>,SiCombinatorialTrackFinderData_xk::kNSeedTypes>,SiCombinatorialTrackFinderData_xk::kNStatEtaTypes> m_summaryStatUsedInTrack {};
-    std::array<std::array<int,SiCombinatorialTrackFinderData_xk::kNSeedTypes>,SiCombinatorialTrackFinderData_xk::kNStatAllTypes> m_summaryStatAll {};
+    std::array<std::array<std::array<int, 
+      SiCombinatorialTrackFinderData_xk::kNRapidityRanges>,
+      SiCombinatorialTrackFinderData_xk::kNSeedTypes>,
+      SiCombinatorialTrackFinderData_xk::kNStatEtaTypes> m_summaryStatUsedInTrack{};
+    std::array<std::array<int, 
+      SiCombinatorialTrackFinderData_xk::kNSeedTypes>,
+      SiCombinatorialTrackFinderData_xk::kNStatAllTypes> m_summaryStatAll{};
 
     /// @name Data members updated only by newEvent method
     //@{
@@ -108,15 +117,13 @@ namespace InDet {
     SeedToTrackConversionData m_conversionData;
     SiDetElementRoadMakerData_xk m_roadMakerData;
 
-    class ExtendedSiCombinatorialTrackFinderData_xk : public SiCombinatorialTrackFinderData_xk {
+    class ExtendedSiCombinatorialTrackFinderData_xk final: public SiCombinatorialTrackFinderData_xk {
     public:
       ExtendedSiCombinatorialTrackFinderData_xk() {};
 
       void setPRDtoTrackMap(const Trk::PRDtoTrackMap *prd_to_track_map) {
         SiCombinatorialTrackFinderData_xk::setPRDtoTrackMap(prd_to_track_map);
       }
-    protected:
-      void dummy() override {}
     };
 
     /// SiCombinatorialTrackFinderData_xk to hold the event dependent data of SiCombinatorialTrackFinder_xk.

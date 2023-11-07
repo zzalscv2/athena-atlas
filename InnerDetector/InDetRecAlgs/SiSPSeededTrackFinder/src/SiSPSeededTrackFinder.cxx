@@ -157,7 +157,7 @@ StatusCode InDet::SiSPSeededTrackFinder::execute(const EventContext& ctx) const
 ///////////////////////////////////////////////////////////////////
 
 namespace InDet {
-  class ExtendedSiTrackMakerEventData_xk : public InDet::SiTrackMakerEventData_xk
+  class ExtendedSiTrackMakerEventData_xk final: public InDet::SiTrackMakerEventData_xk
   {
   public:
     explicit ExtendedSiTrackMakerEventData_xk(const SG::ReadHandleKey<Trk::PRDtoTrackMap> &key) { 
@@ -167,7 +167,6 @@ namespace InDet {
       }
     }
   private:
-    void dummy() {}
     SG::ReadHandle<Trk::PRDtoTrackMap> m_prdToTrackMap;
   };
 }
