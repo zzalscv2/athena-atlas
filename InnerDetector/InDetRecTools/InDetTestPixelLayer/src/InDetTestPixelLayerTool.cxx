@@ -216,7 +216,7 @@ InDet::InDetTestPixelLayerTool::expectHit(
   Identifier id =
     trackpar->associatedSurface().associatedDetectorElement()->identify();
 
-  
+
   const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<InDet::SiDetectorElementStatus> pixelDetElStatus(getPixelDetElStatus(ctx));
 

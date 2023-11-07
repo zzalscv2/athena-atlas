@@ -201,7 +201,7 @@ int InDet::SiDetElementBoundaryLink_xk::intersect(const Trk::PatternTrackParamet
       InDet::SiDetElementBoundaryLink_xk::AxisDirection::NegativeX,
       InDet::SiDetElementBoundaryLink_xk::AxisDirection::PositiveY};
 
-  for (auto& testDirection : otherDirections) {
+  for (const auto& testDirection : otherDirections) {
     double testDistance = m_bound[testDirection][0]*x+m_bound[testDirection][1]*y-m_bound[testDirection][2];
     if (testDistance>distance) {
       distance = testDistance;

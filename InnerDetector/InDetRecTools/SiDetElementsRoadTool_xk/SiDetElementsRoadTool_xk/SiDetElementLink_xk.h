@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -15,94 +15,82 @@
 #ifndef SiDetElementLink_xk_H
 #define SiDetElementLink_xk_H
 
-#include "InDetReadoutGeometry/SiDetectorElement.h"
 #include <utility>
 
-namespace InDet{
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 
+namespace InDet {
 
-  class SiDetElementLink_xk
-    {
-      ///////////////////////////////////////////////////////////////////
-      // Public methods:
-      ///////////////////////////////////////////////////////////////////
+class SiDetElementLink_xk {
+  ///////////////////////////////////////////////////////////////////
+  // Public methods:
+  ///////////////////////////////////////////////////////////////////
 
-    public:
+ public:
+  class ElementWay {
+   public:
+    ElementWay(const InDet::SiDetElementLink_xk* link, float way,
+               float distance)
+        : m_link(link), m_way(way), m_distance(distance) {}
 
-       class ElementWay {
-       public:
-          ElementWay(const InDet::SiDetElementLink_xk*link, float way, float distance)
-             : m_link(link), m_way(way), m_distance(distance) {}
+    const InDet::SiDetElementLink_xk* link() const { return m_link; }
+    float way() const { return m_way; }
+    float distance() const { return m_distance; }
 
-          const InDet::SiDetElementLink_xk* link() const { return m_link; }
-          float way()                              const { return m_way; }
-          float distance()                         const { return m_distance; }
-       private: 
-        const InDet::SiDetElementLink_xk* m_link;
-        float m_way;
-        float m_distance; 
-       };
+   private:
+    const InDet::SiDetElementLink_xk* m_link;
+    float m_way;
+    float m_distance;
+  };
 
-      SiDetElementLink_xk();
-      SiDetElementLink_xk(const InDetDD::SiDetectorElement*,const double*,bool isITk = false);
-      SiDetElementLink_xk(const SiDetElementLink_xk&) = default;
-      ~SiDetElementLink_xk() = default;
-      SiDetElementLink_xk& operator  = (const SiDetElementLink_xk&) = default;
+  SiDetElementLink_xk();
+  SiDetElementLink_xk(const InDetDD::SiDetectorElement*, const double*,
+                      bool isITk = false);
+  SiDetElementLink_xk(const SiDetElementLink_xk&) = default;
+  SiDetElementLink_xk& operator=(const SiDetElementLink_xk&) = default;
+  SiDetElementLink_xk(SiDetElementLink_xk&&) = default;
+  SiDetElementLink_xk& operator=(SiDetElementLink_xk&&) = default;
+  ~SiDetElementLink_xk() = default;
+  ///////////////////////////////////////////////////////////////////
+  // Main methods
+  ///////////////////////////////////////////////////////////////////
 
-      ///////////////////////////////////////////////////////////////////
-      // Main methods
-      ///////////////////////////////////////////////////////////////////
+  void set(const double*, bool isITk = false);
+  const InDetDD::SiDetectorElement* detElement() const { return m_detelement; }
+  float phi() const { return m_phi; }
+  float z() const { return m_z; }
+  float dz() const { return m_dz; }
+  void intersect(const float*, const float*, float*) const;
+  bool intersectITk(const float*, const float*, float&) const;
 
-      void set (const double*, bool isITk = false);
-      const InDetDD::SiDetectorElement* detElement() const {return m_detelement;}
-      float phi () const {return m_phi;}
-      float z   () const {return m_z  ;}
-      float dz  () const {return m_dz ;}
-      void intersect(const float*,const float*,float*) const;
-      bool intersectITk(const float*,const float*,float&) const;
+ private:
+  const InDetDD::SiDetectorElement* m_detelement;  // note owning ptr
+  float m_phi;
+  float m_z;
+  float m_dz;
+  float m_geo[6];
+  float m_center[2];
+  float m_bound[4][3];
+};
 
-    protected:
-      
-      ///////////////////////////////////////////////////////////////////
-      // Protected Data
-      ///////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+// Inline methods
+/////////////////////////////////////////////////////////////////////////////////
 
-      const InDetDD::SiDetectorElement*   m_detelement ;
-      float                               m_phi        ;
-      float                               m_z          ;
-      float                               m_dz         ;
-      float                               m_geo     [6];
-      float                               m_center  [2];
-      float                               m_bound[4][3];
+inline SiDetElementLink_xk::SiDetElementLink_xk() {
+  m_detelement = 0;
+  m_phi = 0.;
+  m_z = 0.;
+  m_dz = 0.;
+}
 
-      ///////////////////////////////////////////////////////////////////
-      // Methods
-      ///////////////////////////////////////////////////////////////////
+inline InDet::SiDetElementLink_xk::SiDetElementLink_xk(
+    const InDetDD::SiDetectorElement* el, const double* P, bool isITk) {
+  m_detelement = el;
+  set(P, isITk);
+}
 
-    };
-  
-  /////////////////////////////////////////////////////////////////////////////////
-  // Inline methods
-  /////////////////////////////////////////////////////////////////////////////////
+}  // namespace InDet
 
-  inline SiDetElementLink_xk::SiDetElementLink_xk()
-    {
-      m_detelement = 0    ;
-      m_phi        = 0.   ;
-      m_z          = 0.   ;
-      m_dz         = 0.   ;
-    }
-
-
-  inline InDet::SiDetElementLink_xk::SiDetElementLink_xk
-    (const InDetDD::SiDetectorElement* el,const double* P,bool isITk)
-    {
-      m_detelement = el; set(P,isITk);
-    } 
-
-
-} // end of name space
-
-#endif // SiDetElementLink_xk
-
+#endif  // SiDetElementLink_xk
 

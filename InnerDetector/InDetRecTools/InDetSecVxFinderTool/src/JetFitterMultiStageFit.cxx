@@ -164,7 +164,7 @@ void JetFitterMultiStageFit::doTheFit(Trk::VxJetCandidate* myJetCandidate,
             Trk::VxVertexOnJetAxis *worseVertex(nullptr);
             for (std::vector<Trk::VxVertexOnJetAxis *>::const_iterator verticesIter = verticesBegin;
                  verticesIter != verticesEnd; ++verticesIter) {
-                if (*verticesIter == 0) {
+                if (*verticesIter == nullptr) {
                     ATH_MSG_WARNING("One vertex is empy. Problem when trying to delete incompatible vertices. No further vertices deleted.");
                 } else {
                     const Trk::FitQuality &fitQuality = (*verticesIter)->fitQuality();
@@ -195,7 +195,7 @@ void JetFitterMultiStageFit::doTheFit(Trk::VxJetCandidate* myJetCandidate,
 
         if (!performClustering) break;
 
-        // m_useFastClustering is false, so possibly can be removed ?? 
+        // m_useFastClustering is false, so possibly can be removed ??
         if (!m_useFastClustering && (int)myJetCandidate->getVerticesOnJetAxis().size()<m_maxTracksForDetailedClustering) {
             m_routines->fillTableWithFullProbOfMerging(myJetCandidate,8,false,10,0.01);
         }
