@@ -7,6 +7,28 @@
 #include "TrkVKalVrtCore/cfMomentum.h"
 #include <cmath>
 
+namespace {
+
+double vkvang_(double *crs, double *centr, const double *r__, const double *xd,
+               const double *yd) {
+  double ret_val, cosf, sinf, cosp, sinp;
+
+  /* Parameter adjustments */
+  --centr;
+  --crs;
+
+  /* Function Body */
+  sinf = (crs[1] - centr[1]) / *r__;
+  cosf = -(crs[2] - centr[2]) / *r__;
+  sinp = *xd * sinf - *yd * cosf;
+  /* vector prod. */
+  cosp = *xd * cosf + *yd * sinf;
+  /* scalar prod. */
+  ret_val = atan2(sinp, cosp);
+  return ret_val;
+}
+}  // namespace
+
 namespace Trk {
 
 /* ================================================================== */
@@ -16,12 +38,6 @@ namespace Trk {
 /*   out(3)       - vertex position estimation */
 /* Author: V.Kostioukhine */
 /* ================================================================== */
-
-void vkvfast_(double *p1, double *p2, const double *dbmag, double *out)
-{
-    double vkvFastV(double*, double*, const double* vRef, double, double *out);
-    vkvFastV(p1, p2, nullptr, (*dbmag), out);   }
-
 
 double vkvFastV(double *p1, double *p2, const double* vRef, double dbmag, double *out)
 {
@@ -179,25 +195,6 @@ double vkvFastV(double *p1, double *p2, const double* vRef, double dbmag, double
 }
 #undef cross_ref
 
-
-double vkvang_(double *crs, double *centr, const double *r__, const double *xd, const double *yd)
-{
-    double ret_val, cosf, sinf, cosp, sinp;
-
-    /* Parameter adjustments */
-    --centr;
-    --crs;
-
-    /* Function Body */
-    sinf = (crs[1] - centr[1]) / *r__;
-    cosf = -(crs[2] - centr[2]) / *r__;
-    sinp = *xd * sinf - *yd * cosf;
-/* vector prod. */
-    cosp = *xd * cosf + *yd * sinf;
-/* scalar prod. */
-    ret_val = atan2(sinp, cosp);
-    return ret_val;
-}
 
 
 } /* End of VKalVrtCore namespace */
