@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -51,9 +51,17 @@ namespace CP {
     std::fill(promptMuonsSelectedToKeep.begin(), promptMuonsSelectedToKeep.end(), true); 
     std::fill(lrtMuonsSelectedToKeep.begin(), lrtMuonsSelectedToKeep.end(), true); 
 
+    /// pre-fill vectors with the default '0 = no overlap decision'
+    std::vector<int> promptMuonsOverlapDecision, lrtMuonsOverlapDecision;
+    promptMuonsOverlapDecision.resize(promptMuonCol.size(), 0);
+    lrtMuonsOverlapDecision.resize(LRTMuonCol.size(), 0);
+
     // loop over prompt muons
+    u_int promptMuonIndex = 0;
     for (const xAOD::Muon* promptMuon : promptMuonCol){
-      // loop over lrt muons
+
+      // loop over LRT muons
+      u_int lrtMuonIndex = 0;
       for( const xAOD::Muon* lrtMuon : LRTMuonCol){
         // check for overlap
         std::pair<bool,bool> writeDecision = {true,true};
@@ -64,7 +72,10 @@ namespace CP {
             break;
           case CP::IMuonLRTOverlapRemovalTool::passThroughAndDecorate:
             /// passThroughAndDecorate strategy
-            checkOverlapAndDecor(promptMuon, lrtMuon);
+            if ( (promptMuonsOverlapDecision.at(promptMuonIndex) == 0) && (lrtMuonsOverlapDecision.at(lrtMuonIndex) == 0) ) {
+              // overwrite the decision only if no overlaps have been found yet. Do not check again if either of the leptons have found overlaps previously.
+              std::tie(promptMuonsOverlapDecision.at(promptMuonIndex), lrtMuonsOverlapDecision.at(lrtMuonIndex)) = checkOverlapForDecor(promptMuon, lrtMuon);
+            }
             break;
           default:
             ATH_MSG_FATAL("Unsupported overlap removal strategy type. Choose from 0 (`defaultStrategy`) or 1 (`passThroughAndDecorate`)");
@@ -77,8 +88,28 @@ namespace CP {
         if(!writeDecision.second){
           lrtMuonsSelectedToKeep.at(lrtMuon->index()) = false;
         }
+        ++lrtMuonIndex;
+      } // LRT muon loop ends
+      ++promptMuonIndex;
+    } // prompt muon loop ends
+
+    if (m_strategy == CP::IMuonLRTOverlapRemovalTool::passThroughAndDecorate) {
+      // if the passThroughAndDecorate strategy is selected, run a final loop over the collections to decorate the muons with the overlap resolution result.
+      static const SG::AuxElement::Decorator<int> MuonLRTOverlapDecision("MuonLRTOverlapDecision"); //0 if no overlap, 1 if overlaps and rejected, 2 if overlaps and retained
+      //final loop over prompt muons
+      u_int promptMuonIndex = 0;
+      for (const xAOD::Muon* promptMuon : promptMuonCol){
+        MuonLRTOverlapDecision(*promptMuon) = promptMuonsOverlapDecision.at(promptMuonIndex);
+        ++promptMuonIndex;
+      }
+      //final loop over LRT muons
+      u_int lrtMuonIndex = 0;
+      for (const xAOD::Muon* lrtMuon : LRTMuonCol){
+        MuonLRTOverlapDecision(*lrtMuon) = lrtMuonsOverlapDecision.at(lrtMuonIndex);
+        ++lrtMuonIndex;
       }
     }
+
   }
 
   bool MuonLRTOverlapRemovalTool::hasOverlap(const xAOD::Muon* promptMuon,
@@ -142,24 +173,20 @@ namespace CP {
     return {true,false};
   }
 
-  void MuonLRTOverlapRemovalTool::checkOverlapAndDecor(const xAOD::Muon* promptMuon,
+  std::tuple<int, int> MuonLRTOverlapRemovalTool::checkOverlapForDecor(const xAOD::Muon* promptMuon,
                                                        const xAOD::Muon* lrtMuon) const{
-
-    static const SG::AuxElement::Decorator<int> MuonLRTOverlapDecision("MuonLRTOverlapDecision"); //0 if no overlap, 1 if overlaps and rejected, 2 if overlaps and retained
+    //return values: 0 if no overlap, 1 if overlaps and rejected, 2 if overlaps and retained.
 
     if (!hasOverlap(promptMuon, lrtMuon)){
-      MuonLRTOverlapDecision(*promptMuon) = 0;
-      MuonLRTOverlapDecision(*lrtMuon) = 0;
+      return std::make_tuple(0, 0);
     }
     else {
       std::pair<bool, bool> overlapDecision = resolveOverlap(promptMuon, lrtMuon);
       if (overlapDecision.first && !overlapDecision.second) {
-        MuonLRTOverlapDecision(*promptMuon) = 2;
-        MuonLRTOverlapDecision(*lrtMuon) = 1;
+        return std::make_tuple(2, 1);
       }
       else {
-        MuonLRTOverlapDecision(*promptMuon) = 1;
-        MuonLRTOverlapDecision(*lrtMuon) = 2;
+        return std::make_tuple(1, 2);
       }
     }
   }
