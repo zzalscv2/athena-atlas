@@ -92,7 +92,7 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
   const ConstDataVector< xAOD::PhotonContainer > vertexPhotons = {ph1, ph2};
 
   CP::IPhotonVertexSelectionTool::FailType vertexFailType;
-  CP::IPhotonVertexSelectionTool::yyVtxType yyvertexVtxType;
+  CP::IPhotonVertexSelectionTool::yyVtxType yyvertexVtxType = CP::IPhotonVertexSelectionTool::Unknown;
 
   ATH_CHECK( m_photonVertexSelectionTool->decorateInputs(*(vertexPhotons.asDataVector()), &vertexFailType) );
 
