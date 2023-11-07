@@ -19,5 +19,7 @@
  <class name="DetailedTrackTruth" />
  <class name="SubDetHitStatistics" />
  <class name="TruthTrajectory" />
+ 
+ <function name="TrkTruthData::getData" />
 
 </lcgdict>
