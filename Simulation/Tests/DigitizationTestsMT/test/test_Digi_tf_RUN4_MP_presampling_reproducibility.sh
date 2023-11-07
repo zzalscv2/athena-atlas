@@ -4,7 +4,7 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-athena-mt: 8
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-include: main/Athena
 # art-output: RUN4_presampling_SP.RDO.pool.root
 # art-output: RUN4_presampling_MP_fork_evt0.RDO.pool.root
