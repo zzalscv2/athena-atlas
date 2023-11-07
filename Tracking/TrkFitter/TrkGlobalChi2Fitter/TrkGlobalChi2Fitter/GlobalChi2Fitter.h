@@ -608,7 +608,7 @@ namespace Trk {
       GXFTrajectory &,
       const ParticleHypothesis
     ) const;
-    
+
     void fillResiduals(
       const EventContext& ctx,
       Cache &,
@@ -649,7 +649,7 @@ namespace Trk {
     void updatePixelROTs(
       GXFTrajectory &,
       Amg::SymMatrixX &,
-      Amg::VectorX & 
+      Amg::VectorX &
     ) const;
 
 
