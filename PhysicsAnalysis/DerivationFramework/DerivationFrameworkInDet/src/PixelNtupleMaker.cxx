@@ -77,19 +77,18 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
   std::vector<int> trkdEdx(nbin_dedx,0);
 
   float maxPt = 0.0;
-  xAOD::TrackParticleContainer::const_iterator trk_maxpt;
+  const xAOD::TrackParticle* trk_maxpt = nullptr;
 
   std::vector<float> tmpCov(15,0.);
 
   // StoreGateSvc+InDetTrackParticles.msosLink
   static const SG::AuxElement::ConstAccessor<MeasurementsOnTrack>  acc_MeasurementsOnTrack("msosLink");
 
-  for (xAOD::TrackParticleContainer::const_iterator trk=tracks->begin(); trk!=tracks->end(); trk++) {
-
-    uint8_t nPixHits = 0;             (*trk)->summaryValue(nPixHits,xAOD::numberOfPixelHits); 
-    uint8_t nSCTHits = 0;             (*trk)->summaryValue(nSCTHits,xAOD::numberOfSCTHits); 
-    if ((*trk)->pt()<1000.0 && nPixHits<4) { continue; }
-    if ((*trk)->pt()<1000.0 && nSCTHits<1) { continue; }
+  for (const xAOD::TrackParticle* trk : *tracks) {
+    uint8_t nPixHits = 0;             trk->summaryValue(nPixHits,xAOD::numberOfPixelHits); 
+    uint8_t nSCTHits = 0;             trk->summaryValue(nSCTHits,xAOD::numberOfSCTHits); 
+    if (trk->pt()<1000.0 && nPixHits<4) { continue; }
+    if (trk->pt()<1000.0 && nSCTHits<1) { continue; }
 
     std::vector<uint64_t> holeIndex;
     std::vector<int> clusterLayer;
@@ -127,7 +126,7 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
     std::vector<std::vector<int>> rdoPhi;
     std::vector<std::vector<int>> rdoEta;
 
-    const MeasurementsOnTrack& measurementsOnTrack = acc_MeasurementsOnTrack(*(*trk));
+    const MeasurementsOnTrack& measurementsOnTrack = acc_MeasurementsOnTrack(*trk);
     for (const auto & msos_iter : measurementsOnTrack) {  
       if (!msos_iter.isValid()) { continue; }
       const xAOD::TrackStateValidation* msos = *msos_iter; 
@@ -247,7 +246,7 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
           }
 
           float charge = clus_itr->auxdata<std::vector<float>>("rdo_charge")[i];
-          if ((*trk)->pt()>2000.0) {
+          if (trk->pt()>2000.0) {
             tmpToT.push_back(tot);
             tmpCharge.push_back(charge);
             tmpPhi.push_back(phi);
@@ -303,55 +302,55 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
       static const SG::AuxElement::Decorator<std::vector<std::vector<int>>>   RdoPhi("RdoPhi");
       static const SG::AuxElement::Decorator<std::vector<std::vector<int>>>   RdoEta("RdoEta");
 
-      d0err(*(*trk))             = (*trk)->definingParametersCovMatrixVec().at(0);
-      z0err(*(*trk))             = (*trk)->definingParametersCovMatrixVec().at(2);
-      HoleIndex(*(*trk))         = std::move(holeIndex);
-      ClusterLayer(*(*trk))      = std::move(clusterLayer);
-      ClusterBEC(*(*trk))        = std::move(clusterBEC);
-      ClusterModulePhi(*(*trk))  = std::move(clusterModulePhi);
-      ClusterModuleEta(*(*trk))  = std::move(clusterModuleEta);
-      ClusterCharge(*(*trk))     = std::move(clusterCharge);
-      ClusterToT(*(*trk))        = std::move(clusterToT);
-      ClusterL1A(*(*trk))        = std::move(clusterL1A);
-      ClusterIsSplit(*(*trk))    = std::move(clusterIsSplit);
-      ClusterSize(*(*trk))       = std::move(clusterSize);
-      ClusterSizePhi(*(*trk))    = std::move(clusterSizePhi);
-      ClusterSizeZ(*(*trk))      = std::move(clusterSizeZ);
-      ClusterIsEdge(*(*trk))     = std::move(isEdge);
-      ClusterIsOverflow(*(*trk)) = std::move(isOverflow);
-      TrackLocalPhi(*(*trk))     = std::move(trackPhi);
-      TrackLocalTheta(*(*trk))   = std::move(trackTheta);
-      TrackLocalX(*(*trk))       = std::move(trackX);
-      TrackLocalY(*(*trk))       = std::move(trackY);
-      ClusterLocalX(*(*trk))     = std::move(localX);
-      ClusterLocalY(*(*trk))     = std::move(localY);
-      ClusterGlobalX(*(*trk))    = std::move(globalX);
-      ClusterGlobalY(*(*trk))    = std::move(globalY);
-      ClusterGlobalZ(*(*trk))    = std::move(globalZ);
-      UnbiasedResidualX(*(*trk)) = std::move(unbiasedResidualX);
-      UnbiasedResidualY(*(*trk)) = std::move(unbiasedResidualY);
-      ClusterIsolation10x2(*(*trk)) = std::move(clusterIsolation10x2);
-      ClusterIsolation20x4(*(*trk)) = std::move(clusterIsolation20x4);
-      NumTotalClustersPerModule(*(*trk)) = std::move(numTotalClustersPerModule);
-      NumTotalPixelsPerModule(*(*trk))   = std::move(numTotalPixelsPerModule);
-      ModuleLorentzShift(*(*trk)) = std::move(moduleLorentzShift);
-      RdoToT(*(*trk))    = std::move(rdoToT);
-      RdoCharge(*(*trk)) = std::move(rdoCharge);
-      RdoPhi(*(*trk))    = std::move(rdoPhi);
-      RdoEta(*(*trk))    = std::move(rdoEta);
+      d0err(*trk)                = trk->definingParametersCovMatrixVec().at(0);
+      z0err(*trk)                = trk->definingParametersCovMatrixVec().at(2);
+      HoleIndex(*trk)            = std::move(holeIndex);
+      ClusterLayer(*trk)         = std::move(clusterLayer);
+      ClusterBEC(*trk)           = std::move(clusterBEC);
+      ClusterModulePhi(*trk)     = std::move(clusterModulePhi);
+      ClusterModuleEta(*trk)     = std::move(clusterModuleEta);
+      ClusterCharge(*trk)        = std::move(clusterCharge);
+      ClusterToT(*trk)           = std::move(clusterToT);
+      ClusterL1A(*trk)           = std::move(clusterL1A);
+      ClusterIsSplit(*trk)       = std::move(clusterIsSplit);
+      ClusterSize(*trk)          = std::move(clusterSize);
+      ClusterSizePhi(*trk)       = std::move(clusterSizePhi);
+      ClusterSizeZ(*trk)         = std::move(clusterSizeZ);
+      ClusterIsEdge(*trk)        = std::move(isEdge);
+      ClusterIsOverflow(*trk)    = std::move(isOverflow);
+      TrackLocalPhi(*trk)        = std::move(trackPhi);
+      TrackLocalTheta(*trk)      = std::move(trackTheta);
+      TrackLocalX(*trk)          = std::move(trackX);
+      TrackLocalY(*trk)          = std::move(trackY);
+      ClusterLocalX(*trk)        = std::move(localX);
+      ClusterLocalY(*trk)        = std::move(localY);
+      ClusterGlobalX(*trk)       = std::move(globalX);
+      ClusterGlobalY(*trk)       = std::move(globalY);
+      ClusterGlobalZ(*trk)       = std::move(globalZ);
+      UnbiasedResidualX(*trk)    = std::move(unbiasedResidualX);
+      UnbiasedResidualY(*trk)    = std::move(unbiasedResidualY);
+      ClusterIsolation10x2(*trk) = std::move(clusterIsolation10x2);
+      ClusterIsolation20x4(*trk) = std::move(clusterIsolation20x4);
+      NumTotalClustersPerModule(*trk) = std::move(numTotalClustersPerModule);
+      NumTotalPixelsPerModule(*trk)   = std::move(numTotalPixelsPerModule);
+      ModuleLorentzShift(*trk)   = std::move(moduleLorentzShift);
+      RdoToT(*trk)    = std::move(rdoToT);
+      RdoCharge(*trk) = std::move(rdoCharge);
+      RdoPhi(*trk)    = std::move(rdoPhi);
+      RdoEta(*trk)    = std::move(rdoEta);
     }
 
     // further track selection for slimmed track variables
-    uint8_t nPixelDeadSensor = 0;     (*trk)->summaryValue(nPixelDeadSensor,xAOD::numberOfPixelDeadSensors);
-    uint8_t numberOfPixelHits= 0;     (*trk)->summaryValue(numberOfPixelHits,xAOD::numberOfPixelHits);
-    uint8_t numberOfPixelHoles= 0;    (*trk)->summaryValue(numberOfPixelHoles,xAOD::numberOfPixelHoles);
-    uint8_t numberOfPixelOutliers= 0; (*trk)->summaryValue(numberOfPixelOutliers,xAOD::numberOfPixelOutliers);
-    uint8_t nSCTHoles = 0;            (*trk)->summaryValue(nSCTHoles,xAOD::numberOfSCTHoles); 
-    uint8_t nPixSharedHits = 0;       (*trk)->summaryValue(nPixSharedHits,xAOD::numberOfPixelSharedHits); 
-    uint8_t nSCTSharedHits = 0;       (*trk)->summaryValue(nSCTSharedHits,xAOD::numberOfSCTSharedHits); 
+    uint8_t nPixelDeadSensor = 0;     trk->summaryValue(nPixelDeadSensor,xAOD::numberOfPixelDeadSensors);
+    uint8_t numberOfPixelHits= 0;     trk->summaryValue(numberOfPixelHits,xAOD::numberOfPixelHits);
+    uint8_t numberOfPixelHoles= 0;    trk->summaryValue(numberOfPixelHoles,xAOD::numberOfPixelHoles);
+    uint8_t numberOfPixelOutliers= 0; trk->summaryValue(numberOfPixelOutliers,xAOD::numberOfPixelOutliers);
+    uint8_t nSCTHoles = 0;            trk->summaryValue(nSCTHoles,xAOD::numberOfSCTHoles); 
+    uint8_t nPixSharedHits = 0;       trk->summaryValue(nPixSharedHits,xAOD::numberOfPixelSharedHits); 
+    uint8_t nSCTSharedHits = 0;       trk->summaryValue(nSCTSharedHits,xAOD::numberOfSCTSharedHits); 
 
     // loose track selection
-    bool passLooseCut = static_cast<bool>(m_selector->accept(*trk));
+    bool passLooseCut = static_cast<bool>(m_selector->accept(trk));
     if (!passLooseCut) { continue; }
 
     //==================
@@ -374,8 +373,8 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
       else if (clusterBEC.at(i)==-2 && clusterLayer.at(i)==2) { checkEC3++; }
     }
 
-    if ((*trk)->pt()>2000.0 && nPixelDeadSensor==0) {
-      int ietabin = trunc(((*trk)->eta()+3.0)/0.2);
+    if (trk->pt()>2000.0 && nPixelDeadSensor==0) {
+      int ietabin = trunc((trk->eta()+3.0)/0.2);
 
       std::for_each((trkEta.begin()+ietabin),(trkEta.begin()+ietabin+1),[](int &n){ n++; }); 
       if (numberOfPixelHoles>0) { std::for_each((trkHole.begin()+ietabin),(trkHole.begin()+ietabin+1),[](int &n){ n++; }); }
@@ -453,8 +452,8 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
     }
     if (isAlphaCut) { continue; }
 
-    if ((*trk)->pt()>maxPt) {
-      maxPt = (*trk)->pt();
+    if (trk->pt()>maxPt) {
+      maxPt = trk->pt();
       trk_maxpt = trk;
     }
 
@@ -520,7 +519,7 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
   if (m_storeMode==2) {
     if (maxPt>0.0) {
       xAOD::TrackParticle* tp = new xAOD::TrackParticle();
-      tp->makePrivateStore(*(*trk_maxpt));
+      tp->makePrivateStore(*trk_maxpt);
       tp->setDefiningParametersCovMatrixVec(tmpCov);
 
       static const SG::AuxElement::Decorator<std::vector<int>> TrackEtaIBL("TrackEtaIBL");
