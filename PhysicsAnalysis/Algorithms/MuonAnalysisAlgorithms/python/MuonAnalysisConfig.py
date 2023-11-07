@@ -4,7 +4,6 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from AthenaConfiguration.Enums import LHCPeriod
-import ROOT
 
 
 class MuonCalibrationConfig (ConfigBlock):
@@ -98,15 +97,15 @@ class MuonWorkingPointConfig (ConfigBlock) :
         self.addOption ('noEffSF', False, type=bool)
 
     def makeAlgs (self, config) :
-
+        from xAODMuon.xAODMuonEnums import xAODMuonEnums
         if self.quality == 'Tight' :
-            quality = ROOT.xAOD.Muon.Tight
+            quality = xAODMuonEnums.Quality.Tight
         elif self.quality == 'Medium' :
-            quality = ROOT.xAOD.Muon.Medium
+            quality = xAODMuonEnums.Quality.Medium
         elif self.quality == 'Loose' :
-            quality = ROOT.xAOD.Muon.Loose
+            quality = xAODMuonEnums.Quality.Loose
         elif self.quality == 'VeryLoose' :
-            quality = ROOT.xAOD.Muon.VeryLoose
+            quality = xAODMuonEnums.Quality.VeryLoose
         elif self.quality == 'HighPt' :
             quality = 4
         elif self.quality == 'LowPtEfficiency' :
