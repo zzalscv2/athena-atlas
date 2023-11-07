@@ -17,6 +17,18 @@ def JETM3SkimmingToolCfg(ConfigFlags):
     electronTriggers = TriggerLists.single_el_Trig(ConfigFlags)
     muonTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
 
+    addRun3ElectronTriggers = ["HLT_e17_lhvloose_L1EM15VHI","HLT_e20_lhvloose_L1EM15VH", "HLT_e250_etcut_L1EM22VHI",
+                               "HLT_e26_lhtight_ivarloose_L1EM22VHI","HLT_e26_lhtight_ivarloose_L1eEM26M",
+                               "HLT_e60_lhmedium_L1EM22VHI","HLT_e60_lhmedium_L1eEM26M",
+                               "HLT_e140_lhloose_L1EM22VHI","HLT_e140_lhloose_L1eEM26M",
+                               "HLT_e300_etcut_L1EM22VHI","HLT_e300_etcut_L1eEM26M",
+                               "HLT_e140_lhloose_noringer_L1EM22VHI","HLT_e140_lhloose_noringer_L1eEM26M"]
+
+    addRund3MuonTriggers = ["HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH","HLT_mu60_0eta105_msonly_L1MU14FCH","HLT_mu60_L1MU14FCH","HLT_mu80_msonly_3layersEC_L1MU14FCH"]
+
+    electronTriggers = electronTriggers+addRun3ElectronTriggers
+    muonTriggers = muonTriggers+addRund3MuonTriggers
+
     elofflinesel = '(count((Electrons.pt > 20*GeV) && (Electrons.DFCommonElectronsLHMedium)) >= 2)'
     muofflinesel = '(count((Muons.pt > 20*GeV) && (Muons.DFCommonMuonPassPreselection)) >= 2)'
 
@@ -233,20 +245,22 @@ def JETM3Cfg(ConfigFlags):
                                             "Electrons", "Photons", "Muons", "TauJets",
                                             "MET_Baseline_AntiKt4EMTopo","MET_Baseline_AntiKt4EMPFlow",
                                             "AntiKt4EMPFlowJets","AntiKt4EMTopoJets",
-                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                             "BTagging_AntiKt4EMPFlow"]
     
-    JETM3SlimmingHelper.AllVariables = ["CaloCalTopoClusters",
-                                        "GlobalChargedParticleFlowObjects", "GlobalNeutralParticleFlowObjects",
-                                        "CHSGChargedParticleFlowObjects", "CHSGNeutralParticleFlowObjects",
-                                        "MuonSegments",
-                                        "LVL1JetRoIs",
+    JETM3SlimmingHelper.AllVariables = ["CHSGChargedParticleFlowObjects", "CHSGNeutralParticleFlowObjects",
+                                        "MuonSegments","LVL1JetRoIs",
                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape"]
 
     JETM3SlimmingHelper.ExtraVariables = ["AntiKt4EMPFlowJets.passOnlyBJVT.DFCommonJets_bJvt.isJvtHS.isJvtPU",
                                           "Muons.energyLossType.EnergyLoss.ParamEnergyLoss.MeasEnergyLoss.EnergyLossSigma.MeasEnergyLossSigma.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus"]
     
+    # Low-level variables
+    from DerivationFrameworkJetEtMiss.CommonJETMXContent import ClusterVariables, FlowElementVariables
+    JETM3SlimmingHelper.ExtraVariables += [".".join(["CaloCalTopoClusters"] + ClusterVariables)]
+    JETM3SlimmingHelper.ExtraVariables += [".".join(["GlobalChargedParticleFlowObjects"] + FlowElementVariables)]
+    JETM3SlimmingHelper.ExtraVariables += [".".join(["GlobalNeutralParticleFlowObjects"] + FlowElementVariables)]
+
     # Truth containers
     if ConfigFlags.Input.isMC:
 

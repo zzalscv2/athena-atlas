@@ -424,6 +424,9 @@ class SlimmingHelper:
                 elif collectionName=="AntiKt4EMTopoLowPtJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4EMTopoLowPtJetsCPContent import AntiKt4EMTopoLowPtJetsCPContent
                         items.extend(AntiKt4EMTopoLowPtJetsCPContent)
+                elif collectionName=="AntiKt4EMTopoNoPtCutJets":
+                        from DerivationFrameworkJetEtMiss.AntiKt4EMTopoNoPtCutJetsCPContent import AntiKt4EMTopoNoPtCutJetsCPContent
+                        items.extend(AntiKt4EMTopoNoPtCutJetsCPContent)
                 elif collectionName=="AntiKt4EMPFlowJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4EMPFlowJetsCPContent import AntiKt4EMPFlowJetsCPContent
                         items.extend(AntiKt4EMPFlowJetsCPContent)
@@ -466,6 +469,9 @@ class SlimmingHelper:
                 elif collectionName=="AntiKt10TruthSoftDropBeta100Zcut10Jets":
                         from DerivationFrameworkJetEtMiss.AntiKt10TruthSoftDropBeta100Zcut10JetsCPContent import AntiKt10TruthSoftDropBeta100Zcut10JetsCPContent
                         items.extend(AntiKt10TruthSoftDropBeta100Zcut10JetsCPContent)
+                elif collectionName=="AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets":
+                        from DerivationFrameworkJetEtMiss.AntiKt10TruthDressedWZSoftDropBeta100Zcut10JetsCPContent import AntiKt10TruthDressedWZSoftDropBeta100Zcut10JetsCPContent
+                        items.extend(AntiKt10TruthDressedWZSoftDropBeta100Zcut10JetsCPContent)
                 elif collectionName=="AntiKt10UFOCHSSoftDropBeta100Zcut10Jets":
                         from DerivationFrameworkJetEtMiss.AntiKt10UFOCHSSoftDropBeta100Zcut10JetsCPContent import AntiKt10UFOCHSSoftDropBeta100Zcut10JetsCPContent
                         items.extend(AntiKt10UFOCHSSoftDropBeta100Zcut10JetsCPContent)

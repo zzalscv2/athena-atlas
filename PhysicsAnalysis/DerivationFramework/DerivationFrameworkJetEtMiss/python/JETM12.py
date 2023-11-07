@@ -18,6 +18,27 @@ def JETM12SkimmingToolCfg(ConfigFlags):
     elTriggers = TriggerLists.single_el_Trig(ConfigFlags)
     muTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
 
+    addRun3METTriggers = ["HLT_xe55_cell_xe70_tcpufit_xe90_pfsum_vssk_L1XE50","HLT_xe55_cell_xe70_tcpufit_xe95_pfsum_cssk_L1XE50","HLT_xe60_cell_xe95_pfsum_cssk_L1XE50","HLT_xe65_cell_xe100_mhtpufit_pf_L1XE50","HLT_xe65_cell_xe105_mhtpufit_em_L1XE50","HLT_xe75_cell_xe65_tcpufit_xe90_trkmht_L1XE50","HLT_xe65_cell_xe90_pfopufit_L1XE50","HLT_xe80_cell_xe115_tcpufit_L1XE50"]
+
+    addRun3ElectronTriggers = ["HLT_e17_lhvloose_L1EM15VHI","HLT_e20_lhvloose_L1EM15VH", "HLT_e250_etcut_L1EM22VHI",
+                               "HLT_e26_lhtight_ivarloose_L1EM22VHI","HLT_e26_lhtight_ivarloose_L1eEM26M",
+                               "HLT_e60_lhmedium_L1EM22VHI","HLT_e60_lhmedium_L1eEM26M",
+                               "HLT_e140_lhloose_L1EM22VHI","HLT_e140_lhloose_L1eEM26M",
+                               "HLT_e300_etcut_L1EM22VHI","HLT_e300_etcut_L1eEM26M",
+                               "HLT_e140_lhloose_noringer_L1EM22VHI","HLT_e140_lhloose_noringer_L1eEM26M"]
+
+    addRund3MuonTriggers = ["HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH","HLT_mu60_0eta105_msonly_L1MU14FCH","HLT_mu60_L1MU14FCH","HLT_mu80_msonly_3layersEC_L1MU14FCH"]
+
+    metTriggers = metTriggers+addRun3METTriggers
+    elTriggers = elTriggers+addRun3ElectronTriggers
+    muTriggers = muTriggers+addRund3MuonTriggers
+
+    # Check if the solenoid was turned on to define skimming
+    from CoolConvUtilities.MagFieldUtils import getFieldForRun
+    magfield=getFieldForRun(ConfigFlags.Input.RunNumber[0],lumiblock=ConfigFlags.Input.LumiBlockNumber[0])
+    addTtbarEvents = magfield.solenoidCurrent() > 0
+
+
     #xAODStringSkimmingTool cannot handle electron trigger names, therefore need to use TriggerSkimmingTool
     tracks = 'InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm'
 
@@ -41,14 +62,6 @@ def JETM12SkimmingToolCfg(ConfigFlags):
     acc.addPublicTool(skimmingTool_W)
     skimmingTool_Mu = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_mu", expression = expression_Mu)
     acc.addPublicTool(skimmingTool_Mu)
-    skimmingTool_ttbarEl = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarEl", expression = expression_ttbarEl)
-    acc.addPublicTool(skimmingTool_ttbarEl)
-    skimmingTool_ttbarElNoTag = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarElNoTag", expression = expression_ttbarElNoTag)
-    acc.addPublicTool(skimmingTool_ttbarElNoTag)
-    skimmingTool_ttbarMu = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarMu", expression = expression_ttbarMu)
-    acc.addPublicTool(skimmingTool_ttbarMu)
-    skimmingTool_ttbarMuNoTag = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarMuNoTag", expression = expression_ttbarMuNoTag)
-    acc.addPublicTool(skimmingTool_ttbarMuNoTag)
 
     # Trigger skimming tools
     JETM12TriggerSkimmingTool_W = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "JETM12TriggerSkimmingTool_W", TriggerListOR = metTriggers)
@@ -62,19 +75,31 @@ def JETM12SkimmingToolCfg(ConfigFlags):
     acc.addPublicTool(JETM12SkimmingTool_W)
     JETM12SkimmingTool_Mu = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_Mu", FilterList=[skimmingTool_Mu, JETM12TriggerSkimmingTool_mu])
     acc.addPublicTool(JETM12SkimmingTool_Mu)
-    JETM12SkimmingTool_ttbarEl      = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarEl",      FilterList=[skimmingTool_ttbarEl, JETM12TriggerSkimmingTool_ele])
-    acc.addPublicTool(JETM12SkimmingTool_ttbarEl)
-    JETM12SkimmingTool_ttbarElNoTag = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarElNoTag", FilterList=[skimmingTool_ttbarElNoTag, JETM12TriggerSkimmingTool_ele])
-    acc.addPublicTool(JETM12SkimmingTool_ttbarElNoTag)
-    JETM12SkimmingTool_ttbarMu      = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarMu",      FilterList=[skimmingTool_ttbarMu, JETM12TriggerSkimmingTool_mu])
-    acc.addPublicTool(JETM12SkimmingTool_ttbarMu)
-    JETM12SkimmingTool_ttbarMuNoTag = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarMuNoTag", FilterList=[skimmingTool_ttbarMuNoTag, JETM12TriggerSkimmingTool_mu])
-    acc.addPublicTool(JETM12SkimmingTool_ttbarMuNoTag)
 
-    JETM12SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(name="JETM12SkimmingTool", FilterList=[JETM12SkimmingTool_W,
-                                                                                                                    JETM12SkimmingTool_Mu,
-                                                                                                                    JETM12SkimmingTool_ttbarEl,JETM12SkimmingTool_ttbarMu,
-                                                                                                                    JETM12SkimmingTool_ttbarElNoTag, JETM12SkimmingTool_ttbarMuNoTag])
+    finalSkimmingTools = [JETM12SkimmingTool_W,JETM12SkimmingTool_Mu]
+
+    if addTtbarEvents:
+        skimmingTool_ttbarEl = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarEl", expression = expression_ttbarEl)
+        acc.addPublicTool(skimmingTool_ttbarEl)
+        skimmingTool_ttbarElNoTag = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarElNoTag", expression = expression_ttbarElNoTag)
+        acc.addPublicTool(skimmingTool_ttbarElNoTag)
+        skimmingTool_ttbarMu = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarMu", expression = expression_ttbarMu)
+        acc.addPublicTool(skimmingTool_ttbarMu)
+        skimmingTool_ttbarMuNoTag = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarMuNoTag", expression = expression_ttbarMuNoTag)
+        acc.addPublicTool(skimmingTool_ttbarMuNoTag)
+
+        JETM12SkimmingTool_ttbarEl      = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarEl",FilterList=[skimmingTool_ttbarEl,JETM12TriggerSkimmingTool_ele])
+        acc.addPublicTool(JETM12SkimmingTool_ttbarEl)
+        JETM12SkimmingTool_ttbarElNoTag = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarElNoTag",FilterList=[skimmingTool_ttbarElNoTag,JETM12TriggerSkimmingTool_ele])
+        acc.addPublicTool(JETM12SkimmingTool_ttbarElNoTag)
+        JETM12SkimmingTool_ttbarMu      = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarMu",FilterList=[skimmingTool_ttbarMu,JETM12TriggerSkimmingTool_mu])
+        acc.addPublicTool(JETM12SkimmingTool_ttbarMu)
+        JETM12SkimmingTool_ttbarMuNoTag = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarMuNoTag",FilterList=[skimmingTool_ttbarMuNoTag,JETM12TriggerSkimmingTool_mu])
+        acc.addPublicTool(JETM12SkimmingTool_ttbarMuNoTag)
+
+        finalSkimmingTools = [JETM12SkimmingTool_W, JETM12SkimmingTool_Mu, JETM12SkimmingTool_ttbarEl, JETM12SkimmingTool_ttbarMu, JETM12SkimmingTool_ttbarElNoTag, JETM12SkimmingTool_ttbarMuNoTag]
+
+    JETM12SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(name="JETM12SkimmingTool", FilterList=finalSkimmingTools)
     acc.addPublicTool(JETM12SkimmingTool, primary = True)
 
     return(acc)
@@ -84,8 +109,19 @@ def JETM12AugmentationToolsForSkimmingCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     # Loose tracks with pT > 1000 MeV and Nonprompt_All_MaxWeight TTVA
-    from IsolationAlgs.IsoToolsConfig import TrackIsolationToolCfg
-    TrackIsoTool = acc.popToolsAndMerge(TrackIsolationToolCfg(ConfigFlags))
+    toolkwargs = {}
+    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    toolkwargs["TrackSelectionTool"] = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(ConfigFlags,
+                                                                                              name = "TrackSelectionTool1000_JETM12",
+                                                                                              minPt = 1000.))
+
+    #Nonprompt_All_MaxWeight TTVA
+    from IsolationAlgs.IsoToolsConfig import isoTTVAToolCfg
+    toolkwargs['TTVATool'] = acc.popToolsAndMerge(isoTTVAToolCfg(ConfigFlags))
+
+    toolkwargs["name"] = "TrackIsolationToolPt1000"
+    TrackIsoTool = CompFactory.xAOD.TrackIsolationTool(**toolkwargs)
+    acc.addPublicTool(TrackIsoTool)
 
     from xAODPrimitives.xAODIso import xAODIso as isoPar
     Pt1000IsoTrackDecorator = CompFactory.DerivationFramework.trackIsolationDecorator(name = "Pt1000IsoTrackDecorator",
@@ -268,7 +304,7 @@ def JETM12Cfg(ConfigFlags):
                                              "BTagging_AntiKt4EMPFlow"]
 
     JETM12SlimmingHelper.AllVariables = ["MuonSegments","InDetTrackParticles",
-                                         "Kt4EMPFlowEventShape","CaloCalTopoClusters"]
+                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","CaloCalTopoClusters"]
 
     JETM12SlimmingHelper.ExtraVariables = ["InDetTrackParticles.TrkIsoPt1000_ptcone40.TrkIsoPt1000_ptcone30.TrkIsoPt1000_ptcone20.TrkIsoPt500_ptcone40.TrkIsoPt500_ptcone30.TrkIsoPt500_ptcone20"]
 
