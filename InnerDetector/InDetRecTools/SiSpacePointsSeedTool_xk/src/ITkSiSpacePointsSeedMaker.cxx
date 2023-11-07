@@ -360,7 +360,7 @@ void SiSpacePointsSeedMaker::newRegion(const EventContext &ctx, EventData &data,
       //
       for (const IdentifierHash &l : vPixel)
       {
-        auto w = spacepointsPixel->indexFindPtr(l);
+        const auto *w = spacepointsPixel->indexFindPtr(l);
         if (w == nullptr)
           continue;
         for (const Trk::SpacePoint *sp : *w)
@@ -396,7 +396,7 @@ void SiSpacePointsSeedMaker::newRegion(const EventContext &ctx, EventData &data,
       //
       for (const IdentifierHash &l : vStrip)
       {
-        auto w = spacepointsStrip->indexFindPtr(l);
+        const auto *w = spacepointsStrip->indexFindPtr(l);
         if (w == nullptr)
           continue;
         for (const Trk::SpacePoint *sp : *w)

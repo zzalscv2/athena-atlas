@@ -294,7 +294,7 @@ namespace InDet
 	Trk::VxVertexOnJetAxis* worseVertex(nullptr);
 	for (std::vector<Trk::VxVertexOnJetAxis*>::const_iterator verticesIter=verticesBegin;
 	     verticesIter!=verticesEnd;++verticesIter) {
-	  if (*verticesIter==0) {
+	  if (*verticesIter==nullptr) {
 	    if (msgLvl(MSG::WARNING)) msg() <<  "One vertex is empy. Problem when trying to delete incompatible vertices. No further vertices deleted." << endmsg;
 	  } else {
 	    const Trk::FitQuality & fitQuality=(*verticesIter)->fitQuality();
