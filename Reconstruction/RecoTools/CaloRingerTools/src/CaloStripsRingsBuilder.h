@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef CALORINGERTOOLS_CALOASYMRINGSBUILDER_H
-#define CALORINGERTOOLS_CALOASYMRINGSBUILDER_H
+#ifndef CALORINGERTOOLS_CALOSTRIPSRINGSBUILDER_H
+#define CALORINGERTOOLS_CALOSTRIPSRINGSBUILDER_H
 
 // Base includes:
 #include "CaloRingerTools/ICaloRingsBuilder.h"
@@ -11,24 +11,24 @@
 
 namespace Ringer {
 
-class CaloAsymRingsBuilder : public CaloRingsBuilder
+class CaloStripsRingsBuilder : public CaloRingsBuilder
 {
 
   public:
 
-    /// @name CaloAsymRingsBuilder ctors and dtors:
+    /// @name RawCaloStripsBuilder ctors and dtors:
     /// @{
-    /** 
+    /**
      * @brief Default constructor
      **/
-    CaloAsymRingsBuilder(const std::string& type,
-                         const std::string& name,
-                         const IInterface* parent);
+    CaloStripsRingsBuilder(const std::string& type,
+                     const std::string& name,
+                     const IInterface* parent);
 
     /** 
      * @brief Destructor
      **/
-    ~CaloAsymRingsBuilder();
+    ~CaloStripsRingsBuilder();
     /// @}
     
     /// Tool main methods:
@@ -42,22 +42,27 @@ class CaloAsymRingsBuilder : public CaloRingsBuilder
      **/
     virtual StatusCode finalize() override;
     /// @}
- 
+
   protected:
-    //
-    /// Tool protected methods:
-    /// @{
-    /** 
-     * @brief main method where the RingSets are built.
-    /// @}
 
+    /**
+     * @brief main method where the strips are build
+     *
+     * NOTE: Please note that RingSets are the strip sets
      **/
-    virtual StatusCode buildRingSet( 
-                                    const xAOD::RingSetConf::RawConf &rawConf,
-                                    const AtlasGeoPoint &seed,
-                                    xAOD::RingSet *rs) override;
+    virtual StatusCode buildRingSet(
+        const xAOD::RingSetConf::RawConf &rawConf,
+        const AtlasGeoPoint &seed,
+        xAOD::RingSet *rs);
     /// @}
 
+    /// Tool props (python configurables):
+    /// @{
+    /**
+     * @brief the axis to build the strips
+     **/
+    std::size_t m_axis;
+    /// @}
     // Tool pro (python configurables):
     /// @{
     /**
@@ -70,12 +75,14 @@ class CaloAsymRingsBuilder : public CaloRingsBuilder
     bool m_doPhiAxesDivision;
 
     bool m_doTransverseEnergy;
+
+
     /// @}
-    
-   
+
 };
 
 } // namespace Ringer
 
 #endif
+
 

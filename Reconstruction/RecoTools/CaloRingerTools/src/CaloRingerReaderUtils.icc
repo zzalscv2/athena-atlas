@@ -65,6 +65,15 @@ template< typename container_t >
 void BuildCaloRingsFctor<container_t>::operator() ( const particle_t *part )
 {
 
+  auto ringsELReader = xAOD::getCaloRingsReader();
+  const xAOD::CaloRingsLinks *caloRingsLinks(nullptr);
+  
+  try { 
+    caloRingsLinks = &(ringsELReader(*part)); 
+  } catch ( const std::exception &e) { 
+    ATH_MSG_DEBUG("Couldn't retrieve CaloRingsELVec. Reason: " << e.what()); 
+  }
+
   incrementCounter(); displayLoopingMessage();
 
   // Retrieve clusters element links:
@@ -111,8 +120,10 @@ void BuildCaloRingsFctor<container_t>::operator() ( const particle_t *part )
     clRingsLinks.push_back( ringsEL );
   }
 
-  // Decorate particle with CaloRings:
-  m_decor->operator()( *part ) = clRingsLinks;
+  if(!caloRingsLinks){
+    // Decorate particle with CaloRings:
+    m_decor->operator()( *part ) = clRingsLinks;
+  }
 
   checkRelease();
 }
