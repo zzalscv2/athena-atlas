@@ -30,10 +30,17 @@ namespace PixelChargeCalib{
     
   private:
     virtual ChargeCalibrationBundle 
-    parseImpl(unsigned int moduleHash, const nlohmann::json & data) override final;
+      parseImpl(unsigned int moduleHash, const nlohmann::json & data, int inputSource) override final;
     
     virtual ChargeCalibrationBundle
-    parseImpl(unsigned int /*moduleHash*/, const std::string & /*data*/) override final {
+      parseImpl(unsigned int /*hash*/, const nlohmann::json & /*data*/) override final {
+      PixelChargeCalib::ChargeCalibrationBundle b(0);
+      b.isValid=false;
+      return b;
+    }
+    
+    virtual ChargeCalibrationBundle
+      parseImpl(unsigned int /*moduleHash*/, const std::string & /*data*/) override final {
       PixelChargeCalib::ChargeCalibrationBundle b(0);
       b.isValid=false;
       return b;

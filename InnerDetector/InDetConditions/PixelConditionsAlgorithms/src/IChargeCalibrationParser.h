@@ -41,6 +41,10 @@ namespace PixelChargeCalib{
     ChargeCalibrationBundle parse(unsigned int hash, const T & data){ 
       return parseImpl(hash, data); 
     }
+    template<class T> 
+      ChargeCalibrationBundle parse(unsigned int hash, const T & data, int inputSource){
+      return parseImpl(hash, data, inputSource); 
+    }
     virtual ~IChargeCalibrationParser() = default;
     
   protected:
@@ -72,10 +76,12 @@ namespace PixelChargeCalib{
     
   private:
     virtual ChargeCalibrationBundle
-    parseImpl(unsigned int  /*hash*/, const nlohmann::json & /*data*/) = 0;
+      parseImpl(unsigned int  /*hash*/, const nlohmann::json & /*data*/, int /*inputSource*/) = 0;
     virtual ChargeCalibrationBundle
-    parseImpl(unsigned int  /*hash*/, const std::string & /*data*/) = 0;
- };
+      parseImpl(unsigned int  /*hash*/, const nlohmann::json & /*data*/) = 0;
+    virtual ChargeCalibrationBundle
+      parseImpl(unsigned int  /*hash*/, const std::string & /*data*/) = 0;
+  };
 }
 
 #endif

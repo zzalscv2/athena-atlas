@@ -98,7 +98,7 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
           IdentifierHash wafer_hash = IdentifierHash(moduleHash);
           const InDetDD::SiDetectorElement *element = elements->getDetectorElement(wafer_hash);
           const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign*>(&element->design());
-          const ChargeCalibrationBundle &  b = pParser->parse(moduleHash, data);
+          const ChargeCalibrationBundle &  b = pParser->parse(moduleHash, data, m_inputSource);
           if (not b.isValid){
             ATH_MSG_FATAL("Parsing failed");
             return StatusCode::FAILURE;
