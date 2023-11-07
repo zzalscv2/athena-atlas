@@ -82,8 +82,8 @@ namespace LVL1 {
     std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGTauMap;
     std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGeTauMap;
     
-    std::array<float,2> getEtaPhi(uint);
-    std::array<uint,2> getEtEmHad(uint);
+    virtual std::array<float,2> getEtaPhi(uint) override;
+    virtual std::array<uint,2> getEtEmHad(uint) override;
     std::unordered_map<uint, jFEXForwardElecInfo> eleClusterList(void);
     StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&);
   };
