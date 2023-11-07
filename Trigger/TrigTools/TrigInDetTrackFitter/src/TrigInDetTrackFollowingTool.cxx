@@ -199,11 +199,13 @@ const InDet::PixelCluster* TrigInDetTrackFollowingTool::findBestPixelHit(const I
       for(int i=0;i<2;i++) cluster_cov[i] *= cluster_cov[i]/12.0;
     }
 
-    double covsum[2][2] = {ets.m_Gk[0][0] + cluster_cov[0], ets.m_Gk[0][1], ets.m_Gk[0][1], ets.m_Gk[1][1] + cluster_cov[1]};
+    double covsum[2][2] = {{ets.m_Gk[0][0] + cluster_cov[0], ets.m_Gk[0][1]},
+                           {ets.m_Gk[0][1], ets.m_Gk[1][1] + cluster_cov[1]}};
     
     double detr = 1/(covsum[0][0]*covsum[1][1] - covsum[0][1]*covsum[1][0]);
 
-    double invcov[2][2] = {detr*covsum[1][1], -detr*covsum[1][0], -detr*covsum[0][1], detr*covsum[0][0]};
+    double invcov[2][2] = {{detr*covsum[1][1], -detr*covsum[1][0]},
+                           {-detr*covsum[0][1], detr*covsum[0][0]}};
 
     double resid[2] = {pPRD->localPosition().x() - ets.m_Xk[0], pPRD->localPosition().y() - ets.m_Xk[1]};
 
@@ -289,11 +291,13 @@ void TrigInDetTrackFollowingTool::update(const InDet::PixelCluster* pPRD, TrigFT
     for(int i=0;i<2;i++) cluster_cov[i] *= cluster_cov[i]/12.0;
   }
   
-  double covsum[2][2] = {ets.m_Gk[0][0] + cluster_cov[0], ets.m_Gk[0][1], ets.m_Gk[0][1], ets.m_Gk[1][1] + cluster_cov[1]};
+  double covsum[2][2] = {{ets.m_Gk[0][0] + cluster_cov[0], ets.m_Gk[0][1]},
+                         {ets.m_Gk[0][1], ets.m_Gk[1][1] + cluster_cov[1]}};
     
   double detr = 1/(covsum[0][0]*covsum[1][1] - covsum[0][1]*covsum[1][0]);
 
-  double invcov[2][2] = {detr*covsum[1][1], -detr*covsum[1][0], -detr*covsum[0][1], detr*covsum[0][0]};
+  double invcov[2][2] = {{detr*covsum[1][1], -detr*covsum[1][0]},
+                         {-detr*covsum[0][1], detr*covsum[0][0]}};
 
   double resid[2] = {pPRD->localPosition().x() - ets.m_Xk[0], pPRD->localPosition().y() - ets.m_Xk[1]};
 
@@ -344,13 +348,11 @@ void TrigInDetTrackFollowingTool::update(const InDet::SCT_Cluster* pPRD, int sha
       Gain[i] = CHT[i] * invcov;
     }
     
-    int idx = 0;
     for(int i=0;i<10;i++) {
       ets.m_Xk[i] += Gain[i]*resid;
       for(int j=0;j<=i;j++) {
 	ets.m_Gk[i][j] = ets.m_Gk[i][j] - Gain[i]*CHT[j];
 	ets.m_Gk[j][i] = ets.m_Gk[i][j];
-	idx++;
       }
     }
   }
@@ -454,8 +456,6 @@ std::unique_ptr<TrigFTF_ExtendedTrackState> TrigInDetTrackFollowingTool::fitTheS
   double sigma_x2 = std::pow(0.08,2);
   double sigma_y2 = std::pow(0.3,2);
 
-  double chi2 = 0.0;
-  
   for(const auto& sp : seed) {
     //1. extrapolate
 
@@ -534,11 +534,8 @@ std::unique_ptr<TrigFTF_ExtendedTrackState> TrigInDetTrackFollowingTool::fitTheS
 
     //std::cout<<" resid r-phi "<<resid<<std::endl;
 
-    double dchi2 = resid*resid*Dx;
-
+    //double dchi2 = resid*resid*Dx;
     //std::cout<<"dchi r-phi ="<<dchi2<<std::endl;
-
-    chi2 += dchi2;
 
     double Kx[3] = {Dx*CHTx[0], Dx*CHTx[1], Dx*CHTx[2]};
 
@@ -553,10 +550,6 @@ std::unique_ptr<TrigFTF_ExtendedTrackState> TrigInDetTrackFollowingTool::fitTheS
     double Dy = 1/(Cey[0][0] + sigma_y2);
 
     resid = measy - Rey[0];
-
-    dchi2 = resid*resid*Dy;
-
-    chi2 += dchi2;
 
     double Ky[2] = {Dy*CHTy[0], Dy*CHTy[1]};
 
