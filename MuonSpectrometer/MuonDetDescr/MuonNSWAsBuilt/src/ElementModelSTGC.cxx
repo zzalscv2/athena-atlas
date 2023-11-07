@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonNSWAsBuilt/ElementModelSTGC.h"
@@ -7,9 +7,8 @@
 
 using namespace NswAsBuilt;
 
-ElementModelSTGC::ElementModelSTGC(double lenX, double lenY, Amg::Vector3D defo0)
-  : m_lenX(lenX),
-  m_lenY(lenY),
+ElementModelSTGC::ElementModelSTGC(double /*lenX*/, double lenY, Amg::Vector3D defo0)
+  : m_lenY(lenY),
   m_defo0(defo0)
 {
 }
