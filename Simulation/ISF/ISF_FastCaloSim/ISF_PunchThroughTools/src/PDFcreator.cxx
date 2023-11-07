@@ -39,15 +39,18 @@ ISF::PDFcreator::~PDFcreator() {
 }
 
 void ISF::PDFcreator::addToEnergyEtaHist1DMap(int energy, int etaMin, TH1 *hist) {
+  // Make a local copy
+  TH1* localHist = (TH1*) hist->Clone();
+  localHist->SetDirectory(0);
 
- if(m_energy_eta_hists1D.find(energy) != m_energy_eta_hists1D.end()){ //if energy entry exists, insert into inner eta map
-   (m_energy_eta_hists1D.find(energy)->second).insert(std::make_pair(etaMin, hist));
- }
- else{ //if energy entry does not exist create new full energy entry
-   std::map< int, TH1*> inner;
-   inner.insert(std::make_pair(etaMin, hist));
-   m_energy_eta_hists1D.insert(std::make_pair(energy, inner));
- }
+  if(m_energy_eta_hists1D.find(energy) != m_energy_eta_hists1D.end()){ //if energy entry exists, insert into inner eta map
+    (m_energy_eta_hists1D.find(energy)->second).insert(std::make_pair(etaMin, localHist));
+  }
+  else{ //if energy entry does not exist create new full energy entry
+    std::map< int, TH1*> inner;
+    inner.insert(std::make_pair(etaMin, localHist));
+    m_energy_eta_hists1D.insert(std::make_pair(energy, inner));
+  }
 }
 
 double ISF::PDFcreator::getRand(CLHEP::HepRandomEngine* rndmEngine, const std::vector<int>& inputParameters) const
