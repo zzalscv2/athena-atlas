@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthConverters/xAODtoHepMCTool.h"
@@ -245,7 +245,7 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
 /// Avoid double deletion
 #ifndef HEPMC3
         if (xPart->hasProdVtx())
-          hepmcParticle.release();
+          (void)hepmcParticle.release();
 #endif
         continue;
       }
@@ -279,7 +279,7 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
       }
     }
 #ifndef HEPMC3
-    hepmcParticle.release();
+    (void)hepmcParticle.release();
 #endif
 
   } // end of particle loop
