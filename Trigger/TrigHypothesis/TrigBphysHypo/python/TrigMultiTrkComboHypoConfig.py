@@ -90,42 +90,6 @@ def StreamerDimuEFComboHypoCfg(flags, name):
     else:
         return ConfigurationComboHypo(flags, **kwargs)
 
-def StreamerDiElecFastComboHypoCfg(flags, name):
-    log.debug('StreamerDiElecFastComboHypoCfg.name = %s ', name)
-    kwargs = {"isStreamer" : True,
-        "trigSequenceName" : 'DiElecFast',
-        "trigLevel" : 'L2',
-        "doElectrons" : True,
-        "TrackCollectionKey" : 'HLT_IDTrack_Electron_FTF'}
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
-    else:
-        return ConfigurationComboHypo(flags, **kwargs)
-
-def StreamerDiElecNoringerFastComboHypoCfg(flags, name):
-    log.debug('StreamerDiElecNoringerFastComboHypoCfg.name = %s ', name)
-    kwargs = {"isStreamer" : True,
-        "trigSequenceName" : 'DiElecNoringerFast',
-        "trigLevel" : 'L2',
-        "doElectrons" : True,
-        "TrackCollectionKey" : 'HLT_IDTrack_Electron_FTF'}
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
-    else:
-        return ConfigurationComboHypo(flags, **kwargs)
-
-def StreamerNoMuonDiElecFastComboHypoCfg(flags, name):
-    log.debug('StreamerNoMuonDiElecFastComboHypoCfg.name = %s ', name)
-    kwargs = {"isStreamer" : True,
-        "trigSequenceName" : 'NoMuonDiElecFast',
-        "trigLevel" : 'L2',
-        "doElectrons" : True,
-        "TrackCollectionKey" : 'HLT_IDTrack_Electron_FTF'}
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
-    else:
-        return ConfigurationComboHypo(flags, **kwargs)
-
 def DiElecPrecisionComboHypoCfg(flags, name):
     log.debug('DiElecPrecisionComboHypoCfg.name = %s ', name)
     kwargs = {"isStreamer" : False,
@@ -237,8 +201,8 @@ def ConfigurationComboHypo(flags, trigSequenceName = 'Dimu', **kwargs):
    from TrigBphysHypo.TrigBPhyCommonConfig import TrigBPHY_TrkVKalVrtFitterCfg
    from InDetConfig.InDetConversionFinderToolsConfig import BPHY_VertexPointEstimatorCfg
    if kwargs["doElectrons"]:
-       kwargs.setdefault("nTracks",  [ 2 ])
-       kwargs.setdefault("trackPtThresholds",  [ [ 4000., 4000. ] ])
+       kwargs.setdefault("nTracks", [ 2 ])
+       kwargs.setdefault("trackPtThresholds", [ [ -1., -1. ] ])
        kwargs.setdefault("massRange",   [ (100., 20000.) ])
        kwargs.setdefault("mergedElectronChains", [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000', 'HLT_e5_lhvloose_noringer_bBeeM6000' ])
        kwargs.setdefault("caloClusterEtThreshold", 5.)
@@ -251,7 +215,7 @@ def ConfigurationComboHypo(flags, trigSequenceName = 'Dimu', **kwargs):
        acc.addEventAlgo(alg, primary=True)
        return acc
    else:
-       kwargs.setdefault("nTracks",  [ 2, 3 ])
+       kwargs.setdefault("nTracks", [ 2, 3 ])
        kwargs.setdefault("trackPtThresholds", [ [ 3650., 3650. ], [ 3650., 3650., 3650. ] ])
        kwargs.setdefault("massRange", [ (100., 20000.), (0., 11000.) ])
        alg = CompFactory.TrigMultiTrkComboHypo(
