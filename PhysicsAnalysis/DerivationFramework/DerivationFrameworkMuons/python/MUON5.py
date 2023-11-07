@@ -39,7 +39,15 @@ def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
     acc.merge(MuonCaloDepositAlgCfg(ConfigFlags)) ### Decorate directly the muons
     acc.merge(MuonCaloDepositAlgCfg(ConfigFlags, name = "IdTrkCaloDepsitDecorator", 
                                                  DecorateMuons = False)) ### Decorate the ID tracks
-    
+    ### Flavour tagging impact parameter decorators
+    from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
+    acc.merge(BTagTrackAugmenterAlgCfg(
+        ConfigFlags,
+        prefix="btagIp_",
+        TrackCollection="InDetTrackParticles",
+        PrimaryVertexCollectionName="PrimaryVertices"
+    ))
+
     # --------
     # Skimming
     # --------
@@ -66,12 +74,9 @@ def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
     # Thinning
     # --------
     
-    #====================================================================
-# TRACK THINNING
-#====================================================================
-    
     MUON5ThinningTools = [] 
     
+    # Track thinning: only keep tracks with |z0| at primary vertex < 10 mm
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg
     MUON5TrackThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(ConfigFlags,
                                                                         name                    = "MUON5TrackThinningTool",
@@ -185,6 +190,9 @@ def MUON5Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
     MUON5SlimmingHelper = SlimmingHelper("MUON5SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    # Many of these are added to AllVariables below as well. We add
+    # these items in both places in case some of the smart collections
+    # add variables from some other collection.
     MUON5SlimmingHelper.SmartCollections = ["EventInfo",
                                             "PrimaryVertices",
                                             "InDetTrackParticles",
@@ -202,6 +210,18 @@ def MUON5Cfg(ConfigFlags):
                                             "DiTauJetsLowPt",
                                           ]
     
+
+    MUON5SlimmingHelper.AllVariables = ["egammaClusters",
+                                        "CaloCalTopoClusters",
+                                        "MuonClusterCollection",
+                                        "TopoClusterIsoCentralEventShape",
+                                        "TopoClusterIsoForwardEventShape",
+                                        "GSFConversionVertices",
+                                        "GSFTrackParticles"
+                                        "PrimaryVertices",
+                                        "AntiKtVR30Rmax4Rmin02PV0TrackJets",
+                                        ]
+
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
     StaticContent = []
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Tight_Vertices"]
@@ -214,27 +234,78 @@ def MUON5Cfg(ConfigFlags):
     MUON5SlimmingHelper.StaticContent = StaticContent
    
     # Extra content
-    MUON5SlimmingHelper.ExtraVariables += [   
-                                              "PrimaryVertices.trackWeights",
-                                              "InDetTrackParticles.vertexLink.vx.vy",
-                                              "Electrons.ptcone20.ptcone30.ptcone40.ptvarcone20.ptvarcone30.ptvarcone40.topoetcone30.neflowisol20.neflowisol30.neflowisol40.ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone20_Nonprompt_All_MaxWeightTTVA_pt500.ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone30_Nonprompt_All_MaxWeightTTVA_pt500.ptcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone40_Nonprompt_All_MaxWeightTTVA_pt500.ptcone40_Nonprompt_All_MaxWeightTTVA_pt1000.topoetconecoreConeEnergyCorrection.topoetconecoreConeSCEnergyCorrection",
-                                              "GSFTrackParticle.definingParametersCovMatrix.vertexLink",
-                                              "Muons.MeasEnergyLoss.MeasEnergyLossSigma.EnergyLossSigma.ParamEnergyLoss.ParamEnergyLossSigmaMinus.ParamEnergyLossSigmaPlus.clusterLink.scatteringCurvatureSignificance.scatteringNeighbourSignificance.ptcone20.ptcone30.ptcone40.ptvarcone20.ptvarcone30.ptvarcone40.topoetcone30.neflowisol20.neflowisol30.neflowisol40.ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone20_Nonprompt_All_MaxWeightTTVA_pt500.ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone30_Nonprompt_All_MaxWeightTTVA_pt500.ptcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone40_Nonprompt_All_MaxWeightTTVA_pt500.ptcone40_Nonprompt_All_MaxWeightTTVA_pt1000",
+    CommonEgammaContent= [
+        "ptcone20","ptcone30","ptcone40", "ptvarcone20", "ptvarcone30", "ptvarcone40", "topoetcone30",
+        "neflowisol20", "neflowisol30", "neflowisol40",
+        "ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt500" ,"ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt1000",
+        "ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500","ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000",
+        "ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt500","ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt1000",
+        "ptcone20_Nonprompt_All_MaxWeightTTVA_pt500", "ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000",
+        "ptcone30_Nonprompt_All_MaxWeightTTVA_pt500", "ptcone30_Nonprompt_All_MaxWeightTTVA_pt1000",
+        "ptcone40_Nonprompt_All_MaxWeightTTVA_pt500", "ptcone40_Nonprompt_All_MaxWeightTTVA_pt1000",
+        "topoetconecoreConeEnergyCorrection", "topoetconecoreConeSCEnergyCorrection",
+    ]
+    ElectronsExtraContent = [
+        ".".join(
+            [
+                "Electrons",
+                "deltaPhiRescaled2","deltaPhiFromLastMeasurement",              
+                "originalTrackParticle"
+            ]  +   CommonEgammaContent
+        )
+    ]
+
+    PhotonsExtraContent = [
+        ".".join(["Photons"] + CommonEgammaContent )
+    ]
+
+    MuonsExtraContent = [
+        ".".join(
+            [
+                "Muons",
+                "MeasEnergyLoss.MeasEnergyLossSigma.EnergyLossSigma.ParamEnergyLoss",
+                "ParamEnergyLossSigmaMinus.ParamEnergyLossSigmaPlus.clusterLink.scatteringCurvatureSignificance",
+                "deltaPhiRescaled2.deltaPhiFromLastMeasurement.scatteringNeighbourSignificance",
+                "ptcone20.ptcone30.ptcone40.ptvarcone20.ptvarcone30.ptvarcone40.topoetcone30",
+                "neflowisol20.neflowisol30.neflowisol40.ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt500",
+                "ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500",
+                "ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt500",
+                "ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone20_Nonprompt_All_MaxWeightTTVA_pt500",
+                "ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone30_Nonprompt_All_MaxWeightTTVA_pt500",
+                "ptcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone40_Nonprompt_All_MaxWeightTTVA_pt500",
+                "ptcone40_Nonprompt_All_MaxWeightTTVA_pt1000"
+            ]   
+        )
+    ]
+
+    InDetTrackParticlesExtraContent = [
+        ".".join(
+            [
+                "InDetTrackParticles",
+                "btagIp_d0.btagIp_z0SinTheta.btagIp_d0Uncertainty.btagIp_z0SinThetaUncertainty",
+                "numberOfNextToInnermostPixelLayerHits.numberOfInnermostPixelLayerSharedHits",
+                "numberOfInnermostPixelLayerSplitHits.numberOfPixelSplitHits.leptonID"
+            ]   
+        )
+    ]
+
+    ExtraVariables = ElectronsExtraContent + PhotonsExtraContent + MuonsExtraContent + InDetTrackParticlesExtraContent
+    MUON5SlimmingHelper.ExtraVariables += ExtraVariables
+    MUON5SlimmingHelper.ExtraVariables += [
                                               "CombinedMuonTrackParticles.definingParametersCovMatrix.definingParametersCovMatrix.vertexLink",
                                               "ExtrapolatedMuonTrackParticles.definingParametersCovMatrix.vertexLink",
                                               "MuonSpectrometerTrackParticles.definingParametersCovMatrix.vertexLink",
                                               "CaloCalTopoClusters.calE.calEta.calM.calPhi.e_sampl.rawM.rawPhi.rawEta.rawE",
                                               "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ",
-                                              "Photons.ptcone20.ptcone30.ptcone40.ptvarcone20.ptvarcone30.ptvarcone40.topoetcone30.neflowisol20.neflowisol30.neflowisol40.ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone20_Nonprompt_All_MaxWeightTTVA_pt500.ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone30_Nonprompt_All_MaxWeightTTVA_pt500.ptcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone40_Nonprompt_All_MaxWeightTTVA_pt500.ptcone40_Nonprompt_All_MaxWeightTTVA_pt1000.topoetconecoreConeEnergyCorrection.topoetconecoreConeSCEnergyCorrection",
                                               "TauJets.jetLink",
                                            ]
     from DerivationFrameworkEGamma.ElectronsCPDetailedContent import ElectronsCPDetailedContent
     MUON5SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
-    MUON5SlimmingHelper.AllVariables = ["egammaClusters", "CaloCalTopoClusters", "MuonClusterCollection", "TopoClusterIsoCentralEventShape", "TopoClusterIsoForwardEventShape", "AntiKtVR30Rmax4Rmin02PV0TrackJets","GSFConversionVertices","GSFTrackParticles"]
-    
+    from DerivationFrameworkEGamma.ElectronsCPDetailedContent import GSFTracksCPDetailedContent
+    MUON5SlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
+
     # Truth content
     if ConfigFlags.Input.isMC:
-        
         MUON5SlimmingHelper.SmartCollections += [
                                                   "AntiKt4TruthJets",
                                                   "AntiKt4TruthDressedWZJets",
@@ -253,6 +324,7 @@ def MUON5Cfg(ConfigFlags):
                                                 ]
         MUON5SlimmingHelper.ExtraVariables+= [  
                                                 "TruthPrimaryVertices.t.x.y.z",
+                                                "InDetTrackParticles.ftagTruthTypeLabel.ftagTruthOriginLabel.ftagTruthVertexIndex"
                                               ]
                                                 
 
@@ -301,6 +373,4 @@ def MUON5Cfg(ConfigFlags):
     MUON5ItemList = MUON5SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_MUON5", ItemList=MUON5ItemList, AcceptAlgs=["MUON5Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_MUON5", AcceptAlgs=["MUON5Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
-
     return acc
-
