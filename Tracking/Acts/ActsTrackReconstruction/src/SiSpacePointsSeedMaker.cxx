@@ -349,13 +349,13 @@ namespace ActsTrk {
 
     // At the beginning of each iteration
     // clearing list of space points to be used for seeding
-    data.l_ITkSpacePointForSeed.clear();
+    InDet::SiSpacePointsSeedMakerEventData::clearPoolList(data.l_ITkSpacePointForSeed);
     data.i_ITkSpacePointForSeed = data.l_ITkSpacePointForSeed.begin();
     data.v_ActsSpacePointForSeed.clear();
 
 
     // clearing list of produced seeds
-    data.i_ITkSeeds.clear();
+    InDet::SiSpacePointsSeedMakerEventData::clearPoolList(data.i_ITkSeeds);
     data.i_ITkSeed = data.i_ITkSeeds.begin();
 
     // First iteration:

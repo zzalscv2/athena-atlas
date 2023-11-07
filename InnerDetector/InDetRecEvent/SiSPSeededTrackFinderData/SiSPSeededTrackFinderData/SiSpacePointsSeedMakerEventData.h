@@ -38,7 +38,7 @@ namespace InDet {
 
  /**
   @class InDet::SiSpacePointsSeedMakerEventData
-  
+
   InDet::SiSpacePointsSeedMakerEventData holds event dependent data
   used by ISiSpacePointsSeedMaker.
   The object is owened by SiSPSeededTrackFinder.
@@ -59,23 +59,23 @@ namespace InDet {
       Trigger ////< SiSpacePointsSeedMaker_Trigger
     };
 
-    bool initialized{false};    ///< has the data object been initialized?  
-    bool trigger{false};        ///< are we running in trigger mode? 
+    bool initialized{false};    ///< has the data object been initialized?
+    bool trigger{false};        ///< are we running in trigger mode?
     bool izvertex{false};
-    /**  indicate if we are done with the seed search for an event. 
-    * Is set to false if we have to abort the current seed finding pass 
-    * (for example due to reaching max seed capacity) and need to 
-    * continue after returning a few seeds to the user first. 
-    **/ 
-    bool endlist{true};    
+    /**  indicate if we are done with the seed search for an event.
+    * Is set to false if we have to abort the current seed finding pass
+    * (for example due to reaching max seed capacity) and need to
+    * continue after returning a few seeds to the user first.
+    **/
+    bool endlist{true};
     bool isvertex{false};   ///< whether or not we contain a non-empty vertex list
     bool checketa{false};   ///< whether to apply eta cuts
 
     int maxSeedsPerSP{0};   ///<Number of Seeds allowed to be built per central Seed
     bool keepAllConfirmedSeeds{false};   ///<Do we keep an unlimited number of confirmed seeds per central SP?
-    int iteration{0};   ///< iteration currently being run 
+    int iteration{0};   ///< iteration currently being run
     int iteration0{0};
-    int r_first{0}; ///< points to the index of the highest occupied radius bin 
+    int r_first{0}; ///< points to the index of the highest occupied radius bin
     int ns{0};      ///< total number of SP that we sorted into our r-binned vector
     int nsaz{0};      ///< number of SP in the Phi-Z 2D binning
     int nsazv{0};
@@ -85,7 +85,7 @@ namespace InDet {
     int nrfzv{0};
     int state{0};     ///< state info - 0 seems to mean cuts aren ot configured
     int nspoint{2};   ///< number of required SP
-    int mode{0};      ///< operation mode (SP per seed etc) 
+    int mode{0};      ///< operation mode (SP per seed etc)
     int nlist{0};
     int fNmin{0};     ///< starting phi bin for looping
     int fvNmin{0};
@@ -97,21 +97,21 @@ namespace InDet {
     int nseeds{0};
     int seedPerSpCapacity{0}; ///< capacity for seeds from a single SP in the respective storage vector
 
-    float K{0.};      ///< conversion from pT in MeV to twice the circle radius in the transverse plane in mm 
-    float dzdrmin{0.};    //<! store eta cuts interpreted as dz/dr 
-    float dzdrmax{0.};    //<! store eta cuts interpreted as dz/dr 
-    float ipt2C{0.};  ///< inverse of 90% of the pt cut, squared, multiplied by a magic conversion factor 
+    float K{0.};      ///< conversion from pT in MeV to twice the circle radius in the transverse plane in mm
+    float dzdrmin{0.};    //<! store eta cuts interpreted as dz/dr
+    float dzdrmax{0.};    //<! store eta cuts interpreted as dz/dr
+    float ipt2C{0.};  ///< inverse of 90% of the pt cut, squared, multiplied by a magic conversion factor
     float ipt2K{0.};  ///< 1 / (K * 0.9 * pt cut)², allows us to directly apply our pt cut on the (2R)² estimate we obtain from the seed
-    float COFK{0.};   ///< a magic number 
+    float COFK{0.};   ///< a magic number
     float zminU{0.};
     float zmaxU{0.};
     float zminB{0.};
     float zmaxB{0.};
     float ftrig{0.};
     float ftrigW{0.};
-    float maxScore{0.};   
+    float maxScore{0.};
     float RTmin{0.};
-    float RTmax{0.}; 
+    float RTmax{0.};
 
     /**
      * @name Beam geometry and magnetic field
@@ -130,7 +130,7 @@ namespace InDet {
     std::vector<int> rf_index;
     std::vector<int> rf_map;
     std::vector<int> rfz_index;  ///< 2D index in the 2D phi-z map of each SP in the r-sored vector
-    std::vector<int> rfz_map;    ///< number of SP in each bin of the 2D phi-z map 
+    std::vector<int> rfz_map;    ///< number of SP in each bin of the 2D phi-z map
     std::vector<int> rfzv_index;
     std::vector<int> rfzv_map;
 
@@ -143,13 +143,13 @@ namespace InDet {
     //@{
     std::vector<InDet::SiSpacePointForSeed*> SP;    ///< space points to consider for the current seed candidate
     std::vector<ITk::SiSpacePointForSeed*> ITkSP;
-    
+
     /// The following are parameters characterising individual space points within a seed (relative to the central point)
     std::vector<float> Zo;    ///< z0 estimate from 2 points
     std::vector<float> Tz;    ///< 1/tan(theta) == dz/dr estimate from 2 points
-    std::vector<float> R;     ///< inverse distance to the central space point 
-    std::vector<float> U;     ///< transformed U coordinate (x/(x²+y²)) in frame around central SP 
-    std::vector<float> V;     ///< transformed V coordinate (y/(x²+y²)) in frame around central SP 
+    std::vector<float> R;     ///< inverse distance to the central space point
+    std::vector<float> U;     ///< transformed U coordinate (x/(x²+y²)) in frame around central SP
+    std::vector<float> V;     ///< transformed V coordinate (y/(x²+y²)) in frame around central SP
     std::vector<float> X;
     std::vector<float> Y;
     std::vector<float> Er;    ///< error component on 1/tan(theta)==dz/dr from the position errors on the space-points
@@ -166,7 +166,7 @@ namespace InDet {
     std::vector<std::pair<float,InDet::SiSpacePointForSeed*>> CmSp;
     std::vector<std::pair<float,ITk::SiSpacePointForSeed*>> ITkCmSp;
 
-    std::vector<std::vector<InDet::SiSpacePointForSeed*>> r_Sorted;     ///< vector of space points in each bin of the 1D radial binning 
+    std::vector<std::vector<InDet::SiSpacePointForSeed*>> r_Sorted;     ///< vector of space points in each bin of the 1D radial binning
     std::vector<std::vector<InDet::SiSpacePointForSeed*>> rf_Sorted;
     std::vector<std::vector<InDet::SiSpacePointForSeed*>> rfz_Sorted;   ///< vector of space points in each bin of the 2D phi-z binning
     std::vector<std::vector<InDet::SiSpacePointForSeed*>> rfzv_Sorted;
@@ -178,22 +178,28 @@ namespace InDet {
 
     /**
      * @brief We want to use a pool block allocator.
+     *
      * AthAllocators provides some options.
      * Namely PoolSTL and HeapSTL
      *
-     * We mainly emplace and we do not call erase
-     * for these lists.
+     * We mainly emplace and we do not call erase for these lists.
      * So we  go for the simplest most performant one.
+     * That is the PoolSTL
      *
      * Note the calls to clear should be handled
-     * as dtor/ctor pairs for the list
-     * with this allocator.
-     * Aka de-allocation happens via dtor
-     * and the ctor will have a block reserved.
+     * as dtor/ctor pairs for the list.
+     * Aka de-allocation of all elements happens via the
+     * dtor and the ctor will have a block reserved.
+     *
+     * See clearPoolList
      */
     using SiSpacePointForSeedPoolList =
         std::list<InDet::SiSpacePointForSeed,
                   SG::ArenaPoolSTLAllocator<InDet::SiSpacePointForSeed>>;
+
+    using ITkSiSpacePointForSeedPoolList =
+        std::list<ITk::SiSpacePointForSeed,
+                  SG::ArenaPoolSTLAllocator<ITk::SiSpacePointForSeed>>;
 
     using SiSpacePointsSeedPoolList =
         std::list<InDet::SiSpacePointsSeed,
@@ -202,6 +208,19 @@ namespace InDet {
     using SiSpacePointsProSeedPoolList =
         std::list<InDet::SiSpacePointsProSeed,
                   SG::ArenaPoolSTLAllocator<InDet::SiSpacePointsProSeed>>;
+
+    using ITkSiSpacePointsProSeedPoolList =
+        std::list<ITk::SiSpacePointsProSeed,
+                  SG::ArenaPoolSTLAllocator<ITk::SiSpacePointsProSeed>>;
+
+    // special treatment for cleaning
+    // given PoolStl allocator
+    template <typename T>
+    static void clearPoolList(std::list<T, SG::ArenaPoolSTLAllocator<T>>& poolList){
+      poolList.~list<T, SG::ArenaPoolSTLAllocator<T>>();
+      poolList = std::list<T, SG::ArenaPoolSTLAllocator<T>>();
+    }
+
     /**
      * list of all space points considered for seed building.
      * This has ownership over the pointers stored in the binned vectors
@@ -211,11 +230,11 @@ namespace InDet {
     //<! keep track of an iterator over the seed list. Frequently used to keep track of where to add the next SP
     SiSpacePointForSeedPoolList::iterator i_spforseed;
 
-    std::list<ITk::SiSpacePointForSeed> l_ITkSpacePointForSeed;
-    std::list<ITk::SiSpacePointForSeed>::iterator i_ITkSpacePointForSeed;
+    ITkSiSpacePointForSeedPoolList l_ITkSpacePointForSeed;
+    ITkSiSpacePointForSeedPoolList::iterator i_ITkSpacePointForSeed;
 
     std::vector<const xAOD::SpacePoint*> v_ActsSpacePointForSeed;  //<! list of acts space points considered for seed building.
-    std::vector<std::unique_ptr<InDet::PixelSpacePoint>> v_PixelSpacePointForSeed; 
+    std::vector<std::unique_ptr<InDet::PixelSpacePoint>> v_PixelSpacePointForSeed;
     std::vector<ITk::SiSpacePointForSeed> v_PixelSiSpacePointForSeed;
     std::map<std::pair<std::size_t, std::size_t>, std::unique_ptr<InDet::SCT_SpacePoint>> v_StripSpacePointForSeed;
 
@@ -226,9 +245,9 @@ namespace InDet {
     SiSpacePointsProSeedPoolList::iterator i_seed_Pro; //<! iterators over the said list
     SiSpacePointsProSeedPoolList::iterator i_seede_Pro;
 
-    std::list<ITk::SiSpacePointsProSeed> i_ITkSeeds;
-    std::list<ITk::SiSpacePointsProSeed>::iterator i_ITkSeed;
-    std::list<ITk::SiSpacePointsProSeed>::iterator i_ITkSeedEnd;
+    ITkSiSpacePointsProSeedPoolList i_ITkSeeds;
+    ITkSiSpacePointsProSeedPoolList::iterator i_ITkSeed;
+    ITkSiSpacePointsProSeedPoolList::iterator i_ITkSeedEnd;
 
     std::vector<InDet::SiSpacePointForSeed*>::iterator rMin;
     std::vector<ITk::SiSpacePointForSeed*>::iterator ITk_rMin;
@@ -250,12 +269,12 @@ namespace InDet {
 
 
     /// allow to resize the space-point container on-the-fly in case
-    /// more space is needed. 
-    /// This is a compromise to avoid a fixed array size while 
+    /// more space is needed.
+    /// This is a compromise to avoid a fixed array size while
     /// still minimising the number of re-allocations
     void resizeSPCont(size_t increment=50, ToolType type = ToolType::ATLxk){
       size_t currSize = SP.size();
-      size_t newSize = currSize + increment; 
+      size_t newSize = currSize + increment;
       if (type == ToolType::ITk) {
         ITkSP.resize(newSize, nullptr);
         X.resize(newSize, 0.);
@@ -290,8 +309,8 @@ namespace InDet {
       } else if (type==ToolType::ITk) {
         ITkCmSp.reserve(500);
       }
-      resizeSPCont(maxsizeSP,type); 
-      seedPerSpCapacity = maxOneSize; 
+      resizeSPCont(maxsizeSP,type);
+      seedPerSpCapacity = maxOneSize;
       if (type==ToolType::ATLxk) {
         OneSeeds_Pro.resize(maxOneSize);
       } else if (type==ToolType::BeamGas or type==ToolType::HeavyIon or type==ToolType::LowMomentum or type==ToolType::Trigger) {
@@ -364,7 +383,7 @@ namespace InDet {
       initialized = true;
     }
   };
-  
+
 } // end of name space
 
 #endif // SiSpacePointsSeedMakerEventData_h
