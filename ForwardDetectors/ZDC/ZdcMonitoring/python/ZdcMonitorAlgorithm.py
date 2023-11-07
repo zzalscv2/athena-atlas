@@ -216,19 +216,19 @@ def ZdcMonitoringConfig(inputFlags, run_type):
                             ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
 
     genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumA;zdcUncalibSumA_vs_lb_160bins_noTrig', type='TH2F', title=';lumi block;E_{ZDC,A} [GeV]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA/LBdep',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=160,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumC;zdcUncalibSumC_vs_lb_160bins_noTrig', type='TH2F', title=';lumi block;E_{ZDC,C} [GeV]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC/LBdep',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=160,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumA;zdcUncalibSumA_vs_lb_160bins_wTrig', type='TH2F', title=';lumi block;E_{ZDC,A} [GeV]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA/LBdep',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, cutmask = 'passTrigSideC',
                             ybins=160,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumC;zdcUncalibSumC_vs_lb_160bins_wTrig', type='TH2F', title=';lumi block;E_{ZDC,C} [GeV]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC/LBdep',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, cutmask = 'passTrigSideA',
                             ybins=160,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     
@@ -375,10 +375,15 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     zdcModuleMonToolArr.defineHistogram('zdcModuleFract',title=';Module Amplitude Fraction;Events',
                             path='ModuleFraction',
                             xbins=50,xmin=0.0,xmax=1.)
-    zdcModuleMonToolArr.defineHistogram('zdcModuleFract; zdcModuleFract_above20N',title=';Module Amplitude Fraction;Events',
+    zdcModuleMonToolArr.defineHistogram('zdcModuleFract;zdcModuleFract_above20N',title=';Module Amplitude Fraction;Events',
                             path='ModuleFraction',
                             cutmask='zdcAbove20NCurrentSide',
                             xbins=50,xmin=0.0,xmax=1.)
+    zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleFract;zdcModuleFract_above20N_vs_lb', type='TH2F',title=';lumi block;Module Amplitude Fraction',
+                            path='ModuleFractionLBdep',
+                            cutmask='zdcAbove20NCurrentSide',
+                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                            ybins=50,ymin=0.0,ymax=1.)
     zdcModuleMonToolArr.defineHistogram('zdcUncalibSumCurrentSide, zdcModuleFract', type='TH2F', title=';Amplitude Sum Current Side [ADC Counts];Module Amplitude Fraction',
                             path='ModuleFraction',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=zdc_amp_sum_xmax / 2.,
