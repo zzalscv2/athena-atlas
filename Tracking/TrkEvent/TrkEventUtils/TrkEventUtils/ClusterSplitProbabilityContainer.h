@@ -66,6 +66,13 @@ namespace Trk {
          assert(cluster);
          m_splitProbMap.insert( std::make_pair( cluster->getHashAndIndex().hashAndIndex(), ProbabilityInfo(-1.,-1.) ) );
       }
+
+     const std::unordered_map<ClusterIdentifier, ProbabilityInfo>&
+     splitProbMap() const
+     {
+       return m_splitProbMap;
+     }
+     
    protected:
       std::unordered_map<ClusterIdentifier, ProbabilityInfo> m_splitProbMap;
       static const ProbabilityInfo s_unset;
