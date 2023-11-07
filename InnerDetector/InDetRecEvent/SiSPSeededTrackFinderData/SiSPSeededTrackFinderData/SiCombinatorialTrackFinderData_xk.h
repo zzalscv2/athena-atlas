@@ -54,26 +54,26 @@ namespace InDet {
     } summaryStatArraySizes;
 
     /**
-     * enum to indicate fit result status (for disappearing track trigger that wants not only for successful tracks)
+     * enum to indicate fit result status (for disappearing track trigger that
+     * wants not only for successful tracks)
      */
     enum ResultCode {
-	Success          = 99,
-	Unrecoverable    =  0,
-	PixSeedDiffKFBwd =  3,
-	PixSeedDiffKFFwd =  4,
-	PixSeedNCluster  =  5,
-	MixSeedDiffKFBwd = -3,
-	MixSeedDiffKFFwd = -4,
-	MixSeedNCluster  = -5,
-	Quality  = 6,
-	Pt       = 7,
-	NCluster = 8,
-	HoleCut  = 9,
+      Success = 99,
+      Unrecoverable = 0,
+      PixSeedDiffKFBwd = 3,
+      PixSeedDiffKFFwd = 4,
+      PixSeedNCluster = 5,
+      MixSeedDiffKFBwd = -3,
+      MixSeedDiffKFFwd = -4,
+      MixSeedNCluster = -5,
+      Quality = 6,
+      Pt = 7,
+      NCluster = 8,
+      HoleCut = 9,
     };
     enum ResultCodeThreshold {
-       RecoverableForDisTrk = 4,
+      RecoverableForDisTrk = 4,
     };
-
 
     ////////////////////////////////////////////////////////
     ///////                  Setters                 ///////
@@ -113,8 +113,14 @@ namespace InDet {
     void setSctContainer(const InDet::SCT_ClusterContainer* sctcont)
     {m_sctcontainer = sctcont;}
 
-    void setPixelDetectorElementStatus( const InDet::SiDetectorElementStatus *pixelDetElStatus) { m_tools.setPixelDetectorElementStatus(pixelDetElStatus); }
-    void setSCTDetectorElementStatus( const InDet::SiDetectorElementStatus *sctDetElStatus)     { m_tools.setSCTDetectorElementStatus(sctDetElStatus); }
+    void setPixelDetectorElementStatus(
+        const InDet::SiDetectorElementStatus* pixelDetElStatus) {
+       m_tools.setPixelDetectorElementStatus(pixelDetElStatus);
+    }
+    void setSCTDetectorElementStatus(
+        const InDet::SiDetectorElementStatus* sctDetElStatus) {
+       m_tools.setSCTDetectorElementStatus(sctDetElStatus);
+    }
 
     /**
      * Setter for ResultCode (for disappearing track trigger)
@@ -222,10 +228,6 @@ namespace InDet {
     //@}
 
   protected:
-    /**
-     * Dummy method defined in child classes. Is it necessary?
-     */
-    virtual void dummy() = 0;
     /**
      * Set PRD to track map
      */

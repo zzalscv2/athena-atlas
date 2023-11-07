@@ -110,7 +110,7 @@ StatusCode InDet::SiSPSeededTrackFinderRoI::initialize()
 ///////////////////////////////////////////////////////////////////
 
 namespace InDet {
-  class ExtendedSiTrackMakerEventData_xk : public InDet::SiTrackMakerEventData_xk
+  class ExtendedSiTrackMakerEventData_xk final: public InDet::SiTrackMakerEventData_xk
   {
   public:
     explicit ExtendedSiTrackMakerEventData_xk(const SG::ReadHandleKey<Trk::PRDtoTrackMap> &key) { 
@@ -120,7 +120,6 @@ namespace InDet {
       }
     }
   private:
-    void dummy() {}
     SG::ReadHandle<Trk::PRDtoTrackMap> m_prdToTrackMap;
   };
 }
@@ -180,8 +179,13 @@ StatusCode InDet::SiSPSeededTrackFinderRoI::execute(const EventContext& ctx) con
     vtxDecor_perigeeZ0Sublead(*theVertexContainer->back()) = listRoIs[r].zPerigeePos[1];
     vtxDecor_isHS(*theVertexContainer->back()) = 1;
   }
-  
-  //Analyses that want to run low-pt tracking with a region of interest care about the beam conditions near a collision of interest.  Validation of the beam conditions elsewhere in the beamspot (regarding low-pt tracks) will be needed to establish meaningful uncertainties.  Choosing a random position allows for this check.  Run with RAWtoESD section of postexec: ToolSvc.InDetSiSpTrackFinder_LowPtRoI.doRandomSpot = True
+
+  // Analyses that want to run low-pt tracking with a region of interest care
+  // about the beam conditions near a collision of interest.  Validation of the
+  // beam conditions elsewhere in the beamspot (regarding low-pt tracks) will be
+  // needed to establish meaningful uncertainties.  Choosing a random position
+  // allows for this check.  Run with RAWtoESD section of postexec:
+  // ToolSvc.InDetSiSpTrackFinder_LowPtRoI.doRandomSpot = True
   double RandZBoundary[2];
   std::vector<InDet::IZWindowRoISeedTool::ZWindow> listRandRoIs;
   if(m_doRandomSpot and not listRoIs.empty()){
