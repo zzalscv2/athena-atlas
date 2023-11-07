@@ -100,7 +100,8 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
                 ATH_MSG_VERBOSE("Given Identifier " << channelId.get_compact() << " is no muon Identifier, continuing");
                 continue;
             }
-            if (m_idHelperSvc->isMM(channelId) || m_idHelperSvc->issTgc(channelId)) continue;  // needs to be still implemented for the NSW
+            if (m_idHelperSvc->isMM(channelId) || m_idHelperSvc->issTgc(channelId) || 
+                (m_idHelperSvc->isRpc(channelId) && m_idHelperSvc->stationIndex(channelId) == Muon::MuonStationIndex::BI)) continue;  // needs to be still implemented for the NSW
 
             MuonCalib::MuonFixedId calibId = m_idTool->idToFixedId(channelId);
             if (!calibId.isValid()) continue;

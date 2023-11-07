@@ -82,6 +82,8 @@ def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kw
     if RDOContainer:
         tool_kwargs["RDOContainer"] = RDOContainer
     
+    if not  flags.Muon.enableNRPC:
+        tool_kwargs["NrpcInputCollection"] = ""
 
     
     # Get the RDO -> PRD tool
