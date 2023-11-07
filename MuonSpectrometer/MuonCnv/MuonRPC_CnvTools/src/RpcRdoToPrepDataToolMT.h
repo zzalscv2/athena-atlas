@@ -17,10 +17,12 @@
 #include "MuonPrepRawData/MuonPrepDataContainer.h"
 #include "MuonRDO/RpcCoinMatrix.h"
 #include "MuonRDO/RpcPadContainer.h"
+#include "xAODMuonRDO/NRPCRDOContainer.h"
 #include "MuonRPC_CnvTools/IRPC_RDO_Decoder.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonTrigCoinData/RpcCoinDataContainer.h"
 #include "RPC_CondCabling/RpcCablingCondData.h"
+#include "MuonCablingData/MuonNRPC_CablingMap.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "MuonPrepRawData/MuonPrepDataCollection_Cache.h"
@@ -81,6 +83,8 @@ namespace Muon {
                                          bool highptpad,  // these are inputs
                                          bool& triggerHit, unsigned short& threshold, unsigned short& overlap, bool& toSkip) const;
 
+        StatusCode processNrpcRdo(const EventContext& ctx, State& state) const;
+
         struct State {
             State(const RpcIdHelper& idHelper);
            
@@ -136,12 +140,15 @@ namespace Muon {
 
         SG::ReadHandleKey<RpcPadContainer> m_rdoContainerKey{this, "RDOContainer", "RPCPAD"};
 
+        SG::ReadHandleKey<xAOD::NRPCRDOContainer> m_rdoNrpcContainerKey{this, "NrpcInputCollection", "NRPCRDO"};
+
         // Rob Data Provider handle
         ToolHandle<Muon::IRPC_RDO_Decoder> m_rpcRdoDecoderTool{this, "RdoDecoderTool", "Muon::RpcRDO_Decoder"};
 
         SG::ReadCondHandleKey<RpcCondDbData> m_readKey{this, "ReadKey", "RpcCondDbData", "Key of RpcCondDbData"};
         SG::ReadCondHandleKey<RpcCablingCondData> m_rpcReadKey{this, "RpcCablingKey", "RpcCablingCondData", "Key of RpcCablingCondData"};
         SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
+        SG::ReadCondHandleKey<MuonNRPC_CablingMap> m_nRpcCablingKey{this, "NrpcCablingKey", "MuonNRPC_CablingMap", "Key of MuonNRPC_CablingMap"};
     
          /// This is the key for the cache for the MDT PRD containers, can be empty
          SG::UpdateHandleKey<RpcPrepDataCollection_Cache> m_prdContainerCacheKey{this,"RpcPrdContainerCacheKey", "", "Optional external cache for the RPC PRD container"};

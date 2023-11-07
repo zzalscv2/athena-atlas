@@ -74,6 +74,8 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::initialize() {
     ATH_CHECK(m_rpcReadKey.initialize());
     ATH_CHECK(m_readKey.initialize(m_RPCInfoFromDb));
     ATH_CHECK(m_rdoContainerKey.initialize());
+    ATH_CHECK(m_rdoNrpcContainerKey.initialize(!m_rdoNrpcContainerKey.empty()));
+    ATH_CHECK(m_nRpcCablingKey.initialize(!m_rdoNrpcContainerKey.empty()));  // If we don't configure the NRPC RDO key, the cabling is needed either.
     ATH_CHECK(m_rpcPrepDataContainerKey.initialize());
     ATH_CHECK(m_rpcCoinDataContainerKey.initialize());
     ATH_CHECK(m_eventInfo.initialize());
@@ -122,10 +124,12 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decode(const EventContext&ctx,
     ATH_CHECK(loadProcessedChambers(ctx, state));
 
     ATH_CHECK(decodeImpl(ctx, state, idVect, selectedIdVect, true));
+    ATH_CHECK(processNrpcRdo(ctx, state) );
     ATH_MSG_DEBUG("Core decode processed in MT decode (hash vector)");
-
+    
     ATH_CHECK(transferAndRecordPrepData(ctx, state));
     ATH_CHECK(transferAndRecordCoinData(ctx, state));
+
     return StatusCode::SUCCESS;
 }
 
@@ -137,10 +141,12 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decode(const EventContext& ctx,
     ATH_CHECK(loadProcessedChambers(ctx, state));
 
     ATH_CHECK(decodeImpl(ctx, state,  robIds, true));
+    ATH_CHECK(processNrpcRdo(ctx, state) );
     ATH_MSG_DEBUG("Core decode processed in MT decode (ROB vector)");
 
     ATH_CHECK(transferAndRecordPrepData(ctx, state));
     ATH_CHECK(transferAndRecordCoinData(ctx, state));
+
     return StatusCode::SUCCESS;
 }
 StatusCode Muon::RpcRdoToPrepDataToolMT::provideEmptyContainer(const EventContext& ctx) const {
@@ -434,6 +440,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(const EventContext& ctx, Sta
                 ATH_CHECK(processPad(ctx, state, rdoColl, processingetaview, processingphiview, nPrepRawData,
                                idVectToBeDecoded, idWithDataVect,  doingSecondLoopAmbigColls));               
             }  // end loop over pads
+            
         }
 
         if (processingetaview) {
@@ -465,7 +472,8 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(const EventContext& ctx, Sta
             break;
         }
     }
-
+    
+    
     ATH_MSG_DEBUG("*** Final Cleanup ");
     // remove empty collections listed in idWithDataVect
     std::vector<IdentifierHash> temIdWithDataVect;
@@ -1237,6 +1245,85 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(const EventContext& ctx,
                   << processingetaview << "/" << processingphiview << " ---# of coll.s with data now is " << idWithDataVect.size()
                   << "***************** for Pad online Id " << padId << " m_logic sector ID " << sectorId);
 
+    return StatusCode::SUCCESS;
+}
+
+StatusCode Muon::RpcRdoToPrepDataToolMT::processNrpcRdo(const EventContext& ctx, State& state) const {
+    if (m_rdoNrpcContainerKey.empty()){
+         ATH_MSG_DEBUG("The NRPC processing is disabled.");
+         return StatusCode::SUCCESS;
+    }
+    
+    ATH_MSG_DEBUG("Retrieving Nrpc RDO container from the store");
+    SG::ReadHandle<xAOD::NRPCRDOContainer> rdoNrpcContainerHandle{m_rdoNrpcContainerKey, ctx};
+    if (!rdoNrpcContainerHandle.isPresent()) {
+        ATH_MSG_ERROR("Retrieval of NRPC RDO "<<m_rdoNrpcContainerKey.fullKey()<<" container failed !");
+        return StatusCode::FAILURE;
+    }
+    
+    if (rdoNrpcContainerHandle->size() == 0) {
+        // empty NRPC RDO container - no nrpc rdo in this event
+        ATH_MSG_DEBUG("Empty NRPC RDO container - no nrpc rdo in this event ");
+        return StatusCode::SUCCESS;
+    }
+    ATH_MSG_DEBUG("Not empty NRPC RDO container in this event ");
+
+
+    SG::ReadCondHandle<MuonNRPC_CablingMap> readCdo{m_nRpcCablingKey, ctx};
+    if (!readCdo.isValid()) {
+        ATH_MSG_ERROR("Could not retrieve "<<m_nRpcCablingKey.fullKey()<<" from the conditions store");
+        return StatusCode::FAILURE;
+    }
+    /// No need to check for its validity. It's done at other places for sure
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgr{m_muDetMgrKey, ctx};
+  
+    for (const xAOD::NRPCRDO* nrpcrdo: *rdoNrpcContainerHandle) {
+        /// Convert from online to offline cabling
+        NrpcCablingData cabling_data{};
+        cabling_data.subDetector = nrpcrdo->subdetector();
+        cabling_data.tdcSector = nrpcrdo->tdcsector();
+        cabling_data.tdc = nrpcrdo->tdc();
+        cabling_data.channelId = nrpcrdo->channel();
+        Identifier chanId{};
+        if (!readCdo->getOfflineId(cabling_data, msgStream()) ||
+            !readCdo->convert(cabling_data, chanId, false)){
+             ATH_MSG_FATAL("Failed to retrieve the offline Identifier");
+             return StatusCode::FAILURE;
+        }
+        const IdentifierHash  rpcHashId = m_idHelperSvc->moduleHash(chanId);
+        RpcPrepDataCollection* collection = state.getPrepCollection(rpcHashId, msgStream());
+
+        const RpcReadoutElement* descriptor = muDetMgr->getRpcReadoutElement(chanId);
+        
+        // List of Digits in the cluster (self)
+        std::vector<Identifier> identifierList{chanId};
+        // Global position
+        const Amg::Vector3D stripPos{descriptor->stripPos(chanId)};
+        ATH_MSG_DEBUG("RPC RDO->PrepRawdata "<<m_idHelperSvc->toString(chanId)<<" global position "<<Amg::toString(stripPos,2));
+        // Local position
+        Amg::Vector2D pointLocPos{Amg::Vector2D::Zero()};
+        descriptor->surface(chanId).globalToLocal(stripPos, stripPos, pointLocPos);
+        // width of the cluster (self)
+        
+        const double stripWidth = descriptor->StripWidth(m_idHelperSvc->rpcIdHelper().measuresPhi(chanId));
+        // Error matrix
+        const double errPos = stripWidth / std::sqrt(12.0);
+        Amg::MatrixX mat(1, 1);
+        mat.setIdentity();
+        mat *= errPos * errPos;
+
+        int ambiguityFlag = 0; // Ambiguity flag not checked for BIS RPCs
+        
+        const float time = nrpcrdo->time();
+        /// That needs to be parsed to the constructor of the PRD somehow...
+        const float timeoverthr = nrpcrdo->timeoverthr();
+
+        RpcPrepData* newPrepData = new RpcPrepData(chanId, rpcHashId, pointLocPos, identifierList,
+                                                   std::move(mat), descriptor, time, timeoverthr, 0, ambiguityFlag);
+
+        newPrepData->setHashAndIndex(collection->identifyHash(), collection->size());        
+        collection->push_back(newPrepData);        
+    }    
     return StatusCode::SUCCESS;
 }
 

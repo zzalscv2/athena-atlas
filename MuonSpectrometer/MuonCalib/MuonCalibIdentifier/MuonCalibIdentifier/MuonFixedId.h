@@ -1062,7 +1062,7 @@ inline int MuonFixedId::rpcDoubletPhi() const {
 }
 
 inline bool MuonFixedId::setRpcGasGapIndex( unsigned int idx ) {
-  if ( idx > kRpcGasGapMask ) {
+  if ( idx > kRpcGasGapMask ) { 
       clear();
       return false;
    }
