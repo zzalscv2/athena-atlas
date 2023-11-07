@@ -124,6 +124,18 @@ AntiKt10TruthSoftDrop = JetSoftDrop(AntiKt10Truth,
                                     Beta = 1., ZCut= 0.1,
                                     )
 
+AntiKt10TruthDressedWZ = JetDefinition("AntiKt",1.0,cst.TruthDressedWZ,
+                                       ghostdefs = flavourghosts ,
+                                       modifiers = ("Sort", "Filter:50000","ktsplitter","JetGhostLabel"),
+                                       standardRecoMode = True,
+                                       lock = True
+)
+
+AntiKt10TruthDressedWZSoftDrop = JetSoftDrop(AntiKt10TruthDressedWZ,
+                                             modifiers = ("Sort","JetGhostLabel")+substrmods+truthmods,
+                                             Beta = 1., ZCut= 0.1,
+)
+
 AntiKt10TruthGEN = JetDefinition("AntiKt",1.0, cst.TruthGEN,
                                 ptmin = 5000, 
                                 ghostdefs = [],

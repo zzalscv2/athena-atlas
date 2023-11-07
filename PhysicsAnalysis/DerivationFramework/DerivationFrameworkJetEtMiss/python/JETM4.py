@@ -15,6 +15,8 @@ def JETM4SkimmingToolCfg(ConfigFlags):
 
     from DerivationFrameworkJetEtMiss import TriggerLists
     triggerlist = TriggerLists.single_photon_Trig(ConfigFlags)
+    addRun3PhotonTriggers = ["HLT_g140_loose_L1EM22VHI","HLT_g300_etcut_L1EM22VHI"]
+    triggerlist = triggerlist+addRun3PhotonTriggers
 
     triggers = '||'.join(triggerlist)
 
@@ -171,14 +173,17 @@ def JETM4Cfg(ConfigFlags):
                                             "BTagging_AntiKt4EMPFlow",
                                             "BTagging_AntiKtVR30Rmax4Rmin02Track"]
 
-    JETM4SlimmingHelper.AllVariables = ["GlobalChargedParticleFlowObjects", "GlobalNeutralParticleFlowObjects",
-                                        "CHSGChargedParticleFlowObjects", "CHSGNeutralParticleFlowObjects",
+    JETM4SlimmingHelper.AllVariables = ["CHSGChargedParticleFlowObjects", "CHSGNeutralParticleFlowObjects",
                                         "MuonSegments",
                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape"]
 
-    JETM4SlimmingHelper.ExtraVariables = ["CaloCalTopoClusters.calE.calEta.calPhi.calM.rawE.rawEta.rawPhi.rawM",
-                                          "TauJets.truthJetLink.truthParticleLink.IsTruthMatched"]
+    JETM4SlimmingHelper.ExtraVariables = ["TauJets.truthJetLink.truthParticleLink.IsTruthMatched"]
 
+    # Low-level variables
+    from DerivationFrameworkJetEtMiss.CommonJETMXContent import ClusterVariables, FlowElementVariables
+    JETM4SlimmingHelper.ExtraVariables += [".".join(["CaloCalTopoClusters"] + ClusterVariables)]
+    JETM4SlimmingHelper.ExtraVariables += [".".join(["GlobalChargedParticleFlowObjects"] + FlowElementVariables)]
+    JETM4SlimmingHelper.ExtraVariables += [".".join(["GlobalNeutralParticleFlowObjects"] + FlowElementVariables)]
     
     # Truth containers
     if ConfigFlags.Input.isMC:
