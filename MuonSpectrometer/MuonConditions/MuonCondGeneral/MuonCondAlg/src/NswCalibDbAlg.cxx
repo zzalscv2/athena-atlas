@@ -257,7 +257,9 @@ StatusCode NswCalibDbAlg::loadT0Data(const std::unique_ptr<TTree>& tree, NswT0Da
   tree->SetBranchAddress("mean"   , &time     );
   tree->SetBranchAddress("stationEta"   , &stationEta);
   tree->SetBranchAddress("channel_type", &channelType);
-  tree->Print();
+     if (msgLvl(MSG::VERBOSE)) {
+          tree->Print();
+     }
 
   ATH_MSG_DEBUG("NSW t0 calibration tree has "<< tree->GetEntries() <<" entries for tech " << (tech==T0Tech::MM ? "MM" : "sTGC"));
   
