@@ -467,6 +467,7 @@ def LLP1Cfg(flags):
 
     LLP1SlimmingHelper.AllVariables =  ["MSDisplacedVertex",
                                         "MuonSpectrometerTrackParticles",
+                                        "UnAssocMuonSegments",
                                         "MuonSegments",
                                         "MSonlyTracklets",
                                         "CombinedMuonTrackParticles",
