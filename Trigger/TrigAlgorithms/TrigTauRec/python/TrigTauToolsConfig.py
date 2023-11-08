@@ -46,7 +46,7 @@ def trigTauTrackFinderCfg(flags,name='',TrackParticlesContainer=''):
     from InDetConfig.InDetTrackSelectorToolConfig import InDetTrigTRTDriftCircleCutToolCfg
 
     TrigTauInDetTrackSelectorTool     = acc.popToolsAndMerge(InDetTrackSelectorToolCfg(flags,'TrigTau_InDetTrackSelectorTool',
-                                                                                       TrtDCCutTool       = acc.popToolsAndMerge(InDetTrigTRTDriftCircleCutToolCfg(flags,'InDetTrigTRTDriftCircleCut')), 
+                                                                                       TrtDCCutTool       = None if not flags.Tracking.ActiveConfig.doTRT else acc.popToolsAndMerge(InDetTrigTRTDriftCircleCutToolCfg(flags,'InDetTrigTRTDriftCircleCut')),
                                                                                        Extrapolator       = TrigTauExtrapolatorTool,
                                                                                        pTMin              = 1000.0,
                                                                                        IPd0Max            = 2.,

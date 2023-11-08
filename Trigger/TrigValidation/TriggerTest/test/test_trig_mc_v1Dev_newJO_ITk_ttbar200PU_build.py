@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Trigger AthenaMT test running new-style job options
+# art-description: Trigger AthenaMT test running new-style job options for ttbar + 200 pileup
 # art-type: build
 # art-include: main/Athena
 # art-include: 23.0/Athena
@@ -15,14 +15,14 @@ run = ExecStep.ExecStep()
 run.type = 'athena'
 run.args = '--CA'
 run.threads = 1
-run.input = 'Single_mu_Run4'
+run.input = 'ttbar_pu200_Run4'
 run.job_options = 'TriggerJobOpts/runHLT.py'
 run.flags = ['Trigger.triggerMenuSetup="MC_pp_run4_v1"',
              'Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
              'Trigger.enableL1CaloPhase1=False',
-             'Trigger.enabledSignatures=["Muon"]']
+             'Trigger.enabledSignatures=["Egamma","Electron","Photon","Muon","Tau","Jet","MET"]']
 
 # The full test configuration
 test = Test.Test()
