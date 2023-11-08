@@ -5,6 +5,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.CFElements import seqAND
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.Utility.MenuAlignmentTools import MenuAlignment
+from TriggerMenuMT.HLT.Menu.MenuPrescaleConfig import applyHLTPrescale
+from TriggerMenuMT.HLT.Menu.MenuPrescaleConfig import MenuPrescaleConfig
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -93,6 +95,11 @@ def generateMenuMT(flags):
     menu.setChainFilter(chainsToGenerate)        
     finalListOfChainConfigs = menu.generateAllChainConfigs(flags)
     log.info("Length of FinalListOfChainConfigs %s", len(finalListOfChainConfigs))
+
+    # Add prescales for disabling items (e.g. MC production)
+    log.info("Applying HLT prescales")
+    (menu.L1Prescales, menu.HLTPrescales, menu.chainsInMenu) = MenuPrescaleConfig(HLTMenuConfig, flags)
+    applyHLTPrescale(HLTMenuConfig, menu.HLTPrescales, menu.signaturesOverwritten)
  
     # make sure that we didn't generate any steps that are fully empty in all chains
     # if there are empty steps, remove them
@@ -129,7 +136,7 @@ def makeHLTTree(flags):
         flatDecisions.extend (step)
     
     
-    # # generate JOSON representation of the config
+    # generate JSON representation of the config
     from TriggerMenuMT.HLT.Config.JSON.HLTMenuJSON import generateJSON_newJO
     generateJSON_newJO(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList(), menuAcc.getSequence("HLTAllSteps"))
 
