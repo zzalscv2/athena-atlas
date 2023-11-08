@@ -441,6 +441,9 @@ for alg in largeRJetAlgs:
 if isMC:
   for alg in largeRJetAlgs:
     addJetTruthLabel(jetalg=alg,sequence=exot3Seq,algname="JetTruthLabelingAlg",labelname="R10TruthLabel_R21Consolidated")
+    addJetTruthLabel(jetalg=alg,sequence=exot3Seq,algname="JetTruthLabelingAlg",labelname="R10TruthLabel_R21Precision")
+    addJetTruthLabel(jetalg=alg,sequence=exot3Seq,algname="JetTruthLabelingAlg",labelname="R10TruthLabel_R21Precision_2022v1")
+
 
 # Create variable-R trackjets and dress AntiKt10LCTopo with ghost VR-trkjet
 # A wrapper function which does all the necessary steps
