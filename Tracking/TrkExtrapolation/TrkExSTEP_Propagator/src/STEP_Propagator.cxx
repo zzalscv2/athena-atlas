@@ -1504,10 +1504,17 @@ std::unique_ptr<Trk::TrackParameters> Trk::STEP_Propagator::propagateM(
 // Main function for track parameters and covariance matrix propagation.
 /////////////////////////////////////////////////////////////////////////////////
 std::unique_ptr<Trk::TrackParameters> Trk::STEP_Propagator::propagate(
-    const EventContext& ctx, const Trk::TrackParameters& trackParameters, const Trk::Surface& targetSurface,
-    Trk::PropDirection propagationDirection, const Trk::BoundaryCheck& boundaryCheck,
-    const Trk::MagneticFieldProperties& magneticFieldProperties, Trk::TransportJacobian*& jacobian, double&,
-    ParticleHypothesis particle, bool returnCurv, const Trk::TrackingVolume* tVol) const {
+    const EventContext& ctx,
+    const Trk::TrackParameters& trackParameters,
+    const Trk::Surface& targetSurface,
+    Trk::PropDirection propagationDirection,
+    const Trk::BoundaryCheck& boundaryCheck,
+    const Trk::MagneticFieldProperties& magneticFieldProperties,
+    std::optional<Trk::TransportJacobian>& jacobian,
+    double&,
+    ParticleHypothesis particle,
+    bool returnCurv,
+    const Trk::TrackingVolume* tVol) const {
 
   double Jacobian[25];
   Cache cache(ctx);
@@ -1542,9 +1549,9 @@ std::unique_ptr<Trk::TrackParameters> Trk::STEP_Propagator::propagate(
     Jacobian[22] = 0.;
     Jacobian[21] = 0.;
     Jacobian[20] = 0.;
-    jacobian = new Trk::TransportJacobian(Jacobian);
+    jacobian = std::make_optional<Trk::TransportJacobian>(Jacobian);
   } else {
-    jacobian = nullptr;
+    jacobian.reset();
   }
 
   return parameters;
@@ -1586,10 +1593,16 @@ std::unique_ptr<Trk::TrackParameters> Trk::STEP_Propagator::propagateParameters(
 // Main function for track parameters propagation without covariance matrix.
 /////////////////////////////////////////////////////////////////////////////////
 std::unique_ptr<Trk::TrackParameters> Trk::STEP_Propagator::propagateParameters(
-    const EventContext& ctx, const Trk::TrackParameters& trackParameters, const Trk::Surface& targetSurface,
-    Trk::PropDirection propagationDirection, const Trk::BoundaryCheck& boundaryCheck,
-    const Trk::MagneticFieldProperties& magneticFieldProperties, Trk::TransportJacobian*& jacobian,
-    ParticleHypothesis particle, bool returnCurv, const Trk::TrackingVolume* tVol) const {
+    const EventContext& ctx,
+    const Trk::TrackParameters& trackParameters,
+    const Trk::Surface& targetSurface,
+    Trk::PropDirection propagationDirection,
+    const Trk::BoundaryCheck& boundaryCheck,
+    const Trk::MagneticFieldProperties& magneticFieldProperties,
+    std::optional<Trk::TransportJacobian>& jacobian,
+    ParticleHypothesis particle,
+    bool returnCurv,
+    const Trk::TrackingVolume* tVol) const {
 
   double Jacobian[25];
 
@@ -1621,9 +1634,9 @@ std::unique_ptr<Trk::TrackParameters> Trk::STEP_Propagator::propagateParameters(
     Jacobian[22] = 0.;
     Jacobian[21] = 0.;
     Jacobian[20] = 0.;
-    jacobian = new Trk::TransportJacobian(Jacobian);
+    jacobian = std::make_optional<Trk::TransportJacobian>(Jacobian);
   } else {
-    jacobian = nullptr;
+    jacobian.reset();
   }
 
   return parameters;

@@ -111,7 +111,7 @@ public:
     PropDirection,
     const BoundaryCheck&,
     const MagneticFieldProperties&,
-    TransportJacobian*&,
+    std::optional<TransportJacobian>&,
     double&,
     ParticleHypothesis,
     bool,
@@ -139,7 +139,7 @@ public:
     PropDirection dir,
     const BoundaryCheck& bcheck,
     const MagneticFieldProperties& mprop,
-    TransportJacobian*&,
+    std::optional<TransportJacobian>&,
     ParticleHypothesis particle = pion,
     bool returnCurv = false,
     const TrackingVolume* tVol = nullptr) const override final;

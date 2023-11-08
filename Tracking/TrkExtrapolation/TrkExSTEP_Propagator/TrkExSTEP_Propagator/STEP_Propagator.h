@@ -260,7 +260,7 @@ public:
     Trk::PropDirection propagationDirection,
     const Trk::BoundaryCheck& boundaryCheck,
     const MagneticFieldProperties& magneticFieldProperties,
-    Trk::TransportJacobian*& jacobian,
+    std::optional<Trk::TransportJacobian>& jacobian,
     double& pathLimit,
     ParticleHypothesis particle,
     bool returnCurv = false,
@@ -287,7 +287,7 @@ public:
     Trk::PropDirection propagationDirection,
     const Trk::BoundaryCheck& boundaryCheck,
     const MagneticFieldProperties& magneticFieldProperties,
-    Trk::TransportJacobian*& jacobian,
+    std::optional<Trk::TransportJacobian>& jacobian,
     ParticleHypothesis particle,
     bool returnCurv = false,
     const Trk::TrackingVolume* tVol = nullptr) const override final;

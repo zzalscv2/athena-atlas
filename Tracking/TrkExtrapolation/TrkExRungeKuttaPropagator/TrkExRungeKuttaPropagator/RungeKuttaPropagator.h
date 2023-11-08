@@ -179,7 +179,7 @@ public:
     const PropDirection,
     const BoundaryCheck&,
     const MagneticFieldProperties&,
-    TransportJacobian*&,
+    std::optional<TransportJacobian>&,
     double&,
     ParticleHypothesis /*not used*/,
     bool,
@@ -221,7 +221,7 @@ public:
     const PropDirection,
     const BoundaryCheck&,
     const MagneticFieldProperties&,
-    TransportJacobian*&,
+    std::optional<TransportJacobian>&,
     ParticleHypothesis /*not used*/,
     bool,
     const TrackingVolume*) const override final;

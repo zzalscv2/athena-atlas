@@ -72,7 +72,7 @@ Trk::ExtrapolationCode Trk::PropagationEngine::propagate(Trk::ExCellCharged& eCe
     // it is the final propagation if it is the endSurface
     bool finalPropagation = (eCell.endSurface == (&sf));
 
-    Trk::TransportJacobian* tjac = nullptr;
+    std::optional<Trk::TransportJacobian> tjac{};
     // we need to first fill the propagation parameters in order to be able to updates & fallbacks
     //release, otherwise need to change the Trk::ExCell code
     auto *pParameters = m_propagator->propagate(
@@ -105,7 +105,7 @@ Trk::ExtrapolationCode Trk::PropagationEngine::propagate(Trk::ExCellCharged& eCe
 
        // check if the propagation was called with directly, then lead parameters become end parameters
        if (eCell.checkConfigurationMode(Trk::ExtrapolationMode::Direct))
-	 eCell.endParameters = eCell.leadParameters;
+         eCell.endParameters = eCell.leadParameters;
 
        // return Success only if it is the final propagation - the extrapolation engine knows that
        return (finalPropagation ? Trk::ExtrapolationCode::SuccessDestination : Trk::ExtrapolationCode::InProgress);

@@ -54,7 +54,6 @@ class Track;
 class Surface;
 class TrackingVolume;
 class TrackingGeometry;
-class TransportJacobian;
 class TrackStateOnSurface;
 class Layer;
 class Volume;
@@ -68,7 +67,7 @@ public:
   /** AlgTool interface methods */
   static const InterfaceID& interfaceID() { return IID_IExtrapolator; }
 
-  /** Main extrapolation Interface starting from neutral parameters 
+  /** Main extrapolation Interface starting from neutral parameters
    * and aiming at surface.*/
   virtual std::unique_ptr<NeutralParameters> extrapolate(
     const NeutralParameters& parameters,
@@ -90,7 +89,7 @@ public:
 
   /** Extrapolation method where a step-wise navigation to the
     destination surface is performed. Returns a vector
-    parameters on all detector elements. Used mainly by the 
+    parameters on all detector elements. Used mainly by the
     hole-search*/
   virtual std::vector<std::unique_ptr<TrackParameters>>
   extrapolateStepwise(const EventContext& ctx,
@@ -99,7 +98,7 @@ public:
                       PropDirection dir = anyDirection,
                       const BoundaryCheck& bcheck = true,
                       ParticleHypothesis particle = pion) const = 0;
-  
+
   /** Main extrapolation interface starting from a Trk::Track and aiming
    * at Surface. It uses the navigator to find the closest parameters
    * of the track to the surface. */
@@ -113,8 +112,8 @@ public:
     MaterialUpdateMode matupmode = addNoise,
     Trk::ExtrapolationCache* cache = nullptr) const = 0;
 
-  /** Extrapolate directly: Forwards directly the call to the 
-   * configured "Global" propagator. No navigation and no 
+  /** Extrapolate directly: Forwards directly the call to the
+   * configured "Global" propagator. No navigation and no
    * material effecs. Useful when we need fast propagation
    * without these. */
   virtual std::unique_ptr<TrackParameters> extrapolateDirectly(
@@ -172,7 +171,7 @@ public:
 
   /** Extrapolation method collecting intersections with subdetector
    * boundaries and active volumes/layers. Destination
-   * (subdetector boundary) : geoID (+ entry, -exit) 
+   * (subdetector boundary) : geoID (+ entry, -exit)
    * default Calo = 3 exit (see GeometrySignature.h)
    * Employs the STEP propagator, used in the ParticleCaloExtension
    * mainly for muons and Particle Flow.

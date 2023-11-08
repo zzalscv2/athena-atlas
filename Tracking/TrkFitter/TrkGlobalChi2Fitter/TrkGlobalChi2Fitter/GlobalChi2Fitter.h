@@ -38,6 +38,7 @@
 #include "TrkGeometry/TrackingGeometry.h"
 
 #include "TrkEventUtils/ClusterSplitProbabilityContainer.h"
+#include "TrkEventPrimitives/TransportJacobian.h"
 
 #include <memory>
 #include <mutex>
@@ -140,7 +141,6 @@ class AtlasDetectorID;
 
 namespace Trk {
   class Track;
-  class TransportJacobian;
   class IMagneticFieldTool;
   class MeasuredPerigee;
   class PrepRawDataComparisonFunction;
@@ -156,7 +156,7 @@ namespace Trk {
   class GlobalChi2Fitter: public extends<AthCheckedComponent<AthAlgTool>, IGlobalTrackFitter> {
     struct PropagationResult {
       std::unique_ptr<const TrackParameters> m_parameters;
-      std::unique_ptr<TransportJacobian> m_jacobian;
+      std::optional<TransportJacobian> m_jacobian;
       std::optional<std::vector<std::unique_ptr<TrackParameters>>> m_preholes;
     };
 
@@ -854,7 +854,7 @@ namespace Trk {
 
     void calculateTrackErrors(GXFTrajectory &, Amg::SymMatrixX &, bool) const;
 
-    std::unique_ptr<TransportJacobian> numericalDerivatives(
+    std::optional<TransportJacobian> numericalDerivatives(
       const EventContext& ctx,
       const TrackParameters *,
       const Surface &,
