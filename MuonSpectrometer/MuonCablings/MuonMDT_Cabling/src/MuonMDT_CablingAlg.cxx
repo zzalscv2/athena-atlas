@@ -11,7 +11,7 @@
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeListSpecification.h"
-#include "MuonCondSvc/MdtStringUtils.h"
+#include "CxxUtils/StringUtils.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
 #include "PathResolver/PathResolver.h"
 #include "SGTools/TransientAddress.h"
@@ -89,10 +89,9 @@ StatusCode MuonMDT_CablingAlg::loadCablingSchema(const EventContext& ctx, SG::Wr
         CablingData map_data;
         if (!extractStationInfo(atr, map_data)) continue;
 
-        constexpr char delimiter = ',';
+        constexpr std::string_view delimiter{","};
         const std::string map = *(static_cast<const std::string*>((atr["Map"]).addressOfData()));
-        std::vector<std::string> info_map;
-        MuonCalib::MdtStringUtils::tokenize(map, info_map, delimiter);
+        std::vector<std::string> info_map = CxxUtils::tokenize(map, delimiter);
 
         while (extractLayerInfo(info_map, map_data)) {
             /// now this mezzanine can be added to the map:
@@ -215,7 +214,7 @@ bool MuonMDT_CablingAlg::extractStationInfo(const coral::AttributeList& atr, Cab
     map_data.stationIndex = m_idHelperSvc->mdtIdHelper().stationNameIndex(stationNameString);
     ATH_MSG_VERBOSE("station name: " << stationNameString << " index: " << static_cast<int>(map_data.stationIndex));
     // convert the subdetector id to integer
-    map_data.subdetectorId = atoi(subdetector_id.c_str());
+    map_data.subdetectorId = CxxUtils::atoi(subdetector_id.c_str());
 
     ATH_MSG_VERBOSE("Data load is chamber_Name = " << chamber_name <<" translated to "<<map_data<<" FINISHED HERE ");
 
@@ -238,7 +237,7 @@ bool MuonMDT_CablingAlg::extractLayerInfo(std::vector<std::string>& info_map, Ca
     bool decoded_full_block{false};
     for (unsigned int i = 0; i < n; ++i) {
         ATH_MSG_VERBOSE(i << "..." << info_map[i]);
-        int info = MuonCalib::MdtStringUtils::atoi(info_map[i]);
+        int info = CxxUtils::atoi(info_map[i]);
         // this is a tdcid
         if (i == 0) {
             map_data.tdcId = info;

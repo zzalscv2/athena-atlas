@@ -7,7 +7,7 @@
 #include <StoreGate/WriteCondHandle.h>
 #include <AthenaKernel/IOVInfiniteRange.h>
 #include <PathResolver/PathResolver.h>
-#include <MuonCondSvc/MdtStringUtils.h>
+#include <CxxUtils/StringUtils.h>
 
 MdtAsBuiltCondAlg::MdtAsBuiltCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
         AthReentrantAlgorithm{name, pSvcLocator} {}
@@ -127,13 +127,13 @@ StatusCode MdtAsBuiltCondAlg::legacyFormatToJSON(const std::string& data,
                                                  nlohmann::json& jsonDump) const {
 
     // Parse corrections
-    constexpr char delimiter = '\n';
-    auto lines = MuonCalib::MdtStringUtils::tokenize(data, delimiter);
+    constexpr std::string_view delimiter{"\n"};
+    auto lines = CxxUtils::tokenize(data, delimiter);
     unsigned int nLines{0};
-    for (const std::string_view& blobline : lines) {
+    for (const std::string& blobline : lines) {
         ++nLines;
-        constexpr char delimiter = ':';
-        auto tokens = MuonCalib::MdtStringUtils::tokenize(blobline, delimiter);
+        constexpr std::string_view delimiter{":"};
+        auto tokens = CxxUtils::tokenize(blobline, delimiter);
         // Check if tokens is not empty
         if (tokens.empty()) {
             ATH_MSG_FATAL("Empty string retrieved from DB in folder " << m_readKey.fullKey());

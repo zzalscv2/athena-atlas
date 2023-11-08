@@ -12,7 +12,7 @@
 
 namespace CxxUtils {
     std::vector<std::string> tokenize(const std::string& str,
-                                      const std::string& delimiters) {
+                                      std::string_view delimiters) {
                                     
         std::vector<std::string> tokens{};
         // Skip delimiters at beginning.
@@ -31,7 +31,7 @@ namespace CxxUtils {
         return tokens;
     }
     std::vector<double> tokenizeDouble(const std::string& the_str,
-                                       const std::string& delimiter){
+                                       std::string_view delimiter){
         const std::vector<std::string> strTokens = tokenize(the_str, delimiter);
         std::vector<double> toReturn{};
         std::transform(strTokens.begin(), strTokens.end(), std::back_inserter(toReturn), 
@@ -52,7 +52,7 @@ namespace CxxUtils {
         return str.substr(begin, end + 1);        
     }
     std::vector<int> tokenizeInt(const std::string& the_str,
-                                 const std::string& delimiter) {
+                                 std::string_view delimiter) {
         const std::vector<std::string> strTokens = tokenize(the_str, delimiter);
         std::vector<int> toReturn{};
         std::transform(strTokens.begin(), strTokens.end(), std::back_inserter(toReturn), 

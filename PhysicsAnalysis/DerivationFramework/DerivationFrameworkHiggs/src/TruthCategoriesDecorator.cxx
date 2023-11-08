@@ -5,7 +5,7 @@
 #include "DerivationFrameworkHiggs/TruthCategoriesDecorator.h"
 
 #include <GaudiKernel/SystemOfUnits.h>
-#include <MuonCondSvc/MdtStringUtils.h>
+#include <CxxUtils/StringUtils.h>
 #include <PathResolver/PathResolver.h>
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/WriteDecorHandle.h>
@@ -114,8 +114,7 @@ namespace DerivationFramework {
                 smp.th_type = HTXS::tH_type::TWH;
                 smp.prod = HTXS::HiggsProdMode::TH;
             }
-            std::vector<std::string> dsid_str{};
-            MuonCalib::MdtStringUtils::tokenize(config.GetValue(Form("HTXS.MCsamples.%s", prod_mode.c_str()), ""), dsid_str, " ");
+            std::vector<std::string> dsid_str = CxxUtils::tokenize(config.GetValue(Form("HTXS.MCsamples.%s", prod_mode.c_str()), ""), " ");
             for (const std::string& dsid : dsid_str) { smp.dsids.insert(std::atoi(dsid.c_str())); }
             m_htxs_samples.push_back(std::move(smp));
         }

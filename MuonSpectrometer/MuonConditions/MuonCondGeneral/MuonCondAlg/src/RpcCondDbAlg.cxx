@@ -5,7 +5,7 @@
 #include "MuonCondAlg/RpcCondDbAlg.h"
 
 #include "AthenaKernel/IOVInfiniteRange.h"
-using namespace MuonCalib;
+
 // constructor
 RpcCondDbAlg::RpcCondDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
     AthReentrantAlgorithm(name, pSvcLocator) {
@@ -103,13 +103,13 @@ StatusCode RpcCondDbAlg::loadDataDeadPanels(EventIDRange& rangeW, RpcCondDbData*
             ATH_MSG_DEBUG("panel_dead " << panel_dead);
             ATH_MSG_DEBUG("panel_reason " << panel_reason);
 
-            char delimiter = ',';
-            auto info_panel = MuonCalib::MdtStringUtils::tokenize(panel_dead, delimiter);
+            constexpr std::string_view delimiter{","};
+            auto info_panel = CxxUtils::tokenize(panel_dead, delimiter);
 
             Identifier PanelId;
 
             for (auto & ch_tmp : info_panel) {
-                PanelId =  MdtStringUtils::atoi(ch_tmp);
+                PanelId =  CxxUtils::atoi(ch_tmp);
                 ATH_MSG_DEBUG("info_panel " << ch_tmp << " " << PanelId);
 
                 if (PanelId.get_compact()) {
@@ -165,13 +165,13 @@ StatusCode RpcCondDbAlg::loadDataOffPanels(EventIDRange& rangeW, RpcCondDbData* 
             ATH_MSG_DEBUG("panel_off " << panel_off);
             ATH_MSG_DEBUG("panel_reason " << panel_reason);
 
-            char delimiter = ',';
-            auto info_panel = MuonCalib::MdtStringUtils::tokenize(panel_off, delimiter);
+            constexpr std::string_view delimiter{","};
+            auto info_panel = CxxUtils::tokenize(panel_off, delimiter);
 
             Identifier PanelId;
 
             for (auto & ch_tmp : info_panel) {
-                PanelId = MdtStringUtils::atoi(ch_tmp);
+                PanelId = CxxUtils::atoi(ch_tmp);
                 ATH_MSG_DEBUG("info_panel " << ch_tmp << " " << PanelId);
 
                 if (PanelId.get_compact()) {
@@ -229,42 +229,42 @@ StatusCode RpcCondDbAlg::loadMcElementStatus(EventIDRange& rangeW, RpcCondDbData
         ATH_MSG_DEBUG("striplist load is " << striplist << " " << striplist.size());
 
         // Efficiencies and Cluster Sizes
-        char delimiter = ' ';
-        const auto info_panel = MdtStringUtils::tokenize(eff_panel, delimiter);
+        constexpr std::string_view delimiter{" "};
+        const auto info_panel = CxxUtils::tokenize(eff_panel, delimiter);
 
-        int DBversion = MdtStringUtils::atoi(info_panel[0]);
+        int DBversion = CxxUtils::atoi(info_panel[0]);
 
-        int npanelstrip = MdtStringUtils::atoi(info_panel[2]);
+        int npanelstrip = CxxUtils::atoi(info_panel[2]);
 
-        double ProjectedTracks = MdtStringUtils::stof(info_panel[1]);
+        double ProjectedTracks = CxxUtils::atof(info_panel[1]);
         writeCdo->setProjectedTrack(chamberId, ProjectedTracks);
 
-        double Efficiency = MdtStringUtils::stof(info_panel[3]);
+        double Efficiency = CxxUtils::atof(info_panel[3]);
         writeCdo->setEfficiency(chamberId, Efficiency);
 
         if (Efficiency <= m_panelEfficiency) writeCdo->setLowEffPanel(chamberId);
 
-        double GapEfficiency = MdtStringUtils::stof(info_panel[5]);
+        double GapEfficiency = CxxUtils::atof(info_panel[5]);
         writeCdo->setGapEfficiency(chamberId, GapEfficiency);
 
-        double MeanClusterSize = MdtStringUtils::stof(info_panel[17]);
+        double MeanClusterSize = CxxUtils::atof(info_panel[17]);
         writeCdo->setMeanClusterSize(chamberId, MeanClusterSize);
 
         if (DBversion > 2) {
-            double FracClusterSize1 = MdtStringUtils::stof(info_panel[19]) + MdtStringUtils::stof(info_panel[20]) * 10000;
+            double FracClusterSize1 = CxxUtils::atof(info_panel[19]) + CxxUtils::atof(info_panel[20]) * 10000;
             writeCdo->setFracClusterSize1(chamberId, FracClusterSize1);
 
-            double FracClusterSize2 = MdtStringUtils::stof(info_panel[21]) + MdtStringUtils::stof(info_panel[22]) * 10000;
+            double FracClusterSize2 = CxxUtils::atof(info_panel[21]) + CxxUtils::atof(info_panel[22]) * 10000;
             writeCdo->setFracClusterSize2(chamberId, FracClusterSize2);
 
-            double FracClusterSize3 = MdtStringUtils::stof(info_panel[23]) + MdtStringUtils::stof(info_panel[24]) * 10000;
+            double FracClusterSize3 = CxxUtils::atof(info_panel[23]) + CxxUtils::atof(info_panel[24]) * 10000;
             writeCdo->setFracClusterSize3(chamberId, FracClusterSize3);
         } else {
             if (info_panel.size() > 20) {
-                double FracClusterSize1 = MdtStringUtils::stof(info_panel[19]);
+                double FracClusterSize1 = CxxUtils::atof(info_panel[19]);
                 writeCdo->setFracClusterSize1(chamberId, FracClusterSize1);
 
-                double FracClusterSize2 = MdtStringUtils::stof(info_panel[20]);
+                double FracClusterSize2 = CxxUtils::atof(info_panel[20]);
                 writeCdo->setFracClusterSize2(chamberId, FracClusterSize2);
             } else {
                 writeCdo->setFracClusterSize1(chamberId, 0.6);
@@ -283,20 +283,20 @@ StatusCode RpcCondDbAlg::loadMcElementStatus(EventIDRange& rangeW, RpcCondDbData
 
         // update for the timing and error on timing
         // new info strip |status time error_on_time|
-        char delimiter_strip = '|';
+        constexpr std::string_view delimiter_strip{"|"};
         std::string strip_status_list = "";
 
-        const auto info_strip= MuonCalib::MdtStringUtils::tokenize(striplist, delimiter_strip);
+        const auto info_strip= CxxUtils::tokenize(striplist, delimiter_strip);
         if (info_strip.size() > 1) {
             for (unsigned int i = 0; i < info_strip.size(); ++i) {
-                const std::string_view &ch_strip2 = info_strip[i];
+                const std::string &ch_strip2 = info_strip[i];
 
-                char delimiter_strip2 = ' ';
+                constexpr std::string_view delimiter_strip2{" "};
 
-                auto info_strip2 = MdtStringUtils::tokenize(ch_strip2, delimiter_strip2);
+                auto info_strip2 = CxxUtils::tokenize(ch_strip2, delimiter_strip2);
 
-                double Time = MdtStringUtils::stof(info_strip2[1]);
-                double SigmaTime = MdtStringUtils::stof(info_strip2[2]);
+                double Time = CxxUtils::atof(info_strip2[1]);
+                double SigmaTime = CxxUtils::atof(info_strip2[2]);
                 const auto &strip_status = info_strip2[0];
 
                 strip_status_list += strip_status;

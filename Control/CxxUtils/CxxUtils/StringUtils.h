@@ -26,13 +26,13 @@ namespace CxxUtils {
 
     /// Splits the string into smaller substrings
     std::vector<std::string> tokenize(const std::string& the_str,
-                                      const std::string& delimiters);
+                                      std::string_view delimiters);
     
     std::vector<double> tokenizeDouble(const std::string& the_str,
-                                       const std::string& delimiter);
+                                       std::string_view delimiter);
                                    
     std::vector<int> tokenizeInt(const std::string& the_str,
-                                 const std::string& delimiter);
+                                 std::string_view delimiter);
     
 
 }

@@ -14,7 +14,6 @@
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeListSpecification.h"
-#include "MuonCondSvc/MdtStringUtils.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
 #include "PathResolver/PathResolver.h"
 #include "SGTools/TransientAddress.h"

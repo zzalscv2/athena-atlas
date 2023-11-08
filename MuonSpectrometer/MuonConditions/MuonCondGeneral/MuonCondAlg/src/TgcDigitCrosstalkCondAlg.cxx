@@ -3,7 +3,7 @@
 */
 
 #include "MuonCondAlg/TgcDigitCrosstalkCondAlg.h"
-#include "MuonCondSvc/MdtStringUtils.h"
+#include "CxxUtils/StringUtils.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/WriteCondHandle.h"
 #include "CoralBase/Blob.h"
@@ -47,55 +47,51 @@ StatusCode TgcDigitCrosstalkCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_ERROR("Invalid intersection range: " << rangeIntersection);
     return StatusCode::FAILURE;
   }
-  using namespace MuonCalib;
   // Fill
   auto outputCdo = std::make_unique<TgcDigitCrosstalkData>();
-  char delimiter{';'};
+  constexpr std::string_view delimiter{";"};
   for (const auto &[channel, attribute] : *readHandle_XTalk.cptr()) {
     const coral::Blob& blob_strip = attribute["bXTalk_strip"].data<coral::Blob>();
-    const char* charstrip = reinterpret_cast<const char*>(blob_strip.startingAddress());
-    std::string_view strstrip(charstrip, blob_strip.size());
+    const std::string strstrip{static_cast<const char*>(blob_strip.startingAddress())};
 
-    std::vector<std::string_view> tokens = MdtStringUtils::tokenize(strstrip, delimiter);
+    std::vector<std::string> tokens = CxxUtils::tokenize(strstrip, delimiter);
     auto it = std::begin(tokens);
-    uint16_t station_number = MdtStringUtils::stoi(*it);
+    uint16_t station_number = CxxUtils::atoi(*it);
     ++it;
-    uint16_t station_eta = MdtStringUtils::stoi(*it);
+    uint16_t station_eta = CxxUtils::atoi(*it);
     ++it;
-    uint16_t layer = MdtStringUtils::stoi(*it);
+    uint16_t layer = CxxUtils::atoi(*it);
     ++it;
-    float prob10 = MdtStringUtils::stof(*it);
+    float prob10 = CxxUtils::atof(*it);
     ++it;
-    float prob11 = MdtStringUtils::stof(*it);
+    float prob11 = CxxUtils::atof(*it);
     ++it;
-    float prob20 = MdtStringUtils::stof(*it);
+    float prob20 = CxxUtils::atof(*it);
     ++it;
-    float prob21 = MdtStringUtils::stof(*it);
+    float prob21 = CxxUtils::atof(*it);
     ++it;
     uint16_t layerId = (station_number << 5) + (station_eta << 2) + layer;
     std::array<float, TgcDigitCrosstalkData::N_PROB> prob_strip{prob10, prob11, prob20, prob21};
     outputCdo->setStripProbability(layerId, prob_strip);
 
     const coral::Blob& blob_wire = attribute["bXTalk_wire"].data<coral::Blob>();
-    const char* charwire = reinterpret_cast<const char*>(blob_wire.startingAddress());
-    std::string_view strwire(charwire, blob_wire.size());
-
+    const std::string strwire {static_cast<const char*>(blob_wire.startingAddress())};
     tokens.clear();
-    tokens = MuonCalib::MdtStringUtils::tokenize(strwire, delimiter);
+    tokens = CxxUtils::tokenize(strwire, delimiter);
     it = std::begin(tokens);
-    station_number = MdtStringUtils::stoi(*it);
+    station_number = CxxUtils::atoi(*it);
     ++it;
-    station_eta = MdtStringUtils::stoi(*it);
+    station_eta = CxxUtils::atoi(*it);
     ++it;
-    layer = MdtStringUtils::stoi(*it);
+    layer = CxxUtils::atoi(*it);
     ++it;
-    prob10 = MdtStringUtils::stof(*it);
+    prob10 = CxxUtils::atof(*it);
     ++it;
-    prob11 = MdtStringUtils::stof(*it);
+    prob11 = CxxUtils::atof(*it);
     ++it;
-    prob20 = MdtStringUtils::stof(*it);
+    prob20 = CxxUtils::atof(*it);
     ++it;
-    prob21 = MdtStringUtils::stof(*it);
+    prob21 = CxxUtils::atof(*it);
     ++it;
     layerId = (station_number << 5) + (station_eta << 2) + layer;
     std::array<float, TgcDigitCrosstalkData::N_PROB> prob_wire{prob10, prob11, prob20, prob21};

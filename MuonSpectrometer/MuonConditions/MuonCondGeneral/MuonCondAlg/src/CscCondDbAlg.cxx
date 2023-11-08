@@ -110,7 +110,6 @@ StatusCode CscCondDbAlg::loadDataHv(writeHandle_t& writeHandle, CscCondDbData* w
     CondAttrListCollection::const_iterator itr;
     std::map<Identifier, int> layerMap;
     int hv_state, lv_state, hv_setpoint0, hv_setpoint1;
-    using namespace MuonCalib;
     unsigned int chan_index = 0;
     for (itr = readCdo->begin(); itr != readCdo->end(); ++itr) {
         unsigned int chanNum = readCdo->chanNum(chan_index);
@@ -124,13 +123,13 @@ StatusCode CscCondDbAlg::loadDataHv(writeHandle_t& writeHandle, CscCondDbData* w
             hv_setpoint0 = *(static_cast<const int*>((atr["HVSetpoint0"]).addressOfData()));
             hv_setpoint1 = *(static_cast<const int*>((atr["HVSetpoint1"]).addressOfData()));
 
-            char delimiter = '_';
-            auto tokens = MuonCalib::MdtStringUtils::tokenize(csc_chan_name, delimiter);
+            std::string_view delimiter{"_"};
+            auto tokens = CxxUtils::tokenize(csc_chan_name, delimiter);
 
             if ((hv_state != 1 or lv_state != 1 or hv_setpoint0 < 1000 or hv_setpoint1 < 1000) && !tokens.empty()) {
                 std::string_view layer = tokens[1];
                 std::string_view number_layer = tokens[1].substr(1, 2);
-                int wirelayer = MdtStringUtils::atoi(number_layer);
+                int wirelayer = CxxUtils::atoi(number_layer);
 
                 int eta = 0;
                 char eta_side = tokens[0][0];
@@ -635,9 +634,8 @@ CscCondDbAlg::loadDataDeadChambers(writeHandle_t & writeHandle, CscCondDbData* w
         const coral::AttributeList& atr = itr->second;
         std::string chamber_enabled = *(static_cast<const std::string*>((atr["enabledChambers"]).addressOfData()));
 
-        std::string delimiter = " ";
-        std::vector<std::string> tokens;
-        MuonCalib::MdtStringUtils::tokenize(chamber_enabled,tokens,delimiter);
+        std::string_view delimiter = " ";
+        std::vector<std::string> tokens =  CxxUtils::tokenize(chamber_enabled, delimiter);
 
         for (unsigned int i=0; i<tokens.size(); i++) goodChambers.push_back(tokens[i]);
     }

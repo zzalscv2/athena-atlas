@@ -50,7 +50,7 @@ StatusCode TgcDigitJitterCondAlg::execute(const EventContext& ctx) const {
         writeHandle.addDependency(readHandle);
         for (CondAttrListCollection::const_iterator itr = readHandle->begin(); itr != readHandle->end(); ++itr) {
             const coral::AttributeList& atr = itr->second;
-            const std::string data{*(static_cast<const std::string*>((atr["data"]).addressOfData()))};
+            const std::string& data{*(static_cast<const std::string*>((atr["data"]).addressOfData()))};
             nlohmann::json lines = nlohmann::json::parse(data);           
             ATH_CHECK(parseDataFromJSON(lines, *writeCdo)); 
         }

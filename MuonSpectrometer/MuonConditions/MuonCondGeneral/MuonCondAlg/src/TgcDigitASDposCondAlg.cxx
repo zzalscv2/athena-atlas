@@ -3,7 +3,7 @@
 */
 
 #include "MuonCondAlg/TgcDigitASDposCondAlg.h"
-#include "MuonCondSvc/MdtStringUtils.h"
+#include "CxxUtils/StringUtils.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/WriteCondHandle.h"
 #include "CoralBase/Blob.h"
@@ -43,26 +43,24 @@ StatusCode TgcDigitASDposCondAlg::execute(const EventContext& ctx) const
 
   // Fill
   auto outputCdo = std::make_unique<TgcDigitASDposData>();
-  using namespace MuonCalib;
-  char delimiter{';'};
+  constexpr std::string_view delimiter{";"};
   for(const auto &[channel, attribute] : **readHandle_ASDpos) {
     const coral::Blob& blob = attribute["bASDPos"].data<coral::Blob>();
-    const char *blobCStr = reinterpret_cast<const char *>(blob.startingAddress());
-    std::string_view blobline(blobCStr, blob.size()/sizeof(char));
-    std::vector<std::string_view> tokens = MuonCalib::MdtStringUtils::tokenize(blobline, delimiter);
+    const std::string blobline{static_cast<const char*>(blob.startingAddress())};
+    std::vector<std::string> tokens = CxxUtils::tokenize(blobline, delimiter);
     auto it = std::begin(tokens);
-    uint16_t station = static_cast<uint16_t>(MdtStringUtils::stoi(*it));
+    uint16_t station = static_cast<uint16_t>(CxxUtils::atoi(*it));
     ++it;
-    uint16_t eta = static_cast<uint16_t>(MdtStringUtils::stoi(*it));
+    uint16_t eta = static_cast<uint16_t>(CxxUtils::atoi(*it));
     ++it;
-    uint16_t phi = (MdtStringUtils::stoi(*it) == -99) ? 0x1f : static_cast<uint16_t>(MdtStringUtils::stoi(*it));
+    uint16_t phi = (CxxUtils::atoi(*it) == -99) ? 0x1f : static_cast<uint16_t>(CxxUtils::atoi(*it));
     uint16_t chamberId = (station << 8)  + (eta << 5) + phi;
 
     std::vector<float> strip_pos(TgcDigitASDposData::N_STRIPASDPOS, 0);
     //strip_pos initialized to size N_STRIPASDPOS
     for (int i=0; i < TgcDigitASDposData::N_STRIPASDPOS; i++) {
       ++it;
-      strip_pos[i] = MdtStringUtils::stof(*it);
+      strip_pos[i] = CxxUtils::atof(*it);
     }
     outputCdo->stripAsdPos.emplace(chamberId, std::move(strip_pos));
 
@@ -70,7 +68,7 @@ StatusCode TgcDigitASDposCondAlg::execute(const EventContext& ctx) const
     //TgcDigitASDposData initialized to size N_WIREASDPOS
     for (int i=0; i < TgcDigitASDposData::N_WIREASDPOS; i++) {
       ++it;
-      wire_pos[i] = MdtStringUtils::stof(*it);
+      wire_pos[i] = CxxUtils::atof(*it);
     }
     outputCdo->wireAsdPos.emplace(chamberId, std::move(wire_pos));
   }  // end of for(attrmap)

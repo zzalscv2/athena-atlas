@@ -19,10 +19,10 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonCondData/CscCondDbData.h"
-#include "MuonCondSvc/MdtStringUtils.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
+#include "CxxUtils/StringUtils.h"
 
 class CscCondDbAlg : public AthReentrantAlgorithm {
 public:
