@@ -37,7 +37,7 @@ class ATLAS_NOT_THREAD_SAFE LArRampFCalCorr : public AthAlgorithm
 
  private: 
 
-  int toMod(int& slot);
+  static int toMod(int& slot);
 
   const LArOnlineID* m_onlineHelper;
 

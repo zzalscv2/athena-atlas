@@ -17,10 +17,9 @@ LArOFCBinAlg::LArOFCBinAlg(const std::string & name, ISvcLocator * pSvcLocator) 
   declareProperty("FileName",m_fileName); 
   declareProperty("PerFebMGCorr",m_perFebMG=true); 
   declareProperty("PerFebCorr",m_perFeb=false); 
-  return;
 }
 
-LArOFCBinAlg::~LArOFCBinAlg() {}
+LArOFCBinAlg::~LArOFCBinAlg() = default;
 
 
 StatusCode LArOFCBinAlg::initialize() {
@@ -46,7 +45,7 @@ StatusCode LArOFCBinAlg::execute() {
   CHECK(m_nt->addItem("correction",ntcorr,0,200));
 
 
-  const LArOnlineID* onlineID=0;
+  const LArOnlineID* onlineID=nullptr;
   CHECK(detStore()->retrieve(onlineID));
 
   std::vector<std::map<HWIdentifier,float> > offsetMap;
@@ -86,7 +85,7 @@ StatusCode LArOFCBinAlg::execute() {
 
   rein.close();
 
-  const LArOFCBinComplete* oldCont=0;
+  const LArOFCBinComplete* oldCont=nullptr;
   CHECK(detStore()->retrieve(oldCont,m_inputContainer));
   
   LArOFCBinComplete* newCont=new LArOFCBinComplete();

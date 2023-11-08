@@ -11,11 +11,11 @@ const unsigned LArParams2Ntuple::m_nClasses = LArParamsProperties::END_OF_LIST ;
 
 LArParams2Ntuple::LArParams2Ntuple(const std::string& name, ISvcLocator* pSvcLocator)
  : LArCond2NtupleBase(name, pSvcLocator),
-   m_completeCaliPulseParams(0), m_completeDetCellParams(0), m_completePhysCaliTdiff(0),
-   m_completeTdrift(0), m_completeMphysOverMcal(0), m_completeRinj(0), m_completeTshaper(0),
-   m_completeEMEC_Cphi(0), m_completeEMEC_HValpha(0), m_completeEMEC_HVbeta(0),
-   m_completeCableLength(0), m_completeCableAttenuation(0),
-   m_completeOFCBin(0)
+   m_completeCaliPulseParams(nullptr), m_completeDetCellParams(nullptr), m_completePhysCaliTdiff(nullptr),
+   m_completeTdrift(nullptr), m_completeMphysOverMcal(nullptr), m_completeRinj(nullptr), m_completeTshaper(nullptr),
+   m_completeEMEC_Cphi(nullptr), m_completeEMEC_HValpha(nullptr), m_completeEMEC_HVbeta(nullptr),
+   m_completeCableLength(nullptr), m_completeCableAttenuation(nullptr),
+   m_completeOFCBin(nullptr)
 { 
   //declareProperty("DumpAllOnlineChannels",m_dumpAllOnlineChannels=std::string("")) ;
   declareProperty("DetStoreSuffix",m_suffix=std::string("")) ;
@@ -38,7 +38,7 @@ LArParams2Ntuple::LArParams2Ntuple(const std::string& name, ISvcLocator* pSvcLoc
 }
 
 LArParams2Ntuple::~LArParams2Ntuple() 
-{}
+= default;
 
 StatusCode LArParams2Ntuple::initialize() {
 
@@ -417,7 +417,7 @@ StatusCode LArParams2Ntuple::stop() {
       HWIdentifier chid = HWIdentifier(p.first) ;
 
       const std::vector<bool> & flags = (p.second).flags() ;
-      if ( flags.size() <= 0 ) continue ;
+      if ( flags.empty() ) continue ;
       if ( flags.size() < m_nClasses ) {  // should never happen...
 	ATH_MSG_WARNING( "... flags vector shorter than " << m_nClasses << ": " << flags.size() ) ;
 	continue ;
@@ -505,7 +505,7 @@ StatusCode LArParams2Ntuple::scanReadoutChannels( const DATA*& data_object ) {
   }
 
   std::string detStoreKey;
-  if (m_detStoreJo.size() > 0 && m_detStoreJo[classIndex] != "") {
+  if (!m_detStoreJo.empty() && !m_detStoreJo[classIndex].empty()) {
     detStoreKey = m_detStoreJo[classIndex];
     ATH_MSG_VERBOSE(classIndex<<" detStoreKey = "<<detStoreKey);
   } else {

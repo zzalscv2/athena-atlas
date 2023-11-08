@@ -39,7 +39,7 @@ class LArDigits2Ntuple : public LArCond2NtupleBase
   NTuple::Array<short>  m_samples;
   //
   //Event based ntuple pointer
-  NTuple::Tuple* m_evt_nt;
+  NTuple::Tuple* m_evt_nt = nullptr;
 
   NTuple::Item<unsigned long long> m_IEventEvt;
   NTuple::Item<short> m_LB;

@@ -305,11 +305,11 @@ StatusCode LArSC2Ntuple::execute()
   }
 
   /// set container pointers to nullptr if size is 0 (avoid checking again the size in many places)
-  if( DigitContainer_next && DigitContainer_next->size()  == 0 ) DigitContainer_next = nullptr;
+  if( DigitContainer_next && DigitContainer_next->empty() ) DigitContainer_next = nullptr;
 
-  if( etcontainer && etcontainer->size()	  == 0 ) etcontainer = nullptr;
+  if( etcontainer && etcontainer->empty() ) etcontainer = nullptr;
 
-  if( etcontainer_next && etcontainer_next->size()	  == 0 ) etcontainer_next = nullptr;
+  if( etcontainer_next && etcontainer_next->empty() ) etcontainer_next = nullptr;
   
   int cellsno   = 0;
   if (hasDigitContainer) {

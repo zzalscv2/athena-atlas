@@ -34,7 +34,7 @@ class LArCalibDigitMaker : public AthAlgorithm
   double m_delayScale;
   bool m_dontRun;
   bool m_isSC;
-  int m_eventNb;
+  int m_eventNb = 0;
   bool m_skipDuplicates;
   std::vector<HWIdentifier> m_pulsedChids;
 };

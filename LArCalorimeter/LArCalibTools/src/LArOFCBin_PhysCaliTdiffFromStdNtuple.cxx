@@ -32,7 +32,7 @@ LArOFCBin_PhysCaliTdiffFromStdNtuple::LArOFCBin_PhysCaliTdiffFromStdNtuple (cons
 }
 
 LArOFCBin_PhysCaliTdiffFromStdNtuple::~LArOFCBin_PhysCaliTdiffFromStdNtuple() 
-{}
+= default;
 
 StatusCode LArOFCBin_PhysCaliTdiffFromStdNtuple::initialize() 
 {
@@ -119,7 +119,7 @@ StatusCode LArOFCBin_PhysCaliTdiffFromStdNtuple::stop()
   // and symlink
 
   if(m_filltdiff) {
-     ILArPhysCaliTdiff *ilarTdiff = NULL;
+     ILArPhysCaliTdiff *ilarTdiff = nullptr;
      ATH_CHECK( detStore()->symLink(larTdiffParams,ilarTdiff) );
   }
 

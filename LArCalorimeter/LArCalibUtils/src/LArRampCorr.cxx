@@ -12,7 +12,7 @@
 
 LArRampCorr::LArRampCorr(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator),
-    m_onlineHelper(0)
+    m_onlineHelper(nullptr)
 {
  m_inputStringIDs.resize(0);
  declareProperty("KeyOutput",       m_keyoutput="LArRampCorr");
@@ -21,7 +21,7 @@ LArRampCorr::LArRampCorr(const std::string& name, ISvcLocator* pSvcLocator)
 }
 
 LArRampCorr::~LArRampCorr() 
-{}
+= default;
 
 StatusCode LArRampCorr::initialize()
 {
@@ -50,7 +50,7 @@ StatusCode LArRampCorr::stop()
  std::vector<std::string>::const_iterator itrStringID=m_inputStringIDs.begin();
  for (;itrStringID!=m_inputStringIDs.end();++itrStringID) {
 
-   std::string theString=*itrStringID;
+   const std::string& theString=*itrStringID;
    std::stringstream is;
    is << theString << std::endl;
    int iBarrel,iSide,iFT,iSlot,iChannel,iGain;

@@ -36,14 +36,14 @@
 #include "LArCalibUtils/LArPhysWaveTool.h"     // added by FT
 #include "LArCalibUtils/LArPhysWaveHECTool.h"  // added by FT
 
-#include <stdio.h>
-#include <iostream>
+#include <cstdio>
 #include <fstream>
-#include <string>
+#include <iostream>
 #include <memory>
+#include <string>
 
 
-typedef LArPhysWaveContainer::ConstConditionsMapIterator PhysWaveIt;
+using PhysWaveIt = LArPhysWaveContainer::ConstConditionsMapIterator;
 
 LArPhysWavePredictor::LArPhysWavePredictor (const std::string& name, ISvcLocator* pSvcLocator) 
  : AthAlgorithm(name, pSvcLocator),
@@ -111,7 +111,7 @@ LArPhysWavePredictor::LArPhysWavePredictor (const std::string& name, ISvcLocator
 
 
 LArPhysWavePredictor::~LArPhysWavePredictor() 
-{}
+= default;
 
 
 StatusCode LArPhysWavePredictor::initialize() 
@@ -154,7 +154,7 @@ StatusCode LArPhysWavePredictor::initialize()
 namespace {
 struct FileCloser
 {
-  FileCloser (FILE* the_f): f (the_f) {}
+  explicit FileCloser (FILE* the_f): f (the_f) {}
   ~FileCloser() { if (f) fclose(f); }
   FILE* f;
 
@@ -196,7 +196,7 @@ StatusCode LArPhysWavePredictor::stop()
 
   
   // Retrieve cabling
-  const LArOnOffIdMapping* cabling(0);
+  const LArOnOffIdMapping* cabling(nullptr);
   if( m_isSC ){
     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKeySC};
     cabling = {*cablingHdl};
@@ -263,7 +263,7 @@ StatusCode LArPhysWavePredictor::stop()
     }
   }
   
-  const ILArFEBTimeOffset* larFebTshift = NULL;  
+  const ILArFEBTimeOffset* larFebTshift = nullptr;  
   if ( m_useJOPhysCaliTdiff ) { // no LArPhysCaliTdiffComplete found, or manual time shift selected
     if ( m_timeShiftByHelper ) {
       ATH_MSG_INFO( "Will use helper class for start time." );
@@ -284,7 +284,7 @@ StatusCode LArPhysWavePredictor::stop()
       ATH_MSG_INFO( "Manually shifting pulses by *FEB* time indexes." );
       sc = detStore()->retrieve(larFebTshift);
       if (sc.isFailure())
-         larFebTshift = NULL;
+         larFebTshift = nullptr;
     }
   }
   
@@ -319,7 +319,7 @@ StatusCode LArPhysWavePredictor::stop()
     return sc;
   }   
   
-  FILE* f = NULL;
+  FILE* f = nullptr;
   if (m_dumpMphysMcali) {
      f = fopen("MphysOverMcali.dat","w");
      fprintf(f,"# Region Layer Eta Phi Gain  MphysMcali\n");
@@ -346,7 +346,7 @@ StatusCode LArPhysWavePredictor::stop()
 
   /////////////IDEAL PHYSWAVE/////////////////////////////
   // Get current LArPhysWaveContainer
-  const LArPhysWaveContainer* larIdealPhysWaveContainer=0;
+  const LArPhysWaveContainer* larIdealPhysWaveContainer=nullptr;
   if(m_isHEC){
     ATH_CHECK(detStore()->retrieve(larIdealPhysWaveContainer,m_keyIdealPhys));
     ATH_MSG_INFO("LArPhysWaveContainer with (key = " << m_keyIdealPhys << ") reading from StoreGate" );
@@ -367,7 +367,7 @@ StatusCode LArPhysWavePredictor::stop()
        //log << MSG::INF0 << "LArCaliWaveContainer (key = " << key << ") not found in StoreGate" );
        continue;   
     }
-    if ( caliWaveContainer == NULL ) {
+    if ( caliWaveContainer == nullptr ) {
        ATH_MSG_INFO( "LArCaliWaveContainer (key = " << key << ") is empty" );
        continue;
     }
@@ -709,6 +709,5 @@ void LArPhysWavePredictor::notFoundMsg(const HWIdentifier chid, const int gain, 
     ATH_MSG_ERROR( "Cannot access " << value << " for channel " << m_onlineHelper->channel_name(chid) 
 		    << ", gain = " << gain << " BC status=[" << badChanStatus << "]. Will use jobO setting." );
   }
-  return;
-}
+  }
 

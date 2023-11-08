@@ -29,15 +29,15 @@ LArAccumulatedCalibDigitContSplitter::LArAccumulatedCalibDigitContSplitter(const
 }
 
 LArAccumulatedCalibDigitContSplitter::~LArAccumulatedCalibDigitContSplitter() 
-{}
+= default;
 
 StatusCode LArAccumulatedCalibDigitContSplitter::initialize()
 { 
   // Default list
-  if (!m_keylist.size()){ // Not key list given
-    m_keylist.push_back("HIGH");
-    m_keylist.push_back("MEDIUM");
-    m_keylist.push_back("LOW");
+  if (m_keylist.empty()){ // Not key list given
+    m_keylist.emplace_back("HIGH");
+    m_keylist.emplace_back("MEDIUM");
+    m_keylist.emplace_back("LOW");
    }
 
   m_event_counter = 0;
@@ -52,7 +52,7 @@ StatusCode LArAccumulatedCalibDigitContSplitter::execute()
    ATH_MSG_INFO ( "Processing event " << m_event_counter );
  ++m_event_counter;
  
- if (m_keylist.size()==0) {
+ if (m_keylist.empty()) {
    ATH_MSG_ERROR ( "Key list is empty! No containers to process!" );
    return StatusCode::FAILURE;
  } 

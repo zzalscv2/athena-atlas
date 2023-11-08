@@ -19,7 +19,7 @@ CaloCellGroup2Ntuple::CaloCellGroup2Ntuple(const std::string& name, ISvcLocator*
 }
 
 CaloCellGroup2Ntuple::~CaloCellGroup2Ntuple() 
-{}
+= default;
 
 StatusCode CaloCellGroup2Ntuple::stop () {
   StatusCode sc;

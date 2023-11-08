@@ -8,8 +8,8 @@
 
 LArRampAdHocPatchingAlg::LArRampAdHocPatchingAlg (const std::string& name, ISvcLocator* pSvcLocator) 
  : AthAlgorithm(name,pSvcLocator),
-   m_contIn(0),
-   m_contOut(0)
+   m_contIn(nullptr),
+   m_contOut(nullptr)
 {
   declareProperty("ContainerKey",   m_containerKey="");
   declareProperty("NewContainerKey",m_newContainerKey="");
@@ -32,8 +32,7 @@ LArRampAdHocPatchingAlg::LArRampAdHocPatchingAlg (const std::string& name, ISvcL
 
 
 LArRampAdHocPatchingAlg::~LArRampAdHocPatchingAlg() 
-{
-}
+= default;
 
 
 StatusCode LArRampAdHocPatchingAlg::initialize() 
@@ -43,7 +42,7 @@ StatusCode LArRampAdHocPatchingAlg::initialize()
   ATH_MSG_INFO ( "MG: "<<m_channelsToBePatchedMG.size()<<" "<<m_patchesToBeAppliedMG.size());
   ATH_MSG_INFO ( "LG: "<<m_channelsToBePatchedLG.size()<<" "<<m_patchesToBeAppliedLG.size());
 
-  if ( m_channelsToBePatchedHG.size() && ( m_channelsToBePatchedHG.size() !=  m_patchesToBeAppliedHG.size() ) ) {
+  if ( !m_channelsToBePatchedHG.empty() && ( m_channelsToBePatchedHG.size() !=  m_patchesToBeAppliedHG.size() ) ) {
     ATH_MSG_ERROR ( "Wrong size of HIGH gain input vectors!" );
     return StatusCode::FAILURE;
   } else {
@@ -56,7 +55,7 @@ StatusCode LArRampAdHocPatchingAlg::initialize()
      }
   } 
 
-  if ( m_channelsToBePatchedMG.size() && ( m_channelsToBePatchedMG.size() !=  m_patchesToBeAppliedMG.size() ) ) {
+  if ( !m_channelsToBePatchedMG.empty() && ( m_channelsToBePatchedMG.size() !=  m_patchesToBeAppliedMG.size() ) ) {
     ATH_MSG_ERROR ( "Wrong size of MEDIUM gain input vectors!" );
     return StatusCode::FAILURE;
   } else {
@@ -69,7 +68,7 @@ StatusCode LArRampAdHocPatchingAlg::initialize()
      }
   } 
 
-  if ( m_channelsToBePatchedLG.size() && ( m_channelsToBePatchedLG.size() !=  m_patchesToBeAppliedLG.size() ) ) {
+  if ( !m_channelsToBePatchedLG.empty() && ( m_channelsToBePatchedLG.size() !=  m_patchesToBeAppliedLG.size() ) ) {
     ATH_MSG_ERROR ( "Wrong size of LOW gain input vectors!" );
     return StatusCode::FAILURE;
   } else {
@@ -90,7 +89,7 @@ StatusCode LArRampAdHocPatchingAlg::stop()
 {
   ATH_MSG_INFO ( "Entering LArRampAdHocPatchingAlg" );
 
-  if (m_newContainerKey.size()) { //New container key give -> different containers for reading and writing
+  if (!m_newContainerKey.empty()) { //New container key give -> different containers for reading and writing
     ATH_CHECK( detStore()->retrieve(m_contIn,m_containerKey) ); //const-retrieve
     m_contOut=new LArRampComplete();
     m_contOut->setGroupingType((LArConditionsContainerBase::GroupingType)m_contIn->groupingType());
@@ -106,17 +105,17 @@ StatusCode LArRampAdHocPatchingAlg::stop()
     ATH_MSG_INFO ( "Work on container '" <<  m_containerKey  << "'" );
   }
 
-  if (m_channelsToBePatchedHG.size()) {
+  if (!m_channelsToBePatchedHG.empty()) {
     ATH_MSG_INFO ( "Going to apply ad-hoc patches to HIGH gain ramps." );
     ATH_CHECK( ApplyAdHocPatches(m_channelsToBePatchedHG,m_patchesToBeAppliedHG,m_valuesToBeAppliedHG, 0) );
   }
 
-  if (m_channelsToBePatchedMG.size()) {
+  if (!m_channelsToBePatchedMG.empty()) {
     ATH_MSG_INFO ( "Going to apply ad-hoc patches to MEDIUM gain ramps." );
     ATH_CHECK( ApplyAdHocPatches(m_channelsToBePatchedMG,m_patchesToBeAppliedMG,m_valuesToBeAppliedMG,1) );
   }
 
-  if (m_channelsToBePatchedLG.size()) {
+  if (!m_channelsToBePatchedLG.empty()) {
     ATH_MSG_INFO ( "Going to apply ad-hoc patches to LOW gain ramps." );
     ATH_CHECK( ApplyAdHocPatches(m_channelsToBePatchedLG,m_patchesToBeAppliedLG,m_valuesToBeAppliedLG,2) );
   }
@@ -145,7 +144,7 @@ StatusCode LArRampAdHocPatchingAlg::ApplyAdHocPatches(std::vector<unsigned>& cha
       break;
                         }
     case PutValues: {
-         if ( valuesToBeApplied[putcount].size() == 0 ) return StatusCode::FAILURE;
+         if ( valuesToBeApplied[putcount].empty() ) return StatusCode::FAILURE;
          PutTheValues(chid,valuesToBeApplied[putcount],gain);
          ++putcount;
          break;

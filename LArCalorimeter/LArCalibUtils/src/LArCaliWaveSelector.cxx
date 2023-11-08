@@ -17,12 +17,12 @@
 #include "LArRawConditions/LArWaveHelper.h"
 
 
-typedef LArCaliWaveContainer::ConstConditionsMapIterator   CaliMapIt;
-typedef LArCaliWaveContainer::LArCaliWaves::const_iterator CaliWaveIt;
+using CaliMapIt = LArCaliWaveContainer::ConstConditionsMapIterator;
+using CaliWaveIt = LArCaliWaveContainer::LArCaliWaves::const_iterator;
 
 LArCaliWaveSelector::LArCaliWaveSelector(const std::string& name, ISvcLocator* pSvcLocator) 
  : AthAlgorithm(name, pSvcLocator),
-   m_cellID(0),
+   m_cellID(nullptr),
    m_gmask(0),
    m_groupingType("ExtendedFeedThrough") 
 {
@@ -35,14 +35,14 @@ LArCaliWaveSelector::LArCaliWaveSelector(const std::string& name, ISvcLocator* p
 }
 
 LArCaliWaveSelector::~LArCaliWaveSelector() 
-{}
+= default;
 
 StatusCode LArCaliWaveSelector::initialize()
 { 
   ATH_MSG_INFO ( " in initialize.." );
 
   // Default list
-  if (!m_keyList.size()) { m_keyList.push_back("LArCaliWave"); }
+  if (m_keyList.empty()) { m_keyList.emplace_back("LArCaliWave"); }
   parseSelection();
 
   ATH_CHECK( detStore()->retrieve (m_cellID, "CaloCell_ID") );

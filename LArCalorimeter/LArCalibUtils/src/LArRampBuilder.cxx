@@ -131,7 +131,7 @@ StatusCode LArRampBuilder::execute()
     return StatusCode::FAILURE;
   }
   
-  const LArFebErrorSummary* febErrSum=NULL;
+  const LArFebErrorSummary* febErrSum=nullptr;
   if (evtStore()->contains<LArFebErrorSummary>("LArFebErrorSummary")) {
     sc=evtStore()->retrieve(febErrSum);
     if (sc.isFailure()) {
@@ -143,7 +143,7 @@ StatusCode LArRampBuilder::execute()
     if (m_event_counter==1)
       ATH_MSG_WARNING("No FebErrorSummaryObject found! Feb errors not checked!");
  
-  const LArOnOffIdMapping* cabling(0);
+  const LArOnOffIdMapping* cabling(nullptr);
   if( m_isSC ){
     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKeySC};
     cabling = {*cablingHdl};
@@ -185,7 +185,7 @@ StatusCode LArRampBuilder::execute()
     
     // retrieve cali wave container
     
-    const LArCaliWaveContainer* caliWaveContainer = NULL;
+    const LArCaliWaveContainer* caliWaveContainer = nullptr;
     ATH_MSG_WARNING("Will retrieve LArCaliWaveContainer ");
     sc= detStore()->retrieve(caliWaveContainer,"CaliWave");
     if (sc.isFailure()) {
@@ -332,7 +332,7 @@ StatusCode LArRampBuilder::execute()
         if (m_thePedestal[chid_hash] < 0) {
 	  
 	  //Pointer to conditions data objects 
-	  const ILArPedestal* larPedestal=NULL;
+	  const ILArPedestal* larPedestal=nullptr;
 	  sc=detStore()->retrieve(larPedestal);
 	  if (sc.isFailure()) {
 	    ATH_MSG_FATAL( "No pedestals found in database. Aborting executiong." );
@@ -399,7 +399,7 @@ StatusCode LArRampBuilder::stop()
     ATH_CHECK(larRampComplete->initialize());
   }
   
-  const LArOnOffIdMapping* cabling(0);
+  const LArOnOffIdMapping* cabling(nullptr);
   if( m_isSC ){
     ATH_MSG_INFO("setting up SC cabling");
     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKeySC};
@@ -588,7 +588,7 @@ StatusCode LArRampBuilder::stop()
 	    }
 	    
 	    // apply reconstruction 
-	    if(m_CaliWaves[gain][chid_hash][GoodIndex].size() > 0){
+	    if(!m_CaliWaves[gain][chid_hash][GoodIndex].empty()){
 	      peak=m_peakShapeTool->peak(ramppoint.Samples,m_CaliWaves[gain][chid_hash][GoodIndex]);  
 	      ATH_MSG_DEBUG("cell chid=" << chid.get_compact() << ",peak= " << peak[0]);
 	    }else{

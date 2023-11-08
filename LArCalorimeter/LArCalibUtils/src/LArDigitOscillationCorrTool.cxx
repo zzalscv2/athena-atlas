@@ -32,7 +32,7 @@ LArDigitOscillationCorrTool::LArDigitOscillationCorrTool(const std::string& type
     m_nSigma(3.0), 
     m_eventPhase(0),
     m_omega(1.024e6*hertz),
-    m_emId(0), m_fcalId(0), m_hecId(0), m_lar_on_id(0)
+    m_emId(nullptr), m_fcalId(nullptr), m_hecId(nullptr), m_lar_on_id(nullptr)
 {
   declareInterface<ILArDigitOscillationCorrTool>(this);
   declareProperty("BeginRunPriority",m_priority);
@@ -148,9 +148,9 @@ StatusCode LArDigitOscillationCorrTool::calculateEventPhase(const LArDigitContai
       for(unsigned int j=0;j<nSamples;j++) {
 	// exclude all samples (and the previous and next sample) which 
 	//have more than nSigma worth of absolute signal 
-	if ( j == 0 || !(std::abs(theSamples[i][j] - theSamples[i][0]) > m_nSigma*theRMSValues[i] 
-			 || ( j > 0 && std::abs(theSamples[i][j-1] - theSamples[i][0]) > m_nSigma*theRMSValues[i])
-			 || ( j < nSamples-1 && std::abs(theSamples[i][j+1] - theSamples[i][0]) > m_nSigma*theRMSValues[i])) ) {
+	if ( j == 0 || (std::abs(theSamples[i][j] - theSamples[i][0]) <= m_nSigma*theRMSValues[i] 
+			 && ( j <= 0 || std::abs(theSamples[i][j-1] - theSamples[i][0]) <= m_nSigma*theRMSValues[i])
+			 && ( j >= nSamples-1 || std::abs(theSamples[i][j+1] - theSamples[i][0]) <= m_nSigma*theRMSValues[i])) ) {
 	  
 	  if ( lchimin < 0 )
 	    nTotSamples ++;
@@ -215,7 +215,7 @@ StatusCode LArDigitOscillationCorrTool::correctLArDigits(LArDigitContainer &theD
       const double& DBchannelPhase=larH6Oscillations->channelPhase(chid);
       const double& DBchannelAmplitude=larH6Oscillations->channelAmplitude(chid);
       ATH_MSG_DEBUG ( "The HWId is " << chid 
-                      << ", the offline Id is " << m_hecId->show_to_string(id,0,'/') 
+                      << ", the offline Id is " << m_hecId->show_to_string(id,nullptr,'/') 
                       << ", the ChannelAmplitude is " <<  DBchannelAmplitude 
                       << ", the ChannelPhase is " <<  DBchannelPhase );
       ATH_MSG_DEBUG  ( "m_omega value is " << m_omega );
@@ -240,7 +240,6 @@ void LArDigitOscillationCorrTool::handle(const Incident& /* inc*/ )
   ATH_MSG_DEBUG ( "LArDigitOscillationCorrTool handle()" );
   
   this->retrieveDB().ignore();
-  return;
 }
 
 // *** retrieve subfactors from the DB *** 

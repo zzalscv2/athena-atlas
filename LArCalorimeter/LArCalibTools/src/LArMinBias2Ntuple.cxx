@@ -26,14 +26,14 @@ LArMinBias2Ntuple::LArMinBias2Ntuple(const std::string& name, ISvcLocator* pSvcL
 }
 
 LArMinBias2Ntuple::~LArMinBias2Ntuple() 
-{}
+= default;
 
 StatusCode LArMinBias2Ntuple::stop() {
    
-  const ILArMinBias* LArMinBias = NULL;
-  const ILArMinBiasAverage* LArMinBiasAv = NULL;
+  const ILArMinBias* LArMinBias = nullptr;
+  const ILArMinBiasAverage* LArMinBiasAv = nullptr;
   
-  if(m_contKey.find("Pileup") != std::string::npos) m_isPileup=true; else m_isPileup=false;
+  m_isPileup = m_contKey.find("Pileup") != std::string::npos;
   if(!m_isPileup) ATH_CHECK( m_detStore->retrieve(LArMinBias,m_contKey) );
   ATH_CHECK( m_detStore->retrieve(LArMinBiasAv,m_contKey+"Average") );
 

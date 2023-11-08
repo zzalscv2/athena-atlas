@@ -20,7 +20,7 @@ LArShapeCorrector::LArShapeCorrector(const std::string& name, ISvcLocator* pSvcL
 }
 
 LArShapeCorrector::~LArShapeCorrector()
-{  }
+= default;
 
 StatusCode LArShapeCorrector::initialize()
 {
@@ -58,7 +58,7 @@ StatusCode LArShapeCorrector::stop() {
 
   ATH_MSG_DEBUG(" In stop() ");
 
-  const LArShapeComplete* inputShape=NULL;
+  const LArShapeComplete* inputShape=nullptr;
   StatusCode sc=detStore()->retrieve(inputShape,m_keyShape);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to get input Shapes with key " << m_keyShape );
@@ -66,7 +66,7 @@ StatusCode LArShapeCorrector::stop() {
   }
     
 
-  const LArShapeComplete* inputShapeResidual=NULL;
+  const LArShapeComplete* inputShapeResidual=nullptr;
   sc=detStore()->retrieve(inputShapeResidual,m_keyShapeResidual);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to get input Shape residuals with key " << m_keyShapeResidual );

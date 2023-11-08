@@ -81,7 +81,7 @@ StatusCode LArCalibDigitMaker::initialize()
   auto calibParams = std::make_unique<LArCalibParams>();
   ATH_CHECK( calibParams->initialize() ); 
   for( long unsigned int i=0; i < theseBoardIDs.size(); i++ ){
-    if (theseBoardIDs[i].size() && m_vDAC[i].size() && m_vDelay.size() && thesePatterns[i].size() && m_nTrigger) {
+    if (!theseBoardIDs[i].empty() && !m_vDAC[i].empty() && !m_vDelay.empty() && !thesePatterns[i].empty() && m_nTrigger) {
       cutPattern = thesePatterns[i];
 
       if (thesePatterns[i].size() != ((unsigned int)m_nPatterns[i])){
@@ -102,10 +102,10 @@ StatusCode LArCalibDigitMaker::initialize()
   ATH_CHECK( detStore()->record(std::move(calibParams),"LArCalibParams") );
   // End set calib board parameters
 
-  if (m_keylist.size()==0) {
-    m_keylist.push_back("HIGH");
-    m_keylist.push_back("MEDIUM");
-    m_keylist.push_back("LOW");
+  if (m_keylist.empty()) {
+    m_keylist.emplace_back("HIGH");
+    m_keylist.emplace_back("MEDIUM");
+    m_keylist.emplace_back("LOW");
   }
 
   ATH_MSG_DEBUG ( "======== LArCalibDigitMaker initialize successfully ========" );
@@ -120,7 +120,7 @@ StatusCode LArCalibDigitMaker::execute() {
  const EventContext& ctx = Gaudi::Hive::currentContext();
 
 
- const LArCalibLineMapping *clcabling=0;
+ const LArCalibLineMapping *clcabling=nullptr;
  if(m_isSC) {
    ATH_MSG_DEBUG ( "======== LArCalibDigitMaker: using SC calib line map" );
    SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapSCKey};
@@ -151,7 +151,7 @@ StatusCode LArCalibDigitMaker::execute() {
      ATH_MSG_DEBUG ( "Cannot read LArDigitContainer from StoreGate! key=" << key );
      continue; //Try next container
    }
-   if (larDigitCont->size()==0) {
+   if (larDigitCont->empty()) {
      ATH_MSG_DEBUG ( "LArDigitContainer with key '" << key << "' is empty. Ignored." );
      continue; //Try next container
    }
@@ -171,7 +171,7 @@ StatusCode LArCalibDigitMaker::execute() {
      const std::vector<short>& samples=digit->samples();
      CaloGain::CaloGain gain=digit->gain();
      const std::vector<HWIdentifier>& calibChannelIDs=clcabling->calibSlotLine(chid);
-     if (calibChannelIDs.size()==0) {
+     if (calibChannelIDs.empty()) {
        continue; //Disconnected channel
      }
      //For the time being, I assume we are in H8 and have only one calib channel per FEB channel

@@ -60,7 +60,7 @@ private:
 
   HWIdentifier constructSingleFebId( const std::vector<int>& v, MsgStream& log) const;
 
-  MsgStream& insertExpandedID( const std::vector<int>& intVec, MsgStream& log) const;
+  static MsgStream& insertExpandedID( const std::vector<int>& intVec, MsgStream& log) ;
 
 };
 

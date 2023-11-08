@@ -54,7 +54,7 @@ private:
     nProblemTypes 
   };
 
-  void writeSum(std::ofstream& exeFile, const std::vector<unsigned>& probs) const;
+  static void writeSum(std::ofstream& exeFile, const std::vector<unsigned>& probs) ;
 
 
 };

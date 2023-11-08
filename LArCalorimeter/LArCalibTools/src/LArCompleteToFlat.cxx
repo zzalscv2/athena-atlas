@@ -42,7 +42,7 @@ LArCompleteToFlat::LArCompleteToFlat( const std::string& name,
 			  ISvcLocator* pSvcLocator ) : 
   ::AthAlgorithm( name, pSvcLocator ),
   m_hashMax(0),
-  m_onlineID(0),
+  m_onlineID(nullptr),
   m_isSC(false)
 {
   declareProperty("isSC",m_isSC);
@@ -68,7 +68,7 @@ LArCompleteToFlat::LArCompleteToFlat( const std::string& name,
 // Destructor
 ///////////////
 LArCompleteToFlat::~LArCompleteToFlat()
-{}
+= default;
 
 // Athena Algorithm's Hooks
 ////////////////////////////
@@ -136,7 +136,7 @@ CondAttrListCollection* LArCompleteToFlat::singleFloatFlat(const char* blobName,
   StatusCode sc=detStore()->record(coll,outputName);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to record CondAttrListCollection with key" << outputName );
-    return NULL;
+    return nullptr;
   }
   return coll;
 }
@@ -313,7 +313,7 @@ CondAttrListCollection* LArCompleteToFlat::ofcFlat(const ILArOFC* input, const s
   StatusCode sc=detStore()->record(collOFC,outputName);//"/LAR/ElecCalibFlat/OFC");
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to record CondAttrListCollection OFC with key " << outputName );
-    return NULL;
+    return nullptr;
   }
 
   ATH_MSG_INFO( "Converted OFCs to inline storage. Total number of channels=" << nChannels );
@@ -421,7 +421,7 @@ CondAttrListCollection* LArCompleteToFlat::shapeFlat(const LArShapeComplete* inp
   StatusCode sc=detStore()->record(coll,outputName);//"/LAR/ElecCalibFlat/SHAPE");
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to record CondAttrListCollection Shape with key " << outputName );
-    return NULL;
+    return nullptr;
   }
 
   ATH_MSG_INFO( "Converted Shapes to inline storage. Total number of channels=" << nChannels );
@@ -450,7 +450,7 @@ CondAttrListCollection* LArCompleteToFlat::rampFlat(const ILArRamp* input, const
 
   std::vector<float> defaultRamp={0.0,1.0};
 
-  const LArOnOffIdMapping* cabling(0);
+  const LArOnOffIdMapping* cabling(nullptr);
   if(m_isSC){
     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKeySC};
     cabling=*cablingHdl;
@@ -492,9 +492,9 @@ CondAttrListCollection* LArCompleteToFlat::rampFlat(const ILArRamp* input, const
          ATH_MSG_WARNING("Protection against crazy ramp values, set 500");
          rampVec[1]=500.;
       }
-      if (rampVec.size()==0 && gain==2 && m_fakeEMBPSLowGain && cabling->isOnlineConnected(chid) ) { 
+      if (rampVec.empty() && gain==2 && m_fakeEMBPSLowGain && cabling->isOnlineConnected(chid) ) { 
 	rampVec=input->ADC2DAC(chid,1).asVector();
-        if(rampVec.size()==0) {
+        if(rampVec.empty()) {
            ATH_MSG_WARNING("Filling EMBPS ramp with default values 0,10");
            rampVec.resize(2);
            rampVec[0]=0.;
@@ -531,7 +531,7 @@ CondAttrListCollection* LArCompleteToFlat::rampFlat(const ILArRamp* input, const
   StatusCode sc=detStore()->record(coll,outputName);//"/LAR/ElecCalibFlat/Ramp");
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to record CondAttrListCollection for ramp with key " << outputName );
-    return NULL;
+    return nullptr;
   }
 
   ATH_MSG_INFO( "Converted Ramps to inline storage. Total number of channels " << nChannels );
@@ -563,7 +563,7 @@ CondAttrListCollection* LArCompleteToFlat::DAC2uAFlat(const ILArDAC2uA* input, c
   StatusCode sc=detStore()->record(coll,outputName);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to record CondAttrListCollection with key" << outputName );
-    return NULL;
+    return nullptr;
   }
   return coll;
 }
@@ -588,7 +588,7 @@ CondAttrListCollection* LArCompleteToFlat::uA2MeVFlat(const ILAruA2MeV* input, c
   StatusCode sc=detStore()->record(coll,outputName);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to record CondAttrListCollection with key" << outputName );
-    return NULL;
+    return nullptr;
   }
   return coll;
 }
@@ -631,7 +631,7 @@ AthenaAttributeList* LArCompleteToFlat::DSPThresholdsFlat(const LArDSPThresholds
   StatusCode sc=detStore()->record(coll,outputName);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to record AthenaAttributeList DSPThresholds with key " << outputName );
-    return NULL;
+    return nullptr;
   }
 
   return coll;
@@ -670,7 +670,7 @@ StatusCode LArCompleteToFlat::stop() {
 
   m_hashMax=m_onlineID->channelHashMax();
   
-  if (m_uA2MeVInput.size()) {
+  if (!m_uA2MeVInput.empty()) {
     const ILAruA2MeV* uA2MeVComplete;
     sc=detStore()->retrieve(uA2MeVComplete,m_uA2MeVInput);
     if (sc.isFailure()) {
@@ -686,7 +686,7 @@ StatusCode LArCompleteToFlat::stop() {
   }//end if have m_uA2MeV
     
 
-  if (m_DAC2uAInput.size()) {
+  if (!m_DAC2uAInput.empty()) {
     const ILArDAC2uA* DAC2uAComplete = nullptr;
     sc=detStore()->retrieve(DAC2uAComplete,m_DAC2uAInput);
     if (sc.isFailure()) {
@@ -701,7 +701,7 @@ StatusCode LArCompleteToFlat::stop() {
     }
   }//end if have m_DAC2uAInput
 
-  if (m_MphysOverMcalInput.size()) {
+  if (!m_MphysOverMcalInput.empty()) {
     const LArMphysOverMcalComplete* MphysOverMcalComplete;
     sc=detStore()->retrieve(MphysOverMcalComplete,m_MphysOverMcalInput);
     if (sc.isFailure()) {
@@ -717,7 +717,7 @@ StatusCode LArCompleteToFlat::stop() {
   }//end if have m_MphysOverMcalInput
 
 
-  if (m_HVScaleCorrInput.size()) {
+  if (!m_HVScaleCorrInput.empty()) {
     const LArHVScaleCorrComplete* HVScaleCorrComplete = nullptr;
     sc=detStore()->retrieve(HVScaleCorrComplete,m_HVScaleCorrInput);
     if (sc.isFailure()) {
@@ -732,7 +732,7 @@ StatusCode LArCompleteToFlat::stop() {
     }
   }//end if have m_HVScaleCorrInput
 
-  if (m_PedestalInput.size()) {
+  if (!m_PedestalInput.empty()) {
     const LArPedestalComplete* pedComplete = nullptr;
     sc=detStore()->retrieve(pedComplete,m_PedestalInput);
     if (sc.isFailure()) {
@@ -765,7 +765,7 @@ StatusCode LArCompleteToFlat::stop() {
   }//end if have m_pedestalInput
 
   //OFC:
-  if (m_OFCInput.size()) {
+  if (!m_OFCInput.empty()) {
     const LArOFCComplete* ofcComplete = nullptr;
     sc=detStore()->retrieve(ofcComplete,m_OFCInput);
     if (sc.isFailure()) {
@@ -779,7 +779,7 @@ StatusCode LArCompleteToFlat::stop() {
       ofcFlat(ofcComplete,flatName+"/OFC");
     }
   }//end have m_OFCInput
-  if (m_OFCCaliInput.size()) {
+  if (!m_OFCCaliInput.empty()) {
     const LArOFCComplete* ofcComplete;
     sc=detStore()->retrieve(ofcComplete,m_OFCCaliInput);
     if (sc.isFailure()) {
@@ -795,7 +795,7 @@ StatusCode LArCompleteToFlat::stop() {
     }
   }//end have m_OFCInput
   //Shape:
-  if (m_ShapeInput.size()) {
+  if (!m_ShapeInput.empty()) {
     const LArShapeComplete* shapeComplete = nullptr;
     sc=detStore()->retrieve(shapeComplete,m_ShapeInput);
     if (sc.isFailure()) {
@@ -827,7 +827,7 @@ StatusCode LArCompleteToFlat::stop() {
   }//end if have m_shapeInput
 
   //Ramp
-  if (m_RampInput.size()) { 
+  if (!m_RampInput.empty()) { 
     const LArRampComplete* rampComplete = nullptr;
     sc=detStore()->retrieve(rampComplete,m_RampInput);
     if (sc.isFailure()) {
@@ -842,7 +842,7 @@ StatusCode LArCompleteToFlat::stop() {
     }
   }
   
-  if(m_DSPThresholdsInput.size()) {
+  if(!m_DSPThresholdsInput.empty()) {
     //DSPThresh:
     const LArDSPThresholdsComplete* DSPTComplete = nullptr;
     sc=detStore()->retrieve(DSPTComplete,m_DSPThresholdsInput);
@@ -880,7 +880,7 @@ StatusCode LArCompleteToFlat::stop() {
 
 void LArCompleteToFlat::errIfConnected(const HWIdentifier chid, const int gain, const char* objName, const char* message) const{
 
-  const LArOnOffIdMapping* cabling(0);
+  const LArOnOffIdMapping* cabling(nullptr);
   if(m_isSC){
     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKeySC};
     cabling=*cablingHdl;
@@ -894,11 +894,10 @@ void LArCompleteToFlat::errIfConnected(const HWIdentifier chid, const int gain, 
   }
 
   if (cabling->isOnlineConnected(chid)) {
-    if (! (gain==2 && m_onlineID->isEMBPS(chid))) { //No LG Presampler calibration
+    if (gain!=2 || !m_onlineID->isEMBPS(chid)) { //No LG Presampler calibration
       ATH_MSG_ERROR( "No valid " << objName << " found for channel "  << m_onlineID->channel_name(chid) << ", gain " << gain << ". ");
       if (message) ATH_MSG_ERROR( message );
       ATH_MSG_ERROR( " Filling with default value." );
     }
   }
-  return;
-}
+  }

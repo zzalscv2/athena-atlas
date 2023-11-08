@@ -14,11 +14,11 @@
 #include <map>
 #include <sstream>
 
-typedef unsigned int uint;
+using uint = unsigned int;
 
 LArOFPhaseFill::LArOFPhaseFill(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator),
-  m_lar_on_id(0),
+  m_lar_on_id(nullptr),
   m_groupingType(0)
 { }
 

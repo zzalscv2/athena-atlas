@@ -28,7 +28,7 @@
 
 LArPedestalAutoCorrBuilder::LArPedestalAutoCorrBuilder(const std::string& name, ISvcLocator* pSvcLocator) 
   : AthAlgorithm(name, pSvcLocator),
-    m_onlineHelper(0),
+    m_onlineHelper(nullptr),
     m_event_counter(0),
     m_fatalFebErrorPattern(0xffff)
 {
@@ -44,7 +44,7 @@ LArPedestalAutoCorrBuilder::LArPedestalAutoCorrBuilder(const std::string& name, 
 }
 
 LArPedestalAutoCorrBuilder::~LArPedestalAutoCorrBuilder()
-{}
+= default;
 
 StatusCode LArPedestalAutoCorrBuilder::initialize()
 {
@@ -68,11 +68,11 @@ StatusCode LArPedestalAutoCorrBuilder::initialize()
     return StatusCode::FAILURE;
   }
 
- if (!m_keylist.size()) // Not key list given
-   {m_keylist.push_back("HIGH");
-    m_keylist.push_back("MEDIUM");
-    m_keylist.push_back("LOW");
-    m_keylist.push_back("FREE"); //For H6....
+ if (m_keylist.empty()) // Not key list given
+   {m_keylist.emplace_back("HIGH");
+    m_keylist.emplace_back("MEDIUM");
+    m_keylist.emplace_back("LOW");
+    m_keylist.emplace_back("FREE"); //For H6....
    }
 
  //Container for internal accumulation
@@ -93,13 +93,13 @@ StatusCode LArPedestalAutoCorrBuilder::execute()
 
   StatusCode sc;
   ++m_event_counter;
-  if (m_keylist.size()==0) {
+  if (m_keylist.empty()) {
     ATH_MSG_ERROR( "Key list is empty! No containers processed!" );
     return StatusCode::FAILURE;
   } 
   
   
-  const LArFebErrorSummary* febErrSum=NULL;
+  const LArFebErrorSummary* febErrSum=nullptr;
   if (evtStore()->contains<LArFebErrorSummary>("LArFebErrorSummary")) {
     sc=evtStore()->retrieve(febErrSum);
     if (sc.isFailure()) {
@@ -130,7 +130,7 @@ StatusCode LArPedestalAutoCorrBuilder::execute()
     foundkey+=1;
 
     // check that container is not empty
-    if(container->size()==0 ) {
+    if(container->empty() ) {
       ATH_MSG_DEBUG("LArAccumulatedDigitContainer (key=" << key << ") is empty ");
       continue;
     }else{

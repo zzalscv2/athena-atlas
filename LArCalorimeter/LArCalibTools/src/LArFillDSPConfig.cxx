@@ -17,7 +17,7 @@
 LArFillDSPConfig::LArFillDSPConfig( const std::string& name, 
 			  ISvcLocator* pSvcLocator ) : 
   ::AthAlgorithm( name, pSvcLocator ),
-  m_onlineID(0)
+  m_onlineID(nullptr)
 {
   declareProperty("Foldername",m_folderName="/LAR/Configuraton/DSPConfiguration");
   declareProperty("Dump",m_dump=true);
@@ -26,7 +26,7 @@ LArFillDSPConfig::LArFillDSPConfig( const std::string& name,
 
 // Destructor
 ///////////////
-LArFillDSPConfig::~LArFillDSPConfig() {}
+LArFillDSPConfig::~LArFillDSPConfig() = default;
 
 // Athena Algorithm's Hooks
 ////////////////////////////

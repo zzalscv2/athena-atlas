@@ -18,7 +18,7 @@ LArDigits2Ntuple::LArDigits2Ntuple(const std::string& name, ISvcLocator* pSvcLoc
 }
 
 LArDigits2Ntuple::~LArDigits2Ntuple() 
-{}
+= default;
 
 
 StatusCode LArDigits2Ntuple::initialize()
@@ -99,7 +99,7 @@ StatusCode LArDigits2Ntuple::initialize()
         return sc;
     }
   }
-  ATH_CHECK(m_contKey.initialize(m_contKey.key().size()) );
+  ATH_CHECK(m_contKey.initialize(!m_contKey.key().empty()) );
   ATH_CHECK(m_LArFebHeaderContainerKey.initialize(!m_isSC) );
 
   m_ipass	   = 0;

@@ -16,7 +16,7 @@ LArFEBTemp2Ntuple::LArFEBTemp2Ntuple(const std::string& name, ISvcLocator* pSvcL
 }
 
 LArFEBTemp2Ntuple::~LArFEBTemp2Ntuple() 
-{}
+= default;
 
 StatusCode LArFEBTemp2Ntuple::stop() {
   StatusCode sc;
@@ -35,7 +35,7 @@ StatusCode LArFEBTemp2Ntuple::stop() {
 	return StatusCode::FAILURE;
      }
    
-   IToolSvc* toolSvc=0;
+   IToolSvc* toolSvc=nullptr;
    sc = service( "ToolSvc",toolSvc);
    if (sc!=StatusCode::SUCCESS) {
 	ATH_MSG_ERROR( "Unable to retrieve IToolSvc");

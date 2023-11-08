@@ -21,7 +21,7 @@ CaloCondBlob2Ntuple::CaloCondBlob2Ntuple(const std::string& name, ISvcLocator* p
 }
 
 CaloCondBlob2Ntuple::~CaloCondBlob2Ntuple() 
-{}
+= default;
 
 StatusCode CaloCondBlob2Ntuple::stop () {
   StatusCode sc;
@@ -49,7 +49,7 @@ StatusCode CaloCondBlob2Ntuple::stop () {
     return StatusCode::FAILURE;
   }
   
-  const AthenaAttributeList* attrList=0;
+  const AthenaAttributeList* attrList=nullptr;
   sc=detStore()->retrieve(attrList,m_folder);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to retrieve AthenaAttributeList with key " << m_folder );

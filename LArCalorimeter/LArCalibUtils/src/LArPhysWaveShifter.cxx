@@ -16,12 +16,12 @@
 #include <fstream>
 #include <string>
 
-typedef LArPhysWaveContainer::ConstConditionsMapIterator PhysWaveIt;
+using PhysWaveIt = LArPhysWaveContainer::ConstConditionsMapIterator;
 
 LArPhysWaveShifter::LArPhysWaveShifter (const std::string& name, ISvcLocator* pSvcLocator) 
 : AthAlgorithm(name, pSvcLocator),
-  m_onlineHelper(0),
-  m_larFEBTstart(0),
+  m_onlineHelper(nullptr),
+  m_larFEBTstart(nullptr),
   m_groupingType("ExtendedSubDetector") // SubDetector, Single, FeedThrough
 {  
   // Input contaners' keys
@@ -69,7 +69,7 @@ LArPhysWaveShifter::LArPhysWaveShifter (const std::string& name, ISvcLocator* pS
 }
 
 LArPhysWaveShifter::~LArPhysWaveShifter() 
-{}
+= default;
 
 StatusCode LArPhysWaveShifter::stop() {
   ATH_MSG_INFO( "... in stop()" ) ;
@@ -116,7 +116,7 @@ StatusCode LArPhysWaveShifter::stop() {
   }
 
   // retrieve PhysCaliTdiff
-  const ILArPhysCaliTdiff* larPhysCaliTdiff = 0;
+  const ILArPhysCaliTdiff* larPhysCaliTdiff = nullptr;
   if (m_usePhysCaliTdiff) {
     sc = detStore()->retrieve(larPhysCaliTdiff,m_cellByCellShiftsKey);
     if (sc!=StatusCode::SUCCESS) {
@@ -168,7 +168,7 @@ StatusCode LArPhysWaveShifter::stop() {
     - can be conputed in the same job...
     - ...or simply read from DetStore (and leaded either from DB of jobOption using LArEventTest/FakeLArTimeOffset
   */
-  const ILArFEBTimeOffset* larFebTshift = NULL;
+  const ILArFEBTimeOffset* larFebTshift = nullptr;
   if ( m_timeShiftByFEB ) {
       ATH_MSG_INFO( "Manually shifting pulses by *FEB* time indexes." );
       sc = detStore()->retrieve(larFebTshift);
@@ -305,7 +305,7 @@ StatusCode LArPhysWaveShifter::stop() {
   }  // End loop over all PhysWave containers in m_keylist
 
 
-  if (m_totalShiftsKey.size()) {
+  if (!m_totalShiftsKey.empty()) {
     sc=detStore()->record(std::move(totalShifts),m_totalShiftsKey);
     if (sc.isFailure()) {
       ATH_MSG_ERROR( "Failed to recrod LArPhysCaliTdiffComplete with key " << m_totalShiftsKey );
@@ -348,7 +348,7 @@ StatusCode LArPhysWaveShifter::ComputeTimeShiftByFEB(unsigned mode=2)
       ATH_MSG_INFO( "LArPhysWaveContainer (key=" << key << ") not found in StoreGate" );
       continue ;
     }
-    if ( larPhysWaveContainerOld == NULL ) {
+    if ( larPhysWaveContainerOld == nullptr ) {
       ATH_MSG_INFO( "LArPhysWaveContainer (key=" << key << ") is empty" );
       continue ;
     }
@@ -465,7 +465,7 @@ StatusCode LArPhysWaveShifter::ComputeTimeShiftByFEB(unsigned mode=2)
      return StatusCode::FAILURE;
   }
 
-  const ILArFEBTimeOffset* ilarFEBTimeOffset=NULL;
+  const ILArFEBTimeOffset* ilarFEBTimeOffset=nullptr;
   sc=detStore()->symLink(m_larFEBTstart,ilarFEBTimeOffset);
   if(sc.isFailure()) {
     ATH_MSG_ERROR( "Can't symlink LArFEBTimeOffset to abstract interface in  DetectorStore" );

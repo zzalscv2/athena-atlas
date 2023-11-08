@@ -18,7 +18,7 @@ LArAccumulatedDigits2Ntuple::LArAccumulatedDigits2Ntuple(const std::string& name
 }
 
 LArAccumulatedDigits2Ntuple::~LArAccumulatedDigits2Ntuple() 
-{}
+= default;
 
 
 StatusCode LArAccumulatedDigits2Ntuple::initialize()

@@ -17,10 +17,10 @@ LArRinj2Ntuple::LArRinj2Ntuple(const std::string& name, ISvcLocator* pSvcLocator
 }
 
 LArRinj2Ntuple::~LArRinj2Ntuple() 
-{}
+= default;
 
 StatusCode LArRinj2Ntuple::stop() {
-  const ILArRinj* LArRinj = NULL;
+  const ILArRinj* LArRinj = nullptr;
   StatusCode sc;
   sc=m_detStore->retrieve(LArRinj,m_contKey);
   if (sc!=StatusCode::SUCCESS) {

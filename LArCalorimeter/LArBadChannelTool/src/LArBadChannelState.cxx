@@ -9,7 +9,7 @@
 LArBadChannelState::LArBadChannelState()
 {
   for ( unsigned int i=0; i<NCoolChannels; i++) {
-    m_DataVec.push_back( CoolChannelData( static_cast<CoolChannelEnum>(i)));
+    m_DataVec.emplace_back( static_cast<CoolChannelEnum>(i));
   }
 }
 

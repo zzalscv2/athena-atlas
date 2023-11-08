@@ -5,8 +5,8 @@
 #include "LArCalibUtils/LArCaliWaveMerger.h"
 #include "CaloIdentifier/CaloGain.h"
 
-typedef LArCaliWaveContainer::ConstConditionsMapIterator   CaliCellIt;
-typedef LArCaliWaveContainer::LArCaliWaves::const_iterator CaliWaveIt;
+using CaliCellIt = LArCaliWaveContainer::ConstConditionsMapIterator;
+using CaliWaveIt = LArCaliWaveContainer::LArCaliWaves::const_iterator;
 
 LArCaliWaveMerger::LArCaliWaveMerger (const std::string& name, ISvcLocator* pSvcLocator) : 
   AthAlgorithm(name, pSvcLocator),
@@ -18,7 +18,7 @@ LArCaliWaveMerger::LArCaliWaveMerger (const std::string& name, ISvcLocator* pSvc
 }
 
 LArCaliWaveMerger::~LArCaliWaveMerger() 
-{}
+= default;
 
 StatusCode LArCaliWaveMerger::stop() 
 {

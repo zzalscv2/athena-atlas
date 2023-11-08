@@ -16,10 +16,11 @@
 #include "TTree.h"
 #include "TChain.h"
 
-#include <vector>
-#include <iostream>
+#include <cmath>
 #include <fstream>
+#include <iostream>
 #include <string>
+#include <vector>
 
 
 LArShapeFromStdNtuple::LArShapeFromStdNtuple (const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator)
@@ -36,7 +37,7 @@ LArShapeFromStdNtuple::LArShapeFromStdNtuple (const std::string& name, ISvcLocat
 }
 
 LArShapeFromStdNtuple::~LArShapeFromStdNtuple() 
-{}
+= default;
 
 StatusCode LArShapeFromStdNtuple::initialize() 
 {
@@ -163,7 +164,7 @@ StatusCode LArShapeFromStdNtuple::stop()
           prevPhase=phase;
        } else {
           if(abs(phase-prevPhase) == 1) {
-            timeBinWidth=fabs(phaseTime - prevTime);
+            timeBinWidth=std::fabs(phaseTime - prevTime);
           }
        }
     }
@@ -171,8 +172,8 @@ StatusCode LArShapeFromStdNtuple::stop()
     if(timeOff < 0) timeOff=timeOffset;
 
     if(m_isComplete) { 
-       if(shape[std::make_pair(hwid,gain)].size()==0) shape[std::make_pair(hwid,gain)].reserve(50);
-       if(shape_der[std::make_pair(hwid,gain)].size()==0) shape_der[std::make_pair(hwid,gain)].reserve(50);
+       if(shape[std::make_pair(hwid,gain)].empty()) shape[std::make_pair(hwid,gain)].reserve(50);
+       if(shape_der[std::make_pair(hwid,gain)].empty()) shape_der[std::make_pair(hwid,gain)].reserve(50);
        shape[std::make_pair(hwid,gain)][phase].reserve(nsamples);
        shape_der[std::make_pair(hwid,gain)][phase].reserve(nsamples);
        for(int i=0;i<nsamples; ++i) {shape[std::make_pair(hwid,gain)][phase][i]=0.;

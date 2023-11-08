@@ -68,7 +68,7 @@ LArRTMParamExtractor::LArRTMParamExtractor (const std::string& name, ISvcLocator
 
 }
 
-LArRTMParamExtractor::~LArRTMParamExtractor() {}
+LArRTMParamExtractor::~LArRTMParamExtractor() = default;
 
 StatusCode LArRTMParamExtractor::initialize() {
   ATH_MSG_INFO( "in initialize()");
@@ -198,7 +198,7 @@ StatusCode LArRTMParamExtractor::stop()
 
   
 
-  const LArOnOffIdMapping* cabling(0);
+  const LArOnOffIdMapping* cabling(nullptr);
   if( m_isSC ){
     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKeySC};
     cabling = {*cablingHdl};
@@ -358,7 +358,7 @@ StatusCode LArRTMParamExtractor::stop()
       ATH_MSG_INFO( "LArCaliWaveContainer (key = " << key << ") not found in StoreGate");
       continue;   
     }
-    if ( caliWaveContainer == NULL ) {
+    if ( caliWaveContainer == nullptr ) {
       ATH_MSG_INFO( "LArCaliWaveContainer (key = " << key << ") is empty");
       continue;
     }
@@ -678,7 +678,7 @@ StatusCode LArRTMParamExtractor::stop()
   
   // Symlink LArCaliPulseParamsComplete to ILArCaliPulseParams for further use
   ATH_MSG_DEBUG( "Trying to symlink ILArCaliPulseParams with LArCaliPulseParamsComplete...");
-  ILArCaliPulseParams *larCaliPulseParams = NULL;
+  ILArCaliPulseParams *larCaliPulseParams = nullptr;
   sc = detStore()->symLink(paramsPtr,larCaliPulseParams);
   if (sc.isFailure()) {
     ATH_MSG_FATAL( "Could not symlink ILArCaliPulseParams with LArCaliPulseParamsComplete." );
@@ -696,7 +696,7 @@ StatusCode LArRTMParamExtractor::stop()
 
   // Symlink LArDetCellParamsComplete to ILArDetCellParams for further use
   ATH_MSG_DEBUG( "Trying to symlink ILArDetCellParams with LArDetCellParamsComplete...");
-  ILArDetCellParams *lArDetCellParams = NULL;
+  ILArDetCellParams *lArDetCellParams = nullptr;
   sc = detStore()->symLink(detcellPtr,lArDetCellParams);
   if (sc.isFailure()) {
     ATH_MSG_FATAL( "Could not symlink ILArDetCellParams with LArDetCellParamsComplete." );
@@ -757,5 +757,4 @@ void LArRTMParamExtractor::Looper::operator() (const tbb::blocked_range<size_t>&
     }
     
   }
-  return;
-}
+  }

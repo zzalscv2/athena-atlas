@@ -30,7 +30,7 @@ LArParamsFromStdNtuple::LArParamsFromStdNtuple (const std::string& name, ISvcLoc
 }
 
 LArParamsFromStdNtuple::~LArParamsFromStdNtuple() 
-{}
+= default;
 
 StatusCode LArParamsFromStdNtuple::initialize() 
 {
@@ -114,10 +114,10 @@ StatusCode LArParamsFromStdNtuple::stop()
   ATH_CHECK( detStore()->record(larDetCellParams,m_store_key_det) );
 
   // and symlink
-  ILArCaliPulseParams *ilarCaliPulse = NULL;
+  ILArCaliPulseParams *ilarCaliPulse = nullptr;
   ATH_CHECK( detStore()->symLink(larCaliPulseParams,ilarCaliPulse) );
 
-  ILArDetCellParams *ilarDetCell = NULL;
+  ILArDetCellParams *ilarDetCell = nullptr;
   ATH_CHECK( detStore()->symLink(larDetCellParams,ilarDetCell) );
 
   ATH_MSG_INFO ( "LArParamsFromStdNtuple finalized!" );

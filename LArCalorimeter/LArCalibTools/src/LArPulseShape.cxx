@@ -17,15 +17,14 @@
 #include "TSystem.h"
 
 LArPulseShape::LArPulseShape(const std::string& name, ISvcLocator* pSvcLocator): 
-  AthAlgorithm(name, pSvcLocator), m_initialized(false),  m_calo_id(0),  
-  m_nt(NULL) 
+  AthAlgorithm(name, pSvcLocator), m_initialized(false),  m_calo_id(nullptr),  
+  m_nt(nullptr) 
 {
   declareProperty("NtupleTitle",m_ntTitle="Pulse shape");
   m_ntpath="/NTUPLES/FILE1/"+m_ntname; 
 }
 
-LArPulseShape::~LArPulseShape() {
-}
+LArPulseShape::~LArPulseShape() = default;
 
 StatusCode LArPulseShape::initialize() {
   const CaloIdManager* caloIdMgr{nullptr};
@@ -38,7 +37,7 @@ StatusCode LArPulseShape::initialize() {
 
   ATH_CHECK( m_trigDec.retrieve() );
 
-  if (m_ntpath.size()==0 || m_ntTitle.size()==0) {
+  if (m_ntpath.empty() || m_ntTitle.empty()) {
     ATH_MSG_ERROR( "Need to set variable 'm_ntpath' and 'm_ntTitle' in constructor of deriving class!" );
     return StatusCode::FAILURE;
   }
@@ -418,7 +417,7 @@ StatusCode LArPulseShape::execute() {
     const LArDigitContainer* larDigitContainer;
     ATH_CHECK( evtStore()->retrieve(larDigitContainer, "FREE") );
     ATH_CHECK( detStore()->retrieve(m_larPedestal) );
-    if (larDigitContainer->size() == 0) {
+    if (larDigitContainer->empty()) {
       ATH_MSG_WARNING ( "LArDigitContainer with key= is empty!" );
 
       return StatusCode::SUCCESS;

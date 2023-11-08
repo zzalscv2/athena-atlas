@@ -34,7 +34,7 @@ StatusCode LArCond2NtupleBase::initialize() {
   
   ATH_MSG_DEBUG("Initializing LArCond2Ntuple base class");
   
-  if (m_ntpath.size()==0 || m_ntTitle.size()==0) {
+  if (m_ntpath.empty() || m_ntTitle.empty()) {
     ATH_MSG_ERROR( "Need to set variable 'm_ntpath' and 'm_ntTitle' in constructor of deriving class!" );
     return StatusCode::FAILURE;
   }
@@ -298,7 +298,7 @@ bool LArCond2NtupleBase::fillFromIdentifier(const HWIdentifier& hwid) {
    }
  }
 
- const LArCalibLineMapping *clCont=0;
+ const LArCalibLineMapping *clCont=nullptr;
  if(m_addCalib) {
    if(m_isSC){
      SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapSCKey};
@@ -314,7 +314,7 @@ bool LArCond2NtupleBase::fillFromIdentifier(const HWIdentifier& hwid) {
    }
  }
 
- const LArOnOffIdMapping* cabling=0;
+ const LArOnOffIdMapping* cabling=nullptr;
  if(m_isSC){
    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingSCKey};
    cabling=*cablingHdl;
@@ -347,7 +347,7 @@ bool LArCond2NtupleBase::fillFromIdentifier(const HWIdentifier& hwid) {
  if(m_addCalib) {
    m_calibLine=NOT_VALID;
    const std::vector<HWIdentifier>& calibLineV=clCont->calibSlotLine(hwid);
-   if(calibLineV.size()) m_calibLine = m_onlineId->channel(calibLineV[0]);
+   if(!calibLineV.empty()) m_calibLine = m_onlineId->channel(calibLineV[0]);
  }
  
 

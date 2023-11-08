@@ -12,15 +12,15 @@
 #include "LArRawConditions/LArOFCComplete.h"
 #include "LArRawConditions/LArShapeComplete.h"
 
-typedef LArPedestalComplete::ConstConditionsMapIterator PedestalIt;
-typedef LArRampComplete::ConstConditionsMapIterator RampIt;
-typedef LArMphysOverMcalComplete::ConstConditionsMapIterator MpMcIt;
-typedef LArOFCComplete::ConstConditionsMapIterator OFCIt;
-typedef LArShapeComplete::ConstConditionsMapIterator ShapeIt;
+using PedestalIt = LArPedestalComplete::ConstConditionsMapIterator;
+using RampIt = LArRampComplete::ConstConditionsMapIterator;
+using MpMcIt = LArMphysOverMcalComplete::ConstConditionsMapIterator;
+using OFCIt = LArOFCComplete::ConstConditionsMapIterator;
+using ShapeIt = LArShapeComplete::ConstConditionsMapIterator;
 
 LArDuplicateConstants::LArDuplicateConstants (const std::string& name, ISvcLocator* pSvcLocator) 
  : AthAlgorithm(name,pSvcLocator),
-   m_onlineHelper(0)
+   m_onlineHelper(nullptr)
 {
   declareProperty("SourceGain"    , m_gainIN   = 1);
   declareProperty("TargetGain"    , m_gainOUT  = 2);
@@ -33,8 +33,7 @@ LArDuplicateConstants::LArDuplicateConstants (const std::string& name, ISvcLocat
 
 
 LArDuplicateConstants::~LArDuplicateConstants() 
-{
-}
+= default;
 
 
 StatusCode LArDuplicateConstants::initialize() 

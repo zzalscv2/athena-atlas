@@ -74,7 +74,7 @@ std::string LArHVIdMappingReader::fromFile() const
 {
   ATH_MSG_WARNING( " Cannot find /LAR/IdentifierOfl/HVLineToElectrodeMap from database, Use ASCII file indeed !!!");
   std::string tablename = PathResolver::find_file ("HVLineToElectrode.data", "DATAPATH");
-  if (tablename == "") {
+  if (tablename.empty()) {
     ATH_MSG_FATAL( "[fillHVMap] Could not locate HVLineToElectrode.data file as well");
     return "";
   }

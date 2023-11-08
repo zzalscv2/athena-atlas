@@ -30,7 +30,7 @@
 
 LArAutoCorrExtrapolate::LArAutoCorrExtrapolate(const std::string& name, ISvcLocator* pSvcLocator) 
   : AthAlgorithm(name, pSvcLocator),
-    m_onlineId(0)
+    m_onlineId(nullptr)
 {
   m_useBad=true;
   declareProperty("KeyOutput",    m_keyoutput="LArAutoCorr");
@@ -43,7 +43,7 @@ LArAutoCorrExtrapolate::LArAutoCorrExtrapolate(const std::string& name, ISvcLoca
 
 
 LArAutoCorrExtrapolate::~LArAutoCorrExtrapolate()
-{}
+= default;
 
 StatusCode LArAutoCorrExtrapolate::initialize()
 {

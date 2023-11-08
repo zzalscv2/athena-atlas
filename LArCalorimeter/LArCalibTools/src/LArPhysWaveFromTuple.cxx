@@ -33,7 +33,7 @@ LArPhysWaveFromTuple::LArPhysWaveFromTuple (const std::string& name, ISvcLocator
 }
 
 LArPhysWaveFromTuple::~LArPhysWaveFromTuple() 
-{}
+= default;
 
 StatusCode LArPhysWaveFromTuple::initialize() 
 {

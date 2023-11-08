@@ -27,7 +27,7 @@ StatusCode LAruA2MeV2Ntuple::initialize() {
 }
   
 LAruA2MeV2Ntuple::~LAruA2MeV2Ntuple() 
-{}
+= default;
 
 StatusCode LAruA2MeV2Ntuple::stop() {
   StatusCode sc;

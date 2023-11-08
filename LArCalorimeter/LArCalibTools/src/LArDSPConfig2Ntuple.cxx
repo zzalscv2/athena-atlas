@@ -57,14 +57,14 @@ StatusCode LArDSPConfig2Ntuple::initialize() {
 }
 
 LArDSPConfig2Ntuple::~LArDSPConfig2Ntuple() 
-{}
+= default;
 
 StatusCode LArDSPConfig2Ntuple::stop() {
   StatusCode sc;
 
    
   //const LArDSPConfig *dc = 0;
-   const AthenaAttributeList* attrList=0;
+   const AthenaAttributeList* attrList=nullptr;
    sc=detStore()->retrieve(attrList,m_folder);
    if (sc.isFailure()) {
      ATH_MSG_ERROR( "Failed to retrieve AthenaAttributeList with key " << m_folder );

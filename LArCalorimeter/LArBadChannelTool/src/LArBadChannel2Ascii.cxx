@@ -27,7 +27,7 @@ LArBadChannel2Ascii::LArBadChannel2Ascii(const std::string& name, ISvcLocator* p
   declareProperty("SuperCell",m_isSC=false);
 }
 
-LArBadChannel2Ascii::~LArBadChannel2Ascii() {}
+LArBadChannel2Ascii::~LArBadChannel2Ascii() = default;
 
 
 StatusCode LArBadChannel2Ascii::initialize() {
@@ -36,7 +36,7 @@ StatusCode LArBadChannel2Ascii::initialize() {
 
   ATH_CHECK(m_BCKey.initialize());
 
-  ATH_CHECK(m_BFKey.initialize(m_executiveSummaryFile.size()));
+  ATH_CHECK(m_BFKey.initialize(!m_executiveSummaryFile.empty()));
 
   ATH_CHECK(m_cablingKey.initialize(m_skipDisconnected));
 
@@ -46,7 +46,7 @@ StatusCode LArBadChannel2Ascii::initialize() {
 
 StatusCode LArBadChannel2Ascii::execute() {
 
-  const bool doExecSummary=(m_executiveSummaryFile.size()!=0);
+  const bool doExecSummary=(!m_executiveSummaryFile.empty());
 
   SG::ReadCondHandle<LArBadChannelCont> bch{m_BCKey};
   const LArBadChannelCont* badChannelCont{*bch};
@@ -88,7 +88,7 @@ StatusCode LArBadChannel2Ascii::execute() {
   
   std::ostream *out = &(std::cout); 
   std::ofstream outfile;
-  if (m_fileName.size()) {
+  if (!m_fileName.empty()) {
     outfile.open(m_fileName.c_str(),std::ios::out);
     if (outfile.is_open()) {
       ATH_MSG_INFO ( "Writing to file " << m_fileName );
@@ -229,7 +229,7 @@ StatusCode LArBadChannel2Ascii::execute() {
 }
 
 
-void LArBadChannel2Ascii::writeSum(std::ofstream& exeFile, const std::vector<unsigned>& probs) const {
+void LArBadChannel2Ascii::writeSum(std::ofstream& exeFile, const std::vector<unsigned>& probs) {
   const unsigned nEMB=109568, nEMEC=63744, nHEC=5632, nFCAL=3524;
   const unsigned nTot=nEMB+nEMEC+nHEC+nFCAL;
   unsigned nTotProb=0;
@@ -245,8 +245,6 @@ void LArBadChannel2Ascii::writeSum(std::ofstream& exeFile, const std::vector<uns
   exeFile << "   FCAL: " <<  std::setw(5) <<probs[FCAL] << " of "  << nFCAL << " (" << std::setprecision(3) << probs[FCAL]*(100./nFCAL) << "%)" << std::endl;    
   exeFile << "  Total: " <<  std::setw(5) << nTotProb << " of "  << nTot << " (" << std::setprecision(3) << nTotProb*(100./nTot) << "%)" << std::endl;
   exeFile << std::endl;
-
-  return;
 
 }
 

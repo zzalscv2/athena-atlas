@@ -23,14 +23,14 @@
 #include "GaudiKernel/IToolSvc.h"
 #include <TMath.h>
 
-typedef LArCaliWaveContainer::ConstConditionsMapIterator CaliCellIt;
-typedef LArCaliWaveContainer::LArCaliWaves::const_iterator CaliWaveIt;
+using CaliCellIt = LArCaliWaveContainer::ConstConditionsMapIterator;
+using CaliWaveIt = LArCaliWaveContainer::LArCaliWaves::const_iterator;
 
 LArTimePhysPrediction::LArTimePhysPrediction (const std::string& name, ISvcLocator* pSvcLocator) : 
   AthAlgorithm(name, pSvcLocator),
-  m_thistSvc(0),
-  m_CaloDepthTool(0),
-  m_nt(0)  
+  m_thistSvc(nullptr),
+  m_CaloDepthTool(nullptr),
+  m_nt(nullptr)  
 {
   declareProperty("KeyInput", m_keyinput="LArCaliWave");
   declareProperty("KeyOutput", m_keyoutput="LArPhysCaliTdiff");
@@ -56,7 +56,7 @@ LArTimePhysPrediction::LArTimePhysPrediction (const std::string& name, ISvcLocat
 }
 
 LArTimePhysPrediction::~LArTimePhysPrediction() 
-{}
+= default;
 
 StatusCode LArTimePhysPrediction::initialize() 
 {
@@ -260,7 +260,7 @@ StatusCode LArTimePhysPrediction::stop()
 	IdentifierHash theHash = caloCID->calo_cell_hash(id) ;
 	const CaloDetDescrElement* theDDE = caloDDM->get_element(theHash) ;
 	
-	if(theDDE==0) {
+	if(theDDE==nullptr) {
 	  ATH_MSG_INFO ( "CellIndex =  " << theHash << " has a DDE pointer NULL " );
 	  continue;
 	}
@@ -273,7 +273,7 @@ StatusCode LArTimePhysPrediction::stop()
 	//WARNING: use the CaloDepthTool's convention radius=r(barrel), radius=z(end-cap)
 	//for HEC and FCAL: lengths could be moved in the job options
 	if(emId->is_lar_em(id) && m_CaloDepthTool){
-	  radius = m_CaloDepthTool->cscopt2_parametrized(sample,real_eta,real_phi,caloDDM);
+	  radius = CaloDepthTool::cscopt2_parametrized(sample,real_eta,real_phi,caloDDM);
 	}
 	else if(hecId->is_lar_hec(id)){//assumption: "arrival point" = middle of the compartment 
 	  if(layer==0) radius=4398.;

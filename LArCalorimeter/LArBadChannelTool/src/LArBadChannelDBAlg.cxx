@@ -26,7 +26,7 @@ LArBadChannelDBAlg::LArBadChannelDBAlg(const std::string& name, ISvcLocator* pSv
   declareProperty("SuperCell",m_isSC);
 }
 
-LArBadChannelDBAlg::~LArBadChannelDBAlg() {}
+LArBadChannelDBAlg::~LArBadChannelDBAlg() = default;
 
 
 StatusCode LArBadChannelDBAlg::initialize() {

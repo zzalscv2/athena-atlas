@@ -196,7 +196,7 @@ StatusCode LArOFCAlg::stop()
     }
   }
   
-  if (m_larPhysWaveBinKey.size()) {
+  if (!m_larPhysWaveBinKey.empty()) {
     ATH_CHECK(detStore()->retrieve(m_larPhysWaveBin,m_larPhysWaveBinKey));
   }
 
@@ -219,7 +219,7 @@ StatusCode LArOFCAlg::stop()
     }
   }
 
-  if (m_allChannelData.size()==0) {
+  if (m_allChannelData.empty()) {
     ATH_MSG_ERROR( "No input waves found" );
     return StatusCode::FAILURE;
   }
@@ -242,7 +242,7 @@ StatusCode LArOFCAlg::stop()
     m_onlineID->isFCALchannel(chanData.chid);
 
 
-    if (m_larPhysWaveBinKey.size()) {
+    if (!m_larPhysWaveBinKey.empty()) {
     	m_larPhysWaveBin->bin(chanData.chid,(CaloGain::CaloGain)chanData.gain);
     }
     /// TBB global control parameter
@@ -361,7 +361,7 @@ StatusCode LArOFCAlg::stop()
   if (nFailed) 
     ATH_MSG_ERROR( "Number of channels * gains with failed OFC verification: " <<  nFailed );
 
-  if ( m_dumpOFCfile.size()) {
+  if ( !m_dumpOFCfile.empty()) {
     ATH_MSG_INFO( "Dumping OFCs to file " << m_dumpOFCfile ) ;
     larOFCComplete->dumpOFC(m_dumpOFCfile) ;
   }
@@ -616,8 +616,7 @@ void LArOFCAlg::process(perChannelData_t& chanData, const LArOnOffIdMapping* cab
     if (pwave)
       chanData.tstart += pwave->getTimeOffset()+m_addOffset;
   }
-  return;
-}
+  }
 
 
 
@@ -709,7 +708,7 @@ StatusCode LArOFCAlg::initCaliWaveContainer() {
 
 
 void  LArOFCAlg::optFilt(const std::vector<float> &gWave, const std::vector<float>  &gDerivWave, const Eigen::MatrixXd& acInverse, //input variables
-			 std::vector<float>& vecOFCa, std::vector<float>& vecOFCb) const { // Output variables;
+			 std::vector<float>& vecOFCa, std::vector<float>& vecOFCb) { // Output variables;
   assert(gWave.size()==gDerivWave.size());
   //assert autoCorr size ....
   const int optNpt = gWave.size();
@@ -752,8 +751,7 @@ void  LArOFCAlg::optFilt(const std::vector<float> &gWave, const std::vector<floa
     vecOFCa[i]=OFCa[i];
     vecOFCb[i]=OFCb[i];
   }
-  return;
-}
+  }
 
 
 
@@ -762,7 +760,7 @@ void  LArOFCAlg::optFilt(const std::vector<float> &gWave, const std::vector<floa
 
 void  LArOFCAlg::optFiltDelta(const std::vector<float> &gWave, const std::vector<float>  &gDerivWave, 
 			      const Eigen::MatrixXd& acInverse, const Eigen::VectorXd& delta, 
-			      std::vector<float>& vecOFCa, std::vector<float>& vecOFCb) const{ 
+			      std::vector<float>& vecOFCa, std::vector<float>& vecOFCb) { 
 
   
 
@@ -832,8 +830,7 @@ void  LArOFCAlg::optFiltDelta(const std::vector<float> &gWave, const std::vector
     vecOFCa[i]=OFCa[i];
     vecOFCb[i]=OFCb[i];
   }
-  return;
-}
+  }
 
 
 
@@ -968,24 +965,23 @@ bool LArOFCAlg::verify(const HWIdentifier chid, const std::vector<float>& OFCa, 
   if ( fabs(1.-recAmpl) > m_errAmpl ) {
     ATH_MSG_WARNING( "Applying phase " << phase << " of " << ofcversion << " to original wave yields an Amplitude of "<< recAmpl 
 		      << " instead of 1. -> Wrong OFCs? channel " << m_onlineID->channel_name(chid) );
-    this->printOFCVec(OFCa,msg());
+    LArOFCAlg::printOFCVec(OFCa,msg());
     result=true;
   }
   if ( fabs(recTime) > m_errTime ) {
     ATH_MSG_WARNING( "Applying  phase " << phase << " of " << ofcversion << " to original wave yields a time offset of " << recTime 
 		       << " -> Wrong OFCs? channel " << m_onlineID->channel_name(chid) );
-    this->printOFCVec(OFCb,msg());
+    LArOFCAlg::printOFCVec(OFCb,msg());
     result=true; 
   }
   return result;
 }
 
-void LArOFCAlg::printOFCVec(const std::vector<float>& vec, MsgStream& mLog) const {
+void LArOFCAlg::printOFCVec(const std::vector<float>& vec, MsgStream& mLog) {
   mLog << MSG::WARNING << "OFCs";
     for(float v : vec) 
       mLog << " " << v;
   mLog << endmsg;
-  return;
 }
 
 

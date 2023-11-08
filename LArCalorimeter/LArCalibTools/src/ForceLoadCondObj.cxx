@@ -19,7 +19,7 @@ ForceLoadCondObj::ForceLoadCondObj(const std::string& name,
 }
 
 ForceLoadCondObj::~ForceLoadCondObj() 
-{}
+= default;
 
 StatusCode ForceLoadCondObj::initialize() {
   ATH_MSG_DEBUG ("in initialize()" );
@@ -36,12 +36,12 @@ StatusCode ForceLoadCondObj::execute() {
   //Loop through objects
   for (unsigned int iobj=0;iobj<m_objectList.size();++iobj) {
     // if object name contains a '#', it represents a specific typename#key
-    std::string::size_type ihash=m_objectList[iobj].find_first_of("#");
+    std::string::size_type ihash=m_objectList[iobj].find_first_of('#');
     if (ihash==std::string::npos) {
       ATH_MSG_ERROR ( "Expected syntax 'object#key' for property ObjectList, got" << m_objectList[iobj] );
       return StatusCode::FAILURE;
     }
-    std::string::size_type ihash2=m_objectList[iobj].find_first_of("#",ihash+1);
+    std::string::size_type ihash2=m_objectList[iobj].find_first_of('#',ihash+1);
     if (ihash2 != std::string::npos) ihash2-=(1+ihash);
     const std::string objName=m_objectList[iobj].substr(0,ihash);
     const std::string objKey=m_objectList[iobj].substr(ihash+1,ihash2);
@@ -58,7 +58,7 @@ StatusCode ForceLoadCondObj::execute() {
       return StatusCode::FAILURE;
     }
     
-    if (proxy->accessData()!=0) { //This should trigger the conversion
+    if (proxy->accessData()!=nullptr) { //This should trigger the conversion
       ATH_MSG_INFO ( "Sucessfully retrieved object of type " << objName << " with key " << objKey );
     }
   }

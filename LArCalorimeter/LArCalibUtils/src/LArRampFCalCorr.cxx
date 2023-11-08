@@ -29,12 +29,12 @@ using std::pow;
 
 LArRampFCalCorr::LArRampFCalCorr(const std::string& name,ISvcLocator* pSvcLocator)
   :AthAlgorithm(name, pSvcLocator),
-   m_onlineHelper(0)
+   m_onlineHelper(nullptr)
 {
   declareProperty("Threshold", m_threshold = 1.0);  // Baseplane problem threshold at HIGH gain.
 }
 
-LArRampFCalCorr::~LArRampFCalCorr() {}
+LArRampFCalCorr::~LArRampFCalCorr() = default;
 
 StatusCode LArRampFCalCorr::initialize(){
   ATH_MSG_DEBUG ( " in initialize() " );
@@ -70,7 +70,7 @@ StatusCode LArRampFCalCorr::stop(){
   // Flag bad channels
     for ( LArRampIt it = ramp->begin(gain); it != ramp->end(gain); ++it) {
       chid = it.channelId();
-      module = this->toMod(slot);
+      module = LArRampFCalCorr::toMod(slot);
       if (it->m_vRamp.size() != 2 || !m_onlineHelper->isFCALchannel(chid)
          || module == -1) continue;
       slot = m_onlineHelper->slot(chid);
@@ -86,7 +86,7 @@ StatusCode LArRampFCalCorr::stop(){
   // Create normalization average
     for ( LArRampIt it = ramp->begin(gain); it != ramp->end(gain); ++it) {
       chid = it.channelId();
-      module = this->toMod(slot);
+      module = LArRampFCalCorr::toMod(slot);
       if (it->m_vRamp.size() != 2 || !m_onlineHelper->isFCALchannel(chid)
          || module == -1) continue;
       slot = m_onlineHelper->slot(chid);
@@ -111,7 +111,7 @@ StatusCode LArRampFCalCorr::stop(){
   // Apply corrections
     for ( LArRampIt it = ramp->begin(gain); it != ramp->end(gain); ++it) {
       chid = it.channelId();
-      module = this->toMod(slot);
+      module = LArRampFCalCorr::toMod(slot);
       if (it->m_vRamp.size() == 2 && m_onlineHelper->isFCALchannel(chid) && module != -1){
         //LArRampP& rampP = const_cast<LArRampP&> (*it); // avoid direct use of payload object!
         LArRampComplete::LArCondObj& rampP = const_cast<LArRampComplete::LArCondObj&> (*it);

@@ -6,7 +6,7 @@
 #include "LArRawConditions/LArRawRampContainer.h"
 #include "LArRawConditions/LArRampComplete.h"
 
-#include <math.h>
+#include <cmath>
 
 LArRamps2Ntuple::LArRamps2Ntuple(const std::string& name, ISvcLocator* pSvcLocator): 
   LArCond2NtupleBase(name, pSvcLocator),
@@ -33,7 +33,7 @@ StatusCode LArRamps2Ntuple::initialize() {
 
 
 LArRamps2Ntuple::~LArRamps2Ntuple() 
-{}
+= default;
 
 StatusCode LArRamps2Ntuple::stop() {
   bool hasRawRampContainer=false;
@@ -71,10 +71,10 @@ StatusCode LArRamps2Ntuple::stop() {
   
   NTuple::Item<float> RampRMS;
 
- if (m_rawRamp && m_contKey.size() > 0) {
+ if (m_rawRamp && !m_contKey.empty()) {
    //Retrieve Raw Ramp Container
    for (const std::string& key : m_contKey) {
-       LArRawRampContainer* rawRampContainer=NULL;
+       LArRawRampContainer* rawRampContainer=nullptr;
        sc=m_detStore->retrieve(rawRampContainer,key);
        if (sc!=StatusCode::SUCCESS || !rawRampContainer) {
          ATH_MSG_WARNING( "Unable to retrieve LArRawRampContainer with key " << key );
@@ -284,7 +284,7 @@ StatusCode LArRamps2Ntuple::stop() {
     }// end if applyCorr
  }//end-if ramp 
 
- const LArOnOffIdMapping *cabling=0;
+ const LArOnOffIdMapping *cabling=nullptr;
  if(m_isSC) {
    ATH_MSG_DEBUG( "LArRamps2Ntuple: using SC cabling" );
    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingSCKey};
@@ -305,7 +305,7 @@ StatusCode LArRamps2Ntuple::stop() {
 
    //Retrieve Raw Ramp Container
    for (const std::string& key : m_contKey) {
-       LArRawRampContainer* rawRampContainer=NULL;
+       LArRawRampContainer* rawRampContainer=nullptr;
        sc=m_detStore->retrieve(rawRampContainer,key);
        if (sc!=StatusCode::SUCCESS || !rawRampContainer) {
          ATH_MSG_WARNING( "Unable to retrieve LArRawRampContainer with key " << key );
@@ -323,7 +323,7 @@ StatusCode LArRamps2Ntuple::stop() {
 
            if(m_saveAllSamples){
 	     
-	     if ( !singleRamp[DACIndex].Samples.size() || !singleRamp[DACIndex].RMS.size() ) {     
+	     if ( singleRamp[DACIndex].Samples.empty() || singleRamp[DACIndex].RMS.empty() ) {     
 	       ATH_MSG_WARNING( "Cannot save all samples, vector empty" );
 	     } else {
 	       
@@ -438,7 +438,7 @@ StatusCode LArRamps2Ntuple::stop() {
           gain  = (long)igain;
           corrUndo = 1;
           const std::vector<float>& rampcoeff=itUndo->second.m_vRamp;
-          if (rampcoeff.size()==0)
+          if (rampcoeff.empty())
             continue; // No ramp for this cell
  
           cellIndex  = cellCounter;

@@ -5,7 +5,7 @@
 #include "LArCalibUtils/LArAutoCorrDecoderTool.h"
 #include "AthenaKernel/errorcheck.h"
 
-LArAutoCorrDecoderTool::~LArAutoCorrDecoderTool() {};
+LArAutoCorrDecoderTool::~LArAutoCorrDecoderTool() = default;;
 
 StatusCode LArAutoCorrDecoderTool::initialize() 
 {

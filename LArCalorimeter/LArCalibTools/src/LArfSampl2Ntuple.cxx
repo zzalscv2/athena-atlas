@@ -15,7 +15,7 @@ LArfSampl2Ntuple::LArfSampl2Ntuple(const std::string& name, ISvcLocator* pSvcLoc
 }
 
 LArfSampl2Ntuple::~LArfSampl2Ntuple() 
-{}
+= default;
 
 StatusCode LArfSampl2Ntuple::initialize(){
   ATH_CHECK(m_contKey.initialize());

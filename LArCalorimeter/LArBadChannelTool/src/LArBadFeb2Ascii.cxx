@@ -16,7 +16,7 @@ LArBadFeb2Ascii::LArBadFeb2Ascii(const std::string& name, ISvcLocator* pSvcLocat
   declareProperty("FileName",m_fileName="");
 }
 
-LArBadFeb2Ascii::~LArBadFeb2Ascii() {}
+LArBadFeb2Ascii::~LArBadFeb2Ascii() = default;
 
 
 StatusCode LArBadFeb2Ascii::initialize() {
@@ -35,7 +35,7 @@ StatusCode LArBadFeb2Ascii::finalize() {
   
   std::ostream *out = &(std::cout); 
   std::ofstream outfile;
-  if (m_fileName.size()) {
+  if (!m_fileName.empty()) {
     outfile.open(m_fileName.c_str(),std::ios::out);
     if (outfile.is_open()) {
       ATH_MSG_INFO ( "Writing to file " << m_fileName );

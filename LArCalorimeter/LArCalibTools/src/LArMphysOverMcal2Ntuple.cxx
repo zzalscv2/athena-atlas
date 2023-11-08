@@ -17,7 +17,7 @@ LArMphysOverMcal2Ntuple::LArMphysOverMcal2Ntuple(const std::string& name, ISvcLo
 }
 
 LArMphysOverMcal2Ntuple::~LArMphysOverMcal2Ntuple() 
-{}
+= default;
 
 StatusCode LArMphysOverMcal2Ntuple::initialize() {
   ATH_CHECK(m_contKey.initialize());
@@ -67,7 +67,7 @@ StatusCode LArMphysOverMcal2Ntuple::stop() {
  }
 
 
- const LArOnOffIdMapping *cabling=0;
+ const LArOnOffIdMapping *cabling=nullptr;
  if(m_isSC) {
    ATH_MSG_DEBUG( "LArMphysOverMcal2Ntuple: using SC cabling" );
    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingSCKey};

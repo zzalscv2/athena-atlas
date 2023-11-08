@@ -13,7 +13,7 @@ LArWaves2Ntuple::LArWaves2Ntuple(const std::string& name, ISvcLocator* pSvcLocat
 }
 
 LArWaves2Ntuple::~LArWaves2Ntuple()
-{}
+= default;
 
 StatusCode LArWaves2Ntuple::initialize() {
   

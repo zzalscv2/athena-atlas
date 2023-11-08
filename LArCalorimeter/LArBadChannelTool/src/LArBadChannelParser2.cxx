@@ -66,7 +66,7 @@ bool LArBadChannelParser2::parseLine( std::string& readLine, ISLine& parsedLine,
     command.push_back(readWord);
     stringIn >> readWord;
   }
-  if(command.size() > 0) {
+  if(!command.empty()) {
     bool success = interpretLine( command, parsedLine, nint, minString, firstWildcard);
     return success;
   }
