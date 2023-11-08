@@ -1,8 +1,8 @@
 #!/bin/sh
 #
 # art-description: Run G4AtlasAlg simulation, reading ttbar events, writing HITS, using RUN2 geometry and conditions
-# art-include: 23.0/Athena
-# art-include: 23.0/AthSimulation
+# art-include: 24.0/Athena
+# art-include: 24.0/AthSimulation
 # art-include: main/Athena
 # art-include: main/AthSimulation
 # art-type: grid
@@ -13,7 +13,7 @@
 
 AtlasG4_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationNoIoV' \
     --DataRunNumber '284500' \
@@ -30,7 +30,7 @@ echo  "art-result: $rc simCA"
 status=$rc
 
 AtlasG4_tf.py \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'AtlasG4Tf:Campaigns/MC23SimulationNoIoV.py' \
     --DataRunNumber '284500' \
@@ -42,7 +42,7 @@ AtlasG4_tf.py \
     --athenaopts '"--config-only=ConfigSimCG.pkl"'
 
 AtlasG4_tf.py \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'AtlasG4Tf:Campaigns/MC23SimulationNoIoV.py' \
     --DataRunNumber '284500' \

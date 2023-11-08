@@ -1,7 +1,7 @@
 #!/bin/sh
 #
-# art-description: Tests detector response to single muons, generated on-the-fly, using 2015 geometry and conditions
-# art-include: 23.0/Athena
+# art-description: Tests detector response to single electrons, generated on-the-fly, using Run3 geometry and conditions
+# art-include: 24.0/Athena
 # art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
@@ -12,16 +12,15 @@
 
 AtlasG4_tf.py \
     --CA \
-    --preExec 'flags.Sim.GenerationConfiguration="ParticleGun.ParticleGunConfig.ParticleGun_SingleMuonCfg"' \
+    --preExec 'flags.Sim.GenerationConfiguration="ParticleGun.ParticleGunConfig.ParticleGun_SingleElectronCfg"' \
     --outputHITSFile 'test.CA.HITS.pool.root' \
-    --maxEvents '2000' \
+    --maxEvents '1000' \
     --randomSeed '10' \
-    --geometryVersion 'ATLAS-R2-2015-03-01-00' \
-    --conditionsTag 'OFLCOND-RUN12-SDR-19' \
-    --DataRunNumber '222525' \
+    --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
+    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
+    --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationSingleIoV' \
     --runNumber '999999' \
-    --physicsList 'FTFP_BERT' \
-    --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
+    --postInclude 'PyJobTransforms.UseFrontier' \
     --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
     --imf False
 rc=$?
@@ -30,32 +29,26 @@ echo  "art-result: $rc simCA"
 status=$rc
 
 AtlasG4_tf.py \
-    --preInclude 'SimulationJobOptions/preInclude.SingleMuonGenerator.py' \
     --outputHITSFile 'test.CA.HITS.pool.root' \
-    --maxEvents '2000' \
+    --maxEvents '1000' \
     --randomSeed '10' \
-    --geometryVersion 'ATLAS-R2-2015-03-01-00_VALIDATION' \
-    --conditionsTag 'OFLCOND-RUN12-SDR-19' \
-    --DataRunNumber '222525' \
+    --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
+    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
+    --preInclude 'AtlasG4Tf:SimulationJobOptions/preInclude.SingleElectronGenerator.py,Campaigns/MC23SimulationSingleIoV.py' \
     --runNumber '999999' \
-    --physicsList 'FTFP_BERT' \
     --postInclude 'PyJobTransforms/UseFrontier.py' \
-    --preExec 'AtlasG4Tf:simFlags.ReleaseGeoModel=False;' \
     --imf False \
     --athenaopts '"--config-only=ConfigSimCG.pkl"'
 
 AtlasG4_tf.py \
-    --preInclude 'SimulationJobOptions/preInclude.SingleMuonGenerator.py' \
     --outputHITSFile 'test.HITS.pool.root' \
-    --maxEvents '2000' \
+    --maxEvents '1000' \
     --randomSeed '10' \
-    --geometryVersion 'ATLAS-R2-2015-03-01-00_VALIDATION' \
-    --conditionsTag 'OFLCOND-RUN12-SDR-19' \
-    --DataRunNumber '222525' \
+    --geometryVersion 'ATLAS-R3S-2021-03-02-00' \
+    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
+    --preInclude 'AtlasG4Tf:SimulationJobOptions/preInclude.SingleElectronGenerator.py,Campaigns/MC23SimulationSingleIoV.py' \
     --runNumber '999999' \
-    --physicsList 'FTFP_BERT' \
     --postInclude 'PyJobTransforms/UseFrontier.py' \
-    --preExec 'AtlasG4Tf:simFlags.ReleaseGeoModel=False;' \
     --imf False
 
 rc2=$?

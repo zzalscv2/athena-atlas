@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# art-description: Run simulation outside ISF, reading di-jet events, using FTFP_BERT physics list, writing HITS, using RUN2 geometry and conditions
-# art-include: 23.0/Athena
-# art-include: 23.0/AthSimulation
+# art-description: Run simulation outside ISF, reading di-jet events, using FTFP_BERT physics list, writing HITS, using Best Knowledge RUN2 geometry and conditions
+# art-include: 24.0/Athena
+# art-include: 24.0/AthSimulation
 # art-include: main/Athena
 # art-include: main/AthSimulation
 # art-type: grid
@@ -13,7 +13,7 @@
 
 AtlasG4_tf.py \
     --CA \
-    --conditionsTag 'OFLCOND-RUN12-SDR-19' \
+    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
     --physicsList 'FTFP_BERT' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationNoIoV' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
@@ -33,7 +33,7 @@ echo  "art-result: $rc simCA"
 status=$rc
 
 AtlasG4_tf.py \
-    --conditionsTag 'OFLCOND-RUN12-SDR-19' \
+    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
     --physicsList 'FTFP_BERT' \
     --preInclude 'AtlasG4Tf:Campaigns/MC23SimulationNoIoV.py' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
@@ -48,7 +48,7 @@ AtlasG4_tf.py \
     --athenaopts '"--config-only=ConfigSimCG.pkl"'
 
 AtlasG4_tf.py \
-    --conditionsTag 'OFLCOND-RUN12-SDR-19' \
+    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
     --physicsList 'FTFP_BERT' \
     --preInclude 'AtlasG4Tf:Campaigns/MC23SimulationNoIoV.py' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
