@@ -42,6 +42,7 @@
 // Handle Keys
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "ActsEvent/TrackContainerHandle.h"
 
 class TrackingSurfaceHelper;
 namespace
@@ -87,6 +88,7 @@ namespace ActsTrk
     SG::ReadHandleKey<ActsTrk::BoundTrackParametersContainer> m_pixelEstimatedTrackParametersKey{this, "PixelEstimatedTrackParameters", "", "estimated track parameters from pixel seeding"};
     SG::ReadHandleKey<ActsTrk::BoundTrackParametersContainer> m_stripEstimatedTrackParametersKey{this, "StripEstimatedTrackParameters", "", "estimated track parameters from strip seeding"};
 
+    ActsTrk::MutableTrackContainerHandle<ActsTrk::TrackFindingAlg> m_tracksBackendHandle{this, "", "Tracks"};
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer", "Output track collection (ActsTrk variant)"};
 
     // Configuration

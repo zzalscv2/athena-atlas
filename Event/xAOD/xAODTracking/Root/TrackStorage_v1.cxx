@@ -27,6 +27,10 @@ DEFINE_API(TrackStorage_v1, unsigned int, nOutliers, setnOutliers)
 
 DEFINE_API(TrackStorage_v1, unsigned int, nSharedHits, setnSharedHits)
 
+DEFINE_API(TrackStorage_v1, unsigned int, tipIndex, setTipIndex)
+
+DEFINE_API(TrackStorage_v1, unsigned int, stemIndex, setStemIndex)
+
 const SG::AuxElement::Accessor<std::vector<double> >
     xAOD::TrackStorage_v1::s_paramsAcc{"params"};
 const SG::AuxElement::Accessor<std::vector<double> >

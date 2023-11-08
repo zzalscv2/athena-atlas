@@ -10,34 +10,64 @@ constexpr std::optional<bool> has_impl(
     ActsTrk::IndexType istate) {
   using namespace Acts::HashedStringLiteral;
   using Acts::MultiTrajectoryTraits::kInvalid;
+  INSPECTCALL(key << " " << istate);
+
   switch (key) {
     case "previous"_hash:
       return trackStates[istate]->previous() < kInvalid;
-    case "chi2"_hash:
+    case "chi2"_hash:{
+      INSPECTCALL(key << " " << istate << " chi2");
       return trackStates[istate]->chi2() < kInvalid;
-    case "pathLength"_hash:
+    }
+    case "pathLength"_hash:{
+      INSPECTCALL(key << " " << istate << " pathLength");
       return trackStates[istate]->pathLength() < kInvalid;
-    case "typeFlags"_hash:
+    }
+    case "typeFlags"_hash:{
+      INSPECTCALL(key << " " << istate << " type flags");
       return static_cast<IndexType>(trackStates[istate]->typeFlags()) < kInvalid;
-    case "predicted"_hash:
+    }
+    case "predicted"_hash:{
+      INSPECTCALL(key << " " << istate << " predicted");
       return trackStates[istate]->predicted() < kInvalid;
-    case "filtered"_hash:
+    }
+    case "filtered"_hash:{
+      INSPECTCALL(key << " " << istate << " filtered");
       return trackStates[istate]->filtered() < kInvalid;
-    case "smoothed"_hash:
+    }
+    case "smoothed"_hash:{
+      INSPECTCALL(key << " " << istate << " smoothed");
       return trackStates[istate]->smoothed() < kInvalid;
-    case "jacobian"_hash:
+    }
+    case "jacobian"_hash:{
+      INSPECTCALL(key << " " << istate << " jacobian");
       return trackStates[istate]->jacobian() < kInvalid;
-    case "projector"_hash:
+    }
+    case "projector"_hash:{
+      INSPECTCALL(key << " " << istate << " projector");
       return trackStates[istate]->calibrated() < kInvalid;
-    case "calibrated"_hash:
+    }
+    case "calibrated"_hash:{
+      INSPECTCALL(key << " " << istate << " calibrated");
       return trackStates[istate]->calibrated() < kInvalid;
-    case "calibratedCov"_hash:
+    }
+    case "calibratedCov"_hash: {
+      INSPECTCALL(key << " " << istate << " calibratedCov");
       return trackStates[istate]->calibrated() < kInvalid;
-    case "measdim"_hash:
+    }
+    case "measdim"_hash: {
+      INSPECTCALL(key << " " << istate << " measdim");
       return trackStates[istate]->measDim() < kInvalid;
+    }
+    case "referenceSurface"_hash: {
+      INSPECTCALL(key << " " << istate << " referenceSurfaceEnco");
+      return true;
+    }
+
       // TODO restore once only the EL Source Links are in use 
       // return !trackStates[istate]->uncalibratedMeasurementLink().isDefault();
   }
+  INSPECTCALL(key << " " << istate << " not a predefined component");
   return std::optional<bool>();
 }
 }  // namespace details
@@ -47,6 +77,8 @@ constexpr std::optional<bool> has_impl(
 constexpr bool ActsTrk::MutableMultiTrajectory::hasColumn_impl(
     Acts::HashedString key) const {
   using namespace Acts::HashedStringLiteral;
+  INSPECTCALL(key);
+
   switch (key) {
     case "previous"_hash:
     case "chi2"_hash:
@@ -61,6 +93,7 @@ constexpr bool ActsTrk::MutableMultiTrajectory::hasColumn_impl(
     case "calibrated"_hash:
     case "calibratedCov"_hash:
     case "measdim"_hash:
+    case "referenceSurface"_hash:
       return true;
     default:
       for (auto& d : m_decorations) {
@@ -75,45 +108,16 @@ constexpr bool ActsTrk::MutableMultiTrajectory::hasColumn_impl(
 template <typename T>
 void ActsTrk::MutableMultiTrajectory::addColumn_impl(const std::string& name) {
   // It is actually not clear if we would allow decorating RO MTJ, maybe we do
-  using std::placeholders::_1;
-  using std::placeholders::_2;
   if constexpr (ActsTrk::detail::accepted_decoration_types<T>::value) {
     m_decorations.emplace_back(
         name,
-        std::bind(&ActsTrk::MutableMultiTrajectory::decorationSetter<T>, this,
-                  _1, _2),
-        std::bind(&ActsTrk::MutableMultiTrajectory::decorationGetter<T>, this,
-                  _1, _2));
+        ActsTrk::detail::decorationSetter<xAOD::TrackStateContainer, T>,
+        ActsTrk::detail::decorationGetter<xAOD::TrackStateContainer, T>,
+        ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, T>
+  );
     // it would be useful to force presence of decoration already here
   } else {
     throw std::runtime_error("Can't add decoration of this type to MutableMultiTrajectory");
   }
 }
 
-template <typename T>
-std::any ActsTrk::MutableMultiTrajectory::decorationSetter(
-    IndexType idx, const std::string& name) {
-  // TODO this approach is known not to be fastest possible, it would be better
-  // to construct SG::Accessor and reuse it
-  // however the SG::Accessor is typed and we'll need a classic inheritance for
-  // that
-  const SG::ConstAuxElement el(m_trackStates.get(), idx);  
-  return &(el.auxdataConst<T>(name));
-
-}
-
-template <typename T>
-const std::any ActsTrk::MutableMultiTrajectory::decorationGetter(
-    ActsTrk::IndexType idx, const std::string& name) const {
-  const auto& trackStates = *m_trackStates;
-  const SG::AuxElement* el = trackStates[idx];
-  return &(el->auxdecor<T>(name));
-}
-
-template <typename T>
-const std::any ActsTrk::MultiTrajectory::decorationGetter(
-    ActsTrk::IndexType idx, const std::string& name) const {
-  const auto& trackStates = *m_trackStates;
-  const SG::AuxElement* el = trackStates[idx];
-  return static_cast<const T*>(&(el->auxdecor<T>(name)));
-}

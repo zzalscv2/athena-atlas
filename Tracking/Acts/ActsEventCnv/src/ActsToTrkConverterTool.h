@@ -78,7 +78,7 @@ public:
    * @param tc The track container to fill
   */
   virtual 
-  void trkTrackCollectionToActsTrackContainer(ActsTrk::future::MutableTrackContainer &tc, const TrackCollection& trackColl, const Acts::GeometryContext& gctx) const override;
+  void trkTrackCollectionToActsTrackContainer(ActsTrk::MutableTrackContainer &tc, const TrackCollection& trackColl, const Acts::GeometryContext& gctx) const override;
 
   virtual
   const IActsTrackingGeometryTool*

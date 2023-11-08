@@ -25,6 +25,8 @@ namespace xAOD {
         std::vector<unsigned int> ndf;
         std::vector<unsigned int> nOutliers;
         std::vector<unsigned int> nSharedHits;
+        std::vector<unsigned int> tipIndex;
+        std::vector<unsigned int> stemIndex;
     };
 }
 

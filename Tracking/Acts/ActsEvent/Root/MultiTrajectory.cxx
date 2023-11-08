@@ -3,11 +3,17 @@
 */
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsEvent/SurfaceEncoding.h"
+#include "xAODTracking/TrackState.h"
+#include "xAODTracking/TrackParameters.h"
+#include "xAODTracking/TrackJacobian.h"
+#include "xAODTracking/TrackMeasurement.h"
 
 constexpr uint64_t InvalidGeoID = std::numeric_limits<uint64_t>::max();
 
 
 ActsTrk::MutableMultiTrajectory::MutableMultiTrajectory() {
+  INSPECTCALL("c-tor " << this)
+
   m_trackStates = std::make_unique<xAOD::TrackStateContainer>();
   m_trackStatesAux = std::make_unique<xAOD::TrackStateAuxContainer>();
   m_trackStates->setStore(m_trackStatesAux.get());
@@ -27,8 +33,41 @@ ActsTrk::MutableMultiTrajectory::MutableMultiTrajectory() {
   m_surfacesBackend = std::make_unique<xAOD::TrackSurfaceContainer>();
   m_surfacesBackendAux = std::make_unique<xAOD::TrackSurfaceAuxContainer>();
   m_surfacesBackend->setStore(m_surfacesBackendAux.get());
-  addColumn_impl<IndexType>("calibratedSourceLink");
+
+  addColumn_impl<IndexType>("next");
+
 }
+
+ActsTrk::MutableMultiTrajectory::MutableMultiTrajectory(const ActsTrk::MutableMultiTrajectory& other) : MutableMultiTrajectory() {
+  INSPECTCALL("copy c-tor " << this <<  " src " << &other << " " << other.size())
+  for ( auto t: *other.m_trackStates.get()) {
+    m_trackStates->push_back(new xAOD::TrackState());
+    *m_trackStates->back() = *t;
+  }
+
+  for ( auto t: *other.m_trackParameters.get()){
+    m_trackParameters->push_back(new xAOD::TrackParameters(*t));
+    *m_trackParameters->back() = *t;
+
+  }
+  for ( auto t: *other.m_trackJacobians.get()){
+    m_trackJacobians->push_back(new xAOD::TrackJacobian(*t));
+    *m_trackJacobians->back() = *t;
+
+  }
+  for ( auto t: *other.m_trackMeasurements.get()){
+    m_trackMeasurements->push_back(new xAOD::TrackMeasurement(*t));
+    *m_trackMeasurements->back() = *t;
+  }
+  m_decorations = other.m_decorations;
+  m_calibratedSourceLinks = other.m_calibratedSourceLinks;
+  m_uncalibratedSourceLinks = other.m_uncalibratedSourceLinks;
+
+  m_surfaces = other.m_surfaces;
+  m_geoContext = other.m_geoContext;
+  INSPECTCALL("copy c-tor  done")
+}
+
 
 bool ActsTrk::MutableMultiTrajectory::has_backends() const {
   return m_trackStates != nullptr and m_trackParameters != nullptr and
@@ -41,11 +80,12 @@ ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
     Acts::TrackStatePropMask mask,
     ActsTrk::IndexType previous) {
   using namespace Acts::HashedStringLiteral;
-
+  INSPECTCALL( this << " " <<  mask << " " << m_trackStates->size() << " " << previous);
   assert(m_trackStates && "Missing Track States backend");
 
   auto state = new xAOD::TrackState_v1();
   m_trackStates->push_back(state);
+  m_surfaces.push_back(nullptr);
 
   // set kInvalid
   using Acts::MultiTrajectoryTraits::kInvalid;
@@ -69,7 +109,7 @@ ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
 
   auto addMeasurement = [this]() -> ActsTrk::IndexType {
     trackMeasurements().push_back(new xAOD::TrackMeasurement_v1());
-    // trackMeasurements are resized by allocateCalibrated()
+
     return trackMeasurements().size() - 1;
   };
 
@@ -88,21 +128,23 @@ ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
     state->setSmoothed(addParam());
   }
 
-  state->setCalibrated(kInvalid);
-  if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
-    state->setCalibrated(addMeasurement());
-    // TODO: in Acts there is m_projections collection
-    // https://github.com/acts-project/acts/blob/main/Core/src/EventData/VectorMultiTrajectory.cpp#L83
-  }
-
   state->setJacobian(kInvalid);
   if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Jacobian)) {
     state->setJacobian(addJacobian());
   }
 
+  m_uncalibratedSourceLinks.emplace_back(std::nullopt);
+
+  state->setCalibrated(kInvalid);
+  state->setMeasDim(0);
+  
+  if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
+    state->setCalibrated(addMeasurement());
+    m_calibratedSourceLinks.emplace_back(std::nullopt);
+    state->setMeasDim(trackMeasurements().back()->size()); // default measurement size
+  }
+
   state->setGeometryId(InvalidGeoID); // surface is invalid until set
-  m_surfaces.push_back(nullptr);
-  m_sourceLinks.resize(m_trackStates->size());
 
   return m_trackStates->size() - 1;
 }
@@ -229,7 +271,7 @@ std::any ActsTrk::MutableMultiTrajectory::component_impl(
     default: {
       for (auto& d : m_decorations) {
         if (d.hash == key) {
-          return d.getter(istate, d.name);
+          return d.setter(m_trackStates.get(), istate, d.name);
         }
       }
       throw std::runtime_error("MutableMultiTrajectory::component_impl no such component " + std::to_string(key));
@@ -277,7 +319,8 @@ const std::any ActsTrk::MutableMultiTrajectory::component_impl(
     default: {
       for (auto& d : m_decorations) {
         if (d.hash == key) {
-          return d.getter(istate, d.name);
+          INSPECTCALL("getting dymaic variable " << d.name << " " << istate);
+          return d.getter(m_trackStates.get(), istate, d.name);
         }
       }
       throw std::runtime_error("MutableMultiTrajectory::component_impl const no such component " + std::to_string(key));
@@ -295,12 +338,14 @@ bool ActsTrk::MutableMultiTrajectory::has_impl(
 
   // TODO remove once EL based source links are in use only
   using namespace Acts::HashedStringLiteral;
-  if (key == "uncalibratedSourceLink"_hash)
-      return m_sourceLinks[istate].has_value();
-
+  if (key == "uncalibratedSourceLink"_hash){
+    INSPECTCALL(key << " " << istate << " uncalibratedSourceLink")
+    return m_uncalibratedSourceLinks[istate].has_value();
+  }
 
   for (auto& d : m_decorations) {
     if (d.hash == key) {
+      INSPECTCALL(key << " " << istate << " d.name")
       return true;
     }
   }
@@ -308,13 +353,53 @@ bool ActsTrk::MutableMultiTrajectory::has_impl(
   return false;
 }
 
+void ActsTrk::MutableMultiTrajectory::clear_impl() {
+  INSPECTCALL(this);
+  m_trackStates->clear();
+  m_trackParameters->clear();
+  m_trackJacobians->clear();
+  m_trackMeasurements->clear();
+  m_surfacesBackend->clear();
+  m_surfaces.clear();
+}
+
+
+void ActsTrk::MutableMultiTrajectory::allocateCalibrated_impl(ActsTrk::IndexType istate, std::size_t measdim) {
+  // resize the calibrated measurement to the size measdim
+  auto& trackStates = *m_trackStates;
+
+  INSPECTCALL(trackStates[istate]->calibrated() << " " << trackMeasurements().size());
+  trackStates[istate]->setMeasDim(measdim);
+  trackMeasurements().at(trackStates[istate]->calibrated())->resize(measdim);
+}
+
+
+ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::calibratedSize_impl(ActsTrk::IndexType istate) const {
+  // Retrieve the calibrated measurement size
+  INSPECTCALL(istate << " " << trackMeasurements().size());
+  return trackStates().at(istate)->measDim();
+}
+
+
+void ActsTrk::MutableMultiTrajectory::setUncalibratedSourceLink_impl(ActsTrk::IndexType istate,
+                                    const Acts::SourceLink& sourceLink) {
+  INSPECTCALL( istate );
+
+  // TODO restore this once tracking code uses source links with EL                                        
+  // auto el =
+  //     sourceLink.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>();
+  // trackStates()[istate]->setUncalibratedMeasurementLink(el);
+  m_uncalibratedSourceLinks[istate] = std::move(sourceLink);
+}
+
+
 typename Acts::SourceLink
 ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
     ActsTrk::IndexType istate) const {
   // TODO see setUncalibratedSourceLink_impl
   // auto el = trackStates()[istate]->uncalibratedMeasurementLink();
   // return Acts::SourceLink(el);
-  return m_sourceLinks[istate].value();
+  return m_uncalibratedSourceLinks[istate].value();
 }
 Acts::SourceLink
 ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
@@ -322,7 +407,7 @@ ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
   // TODO see setUncalibratedSourceLink_impl
   // auto el = trackStates()[istate]->uncalibratedMeasurementLink();
   // return Acts::SourceLink(el);
-  return m_sourceLinks[istate].value();
+  return m_uncalibratedSourceLinks[istate].value();
 
 }
 
@@ -356,7 +441,7 @@ namespace {
 }
 
 const Acts::Surface* ActsTrk::MutableMultiTrajectory::referenceSurface_impl(IndexType istate) const {
-  if ( istate >= m_surfaces.size() ) throw std::out_of_range("MutableMultiTrajectory index out of range when accessing reference surface");
+  if ( istate >= m_surfaces.size() ) throw std::out_of_range("MutableMultiTrajectory index " + std::to_string(istate) + " out of range " + std::to_string(m_surfaces.size()) + " when accessing reference surface");
   return toSurfacePtr(m_surfaces[istate]);
 }
 
@@ -373,6 +458,8 @@ ActsTrk::MultiTrajectory::MultiTrajectory(
       m_trackParameters(trackParameters),
       m_trackJacobians(trackJacobians),
       m_trackMeasurements(trackMeasurements) {
+      INSPECTCALL("ctor " << this << " " << m_trackStates->size());
+
       for ( auto id : m_trackStates->getConstStore()->getAuxIDs() ) {
 
         const std::string name = SG::AuxTypeRegistry::instance().getName(id);
@@ -381,32 +468,28 @@ ActsTrk::MultiTrajectory::MultiTrajectory(
         }
         const std::type_info* typeInfo = SG::AuxTypeRegistry::instance().getType(id);
 
-        using std::placeholders::_1;
-        using std::placeholders::_2;
         // try making decoration accessor of matching type
         // there is a fixed set of supported types (as there is a fixed set available in MutableMTJ)
         // setters are not needed so replaced by a "nullptr"
         if ( *typeInfo == typeid(float) ) {
           m_decorations.emplace_back( name,
-            static_cast<ActsTrk::detail::Decoration::SetterType>(nullptr),
-            std::bind(&ActsTrk::MultiTrajectory::decorationGetter<float>, this,
-                      _1, _2));
+            static_cast<DecorationAccess::SetterType>(nullptr),
+            ActsTrk::detail::decorationGetter<xAOD::TrackStateContainer, float>);
         } else if ( *typeInfo == typeid(double) ) {
           m_decorations.emplace_back( name,
-            static_cast<ActsTrk::detail::Decoration::SetterType>(nullptr),
-            std::bind(&ActsTrk::MultiTrajectory::decorationGetter<double>, this,
-                      _1, _2));
+            static_cast<DecorationAccess::SetterType>(nullptr),
+            ActsTrk::detail::decorationGetter<xAOD::TrackStateContainer, double>);
 
         } else if ( *typeInfo == typeid(short) ) {
           m_decorations.emplace_back( name,
-            static_cast<ActsTrk::detail::Decoration::SetterType>(nullptr),
-            std::bind(&ActsTrk::MultiTrajectory::decorationGetter<short>, this,
-                      _1, _2));
+            static_cast<DecorationAccess::SetterType>(nullptr),
+            ActsTrk::detail::decorationGetter<xAOD::TrackStateContainer, short>);
+
         } else if ( *typeInfo == typeid(uint32_t) ) {
           m_decorations.emplace_back( name,
-            static_cast<ActsTrk::detail::Decoration::SetterType>(nullptr),
-            std::bind(&ActsTrk::MultiTrajectory::decorationGetter<uint32_t>, this,
-                      _1, _2));
+            static_cast<DecorationAccess::SetterType>(nullptr),
+            ActsTrk::detail::decorationGetter<xAOD::TrackStateContainer, short>);
+
         }
 
     }
@@ -422,7 +505,7 @@ bool ActsTrk::MultiTrajectory::has_impl(Acts::HashedString key,
   // TODO remove once EL based source links are in use only
   using namespace Acts::HashedStringLiteral;
   if (key == "uncalibratedSourceLink"_hash)
-      return m_sourceLinks[istate].has_value();
+      return m_uncalibratedSourceLinks[istate].has_value();
 
 
   return false;
@@ -465,7 +548,7 @@ const std::any ActsTrk::MultiTrajectory::component_impl(
     default: {
       for (auto& d : m_decorations) {
         if (d.hash == key) {
-          return  d.getter(istate, d.name);
+          return  d.getter(m_trackStates.cptr(), istate, d.name);
         }
       }
       throw std::runtime_error("MultiTrajectory::component_impl no such component " + std::to_string(key));
@@ -502,9 +585,8 @@ bool ActsTrk::MultiTrajectory::hasColumn_impl(
 
   ActsTrk::IndexType
   ActsTrk::MultiTrajectory::calibratedSize_impl(ActsTrk::IndexType istate) const {
-    const ActsTrk::IndexType i = (*m_trackStates)[istate]->calibrated();
-    return (*m_trackMeasurements)[i]->size();
-  }
+    return m_trackStates->at(istate)->measDim();
+    }
 
 
 typename Acts::SourceLink
@@ -512,16 +594,18 @@ ActsTrk::MultiTrajectory::getUncalibratedSourceLink_impl(ActsTrk::IndexType ista
   // TODO restore this implementation, see other methods like this
   // auto el = (*m_trackStates)[istate]->uncalibratedMeasurementLink();
   // return Acts::SourceLink(el);
-  return m_sourceLinks[istate].value();
+  return m_uncalibratedSourceLinks[istate].value();
 }
 
-void ActsTrk::MultiTrajectory::fillSurfaces(const ActsTrk::MutableMultiTrajectory* mtj) {
+void ActsTrk::MultiTrajectory::moveSurfaces(const ActsTrk::MutableMultiTrajectory* mtj) {
   m_surfaces = std::move(mtj->m_surfaces);
+  INSPECTCALL(this << " " << m_surfaces.size());
 }
 
 // TODO remove this implementation once tracking uses only sourceLinks with EL
-void ActsTrk::MultiTrajectory::fillLinks(const ActsTrk::MutableMultiTrajectory* mtj) {
-  m_sourceLinks = std::move(mtj->m_sourceLinks);
+void ActsTrk::MultiTrajectory::moveLinks(const ActsTrk::MutableMultiTrajectory* mtj) {
+  m_calibratedSourceLinks = std::move(mtj->m_calibratedSourceLinks);
+  m_uncalibratedSourceLinks = std::move(mtj->m_uncalibratedSourceLinks);
 }
 
 void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, const ActsGeometryContext& geoContext ) {
@@ -547,6 +631,7 @@ void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, c
 
 
 const Acts::Surface* ActsTrk::MultiTrajectory::referenceSurface_impl(IndexType istate) const {
-  if ( istate >= m_surfaces.size() ) throw std::out_of_range("MultiTrajectory index out of range when accessing reference surface");
+  INSPECTCALL( this <<  " " << istate << " " << m_trackStates->size() << " " << m_surfaces.size());
+  if ( istate >= m_surfaces.size() ) throw std::out_of_range("MultiTrajectory index " + std::to_string(istate) + " out of range " + std::to_string(m_surfaces.size()) + " when accessing reference surface");
   return toSurfacePtr(m_surfaces[istate]);
 }

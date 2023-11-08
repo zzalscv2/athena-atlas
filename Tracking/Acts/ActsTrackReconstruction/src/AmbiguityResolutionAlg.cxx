@@ -52,7 +52,7 @@ namespace ActsTrk
      }
 
      ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
-     
+     ATH_CHECK(m_resolvedTracksBackendHandle.initialize());
      ATH_CHECK(m_tracksKey.initialize());
      ATH_CHECK(m_resolvedTracksKey.initialize());
      return StatusCode::SUCCESS;
@@ -82,13 +82,10 @@ namespace ActsTrk
        auto destProxy = solvedTracks.getTrack(solvedTracks.addTrack());
        destProxy.copyFrom(trackHandle->getTrack(state.trackTips.at(iTrack)));
     }
-
+    std::unique_ptr<ActsTrk::TrackContainer> outputTracks = m_resolvedTracksBackendHandle.moveToConst( std::move(solvedTracks), ctx);
     SG::WriteHandle<ActsTrk::TrackContainer> resolvedTrackHandle(m_resolvedTracksKey, ctx);
-    std::unique_ptr<ActsTrk::TrackContainer>
-       output_tracks( new ActsTrk::TrackContainer{ Acts::ConstVectorTrackContainer(std::move(solvedTracks.container())),
-                                                        Acts::ConstVectorMultiTrajectory(std::move(solvedTracks.trackStateContainer())) } );
 
-    if (resolvedTrackHandle.record( std::move(output_tracks)).isFailure()) {
+    if (resolvedTrackHandle.record( std::move(outputTracks)).isFailure()) {
        ATH_MSG_ERROR("Failed to record resolved ACTS tracks with key " << m_resolvedTracksKey.key() );
        return StatusCode::FAILURE;
     }

@@ -13,7 +13,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsEvent/TrackContainerHandle.h"
-#include "ActsEvent/FutureTrackContainer.h"
+#include "ActsEvent/TrackContainer.h"
 
 
 namespace ActsTrk {
@@ -36,7 +36,7 @@ class TrkToActsConvertorAlg : public AthReentrantAlgorithm {
   
   
 
-  SG::WriteHandleKey<ActsTrk::future::TrackContainer> m_trackContainerKey {this, "TrackContainerLocation", "ConvertedTrackContainer", "Location of the converted TrackContainer"};
+  SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey {this, "TrackContainerLocation", "ConvertedTrackContainer", "Location of the converted TrackContainer"};
   ActsTrk::MutableTrackContainerHandle<ActsTrk::TrkToActsConvertorAlg> m_trackContainerBackends{this, "", "Converted"};
 
 };
