@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
@@ -650,17 +650,24 @@ namespace InDetDD {
 
   // New global alignment filders
   bool TRT_DetectorManager::processGlobalAlignment(const std::string & key, int level, FrameType frame,
-                                                   const CondAttrListCollection* /*obj*/, GeoVAlignmentStore* alignStore) const
+                                                   const CondAttrListCollection* obj, GeoVAlignmentStore* alignStore) const
   {
 
     bool alignmentChange = false;
 
-    if(msgLvl(MSG::INFO))
-      msg(MSG::INFO) << "Processing new global alignment containers with key " << key << " in the " << frame << " frame at level " << level << endmsg;
+    ATH_MSG_INFO("Processing new global alignment containers with key " << key << " in the " << frame << " frame at level " << level);
 
     Identifier ident=Identifier();
-    const CondAttrListCollection* atrlistcol=nullptr;
-    if (StatusCode::SUCCESS==m_detStore->retrieve(atrlistcol,key)) {
+    const CondAttrListCollection* atrlistcol=obj;
+    if (!atrlistcol) {
+       ATH_MSG_INFO("Read alignment from detector store with key " << key);
+       if (StatusCode::SUCCESS!=m_detStore->retrieve(atrlistcol,key)) {
+          ATH_MSG_WARNING("Cannot find new global align Container for key "
+                          << key << " - no new global alignment");
+          return alignmentChange;
+       }
+    }
+    {
       // loop over objects in collection
       for (CondAttrListCollection::const_iterator citr=atrlistcol->begin(); citr!=atrlistcol->end();++citr) {
 
@@ -703,12 +710,6 @@ namespace InDetDD {
 
         alignmentChange = (alignmentChange || status);
       }
-    }
-    else {
-      if (msgLvl(MSG::INFO))
-        msg(MSG::INFO) << "Cannot find new global align Container for key "
-                       << key << " - no new global alignment " << endmsg;
-      return alignmentChange;
     }
     return alignmentChange;
   }
