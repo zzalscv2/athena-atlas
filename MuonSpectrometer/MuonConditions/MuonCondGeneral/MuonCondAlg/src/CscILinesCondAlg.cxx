@@ -8,7 +8,7 @@
 #include <StoreGate/WriteCondHandle.h>
 #include <AthenaKernel/IOVInfiniteRange.h>
 #include <PathResolver/PathResolver.h>
-#include <MuonCondSvc/MdtStringUtils.h>
+#include <CxxUtils/StringUtils.h>
 
 
  CscILinesCondAlg::CscILinesCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
@@ -96,21 +96,20 @@ StatusCode CscILinesCondAlg::execute(const EventContext& ctx) const {
 
 
 StatusCode CscILinesCondAlg::loadDataFromLegacy(const std::string& data, nlohmann::json& json)  const {
-    using namespace MuonCalib;
     // Parse corrections
-    constexpr char delimiter = '\n';
+    constexpr std::string_view delimiter{"\n"};
     json = nlohmann::json::array();
-    auto lines = MuonCalib::MdtStringUtils::tokenize(data, delimiter);
-    for (const std::string_view& blobline : lines) {
+    auto lines = CxxUtils::tokenize(data, delimiter);
+    for (const std::string& blobline : lines) {
         nlohmann::json line;
-        constexpr char delimiter = ':';
-        auto tokens = MuonCalib::MdtStringUtils::tokenize(blobline, delimiter);
+        constexpr std::string_view delimiter {":"};
+        auto tokens = CxxUtils::tokenize(blobline, delimiter);
         // Check if tokens is not empty
         if (tokens.empty()) {
             ATH_MSG_FATAL("Empty string retrieved from DB ");
             return StatusCode::FAILURE;
         }
-        const std::string_view &type = tokens[0];
+        const std::string_view type = tokens[0];
         // Parse line
         if ('#' == type[0]) {
             // skip it
@@ -123,8 +122,8 @@ StatusCode CscILinesCondAlg::loadDataFromLegacy(const std::string& data, nlohman
             //.... example
             // Corr:  CSL 1 -1 3 1 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
 
-            constexpr char delimiter = ' ';
-            auto tokens = MuonCalib::MdtStringUtils::tokenize(blobline, delimiter);
+            constexpr std::string_view delimiter{"  "};
+            auto tokens = CxxUtils::tokenize(blobline, delimiter);
             if (tokens.size() != 12) {
                 ATH_MSG_FATAL("Invalid length in string retrieved from DB in folder. String length is "
                                 << tokens.size());
@@ -132,25 +131,25 @@ StatusCode CscILinesCondAlg::loadDataFromLegacy(const std::string& data, nlohman
             }
 
             ATH_MSG_VERBOSE("Parsing Line = ");
-            for (const std::string_view& token : tokens) ATH_MSG_VERBOSE(token << " | ");
+            for (std::string_view token : tokens) ATH_MSG_VERBOSE(token << " | ");
           
 
             // Start parsing
             int ival = 1;
             // Station Component identification
             line["typ"] = std::string(tokens[ival++]);
-            line["jff"] = MdtStringUtils::atoi(tokens[ival++]);
-            line["jzz"] = MdtStringUtils::atoi(tokens[ival++]);
-            line["job"] = MdtStringUtils::atoi(tokens[ival++]);
-            line["jlay"] = MdtStringUtils::atoi(tokens[ival++]);
+            line["jff"] = CxxUtils::atoi(tokens[ival++]);
+            line["jzz"] = CxxUtils::atoi(tokens[ival++]);
+            line["job"] = CxxUtils::atoi(tokens[ival++]);
+            line["jlay"] = CxxUtils::atoi(tokens[ival++]);
 
             // I-line
-            line["tras"] = MdtStringUtils::stof(tokens[ival++]);
-            line["traz"] =  MdtStringUtils::stof(tokens[ival++]);
-            line["trat"] = MdtStringUtils::stof(tokens[ival++]);
-            line["rots"] = MdtStringUtils::stof(tokens[ival++]);
-            line["rotz"] = MdtStringUtils::stof(tokens[ival++]);
-            line["rott"] = MdtStringUtils::stof(tokens[ival++]);
+            line["tras"] = CxxUtils::atof(tokens[ival++]);
+            line["traz"] =  CxxUtils::atof(tokens[ival++]);
+            line["trat"] = CxxUtils::atof(tokens[ival++]);
+            line["rots"] = CxxUtils::atof(tokens[ival++]);
+            line["rotz"] = CxxUtils::atof(tokens[ival++]);
+            line["rott"] = CxxUtils::atof(tokens[ival++]);
         }
         if (line.empty()) continue;
         json.push_back(std::move(line));

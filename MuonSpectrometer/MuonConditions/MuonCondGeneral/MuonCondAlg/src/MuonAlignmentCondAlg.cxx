@@ -13,7 +13,7 @@
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeListSpecification.h"
 #include "GaudiKernel/ConcurrencyFlags.h"
-#include "MuonCondSvc/MdtStringUtils.h"
+#include "CxxUtils/StringUtils.h"
 #include "MuonReadoutGeometry/GlobalUtilities.h"
 #include "PathResolver/PathResolver.h"
 #include "SGTools/TransientAddress.h"
@@ -226,16 +226,15 @@ StatusCode MuonAlignmentCondAlg::parseDataFromJSON(const nlohmann::json& lines,
 StatusCode MuonAlignmentCondAlg::loadDataFromLegacy(const std::string& data, nlohmann::json& json,
                                                     bool loadBLines) const {
 
-    using namespace MuonCalib;
     // Parse corrections
-    constexpr char delimiter = '\n';
+    constexpr std::string_view delimiter{"\n"};
 
     json = nlohmann::json::array();
-    auto lines = MdtStringUtils::tokenize(data, delimiter);
-    for (const std::string_view& blobline : lines) {
+    auto lines = CxxUtils::tokenize(data, delimiter);
+    for (const std::string& blobline : lines) {
         nlohmann::json line;
-        constexpr char delimiter = ':';
-        const auto tokens = MdtStringUtils::tokenize(blobline, delimiter);
+        constexpr std::string_view delimiter{":"};
+        const auto tokens = CxxUtils::tokenize(blobline, delimiter);
 
         // Check if tokens is not empty
         if (tokens.empty()) {
@@ -256,8 +255,8 @@ StatusCode MuonAlignmentCondAlg::loadDataFromLegacy(const std::string& data, nlo
         // 0.000000     0.026    -0.353  0.000000  0.070000  0.012000    -0.012    EMS1A08
         
         if (type.compare(0, 4, "Corr") == 0) {
-            constexpr char delimiter = ' ';
-            auto tokens = MdtStringUtils::tokenize(blobline, delimiter);
+            constexpr std::string_view delimiter{" "};
+            auto tokens = CxxUtils::tokenize(blobline, delimiter);
             if (tokens.size() != 25) {
                 ATH_MSG_FATAL("Invalid length in string retrieved. String length is " << tokens.size());
                 return StatusCode::FAILURE;
@@ -266,35 +265,35 @@ StatusCode MuonAlignmentCondAlg::loadDataFromLegacy(const std::string& data, nlo
             int ival = 1;
             // Station Component identification
             line["typ"] = std::string(tokens[ival++]);
-            line["jff"] = MdtStringUtils::atoi(tokens[ival++]);
-            line["jzz"] = MdtStringUtils::atoi(tokens[ival++]);
-            line["job"] = MdtStringUtils::atoi(tokens[ival++]);
+            line["jff"] = CxxUtils::atoi(tokens[ival++]);
+            line["jzz"] = CxxUtils::atoi(tokens[ival++]);
+            line["job"] = CxxUtils::atoi(tokens[ival++]);
             
             // A-line
-            line["svalue"] = MdtStringUtils::stof(tokens[ival++]);
-            line["zvalue"] = MdtStringUtils::stof(tokens[ival++]);
-            line["tvalue"] = MdtStringUtils::stof(tokens[ival++]);
+            line["svalue"] = CxxUtils::atof(tokens[ival++]);
+            line["zvalue"] = CxxUtils::atof(tokens[ival++]);
+            line["tvalue"] = CxxUtils::atof(tokens[ival++]);
             
-            line["tsv"] = MdtStringUtils::stof(tokens[ival++]);
-            line["tzv"] = MdtStringUtils::stof(tokens[ival++]);
-            line["ttv"] = MdtStringUtils::stof(tokens[ival++]);
+            line["tsv"] = CxxUtils::atof(tokens[ival++]);
+            line["tzv"] = CxxUtils::atof(tokens[ival++]);
+            line["ttv"] = CxxUtils::atof(tokens[ival++]);
 
             // B-line
             if (loadBLines) {
-                line["bz"] = MdtStringUtils::stof(tokens[ival++]);
-                line["bp"] = MdtStringUtils::stof(tokens[ival++]);
-                line["bn"] = MdtStringUtils::stof(tokens[ival++]);
-                line["sp"] = MdtStringUtils::stof(tokens[ival++]);
-                line["sn"] = MdtStringUtils::stof(tokens[ival++]);
-                line["tw"] = MdtStringUtils::stof(tokens[ival++]);
-                line["pg"] = MdtStringUtils::stof(tokens[ival++]);
-                line["tr"] = MdtStringUtils::stof(tokens[ival++]);
-                line["eg"] = MdtStringUtils::stof(tokens[ival++]);
-                line["ep"] = MdtStringUtils::stof(tokens[ival++]);
-                line["en"] = MdtStringUtils::stof(tokens[ival++]);
+                line["bz"] = CxxUtils::atof(tokens[ival++]);
+                line["bp"] = CxxUtils::atof(tokens[ival++]);
+                line["bn"] = CxxUtils::atof(tokens[ival++]);
+                line["sp"] = CxxUtils::atof(tokens[ival++]);
+                line["sn"] = CxxUtils::atof(tokens[ival++]);
+                line["tw"] = CxxUtils::atof(tokens[ival++]);
+                line["pg"] = CxxUtils::atof(tokens[ival++]);
+                line["tr"] = CxxUtils::atof(tokens[ival++]);
+                line["eg"] = CxxUtils::atof(tokens[ival++]);
+                line["ep"] = CxxUtils::atof(tokens[ival++]);
+                line["en"] = CxxUtils::atof(tokens[ival++]);
 
-                line["xAtlas"] = MdtStringUtils::stof(tokens[ival++]);
-                line["yAtlas"] = MdtStringUtils::stof(tokens[ival++]);
+                line["xAtlas"] = CxxUtils::atof(tokens[ival++]);
+                line["yAtlas"] = CxxUtils::atof(tokens[ival++]);
 
                 // ChamberName (hardware convention)
                 line["hwElement"] = std::string(tokens[ival++]);

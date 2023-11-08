@@ -16,7 +16,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonCondData/TgcCondDbData.h"
-#include "MuonCondSvc/MdtStringUtils.h"
+#include "CxxUtils/StringUtils.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
