@@ -17,7 +17,7 @@ AtlasG4_tf.py \
     --skipEvents '0' \
     --randomSeed '10' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationSingleIoVCalibrationHits' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
@@ -36,7 +36,7 @@ AtlasG4_tf.py \
     --skipEvents '0' \
     --randomSeed '10' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --preInclude 'AtlasG4Tf:Campaigns/MC23SimulationSingleIoVCalibrationHits.py' \
     --postInclude 'PyJobTransforms/UseFrontier.py' \
     --preExec 'AtlasG4Tf:simFlags.ReleaseGeoModel=False;' \
@@ -50,7 +50,7 @@ AtlasG4_tf.py \
     --skipEvents '0' \
     --randomSeed '10' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --preInclude 'AtlasG4Tf:Campaigns/MC23SimulationSingleIoVCalibrationHits.py' \
     --postInclude 'PyJobTransforms/UseFrontier.py' \
     --preExec 'AtlasG4Tf:simFlags.ReleaseGeoModel=False;' \
