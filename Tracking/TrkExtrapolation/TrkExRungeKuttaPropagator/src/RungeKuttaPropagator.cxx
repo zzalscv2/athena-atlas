@@ -1472,7 +1472,7 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
                                      Trk::PropDirection D,
                                      const Trk::BoundaryCheck& B,
                                      const MagneticFieldProperties& M,
-                                     TransportJacobian*& Jac,
+                                     std::optional<TransportJacobian>& Jac,
                                      double& pathLength,
                                      ParticleHypothesis,
                                      bool returnCurv,
@@ -1492,9 +1492,9 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
     J[22] = 0.;
     J[21] = 0.;
     J[20] = 0.;
-    Jac = new Trk::TransportJacobian(J);
+    Jac = std::make_optional<Trk::TransportJacobian>(J);
   } else
-    Jac = nullptr;
+    Jac.reset();
   return Tpn;
 }
 
@@ -1774,7 +1774,7 @@ Trk::RungeKuttaPropagator::propagateParameters(const ::EventContext& ctx,
                                                Trk::PropDirection D,
                                                const Trk::BoundaryCheck& B,
                                                const MagneticFieldProperties& M,
-                                               TransportJacobian*& Jac,
+                                               std::optional<TransportJacobian>& Jac,
                                                ParticleHypothesis,
                                                bool returnCurv,
                                                const TrackingVolume*) const
@@ -1792,9 +1792,9 @@ Trk::RungeKuttaPropagator::propagateParameters(const ::EventContext& ctx,
     J[22] = 0.;
     J[21] = 0.;
     J[20] = 0.;
-    Jac = new Trk::TransportJacobian(J);
+    Jac = std::make_optional<Trk::TransportJacobian>(J);
   } else
-    Jac = nullptr;
+    Jac.reset();
   return Tpn;
 }
 

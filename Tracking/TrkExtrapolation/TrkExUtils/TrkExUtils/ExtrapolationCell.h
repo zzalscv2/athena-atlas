@@ -187,37 +187,35 @@ template<class T>
 class ExtrapolationStep
 {
 public:
-  const T* parameters;    //!< the parameters of this step
-  const Surface* surface; //!< the surface where the step is bound
-  const Layer*
-    layer; //!< the associatedLayer() or materialLayer() of the surface
-  ExtrapolationConfig
-    stepConfiguration; //!< sensitive, passive, boundary to name the parameters
-  const MaterialProperties* material; //!< the associated material
-  Amg::Vector3D materialPosition; //!< position from where the material is taken
-  double materialScaling; //!< scale factor for the material as calculated
-  const TransportJacobian*
-    transportJacobian; //!< the transport jacobian from the last step
-  double pathLength;   //!< the path length from the last step
-  float time;          //!< timing info
+ const T* parameters;     //!< the parameters of this step
+ const Surface* surface;  //!< the surface where the step is bound
+ const Layer*
+     layer;  //!< the associatedLayer() or materialLayer() of the surface
+ ExtrapolationConfig stepConfiguration;  //!< sensitive, passive, boundary to
+                                         //!< name the parameters
+ const MaterialProperties* material;     //!< the associated material
+ Amg::Vector3D materialPosition;  //!< position from where the material is taken
+ double materialScaling;  //!< scale factor for the material as calculated
+ const TransportJacobian*
+     transportJacobian;  //!< the transport jacobian from the last step
+ double pathLength;      //!< the path length from the last step
+ float time;             //!< timing info
 
-  ExtrapolationStep(const T* pars = 0,
-                    const Surface* sf = nullptr,
-                    const ExtrapolationConfig& eConfig = ExtrapolationConfig(),
-                    const MaterialProperties* mprop = nullptr,
-                    const TransportJacobian* tjac = nullptr,
-                    double pLength = -1.)
-    : parameters(pars)
-    , surface(sf)
-    , layer(nullptr)
-    , stepConfiguration(eConfig)
-    , material(mprop)
-    , materialPosition(Amg::Vector3D(0., 0., 0.))
-    , materialScaling(1.)
-    , transportJacobian(tjac)
-    , pathLength(pLength)
-    , time(0)
-  {}
+ ExtrapolationStep(const T* pars = 0, const Surface* sf = nullptr,
+                   const ExtrapolationConfig& eConfig = ExtrapolationConfig(),
+                   const MaterialProperties* mprop = nullptr,
+                   const TransportJacobian* tjac = nullptr,
+                   double pLength = -1.)
+     : parameters(pars),
+       surface(sf),
+       layer(nullptr),
+       stepConfiguration(eConfig),
+       material(mprop),
+       materialPosition(Amg::Vector3D(0., 0., 0.)),
+       materialScaling(1.),
+       transportJacobian(tjac),
+       pathLength(pLength),
+       time(0) {}
 };
 
 /** @class ExtrapolationCell

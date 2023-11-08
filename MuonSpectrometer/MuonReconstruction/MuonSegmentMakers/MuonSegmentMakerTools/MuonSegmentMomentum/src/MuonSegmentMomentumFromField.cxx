@@ -17,7 +17,7 @@
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include <TString.h> // for Form
 
-MuonSegmentMomentumFromField::MuonSegmentMomentumFromField(const std::string& type,const std::string& name,const IInterface* 
+MuonSegmentMomentumFromField::MuonSegmentMomentumFromField(const std::string& type,const std::string& name,const IInterface*
 							   parent):AthAlgTool(type,name,parent)
 {
   declareInterface<IMuonSegmentMomentumEstimator>(this);
@@ -31,8 +31,8 @@ StatusCode MuonSegmentMomentumFromField::initialize()
   ATH_CHECK(m_navigator.retrieve());
   ATH_CHECK(m_idHelperSvc.retrieve());
   ATH_CHECK(m_fieldCondObjInputKey.initialize());
-  ATH_MSG_VERBOSE("End of Initializing");  
-  return StatusCode::SUCCESS; 
+  ATH_MSG_VERBOSE("End of Initializing");
+  return StatusCode::SUCCESS;
 }
 
 void MuonSegmentMomentumFromField::fitMomentumVectorSegments( const EventContext& ctx, const std::vector <const Muon::MuonSegment*>  & segments, double & signedMomentum ) const
@@ -49,7 +49,7 @@ void MuonSegmentMomentumFromField::fitMomentumVectorSegments( const EventContext
   std::vector<const Muon::MuonSegment*>::const_iterator it_end = segments.end();
 
   ++it2;
-  double maxintegral=0;  
+  double maxintegral=0;
   while (it2!=it_end){
     double integral= m_doOld ? fieldIntegralEstimate_old(ctx,*it,*it2) : fieldIntegralEstimate(ctx,*it,*it2);
     if (std::abs(integral)>maxintegral){
@@ -63,7 +63,7 @@ void MuonSegmentMomentumFromField::fitMomentumVectorSegments( const EventContext
   ATH_MSG_DEBUG( " Estimated signed momentum " << signedMomentum );
 }
 
-double MuonSegmentMomentumFromField::fieldIntegralEstimate( const EventContext& ctx, const Muon::MuonSegment* segment1, const Muon::MuonSegment* segment2) const 
+double MuonSegmentMomentumFromField::fieldIntegralEstimate( const EventContext& ctx, const Muon::MuonSegment* segment1, const Muon::MuonSegment* segment2) const
 {
 
   Amg::Vector3D pos1=segment1->globalPosition();
@@ -101,9 +101,9 @@ double MuonSegmentMomentumFromField::fieldIntegralEstimate( const EventContext& 
   return averagelcrossB*posdiff.mag();
 }
 
-void MuonSegmentMomentumFromField::fitMomentum2Segments( const EventContext& ctx, const Muon::MuonSegment* segment1, const Muon::MuonSegment* segment2, double & signedMomentum ) const 
+void MuonSegmentMomentumFromField::fitMomentum2Segments( const EventContext& ctx, const Muon::MuonSegment* segment1, const Muon::MuonSegment* segment2, double & signedMomentum ) const
 {
-  
+
   /** Estimate signed momentum for two segments
       by fitting 2 segments to one approximate track model */
 
@@ -168,16 +168,16 @@ void MuonSegmentMomentumFromField::fitMomentum2Segments( const EventContext& ctx
     bestseg=myseg2;
     worstseg=myseg1;
   }
-  
+
   for (int itry=0;itry<2;itry++){
 
     if(itry==1) {
 // retry with other as best segmt segment
       if(!flip) {
-        bestseg = myseg2;  
+        bestseg = myseg2;
         worstseg=myseg1;
       } else {
-        bestseg = myseg1;  
+        bestseg = myseg1;
         worstseg=myseg2;
       }
     }
@@ -188,18 +188,18 @@ void MuonSegmentMomentumFromField::fitMomentum2Segments( const EventContext& ctx
     double residual = 9999.;
     double resi[4],qoverp[4];
     for (int i=0;i<4;i++){
-      Trk::TransportJacobian *jac=nullptr;
+      std::optional<Trk::TransportJacobian> jac{};
       Trk::AtaPlane startpar(bestseg->globalPosition(),bestseg->globalDirection().phi(),
  	 		     bestseg->globalDirection().theta(),1/signedMomentum,bestseg->associatedSurface());
       auto par=m_propagator->propagateParameters(
         ctx, startpar,worstseg->associatedSurface(),
         (bestseg==myseg1) ? Trk::alongMomentum : Trk::oppositeMomentum,false,
         Trk::MagneticFieldProperties(Trk::FullField),jac,Trk::nonInteracting);
-      ATH_MSG_DEBUG("par: " << par.get() << " jac: " << jac );
+      ATH_MSG_DEBUG("par: " << par.get() << " jac: " << *jac );
       if (par && jac && (*jac)(1,4)!=0){
         residual = worstseg->localParameters()[Trk::locY] - par->parameters()[Trk::locY];
-        resi[i]   = residual; 
-        qoverp[i] = 1/signedMomentum; 
+        resi[i]   = residual;
+        qoverp[i] = 1/signedMomentum;
 // update qoverp
         double delta_qoverp=residual/(*jac)(1,4);
         double der_simple = -10.*(bestseg->globalPosition()-worstseg->globalPosition()).mag()/(.3*fieldintegral);
@@ -225,12 +225,11 @@ void MuonSegmentMomentumFromField::fitMomentum2Segments( const EventContext& ctx
           ATH_MSG_DEBUG("Too low signed momentum " << signedMomentum_updated );
 //      protect against too low momenta as propagation will fail
           signedMomentum = signedMomentum_updated>0? 1000.:-1000;
-        } else {  
+        } else {
 // do not change momentum beyond last iteration
           if(i<3) signedMomentum = signedMomentum_updated;
         }
         //delete par;
-        delete jac;
         if (std::abs(residual)<1) break;
       }
     }
@@ -242,7 +241,7 @@ void MuonSegmentMomentumFromField::fitMomentum2Segments( const EventContext& ctx
 }
 
 
-double MuonSegmentMomentumFromField::fieldIntegralEstimate_old( const EventContext& ctx, const Muon::MuonSegment* segment1, const Muon::MuonSegment* segment2) const 
+double MuonSegmentMomentumFromField::fieldIntegralEstimate_old( const EventContext& ctx, const Muon::MuonSegment* segment1, const Muon::MuonSegment* segment2) const
 {
 
   Amg::Vector3D pos1=segment1->globalPosition();
@@ -275,9 +274,9 @@ double MuonSegmentMomentumFromField::fieldIntegralEstimate_old( const EventConte
   return averageBcrossl*posdiff.mag();
 }
 
-void MuonSegmentMomentumFromField::fitMomentum2Segments_old( const EventContext& ctx, const Muon::MuonSegment* segment1, const Muon::MuonSegment* segment2, double & signedMomentum ) const 
+void MuonSegmentMomentumFromField::fitMomentum2Segments_old( const EventContext& ctx, const Muon::MuonSegment* segment1, const Muon::MuonSegment* segment2, double & signedMomentum ) const
 {
-  
+
   /** Estimate signed momentum for two segments
       by fitting 2 segments to one approximate track model */
 
@@ -315,7 +314,7 @@ void MuonSegmentMomentumFromField::fitMomentum2Segments_old( const EventContext&
     Identifier id=rot->identify();
 
     if ((m_idHelperSvc->isRpc(id) && m_idHelperSvc->rpcIdHelper().measuresPhi(id)) || (m_idHelperSvc->isCsc(id) && m_idHelperSvc->cscIdHelper().measuresPhi(id)) ||
-	(m_idHelperSvc->isTgc(id) && m_idHelperSvc->tgcIdHelper().isStrip(id))){    
+	(m_idHelperSvc->isTgc(id) && m_idHelperSvc->tgcIdHelper().isStrip(id))){
       if (!firstphi1) firstphi1=rot;
       lastphi1=rot;
     }
@@ -346,7 +345,7 @@ void MuonSegmentMomentumFromField::fitMomentum2Segments_old( const EventContext&
   for (int i=0;i<3;i++){
     Trk::AtaPlane startpar(bestseg->globalPosition(),bestseg->globalDirection().phi(),bestseg->globalDirection().theta(),
 			   1/signedMomentum,bestseg->associatedSurface());
-    Trk::TransportJacobian *jac=nullptr;
+    std::optional<Trk::TransportJacobian> jac{};
     auto par=m_propagator->propagateParameters(
       ctx,startpar,worstseg->associatedSurface(),
       (bestseg==myseg1) ? Trk::alongMomentum : Trk::oppositeMomentum,false,
@@ -357,7 +356,6 @@ void MuonSegmentMomentumFromField::fitMomentum2Segments_old( const EventContext&
       signedMomentum=1/(1/signedMomentum+delta_qoverp);
       ATH_MSG_DEBUG("residual: " << residual << " jac " << (*jac)(1,4) << " dp " << delta_qoverp << " signedmomentum: " << signedMomentum);
      // delete par;
-      delete jac;
       if (std::abs(residual)<1) break;
     }
   }

@@ -888,7 +888,7 @@ namespace Trk {
       return nullptr;
     }
 
-    std::unique_ptr<TransportJacobian> jac1, jac2;
+    std::optional<TransportJacobian> jac1, jac2;
     std::unique_ptr<const TrackParameters> elosspar;
 
     double firstscatphi = 0;
@@ -929,7 +929,6 @@ namespace Trk {
 
       PropDirection propdir = !firstismuon ? oppositeMomentum : alongMomentum;
 
-      TransportJacobian *tmp_jac1 = jac1.get();
       tmpelosspar = m_propagator->propagateParameters(
         ctx,
         *tmppar1,
@@ -938,10 +937,9 @@ namespace Trk {
         propdir,
         false,
         trajectory.m_fieldprop,
-        tmp_jac1,
+        jac1,
         Trk::nonInteracting
       );
-      if (jac1.get() != tmp_jac1) jac1.reset(tmp_jac1);
 
       if (m_numderiv) {
         jac1 = numericalDerivatives(
@@ -953,7 +951,7 @@ namespace Trk {
         );
       }
 
-      if ((tmpelosspar == nullptr) || (jac1 == nullptr)) {
+      if ((tmpelosspar == nullptr) || (jac1 == std::nullopt)) {
         // @TODO
         // according to coverity elosspar cannot be non NULL here
         // because elosspar is initially NULL and only set in the last loop iteration  (i==1)
@@ -971,7 +969,6 @@ namespace Trk {
         elosspar = std::move(tmpelosspar);
       }
 
-      TransportJacobian * tmp_jac2 = jac2.get();
       std::unique_ptr<const TrackParameters> scat2(m_propagator->propagateParameters(
         ctx,
         *elosspar2,
@@ -981,10 +978,9 @@ namespace Trk {
         propdir,
         false,
         trajectory.m_fieldprop,
-        tmp_jac2,
+        jac2,
         Trk::nonInteracting
       ));
-      if (jac2.get() != tmp_jac2) jac2.reset(tmp_jac2);
 
       if (m_numderiv) {
         jac2 = numericalDerivatives(
@@ -1000,7 +996,7 @@ namespace Trk {
         );
       }
 
-      if ((scat2 == nullptr) || (jac2 == nullptr)) {
+      if ((scat2 == nullptr) || (jac2 == std::nullopt)) {
         return nullptr;
       }
 
@@ -1014,8 +1010,8 @@ namespace Trk {
         }
       }
 
-      jac1.reset(nullptr);
-      jac2.reset(nullptr);
+      jac1.reset();
+      jac2.reset();
       Amg::MatrixX jac4(2, 2);
 
       jac4(0, 0) = jac3[0][2];
@@ -7530,7 +7526,7 @@ namespace Trk {
     bool holesearch
   ) const {
     std::unique_ptr<const TrackParameters> rv;
-    TransportJacobian * jac = nullptr;
+    std::optional<TransportJacobian> jac{};
 
     if (calcderiv && !m_numderiv) {
       rv = m_propagator->propagateParameters(
@@ -7542,7 +7538,7 @@ namespace Trk {
       );
 
       if (rv != nullptr && calcderiv) {
-        jac = numericalDerivatives(ctx, &prev, ts.associatedSurface(), propdir, bf).release();
+        jac = numericalDerivatives(ctx, &prev, ts.associatedSurface(), propdir, bf);
       }
     }
 
@@ -7554,7 +7550,7 @@ namespace Trk {
 
     return PropagationResult {
       std::move(rv),
-      std::unique_ptr<TransportJacobian>(jac),
+      std::move(jac),
       std::move(extrapolation)
     };
   }
@@ -7645,7 +7641,7 @@ namespace Trk {
       const TrackParameters *currenttrackpar = states[hitno]->trackParameters();
       const Surface &surf = states[hitno]->associatedSurface();
 
-      if (rv.m_jacobian != nullptr) {
+      if (rv.m_jacobian != std::nullopt) {
         if (
           states[hitno]->materialEffects() != nullptr &&
           states[hitno]->materialEffects()->deltaE() != 0 &&
@@ -7721,7 +7717,7 @@ namespace Trk {
         return FitterStatusCode::ExtrapolationFailure;
       }
 
-      if (rv.m_jacobian != nullptr) {
+      if (rv.m_jacobian != std::nullopt) {
         if (
           states[hitno]->materialEffects() != nullptr &&
           states[hitno]->materialEffects()->deltaE() != 0 &&
@@ -8102,7 +8098,7 @@ namespace Trk {
     }
   }
 
-  std::unique_ptr<TransportJacobian>
+  std::optional<TransportJacobian>
   GlobalChi2Fitter::numericalDerivatives(
     const EventContext& ctx,
     const TrackParameters* prevpar,
@@ -8118,7 +8114,7 @@ namespace Trk {
       0, 0, 0, 1, 0,
       0, 0, 0, 0, 1
     };
-    std::unique_ptr<TransportJacobian> jac = std::make_unique<TransportJacobian>(J);
+    std::optional<TransportJacobian> jac = std::make_optional<TransportJacobian>(J);
     const TrackParameters *tmpprevpar = prevpar;
     double eps[5] = {
       0.01, 0.01, 0.00001, 0.00001, 0.000000001

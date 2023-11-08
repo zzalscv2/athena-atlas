@@ -42,13 +42,18 @@ namespace Trk {
 
 */
 
-class TransportJacobian : public AmgMatrix(5, 5)
+class TransportJacobian final: public AmgMatrix(5, 5)
 {
 public:
   /** Constructor */
   TransportJacobian(const double*);
   TransportJacobian(const AmgMatrix(5, 5) &);
-  /** Destructor */
+  /** default all calling AmgMatrix methods */
+  TransportJacobian() = default;
+  TransportJacobian(const TransportJacobian&) = default;
+  TransportJacobian(TransportJacobian&&) = default;
+  TransportJacobian& operator=(const TransportJacobian&) = default;
+  TransportJacobian& operator=(TransportJacobian&&) = default;
   ~TransportJacobian() = default;
 };
 

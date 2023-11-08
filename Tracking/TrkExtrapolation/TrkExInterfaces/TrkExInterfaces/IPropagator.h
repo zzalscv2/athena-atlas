@@ -29,6 +29,7 @@
 // STL
 #include <utility>
 #include <deque>
+#include <optional>
 
 namespace Trk {
 
@@ -149,7 +150,7 @@ public:
     PropDirection dir,
     const BoundaryCheck& bcheck,
     const MagneticFieldProperties& mprop,
-    TransportJacobian*& jacob,
+    std::optional<TransportJacobian>& jacob,
     double& pathLength,
     ParticleHypothesis particle = pion,
     bool returnCurv = false,
@@ -177,7 +178,7 @@ public:
     PropDirection dir,
     const BoundaryCheck& bcheck,
     const MagneticFieldProperties& mprop,
-    TransportJacobian*& jacob,
+    std::optional<TransportJacobian>& jacob,
     ParticleHypothesis particle = pion,
     bool returnCurv = false,
     const TrackingVolume* tVol = nullptr) const = 0;

@@ -19,7 +19,6 @@
    class Surface;
    class ExtrapolationCache;
    class EnergyLoss;
-   class TransportJacobian;
    class TrackStateOnSurface;
  }
  
