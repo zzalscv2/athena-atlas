@@ -63,9 +63,9 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
     define.halfHeight = chambTrd->getZHalfLength();
     define.halfThickness = chambTrd->getXHalfLength1();
     /// Navigate through the GeoModel tree to find all gas volume leaves
-    std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "tgcGas");
+    std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "TgcGas");
     if (allGasGaps.empty()) {
-        ATH_MSG_FATAL("The volume "<<m_idHelperSvc->toStringDetEl(define.detElId)<<" does not have any childern StripLayer"
+        ATH_MSG_FATAL("The volume "<<m_idHelperSvc->toStringDetEl(define.detElId)<<" does not have any childern TgcGas"
             <<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
         return StatusCode::FAILURE;
     }

@@ -87,7 +87,6 @@ We describe here how each field of the identifier is determined.
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
 #include <xAODMuonSimHit/MuonSimHitContainer.h>
-#include <AthenaBaseComps/AthMessaging.h>
 
 namespace MuonG4R4 {
 

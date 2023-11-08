@@ -3,7 +3,7 @@
 */
 
 #include "RpcSensitiveDetector.h"
-
+#include "MuonSensitiveDetectorsR4/Utils.h"
 #include "G4ThreeVector.hh"
 #include "G4Trd.hh"
 #include "G4Geantino.hh"
@@ -16,22 +16,6 @@
 #include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
-inline std::ostream& operator<<(std::ostream& ostr, const G4StepPoint& step) {
-      ostr<<"position: "<<Amg::toString(Amg::Hep3VectorToEigen(step.GetPosition()),2)<<", ";
-      ostr<<"momentum: "<<Amg::toString(Amg::Hep3VectorToEigen(step.GetMomentum()),2)<<", ";
-      ostr<<"time: "<<step.GetGlobalTime()<<", ";
-      ostr<<"mass: "<<step.GetMass()<<", ";
-      ostr<<"kinetic energy: "<<step.GetKineticEnergy()<<", ";
-      ostr<<"charge: "<<step.GetCharge();
-      return ostr;
-}
-
-
-inline Amg::Transform3D getTransform(const G4VTouchable* history, unsigned int level) {
-   return Amg::Translation3D{Amg::Hep3VectorToEigen(history->GetTranslation(level))}*
-            Amg::CLHEPRotationToEigen(*history->GetRotation(level)).inverse();
-}
-
 using namespace MuonGMR4;
 using namespace CxxUtils;
 using namespace ActsTrk;
@@ -40,8 +24,9 @@ using namespace ActsTrk;
 // construction/destruction
 namespace MuonG4R4 {
 
-RpcSensitiveDetector::RpcSensitiveDetector(const std::string& name, const std::string& output_key,
-                         const MuonGMR4::MuonDetectorManager* detMgr):
+RpcSensitiveDetector::RpcSensitiveDetector(const std::string& name, 
+                                           const std::string& output_key,
+                                           const MuonGMR4::MuonDetectorManager* detMgr):
     G4VSensitiveDetector{name},
     AthMessaging{name},
     m_writeHandle{output_key},
@@ -62,14 +47,6 @@ void RpcSensitiveDetector::Initialize(G4HCofThisEvent*) {
 
 G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
 
-  G4Track* track = aStep->GetTrack();
-
-  /** RPCs sensitive to charged particle only */
-  if (track->GetDefinition()->GetPDGCharge() == 0.0) {
-    if (track->GetDefinition()!=G4Geantino::GeantinoDefinition()) {
-      return true;
-    }
-  }
 
   G4Track* currentTrack = aStep->GetTrack();
 
@@ -79,39 +56,27 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
     else if (currentTrack->GetDefinition()==G4ChargedGeantino::ChargedGeantinoDefinition()) return true;
   }
 
-  const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());
+  const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(currentTrack->GetTouchable());
   const MuonGMR4::RpcReadoutElement* readOutEle = getReadoutElement(touchHist);
-  if (!readOutEle) return true;
-
-
-  const G4StepPoint* preStep = aStep->GetPreStepPoint();
-  const G4StepPoint* postStep = aStep->GetPostStepPoint();
-  G4VPhysicalVolume*  physVolPostStep = postStep->GetPhysicalVolume();
-  if (!physVolPostStep)  {
-    ATH_MSG_VERBOSE("No physical volume stored "<<(*postStep));
-    return true;
+  if (!readOutEle) {
+      return false;
   }
-  
   const Amg::Transform3D globalToLocal = getTransform(currentTrack->GetTouchable(), 0).inverse();
   ATH_MSG_VERBOSE(" Track is inside volume "
                  <<currentTrack->GetTouchable()->GetHistory()->GetTopVolume()->GetName()
                  <<" transformation: "<<Amg::toString(globalToLocal));
   // transform pre and post step positions to local positions
-  const Amg::Vector3D globalVertex1{Amg::Hep3VectorToEigen(preStep->GetPosition())};
-  const Amg::Vector3D globalVertex2{Amg::Hep3VectorToEigen(postStep->GetPosition())};
-
-  const Amg::Vector3D localVertex1{globalToLocal * globalVertex1};
-  const Amg::Vector3D localVertex2{globalToLocal * globalVertex2};
-
-  const Amg::Vector3D localDir = (localVertex2 - localVertex1).unit();
+  
+  const Amg::Vector3D localPos{globalToLocal*Amg::Hep3VectorToEigen(currentTrack->GetPosition())};
+  const Amg::Vector3D localDir{globalToLocal.linear()*Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection())};
   ATH_MSG_VERBOSE("Entry / exit point in "<<m_detMgr->idHelperSvc()->toStringDetEl(readOutEle->identify())
-               <<" "<<Amg::toString(localVertex1, 2)<<" / "<<Amg::toString(localVertex2, 2));
+               <<" "<<Amg::toString(localPos, 2)<<" / "<<Amg::toString(localDir, 2));
   
   
   // The middle of the gas gap is at X= 0
-  std::optional<double> travelDist = Amg::intersect<3>(localVertex1, localDir, Amg::Vector3D::UnitX(), 0.);
+  std::optional<double> travelDist = Amg::intersect<3>(localPos, localDir, Amg::Vector3D::UnitX(), 0.);
   if (!travelDist) return true;
-  const Amg::Vector3D locGapCross = localVertex1 + (*travelDist) * localDir;
+  const Amg::Vector3D locGapCross = localPos + (*travelDist) * localDir;
   ATH_MSG_VERBOSE("Propagation to the gas gap center: "<<Amg::toString(locGapCross, 2));
   const Amg::Vector3D gapCenterCross = globalToLocal.inverse() * locGapCross;
 
@@ -121,9 +86,9 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       ATH_MSG_VERBOSE("No valid hit found");
       return true;
   }
-  const double globalTime = preStep->GetGlobalTime() + (*travelDist) / preStep->GetVelocity();
+  const double globalTime = currentTrack->GetGlobalTime() + (*travelDist) / currentTrack->GetVelocity();
   const Amg::Transform3D& gapTrans{readOutEle->globalToLocalTrans(m_gctx, etaHitID)};
-  const Amg::Vector3D locHitDir = gapTrans.linear() * (globalVertex2 - globalVertex1).unit();
+  const Amg::Vector3D locHitDir = gapTrans.linear() * Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection());
   const Amg::Vector3D locHitPos = gapTrans * gapCenterCross;
   
   xAOD::MuonSimHit* hit = new xAOD::MuonSimHit();
@@ -137,7 +102,7 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   hit->setGlobalTime(globalTime);
   hit->setPdgId(currentTrack->GetDefinition()->GetPDGEncoding());
   hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());
-  hit->setKineticEnergy(preStep->GetKineticEnergy());
+  hit->setKineticEnergy(currentTrack->GetKineticEnergy());
   hit->setGenParticleLink(trHelp.GetParticleLink());
   return true;
 }
@@ -149,11 +114,9 @@ Identifier RpcSensitiveDetector::getIdentifier(const MuonGMR4::RpcReadoutElement
   const Identifier firstChan = idHelper.channelID(readOutEle->identify(),
                                                   readOutEle->doubletZ(),
                                                   readOutEle->doubletPhi(), 1, phiGap, 1);
-   
-  /// The 10 mm are introduced to match the old & new readout geometry. Revert the offset
-  /// to ease the determination of the gasgap
+  
   const Amg::Vector3D locHitPos{readOutEle->globalToLocalTrans(m_gctx, firstChan) * 
-                                hitAtGapPlane};   
+                                hitAtGapPlane};
   const double gapHalfWidth = readOutEle->stripEtaLength() / 2;
   const double gapHalfLength = readOutEle->stripPhiLength()/ 2;
   ATH_MSG_VERBOSE("Detector element: "<<m_detMgr->idHelperSvc()->toStringDetEl(firstChan)
@@ -170,7 +133,7 @@ Identifier RpcSensitiveDetector::getIdentifier(const MuonGMR4::RpcReadoutElement
                             doubletPhi, gasGap, phiGap, 1);
 }
 const MuonGMR4::RpcReadoutElement* RpcSensitiveDetector::getReadoutElement(const G4TouchableHistory* touchHist) const {
-    /// The fourth volume is the envelope volume of the rpc gas gap
+  /// The fourth volume is the envelope volume of the rpc gas gap
    const std::string stationVolume = touchHist->GetVolume(3)->GetName();
    
    const std::vector<std::string> volumeTokens = tokenize(stationVolume, "_");
