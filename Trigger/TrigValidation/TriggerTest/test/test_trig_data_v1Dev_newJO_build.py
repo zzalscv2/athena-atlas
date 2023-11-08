@@ -16,7 +16,7 @@ ex.args = '--CA'
 ex.input = 'data'
 ex.threads = 1
 ex.job_options = 'TriggerJobOpts/runHLT.py'
-ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
             'Trigger.doLVL1=True',
             'Trigger.doRuntimeNaviVal=True']
 

@@ -17,7 +17,7 @@ ex.args = '--CA'
 ex.input = 'ttbar'
 ex.threads = 1
 ex.job_options = 'TriggerJobOpts/runHLT.py'
-ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
             'Trigger.doRuntimeNaviVal=True',
             'Output.doWriteRDO=False'] #TODO enable once fixes issue with missing containers
 
