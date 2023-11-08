@@ -5,28 +5,41 @@
 #ifndef ACTSTRKEVENT_TRACKCONTAINER_H
 #define ACTSTRKEVENT_TRACKCONTAINER_H 1
 
-#include "Acts/EventData/VectorMultiTrajectory.hpp"
-#include "Acts/EventData/VectorTrackContainer.hpp"
+#include "ActsEvent/MultiTrajectory.h"
+#include "ActsEvent/TrackStorageContainer.h"
 
 namespace ActsTrk {
-using MutableTrackBackend = Acts::VectorTrackContainer;
-using TrackBackend = Acts::ConstVectorTrackContainer;
-using MutableTrackStateBackend = Acts::VectorMultiTrajectory;
-using TrackStateBackend = Acts::ConstVectorMultiTrajectory;
+using MutableTrackBackend = ActsTrk::MutableTrackStorageContainer;
+using TrackBackend = ActsTrk::TrackStorageContainer;
+using MutableTrackStateBackend = ActsTrk::MutableMultiTrajectory;
+using TrackStateBackend = ActsTrk::MultiTrajectory;
 
-class MutableTrackContainer
-    : public Acts::TrackContainer<MutableTrackBackend, MutableTrackStateBackend,
+template <typename T>
+struct DataLinkHolder {
+  DataLink<T> m_link;
+  DataLinkHolder(const DataLink<T>& link) : m_link{link} {}
+
+  const T& operator*() const { return *(m_link.cptr()); }
+  const T* operator->() const { return m_link.cptr(); }
+};
+
+using TrackContainer =
+    Acts::TrackContainer<ActsTrk::TrackBackend, ActsTrk::TrackStateBackend,
+                         ActsTrk::DataLinkHolder>;
+
+struct MutableTrackContainer
+    : public Acts::TrackContainer<ActsTrk::MutableTrackBackend,
+                                  ActsTrk::MutableTrackStateBackend,
                                   Acts::detail::ValueHolder> {
- public:
   MutableTrackContainer()
-      : Acts::TrackContainer<MutableTrackBackend, MutableTrackStateBackend,
+      : Acts::TrackContainer<ActsTrk::MutableTrackBackend,
+                             ActsTrk::MutableTrackStateBackend,
                              Acts::detail::ValueHolder>(
             MutableTrackBackend(), MutableTrackStateBackend()) {}
 };
 
-using TrackContainer = Acts::TrackContainer<TrackBackend, TrackStateBackend,
-                                            Acts::detail::ValueHolder>;
 }  // namespace ActsTrk
+
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF(ActsTrk::TrackContainer, 1210898253, 1)
 #endif

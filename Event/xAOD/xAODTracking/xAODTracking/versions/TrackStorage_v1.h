@@ -164,6 +164,44 @@ namespace xAOD
     unsigned int* nSharedHitsPtr();
 
 
+    /**
+      * @brief index of the tip of the TrackStates linked list in MultiTrajectory
+      */
+    unsigned int tipIndex() const;
+
+    /**
+      * @brief Set the tip index
+      * @see tipIndex() for explanation
+      */
+    void setTipIndex(unsigned int);
+
+    /**
+      * @brief pointers API needed by MTJ
+      */
+    const unsigned int* tipIndexPtr() const;
+    unsigned int* tipIndexPtr();
+
+    /**
+      * @brief index of the stem of the TrackStates linked list in MultiTrajectory
+      * steemIndex is needed reverse lookup in MultiTrajectory
+      */
+    unsigned int stemIndex() const;
+
+    /**
+      * @brief Set the stem index
+      * @see stemIndex() for explanation
+      */
+    void setStemIndex(unsigned int);
+
+    /**
+      * @brief pointers API needed by MTJ
+      */
+    const unsigned int* stemIndexPtr() const;
+    unsigned int* stemIndexPtr();
+
+    /**
+     * @brief resize internal arrays to store params (to capacity sz) & convariances (to capacity sz x sz)
+     */
     void resize(size_t sz = 6);
 
     /**

@@ -13,6 +13,8 @@ namespace xAOD {
     AUX_VARIABLE(chi2f);
     AUX_VARIABLE(ndf);
     AUX_VARIABLE(nOutliers);
-    AUX_VARIABLE(nSharedHits);    
+    AUX_VARIABLE(nSharedHits);
+    AUX_VARIABLE(tipIndex);
+    AUX_VARIABLE(stemIndex);
   }
 }

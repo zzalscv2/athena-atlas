@@ -71,9 +71,9 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
 }
 
 // Specialisation for TrackProxy
-// TODO understand why this is not matching: ActsTrk::future::TrackContainer::TrackProxy
+// TODO understand why this is not matching: ActsTrk::TrackContainer::TrackProxy
 template <>
-nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<ActsTrk::TrackStorageContainer, ActsTrk::MultiTrajectory, ActsTrk::future::DataLinkHolder, true> &track) {
+nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<ActsTrk::TrackStorageContainer, ActsTrk::MultiTrajectory, ActsTrk::DataLinkHolder, true> &track) {
   nlohmann::json data;
 
   Acts::GeometryContext gctx = m_trackingGeometryTool->getGeometryContext(getContext()).context();
@@ -160,13 +160,13 @@ StatusCode DumpEventDataToJsonAlg::execute() {
   auto tcHandles = m_trackContainerKeys.makeHandles();
 
 
-  for ( SG::ReadHandle<ActsTrk::future::TrackContainer>& tcHandle: tcHandles ) {
+  for ( SG::ReadHandle<ActsTrk::TrackContainer>& tcHandle: tcHandles ) {
     // Temporary debugging information
     ATH_MSG_VERBOSE("TrackStateContainer has "<< tcHandle->size() << " elements");
 
     
     ATH_MSG_VERBOSE("Trying to load " << tcHandle.key() << " with " << tcHandle->size() << " tracks");
-    const ActsTrk::future::TrackContainer* tc = tcHandle.get();
+    const ActsTrk::TrackContainer* tc = tcHandle.get();
     for (auto track : *tc) {
       nlohmann::json tmp = getData(track);
       j["TrackContainers"][tcHandle.key()].push_back(tmp);

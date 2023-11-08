@@ -30,9 +30,7 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
   ATH_MSG_VERBOSE("create containers");
 
   ATH_MSG_VERBOSE("About to create trackContainer");
-  ActsTrk::MutableTrackStorageContainer tb;
-  ActsTrk::MutableMultiTrajectory mtj;
-  ActsTrk::future::MutableTrackContainer tc(tb, mtj);
+  ActsTrk::MutableTrackContainer tc;
   Acts::GeometryContext tgContext = m_convertorTool->trackingGeometryTool()
                                             ->getGeometryContext(ctx)
                                             .context();
@@ -45,14 +43,14 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
 
     m_convertorTool->trkTrackCollectionToActsTrackContainer(
           tc, *handle, tgContext);
-    ATH_MSG_VERBOSE("multiTraj has  " << mtj.size() << " states");
+    ATH_MSG_VERBOSE("multiTraj has  " << tc.trackStateContainer().size() << " states");
   }
 
   // // Let's dump some information for debugging (will be removed later)
-  ATH_MSG_VERBOSE("TrackStateContainer has  " << mtj.trackStates().size() << " states");
-  ATH_MSG_VERBOSE("TrackParametersContainer has  " << mtj.trackParameters().size() << " parameters");
+  ATH_MSG_VERBOSE("TrackStateContainer has  " << tc.trackStateContainer().trackStates().size() << " states");
+  ATH_MSG_VERBOSE("TrackParametersContainer has  " << tc.trackStateContainer().trackParameters().size() << " parameters");
 
-  std::unique_ptr<ActsTrk::future::TrackContainer> constTrackContainer = m_trackContainerBackends.moveToConst(std::move(tc), ctx);
+  std::unique_ptr<ActsTrk::TrackContainer> constTrackContainer = m_trackContainerBackends.moveToConst(std::move(tc), ctx);
   auto trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
   ATH_MSG_VERBOSE("Saving " << constTrackContainer->size() << " tracks to "<< trackContainerHandle.key());
   ATH_CHECK(trackContainerHandle.record(std::move(constTrackContainer)));

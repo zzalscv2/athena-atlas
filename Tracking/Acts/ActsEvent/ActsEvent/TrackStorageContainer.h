@@ -5,11 +5,10 @@
 #define ActsEvent_TrackStorageContainer_h
 #include <type_traits>
 
-#include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/TrackContainer.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/HashedString.hpp"
-#include "ActsEvent/MultiTrajectory.h"
+#include "ActsEvent/Decoration.h"
 #include "xAODTracking/TrackStorageContainer.h"
 #include "xAODTracking/TrackStorageAuxContainer.h"
 
@@ -47,14 +46,15 @@ using ConstCovariance = Acts::TrackStateTraits<3>::Covariance;
 using Parameters = Acts::TrackStateTraits<3, false>::Parameters;
 using Covariance = Acts::TrackStateTraits<3, false>::Covariance;
 
+
 class MutableTrackStorageContainer;
 
 class TrackStorageContainer {
  public:
-  using IndexType = Acts::MultiTrajectoryTraits::IndexType;
+  using IndexType = uint32_t; // TODO find common place for it
   static constexpr auto kInvalid = Acts::MultiTrajectoryTraits::kInvalid;
   TrackStorageContainer(const DataLink<xAOD::TrackStorageContainer>& lin = nullptr);
-
+  static const std::set<std::string> staticVariables;
   /**
   * return true if the container has specific decoration
   */
@@ -86,24 +86,36 @@ class TrackStorageContainer {
   */
   ActsTrk::ConstCovariance covariance(ActsTrk::IndexType itrack) const;
 
-  void fillSurfaces(ActsTrk::MutableTrackStorageContainer& mtb);
+  void fillFrom(ActsTrk::MutableTrackStorageContainer& mtb);
 
   template<typename T>
   friend class MutableTrackContainerHandle;
   friend class MutableTrackStorageContainer;
 
- protected:
   void restoreDecorations();
-  template <typename T>
-  const std::any decorationGetter(ActsTrk::IndexType, const std::string&) const;
-  std::vector<ActsTrk::detail::Decoration> m_decorations;
+
+  const xAOD::TrackStorageContainer* backend() const{
+    return m_backend.cptr();
+  }
+
+ protected:
+  using DecorationAccess = ActsTrk::detail::Decoration<xAOD::TrackStorageContainer>;
+
+  std::vector<DecorationAccess> m_decorations;
   DataLink<xAOD::TrackStorageContainer> m_backend = nullptr;
+
+
   std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces;
+  std::vector<Acts::ParticleHypothesis> m_particleHypothesis; // TODO move the storage to the backend
 };
 
 class MutableTrackStorageContainer : public TrackStorageContainer {
  public:
   MutableTrackStorageContainer();
+  MutableTrackStorageContainer(const MutableTrackStorageContainer&) = delete;
+  MutableTrackStorageContainer operator=(const MutableTrackStorageContainer&) = delete;
+  MutableTrackStorageContainer(MutableTrackStorageContainer&&) noexcept;
+
   /**
   * adds new track to the tail of the container
   */
@@ -158,7 +170,7 @@ class MutableTrackStorageContainer : public TrackStorageContainer {
   */
   void reserve(ActsTrk::IndexType size);
 
-  /**3660251998 
+  /** 
   * zeroes container
   */
   void clear();
@@ -170,15 +182,29 @@ class MutableTrackStorageContainer : public TrackStorageContainer {
   void setReferenceSurface_impl(ActsTrk::IndexType itrack,
                                 std::shared_ptr<const Acts::Surface> surface);
 
+
+ void setParticleHypothesis_impl(
+    ActsTrk::IndexType itrack, const Acts::ParticleHypothesis& particleHypothesis) {
+    m_particleHypothesis.resize(itrack+1, Acts::ParticleHypothesis::pion());
+    m_particleHypothesis[itrack] = particleHypothesis;
+  }
+
   template<typename T>
   friend class MutableTrackContainerHandle;
 
- private:
-  std::unique_ptr<xAOD::TrackStorageContainer> m_backend;
-  std::unique_ptr<xAOD::TrackStorageAuxContainer> m_backendAux;
+  // obtain access to backend, only needed for testing
+  const xAOD::TrackStorageContainer* backend() const{
+    return m_mutableBackend.get();
+  }
 
-  template <typename T>
-  std::any decorationSetter(ActsTrk::IndexType, const std::string&);
+  xAOD::TrackStorageContainer* backend(){
+    return m_mutableBackend.get();
+  }
+
+
+ private:
+  std::unique_ptr<xAOD::TrackStorageContainer> m_mutableBackend;
+  std::unique_ptr<xAOD::TrackStorageAuxContainer> m_mutableBackendAux;
 };
 
 
@@ -195,6 +221,9 @@ constexpr bool ActsTrk::TrackStorageContainer::hasColumn_impl(
     case "ndf"_hash:
     case "nOutliers"_hash:
     case "hSharedHits"_hash:
+    case "tipIndex"_hash:
+    case "stemIndex"_hash:
+
       return true;
   }
   for (auto& d : m_decorations) {
@@ -205,21 +234,8 @@ constexpr bool ActsTrk::TrackStorageContainer::hasColumn_impl(
   return false;
 }
 
-
-template <typename T>
-const std::any TrackStorageContainer::decorationGetter(
-    ActsTrk::IndexType idx, const std::string& name) const {
-  const SG::ConstAuxElement el(m_backend.cptr(), idx);  
-  return &(el.auxdataConst<T>(name));
-
-}
-
-template <typename T>
-std::any MutableTrackStorageContainer::decorationSetter(
-    ActsTrk::IndexType idx, const std::string& name) {
-  const SG::AuxElement* el = (*m_backend)[idx];
-  return &(el->auxdecor<T>(name));
-}
+namespace details{
+} // EOF detail
 
 template <typename T>
 constexpr void MutableTrackStorageContainer::addColumn_impl(
@@ -229,14 +245,12 @@ constexpr void MutableTrackStorageContainer::addColumn_impl(
         "TrackStorageContainer::addColumn_impl: "
         "unsupported decoration type");
   }
-  using std::placeholders::_1;
-  using std::placeholders::_2;
-  m_decorations.push_back(ActsTrk::detail::Decoration(
+  m_decorations.push_back(DecorationAccess(
       name,
-      std::bind(&ActsTrk::MutableTrackStorageContainer::decorationSetter<T>,
-                this, _1, _2),
-      std::bind(&ActsTrk::TrackStorageContainer::decorationGetter<T>, this,
-                _1, _2)));
+      ActsTrk::detail::decorationSetter<xAOD::TrackStorageContainer, T>,
+      ActsTrk::detail::decorationGetter<xAOD::TrackStorageContainer, T>,
+      ActsTrk::detail::decorationCopier<xAOD::TrackStorageContainer, T>
+      ));
 }
 
 }  // namespace ActsTrk

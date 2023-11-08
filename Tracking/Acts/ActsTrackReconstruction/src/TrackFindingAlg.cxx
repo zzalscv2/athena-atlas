@@ -119,6 +119,7 @@ namespace ActsTrk
     ATH_CHECK(m_stripDetEleCollKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_pixelEstimatedTrackParametersKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_stripEstimatedTrackParametersKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_tracksBackendHandle.initialize());
     ATH_CHECK(m_trackContainerKey.initialize());
 
     ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
@@ -601,7 +602,7 @@ namespace ActsTrk
     // ================================================== //
     // ===================== OUTPUTS ==================== //
     // ================================================== //
-
+    // TODO move closer to the place where it is used
     auto trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
 
     ActsTrk::MutableTrackContainer tracksContainer;
@@ -662,15 +663,9 @@ namespace ActsTrk
         ++category_i;
       }
     }
-
-    // ================================================== //
-    // ===================== STORE OUTPUT =============== //
-    // ================================================== //
-    // TODO once have final version of containers, they need to have movable backends also here
-    ActsTrk::TrackStateBackend trackStateBackend(tracksContainer.trackStateContainer());
-    ActsTrk::TrackBackend trackBackend(tracksContainer.container());
-    auto constTrackContainer = std::make_unique<ActsTrk::TrackContainer>(std::move(trackBackend), std::move(trackStateBackend));
-    ATH_CHECK(trackContainerHandle.record(std::move(constTrackContainer)));
+    
+    std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandle.moveToConst(std::move(tracksContainer), ctx);
+    ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
     if (!trackContainerHandle.isValid())
     {
       ATH_MSG_FATAL("Failed to write TrackContainer with key " << m_trackContainerKey.key());

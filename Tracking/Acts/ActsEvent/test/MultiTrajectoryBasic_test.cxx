@@ -200,7 +200,6 @@ struct EmptyMTJ {  // setup empty MTJ
 };
 
 BOOST_AUTO_TEST_CASE(OwningMTJ) {
-  std::cout << "constructing owning MTJ\n";
   ActsTrk::MutableMultiTrajectory mtj;
 }
 
@@ -215,6 +214,8 @@ BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
   auto i2a = mtj->addTrackState(kMask, i1a);
   auto i2b = mtj->addTrackState(kMask, i1b);
 
+  ActsTrk::MutableMultiTrajectory copy(*mtj.get());
+
   std::vector<size_t> act;
   auto collect = [&](auto p) {
     act.push_back(p.index());
@@ -228,20 +229,30 @@ BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
   std::vector<size_t> exp = {i2a, i1a, i0};
   mtj->applyBackwards(i2a, collect);
   BOOST_CHECK_EQUAL_COLLECTIONS(act.begin(), act.end(), exp.begin(), exp.end());
-  // the same test on read only collection TODO, this needs streamlining so we
-  // so not repeat identical code
+
   act.clear();
   ro_mtj->visitBackwards(i2a, collect);
   BOOST_CHECK_EQUAL_COLLECTIONS(act.begin(), act.end(), exp.begin(), exp.end());
 
   act.clear();
+  copy.applyBackwards(i2a, collect);
+  BOOST_CHECK_EQUAL_COLLECTIONS(act.begin(), act.end(), exp.begin(), exp.end());
+
   exp = {i2b, i1b, i0};
+
+  act.clear();
   mtj->applyBackwards(i2b, collect);
   BOOST_CHECK_EQUAL_COLLECTIONS(act.begin(), act.end(), exp.begin(), exp.end());
-  // the same test on read only collection
+
   act.clear();
   ro_mtj->visitBackwards(i2b, collect);
   BOOST_CHECK_EQUAL_COLLECTIONS(act.begin(), act.end(), exp.begin(), exp.end());
+
+  act.clear();
+  copy.visitBackwards(i2b, collect);
+  BOOST_CHECK_EQUAL_COLLECTIONS(act.begin(), act.end(), exp.begin(), exp.end());
+
+
 }
 
 BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
@@ -682,10 +693,10 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyAllocations, EmptyMTJ) {
   BOOST_CHECK(!tsnone.has<"jacobian"_hash>());
   BOOST_CHECK(!tsnone.has<"calibrated"_hash>());
   BOOST_CHECK(!tsnone.has<"projector"_hash>());
-  // TODO We always set the uncalibrated, see MultiTrajectory.icc l84
-  BOOST_CHECK(tsnone.has<"calibratedSourceLink"_hash>());
+
+  BOOST_CHECK(!tsnone.has<"calibratedSourceLink"_hash>());
   // TODO referenceSurface not implemented
-  // should be here BOOST_CHECK(tsnone.has<"referenceSurface"_hash>());
+  BOOST_CHECK(tsnone.has<"referenceSurface"_hash>());
   BOOST_CHECK(tsnone.has<"measdim"_hash>());
   BOOST_CHECK(tsnone.has<"chi2"_hash>());
   // TODO pathLength and typeFlags not implemented

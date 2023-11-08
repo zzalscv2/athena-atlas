@@ -9,7 +9,6 @@ void encodeSurface(xAOD::TrackSurface* surfBackend, const Acts::Surface* surface
                    const ActsGeometryContext& gctx) {
   // return if surf is a nullptr
   if (surface == nullptr) {
-    std::cout<<"input surface in encodeSurface is a nullptr."<<std::endl;
     return;
   }  
 
