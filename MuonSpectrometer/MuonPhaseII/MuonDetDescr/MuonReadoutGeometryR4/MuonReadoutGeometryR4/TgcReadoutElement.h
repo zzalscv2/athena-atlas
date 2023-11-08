@@ -76,6 +76,8 @@ class TgcReadoutElement : public MuonReadoutElement {
     unsigned int numStrips(unsigned int gasGap) const;
     /// Returns the number of wire gangs for a given gasGap [1-3]
     unsigned int numWireGangs(unsigned int gasGap) const;
+    /// Returns the thickness of the gasGap
+    double gasGapThickness() const;
 
     /// Returns the center of the measurement channel
     ///  eta measurement:  wire gang center
@@ -90,13 +92,16 @@ class TgcReadoutElement : public MuonReadoutElement {
     /// If the gap does not have strips an exception is thrown
     const RadialStripDesign& stripLayout(unsigned int gasGap)  const;
    private:
+        parameterBook m_pars{};
+        const TgcIdHelper& m_idHelper{idHelperSvc()->tgcIdHelper()};
+        /// Distance between 2 gas gaps (Z - direction)
+        double m_gasThickness{0.};
+
+        
         Amg::Transform3D fromGapToChamOrigin(const IdentifierHash& layerHash) const;
         /// Returns the local strip position w.r.t. to the chamber origin
         Amg::Vector3D chamberStripPos(const IdentifierHash& measHash) const;
 
-
-        parameterBook m_pars{};
-        const TgcIdHelper& m_idHelper{idHelperSvc()->tgcIdHelper()};
         /// Constructs the Hash out of the Identifier fields 
         /// (channel, gasGap, isStrip)
         static IdentifierHash constructHash(unsigned int measCh,

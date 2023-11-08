@@ -2,41 +2,28 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "MuonSensitiveDetectorsR4/Utils.h"
 #include "MdtSensitiveDetector.h"
 
 
 #include <MCTruth/TrackHelper.h>
 #include <G4Geantino.hh>
 #include <G4ChargedGeantino.hh>
+
 #include <limits>
 #include <iostream>
-#include <GaudiKernel/MsgStream.h>
 #include <GeoPrimitives/CLHEPtoEigenConverter.h>
 #include <xAODMuonSimHit/MuonSimHitAuxContainer.h>
-
 #include <GaudiKernel/SystemOfUnits.h>
 
-inline std::ostream& operator<<(std::ostream& ostr, const G4Track& step) {
-      ostr<<"position: "<<Amg::toString(Amg::Hep3VectorToEigen(step.GetPosition()),2)<<", ";
-      ostr<<"momentum: "<<Amg::toString(Amg::Hep3VectorToEigen(step.GetMomentum()),2)<<", ";
-      ostr<<"velocity: "<<step.GetVelocity()<<", ";
-      ostr<<"time: "<<step.GetGlobalTime()<<", ";
-      ostr<<"mass: "<<step.GetDefinition()->GetPDGMass()<<", ";
-      ostr<<"kinetic energy: "<<step.GetKineticEnergy()<<", ";
-      ostr<<"charge: "<<step.GetDefinition()->GetPDGCharge();
-      return ostr;
-}
-inline Amg::Transform3D getTransform(const G4VTouchable* history, unsigned int level) {
-   return Amg::Translation3D{Amg::Hep3VectorToEigen(history->GetTranslation(level))}*
-            Amg::CLHEPRotationToEigen(*history->GetRotation(level)).inverse();
-}
 using namespace MuonGMR4;
 using namespace CxxUtils;
 using namespace ActsTrk;
 namespace MuonG4R4{
 
-MdtSensitiveDetector::MdtSensitiveDetector(const std::string& name, const std::string& output_key,
-                         const MuonGMR4::MuonDetectorManager* detMgr):
+MdtSensitiveDetector::MdtSensitiveDetector(const std::string& name, 
+                                           const std::string& output_key,
+                                           const MuonGMR4::MuonDetectorManager* detMgr):
     G4VSensitiveDetector{name},
     AthMessaging{name},
     m_writeHandle{output_key},

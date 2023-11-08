@@ -15,7 +15,7 @@ find_package( GTest )
 atlas_add_library( MuonSensitiveDetectorsR4Lib
                    src/*.cxx
                    OBJECT
-                   NO_PUBLIC_HEADERS MuonSensitiveDetectorsR4
+                   PUBLIC_HEADERS MuonSensitiveDetectorsR4
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    LINK_LIBRARIES GeoPrimitives ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} StoreGateLib  
                                   GaudiKernel xAODMuonSimHit G4AtlasToolsLib MCTruth MuonIdHelpersLib)

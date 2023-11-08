@@ -8,9 +8,6 @@
 #include <optional>
 using namespace ActsTrk;
 
-
-
-
 namespace MuonGMR4 {
 using parameterBook = TgcReadoutElement::parameterBook;
 std::ostream& operator<<(std::ostream& ostr, const parameterBook& pars) {
@@ -88,6 +85,10 @@ StatusCode TgcReadoutElement::initElement() {
 #ifndef SIMULATIONBASE
     m_pars.layerBounds.reset();
 #endif
+    const IdentifierHash firstLay  = constructHash(0, 1, false);
+    const IdentifierHash secondLay = constructHash(0, 2, false);
+    ActsGeometryContext gctx{};
+    m_gasThickness =(center(gctx, firstLay) - center(gctx, secondLay)).mag(); 
     return StatusCode::SUCCESS;
 }
 

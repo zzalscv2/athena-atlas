@@ -28,6 +28,19 @@ def RpcSensitiveDetectorToolCfg(flags, name = "RpcSensitiveDetector", **kwargs):
     result.setPrivateTools(the_tool)
     return result
 
+def TgcSensitiveDetectorToolCfg(flags, name = "TgcSensitiveDetector", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("OutputCollectionNames", [ "xRawTgcSimHits"])
+    kwargs.setdefault("LogicalVolumeNames", ["MuonR4::TgcGas"])
+    from MuonSimHitSorting.MuonSimHitSortingCfg import MuonSimHitSortingAlgCfg
+    result.merge(MuonSimHitSortingAlgCfg(flags,name="TgcSimHitSorterAlg",
+                                               InContainers=["xRawTgcSimHits"],
+                                               OutContainer ="xTgcSimHits",
+                                               deepCopy = True))
+    the_tool = CompFactory.MuonG4R4.TgcSensitiveDetectorTool(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+
 def SetupSensitiveDetectorsCfg(flags):
     result = ComponentAccumulator()
     tools = []
@@ -38,6 +51,9 @@ def SetupSensitiveDetectorsCfg(flags):
     if flags.Detector.EnableRPC:
         tools += [result.popToolsAndMerge(RpcSensitiveDetectorToolCfg(flags))]
 
+    if flags.Detector.EnableTGC:
+        tools += [result.popToolsAndMerge(TgcSensitiveDetectorToolCfg(flags))]
+
     result.setPrivateTools(tools)
     return result
 
@@ -47,4 +63,6 @@ def SimHitContainerListCfg(flags):
         simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMdtSimHits")]
     if flags.Detector.EnableRPC:
         simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawRpcSimHits")]
+    if flags.Detector.EnableTGC:
+        simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawTgcSimHits")]
     return simHitContainers

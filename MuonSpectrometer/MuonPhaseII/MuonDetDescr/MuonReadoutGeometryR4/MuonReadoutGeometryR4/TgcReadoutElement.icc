@@ -11,7 +11,7 @@ inline double TgcReadoutElement::moduleWidthL() const { return 2.*m_pars.halfWid
 inline double TgcReadoutElement::moduleHeight() const { return 2.*m_pars.halfHeight; }
 inline double TgcReadoutElement::moduleThickness() const { return 2.*m_pars.halfThickness; }
 inline double TgcReadoutElement::thickness() const { return moduleThickness(); }
-
+inline double TgcReadoutElement::gasGapThickness() const {return m_gasThickness; }
 
 inline IdentifierHash TgcReadoutElement::constructHash(unsigned int measCh,
                                                        unsigned int gasGap,
