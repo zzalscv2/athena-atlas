@@ -1519,12 +1519,14 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_MSG_WARNING("  *** HACK *** Treating LCTopoJets jets as EMTopo -- use at your own risk!");
       jetcollBTag = "AntiKt4EMTopoJets";
     }
-    //See --> https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagRecommendationsRelease22
-    
-    if(m_bTaggingCalibrationFilePath.find(!m_isRun3 ? "MC20" : "MC21") == std::string::npos) {
-      ATH_MSG_ERROR( "You are using a "<<(!m_isRun3 ? "Run3":"Run2")<<" CDI file while running on "<<(!m_isRun3 ? "Run2":"Run3")<<" sample; Please updates your CDI file to the correct version for "<<(!m_isRun3 ? "Run2":"Run3"));
-      return StatusCode::FAILURE;
+
+    // print a warning if there is indication that the user supplied a CDI file not matching to the sample being processed
+    // for the GN2v00 tagger the Run 2 and Run 3 files are the same, so we skip this check
+    // see --> https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagRel22HighLevelSummary
+    if( (m_bTaggingCalibrationFilePath.find(!m_isRun3 ? "MC20" : "MC21") == std::string::npos) && (m_BtagTagger.find("GN2v00") != std::string::npos) ) {
+      ATH_MSG_WARNING( "You are using a "<<(!m_isRun3 ? "Run3":"Run2")<<" CDI file while running on "<<(!m_isRun3 ? "Run2":"Run3")<<" sample; Please updates your CDI file to the correct version for "<<(!m_isRun3 ? "Run2":"Run3"));
     }
+
     if (m_useBtagging && !m_btagSelTool.isUserConfigured() && !m_BtagWP.empty()) {
       if (jetcollBTag.find("AntiKt4EMTopoJets") == std::string::npos && jetcollBTag.find("AntiKt4EMPFlowJets")==std::string::npos) {
         ATH_MSG_WARNING("** Only AntiKt4EMTopoJets and AntiKt4EMPFlowJets are supported with FTAG scale factors!");
