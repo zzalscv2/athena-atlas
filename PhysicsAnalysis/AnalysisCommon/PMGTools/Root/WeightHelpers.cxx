@@ -44,6 +44,7 @@ std::string weightNameCleanup(const std::string &name)
   {
     {" set = ", "_"}, // Powheg
     {" = ", "_"}, // Powheg
+    {"+", ""},
     {"=", ""},
     {",", ""},
     {".", ""},
