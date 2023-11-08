@@ -33,7 +33,7 @@ LArWFParams2Ntuple::LArWFParams2Ntuple(const std::string& name, ISvcLocator* pSv
 }
 
 LArWFParams2Ntuple::~LArWFParams2Ntuple() 
-{}
+= default;
 
 
 StatusCode LArWFParams2Ntuple::initialize() {
@@ -46,11 +46,11 @@ StatusCode LArWFParams2Ntuple::initialize() {
 StatusCode LArWFParams2Ntuple::stop() {
 
   //Retrieve objects from DetStore
-  const LArCaliPulseParamsComplete* completeCaliPulseParams=0 ;
-  const LArDetCellParamsComplete*   completeDetCellParams=0 ;
-  const LArPhysCaliTdiffComplete*   completePhysCaliTdiff=0 ;
-  const LArTdriftComplete*          completeTdrift=0;
-  const LArOFCBinComplete*          completeOFCBin=0;
+  const LArCaliPulseParamsComplete* completeCaliPulseParams=nullptr ;
+  const LArDetCellParamsComplete*   completeDetCellParams=nullptr ;
+  const LArPhysCaliTdiffComplete*   completePhysCaliTdiff=nullptr ;
+  const LArTdriftComplete*          completeTdrift=nullptr;
+  const LArOFCBinComplete*          completeOFCBin=nullptr;
 
 
   if ( m_dumpCaliPulseParams ) { //try retrieving from det store

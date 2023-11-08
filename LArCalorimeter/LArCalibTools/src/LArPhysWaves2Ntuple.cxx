@@ -16,7 +16,7 @@ LArPhysWaves2Ntuple::LArPhysWaves2Ntuple(const std::string& name, ISvcLocator* p
 }
 
 LArPhysWaves2Ntuple::~LArPhysWaves2Ntuple()
-{}
+= default;
 
 
 StatusCode LArPhysWaves2Ntuple::initialize() {

@@ -30,7 +30,7 @@ LArPhysWaveTool::LArPhysWaveTool ( const std::string& type,
   declareProperty("SubtractBaseline", m_subtractBaseline=true);
 }
 
-LArPhysWaveTool::~LArPhysWaveTool() {}
+LArPhysWaveTool::~LArPhysWaveTool() = default;
 
 
 
@@ -121,7 +121,7 @@ LArWave LArPhysWaveTool::exp2Tri (const LArWave &w,const unsigned N, const doubl
 }
 
 
-LArWave LArPhysWaveTool::caliPhysCorr(const unsigned N, const double dt, const LArWFParams& params) const {
+LArWave LArPhysWaveTool::caliPhysCorr(const unsigned N, const double dt, const LArWFParams& params) {
   LArWave w(N,dt);
   for ( unsigned i=0 ; i<N ; i++ ) 
     w.setSample(i,caliPhysCorr(i*dt,params)) ;
@@ -131,7 +131,7 @@ LArWave LArPhysWaveTool::caliPhysCorr(const unsigned N, const double dt, const L
 /* =====================================================================
  * Function: Calibration to Ionisation correction function
  * ===================================================================== */
-double LArPhysWaveTool::caliPhysCorr ( double t, const LArWFParams& params) const {
+double LArPhysWaveTool::caliPhysCorr ( double t, const LArWFParams& params) {
   const double fstep = params.fstep() ;
   const double Tc    = params.tcal() ;
   const double Td    = params.tdrift() ;
@@ -184,30 +184,30 @@ LArWave LArPhysWaveTool::step2Tri (const LArWave& w, unsigned N, double dt, cons
 /* =================================================================
  * Function: Step response to Ionisation correction function
  * =============================================================== */
-double LArPhysWaveTool::stepPhysCorr ( double t, const double Td) const {
+double LArPhysWaveTool::stepPhysCorr ( double t, const double Td) {
   if ( t<0. || t>=Td ) return 0. ;
   else return -1./Td ;
 }
-LArWave LArPhysWaveTool::stepPhysCorr(unsigned N, double dt, const double Td) const {
+LArWave LArPhysWaveTool::stepPhysCorr(unsigned N, double dt, const double Td) {
   LArWave w(N,dt) ;
   for ( unsigned i=0 ; i<N ; i++ ) w.setSample(i,stepPhysCorr(i*dt,Td)) ;
   return w ;
 }
 
 
-LArWave LArPhysWaveTool::stepCorr(unsigned N, double dt, const LArWFParams& params) const {
+LArWave LArPhysWaveTool::stepCorr(unsigned N, double dt, const LArWFParams& params) {
   LArWave w(N,dt) ;
   for ( unsigned i=0 ; i<N ; i++ ) w.setSample(i,stepCorr(i*dt,params)) ;
   return w ;
 }
-double LArPhysWaveTool::stepCorr (double t, const LArWFParams& params) const {
+double LArPhysWaveTool::stepCorr (double t, const LArWFParams& params) {
   const double fstep = params.fstep();
   const double Tc    = params.tcal();
   return (1.-fstep)/Tc * exp( -fstep*t/Tc );
 }
 
 
-LArWave LArPhysWaveTool::injCorr(unsigned N, double dt, const LArWFParams& params) const {
+LArWave LArPhysWaveTool::injCorr(unsigned N, double dt, const LArWFParams& params) {
   LArWave w(N,dt) ;
   for ( unsigned i=0 ; i<N ; i++ ) w.setSample(i,injCorr(i*dt,params)) ;
   return w ;
@@ -215,7 +215,7 @@ LArWave LArPhysWaveTool::injCorr(unsigned N, double dt, const LArWFParams& param
 /* =================================================================
  * Function: injection point correction function
  * =============================================================== */
-double LArPhysWaveTool::injCorr ( double t, const LArWFParams& params) const {
+double LArPhysWaveTool::injCorr ( double t, const LArWFParams& params) {
   const double tau0 = 1./params.omega0();
   const double taur = params.taur();
   const double Delta = std::pow(taur,2) - std::pow(2*tau0,2) ;

@@ -15,21 +15,21 @@
 #include <vector>
 #include <map>
 
-typedef std::map<int, LArCaliWave> WaveMap;
+using WaveMap = std::map<int, LArCaliWave>;
   
 LArCaliWaveAverage::LArCaliWaveAverage(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator),
-  m_onlineHelper(0),
-  m_emId(0),
-  m_hecId(0),
-  m_fcalId(0)
+  m_onlineHelper(nullptr),
+  m_emId(nullptr),
+  m_hecId(nullptr),
+  m_fcalId(nullptr)
 {  
   m_chids.clear();
   declareProperty("ChannelIDs",     m_chids);
   declareProperty("GroupingType",   m_groupingType  = "ExtendedFeedThrough"); // SubDetector, Single, FeedThrough, ExtendedFeedThrough
 }
 
-LArCaliWaveAverage::~LArCaliWaveAverage() {}
+LArCaliWaveAverage::~LArCaliWaveAverage() = default;
 
 StatusCode LArCaliWaveAverage::initialize() {
   const CaloCell_ID* idHelper = nullptr;
@@ -57,7 +57,7 @@ StatusCode LArCaliWaveAverage::initialize() {
   ATH_CHECK(m_keyOutputCorr.initialize());
   ATH_CHECK(m_keyOutputSymm.initialize());
 
-  if ( m_chids.size() > 0 ) {
+  if ( !m_chids.empty() ) {
     ATH_MSG_INFO ( m_chids.size() << " channels selected for averaging." );
   } else {
     ATH_MSG_ERROR ( "No channels selected for averaging!" );
@@ -110,7 +110,7 @@ StatusCode LArCaliWaveAverage::stop() {
 
     std::vector<HWIdentifier> theSymmetricChannels = SymmetricChannels(chid,m_chids,cabling);
     
-    if ( theSymmetricChannels.size() == 0) {
+    if ( theSymmetricChannels.empty()) {
       ATH_MSG_WARNING ( "No symmetric channels found for channel 0x" << MSG::hex << chid << MSG::dec << ". Cannot average." );
       continue;
     } 
@@ -123,7 +123,7 @@ StatusCode LArCaliWaveAverage::stop() {
     
       // get Wave vector for current ChID/Gain, assuming it exists
       const LArCaliWaveContainer::LArCaliWaves& theCaliWaves = theLArCaliWaveContainer->get(chid,gain);
-      if ( theCaliWaves.size()==0 ){
+      if ( theCaliWaves.empty() ){
         ATH_MSG_WARNING ( "No pulses found for channel 0x" << MSG::hex << chid << MSG::dec 
                           << " in gain " << gain 
                           << ". Are you sure that readout is working? For the time being I'm skipping..." );
@@ -157,7 +157,7 @@ StatusCode LArCaliWaveAverage::stop() {
 	   	   
 	}
 	
-	if ( theSymmetricWavesThisDAC.size()>0 ) {
+	if ( !theSymmetricWavesThisDAC.empty() ) {
 	  
 	  ATH_MSG_INFO ( theSymmetricWavesThisDAC.size() 
                          << " symmetric LArCaliWaves found for channel 0x" << MSG::hex << chid << MSG::dec 
@@ -203,7 +203,7 @@ StatusCode LArCaliWaveAverage::stop() {
   const EventIDBase stop{EventIDBase::UNDEFNUM, EventIDBase::UNDEFEVT, EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
   EventIDRange rangeW{start, stop};
   SG::WriteCondHandle<LArCaliWaveContainer> corrHdl(m_keyOutputCorr);
-  const EventIDRange crangeW(rangeW);
+  const EventIDRange& crangeW(rangeW);
   if(corrHdl.record(crangeW,larCaliWaveContainerCorr.release()).isFailure()) {
     ATH_MSG_ERROR("Could not record LArCaliWaveContainer  object with " << m_keyOutputCorr.key()
                   << " with EventRange " << crangeW << " into Conditions Store");
@@ -330,7 +330,7 @@ std::vector<HWIdentifier> LArCaliWaveAverage::SymmetricChannels(HWIdentifier ChI
 
 LArCaliWave LArCaliWaveAverage::WaveAverage(std::vector<LArCaliWave> ToBeAveraged) 
 {   
-  if ( ToBeAveraged.size()>0 ) { 
+  if ( !ToBeAveraged.empty() ) { 
     
     ATH_MSG_VERBOSE ( "... Averaging wave number 1" );
     LArWave theWaveAverage = (LArWave)ToBeAveraged[0];

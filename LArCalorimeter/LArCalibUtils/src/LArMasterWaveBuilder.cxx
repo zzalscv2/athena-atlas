@@ -9,12 +9,12 @@
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloIdentifier/CaloGain.h"
 
-#include <stdio.h>
-#include <iostream>
+#include <cstdio>
 #include <fstream>
+#include <iostream>
 
-typedef LArCaliWaveContainer::ConstConditionsMapIterator   CaliCellIt;
-typedef LArCaliWaveContainer::LArCaliWaves::const_iterator CaliWaveIt;
+using CaliCellIt = LArCaliWaveContainer::ConstConditionsMapIterator;
+using CaliWaveIt = LArCaliWaveContainer::LArCaliWaves::const_iterator;
 
 inline std::string ChanDacGain(HWIdentifier ch,int DAC,int gain) {
   char compact[25] ;
@@ -25,7 +25,7 @@ inline std::string ChanDacGain(HWIdentifier ch,int DAC,int gain) {
 
 LArMasterWaveBuilder::LArMasterWaveBuilder (const std::string& name, ISvcLocator* pSvcLocator) : 
   AthAlgorithm(name, pSvcLocator),
-  m_waveHelper(0),
+  m_waveHelper(nullptr),
   m_groupingType("FeedThrough") // SubDetector, Single, FeedThrough
 {
   declareProperty("KeyInput",          m_keyinput  = "LArCaliWave" );
@@ -58,7 +58,7 @@ LArMasterWaveBuilder::LArMasterWaveBuilder (const std::string& name, ISvcLocator
 }
 
 LArMasterWaveBuilder::~LArMasterWaveBuilder() 
-{}
+= default;
 
 StatusCode LArMasterWaveBuilder::initialize() {
   // Check DACMin jobOption consistency, in case setup default values
@@ -194,7 +194,7 @@ StatusCode LArMasterWaveBuilder::stop()
   const LArCaliWaveContainer* caliWaveContainer = nullptr;
   ATH_CHECK( detStore()->retrieve(caliWaveContainer,m_keyinput) );
   
-  if ( caliWaveContainer == NULL ) {
+  if ( caliWaveContainer == nullptr ) {
     ATH_MSG_DEBUG ( "LArCaliWaveContainer (" << m_keyinput << ") is empty" );
     return StatusCode::FAILURE;
   }
@@ -402,7 +402,7 @@ StatusCode LArMasterWaveBuilder::stop()
       std::vector<LArWave> fitWave ;
       if ( nGoodDACs >= 2 ) {
 	  fitWave = m_waveHelper->linearMasterWave(vWaves,vDACs) ;
-	  if ( fitWave.size()==0 ) {
+	  if ( fitWave.empty() ) {
 	    ATH_MSG_ERROR ( "Master waveform linear fit failed! Channel 0x" 
                             << MSG::hex << chID.get_compact() << MSG::dec << ", gain = " << gain_it );
 	    continue ;  // skip rest and go to next wave
@@ -472,7 +472,7 @@ StatusCode LArMasterWaveBuilder::stop()
       const HWIdentifier chId = p.first ;    
       const std::vector<int> & DACs = p.second ;
 
-      if ( m_listAllAnalysedChannels || DACs.size()>0 ) {
+      if ( m_listAllAnalysedChannels || !DACs.empty() ) {
         try {
           Identifier id = cabling->cnvToIdentifier(chId);
           int region  = emId->region(id);
@@ -482,7 +482,7 @@ StatusCode LArMasterWaveBuilder::stop()
           const std::vector<HWIdentifier>& calibLineV=clCont->calibSlotLine(chId);
           std::vector<HWIdentifier>::const_iterator calibLineIt=calibLineV.begin();
           int calibLine = 0;
-          if ( calibLineV.size()>0 ) 
+          if ( !calibLineV.empty() ) 
 	      calibLine = onlineHelper->channel(*calibLineIt);
           int channel = onlineHelper->channel(chId) ;
           int slot    = onlineHelper->slot(chId) ;

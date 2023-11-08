@@ -24,7 +24,7 @@ StatusCode LArAutoCorr2Ntuple::initialize() {
 }
 
 LArAutoCorr2Ntuple::~LArAutoCorr2Ntuple() 
-{}
+= default;
 
 StatusCode LArAutoCorr2Ntuple::stop() {
   

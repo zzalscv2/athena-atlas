@@ -43,7 +43,7 @@ StatusCode LArCaliWaves2Ntuple::initialize() {
 }
 
 LArCaliWaves2Ntuple::~LArCaliWaves2Ntuple()
-{}
+= default;
 
 StatusCode LArCaliWaves2Ntuple::stop ATLAS_NOT_THREAD_SAFE ()
 { 
@@ -122,7 +122,7 @@ StatusCode LArCaliWaves2Ntuple::stop ATLAS_NOT_THREAD_SAFE ()
   }
 
   
-  const LArCalibLineMapping *clCont=0;
+  const LArCalibLineMapping *clCont=nullptr;
   if(m_isSC) {
     ATH_MSG_DEBUG( "LArCaliWaves2Ntuple: using SC calib map" );
     SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapSCKey};
@@ -170,7 +170,7 @@ StatusCode LArCaliWaves2Ntuple::stop ATLAS_NOT_THREAD_SAFE ()
       for (const HWIdentifier chid: m_onlineId->channel_range()) {
 	m_gain=(long)igain;
 	const LArCaliWaveVec& cwv = caliWaveContainer->get(chid,igain);
-	if (cwv.size()==0) continue;
+	if (cwv.empty()) continue;
 	
 	LArCaliWaveVec::const_iterator cwv_it=cwv.begin();
 	LArCaliWaveVec::const_iterator cwv_it_e=cwv.end();
@@ -252,7 +252,7 @@ bool LArCaliWaves2Ntuple::writeEntry(const HWIdentifier chid, const unsigned gai
   /// HEC calibration lines
   if ( !m_isSC && m_addCalib) {
     const std::vector<HWIdentifier>& calibLineV = clCont->calibSlotLine(chid);
-    if ( calibLineV.size()>0 ) {
+    if ( !calibLineV.empty() ) {
       ATH_MSG_DEBUG( "wave.getIsPulsedInt() " << wave.getIsPulsedInt()<<" : "<< calibLineV.size());
       for(int i=0;i<4;i++) {
 	m_pulsedCalibLines[i] = NOT_VALID;

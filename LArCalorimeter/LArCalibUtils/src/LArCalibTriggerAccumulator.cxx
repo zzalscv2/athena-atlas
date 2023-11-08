@@ -18,7 +18,7 @@ LArCalibTriggerAccumulator::ERRTYPE LArCalibTriggerAccumulator::add(const std::v
   const size_t nS=digits.size();
   if (nS==0) return WrongNSamples;
   
-  if (m_sampleSum.size()==0 && m_sample2Sum.size()==0) {
+  if (m_sampleSum.empty() && m_sample2Sum.empty()) {
     m_sampleSum.resize(nS);
     m_sample2Sum.resize(nS);
   }

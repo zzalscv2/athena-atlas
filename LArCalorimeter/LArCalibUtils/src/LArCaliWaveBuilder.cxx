@@ -25,7 +25,7 @@ using CLHEP::ns;
 LArCaliWaveBuilder::LArCaliWaveBuilder(const std::string& name, ISvcLocator* pSvcLocator) 
  : AthAlgorithm(name, pSvcLocator),
    m_groupingType("ExtendedFeedThrough"), // SubDetector, Single, FeedThrough
-   m_onlineID(0),
+   m_onlineID(nullptr),
    m_event_counter(0)
 {
  declareProperty("UseAccumulatedDigits",   m_useAccumulatedDigits=true);
@@ -52,14 +52,14 @@ LArCaliWaveBuilder::LArCaliWaveBuilder(const std::string& name, ISvcLocator* pSv
 }
 
 LArCaliWaveBuilder::~LArCaliWaveBuilder() 
-{}
+= default;
 
 StatusCode LArCaliWaveBuilder::initialize()
 { 
-  if (!m_keylistproperty.size()) {
-     m_keylistproperty.push_back("HIGH");
-     m_keylistproperty.push_back("MEDIUM");
-     m_keylistproperty.push_back("LOW");
+  if (m_keylistproperty.empty()) {
+     m_keylistproperty.emplace_back("HIGH");
+     m_keylistproperty.emplace_back("MEDIUM");
+     m_keylistproperty.emplace_back("LOW");
   }
   m_keylist = m_keylistproperty;
 
@@ -147,7 +147,7 @@ StatusCode LArCaliWaveBuilder::execute()
  if ( m_event_counter < 1000 || m_event_counter%100==0 ) 
     ATH_MSG_INFO( "Processing event " << m_event_counter );
  
- if (m_keylist.size()==0) {
+ if (m_keylist.empty()) {
    ATH_MSG_ERROR( "Key list is empty! No containers to process!" );
    return StatusCode::FAILURE;
  } 
@@ -183,7 +183,7 @@ StatusCode LArCaliWaveBuilder::executeWithAccumulatedDigits(const LArCalibParams
    }
    foundkey+=1;
    
-   const LArFebErrorSummary* febErrSum=NULL;
+   const LArFebErrorSummary* febErrSum=nullptr;
    if (evtStore()->contains<LArFebErrorSummary>("LArFebErrorSummary")) {
      sc=evtStore()->retrieve(febErrSum);
      if (sc.isFailure()) {
@@ -266,7 +266,7 @@ StatusCode LArCaliWaveBuilder::executeWithAccumulatedDigits(const LArCalibParams
      int pulsed=0;
      if(m_useParams && calibParams && clcabling) { // get LArCalibParams from DetStore
         const std::vector<HWIdentifier>& calibLineLeg = clcabling->calibSlotLine((*it)->hardwareID());
-        if(calibLineLeg.size()==0) {
+        if(calibLineLeg.empty()) {
            ATH_MSG_WARNING("Why do not have calib lines for "<<(*it)->hardwareID()<<" ?");
            continue;
         }      
@@ -413,7 +413,7 @@ StatusCode LArCaliWaveBuilder::stop()
     }
     
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    const LArOnOffIdMapping* cabling(0);
+    const LArOnOffIdMapping* cabling(nullptr);
     if( m_isSC ){
       SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKeySC, ctx};
       cabling = {*cablingHdl};
@@ -469,7 +469,7 @@ StatusCode LArCaliWaveBuilder::stop()
             }
 	      
 	    const WaveMap& waveMap = (*cell_it);
-	    if (waveMap.size()==0) {
+	    if (waveMap.empty()) {
 	      ATH_MSG_INFO( "Empty accumulated wave. Last id: " << MSG::hex 
 		//<< lastId << " " << emId->show_to_string(lastId) );
 		  << lastId << " this id: "<<hwId<<MSG::dec );

@@ -45,7 +45,7 @@ StatusCode LArOFCBin2Ntuple::stop() {
     return StatusCode::FAILURE;
  }
 
-  const LArOnOffIdMapping *cabling=0;
+  const LArOnOffIdMapping *cabling=nullptr;
   if(m_isSC) {
     ATH_MSG_DEBUG( "LArOFC2Ntuple: using SC cabling" );
     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingSCKey, ctx};

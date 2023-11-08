@@ -15,10 +15,9 @@ LArPhysCaliTDiffAlg::LArPhysCaliTDiffAlg(const std::string & name, ISvcLocator *
   declareProperty("OutputContainer",m_outputContainer="LArPhysCaliTdiff");
   declareProperty("FileName",m_fileName); 
   declareProperty("PerFebMGCorr",m_perFebMG=false); 
-  return;
 }
 
-LArPhysCaliTDiffAlg::~LArPhysCaliTDiffAlg() {}
+LArPhysCaliTDiffAlg::~LArPhysCaliTDiffAlg() = default;
 
 
 StatusCode LArPhysCaliTDiffAlg::initialize() {
@@ -41,7 +40,7 @@ StatusCode LArPhysCaliTDiffAlg::execute() {
   CHECK(m_nt->addItem("correction",ntcorr,0,200));
 
 
-  const LArOnlineID* onlineID=0;
+  const LArOnlineID* onlineID=nullptr;
   CHECK(detStore()->retrieve(onlineID));
 
   std::vector<std::map<HWIdentifier,float> > offsetMap;
@@ -70,7 +69,7 @@ StatusCode LArPhysCaliTDiffAlg::execute() {
 
   rein.close();
 
-  const LArPhysCaliTdiffComplete* oldCont=0;
+  const LArPhysCaliTdiffComplete* oldCont=nullptr;
   CHECK(detStore()->retrieve(oldCont,m_inputContainer));
   
   LArPhysCaliTdiffComplete* newCont=new LArPhysCaliTdiffComplete();

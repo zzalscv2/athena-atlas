@@ -18,7 +18,7 @@ LArPedestals2Ntuple::LArPedestals2Ntuple(const std::string& name, ISvcLocator* p
 }
 
 LArPedestals2Ntuple::~LArPedestals2Ntuple() 
-{}
+= default;
 
 StatusCode LArPedestals2Ntuple::initialize() {
   ATH_CHECK(m_pedKey.initialize());

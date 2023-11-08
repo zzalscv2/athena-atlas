@@ -10,7 +10,7 @@
 #include "LArIdentifier/LArOnline_SuperCellID.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 
-#include <math.h>
+#include <cmath>
 #ifndef __APPLE__
 #include <values.h>
 #else
@@ -103,8 +103,7 @@ LArWFParamTool::LArWFParamTool ( const std::string& type, const std::string& nam
 
 // destructor 
 LArWFParamTool::~LArWFParamTool()
-{
-}
+= default;
 
 //const InterfaceID& LArWFParamTool::interfaceID( )
 //{ return IID_ILArWFParamTool;  }
@@ -389,14 +388,14 @@ double LArWFParamTool::dFstep (const LArWave& gCali, const double fstep, const d
   return -b/a ;
 }
 
-LArWave LArWFParamTool::stepResp (const LArWave& gCali, const double fstep, const double Tc) const {
+LArWave LArWFParamTool::stepResp (const LArWave& gCali, const double fstep, const double Tc) {
   //return m_gCali + m_gCali % stepCorr() ;
   LArWave result = gCali % stepCorr(gCali, fstep, Tc);
   result+=gCali;
   return result;
 }
 
-LArWave LArWFParamTool::stepCorr(const LArWave& gCali, const double& fstep, const double& Tc) const {
+LArWave LArWFParamTool::stepCorr(const LArWave& gCali, const double& fstep, const double& Tc) {
   const unsigned N = gCali.getSize() ;
   const double dt = gCali.getDt() ;
 
@@ -412,11 +411,11 @@ LArWave LArWFParamTool::dstepRespDfstep (const LArWave& gCali, const double& fst
   return gCali % dstepCorrDfstep(gCali,fstep,Tc);
 }
 
-double LArWFParamTool::dstepCorrDfstep (const double t, const double& fstep, const double& Tc ) const {
+double LArWFParamTool::dstepCorrDfstep (const double t, const double& fstep, const double& Tc ) {
   return (-1./Tc)*(1.+((1.-fstep)/Tc)*t)*exp(-fstep*t/Tc);
 }
 
-LArWave LArWFParamTool::dstepCorrDfstep(const LArWave& gCali, const double& fstep, const double& Tcal ) const {
+LArWave LArWFParamTool::dstepCorrDfstep(const LArWave& gCali, const double& fstep, const double& Tcal ) {
   const unsigned N = gCali.getSize() ;
   const double dt = gCali.getDt() ;
   LArWave w(N,dt);
@@ -726,7 +725,7 @@ LArWave LArWFParamTool::cosRespShaper (const LArWave& gCali, const double& fstep
 /******************************************************************
  * Cosine response
  *****************************************************************/
-LArWave LArWFParamTool::cosResp (const LArWave& gCali, const double& fstep, const double& tcal, const double& omega) const {
+LArWave LArWFParamTool::cosResp (const LArWave& gCali, const double& fstep, const double& tcal, const double& omega) {
   
   LArWave result=gCali % cosCorr(gCali.getSize(),gCali.getDt(),fstep, tcal, omega);
   result+=gCali;
@@ -736,7 +735,7 @@ LArWave LArWFParamTool::cosResp (const LArWave& gCali, const double& fstep, cons
 /* =================================================================
  * Function: Cosine response correction function
  * ============================================================== */
-LArWave LArWFParamTool::cosCorr(const unsigned N, const double dt, const double fstep, const double Tc, const double omega) const {
+LArWave LArWFParamTool::cosCorr(const unsigned N, const double dt, const double fstep, const double Tc, const double omega) {
   LArWave w(N,dt);
   const double C1=(fstep*fstep-fstep*fstep*fstep)/Tc;
   const double C2=(fstep+omega*omega*Tc*Tc);
@@ -761,11 +760,11 @@ double LArWFParamTool::logChi2InjRespRes (const double taur, const LArWave& gCal
   return m_wHelper.getSumSquareRegion(injRespRes(gCali,wf.omega0(),taur), range.min, range.max);
 }
 
-LArWave LArWFParamTool::injRespRes (const LArWave& w, const double omega0, const double taur) const {
+LArWave LArWFParamTool::injRespRes (const LArWave& w, const double omega0, const double taur) {
   return w - ( w % injCorr(w.getSize(),w.getDt(),omega0,taur) );
 }
 
-LArWave LArWFParamTool::injCorr(const unsigned N, const double dt,const double omega0, const double taur) const {
+LArWave LArWFParamTool::injCorr(const unsigned N, const double dt,const double omega0, const double taur) {
 
   LArWave w(N,dt);
 

@@ -11,7 +11,7 @@
 #include "LArCOOLConditions/LArHVScaleCorrFlat.h"
 #include "StoreGate/ReadCondHandle.h"
 
-#include <math.h>
+#include <cmath>
 #include <unistd.h>
 
 
@@ -19,7 +19,7 @@
 
 //---------------------------------------------------------------------------
 LArHVCorrMaker::~LArHVCorrMaker()
-{}
+= default;
 
 //---------------------------------------------------------------------------
 StatusCode LArHVCorrMaker::initialize()

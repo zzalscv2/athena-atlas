@@ -19,7 +19,7 @@ LArShape2Ntuple::LArShape2Ntuple(const std::string& name, ISvcLocator* pSvcLocat
 }
 
 LArShape2Ntuple::~LArShape2Ntuple() 
-{}
+= default;
 
 
 StatusCode LArShape2Ntuple::initialize() {
@@ -50,8 +50,8 @@ StatusCode LArShape2Ntuple::stop() {
   ATH_CHECK(m_nt->addItem("Shape",nSamples,Shape));
   ATH_CHECK(m_nt->addItem("ShapeDer",nSamples,ShapeDer));
   
-  const ILArShape* larShape = NULL ;
-  const LArShapeComplete* larShapeComplete = NULL ;
+  const ILArShape* larShape = nullptr ;
+  const LArShapeComplete* larShapeComplete = nullptr ;
 
   if (m_isComplete) {
     ATH_CHECK(detStore()->retrieve(larShapeComplete,m_contKey.key()));
@@ -67,7 +67,7 @@ StatusCode LArShape2Ntuple::stop() {
     }
   }
 
-  const LArOnOffIdMapping *cabling=0;
+  const LArOnOffIdMapping *cabling=nullptr;
   if(m_isSC) {
     ATH_MSG_DEBUG( "LArOFC2Ntuple: using SC cabling" );
     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingSCKey, ctx};

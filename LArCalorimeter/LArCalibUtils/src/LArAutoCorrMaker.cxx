@@ -32,7 +32,7 @@
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawConditions/LArAutoCorrComplete.h"
 
-#include <math.h>
+#include <cmath>
 #include <unistd.h>
 
 #include "xAODEventInfo/EventInfo.h"
@@ -55,21 +55,21 @@ LArAutoCorrMaker::LArAutoCorrMaker(const std::string& name, ISvcLocator* pSvcLoc
 
 
 LArAutoCorrMaker::~LArAutoCorrMaker()
-{}
+= default;
 
 StatusCode LArAutoCorrMaker::initialize() {
 
   ATH_MSG_INFO( ">>> Initialize" );
   
-  if (!m_keylistproperty.size()) // Not key list given
-    {m_keylistproperty.push_back("HIGH");
-    m_keylistproperty.push_back("MEDIUM");
-    m_keylistproperty.push_back("LOW");
-    m_keylistproperty.push_back("FREE"); // For H6...
+  if (m_keylistproperty.empty()) // Not key list given
+    {m_keylistproperty.emplace_back("HIGH");
+    m_keylistproperty.emplace_back("MEDIUM");
+    m_keylistproperty.emplace_back("LOW");
+    m_keylistproperty.emplace_back("FREE"); // For H6...
     }
 
   m_keylist=m_keylistproperty;
-  if (m_keylist.size()==0) {
+  if (m_keylist.empty()) {
     ATH_MSG_ERROR( "Key list is empty!" );
     return StatusCode::FAILURE;
   }
@@ -125,7 +125,7 @@ StatusCode LArAutoCorrMaker::execute()
       ATH_MSG_DEBUG("Cannot read LArDigitContainer from StoreGate! key=" << key);
       continue;
     }
-    if(larDigitContainer->size()==0) {
+    if(larDigitContainer->empty()) {
       ATH_MSG_DEBUG("Got empty LArDigitContainer (key=" << key << ").");
       continue;
     }
@@ -183,7 +183,7 @@ StatusCode LArAutoCorrMaker::stop()
   StatusCode sc;
   ATH_MSG_INFO( ">>> Stop()" );
 
-  if (m_keylist.size()==0) {
+  if (m_keylist.empty()) {
     ATH_MSG_ERROR( "Key list is empty! No containers processed!" );
     return StatusCode::FAILURE;
   }

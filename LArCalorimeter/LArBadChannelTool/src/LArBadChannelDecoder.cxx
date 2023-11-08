@@ -34,7 +34,7 @@ LArBadChannelDecoder::readASCII( const std::string& fname,
     if (hwid.is_valid()) {
       std::pair<bool,LArBadChannel> badCh = constructStatus( i->second, log);
       if (badCh.first) {
-	result.push_back( BadChanEntry( hwid, badCh.second));
+	result.emplace_back( hwid, badCh.second);
       }
     }
   }
@@ -65,7 +65,7 @@ LArBadChannelDecoder::readFebASCII( const std::string& fname,
       std::pair<bool,LArBadFeb> badFeb = constructFebStatus( i->second, log);
       if (badFeb.first) {
 	for (std::vector<HWIdentifier>::const_iterator i=hwid.begin(); i!=hwid.end(); ++i) {
-	  result.push_back( BadFebEntry( *i, badFeb.second));
+	  result.emplace_back( *i, badFeb.second);
 	}
       }
     }
@@ -188,7 +188,7 @@ LArBadChannelDecoder::constructFebStatus( const std::vector<std::string>& vec,
 }
 
 
-MsgStream& LArBadChannelDecoder::insertExpandedID( const std::vector<int>& intVec, MsgStream& log) const 
+MsgStream& LArBadChannelDecoder::insertExpandedID( const std::vector<int>& intVec, MsgStream& log) 
 {
   log << " b/e " << intVec[barrel_ec] 
       << " p/n " << intVec[pos_neg] 

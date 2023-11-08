@@ -31,7 +31,7 @@ class LArAverages2Ntuple : public LArCond2NtupleBase
   virtual StatusCode execute() override final;
 
  private:
-  const LArOnlineID_Base* m_onlineHelper;
+  const LArOnlineID_Base* m_onlineHelper = nullptr;
 
   SG::ReadHandleKey<LArAccumulatedCalibDigitContainer> m_contKey{this, "ContainerKey","","LArAccumulatedCalibDigit key"};
   Gaudi::Property< unsigned int >  m_Nsamples{this, "NSamples", 32,"Number of samples to store"};

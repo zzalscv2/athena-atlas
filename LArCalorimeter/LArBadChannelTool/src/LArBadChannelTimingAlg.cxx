@@ -26,7 +26,7 @@ using namespace std;
 LArBadChannelTimingAlg::LArBadChannelTimingAlg(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm( name, pSvcLocator),
   m_BCKey("LArBadChannel"),
-  m_cellID(0),
+  m_cellID(nullptr),
   m_reallyCheck(true)
 {
   declareProperty("BadChanKey", m_BCKey);
@@ -34,7 +34,7 @@ LArBadChannelTimingAlg::LArBadChannelTimingAlg(const std::string& name, ISvcLoca
 
 }
 
-LArBadChannelTimingAlg::~LArBadChannelTimingAlg() {}
+LArBadChannelTimingAlg::~LArBadChannelTimingAlg() = default;
 
 
 StatusCode LArBadChannelTimingAlg::initialize() {

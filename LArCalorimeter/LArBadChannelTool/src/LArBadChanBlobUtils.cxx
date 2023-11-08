@@ -89,7 +89,7 @@ namespace LArBadChanBlobUtils {
     for (std::size_t i=0; i< vecSize; i++) {
       const Channel* ch = static_cast<const Channel*>( adr);
       adr = static_cast<const void*>(ch+1);
-      result.push_back( HWIdentifier(Identifier32(*ch)));
+      result.emplace_back(Identifier32(*ch));
     }
     return result;
   }

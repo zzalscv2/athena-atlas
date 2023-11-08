@@ -24,7 +24,7 @@ LArDeltaRespTool::LArDeltaRespTool ( const std::string& type, const std::string&
 }
 
 // destructor 
-LArDeltaRespTool::~LArDeltaRespTool() {}
+LArDeltaRespTool::~LArDeltaRespTool() = default;
 
 LArCaliWave LArDeltaRespTool::makeLArDeltaResp( const LArWFParams &larWFParam, 
 					        const LArCaliWave &larCaliWave )

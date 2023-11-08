@@ -136,21 +136,21 @@ private:
   StatusCode GetFstep(const LArWave& gCali, LArWFParams& wfParams, const WaveTiming_t& wt) const;
   double fstepMin (const LArWave& gCali, double fstep, const double Tc, const unsigned Ttail) const;
   double dFstep (const LArWave& gCali, const double fstep, const double Tc, const unsigned Ttail) const ;
-  LArWave stepResp (const LArWave& gCali, const double fstep, const double Tc) const ;
-  LArWave stepCorr(const LArWave& gCali, const double& fstep, const double& Tc) const ;
+  static LArWave stepResp (const LArWave& gCali, const double fstep, const double Tc) ;
+  static LArWave stepCorr(const LArWave& gCali, const double& fstep, const double& Tc) ;
   LArWave dstepRespDfstep (const LArWave& gCali, const double& fstep, const double& Tc) const ;
-  double dstepCorrDfstep (const double t, const double& fstep, const double& Tc ) const ;
-  LArWave dstepCorrDfstep(const LArWave& gCali, const double& fstep, const double& Tcal ) const ;
+  static double dstepCorrDfstep (const double t, const double& fstep, const double& Tc ) ;
+  static LArWave dstepCorrDfstep(const LArWave& gCali, const double& fstep, const double& Tcal ) ;
   StatusCode RTM_Omega0(const LArWave& gCali, const HWIdentifier chid, LArWFParams& wfParams, const WaveTiming_t& wt, const LArOnOffIdMapping *cabling, std::optional<LArCaliWave>& omegaScan) const;
   StatusCode RTM_Taur(const LArWave& gCali, LArWFParams& wfParams, const WaveTiming_t& wt) const;
   double logChi2CosRespShaper (const double omega, const LArWave& gCali, const LArWFParams& wf, const waveRange_t& range) const;
   double logChi2InjRespRes (const double taur, const LArWave& gCali, const LArWFParams& wf, const waveRange_t& range ) const ;
   LArWave cosRespShaper (const LArWave& gCali, const double& fstep, const double& tcal, const double& w, const double& tsh ) const ;
-  LArWave cosResp (const LArWave& gCali, const double& fstep, const double& tcal, const double& omega) const ;
-  LArWave injRespRes (const LArWave& w, const double omega0, const double taur) const ;
-  LArWave injCorr(const unsigned N, const double dt,const double omega0, const double taur) const ;
+  static LArWave cosResp (const LArWave& gCali, const double& fstep, const double& tcal, const double& omega) ;
+  static LArWave injRespRes (const LArWave& w, const double omega0, const double taur) ;
+  static LArWave injCorr(const unsigned N, const double dt,const double omega0, const double taur) ;
   double omega0MinNum (double omegaMin, double omegaMax, const double tol,const LArWave& gCali, const LArWFParams& wf, const waveRange_t&) const;
-  LArWave cosCorr(const unsigned N, const double dt, const double fstep, const double tcal, const double omega) const ;
+  static LArWave cosCorr(const unsigned N, const double dt, const double fstep, const double tcal, const double omega) ;
   double taurMinNum (const double taurmin, const double taurmax, const double tol, const LArWave& gCali, const LArWFParams& wf,const waveRange_t&) const;
 
   double fminbr(double a, double b, const double tol, double (LArWFParamTool::*f)(double, const LArWave&, const LArWFParams&, const waveRange_t&) const, 

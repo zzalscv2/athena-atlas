@@ -71,7 +71,7 @@ LArAutoCorrFromStdNtuple::LArAutoCorrFromStdNtuple (const std::string& name, ISv
 }
 
 LArAutoCorrFromStdNtuple::~LArAutoCorrFromStdNtuple() 
-{}
+= default;
 
 StatusCode LArAutoCorrFromStdNtuple::initialize() 
 {

@@ -21,7 +21,7 @@
 
 LArAutoCorrAlgToDB::LArAutoCorrAlgToDB(const std::string& name, ISvcLocator* pSvcLocator) 
   : AthAlgorithm(name, pSvcLocator),
-    m_onlineHelper(0)
+    m_onlineHelper(nullptr)
 {
    declareProperty("GroupingType",    m_groupingType="ExtendedFeedThrough");
    declareProperty("OutAutoCorrKey",  m_acContName="LArPhysAutoCorr");
@@ -31,7 +31,7 @@ LArAutoCorrAlgToDB::LArAutoCorrAlgToDB(const std::string& name, ISvcLocator* pSv
 
 
 LArAutoCorrAlgToDB::~LArAutoCorrAlgToDB()
-{}
+= default;
 
 //----------------------------------------------------------------------------
 StatusCode LArAutoCorrAlgToDB::initialize()

@@ -21,7 +21,7 @@ LArBadFebMasker::LArBadFebMasker(const std::string& type,
 }
 
 LArBadFebMasker::~LArBadFebMasker()
-{}
+= default;
 
 StatusCode LArBadFebMasker::initialize() 
 {

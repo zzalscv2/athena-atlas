@@ -27,7 +27,7 @@ LArMphysOverMcalFromTuple::LArMphysOverMcalFromTuple (const std::string& name, I
 }
 
 LArMphysOverMcalFromTuple::~LArMphysOverMcalFromTuple() 
-{}
+= default;
 
 StatusCode LArMphysOverMcalFromTuple::initialize() 
 {
@@ -85,7 +85,7 @@ StatusCode LArMphysOverMcalFromTuple::stop()
   // store 
   ATH_CHECK( detStore()->record(container,m_store_key) );
   // Symlink LArMphysOverMcalComplete to ILArMphysOverMcal for further use
-  ILArMphysOverMcal *larMphysOverMcal = NULL;
+  ILArMphysOverMcal *larMphysOverMcal = nullptr;
   ATH_CHECK( detStore()->symLink(container,larMphysOverMcal) );
 
   ATH_MSG_INFO ( "LArMphysOverMcalyFromTuple finalized!" );

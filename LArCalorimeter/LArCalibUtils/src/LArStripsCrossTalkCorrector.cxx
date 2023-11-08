@@ -4,12 +4,12 @@
 
 #include "LArCalibUtils/LArStripsCrossTalkCorrector.h"
 
+#include "CaloIdentifier/CaloGain.h"
+#include "LArBadChannelTool/LArBadChannelDBTools.h"
 #include "LArRawEvent/LArAccumulatedCalibDigitContainer.h"
 #include "LArRawEvent/LArFebErrorSummary.h"
-#include "CaloIdentifier/CaloGain.h"
 #include "LArRecConditions/LArBadChannel.h"
-#include "LArBadChannelTool/LArBadChannelDBTools.h"
-#include <math.h>
+#include <cmath>
 
 
 StatusCode LArStripsCrossTalkCorrector::initialize() {
@@ -65,7 +65,7 @@ StatusCode LArStripsCrossTalkCorrector::execute()
   StatusCode sc;
   unsigned nSaturation=0;
 
-  const LArFebErrorSummary* febErrSum=NULL;
+  const LArFebErrorSummary* febErrSum=nullptr;
   if (evtStore()->contains<LArFebErrorSummary>("LArFebErrorSummary")) {
     sc=evtStore()->retrieve(febErrSum);
     if (sc.isFailure()) {
@@ -228,7 +228,7 @@ StatusCode LArStripsCrossTalkCorrector::execute()
 	  for (unsigned iphi=0; iphi<m_MAXphi; iphi++) {  // Loop over phi range
 	    const unsigned iphi2=iphi+m_MAXphi*iside;    //Phi index inside lookup table 
 	    const LArAccumulatedCalibDigit* currDig=m_stripsLookUp[bec][iphi2][ieta];
-	    if (currDig==0 || currDig==&febErrorDummy) continue; //Digit not found or FEB in error: ignore
+	    if (currDig==nullptr || currDig==&febErrorDummy) continue; //Digit not found or FEB in error: ignore
 	    
 	    if ( currDig->isPulsed() ) {
 	      HWIdentifier chid = currDig->hardwareID();
@@ -246,7 +246,7 @@ StatusCode LArStripsCrossTalkCorrector::execute()
 	      //Fill the pointers and pedestal in the 'neighbours' array
 	      for (unsigned i=0;i<4;i++) {
 		//Set all zero to start with...
-		neighbours[i].dig=NULL;
+		neighbours[i].dig=nullptr;
 		neighbours[i].ped=0.;
 		const int neigbEtaItx=neighbours[i].dist+(int)ieta;
 		//Check if we are supposed to have this neighbour
@@ -348,7 +348,7 @@ StatusCode LArStripsCrossTalkCorrector::execute()
 		  const int j = 3-i; //get mirrored neighbor
 		  ATH_MSG_INFO( "Neighbour " << neighbours[i].dist << " of strip " << m_onlineHelper->channel_name(chid) 
 				<< " cannot be used. Taking mirrored neighbour " << neighbours[j].dist << " instead." );
-		  if (neighbours[j].dig!=0 && neighbours[j].dig!=&inexistingDummy){
+		  if (neighbours[j].dig!=nullptr && neighbours[j].dig!=&inexistingDummy){
 		    correctSamples(SampleSums,neighbours[j]);
 		    ATH_MSG_VERBOSE("Mirrored neighbour " << neighbours[j].dist << " of strip " << m_onlineHelper->channel_name(chid) 
 				    << " (Eta = " << ieta << ", Phi = " << iphi << ") is used for correction");
@@ -378,7 +378,7 @@ StatusCode LArStripsCrossTalkCorrector::execute()
 		if (SampleIndex==iPeak) { //check value of correction at peak
 		  const float dev=(thisSampleSum-oldVal)/oldVal;
 		  m_differences.add(currDig,dev);
-		  if (fabs(dev)>m_acceptableDifference) {
+		  if (std::fabs(dev)>m_acceptableDifference) {
 		    unresonable=true;
 		    ATH_MSG_WARNING("Strip " << m_onlineHelper->channel_name(chid) << " (Eta = " << ieta << ", Phi = " << iphi
 				    << ") DAC=" << currDig->DAC() << ":  Resulting ADC sample " << SampleIndex <<" looks unreasonable: " 
@@ -419,7 +419,7 @@ StatusCode LArStripsCrossTalkCorrector::execute()
   
 
 StatusCode LArStripsCrossTalkCorrector::finalize() { 
-  if (msgLvl(MSG::WARNING) && m_uncorrectedIds.size()>0 ) {
+  if (msgLvl(MSG::WARNING) && !m_uncorrectedIds.empty() ) {
     const LArBadChanBitPacking packing;
     ATH_MSG_WARNING( "The following "<<  m_uncorrectedIds.size() << " channels are (partly) uncorrected because of unresonable high correction:" );
     SG::ReadCondHandle<LArBadChannelCont> bcHdl{m_BCKey};
@@ -520,13 +520,12 @@ XtalkCorrHisto::XtalkCorrHisto(const unsigned nBins, const float upperLimit) :
 
 void XtalkCorrHisto::add(const LArAccumulatedCalibDigit* dig, const float reldiff) {
 
-  unsigned iBin=(unsigned)(fabs(reldiff)/m_binwidth);
+  unsigned iBin=(unsigned)(std::fabs(reldiff)/m_binwidth);
   if (iBin>=m_nBins-1) {
     iBin=m_nBins-1;
-    m_maxlist.push_back(maxlistitem(dig->hardwareID(),dig->DAC(),dig->delay(),reldiff));
+    m_maxlist.emplace_back(dig->hardwareID(),dig->DAC(),dig->delay(),reldiff);
   }
   ++m_diffs[iBin];
-  return;
 }
 
 void XtalkCorrHisto::print(MsgStream& out, const LArOnlineID* onlId,  MSG::Level lvl) {
@@ -539,15 +538,14 @@ void XtalkCorrHisto::print(MsgStream& out, const LArOnlineID* onlId,  MSG::Level
 
   out << lvl << " " << (nBins-1)*m_binwidth << " - max" << ":" << m_diffs[nBins-1] << " channels" << endmsg;
 
-  if (m_maxlist.size()>0) {
+  if (!m_maxlist.empty()) {
     out << lvl << "Data points with the highes correction:" << endmsg;
     std::vector<maxlistitem>::const_iterator it=m_maxlist.begin();
     std::vector<maxlistitem>::const_iterator it_e=m_maxlist.end();
     for(;it!=it_e;++it) 
       out << lvl << " " << onlId->channel_name(it->chid) << " DAC=" << it->dac << " Delay=" << it->delay << " Deviation:" << it->reldiff << endmsg;
   }
-  return;
-}
+  }
 
 
 

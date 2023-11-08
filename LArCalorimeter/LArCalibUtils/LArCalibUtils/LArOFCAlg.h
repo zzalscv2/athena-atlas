@@ -100,14 +100,14 @@ private:
 
   std::vector<perChannelData_t> m_allChannelData;
 
-  void           optFilt(const std::vector<float> &gWave_in, const std::vector<float>  &gDerivWave_in, const Eigen::MatrixXd& autoCorrInv, //input variables
+  static void           optFilt(const std::vector<float> &gWave_in, const std::vector<float>  &gDerivWave_in, const Eigen::MatrixXd& autoCorrInv, //input variables
 			 std::vector<float>& OFCa, std::vector<float>& OFCb // Output variables;
-			 ) const; 
+			 ) ; 
 
-  void           optFiltDelta(const std::vector<float> &gWave_in, const std::vector<float>  &gDerivWave_in, const Eigen::MatrixXd& autoCorrInv, 
+  static void           optFiltDelta(const std::vector<float> &gWave_in, const std::vector<float>  &gDerivWave_in, const Eigen::MatrixXd& autoCorrInv, 
 			      const Eigen::VectorXd& delta, //input variables
 			      std::vector<float>& vecOFCa, std::vector<float>& vecOFCb // Output variables;
-			      ) const; 
+			      ) ; 
 
   void process(perChannelData_t&, const LArOnOffIdMapping* cabling) const;
 
@@ -115,7 +115,7 @@ private:
   bool verify(const HWIdentifier chid, const std::vector<float>& OFCa, const std::vector<float>& OFCb, 
 	      const std::vector<float>& Shape, const char* ofcversion, const unsigned phase) const;
 
-  void printOFCVec(const std::vector<float>& vec, MsgStream& mLog) const;
+  static void printOFCVec(const std::vector<float>& vec, MsgStream& mLog) ;
 
   
   StatusCode     initPhysWaveContainer(const LArOnOffIdMapping* cabling);

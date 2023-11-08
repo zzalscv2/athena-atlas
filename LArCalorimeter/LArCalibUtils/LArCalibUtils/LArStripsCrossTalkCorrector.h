@@ -120,7 +120,7 @@ class ATLAS_NOT_THREAD_SAFE LArStripsCrossTalkCorrector : public AthAlgorithm
 
   XtalkCorrHisto m_differences{6,0.3};
 
-  std::string printMaxSample(const LArAccumulatedCalibDigit* thisDig);
+  static std::string printMaxSample(const LArAccumulatedCalibDigit* thisDig);
   StatusCode initKnownMissingFebs();
 
   size_t getEtaIndex(const Identifier) const;

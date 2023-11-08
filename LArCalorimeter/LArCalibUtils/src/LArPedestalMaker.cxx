@@ -25,7 +25,7 @@
 
 #include "LArIdentifier/LArOnlineID.h"
 
-#include <math.h>
+#include <cmath>
 #include <unistd.h>
 #include <vector>
 
@@ -47,7 +47,7 @@ LArPedestalMaker::LArPedestalMaker(const std::string& name, ISvcLocator* pSvcLoc
 }
 
 LArPedestalMaker::~LArPedestalMaker()
-{}
+= default;
 
 StatusCode LArPedestalMaker::initialize()
 {
@@ -57,11 +57,11 @@ StatusCode LArPedestalMaker::initialize()
   m_rms.resize(1);  
   
  // m_fullFolderName="/lar/"+m_folderName+"/LArPedestal";
- if (!m_keylist.size()) // Not key list given
-   {m_keylist.push_back("HIGH");
-    m_keylist.push_back("MEDIUM");
-    m_keylist.push_back("LOW");
-    m_keylist.push_back("FREE"); //For H6....
+ if (m_keylist.empty()) // Not key list given
+   {m_keylist.emplace_back("HIGH");
+    m_keylist.emplace_back("MEDIUM");
+    m_keylist.emplace_back("LOW");
+    m_keylist.emplace_back("FREE"); //For H6....
    }
   //m_EventCounters.resize(CaloGain::LARNGAIN,0); //Initialize Event counters, one per container
  m_pedestal.setGroupingType(LArConditionsContainerBase::SingleGroup);
@@ -74,7 +74,7 @@ StatusCode LArPedestalMaker::initialize()
 StatusCode LArPedestalMaker::execute()
 //---------------------------------------------------------------------------
 {
-  if (m_keylist.size()==0) {
+  if (m_keylist.empty()) {
     ATH_MSG_ERROR ( "Key list is empty! No containers to process!" );
     return StatusCode::FAILURE;
   } 
@@ -86,7 +86,7 @@ StatusCode LArPedestalMaker::execute()
       ATH_MSG_DEBUG ( "Cannot read LArCalibDigitContainer from StoreGate! key=" << key );
       continue;
     }
-    if(larDigitContainer->size()==0) {
+    if(larDigitContainer->empty()) {
       ATH_MSG_DEBUG ( "Got empty LArDigitContainer (key=" << key << ")." );
       continue;
     }
@@ -136,7 +136,7 @@ StatusCode LArPedestalMaker::stop()
 {
   ATH_MSG_INFO ( ">>> Stop" );
 
-  if (m_keylist.size()==0) {
+  if (m_keylist.empty()) {
     ATH_MSG_ERROR ( "Key list is empty! No containers processed!" );
     return StatusCode::FAILURE;
   } 

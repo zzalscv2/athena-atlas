@@ -17,14 +17,14 @@ LArDeltaRespPredictor::LArDeltaRespPredictor (const std::string& name, ISvcLocat
 {
   // list of gains to be processed
   m_keylist.clear() ;
-  m_keylist.push_back("HIGH");
-  m_keylist.push_back("MEDIUM");
-  m_keylist.push_back("LOW");
+  m_keylist.emplace_back("HIGH");
+  m_keylist.emplace_back("MEDIUM");
+  m_keylist.emplace_back("LOW");
   declareProperty("KeyList",m_keylist);  
 }
 
 LArDeltaRespPredictor::~LArDeltaRespPredictor() 
-{}
+= default;
 
 StatusCode LArDeltaRespPredictor::initialize() 
 {
@@ -54,7 +54,7 @@ StatusCode LArDeltaRespPredictor::stop()
   }
 
   // Create new LArCaliWaveContainer for DeltaResp(s)
-  LArCaliWaveContainer* larDeltaRespContainer = 0;
+  LArCaliWaveContainer* larDeltaRespContainer = nullptr;
 
   // Only record if keylist is not empty
   if (m_keylist.empty())

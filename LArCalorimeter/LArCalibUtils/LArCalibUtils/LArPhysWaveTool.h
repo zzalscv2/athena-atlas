@@ -46,17 +46,17 @@ class LArPhysWaveTool : public AthAlgTool
   
   LArWave exp2Tri(const LArWave &,const unsigned N, const double dt, const LArWFParams& params) const ;
   LArWave physPred(LArCaliWave &);
-  double caliPhysCorr ( double t, const LArWFParams& params) const;
-  LArWave caliPhysCorr(const unsigned N, const double dt, const LArWFParams& params) const;
+  static double caliPhysCorr ( double t, const LArWFParams& params) ;
+  static LArWave caliPhysCorr(const unsigned N, const double dt, const LArWFParams& params) ;
   LArWave injResp (const LArWave& w,unsigned N, double dt, const LArWFParams& params) const;
   LArWave stepResp (const LArCaliWave& gCali, const LArWFParams& params) const;
   LArWave step2Tri (const LArWave& w, unsigned N, double dt, const LArWFParams& params) const;
-  double stepPhysCorr ( double t, const double dT) const;
-  LArWave stepPhysCorr(unsigned N, double dt, const double dT) const;
-  LArWave stepCorr(unsigned N, double dt, const LArWFParams& params) const;
-  double stepCorr ( double t, const LArWFParams& params) const;
-  LArWave injCorr(unsigned N, double dt, const LArWFParams& params) const;
-  double injCorr ( double t, const LArWFParams& params) const;
+  static double stepPhysCorr ( double t, const double dT) ;
+  static LArWave stepPhysCorr(unsigned N, double dt, const double dT) ;
+  static LArWave stepCorr(unsigned N, double dt, const LArWFParams& params) ;
+  static double stepCorr ( double t, const LArWFParams& params) ;
+  static LArWave injCorr(unsigned N, double dt, const LArWFParams& params) ;
+  static double injCorr ( double t, const LArWFParams& params) ;
   
 
 };

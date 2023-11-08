@@ -6,17 +6,17 @@
 
 //#include "GaudiKernel/MsgStream.h"
 
-#include "LArRawEvent/LArAccumulatedCalibDigitContainer.h"
-#include "CaloIdentifier/CaloGain.h"
 #include "CaloIdentifier/CaloCell_ID.h"
+#include "CaloIdentifier/CaloGain.h"
 #include "LArIdentifier/LArOnlineID.h"
+#include "LArRawEvent/LArAccumulatedCalibDigitContainer.h"
 #include "LArRecConditions/LArBadChannel.h"
-#include <math.h>
+#include <cmath>
 
 LArCalibShortCorrector::LArCalibShortCorrector(const std::string& name, ISvcLocator* pSvcLocator) : 
   AthAlgorithm(name, pSvcLocator),
-  m_onlineId(0),
-  m_caloCellId(0)
+  m_onlineId(nullptr),
+  m_caloCellId(nullptr)
 {
   declareProperty("KeyList", m_keylist,
 		  "List of input keys (normally the 'HIGH','MEDIUM','LOW')"); 
@@ -25,8 +25,7 @@ LArCalibShortCorrector::LArCalibShortCorrector(const std::string& name, ISvcLoca
   m_shortsCached=false;
 }
 
-LArCalibShortCorrector::~LArCalibShortCorrector()  {
-}
+LArCalibShortCorrector::~LArCalibShortCorrector()  = default;
 
 StatusCode LArCalibShortCorrector::initialize() {
   ATH_CHECK( m_BCKey.initialize() );
@@ -73,7 +72,7 @@ StatusCode LArCalibShortCorrector::findShortedNeighbors() {
        std::vector<IdentifierHash> neighbors;
        m_caloCellId->get_neighbours(id1_h,LArNeighbours::faces2D,neighbors);
        HWIdentifier chid2;
-       if (neighbors.size()==0) {
+       if (neighbors.empty()) {
 	 ATH_MSG_ERROR ( "No neighbors found for channel with id " << m_onlineId->channel_name(chid1) );
 	 return StatusCode::FAILURE;
        }
@@ -103,7 +102,7 @@ StatusCode LArCalibShortCorrector::findShortedNeighbors() {
 	 ATH_MSG_ERROR ( "No neighbor with 'short' bit set for channel with id: " << chid1.get_compact() );
 	 return StatusCode::FAILURE;
        }
-       m_shortedNeighbors.push_back(std::make_pair(chid1,chid2));
+       m_shortedNeighbors.emplace_back(chid1,chid2);
      }//end this channel has a short
    }//End loop over all identifiers
 

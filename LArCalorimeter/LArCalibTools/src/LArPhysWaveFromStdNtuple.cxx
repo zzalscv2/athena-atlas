@@ -31,7 +31,7 @@ LArPhysWaveFromStdNtuple::LArPhysWaveFromStdNtuple (const std::string& name, ISv
 }
 
 LArPhysWaveFromStdNtuple::~LArPhysWaveFromStdNtuple() 
-{}
+= default;
 
 StatusCode LArPhysWaveFromStdNtuple::initialize() 
 {

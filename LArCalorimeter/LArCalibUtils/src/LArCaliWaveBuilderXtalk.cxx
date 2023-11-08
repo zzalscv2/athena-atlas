@@ -25,7 +25,7 @@ using CLHEP::ns;
 LArCaliWaveBuilderXtalk::LArCaliWaveBuilderXtalk(const std::string& name, ISvcLocator* pSvcLocator) 
   : AthAlgorithm(name, pSvcLocator),
     m_groupingType("ExtendedFeedThrough"), // SubDetector, Single, FeedThrough
-    m_onlineHelper(NULL),
+    m_onlineHelper(nullptr),
     m_posOrNeg(0),
     m_barrelEndcap(0),
     m_isInnerWheel(0),
@@ -67,7 +67,7 @@ LArCaliWaveBuilderXtalk::LArCaliWaveBuilderXtalk(const std::string& name, ISvcLo
 //=========================================================================================================
 LArCaliWaveBuilderXtalk::~LArCaliWaveBuilderXtalk() 
 //=========================================================================================================
-{}
+= default;
 
 //=========================================================================================================
 StatusCode LArCaliWaveBuilderXtalk::initialize()
@@ -104,8 +104,8 @@ StatusCode LArCaliWaveBuilderXtalk::initialize()
 	  ATH_MSG_WARNING ( "Can't read EMEC special region (Inner/Outer Wheel) - set SpecialRegion to OuterWheel." );
       }
 
-      if (m_isInnerWheel == false){	// EMEC outer wheel special crates
-	if ( !(m_feedthroughNumber==2 || m_feedthroughNumber==9 || m_feedthroughNumber==15 || m_feedthroughNumber==21) ){
+      if (!m_isInnerWheel){	// EMEC outer wheel special crates
+	if ( m_feedthroughNumber!=2 && m_feedthroughNumber!=9 && m_feedthroughNumber!=15 && m_feedthroughNumber!=21 ){
 	  ATH_MSG_WARNING ( "FeedthroughPul=" << m_feedthroughNumber << ". For EMEC outer wheel special crates studies one should use FT = 2, 9, 15 or 21." );
 	  ATH_MSG_WARNING ( "Set FeedthroughPul to 2.");
 	  m_feedthroughNumber = 2;
@@ -113,7 +113,7 @@ StatusCode LArCaliWaveBuilderXtalk::initialize()
 	ATH_MSG_INFO ( "Look at EM end-cap outer wheel special crates. Check calibration patterns with FT number " << m_feedthroughNumber );
       }
       else {				// EMEC inner wheel (special crates)
-	if ( !(m_feedthroughNumber==3 || m_feedthroughNumber==10 || m_feedthroughNumber==16 || m_feedthroughNumber==22) ){
+	if ( m_feedthroughNumber!=3 && m_feedthroughNumber!=10 && m_feedthroughNumber!=16 && m_feedthroughNumber!=22 ){
 	  ATH_MSG_WARNING ( "FeedthroughPul=" << m_feedthroughNumber << ". For EMEC inner wheel studies one should use FT = 3, 10, 16 or 22." );
 	  ATH_MSG_WARNING ( "Set FeedthroughPul to 3.");
 	  m_feedthroughNumber = 3;
@@ -141,11 +141,11 @@ StatusCode LArCaliWaveBuilderXtalk::initialize()
   }
   
 
-  if (!m_keylistproperty.size()) // Not key list given
+  if (m_keylistproperty.empty()) // Not key list given
     {
-      m_keylistproperty.push_back("HIGH");
-      m_keylistproperty.push_back("MEDIUM");
-      m_keylistproperty.push_back("LOW");
+      m_keylistproperty.emplace_back("HIGH");
+      m_keylistproperty.emplace_back("MEDIUM");
+      m_keylistproperty.emplace_back("LOW");
     }
   m_keylist= m_keylistproperty;
 
@@ -202,7 +202,7 @@ StatusCode LArCaliWaveBuilderXtalk::initializeCabling(const LArOnOffIdMapping* c
       
       ATH_MSG_INFO ( "Considered Online Channel " << m_onlineHelper->show_to_string(theConsidChannel) );
       ATH_MSG_DEBUG ( "Number of associated calib line " << calibLine.size() );
-      if (calibLine.size() != 0) {
+      if (!calibLine.empty()) {
 	m_CalibLineHW.push_back(calibLine[0]);
 	ATH_MSG_INFO ( "Calib line" << m_onlineHelper->show_to_string(calibLine[0]) );
       }
@@ -223,7 +223,7 @@ StatusCode LArCaliWaveBuilderXtalk::initializeCabling(const LArOnOffIdMapping* c
       
       const std::vector<HWIdentifier>& calibLine = clCont->calibSlotLine(theConsidChannel);
       ATH_MSG_INFO ( "Considered Channel " << m_onlineHelper->show_to_string(theConsidChannel) );
-      if (calibLine.size() != 0) {
+      if (!calibLine.empty()) {
 	m_CalibLineHW.push_back(calibLine[0]);
 	ATH_MSG_INFO ( "Calib Line " << m_onlineHelper->show_to_string(calibLine[0]) );
       }
@@ -240,7 +240,7 @@ StatusCode LArCaliWaveBuilderXtalk::initializeCabling(const LArOnOffIdMapping* c
       
       const std::vector<HWIdentifier>& calibLine = clCont->calibSlotLine(theConsidChannel);
       ATH_MSG_INFO ( "Considered Channel " << m_onlineHelper->show_to_string(theConsidChannel) );
-      if (calibLine.size() != 0) {
+      if (!calibLine.empty()) {
 	m_CalibLineHW.push_back(calibLine[0]);
 	ATH_MSG_INFO ( "Calib Line " << m_onlineHelper->show_to_string(calibLine[0]) );
       }
@@ -273,7 +273,7 @@ StatusCode LArCaliWaveBuilderXtalk::initializeCabling(const LArOnOffIdMapping* c
       
       ATH_MSG_INFO ( "Considered Online Channel " << m_onlineHelper->show_to_string(theConsidChannel) );
       ATH_MSG_DEBUG ( "Number of associated calib line " << calibLine.size() );
-      if (calibLine.size() != 0) {
+      if (!calibLine.empty()) {
 	m_CalibLineHW.push_back(calibLine[0]);
 	ATH_MSG_INFO ( "Calib line" << m_onlineHelper->show_to_string(calibLine[0]) );
       }
@@ -305,7 +305,7 @@ StatusCode LArCaliWaveBuilderXtalk::initializeCabling(const LArOnOffIdMapping* c
       
       ATH_MSG_INFO ( "Considered Channel " << m_onlineHelper->show_to_string(theConsidChannel) );
       ATH_MSG_DEBUG ( "Number of associated calib line " << calibLine.size() );
-      if (calibLine.size() != 0) {
+      if (!calibLine.empty()) {
 	m_CalibLineHW.push_back(calibLine[0]);
 	ATH_MSG_INFO ( "Calib Line " << m_onlineHelper->show_to_string(calibLine[0]) );
       }
@@ -342,7 +342,7 @@ StatusCode LArCaliWaveBuilderXtalk::initializeCabling(const LArOnOffIdMapping* c
       
       const std::vector<HWIdentifier>& calibLine = clCont->calibSlotLine(theConsidChannel);
       ATH_MSG_INFO ( "Considered Channel " << m_onlineHelper->show_to_string(theConsidChannel) );
-      if (calibLine.size() != 0) {
+      if (!calibLine.empty()) {
 	m_CalibLineHW.push_back(calibLine[0]);
 	ATH_MSG_INFO ( "Calib Line " << m_onlineHelper->show_to_string(calibLine[0]) );
       }
@@ -380,7 +380,7 @@ StatusCode LArCaliWaveBuilderXtalk::execute()
     ATH_MSG_INFO ( "Processing event " << m_event_counter );
   m_event_counter++ ;
  
-  if (m_keylist.size()==0) {
+  if (m_keylist.empty()) {
     ATH_MSG_ERROR ( "Key list is empty! No containers to process!" );
     return StatusCode::FAILURE;
   } 
@@ -426,7 +426,7 @@ StatusCode LArCaliWaveBuilderXtalk::execute()
     do{
 
       const std::vector<HWIdentifier>& calibLine = clCont->calibSlotLine((*it)->hardwareID());
-      if (calibLine.size() != 0) {
+      if (!calibLine.empty()) {
 	std::vector<HWIdentifier>::iterator found=find(m_CalibLineHW.begin(),m_CalibLineHW.end(),calibLine[0]);
 
 	if (((*it)->isPulsed()) && (found != m_CalibLineHW.end())) 
@@ -624,7 +624,7 @@ StatusCode LArCaliWaveBuilderXtalk::stop()
       if (!cabling->isOnlineConnected(hwId)) continue; //Ignore disconnected channels
 	      
       const WaveMap& waveMap = (*cell_it);
-      if (waveMap.size()==0) {
+      if (waveMap.empty()) {
 	ATH_MSG_INFO ( "Empty accumulated wave. Last id: " << MSG::hex 
                        << lastId << MSG::dec );
 	continue;

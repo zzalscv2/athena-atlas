@@ -31,7 +31,7 @@ LArOFPhasePicker::LArOFPhasePicker(const std::string& name, ISvcLocator* pSvcLoc
 }
 
 LArOFPhasePicker::~LArOFPhasePicker()
-{  }
+= default;
 
 StatusCode LArOFPhasePicker::initialize()
 {
@@ -94,12 +94,12 @@ StatusCode LArOFPhasePicker::stop() {
 
   ATH_MSG_DEBUG(" In stop() ");
 
-  if (m_keyPhase.size()) {
+  if (!m_keyPhase.empty()) {
     StatusCode sc=detStore()->retrieve(m_inputPhase,m_keyPhase);
     if (sc.isFailure()) {
       ATH_MSG_ERROR( "Failed to get input OFC phase with key " << m_keyPhase );
       ATH_MSG_ERROR( "Will use default phase !!" );
-      m_inputPhase=NULL;
+      m_inputPhase=nullptr;
     } else {
       ATH_MSG_DEBUG( "Got OFC phase with key " << m_keyPhase );
     }
@@ -121,7 +121,7 @@ StatusCode LArOFPhasePicker::stop() {
 
 StatusCode LArOFPhasePicker::pickOFC() {
   StatusCode sc;
-  const LArOFCComplete* inputOFC=NULL;
+  const LArOFCComplete* inputOFC=nullptr;
   sc=detStore()->retrieve(inputOFC,m_keyOFC);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to get input OFCs with key " << m_keyOFC );
@@ -203,7 +203,7 @@ StatusCode LArOFPhasePicker::pickShape()
 {
   StatusCode sc;
 
-  const LArShapeComplete* inputShape=NULL;
+  const LArShapeComplete* inputShape=nullptr;
   sc=detStore()->retrieve(inputShape,m_keyShape);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to get input Shapes with key " << m_keyShape );

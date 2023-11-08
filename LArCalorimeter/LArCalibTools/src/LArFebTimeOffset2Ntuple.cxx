@@ -15,10 +15,9 @@ LArFebTimeOffset2Ntuple::LArFebTimeOffset2Ntuple(const std::string & name, ISvcL
 
   m_ntTitle="FebTimeOffsets";
   m_ntpath="/NTUPLES/FILE1/FEBTIME";
-  return;
 }
 
-LArFebTimeOffset2Ntuple::~LArFebTimeOffset2Ntuple() {}
+LArFebTimeOffset2Ntuple::~LArFebTimeOffset2Ntuple() = default;
 
 
 StatusCode LArFebTimeOffset2Ntuple::initialize() {

@@ -17,7 +17,7 @@ LArOFC2Ntuple::LArOFC2Ntuple(const std::string& name, ISvcLocator* pSvcLocator):
 }
 
 LArOFC2Ntuple::~LArOFC2Ntuple() 
-{}
+= default;
 
 StatusCode LArOFC2Ntuple::initialize() {
   m_ntTitle="Optimal Filtering Coefficients";
@@ -57,7 +57,7 @@ StatusCode LArOFC2Ntuple::stop() {
     larOFC=larOFCHdl.cptr();
   }
 
-  const LArOnOffIdMapping *cabling=0;
+  const LArOnOffIdMapping *cabling=nullptr;
   if(m_isSC) {
     ATH_MSG_DEBUG( "LArOFC2Ntuple: using SC cabling" );
     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingSCKey, ctx};

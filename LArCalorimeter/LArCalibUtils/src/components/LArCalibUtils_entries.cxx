@@ -39,14 +39,14 @@
 #include "../LArConditionsMergerAlg.h"
 
 
-typedef LArCalibPatchingAlg<LArRampComplete> LArRampPatcher;
-typedef LArCalibPatchingAlg<LArCaliWaveContainer> LArCaliWavePatcher;
-typedef LArCalibPatchingAlg<LArMphysOverMcalComplete> LArMphysOverMcalPatcher;
+using LArRampPatcher = LArCalibPatchingAlg<LArRampComplete>;
+using LArCaliWavePatcher = LArCalibPatchingAlg<LArCaliWaveContainer>;
+using LArMphysOverMcalPatcher = LArCalibPatchingAlg<LArMphysOverMcalComplete>;
 
 //typedef LArCalibCopyAlg<LArPedestalComplete> LArPedestalCopyAlg;
-typedef LArCalibCopyAlg<LArPhysWaveContainer> LArPhysWaveCopyAlg;
-typedef LArCalibCopyAlg<LArDAC2uAMC> LArDAC2uAMCCopyAlg;
-typedef LArCalibCopyAlg<LArTdriftComplete> LArTdriftCompleteCopyAlg;
+using LArPhysWaveCopyAlg = LArCalibCopyAlg<LArPhysWaveContainer>;
+using LArDAC2uAMCCopyAlg = LArCalibCopyAlg<LArDAC2uAMC>;
+using LArTdriftCompleteCopyAlg = LArCalibCopyAlg<LArTdriftComplete>;
 
 
 DECLARE_COMPONENT( LArAutoCorrMaker )

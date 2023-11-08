@@ -21,7 +21,7 @@ StatusCode LArGainThresholds2Ntuple::initialize() {
 }
 
 LArGainThresholds2Ntuple::~LArGainThresholds2Ntuple() 
-{}
+= default;
 
 StatusCode LArGainThresholds2Ntuple::stop() {
 

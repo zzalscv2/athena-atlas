@@ -35,7 +35,7 @@ namespace LArBadChannelDBTools {
   coral::AttributeListSpecification* createCoolSpec()
   { 
     coral::AttributeListSpecification* spec = new coral::AttributeListSpecification();
-    if (spec == 0) {
+    if (spec == nullptr) {
       return spec;
     }
     spec->extend("ChannelSize", "unsigned int");

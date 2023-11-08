@@ -44,18 +44,18 @@
 #include "LArCalibTools/LArOFCBin2Ntuple.h"
 #include "LArCalibTools/LArADC2MeV2Ntuple.h"
  
-typedef LArReadParamsFromFile<LArCaliPulseParamsComplete>   LArReadCaliPulseParams ;
-typedef LArReadParamsFromFile<LArDetCellParamsComplete>     LArReadDetCellParams ;
-typedef LArReadParamsFromFile<LArPhysCaliTdiffComplete>     LArReadPhysCaliTdiff ;
-typedef LArReadParamsFromFile<LArTdriftComplete>            LArReadTdrift ;
-typedef LArReadParamsFromFile<LArMphysOverMcalComplete>     LArReadMphysOverMcal ;
-typedef LArReadParamsFromFile<LArRinjComplete>              LArReadRinj ;
-typedef LArReadParamsFromFile<LArTshaperComplete>           LArReadTshaper ;
-typedef LArReadParamsFromFile<LArEMEC_CphiComplete>         LArReadEMEC_Cphi ;
-typedef LArReadParamsFromFile<LArEMEC_HValphaComplete>      LArReadEMEC_HValpha ;
-typedef LArReadParamsFromFile<LArEMEC_HVbetaComplete>       LArReadEMEC_HVbeta ;
-typedef LArReadParamsFromFile<LArCableLengthComplete>       LArReadCableLength ;
-typedef LArReadParamsFromFile<LArCableAttenuationComplete>  LArReadCableAttenuation ;
+using LArReadCaliPulseParams = LArReadParamsFromFile<LArCaliPulseParamsComplete> ;
+using LArReadDetCellParams = LArReadParamsFromFile<LArDetCellParamsComplete> ;
+using LArReadPhysCaliTdiff = LArReadParamsFromFile<LArPhysCaliTdiffComplete> ;
+using LArReadTdrift = LArReadParamsFromFile<LArTdriftComplete> ;
+using LArReadMphysOverMcal = LArReadParamsFromFile<LArMphysOverMcalComplete> ;
+using LArReadRinj = LArReadParamsFromFile<LArRinjComplete> ;
+using LArReadTshaper = LArReadParamsFromFile<LArTshaperComplete> ;
+using LArReadEMEC_Cphi = LArReadParamsFromFile<LArEMEC_CphiComplete> ;
+using LArReadEMEC_HValpha = LArReadParamsFromFile<LArEMEC_HValphaComplete> ;
+using LArReadEMEC_HVbeta = LArReadParamsFromFile<LArEMEC_HVbetaComplete> ;
+using LArReadCableLength = LArReadParamsFromFile<LArCableLengthComplete> ;
+using LArReadCableAttenuation = LArReadParamsFromFile<LArCableAttenuationComplete> ;
 //typedef LArReadParamsFromFile<LArCaliPulseParamsVsCalib>    LArReadCaliPulseParams_Calib ;
 
 DECLARE_COMPONENT( LArAutoCorr2Ntuple )

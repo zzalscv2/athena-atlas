@@ -18,10 +18,10 @@ LArNoise2Ntuple::LArNoise2Ntuple(const std::string& name, ISvcLocator* pSvcLocat
 }
 
 LArNoise2Ntuple::~LArNoise2Ntuple() 
-{}
+= default;
 
 StatusCode LArNoise2Ntuple::stop() {
-  const ILArNoise* larNoise = NULL;
+  const ILArNoise* larNoise = nullptr;
   StatusCode sc;
   sc=m_detStore->retrieve(larNoise,m_contKey);
   if (sc!=StatusCode::SUCCESS) {

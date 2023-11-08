@@ -53,14 +53,14 @@ StatusCode LArDSPThresholds2Ntuple::initialize() {
 }
 
 LArDSPThresholds2Ntuple::~LArDSPThresholds2Ntuple() 
-{}
+= default;
 
 StatusCode LArDSPThresholds2Ntuple::stop() {
   StatusCode sc;
    
-   const LArDSPThresholdsComplete *dc = 0;
-   const LArDSPThresholdsFlat *df = 0;
-   const AthenaAttributeList* attrList=0;
+   const LArDSPThresholdsComplete *dc = nullptr;
+   const LArDSPThresholdsFlat *df = nullptr;
+   const AthenaAttributeList* attrList=nullptr;
    if(m_doFlat) {
       sc=detStore()->retrieve(attrList,m_folder);
       if (sc.isFailure()) {
