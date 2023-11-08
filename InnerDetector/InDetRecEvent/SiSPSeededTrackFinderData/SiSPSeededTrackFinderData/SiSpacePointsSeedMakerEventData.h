@@ -217,6 +217,7 @@ namespace InDet {
     // given PoolStl allocator
     template <typename T>
     static void clearPoolList(std::list<T, SG::ArenaPoolSTLAllocator<T>>& poolList){
+      using namespace std;
       poolList.~list<T, SG::ArenaPoolSTLAllocator<T>>();
       poolList = std::list<T, SG::ArenaPoolSTLAllocator<T>>();
     }
