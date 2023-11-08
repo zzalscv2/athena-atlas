@@ -2,25 +2,25 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArLATOMEBuilderAlg.h" 
+#include "LArLATOMEBuilderAlg.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "LArRawEvent/LArRawSCContainer.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArSCDigitContainer.h"
 #include "LArIdentifier/LArOnline_SuperCellID.h"
 #include "AthAllocators/DataPool.h"
-#include "LArCOOLConditions/LArPedestalSC.h" 
-#include "LArCOOLConditions/LArOFCSC.h" 
-#include "LArCOOLConditions/LArRampSC.h" 
-#include "LArCOOLConditions/LArDAC2uASC.h" 
-#include "LArCOOLConditions/LAruA2MeVSC.h" 
-#include "LArCOOLConditions/LArMphysOverMcalSC.h" 
-#include "LArCOOLConditions/LArHVScaleCorrSC.h" 
+#include "LArCOOLConditions/LArPedestalSC.h"
+#include "LArCOOLConditions/LArOFCSC.h"
+#include "LArCOOLConditions/LArRampSC.h"
+#include "LArCOOLConditions/LArDAC2uASC.h"
+#include "LArCOOLConditions/LAruA2MeVSC.h"
+#include "LArCOOLConditions/LArMphysOverMcalSC.h"
+#include "LArCOOLConditions/LArHVScaleCorrSC.h"
 #include <cmath>
 
 LArLATOMEBuilderAlg::LArLATOMEBuilderAlg(const std::string& name, ISvcLocator* pSvcLocator):
   AthReentrantAlgorithm(name, pSvcLocator) {}
-  
+
 StatusCode LArLATOMEBuilderAlg::initialize() {
 
   ATH_MSG_INFO("LArLATOMEBuilderAlg init");
@@ -36,17 +36,17 @@ StatusCode LArLATOMEBuilderAlg::initialize() {
   ATH_CHECK(m_keyuA2MeVSC.initialize());
   ATH_CHECK(m_keyHVScaleCorrSC.initialize());
   ATH_CHECK(m_keyMphysOverMcalSC.initialize());
- 
+
   const LArOnline_SuperCellID* ll;
   ATH_CHECK(detStore()->retrieve(ll,"LArOnline_SuperCellID"));
   m_onlineId = (const LArOnlineID_Base*)ll;
- 
+
   return StatusCode::SUCCESS;
-}     
+}
 
 StatusCode LArLATOMEBuilderAlg::finalize() {
   return StatusCode::SUCCESS;
-} 
+}
 
 StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
 
@@ -57,9 +57,11 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
   SG::ReadHandle<LArDigitContainer> inputContainer(m_digitKey,ctx);
   //Write output via write handle
   SG::WriteHandle<LArRawSCContainer> outputContainerHdl(m_larRawSCKey,ctx);
-  ATH_CHECK(outputContainerHdl.record(std::make_unique<LArRawSCContainer>()));
-  auto outputContainer = outputContainerHdl.ptr();
+  ATH_CHECK(outputContainerHdl.record(std::make_unique<LArRawSCContainer>(SG::VIEW_ELEMENTS)));
+  auto* outputContainer = outputContainerHdl.ptr();
   outputContainer->reserve(inputContainer->size());
+  DataPool<LArRawSC> dataItemsPool(ctx);
+  dataItemsPool.reserve(inputContainer->size());
 
   //Get Conditions input
   SG::ReadCondHandle<ILArPedestal> pedHdl(m_keyPedestalSC,ctx);
@@ -85,13 +87,13 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
   SG::ReadCondHandle<ILArMphysOverMcal> mphysHdl(m_keyMphysOverMcalSC,ctx);
   const LArMphysOverMcalSC* MphysOverMcals=dynamic_cast<const LArMphysOverMcalSC*>(mphysHdl.cptr());
   if (!MphysOverMcals) return StatusCode::FAILURE;
-  
+
   SG::ReadCondHandle<ILArHVScaleCorr> hvHdl(m_keyHVScaleCorrSC,ctx);
   const LArHVScaleCorrSC* HVScaleCorrs=dynamic_cast<const LArHVScaleCorrSC*>(hvHdl.cptr());
   if (!HVScaleCorrs) return StatusCode::FAILURE;
 
   SG::ReadCondHandle<LArOnOffIdMapping> cabling(m_cablingKey,ctx);
-  
+
   unsigned int nEnergies=m_nEnergies;
 
   //Loop over digits:
@@ -103,7 +105,7 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
       return StatusCode::FAILURE;
     }
     const std::vector<uint16_t>& bcids = digitSC->BCId();
-    const HWIdentifier id=digit->hardwareID();   
+    const HWIdentifier id=digit->hardwareID();
     std::flush(std::cout);
     const std::vector<short>& samples=digit->samples();
     int gain=digit->gain();
@@ -128,7 +130,7 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
     if(ATH_UNLIKELY(!ofcb.valid())){
       ATH_MSG_ERROR("No valid ofcb for connected channel " << id.get_identifier32().get_compact() << " gain " << gain);
       return StatusCode::FAILURE;
-    }    
+    }
     if(ATH_UNLIKELY(!ramp.valid())){
       ATH_MSG_ERROR("No valid ramp for connected channel " << id.get_identifier32().get_compact() << " gain " << gain);
       return StatusCode::FAILURE;
@@ -153,25 +155,25 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
       ATH_MSG_ERROR("No valid hvcorr for connected channel " << id.get_identifier32().get_compact());
       return StatusCode::FAILURE;
     }
-   
+
     /// lets store the floats in case we decide to do a float computation here in the future
     std::vector<float> ofca_mev(ofca.size());
     std::vector<float> ofcb_mev(ofca.size());
     float peda=ped;
     float pedb=ped;
-    for(unsigned int i=0; i<ofca.size(); ++i){
-      ofca_mev[i]=ofca[i]*ramp[1]*dac2ua*ua2mev/ELSB;
-      ofcb_mev[i]=ofcb[i]*ramp[1]*dac2ua*ua2mev/ELSB;
-      if(m_applyMphysOverMcal){
-	ofca_mev[i]/=mphys;
-	ofcb_mev[i]/=mphys;
-      } 
-      if(m_applyHVCorrection){
-	ofca_mev[i]*=hvcorr;
-	ofcb_mev[i]*=hvcorr;
+    for (unsigned int i = 0; i < ofca.size(); ++i) {
+      ofca_mev[i] = ofca[i] * ramp[1] * dac2ua * ua2mev / ELSB;
+      ofcb_mev[i] = ofcb[i] * ramp[1] * dac2ua * ua2mev / ELSB;
+      if (m_applyMphysOverMcal) {
+        ofca_mev[i] /= mphys;
+        ofcb_mev[i] /= mphys;
+      }
+      if (m_applyHVCorrection) {
+        ofca_mev[i] *= hvcorr;
+        ofcb_mev[i] *= hvcorr;
       }
     }
-    if(m_useR0){
+    if (m_useR0) {
       float suma=0; for(auto a:ofca)suma+=a;
       float sumb=0; for(auto b:ofcb)sumb+=b;
       peda=ped-ramp[0]/ramp[1]*suma;
@@ -192,12 +194,14 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
     int satLSBdropped = 6;
     int paramBitSize  = 18;
 
-    for(unsigned int i=0; i<ofca.size(); ++i){
-      if(!floatToInt(ofca_mev[i], ofca_int[i], firLSBdropped-pedHardpoint, paramBitSize)){
-	aoverflow=true;
+    for (unsigned int i = 0; i < ofca.size(); ++i) {
+      if (!floatToInt(ofca_mev[i], ofca_int[i], firLSBdropped - pedHardpoint,
+                      paramBitSize)) {
+        aoverflow = true;
       }
-      if(!floatToInt(ofcb_mev[i], ofcb_int[i], satLSBdropped-pedHardpoint, paramBitSize)){
-	boverflow=true;
+      if (!floatToInt(ofcb_mev[i], ofcb_int[i], satLSBdropped - pedHardpoint,
+                      paramBitSize)) {
+        boverflow = true;
       }
     }
     if(!floatToInt(peda,peda_int,pedHardpoint,paramBitSize))pedoverflow=true;
@@ -237,45 +241,52 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
       unsigned short bcid = bcids[startSample+ss];
       newBCIDs[ss]=bcid;
       for(unsigned int is=0; is<firsamples; ++is){
-	int sample=samples[startSample+ss+is];
-	if(!m_isADCBas)sample*=std::pow(2,pedHardpoint);
-	computedE+= static_cast<int64_t>(sample-peda_int)*ofca_int[is];
-	computedEtau+=static_cast<int64_t>(sample-pedb_int)*ofcb_int[is];
+        int sample = samples[startSample + ss + is];
+        if (!m_isADCBas)
+          sample *= std::pow(2, pedHardpoint);
+        computedE += static_cast<int64_t>(sample - peda_int) * ofca_int[is];
+        computedEtau += static_cast<int64_t>(sample - pedb_int) * ofcb_int[is];
       }
       computedE=computedE>>firLSBdropped;
       computedEtau=computedEtau>>satLSBdropped;
 
       if(std::abs(computedE)>std::pow(2,nMaxBitsEnergy-1)){
-	if(computedE>=0)computedE=std::pow(2,nMaxBitsEnergy-1)-1;
-	else computedE=0;
+        if (computedE >= 0)
+          computedE = std::pow(2, nMaxBitsEnergy - 1) - 1;
+        else
+          computedE = 0;
       }
-      if(std::abs(computedEtau)>std::pow(2,nMaxBitsEnergyTau-1)){
-      if(computedEtau>=0)computedEtau=std::pow(2,nMaxBitsEnergyTau-1)-1;
-      else computedEtau=-std::pow(2,nMaxBitsEnergyTau-1)+1;
+      if (std::abs(computedEtau) > std::pow(2, nMaxBitsEnergyTau - 1)) {
+        if (computedEtau >= 0)
+          computedEtau = std::pow(2, nMaxBitsEnergyTau - 1) - 1;
+        else
+          computedEtau = -std::pow(2, nMaxBitsEnergyTau - 1) + 1;
       }
-      newEnergies[ss]=computedE;
-      tauEnergies[ss]=computedEtau;
-      bool passSelection=false;
-      if(computedE<0 && computedE>-80){
-	if(computedEtau>8*computedE && computedEtau<-8*computedE)passSelection=true;
+      newEnergies[ss] = computedE;
+      tauEnergies[ss] = computedEtau;
+      bool passSelection = false;
+      if (computedE < 0 && computedE > -80) {
+        if (computedEtau > 8 * computedE && computedEtau < -8 * computedE)
+          passSelection = true;
+      } else if (computedE < 800) {
+        if (computedEtau > -8 * computedE && computedEtau < 8 * computedE)
+          passSelection = true;
+      } else if (computedE >= 800) {
+        if (computedEtau > -8 * computedE && computedEtau < 16 * computedE)
+          passSelection = true;
       }
-      else if(computedE<800){
-	if(computedEtau>-8*computedE && computedEtau<8*computedE)passSelection=true;
-      }
-      else if (computedE>=800){
-	if(computedEtau>-8*computedE && computedEtau<16*computedE)passSelection=true;
-      }
-      passSelections[ss]=passSelection;
+      passSelections[ss] = passSelection;
     }
-    LArRawSC* scraw = new LArRawSC(id, digitSC->Channel(), digitSC->SourceId(),
-				   newEnergies, newBCIDs, satur);
+    LArRawSC* scraw = dataItemsPool.nextElementPtr();
+
+    (*scraw) = LArRawSC(id, digitSC->Channel(), digitSC->SourceId(),
+                        newEnergies, newBCIDs, satur);
     scraw->setTauEnergies(tauEnergies);
     scraw->setPassTauSelection(passSelections);
     scraw->setOFCaOverflow(aoverflow);
     scraw->setOFCbOverflow(boverflow);
     scraw->setPedOverflow(pedoverflow);
     outputContainer->push_back(scraw);
-
 
   } /// scs
 
@@ -284,8 +295,8 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
 }
 
 /// reproduce LDPB package computation in https://gitlab.cern.ch/atlas-lar-online/onlinelatomedb/-/blob/master/src/CondFloatDB.cpp
-bool LArLATOMEBuilderAlg::floatToInt(float val, int &newval, int hardpoint, int size) const{
-  
+bool LArLATOMEBuilderAlg::floatToInt(float val, int &newval, int hardpoint, int size) {
+
   if( std::isnan(val) )return false;
   int intVal = round(val*pow(2,hardpoint));
   bool isNeg = (intVal<0);

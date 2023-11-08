@@ -1,4 +1,4 @@
-//Dear emacs, this is -*-c++-*- 
+//Dear emacs, this is -*-c++-*-
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
@@ -46,7 +46,7 @@ class LArLATOMEBuilderAlg : public AthReentrantAlgorithm {
   SG::WriteHandleKey<LArRawSCContainer> m_larRawSCKey{this,"LArRawSCKey","SC_ET_RECO","SG key of the output LArRawSCContainer"};
 
   //Conditions input:
-  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this, "CablingSCKey","LArOnOffIdMapSC","SG Key of LArOnOffIdMapping object"}; 
+  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this, "CablingSCKey","LArOnOffIdMapSC","SG Key of LArOnOffIdMapping object"};
 
   SG::ReadCondHandleKey<ILArPedestal> m_keyPedestalSC{this,"LArPedestalKeySC","LArPedestalSC","SG key of LArPedestal conditions object"};
   SG::ReadCondHandleKey<ILArOFC> m_keyOFCSC{this,"LArOFCKeySC","LArOFCSC","SG key of LArOFC conditions object"};
@@ -70,7 +70,7 @@ class LArLATOMEBuilderAlg : public AthReentrantAlgorithm {
   //Identifier helper
   const LArOnlineID_Base* m_onlineId = nullptr;
 
-  bool floatToInt(float val, int &newval, int hardpoint, int size) const;
+  static bool floatToInt(float val, int &newval, int hardpoint, int size) ;
 
 };
 
