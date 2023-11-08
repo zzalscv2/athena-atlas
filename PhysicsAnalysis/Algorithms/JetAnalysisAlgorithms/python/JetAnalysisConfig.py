@@ -307,7 +307,24 @@ class RScanJetAnalysisConfig (ConfigBlock) :
             print("WARNING: uncertainties for R-Scan jets are not yet released!")
 
 
-
+def _largeLCTopoConfigFile(config, self):
+    is_sim = config.dataType() in {DataType.FullSim}
+    if self.largeRMass == "Comb":
+        if config.dataType() is DataType.Data:
+            return "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
+        if is_sim:
+            return "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_17Oct2018.config"
+    elif self.largeRMass == "Calo":
+        if config.dataType() is DataType.Data:
+            return "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
+        if is_sim:
+            return "JES_MC16recommendation_FatJet_Trimmed_JMS_calo_12Oct2018.config "
+    elif self.largeRMass == "TA":
+        if config.dataType() is DataType.Data:
+            return "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
+        if is_sim:
+            return "JES_MC16recommendation_FatJet_Trimmed_JMS_TA_12Oct2018.config"
+    return None
 
 
 class LargeRJetAnalysisConfig (ConfigBlock) :
@@ -321,9 +338,12 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('postfix', '', type=str)
         self.addOption ('largeRMass', "Comb", type=str)
         self.addOption ('recalibratePhyslite', True, type=bool)
+        self.addOption ('configFileOverride', None, type=str)
 
 
     def makeAlgs (self, config) :
+
+        configFile = None
 
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
@@ -350,21 +370,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             configFile = "JES_MC16recommendation_FatJet_TCC_JMS_calo_30Oct2018.config"
 
         if self.jetInput == "LCTopo":
-            if self.largeRMass == "Comb":
-                if config.dataType() is DataType.Data:
-                    configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
-                if config.dataType() is DataType.FullSim:
-                    configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_17Oct2018.config"
-            elif self.largeRMass == "Calo":
-                if config.dataType() is DataType.Data:
-                    configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
-                if config.dataType() is DataType.FullSim:
-                    configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_calo_12Oct2018.config "
-            elif self.largeRMass == "TA":
-                if config.dataType() is DataType.Data:
-                    configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
-                if config.dataType() is DataType.FullSim:
-                    configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_TA_12Oct2018.config"
+            configFile = _largeLCTopoConfigFile(config, self)
 
         if self.jetInput == "UFO":
             configFile = "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config"
@@ -374,6 +380,11 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
             config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
             alg.calibrationTool.JetCollection = jetCollectionName[:-4]
+            if self.configFileOverride is not None:
+                configFile = self.configFileOverride
+            if configFile is None:
+                raise ValueError(
+                    f'Unsupported: {self.jetInput=}, {config.dataType()=}')
             alg.calibrationTool.ConfigFile = configFile
             if self.jetInput == "TrackCaloCluster" or self.jetInput == "UFO" or config.dataType() is DataType.FullSim:
                 alg.calibrationTool.CalibSequence = "EtaJES_JMS"
