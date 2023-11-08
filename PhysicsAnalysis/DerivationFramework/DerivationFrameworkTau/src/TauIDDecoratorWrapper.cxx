@@ -68,6 +68,31 @@ namespace DerivationFramework {
     }
     const xAOD::TauJetContainer* tauContainer = tauJetsReadHandle.cptr();
 
+  static const SG::AuxElement::Decorator<float> acc_trackWidth("trackWidth");
+
+  for (const auto tau : *tauContainer) {
+    float tauTrackBasedWidth = 0;
+    // equivalent to
+    // tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged)
+    std::vector<const xAOD::TauTrack *> tauTracks = tau->tracks();
+    for (const xAOD::TauTrack *trk : tau->tracks(
+             xAOD::TauJetParameters::TauTrackFlag::classifiedIsolation)) {
+      tauTracks.push_back(trk);
+    }
+    double sumWeightedDR = 0.;
+    double ptSum = 0.;
+    for (const xAOD::TauTrack *track : tauTracks) {
+        double deltaR = tau->p4().DeltaR(track->p4());
+        sumWeightedDR += deltaR * track->pt();
+        ptSum += track->pt();
+    }
+    if (ptSum > 0) {
+      tauTrackBasedWidth = sumWeightedDR / ptSum;
+    }
+
+    acc_trackWidth(*tau) = tauTrackBasedWidth;
+  }
+
     // create shallow copy
     auto shallowCopy = xAOD::shallowCopyContainer (*tauContainer);
     
