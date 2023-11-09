@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -48,8 +48,8 @@ AthTileTripReader::~AthTileTripReader() {
 StatusCode AthTileTripReader::initialize(){
     MsgStream mslog( msgSvc(), name() );
     const char* fname;
-    if(m_tripFile.find("/")==0 || m_tripFile.find("$")==0 || 
-            m_tripFile.find(".")==0 || m_tripFile.find(":")!=string::npos){
+    if(m_tripFile[0] == '/' || m_tripFile[0] == '$' || 
+            m_tripFile[0] == '.' || m_tripFile.find(":")!=string::npos){
         fname = gSystem->ExpandPathName( m_tripFile.c_str() );
     }
     else{
