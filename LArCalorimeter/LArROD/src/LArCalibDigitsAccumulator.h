@@ -57,7 +57,7 @@ public:
 
 private:
 
-  std::string getPatternName(const std::string& gain, bool isPulsed, int delay, int dac);
+  static std::string getPatternName(const std::string& gain, bool isPulsed, int delay, int dac);
 
   ToolHandle<ICaloSuperCellIDTool> m_sc2ccMappingTool;
 

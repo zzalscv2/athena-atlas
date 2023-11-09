@@ -4,11 +4,12 @@
 
 #include "LArRawChannelBuilderAlg.h" 
 #include "GaudiKernel/SystemOfUnits.h"
-#include "LArRawEvent/LArRawChannelContainer.h"
-#include "LArRawEvent/LArDigitContainer.h"
-#include "LArIdentifier/LArOnlineID.h"
 #include "LArCOOLConditions/LArDSPThresholdsFlat.h"
+#include "LArIdentifier/LArOnlineID.h"
+#include "LArRawEvent/LArDigitContainer.h"
+#include "LArRawEvent/LArRawChannelContainer.h"
 #include <cmath>
+#include <memory>
 
   
 StatusCode LArRawChannelBuilderAlg::initialize() {
@@ -72,7 +73,7 @@ StatusCode LArRawChannelBuilderAlg::execute(const EventContext& ctx) const {
   if (m_useDBFortQ) {
     if (!m_run2DSPThresholdsKey.empty()) {
       SG::ReadCondHandle<AthenaAttributeList> dspThrshAttr (m_run2DSPThresholdsKey, ctx);
-      run2DSPThresh = std::unique_ptr<LArDSPThresholdsFlat>(new LArDSPThresholdsFlat(*dspThrshAttr));
+      run2DSPThresh = std::make_unique<LArDSPThresholdsFlat>(*dspThrshAttr);
       if (ATH_UNLIKELY(!run2DSPThresh->good())) {
         ATH_MSG_ERROR( "Failed to initialize LArDSPThresholdFlat from attribute list loaded from " << m_run2DSPThresholdsKey.key()
                        << ". Aborting." ); 

@@ -15,9 +15,9 @@ ReadLArDigits::SortDigits::SortDigits(const LArOnlineID* onlineHelper)
 }
 
 ReadLArDigits::ReadLArDigits(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator),
-  m_emId(NULL),
-  m_onlineHelper(NULL),
-  m_ntuplePtr(NULL)
+  m_emId(nullptr),
+  m_onlineHelper(nullptr),
+  m_ntuplePtr(nullptr)
        
 {m_count=0;
  declareProperty("DumpFile",m_dumpFile="");
@@ -41,7 +41,7 @@ StatusCode ReadLArDigits::initialize()
   ATH_CHECK(m_cablingKey.initialize());
   ATH_CHECK( detStore()->retrieve(m_onlineHelper, "LArOnlineID") );
 
-  if (m_dumpFile.size()>0)
+  if (!m_dumpFile.empty())
     m_outfile.open(m_dumpFile.c_str(),std::ios::out);
   //Ntuple booking
  
@@ -107,7 +107,7 @@ StatusCode ReadLArDigits::execute()
  }
  unsigned cellCounter=0;
  m_cellIndex=0;
- if (larDigitCont.size()>0)
+ if (!larDigitCont.empty())
    m_Nsamples=larDigitCont.front()->samples().size();
  else                       
    m_Nsamples=0;

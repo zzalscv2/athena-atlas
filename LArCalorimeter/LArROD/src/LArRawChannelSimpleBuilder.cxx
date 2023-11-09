@@ -23,10 +23,10 @@ using CLHEP::MeV;
 
 LArRawChannelSimpleBuilder::LArRawChannelSimpleBuilder (const std::string& name, ISvcLocator* pSvcLocator):
   AthReentrantAlgorithm(name, pSvcLocator),
-  m_emId(0),
-  m_fcalId(0),
-  m_hecId(0),
-  m_onlineHelper(0),
+  m_emId(nullptr),
+  m_fcalId(nullptr),
+  m_hecId(nullptr),
+  m_onlineHelper(nullptr),
   m_peakParabolaTool("LArParabolaPeakTool"),
   m_iPedestal(0)// jobO ?
 {
@@ -111,7 +111,7 @@ StatusCode LArRawChannelSimpleBuilder::execute (const EventContext& ctx) const
   ATH_MSG_DEBUG( "1) LArDigitContainer container size = " <<  digitContainer->size()  );
 
   ATH_MSG_DEBUG( "2) LArDigitContainer container size = " <<  digitContainer->size()  );
-  if( digitContainer->size() < 1 ) {
+  if( digitContainer->empty() ) {
     ATH_MSG_INFO( "Empty LArDigitContainer container."  );
     return StatusCode::SUCCESS;
   }
@@ -119,10 +119,10 @@ StatusCode LArRawChannelSimpleBuilder::execute (const EventContext& ctx) const
   auto larRawChannelContainer = std::make_unique<LArRawChannelContainer>();
 
   //Pointer to conditions data objects 
-  const ILArPedestal* larPedestal=NULL;
+  const ILArPedestal* larPedestal=nullptr;
   if (m_usePedestalDB) {
     if (detStore()->retrieve(larPedestal).isFailure()) {
-      larPedestal=NULL;
+      larPedestal=nullptr;
       ATH_MSG_DEBUG( "No pedestal found in database. Use default values."  );
     }
   }
@@ -148,7 +148,7 @@ StatusCode LArRawChannelSimpleBuilder::execute (const EventContext& ctx) const
 
   int nMinEM(0),nMinHEC(0),nMinFCAL(0);
   std::vector<float> fSumEM,fSumHEC,fSumFCAL;
-  std::vector<float> *pSum = 0;
+  std::vector<float> *pSum = nullptr;
   
   fSumEM.resize(0);
   fSumHEC.resize(0);
@@ -264,7 +264,7 @@ StatusCode LArRawChannelSimpleBuilder::execute (const EventContext& ctx) const
 
       if ( iloop == 0 ) {
 
-	if ( pSum->size() == 0) 
+	if ( pSum->empty()) 
 //	  pSum->resize(nSamples-nAverage+1,0);
 	  pSum->resize(nSamples,0);
 
@@ -430,7 +430,7 @@ StatusCode LArRawChannelSimpleBuilder::execute (const EventContext& ctx) const
 	      // fit parameters
 	      disc = A[2]*A[2] - 3*A[1]*A[3];
 	      if ( ! ( CubicFailed = ( disc < 0 || A[3] == 0 ) ) )   {
-		dtmax = (-A[2]-sqrt(disc))/(A[3]*3);
+		dtmax = (-A[2]-std::sqrt(disc))/(A[3]*3);
 		if ( ! ( CubicFailed = ( dtmax < 0 || dtmax > 3 ) ) ) {
 		  time = (float(it0) + dtmax) * 25.0 * nanosecond; // nsec
 		  for(int ia = 0; ia < 4; ia++)
@@ -540,7 +540,7 @@ StatusCode LArRawChannelSimpleBuilder::execute (const EventContext& ctx) const
       unsigned int i;
       float tmpSum = 0;
 
-      if ( fSumEM.size() > 0 ) {
+      if ( !fSumEM.empty() ) {
         for(i=0;i<fSumEM.size();i++) {
 	  if (i == 0 || fSumEM[i] > tmpSum ) {
 	    nMinEM = i;
@@ -556,7 +556,7 @@ StatusCode LArRawChannelSimpleBuilder::execute (const EventContext& ctx) const
 	  tmpSum = fSumHEC[i];
 	}
       }
-      if ( fSumHEC.size() > 0 ) {
+      if ( !fSumHEC.empty() ) {
 	ATH_MSG_DEBUG( "Found best HEC window starting at sample <" << nMinHEC << ">"  );
       }
 
@@ -566,7 +566,7 @@ StatusCode LArRawChannelSimpleBuilder::execute (const EventContext& ctx) const
 	  tmpSum = fSumFCAL[i];
 	}
       }
-      if ( fSumFCAL.size() > 0 ) {
+      if ( !fSumFCAL.empty() ) {
 	ATH_MSG_DEBUG( "Found best FCAL window starting at sample <" << nMinFCAL << ">"  );
       }
 

@@ -15,7 +15,7 @@
 LArRawChannelBuilderDriver::LArRawChannelBuilderDriver(const std::string& name,
 						       ISvcLocator* pSvcLocator):
   AthAlgorithm(name, pSvcLocator),
-  m_onlineHelper(0),
+  m_onlineHelper(nullptr),
   m_DataLocation("FREE"),
   m_ChannelContainerName("LArRawChannels"),
   m_buildTools(this),
@@ -36,7 +36,7 @@ LArRawChannelBuilderDriver::LArRawChannelBuilderDriver(const std::string& name,
 StatusCode LArRawChannelBuilderDriver::initialize()
 {
   // initialize parameters
-  m_params.m_larRawChannelContainer = 0;
+  m_params.m_larRawChannelContainer = nullptr;
   
   ATH_CHECK( detStore()->retrieve(m_onlineHelper, "LArOnlineID") );
   ATH_CHECK( m_cablingKey.initialize() );
@@ -60,15 +60,15 @@ StatusCode LArRawChannelBuilderDriver::initialize()
       ATH_MSG_ERROR( "Unable to initialize Pedestal Tool " << tool->name()  );
   
   // check that we have tools to run the reconstruction !
-  if( m_buildTools.size() == 0 ){
+  if( m_buildTools.empty() ){
       ATH_MSG_ERROR( "Didn't find any BuilderTools to do reconstruction !"  );
       return(StatusCode::FAILURE);  
     }
-  if( m_adc2eTools.size() == 0 ){
+  if( m_adc2eTools.empty() ){
       ATH_MSG_ERROR( "Didn't find and ADC2ETools to do reconstruction !"  );
       return(StatusCode::FAILURE);  
     }
-  if( m_pedestalTools.size() == 0 ){
+  if( m_pedestalTools.empty() ){
       ATH_MSG_ERROR( "Didn't find and PedestalTools to do reconstruction !"  );
       return(StatusCode::FAILURE);  
   }
@@ -81,7 +81,7 @@ StatusCode LArRawChannelBuilderDriver::execute()
   const EventContext& ctx = Gaudi::Hive::currentContext();
 
   //Pointer to input data container
-  const LArDigitContainer* digitContainer=0;
+  const LArDigitContainer* digitContainer=nullptr;
   
   //Retrieve Digit Container
   ATH_MSG_DEBUG("About to retrieve LArDigitContainer with key " << m_DataLocation);
@@ -99,7 +99,7 @@ StatusCode LArRawChannelBuilderDriver::execute()
 
   ATH_MSG_VERBOSE("1) LArDigitContainer container size = " <<  digitContainer->size());
   
-  if( digitContainer->size() < 1 ) {
+  if( digitContainer->empty() ) {
     ATH_MSG_INFO( "Empty LArDigitContainer container."  );
     return StatusCode::SUCCESS;
   }
@@ -225,8 +225,6 @@ void LArRawChannelBuilderDriver::ADC2energy (const EventContext& ctx)
   
   while( !(*it)->ADC2E(ctx, m_ramps, &msg()) && ++it != itEnd )
     ATH_MSG_DEBUG("One ADC2Energy Tool failed");
-  
-  return;
 }
 
 StatusCode LArRawChannelBuilderDriver::finalize()

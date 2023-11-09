@@ -40,7 +40,7 @@ SuperCellVsCaloCellTestAlg::SuperCellVsCaloCellTestAlg( const std::string& name,
 }
 
 
-SuperCellVsCaloCellTestAlg::~SuperCellVsCaloCellTestAlg() {}
+SuperCellVsCaloCellTestAlg::~SuperCellVsCaloCellTestAlg() = default;
 
 
 StatusCode SuperCellVsCaloCellTestAlg::initialize() {
@@ -54,7 +54,7 @@ StatusCode SuperCellVsCaloCellTestAlg::initialize() {
    for(uint i=0;i<CaloSampling::getNumberOfSamplings();i++) {
       if(!m_ccKey.empty()) {
          m_etReso.push_back(new TProfile(TString::Format("%s_calocell",CaloSampling::getSamplingName(i).c_str()),TString::Format("%s;CaloCell E_{T} [GeV];SuperCell E_{T} / CaloCell E_{T}",CaloSampling::getSamplingName(i).c_str()),10,etBins,"s"/* standard deviation for error*/));
-         m_etReso.back()->SetDirectory(0);
+         m_etReso.back()->SetDirectory(nullptr);
 	 m_Reso_et.push_back(new TH1F(TString::Format("%s_SuperCellResolution",CaloSampling::getSamplingName(i).c_str()),TString::Format("%s;(SuperCell E_{T} - CaloCell E_{T}) / CaloCell E_{T} (%%)",CaloSampling::getSamplingName(i).c_str()),80,-40,40) );
 	 m_Reso_et_vs_et.push_back(new TH2F(TString::Format("%s_SuperCellResolution_versus_et",CaloSampling::getSamplingName(i).c_str()),TString::Format("%s; E_{T}[GeV] ; (SuperCell E_{T} - CaloCell E_{T}) / CaloCell E_{T} (%%)",CaloSampling::getSamplingName(i).c_str()),60,-10,50,80,-40,40) );
 	 m_Reso_et_vs_eta.push_back(new TH2F(TString::Format("%s_SuperCellResolution_versus_eta",CaloSampling::getSamplingName(i).c_str()),TString::Format("%s; #eta ; (SuperCell E_{T} - CaloCell E_{T}) / CaloCell E_{T} (%%)",CaloSampling::getSamplingName(i).c_str()),50,-2.5,2.5,80,-40,40) );
@@ -62,7 +62,7 @@ StatusCode SuperCellVsCaloCellTestAlg::initialize() {
       }
       if(!m_tscKey.empty()) {
          m_etResoTruth.push_back(new TProfile(TString::Format("%s_truth",CaloSampling::getSamplingName(i).c_str()),TString::Format("%s;Truth SuperCell E_{T} [GeV];SuperCell E_{T} / Truth SuperCell E_{T}",CaloSampling::getSamplingName(i).c_str()),10,etBins,"s"/* standard deviation for error*/));
-         m_etResoTruth.back()->SetDirectory(0);
+         m_etResoTruth.back()->SetDirectory(nullptr);
       }
    }
 
@@ -118,11 +118,11 @@ StatusCode SuperCellVsCaloCellTestAlg::finalize() {
 
 StatusCode SuperCellVsCaloCellTestAlg::execute() {  
    //get the supercells, calocells
-   const CaloCellContainer* scells=0;CHECK( evtStore()->retrieve(scells, m_scKey) );
+   const CaloCellContainer* scells=nullptr;CHECK( evtStore()->retrieve(scells, m_scKey) );
 
-   const CaloCellContainer* ccells=0;if(!m_ccKey.empty()) CHECK( evtStore()->retrieve(ccells, m_ccKey) );
+   const CaloCellContainer* ccells=nullptr;if(!m_ccKey.empty()) CHECK( evtStore()->retrieve(ccells, m_ccKey) );
 
-   const CaloCellContainer* tscells=0;if(!m_tscKey.empty()) CHECK( evtStore()->retrieve(tscells,m_tscKey) );
+   const CaloCellContainer* tscells=nullptr;if(!m_tscKey.empty()) CHECK( evtStore()->retrieve(tscells,m_tscKey) );
 
    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey}; 
    const LArOnOffIdMapping* cabling{*cablingHdl};
@@ -132,7 +132,7 @@ StatusCode SuperCellVsCaloCellTestAlg::execute() {
    }
 
    //iterate over supercells, and build up a histogram of the resolution
-   for(auto scell : *scells) {
+   for(const auto *scell : *scells) {
       //bool passPeakFinder( (scell->provenance()&0x40) );
       //if(!passPeakFinder) continue; //skip non maxima?
 
@@ -176,8 +176,8 @@ StatusCode SuperCellVsCaloCellTestAlg::execute() {
             m_treeSCET = scellEt;
             m_treeTruthET = tscellEt;
             if(!m_digitKey.empty()) {
-               const LArDigitContainer* digits=0;CHECK( evtStore()->retrieve(digits, m_digitKey) );
-               for(auto digit : *digits) { if(digit->hardwareID()==hwid) *m_treeDigits = digit->samples(); }
+               const LArDigitContainer* digits=nullptr;CHECK( evtStore()->retrieve(digits, m_digitKey) );
+               for(const auto *digit : *digits) { if(digit->hardwareID()==hwid) *m_treeDigits = digit->samples(); }
             }
             m_tree->Fill();
          } 

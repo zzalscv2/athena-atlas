@@ -15,9 +15,9 @@ LArRawChannelBuilderADC2EConstants::LArRawChannelBuilderADC2EConstants(const std
 								       const std::string& name,
 								       const IInterface* parent):
   LArRawChannelBuilderADC2EToolBase(type,name,parent),
-  m_emId(0),
-  m_fcalId(0),
-  m_hecId(0)
+  m_emId(nullptr),
+  m_fcalId(nullptr),
+  m_hecId(nullptr)
 {
   m_helper = new LArRawChannelBuilderStatistics( 1,      // number of possible errors
 					       0x10);  // bit pattern special for this tool,

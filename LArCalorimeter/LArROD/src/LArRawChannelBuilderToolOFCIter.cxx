@@ -12,7 +12,7 @@
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
-#include <math.h>
+#include <cmath>
 
 using CLHEP::ns;
 using CLHEP::nanosecond;
@@ -25,7 +25,7 @@ LArRawChannelBuilderToolOFCIter::LArRawChannelBuilderToolOFCIter(const std::stri
 							     const std::string& name,
 							     const IInterface* parent):
   LArRawChannelBuilderToolBase(type,name,parent),
-  m_larOFIterCont(NULL),
+  m_larOFIterCont(nullptr),
   m_storeGate("StoreGateSvc", name),
   m_peakReco("LArOFPeakRecoTool") {
   m_helper = new LArRawChannelBuilderStatistics( 3,      // number of possible errors
@@ -101,7 +101,7 @@ void LArRawChannelBuilderToolOFCIter::initEvent() {
       MsgStream log(msgSvc(), name());
       log << MSG::ERROR << "Failed to record a LArOFIterResultsContainer with key " << m_timingContKey << " to StoreGate." << endmsg;
       delete m_larOFIterCont;
-      m_larOFIterCont=NULL;
+      m_larOFIterCont=nullptr;
     }
   }
 }

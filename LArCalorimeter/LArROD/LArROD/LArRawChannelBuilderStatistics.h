@@ -27,13 +27,13 @@ class LArRawChannelBuilderStatistics
   ulonglong returnErrorCount(unsigned int nerr);
   ulonglong returnErrorCountPerEvent(unsigned int nerr);
   ulonglong returnErrorCountSqPerEvent(unsigned int nerr);
-  unsigned long returnEvents();
+  unsigned long returnEvents() const;
   
   void setErrorString(unsigned int nerr, const std::string& s);
   std::string returnErrorString(unsigned int nerr);
   
-  unsigned int returnBitPattern();
-  unsigned int returnMaxErrors();
+  unsigned int returnBitPattern() const;
+  unsigned int returnMaxErrors() const;
   
   void resetErrorcountPerEvent();
   

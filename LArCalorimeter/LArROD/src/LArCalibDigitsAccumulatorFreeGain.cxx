@@ -5,14 +5,14 @@
 #include "LArCalibDigitsAccumulatorFreeGain.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
-#include <math.h>
-#include "stdint.h"
+#include <cmath>
+#include <cstdint>
 
 using CLHEP::ns;
 
 LArCalibDigitsAccumulatorFreeGain::LArCalibDigitsAccumulatorFreeGain (const std::string& name, ISvcLocator* pSvcLocator):
   AthAlgorithm(name, pSvcLocator),
-  m_onlineHelper(0),
+  m_onlineHelper(nullptr),
   m_delay(0),
   m_isPulsed(false),
   m_calibAccuDigitContainerName("LArAccumulatedCalibDigits"),
@@ -70,7 +70,7 @@ StatusCode LArCalibDigitsAccumulatorFreeGain::execute()
   }
   
   // pointer to input container
-  const LArCalibDigitContainer* calibDigitContainer=NULL;
+  const LArCalibDigitContainer* calibDigitContainer=nullptr;
 
   // retrieve calibration settings
   const LArCalibParams* calibParams;
@@ -135,7 +135,7 @@ StatusCode LArCalibDigitsAccumulatorFreeGain::execute()
       // get calibration settings
       const std::vector<HWIdentifier>& calibLineID=clcabling->calibSlotLine(chid);
       HWIdentifier calibModuleID;
-      if(calibLineID.size()>0){
+      if(!calibLineID.empty()){
         calibModuleID=m_onlineHelper->calib_module_Id(calibLineID[0]);
         nTriggerPerStep[febhash] = calibParams->NTrigger(calibModuleID);
         ATH_MSG_DEBUG( "Ntrigger per step = " << nTriggerPerStep[febhash] );

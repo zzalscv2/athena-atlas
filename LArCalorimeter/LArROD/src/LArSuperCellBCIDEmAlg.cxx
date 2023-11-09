@@ -57,7 +57,7 @@ LArSuperCellBCIDEmAlg::execute(const EventContext& context) const
         
         new_scell_cont->reserve(scells_from_sg->size());
 
-        for(auto sc : *scells_from_sg){
+        for(const auto *sc : *scells_from_sg){
                 if ( !sc ) continue;
                 std::unique_ptr<CaloCell> cell = sc->clone();
                 // calculate the BCID for all the cells associated to the SC

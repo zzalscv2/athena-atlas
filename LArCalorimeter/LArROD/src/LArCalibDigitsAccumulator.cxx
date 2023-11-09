@@ -3,19 +3,19 @@
 */
 
 #include "LArCalibDigitsAccumulator.h"
+#include "CLHEP/Units/SystemOfUnits.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include "LArIdentifier/LArOnline_SuperCellID.h"
 #include "xAODEventInfo/EventInfo.h"
-#include "CLHEP/Units/SystemOfUnits.h"
-#include <math.h>
-#include "stdint.h"
+#include <cmath>
+#include <cstdint>
 
 using CLHEP::ns;
 
 LArCalibDigitsAccumulator::LArCalibDigitsAccumulator (const std::string& name, ISvcLocator* pSvcLocator):
   AthAlgorithm(name, pSvcLocator),
   m_sc2ccMappingTool("CaloSuperCellIDTool"), 
-  m_onlineHelper(0),
+  m_onlineHelper(nullptr),
   m_sampleShift(0)
 {
   declareProperty("LArAccuCalibDigitContainerName",m_calibAccuDigitContainerName, "LArAccumulatedCalibDigits");
@@ -87,8 +87,8 @@ StatusCode LArCalibDigitsAccumulator::execute()
   }
   
   // new here ====
-  const LArOnOffIdMapping* cabling(0);
-  const LArOnOffIdMapping* cablingLeg(0);
+  const LArOnOffIdMapping* cabling(nullptr);
+  const LArOnOffIdMapping* cablingLeg(nullptr);
   if( m_isSC ){
     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKeySC};
     cabling = {*cablingHdl};
@@ -110,7 +110,7 @@ StatusCode LArCalibDigitsAccumulator::execute()
    
 
   // pointer to input container
-  const LArCalibDigitContainer* calibDigitContainer=NULL;
+  const LArCalibDigitContainer* calibDigitContainer=nullptr;
 
   // Event info 
   const xAOD::EventInfo* thisEventInfo = nullptr;
@@ -215,7 +215,7 @@ StatusCode LArCalibDigitsAccumulator::execute()
       // get calibration settings
       const std::vector<HWIdentifier>& calibLineID=clcabling->calibSlotLine(chid);
       HWIdentifier calibModuleID;
-      if(calibLineID.size()>0){
+      if(!calibLineID.empty()){
 	calibModuleID=m_onlineHelper->calib_module_Id(calibLineID[0]);
 	nTriggerPerStep[febhash] = calibParams->NTrigger(calibModuleID);
 	ATH_MSG_DEBUG( "Ntrigger per step = " << nTriggerPerStep[febhash] );
