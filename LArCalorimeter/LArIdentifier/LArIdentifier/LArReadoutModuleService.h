@@ -48,79 +48,79 @@ public:
      * 
      * </PRE>
      */
-     static HWIdentifier createReadoutModuleID(int atlas_tb, int barrel_ec, int pos_neg, int em_hec_fcal, int rosId, int rodFragId, int rodCrate, int rodSlot);
+     HWIdentifier createReadoutModuleID(int atlas_tb, int barrel_ec, int pos_neg, int em_hec_fcal, int rosId, int rodFragId, int rodCrate, int rodSlot);
 
 
     /**
      * return 0 for ATLAS , 1 for Test Beam
      */
-     static int atlas_tb( const HWIdentifier & id)   ;
+     int atlas_tb( const HWIdentifier & id)   ;
     
     /**
      * return location (0: barrel or 1: end cap )
      */
-     static int barrel_ec(const HWIdentifier & id)  ;
+     int barrel_ec(const HWIdentifier & id)  ;
     
     /**
      * return side <br>
      * positive side : 1 <br>
      * negative side : 0 <br>
      */
-     static int pos_neg(const HWIdentifier & id)  ;
+     int pos_neg(const HWIdentifier & id)  ;
 
     /**
      * return subdetector <br>
      * em : 0, hec : 1, fcal : 2 <br>
      */
-     static int em_hec_fcal(const HWIdentifier & id)  ;
+     int em_hec_fcal(const HWIdentifier & id)  ;
 
 
 
     /**
      * return sub-detector identifier <br>
      */
-     static int subDet(const HWIdentifier & id)  ;
+     int subDet(const HWIdentifier & id)  ;
 
     /**
      * return ROB fragment identifier ( == ROL == RODFrag identifier ) <br>
      */
-     static int robFragId(const HWIdentifier & id)  ;
+     int robFragId(const HWIdentifier & id)  ;
     
     /**
      * return ROL identifier ( == RODFrag == ROBFrag identifier ) <br>
      */
-     static int rol(const HWIdentifier & id)  ;
+     int rol(const HWIdentifier & id)  ;
     
     /**
      * return ROS identifier <br>
      */
-     static int rosId(const HWIdentifier & id)  ;
+     int rosId(const HWIdentifier & id)  ;
     
     /**
      * return ROD fragment identifier ( == ROL == ROB identifier ) <br>
      */
-     static int rodFragId(const HWIdentifier & id)  ;
+     int rodFragId(const HWIdentifier & id)  ;
     
     /**
      * return ROD crate number <br>
      */
-     static int rodCrate(const HWIdentifier & id)  ;
+     int rodCrate(const HWIdentifier & id)  ;
     
     /**
      * return ROD slot number <br>
      */
-     static int rodSlot(const HWIdentifier & id)  ;
+     int rodSlot(const HWIdentifier & id)  ;
     
     /**
      * convert a HWIdentifier into a STL string 
      */
-     static std::string cnvToString(const HWIdentifier & id)   ;
+     std::string cnvToString(const HWIdentifier & id)   ;
     /**
      * convert a HWIdentifier into a STL string, TDAQ convention for sub-detector numbering
      */
-     static std::string cnvToStringTDAQ(const HWIdentifier & id)   ;
+     std::string cnvToStringTDAQ(const HWIdentifier & id)   ;
 
-     static std::string checkReadoutModuleValues(int atlas_tb, int barrel_ec, int pos_neg, int em_hec_fcal, int rosId, int rodFragId, int rodCrate, int rodSlot);
+     std::string checkReadoutModuleValues(int atlas_tb, int barrel_ec, int pos_neg, int em_hec_fcal, int rosId, int rodFragId, int rodCrate, int rodSlot);
     /** destructor */
      ~LArReadoutModuleService() { }
 

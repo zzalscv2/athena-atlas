@@ -3,16 +3,16 @@
 */
 
 #include "LArIdentifier/LArHVLineID.h"
-#include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
+#include "IdDict/IdDictDefs.h"
+#include "GaudiKernel/MsgStream.h"
 #include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <cstdio>
-#include <iostream>
-#include <set>
 #include <string>
+#include <set>
+#include <stdio.h>
+#include <iostream>
+#include <math.h>
+#include <assert.h>
 
 
 LArHVLineID::LArHVLineID(void) : 
@@ -23,13 +23,13 @@ LArHVLineID::LArHVLineID(void) :
   m_canline_index(999),
   m_cannode_index(999),
   m_hvline_index(999),
-  m_dict(nullptr),
+  m_dict(0),
   m_hvlineHashMax(0)
 {
 
 }
 
-LArHVLineID:: ~LArHVLineID()= default;
+LArHVLineID:: ~LArHVLineID(){}
 
 
 IdContext LArHVLineID::hvlineContext(void) const

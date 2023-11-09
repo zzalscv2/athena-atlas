@@ -22,7 +22,8 @@ LArHVPathologyDbTool::LArHVPathologyDbTool(const std::string& type
 }
 
 LArHVPathologyDbTool::~LArHVPathologyDbTool()
-= default;
+{ 
+}
 
 StatusCode LArHVPathologyDbTool::initialize()
 {
@@ -43,9 +44,9 @@ LArHVPathologyDbTool::hvPathology2AttrList(const LArHVPathologiesDb& pathologyCo
   coral::Blob& blob=(*attrList)["Constants"].data<coral::Blob>();
      
   TClass* klass = TClass::GetClass("LArHVPathologiesDb");
-  if (klass==nullptr) {
+  if (klass==NULL) {
     ATH_MSG_ERROR ( "Can't find TClass LArHVPathologiesDb" );
-    return nullptr;
+    return 0;
   }
   else
     ATH_MSG_DEBUG ( "Got TClass LArHVPathologiesDb" );
@@ -54,7 +55,7 @@ LArHVPathologyDbTool::hvPathology2AttrList(const LArHVPathologiesDb& pathologyCo
  
   if(buf.WriteObjectAny(&pathologyContainer, klass)!=1) {
     ATH_MSG_ERROR ( "Failed to stream LArHVPathologiesDb" );
-    return nullptr;
+    return 0;
   }
   
   blob.resize(buf.Length());
@@ -65,7 +66,7 @@ LArHVPathologyDbTool::hvPathology2AttrList(const LArHVPathologiesDb& pathologyCo
 
 
 AthenaAttributeList*
-LArHVPathologyDbTool::newAttrList () 
+LArHVPathologyDbTool::newAttrList () const
 {
   coral::AttributeListSpecification* spec = new coral::AttributeListSpecification();
   spec->extend("blobVersion","unsigned int");   //Should allow schema evolution if needed
@@ -83,13 +84,13 @@ LArHVPathologiesDb* LArHVPathologyDbTool::attrList2HvPathology(const AthenaAttri
  
     if (blobVersion!=0) {
       ATH_MSG_ERROR ( "Can't interpret BLOB version " << blobVersion );
-      return nullptr;
+      return 0;
     }
      
     TClass* klass = TClass::GetClass("LArHVPathologiesDb");
-    if(klass==nullptr){
+    if(klass==NULL){
       ATH_MSG_ERROR ( "Can't find TClass LArHVPathologiesDb" );
-      return nullptr;
+      return 0;
     }
     else
       ATH_MSG_DEBUG ( "Got TClass LArHVPathologiesDb" );
@@ -101,5 +102,5 @@ LArHVPathologiesDb* LArHVPathologyDbTool::attrList2HvPathology(const AthenaAttri
   }catch (coral::AttributeListException &e) {
     ATH_MSG_ERROR ( e.what() );
   }
-  return nullptr;
+  return 0;
 }

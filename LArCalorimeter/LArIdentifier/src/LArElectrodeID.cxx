@@ -3,16 +3,16 @@
 */
 
 #include "LArIdentifier/LArElectrodeID.h"
-#include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
+#include "IdDict/IdDictDefs.h"
+#include "GaudiKernel/MsgStream.h"
 #include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <cstdio>
-#include <iostream>
-#include <set>
 #include <string>
+#include <set>
+#include <stdio.h>
+#include <iostream>
+#include <math.h>
+#include <assert.h>
 
 
 LArElectrodeID::LArElectrodeID(void) : 
@@ -27,13 +27,13 @@ LArElectrodeID::LArElectrodeID(void) :
   m_hveta_index(999),
   m_hvgap_index(999),
   m_electrode_index(999),
-  m_dict(nullptr),
+  m_dict(0),
   m_electrodeHashMax(0)
 {
 
 }
 
-LArElectrodeID:: ~LArElectrodeID()= default;
+LArElectrodeID:: ~LArElectrodeID(){}
 
 
 IdContext LArElectrodeID::electrodeContext(void) const

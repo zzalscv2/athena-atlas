@@ -24,7 +24,7 @@ class LArHVPathologyDbTool: public AthAlgTool, virtual public ILArHVPathologyDbT
   virtual LArHVPathologiesDb* attrList2HvPathology(const AthenaAttributeList&) const override;
 
 private:
-  static AthenaAttributeList* newAttrList() ;
+  AthenaAttributeList* newAttrList() const;
 };
 
 #endif

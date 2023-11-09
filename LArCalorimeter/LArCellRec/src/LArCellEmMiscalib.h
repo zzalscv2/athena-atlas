@@ -52,7 +52,7 @@ class LArCellEmMiscalib :  public CaloCellCorrection
   
  private:
 
-  static int region(int barrelec, double eta, double phi);
+  int region(int barrelec, double eta, double phi);
   void smearingPerRegion (CLHEP::HepRandomEngine* engine);
 
   const LArEM_ID*   m_larem_id;

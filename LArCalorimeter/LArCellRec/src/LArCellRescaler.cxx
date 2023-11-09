@@ -17,7 +17,7 @@ LArCellRescaler::LArCellRescaler (const std::string& type,
 }
                                                                                 
 
-LArCellRescaler::~LArCellRescaler() = default;
+LArCellRescaler::~LArCellRescaler() {}
 
 
 StatusCode LArCellRescaler::initialize() {
@@ -53,4 +53,5 @@ void LArCellRescaler::MakeCorrection (CaloCell* theCell,
   const IdentifierHash& hash_id=theCell->caloDDE()->calo_hash();
   if (m_factors.isValid() && hash_id<m_factors->size())
     theCell->setEnergy(theCell->energy()*(*m_factors)[hash_id]);
+  return;
 }

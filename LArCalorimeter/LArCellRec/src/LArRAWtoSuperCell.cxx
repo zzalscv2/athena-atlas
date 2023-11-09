@@ -70,7 +70,7 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
         
         const LArRawSCContainer* scells_from_sg = cellsHandle.cptr();
         ATH_MSG_DEBUG("Got a CaloCellContainer input with size : "<<scells_from_sg->size());
-	if ( scells_from_sg->empty() ) {
+	if ( scells_from_sg->size() == 0 ) {
 	  ATH_MSG_WARNING("Got an empty input collection, maybe the key is wrong : "
 		<< m_sCellContainerInKey );
 	  // to avoid crash
@@ -83,7 +83,7 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
         
         new_scell_cont->reserve(scells_from_sg->size());
 
-        for(const auto *sc : *scells_from_sg){
+        for(auto sc : *scells_from_sg){
                 if ( !sc ) continue;
                 Identifier off_id = cabling->cnvToIdentifier(sc->hardwareID()); 
                 const CaloDetDescrElement* dde = sem_mgr ->get_element(off_id);
@@ -143,7 +143,7 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
 		}
 		// we probably should soon associate some quality information to the saturation, maybe the bcid to provenance
 		cell->setQuality((unsigned short)saturation);
-                new_scell_cont->push_back( cell );
+                new_scell_cont->push_back( std::move(cell) );
         }
 	ATH_CHECK( scellContainerHandle.record( std::move(new_scell_cont) ) );
 

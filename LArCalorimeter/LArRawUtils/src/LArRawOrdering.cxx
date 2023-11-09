@@ -10,7 +10,7 @@
   { }
 
 
-  LArRawOrdering::LArRawOrdering( ): m_roiMap(nullptr) 
+  LArRawOrdering::LArRawOrdering( ): m_roiMap(NULL) 
   { }
   void LArRawOrdering::setMap( const LArRoIMap* map )
   { m_roiMap = map; }

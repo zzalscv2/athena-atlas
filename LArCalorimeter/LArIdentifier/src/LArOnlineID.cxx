@@ -3,15 +3,15 @@
 */
 
 #include "LArIdentifier/LArOnlineID.h"
-#include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
-#include "Identifier/IdentifierHash.h"
 #include "LArIdentifier/LArOnlID_Exception.h"
-#include <cmath>
-#include <iostream>
+#include "Identifier/IdentifierHash.h"
+#include "IdDict/IdDictDefs.h"
+#include "GaudiKernel/MsgStream.h"
+#include <string>
 #include <set>
 #include <sstream>
-#include <string>
+#include <iostream>
+#include <math.h>
 
 /* See comments in Base class */
 
@@ -23,7 +23,8 @@ LArOnlineID::LArOnlineID(void) :
 
 
 LArOnlineID::~LArOnlineID(void) 
-= default;
+{
+}
 
 /* =================================================================== */
 int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
@@ -49,7 +50,7 @@ int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     }
 
     // init base object
-    if(LArOnlineID_Base::initialize_from_dictionary(dict_mgr)) return (1);
+    if(AtlasDetectorID::initialize_from_dictionary(dict_mgr)) return (1);
     m_dict = dict_mgr.find_dictionary ("LArCalorimeter"); 
     if(!m_dict) {
 

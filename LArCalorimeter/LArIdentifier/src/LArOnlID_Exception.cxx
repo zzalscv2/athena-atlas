@@ -4,7 +4,7 @@
 
 #include "LArIdentifier/LArOnlID_Exception.h"
 
-#include <cstdio>
+#include <stdio.h>
 
 
 LArOnlID_Exception::operator std::string () 

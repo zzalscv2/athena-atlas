@@ -98,22 +98,22 @@ static void check_lar_online_id_decoding(IdDictMgr& idd)
       isEMBPS    = p_laronline_id->isEMBPS         ( l_feedthroughId );
       isEMECPS   = p_laronline_id->isEMECPS        ( l_feedthroughId );
       std::string ftname = p_laronline_id->feedthrough_name( l_feedthroughId );
-      if( isFCAL ){ 
+      if( isFCAL     == true ){ 
 	//std::cout << "FCAL FeedthroughName= " << ftname << std::endl;
 	Nfcal++;
       }
-      if( isHEC ){ Nhec++;}
-      if( isHECold ){ Nhec_old++;}
-      if( isEMB ){ Nembarrel++;}
-      if( isEMBold ){ Nembarrel_old++;}
-      if( isEMEC ){ Nendcap++;}
-      if( isEMECin ){ 
+      if( isHEC      == true ){ Nhec++;}
+      if( isHECold   == true ){ Nhec_old++;}
+      if( isEMB      == true ){ Nembarrel++;}
+      if( isEMBold   == true ){ Nembarrel_old++;}
+      if( isEMEC     == true ){ Nendcap++;}
+      if( isEMECin   == true ){ 
 	std::cout << "EMEC inner wheel FeedthroughName = " << ftname << " (FT=9,10,16,22) " << std::endl;
 	Nendcap_in++;
       }
-      if( isEMECold ){ Nendcap_old++;}
-      if( isEMBPS ){ Nembps++;}
-      if( isEMECPS ){ Nemecps++;}
+      if( isEMECold  == true ){ Nendcap_old++;}
+      if( isEMBPS    == true ){ Nembps++;}
+      if( isEMECPS   == true ){ Nemecps++;}
 
       n_feedthroughId++;
       IdentifierHash hashId = p_laronline_id->feedthrough_Hash( l_feedthroughId );
@@ -205,16 +205,16 @@ static void check_lar_online_id_decoding(IdDictMgr& idd)
 	isEMBPS    = p_laronline_id->isEMBPS         ( l_febId );
 	isEMECPS   = p_laronline_id->isEMECPS        ( l_febId );
 
-	if( isFCAL ){ Nfcal++;}
-	if( isHEC ){ Nhec++;}
-	if( isHECold ){ Nhec_old++;}
-	if( isEMB ){ Nembarrel++;}
-	if( isEMBold ){ Nembarrel_old++;}
-	if( isEMEC ){ Nendcap++;}
-	if( isEMECin ){ Nendcap_in++;}
-	if( isEMECold ){ Nendcap_old++;}
-	if( isEMBPS ){ Nembps++;}
-	if( isEMECPS ){ Nemecps++;}
+	if( isFCAL     == true ){ Nfcal++;}
+	if( isHEC      == true ){ Nhec++;}
+	if( isHECold   == true ){ Nhec_old++;}
+	if( isEMB      == true ){ Nembarrel++;}
+	if( isEMBold   == true ){ Nembarrel_old++;}
+	if( isEMEC     == true ){ Nendcap++;}
+	if( isEMECin   == true ){ Nendcap_in++;}
+	if( isEMECold  == true ){ Nendcap_old++;}
+	if( isEMBPS    == true ){ Nembps++;}
+	if( isEMECPS   == true ){ Nemecps++;}
 
        
 	/* Test of channel from febHash Id */
@@ -363,24 +363,24 @@ static void check_lar_online_id_decoding(IdDictMgr& idd)
 	std::string TestChName;
 	TestChName = p_laronline_id->channel_name(l_channelId);
 
-	if( isFCAL ){ Nfcal++;
+	if( isFCAL     == true ){ Nfcal++;
 	  std::cout << TestChName << std::endl;	 
 	}
-	if( isHEC ){ Nhec++;
+	if( isHEC      == true ){ Nhec++;
 	  std::cout << TestChName << std::endl;	 
 	}
-	if( isHECold ){ Nhec_old++;}
-	if( isEMB ){ Nembarrel++;}
-	if( isEMBold ){ Nembarrel_old++;}
-	if( isEMEC ){ Nendcap++;}
+	if( isHECold   == true ){ Nhec_old++;}
+	if( isEMB      == true ){ Nembarrel++;}
+	if( isEMBold   == true ){ Nembarrel_old++;}
+	if( isEMEC     == true ){ Nendcap++;}
 
-	if( isEMECin ){ 
+	if( isEMECin   == true ){ 
 	  std::cout << TestChName << "EMEC inner wheel Channel = " << ftname << std::endl;	 
 	  Nendcap_in++;
 	}
-	if( isEMECold ){ Nendcap_old++;}
-	if( isEMBPS ){ Nembps++;}
-	if( isEMECPS ){ Nemecps++;}
+	if( isEMECold  == true ){ Nendcap_old++;}
+	if( isEMBPS    == true ){ Nembps++;}
+	if( isEMECPS   == true ){ Nemecps++;}
 
 	/*
 	  isFCAL     = p_laronline_id->isFcalOnline( l_channelId );
@@ -586,19 +586,19 @@ static void check_lar_online_id_decoding(IdDictMgr& idd)
 	isEMB = p_laronline_id->isEmBarrelOnline( l_calibId );
 	isEMEC = p_laronline_id->isEmEndcapOnline( l_calibId );
 	bool isCalib=p_laronline_id->isCalibration( l_calibId);
-	if( isFCAL )
+	if( isFCAL == true )
 	  { 
 	    NcalFcal++;
 	  }
-	if( isHEC )
+	if( isHEC == true )
 	  { 
 	    NcalHec++;
 	  }
-	if( isEMB )
+	if( isEMB == true )
 	  {
 	    NcalEmbarrel++;
 	  }
-	if( isEMEC )
+	if( isEMEC == true )
 	  {
 	    NcalEndcap++;
 	  }
