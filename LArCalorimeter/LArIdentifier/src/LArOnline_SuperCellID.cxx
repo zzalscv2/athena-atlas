@@ -48,7 +48,7 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
     }
 
     // init base object
-    if(LArOnlineID_Base::initialize_from_dictionary(dict_mgr)) return (1);
+    if(AtlasDetectorID::initialize_from_dictionary(dict_mgr)) return (1);
     m_dict = dict_mgr.find_dictionary ("LArCalorimeter"); 
     if(!m_dict) {
 
