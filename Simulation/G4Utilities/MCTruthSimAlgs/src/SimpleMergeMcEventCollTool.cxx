@@ -99,6 +99,7 @@ StatusCode SimpleMergeMcEventCollTool::processAllSubEvents(const EventContext& /
   ATH_CHECK(m_pMergeSvc->retrieveSubEvtsData(m_truthCollInputKey.value(), truthList));
 
   m_nBkgEventsReadSoFar=0;
+  m_newevent = true;
 
   //Check we are getting at least one event
   m_nInputMcEventColls=truthList.size();
