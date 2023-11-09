@@ -17,7 +17,7 @@
 #include "StoreGate/WriteHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
-#include <math.h>
+#include <cmath>
 
 using CLHEP::MeV;
 using CLHEP::megahertz;
@@ -26,7 +26,7 @@ using CLHEP::picosecond;
 
 LArRawChannelBuilder::LArRawChannelBuilder (const std::string& name, ISvcLocator* pSvcLocator):
   AthAlgorithm(name, pSvcLocator),
-  m_onlineHelper(NULL),
+  m_onlineHelper(nullptr),
   m_Ecut(256*MeV),
   m_initialTimeSampleShift(0),
   m_ramp_max(),
@@ -48,7 +48,7 @@ LArRawChannelBuilder::LArRawChannelBuilder (const std::string& name, ISvcLocator
   m_aveChannels(0),
   m_SamplingPeriodeUpperLimit(0),
   m_SamplingPeriodeLowerLimit(0),
-  m_emId(NULL),
+  m_emId(nullptr),
   m_firstSample(0)
   , m_pedestalKey("LArPedestal")
   , m_shapesKey("LArShape")
@@ -165,8 +165,8 @@ StatusCode LArRawChannelBuilder::execute()
   int saturation = 0; // Number of saturating channels in a given event   
   
   //Pointer to conditions data objects 
-  const ILArPedestal* larPedestal=NULL;
-  const ILArShape* larShape=NULL;
+  const ILArPedestal* larPedestal=nullptr;
+  const ILArShape* larShape=nullptr;
   //Retrieve Digit Container
 
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
@@ -665,28 +665,28 @@ StatusCode LArRawChannelBuilder::finalize()
     msg() << msglvl << " *** Error & Warning Summary for all events *** " << std::endl ;
     
     if (m_noEnergy)
-      msg() << msglvl << "   " << m_noEnergy << " events had on average " << (int)round(m_aveNoEnergy) 
-          << " channels out of " << (int)round(m_aveChannels) << " without basic calibration constants." 
+      msg() << msglvl << "   " << m_noEnergy << " events had on average " << (int)std::round(m_aveNoEnergy) 
+          << " channels out of " << (int)std::round(m_aveChannels) << " without basic calibration constants." 
 	  << std::endl;
     
     if (m_noTime) 
-      msg() << msglvl << "   " << m_noTime  << " events had on average " << (int)round(m_aveNoTime) 
-          << " channels out of " << (int)round(m_aveChannels) << " without OFCs for timing." 
+      msg() << msglvl << "   " << m_noTime  << " events had on average " << (int)std::round(m_aveNoTime) 
+          << " channels out of " << (int)std::round(m_aveChannels) << " without OFCs for timing." 
 	  << std::endl ;
    
     if (m_noShape)
-      msg() << msglvl << "   " << m_noShape << " events had on average " << (int)round(m_aveNoShape) 
-          << " channels out of " << (int)round(m_aveChannels) << " without shape information." 
+      msg() << msglvl << "   " << m_noShape << " events had on average " << (int)std::round(m_aveNoShape) 
+          << " channels out of " << (int)std::round(m_aveChannels) << " without shape information." 
 	  << std::endl;
     
     if (m_noShapeDer)
-      msg() << msglvl << "   " << m_noShapeDer << " events had on average " << (int)round(m_aveNoShapeDer) 
-          << " channels out of " << (int)round(m_aveChannels) << " without shape derivative." 
+      msg() << msglvl << "   " << m_noShapeDer << " events had on average " << (int)std::round(m_aveNoShapeDer) 
+          << " channels out of " << (int)std::round(m_aveChannels) << " without shape derivative." 
 	  << std::endl;
 	
     if ( m_saturation )
-      msg() << msglvl << "   " << m_saturation << " events had on average " << (int)round(m_aveSaturCells) 
-          << " out of " << (int)round(m_aveChannels) << " saturating channels."  
+      msg() << msglvl << "   " << m_saturation << " events had on average " << (int)std::round(m_aveSaturCells) 
+          << " out of " << (int)std::round(m_aveChannels) << " saturating channels."  
 	  << std::endl ;
     
     msg() << endmsg;

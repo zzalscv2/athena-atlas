@@ -8,10 +8,10 @@
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include "LArCOOLConditions/LArDSPThresholdsFlat.h"
-#include "GaudiKernel/SystemOfUnits.h"
 
+#include <climits>
 #include <cmath>
-#include <limits.h>
+#include <memory>
 
 #define MAXINT INT_MAX
 #define MAXINT2 -INT_MAX
@@ -87,7 +87,7 @@ StatusCode LArRawChannelBuilderIterAlg::execute(const EventContext& ctx) const {
   if (m_useDBFortQ) {
     if (!m_run2DSPThresholdsKey.empty()) {
       SG::ReadCondHandle<AthenaAttributeList> dspThrshAttr (m_run2DSPThresholdsKey, ctx);
-      run2DSPThresh = std::unique_ptr<LArDSPThresholdsFlat>(new LArDSPThresholdsFlat(*dspThrshAttr));
+      run2DSPThresh = std::make_unique<LArDSPThresholdsFlat>(*dspThrshAttr);
       if (ATH_UNLIKELY(!run2DSPThresh->good())) {
         ATH_MSG_ERROR( "Failed to initialize LArDSPThresholdFlat from attribute list loaded from " << m_run2DSPThresholdsKey.key()
                        << ". Aborting." ); 
@@ -433,7 +433,7 @@ LArOFIterResults LArRawChannelBuilderIterAlg::peak(const std::vector<float>& sam
     }
 
     // if we are within +-0.5*Dt of time bin, we have converged for sure
-    if (fabs(result.m_tau) <= (0.5*timeBinWidth)) { 
+    if (std::fabs(result.m_tau) <= (0.5*timeBinWidth)) { 
       result.m_converged=true;
       delay = delayIdx*timeBinWidth;
       break;
@@ -442,7 +442,7 @@ LArOFIterResults LArRawChannelBuilderIterAlg::peak(const std::vector<float>& sam
     if (kIter>=mynIter) { //Max. number of iterations reached
       delay = delayIdx*timeBinWidth;
       if (result.m_converged) {
-        if (fabs(tau_save) < fabs(result.m_tau)) {
+        if (std::fabs(tau_save) < std::fabs(result.m_tau)) {
             result.m_amplitude = amplitude_save;
             result.m_tau       = tau_save;
             kMax                 = kMax_save;
@@ -450,13 +450,13 @@ LArOFIterResults LArRawChannelBuilderIterAlg::peak(const std::vector<float>& sam
             delayIdx             = delayIdx_save;
         }
       }
-      if (fabs(result.m_tau) <= timeBinWidth) result.m_converged=true;
+      if (std::fabs(result.m_tau) <= timeBinWidth) result.m_converged=true;
       break;
     }
 
     // if we are within +-Dt of time bin, we consider that we have converged but we allow for one more
     // iteration to see if we can find a smaller tau, if not we keep the previous one
-    if (fabs(result.m_tau) <= timeBinWidth) {
+    if (std::fabs(result.m_tau) <= timeBinWidth) {
        result.m_converged = true;
        mynIter = kIter+1;    // allow only for more iteration
        amplitude_save = result.m_amplitude;

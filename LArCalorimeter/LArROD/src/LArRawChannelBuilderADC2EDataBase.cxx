@@ -17,7 +17,7 @@ LArRawChannelBuilderADC2EDataBase::LArRawChannelBuilderADC2EDataBase(const std::
 								     const std::string& name,
 								     const IInterface* parent):
   LArRawChannelBuilderADC2EToolBase(type,name,parent),
-  m_onlineHelper(0)
+  m_onlineHelper(nullptr)
 {
   m_helper = new LArRawChannelBuilderStatistics( 3,      // number of possible errors
 					       0x20);  // bit pattern special for this tool,
@@ -71,7 +71,7 @@ LArRawChannelBuilderADC2EDataBase::ADC2E(const EventContext& ctx,
   Ramps = adc2mev->ADC2MEV(m_parent->curr_chid,m_parent->curr_gain).asVector();
   
   //Check ramp coefficents
-  if (Ramps.size()==0) {
+  if (Ramps.empty()) {
     ATH_MSG_DEBUG("No ADC2MeV data found for channel 0x" << MSG::hex
 		  << m_parent->curr_chid.get_compact() << MSG::dec
 		  << " Gain "<< m_parent->curr_gain << " Skipping channel.");
@@ -97,9 +97,9 @@ LArRawChannelBuilderADC2EDataBase::ADC2E(const EventContext& ctx,
   bool useIntercept_medium = m_useIntercept_medium;
   if (m_onlineHelper->isHECchannel(m_parent->curr_chid)) useIntercept_medium = m_useIntercept_high;
 
-  if( !((( m_parent->curr_gain == CaloGain::LARHIGHGAIN )   && m_useIntercept_high ) ||
-	(( m_parent->curr_gain == CaloGain::LARMEDIUMGAIN ) && useIntercept_medium ) ||
-	(( m_parent->curr_gain == CaloGain::LARLOWGAIN )    && m_useIntercept_low )) )
+  if( (( m_parent->curr_gain != CaloGain::LARHIGHGAIN )   || !m_useIntercept_high ) &&
+	(( m_parent->curr_gain != CaloGain::LARMEDIUMGAIN ) || !useIntercept_medium ) &&
+	(( m_parent->curr_gain != CaloGain::LARLOWGAIN )    || !m_useIntercept_low ) )
     Ramps[0]=0;
   
   /*  //otherwise ignore intercept, E=0;

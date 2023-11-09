@@ -113,7 +113,7 @@ StatusCode LArFebErrorSummaryMaker::execute(const EventContext& ctx) const
     
   int nbOfFebsInError = 0;
 
-  for (const auto it : *hdrCont) {
+  for (const auto *const it : *hdrCont) {
 
       HWIdentifier febid= it->FEBId();
       unsigned int int_id =  febid.get_identifier32().get_compact();
@@ -148,13 +148,13 @@ StatusCode LArFebErrorSummaryMaker::execute(const EventContext& ctx) const
       // This allow to allow to always plot the number of samples in the histo                                          
       if (nbSamplesFirst == 0){
         // Raw data / transparent : Nb of samples is here determined with size of raw data vector                       
-        if (eventType == 2 && (sca.size() != 0)) nbSamplesFirst=sca.size();
+        if (eventType == 2 && (!sca.empty())) nbSamplesFirst=sca.size();
         // Physic : Nb of samples is here determined with method of LArFEBMonHeader                                     
         if (eventType == 4 && (it->NbSamples() != 0)) nbSamplesFirst=it->NbSamples();
       }
       // Test the uniformity of number of samples and that sca # is inside [0;143] only in raw data                     
       if (eventType == 2){
-	if (nbSamplesFirst!=sca.size() && sca.size()!=0) badNbOfSp = true;
+	if (nbSamplesFirst!=sca.size() && !sca.empty()) badNbOfSp = true;
 	for (unsigned int i=0; i<sca.size(); ++i){
 	  if (sca[i]>143) scaOutOfRange = true;
 	}
@@ -162,7 +162,7 @@ StatusCode LArFebErrorSummaryMaker::execute(const EventContext& ctx) const
       if (eventType == 4 && (nbSamplesFirst != it->NbSamples()) && (it->NbSamples() != 0)) badNbOfSp = true;
 
       // Test that the number of samples is not zero only in raw data and results mode                                  
-      if (eventType == 2 &&  sca.size() == 0) zeroSp = true;
+      if (eventType == 2 &&  sca.empty()) zeroSp = true;
       if (eventType == 4 &&  (it->RodResults1Size()  == 0)) zeroSp = true;
 
 
@@ -275,7 +275,7 @@ StatusCode LArFebErrorSummaryMaker::execute(const EventContext& ctx) const
 	//Print warning only for first couple of events and if we have at least one FEB read out
 	//(dont' flood log with useless message is LAr is not in the run)
 	//if (this->outputLevel()<=MSG::WARNING && m_missingFebsWarns < m_warnLimit &&  hdrCont->size()>0) {
-	if (msgLvl(MSG::WARNING) && m_missingFebsWarns.load() < m_warnLimit &&  hdrCont->size()>0) {
+	if (msgLvl(MSG::WARNING) && m_missingFebsWarns.load() < m_warnLimit &&  !hdrCont->empty()) {
 	  warn=true;
 	  const std::string bec= m_onlineHelper->barrel_ec(febid)==0 ? "BARREL/" : "ENDCAP/";
 	  const std::string side=m_onlineHelper->pos_neg(febid)==0 ? "C/" : "A/";
@@ -308,7 +308,7 @@ StatusCode LArFebErrorSummaryMaker::execute(const EventContext& ctx) const
 }
 
 
-bool LArFebErrorSummaryMaker::masked (unsigned int hid, const std::set<unsigned int>& v_feb) const {
+bool LArFebErrorSummaryMaker::masked (unsigned int hid, const std::set<unsigned int>& v_feb) {
 
   //return v_feb.contains(hid); //C++20 only ..
   return v_feb.find(hid) != v_feb.end();

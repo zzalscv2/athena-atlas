@@ -48,8 +48,8 @@ using namespace std ;
 ReadLArRaw::ReadLArRaw(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator),
   m_ChannelContainerName("LArRawChannelContainer"), 
-  m_onlineID(0),
-  m_larem_id(0)
+  m_onlineID(nullptr),
+  m_larem_id(nullptr)
 {
   // Declare the properties
   declareProperty("LArRawChannelContainerName",m_ChannelContainerName);
@@ -73,7 +73,7 @@ StatusCode ReadLArRaw::initialize()
 
 
 
-  if (m_dumpFile.size()) {
+  if (!m_dumpFile.empty()) {
     m_outFile.open(m_dumpFile.c_str());
   }
 

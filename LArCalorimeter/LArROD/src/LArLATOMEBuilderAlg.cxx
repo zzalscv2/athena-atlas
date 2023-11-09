@@ -57,8 +57,8 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
   SG::ReadHandle<LArDigitContainer> inputContainer(m_digitKey,ctx);
   //Write output via write handle
   SG::WriteHandle<LArRawSCContainer> outputContainerHdl(m_larRawSCKey,ctx);
-  ATH_CHECK(outputContainerHdl.record(std::make_unique<LArRawSCContainer>(SG::VIEW_ELEMENTS)));
-  auto* outputContainer = outputContainerHdl.ptr();
+  ATH_CHECK(outputContainerHdl.record(std::make_unique<LArRawSCContainer>()));
+  auto *outputContainer = outputContainerHdl.ptr();
   outputContainer->reserve(inputContainer->size());
   DataPool<LArRawSC> dataItemsPool(ctx);
   dataItemsPool.reserve(inputContainer->size());
@@ -296,7 +296,6 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
 
 /// reproduce LDPB package computation in https://gitlab.cern.ch/atlas-lar-online/onlinelatomedb/-/blob/master/src/CondFloatDB.cpp
 bool LArLATOMEBuilderAlg::floatToInt(float val, int &newval, int hardpoint, int size) {
-
   if( std::isnan(val) )return false;
   int intVal = round(val*pow(2,hardpoint));
   bool isNeg = (intVal<0);

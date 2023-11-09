@@ -61,7 +61,7 @@ ulonglong LArRawChannelBuilderStatistics::returnErrorCountSqPerEvent(unsigned in
   return 0;
 }
 
-unsigned long LArRawChannelBuilderStatistics::returnEvents()
+unsigned long LArRawChannelBuilderStatistics::returnEvents() const
 {
   return m_events;
 }
@@ -77,12 +77,12 @@ std::string LArRawChannelBuilderStatistics::returnErrorString(unsigned int nerr)
     return m_s;
   return m_error_string[nerr];
 }
-unsigned int LArRawChannelBuilderStatistics::returnMaxErrors()
+unsigned int LArRawChannelBuilderStatistics::returnMaxErrors() const
 {
   return m_N_errors;
 }
 
-unsigned int LArRawChannelBuilderStatistics::returnBitPattern()
+unsigned int LArRawChannelBuilderStatistics::returnBitPattern() const
 {
   return m_bit_pattern;
 }

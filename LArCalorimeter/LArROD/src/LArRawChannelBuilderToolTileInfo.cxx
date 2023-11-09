@@ -20,7 +20,7 @@
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 
-#include <math.h>
+#include <cmath>
 
 using CLHEP::Hep3Vector;
 using CLHEP::c_light;
@@ -147,7 +147,7 @@ bool LArRawChannelBuilderToolTileInfo::buildRawChannel(const LArDigit* digit,
       double IPTOF = 0.; //For time of flight correction to Interaction Point
       globaltimeoffset = 0.; //Determined from cosmic data (LArTime-TileComTime) 
     
-      if (caloDDE != NULL) {
+      if (caloDDE != nullptr) {
 
 	double xpos=caloDDE->x();
 	double ypos=caloDDE->y();

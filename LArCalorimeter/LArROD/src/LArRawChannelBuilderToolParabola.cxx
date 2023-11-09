@@ -11,7 +11,7 @@
 #include "Identifier/Identifier.h"
 
 #include "LArRawEvent/LArDigit.h"
-#include <math.h>
+#include <cmath>
 
 #define MAXINT 2147483000
 #define MAXINT2 -2147483000
@@ -22,7 +22,7 @@ LArRawChannelBuilderToolParabola::LArRawChannelBuilderToolParabola(const std::st
 								   const IInterface* parent):
   LArRawChannelBuilderToolBase(type,name,parent),
   m_parabolaRecoTool("LArOFPeakRecoTool"),
-  m_emId(NULL)
+  m_emId(nullptr)
 {
   m_helper = new LArRawChannelBuilderStatistics( 3,      // number of possible errors
 					       0x03);  // bit pattern special for this tool,

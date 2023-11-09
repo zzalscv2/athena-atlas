@@ -7,12 +7,12 @@
 #include "LArIdentifier/LArOnlineID.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
-#include <math.h>
-#include "stdint.h"
+#include <cmath>
+#include <cstdint>
 
 LArDigitsAccumulator::LArDigitsAccumulator (const std::string& name, ISvcLocator* pSvcLocator):
   AthAlgorithm(name, pSvcLocator),
-  m_onlineHelper(0),
+  m_onlineHelper(nullptr),
   m_AccuDigitContainerName("LArAccumulatedDigits"),
   m_NtriggersPerStep(100),
   m_nStepTrigger(30)
@@ -67,7 +67,7 @@ StatusCode LArDigitsAccumulator::execute()
 
   
   // pointer to input container
-  const LArDigitContainer* DigitContainer=NULL;
+  const LArDigitContainer* DigitContainer=nullptr;
 
 
   // retrieve input Digits
@@ -79,7 +79,7 @@ StatusCode LArDigitsAccumulator::execute()
 
     // store LArAccumulatedDigits
     ACCUMDIGIT_VEC& vAccum = m_my_vec;
-    if(vAccum.size()==0) vAccum.resize(m_onlineHelper->channelHashMax());
+    if(vAccum.empty()) vAccum.resize(m_onlineHelper->channelHashMax());
 
     // Loop over DigitContainer
 

@@ -31,7 +31,7 @@
 LArHITtoCell::LArHITtoCell(const std::string& name,
                                    ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator),
-    m_calo_id_manager(0)
+    m_calo_id_manager(nullptr)
 {
 }
 
@@ -82,7 +82,7 @@ StatusCode LArHITtoCell::execute(const EventContext& context) const
      return StatusCode::FAILURE;
   }
 
-  auto fracS = this->retrieve(context,m_fracSKey);
+  const auto *fracS = this->retrieve(context,m_fracSKey);
   if (!fracS ) {
      ATH_MSG_ERROR("Do not have SC fracs !!!");
      return StatusCode::FAILURE;
@@ -111,7 +111,7 @@ StatusCode LArHITtoCell::execute(const EventContext& context) const
     IdentifierHash hash(it);
     const LArHitList& hitlist = hitmapPtr->GetCell(it);
     const std::vector<std::pair<float,float> >& timeE = hitlist.getData();
-    if (timeE.size() == 0 ) continue;
+    if (timeE.empty() ) continue;
     if ( m_isSC ){ // convert hash to sc hash
     Identifier cellId = m_OflHelper->cell_id(hash);
     Identifier scId = m_scidtool->offlineToSuperCellID(cellId);

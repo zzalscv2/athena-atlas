@@ -88,7 +88,7 @@ class LArFebErrorSummaryMaker : public AthReentrantAlgorithm
   SG::WriteHandleKey<LArFebErrorSummary> m_writeKey{this,"WriteKey","LArFebErrorSummary"};
 
   // methods:
-  bool masked (unsigned int hid, const std::set<unsigned int>& v_feb) const; 
+  static bool masked (unsigned int hid, const std::set<unsigned int>& v_feb) ; 
 };
 #endif
 

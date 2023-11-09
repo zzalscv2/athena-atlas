@@ -17,16 +17,15 @@
 LArDigitThinner::LArDigitThinner(const std::string& name,
 				 ISvcLocator* pSvcLocator) :
     AthReentrantAlgorithm(name, pSvcLocator)
-    , m_onlineID(NULL)
-    , m_caloCellId(NULL) {
+    , m_onlineID(nullptr)
+    , m_caloCellId(nullptr) {
   declareProperty("EnergyCuts_Barrel",  m_energyCuts_barrel);
   declareProperty("EnergyCuts_Endcap",  m_energyCuts_endcap);
   declareProperty("EnergyCut_HEC",  m_energyCut_hec = 5000);
   declareProperty("EnergyCut_FCAL",  m_energyCut_fcal = 20000);
 }
 
-LArDigitThinner::~LArDigitThinner() {
-}
+LArDigitThinner::~LArDigitThinner() = default;
 
 
 StatusCode LArDigitThinner::initialize() {

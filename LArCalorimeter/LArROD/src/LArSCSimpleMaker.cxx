@@ -31,7 +31,7 @@
 LArSCSimpleMaker::LArSCSimpleMaker(const std::string& name,
                                    ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator),
-    m_calo_id_manager(0)
+    m_calo_id_manager(nullptr)
 {
 }
 

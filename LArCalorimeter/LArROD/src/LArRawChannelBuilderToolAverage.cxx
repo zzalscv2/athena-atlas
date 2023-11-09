@@ -10,9 +10,9 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 
 #include "CaloIdentifier/CaloCell_ID.h"
-#include "LArIdentifier/LArOnlineID.h"
 #include "Identifier/Identifier.h"
-#include <math.h>
+#include "LArIdentifier/LArOnlineID.h"
+#include <cmath>
 
 using CLHEP::nanosecond;
 using CLHEP::picosecond;
@@ -26,10 +26,10 @@ LArRawChannelBuilderToolAverage::LArRawChannelBuilderToolAverage(const std::stri
 								 const std::string& name,
 								 const IInterface* parent):
   LArRawChannelBuilderToolBase(type,name,parent),
-  m_emId(NULL),
-  m_fcalId(NULL),
-  m_hecId(NULL),
-  m_onlineHelper(NULL)
+  m_emId(nullptr),
+  m_fcalId(nullptr),
+  m_hecId(nullptr),
+  m_onlineHelper(nullptr)
 {
   m_helper = new LArRawChannelBuilderStatistics( 1,      // number of possible errors
 					       0x01);  // bit pattern special for this tool,

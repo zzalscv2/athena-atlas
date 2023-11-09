@@ -11,7 +11,7 @@
 #include "LArRawEvent/LArDigit.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
-#include <math.h>
+#include <cmath>
 
 using CLHEP::ns;
 using CLHEP::nanosecond;
@@ -25,7 +25,7 @@ LArRawChannelBuilderToolCubic::LArRawChannelBuilderToolCubic(const std::string& 
 							     const std::string& name,
 							     const IInterface* parent):
   LArRawChannelBuilderToolBase(type,name,parent),
-  m_fcalId(NULL)
+  m_fcalId(nullptr)
 {
   m_helper = new LArRawChannelBuilderStatistics( 3,      // number of possible errors
 					       0x04);  // bit pattern special for this tool,
@@ -154,7 +154,7 @@ bool LArRawChannelBuilderToolCubic::buildRawChannel(const LArDigit* digit,
       // fit parameters
       disc = A[2]*A[2] - 3*A[1]*A[3];
       if ( ! ( CubicFailed = ( disc < 0 || A[3] == 0 ) ) )   {
-	dtmax = (-A[2]-sqrt(disc))/(A[3]*3);
+	dtmax = (-A[2]-std::sqrt(disc))/(A[3]*3);
 	if ( ! ( CubicFailed = ( dtmax < 0 || dtmax > 3 ) ) ) {
 	  time = (float(it0) + dtmax) * (25.0 * nanosecond/picosecond); // nsec
 	  for(int ia = 0; ia < 4; ia++)
