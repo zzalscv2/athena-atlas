@@ -195,6 +195,33 @@ namespace
     }
   };
 
+  template <class T_MeasurementContainer>
+  std::pair<xAOD::DetectorIDHashType, bool> getMaxHashAndCheckOrder(const T_MeasurementContainer &measurements)
+  {
+    std::pair<xAOD::DetectorIDHashType, bool> max_hash_ordered{0, true};
+    for (const auto &measurement : measurements)
+    {
+      xAOD::DetectorIDHashType id_hash = measurement->identifierHash();
+      max_hash_ordered.second = (id_hash >= max_hash_ordered.first);
+      max_hash_ordered.first = std::max(max_hash_ordered.first, id_hash);
+    }
+    return max_hash_ordered;
+  }
+
+  void gatherGeoIds(const ActsTrk::IActsToTrkConverterTool &converter_tool,
+                    const InDetDD::SiDetectorElementCollection &detectorElements,
+                    std::vector<Acts::GeometryIdentifier> &geo_ids,
+                    std::vector<const Acts::Surface *> &acts_surfaces)
+  {
+    for (const auto *det_el : detectorElements)
+    {
+      const Acts::Surface &surface =
+          converter_tool.trkSurfaceToActsSurface(det_el->surface());
+      geo_ids.push_back(surface.geometryId());
+      acts_surfaces.push_back(&surface);
+    }
+  }
+
   /// Adapted from Acts Examples/Algorithms/TrackFinding/src/TrackFindingAlgorithmFunction.cpp
 
   using Stepper = Acts::EigenStepper<>;
@@ -204,7 +231,7 @@ namespace
 
   // Small holder class to keep CKF and related objects.
   // Keep a unique_ptr<CKF_pimpl> in TrackFindingAlg, so we don't have to expose the
-  // Acts class definitions to in TrackFindingAlg.h.
+  // Acts class definitions in TrackFindingAlg.h.
   // ActsTrk::TrackFindingAlg::CKF_pimpl inherits from CKF_config to prevent -Wsubobject-linkage warning.
   struct CKF_config
   {
@@ -214,10 +241,12 @@ namespace
     Acts::MeasurementSelector measurementSelector;
     Acts::PropagatorPlainOptions pOptions;
     Acts::CombinatorialKalmanFilterExtensions<ActsTrk::MutableTrackStateBackend> ckfExtensions;
+    // Track selection
     Acts::TrackSelector trackSelector;
   };
 
-  // === DuplicateSeedDetector ================================
+  // === DuplicateSeedDetector ===============================================
+
   // Identify duplicate seeds: seeds where all measurements were already located in a previously followed trajectory.
   class DuplicateSeedDetector
   {
@@ -316,7 +345,7 @@ namespace
     size_t m_found = 0u;    // count of found seeds for this/last trajectory
   };
 
-  // === TrackFindingMeasurements ================================
+  // === TrackFindingMeasurements ============================================
 
   // Helper class to convert xAOD::PixelClusterContainer or xAOD::StripClusterContainer to UncalibSourceLinkMultiset.
   class TrackFindingMeasurements

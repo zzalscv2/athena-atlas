@@ -116,7 +116,7 @@ namespace ActsTrk
     Gaudi::Property<std::vector<std::string>> m_seedLables{this, "SeedLabels", {"Pixel", "Strip"}, "Empty or one label per seed key used in outputs"};
     Gaudi::Property<bool> m_dumpAllStatEtaBins{this, "DumpEtaBinsForAll", false, "Dump eta bins of all statistics counter."};
 
-    enum EStat
+    enum EStat : std::size_t
     {
       kNTotalSeeds,
       kNoTrackParam,
@@ -127,6 +127,7 @@ namespace ActsTrk
       kNSelectedTracks,
       kNStat
     };
+    using EventStats = std::vector<std::array<unsigned int, kNStat>>;
 
     /**
      * @brief invoke track finding procedure
@@ -150,7 +151,7 @@ namespace ActsTrk
                ActsTrk::MutableTrackContainer &tracksContainer,
                size_t seedCollectionIndex,
                const char *seedType,
-               std::vector<std::array<unsigned int, kNStat>> &event_stat) const;
+               EventStats &event_stat) const;
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
     StatusCode storeSeedInfo(const ActsTrk::MutableTrackContainer &tracksContainer,
@@ -167,27 +168,29 @@ namespace ActsTrk
     std::unique_ptr<CKF_pimpl> m_trackFinder;
 
     // statistics
-    enum ECategories
+    void initStatTables();
+    void copyStats(const EventStats &event_stat) const;
+    void printStatTables() const;
+
+    enum ECategories : std::size_t
     {
       kPixelSeeds,
       kStripSeeds,
       kNCategories
     };
 
-    static unsigned int nSeedCollections()
+    static std::size_t nSeedCollections()
     {
       return kNCategories;
     }
-    unsigned int seedCollectionStride() const
+    std::size_t seedCollectionStride() const
     {
       return m_statEtaBins.size() + 1;
     }
-    unsigned int getStatCategory(unsigned int seed_collection, float eta) const;
+    std::size_t getStatCategory(std::size_t seed_collection, float eta) const;
+    std::size_t computeStatSum(std::size_t seed_collection, EStat counter_i, const EventStats &stat) const;
 
-    std::size_t computeStatSum(unsigned int seed_collection,
-                               EStat counter_i,
-                               const std::vector<std::array<unsigned int, kNStat>> &stat) const;
-
+    bool m_useAbsEtaForStat = false;
     mutable std::mutex m_mutex ATLAS_THREAD_SAFE;
     mutable std::vector<std::array<std::size_t, kNStat>> m_stat ATLAS_THREAD_SAFE{};
 
@@ -199,34 +202,7 @@ namespace ActsTrk
 
     /// logging instance
     std::unique_ptr<const Acts::Logger> m_logger;
-
-    bool m_useAbsEtaForStat = false;
   };
-
-  inline unsigned int TrackFindingAlg::getStatCategory(unsigned int seed_collection, float eta) const
-  {
-    std::vector<float>::const_iterator bin_iter = std::upper_bound(m_statEtaBins.begin(),
-                                                                   m_statEtaBins.end(),
-                                                                   m_useAbsEtaForStat ? std::abs(eta) : eta);
-    unsigned int category_i = seed_collection * seedCollectionStride() + static_cast<unsigned int>(bin_iter - m_statEtaBins.begin());
-    assert(category_i < m_stat.size());
-    return category_i;
-  }
-
-  inline std::size_t TrackFindingAlg::computeStatSum(unsigned int seed_collection,
-                                                     EStat counter_i,
-                                                     const std::vector<std::array<unsigned int, kNStat>> &stat) const
-  {
-    std::size_t out = 0u;
-    for (unsigned int category_i = seed_collection * seedCollectionStride() + static_cast<unsigned int>(counter_i);
-         category_i < (seed_collection + 1) * seedCollectionStride();
-         ++category_i)
-    {
-      assert(category_i < stat.size());
-      out += stat[category_i][counter_i];
-    }
-    return out;
-  }
 
 } // namespace
 

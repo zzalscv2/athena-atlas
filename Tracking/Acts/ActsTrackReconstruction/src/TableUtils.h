@@ -96,8 +96,8 @@ namespace TableUtils {
                        Range<T_Counter>   counter,
                        Range<std::string> label,
                        const std::string &label_prefix,
-                       const unsigned int column_width,
-                       const unsigned int min_label_width,
+                       const std::size_t column_width,
+                       const std::size_t min_label_width,
                        const bool dump_footer,
                        const bool separate_last_row ) {
       if (counter && label && counter.equalSize(label)) {
@@ -105,16 +105,14 @@ namespace TableUtils {
          for (const std::string &name : label ) {
             max_size = std::max(max_size, name.size());
          }
-         const unsigned int total_size =max_size+3+2*2+column_width;
-         std::string line;
-         line.reserve(total_size);
-         for (unsigned int i=0; i< total_size; ++i) { line.push_back('-');};
+         const std::size_t total_size =max_size+3+2*2+column_width;
+         std::string line(total_size, '-');
          std::array<std::size_t,3> vertical_line_pos{0u, max_size+3, line.size()-1};
          for (std::size_t pos : vertical_line_pos) {
             line[pos]='|';
          }
          out << line << std::endl;
-         unsigned int idx=0;
+         std::size_t idx=0;
          std::string empty;
          for (const T_Counter &a : counter) {
             if (separate_last_row && idx+1 == label.size()) {
@@ -144,8 +142,8 @@ namespace TableUtils {
                        Range<std::string> column_label,
                        const std::string &top_left_label,
                        const std::string &label_prefix,
-                       const unsigned int column_width,
-                       const unsigned int min_label_width,
+                       const std::size_t column_width,
+                       const std::size_t min_label_width,
                        const bool dump_header,
                        const bool dump_footer,
                        const bool separate_last_row) {
@@ -160,17 +158,15 @@ namespace TableUtils {
          for (const std::string &name : column_label ) {
             the_width = std::max(the_width, name.size());
          }
-         unsigned int total_size =max_size+2*2;
-         for (unsigned int column_i=0; column_i<column_label.size(); ++column_i) {
+         std::size_t total_size =max_size+2*2;
+         for (std::size_t column_i=0; column_i<column_label.size(); ++column_i) {
             total_size += the_width + 3;
          }
-         std::string line;
-         line.reserve(total_size);
-         for (unsigned int i=0; i< total_size; ++i) { line.push_back('-');};
+         std::string line(total_size, '-');
          std::size_t pos=0;
          line[pos]='|';
          pos += max_size+3;
-         for (unsigned int column_i=0; column_i<column_label.size(); ++column_i) {
+         for (std::size_t column_i=0; column_i<column_label.size(); ++column_i) {
             line[pos]='|';
             pos += the_width + 3;
          }
@@ -183,7 +179,7 @@ namespace TableUtils {
             out << std::right << std::endl;
          }
          out << line << std::endl;
-         unsigned int idx=0;
+         std::size_t idx=0;
          std::string empty;
          for (const Range<T_Counter> &a_row : counter) {
             if (separate_last_row && idx+1 == row_label.size()) {
@@ -211,16 +207,16 @@ namespace TableUtils {
    struct StatTable {
       Range<T>           m_counter;
       Range<std::string> m_label;
-      StatTable &columnWidth(unsigned int value) { m_columnWidth=value; return *this;}
-      StatTable &minLabelWidth(unsigned int value) { m_minLabelWidth=value; return *this;}
+      StatTable &columnWidth(std::size_t value) { m_columnWidth=value; return *this;}
+      StatTable &minLabelWidth(std::size_t value) { m_minLabelWidth=value; return *this;}
       StatTable &dumpHeader(bool value=true) { m_dumpHeader=value; return *this;}
       StatTable &dumpFooter(bool value=true) { m_dumpFooter=value; return *this;}
       StatTable &separateLastRow(bool value=true) { m_separateLastRow=value; return *this;}
       StatTable &labelPrefix(const std::string& value) { m_labelPrefix=value; return *this;}
 
       std::string        m_labelPrefix {};
-      unsigned int       m_columnWidth=12;
-      unsigned int       m_minLabelWidth=0;
+      std::size_t        m_columnWidth=12;
+      std::size_t        m_minLabelWidth=0;
       bool               m_dumpHeader=true;
       bool               m_dumpFooter=true;
       bool               m_separateLastRow=false;
@@ -232,16 +228,16 @@ namespace TableUtils {
       Range<std::string> m_rowLabel;
       Range<std::string> m_columnLabel;
       std::string        m_topLeftLable;
-      MultiColumnTable &columnWidth(unsigned int value) { m_columnWidth=value; return *this;}
-      MultiColumnTable &minLabelWidth(unsigned int value) { m_minLabelWidth=value; return *this;}
+      MultiColumnTable &columnWidth(std::size_t value) { m_columnWidth=value; return *this;}
+      MultiColumnTable &minLabelWidth(std::size_t value) { m_minLabelWidth=value; return *this;}
       MultiColumnTable &dumpHeader(bool value=true) { m_dumpHeader=value; return *this;}
       MultiColumnTable &dumpFooter(bool value=true) { m_dumpFooter=value; return *this;}
       MultiColumnTable &separateLastRow(bool value=true) { m_separateLastRow=value; return *this;}
       MultiColumnTable &labelPrefix(const std::string& value) { m_labelPrefix=value; return *this;}
 
       std::string        m_labelPrefix {};
-      unsigned int       m_columnWidth=12;
-      unsigned int       m_minLabelWidth=0;
+      std::size_t        m_columnWidth=12;
+      std::size_t        m_minLabelWidth=0;
       bool               m_dumpHeader=true;
       bool               m_dumpFooter=true;
       bool               m_separateLastRow=false;
@@ -263,28 +259,28 @@ namespace TableUtils {
    }
 
    template<class T_Collection>
-   unsigned int maxLabelWidth( const T_Collection &col) {
+   std::size_t maxLabelWidth( const T_Collection &col) {
       std::size_t max_width=0u;
       for (const auto &elm : col ) {
          max_width = std::max( max_width, elm.size());
       }
-      return static_cast<unsigned int>(max_width);
+      return max_width;
    }
 
 
-   constexpr inline std::size_t categoryStride([[maybe_unused]] const unsigned int categories,
-                                               [[maybe_unused]] const unsigned int sub_categories,
-                                               [[maybe_unused]] const unsigned int n_counter) {
+   constexpr inline std::size_t categoryStride([[maybe_unused]] const std::size_t categories,
+                                               [[maybe_unused]] const std::size_t sub_categories,
+                                               [[maybe_unused]] const std::size_t n_counter) {
       return 1;
    }
-   constexpr inline std::size_t subCategoryStride([[maybe_unused]] const unsigned int categories,
-                                                  [[maybe_unused]] const unsigned int sub_categories,
-                                                  [[maybe_unused]] const unsigned int n_counter) {
+   constexpr inline std::size_t subCategoryStride([[maybe_unused]] const std::size_t categories,
+                                                  [[maybe_unused]] const std::size_t sub_categories,
+                                                  [[maybe_unused]] const std::size_t n_counter) {
       return (categories+1) * n_counter;
    }
-   constexpr inline std::size_t counterStride([[maybe_unused]] const unsigned int categories,
-                                              [[maybe_unused]] const unsigned int sub_categories,
-                                              [[maybe_unused]] const unsigned int n_counter) {
+   constexpr inline std::size_t counterStride([[maybe_unused]] const std::size_t categories,
+                                              [[maybe_unused]] const std::size_t sub_categories,
+                                              [[maybe_unused]] const std::size_t n_counter) {
       return (categories+1);
    }
 
@@ -295,8 +291,8 @@ namespace TableUtils {
    // - projections: sum numbers in direction of category and sub_category direction, respectively.
    // - dimension of the resulting vector: (categories+1) * (sub_categories+1) * N
    template< typename T_Output, typename T_Input, const std::size_t N>
-   std::vector<T_Output> createCounterArrayWithProjections( const unsigned int categories,
-                                                            const unsigned int sub_categories,
+   std::vector<T_Output> createCounterArrayWithProjections( const std::size_t categories,
+                                                            const std::size_t sub_categories,
                                                             const std::vector< std::array<T_Input, N> > &input_counts) {
       if (categories*sub_categories!= input_counts.size()) {
          std::stringstream msg;
@@ -307,21 +303,21 @@ namespace TableUtils {
       }
       std::vector<T_Output> output_counts;
       output_counts.resize((categories+1) * (sub_categories+1) * N);
-      const unsigned int sub_category_stride = subCategoryStride(categories, sub_categories, N);
-      const unsigned int counter_stride      = counterStride(categories, sub_categories, N);
-      const unsigned int category_stride     = categoryStride(categories, sub_categories, N);
+      const std::size_t sub_category_stride = subCategoryStride(categories, sub_categories, N);
+      const std::size_t counter_stride      = counterStride(categories, sub_categories, N);
+      const std::size_t category_stride     = categoryStride(categories, sub_categories, N);
       // project seeds
-      for (unsigned int sub_category_i=0;
+      for (std::size_t sub_category_i=0;
            sub_category_i < sub_categories;
            ++sub_category_i) {
-         for (unsigned int category_i=0; category_i<categories; ++category_i) {
-            unsigned int src_idx       = category_i     * sub_categories      + sub_category_i;
-            unsigned int dest_idx_base = sub_category_i * sub_category_stride + 0 * counter_stride;
-            unsigned int dest_idx_project_categories_base = dest_idx_base;
+         for (std::size_t category_i=0; category_i<categories; ++category_i) {
+            std::size_t src_idx       = category_i     * sub_categories      + sub_category_i;
+            std::size_t dest_idx_base = sub_category_i * sub_category_stride + 0 * counter_stride;
+            std::size_t dest_idx_project_categories_base = dest_idx_base;
             dest_idx_base += category_i * category_stride;
             dest_idx_project_categories_base += categories * category_stride;
 
-            for (unsigned int counter_i=0; counter_i<N; ++counter_i) {
+            for (std::size_t counter_i=0; counter_i<N; ++counter_i) {
                std::size_t dest_idx=dest_idx_base + counter_i * counter_stride;
                assert( src_idx < input_counts.size() && counter_i < input_counts[src_idx].size());
                assert( dest_idx < output_counts.size());
@@ -332,15 +328,15 @@ namespace TableUtils {
          }
       }
       // project eta bins
-      for (unsigned int category_i=0; category_i<=categories; ++category_i) {
-         for (unsigned int counter_i=0; counter_i<N; ++counter_i) {
-            unsigned int dest_idx_base  = 0 * sub_category_stride + counter_i * counter_stride + category_i;
-            unsigned int dest_idx_project_sub_categories = sub_categories * sub_category_stride + dest_idx_base;
+      for (std::size_t category_i=0; category_i<=categories; ++category_i) {
+         for (std::size_t counter_i=0; counter_i<N; ++counter_i) {
+            std::size_t dest_idx_base  = 0 * sub_category_stride + counter_i * counter_stride + category_i;
+            std::size_t dest_idx_project_sub_categories = sub_categories * sub_category_stride + dest_idx_base;
             assert( dest_idx_project_sub_categories < output_counts.size() );
-            for (unsigned int sub_category_i=0;
+            for (std::size_t sub_category_i=0;
                  sub_category_i<sub_categories;
                  ++sub_category_i) {
-               unsigned int sub_category_idx = dest_idx_base + sub_category_i * sub_category_stride;
+               std::size_t sub_category_idx = dest_idx_base + sub_category_i * sub_category_stride;
                assert( sub_category_idx < output_counts.size() );
                output_counts[dest_idx_project_sub_categories] += output_counts[sub_category_idx];
             }
@@ -349,21 +345,22 @@ namespace TableUtils {
       return output_counts;
    }
 
+   using SummandDefinition = std::pair<std::size_t, int>;
+   using RatioDefinition = std::pair< std::vector< SummandDefinition >,
+                                      std::vector< SummandDefinition > >;
+
    // helper to create the sum definitions for the ratio of single counters
    // this will lead to the computation of the simple ratio defined by counter[numerator] / counter[denominatpr]
    template <typename T>
-   inline std::pair< std::vector< std::pair<unsigned int, int> >,
-                     std::vector< std::pair<unsigned int, int> > >
+   inline RatioDefinition
    defineSimpleRatio(T numerator, T denominator) {
-      return std::make_pair( std::vector< std::pair<unsigned int, int> > { std::make_pair(static_cast<unsigned int>(numerator),1)},
-                             std::vector< std::pair<unsigned int, int> > { std::make_pair(static_cast<unsigned int>(denominator),1)});
+      return std::make_pair( std::vector< SummandDefinition > { std::make_pair(static_cast<std::size_t>(numerator),1)},
+                             std::vector< SummandDefinition > { std::make_pair(static_cast<std::size_t>(denominator),1)});
    }
 
    // helper to create a named ratio definition for a ratio of two single counters
    template <typename T>
-   inline std::tuple< std::string,
-                       std::pair< std::vector< std::pair<unsigned int, int> >,
-                                  std::vector< std::pair<unsigned int, int> > > >
+   inline std::tuple< std::string, RatioDefinition >
    defineSimpleRatio(std::string &&name, T numerator, T denominator) {
       return std::make_pair( std::move(name), defineSimpleRatio(numerator, denominator) );
    }
@@ -374,16 +371,16 @@ namespace TableUtils {
    // @param multiplier a multiplier to be applied to the value of the referenced counter e.g. +1 or -1.
    // @return the definition of a single summand to be appended to a vector
    template <typename T>
-   inline std::pair<unsigned int, int> defineSummand(T counter_idx, int multiplier) {
-      return std::make_pair(static_cast<unsigned int>(counter_idx), multiplier) ;
+   inline SummandDefinition defineSummand(T counter_idx, int multiplier) {
+      return std::make_pair(static_cast<std::size_t>(counter_idx), multiplier) ;
    }
 
    // compute the sum : sum_j stat[ eta_bin][stat_j][seed] * multiplier_j
    // where the index stat_j is the first element of the pair, and the second element is multiplier_j
-   std::size_t computeSum( const std::vector< std::pair<unsigned int, int> >  &sum_def,
-                           unsigned int eta_offset,
-                           unsigned int row_stride,
-                           unsigned int seed_i,
+   std::size_t computeSum( const std::vector< SummandDefinition >  &sum_def,
+                           std::size_t eta_offset,
+                           std::size_t row_stride,
+                           std::size_t seed_i,
                            const std::vector<std::size_t> &stat);
 
    inline float computeRatio(std::size_t numerator, std::size_t denominator) {
@@ -396,11 +393,10 @@ namespace TableUtils {
    // counters  (first element of the inner pair is the counter index) after multiplying them by the
    // multiplier (second element of  the inner pair). The second elment defines the denominator  of
    // the ratio.
-   inline float computeRatio( const std::pair< std::vector< std::pair<unsigned int, int> > ,
-                                               std::vector< std::pair<unsigned int, int> > >  &ratio_def,
-                         unsigned int eta_offset,
-                         unsigned int row_stride,
-                         unsigned int seed_i,
+   inline float computeRatio( const RatioDefinition &ratio_def,
+                         std::size_t eta_offset,
+                         std::size_t row_stride,
+                         std::size_t seed_i,
                          const std::vector<std::size_t> &stat) {
       std::size_t numerator=computeSum(ratio_def.first, eta_offset, row_stride, seed_i, stat);
       std::size_t denominator=!ratio_def.second.empty()
@@ -409,14 +405,11 @@ namespace TableUtils {
       return computeRatio(numerator,denominator);
    }
 
-   using RatioDefinition = std::pair< std::vector< std::pair<unsigned int, int> >,
-                                      std::vector< std::pair<unsigned int,int> > >;
-
 
    // helper function to define a named ratio
    inline std::tuple< std::string, RatioDefinition> makeRatioDefinition(std::string &&name,
-                                                                        std::vector< std::pair<unsigned int, int> >&&numerator,
-                                                                        std::vector< std::pair<unsigned int, int> >&&denominator) {
+                                                                        std::vector< SummandDefinition >&&numerator,
+                                                                        std::vector< SummandDefinition >&&denominator) {
       return std::make_tuple(std::move(name),
                              std::make_pair(std::move(numerator),
                                             std::move(denominator)));
@@ -439,27 +432,52 @@ namespace TableUtils {
    }
 
 
-   constexpr inline std::size_t categoryStride([[maybe_unused]] const unsigned int categories,
-                                               [[maybe_unused]] const unsigned int sub_categories,
+   constexpr inline std::size_t categoryStride([[maybe_unused]] const std::size_t categories,
+                                               [[maybe_unused]] const std::size_t sub_categories,
                                                [[maybe_unused]] const std::vector<RatioDefinition> &ratio_def) {
       return 1;
    }
-   inline std::size_t subCategoryStride([[maybe_unused]] const unsigned int categories,
-                                        [[maybe_unused]] const unsigned int sub_categories,
+   inline std::size_t subCategoryStride([[maybe_unused]] const std::size_t categories,
+                                        [[maybe_unused]] const std::size_t sub_categories,
                                         [[maybe_unused]] const std::vector<RatioDefinition> &ratio_def) {
       return (categories) * ratio_def.size();
    }
-   constexpr inline std::size_t ratioStride([[maybe_unused]] const unsigned int categories,
-                                            [[maybe_unused]] const unsigned int sub_categories,
+   constexpr inline std::size_t ratioStride([[maybe_unused]] const std::size_t categories,
+                                            [[maybe_unused]] const std::size_t sub_categories,
                                             [[maybe_unused]] const std::vector<RatioDefinition>  &ratio_def) {
       return (categories);
    }
 
 
    std::vector<float> computeRatios(const std::vector<RatioDefinition> &ratio_def,
-                                    const unsigned int categories,
-                                    const unsigned int sub_categories,
+                                    const std::size_t categories,
+                                    const std::size_t sub_categories,
                                     const std::vector< std::size_t> &counter);
+
+   inline std::string makeEtaBinLabel(const std::vector<float> &eta_bins,
+                               std::size_t eta_bin_i,
+                               bool abs_eta=false) {
+     std::stringstream eta_range_label;
+     eta_range_label << std::fixed << std::setprecision(1);
+     if (eta_bin_i==eta_bins.size()+1) {
+         eta_range_label << " All eta";
+     }
+     else {
+         if (eta_bin_i==0) {
+           eta_range_label << std::setw(4) <<  (abs_eta ? "0.0" : "-inf") << "-";
+         }
+         else {
+           eta_range_label << std::setw(4) << eta_bins.at(eta_bin_i-1) <<"-";
+         }
+         if (eta_bin_i>=eta_bins.size()) {
+           eta_range_label << std::setw(4) << "+inf";
+         }
+         else {
+           eta_range_label << std::setw(4) << eta_bins.at(eta_bin_i);
+         }
+     }
+     return eta_range_label.str();
+   }
 }
 
 // Helper method to wrap data that should be dumped in table form to an output stream
@@ -492,8 +510,8 @@ TableUtils::MultiColumnTable<T> makeTable(const std::array<std::array<T, Ncolumn
 // Helper method to wrap two dimensional data that should be dumped in table form to an output stream
 template <typename T>
 TableUtils::MultiColumnTable<T> makeTable(const std::vector<T> &counter,
-                                          unsigned int start_idx,
-                                          unsigned int row_stride,
+                                          std::size_t start_idx,
+                                          std::size_t row_stride,
                                           const std::vector<std::string>    &row_label,
                                           const std::vector<std::string> &column_label,
                                           const std::string &top_left_label="") {
