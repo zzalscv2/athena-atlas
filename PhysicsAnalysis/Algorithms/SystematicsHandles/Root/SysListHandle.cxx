@@ -70,6 +70,19 @@ namespace CP
   {
     for (ISysHandleBase *handle : m_sysHandles)
       m_affecting.insert (handle->getInputAffecting (*m_systematicsService));
+    if (!m_affectingFilter.empty())
+    {
+      std::regex filter (m_affectingFilter);
+      auto affecting = std::move (m_affecting);
+      m_affecting.clear ();
+      for (auto& sys : affecting)
+      {
+        if (!std::regex_match (sys.basename(), filter))
+        {
+          m_affecting.insert (sys);
+        }
+      }
+    }
     ANA_CHECK (fillSystematicsVector());
     for (ISysHandleBase *handle : m_sysHandles)
       ANA_CHECK (handle->fillSystematics (*m_systematicsService, m_affecting, m_systematicsVector));

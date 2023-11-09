@@ -57,6 +57,9 @@ parser.add_option( '--geometry', dest='geometry',
 parser.add_option( '--use-flags', dest='use_flags',
                    action = 'store_true', default = False,
                    help = 'Use Athena-style configuration flags to set up the config blocks')
+parser.add_option( '--only-nominal-or', dest='onlyNominalOR',
+                   action = 'store_true', default = False,
+                   help = 'Only run overlap removal for nominal (skip systematics)')
 ( options, args ) = parser.parse_args()
 
 # Set up (Py)ROOT.
@@ -122,7 +125,7 @@ algSeq = makeSequence (dataType, blockConfig, textConfig, forCompare=forCompare,
                        noSystematics = options.no_systematics,
                        hardCuts = options.hard_cuts, isPhyslite=isPhyslite,
                        noPhysliteBroken=noPhysliteBroken, geometry=geometry,
-                       autoconfigFromFlags=flags)
+                       autoconfigFromFlags=flags, onlyNominalOR=options.onlyNominalOR)
 printSequenceAlgs( algSeq ) # For debugging
 algSeq.addSelfToJob( job )
 

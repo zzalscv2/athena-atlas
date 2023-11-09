@@ -33,6 +33,9 @@ athArgsParser.add_argument( '--physlite', dest='physlite',
 athArgsParser.add_argument( '--no-physlite-broken', dest='no_physlite_broken',
                             action = 'store_true', default = False,
                             help = 'Configure the job to skip algorithms that fail on physlite test file' )
+athArgsParser.add_argument( '--only-nominal-or', dest='onlyNominalOR',
+                            action = 'store_true', default = False,
+                            help = 'Only run overlap removal for nominal (skip systematics)')
 athArgs = athArgsParser.parse_args()
 
 dataType = athArgs.data_type
@@ -73,7 +76,7 @@ from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence
 algSeq = makeSequence (dataType, blockConfig, textConfig, forCompare=forCompare,
                        noSystematics = athArgs.no_systematics,
                        isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
-                       autoconfigFromFlags=flags)
+                       autoconfigFromFlags=flags, onlyNominalOR=athArgs.onlyNominalOR)
 
 # Need to explicitly instantiate the CutFlowSvc in Athena to allow
 # the event filters to run.  In AnalysisBase that is (currently)

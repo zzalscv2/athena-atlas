@@ -16,6 +16,7 @@
    <class name="CP::AsgxAODNTupleMakerAlg" />
    <class name="CP::AsgxAODMetNTupleMakerAlg" />
    <class name="CP::BootstrapGeneratorAlg" />
+   <class name="CP::CopyNominalSelectionAlg" />
    <class name="CP::EventFlagSelectionAlg" />
    <class name="CP::EventStatusSelectionAlg" />
    <class name="CP::EventSelectionByObjectFlagAlg" />
