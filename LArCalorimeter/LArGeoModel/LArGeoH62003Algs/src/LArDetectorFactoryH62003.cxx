@@ -25,15 +25,14 @@
 
 
 LArGeo::LArDetectorFactoryH62003::LArDetectorFactoryH62003()
-  : m_detectorManager(0),
+  : m_detectorManager(nullptr),
     m_fcalVisLimit(-1),
     m_axisVisState(-1)
 {}
 
 
 LArGeo::LArDetectorFactoryH62003::~LArDetectorFactoryH62003()
-{
-}
+= default;
 
 
 // Place the cryostats into a container physical volume.
@@ -67,7 +66,7 @@ void LArGeo::LArDetectorFactoryH62003::create( GeoPhysVol* a_container )
   BeamLineDets.SetFCALVisLimit(m_fcalVisLimit);
   BeamLineDets.SetAxisVisState(m_axisVisState);
     
-  GeoVPhysVol* Envelope = 0;
+  GeoVPhysVol* Envelope = nullptr;
 
   Envelope = BeamLineDets.GetEnvelope();
     
@@ -107,7 +106,7 @@ void LArGeo::LArDetectorFactoryH62003::create( GeoPhysVol* a_container )
   }
 
   detStore->record(fcalDetectorManager,fcalDetectorManager->getName()).ignore();
-  m_detectorManager = new LArDetectorManager(0,0,0,fcalDetectorManager);
+  m_detectorManager = new LArDetectorManager(nullptr,nullptr,nullptr,fcalDetectorManager);
   m_detectorManager->addTreeTop(Envelope);
 
   

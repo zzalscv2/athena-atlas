@@ -28,7 +28,7 @@ EMECDetectorRegion::~EMECDetectorRegion()
 
 EMECCellConstLink EMECDetectorRegion::getEMECCell (unsigned int ieta, unsigned int iphi) const
 {
-  return EMECCellConstLink(new EMECCell(m_endcapIndex,m_descriptor,ieta,iphi));
+  return {new EMECCell(m_endcapIndex,m_descriptor,ieta,iphi)};
 }
 
 HepGeom::Point3D<double> EMECDetectorRegion::getRefPlanePos () const

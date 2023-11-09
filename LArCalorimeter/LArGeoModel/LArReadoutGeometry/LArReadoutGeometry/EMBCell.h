@@ -161,7 +161,7 @@ class EMBCell : public RCBase
       /**
        * @Add HVPathologies 
        */
-      void addHVPathologies (EMBHVPathologiesConstLink);
+      void addHVPathologies (const EMBHVPathologiesConstLink&);
 
 
   private:

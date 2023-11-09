@@ -69,7 +69,7 @@ using GeoTrf::RotateZ3D;
 
 
 LArGeo::LArDetectorConstructionH62003::LArDetectorConstructionH62003()
- : m_H62003EnvelopePhysical(NULL)
+ : m_H62003EnvelopePhysical(nullptr)
  , m_fcalVisLimit(-1)
  , m_axisVisState(false)
  , m_pAccessSvc(nullptr)
@@ -77,8 +77,7 @@ LArGeo::LArDetectorConstructionH62003::LArDetectorConstructionH62003()
 }
 
 LArGeo::LArDetectorConstructionH62003::~LArDetectorConstructionH62003() 
-{
-}
+= default;
 
 GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 {
@@ -104,7 +103,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
     throw std::runtime_error("Error in LArDetectorConstructionH62003, cannot access DetectorStore");
   }
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return 0;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
   StatusCode sc;
   sc=svcLocator->service("RDBAccessSvc",m_pAccessSvc);
@@ -113,8 +112,8 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
   }
 
   DecodeVersionKey larVersion("LAr");
-  std::string detectorKey  = larVersion.tag();
-  std::string detectorNode = larVersion.node();
+  const std::string& detectorKey  = larVersion.tag();
+  const std::string& detectorNode = larVersion.node();
 
   log << MSG::DEBUG << "detectorKey is "  << detectorKey << endmsg; 
   log << MSG::DEBUG << "detectorNode is " << detectorNode << endmsg; 
@@ -217,12 +216,12 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
   std::string nickname   = "POSITION1";
   int nicknumber = 0; 
 
-  if(LArPhysical != 0)
+  if(LArPhysical != nullptr)
     {
       IRDBRecordset_ptr larTBPos = 
 	m_pAccessSvc->getRecordsetPtr("LArTBPosition", detectorKey, detectorNode);
           
-      LArG4TBPosOptions *posOptions = NULL;
+      LArG4TBPosOptions *posOptions = nullptr;
       StatusCode status = detStore->retrieve(posOptions,"LArG4TBPosOptions");
       if (status.isSuccess()) {
 	nickname = posOptions->PositionNickname();
@@ -384,7 +383,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
       // Only need one FCal    
       bool isPositive(false); // C side for TB 2003; C side is negative
       GeoVFullPhysVol* fcalEnvelope = fcalConstruction.GetEnvelope(isPositive);
-      if(fcalEnvelope == 0)
+      if(fcalEnvelope == nullptr)
 	{
 	  throw std::runtime_error("Error getting FCAL envelope");
 	}

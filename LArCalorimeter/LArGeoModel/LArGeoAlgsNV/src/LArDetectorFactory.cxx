@@ -60,8 +60,7 @@ LArGeo::LArDetectorFactory::LArDetectorFactory(StoreGateSvc* detStore
 
 
 LArGeo::LArDetectorFactory::~LArDetectorFactory()
-{
-}
+= default;
 
 
 // Place the cryostats into a container physical volume.

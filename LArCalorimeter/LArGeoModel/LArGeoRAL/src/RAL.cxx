@@ -10,10 +10,10 @@
 #include "LArGeoRAL/RALEmec.h"
 #include "LArGeoRAL/RALHec.h"
 
+#include <cstdlib>
 #include <iostream>
-#include <string>
-#include <stdlib.h>
 #include <stdexcept>
+#include <string>
 
 namespace LArGeo {
 
@@ -27,8 +27,7 @@ namespace LArGeo {
 
 
   RAL::~RAL()
-  {
-  }
+  = default;
 
   double RAL::GetValue(const std::string& a_name,
 			   const int a0,

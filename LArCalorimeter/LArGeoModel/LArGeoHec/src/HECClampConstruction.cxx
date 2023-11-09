@@ -74,8 +74,7 @@ LArGeo::HECClampConstruction::HECClampConstruction(bool front, bool posZSide)
 
 //~Destructor
 LArGeo::HECClampConstruction::~HECClampConstruction() 
-{
-}
+= default;
 
 
 GeoPhysVol* LArGeo::HECClampConstruction::GetClampingBar(bool rail,bool left)

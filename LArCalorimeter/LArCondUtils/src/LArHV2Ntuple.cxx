@@ -31,8 +31,8 @@
   //Constructor
   LArHV2Ntuple:: LArHV2Ntuple(const std::string& name, ISvcLocator* pSvcLocator):
     AthAlgorithm(name,pSvcLocator),
-    m_thistSvc(0),
-    m_tree(0),
+    m_thistSvc(nullptr),
+    m_tree(nullptr),
     m_addcells(false),
     m_bec(0),
     m_isPresampler(0),
@@ -44,7 +44,7 @@
     m_hv(0),
     m_current(0),
     m_barrelec(0), m_posneg(0), m_FT(0),m_slot(0),m_channel(0),
-    m_caloId(0), m_onlId(0)
+    m_caloId(nullptr), m_onlId(nullptr)
   {
     declareProperty("AddCellID",m_addcells);
   }
@@ -129,7 +129,7 @@
     const FCALHVManager& hvManager_FCAL=manager->getFCALHVManager();
     const FCALHVManager::FCALHVData hvdata_FCAL = hvManager_FCAL.getData (**hvCabling, attrLists);
 
-    if(m_hvonlId_map.size()==0) {
+    if(m_hvonlId_map.empty()) {
       SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
       const LArOnOffIdMapping* cabling{*cablingHdl};
       if(!cabling) {
@@ -166,9 +166,9 @@
       }// end map filling
     }
 
-    for (unsigned int iSide=hvManager_EMB.beginSideIndex();iSide<hvManager_EMB.endSideIndex();iSide++) { // loop over HV modules
+    for (unsigned int iSide=EMBHVManager::beginSideIndex();iSide<EMBHVManager::endSideIndex();iSide++) { // loop over HV modules
       for (unsigned int iPhi=hvManager_EMB.beginPhiIndex();iPhi<hvManager_EMB.endPhiIndex();iPhi++) {
-        for (unsigned int iSector=hvManager_EMB.beginSectorIndex();iSector<hvManager_EMB.endSectorIndex();iSector++) {
+        for (unsigned int iSector=EMBHVManager::beginSectorIndex();iSector<EMBHVManager::endSectorIndex();iSector++) {
           for (unsigned int iEta=hvManager_EMB.beginEtaIndex();iEta<hvManager_EMB.endEtaIndex();iEta++) { //0 to 7
             const EMBHVModule& hvMod = hvManager_EMB.getHVModule(iSide,iEta,iPhi,iSector);
             float eta=0.5*(hvMod.getEtaMin()+hvMod.getEtaMax());
@@ -207,7 +207,7 @@
       }
     } //EMBHVManager
 
-    for (unsigned int iSide=hvManager_EMBPS.beginSideIndex();iSide<hvManager_EMBPS.endSideIndex();iSide++) { // loop over HV modules
+    for (unsigned int iSide=EMBPresamplerHVManager::beginSideIndex();iSide<EMBPresamplerHVManager::endSideIndex();iSide++) { // loop over HV modules
       for (unsigned int iPhi=hvManager_EMBPS.beginPhiIndex();iPhi<hvManager_EMBPS.endPhiIndex();iPhi++) {
          for (unsigned int iEta=hvManager_EMBPS.beginEtaIndex();iEta<hvManager_EMBPS.endEtaIndex();iEta++) { //0 to 7
             const EMBPresamplerHVModule& hvMod = hvManager_EMBPS.getHVModule(iSide,iEta,iPhi);
@@ -243,7 +243,7 @@
       }
     } //EMBPresampler
 
-    for (unsigned int iSide=hvManager_EMECPS.beginSideIndex();iSide<hvManager_EMECPS.endSideIndex();iSide++) { // loop over HV modules
+    for (unsigned int iSide=EMECPresamplerHVManager::beginSideIndex();iSide<EMECPresamplerHVManager::endSideIndex();iSide++) { // loop over HV modules
       for (unsigned int iPhi=hvManager_EMECPS.beginPhiIndex();iPhi<hvManager_EMECPS.endPhiIndex();iPhi++) {
             const EMECPresamplerHVModule& hvMod = hvManager_EMECPS.getHVModule(iSide,iPhi);
             for (int iGap=0;iGap<2;iGap++) {
@@ -279,7 +279,7 @@
 
 
 
-    for (unsigned int iSide=hvManager_EMEC_OUT.beginSideIndex();iSide<hvManager_EMEC_OUT.endSideIndex();iSide++) { // loop over HV modules
+    for (unsigned int iSide=EMECHVManager::beginSideIndex();iSide<EMECHVManager::endSideIndex();iSide++) { // loop over HV modules
       for (unsigned int iPhi=hvManager_EMEC_OUT.beginPhiIndex();iPhi<hvManager_EMEC_OUT.endPhiIndex();iPhi++) {
         for (unsigned int iSector=hvManager_EMEC_OUT.beginSectorIndex();iSector<hvManager_EMEC_OUT.endSectorIndex();iSector++) {
           for (unsigned int iEta=hvManager_EMEC_OUT.beginEtaIndex();iEta<hvManager_EMEC_OUT.endEtaIndex();iEta++) {
@@ -320,7 +320,7 @@
       }
     }//EMEC Outer
 
-    for (unsigned int iSide=hvManager_EMEC_IN.beginSideIndex();iSide<hvManager_EMEC_IN.endSideIndex();iSide++) { // loop over HV modules
+    for (unsigned int iSide=EMECHVManager::beginSideIndex();iSide<EMECHVManager::endSideIndex();iSide++) { // loop over HV modules
       for (unsigned int iPhi=hvManager_EMEC_IN.beginPhiIndex();iPhi<hvManager_EMEC_IN.endPhiIndex();iPhi++) {
         for (unsigned int iSector=hvManager_EMEC_IN.beginSectorIndex();iSector<hvManager_EMEC_IN.endSectorIndex();iSector++) {
           for (unsigned int iEta=hvManager_EMEC_IN.beginEtaIndex();iEta<hvManager_EMEC_IN.endEtaIndex();iEta++) {
@@ -365,9 +365,9 @@
     float etamin_layer[4]={1.5,1.5,1.6,1.7};
 
     
-    for (unsigned int iSide=hvManager_HEC.beginSideIndex();iSide<hvManager_HEC.endSideIndex();iSide++) { // loop over HV modules      
-      for (unsigned int iPhi=hvManager_HEC.beginPhiIndex();iPhi<hvManager_HEC.endPhiIndex();iPhi++) {
-        for (unsigned int iSampling=hvManager_HEC.beginSamplingIndex();iSampling<hvManager_HEC.endSamplingIndex();iSampling++) {
+    for (unsigned int iSide=HECHVManager::beginSideIndex();iSide<HECHVManager::endSideIndex();iSide++) { // loop over HV modules      
+      for (unsigned int iPhi=HECHVManager::beginPhiIndex();iPhi<HECHVManager::endPhiIndex();iPhi++) {
+        for (unsigned int iSampling=HECHVManager::beginSamplingIndex();iSampling<HECHVManager::endSamplingIndex();iSampling++) {
           float eta_min,eta_max;
           if (iSide==1) {
            eta_min = etamin_layer[iSampling];
@@ -380,7 +380,7 @@
          const HECHVModule& hvMod = hvManager_HEC.getHVModule(iSide,iPhi,iSampling);
          float phi = 0.5*(hvMod.getPhiMin()+hvMod.getPhiMax());
 
-         for (unsigned int iGap=0;iGap<hvMod.getNumSubgaps();iGap++) {//HEC : 4 gaps, TRY TO FIND AUTOMATICALLY NB OF GAPS
+         for (unsigned int iGap=0;iGap<HECHVModule::getNumSubgaps();iGap++) {//HEC : 4 gaps, TRY TO FIND AUTOMATICALLY NB OF GAPS
             const HECHVSubgap& subgap=hvMod.getSubgap(iGap);
             float hv = hvdata_HEC.voltage (subgap);
             float current = hvdata_HEC.current (subgap);
@@ -408,13 +408,13 @@
      }
    }//HECHVManager 
 
-   for (unsigned int iSide=hvManager_FCAL.beginSideIndex();iSide<hvManager_FCAL.endSideIndex();iSide++) { // loop over HV modules
+   for (unsigned int iSide=FCALHVManager::beginSideIndex();iSide<FCALHVManager::endSideIndex();iSide++) { // loop over HV modules
        float eta_min=3.1,eta_max=4.9;
        if (iSide==0) { eta_min=-4.9; eta_max=-3.1; }
 
        float eta = 0.5*(eta_min+eta_max);
-       for (unsigned int iSampling=hvManager_FCAL.beginSamplingIndex();iSampling<hvManager_FCAL.endSamplingIndex();iSampling++) {
-            for (unsigned int iSector=hvManager_FCAL.beginSectorIndex(iSampling);iSector<hvManager_FCAL.endSectorIndex(iSampling);iSector++) {
+       for (unsigned int iSampling=FCALHVManager::beginSamplingIndex();iSampling<FCALHVManager::endSamplingIndex();iSampling++) {
+            for (unsigned int iSector=FCALHVManager::beginSectorIndex(iSampling);iSector<FCALHVManager::endSectorIndex(iSampling);iSector++) {
  
                  const FCALHVModule& hvMod = hvManager_FCAL.getHVModule(iSide,iSector,iSampling);
   
@@ -426,7 +426,7 @@
                  float phi_max = CaloPhiRange::fix(dphi+phi_min);
                  float phi = 0.5*(phi_min+phi_max);
          
-                 for (unsigned int iLine=0;iLine<hvMod.getNumHVLines();iLine++) {
+                 for (unsigned int iLine=0;iLine<FCALHVModule::getNumHVLines();iLine++) {
                      const FCALHVLine& hvline = hvMod.getHVLine(iLine);
                      float hv = hvdata_FCAL.voltage (hvline);
                      float current = hvdata_FCAL.current (hvline);
@@ -508,7 +508,7 @@ std::vector<int> LArHV2Ntuple::GetHVLines (const EMBHVManager::EMBHVData& hvdata
      const FCALDetectorElement* fcalElement = dynamic_cast<const FCALDetectorElement*>(calodetdescrmgr->get_element(id));
      if (!fcalElement) std::abort();
      const FCALTile* tile = fcalElement->getFCALTile();
-     unsigned int nlines = tile->getNumHVLines();
+     unsigned int nlines = FCALTile::getNumHVLines();
      for (unsigned int i=0;i<nlines;i++) {
        const FCALHVLine* line = tile->getHVLine(i);
        if (line) hv.insert(hvdata_FCAL.hvLineNo (*line));

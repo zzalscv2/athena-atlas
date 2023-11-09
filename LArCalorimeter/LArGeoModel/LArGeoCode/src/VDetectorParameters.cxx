@@ -15,8 +15,8 @@
 // front of so many names.
 
 #include "LArGeoCode/VDetectorParameters.h"
+#include <cstdlib>
 #include <iostream>
-#include <stdlib.h>
 
 
 CxxUtils::CachedUniquePtr<LArGeo::VDetectorParameters> LArGeo::VDetectorParameters::s_instance;
@@ -29,7 +29,7 @@ void LArGeo::VDetectorParameters::SetInstance(std::unique_ptr<VDetectorParameter
 const LArGeo::VDetectorParameters* LArGeo::VDetectorParameters::GetInstance()
 {
   const VDetectorParameters* p = s_instance.get();
-  if(p==0)
+  if(p==nullptr)
       std::cerr << "LArGeo::VDetectorParameters::GetInstance was called, but "
 		<< "the pointer to the detector-parameter access object is 0."
 		<< std::endl;

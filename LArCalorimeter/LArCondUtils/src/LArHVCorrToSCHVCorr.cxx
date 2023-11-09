@@ -66,7 +66,7 @@ StatusCode LArHVCorrToSCHVCorr::stop()
       return StatusCode::FAILURE;
   }
 
-  const CaloCell_SuperCell_ID* calosccellID=0;
+  const CaloCell_SuperCell_ID* calosccellID=nullptr;
   ATH_CHECK( detStore()->retrieve (calosccellID, "CaloCell_SuperCell_ID") );
   const unsigned hashMax=calosccellID->calo_cell_hash_max();
   ATH_MSG_INFO("SuperCell hash max: " << hashMax);

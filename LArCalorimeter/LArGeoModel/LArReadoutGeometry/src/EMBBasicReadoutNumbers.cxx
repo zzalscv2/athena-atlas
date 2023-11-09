@@ -73,7 +73,6 @@ EMBBasicReadoutNumbers::EMBBasicReadoutNumbers()
 }
 
 EMBBasicReadoutNumbers::~EMBBasicReadoutNumbers()
-{
-}
+= default;
 
 

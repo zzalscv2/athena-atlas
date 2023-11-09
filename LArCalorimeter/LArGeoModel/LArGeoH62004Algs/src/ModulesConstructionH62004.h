@@ -27,10 +27,10 @@ namespace LArGeo {
 	    ModulesConstructionH62004 (const ModulesConstructionH62004 &);
             ModulesConstructionH62004 & operator= (const ModulesConstructionH62004 &);
 
-           int GetID(int side, int dir, int calo);
-           GeoLogVol* construct(StoredMaterialManager* materialManager,
+           static int GetID(int side, int dir, int calo);
+           static GeoLogVol* construct(StoredMaterialManager* materialManager,
                                 int side, int dir, int calo);
-           GeoTrf::Transform3D position(int side, int dir, int calo);
+           static GeoTrf::Transform3D position(int side, int dir, int calo);
                         //  side = 0 - left, 1 - right
                         //  dir  = 0 - side, 1 - up, 2 - back
                         //  calo = 0 - EMEC, 1 - HEC1,  2 - HEC2, 3 - FCAL1

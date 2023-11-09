@@ -64,7 +64,7 @@ unsigned int FCALHVModule::getSectorIndex() const
   return m_c->iSector;
 }
 
-unsigned int FCALHVModule::getNumHVLines() const
+unsigned int FCALHVModule::getNumHVLines() 
 {
   return 4;
 }

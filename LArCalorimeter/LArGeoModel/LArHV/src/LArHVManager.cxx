@@ -21,8 +21,7 @@ LArHVManager::LArHVManager()
 }
 
 LArHVManager::~LArHVManager()
-{
-}
+= default;
 
 const EMBHVManager& LArHVManager::getEMBHVManager() const
 {

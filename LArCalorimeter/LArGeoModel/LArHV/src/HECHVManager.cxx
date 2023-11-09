@@ -36,7 +36,7 @@ namespace {
 struct SimIdFunc
 {
   SimIdFunc();
-  std::vector<HWIdentifier> operator()(HWIdentifier id)
+  std::vector<HWIdentifier> operator()(HWIdentifier id) const
   {
     return m_cablingTool->getLArElectrodeIDvec (id);
   }
@@ -59,7 +59,7 @@ SimIdFunc::SimIdFunc()
 
 class HECHVManager::Clockwork {
 public:
-  Clockwork(const HECHVManager* manager) 
+  explicit Clockwork(const HECHVManager* manager)
   {
     for(int iSide=0; iSide<2; ++iSide) {
       for(int iPhi=0; iPhi<32; ++iPhi) {
@@ -78,9 +78,7 @@ public:
       throw std::runtime_error("HECHVManager failed to retrieve LArHVLineID");
     }
   }
-  ~Clockwork()
-  {
-  }
+  ~Clockwork() = default;
   HECHVDescriptor    descriptor{CellBinning(0,2*M_PI,32)};
   std::unique_ptr<const HECHVModule> moduleArray[2][32][4];
   const LArElectrodeID* elecId = nullptr;
@@ -95,31 +93,27 @@ public:
 };
 
 
-HECHVManager::HECHVData::HECHVData()
-{
-}
-  
+HECHVManager::HECHVData::HECHVData() = default;
+
 
 HECHVManager::HECHVData::HECHVData (std::unique_ptr<Payload> payload)
   : m_payload (std::move (payload))
 {
 }
-  
+
 
 HECHVManager::HECHVData&
-HECHVManager::HECHVData::operator= (HECHVData&& other)
-{
+HECHVManager::HECHVData::operator= (HECHVData&& other) noexcept {
   if (this != &other) {
     m_payload = std::move (other.m_payload);
   }
   return *this;
 }
-  
+
 
 HECHVManager::HECHVData::~HECHVData()
-{
-}
-  
+= default;
+
 
 bool HECHVManager::HECHVData::hvOn (const HECHVSubgap& subgap) const
 {
@@ -145,7 +139,7 @@ int  HECHVManager::HECHVData::hvLineNo  (const HECHVSubgap& subgap) const
 }
 
 
-int  HECHVManager::HECHVData::index  (const HECHVSubgap& subgap) const
+int  HECHVManager::HECHVData::index  (const HECHVSubgap& subgap)
 {
   unsigned int subgapIndex    = subgap.getSubgapIndex();
   const HECHVModule& module   = subgap.getModule();
@@ -167,32 +161,32 @@ const HECHVDescriptor& HECHVManager::getDescriptor() const
   return m_c->descriptor;
 }
 
-unsigned int HECHVManager::beginSideIndex() const
+unsigned int HECHVManager::beginSideIndex()
 {
   return 0;
 }
 
-unsigned int HECHVManager::endSideIndex() const
+unsigned int HECHVManager::endSideIndex()
 {
   return 2;
 }
 
-unsigned int HECHVManager::beginPhiIndex() const
+unsigned int HECHVManager::beginPhiIndex()
 {
   return 0;
 }
 
-unsigned int HECHVManager::endPhiIndex() const
+unsigned int HECHVManager::endPhiIndex()
 {
   return 32;
 }
 
-unsigned int HECHVManager::beginSamplingIndex() const
+unsigned int HECHVManager::beginSamplingIndex()
 {
   return 0;
 }
 
-unsigned int HECHVManager::endSamplingIndex() const
+unsigned int HECHVManager::endSamplingIndex()
 {
   return 4;
 }
@@ -205,11 +199,10 @@ const HECHVModule& HECHVManager::getHVModule(unsigned int iSide
 }
 
 HECHVManager::~HECHVManager()
-{
-}
+= default;
 
 HECHVManager::HECHVData
-HECHVManager::getData (idfunc_t idfunc,
+HECHVManager::getData (const idfunc_t& idfunc,
                        const std::vector<const CondAttrListCollection*>& attrLists) const
 {
   auto payload = std::make_unique<HECHVData::Payload>();
@@ -233,7 +226,7 @@ HECHVManager::getData (idfunc_t idfunc,
 
       std::vector<HWIdentifier> electrodeIdVec = idfunc(id);
 
-      for(size_t i=0;i<electrodeIdVec.size();i++) { 
+      for(size_t i=0;i<electrodeIdVec.size();i++) {
         HWIdentifier& elecHWID = electrodeIdVec[i];
 
         int detector = m_c->elecId->detector(elecHWID);
@@ -248,7 +241,7 @@ HECHVManager::getData (idfunc_t idfunc,
         float current = 0.;
         if (!((*citr).second)["R_IMEAS"].isNull()) current = ((*citr).second)["R_IMEAS"].data<float>();
 
-	  
+
         unsigned int sideIndex=1-m_c->elecId->zside(elecHWID);    // 0 for C side, 1 for A side, opposite to HV numbering
         unsigned int phiIndex=m_c->elecId->module(elecHWID);      // 0 to 31
         unsigned int samplingIndex=m_c->elecId->hv_eta(elecHWID)-1; // 0 to 3
@@ -263,7 +256,7 @@ HECHVManager::getData (idfunc_t idfunc,
               << " " << subgapIndex << endmsg;
           continue;
         }
-	  
+
         payload->m_payloadArray[index].voltage=voltage;
         payload->m_payloadArray[index].current=current;
         payload->m_payloadArray[index].hvLineNo=chanID;
@@ -271,7 +264,7 @@ HECHVManager::getData (idfunc_t idfunc,
     } // for (atrlistcol)
   }
 
-  return HECHVManager::HECHVData (std::move (payload));
+  return {std::move (payload)};
 }
 
 

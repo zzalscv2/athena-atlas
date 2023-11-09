@@ -68,7 +68,7 @@ using namespace GeoXF;
 
 // The objects for mapping plane indexes in Pcon to the record index
 // in RDBRecordset
-typedef std::map<int, unsigned int, std::less<int> > planeIndMap;
+using planeIndMap = std::map<int, unsigned int, std::less<int>>;
 
 
 LArGeo::EndcapCryostatConstruction::EndcapCryostatConstruction(
@@ -77,8 +77,8 @@ LArGeo::EndcapCryostatConstruction::EndcapCryostatConstruction(
 ) :
   //  cryoEnvelopePhysical(NULL),
   m_fcalVisLimit(-1),
-  m_pAccessSvc(NULL),
-  m_geoModelSvc(NULL),
+  m_pAccessSvc(nullptr),
+  m_geoModelSvc(nullptr),
   m_fullGeo(fullGeo),
   m_EMECVariantInner(std::move(emecVariantInner)),
   m_EMECVariantOuter(std::move(emecVariantOuter)),
@@ -129,7 +129,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
   // Get the materials from the material manager:-----------------------------------------------------//
   //                                                                                                  //
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return NULL;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
   const GeoMaterial *Lead = materialManager->getMaterial("std::Lead");
   if (!Lead) {
@@ -192,8 +192,8 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 
   planeIndMap cryoMotherPlanes, emhPlanes, fcalNosePlanes;
   std::vector<planeIndMap> brassPlugPlanesVect;
-  brassPlugPlanesVect.push_back(planeIndMap());
-  brassPlugPlanesVect.push_back(planeIndMap());
+  brassPlugPlanesVect.emplace_back();
+  brassPlugPlanesVect.emplace_back();
   planeIndMap::const_iterator iter;
 
   for (unsigned int ind=0; ind<cryoPcons->size(); ind++)
@@ -391,7 +391,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 
         if(!currentRecord->isFieldNull("QUALIFIER")){
           const std::string& qualifier = currentRecord->getString("QUALIFIER");
-          if (qualifier.size()) cylName = cylName + "::" + qualifier;
+          if (!qualifier.empty()) cylName = cylName + "::" + qualifier;
         }
 
         const GeoShape* solidCyl = new GeoTubs(
@@ -499,7 +499,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
           EndcapPresamplerConstruction endcapPresamplerConstruction;
 
           GeoFullPhysVol* emecPSEnvelope = endcapPresamplerConstruction.Envelope();
-          if ( emecPSEnvelope != 0 ) {
+          if ( emecPSEnvelope != nullptr ) {
             // Get the position of the presampler from the geometry helper.
             double Zpos = 30.5*Gaudi::Units::mm;
 
@@ -530,7 +530,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
   // g.p., 3-Apr-2006
   // placing Pcones for FCAL nose, instead of cylinders 34,28,29
   if(m_fullGeo)
-    if (fcalNosePlanes.size()) {
+    if (!fcalNosePlanes.empty()) {
       GeoPcon *fcalNosePcon = new GeoPcon(0,2*M_PI);
       for(unsigned int ind=0; ind<fcalNosePlanes.size(); ind++) {
 	iter = fcalNosePlanes.find(ind);
@@ -585,10 +585,10 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
   GeoFullPhysVol* totalEMHLArPhysical = new GeoFullPhysVol(totalEMHLArLogical);
 
   // Add brass plugs
-  const GeoMaterial *PlugBrass(0);
+  const GeoMaterial *PlugBrass(nullptr);
   for(size_t i(0);i<2;++i) {
     const planeIndMap& brassPlugPlanes = brassPlugPlanesVect[i];
-    if (brassPlugPlanes.size()) {
+    if (!brassPlugPlanes.empty()) {
       if(!PlugBrass) {
 	PlugBrass  = materialManager->getMaterial("LAr::PlugBrass");
 	if (!PlugBrass) throw std::runtime_error("Error in EndcapCryostatConstruction, LAr::PlugBrass is not found.");
@@ -773,7 +773,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
   }
 
   //__________________________ MBTS+moderator+JM tube _____________________________________
-  if(m_enableMBTS && m_pAccessSvc->getChildTag("MBTS",detectorKey, detectorNode)!="") {
+  if(m_enableMBTS && !m_pAccessSvc->getChildTag("MBTS",detectorKey, detectorNode).empty()) {
     // DB related stuff first
     IRDBRecordset_ptr mbtsTubs   = m_pAccessSvc->getRecordsetPtr("MBTSTubs", detectorKey, detectorNode);
     IRDBRecordset_ptr mbtsScin   = m_pAccessSvc->getRecordsetPtr("MBTSScin", detectorKey, detectorNode);
@@ -799,7 +799,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
       IRDBRecordset::const_iterator last = mbtsTubs->end();
 
       // Mother volume
-      GeoPhysVol* pvMM = 0;
+      GeoPhysVol* pvMM = nullptr;
 
       if(mbtsPcons->size()==0) {
 	// ****
@@ -829,8 +829,8 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 
 	GeoTube  *tubeMM = new GeoTube(rminMM,rmaxMM,dzMM);
 
-	GeoTube *tubeJM=NULL;
-	const GeoShape *solidMM=NULL;
+	GeoTube *tubeJM=nullptr;
+	const GeoShape *solidMM=nullptr;
 	if (itTube!=mbtsTubs->end()) {
 	  double dzMod   = (*itTube)->getDouble("DZ")*Gaudi::Units::mm;
 	  double rMaxMod = (*itTube)->getDouble("RMAX")*Gaudi::Units::mm;
@@ -991,7 +991,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 	  // parameterizations
 	  double deltaPhi = 360./nScin;
 	  Variable varInd;
-	  GeoSerialTransformer* stScin = 0;
+	  GeoSerialTransformer* stScin = nullptr;
 
 	  if(bPos) {
 	    GENFUNCTION phiInd = deltaPhi*(varInd + startPhi)*Gaudi::Units::deg;
@@ -1016,14 +1016,14 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 	double zposAirEnv = (*mbtsGen)[0]->getDouble("ZPOSENV");
 	double rposAirEnv = (*mbtsGen)[0]->getDouble("RPOSENV");
 
-	GeoPhysVol *pvAirEnv(0),*pvAluEnv(0),*pvAirInAlu(0);
+	GeoPhysVol *pvAirEnv(nullptr),*pvAluEnv(nullptr),*pvAirInAlu(nullptr);
 
 	// Build the air envelope first
 	std::map<std::string,unsigned>::const_iterator itTrdMap = trdMap.find("MBTSAirEnv");
 	if(itTrdMap==trdMap.end())
 	  throw std::runtime_error("Error in EndcapCryostatConstruction, unable to get MBTS air envelope parameters from the database!");
 	const IRDBRecord* rec = (*mbtsTrds)[itTrdMap->second];
-	pvAirEnv = buildMbtsTrd(rec,materialManager,0);
+	pvAirEnv = buildMbtsTrd(rec,materialManager,nullptr);
 
 	// Build direct children of the air envelope
 	for(itTrdMap=trdMap.begin();itTrdMap!=trdMap.end();++itTrdMap) {
@@ -1057,7 +1057,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 	// parameterizations
 	double deltaPhi = 360./nAirEnv;
 	Variable varInd;
-	GeoSerialTransformer* stAirEnv = 0;
+	GeoSerialTransformer* stAirEnv = nullptr;
 	if(bPos) {
 	  GENFUNCTION phiInd = deltaPhi*(varInd + startPhi)*Gaudi::Units::deg;
 	  TRANSFUNCTION xfAirEnv = Pow(GeoTrf::RotateZ3D(1.0),phiInd)*GeoTrf::TranslateZ3D(zposAirEnv)*GeoTrf::TranslateX3D(rposAirEnv)*GeoTrf::RotateY3D(90*Gaudi::Units::deg);

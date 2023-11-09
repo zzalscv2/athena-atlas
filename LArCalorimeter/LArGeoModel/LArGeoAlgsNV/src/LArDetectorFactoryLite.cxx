@@ -47,8 +47,7 @@ LArGeo::LArDetectorFactoryLite::LArDetectorFactoryLite(StoreGateSvc* detStore
 }
 
 LArGeo::LArDetectorFactoryLite::~LArDetectorFactoryLite()
-{
-}
+= default;
 
 
 void LArGeo::LArDetectorFactoryLite::create(GeoPhysVol* world)

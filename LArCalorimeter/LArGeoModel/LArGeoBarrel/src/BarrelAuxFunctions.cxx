@@ -19,7 +19,7 @@ GeoGenfun::FunctionNoop LArGeo::Fx(double r, GeoGenfun::GENFUNCTION G, const dou
   GeoGenfun::Sin Sin;
   int i = (int)rint(r-.1), j = (int)rint(r+.1) ;
   GeoGenfun::GENFUNCTION result =  (Cos(G)*(Cenx[i]+Cenx[j])/2-Sin(G)*(Ceny[i]+Ceny[j])/2) ;
-  return GeoGenfun::FunctionNoop(&result);
+  return {&result};
 }
 
 GeoGenfun::FunctionNoop LArGeo::Fy(double r, GeoGenfun::GENFUNCTION G, const double Cenx[], const double Ceny[] )
@@ -28,7 +28,7 @@ GeoGenfun::FunctionNoop LArGeo::Fy(double r, GeoGenfun::GENFUNCTION G, const dou
   GeoGenfun::Sin Sin;
   int i = (int)rint(r-.1), j = (int)rint(r+.1) ;
   GeoGenfun::GENFUNCTION result = (Sin(G)*(Cenx[i]+Cenx[j])/2+Cos(G)*(Ceny[i]+Ceny[j])/2) ;
-  return GeoGenfun::FunctionNoop(&result);
+  return {&result};
 }
 
 GeoGenfun::FunctionNoop LArGeo::Del1(GeoGenfun::GENFUNCTION G)
@@ -36,14 +36,14 @@ GeoGenfun::FunctionNoop LArGeo::Del1(GeoGenfun::GENFUNCTION G)
   GeoGenfun::Cos Cos;
   GeoGenfun::Sin Sin;
   GeoGenfun::GENFUNCTION result = (Cos(  G ) * Sin( G ) );
-  return GeoGenfun::FunctionNoop(&result);
+  return {&result};
 }
 
 GeoGenfun::FunctionNoop LArGeo::Del2(GeoGenfun::GENFUNCTION G)
 {
   GeoGenfun::Cos Cos;
   GeoGenfun::GENFUNCTION result = (Cos(  G ) * Cos( G ) );
-  return GeoGenfun::FunctionNoop(&result);
+  return {&result};
 }
 
 
@@ -66,6 +66,6 @@ GeoGenfun::FunctionNoop LArGeo::ATan2(GeoGenfun::GENFUNCTION y, GeoGenfun::GENFU
   // Now take ATan if x is positive 
   
   GeoGenfun::GENFUNCTION result = Theta(x)*ATan(y/x) + Theta(-x)*(Mod2Pi(ATan(y/x)+M_PI)); 
-  return GeoGenfun::FunctionNoop(&result);
+  return {&result};
 
 }

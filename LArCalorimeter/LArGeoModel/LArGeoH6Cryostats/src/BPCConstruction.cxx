@@ -47,16 +47,15 @@
 #include <iostream>
 
 LArGeo::BPCConstruction::BPCConstruction(bool old)
-   :m_BPCPhysical(0),
-    m_msg(0) 
+   :m_BPCPhysical(nullptr),
+    m_msg(nullptr) 
 {
   m_oldType = old;
 }
 
 
 LArGeo::BPCConstruction::~BPCConstruction()
-{
-}
+= default;
 
 
 
@@ -97,7 +96,7 @@ GeoVPhysVol* LArGeo::BPCConstruction::GetEnvelope()
   //                                                                                                  //
 
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return NULL;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
   std::string name;
   double density;
@@ -284,8 +283,8 @@ GeoVPhysVol* LArGeo::BPCConstruction::GetEnvelope()
   else          phys_bpc_xplane->add( new GeoSerialTransformer(phys_bpc_xdiv,  &TX, Ndiv ) );
 
   // Y sensitive plane
-  GeoPhysVol* phys_bpc_yplane = 0;
-  GeoPhysVol* phys_bpc_ydiv = 0;
+  GeoPhysVol* phys_bpc_yplane = nullptr;
+  GeoPhysVol* phys_bpc_ydiv = nullptr;
   if(!m_oldType) {
      GeoBox* shape_bpc_yplane = new GeoBox(bpc_x, bpc_y, bpc_send);
      GeoLogVol* log_bpc_yplane = new GeoLogVol(BPCName + "::bpc_yplane",shape_bpc_yplane, ArCO2_1);

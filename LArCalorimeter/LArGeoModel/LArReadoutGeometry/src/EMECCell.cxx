@@ -12,8 +12,7 @@
 // Class EMECCell 
 
 EMECCell::~EMECCell()
-{
-}
+= default;
 
 unsigned int EMECCell::getNumElectrodes() const {
   return getHVInfo().m_electrode.size();

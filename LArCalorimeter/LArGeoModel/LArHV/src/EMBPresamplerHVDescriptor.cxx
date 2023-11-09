@@ -12,5 +12,4 @@ EMBPresamplerHVDescriptor::EMBPresamplerHVDescriptor(const CellPartitioning &eta
 }
 
 EMBPresamplerHVDescriptor::~EMBPresamplerHVDescriptor()
-{
-}
+= default;

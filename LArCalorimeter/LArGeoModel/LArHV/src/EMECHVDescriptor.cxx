@@ -14,8 +14,7 @@ EMECHVDescriptor::EMECHVDescriptor(const CellPartitioning &etaBinning
 }
 
 EMECHVDescriptor::~EMECHVDescriptor()
-{
-}
+= default;
 
 
 

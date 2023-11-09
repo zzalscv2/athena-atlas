@@ -25,7 +25,7 @@ EMBDetectorRegion::~EMBDetectorRegion()
 
 EMBCellConstLink EMBDetectorRegion::getEMBCell (unsigned int ieta, unsigned int iphi) const
 {
-  return EMBCellConstLink(new EMBCell(m_endcapIndex,m_descriptor,ieta,iphi));
+  return {new EMBCell(m_endcapIndex,m_descriptor,ieta,iphi)};
 }
 
 const Amg::Transform3D&  EMBDetectorRegion::getAbsoluteTransform (const GeoAlignmentStore* alignStore) const

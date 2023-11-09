@@ -11,7 +11,7 @@ class EMBHVDescriptor
 {
  public:
   EMBHVDescriptor(const CellBinning &etaBinning, const CellBinning &phiBinning);
-  ~EMBHVDescriptor();
+  ~EMBHVDescriptor() = default;
 
   const CellBinning &getEtaBinning() const
   {

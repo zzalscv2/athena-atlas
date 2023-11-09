@@ -36,8 +36,8 @@
 #include <cmath>
 
 LArGeo::CryostatConstructionTBEC::CryostatConstructionTBEC():
-m_cryoEnvelopePhysical(NULL),
-m_LArPhysical(NULL)
+m_cryoEnvelopePhysical(nullptr),
+m_LArPhysical(nullptr)
 {;}
 
 LArGeo::CryostatConstructionTBEC::~CryostatConstructionTBEC() {;}
@@ -72,7 +72,7 @@ GeoVFullPhysVol* LArGeo::CryostatConstructionTBEC::GetEnvelope()
   // Get the materials from the material manager:-----------------------------------------------------//
   //                                                                                                  //
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return NULL;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
   
   const GeoMaterial *Air  = materialManager->getMaterial("std::Air");
   if (!Air) throw std::runtime_error("Error in CryostatConstructionTBEC, std::Air is not found.");

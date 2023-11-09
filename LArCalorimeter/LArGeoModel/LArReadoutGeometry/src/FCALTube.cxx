@@ -17,8 +17,7 @@ FCALTube::FCALTube(const FCALTile *tile
 }
 
 // Destructor
-FCALTube::~FCALTube () {
-}
+FCALTube::~FCALTube () = default;
 
 // Get the tube position (x)
 double FCALTube::getXLocal() const {

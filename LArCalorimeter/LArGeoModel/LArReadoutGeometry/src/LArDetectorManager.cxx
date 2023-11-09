@@ -6,10 +6,10 @@
 #include <algorithm>
 
 LArDetectorManager::LArDetectorManager()
-  : m_embManager (0),
-    m_emecManager (0),
-    m_hecManager (0),
-    m_fcalManager (0),
+  : m_embManager (nullptr),
+    m_emecManager (nullptr),
+    m_hecManager (nullptr),
+    m_fcalManager (nullptr),
     m_isTestBeam(false)
 {
 }

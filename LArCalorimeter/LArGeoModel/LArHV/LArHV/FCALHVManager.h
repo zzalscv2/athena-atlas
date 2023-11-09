@@ -41,14 +41,14 @@ class FCALHVManager
     class Payload;
     FCALHVData();
     FCALHVData (std::unique_ptr<Payload> payload);
-    FCALHVData& operator= (FCALHVData&& other);
+    FCALHVData& operator= (FCALHVData&& other) noexcept;
     ~FCALHVData();
     bool hvOn (const FCALHVLine& line) const;
     double voltage (const FCALHVLine& line) const;
     double current (const FCALHVLine& line) const;
     int  hvLineNo  (const FCALHVLine& line) const;
   private:
-    int index (const FCALHVLine& line) const;
+    static int index (const FCALHVLine& line) ;
     std::unique_ptr<Payload> m_payload;
   };
 
@@ -56,14 +56,14 @@ class FCALHVManager
   ~FCALHVManager();
 
   // Begin/End side index (0=negative and 1= positive)
-  unsigned int beginSideIndex() const;
-  unsigned int endSideIndex() const;
+  static unsigned int beginSideIndex() ;
+  static unsigned int endSideIndex() ;
 
-  unsigned int beginSectorIndex(unsigned int iSampling) const;
-  unsigned int endSectorIndex(unsigned int iSampling) const;
+  static unsigned int beginSectorIndex(unsigned int iSampling) ;
+  static unsigned int endSectorIndex(unsigned int iSampling) ;
 
-  unsigned int beginSamplingIndex() const;
-  unsigned int endSamplingIndex() const;
+  static unsigned int beginSamplingIndex() ;
+  static unsigned int endSamplingIndex() ;
 
   const FCALHVModule& getHVModule(unsigned int iSide
 				  , unsigned int iSector
@@ -83,7 +83,7 @@ class FCALHVManager
 
  private:
   using idfunc_t = std::function<std::vector<HWIdentifier>(HWIdentifier)>;
-  FCALHVData getData (idfunc_t idfunc,
+  FCALHVData getData (const idfunc_t& idfunc,
                       const std::vector<const CondAttrListCollection*>& attrLists) const;
 
   FCALHVManager(const FCALHVManager& right) = delete;

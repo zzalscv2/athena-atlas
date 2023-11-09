@@ -77,15 +77,14 @@ LArGeo::LArDetectorFactoryH62004::LArDetectorFactoryH62004(StoreGateSvc *detStor
   : m_cryoXpos(0),
     m_tableYpos(0),
     m_detectorStore(detStore),
-    m_detectorManager(0),
-    m_cell_id(0)
+    m_detectorManager(nullptr),
+    m_cell_id(nullptr)
 {
 }
 
 
 LArGeo::LArDetectorFactoryH62004::~LArDetectorFactoryH62004()
-{
-}
+= default;
 
 
 void LArGeo::LArDetectorFactoryH62004::getSimulationParameters()
@@ -194,7 +193,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
 				   , 12250.*Gaudi::Units::mm );
 
   H6CryostatConstruction  H6CryoCons;
-  GeoVPhysVol* CryoEnvelope = 0;
+  GeoVPhysVol* CryoEnvelope = nullptr;
   CryoEnvelope = H6CryoCons.GetEnvelope();
   expHallPhys->add(new GeoNameTag("LAr"));
   //expHallPhys->add( new GeoTransform( GeoTrf::Translate3D(pos3Vector)*GeoTrf::RotateX3D(Theta)*GeoTrf::RotateZ3D(Phi) ));
@@ -203,7 +202,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
  
 
   // Get LArPhysical so that we can add the HEC
-  GeoPhysVol* LArPhysical = 0;
+  GeoPhysVol* LArPhysical = nullptr;
   LArPhysical = H6CryoCons.GetLArPhysical();
 
   // Add the front beam instrumentation:
@@ -212,9 +211,9 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
   const double bard_z = 100.0*Gaudi::Units::cm;
   const double z_bard=-2160.0*Gaudi::Units::cm+80.1*Gaudi::Units::cm+16.*Gaudi::Units::cm+bard_z;
   {                                             // (with 350=1/2 length of FrontBeam volume)
-    GeoVPhysVol* front = 0;
+    GeoVPhysVol* front = nullptr;
     front = FrontBeamConstruction.GetEnvelope();
-    if(front !=0){
+    if(front !=nullptr){
       expHallPhys->add( new GeoNameTag("H62004::Front"));
       expHallPhys->add( new GeoTransform( GeoTrf::TranslateZ3D(z_bard) ) );  
       expHallPhys->add(front);    
@@ -225,9 +224,9 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
   const double z_bardm=-2160.0*Gaudi::Units::cm+1362.3*Gaudi::Units::cm;
   const double bttb_pos = 833.5*Gaudi::Units::cm;
   {
-     GeoVPhysVol* middle = 0;
+     GeoVPhysVol* middle = nullptr;
      middle = MiddleBeamConstruction.GetEnvelope();
-     if(middle != 0 ){
+     if(middle != nullptr ){
         double ym_pos = m_tableYpos  * (z_bardm + 2160*Gaudi::Units::cm) * (1./(bttb_pos + 2160*Gaudi::Units::cm));
 	expHallPhys->add( new GeoNameTag("H62004::Middle"));
 	expHallPhys->add( new GeoTransform( GeoTrf::TranslateY3D(ym_pos) * GeoTrf::TranslateZ3D(z_bardm) ) );
@@ -237,9 +236,9 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
   // Add MovableTable
   MovableTableConstructionH62004 MovableTable;
   {
-     GeoVPhysVol* mov = 0;
+     GeoVPhysVol* mov = nullptr;
      mov = MovableTable.GetEnvelope();
-     if(mov != 0 ){
+     if(mov != nullptr ){
 	expHallPhys->add( new GeoNameTag("H62004::Movable"));
 	expHallPhys->add( new GeoTransform( GeoTrf::TranslateY3D(m_tableYpos) *  GeoTrf::TranslateZ3D(bttb_pos) ) );
 	expHallPhys->add(mov);
@@ -263,10 +262,10 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
    WarmTCConstructionH62004 wtcConstruction;
    {
      std::cout<<"WTC constructed: "<<std::endl;
-     GeoVPhysVol* wtc = 0;
+     GeoVPhysVol* wtc = nullptr;
      wtc = wtcConstruction.GetEnvelope();
      std::cout<<"WTC envelope: "<<wtc<<"/"<<expHallPhys<<std::endl;
-     if(wtc !=0 ){
+     if(wtc !=nullptr ){
        expHallPhys->add( new GeoNameTag("LAr"));
        GeoTrf::RotateX3D rotTC(WTC_tild);
        expHallPhys->add( new GeoTransform( GeoTrf::Translation3D(WTC_x, WTC_y, bcry_zpos + bcry_rwarm + WTC_z + z_m) * rotTC));
@@ -278,19 +277,19 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
    ModulesConstructionH62004 moduleConstruction;
    {    
      std::cout<<"Module constructed: "<<std::endl;
-     GeoVPhysVol* module = 0;
+     GeoVPhysVol* module = nullptr;
      module = moduleConstruction.GetEnvelope();
      std::cout<<"Module envelope: "<<module<<"/"<<LArPhysical<<std::endl;
-     if(module !=0 && LArPhysical !=0){
+     if(module !=nullptr && LArPhysical !=nullptr){
        LArPhysical->add( new GeoNameTag("LAr::H6::Cryostat::Modules"));
        LArPhysical->add(module);    
      }
    }
 
 
-  EMECDetectorManager *emecDetectorManager  = NULL;
-  FCALDetectorManager  *fcalDetectorManager = NULL;
-  HECDetectorManager *hecDetManager = NULL;
+  EMECDetectorManager *emecDetectorManager  = nullptr;
+  FCALDetectorManager  *fcalDetectorManager = nullptr;
+  HECDetectorManager *hecDetManager = nullptr;
   StoredPhysVol *sEmecInnerWheel;   
   if (StatusCode::SUCCESS==m_detectorStore->retrieve(sEmecInnerWheel, "EMEC_INNER_WHEEL_POS" )) {        
       emecDetectorManager = new EMECDetectorManager();
@@ -419,7 +418,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
   }
 
 
-  m_detectorManager = new LArDetectorManager(0,emecDetectorManager,hecDetManager,fcalDetectorManager);
+  m_detectorManager = new LArDetectorManager(nullptr,emecDetectorManager,hecDetManager,fcalDetectorManager);
   m_detectorManager->isTestBeam(true); 
 
   m_detectorManager->addTreeTop(expHallPhys);

@@ -45,15 +45,14 @@
 #include <iostream>
 
 LArGeo::FrontBeamConstructionH62004::FrontBeamConstructionH62004()
-  :m_H62004FrontBeamPhysical(0),
-   m_detectorManager(0)
+  :m_H62004FrontBeamPhysical(nullptr),
+   m_detectorManager(nullptr)
 {
 }
 
 
 LArGeo::FrontBeamConstructionH62004::~FrontBeamConstructionH62004()
-{
-}
+= default;
 
 
 
@@ -89,7 +88,7 @@ GeoVPhysVol* LArGeo::FrontBeamConstructionH62004::GetEnvelope()
 
   StoredMaterialManager* materialManager = nullptr;
   sc=detStore->retrieve(materialManager, std::string("MATERIALS"));
-  if (StatusCode::SUCCESS != sc) return NULL;
+  if (StatusCode::SUCCESS != sc) return nullptr;
 
   const GeoMaterial *Air  = materialManager->getMaterial("std::Air");
   if (!Air) throw std::runtime_error("Error in FrontBeamConstructionH62004, std::Air is not found.");

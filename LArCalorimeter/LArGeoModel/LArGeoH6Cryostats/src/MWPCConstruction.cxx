@@ -57,8 +57,7 @@ LArGeo::MWPCConstruction::MWPCConstruction(double Step)
 
 
 LArGeo::MWPCConstruction::~MWPCConstruction()
-{
-}
+= default;
 
 
 
@@ -98,7 +97,7 @@ GeoVPhysVol* LArGeo::MWPCConstruction::GetEnvelope()
   //                                                                                                  //
 
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return NULL;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
   std::string name;
   double density;

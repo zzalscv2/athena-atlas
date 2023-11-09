@@ -47,7 +47,7 @@
 #include <iostream>
 
 
-LArGeo::WarmTCConstructionH62004::WarmTCConstructionH62004():m_WarmTCPhys(0) {
+LArGeo::WarmTCConstructionH62004::WarmTCConstructionH62004():m_WarmTCPhys(nullptr) {
 
   //StoreGateSvc* detStore;
 

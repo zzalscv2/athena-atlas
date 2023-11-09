@@ -60,14 +60,13 @@ using GeoTrf::RotateZ3D;
 
 //Constructor
 LArGeo::HECWheelConstruction::HECWheelConstruction(bool fullGeo, const std::string& wheelType, bool threeBoards, bool posZSide):
-  m_physiHECWheel(0),
+  m_physiHECWheel(nullptr),
   m_posZSide(posZSide),
   m_threeBoards(threeBoards),
   m_wheelType(wheelType),
   m_fullGeo(fullGeo)
 {
-  if (m_wheelType=="front") m_frontWheel  = true;
-  else                      m_frontWheel  = false;
+  m_frontWheel = m_wheelType=="front";
 }
 
 //~Destructor

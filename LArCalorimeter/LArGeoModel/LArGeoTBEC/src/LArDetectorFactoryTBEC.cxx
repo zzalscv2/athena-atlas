@@ -35,14 +35,13 @@
 #include "LArGeoCode/VDetectorParameters.h"
 
 LArGeo::LArDetectorFactoryTBEC::LArDetectorFactoryTBEC()
-  : m_detectorManager(0),
+  : m_detectorManager(nullptr),
     m_ecVisLimit(-1)
 {}
 
 
 LArGeo::LArDetectorFactoryTBEC::~LArDetectorFactoryTBEC()
-{
-}
+= default;
 
 
 // Place the cryostats into a container physical volume.
@@ -84,7 +83,7 @@ void LArGeo::LArDetectorFactoryTBEC::create( GeoPhysVol* a_container )
   LArDetectorConstructionTBEC CryostatConstructionTB;
   CryostatConstructionTB.setECVisLimit(m_ecVisLimit);
   
-  GeoVPhysVol* Envelope = 0;
+  GeoVPhysVol* Envelope = nullptr;
   
   Envelope = CryostatConstructionTB.GetEnvelope();
   
@@ -194,7 +193,7 @@ void LArGeo::LArDetectorFactoryTBEC::create( GeoPhysVol* a_container )
     emecDetectorManager->addDetectorRegion(presamplerRegion);
   }                                                                  
   detStore->record(emecDetectorManager,emecDetectorManager->getName()).ignore();
-  m_detectorManager = new LArDetectorManager(0,emecDetectorManager,0,0);
+  m_detectorManager = new LArDetectorManager(nullptr,emecDetectorManager,nullptr,nullptr);
   m_detectorManager->addTreeTop(Envelope);
 
 }

@@ -106,8 +106,7 @@ LArGeo::EMECConstruction::EMECConstruction(bool is_tb, bool has_inner, bool has_
 }
 
 LArGeo::EMECConstruction::~EMECConstruction()
-{
-}
+= default;
 
 GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
 {
@@ -119,8 +118,8 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
 
   // Get GeoModelSvc and RDBAccessSvc
 
-  IRDBAccessSvc* pAccessSvc(0);
-  IGeoModelSvc* geoModelSvc(0);
+  IRDBAccessSvc* pAccessSvc(nullptr);
+  IGeoModelSvc* geoModelSvc(nullptr);
   StatusCode sc = svcLocator->service("RDBAccessSvc",pAccessSvc);
   if(sc != StatusCode::SUCCESS){
     throw std::runtime_error("EMECConstruction: cannot locate RDBAccessSvc!");
@@ -150,7 +149,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
   }
 
   StoredMaterialManager* materialManager = nullptr;
-  if(StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return 0;
+  if(StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
   //////////////////////////////////////////////////////////////////
   // Get materials from the manager
@@ -159,7 +158,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
   const GeoMaterial *LAr  = materialManager->getMaterial("std::LiquidArgon");
   if(!LAr) throw std::runtime_error("Error in EMECConstruction, std::LiquidArgon is not found.");
 
-  const GeoMaterial* innerAbsorberMaterial = 0;
+  const GeoMaterial* innerAbsorberMaterial = nullptr;
   std::string innerAbsorberMaterial_name = "LAr::EMEC_Thickabs";
   if(multilayered_absorbers > 0){
     if(multilayered_absorbers != 2){
@@ -177,7 +176,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
     );
   }
 
-  const GeoMaterial* outerAbsorberMaterial = 0;
+  const GeoMaterial* outerAbsorberMaterial = nullptr;
   std::string outerAbsorberMaterial_name = "LAr::EMEC_Thinabs";
   if(multilayered_absorbers > 0){
     if(multilayered_absorbers != 2){
@@ -195,8 +194,8 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
     );
   }
 
-  const GeoMaterial *Glue = 0;
-  const GeoMaterial *Lead = 0;
+  const GeoMaterial *Glue = nullptr;
+  const GeoMaterial *Lead = nullptr;
   if(multilayered_absorbers > 0){
 // to be replaced with glue and lead - finished by Adam Agocs
     Glue = materialManager->getMaterial("LAr::Glue");
@@ -253,12 +252,12 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
 
   std::string emecMotherName = baseName + "::Mother"; //+ extension;
 
-  GeoTransform *refSystemTransform = 0;
+  GeoTransform *refSystemTransform = nullptr;
   double zTrans = 0.*Gaudi::Units::mm;
   double zMSTrans = 0.*Gaudi::Units::mm;
 
   GeoPcon* emecMotherShape = new GeoPcon(phiPosition - phiSize, 2.*phiSize);  //start phi,total phi
-  for(auto currentRecord : *cryoPcons) {
+  for(auto *currentRecord : *cryoPcons) {
     if(currentRecord->getString("PCON") == "EMEC::Mother"){
       if(!refSystemTransform){
         if(m_isTB){
@@ -511,7 +510,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         double front_shift = 0.*Gaudi::Units::mm;
         double back_shift = 0.*Gaudi::Units::mm;
         try {
-	    for(auto dmPcon : *DMpcons) {
+	    for(auto *dmPcon : *DMpcons) {
                 const std::string& object = dmPcon->getString("PCONNAME");
                 if(object == "FrontSupportMother"){
                     int zplane = dmPcon->getInt("NZPLANE");
@@ -536,7 +535,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         }
 //std::cout << "EMECConstruction : " << front_shift << " " << back_shift << std::endl;
         z0 = zWheelRefPoint + front_shift;
-        EMECSupportConstruction *fsc = 0;
+        EMECSupportConstruction *fsc = nullptr;
         if(m_isTB) fsc = new EMECSupportConstruction(FrontSupp, bPos, true, "LAr::EMEC::", Gaudi::Units::halfpi*Gaudi::Units::rad);
         else fsc = new EMECSupportConstruction(FrontSupp, bPos);
         GeoPhysVol* physicalFSM = fsc->GetEnvelope();
@@ -546,7 +545,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         delete fsc;
 
         z0 = zWheelRefPoint + back_shift; // end of EMEC envelop in the cryo.
-        EMECSupportConstruction *bsc = 0;
+        EMECSupportConstruction *bsc = nullptr;
         if(m_isTB) bsc = new EMECSupportConstruction(BackSupp, bPos, true, "LAr::EMEC::", Gaudi::Units::halfpi*Gaudi::Units::rad);
         else bsc = new EMECSupportConstruction(BackSupp, bPos);
         GeoPhysVol *physicalBSM = bsc->GetEnvelope();
@@ -558,7 +557,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         delete bsc;
 
         z0 = zWheelRefPoint + LArTotalThickness * 0.5; //dist. to middle of sens vol. along z  from WRP
-        EMECSupportConstruction *osc = 0;
+        EMECSupportConstruction *osc = nullptr;
         if(m_isTB) osc = new EMECSupportConstruction(EMECSupportConstruction::Outer, bPos, true, "LAr::EMEC::", Gaudi::Units::halfpi*Gaudi::Units::rad);
         else osc = new EMECSupportConstruction(EMECSupportConstruction::Outer, bPos);
         GeoPhysVol *physicalOSM = osc->GetEnvelope();
@@ -568,7 +567,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         delete osc;
 
         z0 = zWheelRefPoint + LArTotalThickness * 0.5;
-        EMECSupportConstruction *isc = 0;
+        EMECSupportConstruction *isc = nullptr;
         if(m_isTB) isc = new EMECSupportConstruction(EMECSupportConstruction::Inner, bPos, true, "LAr::EMEC::", Gaudi::Units::halfpi*Gaudi::Units::rad);
         else isc = new EMECSupportConstruction(EMECSupportConstruction::Inner, bPos);
         GeoPhysVol *physicalISM = isc->GetEnvelope();
@@ -578,7 +577,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         delete isc;
 
         z0 = zWheelRefPoint + LArTotalThickness * 0.5;
-        EMECSupportConstruction *msc = 0;
+        EMECSupportConstruction *msc = nullptr;
         if(m_isTB) msc = new EMECSupportConstruction(EMECSupportConstruction::Middle, bPos, true, "LAr::EMEC::", Gaudi::Units::halfpi*Gaudi::Units::rad);
         else msc = new EMECSupportConstruction(EMECSupportConstruction::Middle, bPos);
         GeoPhysVol *physicalMSM = msc->GetEnvelope();
@@ -607,7 +606,7 @@ void LArGeo::EMECConstruction::place_custom_solids(
 )
 {
 
-  for(auto name: absorbers){
+  for(const auto& name: absorbers){
     GeoLogVol* log_volume = new GeoLogVol(name, new GeoUnidentifiedShape("LArCustomShape", name) , Absorber);
     GeoPhysVol* phys_volume = new GeoPhysVol(log_volume);
     fullPV->add(new GeoIdentifierTag(1));
@@ -636,7 +635,7 @@ void LArGeo::EMECConstruction::place_custom_solids(
     }
   }
 
-    for(auto name: electrodes){
+    for(const auto& name: electrodes){
       GeoLogVol* log_volume = new GeoLogVol(name, new GeoUnidentifiedShape("LArCustomShape",name), Electrode);
       GeoPhysVol* phys_volume = new GeoPhysVol(log_volume);
       fullPV->add(new GeoIdentifierTag(1));

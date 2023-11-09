@@ -67,9 +67,9 @@
 //===================constructor
 
 LArGeo::FCALConstructionH62004::FCALConstructionH62004():
-  m_absPhysical1(0),
-  m_absPhysical2(0),
-  m_absPhysical3(0),
+  m_absPhysical1(nullptr),
+  m_absPhysical2(nullptr),
+  m_absPhysical3(nullptr),
   m_VisLimit(0)
 {
   m_svcLocator = Gaudi::svcLocator();
@@ -97,8 +97,7 @@ LArGeo::FCALConstructionH62004::FCALConstructionH62004():
 //===================destructor
 
 LArGeo::FCALConstructionH62004::~FCALConstructionH62004()
-{
-}
+= default;
 
 //================== get envelope
 
@@ -153,7 +152,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
 
 
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return NULL;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
   
   const GeoMaterial *Copper  = materialManager->getMaterial("std::Copper");
   if (!Copper) throw std::runtime_error("Error in FCALConstructionH62004, std::Copper is not found.");
@@ -206,7 +205,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
 
   FCAL_ChannelMap *cmap = new FCAL_ChannelMap(0);
 
-  GeoFullPhysVol *fcalPhysical(NULL);
+  GeoFullPhysVol *fcalPhysical(nullptr);
 
   std::string baseName = "LAr::FCAL::";
 
@@ -241,7 +240,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
   if (F1) 
     {
       // Module 1
-      GeoFullPhysVol *modPhysical =0;
+      GeoFullPhysVol *modPhysical =nullptr;
       {
 	double halfDepth       = fcalData[0].fullModuleDepth/2;
 	double innerRadius     = fcalData[0].innerModuleRadius;
@@ -270,7 +269,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
 	
       }   
       // 16 Troughs representing  Cable Harnesses:
-      if(m_absPhysical1==0)
+      if(m_absPhysical1==nullptr)
 	{
 	  double troughDepth       = 0.9999 * Gaudi::Units::cm;
 	  double outerRadius       = fcalData[0].outerModuleRadius;
@@ -288,7 +287,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
 	  modPhysical->add(st);
 	}
       
-      if (m_absPhysical1==0) // Until fixed. (m_absPhysical1==0)
+      if (m_absPhysical1==nullptr) // Until fixed. (m_absPhysical1==0)
 	{
 	  double halfDepth    = fcalData[0].fullGapDepth/2.0;
 	  double innerRadius  = fcalData[0].innerGapRadius;
@@ -311,7 +310,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
 	      if (thisGroup!=myGroup) continue;
 	      double thisTubeX= record->getDouble("X");
 	      double thisTubeY= record->getDouble("Y");
-	      if (!(thisTubeX<0. && thisTubeY>0.)) continue;
+	      if (thisTubeX>=0. || thisTubeY<=0.) continue;
 	      
 	      std::string thisTileStr=record->getString("TILENAME");
 	      int    thisTubeI=record->getInt("I");
@@ -337,7 +336,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
   if (F2) 
     {
       // Module 2
-      GeoFullPhysVol *modPhysical =0;
+      GeoFullPhysVol *modPhysical =nullptr;
       {
 	double halfDepth       = fcalData[1].fullModuleDepth/2;
 	double innerRadius     = fcalData[1].innerModuleRadius;
@@ -366,7 +365,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
 	
       }   
       // 16 Troughs representing  Cable Harnesses:
-      if(m_absPhysical2==0)
+      if(m_absPhysical2==nullptr)
 	{
 	  double troughDepth       = 1.0 * Gaudi::Units::cm;
 	  double outerRadius       = fcalData[1].outerModuleRadius;
@@ -385,7 +384,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
 	}
       
       // Electrodes:
-      if(m_absPhysical2==0) // Until fixed. m_absPhysical2==0)
+      if(m_absPhysical2==nullptr) // Until fixed. m_absPhysical2==0)
       {
 	
 	double halfDepth    = fcalData[1].fullGapDepth/2.0;
@@ -416,7 +415,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
 	    double thisTubeX= record->getDouble("X");
 	    double thisTubeY= record->getDouble("Y");
 	    
-	    if (!(thisTubeX<0. && thisTubeY>0.)) continue;
+	    if (thisTubeX>=0. || thisTubeY<=0.) continue;
 	    
 	    std::string thisTileStr=record->getString("TILENAME");
 	    int    thisTubeI=record->getInt("I");
@@ -440,7 +439,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
   if (F3) 
     {
       // ColdTC......
-      GeoFullPhysVol *modPhysical =0;
+      GeoFullPhysVol *modPhysical =nullptr;
       {
 	double halfDepth       = fcalData[2].fullModuleDepth/2;
 	double innerRadius     = fcalData[2].innerModuleRadius;
@@ -478,7 +477,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
       }   
 
       // Add electrode and gaps......
-     if(m_absPhysical3==0){
+     if(m_absPhysical3==nullptr){
 	double halfDepth       = fcalData[2].fullGapDepth/2;
 	double innerRadius     = fcalData[2].innerGapRadius;
 	double outerRadius     = fcalData[2].outerGapRadius;

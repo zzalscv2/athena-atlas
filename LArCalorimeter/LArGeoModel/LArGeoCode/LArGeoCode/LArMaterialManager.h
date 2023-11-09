@@ -40,7 +40,7 @@ class LArMaterialManager
   LArMaterialManager(StoreGateSvc *pDetStore);
   
   // Destructor:
-  ~LArMaterialManager();
+  ~LArMaterialManager() = default;
 
   // Build LAr specific blended materials
   void buildMaterials();

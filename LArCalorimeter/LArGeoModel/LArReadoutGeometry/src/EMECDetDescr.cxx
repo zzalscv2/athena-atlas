@@ -117,5 +117,4 @@ EMECDetDescr::EMECDetDescr (const EMECDetectorManager *detManager
 
 
 EMECDetDescr::~EMECDetDescr()
-{
-}
+= default;

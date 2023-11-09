@@ -98,7 +98,7 @@ class FCALTile
   /**
    * @brief Get num hvlines
    */
-  unsigned int getNumHVLines() const;
+  static unsigned int getNumHVLines() ;
   
   /**
    * @brief Get hvline

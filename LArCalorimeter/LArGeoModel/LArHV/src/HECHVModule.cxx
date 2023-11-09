@@ -61,7 +61,7 @@ unsigned int HECHVModule::getPhiIndex() const
   return m_c->iPhi;
 }
 
-unsigned int HECHVModule::getNumSubgaps() const
+unsigned int HECHVModule::getNumSubgaps() 
 {
   return 4;
 }

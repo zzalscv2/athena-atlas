@@ -74,7 +74,7 @@ using GeoTrf::Translate3D;
 
 //Constructor
 LArGeo::HEC2WheelConstruction::HEC2WheelConstruction():
-  m_physiHEC(0),
+  m_physiHEC(nullptr),
   m_posZSide(false)
 {
 

@@ -15,10 +15,11 @@
 #include "LArReadoutGeometry/FCAL_ChannelMap.h"
 #include "CxxUtils/trapping_fp.h"
 #include "GaudiKernel/SystemOfUnits.h"
-#include <sstream>
-#include <iostream>
+#include <cstdio>
 #include <iomanip>
-#include <stdio.h>
+#include <iostream>
+#include <sstream>
+#include <utility>
 
 /* === Geometrical parameters === */
 const double FCAL_ChannelMap::m_tubeSpacing[] = {0.75*Gaudi::Units::cm, 0.8179*Gaudi::Units::cm, 0.90*Gaudi::Units::cm};
@@ -104,7 +105,7 @@ void FCAL_ChannelMap::add_tube(const std::string & tileName, int mod, int /*id*/
 
   tileName_t tilename = (a3 << 16) + a2;
 
-  TubePosition tb(tilename, x*Gaudi::Units::cm, y*Gaudi::Units::cm, hvFT);
+  TubePosition tb(tilename, x*Gaudi::Units::cm, y*Gaudi::Units::cm, std::move(hvFT));
   // Add offsets, becaues iy and ix can be negative HMA
   
   i = i+200;

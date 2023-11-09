@@ -44,11 +44,11 @@
 #include <cmath>
 
 LArGeo::H6CryostatConstruction::H6CryostatConstruction():
-  m_cryoMotherPhysical(NULL),
-  m_cryoLArPhys(0)
+  m_cryoMotherPhysical(nullptr),
+  m_cryoLArPhys(nullptr)
 {}
 
-LArGeo::H6CryostatConstruction::~H6CryostatConstruction() {}
+LArGeo::H6CryostatConstruction::~H6CryostatConstruction() = default;
 
 GeoVFullPhysVol* LArGeo::H6CryostatConstruction::GetEnvelope()
 {
@@ -64,7 +64,7 @@ GeoVFullPhysVol* LArGeo::H6CryostatConstruction::GetEnvelope()
 
   // Material Manager
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return 0;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
   const GeoMaterial *Air  = materialManager->getMaterial("std::Air");
   if (!Air) {
