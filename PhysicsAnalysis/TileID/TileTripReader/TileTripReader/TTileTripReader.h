@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -47,6 +47,9 @@ public:
     
     TTileTripReader(const char* name="TTileTripReader" );
     virtual ~TTileTripReader();
+
+    TTileTripReader(const TTileTripReader&) = delete;
+    TTileTripReader& operator= (const TTileTripReader&) = delete;
     
     /** Get the name of the class instance */
     inline const char* getName() const { return m_name.c_str(); };
