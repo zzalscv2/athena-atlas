@@ -13,9 +13,9 @@ namespace LArGeo {
   {
   public:
     EndcapDMConstruction(bool);
-    ~EndcapDMConstruction();
+    ~EndcapDMConstruction() = default;
 
-    void create(GeoFullPhysVol* envelope);
+    void create(GeoFullPhysVol* envelope) const;
 
   private:
     EndcapDMConstruction(const EndcapDMConstruction&);

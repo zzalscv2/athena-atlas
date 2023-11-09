@@ -70,18 +70,17 @@ using namespace GeoXF;
 
 //LArDetectorFactoryH62002::LArDetectorFactoryH62002(StoreGateSvc *detStore)
 LArGeo::LArDetectorFactoryH62002::LArDetectorFactoryH62002(StoreGateSvc *detStore)
-  : log(NULL),
+  : log(nullptr),
     m_cryoXpos(0),
     m_tableYpos(0),
     m_detectorStore(detStore),
-    m_detectorManager(0)
+    m_detectorManager(nullptr)
 {
 }
 
 
 LArGeo::LArDetectorFactoryH62002::~LArDetectorFactoryH62002()
-{
-}
+= default;
 
 
 void LArGeo::LArDetectorFactoryH62002::getSimulationParameters()
@@ -199,7 +198,7 @@ void LArGeo::LArDetectorFactoryH62002::create(GeoPhysVol *world)
   GeoTrf::Translate3D pos3Vector(    m_cryoXpos*Gaudi::Units::mm,    0.*Gaudi::Units::mm,   12250.*Gaudi::Units::mm );
 
   H6CryostatConstruction  H6CryoCons;
-  GeoVPhysVol* Envelope = 0;
+  GeoVPhysVol* Envelope = nullptr;
   Envelope = H6CryoCons.GetEnvelope();
   expHallPhys->add(new GeoNameTag("LAr"));
   //expHallPhys->add( new GeoTransform( GeoTrf::Translate3D(pos3Vector)*GeoTrf::RotateX3D(Theta)*GeoTrf::RotateZ3D(Phi) ));
@@ -213,7 +212,7 @@ void LArGeo::LArDetectorFactoryH62002::create(GeoPhysVol *world)
     const double H62002WallsPos = 10182.*Gaudi::Units::mm;  // A wild guess at the moment.....
     WallsConstruction  WallsConstruction2002;
     GeoVPhysVol* frontwalls = WallsConstruction2002.GetEnvelope();
-    if(frontwalls !=0){
+    if(frontwalls !=nullptr){
       expHallPhys->add( new GeoNameTag("LAr"));
       expHallPhys->add( new GeoTransform( GeoTrf::TranslateZ3D(H62002WallsPos) ) );  
       expHallPhys->add(frontwalls);    
@@ -226,7 +225,7 @@ void LArGeo::LArDetectorFactoryH62002::create(GeoPhysVol *world)
     const double H62002TablePos = 8320.*Gaudi::Units::mm;  
     TableConstructionH62002  TableConstruction;
     GeoVPhysVol* table = TableConstruction.GetEnvelope();
-    if(table !=0 && expHallPhys !=0){
+    if(table !=nullptr && expHallPhys !=nullptr){
       expHallPhys->add( new GeoNameTag("LAr"));
       expHallPhys->add( new GeoTransform( GeoTrf::TranslateZ3D(H62002TablePos) ) );  
       expHallPhys->add(table);    
@@ -241,7 +240,7 @@ void LArGeo::LArDetectorFactoryH62002::create(GeoPhysVol *world)
     // (with 350=1/2 length of FrontBeam volume)
     FrontBeamConstructionH62002  FrontBeamConstruction;
     GeoVPhysVol* front = FrontBeamConstruction.GetEnvelope();
-    if(front !=0 && expHallPhys !=0){
+    if(front !=nullptr && expHallPhys !=nullptr){
       expHallPhys->add( new GeoNameTag("LAr"));
       expHallPhys->add( new GeoTransform( GeoTrf::TranslateZ3D(H62002FrontBeamPos) ) );  
       expHallPhys->add(front);    
@@ -270,7 +269,7 @@ void LArGeo::LArDetectorFactoryH62002::create(GeoPhysVol *world)
   {    
     ExcluderConstruction excluderConstruction;
     GeoPhysVol* excluder = excluderConstruction.GetEnvelope();
-    if(excluder !=0 && LArPhysical !=0){
+    if(excluder !=nullptr && LArPhysical !=nullptr){
       LArPhysical->add( new GeoNameTag("LAr::H6::Cryostat::Excluder"));
       LArPhysical->add(excluder);    
     }
@@ -401,7 +400,7 @@ void LArGeo::LArDetectorFactoryH62002::create(GeoPhysVol *world)
   //std::string PresamplerName = baseName + "::Presampler::";
   EndcapPresamplerConstruction PresamplerConstruction(true);
   GeoFullPhysVol* PresamplerEnvelope = PresamplerConstruction.Envelope();
-  if ( PresamplerEnvelope != 0 && LArPhysical != 0 ) {    
+  if ( PresamplerEnvelope != nullptr && LArPhysical != nullptr ) {    
     //LArPhysical->add( new GeoTransform( GeoTrf::Translate3D(pos3PS)*GeoTrf::RotateX3D(ThetaPS)*GeoTrf::RotateZ3D(PhiPS) ));
      LArPhysical->add( new GeoTransform( GeoTrf::Transform3D(pos3PS*MrotPS) ) );
      LArPhysical->add( PresamplerEnvelope );
@@ -427,7 +426,7 @@ void LArGeo::LArDetectorFactoryH62002::create(GeoPhysVol *world)
   {    
     HECConstructionH62002 hecConstruction;
     GeoVFullPhysVol* hecEnvelope = hecConstruction.GetEnvelope();
-    if(hecEnvelope !=0 && LArPhysical !=0){
+    if(hecEnvelope !=nullptr && LArPhysical !=nullptr){
       LArPhysical->add( new GeoNameTag("LAr"));
       //LArPhysical->add( new GeoTransform( GeoTrf::Translate3D(pos3Hec)*GeoTrf::RotateX3D(ThetaHec)*GeoTrf::RotateZ3D(PhiHec) ));
       LArPhysical->add( new GeoTransform( GeoTrf::Transform3D(pos3Hec*MrotHec) ) );
@@ -471,7 +470,7 @@ void LArGeo::LArDetectorFactoryH62002::create(GeoPhysVol *world)
 
   m_detectorStore->record(hecDetManager,hecDetManager->getName()).ignore();
   m_detectorStore->record(emecDetectorManager,emecDetectorManager->getName()).ignore();
-  m_detectorManager = new LArDetectorManager(0,emecDetectorManager,hecDetManager,0);
+  m_detectorManager = new LArDetectorManager(nullptr,emecDetectorManager,hecDetManager,nullptr);
 
   m_detectorManager->addTreeTop(expHallPhys);
 

@@ -70,7 +70,7 @@ LArGeo::EMECModuleConstruction::EMECModuleConstruction( bool tbb, bool iwb, bool
 
 }
 
-LArGeo::EMECModuleConstruction::~EMECModuleConstruction() {}
+LArGeo::EMECModuleConstruction::~EMECModuleConstruction() = default;
 
 GeoVFullPhysVol* LArGeo::EMECModuleConstruction::GetEnvelope()
 {
@@ -80,7 +80,7 @@ GeoVFullPhysVol* LArGeo::EMECModuleConstruction::GetEnvelope()
     throw std::runtime_error("Error in EndcapCryostatConstruction, cannot access DetectorStore");
   }
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return 0;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
 
   //////////////////////////////////////////////////////////////////

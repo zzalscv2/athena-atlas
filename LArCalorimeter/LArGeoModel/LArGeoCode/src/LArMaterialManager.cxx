@@ -18,7 +18,7 @@
 // #define DEBUGGEO
 
 LArMaterialManager::LArMaterialManager(StoreGateSvc* detStore):
-  m_storedManager(0)
+  m_storedManager(nullptr)
 {
   // Get the Message Service:
   ISvcLocator* svcLocator = Gaudi::svcLocator();
@@ -34,9 +34,7 @@ LArMaterialManager::LArMaterialManager(StoreGateSvc* detStore):
   m_storedManager = materialManager;
 }
 
-LArMaterialManager::~LArMaterialManager()
-{
-}
+
 
 void LArMaterialManager::buildMaterials()
 {

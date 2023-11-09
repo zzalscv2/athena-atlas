@@ -51,7 +51,7 @@ namespace LArGeo {
     std::string m_innerWheelVariant;
     std::string m_outerWheelVariant;
 
-    void place_custom_solids(
+    static void place_custom_solids(
         GeoFullPhysVol *fullPV,
         std::vector<std::string> &absorbers,
         std::vector<std::string> &electrodes,

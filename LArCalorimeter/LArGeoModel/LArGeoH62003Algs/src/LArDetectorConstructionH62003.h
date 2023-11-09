@@ -31,7 +31,7 @@ namespace LArGeo {
       
     private:
       
-      void  createAxis(GeoFullPhysVol* H62003MotherPhysical, const GeoMaterial* mat);
+      static void  createAxis(GeoFullPhysVol* H62003MotherPhysical, const GeoMaterial* mat);
       
       GeoFullPhysVol*      m_H62003EnvelopePhysical;
       

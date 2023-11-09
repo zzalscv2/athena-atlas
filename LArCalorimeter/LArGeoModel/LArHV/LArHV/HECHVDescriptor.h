@@ -11,7 +11,7 @@ class HECHVDescriptor
 {
  public:
   HECHVDescriptor(const CellBinning &phiBinning);
-  ~HECHVDescriptor();
+  ~HECHVDescriptor() = default;
 
   const CellBinning& getPhiBinning() const
   {

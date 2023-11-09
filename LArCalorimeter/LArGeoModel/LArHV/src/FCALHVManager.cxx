@@ -33,7 +33,7 @@ namespace {
 struct SimIdFunc
 {
   SimIdFunc();
-  std::vector<HWIdentifier> operator()(HWIdentifier id)
+  std::vector<HWIdentifier> operator()(HWIdentifier id) const
   {
     return m_cablingTool->getLArElectrodeIDvec (id);
   }
@@ -56,7 +56,7 @@ SimIdFunc::SimIdFunc()
 
 class FCALHVManager::Clockwork {
 public:
-  Clockwork(const FCALHVManager* manager)
+  explicit Clockwork(const FCALHVManager* manager)
   {
     for(int iSide=0; iSide<2; ++iSide) {
       for(int iSector=0; iSector<16; ++iSector) {
@@ -75,9 +75,7 @@ public:
       throw std::runtime_error("FCALHVManager failed to retrieve LArHVLineID");
     }
   }
-  ~Clockwork()
-  {
-  }
+  ~Clockwork() = default;
   std::unique_ptr<const FCALHVModule> moduleArray[2][16][3];
   const LArElectrodeID* elecId = nullptr;
   const LArHVLineID* hvId = nullptr;
@@ -91,31 +89,26 @@ public:
 };
 
 
-FCALHVManager::FCALHVData::FCALHVData()
-{
-}
-  
+FCALHVManager::FCALHVData::FCALHVData() = default;
+
 
 FCALHVManager::FCALHVData::FCALHVData (std::unique_ptr<Payload> payload)
   : m_payload (std::move (payload))
 {
 }
-  
+
 
 FCALHVManager::FCALHVData&
-FCALHVManager::FCALHVData::operator= (FCALHVData&& other)
-{
+FCALHVManager::FCALHVData::operator= (FCALHVData&& other) noexcept {
   if (this != &other) {
     m_payload = std::move (other.m_payload);
   }
   return *this;
 }
-  
 
-FCALHVManager::FCALHVData::~FCALHVData()
-{
-}
-  
+
+FCALHVManager::FCALHVData::~FCALHVData() = default;
+
 
 bool FCALHVManager::FCALHVData::hvOn (const FCALHVLine& line) const
 {
@@ -141,7 +134,7 @@ int  FCALHVManager::FCALHVData::hvLineNo  (const FCALHVLine& line) const
 }
 
 
-int  FCALHVManager::FCALHVData::index  (const FCALHVLine& line) const
+int  FCALHVManager::FCALHVData::index  (const FCALHVLine& line)
 {
   unsigned int lineIndex         = line.getLineIndex();
   const FCALHVModule& module     = line.getModule();
@@ -159,25 +152,24 @@ FCALHVManager::FCALHVManager()
 }
 
 FCALHVManager::~FCALHVManager()
-{
-}
+= default;
 
-unsigned int FCALHVManager::beginSideIndex() const
+unsigned int FCALHVManager::beginSideIndex()
 {
   return 0;
 }
 
-unsigned int FCALHVManager::endSideIndex() const
+unsigned int FCALHVManager::endSideIndex()
 {
   return 2;
 }
 
-unsigned int FCALHVManager::beginSectorIndex(unsigned int /*iSampling*/) const
+unsigned int FCALHVManager::beginSectorIndex(unsigned int /*iSampling*/)
 {
   return 0;
 }
 
-unsigned int FCALHVManager::endSectorIndex(unsigned int iSampling) const
+unsigned int FCALHVManager::endSectorIndex(unsigned int iSampling)
 {
   if (iSampling==0) return 16;
   if (iSampling==1) return 8;
@@ -185,12 +177,12 @@ unsigned int FCALHVManager::endSectorIndex(unsigned int iSampling) const
   return 0;
 }
 
-unsigned int FCALHVManager::beginSamplingIndex() const
+unsigned int FCALHVManager::beginSamplingIndex()
 {
   return 0;
 }
 
-unsigned int FCALHVManager::endSamplingIndex() const
+unsigned int FCALHVManager::endSamplingIndex()
 {
   return 3;
 }
@@ -201,7 +193,7 @@ const FCALHVModule& FCALHVManager::getHVModule(unsigned int iSide, unsigned int 
 }
 
 FCALHVManager::FCALHVData
-FCALHVManager::getData (idfunc_t idfunc,
+FCALHVManager::getData (const idfunc_t& idfunc,
                        const std::vector<const CondAttrListCollection*>& attrLists) const
 {
   auto payload = std::make_unique<FCALHVData::Payload>();
@@ -234,7 +226,7 @@ FCALHVManager::getData (idfunc_t idfunc,
           if (!((*citr).second)["R_VMEAS"].isNull()) voltage = ((*citr).second)["R_VMEAS"].data<float>();
           float current = 0.;
           if (!((*citr).second)["R_IMEAS"].isNull()) current = ((*citr).second)["R_IMEAS"].data<float>();
-	    
+
           unsigned int sideIndex=1-m_c->elecId->zside(elecHWID);      // 0 C side, 1 A side (unline HV numbering)
           unsigned int samplingIndex=m_c->elecId->hv_eta(elecHWID)-1;   // 0 to 2 for the FCAL modules 1-2-3
           unsigned int sectorIndex=m_c->elecId->module(elecHWID);       // 0-15 FCAL1, 0-7 FCAl2, 0-3 FCAL3
@@ -249,8 +241,8 @@ FCALHVManager::getData (idfunc_t idfunc,
             msg << MSG::ERROR << " invalid index for FCAL " << sideIndex << " " << samplingIndex << " " << sectorIndex << " " << lineIndex << endmsg;
             continue;
           }
-	    
-	    
+
+
           payload->m_payloadArray[index].voltage=voltage;
           payload->m_payloadArray[index].current=current;
           payload->m_payloadArray[index].hvLineNo=chanID;
@@ -259,7 +251,7 @@ FCALHVManager::getData (idfunc_t idfunc,
     }   // loop over collection
   }     // loop over folders
 
-  return FCALHVManager::FCALHVData (std::move (payload));
+  return {std::move (payload)};
 }
 
 FCALHVManager::FCALHVData

@@ -39,7 +39,7 @@ EMBDetectorManager::EMBDetectorManager(const EMBHVManager& hvManager
   for (unsigned int r=0;r<2;r++) {
     for (unsigned int s=0;s<4;s++) {
       for (unsigned int e=0;e<2;e++) {
-	m_DetRegionsRandom[r][s][e]=NULL;
+	m_DetRegionsRandom[r][s][e]=nullptr;
       }
     } 
   }

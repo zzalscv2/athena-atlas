@@ -13,7 +13,7 @@
 
 #if !(defined(SIMULATIONBASE) || defined(GENERATIONBASE))
 class LArHVIdMapping;
-#endif 
+#endif
 
 struct EMECHVPayload;
 class CondAttrListCollection;
@@ -21,7 +21,7 @@ class CondAttrListCollection;
 /**
  * @class EMECHVManager
  *
- * @brief  This class provides direct access to information on the HV 
+ * @brief  This class provides direct access to information on the HV
  * electrodes within the EMEC.  The information may be accessed either
  * directly or iteratively.  Direct access is provided by the getHVModule()
  * method.  Iterative access
@@ -30,7 +30,7 @@ class CondAttrListCollection;
  * can obtain a list of electrodes (iteratively or directly).
  *
  * The manager owns the pointers to the HV Modules.
- */ 
+ */
 
 class EMECHVManager
 {
@@ -44,14 +44,14 @@ class EMECHVManager
     class Payload;
     EMECHVData();
     EMECHVData (std::unique_ptr<Payload> payload);
-    EMECHVData& operator= (EMECHVData&& other);
+    EMECHVData& operator= (EMECHVData&& other) noexcept;
     ~EMECHVData();
     bool hvOn (const EMECHVElectrode& electrode, const int& iGap) const;
     double voltage (const EMECHVElectrode& electrode, const int& iGap) const;
     double current (const EMECHVElectrode& electrode, const int& iGap) const;
     int  hvLineNo  (const EMECHVElectrode& electrode, const int& iGap) const;
   private:
-    int index (const EMECHVElectrode& electrode) const;
+    static int index (const EMECHVElectrode& electrode) ;
     std::unique_ptr<Payload> m_payload;
   };
 
@@ -72,8 +72,8 @@ class EMECHVManager
 				  , unsigned int iSector) const;
 
   // Begin/End side index (0=negative and 1= positive)
-  unsigned int beginSideIndex() const;
-  unsigned int endSideIndex() const;
+  static unsigned int beginSideIndex() ;
+  static unsigned int endSideIndex() ;
 
   unsigned int beginSectorIndex() const;
   unsigned int endSectorIndex() const;
@@ -96,7 +96,7 @@ class EMECHVManager
 
  private:
   using idfunc_t = std::function<std::vector<HWIdentifier>(HWIdentifier)>;
-  EMECHVData getData (idfunc_t idfunc,
+  EMECHVData getData (const idfunc_t& idfunc,
                       const std::vector<const CondAttrListCollection*>& attrLists) const;
 
   EMECHVManager& operator=(const EMECHVManager& right) = delete;
@@ -106,4 +106,4 @@ class EMECHVManager
   std::unique_ptr<const Clockwork> m_c;
 };
 
-#endif 
+#endif

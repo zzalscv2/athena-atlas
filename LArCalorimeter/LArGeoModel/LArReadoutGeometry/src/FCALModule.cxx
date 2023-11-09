@@ -39,9 +39,7 @@ FCALModule::FCALModule (const GeoVFullPhysVol *physVol, Module module, Endcap en
 
 
 FCALModule::~FCALModule()
-{
-
-}
+= default;
 
 
 
@@ -62,7 +60,7 @@ const FCALTile* FCALModule::getTile (int i, int j) const
 
   std::vector<FCALTile>::const_iterator it = lower_bound(m_tileList.begin(),m_tileList.end(), id);
   if ((*it).getIndexI()!=i || (*it).getIndexJ()!=j) {
-    return NULL;
+    return nullptr;
   }
   return &*it;
 

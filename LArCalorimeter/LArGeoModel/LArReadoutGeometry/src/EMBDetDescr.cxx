@@ -72,7 +72,6 @@ EMBDetDescr::EMBDetDescr (const EMBDetectorManager *detManager, unsigned int sam
 
 
 EMBDetDescr::~EMBDetDescr()
-{
-}
+= default;
 
 

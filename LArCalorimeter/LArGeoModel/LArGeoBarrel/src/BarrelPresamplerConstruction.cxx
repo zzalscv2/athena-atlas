@@ -55,8 +55,8 @@ LArGeo::BarrelPresamplerConstruction ::BarrelPresamplerConstruction(bool fullGeo
                                                                     const VDetectorParameters* params,
                                                                     int itb):
   m_parameters(params),
-  m_psPhysicalPos(NULL),
-  m_psPhysicalNeg(NULL),
+  m_psPhysicalPos(nullptr),
+  m_psPhysicalNeg(nullptr),
   m_fullGeo(fullGeo)
 {
 

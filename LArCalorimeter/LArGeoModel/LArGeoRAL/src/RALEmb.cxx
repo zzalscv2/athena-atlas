@@ -23,17 +23,17 @@
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 
+#include <cstdlib>
 #include <iostream>
-#include <string>
-#include <stdlib.h>
 #include <stdexcept>
+#include <string>
 
 class LArGeo::RALEmb::Clockwork {
 
 public:
 
-  Clockwork(){}
-  ~Clockwork(){}
+  Clockwork()= default;
+  ~Clockwork()= default;
   
 
   IRDBRecordset_ptr barrelGeometry;

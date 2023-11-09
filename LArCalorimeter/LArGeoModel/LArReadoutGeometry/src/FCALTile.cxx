@@ -24,8 +24,7 @@ FCALTile::FCALTile (const FCALModule *module, FCALTile::TileConstIterator tItera
 
 
 FCALTile::~FCALTile()
-{
-}
+= default;
 
 
 // cppcheck-suppress operatorEqVarError
@@ -79,7 +78,7 @@ const FCALModule *FCALTile::getModule() const {
 }
 
 
-unsigned int FCALTile::getNumHVLines() const {
+unsigned int FCALTile::getNumHVLines() {
   return 4;
 }
 
@@ -133,7 +132,7 @@ FCALTubeConstLink FCALTile::getTube (unsigned int i) const {
 
 	// Is it possible to 
 
-        std::string::size_type pos = FeedThrough.find(".");
+        std::string::size_type pos = FeedThrough.find('.');
 	if (pos==std::string::npos) {
 	  std::cout << "Big problem, feedthrough: " << FeedThrough << std::endl;
 	  throw std::runtime_error("Error parsing FCAL HV Feedthrough string (finding substring)");

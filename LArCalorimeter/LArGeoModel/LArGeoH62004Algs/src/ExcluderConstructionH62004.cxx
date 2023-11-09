@@ -51,7 +51,7 @@ LArGeo::ExcluderConstructionH62004::ExcluderConstructionH62004(int which)
 LArGeo::ExcluderConstructionH62004::~ExcluderConstructionH62004() {;}
 
 
-GeoVFullPhysVol*  LArGeo::ExcluderConstructionH62004::GetEnvelope() {
+GeoVFullPhysVol*  LArGeo::ExcluderConstructionH62004::GetEnvelope() const {
 //----------------------------------------------------------------
 // Elements , Mixtures and Materials 
 //----------------------------------------------------------------
@@ -63,7 +63,7 @@ GeoVFullPhysVol*  LArGeo::ExcluderConstructionH62004::GetEnvelope() {
   }
   StoredMaterialManager* materialManager = nullptr;
   if (StatusCode::SUCCESS != detectorStore->retrieve(materialManager, std::string("MATERIALS"))) {
-    return NULL;
+    return nullptr;
   }
 
 
@@ -121,8 +121,8 @@ GeoVFullPhysVol*  LArGeo::ExcluderConstructionH62004::GetEnvelope() {
 //----------------------------------------------------------------
 
 
-  GeoLogVol*   logicEx = 0;  //pointer to the logical excluder
-  GeoVFullPhysVol* physiEx = 0; // return physical volume
+  GeoLogVol*   logicEx = nullptr;  //pointer to the logical excluder
+  GeoVFullPhysVol* physiEx = nullptr; // return physical volume
   GeoPcon*        fEx;
 //  GeoLogVol*   lfEx; 
 //  G4VPhysicalVolume*  pfEx;

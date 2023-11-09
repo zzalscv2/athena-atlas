@@ -71,8 +71,7 @@ LArDetectorToolNV::LArDetectorToolNV(const std::string& type
 }
 
 LArDetectorToolNV::~LArDetectorToolNV()
-{
-}
+= default;
 
 StatusCode LArDetectorToolNV::create()
 {

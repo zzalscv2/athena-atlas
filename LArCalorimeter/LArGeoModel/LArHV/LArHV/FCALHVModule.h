@@ -31,7 +31,7 @@ class FCALHVModule
   unsigned int getSamplingIndex() const;
   unsigned int getSectorIndex() const;
 
-  unsigned int getNumHVLines() const;
+  static unsigned int getNumHVLines() ;
 
   const FCALHVLine& getHVLine(unsigned int iLine) const;
   

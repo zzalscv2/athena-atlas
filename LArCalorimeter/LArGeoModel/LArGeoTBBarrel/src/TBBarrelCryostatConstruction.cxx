@@ -50,11 +50,11 @@
 LArGeo::TBBarrelCryostatConstruction::TBBarrelCryostatConstruction():
  _barrelSagging(0),
  _barrelVisLimit(-1),
- cryoMotherPhysical(NULL)
+ cryoMotherPhysical(nullptr)
 {}
 
 
-LArGeo::TBBarrelCryostatConstruction::~TBBarrelCryostatConstruction() {}
+LArGeo::TBBarrelCryostatConstruction::~TBBarrelCryostatConstruction() = default;
 
 GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetectorParameters* params)
 {
@@ -87,7 +87,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
 //                                                                                                
 
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return NULL;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
   const GeoMaterial *Air  = materialManager->getMaterial("std::Air");
   if (!Air) {
@@ -635,7 +635,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
      std::cout << " Position ECAM volume in mother LAr at z " << Zcd << std::endl;
 #endif
 
-     if (barrelEnvelope !=0) { 
+     if (barrelEnvelope !=nullptr) { 
           moth_phys->add(new GeoTransform(GeoTrf::TranslateZ3D(Zcd)));
           moth_phys->add(barrelEnvelope);
      }
@@ -664,7 +664,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
      std::cout << " Position PS volume in mother LAr at z " << Zcd << std::endl;
 #endif
 
-     if (barrelPSEnvelope !=0) {
+     if (barrelPSEnvelope !=nullptr) {
        moth_phys->add(new GeoTransform(GeoTrf::TranslateZ3D(Zcd)));
        moth_phys->add(barrelPSEnvelope);
        StoredPhysVol *sPhysVol = new StoredPhysVol(barrelPSEnvelope);

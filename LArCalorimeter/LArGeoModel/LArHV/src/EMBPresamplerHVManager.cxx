@@ -36,7 +36,7 @@
 
 class EMBPresamplerHVManager::Clockwork {
 public:
-  Clockwork(const EMBPresamplerHVManager* manager) {
+  explicit Clockwork(const EMBPresamplerHVManager* manager) {
     CellPartitioning etaPartitioning;
     for (unsigned int i= 0; i<4; i++)  etaPartitioning.addValue(i*0.4);
     etaPartitioning.addValue(1.525);
@@ -59,8 +59,7 @@ public:
       throw std::runtime_error("EMBPresamplerHVManager failed to retrieve LArHVLineID");
     }
   }
-  ~Clockwork() {
-  }
+  ~Clockwork() = default;
   std::unique_ptr<EMBPresamplerHVDescriptor>     descriptor;
   std::unique_ptr<const EMBPresamplerHVModule>   moduleArray[2][4][32];
   const LArElectrodeID* elecId = nullptr;
@@ -75,32 +74,28 @@ public:
 };
 
 
-EMBPresamplerHVManager::EMBPresamplerHVData::EMBPresamplerHVData()
-{
-}
-  
+EMBPresamplerHVManager::EMBPresamplerHVData::EMBPresamplerHVData() = default;
+
 
 EMBPresamplerHVManager::EMBPresamplerHVData::EMBPresamplerHVData
   (std::unique_ptr<Payload> payload)
   : m_payload (std::move (payload))
 {
 }
-  
+
 
 EMBPresamplerHVManager::EMBPresamplerHVData&
-EMBPresamplerHVManager::EMBPresamplerHVData::operator= (EMBPresamplerHVData&& other)
-{
+EMBPresamplerHVManager::EMBPresamplerHVData::operator= (EMBPresamplerHVData&& other) noexcept {
   if (this != &other) {
     m_payload = std::move (other.m_payload);
   }
   return *this;
 }
-  
+
 
 EMBPresamplerHVManager::EMBPresamplerHVData::~EMBPresamplerHVData()
-{
-}
-  
+= default;
+
 
 bool EMBPresamplerHVManager::EMBPresamplerHVData::hvOn
   (const EMBPresamplerHVModule& module, const int& iGap) const
@@ -131,7 +126,7 @@ int EMBPresamplerHVManager::EMBPresamplerHVData::hvLineNo
 
 
 int EMBPresamplerHVManager::EMBPresamplerHVData::index
-  (const EMBPresamplerHVModule& module) const
+  (const EMBPresamplerHVModule& module)
 {
   unsigned int sideIndex         = module.getSideIndex();
   unsigned int phiIndex          = module.getPhiIndex();
@@ -147,8 +142,7 @@ EMBPresamplerHVManager::EMBPresamplerHVManager()
 }
 
 EMBPresamplerHVManager::~EMBPresamplerHVManager()
-{
-}
+= default;
 
 const EMBPresamplerHVDescriptor* EMBPresamplerHVManager::getDescriptor() const
 {
@@ -180,19 +174,19 @@ const EMBPresamplerHVModule& EMBPresamplerHVManager::getHVModule(unsigned int iS
   return *(m_c->moduleArray[iSide][iEta][iPhi]);
 }
 
-unsigned int EMBPresamplerHVManager::beginSideIndex() const
+unsigned int EMBPresamplerHVManager::beginSideIndex()
 {
   return 0;
 }
 
-unsigned int EMBPresamplerHVManager::endSideIndex() const
+unsigned int EMBPresamplerHVManager::endSideIndex()
 {
   return 2;
 }
 
 
 EMBPresamplerHVManager::EMBPresamplerHVData
-EMBPresamplerHVManager::getData (idfunc_t idfunc,
+EMBPresamplerHVManager::getData (const idfunc_t& idfunc,
                                  const std::vector<const CondAttrListCollection*>& attrLists) const
 {
   auto payload = std::make_unique<EMBPresamplerHVData::Payload>();
@@ -202,11 +196,11 @@ EMBPresamplerHVManager::getData (idfunc_t idfunc,
     payload->m_payloadArray[i].voltage[0] = EMBPresamplerHVData::INVALID;
     payload->m_payloadArray[i].voltage[1] = EMBPresamplerHVData::INVALID;
   }
-    
+
   for (const CondAttrListCollection* atrlistcol : attrLists) {
 
     for (CondAttrListCollection::const_iterator citr=atrlistcol->begin(); citr!=atrlistcol->end();++citr) {
-      
+
       // Construct HWIdentifier
       // 1. decode COOL Channel ID
       unsigned int chanID = (*citr).first;
@@ -230,7 +224,7 @@ EMBPresamplerHVManager::getData (idfunc_t idfunc,
           unsigned int sideIndex=1-m_c->elecId->zside(elecHWID);
 // eta index, no trouble
           unsigned int etaIndex=m_c->elecId->hv_eta(elecHWID)-1;
-// phi index   
+// phi index
 //  offline 0 to 2pi in 2pi/32 bins  (2 presampler cells per phi_HV)
 //  module from elecID : 0 to 31
 //    phi        0                                     pi                                            2pi
@@ -247,7 +241,7 @@ EMBPresamplerHVManager::getData (idfunc_t idfunc,
 //                 P8 P7  P6  P5  P4  P3   P2    P1    P0    P15   P14   P13   P12   P11   P10   P9    P8
 //     FT          -1 0                                0  -1                                      0 -1  0
 // Module          15 14        9 8 7 6 5  4  3  2  1   0 31 30 29 38 27 26 25 24 23 22 21 20 19 18 17 16
-//  offline phi    0  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 
+//  offline phi    0  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
           else {
             int imodule=m_c->elecId->module(elecHWID);
             if (imodule<16) phiIndex = 15 - imodule;
@@ -255,7 +249,7 @@ EMBPresamplerHVManager::getData (idfunc_t idfunc,
           }
 
           unsigned int index             =  128*sideIndex+32*etaIndex+phiIndex;
-	  
+
           unsigned int gapIndex=m_c->elecId->gap(elecHWID);
           if (sideIndex==0) gapIndex=1-gapIndex;
 
@@ -273,7 +267,7 @@ EMBPresamplerHVManager::getData (idfunc_t idfunc,
     }
   }
 
-  return EMBPresamplerHVManager::EMBPresamplerHVData (std::move (payload));
+  return {std::move (payload)};
 }
 
 #ifndef SIMULATIONBASE

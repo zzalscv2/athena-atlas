@@ -45,15 +45,14 @@
 #include <iostream>
 
 LArGeo::MiddleBeamConstructionH62004::MiddleBeamConstructionH62004()
-  :m_H62004MiddleBeamPhysical(0),
-   m_detectorManager(0)
+  :m_H62004MiddleBeamPhysical(nullptr),
+   m_detectorManager(nullptr)
 {
 }
 
 
 LArGeo::MiddleBeamConstructionH62004::~MiddleBeamConstructionH62004()
-{
-}
+= default;
 
 
 
@@ -83,7 +82,7 @@ GeoVPhysVol* LArGeo::MiddleBeamConstructionH62004::GetEnvelope()
   //                                                                                                  //
 
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return NULL;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
   const GeoMaterial *Air  = materialManager->getMaterial("std::Air");
   if (!Air) throw std::runtime_error("Error in MiddleBeamConstructionH62004, std::Air is not found.");
@@ -92,9 +91,7 @@ GeoVPhysVol* LArGeo::MiddleBeamConstructionH62004::GetEnvelope()
 
 
   DecodeVersionKey larVersion("LAr");
-  std::string detectorKey  = larVersion.tag();
-  std::string detectorNode = larVersion.node();
-
+   
 
   //////////////////////////////////////////////////////////////////
   // Define geometry

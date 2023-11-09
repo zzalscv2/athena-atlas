@@ -16,7 +16,7 @@ FCALDetectorManager::FCALDetectorManager (const FCALHVManager* hvManager)
   setName("LArFCAL");
   for (int s=0;s<2;s++) {
     for (int m=0;m<3;m++) {
-      m_Module[s][m]=NULL;
+      m_Module[s][m]=nullptr;
     }
   }
 

@@ -68,6 +68,5 @@ GeoStraightAccSection::GeoStraightAccSection()
 }	
 
 GeoStraightAccSection::~GeoStraightAccSection()
-{
-}
+= default;
 

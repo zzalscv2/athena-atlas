@@ -8,8 +8,7 @@
 #include "LArHV/HECHVDescriptor.h"
 
 HECCell::~HECCell()
-{
-}
+= default;
 
 
 unsigned int HECCell::getNumSubgaps() const {

@@ -50,7 +50,7 @@ using GeoTrf::TranslateZ3D;
 
 //Constructor
 LArGeo::HECModuleConstruction::HECModuleConstruction(bool threeBoards, bool frontWheel, bool tb, int tbyear):
-  m_physiHECModule(0)
+  m_physiHECModule(nullptr)
 {
   m_threeBoards = threeBoards;  // If true, build 3 boards in gap. Else just one thick board.
   m_frontWheel = frontWheel;    // If true, build a front Module. Else build a rear Module. 

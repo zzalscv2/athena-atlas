@@ -50,8 +50,7 @@ LArGeo::WallsConstruction::WallsConstruction()
 
 
 LArGeo::WallsConstruction::~WallsConstruction()
-{
-}
+= default;
 
 
 
@@ -92,7 +91,7 @@ GeoVPhysVol* LArGeo::WallsConstruction::GetEnvelope()
   //                                                                                                  //
 
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return NULL;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
   std::string name;
  
@@ -293,7 +292,8 @@ GeoVPhysVol* LArGeo::WallsConstruction::GetEnvelope()
     (*m_msg) << MSG::WARNING << " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! "  << endmsg;
 
     std::vector<double> v_PlateZ;
-    for (int iz=0; iz<(nPlate); iz++)  v_PlateZ.push_back(IronPlatePosZ + double(iz)*(2*IronPlateZ+0.5)); 
+    v_PlateZ.reserve((nPlate));
+for (int iz=0; iz<(nPlate); iz++)  v_PlateZ.push_back(IronPlatePosZ + double(iz)*(2*IronPlateZ+0.5)); 
     
     // The plate itself:
     GeoBox* IronPlateShape = new GeoBox(IronPlateX, IronPlateY, IronPlateZ);  

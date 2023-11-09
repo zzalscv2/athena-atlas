@@ -41,7 +41,7 @@ namespace {
 struct SimIdFunc
 {
   SimIdFunc();
-  std::vector<HWIdentifier> operator()(HWIdentifier id)
+  std::vector<HWIdentifier> operator()(HWIdentifier id) const
   {
     return m_cablingTool->getLArElectrodeIDvec (id);
   }
@@ -88,8 +88,7 @@ public:
       throw std::runtime_error("EMECHVManager failed to retrieve LArHVLineID");
     }
   }
-  ~Clockwork() {
-  }
+  ~Clockwork() = default;
   std::unique_ptr<EMECHVDescriptor> descriptor;
   IOType iWheel;
   std::unique_ptr<const EMECHVModule> moduleArray[2][8][8][8]; // not dense
@@ -106,8 +105,7 @@ public:
 
 
 EMECHVManager::EMECHVData::EMECHVData()
-{
-}
+= default;
   
 
 EMECHVManager::EMECHVData::EMECHVData (std::unique_ptr<Payload> payload)
@@ -118,7 +116,7 @@ EMECHVManager::EMECHVData::EMECHVData (std::unique_ptr<Payload> payload)
 
 EMECHVManager::EMECHVData&
 EMECHVManager::EMECHVData::operator= (EMECHVData&& other)
-{
+ noexcept {
   if (this != &other) {
     m_payload = std::move (other.m_payload);
   }
@@ -127,8 +125,7 @@ EMECHVManager::EMECHVData::operator= (EMECHVData&& other)
   
 
 EMECHVManager::EMECHVData::~EMECHVData()
-{
-}
+= default;
   
 
 bool EMECHVManager::EMECHVData::hvOn (const EMECHVElectrode& electrode, const int& iGap) const
@@ -155,7 +152,7 @@ int  EMECHVManager::EMECHVData::hvLineNo  (const EMECHVElectrode& electrode, con
 }
 
 
-int  EMECHVManager::EMECHVData::index  (const EMECHVElectrode& electrode) const
+int  EMECHVManager::EMECHVData::index  (const EMECHVElectrode& electrode) 
 {
   unsigned int electrodeIndex    = electrode.getElectrodeIndex();
   const EMECHVModule& module     = electrode.getModule();
@@ -228,15 +225,14 @@ const EMECHVModule& EMECHVManager::getHVModule(unsigned int iSide, unsigned int 
 }
 
 EMECHVManager::~EMECHVManager()
-{
-}
+= default;
 
-unsigned int EMECHVManager::beginSideIndex() const
+unsigned int EMECHVManager::beginSideIndex() 
 {
   return 0;
 }
 
-unsigned int EMECHVManager::endSideIndex() const
+unsigned int EMECHVManager::endSideIndex() 
 {
   return 2;
 }
@@ -257,7 +253,7 @@ EMECHVManager::IOType EMECHVManager::getWheelIndex() const
 }
 
 EMECHVManager::EMECHVData
-EMECHVManager::getData (idfunc_t idfunc,
+EMECHVManager::getData (const idfunc_t& idfunc,
                         const std::vector<const CondAttrListCollection*>& attrLists) const
 {
   auto payload = std::make_unique<EMECHVData::Payload>();
@@ -366,7 +362,7 @@ EMECHVManager::getData (idfunc_t idfunc,
     } // for (atrlistcol)
   }
 
-  return EMECHVManager::EMECHVData (std::move (payload));
+  return {std::move (payload)};
 }
 
 

@@ -87,6 +87,5 @@ IRDBRecordset_ptr hadronicEndcap = rdbAccess->getRecordsetPtr("HadronicEndcap", 
 
 
 HECDetDescr::~HECDetDescr()
-{
-}
+= default;
 

@@ -26,8 +26,7 @@ LArDetectorToolH62003::LArDetectorToolH62003(const std::string& type,
 }
 
 LArDetectorToolH62003::~LArDetectorToolH62003()
-{
-}
+= default;
 
 StatusCode LArDetectorToolH62003::create()
 { 
@@ -72,7 +71,7 @@ StatusCode LArDetectorToolH62003::create()
   theLArFactory.setAxisVisState(m_axisVisState);
 
 
-  if (0 == m_detector) 
+  if (nullptr == m_detector) 
   {
     GeoPhysVol *world=&*theExpt->getPhysVol();
     theLArFactory.create(world);

@@ -48,14 +48,14 @@
 #define AXIS_ON 0
 
 // The "database record" types.
-typedef struct {
+using cryoEndcapCylDBRecord_t = struct {
   int cylNumber;
   GeoMaterial* mat;
   double Rmin;
   double Dr;
   double Zmin;
   double Dz;
-} cryoEndcapCylDBRecord_t;
+};
 
 
 LArGeo::LArDetectorConstructionTBEC::LArDetectorConstructionTBEC():
@@ -67,8 +67,8 @@ m_hasLeadCompensator(false),
 m_hasPresampler(false),
 m_ModuleRotation(0),
 m_YShift(0),
-m_tbecEnvelopePhysical(NULL),
-m_pAccessSvc(NULL)
+m_tbecEnvelopePhysical(nullptr),
+m_pAccessSvc(nullptr)
 {;}
 
 void LArGeo::LArDetectorConstructionTBEC::getSimulationParameters()
@@ -113,7 +113,7 @@ StoreGate interface");
     
 }
 
-LArGeo::LArDetectorConstructionTBEC::~LArDetectorConstructionTBEC() {}
+LArGeo::LArDetectorConstructionTBEC::~LArDetectorConstructionTBEC() = default;
 
 GeoVPhysVol* LArGeo::LArDetectorConstructionTBEC::GetEnvelope()
 {
@@ -132,7 +132,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionTBEC::GetEnvelope()
     throw std::runtime_error("Error in LArDetectorConstructionTBEC, cannot access DetectorStore");
   }
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return 0;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
   const GeoMaterial *Air  = materialManager->getMaterial("std::Air");
   if (!Air) {
@@ -146,8 +146,8 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionTBEC::GetEnvelope()
   }
 
   DecodeVersionKey larVersion("LAr");
-  std::string detectorKey  = larVersion.tag();
-  std::string detectorNode = larVersion.node();
+  const std::string& detectorKey  = larVersion.tag();
+  const std::string& detectorNode = larVersion.node();
 
   // Default values....
   m_hasLeadCompensator = false;
@@ -212,7 +212,7 @@ GeoFullPhysVol* LArGeo::LArDetectorConstructionTBEC::createEnvelope()
   // Get the materials from the material manager:-----------------------------------------------------//
   //                                                                                                  //
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return NULL;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
   
   const GeoMaterial *Air  = materialManager->getMaterial("std::Air");
   if (!Air) throw std::runtime_error("Error in LArDetectorConstructionTBEC, std::Air is not found.");
@@ -224,9 +224,7 @@ GeoFullPhysVol* LArGeo::LArDetectorConstructionTBEC::createEnvelope()
   //                                                                                                 //
   //-------------------------------------------------------------------------------------------------//
   DecodeVersionKey larVersion("LAr");
-  std::string detectorKey  = larVersion.tag();
-  std::string detectorNode = larVersion.node();
-
+   
 
   //////////////////////////////////////////////////////////////////
   // Define geometry
@@ -360,7 +358,7 @@ GeoFullPhysVol* LArGeo::LArDetectorConstructionTBEC::createEnvelope()
   GeoTrf::Transform3D Mrot(GeoTrf::RotateZ3D( m_phi_pos + 90*Gaudi::Units::deg)*GeoTrf::RotateY3D(m_ModuleRotation));
   GeoTrf::Vector3D pos( -xcent, m_YShift, -51.4/2*Gaudi::Units::cm );
   
-  if ( LArPhysical != 0 ) {
+  if ( LArPhysical != nullptr ) {
   
      LArPhysical->add( new GeoIdentifierTag( 1 ) );     
      LArPhysical->add( new GeoTransform( GeoTrf::Transform3D( GeoTrf::Translation3D(pos(0),pos(1),pos(2)))*Mrot  ) );
@@ -378,7 +376,7 @@ GeoFullPhysVol* LArGeo::LArDetectorConstructionTBEC::createEnvelope()
     StatusCode status=detStore->record(sPhysVol,"PRESAMPLER_EC_POS");
     if(!status.isSuccess()) throw std::runtime_error ("Cannot store PRESAMPLER_EC_POS");
 	      
-    if ( LArPhysical != 0 ) {
+    if ( LArPhysical != nullptr ) {
      
        LArPhysical->add( new GeoIdentifierTag( 1 ) );
        LArPhysical->add( new GeoTransform( GeoTrf::Transform3D( GeoTrf::Translation3D(pos(0),pos(1),pos(2)))*Mrot  ) );

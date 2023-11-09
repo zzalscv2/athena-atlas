@@ -130,7 +130,7 @@ const LArGeo::ModulesConstructionH62004::LeakGeom
 LArGeo::ModulesConstructionH62004::s_leakGeom;
 
 
-LArGeo::ModulesConstructionH62004::ModulesConstructionH62004():m_ModulesPhys(0),m_Options(0),m_fcalVisLimit(-1)
+LArGeo::ModulesConstructionH62004::ModulesConstructionH62004():m_ModulesPhys(nullptr),m_Options(nullptr),m_fcalVisLimit(-1)
 {
   StatusCode status;
   ISvcLocator* svcLocator = Gaudi::svcLocator();
@@ -145,7 +145,7 @@ LArGeo::ModulesConstructionH62004::ModulesConstructionH62004():m_ModulesPhys(0),
   }
 }
 
-LArGeo::ModulesConstructionH62004::~ModulesConstructionH62004() {}
+LArGeo::ModulesConstructionH62004::~ModulesConstructionH62004() = default;
 
 GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
 {
@@ -294,7 +294,7 @@ GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
   /*if(fcexcluder != 0)*/{
 //     std::cout<<"ModulesConstructionH62004::GetEnvelope positioning Excluder"<<std::endl;
     GeoVFullPhysVol* fcexcluderEnvelope = fcexcluder.GetEnvelope();
-    if(fcexcluderEnvelope != 0){
+    if(fcexcluderEnvelope != nullptr){
       GeoTrf::Transform3D rot2 = GeoTrf::RotateX3D(0.8*bepo_Beta) * GeoTrf::RotateX3D(-bepo_ty) * GeoTrf::RotateZ3D(bepo_tx);
       m_ModulesPhys->add(new GeoSerialIdentifier(0));
 //      m_ModulesPhys->add(new GeoTransform(GeoTrf::Transform3D(rot2,GeoTrf::Vector3D(0.,bepo_y_ex-138.*Gaudi::Units::mm,-477.3*Gaudi::Units::mm))));
@@ -310,7 +310,7 @@ GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
 
   /*if(frontexcluder != 0)*/{
     GeoVFullPhysVol* frontexcluderEnvelope = frontexcluder.GetEnvelope();
-    if(frontexcluderEnvelope != 0){
+    if(frontexcluderEnvelope != nullptr){
       GeoTrf::RotateZ3D rot2((90.)*Gaudi::Units::degree);
       m_ModulesPhys->add(new GeoSerialIdentifier(0));
       m_ModulesPhys->add(new GeoTransform(GeoTrf::Translation3D(0.,0.,20.*Gaudi::Units::mm) * rot2));
@@ -335,7 +335,7 @@ GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
 
   /*if(backexcluder != 0)*/{
     GeoVFullPhysVol* backexcluderEnvelope = backexcluder.GetEnvelope();
-    if(backexcluderEnvelope != 0){
+    if(backexcluderEnvelope != nullptr){
       GeoTrf::RotateZ3D rot2((-90.-29.)*Gaudi::Units::degree);
       m_ModulesPhys->add(new GeoSerialIdentifier(0));
       m_ModulesPhys->add(new GeoTransform(GeoTrf::Translation3D(0.,0.,0.*Gaudi::Units::mm) * rot2));
@@ -402,7 +402,7 @@ GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
     HECConstructionH62004 hec;
     /*if(hec != 0)*/{
       GeoVPhysVol* hecEnvelope = hec.GetEnvelope();
-      if(hecEnvelope != 0){
+      if(hecEnvelope != nullptr){
 //        rot.rotateZ(-bepo_pz);
 //        rot.rotateX(bepo_ty);
 //        rot.rotateX(bepo_Beta);
@@ -430,7 +430,7 @@ GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
     /*if(fcal != 0)*/{
       fcal.setFCALVisLimit(m_fcalVisLimit); 
       GeoVPhysVol* fcalEnvelope = fcal.GetEnvelope();
-      if(fcalEnvelope != 0){
+      if(fcalEnvelope != nullptr){
 //        Gaudi::Units::HepRotation rotFCal;
        // rotFCal.rotateY(0.*Gaudi::Units::deg);
        //  rotFCal.rotateZ(-bepo_pz);
@@ -575,8 +575,8 @@ LArGeo::ModulesConstructionH62004::construct(StoredMaterialManager* materialMana
 
 //----------------- construct ID and name
   int myID = GetID(side,dir,calo);
-  if(myID == 0 || myID > NUM_LEAK) return 0;
-  if(s_leakGeom.m_dX[myID-1] == 0 && s_leakGeom.m_dY[myID-1] == 0 && s_leakGeom.m_dZ[myID-1] == 0) return 0;
+  if(myID == 0 || myID > NUM_LEAK) return nullptr;
+  if(s_leakGeom.m_dX[myID-1] == 0 && s_leakGeom.m_dY[myID-1] == 0 && s_leakGeom.m_dZ[myID-1] == 0) return nullptr;
   name = "LArGeoTB::LeakageDet::";  
   switch(calo){
   case 0:
@@ -599,7 +599,7 @@ LArGeo::ModulesConstructionH62004::construct(StoredMaterialManager* materialMana
     break;
   default:
     std::cerr << "Wrong calo for leakage !!" << std::endl;
-    return 0;
+    return nullptr;
   }
   switch(dir){
   case 0:
@@ -613,7 +613,7 @@ LArGeo::ModulesConstructionH62004::construct(StoredMaterialManager* materialMana
     break;
   default:
     std::cerr << "Wrong direction for leakage !!" << std::endl;
-    return 0;
+    return nullptr;
   }
   if(dir != 1){
     switch(side){
@@ -625,7 +625,7 @@ LArGeo::ModulesConstructionH62004::construct(StoredMaterialManager* materialMana
       break;
     default:
       std::cerr << "Wrong side for leakage !!" << std::endl;
-      return 0;
+      return nullptr;
     }
   }
 

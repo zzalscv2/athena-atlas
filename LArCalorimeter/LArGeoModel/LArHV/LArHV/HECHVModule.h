@@ -32,7 +32,7 @@ class HECHVModule
   unsigned int getSamplingIndex() const;
   unsigned int getPhiIndex() const;
 
-  unsigned int getNumSubgaps() const;
+  static unsigned int getNumSubgaps() ;
   const HECHVSubgap& getSubgap(unsigned int iElectrode) const;
   
   double getPhiMin() const;

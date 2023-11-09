@@ -20,7 +20,7 @@ public:
   /**
    * @brief  compute number (0 to 1023) of closest electrode according to nominal accordion geometry
    **/
-  int phiGap(double radius, double xhit, double yhit);
+  int phiGap(double radius, double xhit, double yhit) const;
 
   /**
    * @brief initialization routine
@@ -186,7 +186,7 @@ void EMBAccordionDetails::Clockwork::getRPhi()
 // ======================================================================================
 // compute number (0 to 1023) of closest electrode according to nominal
 // accordion geometry
-int EMBAccordionDetails::Clockwork::phiGap(double radius, double xhit, const double yhit)
+int EMBAccordionDetails::Clockwork::phiGap(double radius, double xhit, const double yhit) const
 {
   const double m2pi = 2.0*Gaudi::Units::pi;
   double phi_0=phi0(radius)+gam0;   // from -M_PI to M_PI
@@ -296,7 +296,7 @@ double EMBAccordionDetails::Clockwork::phi0(double radius) const
 
 
 const GeoStraightAccSection *EMBAccordionDetails::getAbsorberSections() const {
-  if (m_c->absorberStraightSection==NULL) {
+  if (m_c->absorberStraightSection==nullptr) {
     StatusCode status;
     ISvcLocator* svcLocator = Gaudi::svcLocator(); 
     StoreGateSvc *detStore;
@@ -319,7 +319,7 @@ const GeoStraightAccSection *EMBAccordionDetails::getAbsorberSections() const {
   
 
 const GeoStraightAccSection *EMBAccordionDetails::getElectrodeSections() const {
-  if (m_c->electrodeStraightSection==NULL) {
+  if (m_c->electrodeStraightSection==nullptr) {
     StatusCode status;
     ISvcLocator* svcLocator = Gaudi::svcLocator(); 
     StoreGateSvc *detStore;

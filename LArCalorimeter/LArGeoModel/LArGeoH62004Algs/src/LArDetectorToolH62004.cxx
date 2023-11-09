@@ -45,9 +45,9 @@ LArDetectorToolH62004::~LArDetectorToolH62004()
 {
 	// This will need to be modified once we register the Toy DetectorNode in
 	// the Transient Detector Store
-	if ( 0 != m_detector ) {
+	if ( nullptr != m_detector ) {
 		delete m_detector;
-		m_detector = 0;
+		m_detector = nullptr;
 	}
 }
 
@@ -134,7 +134,7 @@ LArDetectorToolH62004::create()
 
 
 
-  if ( 0 == m_detector ) {
+  if ( nullptr == m_detector ) {
     // Create the H62004Node instance
     try {   
       //

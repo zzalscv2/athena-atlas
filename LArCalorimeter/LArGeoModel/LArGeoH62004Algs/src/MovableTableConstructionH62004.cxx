@@ -45,15 +45,14 @@
 #include <iostream>
 
 LArGeo::MovableTableConstructionH62004::MovableTableConstructionH62004()
-  :m_H62004MovableTablePhysical(0),
-   m_detectorManager(0)
+  :m_H62004MovableTablePhysical(nullptr),
+   m_detectorManager(nullptr)
 {
 }
 
 
 LArGeo::MovableTableConstructionH62004::~MovableTableConstructionH62004()
-{
-}
+= default;
 
 
 
@@ -89,7 +88,7 @@ GeoVPhysVol* LArGeo::MovableTableConstructionH62004::GetEnvelope()
 
   StoredMaterialManager* materialManager = nullptr;
   sc=detStore->retrieve(materialManager, std::string("MATERIALS"));
-  if (StatusCode::SUCCESS != sc) return NULL;
+  if (StatusCode::SUCCESS != sc) return nullptr;
 
   const GeoMaterial *Air  = materialManager->getMaterial("std::Air");
   if (!Air) throw std::runtime_error("Error in MovableTableConstructionH62004, std::Air is not found.");

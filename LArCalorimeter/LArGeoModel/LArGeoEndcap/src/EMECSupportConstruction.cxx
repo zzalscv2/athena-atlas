@@ -224,7 +224,7 @@ static void printWarning(const std::ostringstream &message)
 
 #include<map>
 #include <utility>
-typedef std::map<std::string, unsigned int> map_t;
+using map_t = std::map<std::string, unsigned int>;
 static map_t getMap(const IRDBRecordset_ptr& db, const std::string& s)
 {
   map_t result;
@@ -287,7 +287,7 @@ static double getNumber(
 	return defval;
 }
 
-EMECSupportConstruction::~EMECSupportConstruction() {}
+EMECSupportConstruction::~EMECSupportConstruction() = default;
 
 GeoPhysVol* EMECSupportConstruction::GetEnvelope(void) const
 {
@@ -306,7 +306,7 @@ GeoPhysVol* EMECSupportConstruction::GetEnvelope(void) const
 		tmp << "Unknown Type " << m_Type << " in GetEnvelope,"
 			<< " null pointer returned";
 		printWarning(tmp);
-		return 0;
+		return nullptr;
 	}
 }
 

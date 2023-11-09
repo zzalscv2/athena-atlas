@@ -18,16 +18,15 @@
 #include "GeoModelKernel/GeoFullPhysVol.h"
 
 #include "GeoModelKernel/GeoElement.h"
-#include "GeoModelKernel/GeoMaterial.h"
-#include "GeoModelKernel/GeoFullPhysVol.h"
-#include "GeoModelKernel/GeoPhysVol.h"
-#include "GeoModelKernel/GeoVPhysVol.h"
-#include "GeoModelKernel/GeoLogVol.h"
-#include "GeoModelKernel/GeoTransform.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
+#include "GeoModelKernel/GeoLogVol.h"
+#include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelKernel/GeoNameTag.h"
+#include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelKernel/GeoSerialIdentifier.h"
 #include "GeoModelKernel/GeoSerialTransformer.h"
+#include "GeoModelKernel/GeoTransform.h"
+#include "GeoModelKernel/GeoVPhysVol.h"
 #include "GeoModelKernel/GeoXF.h"
 #include "GeoModelUtilities/GeoRef.h"
 
@@ -115,8 +114,7 @@ LArGeo::BarrelConstruction::BarrelConstruction(bool fullGeo,
 //===================destructor
 
 LArGeo::BarrelConstruction::~BarrelConstruction()
-{
-}
+= default;
 
 //================== get envelope
 
@@ -502,7 +500,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 
 
   //-----------------TELF---------------------------------------------------------//
-  GeoPhysVol *Elnicsf_phys=NULL;
+  GeoPhysVol *Elnicsf_phys=nullptr;
   double Xel1f;
   {
     // WARNING : this "hard_coded" 0.010*Gaudi::Units::mm is a "security" to avoid
@@ -538,7 +536,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
   // GU 28-07-2005
   //------- effective Copper + LAr mixture to accoung for pins+summing boards
   //  (follow mixture described in Pascal Perrodo note
-  GeoPhysVol *Sumb_phys=NULL;
+  GeoPhysVol *Sumb_phys=nullptr;
   {
     double ThickSum = 10.*Gaudi::Units::mm;    // FIXME should be in geometry database
     double Rmini = Moth_inner_radius+Xel1f-ThickSum;
@@ -763,7 +761,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 							      larVersionKey.tag(),   
 							      larVersionKey.node()); 
     if (extraCones->size() > 0 ) {
-      for(auto cone : *extraCones) {
+      for(auto *cone : *extraCones) {
         const std::string& conName = cone->getString("CONE");
         if (conName=="ExtraInBar") {
 	  double extra_dz = 0.5*( cone->getDouble("DZ") );
@@ -823,7 +821,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 #endif // BUILD_BACK_G10
 
 
-  GeoPhysVol *stacPhysical=NULL;
+  GeoPhysVol *stacPhysical=nullptr;
   //---------------------------------ACCORDION VOLUME---------------------------//
   //  STAC = Pcon: LAr volume in which the accordion structure is located       //
   //     (the front/back small straight parts are in ECAM not in STAC)           //
@@ -1120,8 +1118,8 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
       }
 
 
-    GeoStraightAccSection *gStraightElectrodes=NULL;
-    GeoStraightAccSection *gStraightAbsorbers =NULL;
+    GeoStraightAccSection *gStraightElectrodes=nullptr;
+    GeoStraightAccSection *gStraightAbsorbers =nullptr;
     //
     // Loop through the straight and corner(Fold) parts of the Accordion plates
     // Repeat each part around Phi, then move to the next, towards outer radii
@@ -1487,9 +1485,9 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
                  GeoGenfun::GENFUNCTION phi0_ufold_2 = GeoGenfun::FixedConstant(M_PI/2.);
                  GeoGenfun::GENFUNCTION dphi_ufold_2 = Mod2Pi(newalpha-Gama);
 
-                 const GeoGenfun::AbsFunction* phi0_fold=0;
-                 const GeoGenfun::AbsFunction* dphi_fold=0;
-                 const GeoXF::Function* TXfold=0;
+                 const GeoGenfun::AbsFunction* phi0_fold=nullptr;
+                 const GeoGenfun::AbsFunction* dphi_fold=nullptr;
+                 const GeoXF::Function* TXfold=nullptr;
 
                  std::string thinName;
                  std::string thickName;
@@ -1851,9 +1849,9 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
                  GeoGenfun::GENFUNCTION phi0_ufold_2 = GeoGenfun::FixedConstant(M_PI/2.);
                  GeoGenfun::GENFUNCTION dphi_ufold_2 = Mod2Pi(newalphe - Game);
 
-                 const GeoGenfun::AbsFunction* phi0_fold=0;
-                 const GeoGenfun::AbsFunction* dphi_fold=0;
-                 const GeoXF::Function* TXfold=0;
+                 const GeoGenfun::AbsFunction* phi0_fold=nullptr;
+                 const GeoGenfun::AbsFunction* dphi_fold=nullptr;
+                 const GeoXF::Function* TXfold=nullptr;
 
                  std::string eName;
                  if (jrl%2==checkParity) {

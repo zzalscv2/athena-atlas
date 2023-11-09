@@ -22,8 +22,7 @@ LArDetectorToolTBEC::LArDetectorToolTBEC(const std::string& type,
 }
 
 LArDetectorToolTBEC::~LArDetectorToolTBEC()
-{
-}
+= default;
 
 StatusCode LArDetectorToolTBEC::create()
 { 
@@ -64,7 +63,7 @@ StatusCode LArDetectorToolTBEC::create()
   theLArFactory.setECVisLimit        (m_ecVisLimit);
 
 
-  if (0 == m_detector) 
+  if (nullptr == m_detector) 
   {
     GeoPhysVol *world=&*theExpt->getPhysVol();
     theLArFactory.create(world);

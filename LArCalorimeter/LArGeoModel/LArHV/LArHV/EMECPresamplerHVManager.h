@@ -21,7 +21,7 @@ class CellBinning;
 /**
  * @class EMECPresamplerHVManager
  *
- * @brief This class provides direct access to information on the HV 
+ * @brief This class provides direct access to information on the HV
  * electrodes within the EMEC.  The information may be accessed either
  * directly or iteratively.  Direct access is provided by the getHVModule()
  * method.  Iterative access
@@ -42,28 +42,28 @@ class EMECPresamplerHVManager
     class Payload;
     EMECPresamplerHVData();
     EMECPresamplerHVData (std::unique_ptr<Payload> payload);
-    EMECPresamplerHVData& operator= (EMECPresamplerHVData&& other);
+    EMECPresamplerHVData& operator= (EMECPresamplerHVData&& other) noexcept;
     ~EMECPresamplerHVData();
     bool hvOn (const EMECPresamplerHVModule& module, const int& iGap) const;
     double voltage (const EMECPresamplerHVModule& module, const int& iGap) const;
     double current (const EMECPresamplerHVModule& module, const int& iGap) const;
     int  hvLineNo  (const EMECPresamplerHVModule& module, const int& iGap) const;
   private:
-    int index (const EMECPresamplerHVModule& module) const;
+    static int index (const EMECPresamplerHVModule& module) ;
     std::unique_ptr<Payload> m_payload;
   };
 
   EMECPresamplerHVManager();
   ~EMECPresamplerHVManager();
-    
+
   const CellBinning *getPhiBinning() const;
 
   unsigned int beginPhiIndex() const;
   unsigned int endPhiIndex() const;
 
   // Begin/end side index (0=negative and 1= positive)
-  unsigned int beginSideIndex() const;
-  unsigned int endSideIndex() const;
+  static unsigned int beginSideIndex() ;
+  static unsigned int endSideIndex() ;
 
   // Get a link to the HV module:
   const EMECPresamplerHVModule& getHVModule(unsigned int iSide, unsigned int iPhi) const;
@@ -78,7 +78,7 @@ class EMECPresamplerHVManager
 
  private:
   using idfunc_t = std::function<std::vector<HWIdentifier>(HWIdentifier)>;
-  EMECPresamplerHVData getData (idfunc_t idfunc,
+  EMECPresamplerHVData getData (const idfunc_t& idfunc,
                                 const std::vector<const CondAttrListCollection*>& attrLists) const;
 
   // Illegal operations

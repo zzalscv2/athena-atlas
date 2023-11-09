@@ -70,19 +70,19 @@ using namespace GeoGenfun;
 
 // The objects for mapping plane indexes in Pcon to the record index
 // in RDBRecordset
-typedef std::map<int, unsigned int, std::less<int> > planeIndMap;
+using planeIndMap = std::map<int, unsigned int, std::less<int>>;
 
 LArGeo::BarrelCryostatConstruction::BarrelCryostatConstruction(
   bool fullGeo, bool ft
 ):
   m_barrelSagging(0),
   m_barrelVisLimit(-1),
-  m_cryoMotherPhysical(NULL),
+  m_cryoMotherPhysical(nullptr),
   m_fullGeo(fullGeo),
   m_activateFT(ft)
 {}
 
-LArGeo::BarrelCryostatConstruction::~BarrelCryostatConstruction() {}
+LArGeo::BarrelCryostatConstruction::~BarrelCryostatConstruction() = default;
 
 
 GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorParameters* params)
@@ -108,7 +108,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
   // Get the materials from the material manager:-----------------------------------------------------//
   //                                                                                                  //
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return NULL;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
   const GeoMaterial *Air  = materialManager->getMaterial("std::Air");
   if (!Air) {
@@ -153,7 +153,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
   // 1. HalfLar + Presampler (pos/neg)
   // 2. Coil
   std::string names[]={"EMB_POS","EMB_NEG","SOLENOID"};
-  GeoAlignableTransform *xf[]={NULL,NULL,NULL};
+  GeoAlignableTransform *xf[]={nullptr,nullptr,nullptr};
   for (int n=0;n<3;n++) {
 
     IRDBRecordset_ptr larPosition =   rdbAccess->getRecordsetPtr("LArPosition",larVersionKey.tag(), larVersionKey.node());
@@ -391,8 +391,8 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 	}
       }
 
-      const GeoShape* solidBarrelCylinder = 0;
-      const GeoLogVol* logicBarrelCylinder = 0;
+      const GeoShape* solidBarrelCylinder = nullptr;
+      const GeoLogVol* logicBarrelCylinder = nullptr;
 
       // For Reco Geometry construct only solenoid cylinders
       if(m_fullGeo || (10<=cylID && cylID<=14)) {
@@ -625,7 +625,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 							      larVersionKey.node());
     if (extraCones->size() > 0 ) {
       int nextra=0;
-      for(auto cone : *extraCones) {
+      for(auto *cone : *extraCones) {
 	const std::string& conName = cone->getString("CONE");
 	if (conName.find("ExtraInCryo") != std::string::npos) {
 	  nextra++;
@@ -753,7 +753,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 
 
     // Make a Polycon for the inner endwall:
-    if(innerEndWallPlanes.size() > 0) {
+    if(!innerEndWallPlanes.empty()) {
       GeoPcon *innerEndWallPcon = new GeoPcon(0,dphi_all);
 
       for(unsigned int ind=0; ind<innerEndWallPlanes.size(); ind++) {
@@ -892,12 +892,12 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 
     // The "envelope" determined by the EMB should be a GeoFullPhysVol.
     GeoFullPhysVol* barrelPosEnvelope = barrelConstruction.GetPositiveEnvelope();
-    if ( barrelPosEnvelope != 0 )
+    if ( barrelPosEnvelope != nullptr )
       halfLArPhysicalPos->add(barrelPosEnvelope);
 
     // The "envelope" determined by the EMB should be a GeoFullPhysVol.
     GeoFullPhysVol* barrelNegEnvelope = barrelConstruction.GetNegativeEnvelope();
-    if ( barrelNegEnvelope != 0 )
+    if ( barrelNegEnvelope != nullptr )
       halfLArPhysicalNeg->add(barrelNegEnvelope);
 
     if(m_fullGeo) {
@@ -925,7 +925,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 
 	  if (!currentRecord->isFieldNull("QUALIFIER")) {
 	    const std::string& qualifier = currentRecord->getString("QUALIFIER");
-	    if (qualifier.size()) cylStream << qualifier << "::";
+	    if (!qualifier.empty()) cylStream << qualifier << "::";
 	  }
 	  cylStream <<  "Cylinder::#" << currentRecord->getInt("CYL_ID");
 	  std::string cylName= cylStream.str();
@@ -1063,7 +1063,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
   else log << MSG::DEBUG << "CryoPconPhiSect table not found - not building SCT cooling " << endmsg;
 
 
-  if(rdbAccess->getChildTag("LArBarrelDM",larVersionKey.tag(),larVersionKey.node())!="" && m_fullGeo) {
+  if(!rdbAccess->getChildTag("LArBarrelDM",larVersionKey.tag(),larVersionKey.node()).empty() && m_fullGeo) {
     // Dead material in barrel
     CrackDMConstruction crackDMConstruction(rdbAccess,geoModel,materialManager,m_activateFT);
     crackDMConstruction.create(m_cryoMotherPhysical);

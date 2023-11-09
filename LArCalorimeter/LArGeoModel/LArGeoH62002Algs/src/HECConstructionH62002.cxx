@@ -51,7 +51,7 @@ using namespace GeoXF;
 
 
 LArGeo::HECConstructionH62002::HECConstructionH62002()
-   :m_h6Phys(0)
+   :m_h6Phys(nullptr)
 {
  // access source of detector parameters
   // m_parameters = LArGeo::VDetectorParameters::GetInstance();
@@ -59,8 +59,7 @@ LArGeo::HECConstructionH62002::HECConstructionH62002()
 
 
 LArGeo::HECConstructionH62002::~HECConstructionH62002()
-{
-}
+= default;
 
 
 GeoVFullPhysVol* LArGeo::HECConstructionH62002::GetEnvelope()
@@ -99,7 +98,7 @@ GeoVFullPhysVol* LArGeo::HECConstructionH62002::GetEnvelope()
 
   StoredMaterialManager* materialManager = nullptr;
   if (StatusCode::SUCCESS != detectorStore->retrieve(materialManager, std::string("MATERIALS"))) {
-    return NULL; 
+    return nullptr; 
   } 
 
   
@@ -125,8 +124,8 @@ GeoVFullPhysVol* LArGeo::HECConstructionH62002::GetEnvelope()
 
   
   DecodeVersionKey larVersionKey("LAr");
-  std::string detectorKey  =larVersionKey.tag();
-  std::string detectorNode = larVersionKey.node();
+  const std::string& detectorKey  =larVersionKey.tag();
+  const std::string& detectorNode = larVersionKey.node();
 
   IRDBRecordset_ptr hadronicEndcap       = pAccessSvc->getRecordsetPtr("HadronicEndcap",detectorKey, detectorNode); 
   IRDBRecordset_ptr hecLongitudinalBlock = pAccessSvc->getRecordsetPtr("HecLongitudinalBlock",detectorKey, detectorNode); 

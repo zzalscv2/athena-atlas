@@ -46,10 +46,9 @@
 #include <cmath>
 
 LArGeo::ExcluderConstruction::ExcluderConstruction()
-{
-}
+= default;
 
-LArGeo::ExcluderConstruction::~ExcluderConstruction() {}
+LArGeo::ExcluderConstruction::~ExcluderConstruction() = default;
 
 //GeoVFullPhysVol* LArGeo::ExcluderConstruction::GetEnvelope()
 GeoPhysVol* LArGeo::ExcluderConstruction::GetEnvelope()
@@ -70,7 +69,7 @@ GeoPhysVol* LArGeo::ExcluderConstruction::GetEnvelope()
   // Need to add Rohacell here!                                     <<<=============== 
 
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return 0;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
 
   // (use Air for the moment....)                                  <<<================ 

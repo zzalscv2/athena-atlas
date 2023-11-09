@@ -13,8 +13,7 @@
 #include "LArHV/EMBPresamplerHVDescriptor.h"
 
 EMBCell::~EMBCell()
-{
-}
+= default;
 
 
 double EMBCell::getPhiLocalLower(double /*r*/) const {
@@ -113,7 +112,7 @@ void EMBCell::initHV (HVInfo& hvinfo) const
 } 
 
 
-void EMBCell::addHVPathologies (EMBHVPathologiesConstLink pathologies) {
+void EMBCell::addHVPathologies (const EMBHVPathologiesConstLink& pathologies) {
   m_hvPathologies.push_back(pathologies);
 }
 

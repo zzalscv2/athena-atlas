@@ -50,8 +50,7 @@ LArHVPathologyDbAlg::LArHVPathologyDbAlg(const std::string& name, ISvcLocator* p
 }
 
 LArHVPathologyDbAlg::~LArHVPathologyDbAlg()
-{
-}
+= default;
 
 StatusCode LArHVPathologyDbAlg::initialize()
 {
@@ -262,7 +261,7 @@ StatusCode LArHVPathologyDbAlg::printCondObjects (const EventContext& ctx, const
      return StatusCode::FAILURE;
   }
 
-  std::ofstream *fout=0;
+  std::ofstream *fout=nullptr;
   const AthenaAttributeList* attrlist = nullptr;
   StatusCode sc = detStore()->retrieve(attrlist,m_folder);
 
@@ -271,11 +270,11 @@ StatusCode LArHVPathologyDbAlg::printCondObjects (const EventContext& ctx, const
   else {
     LArHVPathologiesDb* pathologyContainer = m_pathologyTool->attrList2HvPathology(*attrlist);
     ATH_MSG_INFO("Unpacked pathologies from Attribute List for " << m_folder);
-    if(m_outFile.value().size()>0) {
+    if(!m_outFile.value().empty()) {
        fout = new std::ofstream(m_outFile.value().c_str());
        if((!fout) || (fout && !(fout->good()))) {
              ATH_MSG_WARNING("Could not open output file: " << m_outFile.value());
-             fout=0;
+             fout=nullptr;
              }
        if(fout) *fout<<m_folder.value()<<std::endl;
     }
@@ -412,7 +411,7 @@ LArHVPathologyDbAlg::getElectInd(const LArHVIdMapping& hvIdMapping,
   if (m_larfcal_id->is_lar_fcal(id)) {
     if (const FCALDetectorElement* fcalElement = dynamic_cast<const FCALDetectorElement*>(calodetdescrmgr->get_element(id))) {
        const FCALTile* tile = fcalElement->getFCALTile();
-       unsigned int nlines = tile->getNumHVLines();
+       unsigned int nlines = FCALTile::getNumHVLines();
        for (unsigned int i=0;i<nlines;i++) {
          const FCALHVLine* line2 = tile->getHVLine(i);
 	 if(line2) {
@@ -511,7 +510,7 @@ int LArHVPathologyDbAlg::getHVline(const LArHVIdMapping& hvIdMapping,
   if (m_larfcal_id->is_lar_fcal(id)) {
     if (const FCALDetectorElement* fcalElement = dynamic_cast<const FCALDetectorElement*>(calodetdescrmgr->get_element(id))) {
        const FCALTile* tile = fcalElement->getFCALTile();
-       unsigned int nlines = tile->getNumHVLines();
+       unsigned int nlines = FCALTile::getNumHVLines();
       if( ElectInd >= nlines) {
          ATH_MSG_ERROR("Wrong line "<<ElectInd<<" for FCAL cell "<<id.get_identifier32().get_compact());
          return -1;

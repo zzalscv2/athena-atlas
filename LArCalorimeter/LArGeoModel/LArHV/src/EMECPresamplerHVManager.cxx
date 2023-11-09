@@ -34,7 +34,7 @@
 
 class EMECPresamplerHVManager::Clockwork {
 public:
-  Clockwork(const EMECPresamplerHVManager* manager) {
+  explicit Clockwork(const EMECPresamplerHVManager* manager) {
     for(int iSide=0; iSide<2; ++iSide) {
       for(int iPhi=0; iPhi<64; ++iPhi) {
 	moduleArray[iSide][iPhi] = std::make_unique<EMECPresamplerHVModule>(manager, iSide, iPhi);
@@ -49,8 +49,7 @@ public:
       throw std::runtime_error("EMECPresamplerHVManager failed to retrieve LArHVLineID");
     }
   }
-  ~Clockwork() {
-  }
+  ~Clockwork() = default;
   CellBinning                   phiBinning{0.0, 2*M_PI, 64};
   std::unique_ptr<const EMECPresamplerHVModule> moduleArray[2][64];  // not dense
   const LArElectrodeID* elecId = nullptr;
@@ -66,31 +65,28 @@ public:
 
 
 EMECPresamplerHVManager::EMECPresamplerHVData::EMECPresamplerHVData()
-{
-}
-  
+= default;
+
 
 EMECPresamplerHVManager::EMECPresamplerHVData::EMECPresamplerHVData
   (std::unique_ptr<Payload> payload)
   : m_payload (std::move (payload))
 {
 }
-  
+
 
 EMECPresamplerHVManager::EMECPresamplerHVData&
-EMECPresamplerHVManager::EMECPresamplerHVData::operator= (EMECPresamplerHVData&& other)
-{
+EMECPresamplerHVManager::EMECPresamplerHVData::operator= (EMECPresamplerHVData&& other) noexcept {
   if (this != &other) {
     m_payload = std::move (other.m_payload);
   }
   return *this;
 }
-  
+
 
 EMECPresamplerHVManager::EMECPresamplerHVData::~EMECPresamplerHVData()
-{
-}
-  
+= default;
+
 
 bool EMECPresamplerHVManager::EMECPresamplerHVData::hvOn
   (const EMECPresamplerHVModule& module, const int& iGap) const
@@ -121,7 +117,7 @@ int EMECPresamplerHVManager::EMECPresamplerHVData::hvLineNo
 
 
 int EMECPresamplerHVManager::EMECPresamplerHVData::index
-  (const EMECPresamplerHVModule& module) const
+  (const EMECPresamplerHVModule& module)
 {
   unsigned int phiIndex          = module.getPhiIndex();
   unsigned int sideIndex         = module.getSideIndex();
@@ -136,8 +132,7 @@ EMECPresamplerHVManager::EMECPresamplerHVManager()
 }
 
 EMECPresamplerHVManager::~EMECPresamplerHVManager()
-{
-}
+= default;
 
 const CellBinning *EMECPresamplerHVManager::getPhiBinning() const
 {
@@ -159,18 +154,18 @@ const EMECPresamplerHVModule& EMECPresamplerHVManager::getHVModule(unsigned int 
   return *(m_c->moduleArray[iSide][iPhi]);
 }
 
-unsigned int EMECPresamplerHVManager::beginSideIndex() const
+unsigned int EMECPresamplerHVManager::beginSideIndex()
 {
   return 0;
 }
 
-unsigned int EMECPresamplerHVManager::endSideIndex() const
+unsigned int EMECPresamplerHVManager::endSideIndex()
 {
   return 2;
 }
 
 EMECPresamplerHVManager::EMECPresamplerHVData
-EMECPresamplerHVManager::getData (idfunc_t idfunc,
+EMECPresamplerHVManager::getData (const idfunc_t& idfunc,
                                   const std::vector<const CondAttrListCollection*>& attrLists) const
 {
   auto payload = std::make_unique<EMECPresamplerHVData::Payload>();
@@ -178,11 +173,11 @@ EMECPresamplerHVManager::getData (idfunc_t idfunc,
   for (unsigned int i=0;i<64;i++) {
     payload->m_payloadArray[i].voltage = EMECPresamplerHVData::INVALID;
   }
-    
+
   for (const CondAttrListCollection* atrlistcol : attrLists) {
 
     for (CondAttrListCollection::const_iterator citr=atrlistcol->begin(); citr!=atrlistcol->end();++citr) {
-	 
+
       // Construct HWIdentifier
       // 1. decode COOL Channel ID
       unsigned int chanID = (*citr).first;
@@ -212,17 +207,17 @@ EMECPresamplerHVManager::getData (idfunc_t idfunc,
 
 // GU  January 2017  -   fix for HV EMEC PS distribution
 // 0-31 in phi module
-// each module has 2 cell in phi, in the mapping database this is referred by "gapIndex" 
+// each module has 2 cell in phi, in the mapping database this is referred by "gapIndex"
 //   0 is on the low phi side (in the ATLAS frame)
 //   1 in on the  high phi side
 // so in total 64 sectors in phi given by 2*phiIndex+gapIndex
 // the two gap of these sectors are powered by the same line and have the same HV
-    
+
           unsigned int gapIndex=m_c->elecId->gap(elecHWID);
- 
+
           unsigned int index = 64*sideIndex+2*phiIndex+gapIndex;
 
-	      
+
           float voltage = EMECPresamplerHVData::INVALID;
           if (!((*citr).second)["R_VMEAS"].isNull()) voltage = ((*citr).second)["R_VMEAS"].data<float>();
           float current = 0.;
@@ -237,7 +232,7 @@ EMECPresamplerHVManager::getData (idfunc_t idfunc,
     } // for (atrlistcol)
   }
 
-  return EMECPresamplerHVManager::EMECPresamplerHVData (std::move (payload));
+  return {std::move (payload)};
 }
 
 

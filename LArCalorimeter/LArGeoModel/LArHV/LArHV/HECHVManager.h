@@ -42,14 +42,14 @@ class HECHVManager
     class Payload;
     HECHVData();
     HECHVData (std::unique_ptr<Payload> payload);
-    HECHVData& operator= (HECHVData&& other);
+    HECHVData& operator= (HECHVData&& other) noexcept;
     ~HECHVData();
     bool hvOn (const HECHVSubgap& subgap) const;
     double voltage (const HECHVSubgap& subgap) const;
     double current (const HECHVSubgap& subgap) const;
     int  hvLineNo  (const HECHVSubgap& subgap) const;
   private:
-    int index (const HECHVSubgap& subgap) const;
+    static int index (const HECHVSubgap& subgap) ;
     std::unique_ptr<Payload> m_payload;
   };
 
@@ -59,14 +59,14 @@ class HECHVManager
   const HECHVDescriptor& getDescriptor() const;
 
   // Begin/End side index (0=negative and 1= positive)
-  unsigned int beginSideIndex() const;
-  unsigned int endSideIndex() const;
+  static unsigned int beginSideIndex() ;
+  static unsigned int endSideIndex() ;
 
-  unsigned int beginPhiIndex() const;
-  unsigned int endPhiIndex() const;
+  static unsigned int beginPhiIndex() ;
+  static unsigned int endPhiIndex() ;
 
-  unsigned int beginSamplingIndex() const;
-  unsigned int endSamplingIndex() const;
+  static unsigned int beginSamplingIndex() ;
+  static unsigned int endSamplingIndex() ;
 
   const HECHVModule& getHVModule(unsigned int iSide
 				 , unsigned int iPhi
@@ -86,7 +86,7 @@ class HECHVManager
 
  private:
   using idfunc_t = std::function<std::vector<HWIdentifier>(HWIdentifier)>;
-  HECHVData getData (idfunc_t idfunc,
+  HECHVData getData (const idfunc_t& idfunc,
                      const std::vector<const CondAttrListCollection*>& attrLists) const;
 
   HECHVManager(const HECHVManager& right) = delete;

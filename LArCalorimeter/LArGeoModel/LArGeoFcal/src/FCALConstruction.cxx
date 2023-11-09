@@ -69,8 +69,7 @@ LArGeo::FCALConstruction::FCALConstruction()
 //===================destructor
 
 LArGeo::FCALConstruction::~FCALConstruction()
-{
-}
+= default;
 
 //================== get envelope
 

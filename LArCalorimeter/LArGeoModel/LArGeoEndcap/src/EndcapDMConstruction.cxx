@@ -43,28 +43,26 @@ LArGeo::EndcapDMConstruction::EndcapDMConstruction(bool ft) :
 {
 }
 
-LArGeo::EndcapDMConstruction::~EndcapDMConstruction()
-{
-}
 
-void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope)
+
+void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope) const
 {
   ISvcLocator* svcLocator = Gaudi::svcLocator();
-  IMessageSvc* msgSvc(0);
+  IMessageSvc* msgSvc(nullptr);
   if(svcLocator->service("MessageSvc", msgSvc, true)==StatusCode::FAILURE)
     throw std::runtime_error("Error in EndcapDMConstruction, cannot access MessageSvc");
   MsgStream log(msgSvc, "EndcapDMConstruction");
   log << MSG::INFO << "Start building EC electronics geometry" << endmsg;
 
-  StoreGateSvc* detStore(0);
+  StoreGateSvc* detStore(nullptr);
   if(svcLocator->service("DetectorStore", detStore, false)==StatusCode::FAILURE)
     throw std::runtime_error("Error in EndcapDMConstruction, cannot access DetectorStore");
 
-  IGeoModelSvc* geoModel(0);
+  IGeoModelSvc* geoModel(nullptr);
   if(svcLocator->service("GeoModelSvc",geoModel) == StatusCode::FAILURE)
     throw std::runtime_error("Error in EndcapDMConstruction, cannot access GeoModelSvc");
 
-  IRDBAccessSvc* rdbAccess(0);
+  IRDBAccessSvc* rdbAccess(nullptr);
   if(svcLocator->service("RDBAccessSvc",rdbAccess) == StatusCode::FAILURE)
     throw std::runtime_error("Error in EndcapDMConstruction, cannot access RDBAccessSvc");
 

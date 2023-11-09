@@ -9,9 +9,7 @@ HECHVDescriptor::HECHVDescriptor(const CellBinning &phiBinning)
 {
 }
 
-HECHVDescriptor::~HECHVDescriptor()
-{
-}
+
 
 
 

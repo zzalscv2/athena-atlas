@@ -22,7 +22,7 @@ StatusCode LArGeo::buildFcalChannelMap(StoreGateSvc* detStore
       , paramSvc->getRecordsetPtr("FCalElecMod2","")
       , paramSvc->getRecordsetPtr("FCalElecMod3","") };
 
-  for(IRDBRecordset_ptr recordset : recordsets) {
+  for(const IRDBRecordset_ptr& recordset : recordsets) {
     auto itStart = recordset->begin();
     auto itEnd = recordset->end();
 

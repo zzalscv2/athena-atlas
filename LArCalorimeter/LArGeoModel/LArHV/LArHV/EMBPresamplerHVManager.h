@@ -22,7 +22,7 @@ struct EMBPresamplerHVPayload;
 /**
  * @class EMBPresamplerHVManager
  *
- * @brief This class provides direct access to information on the HV 
+ * @brief This class provides direct access to information on the HV
  * electrodes within the barrels.  The information may be accessed either
  * directly or iteratively.  Direct access is provided by the getHVModule()
  * method.  Iterative access
@@ -43,14 +43,14 @@ class EMBPresamplerHVManager
     class Payload;
     EMBPresamplerHVData();
     EMBPresamplerHVData (std::unique_ptr<Payload> payload);
-    EMBPresamplerHVData& operator= (EMBPresamplerHVData&& other);
+    EMBPresamplerHVData& operator= (EMBPresamplerHVData&& other) noexcept;
     ~EMBPresamplerHVData();
     bool hvOn (const EMBPresamplerHVModule& module, const int& iGap) const;
     double voltage (const EMBPresamplerHVModule& module, const int& iGap) const;
     double current (const EMBPresamplerHVModule& module, const int& iGap) const;
     int  hvLineNo  (const EMBPresamplerHVModule& module, const int& iGap) const;
   private:
-    int index (const EMBPresamplerHVModule& module) const;
+    static int index (const EMBPresamplerHVModule& module) ;
     std::unique_ptr<Payload> m_payload;
   };
 
@@ -71,8 +71,8 @@ class EMBPresamplerHVManager
 					   , unsigned int iPhi) const;
 
   // Begin/end side index (0=negative and 1= positive)
-  unsigned int beginSideIndex() const;
-  unsigned int endSideIndex() const;
+  static unsigned int beginSideIndex() ;
+  static unsigned int endSideIndex() ;
 
 #if !(defined(SIMULATIONBASE) || defined(GENERATIONBASE))
   EMBPresamplerHVData getData (const LArHVIdMapping& hvIdMapping,
@@ -85,13 +85,13 @@ class EMBPresamplerHVManager
 
  private:
   using idfunc_t = std::function<std::vector<HWIdentifier>(HWIdentifier)>;
-  EMBPresamplerHVData getData (idfunc_t idfunc,
+  EMBPresamplerHVData getData (const idfunc_t& idfunc,
                                const std::vector<const CondAttrListCollection*>& attrLists) const;
 
   // Illegal operations
   EMBPresamplerHVManager(const EMBPresamplerHVManager& right) = delete;
   EMBPresamplerHVManager& operator=(const EMBPresamplerHVManager& right) = delete;
-  
+
   friend class ImaginaryFriend;
   class Clockwork;
   std::unique_ptr<const Clockwork> m_c;

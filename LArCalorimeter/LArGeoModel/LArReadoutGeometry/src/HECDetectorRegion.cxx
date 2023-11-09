@@ -29,7 +29,7 @@ HECDetectorRegion::~HECDetectorRegion()
 HECCellConstLink HECDetectorRegion::getHECCell (unsigned int ieta, unsigned int iphi) const
 {
   HECCell *cell = new HECCell(m_endcapIndex,m_descriptor,ieta,iphi);
-  return HECCellConstLink(cell);
+  return {cell};
 }
 
 Amg::Vector3D HECDetectorRegion::getRefPlanePosAmg () const

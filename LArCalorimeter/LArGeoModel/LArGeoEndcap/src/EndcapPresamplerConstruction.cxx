@@ -42,7 +42,7 @@
 
 
 EndcapPresamplerConstruction::EndcapPresamplerConstruction( bool imb ):
-  m_psPhysical(0)
+  m_psPhysical(nullptr)
 {
   m_isModule = imb;
 }
@@ -62,7 +62,7 @@ GeoFullPhysVol* EndcapPresamplerConstruction::Envelope()
   }
 
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return 0;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
 
   const GeoMaterial *LAr  = materialManager->getMaterial("std::LiquidArgon");
   if (!LAr) {

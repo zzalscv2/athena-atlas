@@ -51,8 +51,7 @@ LArGeo::TableConstructionH62002::TableConstructionH62002()
 
 
 LArGeo::TableConstructionH62002::~TableConstructionH62002()
-{
-}
+= default;
 
 
 
@@ -90,7 +89,7 @@ GeoVPhysVol* LArGeo::TableConstructionH62002::GetEnvelope()
   // Get the materials from the material manager:-----------------------------------------------------//
   //                                                                                                  //  
   StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return NULL;
+  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) return nullptr;
   
   const GeoMaterial *Air  = materialManager->getMaterial("std::Air");
   if (!Air) throw std::runtime_error("Error in TableConstructionH62002, std::Air is not found.");
