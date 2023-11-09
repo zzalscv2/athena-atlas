@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigSteeringEvent )
@@ -37,6 +37,11 @@ else()
    atlas_add_dictionary( TrigSteeringEventDict
       TrigSteeringEvent/TrigSteeringEventDict.h TrigSteeringEvent/selection.xml
       DATA_LINKS TrigRoiDescriptor TrigSuperRoi
+      LINK_LIBRARIES TrigSteeringEvent )
+
+   # Second dictionary for athena-only classes.
+   atlas_add_dictionary( TrigSteeringEventAthenaDict
+      TrigSteeringEvent/TrigSteeringEventAthenaDict.h TrigSteeringEvent/selection_athena.xml
       LINK_LIBRARIES TrigSteeringEvent )
 
    atlas_add_sercnv_library( TrigSteeringEventSerCnv
