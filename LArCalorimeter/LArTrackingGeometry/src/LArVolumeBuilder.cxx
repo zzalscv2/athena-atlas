@@ -146,7 +146,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
 
   /** Helper to collect local garbage and transfer it into global garbage bin on return */
   struct GarbageCollector {
-    GarbageCollector(MaterialGarbage& globalGarbage) : globalBin(globalGarbage) {}
+    explicit GarbageCollector(MaterialGarbage& globalGarbage) : globalBin(globalGarbage) {}
     ~GarbageCollector() {
       static std::mutex mutex;
       std::scoped_lock lock(mutex);

@@ -3,15 +3,15 @@
 */
 
 #include "LArIdentifier/LArOnlineID_Base.h"
-#include "LArIdentifier/LArOnlID_Exception.h"
-#include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictDefs.h"
 #include "GaudiKernel/MsgStream.h"
-#include <string>
+#include "IdDict/IdDictDefs.h"
+#include "Identifier/IdentifierHash.h"
+#include "LArIdentifier/LArOnlID_Exception.h"
+#include <cmath>
+#include <iostream>
 #include <set>
 #include <sstream>
-#include <iostream>
-#include <math.h>
+#include <string>
 
 /* MAY-17-04:*/
 /* AL added init_hashes for calib lines */
@@ -54,7 +54,7 @@ LArOnlineID_Base::LArOnlineID_Base(void) :
   m_slot_index(999),
   m_channel_in_slot_index(999),
   m_slar_index(999),
-  m_dict(0),
+  m_dict(nullptr),
   m_feedthroughHashMax(0),
   m_febHashMax(0),
   m_channelHashMax(0),
@@ -65,8 +65,7 @@ LArOnlineID_Base::LArOnlineID_Base(void) :
 
 
 LArOnlineID_Base::~LArOnlineID_Base(void) 
-{
-}
+= default;
 
 
 //==================================================================
@@ -1371,7 +1370,7 @@ bool LArOnlineID_Base::isValidId(const HWIdentifier id) const {
   const int laronlineid=m_laronline_impl.unpack(id);
   if (larid!=lar_field_value()) return false;
 
-  if (!(laronlineid==s_lar_online_field_value || laronlineid==s_lar_onlineCalib_field_value)) return false; 
+  if (laronlineid!=s_lar_online_field_value && laronlineid!=s_lar_onlineCalib_field_value) return false; 
 
   const int channel=m_channel_in_slot_impl.unpack(id);
   if (channel<0 || channel>128) return false;
@@ -1481,7 +1480,7 @@ LArOnlineID_Base::id_iterator LArOnlineID_Base::feedthrough_end() const
 LArOnlineID_Base::id_range LArOnlineID_Base::feedthrough_range() const
 /*==================================================================*/
 {
-  return id_range (feedthrough_begin(), feedthrough_end());
+  return {feedthrough_begin(), feedthrough_end()};
 }
 
 
@@ -1557,7 +1556,7 @@ IdentifierHash LArOnlineID_Base::feb_Hash (HWIdentifier febId) const
     //      value to obtain the index
     //   2) slot values are a continuous range, then the slot index is
     //      sufficient for the hash calculation
-    if (hc.m_slot_values.size()) {
+    if (!hc.m_slot_values.empty()) {
         // find matching value
         int slotValue = slot(febId);
         for (int i = 0; (unsigned int)i < hc.m_slot_values.size(); ++i) {
@@ -1985,7 +1984,7 @@ LArOnlineID_Base::id_iterator LArOnlineID_Base::feb_end() const
 LArOnlineID_Base::id_range LArOnlineID_Base::feb_range() const
 /*==================================================================*/
 {
-  return id_range (feb_begin(), feb_end());
+  return {feb_begin(), feb_end()};
 }
 
 LArOnlineID_Base::id_iterator LArOnlineID_Base::channel_begin() const
@@ -2001,7 +2000,7 @@ LArOnlineID_Base::id_iterator LArOnlineID_Base::channel_end() const
 LArOnlineID_Base::id_range LArOnlineID_Base::channel_range() const
 /*======================================================================*/
 {
-  return id_range (channel_begin(), channel_end());
+  return {channel_begin(), channel_end()};
 }
 
 int LArOnlineID_Base::barrel_ec(const HWIdentifier id)const

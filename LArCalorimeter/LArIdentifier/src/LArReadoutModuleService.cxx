@@ -43,7 +43,7 @@ HWIdentifier LArReadoutModuleService::createReadoutModuleID(int l_atlas_tb, int 
 	  << l_atlas_tb << ", " << l_barrel_ec << ", " << l_pos_neg << ", " << l_em_hec_fcal 
 	  << ", " << l_rosId << ", " << l_rodFragId << ", " << l_rodCrate << ", " << l_rodSlot << endmsg;
       msg << MSG::ERROR << errorReport << endmsg;
-      return HWIdentifier(); //Return (invalid) default instance
+      return {}; //Return (invalid) default instance
     }
     
     l_rodCrate = l_rodCrate-1; 

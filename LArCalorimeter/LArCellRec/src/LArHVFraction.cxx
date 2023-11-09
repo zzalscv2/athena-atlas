@@ -35,7 +35,7 @@ for(const CaloCell* cell : *cclc) {
     HWIdentifier hwid=cabling->createSignalChannelID(cell->ID());
     float corr=hvcorr->HVScaleCorr(hwid);
     //Correction should be between (0 and 2)
-    if (!(corr>0. && corr<100.)) continue;
+    if (corr<=0. || corr>=100.) continue;
     
     if (fabs(corr-1.)>m_threshold) {
       energyHVaff+=fabs(cell->e());

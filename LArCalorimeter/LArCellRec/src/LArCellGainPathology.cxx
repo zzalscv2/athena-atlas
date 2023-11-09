@@ -134,7 +134,7 @@ void LArCellGainPathology::ApplyPathology(CaloCellContainer* theCont, HWIdentifi
 
 CaloCell* LArCellGainPathology::GetCell(CaloCellContainer* theCont, HWIdentifier id,const LArOnOffIdMapping* cabling) const
 {
-  CaloCell* aCell =0;
+  CaloCell* aCell =nullptr;
   if (cabling->isOnlineConnected(id)) {
     Identifier id_off = cabling->cnvToIdentifier(id);
     IdentifierHash theCellHashID = m_calo_id->calo_cell_hash(id_off);

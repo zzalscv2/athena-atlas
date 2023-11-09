@@ -3,15 +3,15 @@
 */
 
 #include "LArIdentifier/LArOnline_SuperCellID.h"
-#include "LArIdentifier/LArOnlID_Exception.h"
-#include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictDefs.h"
 #include "GaudiKernel/MsgStream.h"
-#include <string>
+#include "IdDict/IdDictDefs.h"
+#include "Identifier/IdentifierHash.h"
+#include "LArIdentifier/LArOnlID_Exception.h"
+#include <cmath>
+#include <iostream>
 #include <set>
 #include <sstream>
-#include <iostream>
-#include <math.h>
+#include <string>
 
 /* See comments in Base class */
 
@@ -23,8 +23,7 @@ LArOnline_SuperCellID::LArOnline_SuperCellID(void) :
 
 
 LArOnline_SuperCellID::~LArOnline_SuperCellID(void) 
-{
-}
+= default;
 
 /* =================================================================== */
 int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
@@ -49,7 +48,7 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
     }
 
     // init base object
-    if(AtlasDetectorID::initialize_from_dictionary(dict_mgr)) return (1);
+    if(LArOnlineID_Base::initialize_from_dictionary(dict_mgr)) return (1);
     m_dict = dict_mgr.find_dictionary ("LArCalorimeter"); 
     if(!m_dict) {
 
