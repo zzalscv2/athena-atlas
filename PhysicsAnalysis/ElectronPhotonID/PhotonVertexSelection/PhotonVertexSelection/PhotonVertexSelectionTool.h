@@ -11,7 +11,7 @@
 #include "AsgDataHandles/ReadHandleKey.h"
 
 // EDM includes
-#include "xAODEventInfo/EventInfo.h" 
+#include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODEgamma/PhotonContainer.h"
 
@@ -39,16 +39,15 @@ namespace CP {
 
   private:
     /// Configuration variables
-    std::string m_configFileCase1; 
-    std::string m_configFileCase2; 
+    std::string m_configFileCase1;
+    std::string m_configFileCase2;
     float       m_convPtCut;
-    bool        m_updatePointing;
     std::string m_vertexContainerName;
     std::string m_derivationPrefix;
 
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
-    SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer {this, "VertexContainer", "PrimaryVertices", "Vertex container name"};  
-   
+    SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer {this, "VertexContainer", "PrimaryVertices", "Vertex container name"};
+
     /// MVA readers
     // Ideally these would be const but the main method called, EvaluateMVA, is non const.
     std::unique_ptr<TMVA::Reader> m_mva1;
@@ -61,26 +60,26 @@ namespace CP {
     /// Sort MLP results
     static bool sortMLP(const std::pair<const xAOD::Vertex*, float> &a, const std::pair<const xAOD::Vertex*, float> &b);
 
-   
+
     /// Given a list of photons, return the MLPs of all vertices in the event
     StatusCode getVertexImp(const xAOD::EgammaContainer &egammas, const xAOD::Vertex* &vertex, bool ignoreConv, bool noDecorate, std::vector<std::pair<const xAOD::Vertex*, float> >&, yyVtxType& , FailType& ) const;
-    
-  
+
+
   public:
     PhotonVertexSelectionTool(const std::string &name);
     virtual ~PhotonVertexSelectionTool();
 
     /// @name Function(s) implementing the asg::IAsgTool interface
     /// @{
-    
+
     /// Function initialising the tool
     virtual StatusCode initialize();
-      
+
     /// @}
 
     /// @name Function(s) implementing the IPhotonVertexSelectionTool interface
     /// @{
-    
+
     /// Given a list of photons, decorate vertex container with MVA variables
     StatusCode decorateInputs(const xAOD::EgammaContainer &egammas, FailType* failType = nullptr) const;
 
@@ -89,11 +88,11 @@ namespace CP {
 
     /// Given a list of photons, return the MLPs of all vertices in the event
     std::vector<std::pair<const xAOD::Vertex*, float> > getVertex(const xAOD::EgammaContainer &egammas, bool ignoreConv = false, bool noDecorate = false, yyVtxType* vtxCase = nullptr, FailType* failType = nullptr) const;
-    
+
     /// Return the last case treated:
     //  Deprecated no longer use this function
     int getCase() const { return -1; }
-    
+
     /// Get possible vertex directly associated with photon conversions
     const xAOD::Vertex* getPrimaryVertexFromConv(const xAOD::PhotonContainer *photons) const;
 
