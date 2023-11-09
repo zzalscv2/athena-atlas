@@ -25,20 +25,20 @@ class CaloStripsRingsBuilder : public CaloRingsBuilder
                      const std::string& name,
                      const IInterface* parent);
 
-    /** 
+    /**
      * @brief Destructor
      **/
     ~CaloStripsRingsBuilder();
     /// @}
-    
+
     /// Tool main methods:
     /// @{
-    /** 
-     * @brief initialize method 
+    /**
+     * @brief initialize method
      **/
     virtual StatusCode initialize() override;
-    /** 
-     * @brief finalize method 
+    /**
+     * @brief finalize method
      **/
     virtual StatusCode finalize() override;
     /// @}
@@ -53,7 +53,7 @@ class CaloStripsRingsBuilder : public CaloRingsBuilder
     virtual StatusCode buildRingSet(
         const xAOD::RingSetConf::RawConf &rawConf,
         const AtlasGeoPoint &seed,
-        xAOD::RingSet *rs);
+        xAOD::RingSet *rs) override;
     /// @}
 
     /// Tool props (python configurables):
