@@ -59,6 +59,7 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
   SG::WriteHandle<LArRawSCContainer> outputContainerHdl(m_larRawSCKey,ctx);
   ATH_CHECK(outputContainerHdl.record(std::make_unique<LArRawSCContainer>()));
   auto *outputContainer = outputContainerHdl.ptr();
+  outputContainer->clear(SG::VIEW_ELEMENTS);
   outputContainer->reserve(inputContainer->size());
   DataPool<LArRawSC> dataItemsPool(ctx);
   dataItemsPool.reserve(inputContainer->size());
