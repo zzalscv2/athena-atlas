@@ -5,19 +5,20 @@
 #include <iomanip>
 #include <sstream>
 #include <array>
+#include <algorithm>
 #include "../src/TableUtils.h"
 
-enum EStat {
+enum EStat : std::size_t {
    k1,
    k2,
    k3,
    kN
 };
 
-std::vector<std::string> makeLabels(const std::string &prefix, unsigned int n) {
+std::vector<std::string> makeLabels(const std::string &prefix, std::size_t n) {
    std::vector<std::string> labels;
    labels.reserve(n);
-   for(unsigned int i=0; i<n; ++i) {
+   for(std::size_t i=0; i<n; ++i) {
       std::stringstream tmp;
       tmp << prefix << "  " << i;
       labels.push_back(tmp.str());
@@ -38,8 +39,8 @@ void dumpRef(std::stringstream &out) {
 bool compare_strings(const std::string &val, const std::string &ref, bool verbose) {
    if (val != ref) {
       std::cout << "size val vs ref: " << val.size() << " =?= " << ref.size() << std::endl;
-      unsigned int last_i = static_cast<unsigned int>(std::min(val.size(),ref.size()));
-      for (unsigned int i=0; i<last_i; ++i) {
+      std::size_t last_i = std::min(val.size(),ref.size());
+      for (std::size_t i=0; i<last_i; ++i) {
          if (ref[i] != val[i]) {
             std::cout << "diff " << std::setw(4) << i << " "
                       << "#" << static_cast<unsigned int>(val[i])
@@ -52,13 +53,13 @@ bool compare_strings(const std::string &val, const std::string &ref, bool verbos
          }
       }
       if (verbose) {
-         for (unsigned int i=last_i; i<val.size(); ++i) {
+         for (std::size_t i=last_i; i<val.size(); ++i) {
             std::cout << "extra in val " << std::setw(4) << i << " #"
                       << static_cast<unsigned int>(val[i])
                       << " | \"" << val[i] << "\""
                       << std::endl;
          }
-         for (unsigned int i=last_i; i<ref.size(); ++i) {
+         for (std::size_t i=last_i; i<ref.size(); ++i) {
             std::cout << "extra in ref " << std::setw(4) << i << " #"
                       << static_cast<unsigned int>(ref[i])
                       << " | \"" << ref[i] << "\""
@@ -70,12 +71,6 @@ bool compare_strings(const std::string &val, const std::string &ref, bool verbos
    return true;
 }
 
-void swap( unsigned int &a, unsigned int &b) {
-   unsigned int tmp=a;
-   a=b;
-   b=tmp;
-}
-
 
 int main(int argc, char **argv) {
    bool verbose=(argc>1 && atoi(argv[1])>0);
@@ -85,12 +80,12 @@ int main(int argc, char **argv) {
    // 2 categories with 4 sub-categories each, each containing 3 counters
    // content are powers of 2
    std::vector< std::array<unsigned int, kN> >  in_stat;
-   unsigned int n_categories = 2;
-   unsigned int n_sub_categories = 4;
+   std::size_t n_categories = 2;
+   std::size_t n_sub_categories = 4;
    in_stat.resize(n_categories * n_sub_categories, std::array<unsigned int, kN>{} );
-   for (unsigned int cat_i=0; cat_i<n_categories; ++cat_i) {
-      for (unsigned int sub_cat_i=0; sub_cat_i<n_sub_categories; ++sub_cat_i) {
-         for (unsigned int stat_i=0; stat_i<kN; ++stat_i) {
+   for (std::size_t cat_i=0; cat_i<n_categories; ++cat_i) {
+      for (std::size_t sub_cat_i=0; sub_cat_i<n_sub_categories; ++sub_cat_i) {
+         for (std::size_t stat_i=0; stat_i<kN; ++stat_i) {
             in_stat.at(cat_i * n_sub_categories + sub_cat_i).at(stat_i)
                = (1<<stat_i)
                * (1<<(cat_i*n_sub_categories*kN))
@@ -98,28 +93,28 @@ int main(int argc, char **argv) {
          }
       }
    }
-   swap(in_stat.at( 0 * n_sub_categories + 3).at(1),  in_stat.at(1 * n_sub_categories + 3).at(0) );
-   for (unsigned int sub_i=3; sub_i-->0; ) {
-      swap(in_stat.at( 1 * n_sub_categories + sub_i).at(0),  in_stat.at((1) * n_sub_categories + (sub_i+1)).at(0) );
+   std::swap(in_stat.at( 0 * n_sub_categories + 3).at(1),  in_stat.at(1 * n_sub_categories + 3).at(0) );
+   for (std::size_t sub_i=3; sub_i-->0; ) {
+      std::swap(in_stat.at( 1 * n_sub_categories + sub_i).at(0),  in_stat.at((1) * n_sub_categories + (sub_i+1)).at(0) );
    }
-   swap(in_stat.at( 0 * n_sub_categories + 3).at(2),  in_stat.at(1 * n_sub_categories + 3).at(1) );
-   for (unsigned int sub_i=3; sub_i-->0; ) {
-      swap(in_stat.at( 1 * n_sub_categories + sub_i).at(1),  in_stat.at((1) * n_sub_categories + (sub_i+1)).at(1) );
+   std::swap(in_stat.at( 0 * n_sub_categories + 3).at(2),  in_stat.at(1 * n_sub_categories + 3).at(1) );
+   for (std::size_t sub_i=3; sub_i-->0; ) {
+      std::swap(in_stat.at( 1 * n_sub_categories + sub_i).at(1),  in_stat.at((1) * n_sub_categories + (sub_i+1)).at(1) );
    }
-   swap(in_stat.at( 0 * n_sub_categories + 2).at(0),  in_stat.at(0 * n_sub_categories + 1).at(2) );
-   swap(in_stat.at( 0 * n_sub_categories + 0).at(0),  in_stat.at(0 * n_sub_categories + 0).at(1) );
+   std::swap(in_stat.at( 0 * n_sub_categories + 2).at(0),  in_stat.at(0 * n_sub_categories + 1).at(2) );
+   std::swap(in_stat.at( 0 * n_sub_categories + 0).at(0),  in_stat.at(0 * n_sub_categories + 0).at(1) );
 
 
    // dump test data
    if (verbose)  {
       std::cout << "test data : " << std::endl;
-      for (unsigned int stat_i=0; stat_i<kN; ++stat_i) {
+      for (std::size_t stat_i=0; stat_i<kN; ++stat_i) {
          std::vector<unsigned int> sum_sub;
          sum_sub.resize( n_categories , 0u);
-         for (unsigned int sub_cat_i=0; sub_cat_i<n_sub_categories; ++sub_cat_i) {
+         for (std::size_t sub_cat_i=0; sub_cat_i<n_sub_categories; ++sub_cat_i) {
             std::cout << std::setw(3) << stat_i << std::setw(3) << sub_cat_i << " :";
             unsigned int sum=0u;
-            for (unsigned int cat_i=0; cat_i<n_categories; ++cat_i) {
+            for (std::size_t cat_i=0; cat_i<n_categories; ++cat_i) {
                std::cout << " " << std::setw(12) << in_stat.at(cat_i*n_sub_categories+sub_cat_i).at(stat_i);
                sum_sub.at(cat_i) += in_stat.at(cat_i*n_sub_categories+sub_cat_i).at(stat_i);
                sum += in_stat.at(cat_i*n_sub_categories+sub_cat_i).at(stat_i);
@@ -128,7 +123,7 @@ int main(int argc, char **argv) {
          }
          std::cout << std::setw(3) << stat_i << std::setw(3) << "" << " :";
          unsigned int sum=0u;
-         for (unsigned int cat_i=0; cat_i<n_categories; ++cat_i) {
+         for (std::size_t cat_i=0; cat_i<n_categories; ++cat_i) {
             std::cout << " " << std::setw(12) << sum_sub.at(cat_i);
             sum += sum_sub.at(cat_i);
          }
@@ -137,9 +132,9 @@ int main(int argc, char **argv) {
       }
       std::cout << "ratios : " << std::endl;
       std::cout << " (aij[2] - aij[1] ) / aij[0] " << std::endl;
-      for (unsigned int sub_cat_i=0; sub_cat_i<n_sub_categories; ++sub_cat_i) {
+      for (std::size_t sub_cat_i=0; sub_cat_i<n_sub_categories; ++sub_cat_i) {
          std::cout << std::setw(3) << "" << std::setw(3) << sub_cat_i << " :";
-         for (unsigned int cat_i=0; cat_i<n_categories; ++cat_i) {
+         for (std::size_t cat_i=0; cat_i<n_categories; ++cat_i) {
             std::cout << " " << std::setw(12) << ( (  in_stat.at(cat_i*n_sub_categories+sub_cat_i).at(2)
                                                     - 1.*in_stat.at(cat_i*n_sub_categories+sub_cat_i).at(1))
                                                     / in_stat.at(cat_i*n_sub_categories+sub_cat_i).at(0) );
@@ -147,27 +142,27 @@ int main(int argc, char **argv) {
          std::cout << std::endl;
       }
       std::cout << " (aij[2]) / aij[1] " << std::endl;
-      for (unsigned int sub_cat_i=0; sub_cat_i<n_sub_categories; ++sub_cat_i) {
+      for (std::size_t sub_cat_i=0; sub_cat_i<n_sub_categories; ++sub_cat_i) {
          std::cout << std::setw(3) << "" << std::setw(3) << sub_cat_i << " :";
-         for (unsigned int cat_i=0; cat_i<n_categories; ++cat_i) {
+         for (std::size_t cat_i=0; cat_i<n_categories; ++cat_i) {
             std::cout << " " << std::setw(12) << ( (  1.*in_stat.at(cat_i*n_sub_categories+sub_cat_i).at(2))
                                                     / in_stat.at(cat_i*n_sub_categories+sub_cat_i).at(1) );
          }
          std::cout << std::endl;
       }
       std::cout << " (aij[1]) / aij[0] " << std::endl;
-      for (unsigned int sub_cat_i=0; sub_cat_i<n_sub_categories; ++sub_cat_i) {
+      for (std::size_t sub_cat_i=0; sub_cat_i<n_sub_categories; ++sub_cat_i) {
          std::cout << std::setw(3) << "" << std::setw(3) << sub_cat_i << " :";
-         for (unsigned int cat_i=0; cat_i<n_categories; ++cat_i) {
+         for (std::size_t cat_i=0; cat_i<n_categories; ++cat_i) {
             std::cout << " " << std::setw(12) << ( (  1.*in_stat.at(cat_i*n_sub_categories+sub_cat_i).at(1))
                                                     / in_stat.at(cat_i*n_sub_categories+sub_cat_i).at(0) );
          }
          std::cout << std::endl;
       }
       std::cout << " (aij[2]) / aij[0] " << std::endl;
-      for (unsigned int sub_cat_i=0; sub_cat_i<n_sub_categories; ++sub_cat_i) {
+      for (std::size_t sub_cat_i=0; sub_cat_i<n_sub_categories; ++sub_cat_i) {
          std::cout << std::setw(3) << "" << std::setw(3) << sub_cat_i << " :";
-         for (unsigned int cat_i=0; cat_i<n_categories; ++cat_i) {
+         for (std::size_t cat_i=0; cat_i<n_categories; ++cat_i) {
             std::cout << " " << std::setw(12) << ( (  1.*in_stat.at(cat_i*n_sub_categories+sub_cat_i).at(2))
                                                     / in_stat.at(cat_i*n_sub_categories+sub_cat_i).at(0) );
          }
@@ -194,22 +189,22 @@ int main(int argc, char **argv) {
                                                                                               in_stat);
 
    // get the strides to iterate over the counter, and sub categories
-   unsigned int stat_stride=TableUtils::counterStride(n_categories,
+   std::size_t stat_stride=TableUtils::counterStride(n_categories,
                                                       n_sub_categories,
                                                       static_cast<std::size_t>(kN));
-   unsigned int sub_cat_stride=TableUtils::subCategoryStride(n_categories,
+   std::size_t sub_cat_stride=TableUtils::subCategoryStride(n_categories,
                                                              n_sub_categories,
                                                              static_cast<std::size_t>(kN));
 
    // get the maximum lable width of stat and sub_category
-   unsigned int max_label_width = TableUtils::maxLabelWidth(stat_labels) + TableUtils::maxLabelWidth(sub_category_labels) +1;
+   std::size_t max_label_width = TableUtils::maxLabelWidth(stat_labels) + TableUtils::maxLabelWidth(sub_category_labels) +1;
 
    // -- dump tables showing the counter split by category and sub-category and the total in category and sub-category
    // -- direction
    std::stringstream table_out;
    table_out << std::setprecision(5);
-   for (unsigned int stat_i=0; stat_i<kN; ++stat_i) {
-      unsigned int dest_idx_offset = stat_i * stat_stride;
+   for (std::size_t stat_i=0; stat_i<kN; ++stat_i) {
+      std::size_t dest_idx_offset = stat_i * stat_stride;
       table_out << makeTable(stat, dest_idx_offset, sub_cat_stride,
                              sub_category_labels,
                              category_labels)
@@ -261,7 +256,7 @@ int main(int argc, char **argv) {
 
    // --- only dump a table of the totals in sub-category direction
    // compute index of the total
-   unsigned int dest_idx_offset = n_sub_categories * sub_cat_stride;
+   std::size_t dest_idx_offset = n_sub_categories * sub_cat_stride;
    table_out.str("");
    table_out << makeTable(stat, dest_idx_offset,stat_stride,
                           stat_labels,
@@ -292,11 +287,11 @@ int main(int argc, char **argv) {
    // --- ratios
    auto [ratio_labels, ratio_def] = TableUtils::splitRatioDefinitionsAndLabels( {
          TableUtils::makeRatioDefinition("3-2 / 1",
-                                         std::vector< std::pair<unsigned int, int> > {
+                                         std::vector< TableUtils::SummandDefinition > {
                                             TableUtils::defineSummand(k3,      1),
                                             TableUtils::defineSummand(k2,      -1),
                                          },   // failed seeds i.e. seeds which are not duplicates but did not produce a track
-                                         std::vector< std::pair<unsigned int, int> >{ TableUtils::defineSummand(k1,1) }),
+                                         std::vector< TableUtils::SummandDefinition >{ TableUtils::defineSummand(k1,1) }),
          TableUtils::defineSimpleRatio("3/2",          k3, k2),
          TableUtils::defineSimpleRatio("1/2",          k2, k1),
          TableUtils::defineSimpleRatio("3/1",          k3,k1)
@@ -308,17 +303,17 @@ int main(int argc, char **argv) {
                                                         stat);
 
    // the extra columns and rows for the projections are _not_ added internally
-   unsigned int ratio_stride=TableUtils::ratioStride(n_categories+1,
+   std::size_t ratio_stride=TableUtils::ratioStride(n_categories+1,
                                                      n_sub_categories+1,
                                                      ratio_def);
-   unsigned int ratio_sub_stride=TableUtils::subCategoryStride(n_categories+1,
+   std::size_t ratio_sub_stride=TableUtils::subCategoryStride(n_categories+1,
                                                                n_sub_categories+1,
                                                                ratio_def);
    max_label_width = TableUtils::maxLabelWidth(ratio_labels) + TableUtils::maxLabelWidth(sub_category_labels) + 1;
    // -- dump one table per ratio splitted by category and sub-category, and ratios of the projections in the two
    // -- directions
    table_out.str("");
-   for (unsigned int ratio_i=0; ratio_i<ratio_labels.size(); ++ratio_i) {
+   for (std::size_t ratio_i=0; ratio_i<ratio_labels.size(); ++ratio_i) {
       table_out << makeTable(ratio,
                              ratio_i*ratio_stride,
                              ratio_sub_stride,

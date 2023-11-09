@@ -5,13 +5,13 @@
 
 namespace TableUtils {
 
-   std::size_t computeSum( const std::vector< std::pair<unsigned int, int> >  &sum_def,
-                                  unsigned int eta_offset,
-                                  unsigned int row_stride,
-                                  unsigned int seed_i,
+   std::size_t computeSum( const std::vector< SummandDefinition >  &sum_def,
+                                  std::size_t eta_offset,
+                                  std::size_t row_stride,
+                                  std::size_t seed_i,
                                   const std::vector<std::size_t> &stat) {
       std::size_t sum=0;
-      for (const std::pair<unsigned int, int> &summand : sum_def ) {
+      for (const SummandDefinition &summand : sum_def ) {
          assert( eta_offset + row_stride * summand.first + seed_i < stat.size() );
          sum += stat[eta_offset + row_stride * summand.first + seed_i ] * summand.second;
       }
@@ -19,8 +19,8 @@ namespace TableUtils {
    }
 
    std::vector<float> computeRatios(const std::vector<RatioDefinition> &ratio_def,
-                                    const unsigned int categories,
-                                    const unsigned int sub_categories,
+                                    const std::size_t categories,
+                                    const std::size_t sub_categories,
                                     const std::vector< std::size_t> &counter)
    {
        std::vector<float> ratio;
@@ -31,18 +31,18 @@ namespace TableUtils {
               << counter.size();
           throw std::logic_error(msg.str());
        }
-       unsigned int n_counter = counter.size() / (categories*sub_categories);
+       std::size_t n_counter = counter.size() / (categories*sub_categories);
        ratio.resize( categories * ratio_def.size() * sub_categories);
 
-       unsigned int input_counter_stride=categories;
-       unsigned int input_sub_category_stride = categories * n_counter;
-       unsigned int ratio_stride = categories;
-       unsigned int ratio_sub_category_stride = ratio_stride * ratio_def.size();
+       std::size_t input_counter_stride=categories;
+       std::size_t input_sub_category_stride = categories * n_counter;
+       std::size_t ratio_stride = categories;
+       std::size_t ratio_sub_category_stride = ratio_stride * ratio_def.size();
 
-       for (unsigned int sub_category_i=0; sub_category_i < sub_categories; ++sub_category_i) {
-          for (unsigned int ratio_i=0; ratio_i<ratio_def.size(); ++ratio_i) {
-             for (unsigned int category_i=0; category_i<categories; ++category_i) {
-                unsigned int ratio_dest_idx = sub_category_i * ratio_sub_category_stride + ratio_stride * ratio_i + category_i;
+       for (std::size_t sub_category_i=0; sub_category_i < sub_categories; ++sub_category_i) {
+          for (std::size_t ratio_i=0; ratio_i<ratio_def.size(); ++ratio_i) {
+             for (std::size_t category_i=0; category_i<categories; ++category_i) {
+                std::size_t ratio_dest_idx = sub_category_i * ratio_sub_category_stride + ratio_stride * ratio_i + category_i;
                 assert(ratio_dest_idx < ratio.size());
                 assert( sub_category_i * input_sub_category_stride < counter.size() );
                 assert( sub_category_i * input_sub_category_stride + n_counter * input_counter_stride <= counter.size() );
