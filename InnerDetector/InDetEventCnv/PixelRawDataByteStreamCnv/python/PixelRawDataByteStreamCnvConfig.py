@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -9,6 +9,9 @@ def PixelRawDataProviderAlgCfg(flags, RDOKey="PixelRDOs", **kwargs):
     """ Main function to configure Pixel raw data decoding """
     acc = PixelCablingCondAlgCfg(flags)
     acc.merge(PixelHitDiscCnfgAlgCfg(flags))
+
+    from PixelReadoutGeometry.PixelReadoutGeometryConfig import PixelReadoutManagerCfg
+    acc.merge (PixelReadoutManagerCfg(flags))
 
     from RegionSelector.RegSelToolConfig import regSelTool_Pixel_Cfg
     regSelTool = acc.popToolsAndMerge(regSelTool_Pixel_Cfg(flags))
