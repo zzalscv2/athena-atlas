@@ -570,22 +570,27 @@ def TrigJetMonConfig(inputFlags):
   # them to GenericMonitoringTools
   from AthenaMonitoring import AthMonitorCfgHelper
   helper = AthMonitorCfgHelper(inputFlags,'TrigJetMonitorAlgorithm')
-
+   # Configure filter tools                                                                                                                                                                     
+  from AthenaMonitoring.EventFlagFilterToolConfig import EventFlagFilterToolCfg
+  from AthenaMonitoring.BadLBFilterToolConfig import LArBadLBFilterToolCfg
   # Loop over L1 jet collections
   for jetcoll in CopiedL1JetCollections[monMode]:
     l1jetconf = l1JetMonitoringConfig(inputFlags,jetcoll,CopiedL1JetCollections,monMode,'',True)
-    l1jetconf.toAlg(helper)
+    alg=l1jetconf.toAlg(helper)
+    alg.FilterTools = [ EventFlagFilterToolCfg(inputFlags),helper.resobj.popToolsAndMerge(LArBadLBFilterToolCfg(inputFlags))]
 
   # Loop over L1 jet chains
   for chain,jetcolls in Chain2L1JetCollDict[monMode].items():
     for jetcoll in jetcolls:
       l1chainconf = l1JetMonitoringConfig(inputFlags,jetcoll,L1JetCollections,monMode,chain)
-      l1chainconf.toAlg(helper)
+      alg=l1chainconf.toAlg(helper)
+      alg.FilterTools = [ EventFlagFilterToolCfg(inputFlags),helper.resobj.popToolsAndMerge(LArBadLBFilterToolCfg(inputFlags))]
 
   # Loop over offline jet collections
   for jetcoll in CopiedOfflineJetCollections[monMode]:
     offlineMonitorConf = jetMonitoringConfig(inputFlags,jetcoll,CopiedOfflineJetCollections,monMode)
-    offlineMonitorConf.toAlg(helper)
+    alg=offlineMonitorConf.toAlg(helper)
+    alg.FilterTools = [ EventFlagFilterToolCfg(inputFlags),helper.resobj.popToolsAndMerge(LArBadLBFilterToolCfg(inputFlags))]
 
   # Loop over HLT jet collections
   for jetcoll in CopiedJetCollections[monMode]:
@@ -600,10 +605,12 @@ def TrigJetMonConfig(inputFlags):
     # kinematic plots
     # only use passing jets
     chainMonitorConfT = jetChainMonitoringConfig(inputFlags,jetcoll,chain,True)
-    chainMonitorConfT.toAlg(helper)
+    alg=chainMonitorConfT.toAlg(helper)
+    alg.FilterTools = [ EventFlagFilterToolCfg(inputFlags),helper.resobj.popToolsAndMerge(LArBadLBFilterToolCfg(inputFlags))]
     # all jets
     chainMonitorConfF = jetChainMonitoringConfig(inputFlags,jetcoll,chain,False)
-    chainMonitorConfF.toAlg(helper)
+    alg=chainMonitorConfF.toAlg(helper)
+    alg.FilterTools = [ EventFlagFilterToolCfg(inputFlags),helper.resobj.popToolsAndMerge(LArBadLBFilterToolCfg(inputFlags))]
     # efficiency plots
     if chainDict['RefChain'] != 'NONE' and chainDict['OfflineColl'] != 'NONE':
       effMonitorConf = jetEfficiencyMonitoringConfig(inputFlags,jetcoll,chainDict['OfflineColl'],chain,chainDict['RefChain'])
