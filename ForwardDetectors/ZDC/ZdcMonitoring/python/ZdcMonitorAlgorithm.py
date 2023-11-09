@@ -34,7 +34,8 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     zdcMonAlg = helper.addAlgorithm(CompFactory.ZdcMonitorAlgorithm,'ZdcMonAlg')
 
     # Edit properties of a algorithm
-    # zdcMonAlg.CalInfoOn = False
+    zdcMonAlg.EnableTrigger = inputFlags.DQ.useTrigger
+    zdcMonAlg.CalInfoOn = inputFlags.Input.TriggerStream == 'physics_MinBias' # turn calorimeter info on if input triggerstream (autoconfigured from input file) is physics_MinBias
 
     genZdcMonTool = helper.addGroup(
         zdcMonAlg,
@@ -547,12 +548,14 @@ if __name__=='__main__':
     directory = ''
     inputfile = 'myAOD.pool.root'
     ConfigFlags.Input.Files = [directory+inputfile]
-    ConfigFlags.Input.isMC = False
+    # ConfigFlags.Input.isMC = False
     parser = ConfigFlags.getArgumentParser()
     parser.add_argument('--runNumber',default=None,help="specify to select a run number")
     parser.add_argument('--streamTag',default="ZDCCalib",help="ZDCCalib or MinBias")
     parser.add_argument('--outputHISTFile',default=None,help="specify output HIST file name")
     args = ConfigFlags.fillFromArgs(parser=parser)
+
+    ConfigFlags.DQ.useTrigger = False if ConfigFlags.Input.isMC else True # isMC is autoconfigured from the input file; if MC: turn trigger off
     if args.runNumber is not None: # streamTag has default but runNumber doesn't
         ConfigFlags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}_{args.runNumber}.root'
     else:

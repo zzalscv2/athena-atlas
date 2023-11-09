@@ -77,7 +77,6 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     ATH_MSG_DEBUG("calling the fillPhysicsDataHistograms function");    
 
     auto zdcTool = getGroup("genZdcMonTool"); // get the tool for easier group filling
-    const auto &trigDecTool = getTrigDecisionTool();
 // ______________________________________________________________________________
     // declaring & obtaining event-level information of interest 
 // ______________________________________________________________________________
@@ -86,10 +85,17 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     auto lumiBlock = Monitored::Scalar<uint32_t>("lumiBlock", eventInfo->lumiBlock());
     auto bcid = Monitored::Scalar<unsigned int>("bcid", eventInfo->bcid());
 
-    auto passTrigSideA = Monitored::Scalar<bool>("passTrigSideA",trigDecTool->isPassed(m_triggerSideA, TrigDefs::Physics));
-    auto passTrigSideC = Monitored::Scalar<bool>("passTrigSideC",trigDecTool->isPassed(m_triggerSideC, TrigDefs::Physics));
-    if (passTrigSideA) ATH_MSG_DEBUG("passing trig on side A!");    
-    if (passTrigSideC) ATH_MSG_DEBUG("passing trig on side C!");    
+    auto passTrigSideA = Monitored::Scalar<bool>("passTrigSideA",false); // if trigger isn't enabled (e.g, MC) the with-trigger histograms are never filled (cut mask never satisfied)
+    auto passTrigSideC = Monitored::Scalar<bool>("passTrigSideC",false);
+
+    if(m_enableTrigger){
+        const auto &trigDecTool = getTrigDecisionTool();
+        passTrigSideA = trigDecTool->isPassed(m_triggerSideA, TrigDefs::Physics);
+        passTrigSideC = trigDecTool->isPassed(m_triggerSideC, TrigDefs::Physics);
+        if (passTrigSideA) ATH_MSG_DEBUG("passing trig on side A!");    
+        if (passTrigSideC) ATH_MSG_DEBUG("passing trig on side C!");    
+    }
+
 
 // ______________________________________________________________________________
     // declaring & obtaining variables of interest for the ZDC sums
