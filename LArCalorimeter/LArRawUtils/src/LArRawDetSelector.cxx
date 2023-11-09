@@ -13,8 +13,8 @@
 #include "StoreGate/StoreGateSvc.h" 
 
 LArRawDetSelector::LArRawDetSelector ( const LArRawChannelContainer*  )
-  : m_onlineID(0),
-    m_caloCellID(0),
+  : m_onlineID(nullptr),
+    m_caloCellID(nullptr),
     m_em(false),
     m_hec(false),
     m_fcal(false)
@@ -45,16 +45,13 @@ LArRawDetSelector::LArRawDetSelector ( const LArRawChannelContainer*  )
       log << MSG::ERROR << "Faild to get LArOnlineID helper" << endmsg;
       return;
     }
-    return ;
-}
+    }
 
 void LArRawDetSelector::setDet(const Identifier& id ){
 
   m_em  = m_caloCellID->is_lar_em(id) ;
   m_hec  = m_caloCellID->is_lar_hec(id) ;
   m_fcal  = m_caloCellID->is_lar_fcal(id) ;
-  
-return; 
 
 }
 
@@ -63,8 +60,6 @@ void LArRawDetSelector::setDet(const HWIdentifier& chid ){
   m_em    = m_onlineID->isEMBchannel(chid) || m_onlineID->isEMECchannel(chid);
   m_hec   = m_onlineID->isHECchannel(chid);
   m_fcal  = m_onlineID->isFCALchannel(chid);
-  
-return; 
 
 }
 

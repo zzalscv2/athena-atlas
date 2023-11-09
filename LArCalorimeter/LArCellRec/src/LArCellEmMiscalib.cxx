@@ -96,7 +96,7 @@ void LArCellEmMiscalib::initOnce (const EventContext& ctx) {
     const CaloDetDescrElement* calodde = m_calodetdescrmgr->get_element(id);
     double eta = fabs(calodde->eta_raw());
     double phi = calodde->phi_raw();
-    int iregion= this->region(barrel_ec,eta,phi);
+    int iregion= LArCellEmMiscalib::region(barrel_ec,eta,phi);
     if (iregion>=0) {
         ATH_MSG_VERBOSE("barrel_ec,eta,phi,region " << barrel_ec << " " << eta << " " << phi << " " 
 		    << iregion << " " << m_spread1[iregion]);
@@ -115,8 +115,7 @@ void LArCellEmMiscalib::initOnce (const EventContext& ctx) {
   }
 
 
-  return;
-
+  
 }
 ////////////////////////////////////////////////////////////////////////////////////////
 

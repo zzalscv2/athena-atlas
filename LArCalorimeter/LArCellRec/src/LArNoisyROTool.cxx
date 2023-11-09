@@ -20,7 +20,7 @@ LArNoisyROTool::LArNoisyROTool( const std::string& type,
 				const std::string& name, 
 				const IInterface* parent ) : 
   ::AthAlgTool  ( type, name, parent   ),
-  m_calo_id(0), m_onlineID(0), 
+  m_calo_id(nullptr), m_onlineID(nullptr), 
   m_partitionMask({{LArNoisyROSummary::EMECAMask,LArNoisyROSummary::EMBAMask,LArNoisyROSummary::EMBCMask,LArNoisyROSummary::EMECCMask}}) //beware: The order matters! 
 {
   declareInterface<ILArNoisyROTool >(this);
@@ -41,7 +41,7 @@ LArNoisyROTool::LArNoisyROTool( const std::string& type,
 // Destructor
 ///////////////
 LArNoisyROTool::~LArNoisyROTool()
-{}
+= default;
 
 // Athena algtool's Hooks
 ////////////////////////////

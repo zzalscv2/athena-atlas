@@ -66,7 +66,7 @@ StatusCode LArNoisyROAlg::execute (const EventContext& ctx) const
     const LArBadFebCont* MNBCont=*MNBHdl;
     if(MNBCont) {
       for(LArBadFebCont::BadChanVec::const_iterator i = MNBCont->begin(); i!=MNBCont->end(); ++i) {
-        MNBfeb.push_back(HWIdentifier(i->first));
+        MNBfeb.emplace_back(i->first);
       } 
     }
   }

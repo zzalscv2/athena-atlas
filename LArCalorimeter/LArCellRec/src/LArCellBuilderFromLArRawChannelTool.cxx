@@ -54,8 +54,7 @@ LArCellBuilderFromLArRawChannelTool::LArCellBuilderFromLArRawChannelTool(
 
 
 
-LArCellBuilderFromLArRawChannelTool::~LArCellBuilderFromLArRawChannelTool() { 
-}
+LArCellBuilderFromLArRawChannelTool::~LArCellBuilderFromLArRawChannelTool() = default;
 
 
 StatusCode LArCellBuilderFromLArRawChannelTool::initialize() {
@@ -131,7 +130,7 @@ LArCellBuilderFromLArRawChannelTool::process (CaloCellContainer* theCellContaine
   unsigned nCellsAdded=0;
   std::bitset<CaloCell_ID::NSUBCALO> includedSubcalos;
   // resize calo cell container to correct size
-  if (theCellContainer->size()) {
+  if (!theCellContainer->empty()) {
     ATH_MSG_ERROR( "fillCompleteCellCont: container should be empty! Clear now."   );
     theCellContainer->clear();
   }
@@ -239,14 +238,14 @@ LArCellBuilderFromLArRawChannelTool::process (CaloCellContainer* theCellContaine
     //Note this works only because the cells are actually owned by the DataPool<LArCell>
     size_t i=0,j=1;
     for (i=0;i<m_nTotalCells;++i) {
-      if (theCellContainer->at(i)==0) {
+      if (theCellContainer->at(i)==nullptr) {
 	ATH_MSG_VERBOSE("Cell with hash " << i << " missing");
 	if (j<=i) j=i+1;
-	while (j<m_nTotalCells && theCellContainer->at(j)==0) ++j;
+	while (j<m_nTotalCells && theCellContainer->at(j)==nullptr) ++j;
 	if (j>=m_nTotalCells) break;
 	//Now j points to next filled place
 	theCellContainer->at(i)=theCellContainer->at(j);
-	theCellContainer->at(j)=NULL;
+	theCellContainer->at(j)=nullptr;
 	ATH_MSG_VERBOSE("Replacing cell with hash " << i << " by cell from position " << j);
       }//end if at(i)==0
     }//end loop over cells

@@ -23,8 +23,8 @@ PURPOSE:  non linearity if only linear calibration fit is used
 // Units
 #include "CLHEP/Units/SystemOfUnits.h"
 
+#include <cmath>
 #include <iostream>
-#include <math.h>
 
 using CLHEP::GeV;
 
@@ -73,7 +73,7 @@ using CLHEP::GeV;
 
 LArNonLinearity::LArNonLinearity(const std::string& type, const std::string& name, 
 			 const IInterface* parent)
-  : CaloCellCorrection(type, name, parent),m_emID(NULL),m_hecID(NULL),m_fcalID(NULL)
+  : CaloCellCorrection(type, name, parent),m_emID(nullptr),m_hecID(nullptr),m_fcalID(nullptr)
 
 { 
   
@@ -96,7 +96,7 @@ StatusCode LArNonLinearity::initialize()
 // Desctructor
 
 LArNonLinearity::~LArNonLinearity()
-{  }
+= default;
 
 // MakeCorrection:  This is called with a pointer to the Cell Object.
 
