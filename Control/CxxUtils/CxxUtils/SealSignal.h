@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -88,26 +88,6 @@ typedef int sigset_t;
 
 //namespace seal {                                wlav
 namespace Athena {                             // wlav
-
-// wlav copied from SealBase/BitTraits.h
-/** Describe the bit features of an integral type @c T. */
-template <class T>
-struct BitTraits
-{
-    /// Number of bits in @c T.
-    enum { Bits		= sizeof (T) * CHAR_BIT };
-
-    /// Number of 8-bit bytes in @c T.
-    enum { Bytes	= Bits / 8 + ((Bits % 8) > 0) };
-
-    /// Number of base-10 digits in @c T (without leading sign).
-    enum { Digits	= (Bits * 30103) / 100000 + 1 };
-    // 30103 =~ M_LN2 / M_LN10 * 100000
-
-    /// Number of base-16 digits in @c T (without leading sign).
-    enum { HexDigits	= Bits / 4 + ((Bits % 4) > 0) };
-};
-
 
 /** Utilities for handling signals and fatal errors.
 
