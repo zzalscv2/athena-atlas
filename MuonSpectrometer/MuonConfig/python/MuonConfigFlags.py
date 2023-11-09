@@ -84,7 +84,7 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.runCommissioningChain", lambda prevFlags: ( False and (prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC) \
                                                                  and prevFlags.Beam.Type is BeamType.Collisions) )
     
-    mcf.addFlag("Muon.applyMMPassivation", lambda prevFlags: prevFlags.GeoModel.Run>=LHCPeriod.Run3 and not prevFlags.Common.isOnline and (prevFlags.Common.Project is not Project.AthSimulation \
+    mcf.addFlag("Muon.applyMMPassivation", lambda prevFlags: prevFlags.Detector.EnableMM and not prevFlags.Common.isOnline and (prevFlags.Common.Project is not Project.AthSimulation \
                                                       and (prevFlags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain] or prevFlags.Overlay.DataOverlay)))
     # CalibFlags
     mcf.addFlag("Muon.Calib.readMDTCalibFromBlob", True)  # Read mdt tube calibration from blob-folders
