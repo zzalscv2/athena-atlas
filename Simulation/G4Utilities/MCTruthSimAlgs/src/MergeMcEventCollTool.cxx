@@ -200,6 +200,7 @@ StatusCode MergeMcEventCollTool::processAllSubEvents(const EventContext& /*ctx*/
   ATH_MSG_DEBUG( "execute: there are " << m_nInputMcEventColls << " subevents in this event.");
   TimedTruthList::iterator timedTruthListIter(truthList.begin()), endOfTimedTruthList(truthList.end());
   //loop over the McEventCollections (each one assumed to containing exactly one GenEvent) of the various input events
+  m_newevent=true;
   while (timedTruthListIter != endOfTimedTruthList) {
     const PileUpTimeEventIndex& currentPileUpTimeEventIndex(timedTruthListIter->first);
     const McEventCollection *pBackgroundMcEvtColl(&*(timedTruthListIter->second));
@@ -215,8 +216,6 @@ StatusCode MergeMcEventCollTool::processAllSubEvents(const EventContext& /*ctx*/
 
   //Sort the GenEvents in the output McEventCollection according to background classification
   std::sort(m_pOvrlMcEvColl->begin(), m_pOvrlMcEvColl->end(), GenEventSorter(m_backgroundClassificationMap));
-
-  m_newevent=true;
 
   if(msgLvl(MSG::DEBUG)) {
     ATH_MSG_DEBUG("Sorted McEventCollection OK.");
