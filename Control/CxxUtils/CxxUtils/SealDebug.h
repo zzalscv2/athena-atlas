@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -21,12 +21,8 @@
 #ifndef CXXUTILS_SEAL_DEBUG_H // wlav SEAL_BASE_DEBUG_H
 #define CXXUTILS_SEAL_DEBUG_H // wlav SEAL_BASE_DEBUG_H
 
-//<<<<<< INCLUDES                                                       >>>>>>
-
 #include "CxxUtils/checker_macros.h"
 #include "CxxUtils/SealCommon.h"  // sss -- needed for IOFD
-//# include "SealBase/Macros.h"                   wlav
-//# include "SealBase/sysapi/IOTypes.h"           wlav
 # include <cstddef>
 # include <atomic>
 
@@ -49,13 +45,28 @@
 # endif
 
 
-//namespace seal {                                wlav
 namespace Athena {                             // wlav
-//<<<<<< PUBLIC DEFINES                                                 >>>>>>
-//<<<<<< PUBLIC CONSTANTS                                               >>>>>>
-//<<<<<< PUBLIC TYPES                                                   >>>>>>
-//<<<<<< PUBLIC VARIABLES                                               >>>>>>
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
+
+
+// wlav copied from SealBase/BitTraits.h
+/** Describe the bit features of an integral type @c T. */
+template <class T>
+struct BitTraits
+{
+    /// Number of bits in @c T.
+    enum { Bits		= sizeof (T) * CHAR_BIT };
+
+    /// Number of 8-bit bytes in @c T.
+    enum { Bytes	= Bits / 8 + ((Bits % 8) > 0) };
+
+    /// Number of base-10 digits in @c T (without leading sign).
+    enum { Digits	= (Bits * 30103) / 100000 + 1 };
+    // 30103 =~ M_LN2 / M_LN10 * 100000
+
+    /// Number of base-16 digits in @c T (without leading sign).
+    enum { HexDigits	= Bits / 4 + ((Bits % 4) > 0) };
+};
+
 
 /** Utilities for debugging support.  */
 class DebugAids
@@ -77,10 +88,6 @@ private:
     static std::atomic<IOFD>	 s_stackTraceFd;
 };
 
-//<<<<<< PUBLIC FUNCTIONS                                               >>>>>>
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
 
-//} // namespace seal                             wlav
 } // namespace Athena                             wlav
 #endif // CXXUTILS_SEAL_DEBUG_H wlav SEAL_BASE_DEBUG_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,12 +16,10 @@
  *        (wlav, 03/11/11)
  */
 
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "CxxUtils/SealCommon.h"               // wlav
 #include "CxxUtils/SealDebug.h"                // wlav
 #include "CxxUtils/SealSignal.h"               // wlav
-#include "CxxUtils/SealSharedLib.h"            // wlav
 #include "CxxUtils/UnwindBacktrace.h"          // sss
 #include "CxxUtils/checker_macros.h"
 
@@ -255,19 +253,12 @@ int stacktraceReadline (int fd, char* buf, int buflen)
 #endif
 
 
-//namespace seal {                                wlav
 namespace Athena {                             // wlav
-//<<<<<< PRIVATE DEFINES                                                >>>>>>
-//<<<<<< PRIVATE CONSTANTS                                              >>>>>>
-//<<<<<< PRIVATE TYPES                                                  >>>>>>
-//<<<<<< PRIVATE VARIABLE DEFINITIONS                                   >>>>>>
-//<<<<<< PUBLIC VARIABLE DEFINITIONS                                    >>>>>>
-//<<<<<< CLASS STRUCTURE INITIALIZATION                                 >>>>>>
+
 
 /** The default output file descriptor for #stacktrace().  */
 std::atomic<IOFD>  DebugAids::s_stackTraceFd = IOFD_INVALID;
 
-//<<<<<< PRIVATE FUNCTION DEFINITIONS                                   >>>>>>
 
 #ifdef _WIN32
 // /** WIN32 function to grab the current PC address from the SEH context.
@@ -1059,9 +1050,5 @@ void DebugAids::disableCoreFiles()
   setrlimit(RLIMIT_CORE, &core_limit);
 }
 
-/////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
 
-//} // namespace seal                             wlav
 } // namespace Athena                             wlav
