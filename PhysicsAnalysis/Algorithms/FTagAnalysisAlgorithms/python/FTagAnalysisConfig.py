@@ -18,7 +18,7 @@ def parseTDPdatabase(tdpFile, dsid):
                 continue
             columns = line.split()
             if columns[0].isdigit() and int(columns[0]) == dsid:
-                result = columns[4].strip()
+                result = columns[3].strip()
                 break
     return result
 
