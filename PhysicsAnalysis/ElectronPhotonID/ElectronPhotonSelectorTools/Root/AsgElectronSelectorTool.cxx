@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -51,6 +51,8 @@ AsgElectronSelectorTool::AsgElectronSelectorTool( const std::string& myname ) :
   declareProperty("quantileFileName", m_quantileFileName="", "The input file name that holds the QuantileTransformer");
   // Model used is a multiclass or a binary model
   declareProperty("multiClass", m_multiClass, "Whether the given model is multiclass or not");
+  // DNN menu used is CF+ID or regular ID
+  declareProperty("CFReject", m_CFReject, "Whether we use the DNN CF+ID approach or the regular DNN ID");
   // If multiclass, how to treat the chargeflip output node when combining into one discriminant
   declareProperty("cfSignal", m_cfSignal, "Whether to include the CF fraction in the numerator or denominator");
   // If multiclass, fractions with which the different output nodes get multiplied before combining them
@@ -58,7 +60,8 @@ AsgElectronSelectorTool::AsgElectronSelectorTool( const std::string& myname ) :
   // Variable list
   declareProperty("Variables", m_variables, "Variables used in the MVA tool");
   // The mva cut values
-  declareProperty("CutSelector", m_cutSelector, "Cut on MVA discriminant");
+  declareProperty("CutSelector", m_cutSelector, "Cut on prompt electrons MVA discriminant");
+  declareProperty("CutSelectorCF", m_cutSelectorCF, "Cut on CF electrons MVA discriminant");
   // do the ambiguity cut
   declareProperty("CutAmbiguity" , m_cutAmbiguity, "Apply a cut on the ambiguity bit");
   // cut on b-layer
@@ -153,8 +156,6 @@ StatusCode AsgElectronSelectorTool::initialize()
 
     // Model is multiclass or not, default is binary model
     m_multiClass = env.GetValue("multiClass", false);
-    // Create an instance of the class calculating the DNN score
-    m_mvaTool = std::make_unique<ElectronDNNCalculator>(this, filename.c_str(), qfilename.c_str(), m_variables, m_multiClass);
     // Include cf node in numerator or denominator when combining different outputs
     m_cfSignal = env.GetValue("cfSignal", true);
     // Fractions to multiply different outputs with before combining
@@ -162,6 +163,8 @@ StatusCode AsgElectronSelectorTool::initialize()
 
     // cut on MVA discriminant
     m_cutSelector = AsgConfigHelper::HelperDouble("CutSelector", env);
+    m_cutSelectorCF = AsgConfigHelper::HelperDouble("CutSelectorCF", env);
+    
     // cut on ambiuity bit
     m_cutAmbiguity = AsgConfigHelper::HelperInt("CutAmbiguity", env);
     // cut on b-layer
@@ -184,6 +187,21 @@ StatusCode AsgElectronSelectorTool::initialize()
                     " input size " << m_cutSelector.size());
       return StatusCode::FAILURE;
     }
+
+    if (!m_cutSelectorCF.empty()){
+      m_CFReject = true;
+      if (m_cutSelectorCF.size() != numberOfExpectedBinCombinedMVA){
+        ATH_MSG_ERROR("Configuration issue :  cutSelectorCF expected size " << numberOfExpectedBinCombinedMVA <<
+                      " input size " << m_cutSelectorCF.size());
+        return StatusCode::FAILURE;
+      }
+    }
+    else {
+      m_CFReject = false;
+    }
+
+    // Create an instance of the class calculating the DNN score
+    m_mvaTool = std::make_unique<ElectronDNNCalculator>(this, filename.c_str(), qfilename.c_str(), m_variables, m_multiClass, m_CFReject);
 
     if (m_multiClass){
       // Fractions are only needed if multiclass model is used
@@ -362,13 +380,21 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
 
   // calculate the output of the selector tool
   double mvaScore = calculate(ctx, eg, mu);
-
   ATH_MSG_VERBOSE(Form("PassVars: MVA=%8.5f, eta=%8.5f, et=%8.5f, nSiHitsPlusDeadSensors=%i, nHitsPlusPixDeadSensors=%i, passBLayerRequirement=%i, ambiguityBit=%i, mu=%8.5f",
                        mvaScore, eta, et,
                        nSiHitsPlusDeadSensors, nPixHitsPlusDeadSensors,
                        passBLayerRequirement,
                        ambiguityBit, mu));
-
+  double mvaScoreCF = 0;
+  if (m_CFReject){
+    mvaScoreCF = calculateCF(ctx, eg, mu);
+    ATH_MSG_VERBOSE(Form("PassVars: MVA=%8.5f, eta=%8.5f, et=%8.5f, nSiHitsPlusDeadSensors=%i, nHitsPlusPixDeadSensors=%i, passBLayerRequirement=%i, ambiguityBit=%i, mu=%8.5f",
+                        mvaScoreCF, eta, et,
+                        nSiHitsPlusDeadSensors, nPixHitsPlusDeadSensors,
+                        passBLayerRequirement,
+                        ambiguityBit, mu));
+  }
+  
   if (!allFound){
     throw std::runtime_error("AsgElectronSelectorTool: Not all variables needed for the decision are found. The following variables are missing: " + notFoundList );
   }
@@ -429,10 +455,33 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
     }
   }
 
-  double cutDiscriminant;
   unsigned int ibin_combinedMVA = etBin*s_fnDiscEtaBins+etaBin; // Must change if number of eta bins changes!.
 
+  // First cut on the CF discriminant
+  // If empty, continue only with prompt ID
+  if (!m_cutSelectorCF.empty()){
+    double cutDiscriminantCF;
+    // To protect against a binning mismatch, which should never happen
+    if (ibin_combinedMVA >= m_cutSelectorCF.size()){
+      throw std::runtime_error("AsgElectronSelectorTool: The desired eta/pt bin is outside of the range specified by the input. This should never happen! This indicates a mismatch between the binning in the configuration file and the tool implementation." );
+    }
+    if (m_doSmoothBinInterpolation){
+      cutDiscriminantCF = interpolateCuts(m_cutSelectorCF, et, eta);
+    }
+    else{
+      cutDiscriminantCF = m_cutSelectorCF.at(ibin_combinedMVA);
+    }
+    // Determine if the calculated mva score value passes the combined cut
+    ATH_MSG_DEBUG("MVA macro: CF Discriminant: ");
+    if (mvaScoreCF < cutDiscriminantCF){
+      ATH_MSG_DEBUG("MVA macro: CF cut failed.");
+      passMVA = false;
+    }
+  }
+  
+// (Second) cut on prompt discriminant
   if (!m_cutSelector.empty()){
+    double cutDiscriminant;
     // To protect against a binning mismatch, which should never happen
     if (ibin_combinedMVA >= m_cutSelector.size()){
       throw std::runtime_error("AsgElectronSelectorTool: The desired eta/pt bin is outside of the range specified by the input. This should never happen! This indicates a mismatch between the binning in the configuration file and the tool implementation." );
@@ -443,10 +492,10 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
     else{
       cutDiscriminant = m_cutSelector.at(ibin_combinedMVA);
     }
-    // Determine if the calculated mva score value passes the cut
-    ATH_MSG_DEBUG("MVA macro: Discriminant: ");
+    // Determine if the calculated mva score value passes the combined cut
+    ATH_MSG_DEBUG("MVA macro: Prompt Discriminant: "); 
     if (mvaScore < cutDiscriminant){
-      ATH_MSG_DEBUG("MVA macro: Disciminant Cut Failed.");
+      ATH_MSG_DEBUG("MVA macro: Prompt cut failed.");
       passMVA = false;
     }
   }
@@ -480,6 +529,24 @@ double AsgElectronSelectorTool::calculate( const EventContext& ctx, const xAOD::
     const float eta = cluster->etaBE(2);
     // combine the six output nodes into one discriminant to cut on, any necessary transformation is applied within combineOutputs()
     discriminant = combineOutputs(mvaOutputs, eta);
+  }
+
+  return discriminant;
+}
+
+double AsgElectronSelectorTool::calculateCF( const EventContext& ctx, const xAOD::Electron* eg, double mu ) const
+{
+  // Get all outputs of the mva tool
+  std::vector<float> mvaOutputs = calculateMultipleOutputs(ctx, eg, mu);
+
+  double discriminant = 0;
+  // If a binary model is used, vector will have one entry, if multiclass is used vector will have six entries
+  if (!m_multiClass){
+    discriminant = transformMLOutput(mvaOutputs.at(0));
+  }
+  else{
+    // combine the six output nodes into one discriminant to cut on, any necessary transformation is applied within combineOutputs()
+    discriminant = combineOutputsCF(mvaOutputs);
   }
 
   return discriminant;
@@ -526,9 +593,10 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
 
   // Variables used in the ML model
   // track quantities
+  double  SCTWeightedCharge(0.0);
   uint8_t nSCTHitsPlusDeadSensors(0);
   uint8_t nPixHitsPlusDeadSensors(0);
-  float d0(0.0), d0sigma(0.0), d0significance(0.0);
+  float d0(0.0), d0sigma(0.0), d0significance(0.0), qd0(0.0);
   float trackqoverp(0.0);
   double dPOverP(0.0);
   float TRT_PID(0.0);
@@ -546,6 +614,7 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
   // retrieve track variables
   trackqoverp = track->qOverP();
   d0 = track->d0();
+  qd0 = (eg->charge())*track->d0();
   float vard0 = track->definingParametersCovMatrix()(0, 0);
   if (vard0 > 0){
     d0sigma = std::sqrt(vard0);
@@ -579,7 +648,7 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
     trans_TRTPID = trans_TRT_PID_acc(*eg);
   }
 
-  // Change default value of TRT PID to 0.15 instead of 0 when there is no information from the TRT
+  //Change default value of TRT PID to 0.15 instead of 0 when there is no information from the TRT
   if ((std::abs(trans_TRTPID) < 1.0e-6) && (std::abs(eta) > 2.01)){
       trans_TRTPID = 0.15;
   }
@@ -602,6 +671,22 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
   nPixHitsPlusDeadSensors = ElectronSelectorHelpers::numberOfPixelHitsAndDeadSensors(*track);
   nSCTHitsPlusDeadSensors = ElectronSelectorHelpers::numberOfSCTHitsAndDeadSensors(*track);
 
+  float charge = 0;
+  uint8_t SCT = 0;
+  for (unsigned TPit = 0; TPit < eg->nTrackParticles(); TPit++) {
+    uint8_t temp_NSCTHits = 0;
+    if (eg->trackParticle(TPit)) {
+      eg->trackParticle(TPit)->summaryValue(temp_NSCTHits, xAOD::numberOfSCTHits);
+      SCT += temp_NSCTHits;
+      charge += temp_NSCTHits*(eg->trackParticle(TPit)->charge());
+    }
+  }
+  if (SCT)
+    SCTWeightedCharge = (eg->charge()*charge/SCT);
+  else {
+    ATH_MSG_WARNING("No SCT hit for any track associated to electron ! nTP = " << eg->nTrackParticles());
+  } 
+  
   // retrieve Calorimeter variables
   // reta = e237/e277
   if (!eg->showerShapeValue(Reta, xAOD::EgammaParameters::Reta)){
@@ -668,15 +753,15 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
   }
 
 
-  ATH_MSG_VERBOSE(Form("Vars: eta=%8.5f, et=%8.5f, f3=%8.5f, rHad==%8.5f, rHad1=%8.5f, Reta=%8.5f, w2=%8.5f, f1=%8.5f, Emaxs1=%8.5f, deltaEta1=%8.5f, d0=%8.5f, d0significance=%8.5f, Rphi=%8.5f, dPOverP=%8.5f, deltaPhiRescaled2=%8.5f, TRT_PID=%8.5f, trans_TRTPID=%8.5f, mu=%8.5f, wtots1=%8.5f, EoverP=%8.5f, nPixHitsPlusDeadSensors=%2df, nSCTHitsPlusDeadSensors=%2df",
+  ATH_MSG_VERBOSE(Form("Vars: eta=%8.5f, et=%8.5f, f3=%8.5f, rHad==%8.5f, rHad1=%8.5f, Reta=%8.5f, w2=%8.5f, f1=%8.5f, Emaxs1=%8.5f, deltaEta1=%8.5f, d0=%8.5f, qd0=%8.5f, d0significance=%8.5f, Rphi=%8.5f, dPOverP=%8.5f, deltaPhiRescaled2=%8.5f, TRT_PID=%8.5f, trans_TRTPID=%8.5f, mu=%8.5f, wtots1=%8.5f, EoverP=%8.5f, nPixHitsPlusDeadSensors=%2df, nSCTHitsPlusDeadSensors=%2df, SCTWeightedCharge=%8.5f",
                        eta, et, f3, Rhad, Rhad1, Reta,
                        w2, f1, Eratio,
-                       deltaEta1, d0,
+                       deltaEta1, d0, qd0,
                        d0significance,
                        Rphi, dPOverP, deltaPhiRescaled2,
                        TRT_PID, trans_TRTPID,
                        mu,
-                       wtots1, EoverP, int(nPixHitsPlusDeadSensors), int(nSCTHitsPlusDeadSensors)));
+                       wtots1, EoverP, int(nPixHitsPlusDeadSensors), int(nSCTHitsPlusDeadSensors), SCTWeightedCharge));
 
   if (!allFound){
     throw std::runtime_error("AsgElectronSelectorTool: Not all variables needed for MVA calculation are found. The following variables are missing: " + notFoundList );
@@ -694,7 +779,13 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
   vars.f1 = f1;
   vars.Eratio = Eratio;
   vars.deltaEta1 = deltaEta1;
-  vars.d0 = d0;
+  if (m_CFReject){
+    vars.qd0 = qd0;
+    vars.SCTWeightedCharge = SCTWeightedCharge;
+  }
+  else {
+    vars.d0 = d0;
+  }
   vars.d0significance = d0significance;
   vars.Rphi = Rphi;
   vars.dPOverP = dPOverP;
@@ -836,6 +927,7 @@ double AsgElectronSelectorTool::combineOutputs( const std::vector<float>& mvaSco
 
   if (m_cfSignal){
     // Put cf node into numerator
+
     disc = (mvaScores.at(0) * (1 - m_fractions.at(5 * etaBin + 0)) +
             (mvaScores.at(1) * m_fractions.at(5 * etaBin + 0))) /
            ((mvaScores.at(2) * m_fractions.at(5 * etaBin + 1)) +
@@ -854,6 +946,14 @@ double AsgElectronSelectorTool::combineOutputs( const std::vector<float>& mvaSco
   }
 
   // Log transform to have values in reasonable range
+  return std::log(disc);
+}
+
+double AsgElectronSelectorTool::combineOutputsCF( const std::vector<float>& mvaScores ) const
+{
+  double disc = 0;
+  disc = mvaScores.at(0) / mvaScores.at(1);
+    
   return std::log(disc);
 }
 

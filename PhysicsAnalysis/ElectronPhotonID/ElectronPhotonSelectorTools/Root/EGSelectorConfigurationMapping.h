@@ -125,14 +125,17 @@ const std::map<std::string, unsigned int> PhotonCutPointToMask = {
   { "TightPhotonWithMu", egammaPID::PhotonTight },
 };
 const std::map<std::string, std::string> ElectronDNNPointToConfFile = {
+  { "VeryLooseDNNElectron",
+    "ElectronPhotonSelectorTools/offline/mc20_20231026/"
+    "ElectronDNNMulticlassVeryLoose.conf"},
   { "LooseDNNElectron",
-    "ElectronPhotonSelectorTools/offline/mc16_20210430/"
+    "ElectronPhotonSelectorTools/offline/mc20_20231026/"
     "ElectronDNNMulticlassLoose.conf"},
   { "MediumDNNElectron",
-    "ElectronPhotonSelectorTools/offline/mc16_20210430/"
+    "ElectronPhotonSelectorTools/offline/mc20_20231026/"
     "ElectronDNNMulticlassMedium.conf"},
   { "TightDNNElectron",
-    "ElectronPhotonSelectorTools/offline/mc16_20210430/"
+    "ElectronPhotonSelectorTools/offline/mc20_20231026/"
     "ElectronDNNMulticlassTight.conf"}
 };
 }
