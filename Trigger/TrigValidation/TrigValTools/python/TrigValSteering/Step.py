@@ -16,6 +16,7 @@ from enum import Enum
 from threading import Timer
 from TrigValTools.TrigValSteering.Common import get_logger, art_result, running_in_CI
 from TestTools.logfiles import grep_with_context
+from TrigValTools.TrigARTUtils import remember_cwd
 
 
 class Step(object):
@@ -45,6 +46,7 @@ class Step(object):
         self.timeout = None
         self.prmon = False
         self.prmon_interval = 5  # monitoring interval in seconds
+        self.workdir = None
 
     def get_log_file_name(self):
         return self.log_file_name or self.name+'.log'
@@ -178,14 +180,21 @@ class Step(object):
         if dry_run:
             self.result = 0
         else:
-            if self.prmon:
-                prmon_proc = self.__start_prmon()
-            if self.timeout:
-                self.result = self.__execute_with_timeout(cmd, self.timeout)
-            else:
-                self.result = subprocess.call(cmd, shell=True)
-            if self.prmon:
-                self.__stop_prmon(prmon_proc)
+            with remember_cwd():
+                if self.workdir:
+                    assert '..' not in self.workdir, "Illegal path for workdir -- must be a subdirectory of CWD"
+                    assert self.workdir.startswith('/'), "Illegal path for workdir -- no absolute paths!"
+                    os.makedirs(self.workdir)
+                    os.chdir(self.workdir)
+
+                if self.prmon:
+                    prmon_proc = self.__start_prmon()
+                if self.timeout:
+                    self.result = self.__execute_with_timeout(cmd, self.timeout)
+                else:
+                    self.result = subprocess.call(cmd, shell=True)
+                if self.prmon:
+                    self.__stop_prmon(prmon_proc)
 
         if self.auto_report_result:
             self.report_result()
