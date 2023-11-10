@@ -41,7 +41,7 @@ if [ $status -eq 0 ]; then
         --outputHITS_RSMFile "resim.HITS.pool.root" \
         --maxEvents $MAXEVENTS \
         --imf False
-    rc=$?
+    rc2=$?
     status=$rc2
 fi
 echo "art-result: $rc2 re-sim"
