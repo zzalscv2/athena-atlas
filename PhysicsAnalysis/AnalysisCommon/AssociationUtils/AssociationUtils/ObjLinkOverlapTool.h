@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASSOCIATIONUTILS_OBJLINKOVERLAPTOOL_H
@@ -47,20 +47,6 @@ namespace ORUtils
 
       /// Initialize the tool
       virtual StatusCode initializeDerived() override;
-
-    private:
-
-      //
-      // Configurable properties
-      //
-
-      //
-      // Utilities
-      //
-
-      /// Helper for reading object links
-      std::unique_ptr<OverlapLinkHelper> m_objLinkHelper;
-
   }; // class ObjLinkOverlapTool
 
 } // namespace ORUtils
