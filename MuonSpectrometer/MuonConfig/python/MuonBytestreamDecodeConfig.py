@@ -252,7 +252,7 @@ def NswTrigProcessorRodDecoderCfg(flags, name ="NswTrigProcessorDecoder", **kwar
     the_tool = CompFactory.Muon.NSWTP_ROD_Decoder(name = name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
-def NswTrigProccesorRawDataProviderToolCfg(flags, name = "NswTrigProcessorRawDataTool", **kwargs ):
+def NswTrigProcessorRawDataProviderToolCfg(flags, name = "NswTrigProcessorRawDataTool", **kwargs ):
     result = ComponentAccumulator()
     kwargs.setdefault("Decoder", result.popToolsAndMerge(NswTrigProcessorRodDecoderCfg(flags)))
     kwargs.setdefault( "RdoLocation", ( flags.Overlay.BkgPrefix  if flags.Common.isOverlay else "") + "NSW_TrigProcessor_RDO" )
@@ -265,7 +265,7 @@ def NswTrigProcByteStreamDecodeCfg(flags, name = "NswProcByteStream"):
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     result.merge(MuonGeoModelCfg(flags))
     the_alg = CompFactory.Muon.sTgcPadTriggerRawDataProvider(name = name,
-                                                             ProviderTool = result.popToolsAndMerge(NswTrigProccesorRawDataProviderToolCfg(flags)) )
+                                                             ProviderTool = result.popToolsAndMerge(NswTrigProcessorRawDataProviderToolCfg(flags)) )
     result.addEventAlgo(the_alg, primary = True)
     return result
 
