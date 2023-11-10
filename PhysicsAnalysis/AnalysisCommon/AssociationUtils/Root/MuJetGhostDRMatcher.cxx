@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Infrastructure
@@ -21,9 +21,9 @@ namespace ORUtils
   // Constructor
   //---------------------------------------------------------------------------
   MuJetGhostDRMatcher::MuJetGhostDRMatcher(double dR, bool useRapidity)
-    : asg::AsgMessaging("MuJetGhostDRMatcher")
+    : asg::AsgMessaging("MuJetGhostDRMatcher"),
+      m_drMatcher (std::make_unique<DeltaRMatcher>(dR, useRapidity))
   {
-    m_drMatcher = std::make_unique<DeltaRMatcher>(dR, useRapidity);
   }
 
   //---------------------------------------------------------------------------
