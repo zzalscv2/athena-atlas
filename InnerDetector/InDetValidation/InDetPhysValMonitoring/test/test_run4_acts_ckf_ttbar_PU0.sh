@@ -66,7 +66,7 @@ fi
 run "Reconstruction-ambi" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateAmbiguityResolutionFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateResolvedTracksFlags" \
     --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${ArtInFile} \
     --outputAODFile AOD.ambi.root \

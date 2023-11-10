@@ -48,7 +48,7 @@ def actsValidateTracksFlags(flags):
     flags.Acts.doAmbiguityResolution = False
     flags.Tracking.recoChain = [TrackingComponent.ValidateActsTracks]
 
-def actsValidateAmbiguityResolutionFlags(flags):
+def actsValidateResolvedTracksFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use ActsTrackFinding during reconstruction with ambi. resolution"""
     actsValidateTracksFlags(flags)
     flags.Acts.doAmbiguityResolution = True
