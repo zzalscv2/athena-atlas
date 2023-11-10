@@ -23,7 +23,7 @@ ClusterFilterTool::ClusterFilterTool(const std::string& t, const std::string& n,
   declareProperty("PtFractionAtPV0",                  m_ptFractionPV0               = 0.1                     );
 }
 
-ClusterFilterTool::~ClusterFilterTool() {}
+ClusterFilterTool::~ClusterFilterTool() = default;
 
 StatusCode ClusterFilterTool::initialize() {
   ATH_MSG_INFO ("Initializing " << name() << "...");
@@ -39,13 +39,13 @@ StatusCode ClusterFilterTool::finalize() {
 bool ClusterFilterTool::rejectCluster(const xAOD::CaloCluster& cluster) const {
       
   // loop on all the tracks
-  const auto allTracks   = getContainer<xAOD::TrackParticleContainer>(m_trackParticleCollectionName);
+  const auto *const allTracks   = getContainer<xAOD::TrackParticleContainer>(m_trackParticleCollectionName);
   if (not allTracks) {
     ATH_MSG_DEBUG ("No rejection applied... returning");
     return false;
   }
   
-  const auto allVertices = getContainer<xAOD::VertexContainer>(m_vertexCollectionName);
+  const auto *const allVertices = getContainer<xAOD::VertexContainer>(m_vertexCollectionName);
   if (not allVertices) {
     ATH_MSG_DEBUG ("No rejection applied... returning");
     return false;
@@ -54,10 +54,10 @@ bool ClusterFilterTool::rejectCluster(const xAOD::CaloCluster& cluster) const {
   bool matchedPV0 = false;
   bool matchedPVX  = false;
       
-  for (const auto track : *allTracks) {
+  for (const auto *const track : *allTracks) {
     // check compatibility with PVX where X>0
     // retrieve the caloExtensionContainer to get the track position at the calo entrance
-    IParticleToCaloExtensionMap * caloExtensionMap = 0;
+    IParticleToCaloExtensionMap * caloExtensionMap = nullptr;
     if(evtStore()->retrieve(caloExtensionMap,m_caloEntryMapName).isFailure())
       ATH_MSG_WARNING( "Unable to retrieve " << m_caloEntryMapName << " will leak the ParticleCaloExtension" );
     const Trk::TrackParameters* pars = caloExtensionMap->readCaloEntry(track);
@@ -75,7 +75,7 @@ bool ClusterFilterTool::rejectCluster(const xAOD::CaloCluster& cluster) const {
         
     // check if the track is matching the cluster
     if (dr2<m_coneSize*m_coneSize) {      
-      if (allVertices && allVertices->size()!=0) {
+      if (allVertices && !allVertices->empty()) {
 	if (m_loosetrackvertexassoTool->isCompatible(*track, *(allVertices->at(0)))) {
 	  ATH_MSG_DEBUG ("PV0 is matched");
 	  matchedPV0 = true;
@@ -87,8 +87,6 @@ bool ClusterFilterTool::rejectCluster(const xAOD::CaloCluster& cluster) const {
     }
   }
       
-  if (not matchedPV0 and matchedPVX) return true;
- 
-  return false;
+  return not matchedPV0 and matchedPVX;
   
 }

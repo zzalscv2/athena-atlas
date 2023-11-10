@@ -109,7 +109,7 @@ namespace TCCHelpers{
 
     // additional members 
     std::multimap <const xAOD::IParticle*, const xAOD::TrackParticle*> pfoToTracksMap;
-    TrackCaloClusterInfo * tccInfo_nonconst;
+    TrackCaloClusterInfo * tccInfo_nonconst = nullptr;
 
     const xAOD::IParticle::FourMom_t nullV = {0,0,0,0};
     

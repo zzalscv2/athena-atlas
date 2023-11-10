@@ -112,7 +112,7 @@ public:
 protected:
   /// optionnal tool to filter cluster we don't want to consider as TCC
   ToolHandle<IClusterFilterTool> m_clusterFilterTool {this, "ClusterFilterTool", ""};
-  bool m_applyFilter ; // set automatically according to ClusterFilterTool
+  bool m_applyFilter = false ; // set automatically according to ClusterFilterTool
 };
 
 

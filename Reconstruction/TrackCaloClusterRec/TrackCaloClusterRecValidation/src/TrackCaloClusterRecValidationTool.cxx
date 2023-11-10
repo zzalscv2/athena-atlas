@@ -64,7 +64,7 @@ TrackCaloClusterRecValidationTool::TrackCaloClusterRecValidationTool(const std::
   declareProperty("TCCetaMax", m_tccEtaMax = 2.5);
 }
 
-TrackCaloClusterRecValidationTool::~TrackCaloClusterRecValidationTool() {}
+TrackCaloClusterRecValidationTool::~TrackCaloClusterRecValidationTool() = default;
 
 StatusCode
 TrackCaloClusterRecValidationTool::initialize()
