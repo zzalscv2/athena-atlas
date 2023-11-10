@@ -7,6 +7,7 @@ from TrkConfig.TrackingPassFlags import printActiveConfig
 from InDetConfig.TrackRecoConfig import FTAG_AUXDATA
 
 _flags_set = []  # For caching
+_extensions_list = [] # For caching
 
 def CombinedTrackingPassFlagSets(flags):
     global _flags_set
@@ -211,6 +212,120 @@ def ITkTrackFinalCfg(flags,
     return result
 
 
+def ITkTrackSeedsFinalCfg(flags):
+    result = ComponentAccumulator()
+
+    # get list of extensions requesting track seeds.
+    # Add always the Primary Pass.
+    listOfExtensionsRequesting = [
+        e for e in _extensions_list
+        if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
+
+    for extension in listOfExtensionsRequesting:
+        TrackContainer = "SiSPSeedSegments"+extension
+
+        if flags.Tracking.doTruth:
+            from InDetConfig.TrackTruthConfig import ITkTrackTruthCfg
+            result.merge(ITkTrackTruthCfg(
+                flags,
+                Tracks=TrackContainer,
+                DetailedTruth=f"{TrackContainer}DetailedTruth",
+                TracksTruth=f"{TrackContainer}TruthCollection"))
+
+        from xAODTrackingCnv.xAODTrackingCnvConfig import (
+            ITkTrackParticleCnvAlgCfg)
+        result.merge(ITkTrackParticleCnvAlgCfg(
+            flags,
+            name=f"{TrackContainer}CnvAlg",
+            TrackContainerName=TrackContainer,
+            xAODTrackParticlesFromTracksContainerName=(
+                f"{TrackContainer}TrackParticles")))
+
+    return result
+
+
+def ITkSiSPSeededTracksFinalCfg(flags):
+    result = ComponentAccumulator()
+
+    # get list of extensions requesting track candidates.
+    # Add always the Primary Pass.
+    listOfExtensionsRequesting = [
+        e for e in _extensions_list
+        if (e=='' or flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks) ]
+
+    for extension in listOfExtensionsRequesting:
+        AssociationMapNameKey="PRDtoTrackMapCombinedITkTracks"
+        if not (extension == ''):
+            AssociationMapNameKey = f"ITkPRDtoTrackMap{extension}"
+
+        from xAODTrackingCnv.xAODTrackingCnvConfig import (
+            ITkTrackParticleCnvAlgCfg)
+        result.merge(ITkTrackParticleCnvAlgCfg(
+            flags,
+            name = f"SiSPSeededTracks{extension}CnvAlg",
+            TrackContainerName = f"SiSPSeeded{extension}Tracks",
+            xAODTrackParticlesFromTracksContainerName=(
+                f"SiSPSeededTracks{extension}TrackParticles"),
+            AssociationMapName=AssociationMapNameKey))
+
+    return result
+
+
+def ITkStatsCfg(flags, StatTrackCollections=None,
+                  StatTrackTruthCollections=None):
+    result = ComponentAccumulator()
+
+    from InDetConfig.InDetRecStatisticsConfig import (
+        ITkRecStatisticsAlgCfg)
+    result.merge(ITkRecStatisticsAlgCfg(
+        flags,
+        TrackCollectionKeys=StatTrackCollections,
+        TrackTruthCollectionKeys=(
+            StatTrackTruthCollections if flags.Tracking.doTruth else [])))
+
+    if flags.Tracking.doTruth:
+        from InDetConfig.InDetTrackClusterAssValidationConfig import (
+            ITkTrackClusterAssValidationCfg)
+        result.merge(ITkTrackClusterAssValidationCfg(
+            flags,
+            TracksLocation=StatTrackCollections))
+
+    return result
+
+
+def ITkExtendedPRDInfoCfg(flags):
+    result = ComponentAccumulator()
+
+    if flags.Tracking.doTIDE_AmbiTrackMonitoring:
+        from InDetConfig.InDetPrepRawDataToxAODConfig import (
+            ITkPixelPrepDataToxAOD_ExtraTruthCfg as PixelPrepDataToxAODCfg,
+            ITkStripPrepDataToxAOD_ExtraTruthCfg as StripPrepDataToxAODCfg)
+    else:
+        from InDetConfig.InDetPrepRawDataToxAODConfig import (
+            ITkPixelPrepDataToxAODCfg as PixelPrepDataToxAODCfg,
+            ITkStripPrepDataToxAODCfg as StripPrepDataToxAODCfg)
+
+    result.merge(PixelPrepDataToxAODCfg(
+        flags,
+        ClusterSplitProbabilityName=(
+            ITkClusterSplitProbabilityContainerName(flags))))
+    result.merge(StripPrepDataToxAODCfg(flags))
+
+    from DerivationFrameworkInDet.InDetToolsConfig import (
+        ITkTSOS_CommonKernelCfg)
+    result.merge(ITkTSOS_CommonKernelCfg(flags))
+
+    if flags.Tracking.doStoreSiSPSeededTracks:
+        from DerivationFrameworkInDet.InDetToolsConfig import (
+            ITkSiSPTSOS_CommonKernelCfg)
+        result.merge(ITkSiSPTSOS_CommonKernelCfg(flags))
+
+    if flags.Input.isMC:
+        from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
+            ITkPhysHitDecoratorAlgCfg)
+        result.merge(ITkPhysHitDecoratorAlgCfg(flags))
+
+
 ##############################################################################
 #####################     Main ITk tracking config       #####################
 ##############################################################################
@@ -234,12 +349,12 @@ def ITkTrackRecoCfg(flags):
     StatTrackTruthCollections = []
 
     from InDetConfig.SiliconPreProcessing import ITkRecPreProcessingSiliconCfg
-    from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
 
     for current_flags in flags_set:
         printActiveConfig(current_flags)
 
         extension = current_flags.Tracking.ActiveConfig.extension
+        _extensions_list.append(extension)
 
         # Data Preparation
         # According to the tracking pass we have different data preparation 
@@ -265,84 +380,24 @@ def ITkTrackRecoCfg(flags):
                          StatTrackCollections=StatTrackCollections,
                          StatTrackTruthCollections=StatTrackTruthCollections))
 
+    if flags.Tracking.doStoreTrackSeeds:
+        result.merge(ITkTrackSeedsFinalCfg(flags))
+
+    if flags.Tracking.doStoreSiSPSeededTracks:
+        result.merge(ITkSiSPSeededTracksFinalCfg(flags))
+
     if flags.Tracking.doVertexFinding:
         from InDetConfig.InDetPriVxFinderConfig import primaryVertexFindingCfg
         result.merge(primaryVertexFindingCfg(flags))
 
     if flags.Tracking.doStats:
-        from InDetConfig.InDetRecStatisticsConfig import (
-            ITkRecStatisticsAlgCfg)
-        result.merge(ITkRecStatisticsAlgCfg(
-            flags,
-            TrackCollectionKeys=StatTrackCollections,
-            TrackTruthCollectionKeys=(
-                StatTrackTruthCollections if flags.Tracking.doTruth else [])))
-
-        if flags.Tracking.doTruth:
-            from InDetConfig.InDetTrackClusterAssValidationConfig import (
-                ITkTrackClusterAssValidationCfg)
-            result.merge(ITkTrackClusterAssValidationCfg(
-                flags_set[0],  # Use cuts from primary pass
-                TracksLocation=StatTrackCollections))
+        result.merge(ITkStatsCfg(
+            flags_set[0], # Use cuts from primary pass
+            StatTrackCollections=StatTrackCollections,
+            StatTrackTruthCollections=StatTrackTruthCollections))
 
     if flags.Tracking.writeExtendedSi_PRDInfo:
-        if flags.Tracking.doTIDE_AmbiTrackMonitoring:
-            from InDetConfig.InDetPrepRawDataToxAODConfig import (
-                ITkPixelPrepDataToxAOD_ExtraTruthCfg, ITkStripPrepDataToxAOD_ExtraTruthCfg)
-            result.merge(ITkPixelPrepDataToxAOD_ExtraTruthCfg(
-                flags,
-                ClusterSplitProbabilityName=(
-                    ITkClusterSplitProbabilityContainerName(flags))))
-            result.merge(ITkStripPrepDataToxAOD_ExtraTruthCfg(flags))
-        else:
-            from InDetConfig.InDetPrepRawDataToxAODConfig import (
-                ITkPixelPrepDataToxAODCfg, ITkStripPrepDataToxAODCfg)
-            result.merge(ITkPixelPrepDataToxAODCfg(
-                flags,
-                ClusterSplitProbabilityName=(
-                    ITkClusterSplitProbabilityContainerName(flags))))
-            result.merge(ITkStripPrepDataToxAODCfg(flags))
-
-        from DerivationFrameworkInDet.InDetToolsConfig import (
-            ITkTSOS_CommonKernelCfg)
-        result.merge(ITkTSOS_CommonKernelCfg(flags))
-
-        if flags.Tracking.doStoreSiSPSeededTracks:
-            from DerivationFrameworkInDet.InDetToolsConfig import (
-                ITkSiSPTSOS_CommonKernelCfg)
-            result.merge(ITkSiSPTSOS_CommonKernelCfg(flags))
-
-        if flags.Input.isMC:
-            from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
-                InDetPhysHitDecoratorAlgCfg)
-            result.merge(InDetPhysHitDecoratorAlgCfg(flags))
-
-    if flags.Tracking.doStoreTrackSeeds:
-        TrackContainer = "SiSPSeedSegments"
-        from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
-        result.merge(ITkTrackTruthCfg(
-            flags,
-            Tracks=TrackContainer,
-            DetailedTruth=f"{TrackContainer}DetailedTruth",
-            TracksTruth=f"{TrackContainer}TruthCollection"))
-
-        result.merge(ITkTrackParticleCnvAlgCfg(
-            flags,
-            name=f"{TrackContainer}TrackParticleCnvAlg",
-            TrackContainerName=TrackContainer,
-            xAODTrackParticlesFromTracksContainerName=(
-                f"{TrackContainer}TrackParticles")))
-
-    if flags.Tracking.doStoreSiSPSeededTracks:
-        result.merge(ITkTrackParticleCnvAlgCfg(
-            flags,
-            name = "ITkSiSPSeededTracksCnvAlg",
-            TrackContainerName = "SiSPSeededTracks",
-            xAODTrackParticlesFromTracksContainerName=(
-                "SiSPSeededTracksTrackParticles"),
-            AssociationMapName=(
-                "PRDtoTrackMapCombinedITkTracks")))
-
+        result.merge(ITkExtendedPRDInfoCfg(flags))
 
 
     # output
@@ -385,9 +440,23 @@ def ITkTrackRecoOutputCfg(flags):
         toESD += ["TrackTruthCollection#CombinedITkTracksTrackTruthCollection"]
         toESD += ["DetailedTrackTruthCollection#CombinedITkTracksDetailedTrackTruth"]
 
-    # add tracks
+    if flags.Tracking.doStoreSiSPSeededTracks:
+        # get list of extensions requesting track candidates. Add always the Primary Pass.
+        listOfExtensionsRequesting = [
+            e for e in _extensions_list
+            if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks) ]
+        for extension in listOfExtensionsRequesting:
+            toAOD += [
+                f"xAOD::TrackParticleContainer#SiSPSeededTracks{extension}TrackParticles"]
+            toAOD += [
+                f"xAOD::TrackParticleAuxContainer#SiSPSeededTracks{extension}TrackParticlesAux.{excludedAuxData}"]
+
     if flags.Tracking.doStoreTrackSeeds:
-        toESD += ["TrackCollection#SiSPSeedSegments"]
+        listOfExtensionsRequesting = [
+            e for e in _extensions_list
+            if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
+        for extension in listOfExtensionsRequesting:
+            toESD += ["TrackCollection#SiSPSeedSegments"+extension]
 
     toESD += ["TrackCollection#CombinedITkTracks"]
 
@@ -408,21 +477,18 @@ def ITkTrackRecoOutputCfg(flags):
             "xAOD::TrackStateValidationAuxContainer#ITkStripMSOSsAux."
         ]
 
+        if flags.Tracking.doStoreSiSPSeededTracks:
+            toAOD += [
+                "xAOD::TrackStateValidationContainer#SiSP_ITkPixel_MSOSs",
+                "xAOD::TrackStateValidationAuxContainer#SiSP_ITkPixel_MSOSsAux.",
+                "xAOD::TrackStateValidationContainer#SiSP_ITkStrip_MSOSs",
+                "xAOD::TrackStateValidationAuxContainer#SiSP_ITkStrip_MSOSsAux." ]
+
     if (flags.Tracking.doLargeD0 and
             flags.Tracking.storeSeparateLargeD0Container):
         toAOD += [
             "xAOD::TrackParticleContainer#InDetLargeD0TrackParticles",
             f"xAOD::TrackParticleAuxContainer#InDetLargeD0TrackParticlesAux.{excludedAuxData}"
-        ]
-
-    if flags.Tracking.doStoreSiSPSeededTracks:
-        toAOD += [
-            "xAOD::TrackStateValidationContainer#SiSP_ITkPixel_MSOSs",
-            "xAOD::TrackStateValidationAuxContainer#SiSP_ITkPixel_MSOSsAux.",
-            "xAOD::TrackStateValidationContainer#SiSP_ITkStrip_MSOSs",
-            "xAOD::TrackStateValidationAuxContainer#SiSP_ITkStrip_MSOSsAux.",
-            "xAOD::TrackParticleContainer#SiSPSeededTracksTrackParticles",
-            f"xAOD::TrackParticleAuxContainer#SiSPSeededTracksTrackParticlesAux.{excludedAuxData}"
         ]
 
 
