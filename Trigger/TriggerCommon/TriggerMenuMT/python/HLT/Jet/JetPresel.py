@@ -65,24 +65,32 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
 
     # Get from the last chainPart in order to avoid to specify preselection for every leg
     #TODO: add protection for cases where the preselection is not specified in the last chainPart
-    presel_matched = re.match(r'presel(?P<cut>\d?\d?[jacf](HT)?[\d\D]+)', trkpresel)
+    presel_matched = re.match(r'presel(?P<cut>\d?\d?[jacf](HT)?(DIPZ)?[\d\D]+)', trkpresel)
     assert presel_matched is not None, "Impossible to match preselection pattern for self.trkpresel=\'{0}\'.".format(trkpresel)
     presel_cut_str = presel_matched.groupdict()['cut'] #This is the cut string you want to parse. For example 'presel2j50XXj40'
-
+    
     preselCommonJetParts = dict(JetChainParts_Default)
 
     for ip,p in enumerate(presel_cut_str.split('XX')):
-        if not doBJetSel:  # Removing b-jet parts if b-jet presel is not requested
-            p = re.sub(r'b\w?\d+', '', p)
+        if not doBJetSel:  # Removing b-jet parts if b-jet presel is not requested (same for DIPZ as they use same input)
+            p = re.sub(r'b\w?\d+|Z\d+', '', p)
         hasBjetSel = bool(re.match(r'.*b\w?\d+', p))
-        assert not (hasBjetSel and not doBJetSel), "Your jet preselection has a b-jet part but a calo-only preselection was requested instead. This should not be possible. Please investigate."
+        hasDIPZsel = bool(re.match(r'.*Z', p))
+        
+        assert not ( (hasBjetSel or hasDIPZsel) and not doBJetSel), "Your jet preselection has a b-jet part but a calo-only preselection was requested instead. This should not be possible. Please investigate."
+        
+        pattern_to_test = r'(?P<mult>\d?\d?)(?P<region>[jacf])' # jet multiplicity and region
+        pattern_to_test += r'(?P<cut>\d+)(?P<scenario>(Z(?P<dipzwp>\d+))?)(?P<prefilt>(MAXMULT\d+)?)' if hasDIPZsel else r'(?P<scenario>(HT)?)(?P<cut>\d+)' # scenario string # could be made more general
+        pattern_to_test += r'b(?P<btagger>\D?)(?P<bwp>\d+)' if hasBjetSel else '' # b-tagging if needed
 
-        matched = re.match(r'(?P<mult>\d?\d?)(?P<region>[jacf])(?P<scenario>(HT)?)(?P<cut>\d+)'+(r'b(?P<btagger>\D?)(?P<bwp>\d+)' if hasBjetSel else ''), p)
+        matched = re.match(pattern_to_test, p)
         assert matched is not None, "Impossible to extract preselection cut for \'{0}\' substring. Please investigate.".format(p)
         cut_dict = matched.groupdict()
         if 'bwp' not in cut_dict.keys(): cut_dict['bwp'] = ''
         if 'btagger' not in cut_dict.keys(): cut_dict['btagger'] = ''
-        mult,region,scenario,cut,btagger,bwp=cut_dict['mult'],cut_dict['region'],cut_dict['scenario'],cut_dict['cut'],cut_dict['btagger'], cut_dict['bwp']
+        if 'dipzwp' not in cut_dict.keys(): cut_dict['dipzwp'] = ''
+        if 'prefilt' not in cut_dict.keys(): cut_dict['prefilt'] = ''
+        mult,region,scenario,cut,btagger,bwp,dipzwp,prefilt=cut_dict['mult'],cut_dict['region'],cut_dict['scenario'],cut_dict['cut'],cut_dict['btagger'], cut_dict['bwp'], cut_dict['dipzwp'], cut_dict['prefilt']
 
         if mult=='': mult='1'
         etarange = etaRangeAbbrev[region]
@@ -90,11 +98,16 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
             hyposcenario=f'HT{cut}XX{etarange}'
             threshold='0'
             chainPartName=f'j0_{hyposcenario}'
+        elif scenario == "Z%s"%str(dipzwp):
+            hyposcenario=f'Z{dipzwp}XX{mult}j{cut}ptXX{etarange}'
+            if prefilt != '': hyposcenario += f'_{prefilt}'
+            threshold='0'
+            chainPartName=f'j0_{hyposcenario}'
         else:
             hyposcenario='simple'
             threshold=cut
             chainPartName=f'{mult}j{cut}_{etarange}'
-
+        
         if btagger == 'g':
             btagger = 'gnone'
         elif btagger == '':
@@ -144,7 +157,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
     for porig,ppresel in zip(mainChainDict['chainParts'],preselChainDict['chainParts']):
         for key in ['chainPartIndex','signature']:
             ppresel[key] = porig[key]
-
+    
     assert(len(preselChainDict['chainParts'])==len(mainChainDict['chainParts']))
     try:
         return trigJetHypoToolFromDict(flags, preselChainDict)

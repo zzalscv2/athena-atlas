@@ -219,7 +219,7 @@ def getDevSignatures():
 
 
     chains['Jet'] = [
-
+        
         # pflow jet chains without pile-up residual correction for calibration derivations and calibration cross-checks ATR-26827
         ChainProp(name='HLT_j0_perf_pf_subjesgscIS_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportGroup+['RATE:CPS_RD0_FILLED']),
         ChainProp(name='HLT_j25_pf_subjesgscIS_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportGroup+['RATE:CPS_RD0_FILLED']),
@@ -399,10 +399,16 @@ def getDevSignatures():
         ChainProp(name='HLT_2j330_a10t_lcw_jes_35smcINF_L1J100', groups=DevGroup+MultiJetGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1SC111-CJ15', groups=DevGroup+MultiJetGroup+LegacyTopoGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1jLJ140', groups=DevGroup+MultiJetGroup, l1SeedThresholds=['FSNOSEED']),
-
+        
         # Test chain for X to bb tagging
         ChainProp(name='HLT_j100_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
 #        ChainProp(name='HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1gLJ140', groups=DevGroup+MultiJetGroup, l1SeedThresholds=['FSNOSEED']),
+
+        # Test chains for multijet DIPZ 
+        #ChainProp(name='HLT_j0_Z50XX4j20_roiftf_preselj20_L13J35p0ETA23', groups=MultiJetGroup+DevGroup, l1SeedThresholds=['FSNOSEED']),        
+        #ChainProp(name='HLT_j0_Z50XX4j20_MAXMULT20_roiftf_preselj20_L13J35p0ETA23', groups=MultiJetGroup+DevGroup, l1SeedThresholds=['FSNOSEED']),        
+        #ChainProp(name='HLT_4j110_pf_ftf_presel4c20Z50_L13J50', groups=MultiJetGroup+DevGroup, l1SeedThresholds=['FSNOSEED']),
+        #ChainProp(name='HLT_4j110_pf_ftf_presel4c20Z50MAXMULT20_L13J50', groups=MultiJetGroup+DevGroup, l1SeedThresholds=['FSNOSEED']),
 
         ]
 

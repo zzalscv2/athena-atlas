@@ -229,6 +229,9 @@ JetChainParts = {
        'presela20b85XX3a20',
        #beamspot preselction option
        'presel2c20b85',
+       #DIPZ preselection
+       'presel4c20Z50',
+       'presel4c20Z50MAXMULT20'
      ],
     # Hypo information
     #   If hypoScenario is 'simple', then hypo configuration is handled based on the
@@ -286,7 +289,11 @@ JetChainParts = {
                       'HT1000XX0eta240',
                       'HT1000XX020jvt',
                       'HT1000XX0eta240XX020jvt',
-                      'HT50XX10etXX0eta320'  # needed for hypoToolTests.py
+                      'HT50XX10etXX0eta320',  # needed for hypoToolTests.py
+
+                      # DIPZ category applies a cut on a group of n jets
+                      'Z50XX4j20',
+                      'Z50XX4j20_MAXMULT20',
                       ],
 
     'exotHypo' : ['emergingPTF0p2dR1p2', 'emergingPTF0p1dR1p2', 'emergingPTF0p09dR1p2', 'emergingPTF0p08dR1p2', 'emergingPTF0p075dR1p2', 'emergingPTF0p07dR1p2', 'emergingPTF0p0dR1p2',
@@ -315,7 +322,8 @@ JetChainParts = {
      # ptrangeXrY (X, Y matches regex \d+)  triggers a prehypo selection of
      # jets by ordering by pt, and selecting those with indices in [X,Y]
      'PTRANGE0r1',
-     'PTRANGE2r3'],
+     'PTRANGE2r3',
+     'MAXMULT20'],
     'bsel': ['95bdips','90bdips','85bdips','80bdips','77bdips','95bgnone','90bgnone','85bgnone','80bgnone','77bgnone', '60bgntwox' ],
     'smc'           : # "Single mass condition" -- rename?
       ['30smcINF', '35smcINF', '40smcINF', '50smcINF', '60smcINF', 'nosmc'],
