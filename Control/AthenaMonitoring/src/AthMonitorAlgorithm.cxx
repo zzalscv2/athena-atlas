@@ -25,9 +25,13 @@ StatusCode AthMonitorAlgorithm::initialize() {
     if ( !m_tools.empty() ) {
         ATH_CHECK( m_tools.retrieve() );
         for (size_t idx = 0; idx < m_tools.size(); ++idx) {
-	    std::string name(m_tools[idx].name());
-	    m_toolLookupMap[ name ] = idx;
-        }
+            if (m_tools[idx].empty()) {
+                ATH_MSG_FATAL("Encountered empty ToolHandle");
+                return StatusCode::FAILURE;
+            }
+            std::string name(m_tools[idx].name());
+            m_toolLookupMap[ name ] = idx;
+        }   
     }
 
     // Retrieve the trigger decision tool if requested
@@ -157,32 +161,28 @@ AthMonitorAlgorithm::DataType_t AthMonitorAlgorithm::dataTypeStringToEnum( const
 }
 
 
-ToolHandle<GenericMonitoringTool> AthMonitorAlgorithm::getGroup( const std::string& name ) const {
+const ToolHandle<GenericMonitoringTool>& AthMonitorAlgorithm::getGroup( const std::string& name ) const {
     // get the pointer to the tool, and check that it exists
-    const ToolHandle<GenericMonitoringTool>* toolPtr{nullptr};
     auto idx = m_toolLookupMap.find(name);
     if (ATH_LIKELY(idx != m_toolLookupMap.end())) {
-        toolPtr = &m_tools[idx->second];
+        return m_tools[idx->second];
     }
-    if ( ATH_UNLIKELY(!toolPtr) ) {
-	if ( ! isInitialized() ) {
-	  ATH_MSG_FATAL("It seems that the AthMonitorAlgorithm::initialize was not called in derived class initialize method");
-	} else {
-	  std::string available = std::accumulate( m_toolLookupMap.begin(), m_toolLookupMap.end(),
-						   std::string(""), [](const std::string& s, auto h){return s + "," + h.first;} );
-	  ATH_MSG_FATAL( "The tool " << name << " could not be found in the tool array of the " <<
-			 "monitoring algorithm " << m_name << ". This probably reflects a discrepancy between " <<
-			 "your python configuration and c++ filling code. Note: your available groups are {" <<
-			 available << "}." );
-	}
-        return ToolHandle<GenericMonitoringTool>();
+    else {
+      if (!isInitialized()) {
+        ATH_MSG_FATAL(
+            "It seems that the AthMonitorAlgorithm::initialize was not called "
+            "in derived class initialize method");
+      } else {
+        std::string available = std::accumulate(
+            m_toolLookupMap.begin(), m_toolLookupMap.end(), std::string(""),
+            [](const std::string& s, auto h) { return s + "," + h.first; });
+        ATH_MSG_FATAL("The tool " << name << " could not be found in the tool array of the "
+                      << "monitoring algorithm " << m_name << ". This probably reflects a discrepancy between "
+                      << "your python configuration and c++ filling code. Note: your available groups are {"
+                      << available << "}.");
+        }
     }
-    const ToolHandle<GenericMonitoringTool> toolHandle = *toolPtr;
-    if ( ATH_UNLIKELY(toolHandle.empty()) ) {
-        ATH_MSG_FATAL("The tool "<<name<<" could not be found because of an empty tool handle." );
-    }
-    // return the tool handle
-    return toolHandle;
+    return m_dummy;
 }
 
 

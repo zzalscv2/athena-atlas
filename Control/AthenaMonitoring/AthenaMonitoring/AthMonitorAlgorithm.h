@@ -239,7 +239,7 @@ public:
      * @param name string name of the desired tool
      * @return reference to the desired monitoring tool
      */
-    ToolHandle<GenericMonitoringTool> getGroup( const std::string& name ) const;
+    const ToolHandle<GenericMonitoringTool>& getGroup( const std::string& name ) const;
 
 
     /** 
@@ -366,7 +366,9 @@ private:
     std::string m_name;
     std::unordered_map<std::string, size_t> m_toolLookupMap;
 
-  
+    const ToolHandle<GenericMonitoringTool> m_dummy;
+
+
    Gaudi::Property<bool> m_enforceExpressTriggers{this,
                           "EnforceExpressTriggers", false,
                           "Requires that matched triggers made the event enter the express stream"};
