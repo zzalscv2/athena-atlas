@@ -33,6 +33,7 @@ private:
     // athena/Control/AthToolSupport/AsgTools/AsgTools/PropertyWrapper.h
     // input to constructor: owner, name, value, title = "" (by default)
     Gaudi::Property<bool> m_CalInfoOn {this,"CalInfoOn",false};
+    Gaudi::Property<bool> m_enableTrigger {this,"EnableTrigger",true};
 
     Gaudi::Property<std::string> m_zdcModuleContainerName {this, "ZdcModuleContainerName", "ZdcModules", "Location of ZDC processed data"};
     Gaudi::Property<std::string> m_zdcSumContainerName {this, "ZdcSumContainerName", "ZdcSums", "Location of ZDC processed sums"};
