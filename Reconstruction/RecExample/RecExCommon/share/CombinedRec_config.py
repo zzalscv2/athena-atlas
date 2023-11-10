@@ -217,8 +217,8 @@ else:
 #
 pdr.flag_domain('caloringer')
 if rec.doCaloRinger and rec.doESD():
-  from CaloRingerAlgs.CaloRingerAlgsConfig import CaloRingerAlgsCfg
-  CAtoGlobalWrapper(CaloRingerAlgsCfg, ConfigFlags)
+  from CaloRingerAlgs.CaloRingerAlgsConfig import CaloRingerSteeringCfg
+  CAtoGlobalWrapper(CaloRingerSteeringCfg, ConfigFlags)
 
 
 
