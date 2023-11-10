@@ -369,18 +369,15 @@ int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 
 
         if (m_bec_ft_impl.unpack(min) >= size) {
-            std::stringstream strm, strm1, strm2, strm3;
-            strm << size;
-            strm1 << show_to_string(min);
-            strm2 << m_bec_ft_impl.unpack(min);
-            strm3 << min_hash;
-            std::string strg = "Min > " + strm.str() + " " + strm1.str() + " " + strm2.str() + " " + strm3.str();
-            if(m_msgSvc) {
+            std::string strg = "Min > " + std::to_string(size) + " " +
+                               show_to_string(min) + " " +
+                               std::to_string(m_bec_ft_impl.unpack(min)) + " " +
+                               std::to_string(min_hash);
+            if (m_msgSvc) {
                 log << MSG::DEBUG << strg << endmsg;
-            }
-            else {
+            } else {
                 std::cout << strg << std::endl;
-            }     
+            }
         }
     }
 
@@ -388,12 +385,8 @@ int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     for (unsigned int i = 0; i < m_febHashMax; ++i) {
         HWIdentifier id = feb_Id(i);
         if (feb_Hash(id) != i) {
-            std::stringstream strm, strm1, strm2;
-            strm << show_to_string(id);
-            strm1 << feb_Hash(id);
-            strm2 << i;
             std::string strg = " *****  Warning feb ranges, id, hash, i = " + 
-                strm.str() + " , " + strm1.str() + " , "+strm2.str();
+                show_to_string(id) + " , " + std::to_string(feb_Hash(id)) + " , "+std::to_string(i);
             if(m_msgSvc) {
                 log << MSG::WARNING << strg << endmsg;
             }
@@ -412,9 +405,6 @@ int LArOnlineID::init_H8Hashes(void)
 /*========================================*/
 {
   MsgStream log(m_msgSvc, "LArOnlineID" );
-  std::stringstream strm1;
-  std::stringstream strm2;
-  std::stringstream strm3;
   std::string strg1;
   std::string strg2;
   std::string strg3;
@@ -438,10 +428,8 @@ int LArOnlineID::init_H8Hashes(void)
                                               exp_id[m_channel_in_slot_index]);
           if(!(ids.insert(id)).second)
             {
-              strm1 << nids;
-              strg1 = " init_hashes : duplicated id for channel nb = "+strm1.str();
-              strm3 << show_to_string(id);
-              strg3 = " expanded Id= "+strm3.str();
+              strg1 = " init_hashes : duplicated id for channel nb = "+std::to_string(nids);
+              strg3 = " expanded Id= "+show_to_string(id);
               if(m_msgSvc)
                 {
                   log  << MSG::ERROR << strg1 << endmsg;
@@ -489,10 +477,8 @@ int LArOnlineID::init_H8Hashes(void)
                                        exp_id[m_slot_index] );
           if(!(ids.insert(febId)).second)
             {
-              strm1 << nids;
-              strg1 = " init_hashes: duplicated id for FEB nb = "+strm1.str();
-              strm3 << show_to_string(febId);
-              strg3 = " expanded Id= "+strm3.str();
+              strg1 = " init_hashes: duplicated id for FEB nb = "+std::to_string(nids);
+              strg3 = " expanded Id= "+show_to_string(febId);
               if(m_msgSvc)
                 {
                   log  << MSG::ERROR << strg1 << endmsg;
@@ -543,10 +529,8 @@ int LArOnlineID::init_H8Hashes(void)
               << "," << test_pn << "," << test_ft << "]"<< endmsg;
           if(!(ids.insert(feedthroughId)).second)
             {
-              strm1 << nids;
-              strg1 = " init_hashes : duplicated id for feedthrough nb = "+strm1.str();
-              strm3 << show_to_string(feedthroughId);
-              strg3 = " expanded Id= "+strm3.str();
+              strg1 = " init_hashes : duplicated id for feedthrough nb = "+std::to_string(nids);
+              strg3 = " expanded Id= "+show_to_string(feedthroughId); 
               if(m_msgSvc)
                 {
                   log  << MSG::ERROR << strg1 << endmsg;
@@ -584,9 +568,6 @@ int LArOnlineID::init_H6Hashes(void)
 /*========================================*/
 {
   MsgStream log(m_msgSvc, "LArOnlineID" );
-  std::stringstream strm1;
-  std::stringstream strm2;
-  std::stringstream strm3;
   std::string strg1;
   std::string strg2;
   std::string strg3;
@@ -610,10 +591,8 @@ int LArOnlineID::init_H6Hashes(void)
                                               exp_id[m_channel_in_slot_index]);
           if(!(ids.insert(id)).second)
             {
-              strm1 << nids;
-              strg1 = " init_hashes: duplicated id for channel nb = "+strm1.str();
-              strm3 << show_to_string(id);
-              strg3 = " expanded Id= "+strm3.str();
+              strg1 = " init_hashes: duplicated id for channel nb = "+std::to_string(nids);
+              strg3 = " expanded Id= "+show_to_string(id);
               if(m_msgSvc)
                 {
                   log  << MSG::ERROR << strg1 << endmsg;
@@ -660,10 +639,8 @@ int LArOnlineID::init_H6Hashes(void)
                                        exp_id[m_slot_index] );
           if(!(ids.insert(febId)).second)
             {
-              strm1 << nids;
-              strg1 = " init_hashes : duplicated id for FEB nb = "+strm1.str();
-              strm3 << show_to_string(febId);
-              strg3 = " expanded Id= "+strm3.str();
+              strg1 = " init_hashes : duplicated id for FEB nb = "+std::to_string(nids);
+              strg3 = " expanded Id= "+show_to_string(febId);
               if(m_msgSvc)
                 {
                   log  << MSG::ERROR << strg1 << endmsg;
@@ -720,10 +697,8 @@ int LArOnlineID::init_H6Hashes(void)
               << "," << test_pn << "," << test_ft << "]"<< endmsg;
           if(!(ids.insert(feedthroughId)).second)
             {
-              strm1 << nids;
-              strg1 = " init_hashes : duplicated id for feedthrough nb = "+strm1.str();
-              strm3 << show_to_string(feedthroughId);
-              strg3 = " expanded Id= "+strm3.str();
+              strg1 = " init_hashes : duplicated id for feedthrough nb = "+std::to_string(nids);
+              strg3 = " expanded Id= "+show_to_string(feedthroughId);
               if(m_msgSvc)
                 {
                   log  << MSG::ERROR << strg1 << endmsg;
