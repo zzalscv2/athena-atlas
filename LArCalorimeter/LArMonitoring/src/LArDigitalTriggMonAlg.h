@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARMONITORING_LARDIGITALTRIGGMON_H
@@ -22,29 +22,21 @@
 #include "GaudiKernel/ToolHandle.h"
 
 //Events infos:
-#include "xAODEventInfo/EventInfo.h"
-#include "LumiBlockComps/ILumiBlockMuTool.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArRawSCContainer.h"
 #include "LArRawEvent/LArLATOMEHeaderContainer.h"
 #include "LArCabling/LArOnOffIdMapping.h"
-#include "LumiBlockData/LuminosityCondData.h"
-#include <mutex>
 
-class LArEM_ID;
-class LArOnlineID;
-class HWIdentifier;
-class LArOnlineIDStrHelper;
-class LArOnOffIdMapping;
+class LArOnline_SuperCellID;
 class CaloCell_SuperCell_ID;
 
 class LArDigitalTriggMonAlg: public AthMonitorAlgorithm
 {
   
   
-public:
-  LArDigitalTriggMonAlg(const std::string& name, ISvcLocator* pSvcLocator);
-  
+public: 
+  using AthMonitorAlgorithm::AthMonitorAlgorithm;
+
   /** @brief Default destructor */
   virtual ~LArDigitalTriggMonAlg();
   
@@ -53,26 +45,15 @@ public:
   virtual StatusCode fillHistograms(const EventContext& ctx) const override;
   
 private:  
+
+  /** private methods: */
+  int whatPartition(HWIdentifier id, int side) const; 
+  unsigned getXbinFromSourceID(const unsigned sourceID) const;
+
   /**declaration variables used in joboptions*/
-  Gaudi::Property<std::string> m_MonGroupName  {this, "LArDigitTriggMonGroupName", "LArDigitTriggMonGroup"};
-  /**Range to check for the max sample. If min and max=0, the range is set dynamically	*/
-  Gaudi::Property<int>         m_AskedSampleRangeLow{this, "SampleRangeLow", -1};
-  Gaudi::Property<int>         m_AskedSampleRangeUp {this, "SampleRangeUp", -1};
-  /**default saturation cuts*/
-  Gaudi::Property<int>         m_ADCsatureCut  {this, "ADCSatureCut", 4095};
-  /**default cut to select events*/
-  Gaudi::Property<int>         m_SigmaCut      {this, "SigmaCut", 5};
-  /** Use the SampleMax expected and the SampleNumber from DB*/
-  Gaudi::Property<int>         m_ExpectedSampleMax {this, "ExpectedSampleMax", 0};
-  Gaudi::Property<int>         m_SampleNumberFromDB{this, "SampleNumberFromDB", 0};
-  /** Switch to online/offline mode*/
-  Gaudi::Property<bool>        m_IsOnline      {this, "IsOnline", false}; 
-  Gaudi::Property<int>         m_NLatomeBins{this, "NLatomeBins", 117};
-
-
-  Gaudi::Property<std::string>        m_EtName{this, "EtName", "Dummy"};
-  Gaudi::Property<std::string>        m_AdcName{this, "AdcName", "Dummy"};
-
+  Gaudi::Property<std::string>   m_MonGroupName  {this, "LArDigitTriggMonGroupName", "LArDigitTriggMonGroup"};
+  Gaudi::Property<unsigned>      m_NLatomeBins{this, "NLatomeBins", 117};
+  Gaudi::Property<bool>          m_isADCBaseline{this,"isADCBas",false,"Set true for ADC_BAS (implies dividing ADC-value by 8)"};
 
   //Added for Stream aware:
   /** Give the name of the streams you want to monitor:*/
@@ -81,23 +62,19 @@ private:
   //Histogram group names
   Gaudi::Property<std::string> m_scMonGroupName {this, "SCMonGroup", "SC"};
 
-  //\** Handle to cabling *\/ 
+  //** Handle to cabling */
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this, "CablingSCKey","LArOnOffIdMapSC","SG Key of LArOnOffIdMapping object"}; 
 
-  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfo","EventInfo","SG Key of EventInfo object"};
-
-  /** Handle to digits */
+  /** Handle to EventData (input) */
   SG::ReadHandleKey<LArDigitContainer> m_digitContainerKey{this,"LArDigitContainerKey","dummy","SG key of LArDigitContainer read from Bytestream"}; //raw ADC 12 bits - ADC axis up to 4096
   SG::ReadHandleKey<LArRawSCContainer> m_rawSCContainerKey{this,"LArRawSCContainerKey","dummy","SG key of LArRawSCContainer read from Bytestream"};
-
   SG::ReadHandleKey<LArRawSCContainer> m_rawSCEtRecoContainerKey{this,"LArRawSCEtRecoContainerKey","SC_ET_RECO","SG key of LArRawSCContainer read from Bytestream"};
-  
+  SG::ReadHandleKey<LArLATOMEHeaderContainer> m_LATOMEHeaderContainerKey{this,"LArLATOMEHeaderContainerKey","SC_LATOME_HEADER","SG key of LArLATOMEHeaderContainer read from Bytestream"};
+
   /** Handle to bad-channel mask */
-  LArBadChannelMask m_bcMask;
+  LArBadChannelMask m_bcMask{true}; //isSC=true
   SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey {this, "BadChanKey", "LArBadChannelSC", "SG key for LArBadChan object"};
   Gaudi::Property<std::vector<std::string> > m_problemsToMask{this,"ProblemsToMask",{}, "Bad-Channel categories to mask"};
-
-  SG::ReadHandleKey<LArLATOMEHeaderContainer> m_LATOMEHeaderContainerKey{this,"LArLATOMEHeaderContainerKey","SC_LATOME_HEADER","SG key of LArLATOMEHeaderContainer read from Bytestream"};
 
   /** Handle to pedestal */
   SG::ReadCondHandleKey<ILArPedestal>    m_keyPedestalSC{this,"LArPedestalKeySC","LArPedestalSC","SG key of LArPedestal CDO"};
@@ -110,63 +87,69 @@ private:
 
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_actualMuKey {this, "actualInteractionsPerCrossing",
            "EventInfo.actualInteractionsPerCrossing","Decoration for Actual Number of Interactions Per Crossing"};
-  // SC_ET_ID cuts on taus selection, SC_ET just takes everything
 
-  /* Id helpers */
-  const LArOnlineID* m_LArOnlineIDHelper;
-  const LArEM_ID* m_LArEM_IDHelper;
-  const CaloCell_SuperCell_ID*  m_SCID_helper;
+  StringArrayProperty m_layerNames{this, "LayerNames", {"EMBPA", "EMBPC", "EMB1A", "EMB1C", "EMB2A", "EMB2C", "EMB3A", "EMB3C", "HEC0A", "HEC0C", "HEC1A", "HEC1C", "HEC2A", "HEC2C", "HEC3A", "HEC3C", "EMECPA", "EMECPC", "EMEC1A", "EMEC1C", "EMEC2A", "EMEC2C", "EMEC3A", "EMEC3C", "FCAL1A", "FCAL1C", "FCAL2A", "FCAL2C", "FCAL3A", "FCAL3C", "ALL"},
+          "Names of individual layers to monitor"};
 
-
-  int WhatPartition(HWIdentifier id, int side) const; 
-  int getXbinFromSourceID(int sourceID) const;
-  int getXbinPerSideFromSourceID(int sourceID) const;
 
   //Enumerate layer-types, ignoring sides. Useful for configuration that is per-definition symmetric 
   enum LayerEnumNoSides{EMBPNS=0, EMB1NS, EMB2NS, EMB3NS, HEC0NS, HEC1NS, HEC2NS, HEC3NS,
                         EMECPNS,EMEC1NS,EMEC2NS,EMEC3NS,FCAL1NS,FCAL2NS,FCAL3NS,MAXLYRNS};
 
   //Mapping of CaloCell nomencature to CaloCellMonitoring nomencature
-  const std::map<unsigned,LayerEnumNoSides> m_caloSamplingToLyrNS{ 
-    {CaloSampling::PreSamplerB, EMBPNS},{CaloSampling::EMB1,EMB1NS},{CaloSampling::EMB2,EMB2NS},{CaloSampling::EMB3,EMB3NS},         //LAr Barrel
-    {CaloSampling::PreSamplerE, EMECPNS},{CaloSampling::EME1,EMEC1NS}, {CaloSampling::EME2,EMEC2NS}, {CaloSampling::EME3,EMEC3NS},   //LAr Endcap 		
-    {CaloSampling::HEC0,HEC0NS}, {CaloSampling::HEC1,HEC1NS}, {CaloSampling::HEC2,HEC2NS}, {CaloSampling::HEC3,HEC3NS},              //Hadronic endcap
-    {CaloSampling::FCAL0,FCAL1NS}, {CaloSampling::FCAL1,FCAL2NS}, {CaloSampling::FCAL2,FCAL3NS}                                      //FCAL
+  const std::array<unsigned,CaloSampling::Unknown> m_caloSamplingToLyrNS{ 
+    EMBPNS,   //CALOSAMPLING(PreSamplerB, 1, 0) //  0
+    EMB1NS,   //CALOSAMPLING(EMB1,        1, 0) //  1
+    EMB2NS,   //CALOSAMPLING(EMB2,        1, 0) //  2
+    EMB3NS,   //CALOSAMPLING(EMB3,        1, 0) //  3
+    EMECPNS, //CALOSAMPLING(PreSamplerE, 0, 1) //  4
+    EMEC1NS,  //CALOSAMPLING(EME1,        0, 1) //  5
+    EMEC2NS,  //CALOSAMPLING(EME2,        0, 1) //  6
+    EMEC2NS,  //CALOSAMPLING(EME3,        0, 1) //  7
+    EMEC2NS,  //CALOSAMPLING(HEC0,        0, 1) //  8
+    HEC1NS,   //CALOSAMPLING(HEC1,        0, 1) //  9
+    HEC2NS,   //CALOSAMPLING(HEC2,        0, 1) // 10
+    HEC3NS,   //CALOSAMPLING(HEC3,        0, 1) // 11
+    MAXLYRNS, //CALOSAMPLING(TileBar0,    1, 0) // 12
+    MAXLYRNS, //CALOSAMPLING(TileBar1,    1, 0) // 13
+    MAXLYRNS, //CALOSAMPLING(TileBar2,    1, 0) // 14
+    MAXLYRNS, //CALOSAMPLING(TileGap1,    1, 0) // 15
+    MAXLYRNS, //CALOSAMPLING(TileGap2,    1, 0) // 16
+    MAXLYRNS, // CALOSAMPLING(TileGap3,    1, 0) // 17
+    MAXLYRNS, //CALOSAMPLING(TileExt0,    1, 0) // 18
+    MAXLYRNS, //CALOSAMPLING(TileExt1,    1, 0) // 19
+    MAXLYRNS, //CALOSAMPLING(TileExt2,    1, 0) // 20
+    FCAL1NS,  //CALOSAMPLING(FCAL0,       0, 1) // 21
+    FCAL2NS,  //CALOSAMPLING(FCAL1,       0, 1) // 22
+    FCAL3NS,  //ALOSAMPLING(FCAL2,       0, 1) // 23
+    MAXLYRNS, //CALOSAMPLING(MINIFCAL0,   0, 1) // 24
+    MAXLYRNS, //CALOSAMPLING(MINIFCAL1,   0, 1) // 25
+    MAXLYRNS, //CALOSAMPLING(MINIFCAL2,   0, 1) // 26
+    MAXLYRNS, //CALOSAMPLING(MINIFCAL3,   0, 1) // 27
   };
   
-  StringArrayProperty m_layerNames{this, "LayerNames", {"EMBPA", "EMBPC", "EMB1A", "EMB1C", "EMB2A", "EMB2C", "EMB3A", "EMB3C",
-	"HEC0A", "HEC0C", "HEC1A", "HEC1C", "HEC2A", "HEC2C", "HEC3A", "HEC3C",
-	"EMECPA", "EMECPC", "EMEC1A", "EMEC1C", "EMEC2A", "EMEC2C", "EMEC3A", "EMEC3C", 
-	"FCAL1A", "FCAL1C", "FCAL2A", "FCAL2C", "FCAL3A", "FCAL3C"},
-        "Names of individual layers to monitor"};
 
-  const std::map <std::string, std::pair<std::string, int> > m_LatomeDetBinMapping = {
-    {"0x48",{"FCALC",1}},
-    {"0x4c",{"EMEC/HECC",3}},
-  {"0x44",{"EMECC",11}},
-    {"0x4a",{"EMB/EMECC",27}},
-    {"0x42",{"EMBC",43}},
-    {"0x41",{"EMBA",59}},
-    {"0x49",{"EMB/EMECA",75}},
-    {"0x43",{"EMECA",91}},
-    {"0x4b",{"EMEC/HECA",107}},
-    {"0x47",{"FCALA",115}}
+ 
+ const std::map <unsigned, unsigned> m_LatomeDetBinMappingQ{
+    {0x48,  1},  //FCALC
+    {0x4c,  3},  //EMECC/HEC
+    {0x44, 11},  //EMECC
+    {0x4a, 27},  //EMB/EMECC
+    {0x42, 43},  //EMBC	   
+    {0x41, 59},  //EMBA	   
+    {0x49, 75},  //EMB/EMECA
+    {0x43, 91},  //EMECA
+    {0x4b,107},  //EMEC/HECA
+    {0x47,115}   //FCALA
   };
-  const std::map <std::string, std::pair<std::string, int> > m_LatomeDetBinMappingPerSide = { 
-    {"0x48",{"FCAL",57}},
-    {"0x4c",{"EMEC_HEC",49}},
-    {"0x44",{"EMEC",33}},
-    {"0x4a",{"EMB_EMEC",17}},
-    {"0x42",{"EMB",1}},
-    {"0x41",{"EMB",1}},
-    {"0x49",{"EMB_EMEC",17}},
-    {"0x43",{"EMEC",33}},
-    {"0x4b",{"EMEC_HEC",49}},
-    {"0x47",{"FCAL",57}}
-  };				     
 
   std::map<std::string,int> m_toolmapLayerNames_digi;
   std::map<std::string,int> m_toolmapLayerNames_sc;
+
+   /* Id helpers */
+  const LArOnline_SuperCellID*  m_LArOnlineIDHelper=nullptr;
+  const CaloCell_SuperCell_ID*  m_SCID_helper=nullptr;
+
 
 };
 #endif
