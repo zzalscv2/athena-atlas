@@ -263,13 +263,13 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     elif regexXAODTruthMetaData.match(class_name):
                         meta_dict[filename]['metadata_items'][name] = 'TruthMetaData'
                     else:
-                        if not class_name:
+                        type_name = class_name
+                        if not type_name:
                             try:
-                                meta_dict[filename]['metadata_items'][name] = branch.GetListOfLeaves()[0].GetTypeName()
+                                type_name = branch.GetListOfLeaves()[0].GetTypeName()
                             except IndexError:
                                 pass
-                        else:
-                            meta_dict[filename]['metadata_items'][name] = class_name
+                        meta_dict[filename]['metadata_items'][name] = type_name
 
                     if len(meta_filter) > 0:
                         keep = False
