@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKTRUTHDATA_TRKTRUTHDATADICT_H
@@ -16,6 +16,26 @@
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "AthLinks/DataLink.h"
 #include <utility>
+
+
+// Helpers for use from python.
+namespace TrkTruthDataHelpers {
+
+  
+std::vector<std::pair<Identifier, HepMcParticleLink> >
+getData (const PRD_MultiTruthCollection& prd)
+{
+  std::vector<std::pair<Identifier, HepMcParticleLink> > v;
+  v.reserve (prd.size());
+  for (const auto& p : prd) {
+    v.emplace_back (p.first, p.second);
+  }
+  return v;
+}
+
+
+} // namespace TrkTruthDataHelpers
+
  
 namespace 
 {

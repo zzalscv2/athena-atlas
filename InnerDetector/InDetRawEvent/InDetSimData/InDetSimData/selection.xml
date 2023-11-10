@@ -4,5 +4,7 @@
      <class pattern="*pair*<HepMcParticleLink*float>" /> 
      <class name="std::vector<std::pair< HepMcParticleLink , float> >" />
      <class name="std::map<Identifier,InDetSimData>" />
+     <function name="InDetSimData::identifiers" />
+     <function name="InDetSimData::getData" />
 </lcgdict>
  
