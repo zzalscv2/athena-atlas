@@ -29,6 +29,9 @@ class FastReductionAlgToolFactory:
             'RangeFilterConfigTool':
             [CompFactory.TrigJetHypoToolConfig_rangefilter, 0],
 
+            'MaxMultFilterConfigTool':
+            [CompFactory.TrigJetHypoToolConfig_maxmultfilter, 0],
+
             'RepeatedConditionConfigTool':
             [CompFactory.TrigJetConditionConfig_repeated, 0],
                         
@@ -48,6 +51,7 @@ class FastReductionAlgToolFactory:
             'smc': [CompFactory.TrigJetConditionConfig_smc, 0],
             'jvt': [CompFactory.TrigJetConditionConfig_jvt, 0],
             'ht': [CompFactory.TrigJetConditionConfig_htfr, 0],
+            'dipz_mlpl': [CompFactory.TrigJetConditionConfig_dipzmlpl, 0],
             'bsel': [CompFactory.TrigJetConditionConfig_bdips, 0],
             'clean': [CompFactory.TrigJetConditionConfig_clean, 0],
             'all': [CompFactory.TrigJetConditionConfig_acceptAll, 0],

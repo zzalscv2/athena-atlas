@@ -54,8 +54,7 @@ std::string EtaConditionAbs::toString() const {
   std::stringstream ss;
   ss << "EtaConditionAbs (" << this << ") Capacity: " << s_capacity
      << " etaMin "<<  m_min 
-     << " etaMax " << m_max 
-       <<'\n';
+     << " etaMax " << m_max;
 
   return ss.str();
 }

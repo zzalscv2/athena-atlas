@@ -5,6 +5,7 @@ from TrigHLTJetHypo.FastReductionAlgToolFactory import toolfactory
 # import modules concerned with extracting scenario paramters
 # from a scenario string
 from TrigHLTJetHypo.scenario_ht import scenario_ht
+from TrigHLTJetHypo.scenario_dipz import scenario_dipz
 from TrigHLTJetHypo.scenario_dijet import scenario_dijet
 from TrigHLTJetHypo.scenario_fbdjnoshared import scenario_fbdjnoshared
 from TrigHLTJetHypo.scenario_fbdjshared import scenario_fbdjshared
@@ -12,6 +13,7 @@ from TrigHLTJetHypo.scenario_simple import scenario_simple
 
 from TrigHLTJetHypo.prefilter_mask import prefilter_mask
 from TrigHLTJetHypo.prefilter_ptrange import prefilter_ptrange
+from TrigHLTJetHypo.prefilter_maxmult import prefilter_maxmult
 from TrigHLTJetHypo.prefilter_clean import prefilter_clean
 
 from TrigHLTJetHypo.makeConditionFilterConfigurer import (
@@ -120,6 +122,19 @@ def process_simple(chain_parts):
     return helperconfigobjs
 
 
+def process_dipz(scenario, chainPartInd):
+    """Obtain the paramters needed to build an AlgTool
+    to initialise a jet hypo HelperAlgTool"""
+
+    # obtain a list of parameter objects that will be used
+    # to build a helper config AlgTools
+    helper_params = scenario_dipz(scenario, chainPartInd)
+
+    # build the helper config AlgTools
+    helperconfigobjs = [buildHypoHelperConfigTool(params) for params in
+                        helper_params]
+                           
+    return helperconfigobjs
 
 def process_ht(scenario, chainPartInd):
     """Obtain the paramters needed to build an AlgTool
@@ -191,6 +206,7 @@ def process_nonsimple(scenario, chainPartInd):
 
     router = {
         'HT': process_ht,
+        'Z': process_dipz,
         'DIJET': process_dijet,
         'FBDJSHARED': process_fbdjshared,
         'FBDJNOSHARED': process_fbdjnoshared,
@@ -299,6 +315,7 @@ def make_prefilter_configurers(chain_dict):
     prefilter_router = {
         'MASK': prefilter_mask,
         'PTRANGE': prefilter_ptrange,
+        'MAXMULT': prefilter_maxmult,
         'CLEAN': prefilter_clean,
     }
 

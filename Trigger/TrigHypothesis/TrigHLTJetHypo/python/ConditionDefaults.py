@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from AthenaCommon.Constants import DEBUG
@@ -30,6 +30,8 @@ class ConditionDefaults:
             'djdeta': {'min': '0', 'max': 'inf'},
             'djdphi': {'min': '0', 'max': str(math.pi)},
             'ht': {'min': '0', 'max': 'inf'},
+            'dipz_mlpl': {'min': '-inf', 'max': 'inf'},
+            'dipz_njet': {'min': '2', 'max': 'inf'},
             'smc': {'min': '0', 'max': 'inf'},
             'jvt': {'min': '0', 'max': 'inf'},
             'bsel': {'min': '-inf', 'max': 'inf'},
@@ -52,6 +54,8 @@ class ConditionDefaults:
             'djdeta': 0.01, 
             'djdphi': 0.01,
             'ht': 1000.,
+            'dipz_mlpl': -0.1,
+            'dipz_njet': 1.0,
             'smc': 1000.,
             'jvt': 0.01,
             'momCuts': 0.01,
