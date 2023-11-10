@@ -1,11 +1,14 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 # Define some handy strings for plot labels
 
 
 # TO DO  - add defined cut names for selections, add them to plot names
+
+from AthenaConfiguration.ComponentFactory import CompFactory
+
 
 # selections from the digi (ADC) loop
 selStr = {}
@@ -30,7 +33,6 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'LArDigitalTriggMonAlgCfg')
 
-    from AthenaConfiguration.ComponentFactory import CompFactory
     from LArMonitoring.GlobalVariables import lArDQGlobals
     
     from AthenaCommon.Logging import logging
@@ -48,6 +50,8 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
     from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
     helper.resobj.merge(LArElecCalibDBSCCfg(inputFlags, condObjs=["Ramp","DAC2uA", "Pedestal", "uA2MeV", "MphysOverMcal", "OFC", "Shape", "HVScaleCorr"]))
 
+
+
     larDigitalTriggMonAlg = helper.addAlgorithm(CompFactory.LArDigitalTriggMonAlg('larDigitalTriggMonAlg'))
     larDigitalTriggMonAlg.ProblemsToMask=["maskedOSUM"] #highNoiseHG","highNoiseMG","highNoiseLG","deadReadout","deadPhys"]
          
@@ -59,40 +63,35 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
         mlog.info("runinfo.streamTypes()[i]: "+str(streamTypes[i]))
         if streamTypes[i] ==  "SelectedEnergy":
             hasEtId = True
-            larDigitalTriggMonAlg.EtName = "SC_ET_ID"
             larDigitalTriggMonAlg.LArRawSCContainerKey = "SC_ET_ID"
         if streamTypes[i] ==  "Energy":
             hasEt = True
-            larDigitalTriggMonAlg.EtName = "SC_ET"
             larDigitalTriggMonAlg.LArRawSCContainerKey = "SC_ET"
         if streamTypes[i] ==  "RawADC":
             hasAdc = True
-            larDigitalTriggMonAlg.AdcName = "SC"
             larLATOMEBuilderAlg.LArDigitKey = "SC"
             larLATOMEBuilderAlg.isADCBas = False
             larDigitalTriggMonAlg.LArDigitContainerKey = "SC"
         if streamTypes[i] ==  "ADC":
             hasAdcBas = True
-            larDigitalTriggMonAlg.AdcName = "SC_ADC_BAS"
+            larDigitalTriggMonAlg.isADCBas = True
             larDigitalTriggMonAlg.LArDigitContainerKey = "SC_ADC_BAS"
             larLATOMEBuilderAlg.isADCBas = True
             larLATOMEBuilderAlg.LArDigitKey = "SC_ADC_BAS"
 
     if (hasEtId and hasEt): #prefer EtId if both in recipe
         hasEt = False
-        larDigitalTriggMonAlg.EtName = "SC_ET_ID"
+        #larDigitalTriggMonAlg.EtName = "SC_ET_ID"
 
     if (hasAdc and hasAdcBas): #prefer Raw Adc if both in recipe
         hasAdc = False
-        larDigitalTriggMonAlg.AdcName = "SC"
+        larDigitalTriggMonAlg.usADCBas=False
 
     mlog.info("Mux settings from COOL:")
     mlog.info("has ET Id: "+str(hasEtId))
     mlog.info("has ET: "+str(hasEt))
     mlog.info("has ADC: "+str(hasAdc))
     mlog.info("has ADC Bas: "+str(hasAdcBas))
-    mlog.info("Et name: "+str(larDigitalTriggMonAlg.EtName))
-    mlog.info("ADC name: "+str(larDigitalTriggMonAlg.AdcName))
 
     SCGroupName="SC"
     larDigitalTriggMonAlg.SCMonGroup=SCGroupName
@@ -362,43 +361,49 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
 
 
     #### Per-subdetector/layer plots
-    layerList = ["EMBPA", "EMBPC", "EMB1A", "EMB1C", "EMB2A", "EMB2C", "EMB3A", "EMB3C", "HEC0A", "HEC0C", "HEC1A", "HEC1C", "HEC2A", "HEC2C", "HEC3A", "HEC3C", "EMECPA", "EMECPC", "EMEC1A", "EMEC1C", "EMEC2A", "EMEC2C", "EMEC3A", "EMEC3C", "FCAL1A", "FCAL1C", "FCAL2A", "FCAL2C", "FCAL3A", "FCAL3C"]
-
-    partGroup_digi = helper.addArray([layerList], larDigitalTriggMonAlg, 'LArDigitalTriggerMon_digi', topPath='/LArDigitalTrigger/PerPartition/')
-    partGroup_sc = helper.addArray([layerList], larDigitalTriggMonAlg, 'LArDigitalTriggerMon_sc', topPath='/LArDigitalTrigger/PerPartition/')
-
+    partGroup_digi = helper.addArray([larDigitalTriggMonAlg.LayerNames], larDigitalTriggMonAlg, 'LArDigitalTriggerMon_digi')
+    partGroup_sc = helper.addArray([larDigitalTriggMonAlg.LayerNames], larDigitalTriggMonAlg, 'LArDigitalTriggerMon_sc')
     
     for part in larDigitalTriggMonAlg.LayerNames:
         selStrPart = {}
         for sel in selStr.keys():
             selStrPart[sel] = "in "+part+" "+selStr[sel]
-
-        Part = part[:-2]
-        if Part == "FCAL": 
-            Part = "FCal"
-        Side = part[-1]
-        Sampling = part[-2]
-        if Sampling == "P": 
-            Sampling = "0"
-
-
+            
+        if part == "ALL":
+            partxbins=lArDQGlobals.SuperCell_Variables["etaRange"]["All"]["All"]
+            partybins=lArDQGlobals.SuperCell_Variables["phiRange"]["All"]["All"]
+            topPath="/"
+        else:
+            topPath="/LArDigitalTrigger/PerPartition/"
+            Part = part[:-2]
+            if Part == "FCAL": 
+                Part = "FCal"
+            Side = part[-1]
+            Sampling = part[-2]
+            if Sampling == "P": 
+                Sampling = "0"
+            partxbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling]
+            partybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling]
+                
+        
+        
         #### Plots from Digi (ADC) loop
         partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi;Coverage_eta_phi_digi',
                                        title='SC coverage '+selStrPart["passDigiNom"]+': #phi vs #eta;#eta;#phi',
                                        type='TH2F', 
-                                       path='Coverage/passDigiNom',
+                                       path=topPath+'Coverage/passDigiNom',
                                        cutmask='Digi_part_passDigiNom',
-                                       xbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling],
-                                       ybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling],
+                                       xbins=partxbins,
+                                       ybins=partybins,
                                        pattern=[(part)])
 
         partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi;Coverage_eta_phi_bad',
                                        title='SC coverage '+selStrPart["badNotMasked"]+': #phi vs #eta;#eta;#phi',
                                        type='TH2F', 
-                                       path='Coverage/BadNotMasked',
+                                       path=topPath+'Coverage/BadNotMasked',
                                        cutmask='Digi_part_badNotMasked',
-                                       xbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling],
-                                       ybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling],
+                                       xbins=partxbins,
+                                       ybins=partybins,
                                        pattern=[(part)])
 
 
@@ -406,16 +411,16 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
                                        title='ADC - Pedestal'+selStrPart["passDigiNom"]+': #phi vs #eta;#eta;#phi',
                                        type='TProfile2D',
                                        cutmask='Digi_part_passDigiNom',
-                                       path='Diff_ADC_Ped',
-                                       xbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling],
-                                       ybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling],
+                                       path=topPath+'Diff_ADC_Ped',
+                                       xbins=partxbins,
+                                       ybins=partybins,
                                        pattern=[(part)])
 
         partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_adc;ADCvsBCID', 
                                        title='ADC value vs BCID '+selStrPart["passDigiNom"]+'; BCID; ADC Value',
                                        type='TProfile',
                                        cutmask='Digi_part_passDigiNom',
-                                       path='BaselineCorrection/Raw_ADC',
+                                       path=topPath+'BaselineCorrection/Raw_ADC',
                                        xbins=3564,xmin=-0.5,xmax=3563.5,
                                        ybins=500, ymin=0, ymax=5000,
                                        pattern=[(part)])
@@ -424,7 +429,7 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
                                        title='ADC - Ped value vs BCID '+selStrPart["passDigiNom"]+'; BCID; ADC Value',
                                        type='TProfile',
                                        cutmask='Digi_part_passDigiNom',
-                                       path='BaselineCorrection/Diff_ADC_Ped',
+                                       path=topPath+'BaselineCorrection/Diff_ADC_Ped',
                                        xbins=3564,xmin=-0.5,xmax=3563.5,
                                        ybins=500, ymin=-5, ymax=5,
                                        pattern=[(part)])
@@ -436,17 +441,17 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
             partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi;Coverage_eta_phi_'+thisSel,
                                          title='SC coverage '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
                                          type='TH2F', 
-                                         path='Coverage/'+thisSel,
+                                         path=topPath+'Coverage/'+thisSel,
                                          cutmask='SC_part_'+thisSel,
-                                         xbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling],
-                                         ybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling],
+                                         xbins=partxbins,
+                                         ybins=partybins,
                                          pattern=[(part)])
 
         for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10" ]:
             partGroup_sc.defineHistogram('SC_part_time;OfflineLATOMEtime_'+thisSel,
                                          title='LATOME #tau from Offline Computation '+selStrPart[thisSel]+':#tau [ns]; Evts',
                                          type='TH1F', 
-                                         path='OfflineLATOMETime/'+thisSel,
+                                         path=topPath+'OfflineLATOMETime/'+thisSel,
                                          cutmask='SC_part_'+thisSel,
                                          xbins=100,xmin=-25,xmax=25,
                                          pattern=[(part)])
@@ -455,7 +460,7 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
                                          title='Average LATOME #tau from Offline computation per BCID '+selStrPart[thisSel]+'; BCID; #tau [ns]',
                                          type='TProfile',
                                          cutmask='SC_part_'+thisSel,
-                                         path='OfflineLATOMETime_perBCID/'+thisSel,
+                                         path=topPath+'OfflineLATOMETime_perBCID/'+thisSel,
                                          xbins=3564,xmin=-0.5,xmax=3563.5, 
                                          pattern=[(part)])
 
@@ -463,7 +468,7 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
                                          title='Average LATOME #tau from Offline computation per LB '+selStrPart[thisSel]+'; LumiBlock; #tau [ns]',
                                          type='TProfile',
                                          cutmask='SC_part_'+thisSel,
-                                         path='OfflineLATOMETime_perLB/'+thisSel,
+                                         path=topPath+'OfflineLATOMETime_perLB/'+thisSel,
                                          xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
                                          pattern=[(part)])
 
@@ -471,16 +476,16 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
                                          title='LATOME #tau from Offline Computation '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
                                          type='TProfile2D',
                                          cutmask='SC_part_'+thisSel,
-                                         path='OfflineLATOMETimeProfile/'+thisSel,
-                                         xbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling],
-                                         ybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling],
+                                         path=topPath+'OfflineLATOMETimeProfile/'+thisSel,
+                                         xbins=partxbins,
+                                         ybins=partybins,
                                          pattern=[(part)])
 
 
             partGroup_sc.defineHistogram('SC_part_ET_onl;SCeT_'+thisSel,
                                          title='SC Energy '+selStrPart[thisSel]+';',
                                          type='TH1F',
-                                         path='ET_TH1/'+thisSel,
+                                         path=topPath+'ET_TH1/'+thisSel,
                                          cutmask='SC_part_'+thisSel,
                                          xbins=500, xmin=-100, xmax=400,
                                          pattern=[(part)])
@@ -489,9 +494,9 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
                                          title='SC Energy '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
                                          type='TProfile2D',
                                          cutmask='SC_part_'+thisSel,
-                                         path='ETProfile/'+thisSel,
-                                         xbins=lArDQGlobals.SuperCell_Variables["etaRange"][Part][Side][Sampling],
-                                         ybins=lArDQGlobals.SuperCell_Variables["phiRange"][Part][Side][Sampling],
+                                         path=topPath+'ETProfile/'+thisSel,
+                                         xbins=partxbins,
+                                         ybins=partybins,
                                          pattern=[(part)])
 
 
@@ -499,7 +504,7 @@ def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, stream
                                      title='Average Energy vs BCID '+selStrPart["passSCNom"]+'; BCID; Energy per SC [MeV]',
                                      type='TProfile',
                                      cutmask='SC_part_passSCNom',
-                                     path='BaselineCorrection/AvEnergyVsBCID',
+                                     path=topPath+'BaselineCorrection/AvEnergyVsBCID',
                                      xbins=3564,xmin=-0.5,xmax=3563.5,
                                      ybins=10, ymin=-20, ymax=20,
                                      pattern=[(part)])
@@ -512,18 +517,22 @@ if __name__=='__main__':
 
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
    from AthenaCommon.Logging import log
-   from AthenaCommon.Constants import WARNING,ERROR
+   from AthenaCommon.Constants import WARNING,ERROR,DEBUG # noqa: F401
    log.setLevel(WARNING)
    flags = initConfigFlags()
    
+   from AthenaConfiguration.Enums import LHCPeriod
+   flags.GeoModel.Run = LHCPeriod.Run3
+
    def __monflags():
       from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
       return createLArMonConfigFlags()
 
    flags.addFlagsCategory("LArMon", __monflags)
 
-   flags.Input.Files = ["/eos/atlas/atlastier0/rucio/data21_idcomm/physics_CosmicCalo/00401410/data21_idcomm.00401410.physics_CosmicCalo.merge.RAW/data21_idcomm.00401410.physics_CosmicCalo.merge.RAW._lb0722._SFO-ALL._0001.1"]
-   
+   flags.Input.Files = ["/eos/atlas/atlascerngroupdisk/proj-spot/spot-job-inputs/data23_13p6TeV/data23_13p6TeV.00451569.physics_Main.daq.RAW._lb0260._SFO-14._0001.data"]
+
+   flags.Input.RunNumber=[451569]
    flags.Output.HISTFileName = 'LArDigitalTriggMonOutput.root'
 
    flags.DQ.useTrigger = False
@@ -535,6 +544,10 @@ if __name__=='__main__':
    from CaloRec.CaloRecoConfig import CaloRecoCfg
    cfg=CaloRecoCfg(flags)
 
+   from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
+   cfg.merge(LArBadChannelCfg(flags, isSC=True))
+
+
    #from AthenaCommon.AppMgr import (ServiceMgr as svcMgr,ToolSvc)
    from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
    SCData_acc =  LArRawSCDataReadingCfg(flags)
@@ -542,10 +555,14 @@ if __name__=='__main__':
  
    cfg.merge(SCData_acc)
 
-   aff_acc = LArDigitalTriggMonConfig(flags)
+   larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg",LArDigitKey="SC", isADCBas=False)
+   cfg.addEventAlgo(larLATOMEBuilderAlg)
+
+   streamTypes = ["SelectedEnergy", "ADC"]
+   aff_acc = LArDigitalTriggMonConfig(flags, larLATOMEBuilderAlg, streamTypes=streamTypes)
    cfg.merge(aff_acc)
    
-   cfg.getCondAlgo("LArHVCondAlg").OutputLevel=ERROR
+   cfg.getCondAlgo("LArHVCondAlg").OutputLevel=DEBUG
 
    flags.dump()
    f=open("LArDigitalTriggMon.pkl","wb")
@@ -553,5 +570,6 @@ if __name__=='__main__':
    f.close()
 
 
+   #cfg.run()
 
 
