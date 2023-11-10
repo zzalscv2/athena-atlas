@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMON_CONFIG_H
@@ -53,6 +53,10 @@ class TrigMonConfig
   template<class T> typename std::vector<TrigConfChain>::iterator findChainIter(const T& key);
   template<class T> typename std::vector<TrigConfSeq>::iterator   findSeqIter(const T& key); 
   
+  // Additional overloads callable from python.
+  const std::vector<TrigConfChain>& getChainVec() const { return m_chain; }
+  const std::vector<TrigConfSeq>& getSeqVec() const { return m_seq; }
+
   void clear();
   void clearStrings();
   void processConfig ATLAS_NOT_THREAD_SAFE ();
