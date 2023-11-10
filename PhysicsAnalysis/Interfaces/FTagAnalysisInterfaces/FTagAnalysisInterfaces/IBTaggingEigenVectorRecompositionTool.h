@@ -47,7 +47,7 @@ class IBTaggingEigenVectorRecompositionTool : virtual public CP::ISystematicsToo
    * eigenIdxList and return it to user. If given empty evIdxList, the function
    * returns a full map. Produced map is for the chosen flavour label.
    **/
-  virtual std::map<std::string, std::map<std::string, float>> getCoefficientMap(const std::string& label, const std::vector<unsigned int> eigenIdxList = std::vector<unsigned int>()) const = 0;
+  virtual std::map<std::string, std::map<std::string, float>> getCoefficientMap(const std::string& label, const std::vector<unsigned int>& eigenIdxList = std::vector<unsigned int>()) const = 0;
   /**
    * Returns a vector contains the coefficients value of the chosen label
    * and the chosen eigenvector. The order of the value is the same as

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ class BTaggingEigenVectorRecompositionTool: public asg::AsgTool,
    * returns a full map. Produced map is for the chosen flavour label.
    **/
    std::map<std::string, std::map<std::string, float>> getCoefficientMap(const std::string & label,
-									 const std::vector<unsigned int> eigenIdxList = 
+									 const std::vector<unsigned int>& eigenIdxList = 
 									 std::vector<unsigned int>()) const;
 
   /**

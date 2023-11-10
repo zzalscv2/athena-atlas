@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "CxxUtils/checker_macros.h"
 #include "xAODBTaggingEfficiency/BTaggingSelectionTool.h"
@@ -190,7 +190,7 @@ StatusCode BTaggingSelectionTool::initialize() {
  return StatusCode::SUCCESS;
 }
 
-void BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagger, std::string taggerName, std::string OP){
+void BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagger, const std::string& taggerName, const std::string& OP){
 
   TString cutname = OP;
 
