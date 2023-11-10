@@ -419,7 +419,7 @@ namespace InDetDD {
     if (isSCT() and m_otherSide and getIdHelper()->helper() == AtlasDetectorID::HelperType::SCT) {
       double sinStereoThis = std::abs(sinStereoImpl()); // Call the private impl method
       double sinStereoOther = std::abs(m_otherSide->sinStereo());
-      if (sinStereoThis == sinStereoOther) {
+      if (std::abs(sinStereoThis - sinStereoOther) < 1e-5) {
         // If they happen to be equal then set side0 as axial and side1 as stereo.
         const SCT_ID* sctId = static_cast<const SCT_ID*>(getIdHelper());
         if (sctId) {
