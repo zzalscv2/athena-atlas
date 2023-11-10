@@ -111,7 +111,7 @@ void ActsTrk::MutableMultiTrajectory::addColumn_impl(const std::string& name) {
   if constexpr (ActsTrk::detail::accepted_decoration_types<T>::value) {
     m_decorations.emplace_back(
         name,
-        ActsTrk::detail::decorationGetter<xAOD::TrackStateContainer, T>,
+        ActsTrk::detail::constDecorationGetter<xAOD::TrackStateContainer, T>,
         ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, T>,
         ActsTrk::detail::decorationSetter<xAOD::TrackStateContainer, T>
   );
