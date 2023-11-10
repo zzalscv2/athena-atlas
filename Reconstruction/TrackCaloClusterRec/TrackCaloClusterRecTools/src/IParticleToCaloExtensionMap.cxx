@@ -19,7 +19,7 @@ const Trk::TrackParameters*  IParticleToCaloExtensionMap::readCaloEntry(const xA
 {
   auto pos = m_caloExtensionMap.find(particle);
   if (pos == m_caloExtensionMap.end())
-    return 0;
+    return nullptr;
   else
     return pos->second;
 }

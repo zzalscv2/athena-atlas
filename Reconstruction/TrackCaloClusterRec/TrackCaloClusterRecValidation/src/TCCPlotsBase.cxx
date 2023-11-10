@@ -47,7 +47,6 @@ void TCCPlotsBase::book(TH1*& pHisto, const std::string& histoIdentifier, const 
     ATH_MSG_WARNING("Histogram definition is empty for identifier " << histoIdentifier);
   }
   book(pHisto, hd);
-  return;
 }
 
 void TCCPlotsBase::book(TH1*& pHisto, const SingleHistogramDefinition& hd) {
@@ -56,8 +55,7 @@ void TCCPlotsBase::book(TH1*& pHisto, const SingleHistogramDefinition& hd) {
 		    hd.nBinsX, hd.xAxis.first, hd.xAxis.second, 
 		    false);
   }
-  return;
-}
+  }
 
 void TCCPlotsBase::book(TH2*& pHisto, const std::string& histoIdentifier, const std::string& folder) {
   const SingleHistogramDefinition hd = retrieveDefinition(histoIdentifier, folder);
@@ -65,7 +63,6 @@ void TCCPlotsBase::book(TH2*& pHisto, const std::string& histoIdentifier, const 
     ATH_MSG_WARNING("Histogram definition is empty for identifier " << histoIdentifier);
   }
   book(pHisto, hd);
-  return;
 }
 
 void TCCPlotsBase::book(TH2*& pHisto, const SingleHistogramDefinition& hd) {
@@ -75,8 +72,7 @@ void TCCPlotsBase::book(TH2*& pHisto, const SingleHistogramDefinition& hd) {
 		    hd.nBinsY, hd.yAxis.first, hd.yAxis.second, 
 		    false);
   }
-  return;
-}
+  }
 
 void TCCPlotsBase::book(TH3*& pHisto, const std::string& histoIdentifier, const std::string& folder) {
   const SingleHistogramDefinition hd = retrieveDefinition(histoIdentifier, folder);
@@ -84,7 +80,6 @@ void TCCPlotsBase::book(TH3*& pHisto, const std::string& histoIdentifier, const 
     ATH_MSG_WARNING("Histogram definition is empty for identifier " << histoIdentifier);
   }
   book(pHisto, hd);
-  return;
 }
 
 void TCCPlotsBase::book(TH3*& pHisto, const SingleHistogramDefinition& hd) {
@@ -95,8 +90,7 @@ void TCCPlotsBase::book(TH3*& pHisto, const SingleHistogramDefinition& hd) {
 		    hd.nBinsZ, hd.zAxis.first, hd.zAxis.second,
 		    false);
   }
-  return;
-}
+  }
 
 // 
 void TCCPlotsBase::fillHisto(TH1* pTh1, const float value) {

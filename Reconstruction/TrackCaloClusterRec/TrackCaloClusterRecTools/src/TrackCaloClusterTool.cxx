@@ -18,7 +18,7 @@
 namespace {
   // helper functions needed only in this file are defined in this anonymous namespace
   
-  typedef xAOD::IParticle::FourMom_t  FourMom_t; // this is actually 
+  using FourMom_t = xAOD::IParticle::FourMom_t; // this is actually 
 
   // update the given eta and phi coordinates by shifting the origin to the position of vertex
   void computeVertexCorr(double& eta, double& phi, const Amg::Vector3D& vertex, double radius) {
@@ -80,7 +80,7 @@ TrackCaloClusterBaseTool::TrackCaloClusterBaseTool(const std::string& t, const s
 {
   declareInterface<ITrackCaloClusterTool>(this);
 }
-TrackCaloClusterBaseTool::~TrackCaloClusterBaseTool() {}
+TrackCaloClusterBaseTool::~TrackCaloClusterBaseTool() = default;
 
 
 StatusCode TrackCaloClusterBaseTool::initialize() {
@@ -306,9 +306,9 @@ namespace TCCHelpers{
   ///  see TCCHelpers.h in TrackCaloClusterRecTools/
   struct UFOBuilder : public CombinedUFOLoop {
 
-    const xAOD::FlowElementContainer * m_pfoContainer;
-    const TrackCaloClusterInfo* m_tccInfo;
-    xAOD::FlowElementContainer * m_tccContainer;
+    const xAOD::FlowElementContainer * m_pfoContainer = nullptr;
+    const TrackCaloClusterInfo* m_tccInfo = nullptr;
+    xAOD::FlowElementContainer * m_tccContainer = nullptr;
     
     std::vector<ElementLink< xAOD::FlowElementContainer > > m_pfoLinks;
     FourMom_t m_tcc_4p = {0.,0.,0.,0.};

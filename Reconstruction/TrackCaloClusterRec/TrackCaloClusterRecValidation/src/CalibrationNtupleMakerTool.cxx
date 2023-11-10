@@ -74,7 +74,7 @@ CalibrationNtupleMakerTool::CalibrationNtupleMakerTool(const std::string& name, 
   }
   
 CalibrationNtupleMakerTool::~CalibrationNtupleMakerTool()
-{}
+= default;
   
 StatusCode CalibrationNtupleMakerTool::initialize()
 {
