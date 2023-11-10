@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMON_EVENT_H
@@ -52,6 +52,12 @@ class TrigMonEvent
   template<class T> const std::vector<T>& getVec() const;
 
   template<class T> bool add(const T &obj);
+
+  // Additional overloads callable from python.
+  const std::vector<TrigMonROB>& getROBVec() const { return m_rob; }
+  const std::vector<TrigMonRoi>& getRoiVec() const { return m_roi; }
+  const std::vector<TrigMonSeq>& getSeqVec() const { return m_seq; }
+  const std::vector<TrigMonTE>& getTEVec() const { return m_te; }
     
   void clear();
   
