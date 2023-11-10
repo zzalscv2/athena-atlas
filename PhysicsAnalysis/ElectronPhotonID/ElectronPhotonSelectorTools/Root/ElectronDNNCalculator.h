@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -33,6 +33,7 @@ namespace MVAEnum{
     double Eratio;
     double deltaEta1;
     double d0;
+    double qd0;
     double d0significance;
     double Rphi;
     double dPOverP;
@@ -42,6 +43,7 @@ namespace MVAEnum{
     double EoverP;
     double nPixHitsPlusDeadSensors;
     double nSCTHitsPlusDeadSensors;
+    double SCTWeightedCharge;
   };
 
   struct QTVars{
@@ -56,6 +58,7 @@ namespace MVAEnum{
     std::vector<double> Eratio;
     std::vector<double> deltaEta1;
     std::vector<double> d0;
+    std::vector<double> qd0;
     std::vector<double> d0significance;
     std::vector<double> Rphi;
     std::vector<double> dPOverP;
@@ -65,6 +68,7 @@ namespace MVAEnum{
     std::vector<double> EoverP;
     std::vector<double> nPixHitsPlusDeadSensors;
     std::vector<double> nSCTHitsPlusDeadSensors;
+    std::vector<double> SCTWeightedCharge; 
   };
 
 }
@@ -78,7 +82,8 @@ public:
                          const std::string& modelFileName,
                          const std::string& quantileFileName,
                          const std::vector<std::string>& variablesName,
-                         const bool multiClass);
+                         const bool multiClass,
+                         const bool CFReject);
 
   /** Standard destructor*/
   ~ElectronDNNCalculator() {};
@@ -101,6 +106,7 @@ private:
   std::vector<double> m_references;
   /// Whether the used model is a multiclass model or not.
   bool m_multiClass;
+  bool m_CFReject; 
 
 };
 

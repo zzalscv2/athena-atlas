@@ -27,9 +27,11 @@ ElectronDNNCalculator::ElectronDNNCalculator(AsgElectronSelectorTool* owner,
                                              const std::string& modelFileName,
                                              const std::string& quantileFileName,
                                              const std::vector<std::string>& variables,
-                                             const bool multiClass) :
+                                             const bool multiClass,
+                                             const bool CFReject) :
                                             asg::AsgMessagingForward(owner),
-                                            m_multiClass(multiClass)
+                                            m_multiClass(multiClass),
+                                            m_CFReject(CFReject)
 {
   ATH_MSG_INFO("Initializing ElectronDNNCalculator...");
 
@@ -45,11 +47,21 @@ ElectronDNNCalculator::ElectronDNNCalculator(AsgElectronSelectorTool* owner,
 
   // Create input order for the NN, the data needs to be passed in this exact order
   lwt::InputOrder order;
-  std::vector<std::string> inputVariables = {"d0", "d0significance", "dPOverP",
-                                             "deltaEta1", "deltaPhiRescaled2", "trans_TRTPID",
-                                             "nPixHitsPlusDeadSensors", "nSCTHitsPlusDeadSensors",
-                                             "EoverP", "eta", "et", "Rhad1", "Rhad", "f3", "f1",
-                                             "weta2", "Rphi", "Reta", "Eratio", "wtots1"};
+  std::vector<std::string> inputVariables;
+  if(m_CFReject){
+    inputVariables = {"d0significance", "dPOverP",
+                                            "deltaEta1", "deltaPhiRescaled2", "trans_TRTPID",
+                                            "nPixHitsPlusDeadSensors", "nSCTHitsPlusDeadSensors",
+                                            "EoverP", "eta", "et", "Rhad1", "Rhad", "f3", "f1",
+                                            "weta2", "Rphi", "Reta", "Eratio", "wtots1", "SCTWeightedCharge","qd0"};
+  }
+  else {
+    inputVariables = {"d0", "d0significance", "dPOverP",
+                                            "deltaEta1", "deltaPhiRescaled2", "trans_TRTPID",
+                                            "nPixHitsPlusDeadSensors", "nSCTHitsPlusDeadSensors",
+                                            "EoverP", "eta", "et", "Rhad1", "Rhad", "f3", "f1",
+                                            "weta2", "Rphi", "Reta", "Eratio", "wtots1"};
+  }                                        
   order.scalar.emplace_back("node_0", inputVariables );
 
   // create the model
@@ -87,29 +99,55 @@ ElectronDNNCalculator::ElectronDNNCalculator(AsgElectronSelectorTool* owner,
 Eigen::Matrix<float, -1, 1> ElectronDNNCalculator::calculate( const MVAEnum::MVACalcVars& varsStruct ) const
 {
   // Create the input for the model
-  Eigen::VectorXf inputVector(20);
+  Eigen::VectorXf inputVector(21);
 
   // This has to be in the same order as the InputOrder was defined
-  inputVector(0) = transformInput( m_quantiles.d0, varsStruct.d0);
-  inputVector(1) = transformInput( m_quantiles.d0significance, varsStruct.d0significance);
-  inputVector(2) = transformInput( m_quantiles.dPOverP, varsStruct.dPOverP);
-  inputVector(3) = transformInput( m_quantiles.deltaEta1, varsStruct.deltaEta1);
-  inputVector(4) = transformInput( m_quantiles.deltaPhiRescaled2, varsStruct.deltaPhiRescaled2);
-  inputVector(5) = transformInput( m_quantiles.trans_TRTPID, varsStruct.trans_TRTPID);
-  inputVector(6) = transformInput( m_quantiles.nPixHitsPlusDeadSensors, varsStruct.nPixHitsPlusDeadSensors);
-  inputVector(7) = transformInput( m_quantiles.nSCTHitsPlusDeadSensors, varsStruct.nSCTHitsPlusDeadSensors);
-  inputVector(8) = transformInput( m_quantiles.EoverP, varsStruct.EoverP);
-  inputVector(9) = transformInput( m_quantiles.eta, varsStruct.eta);
-  inputVector(10) = transformInput( m_quantiles.et, varsStruct.et);
-  inputVector(11) = transformInput( m_quantiles.Rhad1, varsStruct.Rhad1);
-  inputVector(12) = transformInput( m_quantiles.Rhad, varsStruct.Rhad);
-  inputVector(13) = transformInput( m_quantiles.f3, varsStruct.f3);
-  inputVector(14) = transformInput( m_quantiles.f1, varsStruct.f1);
-  inputVector(15) = transformInput( m_quantiles.weta2, varsStruct.weta2);
-  inputVector(16) = transformInput( m_quantiles.Rphi, varsStruct.Rphi);
-  inputVector(17) = transformInput( m_quantiles.Reta, varsStruct.Reta);
-  inputVector(18) = transformInput( m_quantiles.Eratio, varsStruct.Eratio);
-  inputVector(19) = transformInput( m_quantiles.wtots1, varsStruct.wtots1);
+  
+  if(m_CFReject){
+    inputVector(0) = transformInput( m_quantiles.d0significance, varsStruct.d0significance);
+    inputVector(1) = transformInput( m_quantiles.dPOverP, varsStruct.dPOverP);
+    inputVector(2) = transformInput( m_quantiles.deltaEta1, varsStruct.deltaEta1);
+    inputVector(3) = transformInput( m_quantiles.deltaPhiRescaled2, varsStruct.deltaPhiRescaled2);
+    inputVector(4) = transformInput( m_quantiles.trans_TRTPID, varsStruct.trans_TRTPID);
+    inputVector(5) = transformInput( m_quantiles.nPixHitsPlusDeadSensors, varsStruct.nPixHitsPlusDeadSensors);
+    inputVector(6) = transformInput( m_quantiles.nSCTHitsPlusDeadSensors, varsStruct.nSCTHitsPlusDeadSensors);
+    inputVector(7) = transformInput( m_quantiles.EoverP, varsStruct.EoverP);
+    inputVector(8) = transformInput( m_quantiles.eta, varsStruct.eta);
+    inputVector(9) = transformInput( m_quantiles.et, varsStruct.et);
+    inputVector(10) = transformInput( m_quantiles.Rhad1, varsStruct.Rhad1);
+    inputVector(11) = transformInput( m_quantiles.Rhad, varsStruct.Rhad);
+    inputVector(12) = transformInput( m_quantiles.f3, varsStruct.f3);
+    inputVector(13) = transformInput( m_quantiles.f1, varsStruct.f1);
+    inputVector(14) = transformInput( m_quantiles.weta2, varsStruct.weta2);
+    inputVector(15) = transformInput( m_quantiles.Rphi, varsStruct.Rphi);
+    inputVector(16) = transformInput( m_quantiles.Reta, varsStruct.Reta);
+    inputVector(17) = transformInput( m_quantiles.Eratio, varsStruct.Eratio);
+    inputVector(18) = transformInput( m_quantiles.wtots1, varsStruct.wtots1);
+    inputVector(19) = transformInput( m_quantiles.SCTWeightedCharge, varsStruct.SCTWeightedCharge);
+    inputVector(20) = transformInput( m_quantiles.qd0, varsStruct.qd0);
+  }
+  else {
+    inputVector(0) = transformInput( m_quantiles.d0, varsStruct.d0);
+    inputVector(1) = transformInput( m_quantiles.d0significance, varsStruct.d0significance);
+    inputVector(2) = transformInput( m_quantiles.dPOverP, varsStruct.dPOverP);
+    inputVector(3) = transformInput( m_quantiles.deltaEta1, varsStruct.deltaEta1);
+    inputVector(4) = transformInput( m_quantiles.deltaPhiRescaled2, varsStruct.deltaPhiRescaled2);
+    inputVector(5) = transformInput( m_quantiles.trans_TRTPID, varsStruct.trans_TRTPID);
+    inputVector(6) = transformInput( m_quantiles.nPixHitsPlusDeadSensors, varsStruct.nPixHitsPlusDeadSensors);
+    inputVector(7) = transformInput( m_quantiles.nSCTHitsPlusDeadSensors, varsStruct.nSCTHitsPlusDeadSensors);
+    inputVector(8) = transformInput( m_quantiles.EoverP, varsStruct.EoverP);
+    inputVector(9) = transformInput( m_quantiles.eta, varsStruct.eta);
+    inputVector(10) = transformInput( m_quantiles.et, varsStruct.et);
+    inputVector(11) = transformInput( m_quantiles.Rhad1, varsStruct.Rhad1);
+    inputVector(12) = transformInput( m_quantiles.Rhad, varsStruct.Rhad);
+    inputVector(13) = transformInput( m_quantiles.f3, varsStruct.f3);
+    inputVector(14) = transformInput( m_quantiles.f1, varsStruct.f1);
+    inputVector(15) = transformInput( m_quantiles.weta2, varsStruct.weta2);
+    inputVector(16) = transformInput( m_quantiles.Rphi, varsStruct.Rphi);
+    inputVector(17) = transformInput( m_quantiles.Reta, varsStruct.Reta);
+    inputVector(18) = transformInput( m_quantiles.Eratio, varsStruct.Eratio);
+    inputVector(19) = transformInput( m_quantiles.wtots1, varsStruct.wtots1);
+  }
 
   std::vector<Eigen::VectorXf> inp;
   inp.emplace_back(std::move(inputVector));
@@ -168,7 +206,6 @@ int ElectronDNNCalculator::readQuantileTransformer( TTree* tree, const std::vect
   for (int i = 0; i < tree->GetEntries(); i++){
     tree->GetEntry(i);
     m_references.push_back(references);
-    m_quantiles.d0.push_back(readVars["d0"]);
     m_quantiles.d0significance.push_back(readVars["d0significance"]);
     m_quantiles.dPOverP.push_back(readVars["dPOverP"]);
     m_quantiles.deltaEta1.push_back(readVars["deltaEta1"]);
@@ -188,6 +225,13 @@ int ElectronDNNCalculator::readQuantileTransformer( TTree* tree, const std::vect
     m_quantiles.Reta.push_back(readVars["Reta"]);
     m_quantiles.Eratio.push_back(readVars["Eratio"]);
     m_quantiles.wtots1.push_back(readVars["wtots1"]);
+    if(m_CFReject){
+      m_quantiles.SCTWeightedCharge.push_back(readVars["SCTWeightedCharge"]);
+      m_quantiles.qd0.push_back(readVars["qd0"]);
+    }
+    else {
+      m_quantiles.d0.push_back(readVars["d0"]);
+    }
   }
   return sc;
 }

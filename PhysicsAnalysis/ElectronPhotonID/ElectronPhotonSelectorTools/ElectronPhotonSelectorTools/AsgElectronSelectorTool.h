@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -80,9 +80,12 @@ public:
   double calculate( const EventContext &ctx, const xAOD::Egamma* eg ) const override {
     return calculate (ctx, eg, -99); // mu = -99 as input will force accept to grab the pileup variable from the xAOD object
   }
-
+  
   /** The main result method: the actual mva score is calculated here */
   double calculate( const EventContext &ctx, const xAOD::Electron* eg, double mu ) const override;
+
+  /** The main result method: the actual CF mva score is calculated here */
+  double calculateCF( const EventContext &ctx, const xAOD::Electron* eg, double mu) const;
 
   /** The main result method: the actual mva score is calculated here */
   double calculate( const EventContext &ctx, const xAOD::Egamma* eg, double mu ) const override;
@@ -106,6 +109,7 @@ private:
 
   /** Combines the six output nodes of a multiclass model into one discriminant. */
   double combineOutputs(const std::vector<float>& mvaScores, double eta) const;
+  double combineOutputsCF(const std::vector<float>& mvaScores) const;
 
   /** Gets the Discriminant Eta bin [0,s_fnDiscEtaBins-1] given the eta*/
   static unsigned int getDiscEtaBin( double eta ) ;
@@ -148,6 +152,8 @@ private:
 
   /// Multiclass model or not
   bool m_multiClass{};
+  /// Multiclass model or not
+  bool m_CFReject{};
   /// Use the CF output node in the numerator or the denominator
   bool m_cfSignal{};
   /// Fractions to combine the output nodes of a multiclass model into one discriminant.
@@ -165,6 +171,7 @@ private:
   bool m_doSmoothBinInterpolation{};
   /// cut on mva output
   std::vector<double> m_cutSelector;
+  std::vector<double> m_cutSelectorCF;
 
 
   /// The position of the kinematic cut bit in the AcceptInfo return object
