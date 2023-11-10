@@ -16,6 +16,8 @@
 
 namespace {
   const std::string jetLinkName = "jetLink";
+  const std::string unsafeEnvVar = "ALLOW_FTAG_TO_BREAK_THE_EDM";
+  const std::string envVarTrue = "Yes please.";
 }
 
 namespace FlavorTagDiscriminants {
@@ -31,12 +33,18 @@ namespace FlavorTagDiscriminants {
     m_defaultValue(defaultOutputValue),
     m_decorate_tracks(decorate_tracks)
   {
-    // track decoration is allowed only for AnalysisBase or AthAnalysis or internal FTAG
-    #if !(defined(XAOD_ANALYSIS) || defined(FTAG_ALLOW_BREAK_EDM))
+    // track decoration is allowed only for non-production builds
     if (m_decorate_tracks) {
-      throw std::runtime_error("This can not run in Athena Production or Derivation. It mangles the xAOD ouput via conditional decorations and will cause issues with the scheduler.");
+      const char* break_edm = std::getenv(unsafeEnvVar.c_str());
+      if (break_edm == nullptr || std::string(break_edm) != envVarTrue) {
+        throw std::runtime_error(
+          "Flavor tagging is trying to break the EDM!\n\n"
+          "You are trying to break the EDM!!! "
+          "We'll let you do this, if you set an environement variable. "
+          "Which one? Not telling. "
+          "Now go think about what you just did.\n\n");
+      }
     }
-    #endif  
 
     std::string fullPathToOnnxFile = PathResolverFindCalibFile(nnFile);
     m_onnxUtil = std::make_shared<OnnxUtil>(fullPathToOnnxFile);
@@ -76,7 +84,7 @@ namespace FlavorTagDiscriminants {
 
     std::tie(m_decorators_float, m_decorators_vecchar, m_decorators_vecfloat, m_decorators_tracklinks, m_decorators_track_char, m_decorators_track_float, dd, rd) = dataprep::createGNDecorators(
       m_config_gnn, options);
-    
+
     m_dataDependencyNames += dd;
 
     rd.merge(rt);
@@ -107,7 +115,7 @@ namespace FlavorTagDiscriminants {
   void GNN::decorate(const xAOD::Jet& jet, const SG::AuxElement& btag) const {
 
     using namespace internal;
-    
+
     std::map<std::string, input_pair> gnn_input;
 
     std::vector<float> jet_feat;
@@ -123,9 +131,9 @@ namespace FlavorTagDiscriminants {
     gnn_input.insert({"jet_features", jet_info});
 
     // Only one track sequence is allowed because the tracks are declared
-    // outside the loop over sequences. 
-    // Having more than one sequence would overwrite them. 
-    // These are only used outside the loop to write the track links. 
+    // outside the loop over sequences.
+    // Having more than one sequence would overwrite them.
+    // These are only used outside the loop to write the track links.
     if (m_trackSequenceBuilders.size() > 1) {
       throw std::runtime_error("Only one track sequence is supported");
     }
