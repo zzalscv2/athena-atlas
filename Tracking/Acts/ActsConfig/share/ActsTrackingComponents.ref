@@ -206,7 +206,7 @@ Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by T
 
 ************************************************************************
 ******************** Tracking reconstruction Config ********************
-                     Active Config is ValidateActsAmbiguityResolution
+                     Active Config is ValidateActsResolvedTracks
 Flag Name                                : Value
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : False [function]
 Tracking.ActiveConfig.doAthenaCluster    : True

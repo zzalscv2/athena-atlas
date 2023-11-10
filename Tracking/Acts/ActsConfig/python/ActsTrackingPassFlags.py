@@ -63,7 +63,7 @@ def createValidateActsSeedsTrackingPassFlags():
 
 def createValidateActsTracksTrackingPassFlags():
     icf = createITkTrackingPassFlags()
-    icf.extension = lambda pcf : "ValidateActsTracks" if not pcf.Acts.doAmbiguityResolution else "ValidateActsAmbiguityResolution"
+    icf.extension = lambda pcf : "ValidateActsTracks" if not pcf.Acts.doAmbiguityResolution else "ValidateActsResolvedTracks"
     deactivateAthenaComponents(icf)
     # sequence is still a work in progress
     # Requires Athena cluster and cluster EDM converter 

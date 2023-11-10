@@ -207,7 +207,7 @@ def ITkTrackFinalCfg(flags,
         AssociationMapName=(
             "" if flags.Tracking.doITkFastTracking else
             f"PRDtoTrackMap{TrackContainer}"),
-        isActsAmbi = 'ValidateActsAmbiguityResolution' in splitProbName or ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
+        isActsAmbi = 'ValidateActsResolvedTracks' in splitProbName or ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
 
     return result
 

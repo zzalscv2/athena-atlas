@@ -62,7 +62,7 @@ fi
 run "Reconstruction-ambi" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateAmbiguityResolutionFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateResolvedTracksFlags" \
     --inputRDOFile ${rdo_23p0} \
     --outputAODFile AOD.ambi.root \
     --perfmon fullmonmt \
