@@ -730,8 +730,9 @@ StatusCode BTaggingTruthTaggingTool::getTRFweight(TRFinfo &trfinf,unsigned int n
   unsigned int limit = (njets > 7) ? 8 : njets+1;
 
   // Permutations: njets, ntags, permutations
-  if (trfinf.perms.find(njets)==trfinf.perms.end()){   // if I don't have already saved the possible permutations for njet
-    trfinf.perms[njets] = std::vector<std::vector<std::vector<bool> > >(limit);
+  auto& perm = trfinf.perms[njets];
+  if (perm.empty()) {   // if I don't have already saved the possible permutations for njet
+    perm.resize (limit);
     for(unsigned int i=0;i<limit;i++)
       trfinf.perms[njets].at(i) = generatePermutations(njets,i);
   }

@@ -9,8 +9,9 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #include <cstdint> //for int64_t
 
 // Constructor
-OnnxUtil::OnnxUtil(const std::string& name){
-    m_path_to_onnx = name;
+OnnxUtil::OnnxUtil(const std::string& name)
+  : m_path_to_onnx (name)
+{
 }
 
 void OnnxUtil::initialize(){

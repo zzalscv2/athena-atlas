@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -105,7 +105,7 @@ std::vector<std::string> BTaggingEigenVectorRecompositionTool::getListOfOriginal
 // Produce a coefficient map contains only eigenvectors that is showing in
 // eigenIdxList and return it to user. If given empty evIdxList, the function
 // returns a full map. Produced map is for the chosen flavour label.
-std::map<std::string, std::map<std::string, float>> BTaggingEigenVectorRecompositionTool::getCoefficientMap(const std::string & label, const std::vector<unsigned int> evIdxList) const
+std::map<std::string, std::map<std::string, float>> BTaggingEigenVectorRecompositionTool::getCoefficientMap(const std::string & label, const std::vector<unsigned int>& evIdxList) const
 {
   ATH_MSG_INFO("getCoefficientMap()");
   

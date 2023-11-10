@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -137,7 +137,7 @@ private:
   };
   //get from the CDI file the taggers cut object(that holds the definition of cut values)
   //and flaovur fraction (for DL1 tagger) and store them in the right taggerproperties struct
-  void ExtractTaggerProperties(taggerproperties& tagger, std::string taggerName, std::string OP);
+  void ExtractTaggerProperties(taggerproperties& tagger, const std::string& taggerName, const std::string& OP);
 
   std::vector<std::string> split (const std::string &input, const char &delimiter);
 
