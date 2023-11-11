@@ -72,7 +72,8 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
     unsigned int gasGap{0};
     for (const physVolWithTrans& pVolTrans : allGasGaps) {
         std::stringstream key{};
-        key<<define.chambDesign<<"_"<<(gasGap+1);
+        key<<define.chambDesign<<"_"<<(gasGap+1)
+           <<(m_idHelperSvc->stationEta(define.detElId) ? "A" : "C");
 
         StripLayerPtr& stripLayout{factoryCache.stripDesigns[key.str()]};
         StripLayerPtr& wireLayout{factoryCache.wireDesigns[key.str()]};
@@ -98,7 +99,7 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
             const double halfY = gapTrd->getZHalfLength();
 
             if (!wireLayout && table.wireGangs.size()) {
-                std::shared_ptr<WireGroupDesign> wireGrp = std::make_shared<WireGroupDesign>();
+                WireDesignPtr wireGrp = std::make_unique<WireGroupDesign>();
                 wireGrp->defineTrapezoid(halfMinX, halfMaxX, halfY);
                 for (unsigned int gang : table.wireGangs) {
                     wireGrp->declareGroup(gang); 
@@ -112,11 +113,10 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
                                              * Amg::getRotateX3D(180.* Gaudi::Units::deg)};
                 /// Reserve the first bit for the isStrip property
                 const IdentifierHash hash{gasGap << 1};
-                StripDesignPtr stripDesign{wireGrp};
-                wireLayout = std::make_unique<StripLayer>(trans, stripDesign, hash);
+                wireLayout = std::make_unique<StripLayer>(trans, (*factoryCache.wireLayouts.insert(std::move(wireGrp)).first), hash);
             }
             if (!stripLayout && table.bottomStripPos.size()) {
-                std::shared_ptr<RadialStripDesign> radDesign = std::make_shared<RadialStripDesign>();
+                RadialStripDesignPtr radDesign = std::make_unique<RadialStripDesign>();
                 radDesign->defineTrapezoid(halfMinX, halfMaxX, halfY);
                 radDesign->defineStripLayout(Amg::Vector2D{-halfY,0.},
                                                 0.,0.,table.bottomStripPos.size());
@@ -130,8 +130,7 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
                 const Amg::Transform3D trans{pVolTrans.transform 
                                              * Amg::getRotateZ3D(90.* Gaudi::Units::deg)                                            
                                              * Amg::getRotateX3D(90.*Gaudi::Units::deg)};
-                StripDesignPtr stripDesign{radDesign};
-                stripLayout = std::make_unique<StripLayer>(trans, stripDesign, hash);                
+                stripLayout = std::make_unique<StripLayer>(trans, (*factoryCache.stripLayouts.insert(std::move(radDesign)).first), hash);                
             }
         }
         ++gasGap;
@@ -221,16 +220,22 @@ StatusCode TgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
     for (const IRDBRecord* record : *paramTable) {
         const std::string chambType = record->getString("technology");
         const int gasGap = record->getInt("gasGap");
-        std::stringstream key{};
-        key<<chambType<<"_"<<gasGap;
-        wTgcTable& parBook{cache.parameterBook[key.str()]};
         const std::vector<int> wireGangs{tokenizeInt(record->getString("wireGangs"),",")};
-        parBook.wireGangs.insert(parBook.wireGangs.end(), wireGangs.begin(), wireGangs.end());
-
-        parBook.bottomStripPos = tokenizeDouble(record->getString("bottomStrips"), ",");
-        parBook.topStripPos = tokenizeDouble(record->getString("topStrips"), ",");
-        parBook.wirePitch = record->getDouble("wirePitch");
-        parBook.gasGap = gasGap;
+        const std::vector<double> botStrips = tokenizeDouble(record->getString("bottomStrips"), ",");
+        const std::vector<double> topStrips = tokenizeDouble(record->getString("topStrips"), ",");
+        const std::vector<std::string> sides = tokenize(record->getString("side"), ";");
+        const double wirePitch = record->getDouble("wirePitch");
+        for (const std::string& side : sides) {
+            std::stringstream key{};
+            key<<chambType<<"_"<<gasGap<<side;
+            wTgcTable& parBook{cache.parameterBook[key.str()]};
+            parBook.wireGangs.insert(parBook.wireGangs.end(), wireGangs.begin(), wireGangs.end());
+            parBook.bottomStripPos = botStrips;
+            parBook.topStripPos = topStrips;
+            parBook.wirePitch = wirePitch;
+            parBook.gasGap = gasGap;
+        }
+       
     }
     ATH_MSG_DEBUG("Read in total "<<cache.parameterBook.size()<<" chamber layouts");
     return StatusCode::SUCCESS;

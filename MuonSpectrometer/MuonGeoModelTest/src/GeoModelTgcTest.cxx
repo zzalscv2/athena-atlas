@@ -16,7 +16,7 @@
 namespace MuonGM {
 
 template<typename VType> bool isEqual(const std::vector<VType>& a,
-                                      const std::vector<VType>&b){
+                                      const std::vector<VType>& b) {
     if (a.size() != b.size()) {
         return false;
     }
@@ -43,6 +43,11 @@ template <typename VType> std::ostream& operator<<(std::ostream& ostr, const std
     } 
     return ostr;
 }
+inline int nStrips(const MuonGM::TgcReadoutElement& readoutEle, int layer) {
+    return readoutEle.getNStrips(layer) > 1 ? readoutEle.getNStrips(layer) : 0;
+} 
+
+
 struct TgcChamberLayout {
     Identifier gasGap{};
     std::string techType{};
@@ -60,7 +65,9 @@ struct TgcChamberLayout {
 };
 struct ChamberGrp {
     ChamberGrp(const TgcChamberLayout& grp):
-            m_lay{grp} {m_gaps[grp.techType].insert(grp.gasGap);}
+            m_lay{grp} {
+        m_gaps[grp.techType].insert(grp.gasGap);
+    }
     bool addChamber(const TgcChamberLayout& lay){
         if (m_lay == lay) { 
             m_gaps[lay.techType].insert(lay.gasGap);
@@ -70,6 +77,7 @@ struct ChamberGrp {
     }
     const std::map<std::string, std::set<Identifier>>& allGaps() const{ return m_gaps; }
     const TgcChamberLayout& layout() const { return m_lay; }
+    TgcChamberLayout& layout(){ return m_lay; }
     private:
         TgcChamberLayout m_lay{};
         std::map<std::string, std::set<Identifier>> m_gaps{};
@@ -187,7 +195,7 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
 
     for (bool isStrip : {false, true}) {        
         for (int layer = 1 ; layer <= readoutEle->numberOfLayers(isStrip); ++layer){
-            const unsigned int nChan = isStrip ? readoutEle->getNStrips(layer) :
+            const unsigned int nChan = isStrip ? nStrips(*readoutEle, layer) :
                                                  readoutEle->nGangs(layer);
             if (!nChan) continue;
             const Identifier layerId = idHelper.channelID(readoutEle->identify(),layer, isStrip, 1);
@@ -202,7 +210,7 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
             
             if (isStrip) {
                 /// The last strip is for one reason always 0
-                for (int strip = 1; strip < readoutEle->getNStrips(layer); ++strip) {
+                for (int strip = 1; strip <= nStrips(*readoutEle,layer); ++strip) {
                     bool is_valid{false};
                     const Identifier stripId = idHelper.channelID(readoutEle->identify(), layer, isStrip, strip, is_valid);
                     if (!is_valid) continue;
@@ -281,11 +289,23 @@ void GeoModelTgcTest::dumpReadoutXML(const MuonGM::MuonDetectorManager& detMgr) 
                 chambLayout.gasGap = m_idHelperSvc->gasGapId(layerId);
                 chambLayout.techType = reEle->getTechnologyName();
                 if (isStrip) {
-                   for (int strip = 1; strip < reEle->getNStrips(layer); ++strip) {
+                   for (int strip = 1; nStrips(*reEle, layer) && strip <= 33; ++strip) {
                         /// Note the slight shift in the coordinate system given that the positions in the legacy
                         /// are given w.r.t. strip center while for the new geometry we need them w.r.t. strip edge
-                        chambLayout.botStripPos.push_back(reEle->getStripPositionOnShortBase(strip) + 0.5*reEle->getSsize());
-                        chambLayout.topStripPos.push_back(reEle->getStripPositionOnLargeBase(strip) + 0.5*reEle->getLongSsize());
+                        const double botPos = reEle->getStripPositionOnShortBase(strip);
+                        const double topPos = reEle->getStripPositionOnLargeBase(strip);
+                        std::vector<double>& botStrip{chambLayout.botStripPos};
+                        std::vector<double>& topStrip{chambLayout.topStripPos};
+                        
+                        if ( (reEle->getStationEta() > 0 && layer == 1) || 
+                             (reEle->getStationEta() < 0 && layer != 1) ) {
+                            botStrip.push_back(-botPos);
+                            topStrip.push_back(-topPos);
+                        } else {
+                            botStrip.push_back(botPos);
+                            topStrip.push_back(topPos);
+
+                        }
                    }
                 } else {
                     unsigned int accumlWires{0};
@@ -310,36 +330,39 @@ void GeoModelTgcTest::dumpReadoutXML(const MuonGM::MuonDetectorManager& detMgr) 
         }
     }
     /// Select the set of all layouts that are belonging together
-    std::vector<ChamberGrp> groupies{};
+    std::vector<ChamberGrp> groupedLayouts{};
     for (const auto& lay : allLayouts) {
         bool added{false};
-        for (ChamberGrp& grp : groupies) {
+        for (ChamberGrp& grp : groupedLayouts) {
             if (grp.addChamber(lay.second)){
                 added = true;
                 break;
             }
         }
-        if (!added) groupies.emplace_back(lay.second);
+        if (!added) groupedLayouts.emplace_back(lay.second);
     }
     allLayouts.clear();
-    std::stable_sort(groupies.begin(),groupies.end(), 
+    std::stable_sort(groupedLayouts.begin(),groupedLayouts.end(), 
                     [](const ChamberGrp& a, const ChamberGrp& b){
                         return a.layout().techType < b.layout().techType;
                     });
     /// All added
-    ATH_MSG_INFO("Found in total "<<groupies.size()<<" different chamber layouts");
+    ATH_MSG_INFO("Found in total "<<groupedLayouts.size()<<" different chamber layouts");
     xmlStream<<"<Table name=\"TgcSensorLayout\">"<<std::endl;
     unsigned int counter{1};
-    for (const ChamberGrp& grp : groupies) {
+    for (const ChamberGrp& grp : groupedLayouts) {
         for (const auto& [tech_type, gapIds]: grp.allGaps() ){
-            std::set<int> gaps{};            
+            std::set<int> gaps{};
+            std::set<char> sides{};         
             for (const Identifier gapId : gapIds) {
                 gaps.insert(m_idHelperSvc->gasGap(gapId));
+                sides.insert(m_idHelperSvc->stationEta(gapId) > 0 ? 'A' : 'C');
             }
             xmlStream<<"    <Row ";
             xmlStream<<"TGCSENSORLAYOUT_DATA_ID=\""<<counter<<"\" ";
             xmlStream<<"technology=\""<<tech_type<<"\" ";
             xmlStream<<"gasGap=\""<<gaps<<"\" ";
+            xmlStream<<"side=\""<<sides<<"\" "; 
             xmlStream<<"wirePitch=\""<<grp.layout().wirePitch<<"\" ";
             xmlStream<<"wireGangs=\""<<grp.layout().wireGangLayout<<"\" ";
             xmlStream<<"bottomStrips=\""<<grp.layout().botStripPos<<"\" ";

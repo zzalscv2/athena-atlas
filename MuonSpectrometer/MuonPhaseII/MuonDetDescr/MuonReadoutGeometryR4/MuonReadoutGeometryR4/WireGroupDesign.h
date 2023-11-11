@@ -74,5 +74,7 @@ struct WireDesignSorter{
     }
 };
 
+using WireGroupDesignSet = std::set<WireDesignPtr, WireDesignSorter>;
+
 }
 #endif

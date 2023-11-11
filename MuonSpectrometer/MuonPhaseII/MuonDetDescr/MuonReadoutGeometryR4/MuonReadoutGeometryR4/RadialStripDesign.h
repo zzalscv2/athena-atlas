@@ -26,14 +26,39 @@ class RadialStripDesign: public StripDesign {
         /// set sorting operator
         bool operator<(const RadialStripDesign& other) const;
         
+        /** @brief: Defines a new radial strip.
+         *  @param: Intersection between the left strip edge & the bottom panel edge measured from the panel edge center
+         *  @param: Intersection between the left strip edge & the top panel edge measured from the panel edge center
+        */
         void addStrip(const double posOnBottom,
                       const double posOnTop);
         
+        /** @brief: Returns the direction of the radial strip (Pointing from the bottom edge to the top edge)
+          * @param: Strip number in the global scheme [1- nStrips()] 
+        */
         Amg::Vector2D stripDir(int stripNumber) const;
+        /** @brief: Returns the intersection of the left strip edge at the bottom panel's edge*/
+        Amg::Vector2D stripLeftEdgeBottom(int stripNumber) const;
+        /** @brief: Returns the intersecton of the strip right edge at the bottom panel's edge*/
+        Amg::Vector2D stripRightEdgeBottom(int stripNumber) const;
+        /** @brief: Returns the intersection of the left strip edge at the top panel's edge */
+        Amg::Vector2D stripLeftEdgeTop(int stripNumber) const;
+        /** @brief: Returns the intersecetion fo the right strip edge at the top panel's edge */
+        Amg::Vector2D stripRightEdgeTop(int stripNumber) const;
 
-    private:
-        Amg::Vector2D stripPosition(int stripNum) const override final;
+        /// Returns the number of defined strips
+        int numStrips() const override;
+
+    private:        
+        Amg::Vector2D panelEdgeCenter() const;
+        Amg::Vector2D leftInterSect(int stripNum, bool uncapped = false) const override final;
+        Amg::Vector2D rightInterSect(int stripNum, bool uncapped = false) const override final;        
+        /// Helper struct to 
         struct stripEdges{
+            stripEdges(double dBot, double dTop):
+                distOnBottom{dBot},
+                distOnTop{dTop} {}
+
             double distOnBottom{0.};
             double distOnTop{0.};
         };
@@ -49,5 +74,8 @@ struct RadialDesignSorter{
     }
 };
 
+using RadialStripDesignSet = std::set<RadialStripDesignPtr, RadialDesignSorter>;
+
 }
+#include <MuonReadoutGeometryR4/RadialStripDesign.icc>
 #endif
