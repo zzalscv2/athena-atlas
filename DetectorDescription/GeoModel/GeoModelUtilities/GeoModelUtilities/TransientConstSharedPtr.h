@@ -12,6 +12,7 @@ namespace GeoModel {
     /// The class takes the ownership of the object using a shared_ptr
     template <typename Obj> class TransientConstSharedPtr {
     public:
+        template <typename ObjGrp> friend class GeoModel::TransientConstSharedPtr;
         /// Get (non-const) access to the underlying object
         Obj* get() { return m_ptr.get(); }
         Obj* operator->() { return get(); }
@@ -32,18 +33,33 @@ namespace GeoModel {
         /// Standard constructor
         TransientConstSharedPtr() = default;
         /// Delete the copy constructor if the object is const
-        TransientConstSharedPtr(const TransientConstSharedPtr& other) = default;
+        template <typename ObjGrp>
+        TransientConstSharedPtr(const TransientConstSharedPtr<ObjGrp>& other):
+             m_ptr{other.m_ptr}{}
         /// Standard move constructor
-        TransientConstSharedPtr(TransientConstSharedPtr&& other) = default;
+        template <typename ObjGrp>
+        TransientConstSharedPtr(TransientConstSharedPtr<ObjGrp>&& other):
+            m_ptr{std::move(other.m_ptr)}{}
 
         /// Assignment operator
-        TransientConstSharedPtr& operator=(const TransientConstSharedPtr& other) = default;
-        TransientConstSharedPtr& operator=(const std::shared_ptr<Obj>& other) {
+        template <typename ObjGrp>
+        TransientConstSharedPtr& operator=(const TransientConstSharedPtr<ObjGrp>& other){
+            if (&other != this) {
+                m_ptr = other.m_ptr;
+            }
+            return *this;
+        }
+        template <typename ObjGrp>
+        TransientConstSharedPtr& operator=(const std::shared_ptr<ObjGrp>& other) {
             m_ptr = other.m_ptr;
             return *this;
         }
         /// Move assignment operator
-        TransientConstSharedPtr& operator=(TransientConstSharedPtr&& other) = default;
+        template <typename ObjGrp>
+        TransientConstSharedPtr& operator=(TransientConstSharedPtr<ObjGrp>&& other){
+            m_ptr = std::move(other.m_ptr);
+            return *this;
+        }
         TransientConstSharedPtr& operator=(std::unique_ptr<Obj>&& other) {
             m_ptr = std::move(other);
             return *this;

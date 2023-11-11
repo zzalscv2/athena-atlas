@@ -93,13 +93,10 @@ StatusCode GeoModelRpcTest::execute() {
       const Amg::Transform3D& localToGlob{reElement->localToGlobalTrans(gctx)};
       /// Closure test that the transformations actually close
       const Amg::Transform3D transClosure = globToLocal * localToGlob;
-      for (Amg::Vector3D axis :{Amg::Vector3D::UnitX(),Amg::Vector3D::UnitY(),Amg::Vector3D::UnitZ()}) {
-         const double closure_mag = std::abs( (transClosure*axis).dot(axis) - 1.);
-         if (closure_mag > std::numeric_limits<float>::epsilon() ) {
-            ATH_MSG_FATAL("Closure test failed for "<<m_idHelperSvc->toStringDetEl(test_me)<<" and axis "<<Amg::toString(axis, 0)
-            <<". Ended up with "<< Amg::toString(transClosure*axis) );
-            return StatusCode::FAILURE;
-         }         
+      if (!Amg::doesNotDeform(transClosure)) {
+        ATH_MSG_FATAL("Closure test failed for "<<m_idHelperSvc->toStringDetEl(test_me)
+                    <<". Ended up with "<< Amg::toString(transClosure) );
+        return StatusCode::FAILURE;                  
       }
       const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
       for (unsigned int gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {

@@ -36,7 +36,7 @@ namespace MuonGMR4 {
             /// Width of a strip
             double stripWidth() const;
             /// Number of strips on the panel
-            int numStrips() const;
+            virtual int numStrips() const;
             /// Defines the layout of the strip detector by specifing the position of the first strip w.r.t.
             /// the layer center, the pitch to the next strip, the corresponding width of each strip,
             /// the total number of strips and finally the number of the first strip in the global numbering scheme
@@ -88,20 +88,40 @@ namespace MuonGMR4 {
             bool operator<(const StripDesign& other) const;
             /// Returns length of the strip
             double stripLength(int stripNumb) const;
+            /// Dump properties to the ostr
+            virtual void print(std::ostream&ostr) const;
+
         protected:
             /// Calculates the position of a given strip (Local numbering scheme)
             virtual Amg::Vector2D stripPosition(int stripNum) const;
             /// Returns the intersection of a given strip with the left or right edge of the trapezoid
             /// If uncapped is set to false and the strip is a routed strip, then the intersection onto
             /// the corresponding bottom / top edges are returned
-            Amg::Vector2D leftInterSect(int stripNum, bool uncapped = false) const;
-            Amg::Vector2D rightInterSect(int stripNum, bool uncapped = false) const;
+            virtual Amg::Vector2D leftInterSect(int stripNum, bool uncapped = false) const;
+            virtual Amg::Vector2D rightInterSect(int stripNum, bool uncapped = false) const;
             
             Amg::Vector2D leftInterSect(const Amg::Vector2D& stripPos, bool uncapped = false) const;
             Amg::Vector2D rightInterSect(const Amg::Vector2D& stripPos, bool uncapped = false) const;
-
+        public:
             /// Returns the geometrical center of a given strip
             Amg::Vector2D stripCenter(int stripNum) const;
+            /// Returns the bottom left corner  of the trapezoid
+            const Amg::Vector2D& cornerBotLeft() const;
+            /// Returns the bottom right corner of the trapezoid
+            const Amg::Vector2D& cornerBotRight() const;
+            /// Returns the top left corner of the trapezoid
+            const Amg::Vector2D& cornerTopLeft() const;
+            /// Returns the top right corner of the trapezoid
+            const Amg::Vector2D& cornerTopRight() const;
+
+            /// Returns the unit vector pointing from the bottom left -> right corner
+            const Amg::Vector2D& edgeDirBottom() const;
+            /// Returns the unit vector pointing from the top left -> right corner
+            const Amg::Vector2D& edgeDirTop() const;
+            /// Returns the unit vector pointing from the left bottom -> top corner
+            const Amg::Vector2D& edgeDirLeft() const;
+            /// Returns the unit vector pointing from the right bottom -> top corner
+            const Amg::Vector2D& edgeDirRight() const;
         private:
             void setStereoAngle(double stereo);
             /// Shift between the 0-th readout channel and the first strip described by the panel
@@ -130,22 +150,19 @@ namespace MuonGMR4 {
             AmgSymMatrix(2) m_stereoRotMat{AmgSymMatrix(2)::Identity()};
             /// Matrixt to translate from stereo -> nominal frame
             AmgSymMatrix(2) m_nominalRotMat{AmgSymMatrix(2)::Identity()};
-        protected:    
             /// Bottom left point of the trapezoid
             Amg::Vector2D m_bottomLeft{Amg::Vector2D::Zero()};
             /// Top right point of the trapezoid
             Amg::Vector2D m_topLeft{Amg::Vector2D::Zero()};
-        private:
             /// Bottom right point of the trapezoid
             Amg::Vector2D m_topRight{Amg::Vector2D::Zero()};
            /// Bottom right point of the trapezoid
             Amg::Vector2D m_bottomRight{Amg::Vector2D::Zero()};
-        protected:
+            
             /// Vector describing the top edge of the trapzoid (top left -> top right)
             Amg::Vector2D m_dirTopEdge{Amg::Vector2D::Zero()};
             /// Vector describing the bottom edge of the trapezoid (bottom left -> bottom right)
             Amg::Vector2D m_dirBotEdge{Amg::Vector2D::Zero()};
-        private:   
             /// Vector describing the left adge of the trapezoid (bottom left -> top left)
             Amg::Vector2D m_dirLeftEdge{Amg::Vector2D::UnitY()};
             /// Vector describing the right edge of the trapezoid (bottom right -> top right)
@@ -156,6 +173,12 @@ namespace MuonGMR4 {
             double m_shortHalfY{0.};
             double m_longHalfY{0.};
             double m_halfX{0.};
+
+
+            /// Returns the intersection of a strip with the left edge of the trapezoid in case it's flipped
+            Amg::Vector2D leftInterSectFlipped(const Amg::Vector2D& stripPos, bool uncapped = false) const;
+            /// Returns the intersection of a strip with the right edge of the trapezoid in case it's flipped
+            Amg::Vector2D rightInterSectFlipped(const Amg::Vector2D& stripPos, bool uncapped = false) const;
     };
     
     struct StripDesignSorter{

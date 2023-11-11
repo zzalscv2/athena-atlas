@@ -17,33 +17,8 @@ namespace MuonGMR4{
         }
         return static_cast<const StripDesign&>(*this) < other;
     }
-    Amg::Vector2D RadialStripDesign::stripPosition(int stripNum) const {
-        if (stripNum >= static_cast<int>(m_strips.size())) {
-            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The strip number "<<stripNum
-                           <<"is out of range.");
-            return Amg::Vector2D::Zero();
-        }
-        const stripEdges& edges = m_strips[stripNum];
-        return 0.5* (m_bottomLeft  + edges.distOnBottom * m_dirBotEdge + 
-                     m_topLeft + edges.distOnTop*m_dirTopEdge);
-    }
     void RadialStripDesign::addStrip(const double posOnBottom,
-                                     const double posOnTop) {
-        
-        m_strips.resize(m_strips.size() +1);
-        stripEdges& edges{m_strips.back()};
-        edges.distOnBottom = posOnBottom / (2. * shortHalfHeight());
-        edges.distOnBottom = posOnTop / (2. * longHalfHeight());
+                                     const double posOnTop) {        
+        m_strips.emplace_back(posOnBottom, posOnTop);
     }
-    Amg::Vector2D RadialStripDesign::stripDir(int stripNumber) const {
-        const int stripCh = (stripNumber - firstStripNumber());
-        if (stripCh < 0 ||  stripCh > numStrips()) {
-            ATH_MSG_WARNING("stripDir() -- Invalid strip number given "<<stripNumber<<" allowed range ["
-                         <<firstStripNumber()<<";"<<numStrips()<<"]");
-            return Amg::Vector2D::Zero();
-        }
-        const stripEdges& edges = m_strips[stripCh];        
-        return ((m_bottomLeft  + edges.distOnBottom * m_dirBotEdge)  - 
-                     (m_topLeft + edges.distOnTop*m_dirTopEdge) ).unit();
-    } 
 }

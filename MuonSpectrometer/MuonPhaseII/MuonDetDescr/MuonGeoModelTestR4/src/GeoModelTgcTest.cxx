@@ -13,7 +13,7 @@ using namespace ActsTrk;
 namespace MuonGMR4{
 
 GeoModelTgcTest::GeoModelTgcTest(const std::string& name, ISvcLocator* pSvcLocator):
-AthHistogramAlgorithm(name,pSvcLocator) {}
+    AthHistogramAlgorithm(name,pSvcLocator) {}
 
 StatusCode GeoModelTgcTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -84,13 +84,10 @@ StatusCode GeoModelTgcTest::execute() {
       const Amg::Transform3D& localToGlob{reElement->localToGlobalTrans(gctx)};
       /// Closure test that the transformations actually close
       const Amg::Transform3D transClosure = globToLocal * localToGlob;
-      for (Amg::Vector3D axis :{Amg::Vector3D::UnitX(),Amg::Vector3D::UnitY(),Amg::Vector3D::UnitZ()}) {
-         const double closure_mag = std::abs( (transClosure*axis).dot(axis) - 1.);
-         if (closure_mag > std::numeric_limits<float>::epsilon() ) {
-            ATH_MSG_FATAL("Closure test failed for "<<m_idHelperSvc->toStringDetEl(test_me)<<" and axis "<<Amg::toString(axis, 0)
-            <<". Ended up with "<< Amg::toString(transClosure*axis) );
-            return StatusCode::FAILURE;
-         }         
+      if (!Amg::doesNotDeform(transClosure)) {
+            ATH_MSG_FATAL("Closure test failed for "<<m_idHelperSvc->toStringDetEl(test_me)
+                        <<". Ended up with "<< Amg::toString(transClosure) );
+            return StatusCode::FAILURE;                  
       }
       const TgcIdHelper& id_helper{m_idHelperSvc->tgcIdHelper()};
       for (unsigned int gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
@@ -98,7 +95,7 @@ StatusCode GeoModelTgcTest::execute() {
             const unsigned int nChan = isStrip ? reElement->numStrips(gasGap)
                                                : reElement->numWireGangs(gasGap);
             for (unsigned int chan = 1; chan <= nChan ; ++chan) {
-                bool isValid{0};
+                bool isValid{false};
                 const Identifier channelId = id_helper.channelID(reElement->identify(),
                                                                  gasGap, isStrip, chan, isValid);
                 if (!isValid) {
@@ -151,8 +148,9 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx,
             const Identifier measId = idHelper.channelID(reElement->identify(),gap, true, strip);
             const RadialStripDesign& layout{reElement->stripLayout(gap)};
 
+            const Amg::Transform3D& localToGlobal{reElement->localToGlobalTrans(gctx,measId)};
             if (strip == 1) {
-                m_layTans.push_back(reElement->localToGlobalTrans(gctx,measId));
+                m_layTans.push_back(localToGlobal);
                 m_layMeasPhi.push_back(true);
                 m_layNumber.push_back(gap);
                 m_layShortWidth.push_back(2.*layout.shortHalfHeight());
@@ -160,6 +158,21 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx,
                 m_layHeight.push_back(2.*layout.halfWidth());
                 m_layNumWires.push_back(0);
             }
+            m_stripGasGap.push_back(gap);
+            m_stripNum.push_back(strip);
+            m_stripCenter.push_back(reElement->channelPosition(gctx, measId));
+            const RadialStripDesign& stripDesign{reElement->stripLayout(gap)};
+            const Amg::Vector2D locTop2D{stripDesign.leftEdge(strip).value_or(Amg::Vector2D::Zero())};
+            const Amg::Vector2D locBot2D{stripDesign.rightEdge(strip).value_or(Amg::Vector2D::Zero())};
+            const Amg::Vector3D globTop{localToGlobal * Amg::Vector3D{locTop2D.x(), locTop2D.y(), 0}};
+            const Amg::Vector3D globBot{localToGlobal * Amg::Vector3D{locBot2D.x(), locBot2D.y(), 0}};
+            
+            m_stripBottom.push_back(globBot);
+            m_stripTop.push_back(globTop);
+            m_locStripTop.push_back(locTop2D);
+            m_locStripCenter.push_back(stripDesign.center(strip).value_or(Amg::Vector2D::Zero()));
+            m_locStripBottom.push_back(locBot2D);
+
         }
         /// Loop over all wire gangs dump their respective information
         for (unsigned int gang = 1; gang <= reElement->numWireGangs(gap); ++gang) {

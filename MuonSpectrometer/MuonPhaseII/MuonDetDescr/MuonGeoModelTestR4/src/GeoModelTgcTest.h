@@ -23,10 +23,8 @@ class GeoModelTgcTest : public AthHistogramAlgorithm{
 
         ~GeoModelTgcTest() = default;
 
-        StatusCode execute() override;
-        
-        StatusCode initialize() override;
-        
+        StatusCode execute() override; 
+        StatusCode initialize() override;        
         StatusCode finalize() override;
 
         unsigned int cardinality() const override final {return 1;}
@@ -89,12 +87,12 @@ class GeoModelTgcTest : public AthHistogramAlgorithm{
     MuonVal::VectorBranch<float>& m_stripShortWidth{m_tree.newVector<float>("stripShortWidth")};
     MuonVal::VectorBranch<float>& m_stripLongWidth{m_tree.newVector<float>("stripLongWidth")};
     MuonVal::VectorBranch<float>& m_stripPitch{m_tree.newVector<float>("stripPitch")};
-    
     MuonVal::VectorBranch<float>& m_stripLength{m_tree.newVector<float>("stripLength")};
-   
+
+
+    /// Wire gangs
     MuonVal::ThreeVectorBranch m_gangCenter{m_tree, "gangCenter"};
     MuonVal::TwoVectorBranch m_locGangPos{m_tree, "gangLocalPos"};
-    
     MuonVal::VectorBranch<uint8_t>& m_gangGasGap{m_tree.newVector<uint8_t>("gangGasGap")};
     MuonVal::VectorBranch<unsigned int>& m_gangNum{m_tree.newVector<unsigned int>("gangNumber")};
     MuonVal::VectorBranch<uint8_t>& m_gangNumWires{m_tree.newVector<uint8_t>("gangNumWires")};

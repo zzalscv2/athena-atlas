@@ -51,6 +51,9 @@ class TgcReadoutGeomTool : public AthAlgTool,
        using ReadoutTable = std::map<std::string, StripLayerPtr>;
        ReadoutTable wireDesigns{};
        ReadoutTable stripDesigns{};
+
+       RadialStripDesignSet stripLayouts{};
+       WireGroupDesignSet wireLayouts{};
     };
 
     /// Retrieves the auxillary tables from the database

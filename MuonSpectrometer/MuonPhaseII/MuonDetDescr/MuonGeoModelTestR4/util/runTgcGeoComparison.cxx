@@ -67,7 +67,7 @@ struct TgcChamber{
             return number < other.number;
         }
     };
-
+    
     struct LayerTrans{
         unsigned int gasGap{0};
         bool measPhi{false};
@@ -84,24 +84,40 @@ struct TgcChamber{
              return measPhi < other.measPhi;
         }
     };
+
+    struct RadialStrip {
+        unsigned int gasGap{0};
+        unsigned int number{0};
+
+        /// Strip center
+        Amg::Vector3D globCenter{Amg::Vector3D::Zero()};
+        Amg::Vector2D locCenter{Amg::Vector2D::Zero()};
+        // Strip bottom position
+        Amg::Vector3D globBottom{Amg::Vector3D::Zero()};
+        Amg::Vector2D locBottom{Amg::Vector2D::Zero()};
+        // Strip top position
+        Amg::Vector3D globTop{Amg::Vector3D::Zero()};
+        Amg::Vector2D locTop{Amg::Vector2D::Zero()};
+        
+        bool operator<(const RadialStrip& other) const {
+            if (gasGap != other.gasGap) return gasGap < other.gasGap;
+            return number < other.number;
+        }
+
+    };
     std::set<WireGang> etaWires{};
+    std::set<RadialStrip> strips{};
     std::set<LayerTrans> transforms{};
 
 };
 
-class ChamberWidthTest : public StripDesign {
-    public:
-        double widthAtPos(const Amg::Vector2D& pos) const{
-            Amg::Vector2D delta  = leftInterSect(pos) - rightInterSect(pos);
-            return std::hypot (delta.x(), delta.y());
-        }
-
-
-};
-
 std::ostream& operator<<(std::ostream& ostr, const TgcChamber::WireGang& gang) {
-    ostr<<"wire gang (gap/number/n-Wires/length): "<<gang.gasGap<<"/"<<gang.number<<"/"<<gang.numWires<<"/"<<gang.length;
+    ostr<<"wire gang (gap/number/n-Wires/length): "<<gang.gasGap<<"/"<<std::setfill('0')<<std::setw(2)<<gang.number<<"/"<<std::setfill('0')<<std::setw(3)<<gang.numWires<<std::setw(-1)<<"/"<<gang.length;
     // ostr<<" position: "<<Amg::toString(gang.position,2 );
+    return ostr;
+}
+std::ostream& operator<<(std::ostream& ostr, const TgcChamber::RadialStrip& strip) {
+    ostr<<"strip (gap/number): "<<strip.gasGap<<"/"<<std::setfill('0')<<std::setw(2)<<strip.number<<std::setw(-1);
     return ostr;
 }
 std::ostream& operator<<(std::ostream& ostr, const TgcChamber::LayerTrans& lTrans) {
@@ -116,9 +132,10 @@ std::ostream& operator<<(std::ostream& ostr, const TgcChamber& chamb) {
         {45, "T3F"}, {46, "T3E"},
         {47, "T4F"}, {48, "T4E"},
     };
+    ostr<<"eta: "<<std::setfill(' ')<<std::setw(2)<<chamb.eta<<" ";
+    ostr<<"phi: "<<std::setfill('0')<<std::setw(2)<<chamb.phi<<" ";
     ostr<<"stName: "<<stationDict.at(chamb.stIdx)<<" ";
-    ostr<<"eta: "<<chamb.eta<<" ";
-    ostr<<"phi: "<<chamb.phi<<" ";
+    ostr<<std::setw(-1);
     return ostr;    
 }
 
@@ -152,12 +169,36 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> geoModelTransformZ{treeReader, "GeoModelTransformZ"};
 
 
-    TTreeReaderValue<std::vector<float>>gangCenterX{treeReader, "gangCenterX"};
-    TTreeReaderValue<std::vector<float>>gangCenterY{treeReader, "gangCenterY"};
-    TTreeReaderValue<std::vector<float>>gangCenterZ{treeReader, "gangCenterZ"};
+    TTreeReaderValue<std::vector<float>> gangCenterX{treeReader, "gangCenterX"};
+    TTreeReaderValue<std::vector<float>> gangCenterY{treeReader, "gangCenterY"};
+    TTreeReaderValue<std::vector<float>> gangCenterZ{treeReader, "gangCenterZ"};
     
-    TTreeReaderValue<std::vector<float>>gangLocalPosX{treeReader, "gangLocalPosX"};
-    TTreeReaderValue<std::vector<float>>gangLocalPosY{treeReader, "gangLocalPosY"};
+    TTreeReaderValue<std::vector<float>> gangLocalPosX{treeReader, "gangLocalPosX"};
+    TTreeReaderValue<std::vector<float>> gangLocalPosY{treeReader, "gangLocalPosY"};
+
+
+    TTreeReaderValue<std::vector<float>> stripCenterX{treeReader, "stripCenterX"};
+    TTreeReaderValue<std::vector<float>> stripCenterY{treeReader, "stripCenterY"};
+    TTreeReaderValue<std::vector<float>> stripCenterZ{treeReader, "stripCenterZ"};
+     
+    TTreeReaderValue<std::vector<float>> stripBottomX{treeReader, "stripBottomX"};
+    TTreeReaderValue<std::vector<float>> stripBottomY{treeReader, "stripBottomY"};
+    TTreeReaderValue<std::vector<float>> stripBottomZ{treeReader, "stripBottomZ"};
+
+    TTreeReaderValue<std::vector<float>> stripTopX{treeReader, "stripTopX"};
+    TTreeReaderValue<std::vector<float>> stripTopY{treeReader, "stripTopY"};
+    TTreeReaderValue<std::vector<float>> stripTopZ{treeReader, "stripTopZ"};
+
+    TTreeReaderValue<std::vector<float>> stripLocalCenterX{treeReader, "stripLocalCenterX"};
+    TTreeReaderValue<std::vector<float>> stripLocalCenterY{treeReader, "stripLocalCenterY"};
+    TTreeReaderValue<std::vector<float>> stripLocalBottomX{treeReader, "stripLocalBottomX"};
+    TTreeReaderValue<std::vector<float>> stripLocalBottomY{treeReader, "stripLocalBottomY"};
+    TTreeReaderValue<std::vector<float>> stripLocalTopX{treeReader, "stripLocalTopX"};
+    TTreeReaderValue<std::vector<float>> stripLocalTopY{treeReader, "stripLocalTopY"};
+
+    TTreeReaderValue<std::vector<uint8_t>> stripGasGap{treeReader, "stripGasGap"};
+    TTreeReaderValue<std::vector<unsigned int>> stripNum{treeReader, "stripNumber"};
+
 
     TTreeReaderValue<std::vector<uint8_t>> gangGasGap{treeReader, "gangGasGap"};
     TTreeReaderValue<std::vector<unsigned int>> gangNum{treeReader, "gangNumber"};
@@ -217,12 +258,34 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
             auto insert_itr = newchamber.etaWires.insert(std::move(newGang));
             if (!insert_itr.second) {
                 std::stringstream err{};
-                err<<"runTgcComparison() "<<__LINE__<<": The chamber "<<(*insert_itr.first)
+                err<<"runTgcComparison() "<<__LINE__<<": The wire "<<(*insert_itr.first)
                     <<" has already been inserted. "<<std::endl;
                 throw std::runtime_error(err.str());
             }
         }
 
+        for (size_t s = 0; s < stripNum->size(); ++s) {
+            TgcChamber::RadialStrip strip{};
+            strip.gasGap = (*stripGasGap)[s];
+            strip.number = (*stripNum) [s];
+        
+            strip.globCenter = Amg::Vector3D{(*stripCenterX)[s], (*stripCenterY)[s], (*stripCenterZ)[s]};
+            strip.locCenter = Amg::Vector2D{(*stripLocalCenterX)[s], (*stripLocalCenterY)[s]};
+        
+            strip.globBottom = Amg::Vector3D{(*stripBottomX)[s], (*stripBottomY)[s], (*stripBottomZ)[s]};
+            strip.locBottom = Amg::Vector2D{(*stripLocalBottomX)[s], (*stripLocalBottomY)[s]};
+        
+            strip.globTop = Amg::Vector3D{(*stripTopX)[s], (*stripTopY)[s], (*stripTopZ)[s]};
+            strip.locTop = Amg::Vector2D{(*stripLocalTopX)[s], (*stripLocalTopY)[s]};
+
+            auto insert_itr = newchamber.strips.insert(std::move(strip));
+            if (!insert_itr.second) {
+                std::stringstream err{};
+                err<<"runTgcComparison() "<<__LINE__<<": The strip "<<(*insert_itr.first)
+                    <<" has already been inserted. "<<std::endl;
+                throw std::runtime_error(err.str());
+            } 
+        }
         for (size_t l = 0 ; l < layerMeasPhi->size(); ++l) {
             Amg::RotationMatrix3D layRot{Amg::RotationMatrix3D::Identity()};
             layRot.col(0) = Amg::Vector3D{(*layerCol1X)[l], (*layerCol1Y)[l], (*layerCol1Z)[l]};
@@ -240,7 +303,7 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
             auto insert_itr = newchamber.transforms.insert(std::move(layTrans));
             if (!insert_itr.second) {
                 std::stringstream err{};
-                err<<"runTgcComparison() "<<__LINE__<<": The chamber "<<(*insert_itr.first)
+                err<<"runTgcComparison() "<<__LINE__<<": The layer transformation "<<(*insert_itr.first)
                     <<" has already been inserted. "<<std::endl;
                 throw std::runtime_error(err.str());
             }
@@ -259,7 +322,7 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
 
 #define TEST_BASICPROP(attribute, propName)                                      \
     if (std::abs(1.*test.attribute - 1.*ref.attribute) > tolerance) {            \
-        std::cerr<<"TgcGeoModelComparison() "<<__LINE__<<": The chamber "<<test  \
+        std::cerr<<"runTgcComparison() "<<__LINE__<<": The chamber "<<test       \
                  <<" differs w.r.t "<<propName<<" "<< ref.attribute              \
                  <<" (ref) vs. " <<test.attribute << " (test)" << std::endl;     \
         chambOk = false;                                                         \
@@ -267,7 +330,7 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
 
 #define TEST_LAYPROP(attribute, propName)                                          \
     if (std::abs(1.*refTrans.attribute - 1.*testTrans.attribute) > tolerance) {    \
-        std::cerr<<"TgcGeoModelComparison() "<<__LINE__<<": The chamber "<<test    \
+        std::cerr<<"runTgcComparison() "<<__LINE__<<": The chamber "<<test         \
                  <<" differs in "<<refTrans<<" w.r.t. "<<propName<<". "            \
                  <<refTrans.attribute<<" (ref) vs. "<<testTrans.attribute          \
                  <<" (test), delta: "<<(refTrans.attribute - testTrans.attribute)  \
@@ -323,8 +386,7 @@ int main( int argc, char** argv ) {
             std::set<TgcChamber::LayerTrans>::const_iterator l_test_itr = test.transforms.find(refTrans);
             if (l_test_itr == test.transforms.end()) {
                 std::cerr<<"runTgcComparison() "<<__LINE__<<": The layer "<<refTrans
-                          <<" in chamber "<<ref
-                          <<" is not part of the test geometry. "<<std::endl;
+                          <<" in chamber "<<ref <<" is not part of the test geometry. "<<std::endl;
                 chambOk = false;
                 break;
             }
@@ -349,6 +411,34 @@ int main( int argc, char** argv ) {
             TEST_LAYPROP(height, "height");
             if (!chambOk) break;
         }
+        for (const TgcChamber::RadialStrip& refStrip : ref.strips) {
+            std::set<TgcChamber::RadialStrip>::const_iterator s_test_itr = test.strips.find(refStrip);
+            if (s_test_itr == test.strips.end()) {
+                std::cerr<<"runTgcComparison() "<<__LINE__<<": In chamber "<<ref
+                          <<" "<<refStrip<<" is not part of the test geometry. "<<std::endl;
+                chambOk = false;
+                continue;
+            }
+            const TgcChamber::RadialStrip& testStrip{*s_test_itr};
+            if ( (testStrip.locCenter - refStrip.locCenter).mag() > tolerance) {
+                std::cerr<<"runTgcComparison() "<<__LINE__<<": In "<<ref<<", " 
+                         <<refStrip<<" should be located at "<<Amg::toString(refStrip.locCenter, 1)<<
+                         ". Currently, it is at "<<Amg::toString(testStrip.locCenter, 1)<<std::endl;
+                chambOk = false;
+                break;
+            }
+
+            if ( (testStrip.globCenter - refStrip.globCenter).mag() > tolerance) {
+                std::cerr<<"runTgcComparison() "<<__LINE__<<": In "<<ref 
+                         <<" " <<refStrip<<" should be located at "<<Amg::toString(refStrip.globCenter, 1)<<
+                         ". Currently, it is at "<<Amg::toString(testStrip.globCenter, 1)<<std::endl;
+                chambOk = false;
+            }
+        }
+        if (!chambOk) {
+            retCode = EXIT_FAILURE;
+            continue;
+        }
         /// Let's take a look at the wire gang positions
         for (const TgcChamber::WireGang& refGang : ref.etaWires) {
             std::set<TgcChamber::WireGang>::const_iterator test_itr = test.etaWires.find(refGang);
@@ -372,27 +462,16 @@ int main( int argc, char** argv ) {
                          <<" is displaced by "<<Amg::toString(diffPos, 2)<<", mag="<<diffPos.mag()<<std::endl;
                 chambOk = false;
             }
-            TgcChamber::LayerTrans findLayer{};
-            findLayer.gasGap = testGang.gasGap;
-            const TgcChamber::LayerTrans& refLayer{*ref.transforms.find(findLayer)};
-            const TgcChamber::LayerTrans& testLayer{*test.transforms.find(findLayer)};
-            
-            ChamberWidthTest wTest{};
-            wTest.defineTrapezoid(refLayer.shortWidth/2, refLayer.longWidth /2 , refLayer.height /2);
             
             if (std::abs(refGang.length - testGang.length) > tolerance) {
                 std::cerr<<"runTgcComparison() "<<__LINE__<<": In "<<ref<<" "<<testGang<<" different length detected "
                          <<refGang.length<<" (ref) vs. "<<testGang.length<<" (test). Delta: "
-                         <<(refGang.length - testGang.length)
-                         <<" edge intersection: "<<(wTest.widthAtPos(refGang.localPos) - std::abs(refLayer.shortWidth - testLayer.shortWidth))
-                         <<" hand calculation: "<<(wTest.shortHalfHeight()*2. + (wTest.halfWidth() + refGang.localPos.x())* 
-                                (wTest.longHalfHeight() - wTest.shortHalfHeight()) / wTest.halfWidth() - std::abs(refLayer.shortWidth - testLayer.shortWidth))<<std::endl;      
+                         <<(refGang.length - testGang.length) <<std::endl;      
                 chambOk = false;
             }
         }
         if (!chambOk) {
             retCode = EXIT_FAILURE;
-            continue;
         }
     }
     return retCode;

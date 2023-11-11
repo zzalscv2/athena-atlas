@@ -41,14 +41,19 @@ namespace MuonGMR4{
         return isFlipped() < other.isFlipped();
     }
     std::ostream& operator<<(std::ostream& ostr, const StripDesign& design) {
-        ostr<<"Strip -- number: "<<design.numStrips()<<", ";        
-        ostr<<"pitch: "<<design.stripPitch()<<", ";
-        ostr<<"width: "<<design.stripWidth()<<", ";
-        ostr<<"Dimension  -- width x height:"<<design.halfWidth() * Gaudi::Units::mm<<" [mm] x ";
-        ostr<<design.shortHalfHeight()<<"/"<<design.longHalfHeight()<<" [mm], ";
-        if (design.hasStereoAngle()) ostr<<"stereo angle: "<<design.stereoAngle() / Gaudi::Units::deg<<", ";
-        ostr<<"position first strip "<<Amg::toString(design.center(design.firstStripNumber()).value_or(Amg::Vector2D::Zero()),1);
+        design.print(ostr);
         return ostr;
+    }
+    void StripDesign::print(std::ostream& ostr) const {
+        ostr<<"Strip -- number: "<<numStrips()<<", ";        
+        ostr<<"pitch: "<<stripPitch()<<", ";
+        ostr<<"width: "<<stripWidth()<<", ";
+        ostr<<"Dimension  -- width x height:"<<halfWidth() * Gaudi::Units::mm<<" [mm] x ";
+        ostr<<shortHalfHeight()<<"/"<<longHalfHeight()<<" [mm], ";
+        if (hasStereoAngle()) ostr<<"stereo angle: "<<stereoAngle() / Gaudi::Units::deg<<", ";
+        ostr<<"position first strip "<<Amg::toString(center(firstStripNumber()).value_or(Amg::Vector2D::Zero()),1);
+        ostr<<"Trapezoid edges "<<Amg::toString(m_bottomLeft,1)<<" - "<<Amg::toString(m_bottomRight, 1)<<" --- ";
+        ostr<<Amg::toString(m_topLeft, 1)<<" - "<<Amg::toString(m_topRight, 1);
     }
     void StripDesign::defineTrapezoid(double HalfShortY, double HalfLongY, double HalfHeight, double sAngle){
         defineTrapezoid(HalfShortY,HalfLongY, HalfHeight);
@@ -73,7 +78,7 @@ namespace MuonGMR4{
         m_topRight = Amg::Vector2D{HalfHeight, HalfLongY};
 
         m_dirBotEdge = (m_bottomRight - m_bottomLeft).unit();
-        m_dirTopEdge =   (m_topLeft - m_topRight);
+        m_dirTopEdge = (m_topRight - m_topLeft);
         m_lenSlopEdge = std::hypot(m_dirTopEdge.x(), m_dirTopEdge.y());
         m_dirTopEdge = m_dirTopEdge.unit();
 
@@ -86,17 +91,16 @@ namespace MuonGMR4{
             ATH_MSG_WARNING("It's impossible to flip a trapezoid twice. Swap short and long lengths");
             return;
         }
-        Eigen::Rotation2D flip{M_PI_2};
+        m_bottomLeft = Amg::Vector2D{-m_shortHalfY, -m_halfX};
+        m_bottomRight = Amg::Vector2D{m_shortHalfY, -m_halfX};
+        m_topLeft = Amg::Vector2D{-m_longHalfY, m_halfX};
+        m_topRight = Amg::Vector2D{m_longHalfY, m_halfX};
 
-        m_bottomLeft =  flip * m_bottomLeft;
-        m_bottomRight = flip * m_bottomRight;
-        m_topLeft = flip * m_topLeft;
-        m_topRight = flip * m_topRight;
         m_dirBotEdge = (m_bottomRight - m_bottomLeft).unit();
-        m_dirTopEdge =   (m_topLeft - m_topRight);
-        m_lenSlopEdge = std::hypot(m_dirTopEdge.x(), m_dirTopEdge.y());
-        m_dirTopEdge = m_dirTopEdge.unit();
-        m_dirLeftEdge = (m_topLeft - m_bottomLeft).unit();
+        m_dirTopEdge = (m_topRight - m_topLeft).unit();
+        m_dirLeftEdge = (m_topLeft - m_bottomLeft);
+        m_lenSlopEdge = std::hypot(m_dirLeftEdge.x(), m_dirLeftEdge.y());
+        m_dirLeftEdge = m_dirLeftEdge.unit();
         m_dirRightEdge = (m_topRight - m_bottomRight).unit();
         m_isFlipped = true;
     }
