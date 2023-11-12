@@ -48,8 +48,8 @@ private:
     static const int m_nModules = 4;
     static const int m_nChannels = 16;
     static const int m_nZdcStatusBits = 18; // ignoring the last one
-    static const int m_nRpdStatusBits = 3; // ignoring the last one
-    static const int m_nRpdCentroidStatusBits = 17; // ignoring the last one
+    static const int m_nRpdStatusBits = 15; // ignoring the last one
+    static const int m_nRpdCentroidStatusBits = 21; // ignoring the last one
 
     // the i-th element (or (i,j)-th element for 2D vector) here gives the index of the generic monitoring tool (GMT)
     // in the array of all GMT's --> allows faster tool retrieving and hence faster histogram filling
@@ -95,40 +95,37 @@ private:
         "Column index of RPD channel"
     };
 
-    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelPileupFitParamsKey{
-        this, "RpdChannelPileupFitParams", m_zdcModuleContainerName+".RPDChannelPileupFitParams"+m_auxSuffix, 
-        "RPD Channel Pileup Fit Parameters: exp([0] + [1]*sample)"};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelPileupExpFitParamsKey{
+        this, "RpdChannelPileupExpFitParamsKey", m_zdcModuleContainerName+".RPDChannelPileupExpFitParams"+m_auxSuffix, 
+        "RPD channel pileup exponential fit parameters: exp( [0] + [1]*sample )"};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelPileupFracKey{
-        this, "RPDChannelPileupFrac", m_zdcModuleContainerName+".RPDChannelPileupFrac"+m_auxSuffix, 
-        "RPD Channel Pileup as Fraction of Sum"};
-    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDsubAmpKey {
-        this, "rpdSubAmpKey", m_zdcSumContainerName + ".RpdSubAmp" + m_auxSuffix,
-        "Subtracted RPD amplitudes, index row then column"};
-    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDsubAmpSumKey {
-        this, "rpdSubAmpSumKey", m_zdcSumContainerName + ".RpdSubAmpSum" + m_auxSuffix,
-        "Sum of subtracted RPD amplitudes"};
+        this, "RPDChannelPileupFracKey", m_zdcModuleContainerName+".RPDChannelPileupFrac"+m_auxSuffix, 
+        "RPD channel pileup as fraction of total (nominal baseline-subtracted) sum ADC"};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelSubtrAmpKey {
+        this, "RPDChannelSubtrAmpKey", m_zdcSumContainerName + ".RPDChannelSubtrAmp" + m_auxSuffix,
+        "RPD channel subtracted amplitudes (tile mass) used in centroid calculation"};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDSubtrAmpSumKey {
+        this, "RPDSubtrAmpSumKey", m_zdcSumContainerName + ".RPDSubtrAmpSum" + m_auxSuffix,
+        "Sum of RPD channel subtracted amplitudes (total mass) used in centroid calculation"};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDxCentroidKey {
         this, "xCentroidKey", m_zdcSumContainerName + ".xCentroid" + m_auxSuffix, 
-        "X position of centroid in beamline coordinates (after geometry corrections)"};
+        "X centroid after geometry corrections and after average centroid subtraction"};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDyCentroidKey {
         this, "yCentroidKey", m_zdcSumContainerName + ".yCentroid" + m_auxSuffix, 
-        "Y position of centroid in beamline coordinates (after geometry corrections)"};
-    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDxDetCentroidUnsubKey {
-        this, "xDetCentroidUnsubKey", m_zdcSumContainerName + ".xDetCentroidUnsub" + m_auxSuffix, 
-        "X position of centroid in RPD detector coordinates (before geometry corrections), calculated with unsubtracted amplitudes"};
-    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDyDetCentroidUnsubKey {
-        this, "yDetCentroidUnsubKey", m_zdcSumContainerName + ".yDetCentroidUnsub" + m_auxSuffix, 
-        "Y position of centroid in RPD detector coordinates (before geometry corrections), calculated with unsubtracted amplitudes"};
+        "Y centroid after geometry corrections and after average centroid subtraction"};
     
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDreactionPlaneAngleKey {
         this, "reactionPlaneAngleKey", m_zdcSumContainerName + ".reactionPlaneAngle" + m_auxSuffix, 
-        "Reaction plane angle"};
+        "Reaction plane angle in [-pi, pi) from the positive x axis (angle of centorid on side C, angle of centroid + pi on side A)"};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDcosDeltaReactionPlaneAngleKey {
         this, "cosDeltaReactionPlaneAngleKey", m_zdcSumContainerName + ".cosDeltaReactionPlaneAngle" + m_auxSuffix, 
         "Cosine of the difference between the reaction plane angles of the two sides"};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDcentroidStatusKey {
         this, "centroidStatusKey", m_zdcSumContainerName + ".centroidStatus" + m_auxSuffix, 
-        "Centriod calculation status word"};
+        "Centroid status word"};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDSideStatusKey {
+        this, "RPDSideStatusKey", m_zdcSumContainerName + ".RPDStatus" + m_auxSuffix, 
+        "Centroid status word"};
     //---------------------------------------------------
 
 };

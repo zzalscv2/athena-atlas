@@ -239,7 +239,7 @@ def ZdcMonitoringConfig(inputFlags, run_type):
 
     genZdcMonTool.defineHistogram('rpdCosDeltaReactionPlaneAngle', title=';Cos (#Delta #phi_{AorC});Events',
                             path='ZDC/Global/ReactionPlane',
-                            cutmask='bothSubAmpSumPositive', # only require subtracted amplitude sum on both sides to be positive
+                            cutmask='bothHasCentroid', # only require both sides to have centroid
                             xbins=n_time_centroid_bins_default,xmin=-1,xmax=1)
     genZdcMonTool.defineHistogram('rpdCosDeltaReactionPlaneAngle;rpdCosDeltaReactionPlaneAngle_requireValid', title=';Cos (#Delta #phi_{AorC});Events',
                             path='ZDC/Global/ReactionPlane',
@@ -268,8 +268,8 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     nChannels = 16
 
     nZdcStatusBits = 18
-    nRpdStatusBits = 3
-    nRpdCentroidStatusBits = 17
+    nRpdStatusBits = 15
+    nRpdCentroidStatusBits = 21
 
 # --------------------------------------------------------------------------------------------------
 
@@ -289,13 +289,9 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     zdcSideMonToolArr.defineHistogram('centroidStatusBits',title=';;Events',
                             path='ZDC/Global/Centroid',
                             xbins=nRpdCentroidStatusBits,xmin=0.0,xmax=nRpdCentroidStatusBits,opt='kVec',
-                            xlabels=['ValidBit', 'ZDCValidBit', 'RPDValidBit', 'MinimumZDCEnergyBit', 'ExcessiveZDCEnergyBit', 'PileupBit', 'ExcessivePileupBit', 'SubtrUnderflowBit', 'ZeroSumBit', 'ZeroSumRow0Bit', 'ZeroSumRow1Bit', 'ZeroSumRow2Bit', 'ZeroSumRow3Bit', 'ZeroSumCol0Bit', 'ZeroSumCol1Bit', 'ZeroSumCol2Bit', 'ZeroSumCol3Bit'])
+                            xlabels=['ValidBit', 'HasCentroidBit', 'ZDCInvalidBit', 'InsufficientZDCEnergyBit', 'ExcessiveZDCEnergyBit', 'EMInvalidBit', 'InsufficientEMEnergyBit', 'ExcessiveEMEnergyBit', 'RPDInvalidBit', 'PileupBit', 'ExcessivePileupBit', 'ZeroSumBit', 'ExcessiveSubtrUnderflowBit', 'Row0ValidBit', 'Row1ValidBit', 'Row2ValidBit', 'Row3ValidBit', 'Col0ValidBit', 'Col1ValidBit', 'Col2ValidBit', 'Col3ValidBit'])
 
     zdcSideMonToolArr.defineHistogram('xCentroid, yCentroid',type='TH2F',title=';Centroid x position [mm];Centroid y position [mm]',
-                            path='ZDC/Global/Centroid',
-                            xbins=n_time_centroid_bins_default,xmin=x_centroid_min,xmax=x_centroid_max,
-                            ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
-    zdcSideMonToolArr.defineHistogram('xDetCentroidUnsub, yDetCentroidUnsub',type='TH2F',title=';Centroid x position unsubtracted;Centroid y position unsubtracted',
                             path='ZDC/Global/Centroid',
                             xbins=n_time_centroid_bins_default,xmin=x_centroid_min,xmax=x_centroid_max,
                             ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
@@ -304,11 +300,6 @@ def ZdcMonitoringConfig(inputFlags, run_type):
                             xbins=64,xmin=-3.141593,xmax=3.141593)
 
     zdcSideMonToolArr.defineHistogram('xCentroid, yCentroid;yCentroid_vs_xCentroid_requireValid',type='TH2F',title=';Centroid x position [mm];Centroid y position [mm]',
-                            path='ZDC/Global/Centroid',
-                            cutmask='centroidValid',
-                            xbins=n_time_centroid_bins_default,xmin=x_centroid_min,xmax=x_centroid_max,
-                            ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
-    zdcSideMonToolArr.defineHistogram('xDetCentroidUnsub, yDetCentroidUnsub;yDetCentroidUnsub_vs_xDetCentroidUnsub_requireValid',type='TH2F',title=';Centroid x position unsubtracted;Centroid y position unsubtracted',
                             path='ZDC/Global/Centroid',
                             cutmask='centroidValid',
                             xbins=n_time_centroid_bins_default,xmin=x_centroid_min,xmax=x_centroid_max,
@@ -341,18 +332,22 @@ def ZdcMonitoringConfig(inputFlags, run_type):
 
     zdcSideMonToolArr.defineHistogram('rpdSubAmpSum', title=';RPD Subtracted Amp Sum (AorC) [ADC counts]',
                             path='ZDC/RPD/PerArm',
+                            cutmask='centroidValid',
                             xbins=n_energy_bins_default,xmin = - rpd_amp_sum_xmax / 16., xmax=rpd_amp_sum_xmax / 4.) # try a value for now
 
     zdcSideMonToolArr.defineHistogram('zdcEnergySum, rpdMaxADCSum', type='TH2F', title=';E ZDC side [TeV];RPD Max ADC Sum (AorC) [ADC counts]',
                             path='ZDC/ZdcRpdPerSideCorr',
+                            cutmask='RPDSideValid',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=rpd_max_adc_sum_xmax) # try a value for now
     zdcSideMonToolArr.defineHistogram('zdcEnergySum, rpdAmplitudeCalibSum', type='TH2F', title=';E ZDC side [GeV];RPD Calib Amp Sum (AorC) [ADC counts]',
                             path='ZDC/ZdcRpdPerSideCorr',
+                            cutmask='RPDSideValid',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=rpd_amp_sum_xmax) # try a value for now
     zdcSideMonToolArr.defineHistogram('zdcEMModuleEnergy, rpdAmplitudeCalibSum', type='TH2F', title=';E EM module AorC [GeV];RPD Calib Amp Sum (AorC) [ADC counts]',
                             path='ZDC/ZdcRpdPerSideCorr',
+                            cutmask='RPDSideValid',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=module_calib_amp_xmax / 2., # divide by 2 to make a more zoomed-in plot (not full range)
                             ybins=n_energy_bins_default,ymin=0.0,ymax=rpd_amp_sum_xmax) # try a value for now
 
@@ -456,30 +451,37 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     rpdChannelMonToolArr.defineHistogram('RPDStatusBits',title=';;Events',
                             path='StatusBits',
                             xbins=nRpdStatusBits,xmin=0,xmax=nRpdStatusBits,opt='kVec',
-                            xlabels=['ChValidBit', 'ChOutOfTimePileupBit', 'ChOverflowBit'])
+                            xlabels=['ValidBit', 'OutOfTimePileupBit', 'OverflowBit', 'PrePulseBit', 'PostPulseBit', 'NoPulseBit', 'BadAvgBaselineSubtrBit', 'InsufficientPileupFitPointsBit', 'PileupStretchedExpFitFailBit', 'PileupStretchedExpGrowthBit', 'PileupBadStretchedExpSubtrBit', 'PileupExpFitFailBit', 'PileupExpGrowthBit', 'PileupBadExpSubtrBit', 'PileupStretchedExpPulseLike'])
 
     rpdChannelMonToolArr.defineHistogram('RPDChannelAmplitudeCalib', title=';RPD Channel Calibrated Amplitude;Events',
                             path='CalibAmp',
+                            cutmask='RPDChannelValid',
                             xbins=n_rpd_amp_bins_full_range,xmin=rpd_channel_amp_min,xmax=module_amp_xmax) # NOT energy calibration - calibration factor is 1 for now
     rpdChannelMonToolArr.defineHistogram('RPDChannelAmplitudeCalib;RPDChannelAmplitudeCalib_halfrange', title=';RPD Channel Calibrated Amplitude;Events',
                             path='CalibAmp',
+                            cutmask='RPDChannelValid',
                             xbins=n_rpd_amp_bins_half_range,xmin=rpd_channel_amp_min,xmax=module_amp_xmax / 2.) # NOT energy calibration - calibration factor is 1 for now
     rpdChannelMonToolArr.defineHistogram('RPDChannelSubAmp', title=';RPD Channel Subtracted Amplitude;Events',
                             path='SubAmp',
+                            cutmask='RPDChannelCentroidValid',
                             xbins=n_rpd_sub_amp_bins,xmin=rpd_sub_amp_min,xmax=rpd_sub_amp_max) # NOT energy calibration - calibration factor is 1 for now
     rpdChannelMonToolArr.defineHistogram('RPDChannelMaxADC', title=';Max ADC [ADC Counts];Events',
                             path='MaxADC',
+                            cutmask='RPDChannelValid',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=4096.0)
     rpdChannelMonToolArr.defineHistogram('lumiBlock, RPDChannelAmplitudeCalib;RPDChannelAmplitudeCalib_vs_lb', type='TH2F', title=';lumi block;RPD Channel Calibrated Amplitude',
                             path='CalibAmpLBdep',
+                            cutmask='RPDChannelValid',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_rpd_amp_bins_full_range,ymin=rpd_channel_amp_min,ymax=module_amp_xmax) # NOT energy calibration - calibration factor is 1 for now
     rpdChannelMonToolArr.defineHistogram('lumiBlock, RPDChannelAmplitudeCalib;RPDChannelAmplitudeCalib_halfrange_vs_lb', type='TH2F', title=';lumi block;RPD Channel Calibrated Amplitude',
                             path='CalibAmpLBdep',
+                            cutmask='RPDChannelValid',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_rpd_amp_bins_half_range,ymin=rpd_channel_amp_min,ymax=module_amp_xmax / 2.) # NOT energy calibration - calibration factor is 1 for now
     rpdChannelMonToolArr.defineHistogram('lumiBlock, RPDChannelMaxADC;RPDChannelMaxADC_vs_lb', type='TH2F', title=';lumi block;Max ADC [ADC Counts]',
                             path='MaxADCLBdep',
+                            cutmask='RPDChannelValid',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=4096.0)
 
@@ -516,11 +518,11 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     # Study of effect of minimum EM module energy cut on RPD channel amplitude
     rpdChannelMonToolArr.defineHistogram('RPDChannelAmplitudeCalib;RPDChannelAmplitudeCalib_EMbelow0', title=';RPD Channel Calibrated Amplitude;Events',
                             path='CalibAmp/RpdChanAmpDistrAtLowEMModuleEnergy',
-                            cutmask='zdcEMModuleEnergySameSideBelow0',
+                            cutmask='rpdValidZdcEMModuleEnergySameSideBelow0',
                             xbins=n_rpd_amp_bins_half_range,xmin=rpd_channel_amp_min,xmax=module_amp_xmax / 2.) # NOT energy calibration - calibration factor is 1 for now
     rpdChannelMonToolArr.defineHistogram('RPDChannelAmplitudeCalib;RPDChannelAmplitudeCalib_EMbelow70', title=';RPD Channel Calibrated Amplitude;Events',
                             path='CalibAmp/RpdChanAmpDistrAtLowEMModuleEnergy',
-                            cutmask='zdcEMModuleEnergySameSideBelow70',
+                            cutmask='rpdValidZdcEMModuleEnergySameSideBelow70',
                             xbins=n_rpd_amp_bins_half_range,xmin=rpd_channel_amp_min,xmax=module_amp_xmax / 2.) # NOT energy calibration - calibration factor is 1 for now
 
 

@@ -5,6 +5,7 @@
 #include "ZdcMonitoring/ZdcMonitorAlgorithm.h"
 #include "ZdcAnalysis/ZDCPulseAnalyzer.h"
 #include "ZdcAnalysis/RpdSubtractCentroidTool.h"
+#include "ZdcAnalysis/RPDDataAnalyzer.h"
 
 ZdcMonitorAlgorithm::ZdcMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
 :AthMonitorAlgorithm(name,pSvcLocator){
@@ -46,18 +47,17 @@ StatusCode ZdcMonitorAlgorithm::initialize() {
     ATH_CHECK( m_RPDChannelAmplitudeCalibKey.initialize() );
     ATH_CHECK( m_RPDChannelMaxADCKey.initialize() );
     ATH_CHECK( m_RPDChannelStatusKey.initialize() );
-    ATH_CHECK( m_RPDChannelPileupFitParamsKey.initialize() );
+    ATH_CHECK( m_RPDChannelPileupExpFitParamsKey.initialize() );
     ATH_CHECK( m_RPDChannelPileupFracKey.initialize() );
 
-    ATH_CHECK( m_RPDsubAmpKey.initialize() );
-    ATH_CHECK( m_RPDsubAmpSumKey.initialize() );
+    ATH_CHECK( m_RPDChannelSubtrAmpKey.initialize() );
+    ATH_CHECK( m_RPDSubtrAmpSumKey.initialize() );
     ATH_CHECK( m_RPDxCentroidKey.initialize() );
     ATH_CHECK( m_RPDyCentroidKey.initialize() );
-    ATH_CHECK( m_RPDxDetCentroidUnsubKey.initialize() );
-    ATH_CHECK( m_RPDyDetCentroidUnsubKey.initialize() );
     ATH_CHECK( m_RPDreactionPlaneAngleKey.initialize() );
     ATH_CHECK( m_RPDcosDeltaReactionPlaneAngleKey.initialize() );
     ATH_CHECK( m_RPDcentroidStatusKey.initialize() );
+    ATH_CHECK( m_RPDSideStatusKey.initialize() );
     
 
     m_ZDCSideToolIndices = buildToolMap<int>(m_tools,"ZdcSideMonitor",m_nSides);
@@ -102,15 +102,14 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> ZdcSumAverageTimeHandle(m_ZdcSumAverageTimeKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> ZdcSumModuleMaskHandle(m_ZdcSumModuleMaskKey, ctx);
    
-    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, std::vector<std::vector<float>>> RPDsubAmpHandle(m_RPDsubAmpKey, ctx);
-    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDsubAmpSumHandle(m_RPDsubAmpSumKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, std::vector<float>> RPDsubAmpHandle(m_RPDChannelSubtrAmpKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDsubAmpSumHandle(m_RPDSubtrAmpSumKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDxCentroidHandle(m_RPDxCentroidKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDyCentroidHandle(m_RPDyCentroidKey, ctx);
-    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDxDetCentroidUnsubHandle(m_RPDxDetCentroidUnsubKey, ctx);
-    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDyDetCentroidUnsubHandle(m_RPDyDetCentroidUnsubKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDreactionPlaneAngleHandle(m_RPDreactionPlaneAngleKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDcosDeltaReactionPlaneAngleHandle(m_RPDcosDeltaReactionPlaneAngleKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> RPDcentroidStatusHandle(m_RPDcentroidStatusKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> RPDsideStatusHandle(m_RPDSideStatusKey, ctx);
     
     auto zdcEnergySumA = Monitored::Scalar<float>("zdcEnergySumA",-1000.0);
     auto zdcEnergySumC = Monitored::Scalar<float>("zdcEnergySumC",-1000.0);
@@ -118,16 +117,16 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     auto zdcUncalibSumC = Monitored::Scalar<float>("zdcUncalibSumC",-1000.0);
     auto rpdCosDeltaReactionPlaneAngle = Monitored::Scalar<float>("rpdCosDeltaReactionPlaneAngle",-1000.0);
     auto bothReactionPlaneAngleValid = Monitored::Scalar<bool>("bothReactionPlaneAngleValid",true);
-    auto bothSubAmpSumPositive = Monitored::Scalar<bool>("bothSubAmpSumPositive",true); // the looser requirement that the subtracted amplitude sum on both sides are positive
+    auto bothHasCentroid = Monitored::Scalar<bool>("bothHasCentroid",true); // the looser requirement that both centroids were calculated (ignore valid)
     
-    std::array<std::vector<std::vector<float>>,2> rpdSubAmpVecs;
+    std::array<bool, 2> centroidSideValid;
+    std::array<bool, 2> rpdSideValid = {false, false};
+    std::array<std::vector<float>,2> rpdSubAmpVecs;
     auto zdcAvgTimeCurSide = Monitored::Scalar<float>("zdcAvgTime",-1000.0);
     auto zdcModuleMaskCurSide = Monitored::Scalar<bool>("zdcModuleMask",false);
     auto rpdSubAmpSumCurSide = Monitored::Scalar<float>("rpdSubAmpSum",-1000.0);
     auto rpdXCentroidCurSide = Monitored::Scalar<float>("xCentroid",-1000.0);
     auto rpdYCentroidCurSide = Monitored::Scalar<float>("yCentroid",-1000.0);
-    auto rpdXDetCentroidUnsubCurSide = Monitored::Scalar<float>("xDetCentroidUnsub",-1000.0);
-    auto rpdYDetCentroidUnsubCurSide = Monitored::Scalar<float>("yDetCentroidUnsub",-1000.0);
     auto rpdReactionPlaneAngleCurSide = Monitored::Scalar<float>("ReactionPlaneAngle",-1000.0);
     auto centroidValid = Monitored::Scalar<bool>("centroidValid",false);
 
@@ -161,17 +160,18 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                 rpdSubAmpSumCurSide = RPDsubAmpSumHandle(*zdcSum);
                 rpdXCentroidCurSide = RPDxCentroidHandle(*zdcSum);
                 rpdYCentroidCurSide = RPDyCentroidHandle(*zdcSum);
-                rpdXDetCentroidUnsubCurSide = RPDxDetCentroidUnsubHandle(*zdcSum);
-                rpdYDetCentroidUnsubCurSide = RPDyDetCentroidUnsubHandle(*zdcSum);
                 rpdReactionPlaneAngleCurSide = RPDreactionPlaneAngleHandle(*zdcSum);
                 
                 unsigned int rpdCentroidStatusCurSide = RPDcentroidStatusHandle(*zdcSum);
+                unsigned int rpdStatusCurSide = RPDsideStatusHandle(*zdcSum);
 
                 centroidValid = (rpdCentroidStatusCurSide & 1 << ZDC::RpdSubtractCentroidTool::ValidBit);
-                bool subAmpSumCurSidePostive = (!(rpdCentroidStatusCurSide & 1 << ZDC::RpdSubtractCentroidTool::ZeroSumBit));
+                centroidSideValid.at(iside) = rpdCentroidStatusCurSide & 1 << ZDC::RpdSubtractCentroidTool::ValidBit;
+                rpdSideValid.at(iside) = rpdStatusCurSide & 1 << RPDDataAnalyzer::ValidBit;
+                bool curSideHasCentroid = (rpdCentroidStatusCurSide & 1 << ZDC::RpdSubtractCentroidTool::HasCentroidBit);
 
                 bothReactionPlaneAngleValid &= centroidValid;
-                bothSubAmpSumPositive &= subAmpSumCurSidePostive;
+                bothHasCentroid &= curSideHasCentroid;
 
                 
                 for (int bit = 0; bit < m_nRpdCentroidStatusBits; bit++) centroidStatusBitsCountCurSide[bit] = 0; // reset
@@ -182,8 +182,8 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                 }
                 auto centroidStatusBits = Monitored::Collection("centroidStatusBits", centroidStatusBitsCountCurSide);
 
-                if (subAmpSumCurSidePostive){ // only impose the looser requirement of the subtracted amplitude sum being positive; have a set of histograms for the more stringent centroid-valid requirement
-                    fill(m_tools[m_ZDCSideToolIndices[iside]], zdcAvgTimeCurSide, zdcModuleMaskCurSide, rpdSubAmpSumCurSide, centroidValid, rpdXCentroidCurSide, rpdYCentroidCurSide, rpdXDetCentroidUnsubCurSide, rpdYDetCentroidUnsubCurSide, rpdReactionPlaneAngleCurSide, centroidStatusBits, lumiBlock, bcid);
+                if (curSideHasCentroid){ // only impose the looser requirement that this side has centroid; have a set of histograms for the more stringent centroid-valid requirement
+                    fill(m_tools[m_ZDCSideToolIndices[iside]], zdcAvgTimeCurSide, zdcModuleMaskCurSide, rpdSubAmpSumCurSide, centroidValid, rpdXCentroidCurSide, rpdYCentroidCurSide, rpdReactionPlaneAngleCurSide, centroidStatusBits, lumiBlock, bcid);
                 }else{
                     fill(m_tools[m_ZDCSideToolIndices[iside]], zdcAvgTimeCurSide, zdcModuleMaskCurSide, rpdSubAmpSumCurSide, centroidStatusBits, lumiBlock, bcid);
                 }
@@ -226,7 +226,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDChannelAmplitudeHandle(m_RPDChannelAmplitudeKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDChannelMaxADCHandle(m_RPDChannelMaxADCKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDChannelAmplitudeCalibHandle(m_RPDChannelAmplitudeCalibKey, ctx);
-    SG::ReadDecorHandle<xAOD::ZdcModuleContainer,std::vector<float>> RPDChannelPileupFitParamsHandle(m_RPDChannelPileupFitParamsKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer,std::vector<float>> RPDChannelPileupExpFitParamsHandle(m_RPDChannelPileupExpFitParamsKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer,float> RPDChannelPileupFracHandle(m_RPDChannelPileupFracKey, ctx);
 
 
@@ -249,14 +249,16 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     auto rpdChannelStatus = Monitored::Scalar<unsigned int>("RPDChannelStatus", 1000);
     auto rpdChannelPileupFitSlope = Monitored::Scalar<float>("RPDChannelPileupFitSlope", -1000);
     auto absRpdChannelAmplitude = Monitored::Scalar<float>("absRPDChannelAmplitude", -1000.); // EM module energy on the same side (assuming filled already)
+    auto rpdChannelValid = Monitored::Scalar<bool>("RPDChannelValid", false);
+    auto rpdChannelCentroidValid = Monitored::Scalar<bool>("RPDChannelCentroidValid", false);
     auto rpdChannelNegativeAmp = Monitored::Scalar<bool>("RPDChannelNegativeAmp", false); // negative amplitude
     auto rpdChannelNegativePileup = Monitored::Scalar<bool>("RPDChannelNegativePileup", false); // negative amplitude & performed pileup fitting
     auto rpdChannelNoPileup = Monitored::Scalar<bool>("RPDChannelNoPileup", false); // no pileup fitting performed
     auto rpdChannelPileupFrac = Monitored::Scalar<float>("RPDChannelPileupFrac", -1000.);
     auto zdcEMModuleEnergySameSide = Monitored::Scalar<float>("zdcEMModuleEnergySameSide", -1000.); // EM module energy on the same side (assuming filled already)
     auto zdcEMModuleSameSideHasPulse = Monitored::Scalar<bool>("zdcEMModuleSameSideHasPulse", false);
-    auto zdcEMModuleEnergySameSideBelow0 = Monitored::Scalar<bool>("zdcEMModuleEnergySameSideBelow0", false);
-    auto zdcEMModuleEnergySameSideBelow70 = Monitored::Scalar<bool>("zdcEMModuleEnergySameSideBelow70", false);
+    auto rpdValidZdcEMModuleEnergySameSideBelow0 = Monitored::Scalar<bool>("rpdValidZdcEMModuleEnergySameSideBelow0", false);
+    auto rpdValidZdcEMModuleEnergySameSideBelow70 = Monitored::Scalar<bool>("rpdValidZdcEMModuleEnergySameSideBelow70", false);
 
     std::array<float, m_nZdcStatusBits> zdcStatusBitsCount;
     std::array<float, m_nRpdStatusBits> rpdStatusBitsCount;
@@ -312,8 +314,6 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
             // this is the RPD
 
             int ichannel = zdcMod->zdcChannel(); // zero-based
-            int row = RPDrowHandle(*zdcMod);
-            int col = RPDcolHandle(*zdcMod);
             int status = RPDChannelStatusHandle(*zdcMod);
 
             for (int bit = 0; bit < m_nRpdStatusBits; bit++) rpdStatusBitsCount[bit] = 0; // reset
@@ -325,19 +325,22 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 
             auto rpdStatusBits = Monitored::Collection("RPDStatusBits", rpdStatusBitsCount);
             
-            rpdChannelSubAmp = rpdSubAmpVecs[iside][row][col];
+            rpdChannelSubAmp = rpdSubAmpVecs[iside][ichannel];
             rpdChannelAmplitude = RPDChannelAmplitudeHandle(*zdcMod);
             rpdChannelMaxADC = RPDChannelMaxADCHandle(*zdcMod);
             rpdChannelAmplitudeCalib = RPDChannelAmplitudeCalibHandle(*zdcMod);
-            std::vector<float> rpdChannelPileupFitParams = RPDChannelPileupFitParamsHandle(*zdcMod);
+            std::vector<float> rpdChannelPileupFitParams = RPDChannelPileupExpFitParamsHandle(*zdcMod);
             rpdChannelPileupFitSlope = rpdChannelPileupFitParams[1];
             rpdChannelPileupFrac = RPDChannelPileupFracHandle(*zdcMod);
 
             absRpdChannelAmplitude = abs(rpdChannelAmplitude);
             zdcEMModuleEnergySameSide = zdcEMModuleEnergy[iside];
             zdcEMModuleSameSideHasPulse = (zdcEMModuleEnergySameSide >= 0); // default negative value indicates no pulse in the EM module
-            zdcEMModuleEnergySameSideBelow0 = (zdcEMModuleEnergySameSide == 0);
-            zdcEMModuleEnergySameSideBelow70 = (zdcEMModuleEnergySameSide < 70);
+            bool curRpdChannelValid = status & 1 << RPDDataAnalyzer::ValidBit;
+            rpdValidZdcEMModuleEnergySameSideBelow0 = (zdcEMModuleEnergySameSide == 0) && curRpdChannelValid;
+            rpdValidZdcEMModuleEnergySameSideBelow70 = (zdcEMModuleEnergySameSide < 70) && curRpdChannelValid;
+            rpdChannelValid = curRpdChannelValid;
+            rpdChannelCentroidValid = centroidSideValid.at(iside);
             rpdChannelNegativeAmp = (rpdChannelAmplitude < 0);
             rpdChannelNegativePileup = (rpdChannelPileupFrac == -1);
             rpdChannelNoPileup = (rpdChannelPileupFrac == 0);
@@ -345,7 +348,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
             rpdAmplitudeCalibSum[iside] += rpdChannelAmplitudeCalib;
             rpdMaxADCSum[iside] += rpdChannelMaxADC;
 
-            fill(m_tools[m_RPDChannelToolIndices[iside][ichannel]], rpdChannelSubAmp, rpdChannelAmplitude, rpdChannelAmplitudeCalib, rpdChannelMaxADC, rpdStatusBits, rpdChannelPileupFitSlope, absRpdChannelAmplitude, rpdChannelPileupFrac, zdcEMModuleEnergySameSide, zdcEMModuleSameSideHasPulse, zdcEMModuleEnergySameSideBelow0, zdcEMModuleEnergySameSideBelow70, rpdChannelNegativeAmp, rpdChannelNegativePileup, rpdChannelNoPileup, lumiBlock, bcid);
+            fill(m_tools[m_RPDChannelToolIndices[iside][ichannel]], rpdChannelSubAmp, rpdChannelAmplitude, rpdChannelAmplitudeCalib, rpdChannelMaxADC, rpdStatusBits, rpdChannelPileupFitSlope, absRpdChannelAmplitude, rpdChannelPileupFrac, zdcEMModuleEnergySameSide, zdcEMModuleSameSideHasPulse, rpdValidZdcEMModuleEnergySameSideBelow0, rpdValidZdcEMModuleEnergySameSideBelow70, rpdChannelValid, rpdChannelCentroidValid, rpdChannelNegativeAmp, rpdChannelNegativePileup, rpdChannelNoPileup, lumiBlock, bcid);
         }
     }
     
@@ -382,9 +385,9 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 // ______________________________________________________________________________
 
     if (m_CalInfoOn){ // calorimeter information is turned on
-        fill(zdcTool, lumiBlock, bcid, passTrigSideA, passTrigSideC, zdcEnergySumA, zdcEnergySumC, zdcUncalibSumA, zdcUncalibSumC, rpdCosDeltaReactionPlaneAngle, bothReactionPlaneAngleValid, bothSubAmpSumPositive, fcalEtA, fcalEtC);
+        fill(zdcTool, lumiBlock, bcid, passTrigSideA, passTrigSideC, zdcEnergySumA, zdcEnergySumC, zdcUncalibSumA, zdcUncalibSumC, rpdCosDeltaReactionPlaneAngle, bothReactionPlaneAngleValid, bothHasCentroid, fcalEtA, fcalEtC);
     } else{
-        fill(zdcTool, lumiBlock, bcid, passTrigSideA, passTrigSideC, zdcEnergySumA, zdcEnergySumC, zdcUncalibSumA, zdcUncalibSumC, rpdCosDeltaReactionPlaneAngle, bothReactionPlaneAngleValid, bothSubAmpSumPositive);
+        fill(zdcTool, lumiBlock, bcid, passTrigSideA, passTrigSideC, zdcEnergySumA, zdcEnergySumC, zdcUncalibSumA, zdcUncalibSumC, rpdCosDeltaReactionPlaneAngle, bothReactionPlaneAngleValid, bothHasCentroid);
     }
 
 
@@ -393,7 +396,8 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
         auto zdcEMModuleEnergyCurSide = Monitored::Scalar<float>("zdcEMModuleEnergy",zdcEMModuleEnergy[iside]);
         auto rpdAmplitudeCalibSumCurSide = Monitored::Scalar<float>("rpdAmplitudeCalibSum",rpdAmplitudeCalibSum[iside]);
         auto rpdMaxADCSumCurSide = Monitored::Scalar<float>("rpdMaxADCSum",rpdMaxADCSum[iside]);
-        fill(m_tools[m_ZDCSideToolIndices[iside]], zdcEnergySumCurSide, zdcEMModuleEnergyCurSide, rpdAmplitudeCalibSumCurSide, rpdMaxADCSumCurSide, lumiBlock, bcid);
+        auto rpdCurSideValid = Monitored::Scalar<bool>("RPDSideValid",rpdSideValid[iside]);
+        fill(m_tools[m_ZDCSideToolIndices[iside]], zdcEnergySumCurSide, zdcEMModuleEnergyCurSide, rpdAmplitudeCalibSumCurSide, rpdMaxADCSumCurSide, rpdCurSideValid, lumiBlock, bcid);
     }
     return StatusCode::SUCCESS;
 }

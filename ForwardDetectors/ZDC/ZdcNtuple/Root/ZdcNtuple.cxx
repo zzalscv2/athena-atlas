@@ -173,7 +173,12 @@ StatusCode ZdcNtuple :: initialize ()
     if (enableRPD)
     {
       m_outputTree->Branch("zdc_RpdChannelBaseline",&t_RpdChannelBaseline,"zdc_RpdChannelBaseline[2][16]/F");
-      m_outputTree->Branch("zdc_RpdChannelPileupFitParams",&t_RpdChannelPileupFitParams,"zdc_RpdChannelPileupFitParams[2][16][2]/F");
+      m_outputTree->Branch("zdc_RpdChannelPileupExpFitParams",&t_RpdChannelPileupExpFitParams,"zdc_RpdChannelPileupExpFitParams[2][16][2]/F");
+      m_outputTree->Branch("zdc_RpdChannelPileupStretchedExpFitParams",&t_RpdChannelPileupStretchedExpFitParams,"zdc_RpdChannelPileupStretchedExpFitParams[2][16][3]/F");
+      m_outputTree->Branch("zdc_RpdChannelPileupExpFitParamErrs",&t_RpdChannelPileupExpFitParamErrs,"zdc_RpdChannelPileupExpFitParamErrs[2][16][2]/F");
+      m_outputTree->Branch("zdc_RpdChannelPileupStretchedExpFitParamErrs",&t_RpdChannelPileupStretchedExpFitParamErrs,"zdc_RpdChannelPileupStretchedExpFitParamErrs[2][16][3]/F");
+      m_outputTree->Branch("zdc_RpdChannelPileupExpFitMSE",&t_RpdChannelPileupExpFitMSE,"zdc_RpdChannelPileupExpFitMSE[2][16]/F");
+      m_outputTree->Branch("zdc_RpdChannelPileupStretchedExpFitMSE",&t_RpdChannelPileupStretchedExpFitMSE,"zdc_RpdChannelPileupStretchedExpFitMSE[2][16]/F");
       m_outputTree->Branch("zdc_RpdChannelAmplitude",&t_RpdChannelAmplitude,"zdc_RpdChannelAmplitude[2][16]/F");
       m_outputTree->Branch("zdc_RpdChannelAmplitudeCalib",&t_RpdChannelAmplitudeCalib,"zdc_RpdChannelAmplitudeCalib[2][16]/F");
       m_outputTree->Branch("zdc_RpdChannelMaxAdc",&t_RpdChannelMaxAdc,"zdc_RpdChannelMaxAdc[2][16]/F");
@@ -181,24 +186,24 @@ StatusCode ZdcNtuple :: initialize ()
       m_outputTree->Branch("zdc_RpdChannelMaxSample",&t_RpdChannelMaxSample,"zdc_RpdChannelMaxSample[2][16]/i");
       m_outputTree->Branch("zdc_RpdChannelStatus",&t_RpdChannelStatus,"zdc_RpdChannelStatus[2][16]/i");
       m_outputTree->Branch("zdc_RpdChannelPileupFrac",&t_RpdChannelPileupFrac,"zdc_RpdChannelPileupFrac[2][16]/F");
+      m_outputTree->Branch("zdc_RpdSideStatus",&t_RpdSideStatus,"zdc_t_RpdSideStatus[2]/i");
     }
     if (enableCentroid)
     {
-      m_outputTree->Branch("zdc_RpdSubAmp",&t_RpdSubAmp,"zdc_RpdSubAmp[2][4][4]/F");
-      m_outputTree->Branch("zdc_RpdSubAmpSum",&t_RpdSubAmpSum,"zdc_RpdSubAmpSum[2]/F");
-      m_outputTree->Branch("zdc_xDetCentroid",&t_xDetCentroid,"zdc_xDetCentroid[2]/F");
-      m_outputTree->Branch("zdc_yDetCentroid",&t_yDetCentroid,"zdc_yDetCentroid[2]/F");
-      m_outputTree->Branch("zdc_xCentroid",&t_xCentroid,"zdc_xCentroid[2]/F");
-      m_outputTree->Branch("zdc_yCentroid",&t_yCentroid,"zdc_yCentroid[2]/F");
-      m_outputTree->Branch("zdc_xDetCentroidUnsub",&t_xDetCentroidUnsub,"zdc_xDetCentroidUnsub[2]/F");
-      m_outputTree->Branch("zdc_yDetCentroidUnsub",&t_yDetCentroidUnsub,"zdc_yDetCentroidUnsub[2]/F");
-      m_outputTree->Branch("zdc_xDetRowCentroid",&t_xDetRowCentroid,"zdc_xDetRowCentroid[2][4]/F");
-      m_outputTree->Branch("zdc_yDetColCentroid",&t_yDetColCentroid,"zdc_yDetColCentroid[2][4]/F");
-      m_outputTree->Branch("zdc_xDetRowCentroidStdev",&t_xDetRowCentroidStdev,"zdc_xDetRowCentroidStdev[2]/F");
-      m_outputTree->Branch("zdc_yDetColCentroidStdev",&t_yDetColCentroidStdev,"zdc_yDetColCentroidStdev[2]/F");
-      m_outputTree->Branch("zdc_reactionPlaneAngle",&t_reactionPlaneAngle,"zdc_reactionPlaneAngle[2]/F");
-      m_outputTree->Branch("zdc_cosDeltaReactionPlaneAngle",&t_cosDeltaReactionPlaneAngle,"zdc_cosDeltaReactionPlaneAngle/F");
-      m_outputTree->Branch("zdc_centroidStatus",&t_centroidStatus,"zdc_centroidStatus[2]/i");
+      m_outputTree->Branch("zdc_centroidEventValid", &t_centroidEventValid, "zdc_centroidEventValid/b");
+      m_outputTree->Branch("zdc_centroidStatus", &t_centroidStatus, "zdc_centroidStatus[2]/i");
+      m_outputTree->Branch("zdc_RPDChannelSubtrAmp", &t_RPDChannelSubtrAmp, "zdc_RPDChannelSubtrAmp[2][16]/F");
+      m_outputTree->Branch("zdc_RPDSubtrAmpSum", &t_RPDSubtrAmpSum, "zdc_RPDSubtrAmpSum[2]/F");
+      m_outputTree->Branch("zdc_xCentroidPreGeomCorPreAvgSubtr", &t_xCentroidPreGeomCorPreAvgSubtr, "zdc_xCentroidPreGeomCorPreAvgSubtr[2]/F");
+      m_outputTree->Branch("zdc_yCentroidPreGeomCorPreAvgSubtr", &t_yCentroidPreGeomCorPreAvgSubtr, "zdc_yCentroidPreGeomCorPreAvgSubtr[2]/F");
+      m_outputTree->Branch("zdc_xCentroidPreAvgSubtr", &t_xCentroidPreAvgSubtr, "zdc_xCentroidPreAvgSubtr[2]/F");
+      m_outputTree->Branch("zdc_yCentroidPreAvgSubtr", &t_yCentroidPreAvgSubtr, "zdc_yCentroidPreAvgSubtr[2]/F");
+      m_outputTree->Branch("zdc_xCentroid", &t_xCentroid, "zdc_xCentroid[2]/F");
+      m_outputTree->Branch("zdc_yCentroid", &t_yCentroid, "zdc_yCentroid[2]/F");
+      m_outputTree->Branch("zdc_xRowCentroid", &t_xRowCentroid, "zdc_xRowCentroid[2][4]/F");
+      m_outputTree->Branch("zdc_yColCentroid", &t_yColCentroid, "zdc_yColCentroid[2][4]/F");
+      m_outputTree->Branch("zdc_reactionPlaneAngle", &t_reactionPlaneAngle, "zdc_reactionPlaneAngle[2]/F");
+      m_outputTree->Branch("zdc_cosDeltaReactionPlaneAngle", &t_cosDeltaReactionPlaneAngle, "zdc_cosDeltaReactionPlaneAngle/F");
     }
 
     if (!(zdcCalib || zdcLaser || zdcOnly))
@@ -604,7 +609,12 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	{
 	  for (int ch = 0; ch < 16; ch++) {
 	    t_RpdChannelBaseline[iside][ch] = 0;
-	    std::fill(t_RpdChannelPileupFitParams[iside][ch], t_RpdChannelPileupFitParams[iside][ch] + 2, 0);
+	    std::fill(t_RpdChannelPileupExpFitParams[iside][ch], t_RpdChannelPileupExpFitParams[iside][ch] + 2, 0);
+	    std::fill(t_RpdChannelPileupStretchedExpFitParams[iside][ch], t_RpdChannelPileupStretchedExpFitParams[iside][ch] + 3, 0);
+	    std::fill(t_RpdChannelPileupExpFitParamErrs[iside][ch], t_RpdChannelPileupExpFitParamErrs[iside][ch] + 2, 0);
+	    std::fill(t_RpdChannelPileupStretchedExpFitParamErrs[iside][ch], t_RpdChannelPileupStretchedExpFitParamErrs[iside][ch] + 3, 0);
+	    t_RpdChannelPileupExpFitMSE[iside][ch] = 0;
+	    t_RpdChannelPileupStretchedExpFitMSE[iside][ch] = 0;
 	    t_RpdChannelAmplitude[iside][ch] = 0;
 	    t_RpdChannelAmplitudeCalib[iside][ch] = 0;
 	    t_RpdChannelMaxAdc[iside][ch] = 0;
@@ -613,37 +623,30 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	    t_RpdChannelStatus[iside][ch] = 0;
 	    t_RpdChannelPileupFrac[iside][ch] = 0;
           }
+    t_RpdSideStatus[iside] = 0;
 	}
-      if (enableCentroid)
-	{
-	  for (int row = 0; row < 4; row++) {
-            for (int col = 0; col < 4; col++) {
-              t_RpdSubAmp[iside][row][col] = 0;
-            }
-          }
-          t_RpdSubAmpSum[iside] = 0;
-          t_xDetCentroid[iside] = 0;
-          t_yDetCentroid[iside] = 0;
-          t_xCentroid[iside] = 0;
-          t_yCentroid[iside] = 0;
-          t_xDetCentroidUnsub[iside] = 0;
-          t_yDetCentroidUnsub[iside] = 0;
-          for (int row = 0; row < 4; row++) {
-            t_xDetRowCentroid[iside][row] = 0;
-          }
-          for (int col = 0; col < 4; col++) {
-            t_yDetColCentroid[iside][col] = 0;
-          }
-          t_xDetRowCentroidStdev[iside] = 0;
-          t_yDetColCentroidStdev[iside] = 0;
-          t_reactionPlaneAngle[iside] = 0;
-          t_centroidStatus[iside] = 0;
-	}
+      if (enableCentroid) {
+        t_centroidStatus[iside] = 0;
+        std::fill(t_RPDChannelSubtrAmp[iside], t_RPDChannelSubtrAmp[iside] + 16, 0);
+        t_RPDSubtrAmpSum[iside] = 0;
+        t_xCentroidPreGeomCorPreAvgSubtr[iside] = 0;
+        t_yCentroidPreGeomCorPreAvgSubtr[iside] = 0;
+        t_xCentroidPreAvgSubtr[iside] = 0;
+        t_yCentroidPreAvgSubtr[iside] = 0;
+        t_xCentroid[iside] = 0;
+        t_yCentroid[iside] = 0;
+        std::fill(t_xRowCentroid[iside], t_xRowCentroid[iside] + 4, 0);
+        std::fill(t_yColCentroid[iside], t_yColCentroid[iside] + 4, 0);
+        t_reactionPlaneAngle[iside] = 0;
+      }
     }
   }
 
   t_ZdcModuleMask = 0;
-  if (enableCentroid) t_cosDeltaReactionPlaneAngle = 0;
+  if (enableCentroid) {
+    t_centroidEventValid = false;
+    t_cosDeltaReactionPlaneAngle = 0;
+  }
   
   if (t_zdcEventInfoError == xAOD::EventInfo::Error)
     {
@@ -658,6 +661,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
     {
       if (zdcSum->zdcSide()==0) {
         // new global sum
+        t_centroidEventValid = zdcSum->auxdataConst<bool>("centroidEventValid" + auxSuffix);
         t_cosDeltaReactionPlaneAngle = zdcSum->auxdataConst<float>("cosDeltaReactionPlaneAngle" + auxSuffix);
         continue;
       }
@@ -683,28 +687,24 @@ void ZdcNtuple::processZdcNtupleFromModules()
 
       if (nsamplesZdc == 24) {
         if (enableCentroid) {
-          for (int row = 0; row < 4; row++) {
-            for (int col = 0; col < 4; col++) {
-              t_RpdSubAmp[iside][row][col] = zdcSum->auxdataConst<std::vector<std::vector<float>>>("RpdSubAmp" + auxSuffix).at(row).at(col);
-            }
-          }
-          t_RpdSubAmpSum[iside] = zdcSum->auxdataConst<float>("RpdSubAmpSum" + auxSuffix);
-          t_xDetCentroid[iside] = zdcSum->auxdataConst<float>("xDetCentroid" + auxSuffix);
-          t_yDetCentroid[iside] = zdcSum->auxdataConst<float>("yDetCentroid" + auxSuffix);
+          t_centroidStatus[iside] = zdcSum->auxdataConst<unsigned int>("centroidStatus" + auxSuffix);
+          std::vector<float> const& rpdChannelSubtrAmp = zdcSum->auxdataConst<std::vector<float>>("RPDChannelSubtrAmp" + auxSuffix);
+          std::copy(rpdChannelSubtrAmp.begin(), rpdChannelSubtrAmp.end(), t_RPDChannelSubtrAmp[iside]);
+          t_RPDSubtrAmpSum[iside] = zdcSum->auxdataConst<float>("RPDSubtrAmpSum" + auxSuffix);
+          t_xCentroidPreGeomCorPreAvgSubtr[iside] = zdcSum->auxdataConst<float>("xCentroidPreGeomCorPreAvgSubtr" + auxSuffix);
+          t_yCentroidPreGeomCorPreAvgSubtr[iside] = zdcSum->auxdataConst<float>("yCentroidPreGeomCorPreAvgSubtr" + auxSuffix);
+          t_xCentroidPreAvgSubtr[iside] = zdcSum->auxdataConst<float>("xCentroidPreAvgSubtr" + auxSuffix);
+          t_yCentroidPreAvgSubtr[iside] = zdcSum->auxdataConst<float>("yCentroidPreAvgSubtr" + auxSuffix);
           t_xCentroid[iside] = zdcSum->auxdataConst<float>("xCentroid" + auxSuffix);
           t_yCentroid[iside] = zdcSum->auxdataConst<float>("yCentroid" + auxSuffix);
-          t_xDetCentroidUnsub[iside] = zdcSum->auxdataConst<float>("xDetCentroidUnsub" + auxSuffix);
-          t_yDetCentroidUnsub[iside] = zdcSum->auxdataConst<float>("yDetCentroidUnsub" + auxSuffix);
-          for (int row = 0; row < 4; row++) {
-            t_xDetRowCentroid[iside][row] = zdcSum->auxdataConst<std::vector<float>>("xDetRowCentroid" + auxSuffix).at(row);
-          }
-          for (int col = 0; col < 4; col++) {
-            t_yDetColCentroid[iside][col] = zdcSum->auxdataConst<std::vector<float>>("yDetColCentroid" + auxSuffix).at(col);
-          }
-          t_xDetRowCentroidStdev[iside] = zdcSum->auxdataConst<float>("xDetRowCentroidStdev" + auxSuffix);
-          t_yDetColCentroidStdev[iside] = zdcSum->auxdataConst<float>("yDetColCentroidStdev" + auxSuffix);
+          std::vector<float> const& xRowCentroid = zdcSum->auxdataConst<std::vector<float>>("xRowCentroid" + auxSuffix);
+          std::copy(xRowCentroid.begin(), xRowCentroid.end(), t_xRowCentroid[iside]);
+          std::vector<float> const& yColCentroid = zdcSum->auxdataConst<std::vector<float>>("yColCentroid" + auxSuffix);
+          std::copy(yColCentroid.begin(), yColCentroid.end(), t_yColCentroid[iside]);
           t_reactionPlaneAngle[iside] = zdcSum->auxdataConst<float>("reactionPlaneAngle" + auxSuffix);
-          t_centroidStatus[iside] = zdcSum->auxdataConst<unsigned int>("centroidStatus" + auxSuffix);
+        }
+        if (enableRPD) {
+          t_RpdSideStatus[iside] = zdcSum->auxdataConst<unsigned int>("RPDStatus" + auxSuffix);
         }
       }
     }
@@ -778,8 +778,16 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	if (enableRPD)
 	  {
 	    t_RpdChannelBaseline[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelBaseline" + auxSuffix);
-	    std::vector<float> const &rpdChannelPileupFitParams = zdcMod->auxdataConst<std::vector<float>>("RPDChannelPileupFitParams" + auxSuffix);
-	    std::copy(rpdChannelPileupFitParams.begin(), rpdChannelPileupFitParams.end(), t_RpdChannelPileupFitParams[iside][zdcMod->zdcChannel()]);
+	    std::vector<float> const &rpdChannelPileupExpFitParams = zdcMod->auxdataConst<std::vector<float>>("RPDChannelPileupExpFitParams" + auxSuffix);
+	    std::copy(rpdChannelPileupExpFitParams.begin(), rpdChannelPileupExpFitParams.end(), t_RpdChannelPileupExpFitParams[iside][zdcMod->zdcChannel()]);
+	    std::vector<float> const &rpdChannelPileupExpFitParamErrs = zdcMod->auxdataConst<std::vector<float>>("RPDChannelPileupExpFitParamErrs" + auxSuffix);
+	    std::copy(rpdChannelPileupExpFitParamErrs.begin(), rpdChannelPileupExpFitParamErrs.end(), t_RpdChannelPileupExpFitParamErrs[iside][zdcMod->zdcChannel()]);
+	    std::vector<float> const &rpdChannelPileupStretchedExpFitParams = zdcMod->auxdataConst<std::vector<float>>("RPDChannelPileupStretchedExpFitParams" + auxSuffix);
+	    std::copy(rpdChannelPileupStretchedExpFitParams.begin(), rpdChannelPileupStretchedExpFitParams.end(), t_RpdChannelPileupStretchedExpFitParams[iside][zdcMod->zdcChannel()]);
+	    std::vector<float> const &rpdChannelPileupStretchedExpFitParamErrs = zdcMod->auxdataConst<std::vector<float>>("RPDChannelPileupStretchedExpFitParamErrs" + auxSuffix);
+	    std::copy(rpdChannelPileupStretchedExpFitParamErrs.begin(), rpdChannelPileupStretchedExpFitParamErrs.end(), t_RpdChannelPileupStretchedExpFitParamErrs[iside][zdcMod->zdcChannel()]);
+	    t_RpdChannelPileupExpFitMSE[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelPileupExpFitMSE" + auxSuffix);
+	    t_RpdChannelPileupStretchedExpFitMSE[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelPileupStretchedExpFitMSE" + auxSuffix);
 	    t_RpdChannelAmplitude[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelAmplitude" + auxSuffix);
 	    t_RpdChannelAmplitudeCalib[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelAmplitudeCalib" + auxSuffix);
 	    t_RpdChannelMaxAdc[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelMaxADC" + auxSuffix);
