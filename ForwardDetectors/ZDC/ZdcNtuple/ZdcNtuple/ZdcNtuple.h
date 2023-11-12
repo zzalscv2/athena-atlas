@@ -195,7 +195,12 @@ public:
   float t_ZdcModuleMaxADC[2][4];
 
   float t_RpdChannelBaseline[2][16];
-  float t_RpdChannelPileupFitParams[2][16][2];
+  float t_RpdChannelPileupExpFitParams[2][16][2];
+  float t_RpdChannelPileupStretchedExpFitParams[2][16][3];
+  float t_RpdChannelPileupExpFitParamErrs[2][16][2];
+  float t_RpdChannelPileupStretchedExpFitParamErrs[2][16][3];
+  float t_RpdChannelPileupExpFitMSE[2][16];
+  float t_RpdChannelPileupStretchedExpFitMSE[2][16];
   float t_RpdChannelAmplitude[2][16];
   float t_RpdChannelAmplitudeCalib[2][16];
   float t_RpdChannelMaxAdc[2][16];
@@ -203,22 +208,22 @@ public:
   unsigned int t_RpdChannelMaxSample[2][16];
   unsigned int t_RpdChannelStatus[2][16];
   float t_RpdChannelPileupFrac[2][16];
+  unsigned int t_RpdSideStatus[2];
 
-  float t_RpdSubAmp[2][4][4];
-  float t_RpdSubAmpSum[2];
-  float t_xDetCentroid[2];
-  float t_yDetCentroid[2];
+  bool t_centroidEventValid;
+  unsigned int t_centroidStatus[2];
+  float t_RPDChannelSubtrAmp[2][16];
+  float t_RPDSubtrAmpSum[2];
+  float t_xCentroidPreGeomCorPreAvgSubtr[2];
+  float t_yCentroidPreGeomCorPreAvgSubtr[2];
+  float t_xCentroidPreAvgSubtr[2];
+  float t_yCentroidPreAvgSubtr[2];
   float t_xCentroid[2];
   float t_yCentroid[2];
-  float t_xDetCentroidUnsub[2];
-  float t_yDetCentroidUnsub[2];
-  float t_xDetRowCentroid[2][4];
-  float t_yDetColCentroid[2][4];
-  float t_xDetRowCentroidStdev[2];
-  float t_yDetColCentroidStdev[2];
+  float t_xRowCentroid[2][4];
+  float t_yColCentroid[2][4];
   float t_reactionPlaneAngle[2];
   float t_cosDeltaReactionPlaneAngle;
-  unsigned int t_centroidStatus[2];
 
   int   t_nvx;
   float t_vx[3];
