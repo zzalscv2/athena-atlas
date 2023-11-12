@@ -30,6 +30,16 @@ public:
    double mean() const { return m_n>0 ? m_sum/m_n : 0.; }
    double rms2() const { return m_n>1 ? (m_sum2 - m_sum *m_sum/m_n)/(m_n-1) : 0.; }
    double rms() const { return std::sqrt( rms2() ); }
+
+   /// Set statistics to zero
+   void reset() {
+      m_n=0;
+      m_sum=0.;
+      m_sum2=0.;
+      m_min=std::numeric_limits<double>::max();
+      m_max=-std::numeric_limits<double>::max();
+   }
+
    /// @breif Add the statistics gathered in the Stat object b
    Stat &operator +=(const Stat &b) {
       m_n += b.m_n;
@@ -77,9 +87,18 @@ public:
    /// @param the value at the lower edge of the first bin
    /// @param the value at the upper edge of the last bin
    StatHist(unsigned int n_bins, float xmin, float xmax)
-      : m_xmin(xmin),
-        m_scale( n_bins / (xmax-xmin) )
    {
+      setBinning(n_bins,xmin,xmax);
+   }
+
+   /// Define histogramm bins and enable histogramming.
+   /// @param n_bins number of bins without over and underflow
+   /// @param the value at the lower edge of the first bin
+   /// @param the value at the upper edge of the last bin
+   void setBinning(unsigned int n_bins, float xmin, float xmax)
+   {
+      m_xmin=xmin;
+      m_scale = ( n_bins / (xmax-xmin) );
       m_xmin -= 1./m_scale;
       m_histogram.resize(n_bins+2,0u);
    }
@@ -103,6 +122,14 @@ public:
       }
    }
 
+   /// Set histogram contents and statistics to zero
+   void reset() {
+      Stat::reset();
+      for (unsigned int &bin : m_histogram) {
+         bin = 0u;
+      }
+   }
+
    /// @brief Add the statistucs and histogrammed data fro the given object.
    StatHist &operator +=(const StatHist &b) {
       Stat::operator+=(b);
@@ -121,7 +148,7 @@ public:
    }
 
    /// @brief Create a string showing the contents of the histogram
-   /// The string 
+   /// The string
    std::string histogramToString() const {
       std::stringstream msg;
       if (m_histogram.size()>2) {
