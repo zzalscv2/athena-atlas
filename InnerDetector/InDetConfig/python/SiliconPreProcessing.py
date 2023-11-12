@@ -176,6 +176,11 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
         from InDetConfig.InDetTruthAlgsConfig import ITkPRD_MultiTruthMakerSiCfg
         acc.merge(ITkPRD_MultiTruthMakerSiCfg(flags))
 
+        if flags.Tracking.ActiveConfig.doActsCluster or flags.Tracking.ActiveConfig.doAthenaToActsCluster:
+            from ActsConfig.ActsTruthConfig import ITkTruthAssociationCfg
+            acc.merge(ITkTruthAssociationCfg(flags))
+
+
     return acc
 
 
