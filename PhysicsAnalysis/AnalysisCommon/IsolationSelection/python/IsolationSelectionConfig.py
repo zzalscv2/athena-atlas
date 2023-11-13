@@ -55,6 +55,9 @@ def IsoCloseByCorrSkimmingAlgCfg(flags, suff = "", name="IsoCloseByCorrSkimmingA
 def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], useSelTools = False, **kwargs):
 
     result = ComponentAccumulator()
+    # Check for LLP1 to use different selection decorators
+    isLLP1 = suff == "_LLP1"
+
     # Configure the CloseBy isolation correction alg - only need two WPs each for all iso variables
     elIsoWPs   = [ "Loose_VarRad", "TightTrackOnly_FixedRad" ]
     muIsoWPs   = [ "PflowLoose_VarRad", "Loose_VarRad" ] 
@@ -82,22 +85,10 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
                                                                 MuQuality     = 2, ### Select the loose working point
                                                                 )))  
 
-    # For PHYS, one can use accessors. Otherwise, add in electron and photon selection tools for el LH very loose and ph isEM loose
-    if isPhysLite or useSelTools:
-        from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
-        from ElectronPhotonSelectorTools.ElectronLikelihoodToolMapping import  electronLHmenu
-        from ElectronPhotonSelectorTools.LikelihoodEnums import LikeEnum
-        from AthenaConfiguration.Enums import LHCPeriod
-        kwargs.setdefault("ElectronSelectionTool", result.popToolsAndMerge(AsgElectronLikelihoodToolCfg(flags,
-                                                                            name= "ElectronSelTool",
-                                                                            quality = LikeEnum.VeryLoose,
-                                                                            menu=electronLHmenu.offlineMC21 if flags.GeoModel.Run >= LHCPeriod.Run3 else electronLHmenu.offlineMC20)))
-
-        from ElectronPhotonSelectorTools.AsgPhotonIsEMSelectorsConfig import AsgPhotonIsEMSelectorCfg
-        from ROOT import egammaPID
-        kwargs.setdefault("PhotonSelectionTool", result.popToolsAndMerge(AsgPhotonIsEMSelectorCfg(flags,
-                                                                            name= "PhotonSelTool",
-                                                                            quality = egammaPID.PhotonIDLoose)))
+    # Define selectors for electron and photon - different for LLP1 as compared to PHYS and PHYSLITE
+    if isLLP1:
+        kwargs.setdefault("ElecSelectionKey",  "Electrons.DFCommonElectronsLHVeryLooseNoPix")
+        kwargs.setdefault("PhotSelectionKey",  "Photons.DFCommonPhotonsIsEMMedium")
     else:
         kwargs.setdefault("ElecSelectionKey",  "Electrons.DFCommonElectronsLHVeryLoose")
         kwargs.setdefault("PhotSelectionKey",  "Photons.DFCommonPhotonsIsEMLoose")
