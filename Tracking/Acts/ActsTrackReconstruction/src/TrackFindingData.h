@@ -450,6 +450,20 @@ namespace
       }
     }
 
+    std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> measurementOffsets() const
+    {
+      std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> offsets;
+      offsets.reserve(m_measurementRanges.m_measurementContainer.size() - 1); // first one usually 0
+      for (std::size_t typeIndex = 0; typeIndex < m_measurementRanges.m_measurementContainer.size(); ++typeIndex)
+      {
+        if (measurementOffset(typeIndex) > 0 && m_measurementRanges.m_measurementContainer[typeIndex] != nullptr)
+        {
+          offsets.emplace_back(m_measurementRanges.m_measurementContainer[typeIndex], measurementOffset(typeIndex));
+        }
+      }
+      return offsets;
+    }
+
     size_t measurementOffset(size_t typeIndex) const { return typeIndex < m_measurementOffset.size() ? m_measurementOffset[typeIndex] : 0u; }
     size_t seedOffset(size_t typeIndex) const { return typeIndex < m_seedOffset.size() ? m_seedOffset[typeIndex] : 0u; }
 
