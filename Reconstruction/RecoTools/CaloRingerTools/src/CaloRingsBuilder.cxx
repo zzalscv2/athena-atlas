@@ -29,8 +29,8 @@
 
 // STL
 #include <algorithm>
-#include <math.h>
 #include <cfloat>
+#include <cmath>
 #include <sstream>
 
 namespace Ringer {
@@ -49,8 +49,7 @@ CaloRingsBuilder::CaloRingsBuilder(const std::string& type,
 }
 
 // =====================================================================================
-CaloRingsBuilder::~CaloRingsBuilder()
-{ }
+CaloRingsBuilder::~CaloRingsBuilder() = default;
 
 // =====================================================================================
 StatusCode CaloRingsBuilder::initialize()
@@ -338,7 +337,7 @@ StatusCode CaloRingsBuilder::buildRingSet(
           ) / rawConf.etaWidth;
       // calculate the normalised difference in phi
       const float deltaPhi = fabs(
-          m_phiHelper.diff(cell->phi(), seed.phi())
+          CaloPhiRange::diff(cell->phi(), seed.phi())
           ) / rawConf.phiWidth;
       // The biggest difference indicates the ring number (we are using
       // squared-shape rings)

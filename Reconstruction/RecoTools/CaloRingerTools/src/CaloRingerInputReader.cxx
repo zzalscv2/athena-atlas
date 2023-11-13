@@ -24,7 +24,7 @@ CaloRingerInputReader::CaloRingerInputReader(const std::string& type,
 
 // =============================================================================
 CaloRingerInputReader::~CaloRingerInputReader()
-{ }
+= default;
 
 // =============================================================================
 StatusCode CaloRingerInputReader::initialize()

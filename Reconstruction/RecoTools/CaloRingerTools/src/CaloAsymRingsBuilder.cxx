@@ -30,8 +30,8 @@
 
 // STL
 #include <algorithm>
-#include <math.h>
 #include <cfloat>
+#include <cmath>
 #include <sstream>
 
 namespace Ringer {
@@ -54,7 +54,7 @@ CaloAsymRingsBuilder::CaloAsymRingsBuilder(const std::string& type,
 
 // =====================================================================================
 CaloAsymRingsBuilder::~CaloAsymRingsBuilder()
-{ }
+= default;
 
 // =====================================================================================
 StatusCode CaloAsymRingsBuilder::initialize()
@@ -168,14 +168,14 @@ StatusCode CaloAsymRingsBuilder::buildRingSet(
       // calculate the normalised difference in eta
       float deltaEta = (cell->eta() - seed.eta())
                              / rawConf.etaWidth;
-      bool etaPositive = ( deltaEta > 0 )?true:false;
+      bool etaPositive = deltaEta > 0;
       deltaEta = fabs(deltaEta);
 
       // TODO Add phi asimetry...
       // calculate the normalised difference in phi
-      float deltaPhi = m_phiHelper.diff(cell->phi(), seed.phi());
+      float deltaPhi = CaloPhiRange::diff(cell->phi(), seed.phi());
 
-      bool phiPositive = ( deltaPhi > 0)?true:false;
+      bool phiPositive = deltaPhi > 0;
       deltaPhi = fabs(deltaPhi)/rawConf.phiWidth;
 
       // The biggest difference indicates the ring number (we are using

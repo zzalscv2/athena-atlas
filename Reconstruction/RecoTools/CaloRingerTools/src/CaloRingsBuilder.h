@@ -136,7 +136,7 @@ class CaloRingsBuilder : public ::AthAlgTool,
     /**
      * @brief Fill RingSet seed for IParticle.
      **/
-    StatusCode getRingSetSeed(
+    static StatusCode getRingSetSeed(
         const xAOD::RingSetConf::RawConf &/*rawConf*/,
         const xAOD::IParticle &part,
         AtlasGeoPoint &seed);
