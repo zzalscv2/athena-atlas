@@ -1,0 +1,145 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef MUONREADOUTGEOMETRY_MDTREADOUTELEMENT_ICC
+#define MUONREADOUTGEOMETRY_MDTREADOUTELEMENT_ICC
+
+#ifndef NDEBUG 
+#define CHECK_IDVALID(ID) \
+    {if (idHelperSvc()->detElId(ID) != identify()) {\
+     ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- The detector element "<<idHelperSvc()->toStringDetEl(identify())<<" is not suited for measurement " \
+       <<idHelperSvc()->toString(ID)); \
+       throw std::runtime_error("Wrong detector element"); \
+    } \
+    const int tube{m_idHelper.tube(ID)}, layer{m_idHelper.tubeLayer(ID)}; \
+    if (tube < 1 || tube > m_ntubesperlayer) { \
+        ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- Invalid tube "<<tube<<" was given. Allowed 1-"<<m_ntubesperlayer); \
+        throw std::runtime_error("Tube is out of range"); \
+    } \
+    if (layer <1 || layer > m_nlayers) { \
+        ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- Invalid layer "<<layer<<" was given. Allowed 1-"<<m_ntubesperlayer); \
+        throw std::runtime_error("Layer is out of range"); \
+    }}
+#else 
+#define CHECK_IDVALID(ID) \
+    {}
+#endif
+namespace MuonGM {
+    inline const Amg::Transform3D& MdtReadoutElement::transform() const { return absTransform(); }
+    inline const Amg::Vector3D& MdtReadoutElement::normal(const Identifier&) const {return normal();}
+    inline bool MdtReadoutElement::barrel() const { return m_inBarrel;}
+    inline bool MdtReadoutElement::endcap() const { return !barrel(); }
+    inline double MdtReadoutElement::innerTubeRadius() const { return m_innerRadius; }
+    inline double MdtReadoutElement::outerTubeRadius() const { return m_innerRadius + m_tubeWallThickness; }
+
+
+    inline int MdtReadoutElement::getMultilayer() const { return m_multilayer; }
+    inline int MdtReadoutElement::getNLayers() const { return m_nlayers; }
+    inline int MdtReadoutElement::getNtubesperlayer() const { return m_ntubesperlayer; }
+    inline int MdtReadoutElement::getNtubesinastep() const { return m_ntubesinastep; }   
+    inline double MdtReadoutElement::tubePitch() const { return m_tubepitch; }
+    inline double MdtReadoutElement::getWireLength(const int tubeLayer, const int tube) const {
+        return tubeLength(tubeLayer, tube) - 2. * m_endpluglength;
+    }
+    inline double MdtReadoutElement::tubeLength(const int tubeLayer, const int tube) const {
+        return getActiveTubeLength(tubeLayer, tube) + 2. * m_deadlength;
+    }
+    inline double MdtReadoutElement::getActiveTubeLength(const int tubeLayer, const int tube) const {
+        return 2. * (bounds(tubeLayer, tube).halflengthZ());
+    }
+    inline const Amg::Transform3D& MdtReadoutElement::transform(const Identifier& id) const {
+        CHECK_IDVALID(id);
+        return transform(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    } 
+    inline Amg::Transform3D MdtReadoutElement::globalToLocalTransf(const Identifier& id) const {
+        return transform(id).inverse();
+    }
+    
+    //// <Global <--> Local transformation without deformations
+    inline Amg::Transform3D MdtReadoutElement::nodeform_localToGlobalTransf(const Identifier& id) const {
+        CHECK_IDVALID(id);
+        return nodeform_localToGlobalTransf(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }
+    inline Amg::Transform3D MdtReadoutElement::nodeform_globalToLocalTransf(const Identifier& id) const {
+        return nodeform_localToGlobalTransf(id).inverse();
+    }
+    inline const Amg::Transform3D& MdtReadoutElement::localToGlobalTransf(const Identifier&id) const {
+        CHECK_IDVALID(id);
+        return localToGlobalTransf(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }
+    inline const Amg::Transform3D& MdtReadoutElement::localToGlobalTransf(int tubeLayer, int tube) const {
+        return transform(tubeLayer, tube);
+    }
+
+   
+
+    inline Amg::Transform3D MdtReadoutElement::tubeToMultilayerTransf(const Identifier& id) const {
+        CHECK_IDVALID(id);
+        return tubeToMultilayerTransf(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }
+    inline double MdtReadoutElement::tubeLength(const Identifier& id) const {
+        CHECK_IDVALID(id);
+        return tubeLength(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }
+    inline double MdtReadoutElement::RODistanceFromTubeCentre(const Identifier& id) const {
+        CHECK_IDVALID(id);
+        return RODistanceFromTubeCentre(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }
+    inline double MdtReadoutElement::signedRODistanceFromTubeCentre(const Identifier& id) const {
+        CHECK_IDVALID(id);      
+        return signedRODistanceFromTubeCentre(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }
+    inline Amg::Vector3D MdtReadoutElement::tubeFrame_localROPos(const Identifier& id) const {
+        CHECK_IDVALID(id);
+        return tubeFrame_localROPos(m_idHelper.tubeLayer(id), m_idHelper.tube(id));       
+    }
+    inline Amg::Vector3D MdtReadoutElement::localROPos(const Identifier& id) const { 
+        CHECK_IDVALID(id);
+        const int tubeLayer = m_idHelper.tubeLayer(id);
+        const int tube = m_idHelper.tube(id);
+        return tubeToMultilayerTransf(tubeLayer, tube) * tubeFrame_localROPos(tubeLayer, tube); 
+    }
+   inline  Amg::Vector3D MdtReadoutElement::ROPos(const Identifier& id) const {
+        CHECK_IDVALID(id);
+        return ROPos(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }
+    inline Amg::Vector3D MdtReadoutElement::localTubePos(const Identifier& id) const {
+        CHECK_IDVALID(id);
+        return localTubePos(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }
+    inline Amg::Vector3D MdtReadoutElement::nodeform_localTubePos(const Identifier& id) const {
+        CHECK_IDVALID(id);
+        return nodeform_localTubePos(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }
+    inline Amg::Vector3D MdtReadoutElement::nodeform_tubePos(const Identifier& id) const {
+        CHECK_IDVALID(id);
+        return nodeform_tubePos(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }
+    inline Amg::Vector3D MdtReadoutElement::tubePos(const Identifier& id) const {
+        CHECK_IDVALID(id);
+        return tubePos(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }   
+    inline double MdtReadoutElement::distanceFromRO(const Amg::Vector3D& x, const Identifier& id) const {   
+        CHECK_IDVALID(id);
+        return distanceFromRO(x, m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }
+    inline int MdtReadoutElement::isAtReadoutSide(const Amg::Vector3D& GlobalHitPosition, const Identifier& id) const {
+        CHECK_IDVALID(id);
+        return isAtReadoutSide(GlobalHitPosition, m_idHelper.tubeLayer(id), m_idHelper.tube(id));       
+    }
+    inline const Trk::SaggedLineSurface& MdtReadoutElement::surface(const Identifier& id) const { 
+        CHECK_IDVALID(id);
+        return surface(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }
+    inline const Trk::CylinderBounds& MdtReadoutElement::bounds(const Identifier& id) const {
+        CHECK_IDVALID(id);
+        return bounds(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }
+    inline const Amg::Vector3D& MdtReadoutElement::center(const Identifier& id) const {
+        CHECK_IDVALID(id);
+        return center(m_idHelper.tubeLayer(id), m_idHelper.tube(id));
+    }    
+} 
+#undef CHECK_IDVALID
+#endif  // MUONREADOUTGEOMETRY_MDTREADOUTELEMENT_H
