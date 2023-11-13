@@ -9,15 +9,14 @@
 # art-html: dcube_physlite
 
 export ATHENA_CORE_NUMBER=8
-Reco_tf.py \
+Reco_tf.py --CA \
   --AMI q445 \
   --inputHITSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/HITS/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8453_s3873/1000events_singleBS.HITS.pool.root \
   --sharedWriter True \
   --steering 'doRDO_TRIG' 'doTRIGtoALL' \
   --outputAODFile myAOD.pool.root \
   --athenaopts "HITtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "AODtoDAOD:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" \
-  --postExec 'from AthenaAuditors.AthenaAuditorsConf import FPEAuditor;FPEAuditor.NStacktracesOnFPE=10;' \
-  --preExec 'from RecExConfig.RecFlags import rec;rec.runUnsupportedLegacyReco=True' \
+  --preExec 'flags.Exec.FPE=10' \
   --runNumber=410000 \
   --DataRunNumber=410000 \
   --maxEvents 1000
@@ -36,7 +35,7 @@ Derivation_tf.py \
   --maxEvents -1
 
 rcderiv=$?
-echo "art-result: ${rcderiv} Derivation_tf_q449_phys_physlite_mp_ca" 
+echo "art-result: ${rcderiv} Derivation_tf_q445_phys_physlite_mp_ca"
 
 # Check for FPEs in the logiles
 test_trf_check_fpe.sh
