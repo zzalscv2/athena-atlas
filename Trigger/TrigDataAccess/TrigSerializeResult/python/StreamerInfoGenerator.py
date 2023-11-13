@@ -6,7 +6,7 @@ import ROOT
 
 class StreamerInfoGenerator:
   def __init__(self):
-    self.debug = True
+    self.debug = False
     print("StreamerInfoGenerator   v1.0.0")
     self.classlist = []
     self.problemclasses = []
@@ -36,7 +36,7 @@ class StreamerInfoGenerator:
     
     try:
       t = self.type.ByName(typename)
-      print(t)
+      if self.debug: print(type(t))
       if t.IsFundamental():
         if self.debug: print(typename, ' is fundamental')
         return
@@ -46,7 +46,7 @@ class StreamerInfoGenerator:
       pass
 
     # can't handle anonymous types
-    exceptions = ["string::(anonymous)"]
+    exceptions = ["string::(anonymous)","string::(unnamed)"]
     try:
       # This doesn't work in ROOT 6.22 anymore
       # cl = cppyy.makeClass(typename)
@@ -59,15 +59,16 @@ class StreamerInfoGenerator:
       base_and_arg[0] = base_and_arg[0].replace("::", ".")
       bind_name = "[".join(base_and_arg)
       bind_name = "ROOT." + bind_name
-      print("Making class {} -> {}".format(typename, bind_name))
-      print("cl = " + bind_name)
+      if self.debug:
+          print("Making class {} -> {}".format(typename, bind_name))
+          print("cl = " + bind_name)
       exec("cl = " + bind_name, globals())
-      print(cl)  # noqa: F821
+      if self.debug: print(cl)  # noqa: F821
       if not dontAdd:
         self.classlist.append(typename)
-        print("appended type to the classlist")
+        if self.debug: print("appended type to the classlist")
     except Exception as ex:
-      print('Cannot create class of {}: {}'.format(typename, ex))
+      if self.debug: print('Cannot create class of {}: {}'.format(typename, ex))
       if typename not in exceptions:
         raise ex
 
@@ -76,7 +77,7 @@ class StreamerInfoGenerator:
     if t.IsComplete():
       if self.debug: print(typename, 'is complete')
     else:
-      print(typename, ' isn\'t complete')
+      if self.debug: print(typename, ' isn\'t complete')
 
     if t.IsPointer():
       if self.debug: print(typename, ' is a pointer')
@@ -86,11 +87,11 @@ class StreamerInfoGenerator:
       if (underlying):
         self.inspect(underlying.Name(7))
     elif t.IsArray():
-      print(typename,' is an array')
+      if self.debug: print(typename,' is an array')
     elif t.IsTemplateInstance():
-      print(typename, ' is template')
+      if self.debug: print(typename, ' is template')
       if typename.find('std::')==0:
-        print('std::business removed')
+        if self.debug: print('std::business removed')
         try:
           self.classlist.remove(typename)
         except Exception:
