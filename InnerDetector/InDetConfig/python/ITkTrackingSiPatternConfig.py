@@ -90,6 +90,13 @@ def ITkTrackingSiPatternCfg(flags,
             from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
             acc.merge(ActsToTrkConvertorAlgCfg(flags,
                                                TracksLocation=SiSPSeededTrackCollectionKey))
+
+        # Convert tracks Athena -> Acts (before ambi)
+        if flags.Tracking.ActiveConfig.doAthenaToActsTrack:
+            from ActsConfig.ActsEventCnvConfig import TrkToActsConvertorAlgCfg
+            acc.merge(TrkToActsConvertorAlgCfg(flags,
+                                               TrackContainerLocation="ActsTracks",
+                                               TrackCollectionKeys=[SiSPSeededTrackCollectionKey]))
             
     from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
     if flags.Tracking.doTruth and runTruth:

@@ -11,6 +11,7 @@ Tracking.ActiveConfig.doAthenaSeed       : True
 Tracking.ActiveConfig.doAthenaSpacePoint : True
 Tracking.ActiveConfig.doAthenaToActsCluster : False
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
+Tracking.ActiveConfig.doAthenaToActsTrack : False					       
 Tracking.ActiveConfig.doAthenaTrack      : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
@@ -40,6 +41,7 @@ Tracking.ActiveConfig.doAthenaSeed       : False
 Tracking.ActiveConfig.doAthenaSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsCluster : False
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
+Tracking.ActiveConfig.doAthenaToActsTrack : False					       
 Tracking.ActiveConfig.doAthenaTrack      : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
@@ -69,6 +71,7 @@ Tracking.ActiveConfig.doAthenaSeed       : True
 Tracking.ActiveConfig.doAthenaSpacePoint : True
 Tracking.ActiveConfig.doAthenaToActsCluster : False
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
+Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
@@ -98,6 +101,7 @@ Tracking.ActiveConfig.doAthenaSeed       : False
 Tracking.ActiveConfig.doAthenaSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsCluster : True
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
+Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
@@ -127,6 +131,7 @@ Tracking.ActiveConfig.doAthenaSeed       : False
 Tracking.ActiveConfig.doAthenaSpacePoint : True
 Tracking.ActiveConfig.doAthenaToActsCluster : False
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : True
+Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
@@ -156,6 +161,7 @@ Tracking.ActiveConfig.doAthenaSeed       : False
 Tracking.ActiveConfig.doAthenaSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsCluster : True
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
+Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
@@ -173,6 +179,36 @@ Tracking.ActiveConfig.doActsTrack        : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
 ************************************************************************
+Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by Tracking.ITkValidateActsAmbiguityResolutionPass
+
+************************************************************************
+******************** Tracking reconstruction Config ********************
+                     Active Config is ValidateActsAmbiguityResolution
+Flag Name                                : Value
+Tracking.ActiveConfig.doAthenaAmbiguityResolution : False
+Tracking.ActiveConfig.doAthenaCluster    : True
+Tracking.ActiveConfig.doAthenaSeed       : True
+Tracking.ActiveConfig.doAthenaSpacePoint : True
+Tracking.ActiveConfig.doAthenaToActsCluster : False
+Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
+Tracking.ActiveConfig.doAthenaToActsTrack : True
+Tracking.ActiveConfig.doAthenaTrack      : True
+Flag categories that can be loaded dynamically
+Category                  :                 Generator name : Defined in
+Flag Name                                : Value
+Tracking.ActiveConfig.doActsAmbiguityResolution : True
+Tracking.ActiveConfig.doActsCluster      : False
+Tracking.ActiveConfig.doActsSeed         : False
+Tracking.ActiveConfig.doActsSpacePoint   : False
+Tracking.ActiveConfig.doActsToAthenaCluster : False
+Tracking.ActiveConfig.doActsToAthenaResolvedTrack : True
+Tracking.ActiveConfig.doActsToAthenaSeed : False
+Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
+Tracking.ActiveConfig.doActsToAthenaTrack : False
+Tracking.ActiveConfig.doActsTrack        : False
+Flag categories that can be loaded dynamically
+Category                  :                 Generator name : Defined in
+************************************************************************
 Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by Tracking.ITkActsBenchmarkSpotPass
 
 ************************************************************************
@@ -185,6 +221,7 @@ Tracking.ActiveConfig.doAthenaSeed       : False
 Tracking.ActiveConfig.doAthenaSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsCluster : True
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
+Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
@@ -214,6 +251,7 @@ Tracking.ActiveConfig.doAthenaSeed       : False
 Tracking.ActiveConfig.doAthenaSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsCluster : True
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
+Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
@@ -231,3 +269,4 @@ Tracking.ActiveConfig.doActsTrack        : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
 ************************************************************************
+

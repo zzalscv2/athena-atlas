@@ -50,6 +50,7 @@ class TrackingComponent(FlagEnum):
     ValidateActsSpacePoints = "ValidateActsSpacePoints"
     ValidateActsSeeds = "ValidateActsSeeds"
     ValidateActsTracks = "ValidateActsTracks"
+    ValidateActsAmbiguityResolution = "ValidateActsAmbiguityResolution"
     # Benchmarking
     BenchmarkSpot = "BenchmarkSpot"
 
@@ -437,6 +438,7 @@ def createTrackingConfigFlags():
         createValidateActsSpacePointsTrackingPassFlags,
         createValidateActsSeedsTrackingPassFlags,
         createValidateActsTracksTrackingPassFlags,
+        createValidateActsAmbiguityResolutionTrackingPassFlags,
         createActsBenchmarkSpotTrackingPassFlags
     )
 
@@ -450,6 +452,8 @@ def createTrackingConfigFlags():
                           createValidateActsSeedsTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkValidateActsTracksPass",
                           createValidateActsTracksTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkValidateActsAmbiguityResolutionPass",
+                          createValidateActsAmbiguityResolutionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsBenchmarkSpotPass",
                           createActsBenchmarkSpotTrackingPassFlags, prefix=True)
 

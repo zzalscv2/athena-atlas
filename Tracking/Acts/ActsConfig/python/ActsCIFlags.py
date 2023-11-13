@@ -53,6 +53,11 @@ def actsValidateResolvedTracksFlags(flags):
     actsValidateTracksFlags(flags)
     flags.Acts.doAmbiguityResolution = True
 
+def actsValidateAmbiguityResolutionFlags(flags):
+    """flags for Reco_tf with CA used in CI tests: use Acts Ambiguity Resolution after Athena reconstruction"""
+    flags.Reco.EnableHGTDExtension = False
+    flags.Tracking.recoChain = [TrackingComponent.ValidateActsAmbiguityResolution]
+
 def actsValidateGSFFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use GaussianSumFitter"""
     flags.Reco.EnableHGTDExtension = False
