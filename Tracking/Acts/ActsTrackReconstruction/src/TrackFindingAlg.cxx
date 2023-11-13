@@ -403,7 +403,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("    \\__ Created " << tracksContainer.size() << " tracks");
 
     copyStats(event_stat);
-    
+
     std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandle.moveToConst(std::move(tracksContainer), ctx);
     ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
     if (!trackContainerHandle.isValid())
@@ -517,26 +517,19 @@ namespace ActsTrk
       }
       const auto &tracksForSeed = result.value();
 
+      if (!m_trackStatePrinter.empty())
+      {
+        m_trackStatePrinter->printTracks(tgContext, tracksContainerTemp, tracksForSeed, measurements.measurementOffsets());
+      }
+
       // Fill the track infos into the duplicate seed detector
-      ATH_CHECK(storeSeedInfo(tracksContainerTemp, tracksForSeed, duplicateSeedDetector));
+      if (m_skipDuplicateSeeds)
+      {
+        ATH_CHECK(storeSeedInfo(tracksContainerTemp, tracksForSeed, duplicateSeedDetector));
+      }
 
       size_t ntracks = tracksForSeed.size();
       event_stat[category_i][kNOutputTracks] += ntracks;
-
-      if (!m_trackStatePrinter.empty())
-      {
-        const MeasurementRangeList &measurement_list = measurements.measurementRanges();
-        std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> offset;
-        offset.reserve(measurement_list.m_measurementContainer.size());
-        for (std::size_t type_index = 0; type_index < measurement_list.m_measurementContainer.size(); ++type_index)
-        {
-          if (measurement_list.m_measurementContainer[type_index] != nullptr)
-          {
-            offset.push_back(std::make_pair(measurement_list.m_measurementContainer[type_index], measurements.measurementOffset(type_index)));
-          }
-        }
-        m_trackStatePrinter->printTracks(tgContext, tracksContainerTemp, result.value(), offset);
-      }
 
       if (ntracks == 0)
       {

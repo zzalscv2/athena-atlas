@@ -408,11 +408,11 @@ namespace ActsTrk
     {
       ATLASUncalibSourceLink sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
       index = (*sl)->index();
-      for (const std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t> &a_offset : container_offset)
+      for (const auto &[container, offset] : container_offset)
       {
-        if ((*sl)->container() == a_offset.first)
+        if ((*sl)->container() == container)
         {
-          index += a_offset.second;
+          index += offset;
           break;
         }
       }
