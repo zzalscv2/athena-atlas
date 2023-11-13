@@ -13,6 +13,11 @@ from collections.abc import Hashable, Iterable
 from collections import defaultdict
 from dataclasses import dataclass
 
+try:
+    from GaudiKernel.DataHandle import DataHandle
+except ImportError:
+    class DataHandle: pass  # for analysis releases
+
 
 class AccumulatorCachable(ABC):
     """Abstract base for classes needing custom AccumulatorCache behavior."""
@@ -108,17 +113,19 @@ class AccumulatorDecorator:
         cls._memoize = True
 
     def _hasHash(x):
-        if(hasattr(x , "athHash")):
+        if hasattr(x, "athHash"):
             return True
-        elif(isinstance(x , Hashable)):
+        elif isinstance(x, (Hashable, DataHandle)):
             return True
         return False
 
     def _getHash(x):
-        if(hasattr(x , "athHash")):
+        if hasattr(x, "athHash"):
             return x.athHash()
-        elif(isinstance(x , Hashable)):
+        elif isinstance(x, Hashable):
             return hash(x)
+        elif isinstance(x, DataHandle):
+            return hash(repr(x))
         return None
 
     def _evict(x):
@@ -154,12 +161,12 @@ class AccumulatorDecorator:
             for a in args:
                 if(not AccumulatorDecorator._hasHash(a)):
                     hashable_args = False
-                    _msg.debug("Positional argument %s to AccumulatorDecorator __call__ is not hashable.",str(a))
+                    _msg.warning("Positional argument '%r' in %s is not hashable.", a, self._func)
                     break
             for k , v in kwargs.items():
                 if(not AccumulatorDecorator._hasHash(v)):
                     hashable_args = False
-                    _msg.debug("Value in keyword argument %s to AccumulatorDecorator __call__ is not hashable.",str(k))
+                    _msg.warning("Value '%r' of keyword argument '%s' in %s is not hashable.", v, k, self._func)
                     break
             if(hashable_args):
                 # frozen set makes the order of keyword arguments irrelevant
@@ -205,7 +212,7 @@ class AccumulatorDecorator:
                 else:
                     _msg.debug('Hash not found in AccumulatorCache for function %s' , self._func)
                     if(len(self._cache) >= self._maxSize):
-                        _msg.debug("Cache limit (%d) reached for %s.%s", self._maxSize, self._func.__module__, self._func.__name__)
+                        _msg.warning("Cache limit (%d) reached for %s.%s", self._maxSize, self._func.__module__, self._func.__name__)
                         oldest = self._cache.pop(next(iter(self._cache)))
                         AccumulatorDecorator._evict(oldest)
 
@@ -223,7 +230,6 @@ class AccumulatorDecorator:
 
                     return (deepcopy(res) if self._deepcopy else res, False)
             else:
-                _msg.debug('Could not calculate hash of arguments for function %s in AccumulatorCache.' , self._func)
                 return (self._func(*args , **kwargs), False)
         else:
             return (self._func(*args , **kwargs), None)
