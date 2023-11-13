@@ -5,7 +5,7 @@ import os
 
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
-from LArCalibProcessing.LArSC2NtupleConfig import LArSC2NtupleCfg
+from LArCalibTools.LArSC2NtupleConfig import LArSC2NtupleCfg
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
 def L1CaloMenuCfg(flags):

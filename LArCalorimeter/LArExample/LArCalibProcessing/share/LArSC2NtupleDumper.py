@@ -189,7 +189,7 @@ if __name__=='__main__':
       #acc.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg())
       #AthReadAlg_ExtraInputs.append(('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')) 
 
-  from LArCalibProcessing.LArSC2NtupleConfig import LArSC2NtupleCfg
+  from LArCalibTools.LArSC2NtupleConfig import LArSC2NtupleCfg
   acc.merge(LArSC2NtupleCfg(flags, AddBadChannelInfo=args.bc, AddFEBTempInfo=False, isSC=True, isFlat=False, 
                             OffId=args.offline, AddHash=args.ahash, AddCalib=args.calib, RealGeometry=args.geom, ExpandId=args.expid, # from LArCond2NtupleBase 
                             NSamples=flags.LArSCDump.nSamples, FTlist={}, FillBCID=args.bcid, ContainerKey=flags.LArSCDump.digitsKey,  # from LArDigits2Ntuple

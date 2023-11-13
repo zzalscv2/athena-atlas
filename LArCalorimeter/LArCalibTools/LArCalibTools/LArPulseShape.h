@@ -71,7 +71,7 @@ class LArPulseShape : public AthAlgorithm {
    int m_mindist = 0;
    int m_closestBC = 0;
 
-   ToolHandle<Trig::TrigDecisionTool> m_trigDec;  
+   PublicToolHandle<Trig::TrigDecisionTool>m_trigDec{this, "TrigDecisionTool", "", "Handle to the TrigDecisionTool"};  
 
    SG::ReadCondHandleKey<LuminosityCondData> m_lumiDataKey{this,"LumiKey", "LuminosityCondData","SG Key of LuminosityCondData object"};  
    SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};

@@ -15,5 +15,6 @@ atlas_add_component( LArCalibTools
                      LINK_LIBRARIES ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolUtilities CaloCondBlobObjs CaloDetDescrLib CaloIdentifier CxxUtils GaudiKernel LArCOOLConditions LArCablingLib LArElecCalib LArIdentifier LArRawConditions LArRawEvent LArRecConditions LumiBlockData StoreGateLib TrigDecisionToolLib xAODEventInfo TrigT1CaloEventLib TrigT1CaloCalibToolInterfaces TrigT1CaloToolInterfaces TrigT1Interfaces )
 
 # Install files from the package:
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.py )
 atlas_install_scripts( share/LArConditions2Ntuple.py )
