@@ -765,10 +765,10 @@ StatusCode MdtCalibDbAlg::legacyTubePayloadToJSON(const coral::AttributeList& at
             layer = 1;
             ++ml;
         }
-        calibData.push_back(channelData);
+        calibData.push_back(std::move(channelData));
     }
-    channel["calibConstants"] = calibData;
-    json.push_back(channel);    
+    channel["calibConstants"] = std::move(calibData);
+    json.push_back(std::move(channel));
     return StatusCode::SUCCESS;
 }
 StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx, MuonCalib::MdtCalibDataContainer& writeCdo) const {
@@ -848,7 +848,8 @@ StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx, MuonCalib::MdtCalibD
                         <<" ID fields: "<<stName<<","<<ieta<<","<<iphi);
             return StatusCode::FAILURE;
         }
-        nlohmann::json tubeConstants = chambChannel["calibConstants"];
+        //const ref. No copy
+        const nlohmann::json& tubeConstants = chambChannel["calibConstants"];
         for (const auto& tubeChannel : tubeConstants) {
             const int ml = tubeChannel["ml"]; 
             const int l = tubeChannel["layer"];
