@@ -75,6 +75,7 @@ cloneObj<Trk::TrackParameters>(const Trk::TrackParameters* p_ptr)
 
 namespace {
 constexpr double s_distIncreaseTolerance = 100. * Gaudi::Units::millimeter;
+constexpr unsigned int INVALIDPROPAGATORS = Trk::NumberOfSignatures+3;
 
 /** RadialDirection helper method
   - inbound : -1
@@ -133,7 +134,7 @@ Trk::Extrapolator::Extrapolator(const std::string& t, const std::string& n, cons
   , m_cacheLastMatLayer(false)
   , m_returnPassiveLayers(false)
   , m_meotpIndex(0)
-  , m_configurationLevel(10)
+  , m_numOfValidPropagators(INVALIDPROPAGATORS)
   , m_searchLevel(10)
   , m_initialLayerAttempts(3)
   , m_successiveLayerAttempts(1)
@@ -251,11 +252,10 @@ Trk::Extrapolator::initialize()
 
   if (!validprop) {
     ATH_MSG_WARNING("None of the defined propagators could be retrieved!");
-    ATH_MSG_WARNING(
-      "Extrapolators jumps back in unconfigured mode, only strategy pattern methods can be used.");
+    ATH_MSG_WARNING("Extrapolator unconfigured");
   } else {
-    m_configurationLevel = validprop - 1;
-    ATH_MSG_VERBOSE("Configuration level automatically set to " << m_configurationLevel);
+    m_numOfValidPropagators = validprop ;
+    ATH_MSG_VERBOSE("Number of Valid Propagators " << m_numOfValidPropagators);
   }
 
   // Get the Navigation AlgTools
@@ -445,14 +445,13 @@ Trk::Extrapolator::extrapolate(const NeutralParameters& parameters,
                                PropDirection dir,
                                const BoundaryCheck& bcheck) const
 {
-  if (m_configurationLevel < 10) {
-    const IPropagator* currentPropagator =
+  const IPropagator* currentPropagator =
       !m_subPropagators.empty() ? m_subPropagators[Trk::Global] : nullptr;
-    if (currentPropagator) {
-      return currentPropagator->propagate(parameters, sf, dir, bcheck);
-    }
+  if (currentPropagator) {
+    return currentPropagator->propagate(parameters, sf, dir, bcheck);
   }
-  ATH_MSG_ERROR("  [!] No default Propagator is configured ! Please check jobOptions.");
+  ATH_MSG_ERROR(
+      "  [!] No default Propagator is configured ! Please check jobOptions.");
   return nullptr;
 }
 
@@ -2018,15 +2017,14 @@ Trk::Extrapolator::extrapolateStepwise(const EventContext& ctx,
                                        Trk::ParticleHypothesis particle) const
 {
 
-  if (m_configurationLevel < 10) {
-    // set propagator to the sticky one, will be adopted if m_stickyConfiguration == false
-    const IPropagator* currentPropagator =
+  const IPropagator* currentPropagator =
       !m_subPropagators.empty() ? m_subPropagators[Trk::Global] : nullptr;
-    if (currentPropagator) {
-      return extrapolateStepwiseImpl(ctx, (*currentPropagator), parm, sf, dir, bcheck, particle);
-    }
+  if (currentPropagator) {
+    return extrapolateStepwiseImpl(ctx, (*currentPropagator), parm, sf, dir,
+                                   bcheck, particle);
   }
-  ATH_MSG_ERROR("  [!] No default Propagator is configured ! Please check jobOptions.");
+  ATH_MSG_ERROR(
+      "  [!] No default Propagator is configured ! Please check jobOptions.");
   return {};
 }
 
@@ -2071,28 +2069,22 @@ Trk::Extrapolator::extrapolateBlindly(const EventContext& ctx,
                                       Trk::ParticleHypothesis particle,
                                       const Trk::Volume* boundaryVol) const
 {
-  if (m_configurationLevel < 10) {
-    // set propagator to the global one
-    const IPropagator* currentPropagator =
+  // set propagator to the global one
+  const IPropagator* currentPropagator =
       !m_subPropagators.empty() ? m_subPropagators[Trk::Global] : nullptr;
 
-    if (currentPropagator) {
+  if (currentPropagator) {
       Cache cache{};
-      //TODO revisit when objcontainer is streamlined
+      // TODO revisit when objcontainer is streamlined
       auto cloneInput = std::unique_ptr<Trk::TrackParameters>(parm.clone());
       // Material effect updator cache
       cache.populateMatEffUpdatorCache(m_subupdaters);
-      return extrapolateBlindlyImpl(ctx,
-                                    cache,
-                                    (*currentPropagator),
+      return extrapolateBlindlyImpl(ctx, cache, (*currentPropagator),
                                     cache.manage(std::move(cloneInput)).index(),
-                                    dir,
-                                    bcheck,
-                                    particle,
-                                    boundaryVol);
-    }
+                                    dir, bcheck, particle, boundaryVol);
   }
-  ATH_MSG_ERROR("  [!] No default Propagator is configured ! Please check jobOptions.");
+  ATH_MSG_ERROR(
+      "  [!] No default Propagator is configured ! Please check jobOptions.");
   return {};
 }
 
@@ -2127,24 +2119,18 @@ Trk::Extrapolator::extrapolateToNextActiveLayerM(
   ParticleHypothesis particle,
   MaterialUpdateMode matupmode) const
 {
-  if (m_configurationLevel < 10) {
-    // set propagator to the MS one - can be reset inside the next methode (once volume information
-    // is there) set propagator to the MS one - can be reset inside the next methode (once volume
-    // information is there)
-    const IPropagator* currentPropagator =
+  // set propagator to the MS one - can be reset inside the next methode (once
+  // volume information is there) set propagator to the MS one - can be reset
+  // inside the next methode (once volume information is there)
+  const IPropagator* currentPropagator =
       !m_subPropagators.empty() ? m_subPropagators[Trk::MS] : nullptr;
-    if (currentPropagator) {
-      return extrapolateToNextActiveLayerMImpl(ctx,
-                                               (*currentPropagator),
-                                               parm,
-                                               dir,
-                                               bcheck,
-                                               material,
-                                               particle,
-                                               matupmode);
-    }
+  if (currentPropagator) {
+    return extrapolateToNextActiveLayerMImpl(ctx, (*currentPropagator), parm,
+                                             dir, bcheck, material, particle,
+                                             matupmode);
   }
-  ATH_MSG_ERROR("  [!] No default Propagator is configured ! Please check jobOptions.");
+  ATH_MSG_ERROR(
+      "  [!] No default Propagator is configured ! Please check jobOptions.");
   return {nullptr, nullptr};
 }
 
@@ -2156,15 +2142,16 @@ Trk::Extrapolator::extrapolateToVolume(const EventContext& ctx,
                                        ParticleHypothesis particle) const
 {
 
-  if (m_configurationLevel < 10) {
-    // take the volume signatrue to define the right propagator
-    const IPropagator* currentPropagator =
-      !m_subPropagators.empty() ? m_subPropagators[vol.geometrySignature()] : nullptr;
-    if (currentPropagator) {
-      return (extrapolateToVolumeImpl(ctx, *currentPropagator, parm, vol, dir, particle));
-    }
+  // take the volume signatrue to define the right propagator
+  const IPropagator* currentPropagator =
+      !m_subPropagators.empty() ? m_subPropagators[vol.geometrySignature()]
+                                : nullptr;
+  if (currentPropagator) {
+    return (extrapolateToVolumeImpl(ctx, *currentPropagator, parm, vol, dir,
+                                    particle));
   }
-  ATH_MSG_ERROR("  [!] No default Propagator is configured ! Please check jobOptions.");
+  ATH_MSG_ERROR(
+      "  [!] No default Propagator is configured ! Please check jobOptions.");
   return nullptr;
 }
 
@@ -2830,16 +2817,15 @@ Trk::Extrapolator::extrapolateImpl(const EventContext& ctx,
     }
   }
 
-  if (m_configurationLevel < 10) {
-    // chose the propagator fromt he geometry signature -- start with default
-    const IPropagator* currentPropagator =
+  // chose the propagator fromt he geometry signature -- start with default
+  const IPropagator* currentPropagator =
       !m_subPropagators.empty() ? m_subPropagators[Trk::Global] : nullptr;
-    if (currentPropagator) {
-      return extrapolateImpl(
-        ctx, cache, (*currentPropagator), parm, sf, dir, bcheck, particle, matupmode);
-    }
+  if (currentPropagator) {
+    return extrapolateImpl(ctx, cache, (*currentPropagator), parm, sf, dir,
+                           bcheck, particle, matupmode);
   }
-  ATH_MSG_ERROR("  [!] No default Propagator is configured ! Please check jobOptions.");
+  ATH_MSG_ERROR(
+      "  [!] No default Propagator is configured ! Please check jobOptions.");
   return {};
 }
 
@@ -3472,9 +3458,9 @@ Trk::Extrapolator::insideVolumeStaticLayers(const EventContext& ctx,
 
   ManagedTrackParmPtr bParameters(cache.manage());
 
-  if (m_configurationLevel < 10) {
+  if (m_numOfValidPropagators != INVALIDPROPAGATORS) {
     // loop over propagators to do the search
-    while (navprop <= m_configurationLevel) {
+    while (navprop < m_numOfValidPropagators) {
       const IPropagator* navPropagator = &(*m_propagators[navprop]);
 
       // we veto the navigaiton parameters for calo-volumes with calo dynamic
