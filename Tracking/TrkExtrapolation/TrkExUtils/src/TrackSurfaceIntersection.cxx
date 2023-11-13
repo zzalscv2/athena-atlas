@@ -14,11 +14,6 @@
 #include <iomanip>
 #include <iostream>
 
-// initialize static serial number
-std::atomic<unsigned long long> Trk::TrackSurfaceIntersection::s_serialNumber{
-  0
-};
-
 // constructor
 Trk::TrackSurfaceIntersection::TrackSurfaceIntersection(
   const Amg::Vector3D& pos,
@@ -28,7 +23,6 @@ Trk::TrackSurfaceIntersection::TrackSurfaceIntersection(
   , m_direction(dir)
   , m_pathlength(path)
 {
-  m_serialNumber = ++s_serialNumber;
 }
 
 Trk::TrackSurfaceIntersection::TrackSurfaceIntersection(
@@ -37,7 +31,6 @@ Trk::TrackSurfaceIntersection::TrackSurfaceIntersection(
   , m_direction(other.m_direction)
   , m_pathlength(other.m_pathlength)
 {
-  m_serialNumber = ++s_serialNumber;
 }
 
 Trk::TrackSurfaceIntersection::TrackSurfaceIntersection(
@@ -48,7 +41,6 @@ Trk::TrackSurfaceIntersection::TrackSurfaceIntersection(
   , m_pathlength(other.m_pathlength)
   , m_cache(std::move(cache))
 {
-  m_serialNumber = ++s_serialNumber;
 }
 
 Trk::TrackSurfaceIntersection&
@@ -59,7 +51,6 @@ Trk::TrackSurfaceIntersection::operator=(const TrackSurfaceIntersection& other)
     m_direction = other.m_direction;
     m_pathlength = other.m_pathlength;
     m_cache = other.m_cache->clone();
-    m_serialNumber = other.m_serialNumber;
   }
   return *this;
 }

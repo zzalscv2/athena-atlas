@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,105 +9,115 @@
 #ifndef TRKEXUTILS_TRACKSURFACEINTERSECTION_H
 #define TRKEXUTILS_TRACKSURFACEINTERSECTION_H
 
-//Trk
-#include "GeoPrimitives/GeoPrimitives.h"
-#include <memory>
+// Trk
 #include <atomic>
+#include <memory>
+
+#include "GeoPrimitives/GeoPrimitives.h"
 class MsgStream;
 
 namespace Trk {
 
-      /** @class TrackSurfaceIntersection
-         
-         An intersection with a Surface is given by
-         - a global position
-         - a momentum direction (unit vector)
-         - the pathlength to go there from the starting point
+/** @class TrackSurfaceIntersection
 
-         We can optionally attach an additional block of data (`cache')
-         for the private use of a particular intersection tool.
-          @author Andreas.Salzburger@cern.ch 
-        */
-      class TrackSurfaceIntersection {
-       
-      public:
-          /**Base class for cache block.*/
-          class IIntersectionCache
-          {
-          public:
-            virtual ~IIntersectionCache() = default;
-            virtual std::unique_ptr<IIntersectionCache> clone() const = 0;
-          };
+   An intersection with a Surface is given by
+   - a global position
+   - a momentum direction (unit vector)
+   - the pathlength to go there from the starting point
 
-          /**Constructor*/
-	  TrackSurfaceIntersection(const Amg::Vector3D& pos, const Amg::Vector3D& dir, double path);
-	  /**Destructor*/
-	  virtual ~TrackSurfaceIntersection() = default;
+   We can optionally attach an additional block of data (`cache')
+   for the private use of a particular intersection tool.
 
-          TrackSurfaceIntersection (const TrackSurfaceIntersection& other);
-          TrackSurfaceIntersection (const TrackSurfaceIntersection& other,
-                                    std::unique_ptr<IIntersectionCache> cache);
-          TrackSurfaceIntersection& operator= (const TrackSurfaceIntersection& other);
+    @author Andreas.Salzburger@cern.ch
+  */
+class TrackSurfaceIntersection final {
 
-          TrackSurfaceIntersection (TrackSurfaceIntersection&& other) = default;
-          TrackSurfaceIntersection& operator= (TrackSurfaceIntersection&& other) = default;
+ public:
+  /**Base class for cache block.*/
+  class IIntersectionCache {
+   public:
+    virtual ~IIntersectionCache() = default;
+    virtual std::unique_ptr<IIntersectionCache> clone() const = 0;
+  };
 
-	  /** Method to retrieve the position of the Intersection */
-	  const Amg::Vector3D& position() const;
-	        Amg::Vector3D& position();
-        
-	  /** Method to retrieve the direction at the Intersection */
-	  const Amg::Vector3D& direction() const;
-	        Amg::Vector3D& direction();
-        
-	  /** Method to retrieve the pathlength propagated till the Intersection */
-	  double  pathlength() const;
-	  double& pathlength();
-        
-	  /** Method to retrieve the object serial number (needed for speed optimization) */
-	  unsigned long long serialNumber() const;
+  /**Constructor*/
+  TrackSurfaceIntersection(const Amg::Vector3D& pos, const Amg::Vector3D& dir,
+                           double path);
+  /**Destructor*/
+  ~TrackSurfaceIntersection() = default;
 
-          /** Retrieve the associated cache block, if it exists. */
-          const IIntersectionCache* cache() const;
+  TrackSurfaceIntersection(const TrackSurfaceIntersection& other);
+  TrackSurfaceIntersection(const TrackSurfaceIntersection& other,
+                           std::unique_ptr<IIntersectionCache> cache);
+  TrackSurfaceIntersection& operator=(const TrackSurfaceIntersection& other);
 
-      private:
-	  static std::atomic<unsigned long long>	s_serialNumber;
+  TrackSurfaceIntersection(TrackSurfaceIntersection&& other) = default;
+  TrackSurfaceIntersection& operator=(TrackSurfaceIntersection&& other) = default;
 
-	  unsigned long long		m_serialNumber;
-	  Amg::Vector3D			m_position;
-	  Amg::Vector3D			m_direction;
-	  double			m_pathlength;
-          std::shared_ptr<IIntersectionCache> m_cache;
-      };
+  /** Method to retrieve the position of the Intersection */
+  const Amg::Vector3D& position() const;
+  Amg::Vector3D& position();
 
-  inline const Amg::Vector3D& TrackSurfaceIntersection::position() const
-  { return m_position; }
+  /** Method to retrieve the direction at the Intersection */
+  const Amg::Vector3D& direction() const;
+  Amg::Vector3D& direction();
 
-  inline Amg::Vector3D& TrackSurfaceIntersection::position()
-  { return m_position; }
+  /** Method to retrieve the pathlength propagated till the Intersection */
+  double pathlength() const;
+  double& pathlength();
 
-  inline const Amg::Vector3D& TrackSurfaceIntersection::direction() const
-  { return m_direction; }
+  /** Retrieve the associated cache block, if it exists. */
+  const IIntersectionCache* cache() const;
+  IIntersectionCache* cache();
 
-  inline Amg::Vector3D& TrackSurfaceIntersection::direction()
-  { return m_direction; }
+ private:
+  Amg::Vector3D m_position;
+  Amg::Vector3D m_direction;
+  double m_pathlength;
+  std::unique_ptr<IIntersectionCache> m_cache;
+};
 
-  inline double TrackSurfaceIntersection::pathlength() const
-  { return m_pathlength; }
-  
-  inline double& TrackSurfaceIntersection::pathlength()
-  { return m_pathlength; }
-  
-  inline unsigned long long TrackSurfaceIntersection::serialNumber() const
-  { return m_serialNumber; }
+inline const Amg::Vector3D& TrackSurfaceIntersection::position() const {
+  return m_position;
+}
 
-  inline const TrackSurfaceIntersection::IIntersectionCache* TrackSurfaceIntersection::cache() const
-  { return m_cache.get(); }
+inline Amg::Vector3D& TrackSurfaceIntersection::position() {
+  return m_position;
+}
 
-/**Overload of << operator for both, MsgStream and std::ostream for debug output*/ 
-MsgStream& operator << ( MsgStream& sl, const TrackSurfaceIntersection& tsfi);
-std::ostream& operator << ( std::ostream& sl, const TrackSurfaceIntersection& tsfi); 
-        
-} // end of namespace
+inline const Amg::Vector3D& TrackSurfaceIntersection::direction() const {
+  return m_direction;
+}
 
-#endif // TRKEXUTILS_TRACKSURFACEINTERSECTION_H
+inline Amg::Vector3D& TrackSurfaceIntersection::direction() {
+  return m_direction;
+}
+
+inline double TrackSurfaceIntersection::pathlength() const {
+  return m_pathlength;
+}
+
+inline double& TrackSurfaceIntersection::pathlength() {
+  return m_pathlength;
+}
+
+inline const TrackSurfaceIntersection::IIntersectionCache*
+TrackSurfaceIntersection::cache() const {
+  return m_cache.get();
+}
+
+inline TrackSurfaceIntersection::IIntersectionCache*
+TrackSurfaceIntersection::cache() {
+  return m_cache.get();
+}
+
+
+/**Overload of << operator for both, MsgStream and std::ostream for debug
+ * output*/
+MsgStream& operator<<(MsgStream& sl, const TrackSurfaceIntersection& tsfi);
+std::ostream& operator<<(std::ostream& sl,
+                         const TrackSurfaceIntersection& tsfi);
+
+}  // namespace Trk
+
+#endif  // TRKEXUTILS_TRACKSURFACEINTERSECTION_H
