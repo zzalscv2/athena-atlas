@@ -54,7 +54,8 @@ def LArRawChannelBuilderAlgCfg(configFlags, **kwargs):
         dbInstance="LAR_ONL"
         acc.merge(addFolders(configFlags,fld, dbInstance, className=obj, db=dbString))
 
-    kwargs.setdefault(dspkey, sgkey)
+    if configFlags.GeoModel.Run is not LHCPeriod.Run1:
+        kwargs.setdefault(dspkey, sgkey)
 
     if configFlags.LAr.ROD.forceIter or configFlags.LAr.RawChannelSource is RawChannelSource.Calculated:
        # iterative OFC procedure
