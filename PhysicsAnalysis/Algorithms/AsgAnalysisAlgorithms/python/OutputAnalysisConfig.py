@@ -2,7 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-import copy
+import copy, re
 
 class OutputAnalysisConfig (ConfigBlock):
     """the ConfigBlock for the MET configuration"""
@@ -16,6 +16,8 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('treeName', 'analysis', type=str)
         self.addOption ('metTermName', 'Final', type=str)
         self.addOption ('systematicsHistogram', None , type=str)
+        self.addOption ('commands', [], type=None,
+                        info="a list of commands for branch selection/configuration")
 
 
     def makeAlgs (self, config) :
@@ -33,6 +35,34 @@ class OutputAnalysisConfig (ConfigBlock):
                 else :
                     outputConfig.outputContainerName = config.readName (containerName)
                 outputConfigs[prefix + outputName] = outputConfig
+
+        for command in self.commands :
+            words = command.split (' ')
+            if len (words) == 0 :
+                raise ValueError ('received empty command for "commands" option')
+            if words[0] == 'enable' :
+                if len (words) != 2 :
+                    raise ValueError ('enable takes exactly one argument: ' + command)
+                used = False
+                for name in outputConfigs :
+                    if re.match (words[1], name) :
+                        outputConfigs[name].enabled = True
+                        used = True
+                if not used :
+                    raise KeyError ('unknown branch pattern for enable: ' + words[1])
+            elif words[0] == 'disable' :
+                if len (words) != 2 :
+                    raise ValueError ('disable takes exactly one argument: ' + command)
+                used = False
+                for name in outputConfigs :
+                    if re.match (words[1], name) :
+                        outputConfigs[name].enabled = False
+                        used = True
+                if not used :
+                    raise KeyError ('unknown branch pattern for disable: ' + words[1])
+            else :
+                raise KeyError ('unknown command for "commands" option: ' + words[0])
+
         autoVars = []
         autoMetVars = []
         for outputName in outputConfigs :
