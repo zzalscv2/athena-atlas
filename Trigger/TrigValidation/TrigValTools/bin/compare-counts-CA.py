@@ -179,6 +179,11 @@ def main():
     # could get misaligned. The retrieved mapping also
     # contains the first legacy step not reflected in CA
     common_chainsteps = get_common_chainsteps(chainsteps_leg, chainsteps_ca, ignore_step_number=True)
+    json.dump(
+        common_chainsteps,
+        open('common_chainsteps.json','w'),
+        indent=4
+    )
 
     ########### Compare chain event counts
     chain_counts_path_leg = f'{args.legacy}/HLTChain.txt'
