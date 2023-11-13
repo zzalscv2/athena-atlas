@@ -27,7 +27,7 @@ except ImportError:
     print('FATAL: this script needs the requests module. Either install it yourself, or run "lsetup gitlab"')
 
 class CITest:
-    def __init__(self, name, tag, mr, date, existing_ref, existing_version, new_version, new_version_directory, copied_file_path, diffDigest, type):
+    def __init__(self, name, tag, mr, date, existing_ref, existing_version, new_version, new_version_directory, copied_file_path, digest_old, digest_new, type):
         self.name = name
         self.tag = tag
         self.mr = mr
@@ -37,7 +37,8 @@ class CITest:
         self.new_version = new_version
         self.new_version_directory = new_version_directory
         self.copied_file_path = copied_file_path
-        self.diffDigest = diffDigest
+        self.digest_old = digest_old
+        self.digest_new = digest_new
         self.type = type
     
     def __repr__(self):
@@ -53,6 +54,7 @@ class CITest:
 
 failing_tests = defaultdict(list) # Key is branch, value is list of CITest objects
 dirs_created=[] #Used later to ensure we don't try to create the same directory twice
+debug = False
 
 def process_log_file(url, branch, test_name):
     """So now we have a URL to a failing test.
@@ -91,17 +93,13 @@ def process_log_file(url, branch, test_name):
     date = mr_match.group('date')
     human_readable_date = ':'.join(date.split('-')[0:3]) + " at " + ':'.join(date.split('-')[3:])
 
-    test_type = None
     if "Your change breaks the digest in test" in text:
         # Okay, we have a digest change
         failing_tests[branch].append(process_digest_change(text, ami_tag, mr_number, human_readable_date, test_name))
-        test_type='digest'
 
     if 'ERROR    Your change breaks the frozen tier0 policy in test' in text:
         failing_tests[branch].append(process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_name))
-        if test_type=='digest':
-            print('FATAL: Test is both a digest and diffpool change. This is not supported.')
-            exit(1)
+
     return
 
 def process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_name):
@@ -141,7 +139,7 @@ def process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_
         exit(1)
 
 
-    test = CITest(name=test_name, tag=ami_tag, mr=mr_number, date=human_readable_date, existing_ref = old_version_directory, existing_version = existing_version_number, new_version = new_version_number, new_version_directory = new_version_directory, copied_file_path = copied_file_path, diffDigest=None, type='DiffPool')
+    test = CITest(name=test_name, tag=ami_tag, mr=mr_number, date=human_readable_date, existing_ref = old_version_directory, existing_version = existing_version_number, new_version = new_version_number, new_version_directory = new_version_directory, copied_file_path = copied_file_path, digest_old=None, digest_new=None, type='DiffPool')
     return test
 
 def process_digest_change(text, ami_tag, mr_number, human_readable_date, test_name):    
@@ -158,29 +156,33 @@ def process_digest_change(text, ami_tag, mr_number, human_readable_date, test_na
         exit(1)
     ref_file_path = ref_file_match.groups()[1]
 
-    diff_lines = []
+    old_diff_lines = []
+    new_diff_lines = []
     diff_started = False # Once we hit the beginning of the diff, we start recording
-    new_diff_started = False
+    # Diff starts with e.g. 
+    # ERROR    The output 'q449_AOD_digest.txt' (>) differs from the reference 'q449_AOD_digest.ref' (<):
+    # and ends with next INFO line
 
-    for lines in text.split('\n'):
-        if 'differs from the reference' in lines:
+    for line in text.split('\n'):
+        if 'differs from the reference' in line:
             # Start of the diff
             diff_started = True
         elif diff_started:
-          if 'INFO' in lines:
+          if line.startswith('&lt;'):
+              old_diff_lines.append(line)
+          elif line.startswith('&gt;'):
+              new_diff_lines.append(line)
+          elif 'INFO' in line:
             # End of the diff
             break
-          if diff_started:
-            diff_lines.append(lines)
 
-    test = CITest(name=test_name, tag=ami_tag, mr=mr_number, date=human_readable_date, existing_ref = ref_file_path, existing_version = existing_version_number, new_version = new_version_number, new_version_directory = new_version_directory, copied_file_path = copied_file_path, diffDigest=diff_lines, type='Digest')
+    test = CITest(name=test_name, tag=ami_tag, mr=mr_number, date=human_readable_date, existing_ref = ref_file_path, existing_version = existing_version_number, new_version = new_version_number, new_version_directory = new_version_directory, copied_file_path = copied_file_path, digest_old=old_diff_lines, digest_new=new_diff_lines, type='Digest')
     return test
 
 def update_reference_files(actually_update=True, update_local_files=False):
     print
     print('Updating reference files')
     print('========================')
-    problem = False # Set to true if we find a problem which does not require an immediate exit
     commands = []
     for branch, tests in failing_tests.items():
         for test in tests:
@@ -211,81 +213,47 @@ def update_reference_files(actually_update=True, update_local_files=False):
                 print(' * This is a Digest test. Need to update reference file {}.'.format(test.existing_ref))
                 data = []
 
-                # First, let's sanity check the diff
-                index_of_diff_middle = None
-                index_of_diff_start = None
-                index_of_diff_start2 = None
-                for line in test.diffDigest:
-                    if not index_of_diff_start and line.startswith('&lt;'):
-                        index_of_diff_start = test.diffDigest.index(line)
-                    if not index_of_diff_start2 and line.startswith('&gt;'):
-                        index_of_diff_start2 = test.diffDigest.index(line)
-                    if line.startswith('---'):
-                        if index_of_diff_middle:
-                            print('FATAL: Found more than one line with --- in it. Aborting.')
-                            exit(1)
-                        index_of_diff_middle = test.diffDigest.index(line)
-                
-                if not index_of_diff_middle or not index_of_diff_start or not index_of_diff_start2 or index_of_diff_start > index_of_diff_middle or index_of_diff_start2 < index_of_diff_middle or index_of_diff_start2!=index_of_diff_middle+1:
-                    print('FATAL: Malformed diff. Aborting.')
-                    print('index_of_diff_middle: {}'.format(index_of_diff_middle))
-                    print('index_of_diff_start: {}'.format(index_of_diff_start))
-                    print('index_of_diff_start2: {}'.format(index_of_diff_start2))
-                    exit(1)
-                
-                length_of_diff = index_of_diff_middle - index_of_diff_start
-                if not len(test.diffDigest)> (index_of_diff_middle + length_of_diff):
-                    print('FATAL: Malformed diff (not long enough). Aborting.')
-                    exit(1)
-
-                current_diff_line = 0 #The line in the diff which matches the current line in the digest
+                diff_line=0 # We will use this to keep track of which line in the diff we are on
                 with open('Tools/PROCTools/data/'+test.existing_ref, 'r') as f:
                     lines = f.readlines()
-                    for line in lines:
-                        # Sanity check
+                    for current_line, line in enumerate(lines):
                         split_curr_line = line.split()
                         if (split_curr_line[0] == 'run'): # Skip header line
                             data.append(line)
                             continue
-                        
+
                         # So, we expect first two numbers to be run/event respectively
                         if (not split_curr_line[0].isnumeric()) or (not split_curr_line[1].isnumeric()):
                             print('FATAL: Found a line in current digest which does not start with run/event numbers: {}'.format(line))
                             exit(1)
                         
-                        if current_diff_line+index_of_diff_start >= index_of_diff_middle:
-                            # Diff is over so just copy the rest of the lines
-                            data.append(line)
+                        split_old_diff_line = test.digest_old[diff_line].split()
+                        split_old_diff_line.pop(0) # Remove the < character
+                        split_new_diff_line = test.digest_new[diff_line].split()
+                        split_new_diff_line.pop(0) # Remove the > character
+
+                        # Let's check to see if the run/event numbers match
+                        if split_curr_line[0] == split_old_diff_line[0] and split_curr_line[1] == split_old_diff_line[1]:
+                            # Okay so run/event numbers match. Let's just double-check it wasn't already updated
+                           if  split_curr_line!=split_old_diff_line:
+                               print('FATAL: It seems like this line was already changed.')
+                               print('Line we expected: {}'.format(test.old_diff_lines[diff_line]))
+                               print('Line we got     : {}'.format(line))
+                               exit(1)
+
+                        # Check if the new run/event numbers match
+                        if split_curr_line[0] == split_new_diff_line[0] and split_curr_line[1] == split_new_diff_line[1]:
+                            #Replace the existing line with the new one, making sure we right align within 12 characters
+                            data.append("".join(["{:>12}".format(x) for x in split_new_diff_line])+ '\n')
+                            if ((diff_line+1)<len(test.digest_old)):
+                                diff_line+=1
                             continue
 
-                        split_diff_line_before = test.diffDigest[index_of_diff_start+current_diff_line].split()
-                        # Can we compare to diff yet?
-                        if not current_diff_line:
-                            # Check to see if this line matches the first relevant line in the diff
-                            if (split_diff_line_before[1] == split_curr_line[0]) and (split_diff_line_before[2] == split_curr_line[1]):
-                                current_diff_line = 0
-                            else:
-                                # Okay, still before the diff starts so just copy the line and continue
-                                data.append(line)
-                                continue
+                        # Otherwise, we just keep the existing line
+                        data.append(line)
                         
-                        # Let's check that the before lines in the diff match with what is there now
-                        line_changed=False
-                        for i in range(2,len(split_curr_line)):
-                            if split_diff_line_before[i+1] != split_curr_line[i]:
-                                line_changed=True
-                        if line_changed:
-                            print('ERROR: It seems like this line was already changed compared to the test {}'.format(line))
-                            problem=True
-
-                        #Replace the existing line with the new one, removing > character, making sure we right align within 12 characters
-                        split_curr_line = test.diffDigest[index_of_diff_start2+current_diff_line].split()
-                        del split_curr_line[0]
-                        data.append("".join(["{:>12}".format(x) for x in split_curr_line])+ '\n')
                         
-                        current_diff_line += 1
-                        
-                print(' -> Updating PROCTools digest file')
+                print(' -> Updating PROCTools digest file {}'.format(test.existing_ref))
                 with open('Tools/PROCTools/data/'+test.existing_ref, 'w') as f:
                     f.writelines(data)
     return commands
@@ -407,7 +375,7 @@ if __name__ == '__main__':
         exit(1)
  
     if args.test_run:
-        print(' -> Running in test mode so will not touch EOS, but will only modify files locally (these changes can easily be reverted).')
+        print(' -> Running in test mode so will not touch EOS, but will only modify files locally (these changes can easily be reverted with "git checkout" etc).')
     
     print('========================')
     extract_links_from_json(args.url)
