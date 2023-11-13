@@ -16,6 +16,7 @@
 
 #include "CoralBase/Attribute.h"
 
+#include <cmath>
 #include <fstream>
 
 TileDCSCondAlg::TileDCSCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -242,13 +243,13 @@ StatusCode TileDCSCondAlg::execute(const EventContext& ctx) const {
             if (itr != m_knownBadHV.end()) { // known unstable PMTs
 
               float hvGap = (m_readHVSet) ? // take into account offset if HVSET is used
-                fabs(hvSet + itr->second.second - hv) : fabs(hvSet - hv);
+                std::fabs(hvSet + itr->second.second - hv) : std::fabs(hvSet - hv);
 
               if (hvGap <= m_goodHVLimit) channelHVStatus = TileDCSState::OK_KNOWNBADPMT;
               else if (hvGap <= m_warningHVLimit) channelHVStatus = TileDCSState::WARNING_KNOWNBADPMT;
               else channelHVStatus = TileDCSState::ALERT_KNOWNBADPMT;
             } else {
-              float hvGap = fabs(hvSet - hv);
+              float hvGap = std::fabs(hvSet - hv);
               if (hvGap <= m_goodHVLimit) channelHVStatus = TileDCSState::OK;
               else if (hvGap <= m_warningHVLimit) channelHVStatus = TileDCSState::WARNING;
               else channelHVStatus = TileDCSState::ALERT;

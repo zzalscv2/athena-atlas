@@ -16,7 +16,7 @@
 TileCondToolOfc::TileCondToolOfc(const std::string& type, const std::string& name,
                                  const IInterface* parent)
     : base_class(type, name, parent)
-    , m_tileInfo(0)
+    , m_tileInfo(nullptr)
 {
   declareProperty("nSamples", m_nSamples = 7, "number of samples used in the run");
   declareProperty("OptFilterDeltaCorrelation", m_deltaCorrelation = false

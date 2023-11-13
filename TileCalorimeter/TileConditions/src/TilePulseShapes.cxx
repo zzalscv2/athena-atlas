@@ -10,7 +10,7 @@
 
 TilePulseShapes::TilePulseShapes()
   : m_loaded(false)
-  , m_shapes(NULL)
+  , m_shapes(nullptr)
 {
 }
 
@@ -109,7 +109,7 @@ TilePulseShapes::load(MsgStream &log) {
 }
 
 bool
-TilePulseShapes::ReadFile(MsgStream &log, std::string fname, const char *xname, const char *yname,
+TilePulseShapes::ReadFile(MsgStream &log, const std::string& fname, const char *xname, const char *yname,
                           std::vector<double> & x, std::vector<double> & y, int nskip)
 {
   bool status=false;

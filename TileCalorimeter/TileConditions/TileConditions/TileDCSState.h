@@ -198,8 +198,8 @@ class TileDCSState {
       NUMBER_OF_DRAWERS = 64 //!< Number of Tile drawers in one ROS
     };
 
-    void checkDrawer(std::string description, unsigned int ros, unsigned int drawer) const;
-    void checkChannel(std::string description, unsigned int ros, unsigned int drawer,
+    void checkDrawer(const std::string& description, unsigned int ros, unsigned int drawer) const;
+    void checkChannel(const std::string& description, unsigned int ros, unsigned int drawer,
                      unsigned int channel, unsigned int maxChannel) const;
 
     int m_states[NUMBER_OF_ROSES][NUMBER_OF_DRAWERS];
@@ -338,7 +338,7 @@ void TileDCSState::setWarningDrawer(const std::vector<int>& warningDrawer) {
 }
 
 inline
-void TileDCSState::checkDrawer(std::string description,
+void TileDCSState::checkDrawer(const std::string& description,
                                unsigned int ros, unsigned int drawer) const {
 
   if (ros > NUMBER_OF_ROSES) {
@@ -353,7 +353,7 @@ void TileDCSState::checkDrawer(std::string description,
 
 
 inline
-void TileDCSState::checkChannel(std::string description,
+void TileDCSState::checkChannel(const std::string& description,
                                 unsigned int ros, unsigned int drawer,
                                 unsigned int channel, unsigned int maxChannel) const {
 
