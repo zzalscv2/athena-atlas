@@ -5,19 +5,19 @@
 
 #include "CaloStripsRingsBuilder.h"
 #include "AthenaKernel/errorcheck.h"
-#include "CaloUtils/CaloCellList.h"
-#include "CaloGeoHelpers/CaloSampling.h"
 #include "CaloEvent/CaloCellContainer.h"
-#include "xAODCaloRings/RingSetContainer.h"
-#include "xAODCaloRings/RingSetAuxContainer.h"
-#include "xAODCaloRings/CaloRingsContainer.h"
-#include "xAODCaloRings/CaloRingsAuxContainer.h"
-#include "xAODCaloRings/RingSetConf.h"
+#include "CaloGeoHelpers/CaloSampling.h"
+#include "CaloUtils/CaloCellList.h"
 #include "xAODBase/IParticle.h"
 #include "xAODCaloEvent/CaloCluster.h"
+#include "xAODCaloRings/CaloRingsAuxContainer.h"
+#include "xAODCaloRings/CaloRingsContainer.h"
+#include "xAODCaloRings/RingSetAuxContainer.h"
+#include "xAODCaloRings/RingSetConf.h"
+#include "xAODCaloRings/RingSetContainer.h"
 #include <algorithm>
-#include <math.h>
 #include <cfloat>
+#include <cmath>
 #include <sstream>
 
 namespace Ringer {
@@ -36,8 +36,7 @@ CaloStripsRingsBuilder::CaloStripsRingsBuilder(const std::string& type,
 }
 
 // =====================================================================================
-CaloStripsRingsBuilder::~CaloStripsRingsBuilder()
-{ }
+CaloStripsRingsBuilder::~CaloStripsRingsBuilder() = default;
 
 // =====================================================================================
 StatusCode CaloStripsRingsBuilder::initialize()
@@ -125,8 +124,8 @@ StatusCode CaloStripsRingsBuilder::buildRingSet(
   for ( const int layer : rawConf.layers) {
     cells.select(seed.eta(), seed.phi(), m_cellMaxDEtaDist, m_cellMaxDPhiDist, layer );
     for ( const CaloCell *cell : cells ) {
-      float deltaPhi = m_phiHelper.diff(cell->phi(), seed.phi());
-      bool phiPositive = ( deltaPhi > 0)?true:false;
+      float deltaPhi = CaloPhiRange::diff(cell->phi(), seed.phi());
+      bool phiPositive = deltaPhi > 0;
       const auto delta = calcDelta( cell );
       int idx =copysign(static_cast<int>(std::floor( delta + .5)),delta);
       unsigned int stripIdx(0);

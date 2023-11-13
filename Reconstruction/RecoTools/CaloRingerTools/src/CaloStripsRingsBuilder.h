@@ -74,7 +74,7 @@ class CaloStripsRingsBuilder : public CaloRingsBuilder
     **/
     bool m_doPhiAxesDivision;
 
-    bool m_doTransverseEnergy;
+    bool m_doTransverseEnergy = false;
 
 
     /// @}

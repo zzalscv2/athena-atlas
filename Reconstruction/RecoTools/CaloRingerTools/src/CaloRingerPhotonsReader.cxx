@@ -16,7 +16,7 @@ CaloRingerPhotonsReader::CaloRingerPhotonsReader(const std::string& type,
                                  const std::string& name,
                                  const ::IInterface* parent)
   : CaloRingerInputReader(type, name, parent),
-    m_clRingsBuilderPhotonFctor(0)
+    m_clRingsBuilderPhotonFctor(nullptr)
     //m_selectorAvailable(false)
 {
 
@@ -77,7 +77,7 @@ StatusCode CaloRingerPhotonsReader::execute()
     ATH_CHECK( m_clRingsBuilderPhotonFctor->prepareToLoopFor(photons->size()) );
 
     // loop over our particles:
-    for ( const auto photon : *photons ){
+    for ( const auto *const photon : *photons ){
       m_clRingsBuilderPhotonFctor->operator()( photon );
     }
 

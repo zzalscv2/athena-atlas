@@ -81,7 +81,7 @@ StatusCode CaloRingerElectronsReader::execute()
     ATH_CHECK( m_clRingsBuilderElectronFctor->prepareToLoopFor(electrons->size()) );
 
     // loop over our particles:
-    for ( const auto electron : *electrons ){
+    for ( const auto *const electron : *electrons ){
       m_clRingsBuilderElectronFctor->operator()( electron );
     }
 
