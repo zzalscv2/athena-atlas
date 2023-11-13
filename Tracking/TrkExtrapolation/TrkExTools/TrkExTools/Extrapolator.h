@@ -43,7 +43,6 @@
 class MsgStream;
 class EventContext;
 
-
 namespace Trk {
 class Track;
 class Surface;
@@ -617,7 +616,7 @@ private:
   ToolHandle<INavigator> m_navigator{ this,
                                       "Navigator",
                                       "Trk::Navigator/AtlasNavigator" };
-  //!<  Array of Material updaters
+  //!<  Array of Material updatersc
   ToolHandleArray<IMaterialEffectsUpdator> m_updaters{
     this,
     "MaterialEffectsUpdators",
@@ -664,7 +663,9 @@ private:
   bool m_cacheLastMatLayer; //!< steering of the material layer cache
   bool m_returnPassiveLayers;
   unsigned int m_meotpIndex; //!< if several meotps are available in a volume steer which one to use
-  unsigned int m_configurationLevel; //!< see the supported levels of configuration above
+  //!< number of sub valid propagators in the m_subPropagators array
+  //if we have no valid subpropagatos it will be set to an INVALID value
+  unsigned int m_numOfValidPropagators;
   unsigned int m_searchLevel;        //!< see the supported search levels above
   unsigned int m_initialLayerAttempts; //!< allowed layer intersection attempts at the start of a volume
   unsigned int m_successiveLayerAttempts; //!< layer intersection attemps after one layer has been
