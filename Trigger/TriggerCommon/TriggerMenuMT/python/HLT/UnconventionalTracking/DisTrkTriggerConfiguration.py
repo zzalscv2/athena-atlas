@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-from AthenaCommon.CFElements import seqAND
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 
 logging.getLogger().info("Importing %s",__name__)
@@ -10,19 +10,22 @@ log = logging.getLogger(__name__)
 def DisTrkTriggerHypoSequence(flags):
 
         from TrigLongLivedParticlesHypo.TrigDisappearingTrackHypoConfig import TrigDisappearingTrackHypoToolFromDict
-        from TrigLongLivedParticlesHypo.TrigDisappearingTrackHypoConfig import createTrigDisappearingTrackHypoAlg
+        from TrigLongLivedParticlesHypo.TrigDisappearingTrackHypoConfig import createTrigDisappearingTrackHypoAlgCfg
 
-        theDisTrkHypo = createTrigDisappearingTrackHypoAlg(flags, "DisTrkTrack")
+        selAcc = SelectionCA('DisTrkSeq')
+        theDisTrkHypo = createTrigDisappearingTrackHypoAlgCfg(flags, "DisTrkTrack")
 
-        from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
-        from AthenaConfiguration.ComponentFactory import CompFactory
-        DummyInputMakerAlg = conf2toConfigurable(CompFactory.InputMakerForRoI( "IM_DisTrkTrack_HypoOnlyStep" ))
-        DummyInputMakerAlg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
 
+        DummyInputMakerAlg = CompFactory.InputMakerForRoI( "IM_DisTrkTrack_HypoOnlyStep" )
+        DummyInputMakerAlg.RoITool = CompFactory.ViewCreatorInitialROITool()
+
+
+        reco = InEventRecoCA('DisTrkEmptyStep',inputMaker=DummyInputMakerAlg)
+        selAcc.mergeReco(reco)
+        selAcc.mergeHypo(theDisTrkHypo)
+                        
         log.debug("Building the Step dictinary for DisTrk")
-        return MenuSequence( flags,
-                             Sequence    = seqAND("DisTrkEmptyStep",[DummyInputMakerAlg]),
-                             Maker       = DummyInputMakerAlg,
-                             Hypo        = theDisTrkHypo,
-                             HypoToolGen = TrigDisappearingTrackHypoToolFromDict,
-                         )
+        return MenuSequenceCA(flags,
+                              selAcc,
+                              HypoToolGen = TrigDisappearingTrackHypoToolFromDict,
+                              )

@@ -15,16 +15,21 @@ def VrtSecInclusiveSequence(flags):
 
     
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanLRTSequence
-    selAcc,reco = getCommonInDetFullScanLRTSequence(flags)
+    selAcc,reco,trkAcc = getCommonInDetFullScanLRTSequence(flags)
 
     acc = ComponentAccumulator()
 
     from TrigVrtSecInclusive.TrigVrtSecInclusiveConfig import TrigVrtSecInclusiveCfg
     theVSI = TrigVrtSecInclusiveCfg(flags, "TrigVrtSecInclusive", fscfg.tracks_FTF(), lrtcfg.tracks_FTF(), fscfg.vertex, "HLT_TrigVSIVertex", "HLT_TrigVSITrkPair",recordTrkPair=False)
 
+    trkseq = parOR("UncTrkrecoSeqLRTVSI")
+    acc.addSequence(trkseq)
+    acc.merge(trkAcc)
+    
     vsiseq = parOR("UncTrkrecoSeqVSI")
     acc.addSequence(vsiseq)
     acc.merge(theVSI)
+
     
     reco.mergeReco(acc)
     

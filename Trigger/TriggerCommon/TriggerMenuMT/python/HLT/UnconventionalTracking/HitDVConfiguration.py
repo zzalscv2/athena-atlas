@@ -1,29 +1,23 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.CFElements import seqAND
-from AthenaCommon.Configurable import ConfigurableCABehavior
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
 from AthenaCommon.Logging import logging
 
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg
-from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper, extractAlgorithmsAndAppendCA
-
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from AthenaCommon.CFElements import seqAND
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
 
 def UTTJetRecoSequence(flags):
 
-        topoClusterSequence = algorithmCAToGlobalWrapper(jetmetTopoClusteringCfg,
-                                                 flags = flags,
-                                                 RoIs = '')
+        topoClusterSequence = jetmetTopoClusteringCfg(flags,RoIs = '')
         clustersKey = "HLT_TopoCaloClustersFS"
  
-        from TrigStreamerHypo.TrigStreamerHypoConf   import TrigStreamerHypoAlg
         from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 
         from ..Jet.JetRecoSequencesConfig  import JetRecoCfg
@@ -35,21 +29,30 @@ def UTTJetRecoSequence(flags):
                 {'recoAlg': 'a4', 'constitType': 'tc', 'clusterCalib': 'em', 'constitMod': '', 'trkopt': 'notrk'}
         )
 
-        with ConfigurableCABehavior():
-                JetCA, jetName, jetDef = JetRecoCfg(flags, clustersKey, **jetRecoDict)
-                JetSeq = extractAlgorithmsAndAppendCA(JetCA)
-
-        HypoAlg = TrigStreamerHypoAlg("UTTJetRecDummyStream")
+        JetCA, jetName, jetDef = JetRecoCfg(flags, clustersKey, **jetRecoDict)
+        HypoAlg = CompFactory.TrigStreamerHypoAlg("UTTJetRecDummyStream")
 
         from TrigT2CaloCommon.CaloDef import clusterFSInputMaker
         IMalg = clusterFSInputMaker()
 
-        return MenuSequence( flags,
-                             Sequence    = seqAND("UTTJetRecoSeq", [IMalg,topoClusterSequence,JetSeq]),
-                             Maker       = IMalg,
-                             Hypo        = HypoAlg,
-                             HypoToolGen = StreamerHypoToolGenerator
-                     )
+        selAcc = SelectionCA('UTTJetRecoSeq')
+        reco = InEventRecoCA('UTTJetRecoStep',inputMaker=IMalg)
+
+        acc = ComponentAccumulator()
+        jetseq = seqAND('UTTJetPartSeq')
+        acc.addSequence(jetseq)
+        acc.merge(topoClusterSequence)
+        acc.merge(JetCA)
+
+        reco.mergeReco(acc)
+        
+        selAcc.mergeReco(reco)
+        selAcc.addHypoAlgo(HypoAlg)
+        
+        return MenuSequenceCA(flags,
+                              selAcc,
+                              HypoToolGen = StreamerHypoToolGenerator
+                              )
 
 
 def HitDVHypoSequence(flags):

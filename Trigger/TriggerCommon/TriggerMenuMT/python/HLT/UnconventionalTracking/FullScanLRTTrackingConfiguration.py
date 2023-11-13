@@ -17,7 +17,7 @@ def FullScanLRTTriggerSequence(flags):
 
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanLRTSequence
 
-    selAcc,reco = getCommonInDetFullScanLRTSequence(flags)
+    selAcc,reco,trkAcc = getCommonInDetFullScanLRTSequence(flags)
 
     from TrigInDetConfig.TrigInDetConfig import trigInDetPrecisionTrackingCfg
 
@@ -27,6 +27,7 @@ def FullScanLRTTriggerSequence(flags):
     
     acc.merge(trigInDetPrecisionTrackingCfg(flags, trkFSRoI, lrtcfg.input_name,in_view=False), sequenceName=pt_seq.name)
     
+    reco.mergeReco(trkAcc)
     reco.mergeReco(acc)
     
     sequenceOut = lrtcfg.tracks_IDTrig()
