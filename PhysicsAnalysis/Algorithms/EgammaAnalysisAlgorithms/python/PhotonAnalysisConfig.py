@@ -176,7 +176,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
 
         # Set up the photon selection algorithm:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonIsEMSelectorAlg' + postfix )
-        alg.selectionDecoration = 'selectEM,as_bits'
+        alg.selectionDecoration = 'selectEM' + postfix + ',as_bits'
         if self.recomputeIsEM:
             # Rerun the cut-based ID
             config.addPrivateTool( 'selectionTool', 'AsgPhotonIsEMSelector' )
