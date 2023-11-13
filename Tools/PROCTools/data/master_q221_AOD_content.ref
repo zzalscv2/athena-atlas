@@ -99,6 +99,9 @@ CombinedMuonsLRTTrackParticlesAuxDyn.sigmadeltatheta_0
 CombinedMuonsLRTTrackParticlesAuxDyn.sigmadeltatheta_1
 CombinedMuonsLRTTrackParticlesAuxDyn.trackLink
 CombinedMuonsLRTTrackParticlesAuxDyn.trackParameterCovarianceMatrices
+CombinedMuonsLRTTrackParticlesAuxDyn.truthOrigin
+CombinedMuonsLRTTrackParticlesAuxDyn.truthParticleLink
+CombinedMuonsLRTTrackParticlesAuxDyn.truthType
 CombinedStauTrackParticles
 CombinedStauTrackParticlesAux.
 CombinedStauTrackParticlesAuxDyn.TRTdEdx
@@ -126,6 +129,9 @@ CombinedStauTrackParticlesAuxDyn.sigmadeltatheta_0
 CombinedStauTrackParticlesAuxDyn.sigmadeltatheta_1
 CombinedStauTrackParticlesAuxDyn.trackLink
 CombinedStauTrackParticlesAuxDyn.trackParameterCovarianceMatrices
+CombinedStauTrackParticlesAuxDyn.truthOrigin
+CombinedStauTrackParticlesAuxDyn.truthParticleLink
+CombinedStauTrackParticlesAuxDyn.truthType
 ConditionsRun
 DataHeader
 DataHeaderForm
@@ -244,6 +250,9 @@ ExtraPolatedMuonsLRTTrackParticlesAuxDyn.sigmadeltatheta_0
 ExtraPolatedMuonsLRTTrackParticlesAuxDyn.sigmadeltatheta_1
 ExtraPolatedMuonsLRTTrackParticlesAuxDyn.trackLink
 ExtraPolatedMuonsLRTTrackParticlesAuxDyn.trackParameterCovarianceMatrices
+ExtraPolatedMuonsLRTTrackParticlesAuxDyn.truthOrigin
+ExtraPolatedMuonsLRTTrackParticlesAuxDyn.truthParticleLink
+ExtraPolatedMuonsLRTTrackParticlesAuxDyn.truthType
 ExtrapolatedMuonTrackParticles
 ExtrapolatedMuonTrackParticlesAux.
 ExtrapolatedMuonTrackParticlesAuxDyn.TRTdEdx
@@ -1595,6 +1604,7 @@ LRTElectronsAuxDyn.Tight
 LRTElectronsAuxDyn.ambiguityType
 LRTElectronsAuxDyn.asy1
 LRTElectronsAuxDyn.barys1
+LRTElectronsAuxDyn.core57cellsEnergyCorrection
 LRTElectronsAuxDyn.deltaEta1PearDistortion
 LRTElectronsAuxDyn.e1152
 LRTElectronsAuxDyn.e132
@@ -1615,6 +1625,12 @@ LRTElectronsAuxDyn.pos7
 LRTElectronsAuxDyn.poscs1
 LRTElectronsAuxDyn.poscs2
 LRTElectronsAuxDyn.r33over37allcalo
+LRTElectronsAuxDyn.topoetcone20
+LRTElectronsAuxDyn.topoetcone20ptCorrection
+LRTElectronsAuxDyn.topoetcone30
+LRTElectronsAuxDyn.topoetcone30ptCorrection
+LRTElectronsAuxDyn.topoetcone40
+LRTElectronsAuxDyn.topoetcone40ptCorrection
 LRTElectronsAuxDyn.truthOrigin
 LRTElectronsAuxDyn.truthParticleLink
 LRTElectronsAuxDyn.truthType
@@ -1656,6 +1672,7 @@ LRTegammaClustersAuxDyn.eta_sampl
 LRTegammaClustersAuxDyn.etamax_sampl
 LRTegammaClustersAuxDyn.phi_sampl
 LRTegammaClustersAuxDyn.phimax_sampl
+LRTegammaClusters_links
 LRTegammaTruthParticles
 LRTegammaTruthParticlesAux.
 LRTegammaTruthParticlesAuxDyn.recoElectronLink
@@ -1752,6 +1769,12 @@ MuonSegmentsAuxDyn.clusterTimeError
 MuonSegmentsAuxDyn.clusterTimeValid
 MuonSegmentsAuxDyn.muonSegment
 MuonSegmentsAuxDyn.truthSegmentLink
+MuonSegments_LRT
+MuonSegments_LRTAux.
+MuonSegments_LRTAuxDyn.clusterTime
+MuonSegments_LRTAuxDyn.clusterTimeError
+MuonSegments_LRTAuxDyn.clusterTimeValid
+MuonSegments_LRTAuxDyn.muonSegment
 MuonSpectrometerTrackParticles
 MuonSpectrometerTrackParticlesAux.
 MuonSpectrometerTrackParticlesAuxDyn.TRTdEdx
@@ -1830,6 +1853,7 @@ MuonTruthParticlesAuxDyn.phiLayer2Hits
 MuonTruthParticlesAuxDyn.phiLayer3Hits
 MuonTruthParticlesAuxDyn.phiLayer4Hits
 MuonTruthParticlesAuxDyn.recoMuonLink
+MuonTruthParticlesAuxDyn.recoMuonLinkLRT
 MuonTruthParticlesAuxDyn.truthCscHits
 MuonTruthParticlesAuxDyn.truthMdtHits
 MuonTruthParticlesAuxDyn.truthOrigin
@@ -1935,6 +1959,9 @@ MuonsLRTAuxDyn.isSmallGoodSectors
 MuonsLRTAuxDyn.middleClosePrecisionHits
 MuonsLRTAuxDyn.middleOutBoundsPrecisionHits
 MuonsLRTAuxDyn.nUnspoiledCscHits
+MuonsLRTAuxDyn.nphiMatchedHitsPerChamberLayer
+MuonsLRTAuxDyn.nprecMatchedHitsPerChamberLayer
+MuonsLRTAuxDyn.ntrigEtaMatchedHitsPerChamberLayer
 MuonsLRTAuxDyn.numEnergyLossPerTrack
 MuonsLRTAuxDyn.numberOfGoodPrecisionLayers
 MuonsLRTAuxDyn.outerClosePrecisionHits
@@ -1947,6 +1974,9 @@ MuonsLRTAuxDyn.sigmadeltaphi_1
 MuonsLRTAuxDyn.sigmadeltatheta_0
 MuonsLRTAuxDyn.sigmadeltatheta_1
 MuonsLRTAuxDyn.theta_staco
+MuonsLRTAuxDyn.truthOrigin
+MuonsLRTAuxDyn.truthParticleLink
+MuonsLRTAuxDyn.truthType
 MuonsLRTAuxDyn.z0_staco
 NCB_MuonSegments
 NCB_MuonSegmentsAux.
@@ -2042,6 +2072,9 @@ StausAuxDyn.isSmallGoodSectors
 StausAuxDyn.middleClosePrecisionHits
 StausAuxDyn.middleOutBoundsPrecisionHits
 StausAuxDyn.nUnspoiledCscHits
+StausAuxDyn.nphiMatchedHitsPerChamberLayer
+StausAuxDyn.nprecMatchedHitsPerChamberLayer
+StausAuxDyn.ntrigEtaMatchedHitsPerChamberLayer
 StausAuxDyn.numEnergyLossPerTrack
 StausAuxDyn.numberOfGoodPrecisionLayers
 StausAuxDyn.outerClosePrecisionHits
@@ -2054,6 +2087,9 @@ StausAuxDyn.sigmadeltaphi_1
 StausAuxDyn.sigmadeltatheta_0
 StausAuxDyn.sigmadeltatheta_1
 StausAuxDyn.theta_staco
+StausAuxDyn.truthOrigin
+StausAuxDyn.truthParticleLink
+StausAuxDyn.truthType
 StausAuxDyn.z0_staco
 StreamAOD
 SuspectLumiBlocks
