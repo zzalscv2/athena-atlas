@@ -36,7 +36,7 @@ const InterfaceID& TileCablingSvc::interfaceID() {
 //_____________________________________________________________________________
 TileCablingSvc::TileCablingSvc(const std::string& name, ISvcLocator* pSvcLocator)
     : AthService(name, pSvcLocator)
-  , m_cablingService(0)
+  , m_cablingService(nullptr)
   , m_detStore("DetectorStore", name)
 {
   declareProperty("ConnectedDrawers", m_connectedDrawers, "List of connected drawer ranges: starts,end1,start2,end2,...");
@@ -74,16 +74,16 @@ StatusCode TileCablingSvc::initialize ATLAS_NOT_THREAD_SAFE () {
   CHECK( m_detStore.retrieve() );
 
   //=== retrieve all helpers from detector store
-  const CaloLVL1_ID* caloID(0);
+  const CaloLVL1_ID* caloID(nullptr);
   CHECK( m_detStore->retrieve(caloID) );
 
-  const TileID* tileID(0);
+  const TileID* tileID(nullptr);
   CHECK( m_detStore->retrieve(tileID) );
 
-  const TileTBID* tileTBID(0);
+  const TileTBID* tileTBID(nullptr);
   CHECK( m_detStore->retrieve(tileTBID) );
 
-  const TileHWID* tileHWID(0);
+  const TileHWID* tileHWID(nullptr);
   CHECK( m_detStore->retrieve(tileHWID) );
 
   //=== Initialize TileCablingService singleton
@@ -104,8 +104,8 @@ StatusCode TileCablingSvc::initialize ATLAS_NOT_THREAD_SAFE () {
 
     msg(MSG::INFO) << "Connected drawer list:" << MSG::hex;
     for (unsigned int dr = 1; dr < m_connectedDrawers.size(); dr += 2) {
-      int frag1 = std::strtol(m_connectedDrawers[dr - 1].data(), NULL, 0);
-      int frag2 = std::strtol(m_connectedDrawers[dr].data(), NULL, 0);
+      int frag1 = std::strtol(m_connectedDrawers[dr - 1].data(), nullptr, 0);
+      int frag2 = std::strtol(m_connectedDrawers[dr].data(), nullptr, 0);
       for (int frag = frag1; frag <= frag2; ++frag) {
         int ros = frag >> 8;
         int drawer = frag & 0xFF;
@@ -142,7 +142,7 @@ StatusCode TileCablingSvc::initialize ATLAS_NOT_THREAD_SAFE () {
     msg(MSG::INFO) << MSG::dec << endmsg;
   }
 
-  const IGeoModelSvc* geoModel = 0;
+  const IGeoModelSvc* geoModel = nullptr;
   StatusCode sc = service("GeoModelSvc", geoModel);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Could not locate GeoModelSvc"  );

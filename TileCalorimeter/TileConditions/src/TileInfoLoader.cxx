@@ -226,7 +226,7 @@ StatusCode TileInfoLoader::initialize() {
   //=== Find the detector store service.
   CHECK( m_detStore.retrieve() );
 
-  const IGeoModelSvc *geoModel=0;
+  const IGeoModelSvc *geoModel=nullptr;
 
   if(service("GeoModelSvc", geoModel).isFailure()) {
     ATH_MSG_ERROR( "Could not locate GeoModelSvc" );
@@ -336,7 +336,7 @@ StatusCode TileInfoLoader::buildDigitsShapesHiLo(TileInfo& info) {
   ATH_MSG_DEBUG( "Reading file  " << file_hi );
 
   //=== Test if files are there and can be opened
-  if (file_hi.size() == 0) {
+  if (file_hi.empty()) {
     ATH_MSG_ERROR( "Could not find input file " << m_digitsShapeFileHi );
     return StatusCode::FAILURE;
   }
@@ -385,7 +385,7 @@ StatusCode TileInfoLoader::buildDigitsShapesHiLo(TileInfo& info) {
   ATH_MSG_DEBUG( "Reading file  " << file_lo );
 
   //=== Test if files are there and can be opened
-  if (file_lo.size() == 0) {
+  if (file_lo.empty()) {
     ATH_MSG_ERROR( "Could not find input file " << m_digitsShapeFileLo );
     return StatusCode::FAILURE;
   }
@@ -524,7 +524,7 @@ StatusCode TileInfoLoader::buildTTL1Shapes(TileInfo& info,
   std::string file = PathResolver::find_file(ShapeFile, "DATAPATH");
   ATH_MSG_DEBUG( "Reading file  " << file );
 
-  if (file.size() == 0) {
+  if (file.empty()) {
     ATH_MSG_ERROR( "Could not find input file " << ShapeFile );
     return StatusCode::FAILURE;
   }
@@ -673,7 +673,7 @@ void TileInfoLoader::buildCovMatrix (TileInfo& info)
         std::string file = PathResolver::find_file(buff, "DATAPATH");
 //        ATH_MSG_DEBUG( "  buff=" << buff  << " file=" << file.c_str()  );
 
-        if (file.size() == 0) {
+        if (file.empty()) {
           ATH_MSG_WARNING( "Could not find input file " << buff  );
         } else {
           ATH_MSG_DEBUG( "Reading file  " << file );
@@ -721,7 +721,7 @@ void TileInfoLoader::buildCovMatrix (TileInfo& info)
                 if (column == 0) {
                   word = strtok_r(buff, TOKENS, &saveptr);
                 } else {
-                  word = strtok_r(NULL, TOKENS, &saveptr);
+                  word = strtok_r(nullptr, TOKENS, &saveptr);
                 }
                 double pippo = (word) ? atof(word) : 0.0;
                 //            int nread = sscanf(buff, "%1f", &pippo);

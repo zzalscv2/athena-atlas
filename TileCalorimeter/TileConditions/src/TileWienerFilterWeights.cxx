@@ -48,7 +48,7 @@ void TileWienerFilterWeights::loadWeights(MsgStream &log)
 
     while (std::getline(file_gn, line_gn)) {
       // skip empty or comment lines
-      if (line_gn.size() == 0 || line_gn[0] == '#') continue;
+      if (line_gn.empty() || line_gn[0] == '#') continue;
 
       // read values
       std::istringstream iss(line_gn);
@@ -82,7 +82,7 @@ void TileWienerFilterWeights::loadWeights(MsgStream &log)
 
     while (std::getline(file_op, line_op)) {
       // skip empty or comment lines
-      if (line_op.size() == 0 || line_op[0] == '#') continue;
+      if (line_op.empty() || line_op[0] == '#') continue;
 
       // read values
       std::istringstream iss(line_op);

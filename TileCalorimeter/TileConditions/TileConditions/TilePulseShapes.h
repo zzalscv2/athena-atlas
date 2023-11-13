@@ -172,7 +172,7 @@ friend class TileInfoLoader;
   bool m_loaded;
   TilePulseShapesStruct * m_shapes;
 
-  bool ReadFile(MsgStream &log, std::string fname, const char *xname, const char * yname,
+  bool ReadFile(MsgStream &log, const std::string& fname, const char *xname, const char * yname,
                 std::vector<double> & x, std::vector<double> & y, int nskip=0);
 };
 

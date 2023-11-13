@@ -246,7 +246,7 @@ const std::vector<float>& TileBadChanTool::getTripsProbabilities(unsigned int ro
 
   const std::vector<std::vector<float>>& tripsProbs = badChannels->getTripsProbabilities();
 
-  if (tripsProbs.size()) {
+  if (!tripsProbs.empty()) {
     return tripsProbs.at(ros - 1);
   }
 

@@ -27,8 +27,8 @@ const InterfaceID& TileCondIdTransforms::interfaceID() {
 TileCondIdTransforms::TileCondIdTransforms(const std::string& type, const std::string& name,
     const IInterface* parent)
     : AthAlgTool(type, name, parent)
-    , m_tileHWID(0)
-    , m_tileID(0)
+    , m_tileHWID(nullptr)
+    , m_tileID(nullptr)
 {
   declareInterface<TileCondIdTransforms>(this);
 }

@@ -14,7 +14,7 @@
 using namespace std;
 //constructor
 TileCondDCS_Data::TileCondDCS_Data()
-  : m_pModulesHV(0)
+  : m_pModulesHV(nullptr)
 {}
 //////////////////////////////////
 //destructor

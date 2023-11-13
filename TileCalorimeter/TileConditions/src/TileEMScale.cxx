@@ -3,6 +3,8 @@
 */
 
 // Tile includes
+#include <cmath>
+
 #include "TileConditions/TileEMScale.h"
 #include "TileConditions/Exception.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
@@ -457,7 +459,7 @@ bool TileEMScale::checkIfOflLaserLinearCalibrationUsed() const {
   for (unsigned int drawerIdx = 0; drawerIdx < TileCalibUtils::MAX_DRAWERIDX; ++drawerIdx) {
     for (unsigned int chn = 0; chn < TileCalibUtils::MAX_CHAN; ++chn) {
       val = m_calibOflLasLin->getCalibDrawer(drawerIdx)->getCalib(chn, 0, defval);
-      if (fabs(val - defval) > epsilon) {
+      if (std::abs(val - defval) > epsilon) {
         return true;
       }
     }
@@ -475,7 +477,7 @@ bool TileEMScale::checkIfOflLaserNonLinearCalibrationUsed() const {
   for (unsigned int drawerIdx = 0; drawerIdx < TileCalibUtils::MAX_DRAWERIDX; ++drawerIdx) {
     for (unsigned int chn = 0; chn < TileCalibUtils::MAX_CHAN; ++chn) {
       val = m_calibOflLasNln->getCalibDrawer(drawerIdx)->getCalib(chn, 0, defval);
-      if (fabs(val - defval) > epsilon) {
+      if (std::abs(val - defval) > epsilon) {
         return true;
       }
     }
