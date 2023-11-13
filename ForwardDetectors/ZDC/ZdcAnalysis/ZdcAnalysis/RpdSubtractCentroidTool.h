@@ -6,6 +6,7 @@
 #define ZDCANALYSIS_RPDSUBTRACTCENTROIDTOOL_H
 
 #include <array>
+#include <bitset>
 
 #include "AsgTools/AsgTool.h"
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
@@ -14,10 +15,8 @@
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/ReadDecorHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
-#include "ZdcAnalysis/ZDCMsg.h"
 
 #include "xAODEventInfo/EventInfo.h"
-#include "CxxUtils/checker_macros.h"
 
 namespace ZDC
 {
@@ -26,241 +25,280 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
 {
   ASG_TOOL_CLASS(RpdSubtractCentroidTool, ZDC::IZdcAnalysisTool)
 
-public:
-  /**
-   * The centroid calculation is invalid (ValidBit -> 0) if:
-   * - ZDC or RPD analysis failed
-   * - ZDC energy is out of bounds (min, max) set as tool property
-   * - fractional pileup in a channel exceeds max set as tool property
-   * - a subtracted amplitude is negative and fraction of sum exceeds max set as tool property
-   * - an amplitude sum over all tiles was zero or negative
-   * The centroid calculation is NOT invalidated if:
-   * - there is pileup that does not exceed specified limit
-   * - a subtracted amplitude is negative but fraction does not exceed specified underflow limit
-   * - an amplitude sum over a row or column was zero or negative
-   */
+ public:
   enum {
-    ValidBit = 0,              // the output for the given side is valid
-    ZDCValidBit = 1,           // the ZDC analysis on this side was valid, i.e. not failed
-    RPDValidBit = 2,           // the RPD analysis on this side was valid, i.e. not failed
-    MinimumZDCEnergyBit = 3,   // there was less than the minimum ZDC energy (!m_useEmCut) / minimum EM amplitude (m_useEmCut) on this side
-    ExcessiveZDCEnergyBit = 4, // there was more than the maximum ZDC energy (!m_useEmCut) / minimum EM amplitude (m_useEmCut) on this side
-    PileupBit = 5,             // pileup was detected on at least one channel
-    ExcessivePileupBit = 6,    // pileup exceeding specified limit on at least one channel
-    SubtrUnderflowBit = 7,     // the subtraction yielded excessively negative values in at least one channel
-    ZeroSumBit = 8,            // a total amplitude sum was zero/negative => undefined/nonsense centroid
+    ValidBit                     =  0, // analysis and output are valid
+    HasCentroidBit               =  1, // centroid was calculated but analysis is invalid
+    ZDCInvalidBit                =  2, // ZDC analysis on this side failed => analysis is invalid
+    InsufficientZDCEnergyBit     =  3, // ZDC energy on this side is below minimum => analysis is invalid
+    ExcessiveZDCEnergyBit        =  4, // ZDC energy on this side is above maximum => analysis is invalid
+    EMInvalidBit                 =  5, // EM analysis on this side failed => analysis is invalid
+    InsufficientEMEnergyBit      =  6, // EM energy on this side is below minimum => analysis is invalid
+    ExcessiveEMEnergyBit         =  7, // EM energy on this side is above maximum => analysis is invalid
+    RPDInvalidBit                =  8, // RPD analysis on this side was invalid => calculation stopped and analysis is invalid
+    PileupBit                    =  9, // pileup was detected in RPD on this side
+    ExcessivePileupBit           = 10, // pileup was detected in RPD on this side and a channel exceeded the fractional limit => analysis is invalid
+    ZeroSumBit                   = 11, // sum of subtracted RPD amplitudes on this side was not positive => calculation stopped and analysis is invalid
+    ExcessiveSubtrUnderflowBit   = 12, // a subtracted RPD amplitude on this side was negatibe and exceeded the fractional limit => analysis is invalid
 
-    ZeroSumRow0Bit =  9, // amplitude sum over row 0 was zero/negative => undefined/nonsense row 0 x centroid
-    ZeroSumRow1Bit = 10, // amplitude sum over row 1 was zero/negative => undefined/nonsense row 1 x centroid
-    ZeroSumRow2Bit = 11, // amplitude sum over row 2 was zero/negative => undefined/nonsense row 2 x centroid
-    ZeroSumRow3Bit = 12, // amplitude sum over row 3 was zero/negative => undefined/nonsense row 3 x centroid
-    ZeroSumCol0Bit = 13, // amplitude sum over col 0 was zero/negative => undefined/nonsense col 0 y centroid
-    ZeroSumCol1Bit = 14, // amplitude sum over col 1 was zero/negative => undefined/nonsense col 1 y centroid
-    ZeroSumCol2Bit = 15, // amplitude sum over col 2 was zero/negative => undefined/nonsense col 2 y centroid
-    ZeroSumCol3Bit = 16, // amplitude sum over col 3 was zero/negative => undefined/nonsense col 3 y centroid
+    Row0ValidBit                 = 13, // row 0 x centroid is valid
+    Row1ValidBit                 = 14, // row 1 x centroid is valid
+    Row2ValidBit                 = 15, // row 2 x centroid is valid
+    Row3ValidBit                 = 16, // row 3 x centroid is valid
+    Col0ValidBit                 = 17, // column 0 y centroid is valid
+    Col1ValidBit                 = 18, // column 1 y centroid is valid
+    Col2ValidBit                 = 19, // column 2 y centroid is valid
+    Col3ValidBit                 = 20, // column 3 y centroid is valid
   };
 
   RpdSubtractCentroidTool(const std::string& name);
   virtual ~RpdSubtractCentroidTool() override;
 
-  //interface from AsgTool
+  // interface from AsgTool and IZdcAnalysisTool
   StatusCode initialize() override;
   StatusCode recoZdcModules(const xAOD::ZdcModuleContainer& moduleContainer, const xAOD::ZdcModuleContainer& moduleSumContainer) override;
   StatusCode reprocessZdc() override;
 
-private:
-  // Private methods
+ private:
+  // job properties
   //
-  /**
-   * @brief Calculate the x position in beamline coordinates from a position in RPD detector
-   * coordinates using the offset of the RPD center and the rotation of the RPD plane.
-   * 
-   * @param x_rpd x position in RPD detector coordinates
-   * @param y_rpd y position in RPD detector coordinates
-   * @param side side of RPD (C = 0, A = 1)
-   * @return float x position in beamline coordinates
-   */
-  float geometryCorrectionX(float x_rpd, float y_rpd, int side) const;
-  /**
-   * @brief Calculate the y position in beamline coordinates from a position in RPD detector
-   * coordinates using the offset of the RPD center and the rotation of the RPD plane.
-   * 
-   * @param x_rpd x position in RPD detector coordinates
-   * @param y_rpd y position in RPD detector coordinates
-   * @param side side of RPD (C = 0, A = 1)
-   * @return float y position in beamline coordinates
-   */
-  float geometryCorrectionY(float x_rpd, float y_rpd, int side) const;
+  std::string m_zdcModuleContainerName;
+  std::string m_zdcSumContainerName;
+  bool m_writeAux;
+  std::string m_auxSuffix;
 
-  // Data members
+  std::vector<float> m_minZdcEnergy;
+  std::vector<float> m_maxZdcEnergy;
+  std::vector<float> m_minEmEnergy;
+  std::vector<float> m_maxEmEnergy;
+  std::vector<float> m_pileupMaxFrac;
+  std::vector<float> m_maximumNegativeSubtrAmpFrac;
+  bool m_useRpdSumAdc;
+  bool m_useCalibDecorations;
+
+
+  //   As in the ZDC analysis, we use side C = 0, side A = 1 for indexing
+  //   note that ZDC side from AOD containers is C = -1, A = 1, but
+  //     side C is mapped -1 -> 0 for indexing
+
+  // constants
+  //
+  unsigned int const m_nRows = 4;
+  unsigned int const m_nCols = 4;
+  unsigned int const m_nChannels = m_nRows*m_nCols;
+
+  // internal properties
   //
   std::string m_name;
   bool m_init;
 
-  const int m_nRows = 4;
-  const int m_nCols = 4;
-
-  // Configuration data, set to be properties of the tool
-  //   as in the ZDC, we use side C = 0, side A = 1 for indexing 
-  //   note that ZDC side from ZdcSums container is C = -1, A = 1, but
-  //     side C is mapped -1 -> 0 for indexing
+  // results from RPD analysis needed for centroid calculation (read from AOD)
   //
-  std::vector<bool> m_useEmCut; // true: on the EM ampliitude, false: cut on the ZDC calibrated energy
-  std::vector<float> m_minZdcEnergy; // the minimum ZDC calibrated energy for which calculation is valid
-  std::vector<float> m_maxZdcEnergy; // the maximum ZDC calibrated energy for which calculation is valid
-  std::vector<float> m_minEmAmp; // the minimum EM amplitude for which calculation is valid
-  std::vector<float> m_maxEmAmp; // the maximum EM amplitude for which calculation is valid
-  std::vector<float> m_minRpdSubAmp; // the lowest value for a subtracted amplitude to be included in calculation, otherwise taken to be zero
-  std::vector<float> m_subAmpUnderflowFrac; // the lowest (most negative) value for a subtracted amplitude as fraction of the sum, if exceeded calculation is invalid
-  std::vector<float> m_pileupMaxFrac; // the largest fractional pileup allowed for any channel, if exceeded calculation is invalid
-  
-  bool m_writeAux;
-  std::string m_auxSuffix;
-  std::string m_zdcModuleContainerName;
-  std::string m_zdcSumContainerName;
+  struct RpdChannelData {
+    int channel;
+    float xposRel;
+    float yposRel;
+    unsigned short row;
+    unsigned short col;
+    float amp;
+    float subtrAmp;
+    float pileupFrac;
+    unsigned int status;
+  };
+  std::array<std::bitset<32>, 2> m_rpdSideStatus = {0, 0}; /** RPD analysis status word on each side */
+  std::array<unsigned int, 2> m_zdcSideStatus = {0, 0}; /** ZDC analysis status on each side */
+  std::array<float, 2> m_zdcFinalEnergy = {0, 0}; /** ZDC final (calibrated) energy on each side */
+  std::array<float, 2> m_emCalibEnergy = {0, 0}; /** EM calibrated energy on each side */
+  std::array<std::bitset<32>, 2> m_emStatus = {0, 0}; /** EM modlue status word on each side */
+  std::array<std::vector<std::vector<RpdChannelData>>, 2> m_rpdChannelData = {
+    std::vector<std::vector<RpdChannelData>>(m_nRows, std::vector<RpdChannelData>(m_nCols)),
+    std::vector<std::vector<RpdChannelData>>(m_nRows, std::vector<RpdChannelData>(m_nCols))
+  }; /** RPD channel data for each channel (first index row, then index column) on each side */
 
-  // Information from geometry
-  //   as in the ZDC, we use side C = 0, side A = 1 for indexing 
-  /**
-   * beamline coordinates are:
-   *    +x points towards the center of the circle that is the LHC
-   *    +y points vertically up
-   *    +z points counterclockwise looking down => from side C = 0 to side A = 1
-   * if the RPD rotation angles are zero, its +x and +y axes are aligned
-   *    with those of the beamline
-   * m_xCenter is the x offset of the center of the RPD relative to beamline +z,
-   *    e.g. positive => RPD is too far towards inside of circle that is LHC
-   * m_yCenter is the y offset of the center of the RPD relative to beamline +z,
-   *    e.g. positive => RPD is too far vertically above beamline
-   * m_xyRotAngle is the rotation of the RPD plane about its +z axis from nominal,
-   *    its positive direction is given by the right hand rule,
-   *    e.g. small and positive => +y axis of RPD is tilted towards the outside
-   *    of the circle that is the LHC
-   * m_yzRotAngle is the rotation of the RPD plane about the +x axis from nominal,
-   *    its positive direction is given by the right hand rule,
-   *    e.g. small and positive => +y axis of RPD is tilted towards beamline +z
-   *    (for side C = 0, that is towards ATLAS, for side A = 1, that is away from ATLAS)
-   */
-  std::array<float, 2> m_xCenter;    // The horizontal offset of the RPD relative to the 0 degree line
-  std::array<float, 2> m_yCenter;    // The vertical offset of the RPD relative to the 0 degree line
-  std::array<float, 2> m_xyRotAngle; // The rotation of the RPD in the x-y plane about its center (in radians)
-  std::array<float, 2> m_yzRotAngle; // The rotation of the RPD in the y-z plane about its center (in radians)
-    
-  
+  // alignment (geometry) and crossing angle correction, to be read from ZdcConditions
+  //
+  std::array<float, 2> m_alignmentXOffset = {0.0, 0.0}; /** geometry + crossing angle correction in x (ATLAS coordinates) */
+  std::array<float, 2> m_alignmentYOffset = {0.0, 0.0}; /** geometry + crossing angle correction in y (ATLAS coordinates) */
+  /** ROTATIONS GO HERE */
+
+  // average centroids, to be read from monitoring histograms
+  //
+  std::array<float, 2> m_avgXCentroid = {0.0, 0.0}; /** average x centroid */
+  std::array<float, 2> m_avgYCentroid = {0.0, 0.0}; /** average y centroid */
+
+  // centroid calculation results (reset each event)
+  //
+  bool m_eventStatus; /** event status */
+  std::array<std::bitset<32>, 2> m_centroidStatus = {1 << ValidBit, 1 << ValidBit}; /** centroid status (valid by default) on each side */
+  std::array<std::vector<float>, 2> m_subtrAmp = {
+    std::vector<float>(m_nChannels, 0.0),
+    std::vector<float>(m_nChannels, 0.0)
+  }; /** subtracted amplitude for each channel on each side */
+  std::array<std::vector<float>, 2> m_subtrAmpRowSum = {
+    std::vector<float>(m_nRows, 0.0),
+    std::vector<float>(m_nRows, 0.0)
+  }; /** subtracted amplitude for each row on each side */
+  std::array<std::vector<float>, 2> m_subtrAmpColSum = {
+    std::vector<float>(m_nCols, 0.0),
+    std::vector<float>(m_nCols, 0.0)
+  }; /** subtracted amplitude for each column on each side */
+  std::array<float, 2> m_subtrAmpSum = {0.0, 0.0}; /** subtracted amplitude sum on each side */
+  std::array<float, 2> m_xCentroidPreGeomCorPreAvgSubtr = {0.0, 0.0};  /** x centroid before geomerty correction and before average subtraction (RPD detector coordinates) on each side */
+  std::array<float, 2> m_yCentroidPreGeomCorPreAvgSubtr = {0.0, 0.0};  /** y centroid before geomerty correction and before average subtraction (RPD detector coordinates) on each side */
+  std::array<float, 2> m_xCentroidPreAvgSubtr = {0.0, 0.0};  /** x centroid after geomerty correction and before average subtraction on each side */
+  std::array<float, 2> m_yCentroidPreAvgSubtr = {0.0, 0.0};  /** y centroid after geomerty correction and before average subtraction on each side */
+  std::array<float, 2> m_xCentroid = {0.0, 0.0};  /** x centroid after geomerty correction and after average subtraction on each side */
+  std::array<float, 2> m_yCentroid = {0.0, 0.0};  /** y centroid after geomerty correction and after average subtraction on each side */
+  std::array<std::vector<float>, 2> m_xRowCentroid = {
+    std::vector<float>(m_nRows, 0.0),
+    std::vector<float>(m_nRows, 0.0)
+  }; /** the x centroid for each row on each side */
+  std::array<std::vector<float>, 2> m_yColCentroid = {
+    std::vector<float>(m_nCols, 0.0),
+    std::vector<float>(m_nCols, 0.0)
+  }; /** the y centroid for each column on each side */
+  std::array<float, 2> m_reactionPlaneAngle = {0.0, 0.0}; /** reaction plane angle on each side */
+  float m_cosDeltaReactionPlaneAngle = 0; /** cosine of difference between reaction plane angles of the two sides */
+
+  // methods used for centroid calculation
+  //
+  void reset();
+  bool readAOD(xAOD::ZdcModuleContainer const& moduleContainer, xAOD::ZdcModuleContainer const& moduleSumContainer);
+  bool checkZdcRpdValidity(unsigned int side);
+  bool subtractRpdAmplitudes(unsigned int side);
+  void calculateDetectorCentroid(unsigned int side);
+  void geometryCorrection(unsigned int side);
+  void subtractAverageCentroid(unsigned int side);
+  void calculateReactionPlaneAngle(unsigned int side);
+  void writeAOD(xAOD::ZdcModuleContainer const& moduleSumContainer) const;
+
+  // note that we leave the keys of read/write decor handle keys unset here since they will be set
+  // by this tool's initialize(); this is because container names (and suffix) are taken as tool properties
+  // and cannot be used in an in-class initializer (before constructor, where properties are declared)
+
   // read handle keys
+  //
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {
     this, "EventInfoKey", "EventInfo",
     "Location of the event info"
   };
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_xposRelKey {
-    this, "xposRelKey", ""
+    this, "xposRelKey", "",
     "X position of RPD tile center relative to center of RPD active area"
   };
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_yposRelKey {
-    this, "yposRelKey", ""
+    this, "yposRelKey", "",
     "Y position of RPD tile center relative to center of RPD active area"
   };
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_rowKey {
-    this, "rowKey", ""
+    this, "rowKey", "",
     "Row index of RPD channel"
   };
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_colKey {
-    this, "colKey", ""
+    this, "colKey", "",
     "Column index of RPD channel"
   };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZDCAmplitudeKey {
-    this, "AmplitudeKey", ""
+  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZDCModuleCalibEnergyKey {
+    this, "CalibEnergyKey", "",
     "ZDC module amplitude"
   };
+  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZDCModuleStatusKey {
+    this, "ZDCModuleStatusKey", "",
+    "ZDC module status word"
+  };
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelAmplitudeKey {
-    this, "RPDChannelAmplitudeKey", ""
+    this, "RPDChannelAmplitudeKey", "",
     "RPD channel amplitude"
   };
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelAmplitudeCalibKey {
-    this, "RPDChannelAmplitudeCalibKey", ""
+    this, "RPDChannelAmplitudeCalibKey", "",
     "Calibrated RPD channel amplitude"
   };
+  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelMaxAdcKey {
+    this, "RPDChannelMaxAdcKey", "",
+    "RPD channel max ADC"
+  };
+  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelMaxAdcCalibKey {
+    this, "RPDChannelMaxAdcCalibKey", "",
+    "Calibrated RPD channel max ADC"
+  };
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelPileupFracKey {
-    this, "RPDChannelPileupFracKey", ""
+    this, "RPDChannelPileupFracKey", "",
     "RPD channel (out of time) pileup as a fraction of non-pileup sum"
   };
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelStatusKey {
-    this, "RPDChannelStatusKey", ""
+    this, "RPDChannelStatusKey", "",
     "RPD channel status word"
   };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDStatusKey {
-    this, "RPDStatusKey", ""
+  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDSideStatusKey {
+    this, "RPDStatusKey", "",
     "RPD side status word"
   };
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZDCFinalEnergyKey {
-    this, "FinalEnergyKey", ""
+    this, "FinalEnergyKey", "",
     "ZDC final energy"
   };
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZDCStatusKey {
-    this, "StatusKey", ""
+    this, "ZDCStatusKey", "",
     "ZDC sum status word"
   };
-  
+
   // write handle keys
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdSubAmpKey {
-    this, "rpdSubAmpKey", ""
-    "Subtracted RPD amplitudes, index row then column"
-  };
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdSubAmpSumKey {
-    this, "rpdSubAmpSumKey", ""
-    "Sum of subtracted RPD amplitudes"
-  };
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_xDetCentroidKey {
-    this, "xDetCentroidKey", ""
-    "X position of centroid in RPD detector coordinates (before geometry corrections)"
-  };
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_yDetCentroidKey {
-    this, "yDetCentroidKey", ""
-    "Y position of centroid in RPD detector coordinates (before geometry corrections)"
-  };
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_xCentroidKey {
-    this, "xCentroidKey", ""
-    "X position of centroid in beamline coordinates (after geometry corrections)"
-  };
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_yCentroidKey {
-    this, "yCentroidKey", ""
-    "Y position of centroid in beamline coordinates (after geometry corrections)"
-  };
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_xDetCentroidUnsubKey {
-    this, "xDetCentroidUnsubKey", ""
-    "X position of centroid in RPD detector coordinates (before geometry corrections), calculated with unsubtracted amplitudes"
-  };
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_yDetCentroidUnsubKey {
-    this, "yDetCentroidUnsubKey", ""
-    "Y position of centroid in RPD detector coordinates (before geometry corrections), calculated with unsubtracted amplitudes"
-  };
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_xDetRowCentroidKey {
-    this, "xDetRowCentroidKey", ""
-    "Row x centroids in RPD detector coordinates (before geometry corrections)"
-  };
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_yDetColCentroidKey {
-    this, "yDetColCentroidKey", ""
-    "Column y centroids in RPD detector coordinates (before geometry corrections)"
-  };
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_xDetRowCentroidStdevKey {
-    this, "xDetRowCentroidStdevKey", ""
-    "Standard deviation of row x centroids in RPD detector coordinates (before geometry corrections)"
-  };
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_yDetColCentroidStdevKey {
-    this, "yDetColCentroidStdevKey", ""
-    "Standard deviation of column y centroids in RPD detector coordinates (before geometry corrections)"
-  };
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_reactionPlaneAngleKey {
-    this, "reactionPlaneAngleKey", ""
-    "Reaction plane angle"
-  };
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_cosDeltaReactionPlaneAngleKey {
-    this, "cosDeltaReactionPlaneAngleKey", ""
-    "Cosine of the difference between the reaction plane angles of the two sides"
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_centroidEventValidKey {
+    this, "centroidEventValidKey", "",
+    "Event status: true if both centroids are valid, else false"
   };
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_centroidStatusKey {
-    this, "centroidStatusKey", ""
-    "Centriod calculation status word"
+    this, "centroidStatusKey", "",
+    "Centroid status word"
+  };
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelSubtrAmpKey {
+    this, "RPDChannelSubtrAmpKey", "",
+    "RPD channel subtracted amplitudes (tile mass) used in centroid calculation"
+  };
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDSubtrAmpSumKey {
+    this, "RPDSubtrAmpSumKey", "",
+    "Sum of RPD channel subtracted amplitudes (total mass) used in centroid calculation"
+  };
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_xCentroidPreGeomCorPreAvgSubtrKey {
+    this, "xCentroidPreGeomCorPreAvgSubtrKey", "",
+    "X centroid before geometry corrections and before average centroid subtraction (RPD detector coordinates)"
+  };
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_yCentroidPreGeomCorPreAvgSubtrKey {
+    this, "yCentroidPreGeomCorPreAvgSubtrKey", "",
+    "Y centroid before geometry corrections and before average centroid subtraction (RPD detector coordinates)"
+  };
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_xCentroidPreAvgSubtrKey {
+    this, "xCentroidPreAvgSubtrKey", "",
+    "X centroid after geometry corrections and before average centroid subtraction"
+  };
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_yCentroidPreAvgSubtrKey {
+    this, "yCentroidPreAvgSubtrKey", "",
+    "Y centroid after geometry corrections and before average centroid subtraction"
+  };
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_xCentroidKey {
+    this, "xCentroidKey", "",
+    "X centroid after geometry corrections and after average centroid subtraction"
+  };
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_yCentroidKey {
+    this, "yCentroidKey", "",
+    "Y centroid after geometry corrections and after average centroid subtraction"
+  };
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_xRowCentroidKey {
+    this, "xRowCentroidKey", "",
+    "Row X centroids after geometry corrections and after average centroid subtraction"
+  };
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_yColCentroidKey {
+    this, "yColCentroidKey", "",
+    "Column Y centroids after geometry corrections and after average centroid subtraction"
+  };
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_reactionPlaneAngleKey {
+    this, "reactionPlaneAngleKey", "",
+    "Reaction plane angle in [-pi, pi) from the positive x axis (angle of centorid on side C, angle of centroid + pi on side A)"
+  };
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_cosDeltaReactionPlaneAngleKey {
+    this, "cosDeltaReactionPlaneAngleKey", "",
+    "Cosine of the difference between the reaction plane angles of the two sides"
   };
 
 };
