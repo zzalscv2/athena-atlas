@@ -80,6 +80,14 @@ namespace CP
 
 
 
+  const std::string& SysWriteSelectionHandle ::
+  getSelection () const
+  {
+    return m_selection;
+  }
+
+
+
   std::string SysWriteSelectionHandle ::
   getNamePattern () const
   {

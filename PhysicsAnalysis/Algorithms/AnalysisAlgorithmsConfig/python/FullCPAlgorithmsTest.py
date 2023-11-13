@@ -549,7 +549,8 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
 
 
 
-def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken, geometry=None, autoconfigFromFlags=None, noSystematics=None) :
+def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
+        geometry=None, autoconfigFromFlags=None, noSystematics=None, onlyNominalOR=False) :
 
     vars = []
     metVars = []
@@ -798,6 +799,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.taus',        'AnaTauJets.tight')
     configSeq.setOptionValue ('.inputLabel',  'preselectOR')
     configSeq.setOptionValue ('.outputLabel', 'passesOR' )
+    configSeq.setOptionValue ('.nominalOnly', onlyNominalOR )
     if not forCompare :
         # ask to be added to the baseline selection for all objects, and to
         # provide a preselection for the objects in subsequent algorithms
@@ -892,7 +894,9 @@ def printSequenceAlgs (sequence) :
         print (sequence)
 
 
-def makeSequence (dataType, useBlocks, yamlPath, forCompare, noSystematics, hardCuts = False, isPhyslite = False, noPhysliteBroken = False, geometry = None, autoconfigFromFlags = None) :
+def makeSequence (dataType, useBlocks, yamlPath, forCompare, noSystematics, hardCuts = False,
+            isPhyslite = False, noPhysliteBroken = False, geometry = None, autoconfigFromFlags = None,
+            onlyNominalOR = False) :
 
     # do some harder cuts on all object types, this is mostly used for
     # benchmarking
@@ -914,7 +918,7 @@ def makeSequence (dataType, useBlocks, yamlPath, forCompare, noSystematics, hard
     if useBlocks :
         ca = makeSequenceBlocks (dataType, algSeq, forCompare=forCompare,
                                  isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
-                                 geometry=geometry,
+                                 geometry=geometry, onlyNominalOR=onlyNominalOR,
                                  autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
     elif yamlPath :
         from AnalysisAlgorithmsConfig.ConfigText import makeSequence as makeSequenceText

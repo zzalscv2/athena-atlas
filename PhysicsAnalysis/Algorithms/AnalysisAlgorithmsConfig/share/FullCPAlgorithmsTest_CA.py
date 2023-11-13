@@ -37,6 +37,9 @@ athArgsParser.add_argument( '--physlite', dest='physlite',
 athArgsParser.add_argument( '--no-physlite-broken', dest='no_physlite_broken',
                             action = 'store_true', default = False,
                             help = 'Configure the job to skip algorithms that fail on physlite test file' )
+athArgsParser.add_argument( '--only-nominal-or', dest='onlyNominalOR',
+                            action = 'store_true', default = False,
+                            help = 'Only run overlap removal for nominal (skip systematics)')
 athArgs = flags.fillFromArgs(parser=athArgsParser)
 
 dataType = athArgs.data_type
@@ -79,7 +82,7 @@ cfg.merge(CutFlowSvcCfg(flags))
 cp_cfg = makeSequence (dataType, blockConfig, textConfig, forCompare=forCompare,
                        noSystematics = athArgs.no_systematics,
                        isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
-                       autoconfigFromFlags=flags)
+                       autoconfigFromFlags=flags, onlyNominalOR=athArgs.onlyNominalOR)
 # Add all algorithms from the sequence to the job.
 cfg.merge(cp_cfg)
 

@@ -10,6 +10,7 @@
 
 #include <AsgMessaging/AsgMessagingForward.h>
 #include <AsgServices/ServiceHandle.h>
+#include <AsgTools/PropertyWrapper.h>
 #include <PATInterfaces/SystematicSet.h>
 #include <SystematicsHandles/ISystematicsSvc.h>
 #include <SystematicsHandles/SysListType.h>
@@ -140,6 +141,10 @@ namespace CP
     /// \brief the handle for the systematics service
   private:
     ServiceHandle<ISystematicsSvc> m_systematicsService {"SystematicsSvc", ""};
+
+    /// \brief an (optional) filter to remove affecting systematics
+  private:
+    std::string m_affectingFilter;
 
     /// \brief the list of systematics handles we have
   private:

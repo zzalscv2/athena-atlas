@@ -83,6 +83,7 @@ add_test_job( TestJobDataSequence data --for-compare --no-systematics )
 add_test_job( TestJobDataConfig   data --for-compare --block-config --no-systematics )
 add_test_job( TestJobDataTextConfig data --for-compare --text-config ${CONFIG_PATH} --no-systematics )
 add_test_job( TestJobDataFull     data --block-config --no-systematics )
+add_test_job( TestJobDataNominalOR   data --block-config --no-systematics --only-nominal-or )
 add_test_compare( TestJobDataCompare data TestJobDataSequence TestJobDataConfig )
 add_test_compare( TestJobDataCompareConfig data TestJobDataConfig TestJobDataTextConfig )
 
@@ -90,6 +91,7 @@ add_test_job( TestJobFullSimSequence mc ${USE_FLAGS} --for-compare )
 add_test_job( TestJobFullSimConfig   mc ${USE_FLAGS} --for-compare --block-config )
 add_test_job( TestJobFullSimTextConfig  mc ${USE_FLAGS} --for-compare --text-config ${CONFIG_PATH} )
 add_test_job( TestJobFullSimFull     mc ${USE_FLAGS} --block-config )
+add_test_job( TestJobFullSimNominalOR   mc ${USE_FLAGS} --block-config --only-nominal-or )
 add_test_compare( TestJobFullSimCompare mc TestJobFullSimSequence TestJobFullSimConfig )
 add_test_compare( TestJobFullSimCompareConfig mc TestJobFullSimConfig TestJobFullSimTextConfig )
 
@@ -97,6 +99,7 @@ add_test_job( TestJobFastSimSequence afii ${USE_FLAGS} --for-compare )
 add_test_job( TestJobFastSimConfig   afii ${USE_FLAGS} --for-compare --block-config )
 add_test_job( TestJobFastSimTextConfig   afii ${USE_FLAGS} --for-compare --text-config ${CONFIG_PATH} )
 add_test_job( TestJobFastSimFull     afii ${USE_FLAGS} --block-config )
+add_test_job( TestJobFastSimNominalOR   afii ${USE_FLAGS} --block-config --only-nominal-or )
 add_test_compare( TestJobFastSimCompare afii TestJobFastSimSequence TestJobFastSimConfig )
 
 # FIX ME: the text configuration currently does not create weight_pileup_%SYS%
@@ -115,6 +118,7 @@ add_test_job( TestJobDataSequenceLite data --for-compare --physlite --no-physlit
 add_test_job( TestJobDataConfigLite   data --for-compare --block-config --physlite --no-physlite-broken --no-systematics )
 add_test_job( TestJobDataTextConfigLite data --for-compare --text-config ${CONFIG_PATH} --physlite --no-physlite-broken --no-systematics )
 add_test_job( TestJobDataFullLite     data --block-config --physlite --no-physlite-broken --no-systematics )
+add_test_job( TestJobDataNominalORLite    data --block-config --only-nominal-or --physlite --no-physlite-broken )
 #add_test_compare( TestJobDataCompareLite data TestJobDataSequenceLite TestJobDataConfigLite )
 #add_test_compare( TestJobDataCompareConfigLite data TestJobDataConfigLite TestJobDataTextConfigLite )
 
@@ -124,12 +128,14 @@ add_test_job( TestJobFullSimSequenceLite mc ${USE_FLAGS} --for-compare --physlit
 add_test_job( TestJobFullSimConfigLite   mc ${USE_FLAGS} --for-compare --block-config --physlite --no-physlite-broken )
 add_test_job( TestJobFullSimTextConfigLite mc ${USE_FLAGS} --for-compare --text-config ${CONFIG_PATH} --physlite --no-physlite-broken )
 add_test_job( TestJobFullSimFullLite     mc ${USE_FLAGS} --block-config --physlite --no-physlite-broken )
+add_test_job( TestJobFullSimNominalORLite    mc ${USE_FLAGS} --block-config --only-nominal-or --physlite --no-physlite-broken )
 add_test_compare( TestJobFullSimCompareLite mc TestJobFullSimSequenceLite TestJobFullSimConfigLite )
 
 add_test_job( TestJobFastSimSequenceLite afii ${USE_FLAGS} --for-compare --physlite --no-physlite-broken )
 add_test_job( TestJobFastSimConfigLite   afii ${USE_FLAGS} --for-compare --block-config --physlite --no-physlite-broken )
 add_test_job( TestJobFastSimTextConfigLite afii ${USE_FLAGS} --for-compare --text-config ${CONFIG_PATH} --physlite --no-physlite-broken )
 add_test_job( TestJobFastSimFullLite     afii ${USE_FLAGS} --block-config --physlite --no-physlite-broken )
+add_test_job( TestJobFastSimNominalORLite    afii ${USE_FLAGS} --block-config --only-nominal-or --physlite --no-physlite-broken )
 add_test_compare( TestJobFastSimCompareLite afii TestJobFastSimSequenceLite TestJobFastSimConfigLite )
 
 endif()

@@ -18,6 +18,7 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('bJetLabel', '', type=str)
         self.addOption ('boostedLeptons', False, type=bool)
         self.addOption ('postfix', '', type=str)
+        self.addOption ('nominalOnly', False, type=bool)
         self.addOption ('jets', "", type=str)
         self.addOption ('fatJets', "", type=str)
         self.addOption ('electrons', "", type=str)
@@ -89,7 +90,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             electrons, alg.preselection = config.readNameAndSelection (self.electrons)
             alg.particles = electrons
             alg.selectionDecoration = self.inputLabel + ',as_char'
-            config.addOutputVar (self.electrons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or')
+            config.addOutputVar (self.electrons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly)
 
         photons = None
         if self.photons != "" :
@@ -97,7 +98,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             photons, alg.preselection = config.readNameAndSelection (self.photons)
             alg.particles = photons
             alg.selectionDecoration = self.inputLabel + ',as_char'
-            config.addOutputVar (self.photons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or')
+            config.addOutputVar (self.photons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly)
 
         muons = None
         if self.muons != "" :
@@ -105,7 +106,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             muons, alg.preselection = config.readNameAndSelection (self.muons)
             alg.particles = muons
             alg.selectionDecoration = self.inputLabel + ',as_char'
-            config.addOutputVar (self.muons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or')
+            config.addOutputVar (self.muons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly)
 
         taus = None
         if self.taus != "" :
@@ -113,7 +114,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             taus, alg.preselection = config.readNameAndSelection (self.taus)
             alg.particles = taus
             alg.selectionDecoration = self.inputLabel + ',as_char'
-            config.addOutputVar (self.taus.split('.')[0], self.outputLabel + '_%SYS%', 'select_or')
+            config.addOutputVar (self.taus.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly)
 
         jets = None
         if self.jets != "" :
@@ -121,7 +122,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             jets, alg.preselection = config.readNameAndSelection (self.jets)
             alg.particles = jets
             alg.selectionDecoration = self.inputLabel + ',as_char'
-            config.addOutputVar (self.jets.split('.')[0], self.outputLabel + '_%SYS%', 'select_or')
+            config.addOutputVar (self.jets.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly)
 
         fatJets = None
         if self.fatJets != "" :
@@ -129,12 +130,14 @@ class OverlapAnalysisConfig (ConfigBlock):
             fatJets, alg.preselection = config.readNameAndSelection (self.fatJets)
             alg.particles = fatJets
             alg.selectionDecoration = self.inputLabel + ',as_char'
-            config.addOutputVar (self.fatJets.split('.')[0], self.outputLabel + '_%SYS%', 'select_or')
+            config.addOutputVar (self.fatJets.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly)
 
 
         # Create the overlap removal algorithm:
         alg = config.createAlgorithm( 'CP::OverlapRemovalAlg', 'OverlapRemovalAlg' + postfix )
         alg.OutputLabel = self.outputLabel
+        if self.nominalOnly :
+            alg.affectingSystematicsFilter = '.*'
         if electrons :
             alg.electrons = electrons
             alg.electronsDecoration = self.outputLabel + '_%SYS%,as_char'
@@ -301,6 +304,32 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.JetFatJetORT.DR = 1.0
             alg.overlapTool.JetFatJetORT.OutputPassValue = True
         
+        if self.nominalOnly :
+            if electrons :
+                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORElectronsCopyAlg' + postfix)
+                alg.particles = electrons
+                alg.selectionDecoration = self.outputLabel + '_%SYS%,as_char'
+            if muons :
+                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORMuonsCopyAlg' + postfix)
+                alg.particles = muons
+                alg.selectionDecoration = self.outputLabel + '_%SYS%,as_char'
+            if taus :
+                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORTausCopyAlg' + postfix)
+                alg.particles = taus
+                alg.selectionDecoration = self.outputLabel + '_%SYS%,as_char'
+            if jets :
+                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORJetsCopyAlg' + postfix)
+                alg.particles = jets
+                alg.selectionDecoration = self.outputLabel + '_%SYS%,as_char'
+            if photons :
+                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORPhotonsCopyAlg' + postfix)
+                alg.particles = photons
+                alg.selectionDecoration = self.outputLabel + '_%SYS%,as_char'
+            if fatJets :
+                alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORFatJetsCopyAlg' + postfix)
+                alg.particles = fatJets
+                alg.selectionDecoration = self.outputLabel + '_%SYS%,as_char'
+
         # provide a preselection if requested
         if self.addPreselection:
             if self.preselectLabel is not None :

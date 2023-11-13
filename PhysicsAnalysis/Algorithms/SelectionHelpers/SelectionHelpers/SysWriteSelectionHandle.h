@@ -69,6 +69,10 @@ namespace CP
   public:
     std::string getLabel () const;
 
+    /// \brief get the actual selection string
+  public:
+    const std::string& getSelection () const;
+
 
 
     /// Inherited Members
