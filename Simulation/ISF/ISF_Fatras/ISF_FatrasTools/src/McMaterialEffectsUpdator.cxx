@@ -24,8 +24,6 @@
 #include "ISF_FatrasInterfaces/IProcessSamplingTool.h"
 #include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
 #include "ISF_FatrasInterfaces/IPhotonConversionTool.h"
-// FastSimulation
-#include "FastSimulationEvent/GenParticleEnergyDepositMap.h"
 // Trk inlcude
 #include "TrkExInterfaces/IEnergyLossUpdator.h"
 #include "TrkExInterfaces/IMultipleScatteringUpdator.h"
@@ -38,6 +36,7 @@
 #include "TrkGeometry/MaterialProperties.h"
 #include "TrkVolumes/CylinderVolumeBounds.h"
 #include "TrkMaterialOnTrack/EnergyLoss.h"
+#include "TrkMaterialOnTrack/MaterialEffectsOnTrack.h"
 // CLHEP
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CLHEP/Matrix/Vector.h"
