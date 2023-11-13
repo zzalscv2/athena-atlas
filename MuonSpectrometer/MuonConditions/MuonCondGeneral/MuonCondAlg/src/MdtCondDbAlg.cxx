@@ -519,7 +519,7 @@ StatusCode MdtCondDbAlg::loadMcNoisyChannels(const EventContext& ctx, MdtCondDbD
 }
 Identifier MdtCondDbAlg::identifyChamber(std::string chamber) const {
     if (chamber[2] == 'Y' || chamber[2] == 'X') chamber[2] = 'S';    
-    auto itr = m_chamberNames.find(chamber.substr(0, chamber.find("_")));
+    auto itr = m_chamberNames.find(chamber.substr(0, chamber.find('_')));
     if (itr != m_chamberNames.end()) return itr->second;
     ATH_MSG_DEBUG("The chamber "<<chamber<<" is unknown.");
     return Identifier{};
