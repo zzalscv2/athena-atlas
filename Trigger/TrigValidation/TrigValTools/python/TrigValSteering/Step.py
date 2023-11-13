@@ -183,7 +183,7 @@ class Step(object):
             with remember_cwd():
                 if self.workdir:
                     assert '..' not in self.workdir, "Illegal path for workdir -- must be a subdirectory of CWD"
-                    assert self.workdir.startswith('/'), "Illegal path for workdir -- no absolute paths!"
+                    assert not self.workdir.startswith('/'), "Illegal path for workdir -- no absolute paths!"
                     os.makedirs(self.workdir)
                     os.chdir(self.workdir)
 
