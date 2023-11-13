@@ -7,9 +7,8 @@
 # art-athena-mt: 8
 
 export ATHENA_CORE_NUMBER=8
-Reco_tf.py \
+Reco_tf.py --CA \
     --AMI q445 \
-    --preExec 'from RecExConfig.RecFlags import rec;rec.runUnsupportedLegacyReco=True' \
     --maxEvents 100 \
     --multithreaded="True" \
     --outputAODFile myAOD.MT.pool.root
