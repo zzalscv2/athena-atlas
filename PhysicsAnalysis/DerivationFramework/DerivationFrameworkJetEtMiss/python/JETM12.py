@@ -33,10 +33,12 @@ def JETM12SkimmingToolCfg(ConfigFlags):
     elTriggers = elTriggers+addRun3ElectronTriggers
     muTriggers = muTriggers+addRund3MuonTriggers
 
-    # Check if the solenoid was turned on to define skimming
-    from CoolConvUtilities.MagFieldUtils import getFieldForRun
-    magfield=getFieldForRun(ConfigFlags.Input.RunNumber[0],lumiblock=ConfigFlags.Input.LumiBlockNumber[0])
-    addTtbarEvents = magfield.solenoidCurrent() > 0
+    addTtbarEvents = True
+    if not ConfigFlags.Input.isMC:
+        # Check if the solenoid was turned on to define skimming
+        from CoolConvUtilities.MagFieldUtils import getFieldForRun
+        magfield=getFieldForRun(ConfigFlags.Input.RunNumber[0],lumiblock=ConfigFlags.Input.LumiBlockNumber[0])
+        addTtbarEvents = magfield.solenoidCurrent() > 0
 
 
     #xAODStringSkimmingTool cannot handle electron trigger names, therefore need to use TriggerSkimmingTool
