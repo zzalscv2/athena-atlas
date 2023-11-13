@@ -473,22 +473,22 @@ ActsTrk::MultiTrajectory::MultiTrajectory(
         // setters are not needed so replaced by a "nullptr"
         if ( *typeInfo == typeid(float) ) {
           m_decorations.emplace_back( name,
-            static_cast<DecorationAccess::SetterType>(nullptr),
-            ActsTrk::detail::decorationGetter<xAOD::TrackStateContainer, float>);
+            ActsTrk::detail::decorationGetter<xAOD::TrackStateContainer, float>,
+            ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, float>);
         } else if ( *typeInfo == typeid(double) ) {
           m_decorations.emplace_back( name,
-            static_cast<DecorationAccess::SetterType>(nullptr),
-            ActsTrk::detail::decorationGetter<xAOD::TrackStateContainer, double>);
+            ActsTrk::detail::decorationGetter<xAOD::TrackStateContainer, double>,
+            ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, double>);
 
         } else if ( *typeInfo == typeid(short) ) {
           m_decorations.emplace_back( name,
-            static_cast<DecorationAccess::SetterType>(nullptr),
-            ActsTrk::detail::decorationGetter<xAOD::TrackStateContainer, short>);
+            ActsTrk::detail::decorationGetter<xAOD::TrackStateContainer, short>,
+            ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, short>);
 
         } else if ( *typeInfo == typeid(uint32_t) ) {
           m_decorations.emplace_back( name,
-            static_cast<DecorationAccess::SetterType>(nullptr),
-            ActsTrk::detail::decorationGetter<xAOD::TrackStateContainer, short>);
+            ActsTrk::detail::decorationGetter<xAOD::TrackStateContainer, uint32_t>,
+            ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, uint32_t>);
 
         }
 
