@@ -88,7 +88,6 @@ namespace ActsTrk
     for (const typename ActsTrk::TrackContainer::ConstTrackProxy &track : tracks)
     {
       const auto lastMeasurementIndex = track.tipIndex();
-      std::cout << " tip index " << lastMeasurementIndex << std::endl;
       auto finalTrajectory = std::make_unique<Trk::TrackStates>();
       // initialise the number of dead Pixel and Acts strip
       int numberOfDeadPixel = 0;

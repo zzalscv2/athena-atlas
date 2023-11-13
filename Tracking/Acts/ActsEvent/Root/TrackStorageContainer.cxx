@@ -107,28 +107,28 @@ void ActsTrk::TrackStorageContainer::restoreDecorations() {
     // "nullptr"
     if (*typeInfo == typeid(float)) {
       m_decorations.emplace_back(
-          name, static_cast<DecorationAccess::SetterType>(nullptr),
+          name,
           ActsTrk::detail::constDecorationGetter<xAOD::TrackStorageContainer,
                                                  float>,
           ActsTrk::detail::decorationCopier<xAOD::TrackStorageContainer,
                                             float>);
     } else if (*typeInfo == typeid(double)) {
       m_decorations.emplace_back(
-          name, static_cast<DecorationAccess::SetterType>(nullptr),
+          name,
           ActsTrk::detail::constDecorationGetter<xAOD::TrackStorageContainer,
                                                  double>,
           ActsTrk::detail::decorationCopier<xAOD::TrackStorageContainer,
                                             double>);
     } else if (*typeInfo == typeid(short)) {
       m_decorations.emplace_back(
-          name, static_cast<DecorationAccess::SetterType>(nullptr),
+          name,
           ActsTrk::detail::constDecorationGetter<xAOD::TrackStorageContainer,
                                                  short>,
           ActsTrk::detail::decorationCopier<xAOD::TrackStorageContainer,
                                             short>);
     } else if (*typeInfo == typeid(uint32_t)) {
       m_decorations.emplace_back(
-          name, static_cast<DecorationAccess::SetterType>(nullptr),
+          name,
           ActsTrk::detail::constDecorationGetter<xAOD::TrackStorageContainer,
                                                  uint32_t>,
           ActsTrk::detail::decorationCopier<xAOD::TrackStorageContainer,
