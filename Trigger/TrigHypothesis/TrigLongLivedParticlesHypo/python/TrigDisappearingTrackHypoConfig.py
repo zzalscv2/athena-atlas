@@ -3,12 +3,16 @@
 from AthenaCommon.Logging import logging
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def createTrigDisappearingTrackHypoAlg(flags, name):
-    # make the Hypo
-    from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import (TrigDisappearingTrackHypoAlg)
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+
+def createTrigDisappearingTrackHypoAlgCfg(flags: AthConfigFlags, name : str) -> ComponentAccumulator:
+
+    acc = ComponentAccumulator()
 
     # Setup the hypothesis algorithm
-    theDisTrkHypo = TrigDisappearingTrackHypoAlg(name)
+    theDisTrkHypo = CompFactory.TrigDisappearingTrackHypoAlg(name)
     
     from TrigEDMConfig.TriggerEDMRun3 import recordable
     theDisTrkHypo.DisTrkBDTSel = recordable("HLT_DisTrkBDTSel")
@@ -77,7 +81,9 @@ def createTrigDisappearingTrackHypoAlg(flags, name):
     monTool.HistPath = 'disappearingTrackHypoAlg'
     theDisTrkHypo.MonTool = monTool
 
-    return theDisTrkHypo
+    acc.addEventAlgo(theDisTrkHypo)
+    return acc
+
 
 
 def TrigDisappearingTrackHypoToolFromDict( chainDict ):

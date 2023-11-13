@@ -27,8 +27,6 @@ def createTrigVSIHypoAlgCfg(flags: AthConfigFlags, name: str, **kwargs) ->CompFa
     return theHypoAlg
 
 
-
-
 def TrigVSIHypoToolFromDict( chainDict ):
     """ Use menu decoded chain dictionary to configure the tool """
 

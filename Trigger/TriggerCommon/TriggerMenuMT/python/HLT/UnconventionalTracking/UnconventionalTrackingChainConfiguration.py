@@ -96,6 +96,10 @@ class UnconventionalTrackingChainConfiguration(ChainConfigurationBase):
     def getDisTrkTrigger(self, flags):
         return self.getStep(flags,4,'DisTrkTriggerCfg',[DisTrkTriggerCfg])
     def getVSITrigger(self, flags):
+        #not working in the CA menu for the moment
+        if isComponentAccumulatorCfg(): 
+            return self.getEmptyStep(4, 'VSITrigger_MissingCA')
+        ##
         return self.getStep(flags,4,'VSITrigger',[VSITriggerCfg])
     def getDJPromptStep(self, flags):
         return self.getStep(flags,3,'DJPromptStepCfg',[DJPromptStepCfg], comboTools = [TrigDJComboHypoToolFromDict])
@@ -110,7 +114,10 @@ class UnconventionalTrackingChainConfiguration(ChainConfigurationBase):
 
 def IsoHPtTrackTriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.IsoHighPtTrackTriggerConfiguration import IsoHPtTrackTriggerHypoSequence
-    return IsoHPtTrackTriggerHypoSequence(flags)
+    if isComponentAccumulatorCfg():
+        return IsoHPtTrackTriggerHypoSequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(IsoHPtTrackTriggerHypoSequence,flags)
 
 def FTFRecoOnlyCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getFullScanRecoOnlySequence
@@ -149,19 +156,31 @@ def HitDVTriggerCfg(flags):
 
 def JetRecoOnlyCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.HitDVConfiguration import UTTJetRecoSequence
-    return UTTJetRecoSequence(flags)
-
+    if isComponentAccumulatorCfg():
+        return UTTJetRecoSequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(UTTJetRecoSequence,flags)
+    
 def DisTrkTriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.DisTrkTriggerConfiguration import DisTrkTriggerHypoSequence
-    return DisTrkTriggerHypoSequence(flags)
-
+    if isComponentAccumulatorCfg():
+        return DisTrkTriggerHypoSequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(DisTrkTriggerHypoSequence,flags)
+    
 def DJPromptStepCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.DJTriggerConfiguration import DJPromptStep
-    return DJPromptStep(flags)
-
+    if isComponentAccumulatorCfg():
+        return DJPromptStep(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(DJPromptStep,flags)
+    
 def DJDispStepCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.DJTriggerConfiguration import DJDispStep
-    return DJDispStep(flags)
+    if isComponentAccumulatorCfg():
+        return DJDispStep(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(DJDispStep,flags)
 
 def DVRecoStepCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.DVTriggerConfiguration import DVRecoSequence

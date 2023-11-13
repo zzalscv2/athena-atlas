@@ -1,12 +1,13 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.CFElements import (seqAND, parOR)
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
+from AthenaCommon.CFElements import (parOR)
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA, InViewRecoCA
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+
 from AthenaCommon.Logging import logging
 
-from ..Config.MenuComponents import RecoFragmentsPool, algorithmCAToGlobalWrapper
 from TrigEDMConfig.TriggerEDMRun3 import recordable
-from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnIParticleROITool
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
@@ -17,9 +18,9 @@ log = logging.getLogger(__name__)
 
 def DJPromptStep(flags):
     from TrigLongLivedParticlesHypo.TrigDJHypoConfig import TrigDJHypoPromptToolFromDict
-    from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import DisplacedJetPromptHypoAlg
 
-    hypo_alg = DisplacedJetPromptHypoAlg("DJTrigPromptHypoAlg")
+
+    hypo_alg = CompFactory.DisplacedJetPromptHypoAlg("DJTrigPromptHypoAlg")
 
     #get the jet tracking config to get the track collection name
     fscfg = getInDetTrigConfig("fullScan")
@@ -31,48 +32,58 @@ def DJPromptStep(flags):
     hypo_alg.countsKey = "DispJetTrigger_Counts"
 
     #run at the event level
-    from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    im_alg = conf2toConfigurable(CompFactory.InputMakerForRoI( "IM_DJTRIG_Prompt" ))
-    im_alg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
+    im_alg = CompFactory.InputMakerForRoI( "IM_DJTRIG_Prompt" )
+    im_alg.RoITool = CompFactory.ViewCreatorInitialROITool()
 
-    return MenuSequence( flags,
-                         Sequence    = seqAND("DJTrigPromptEmptyStep",[im_alg]),
-                         Maker       = im_alg,
-                         Hypo        = hypo_alg,
-                         HypoToolGen = TrigDJHypoPromptToolFromDict,
-                     )
+    selAcc = SelectionCA('DJTrigPromptSeq')
+    reco = InEventRecoCA('DJTrigPromptStep',inputMaker=im_alg)
+    selAcc.mergeReco(reco)
+    selAcc.addHypoAlgo(hypo_alg)
+
+    return MenuSequenceCA(flags,
+                          selAcc,
+                          HypoToolGen = TrigDJHypoPromptToolFromDict,
+                          )
 
 def DJDispFragment(flags):
+
     lrtcfg = getInDetTrigConfig( 'DJetLRT' )
     roiTool = ViewCreatorCentredOnIParticleROITool('ViewCreatorDJRoI', RoisWriteHandleKey = recordable(lrtcfg.roi), RoIEtaWidth = lrtcfg.etaHalfWidth, RoIPhiWidth = lrtcfg.phiHalfWidth, RoIZedWidth=lrtcfg.zedHalfWidth, UseZedPosition=False)
-    InputMakerAlg = EventViewCreatorAlgorithm("IMDJRoIFTF",mergeUsingFeature = True, RoITool = roiTool,Views = "DJRoIViews",InViewRoIs = "InViewRoIs",RequireParentView = False,ViewFallThrough = True)
+
+    InViewRoIs = "InViewRoIs"
+    reco = InViewRecoCA("IMDJRoIFTF", RoITool = roiTool, mergeUsingFeature = True, 
+                        InViewRoIs = InViewRoIs,
+                        RequireParentView = False,ViewFallThrough = True)
+    
     fscfg = getInDetTrigConfig("fullScan")
+
+    acc = ComponentAccumulator()
+    reco_seq = parOR('UncTrkrecoSeqDJTrigDispRecoSeq')
+    acc.addSequence(reco_seq)
 
     flagsWithTrk = getFlagsForActiveConfig(flags, lrtcfg.name, log)
 
-    lrt_algs = algorithmCAToGlobalWrapper(
-    trigInDetLRTCfg,
-        flagsWithTrk,
-        fscfg.trkTracks_FTF(),
-        InputMakerAlg.InViewRoIs,
-        in_view=True,
-    )
+    lrt_algs = trigInDetLRTCfg(flagsWithTrk,
+                               fscfg.trkTracks_FTF(),
+                               InViewRoIs,
+                               in_view=True,
+                               )
 
-    reco_seq = parOR("UncTrkrecoSeqDJTrigDispRecoSeq", lrt_algs)
-
-    InputMakerAlg.ViewNodeName = reco_seq.name()
-
+    acc.merge(lrt_algs)
+    
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=InputMakerAlg.name())[0]
+    robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix=reco.name)
 
-    return (seqAND("UncTrkrecoSeqDJTrigDisp", [InputMakerAlg, robPrefetchAlg, reco_seq]), InputMakerAlg)
+    reco.mergeReco(acc)
+    
+    selAcc = SelectionCA('UncTrkrecoSeqDJTrigDisp')
+    selAcc.mergeReco(reco, robPrefetchCA=robPrefetchAlg)
+    return selAcc
 
 def DJDispStep(flags):
     from TrigLongLivedParticlesHypo.TrigDJHypoConfig import TrigDJHypoDispToolFromDict
-    from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import (DisplacedJetDispHypoAlg)
 
-    hypo_alg = DisplacedJetDispHypoAlg("DJTrigDispHypoAlg")
+    hypo_alg = CompFactory.DisplacedJetDispHypoAlg("DJTrigDispHypoAlg")
 
     lrtcfg = getInDetTrigConfig( 'DJetLRT' )
     fscfg = getInDetTrigConfig("fullScan")
@@ -80,11 +91,11 @@ def DJDispStep(flags):
     hypo_alg.lrtTracksKey = lrtcfg.tracks_FTF()
     hypo_alg.vtxKey = fscfg.vertex_jet
 
-    ( alg_seq ,im_alg) = RecoFragmentsPool.retrieve(DJDispFragment,flags)
+    selAcc = DJDispFragment(flags)
 
-    return MenuSequence(flags,
-                        Sequence    = alg_seq,
-                        Maker       = im_alg,
-                        Hypo        = hypo_alg,
-                        HypoToolGen = TrigDJHypoDispToolFromDict,
-                        )
+    selAcc.addHypoAlgo(hypo_alg)
+    
+    return MenuSequenceCA(flags,
+                          selAcc,
+                          HypoToolGen = TrigDJHypoDispToolFromDict,
+                          )
