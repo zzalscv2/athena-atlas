@@ -361,6 +361,8 @@ void ActsTrk::MutableMultiTrajectory::clear_impl() {
   m_trackMeasurements->clear();
   m_surfacesBackend->clear();
   m_surfaces.clear();
+  m_calibratedSourceLinks.clear();
+  m_uncalibratedSourceLinks.clear();
 }
 
 
