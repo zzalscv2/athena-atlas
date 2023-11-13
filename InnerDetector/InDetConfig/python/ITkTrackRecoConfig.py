@@ -23,6 +23,7 @@ def CombinedTrackingPassFlagSets(flags):
         TrackingComponent.ValidateActsSpacePoints : "ValidateActsSpacePoints",
         TrackingComponent.ValidateActsSeeds : "ValidateActsSeeds",
         TrackingComponent.ValidateActsTracks : "ValidateActsTracks",
+        TrackingComponent.ValidateActsAmbiguityResolution : "ValidateActsAmbiguityResolution",
         TrackingComponent.BenchmarkSpot : "ActsBenchmarkSpot"
     }
     
@@ -207,7 +208,9 @@ def ITkTrackFinalCfg(flags,
         AssociationMapName=(
             "" if flags.Tracking.doITkFastTracking else
             f"PRDtoTrackMap{TrackContainer}"),
-        isActsAmbi = 'ValidateActsResolvedTracks' in splitProbName or ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
+        isActsAmbi = 'ValidateActsResolvedTracks' in splitProbName or \
+        'ValidateActsAmbiguityResolution' in splitProbName or \
+        ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
 
     return result
 

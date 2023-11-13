@@ -26,6 +26,7 @@ if __name__ == "__main__":
                       "ValidateActsSpacePoints",
                       "ValidateActsSeeds",
                       "ValidateActsTracks",
+                      "ValidateActsAmbiguityResolution",
                       "ActsBenchmarkSpot"]
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags

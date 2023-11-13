@@ -87,6 +87,23 @@ def createValidateActsTracksTrackingPassFlags():
     icf.doAmbiguityProcessorTrackFit = False
     return icf
 
+def createValidateActsAmbiguityResolutionTrackingPassFlags():
+    icf = createITkTrackingPassFlags()
+    icf.extension = "ValidateActsAmbiguityResolution"
+    deactivateAthenaComponents(icf)
+    # The sequence will schedule Athena algorithms from clustering to 
+    # track reconstruction, but not the ambi. resolution
+    # We convert tracks, run the acts ambi. resolution and convert 
+    # resolved tracks back to Athena EDM
+    icf.doAthenaCluster = True
+    icf.doAthenaSpacePoint = True
+    icf.doAthenaSeed = True
+    icf.doAthenaTrack = True
+    icf.doAthenaToActsTrack = True
+    icf.doActsAmbiguityResolution = True
+    icf.doActsToAthenaResolvedTrack = True
+    return icf
+
 def createActsBenchmarkSpotTrackingPassFlags():
     icf = createITkTrackingPassFlags()
     icf.extension = "ActsBenchmarkSpot"

@@ -244,6 +244,9 @@ atlas_add_citest( ACTS_ValidateTracks
 atlas_add_citest( ACTS_ValidateResolvedTracks
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateResolvedTracks.sh )
 
+atlas_add_citest( ACTS_ValidateAmbiguityResolution
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateAmbiguityResolution.sh )
+
 atlas_add_citest( ACTS_ActsKfRefitting
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsKfRefitting.sh )
 
