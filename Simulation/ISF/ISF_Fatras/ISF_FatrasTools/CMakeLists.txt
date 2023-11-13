@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_FatrasTools )
@@ -11,7 +11,7 @@ find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 atlas_add_component( ISF_FatrasTools
                      src/*.cxx src/components/*.cxx
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} TruthUtils AthenaBaseComps AthenaKernel AtlasDetDescr BarcodeEventLib CxxUtils EventPrimitives FastSimulationEventLib GaudiKernel GeoPrimitives ISF_Event ISF_FatrasInterfaces ISF_InterfacesLib StoreGateLib TrkDetDescrInterfaces TrkDetDescrUtils TrkEventPrimitives TrkExInterfaces TrkExUtils TrkGeometry TrkMaterialOnTrack TrkNeutralParameters TrkParameters TrkSurfaces TrkTrack TrkVolumes TruthUtils )
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} TruthUtils AthenaBaseComps AthenaKernel AtlasDetDescr BarcodeEventLib CxxUtils EventPrimitives GaudiKernel GeoPrimitives ISF_Event ISF_FatrasInterfaces ISF_InterfacesLib StoreGateLib TrkDetDescrInterfaces TrkDetDescrUtils TrkEventPrimitives TrkExInterfaces TrkExUtils TrkGeometry TrkMaterialOnTrack TrkNeutralParameters TrkParameters TrkSurfaces TrkTrack TrkVolumes TruthUtils )
 
 foreach( name
          EnergyLossSamplerBetheHeitler_test
