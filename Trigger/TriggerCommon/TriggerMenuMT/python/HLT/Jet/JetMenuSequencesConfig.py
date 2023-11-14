@@ -325,7 +325,7 @@ def jetRoITrackJetTagSelCfg(flags, jetsIn, isPresel=True, **jetRecoDict):
 
     # Add to top-level serial sequence to ensure it is ready for in-view reco
     from .JetRecoSequencesConfig import FastFtaggedJetCopyAlgCfg, JetRoITrackJetTagSequenceCfg, JetViewAlgCfg
-    ftagjet_acc, ftaggedJetsIn = FastFtaggedJetCopyAlgCfg(flags,jetsIn=jetsIn,jetRecoDict=jetRecoDict)
+    ftagjet_acc, ftaggedJetsIn = FastFtaggedJetCopyAlgCfg(flags,jetsIn=jetsIn,**jetRecoDict)
     reco.mergeReco(ftagjet_acc)
     ftaggedJetsIn=recordable(ftaggedJetsIn)
 

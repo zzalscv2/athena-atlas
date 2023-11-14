@@ -458,7 +458,7 @@ def ReclusteredJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
 
 
 @AccumulatorCache
-def FastFtaggedJetCopyAlgCfg(flags,jetsIn,jetRecoDict):
+def FastFtaggedJetCopyAlgCfg(flags,jetsIn,**jetRecoDict):
 
     acc = ComponentAccumulator()
     caloJetRecoDict = jetRecoDictFromString(jetsIn)
