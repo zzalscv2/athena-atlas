@@ -155,7 +155,7 @@ def MessageSvcCfg(flags):
         msgsvc.statLevel = WARNING
 
     from AthenaConfiguration.Enums import ProductionStep
-    if flags.Common.ProductionStep not in [ProductionStep.Default, ProductionStep.Reconstruction]:
+    if flags.Common.ProductionStep not in [ProductionStep.Default, ProductionStep.Reconstruction, ProductionStep.Derivation]:
         msgsvc.Format = "% F%18W%S%7W%R%T %0W%M" # Temporary to match legacy configuration for serial simulation/digitization/overlay jobs
     if flags.Concurrency.NumThreads>0:
         msgsvc.Format = "% F%{:d}W%C%6W%R%e%s%8W%R%T %0W%M".format(flags.Common.MsgSourceLength)
