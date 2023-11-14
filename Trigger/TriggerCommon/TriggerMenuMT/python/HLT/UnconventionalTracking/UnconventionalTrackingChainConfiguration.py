@@ -77,38 +77,34 @@ class UnconventionalTrackingChainConfiguration(ChainConfigurationBase):
 
     # Step 2
     def getFSLRTTrigger(self, flags):
-        return self.getStep(flags,2,'FSLRTTrigger',[FSLRTTriggerCfg])
+        return self.getStep(flags,2,'FSLRT',[FSLRTTriggerCfg])
     # Empty for alignment with jets
     def getRoITrkEmpty(self, flags):
         return self.getEmptyStep(2, 'RoITrkEmptyStep')
 
     # Step 3 -- all FTF tracking here
     def getFTFTrackReco(self, flags):
-        return self.getStep(flags,3,'FTFRecoOnlyCfg',[FTFRecoOnlyCfg])
+        return self.getStep(flags,3,'FTFRecoOnly',[FTFRecoOnlyCfg])
 
     # Step 4+ -- everything post FTF tracking
     def getIsoHPtTrackTrigger(self, flags):
-        return self.getStep(flags,4,'IsoHPtTrackTriggerCfg',[IsoHPtTrackTriggerCfg])
+        return self.getStep(flags,4,'IsoHPtTrack',[IsoHPtTrackTriggerCfg])
     def getdEdxTrigger(self, flags):
-        return self.getStep(flags,4,'dEdxTriggerCfg',[dEdxTriggerCfg])
+        return self.getStep(flags,4,'dEdx',[dEdxTriggerCfg])
     def getHitDVTrigger(self, flags):
-        return self.getStep(flags,4,'HitDVTriggerCfg',[HitDVTriggerCfg])
+        return self.getStep(flags,4,'HitDV',[HitDVTriggerCfg])
     def getDisTrkTrigger(self, flags):
-        return self.getStep(flags,4,'DisTrkTriggerCfg',[DisTrkTriggerCfg])
+        return self.getStep(flags,4,'DisTrk',[DisTrkTriggerCfg])
     def getVSITrigger(self, flags):
-        #not working in the CA menu for the moment
-        if isComponentAccumulatorCfg(): 
-            return self.getEmptyStep(4, 'VSITrigger_MissingCA')
-        ##
-        return self.getStep(flags,4,'VSITrigger',[VSITriggerCfg])
+        return self.getStep(flags,4,'LRTVSI',[VSITriggerCfg])
     def getDJPromptStep(self, flags):
-        return self.getStep(flags,3,'DJPromptStepCfg',[DJPromptStepCfg], comboTools = [TrigDJComboHypoToolFromDict])
+        return self.getStep(flags,3,'DJPromptStep',[DJPromptStepCfg], comboTools = [TrigDJComboHypoToolFromDict])
     def getDJDispStep(self, flags):
-        return self.getStep(flags,4,'DJDispStepCfg',[DJDispStepCfg])
+        return self.getStep(flags,4,'DJDispStep',[DJDispStepCfg])
     def getDVRecoStep(self, flags):
-        return self.getStep(flags,5,'DVRecoStepCfg',[DVRecoStepCfg])
+        return self.getStep(flags,5,'DVRecoStep',[DVRecoStepCfg])
     def getDVEDStep(self, flags):
-        return self.getStep(flags,6,'DVEDStepCfg',[DVEDStepCfg])
+        return self.getStep(flags,6,'DVEDStep',[DVEDStepCfg])
 
 
 
@@ -127,11 +123,11 @@ def FTFRecoOnlyCfg(flags):
         return menuSequenceCAToGlobalWrapper(getFullScanRecoOnlySequence,flags)
 
 def FSLRTTriggerCfg(flags):
-    from TriggerMenuMT.HLT.UnconventionalTracking.FullScanLRTTrackingConfiguration import FullScanLRTTriggerMenuSequence
+    from TriggerMenuMT.HLT.UnconventionalTracking.FullScanLRTTrackingConfiguration import FullScanLRTMenuSequence
     if isComponentAccumulatorCfg():
-        return FullScanLRTTriggerMenuSequence(flags)
+        return FullScanLRTMenuSequence(flags)
     else:
-        return menuSequenceCAToGlobalWrapper(FullScanLRTTriggerMenuSequence,flags)
+        return menuSequenceCAToGlobalWrapper(FullScanLRTMenuSequence,flags)
     
 def VSITriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.VrtSecInclusiveConfiguration import VrtSecInclusiveMenuSequence
