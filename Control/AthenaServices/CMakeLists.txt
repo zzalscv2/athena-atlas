@@ -75,6 +75,9 @@ atlas_add_test( AthDictLoaderSvc
    SCRIPT athena.py AthenaServices/AthDictLoaderSvc_test.py
    PROPERTIES TIMEOUT 300 )
 
+atlas_add_test( ItemListSemanticsTest
+   SCRIPT test/OutputStreamItemListTest.py
+   POST_EXEC_SCRIPT nopost.sh)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py
