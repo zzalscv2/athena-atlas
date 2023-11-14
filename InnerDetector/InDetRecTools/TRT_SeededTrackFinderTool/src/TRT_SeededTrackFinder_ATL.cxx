@@ -109,8 +109,7 @@ InDet::TRT_SeededTrackFinder_ATL::TRT_SeededTrackFinder_ATL
   m_useassoTool  = false            ;   //Use prd-track association tool during combinatorial track finding
   m_outlierCut   = 25.              ;
   m_searchInCaloROI   = false       ;
-  m_phiWidth     = .3                 ;
-  m_etaWidth     = 4.0                ;
+  m_phiWidth     = .3               ;
 
 
   declareInterface<ITRT_SeededTrackFinder>(this);
@@ -136,7 +135,6 @@ InDet::TRT_SeededTrackFinder_ATL::TRT_SeededTrackFinder_ATL
   declareProperty("OutlierCut"              ,m_outlierCut    );
   declareProperty("SearchInCaloROI"         ,m_searchInCaloROI);
   declareProperty("phiWidth"                ,m_phiWidth    );
-  declareProperty("etaWidth"                ,m_etaWidth    );
 
 }
 
@@ -373,11 +371,9 @@ InDet::TRT_SeededTrackFinder_ATL::getTrack(const EventContext& ctx,
   constexpr auto horizontalRule{"==============================================================\n"};
   //Do the actual tracking and smoothing and get the Si track states on surface
   ATH_MSG_DEBUG(horizontalRule << "Start initial search with 3-4 SCT layer combinations ");
-  
 
-  // aalonso
-  if (  m_searchInCaloROI && !isCaloCompatible( *newPerPar, event_data )) {
-    	return aSiTrack;
+  if (m_searchInCaloROI && !isCaloCompatible( *newPerPar, event_data )) {
+    return aSiTrack;
   }
 
   // Get AtlasFieldCache

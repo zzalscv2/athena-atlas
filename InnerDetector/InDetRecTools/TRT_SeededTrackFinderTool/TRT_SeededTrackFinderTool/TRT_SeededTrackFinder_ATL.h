@@ -122,11 +122,11 @@ namespace InDet{
           friend class TRT_SeededTrackFinder_ATL;
           EventData(SiCombinatorialTrackFinderData_xk& combinatorialData,
                     std::unique_ptr<InDet::ITRT_SeededSpacePointFinder::IEventData> &&spacePointFinderEventData)
-             : m_combinaatorialData(&combinatorialData),
+             : m_combinatorialData(&combinatorialData),
                m_spacePointFinderEventData(std::move(spacePointFinderEventData) )
           {}
-          virtual InDet::SiCombinatorialTrackFinderData_xk &combinatorialData() override             { return *m_combinaatorialData; }
-          virtual const InDet::SiCombinatorialTrackFinderData_xk &combinatorialData() const override { return *m_combinaatorialData; }
+          virtual InDet::SiCombinatorialTrackFinderData_xk &combinatorialData() override             { return *m_combinatorialData; }
+          virtual const InDet::SiCombinatorialTrackFinderData_xk &combinatorialData() const override { return *m_combinatorialData; }
 
           InDet::ITRT_SeededSpacePointFinder::IEventData &spacePointFinderEventData(){ return *m_spacePointFinderEventData; }
           std::multimap<const Trk::PrepRawData*,const Trk::Track*> &clusterTrack() { return m_clusterTrack; }
@@ -140,7 +140,7 @@ namespace InDet{
           const InDet::SiNoise_bt&                                  noise()  const { return m_noise; }
           InDet::SiDetElementRoadMakerData_xk& roadMakerData() {return m_roadMakerData; }
        protected:
-          SiCombinatorialTrackFinderData_xk                              *m_combinaatorialData;
+          SiCombinatorialTrackFinderData_xk                              *m_combinatorialData;
           std::unique_ptr<InDet::ITRT_SeededSpacePointFinder::IEventData> m_spacePointFinderEventData;
           std::multimap<const Trk::PrepRawData*,const Trk::Track*> m_clusterTrack  ; /** Multimap of tracks and associated PRDs  */
           const ROIPhiRZContainer        *m_caloClusterROIEM {};
@@ -252,10 +252,9 @@ namespace InDet{
       std::list<Trk::Track*> 
       cleanTrack(std::list<Trk::Track*>) const;
 
-      /** aalonso: Only propagete to the Si if the TRT segment is compatible with a calo measurement */
+      /** Only propagate to the Si if the TRT segment is compatible with a calo measurement */
       bool isCaloCompatible(const Trk::TrackParameters&, const InDet::TRT_SeededTrackFinder_ATL::EventData &event_data) const;
-      double m_phiWidth{}                             ;
-      double m_etaWidth{}                              ;
+      double m_phiWidth{};
 
       MsgStream&    dumpconditions(MsgStream&    out) const;
 
