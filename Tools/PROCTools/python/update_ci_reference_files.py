@@ -16,10 +16,8 @@ This is a good way to check that the proposed changes look rational before actua
 """
 
 from collections import defaultdict
-from datetime import datetime
 import subprocess
 import re
-import os
 import argparse
 try:
     import requests 
@@ -74,14 +72,18 @@ def process_log_file(url, branch, test_name):
     # First check that this looks like a test whose ref files need updating, bail otherwise
     # INFO     All q442 athena steps completed successfully
     test_match = re.search(r'All (?P<ami_tag>\w+) athena steps completed successfully', text)
-    if not test_match:
-        print('FATAL: Did not find an athena job completing successfully in this test. Aborting.')
-        exit(1)
+    ami_tag = test_match.group('ami_tag') if test_match else None
 
     # We have two types of tests, but lets try to extract some common information
-    ami_tag = test_match.group('ami_tag') if test_match else None
     if not ami_tag:
-        problems.append("No AMI tag")
+        # Okay, maybe it was truncated? Try again.
+        match_attempt_2 = re.search(r'AMIConfig (?P<ami_tag>\w+)', text)
+        if match_attempt_2:
+            ami_tag = match_attempt_2.group('ami_tag')
+    
+    if not ami_tag:
+       print('FATAL: Did not find an AMI tag in this test {}. Aborting.'.format(test_name))
+       exit(1)
 
     mr_match = re.search(r'NICOS_TestLog_MR-(?P<mr_number>\d+)-(?P<date>\d{4}-\d{2}-\d{2}-\d{2}-\d{2})', url)
     if not mr_match:
@@ -190,23 +192,36 @@ def update_reference_files(actually_update=True, update_local_files=False):
             if test.type == 'DiffPool':
                 print(' * This is a DiffPool test, and currently has version {} of {}. Will update References.py with new version.'.format(test.existing_version, test.tag))
                 if actually_update:
-                    print(' -> The new version is: {}. Creating directory now.'.format(test.new_version))
+                    print(' -> The new version is: {}. Creating directory and copying files on EOS now.'.format(test.new_version))
                     create_dir_and_copy_refs(test, True)
                 else:
                     # We will print these later, so we can sanity check them when in test mode
                     commands.extend(create_dir_and_copy_refs(test, False))
+                    # Remove any duplicates, whilst preserving the order
+                    commands = list(dict.fromkeys(commands))
 
                 # Now, update local References.py file
                 if update_local_files:
                     data = []
-
+                    if debug:
+                        print ('Updating local References.py file with new version {} for tag {}'.format(test.new_version, test.tag))
+                    line_found = False
                     with open('Tools/WorkflowTestRunner/python/References.py', 'r') as f:
                         lines = f.readlines()
                         for line in lines:
                             if test.tag in line:
-                                old_line = line
-                                line = line.replace(test.existing_version, test.new_version)
+                                if test.existing_version in line:
+                                    line = line.replace(test.existing_version, test.new_version)
+                                else:
+                                    print('')
+                                    print('** WARNING: For tag {} we were looking for existing version {}, but the line in the file is: {}'.format(test.tag, test.existing_version, line), end='')
+                                    print('** Are you sure your branch is up-to-date with main? We cannot update an older version of References.py!')
+                                line_found = True
                             data.append(line)
+                    
+                    if not line_found:
+                        print('** WARNING - no matching line was found for the AMI tag {} in References.py. Are you sure your branch is up-to-date with main? We cannot update an older version of References.py!'.format(test.tag))
+                    
                     with open('Tools/WorkflowTestRunner/python/References.py', 'w') as f:
                         f.writelines(data)
             elif test.type == 'Digest' and update_local_files:
@@ -250,8 +265,7 @@ def update_reference_files(actually_update=True, update_local_files=False):
                             continue
 
                         # Otherwise, we just keep the existing line
-                        data.append(line)
-                        
+                        data.append(line)               
                         
                 print(' -> Updating PROCTools digest file {}'.format(test.existing_ref))
                 with open('Tools/PROCTools/data/'+test.existing_ref, 'w') as f:
@@ -264,13 +278,8 @@ def create_dir_and_copy_refs(test, actually_update=False):
     If called with actually_update=False, this function will return a list of commands which would have been executed.
     """
     commands = []
-    if actually_update and (test.new_version_directory not in dirs_created):
-        try:
-            os.mkdir(test.new_version_directory)
-        except Exception as e:
-            print('Unable to create directory due to:', e)
-            print('Do you have EOS available on this machine?') 
-            print('If so, maybe the problem is the path: {}'.format(test.new_version_directory))
+    if test.new_version_directory not in dirs_created:
+        commands.append("mkdir " + test.new_version_directory)
         dirs_created.append(test.new_version_directory)
                 
     # Create a file with some information about the test
@@ -285,13 +294,17 @@ def create_dir_and_copy_refs(test, actually_update=False):
 
     # Copy new directory first, then copy old (in case the new MR did not touch all files)
     # Important! Use no-clobber for second copy or we will overwrite the new data with old!
-    commands.append("cp " + test.copied_file_path + "* "+ test.new_version_directory)
-    commands.append("cp -n " + test.existing_ref + "/* "+ test.new_version_directory)
+    commands.append("cp " + test.copied_file_path + "* "+ test.new_version_directory+"/")
+    commands.append("cp -n " + test.existing_ref + "/* "+ test.new_version_directory+"/")
     if actually_update:
         print(' -> Copying files from {} to {}'.format(test.copied_file_path, test.new_version_directory))
         try:
             for command in commands:
-                subprocess.call( command, shell=True)
+                try:
+                    subprocess.call( command, shell=True)
+                except Exception as e:
+                    print('Command failed due to:', e)
+                    print('Do you have EOS available on this machine?') 
         except Exception as e:
             print('FATAL: Unable to copy files due to:', e)
             exit(1)
@@ -393,7 +406,7 @@ if __name__ == '__main__':
     print(" $ git rebase upstream/main") # In case there have been any changes since the MR was created
     print()
 
-    msg = f'Would you like to (locally) update digest ref files and/or versions in References.py?'
+    msg = 'Would you like to (locally) update digest ref files and/or versions in References.py?'
     update_local_files = False
     if input("%s (y/N) " % msg).lower() == 'y':
         not_in_athena_dir = subprocess.call("git rev-parse --is-inside-work-tree", shell=True)
@@ -403,7 +416,9 @@ if __name__ == '__main__':
         update_local_files = True
         
     commands = update_reference_files(not args.test_run, update_local_files)
+    
     if commands and args.test_run:
+        print('')
         print(' -> In test-run mode. In normal mode we would also have executed:')
         for command in commands:
             print('    ', command)
