@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
 
 // generate the T/P converter entries
@@ -42,10 +42,6 @@
 #include "LArTPCnv/LArNoisyROSummaryCnv_p5.h"
 
 #include "LArTPCnv/LArLATOMEHeaderContainerCnv_p1.h"
-
-#include "LArTPCnv/LArTTL1_p1.h"
-#include "LArTPCnv/LArTTL1Container_p1.h"
-#include "LArTPCnv/LArTTL1ContainerCnv_p1.h"
 
 DECLARE_TPCNV_FACTORY(LArDigitContainerCnv_p1,
                       LArDigitContainer,
@@ -107,7 +103,3 @@ DECLARE_TPCNV_FACTORY(LArLATOMEHeaderContainerCnv_p1,
                       LArLATOMEHeaderContainer_p1,
                       Athena::TPCnvVers::Current)
                       
-DECLARE_TPCNV_FACTORY(LArTTL1ContainerCnv_p1,
-                      LArContainer<LArTTL1>,
-                      LArTTL1Container_p1,
-                      Athena::TPCnvVers::Current)
