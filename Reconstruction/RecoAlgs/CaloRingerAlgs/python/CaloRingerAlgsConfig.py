@@ -306,50 +306,50 @@ def CaloRingerOutputCfg(flags,name="CaloRingerOutputList"):
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
     acc = ComponentAccumulator()
 
-    toOuput = []
+    toOutput = []
     if flags.CaloRinger.buildElectronRings:
-        toOuput +=[ 'xAOD::RingSetContainer#ElectronRingSets',
-                    'xAOD::RingSetAuxContainer#ElectronRingSetsAux.',
-                    'xAOD::CaloRingsContainer#ElectronCaloRings',
-                    'xAOD::CaloRingsAuxContainer#ElectronCaloRingsAux.',
+        toOutput +=[ 'xAOD::RingSetContainer#ElectronRingSets',
+                     'xAOD::RingSetAuxContainer#ElectronRingSetsAux.',
+                     'xAOD::CaloRingsContainer#ElectronCaloRings',
+                     'xAOD::CaloRingsAuxContainer#ElectronCaloRingsAux.',
                     ]
     if flags.CaloRinger.buildElectronAsymRings:
-        toOuput +=[ 'xAOD::RingSetContainer#ElectronAsymRingSets',
-                    'xAOD::RingSetAuxContainer#ElectronAsymRingSetsAux.',
-                    'xAOD::CaloRingsContainer#ElectronCaloAsymRings',
-                    'xAOD::CaloRingsAuxContainer#ElectronCaloAsymRingsAux.',
+        toOutput +=[ 'xAOD::RingSetContainer#ElectronAsymRingSets',
+                     'xAOD::RingSetAuxContainer#ElectronAsymRingSetsAux.',
+                     'xAOD::CaloRingsContainer#ElectronCaloAsymRings',
+                     'xAOD::CaloRingsAuxContainer#ElectronCaloAsymRingsAux.',
                     ]
     if flags.CaloRinger.buildElectronStripsRings:
-        toOuput +=[ 'xAOD::RingSetContainer#ElectronStripsRingSets',
-                    'xAOD::RingSetAuxContainer#ElectronStripsRingSetsAux.',
-                    'xAOD::CaloRingsContainer#ElectronCaloStripsRings',
-                    'xAOD::CaloRingsAuxContainer#ElectronCaloStripsRingsAux.',
+        toOutput +=[ 'xAOD::RingSetContainer#ElectronStripsRingSets',
+                     'xAOD::RingSetAuxContainer#ElectronStripsRingSetsAux.',
+                     'xAOD::CaloRingsContainer#ElectronCaloStripsRings',
+                     'xAOD::CaloRingsAuxContainer#ElectronCaloStripsRingsAux.',
                     ]
     if flags.CaloRinger.buildPhotonRings:
-        toOuput += [
-                    'xAOD::RingSetContainer#PhotonRingSets',
-                    'xAOD::RingSetAuxContainer#PhotonRingSetsAux.',
-                    'xAOD::CaloRingsContainer#PhotonCaloRings',
-                    'xAOD::CaloRingsAuxContainer#PhotonCaloRingsAux.'
+        toOutput += [
+                     'xAOD::RingSetContainer#PhotonRingSets',
+                     'xAOD::RingSetAuxContainer#PhotonRingSetsAux.',
+                     'xAOD::CaloRingsContainer#PhotonCaloRings',
+                     'xAOD::CaloRingsAuxContainer#PhotonCaloRingsAux.'
                     ]   
     if flags.CaloRinger.buildPhotonAsymRings:
-        toOuput +=[ 
-                    'xAOD::RingSetContainer#PhotonAsymRingSets',
-                    'xAOD::RingSetAuxContainer#PhotonAsymRingSetsAux.',
-                    'xAOD::CaloRingsContainer#PhotonCaloAsymRings',
-                    'xAOD::CaloRingsAuxContainer#PhotonCaloAsymRingsAux.',
+        toOutput +=[ 
+                     'xAOD::RingSetContainer#PhotonAsymRingSets',
+                     'xAOD::RingSetAuxContainer#PhotonAsymRingSetsAux.',
+                     'xAOD::CaloRingsContainer#PhotonCaloAsymRings',
+                     'xAOD::CaloRingsAuxContainer#PhotonCaloAsymRingsAux.',
                     ]
     if flags.CaloRinger.buildPhotonStripsRings:
-        toOuput +=[ 
+        toOutput +=[ 
                     'xAOD::RingSetContainer#PhotonStripsRingSets',
                     'xAOD::RingSetAuxContainer#PhotonStripsRingSetsAux.',
                     'xAOD::CaloRingsContainer#PhotonCaloStripsRings',
                     'xAOD::CaloRingsAuxContainer#PhotonCaloStripsRingsAux.',
                     ]
     if flags.Output.doWriteAOD:
-        acc.merge(addToAOD(flags, toOuput))
+        acc.merge(addToAOD(flags, toOutput))
     if flags.Output.doWriteESD:
-        acc.merge(addToESD(flags, toOuput))
+        acc.merge(addToESD(flags, toOutput))
 
     return acc
 
