@@ -13,7 +13,6 @@ from MuonConfig.MuonRdoDecodeConfig import MuonPrdCacheNames
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
-from ..Config.MenuComponents import algorithmCAToGlobalWrapper
 
 CBTPname = recordable("HLT_CBCombinedMuon_RoITrackParticles")
 CBTPnameFS = recordable("HLT_CBCombinedMuon_FSTrackParticles")
@@ -553,54 +552,42 @@ def muEFInsideOutRecoSequenceCfg(flags, RoIs, name):
   return acc
 
 
+def VDVMuIsoCfg(flags, name, RoIs):
+  acc = ComponentAccumulator()
+  dataObjects = [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+'+RoIs ),
+                             ( 'xAOD::MuonContainer' , 'StoreGateSvc+IsoViewMuons'+name )]
 
-def efmuisoRecoSequence( flags, RoIs, Muons, doMSiso=False ):
+  alg = CompFactory.AthViews.ViewDataVerifier( name = "efMuIsoVDV"+name,
+                                               DataObjects = dataObjects)
+  acc.addEventAlgo(alg)
+  return acc
 
-  from AthenaCommon.CFElements import parOR
+
+def efmuisoRecoSequenceCfg( flags, RoIs, Muons, doMSiso=False ):
 
   name = ""
   if doMSiso:
     name = "MS"
+  acc = VDVMuIsoCfg(flags, name, RoIs)
 
-  efmuisoRecoSequence = parOR("efmuIsoViewNode"+name)
+  acc.merge(muonIDFastTrackingSequenceCfg(flags, RoIs, "muonIso"+name ))
 
+  from TrigInDetConfig.TrigInDetConfig import trigInDetPrecisionTrackingCfg
+  flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muonIso"+name)
+  acc.merge(trigInDetPrecisionTrackingCfg(flags, rois= RoIs, signatureName="muonIso"+name, in_view=False))
+  if doMSiso:
+    trackParticles = flags.Trigger.InDetTracking.muonIsoMS.tracks_IDTrig
+  else:
+    trackParticles = flags.Trigger.InDetTracking.muonIso.tracks_IDTrig
 
-  from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-  IDTrigConfig = getInDetTrigConfig( 'muonIso'+name )
-
-  from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-  viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = IDTrigConfig, rois = RoIs )
-  viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+MUEFIsoRoIs'+name ),
-                             ( 'xAOD::MuonContainer' , 'StoreGateSvc+IsoViewMuons'+name ),
-                             ]
-
-
-  for viewAlg in viewAlgs:
-    efmuisoRecoSequence += viewAlg
-
-  #Precision Tracking
-  PTAlgs = [] #List of precision tracking algs
-  PTTracks = [] #List of TrackCollectionKeys
-  PTTrackParticles = [] #List of TrackParticleKeys
-  
-  from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
-  PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois=RoIs )
-
-  PTSeq = parOR("precisionTrackingInMuonsIso"+name, PTAlgs  )
-  efmuisoRecoSequence += PTSeq
-
-  # set up algs
+  # Isolation alg
   from TrigMuonEF.TrigMuonEFConfig import TrigMuonEFTrackIsolationAlgCfg
-  trigEFmuIso = algorithmCAToGlobalWrapper(TrigMuonEFTrackIsolationAlgCfg,flags,name="TrigEFMuIso"+name, requireCombinedMuon = not doMSiso, 
-                                           MuonEFContainer = Muons,IdTrackParticles = PTTrackParticles[-1], MuonContName = muNames.EFIsoMuonName+name,
+  acc.merge(TrigMuonEFTrackIsolationAlgCfg(flags,name="TrigEFMuIso"+name, requireCombinedMuon = not doMSiso, 
+                                           MuonEFContainer = Muons,IdTrackParticles = trackParticles, MuonContName = muNames.EFIsoMuonName+name,
                                            ptcone02Name = muNames.EFIsoMuonName+name + ".ptcone02",
-                                           ptcone03Name = muNames.EFIsoMuonName+name + ".ptcone03")
+                                           ptcone03Name = muNames.EFIsoMuonName+name + ".ptcone03"))
 
-  efmuisoRecoSequence += trigEFmuIso
-
-  sequenceOut = muNames.EFIsoMuonName+name
-
-  return efmuisoRecoSequence, sequenceOut
+  return acc
 
 def VDVLateMuCfg(flags):
   acc = ComponentAccumulator()

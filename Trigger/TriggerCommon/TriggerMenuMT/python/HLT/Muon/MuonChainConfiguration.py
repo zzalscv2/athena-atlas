@@ -12,10 +12,7 @@ log = logging.getLogger(__name__)
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
-if not isComponentAccumulatorCfg():
-    from .MuonMenuSequences import muEFIsoSequence, muEFMSIsoSequence
-
-from .MuonMenuSequences import muFastSequence, muFastCalibSequence, mul2mtSAOvlpRmSequence, muCombSequence, muCombOvlpRmSequence, mul2mtCBOvlpRmSequence, mul2IOOvlpRmSequence, muCombLRTSequence, muEFSASequence, muEFSAFSSequence, efLateMuSequence, muEFCBSequence, muEFCBIDperfSequence, muEFCBLRTSequence, muEFCBLRTIDperfSequence, muEFCBFSSequence, muEFIDtpSequence
+from .MuonMenuSequences import muFastSequence, muFastCalibSequence, mul2mtSAOvlpRmSequence, muCombSequence, muCombOvlpRmSequence, mul2mtCBOvlpRmSequence, mul2IOOvlpRmSequence, muCombLRTSequence, muEFSASequence, muEFSAFSSequence, efLateMuSequence, muEFCBSequence, muEFCBIDperfSequence, muEFCBLRTSequence, muEFCBLRTIDperfSequence, muEFCBFSSequence, muEFIDtpSequence, muEFIsoSequence, muEFMSIsoSequence
 
 from .MuonMenuSequences import efLateMuRoISequence, muRoiClusterSequence
 from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
@@ -122,10 +119,16 @@ def FSmuEFCBSequenceCfg(flags,is_probe_leg=False):
         return menuSequenceCAToGlobalWrapper(muEFCBFSSequence, flags, is_probe_leg=is_probe_leg)
 
 def muEFIsoSequenceCfg(flags,is_probe_leg=False):
-    return muEFIsoSequence(flags, is_probe_leg=is_probe_leg)
+    if isComponentAccumulatorCfg():
+        return muEFIsoSequence(flags, is_probe_leg=is_probe_leg)
+    else:
+        return menuSequenceCAToGlobalWrapper(muEFIsoSequence, flags, is_probe_leg=is_probe_leg)
 
 def muEFMSIsoSequenceCfg(flags,is_probe_leg=False):
-    return muEFMSIsoSequence(flags, is_probe_leg=is_probe_leg)
+    if isComponentAccumulatorCfg():
+        return muEFMSIsoSequence(flags, is_probe_leg=is_probe_leg)
+    else:
+        return menuSequenceCAToGlobalWrapper(muEFMSIsoSequence, flags, is_probe_leg=is_probe_leg)
 
 def muEFLateRoISequenceCfg(flags,is_probe_leg=False):
     if isComponentAccumulatorCfg():
@@ -286,7 +289,7 @@ class MuonChainConfiguration(ChainConfigurationBase):
 
     #---------------------
     def getmuEFIso(self, flags, is_probe_leg=False):
-        if any(x in self.dict['topo'] for x in ['b7invmAB9vtx20', 'b11invmAB60vtx20', 'b11invmAB24vtx20', 'b24invmAB60vtx20']):
+        if any(x in self.dict['topo'] for x in ['b7invmAB9vtx20', 'b11invmAB60vtx20', 'b11invmAB24vtx20', 'b24invmAB60vtx20']) and not isComponentAccumulatorCfg():
             from TrigBphysHypo.TrigMultiTrkComboHypoConfig import DrellYanComboHypoCfg, TrigMultiTrkComboHypoToolFromDict
             return self.getStep(flags,5,'muEFIsoDY', [muEFIsoSequenceCfg], comboHypoCfg=DrellYanComboHypoCfg, comboTools=[TrigMultiTrkComboHypoToolFromDict], is_probe_leg=is_probe_leg)
         else:
