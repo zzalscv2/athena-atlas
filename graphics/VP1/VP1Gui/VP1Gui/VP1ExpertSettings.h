@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -28,7 +28,7 @@ class VP1ExpertSettings : public QDialog
 public:
     explicit VP1ExpertSettings(QWidget *parent = 0);
 
-public slots:
+public Q_SLOTS:
     void setPluginPath(const QString &path);
     void setFileSelectDir(const QString &path);
     void setScreenshotDir(const QString &path);
@@ -61,7 +61,7 @@ class GeneralTab : public QWidget
 public:
     explicit GeneralTab(QWidget *parent = 0);
 
-private slots:
+private Q_SLOTS:
     #if defined BUILDVP1LIGHT
         void setExpertSetting(const QString &type, const QString &name);
     #else
@@ -97,7 +97,7 @@ class AdvancedTab : public QWidget
 public:
     explicit AdvancedTab(QWidget *parent = 0);
 
-private slots:
+private Q_SLOTS:
     void on_browseButton1_clicked();
     void on_browseButton2_clicked();
     void on_browseButton3_clicked();

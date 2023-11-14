@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -59,7 +59,7 @@ public:
 signals:
   void urlChanged(const QString& url );
 
-private slots:
+private Q_SLOTS:
   void httpRequestDone(bool);
 protected:
   void timerEvent(QTimerEvent*);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -95,7 +95,7 @@ public:
 
   QStringList userRequestedFiles();
   
-public slots:
+public Q_SLOTS:
   void loadPluginFile(QString filename);
 
   #ifdef BUILDVP1LIGHT
@@ -193,7 +193,7 @@ protected:
 
 public:
   QProgressBar*progressbar;
-protected slots:
+protected Q_SLOTS:
   void receivedExternalRequest(VP1ExternalRequest);
   void processEnqueuedRequests();
   void finishedIncomingDialog();

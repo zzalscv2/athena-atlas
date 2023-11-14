@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -67,12 +67,12 @@ public:
 	void showRenderingFrame();
 	void hideRenderingFrame();
 
-	public slots:
+	public Q_SLOTS:
 	void zoomIn(int level = 1);
 	void zoomOut(int level = 1);
 	void print();
 
-	private slots:
+	private Q_SLOTS:
 	void resetView();
 	void setResetButtonEnabled();
 	void setupMatrix();

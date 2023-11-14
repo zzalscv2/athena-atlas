@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -44,7 +44,7 @@ public:
 
 signals:
   void wasSelected(VP1DockWidget*);
-private slots:
+private Q_SLOTS:
   void systemRefreshInfoChanged(QString sysrefreshing, int nsysOn, int nsysOnRefreshed);
   void updateTitle();
 protected:
