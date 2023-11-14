@@ -4,10 +4,9 @@
 
 #include "sTGC_Digitization/sTgcDigitMaker.h"
 
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "MuonDigitContainer/sTgcDigitCollection.h"
-#include "MuonSimEvent/sTgcHitIdHelper.h"
 #include "MuonSimEvent/sTgcSimIdToOfflineId.h"
-#include "MuonIdHelpers/sTgcIdHelper.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
 #include "TrkEventPrimitives/LocalDirection.h"
@@ -32,15 +31,13 @@
 //---------------------------------------------------
 
 //----- Constructor
-sTgcDigitMaker::sTgcDigitMaker(const sTgcHitIdHelper* hitIdHelper,
-                               const MuonGM::MuonDetectorManager* mdManager,
-                               bool doEfficiencyCorrection,
+sTgcDigitMaker::sTgcDigitMaker(const Muon::IMuonIdHelperSvc* idHelperSvc,
+                               const int channelTypes,
                                double meanGasGain,
                                bool doPadChargeSharing)
   : AthMessaging ("sTgcDigitMaker"),
-  m_hitIdHelper{hitIdHelper},
-  m_mdManager{mdManager},
-  m_doEfficiencyCorrection{doEfficiencyCorrection},
+  m_idHelperSvc{idHelperSvc},
+  m_channelTypes{channelTypes},
   m_meanGasGain{meanGasGain},
   m_doPadSharing{doPadChargeSharing} {}
 //----- Destructor
@@ -48,24 +45,7 @@ sTgcDigitMaker::~sTgcDigitMaker() = default;
 //------------------------------------------------------
 // Initialize
 //------------------------------------------------------
-StatusCode sTgcDigitMaker::initialize(const int channelTypes)
-{
-  // Initialize TgcIdHelper
-  if (!m_hitIdHelper) {
-    m_hitIdHelper = sTgcHitIdHelper::GetHelper();
-  }
-
-  ////set the flag of timeCorrection
-  //m_doTimeCorrection = doTimeCorrection;
-
-  //set the flag of channelTypes which will be digitized
-  m_channelTypes = channelTypes;
-
-  // initialize the TGC identifier helper
-  m_idHelper = m_mdManager->stgcIdHelper();
-
-  // Read share/sTGC_Digitization_effChamber.dat file and store values in m_ChamberEfficiency.
-  ATH_CHECK(readFileOfEffChamber());
+StatusCode sTgcDigitMaker::initialize() {
 
   // Read share/sTGC_Digitization_timeArrivale.dat, containing the digit time of arrival
   ATH_CHECK(readFileOfTimeArrival());
@@ -74,50 +54,42 @@ StatusCode sTgcDigitMaker::initialize(const int channelTypes)
   if (m_doTimeOffsetStrip) {
     ATH_CHECK(readFileOfTimeOffsetStrip());
   }
-
+  // check the digitization channel type
+  if(m_channelTypes!=1 && m_channelTypes!=2 && m_channelTypes!=3) {
+      ATH_MSG_ERROR("Invalid ChannelTypes : " << m_channelTypes << " (valid values are : 1 --> strips ; 2 --> strips / wires ; 3 --> strips / wires / pads)");
+      return StatusCode::FAILURE;
+  }
   return StatusCode::SUCCESS;
 }
 
 //---------------------------------------------------
 // Execute Digitization
 //---------------------------------------------------
-std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHit* hit,
-                                                                 const float /*globalHitTime*/,
-                                                                 CLHEP::HepRandomEngine* rndmEngine) const
-{
-
-  // check the digitization channel type
-  if(m_channelTypes!=1 && m_channelTypes!=2 && m_channelTypes!=3){
-    ATH_MSG_ERROR("Invalid ChannelTypes : " << m_channelTypes << " (valid values are : 1 --> strips ; 2 --> strips / wires ; 3 --> strips / wires / pads)");
-  }
-
+sTgcDigitMaker::sTgcDigitVec sTgcDigitMaker::executeDigi(const DigiConditions& condContainers, 
+                                                         const sTGCSimHit& hit) const {
   // SimHits without energy loss are not recorded.
-  double energyDeposit = hit->depositEnergy(); // Energy deposit in MeV
-  if(energyDeposit==0.) return nullptr;
+  double energyDeposit = hit.depositEnergy(); // Energy deposit in MeV
+  if(energyDeposit==0.) return {};
 
   //////////  convert ID for this digitizer system
-  sTgcSimIdToOfflineId simToOffline(m_idHelper);
-  int simId = hit->sTGCId();
-  Identifier offlineId = simToOffline.convert(simId);
-  std::string stationName= m_idHelper->stationNameString(m_idHelper->stationName(offlineId));
-  int stationEta = m_idHelper->stationEta(offlineId);
-  int stationPhi  = m_idHelper->stationPhi(offlineId);
-  int multiPlet = m_idHelper->multilayer(offlineId);
-  int gasGap = m_idHelper->gasGap(offlineId);
-  Identifier layid = m_idHelper->channelID(m_idHelper->stationName(offlineId), stationEta, stationPhi,
-                                           multiPlet, gasGap, sTgcIdHelper::sTgcChannelTypes::Wire, 1);
+  const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+  sTgcSimIdToOfflineId simToOffline{&idHelper};
+  const Identifier offlineId = simToOffline.convert(hit.sTGCId());
+  const Identifier layid = idHelper.channelID(offlineId, 
+                                              idHelper.multilayer(offlineId),
+                                              idHelper.gasGap(offlineId), 
+                                              sTgcIdHelper::sTgcChannelTypes::Wire, 1);
 
-  ATH_MSG_VERBOSE("sTgc hit:  time " << hit->globalTime() << " position " << hit->globalPosition().x() << "  " << hit->globalPosition().y() << "  " << hit->globalPosition().z() << " mclink " << hit->particleLink() << " PDG ID " << hit->particleEncoding() );
+  ATH_MSG_VERBOSE("sTgc hit:  time " << hit.globalTime() 
+              << " position " << Amg::toString(hit.globalPosition(), 2) 
+              << " mclink " << hit.particleLink() << " PDG ID " << hit.particleEncoding() );
 
-  int isSmall = stationName[2] == 'S';
+  
+  ATH_MSG_DEBUG("Retrieving detector element for: "<< m_idHelperSvc->toStringDetEl(layid) << " energyDeposit "<<energyDeposit );
 
-  ATH_MSG_DEBUG("Retrieving detector element for: isSmall " << isSmall << " eta " << stationEta << " phi " << stationPhi << " ml " << multiPlet << " energyDeposit "<<energyDeposit );
-
-  const MuonGM::sTgcReadoutElement* detEl = m_mdManager->getsTgcReadoutElement(layid);
-  if( !detEl ){
-    ATH_MSG_WARNING("Failed to retrieve detector element for: isSmall " << isSmall << " eta " << stationEta << " phi " << stationPhi << " ml " << multiPlet );
-    return nullptr;
-  }
+  const MuonGM::sTgcReadoutElement* detEl = condContainers.detMgr->getsTgcReadoutElement(layid);
+  if( !detEl ){ return {}; }
+  
 
   // DO THE DIGITIZATTION HERE ////////
 
@@ -125,21 +97,20 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
   constexpr double length_tolerance = 0.01;
 
   // Retrieve the wire surface
-  int surfHash_wire = detEl->surfaceHash(gasGap, sTgcIdHelper::sTgcChannelTypes::Wire);
+  int surfHash_wire = detEl->surfaceHash(layid);
   const Trk::PlaneSurface& SURF_WIRE = detEl->surface(surfHash_wire); // get the wire surface
 
   // Hit post-Step global position
-  const Amg::Vector3D& GPOS{hit->globalPosition()};
+  const Amg::Vector3D& GPOS{hit.globalPosition()};
   // Hit pre-Step global position
-  const Amg::Vector3D& pre_pos{hit->globalPrePosition()};
+  const Amg::Vector3D& pre_pos{hit.globalPrePosition()};
   // Hit global direction
-  const Amg::Vector3D& GLODIRE{hit->globalDirection()};
+  const Amg::Vector3D& GLODIRE{hit.globalDirection()};
 
   // Hit position in the wire surface's coordinate frame
-  Amg::Vector3D hitOnSurface_wire = SURF_WIRE.transform().inverse() * GPOS;
-  Amg::Vector3D pre_pos_wire_surf = SURF_WIRE.transform().inverse() * pre_pos;
-  Amg::Vector2D posOnSurf_wire(0.5 * (hitOnSurface_wire.x() + pre_pos_wire_surf.x()),
-                               0.5 * (hitOnSurface_wire.y() + pre_pos_wire_surf.y()));
+  Amg::Vector3D hitOnSurface_wire{SURF_WIRE.transform().inverse() * GPOS};
+  Amg::Vector3D pre_pos_wire_surf{SURF_WIRE.transform().inverse() * pre_pos};
+  Amg::Vector2D posOnSurf_wire{0.5 * (hitOnSurface_wire + pre_pos_wire_surf).block<2,1>(0,0)};
 
   /* Determine the closest wire and the distance of closest approach
    * Since most particles pass through the the wire plane between two wires,
@@ -159,16 +130,14 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
   if ((wire_number < 1) || (wire_number > number_wires)) {
     // Compute the wire number using either the pos-step position or
     // the pre-step position, whichever yields a valid wire number.
-    Amg::Vector2D new_posOnSurf(hitOnSurface_wire.x(), hitOnSurface_wire.y());
-    wire_number = detEl->getDesign(layid)->wireNumber(new_posOnSurf);
+    wire_number = detEl->getDesign(layid)->wireNumber(hitOnSurface_wire.block<2,1>(0,0));
     if ((wire_number < 1) || (wire_number > number_wires)) {
-      new_posOnSurf = Amg::Vector2D(pre_pos_wire_surf.x(), pre_pos_wire_surf.y());
-      wire_number = detEl->getDesign(layid)->wireNumber(new_posOnSurf);
+      wire_number = detEl->getDesign(layid)->wireNumber(pre_pos_wire_surf.block<2,1>(0,0));
     }
   }
 
   // Compute the position of the ionization and its distance relative to a given sTGC wire.
-  Ionization ionization = pointClosestApproach(layid, wire_number, pre_pos_wire_surf, hitOnSurface_wire);
+  Ionization ionization = pointClosestApproach(detEl, layid, wire_number, pre_pos_wire_surf, hitOnSurface_wire);
   double dist_wire = ionization.distance;
   if (dist_wire > 0.) {
     // Determine the other adjacent wire, which is
@@ -178,7 +147,7 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
     if (ionization.posOnSegment.x() < ionization.posOnWire.x()) {adjacent = -1;}
 
     // Find the position of the ionization with respect to the adjacent wire
-    Ionization ion_adj = pointClosestApproach(layid, wire_number+adjacent, pre_pos_wire_surf, hitOnSurface_wire);
+    Ionization ion_adj = pointClosestApproach(detEl, layid, wire_number+adjacent, pre_pos_wire_surf, hitOnSurface_wire);
     // Keep the closest point
     double dist_wire_adj = ion_adj.distance;
     if ((dist_wire_adj > 0.) && (dist_wire_adj < dist_wire)) {
@@ -188,37 +157,25 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
     }
   } else {
     ATH_MSG_DEBUG("Failed to get the distance between the wire number = " << wire_number
-                    << " and hit at (" << hitOnSurface_wire.x() << ", " << hitOnSurface_wire.y() << ")"
+                    << " and hit at " <<Amg::toString(hitOnSurface_wire, 2)
                     << ". Number of wires = " << number_wires
-                    << ", chamber stationName: " << stationName
-                    << ", stationEta: " << stationEta
-                    << ", stationPhi: " << stationPhi
-                    << ", multiplet:" << multiPlet
-                    << ", gas gap: " << gasGap);
-    return nullptr;
+                    << ", "<<m_idHelperSvc->toStringGasGap(layid));
+    return {};
   }
 
   // Update the position of ionization on the wire surface
-  posOnSurf_wire = Amg::Vector2D(ionization.posOnWire.x(), ionization.posOnWire.y());
+  posOnSurf_wire = ionization.posOnWire.block<2,1>(0,0);
   // Position of the ionization in the global coordinate frame
   const Amg::Vector3D glob_ionization_pos = SURF_WIRE.transform() * ionization.posOnWire;
 
   ATH_MSG_VERBOSE("Ionization_info: distance: " << ionization.distance
-    << " posOnTrack: " << ionization.posOnSegment.x() << " "
-                        << ionization.posOnSegment.y() << " "
-                        << ionization.posOnSegment.z() << " "
-    << " posOnWire: " << ionization.posOnWire.x() << " "
-                       << ionization.posOnWire.y() << " "
-                       << ionization.posOnWire.z() << " "
-    << " hitGPos: " << GPOS.x() <<" "<< GPOS.y() <<" "<< GPOS.z() << " "
-    << " hitPrePos: " << pre_pos.x() <<" "<< pre_pos.y() <<" "<< pre_pos.z()  << " "
-    << " EDep: " << hit->depositEnergy() << " EKin: " << hit->kineticEnergy()
-    << " pdgId: " << hit->particleEncoding()
-    << " stationName: " << stationName
-    << " stationEta: " << stationEta
-    << " stationPhi: " << stationPhi
-    << " multiplet: " << multiPlet
-    << " gasgap: " << gasGap);
+    << " posOnTrack: " <<Amg::toString(ionization.posOnSegment, 3)
+    << " posOnWire: " << Amg::toString(ionization.posOnWire, 3)
+    << " hitGPos: " << Amg::toString(GPOS,3)
+    << " hitPrePos: " <<Amg::toString(pre_pos, 3)
+    << " EDep: " << hit.depositEnergy() << " EKin: " << hit.kineticEnergy()
+    << " pdgId: " << hit.particleEncoding()
+    <<" "<<m_idHelperSvc->toStringGasGap(layid));
 
   // Distance should be in the range [0, 0.9] mm, excepting
   // - particles pass through the wire plane near the edges
@@ -226,22 +183,19 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
   //   Most of such particles are not muons and have low kinetic energy.
   // - particle with trajectory parallel to the sTGC wire plane
   const double wire_pitch = detEl->wirePitch();
-  if ((dist_wire > 0.) && (std::abs(hit->particleEncoding()) == 13) && (dist_wire > (wire_pitch/2))) {
+  if ((dist_wire > 0.) && (std::abs(hit.particleEncoding()) == 13) && (dist_wire > (wire_pitch/2))) {
     ATH_MSG_DEBUG("Distance to the nearest wire (" << dist_wire << ") is greater than expected.");
-    ATH_MSG_DEBUG("Hit globalPos: (" << GPOS.x() <<", "<< GPOS.y() <<", "<< GPOS.z() << ") "
-                 << " globalPrePos: (" << pre_pos.x() <<", "<< pre_pos.y() <<", "<< pre_pos.z()  << ") "
-                 << " EDeposited: " << hit->depositEnergy() << " EKinetic: " << hit->kineticEnergy()
-                 << " pdgID: " << hit->particleEncoding()
-                 << " stationName = " << stationName
-                 << " stationEta = " << stationEta
-                 << " stationPhi = " << stationPhi
-                 << " multiplet = " << multiPlet
-                 << " gas gap = " << gasGap);
+    ATH_MSG_DEBUG("Hit globalPos: "<<Amg::toString(GPOS,2)
+                 << " globalPrePos: " << Amg::toString(pre_pos, 2)
+                 << " EDeposited: " << hit.depositEnergy() 
+                 << " EKinetic: " << hit.kineticEnergy()
+                 << " pdgID: " << hit.particleEncoding()
+                 << " "<<m_idHelperSvc->toStringGasGap(layid));
   }
 
   // Do not digitize hits that are too far from the nearest wire
   if (dist_wire > wire_pitch) {
-    return nullptr;
+    return {};
   }
 
   // Get the gamma pdf parameters associated with the distance of closest approach.
@@ -260,7 +214,7 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
   // to account for drift time.
   // Note: CLHEP::RandGamma takes the parameters k and lambda,
   // where lambda = 1 / theta.
-  double digit_time = t0_par + CLHEP::RandGamma::shoot(rndmEngine, par_kappa, 1/par_theta);
+  double digit_time = t0_par + CLHEP::RandGamma::shoot(condContainers.rndmEngine, par_kappa, 1/par_theta);
 
   // Sometimes, digit_time is negative because t0_par can be negative.
   // In such case, discard the negative value and shoot RandGamma for another value.
@@ -273,7 +227,7 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
       digit_time = 0.;
       break;
     }
-    digit_time = t0_par + CLHEP::RandGamma::shoot(rndmEngine, par_kappa, 1/par_theta);
+    digit_time = t0_par + CLHEP::RandGamma::shoot(condContainers.rndmEngine, par_kappa, 1/par_theta);
     ++shoot_counter;
   }
 
@@ -285,31 +239,21 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
 
   bool isValid = false;
   //// HV efficiency correction
-  if (m_doEfficiencyCorrection){
-    Identifier tempId = m_idHelper->channelID(m_idHelper->parentID(layid), multiPlet, gasGap, sTgcIdHelper::sTgcChannelTypes::Wire, 1, isValid);
-    if (!isValid) return nullptr;
-    // Transform STL and STS to 0 and 1 respectively
-    int stNameInt = (stationName=="STL") ? 0 : 1;
-    // If inside eta0 bin of QL1/QS1, remove 1 from eta index
-    int etaZero = detEl->isEtaZero(tempId, posOnSurf_wire) ? 1 : 0;
-    float efficiency = getChamberEfficiency(stNameInt, std::abs(stationEta)-etaZero, stationPhi-1, multiPlet-1, gasGap-1);
+  if (condContainers.efficiencies) {
+    const double efficiency = condContainers.efficiencies->getEfficiency(layid);
     // Lose Hits to match HV efficiency
-    if (CLHEP::RandFlat::shoot(rndmEngine,0.0,1.0) > efficiency) return nullptr;
+    if (CLHEP::RandFlat::shoot(condContainers.rndmEngine,0.0,1.0) > efficiency) return {};
   }
 
-  IdentifierHash coll_hash;
-  // contain (name, eta, phi, multiPlet)
-  m_idHelper->get_detectorElement_hash(layid, coll_hash);
-  //ATH_MSG_DEBUG(" looking up collection using hash " << (int)coll_hash << " " << m_idHelper->print_to_string(layid) );
+  
+  sTgcDigitVec digits{};
 
-  auto digits = std::make_unique<sTgcDigitCollection>(layid, coll_hash);
+  //const double stripPropagationTime = 3.3*CLHEP::ns/CLHEP::m * detEl->distanceToReadout(posOnSurf_strip, elemId); // 8.5*ns/m was used until MC10.
+  const double stripPropagationTime = 0.; // 8.5*ns/m was used until MC10.
 
-  //const float stripPropagationTime = 3.3*CLHEP::ns/CLHEP::m * detEl->distanceToReadout(posOnSurf_strip, elemId); // 8.5*ns/m was used until MC10.
-  const float stripPropagationTime = 0.; // 8.5*ns/m was used until MC10.
-
-  float sDigitTimeWire = digit_time;
-  float sDigitTimePad = sDigitTimeWire;
-  float sDigitTimeStrip = sDigitTimeWire + stripPropagationTime;
+  double sDigitTimeWire = digit_time;
+  double sDigitTimePad = sDigitTimeWire;
+  double sDigitTimeStrip = sDigitTimeWire + stripPropagationTime;
 
   uint16_t bctag = 0;
 
@@ -319,10 +263,11 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
   ATH_MSG_DEBUG("sTgcDigitMaker::strip response ");
   int channelType = sTgcIdHelper::sTgcChannelTypes::Strip;
 
-  Identifier newId = m_idHelper->channelID(m_idHelper->parentID(layid), multiPlet, gasGap, channelType, 1, isValid);
+  Identifier newId = idHelper.channelID(layid,idHelper.multilayer(layid), 
+                                        idHelper.gasGap(layid), channelType, 1, isValid);
 
   // get strip surface
-  int surfHash_strip =  detEl->surfaceHash(gasGap, 1);
+  int surfHash_strip =  detEl->surfaceHash(newId);
   const Trk::PlaneSurface& SURF_STRIP = detEl->surface(surfHash_strip); // get the strip surface
 
   const Amg::Vector3D hitOnSurface_strip = SURF_STRIP.transform().inverse()*glob_ionization_pos;
@@ -330,8 +275,8 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
   const Amg::Vector2D posOnSurf_strip(hitOnSurface_strip.x(),hitOnSurface_strip.y());
   bool insideBounds = SURF_STRIP.insideBounds(posOnSurf_strip);
   if(!insideBounds) {
-    ATH_MSG_DEBUG("Outside of the strip surface boundary : " <<  m_idHelper->print_to_string(newId) << "; local position " <<posOnSurf_strip );
-    return nullptr;
+    ATH_MSG_DEBUG("Outside of the strip surface boundary : " <<  m_idHelperSvc->toString(newId) << "; local position " <<posOnSurf_strip );
+    return {};
   }
 
   //************************************ find the nearest readout element **************************************
@@ -339,21 +284,22 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
   int stripNumber = detEl->stripNumber(posOnSurf_strip, newId);
   if( stripNumber == -1 ){
     // Verify if the energy deposit is at the boundary
-    const float new_posX = (posOnSurf_strip.x() > 0.0)? posOnSurf_strip.x() - length_tolerance
+    const double new_posX = (posOnSurf_strip.x() > 0.0)? posOnSurf_strip.x() - length_tolerance
                                                       : posOnSurf_strip.x() + length_tolerance;
     const Amg::Vector2D new_position(new_posX, posOnSurf_strip.y());
     stripNumber = detEl->stripNumber(new_position, newId);
     // Skip hit if still unable to obtain strip number
     if (stripNumber < 1) {
-      ATH_MSG_WARNING("Failed to obtain strip number " << m_idHelper->print_to_string(newId) );
+      ATH_MSG_WARNING("Failed to obtain strip number " << m_idHelperSvc->toString(newId) );
       ATH_MSG_WARNING("Position on strip surface = (" << posOnSurf_strip.x() << ", " << posOnSurf_strip.y() << ")");
-      return nullptr;
+      return {};
     }
   }
-  newId = m_idHelper->channelID(m_idHelper->parentID(layid), multiPlet, gasGap, channelType, stripNumber, isValid);
+  newId = idHelper.channelID(layid, idHelper.multilayer(layid), 
+                             idHelper.gasGap(layid), channelType, stripNumber, isValid);
   if(!isValid && stripNumber != -1) {
-    ATH_MSG_ERROR("Failed to obtain identifier " << m_idHelper->print_to_string(newId) );
-    return nullptr;
+    ATH_MSG_ERROR("Failed to obtain identifier " << m_idHelperSvc->toString(newId) );
+    return {};
   }
 
   const int NumberOfStrips = detEl->numberOfStrips(newId);
@@ -375,7 +321,7 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
   //     alpha = 1+theta and
   //     beta = 1+theta/mean
   // With these substitutions, gamma PDF gives the same sampling values as those from polya PDF.
-  const double gain =  CLHEP::RandGamma::shoot(rndmEngine, 1. + m_theta, (1. + m_theta)/m_meanGasGain);
+  const double gain =  CLHEP::RandGamma::shoot(condContainers.rndmEngine, 1. + m_theta, (1. + m_theta)/m_meanGasGain);
 
   // total charge after avalanche
   const double total_charge = gain*ionized_charge;
@@ -388,7 +334,7 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
   const double angle_dependency = std::hypot(m_posResIncident, m_posResAngular * tan_theta);
 
   const double cluster_posX = posOnSurf_strip.x();
-  double peak_position = CLHEP::RandGaussZiggurat::shoot(rndmEngine, cluster_posX, m_StripResolution*angle_dependency);
+  double peak_position = CLHEP::RandGaussZiggurat::shoot(condContainers.rndmEngine, cluster_posX, m_StripResolution*angle_dependency);
 
   // Each readout plane reads about half the total charge produced on the wire,
   // including a tan(theta) term to describe the increase of charge with incident angle
@@ -415,11 +361,12 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
     if (currentStrip > NumberOfStrips) break;
 
     // Get the strip identifier and create the digit
-    newId = m_idHelper->channelID(m_idHelper->parentID(layid), multiPlet, gasGap, channelType, currentStrip, isValid);
+    newId = idHelper.channelID(layid, idHelper.multilayer(layid), idHelper.gasGap(layid), 
+                               channelType, currentStrip, isValid);
     if (isValid) {
-      Amg::Vector2D locpos(0., 0.);
+      Amg::Vector2D locpos{Amg::Vector2D::Zero()};
       if (!detEl->stripPosition(newId, locpos)) {
-        ATH_MSG_WARNING("Failed to obtain local position for identifier " << m_idHelper->print_to_string(newId) );
+          ATH_MSG_WARNING("Failed to obtain local position for identifier " << m_idHelperSvc->toString(newId) );
       }
 
       // Estimate the digit charge
@@ -443,12 +390,12 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
         strip_time += getTimeOffsetStrip(indexFromMiddleStrip);
       }
 
-      addDigit(digits.get(),newId, bctag, strip_time, charge, channelType);
+      addDigit(digits, newId, bctag, strip_time, charge);
 
       ATH_MSG_VERBOSE("Created a strip digit: strip number = " << currentStrip << ", charge = " << charge
                       << ", time = " << strip_time << ", time offset = " << strip_time-sDigitTimeStrip
                       << ", neighbor index = " << iStrip
-                      << ", strip position = (" << locpos.x() << "," << locpos.y() << ")");
+                      << ", strip position = "<<Amg::toString(locpos, 2));
     }
   }
 
@@ -457,11 +404,12 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
     int currentStrip = stripNumber - iStrip;
     if (currentStrip < 1) break;
 
-    newId = m_idHelper->channelID(m_idHelper->parentID(layid), multiPlet, gasGap, channelType, currentStrip, isValid);
+    newId = idHelper.channelID(layid,idHelper.multilayer(layid), 
+                              idHelper.gasGap(layid), channelType, currentStrip, isValid);
     if (isValid) {
-      Amg::Vector2D locpos(0., 0.);
+      Amg::Vector2D locpos{Amg::Vector2D::Zero()};
       if (!detEl->stripPosition(newId, locpos)) {
-        ATH_MSG_WARNING("Failed to obtain local position for identifier " << m_idHelper->print_to_string(newId) );
+        ATH_MSG_WARNING("Failed to obtain local position for identifier " << m_idHelperSvc->toString(newId) );
       }
 
       // Estimate the digit charge
@@ -477,12 +425,12 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
         strip_time += getTimeOffsetStrip(indexFromMiddleStrip);
       }
 
-      addDigit(digits.get(),newId, bctag, strip_time, charge, channelType);
+      addDigit(digits, newId, bctag, strip_time, charge);
 
       ATH_MSG_VERBOSE("Created a strip digit: strip number = " << currentStrip << ", charge = " << charge
                       << ", time = " << strip_time << ", time offset = " << strip_time-sDigitTimeStrip
                       << ", neighbor index = " << iStrip
-                      << ", strip position = (" << locpos.x() << "," << locpos.y() << ")");
+                      << ", strip position = " << Amg::toString(locpos, 2));
     }
   }
   // end of strip digitization
@@ -498,40 +446,42 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
   ATH_MSG_DEBUG("sTgcDigitMaker::pad response ");
   channelType = sTgcIdHelper::sTgcChannelTypes::Pad;
 
+  Identifier PAD_ID = idHelper.channelID(layid, idHelper.multilayer(layid), 
+                                        idHelper.gasGap(layid), channelType, 1);// find the a pad id
   //************************************ find the nearest readout element **************************************
-  int  surfHash_pad =  detEl->surfaceHash(gasGap, 0);
+  int  surfHash_pad =  detEl->surfaceHash(PAD_ID);
   const Trk::PlaneSurface& SURF_PAD = detEl->surface(surfHash_pad); // get the pad surface
 
   const Amg::Vector3D hitOnSurface_pad = SURF_PAD.transform().inverse()*glob_ionization_pos;
   const Amg::Vector2D posOnSurf_pad(hitOnSurface_pad.x(), hitOnSurface_pad.y());
 
-  Identifier PAD_ID = m_idHelper->channelID(m_idHelper->parentID(layid), multiPlet, gasGap, channelType, 1);// find the a pad id
-
+  
   insideBounds = SURF_PAD.insideBounds(posOnSurf_pad);
 
   if(insideBounds) {
     int padNumber = detEl->stripNumber(posOnSurf_pad, PAD_ID);
     if( padNumber == -1 ){
       // Verify if the energy deposit is at the boundary
-      const float new_posX = (posOnSurf_pad.x()>0.0)? posOnSurf_pad.x()-length_tolerance
+      const double new_posX = (posOnSurf_pad.x()>0.0)? posOnSurf_pad.x()-length_tolerance
                                                     : posOnSurf_pad.x()+length_tolerance;
-      const float new_posY = (posOnSurf_pad.y()>0.0)? posOnSurf_pad.y()-length_tolerance
+      const double new_posY = (posOnSurf_pad.y()>0.0)? posOnSurf_pad.y()-length_tolerance
                                                     : posOnSurf_pad.y()+length_tolerance;
       const Amg::Vector2D new_position(new_posX, new_posY);
       padNumber = detEl->stripNumber(new_position, PAD_ID);
       // Skip hit if still unable to obtain pad number
       if (padNumber < 1) {
-        ATH_MSG_WARNING("Failed to obtain pad number " << m_idHelper->print_to_string(PAD_ID) );
+        ATH_MSG_WARNING("Failed to obtain pad number " << m_idHelperSvc->toString(PAD_ID) );
         ATH_MSG_WARNING("Position on pad surface = (" << posOnSurf_pad.x() << ", " << posOnSurf_pad.y() << ")");
         return digits;
       }
     }
-    newId = m_idHelper->channelID(m_idHelper->parentID(layid), multiPlet, gasGap, channelType, padNumber, isValid);
+    newId = idHelper.channelID(layid, idHelper.multilayer(layid), 
+                               idHelper.gasGap(layid), channelType, padNumber, isValid);
     if(isValid) {
       // Find centre position of pad
-      Amg::Vector2D padPos(Amg::Vector2D::Zero());
+      Amg::Vector2D padPos{Amg::Vector2D::Zero()};
       if (!detEl->stripPosition(newId, padPos)) {
-        ATH_MSG_ERROR("Failed to obtain local position for neighbor pad with identifier " << m_idHelper->print_to_string(newId) );
+        ATH_MSG_ERROR("Failed to obtain local position for neighbor pad with identifier " << m_idHelperSvc->toString(newId) );
         return digits;
       }
       // Pad sharing needs to look at position on hit vs pad boundaries
@@ -561,56 +511,59 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
         int newEta = diff.y() > 0 ? padEtaPhi.first+1 : padEtaPhi.first-1;
         bool validEta = newEta > 0 && newEta < detEl->getPadDesign(newId)->nPadH+1;
         bool validPhi = newPhi > 0 && newPhi < detEl->getPadDesign(newId)->nPadColumns+1;
-        const Amg::Vector2D new_pos(Amg::Vector2D::Zero());
-
+    
         if (isNeighX && isNeighY && validEta && validPhi){
           // 4 pads total; makes life a bit harder. Corner of 4 valid pads
-          Identifier neigh_ID_X = m_idHelper->padID(m_idHelper->parentID(newId), multiPlet, gasGap, channelType, padEtaPhi.first, newPhi, isValid);
-          Identifier neigh_ID_Y = m_idHelper->padID(m_idHelper->parentID(newId), multiPlet, gasGap, channelType, newEta, padEtaPhi.second, isValid);
-          Identifier neigh_ID_XY = m_idHelper->padID(m_idHelper->parentID(newId), multiPlet, gasGap, channelType, newEta, newPhi, isValid);
+          Identifier neigh_ID_X = idHelper.padID(newId, idHelper.multilayer(newId), idHelper.gasGap(newId),
+                                                  channelType, padEtaPhi.first, newPhi, isValid);
+          Identifier neigh_ID_Y = idHelper.padID(newId, idHelper.multilayer(newId), idHelper.gasGap(newId),
+                                                  channelType, newEta, padEtaPhi.second, isValid);
+          Identifier neigh_ID_XY = idHelper.padID(newId, idHelper.multilayer(newId), idHelper.gasGap(newId),
+                                                  channelType, newEta, newPhi, isValid);
           double xQfraction = getPadChargeFraction(deltaX);
           double yQfraction = getPadChargeFraction(deltaY);
 
           // Main pad gets 1 - Qfraction of total
-          addDigit(digits.get(), neigh_ID_X, bctag, sDigitTimePad, xQfraction*(1.-yQfraction)*0.5*total_charge, channelType);
-          addDigit(digits.get(), neigh_ID_Y, bctag, sDigitTimePad, yQfraction*(1.-xQfraction)*0.5*total_charge, channelType);
-          addDigit(digits.get(), neigh_ID_XY, bctag, sDigitTimePad, xQfraction*yQfraction*0.5*total_charge, channelType);
-          addDigit(digits.get(), newId, bctag, sDigitTimePad, (1.-xQfraction-yQfraction+xQfraction*yQfraction)*0.5*total_charge, channelType);
-        }
-        else if (isNeighX && validPhi){
+          addDigit(digits, neigh_ID_X, bctag, sDigitTimePad, xQfraction*(1.-yQfraction)*0.5*total_charge);
+          addDigit(digits, neigh_ID_Y, bctag, sDigitTimePad, yQfraction*(1.-xQfraction)*0.5*total_charge);
+          addDigit(digits, neigh_ID_XY, bctag, sDigitTimePad, xQfraction*yQfraction*0.5*total_charge);
+          addDigit(digits, newId, bctag, sDigitTimePad, (1.-xQfraction-yQfraction+xQfraction*yQfraction)*0.5*total_charge);
+        } else if (isNeighX && validPhi){
           // There is only 1 neighbor, immediately to the left or right.
-          Identifier neigh_ID = m_idHelper->padID(m_idHelper->parentID(newId), multiPlet, gasGap, channelType, padEtaPhi.first, newPhi, isValid);
+          Identifier neigh_ID = idHelper.padID(newId, idHelper.multilayer(newId), idHelper.gasGap(newId), 
+                                               channelType, padEtaPhi.first, newPhi, isValid);
 
           // NeighborPad gets Qfraction of the total pad charge: 0.5*total_charge
           // Main pad gets 1 - Qfraction of total
           double xQfraction = getPadChargeFraction(deltaX);
-          addDigit(digits.get(), newId, bctag, sDigitTimePad, (1.-xQfraction)*0.5*total_charge, channelType);
-          addDigit(digits.get(), neigh_ID, bctag, sDigitTimePad, xQfraction*0.5*total_charge, channelType);
+          addDigit(digits, newId, bctag, sDigitTimePad, (1.-xQfraction)*0.5*total_charge);
+          addDigit(digits, neigh_ID, bctag, sDigitTimePad, xQfraction*0.5*total_charge);
         }
         else if (isNeighY && validEta){
           // There is only 1 neighbor, immediately above or below
-          Identifier neigh_ID = m_idHelper->padID(m_idHelper->parentID(newId), multiPlet, gasGap, channelType, newEta, padEtaPhi.second, isValid);
+          Identifier neigh_ID = idHelper.padID(newId, idHelper.multilayer(newId), idHelper.gasGap(newId), 
+                                               channelType, newEta, padEtaPhi.second, isValid);
 
           // NeighborPad gets Qfraction of the total pad charge: 0.5*total_charge
           // Main pad gets 1 - Qfraction of total
           double yQfraction = getPadChargeFraction(deltaX);
-          addDigit(digits.get(), newId, bctag, sDigitTimePad, (1.-yQfraction)*0.5*total_charge, channelType);
-          addDigit(digits.get(), neigh_ID, bctag, sDigitTimePad, yQfraction*0.5*total_charge, channelType);
+          addDigit(digits, newId, bctag, sDigitTimePad, (1.-yQfraction)*0.5*total_charge);
+          addDigit(digits, neigh_ID, bctag, sDigitTimePad, yQfraction*0.5*total_charge);
         }
 
       }
       else{
         // No charge sharing: hit is nicely isolated within pad
-        addDigit(digits.get(), newId, bctag, sDigitTimePad, 0.5*total_charge, channelType);
+        addDigit(digits, newId, bctag, sDigitTimePad, 0.5*total_charge);
       }
 
     }
     else if(padNumber != -1) {
-      ATH_MSG_ERROR("Failed to obtain identifier " << m_idHelper->print_to_string(newId) );
+      ATH_MSG_ERROR("Failed to obtain identifier " << m_idHelperSvc->toString(newId) );
     }
   }
   else {
-    ATH_MSG_DEBUG("Outside of the pad surface boundary :" << m_idHelper->print_to_string(PAD_ID)<< " local position " <<posOnSurf_pad );
+    ATH_MSG_DEBUG("Outside of the pad surface boundary :" << m_idHelperSvc->toString(PAD_ID)<< " local position " <<posOnSurf_pad );
   }
 
   if(m_channelTypes==2) {
@@ -626,10 +579,11 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
   channelType = sTgcIdHelper::sTgcChannelTypes::Wire;
 
     // Find the ID of the first wiregroup
-    Identifier WIREGP_ID = m_idHelper->channelID(m_idHelper->parentID(layid), multiPlet, gasGap, channelType, 1);
+  Identifier WIREGP_ID = idHelper.channelID(layid, idHelper.multilayer(layid),
+                                            idHelper.gasGap(layid), channelType, 1);
 
-    //************************************ find the nearest readout element **************************************
-    insideBounds = SURF_WIRE.insideBounds(posOnSurf_wire);
+   //************************************ find the nearest readout element **************************************
+   insideBounds = SURF_WIRE.insideBounds(posOnSurf_wire);
 
     if(insideBounds) {
         // Determine the wire number
@@ -637,31 +591,34 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
         int wiregroupNumber = detEl->stripNumber(posOnSurf_wire, WIREGP_ID);
         if( wiregroupNumber == -1 ){
           // Verify if the energy deposit is at the boundary
-          const float new_posX = (posOnSurf_wire.x() > 0.0)? posOnSurf_wire.x() - length_tolerance
+          const double new_posX = (posOnSurf_wire.x() > 0.0)? posOnSurf_wire.x() - length_tolerance
                                                            : posOnSurf_wire.x() + length_tolerance;
           const Amg::Vector2D new_position(new_posX, posOnSurf_wire.y());
           wiregroupNumber = detEl->stripNumber(new_position, WIREGP_ID);
           // Skip hit if still unable to obtain pad number
           if (wiregroupNumber < 1) {
-            ATH_MSG_WARNING("Failed to obtain wire number " << m_idHelper->print_to_string(WIREGP_ID) );
+            ATH_MSG_WARNING("Failed to obtain wire number " << m_idHelperSvc->toString(WIREGP_ID) );
             ATH_MSG_WARNING("Position on wire surface = (" << posOnSurf_wire.x() << ", " << posOnSurf_wire.y() << ")");
             return digits;
           }
         }
 
         // Find ID of the actual wiregroup
-        newId = m_idHelper->channelID(m_idHelper->parentID(layid), multiPlet, gasGap, channelType, wiregroupNumber, isValid);
+        newId = idHelper.channelID(layid, idHelper.multilayer(layid), idHelper.gasGap(layid), 
+                                   channelType, wiregroupNumber, isValid);
 
         if(isValid) {
           int NumberOfWiregroups = detEl->numberOfStrips(newId);
-          if(wiregroupNumber>=1&&wiregroupNumber<=NumberOfWiregroups) addDigit(digits.get(), newId, bctag, sDigitTimeWire, total_charge, channelType);
+          if(wiregroupNumber>=1&&wiregroupNumber<=NumberOfWiregroups) {
+            addDigit(digits, newId, bctag, sDigitTimeWire, total_charge);
+          }
         } // end of if(isValid)
         else if (wiregroupNumber != -1){
-          ATH_MSG_ERROR("Failed to obtain wiregroup identifier " << m_idHelper->print_to_string(newId) );
+          ATH_MSG_ERROR("Failed to obtain wiregroup identifier " << m_idHelperSvc->toString(newId) );
         }
     }
     else {
-      ATH_MSG_DEBUG("Outside of the wire surface boundary :" << m_idHelper->print_to_string(WIREGP_ID)<< " local position " <<posOnSurf_wire );
+      ATH_MSG_DEBUG("Outside of the wire surface boundary :" << m_idHelperSvc->toString(WIREGP_ID)<< " local position " <<posOnSurf_wire );
     }
     // end of wire digitization
 
@@ -669,75 +626,21 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++
-double sTgcDigitMaker::distanceToWire(Amg::Vector3D& position, Amg::Vector3D& direction, Identifier id, int wire_number) const
-{
-  // Wire number should be one or greater
-  if (wire_number < 1) {
-    return -9.99;
-  }
-
-  // Get the current sTGC element (a four-layer chamber)
-  const MuonGM::sTgcReadoutElement* detEl = m_mdManager->getsTgcReadoutElement(id);
-
-  // Wire number too large
-  if (wire_number > detEl->numberOfWires(id)) {
-    return -9.99;
-  }
-
-  // Wire pitch
-  double wire_pitch = detEl->wirePitch();
-  // Wire local position on the wire plane, the y-coordinate is arbitrary and z-coordinate is zero
-  double wire_posX = detEl->positionFirstWire(id) + (wire_number - 1) * wire_pitch;
-  Amg::Vector3D wire_position(wire_posX, position.y(), 0.);
-  // The wires are parallel to Y in the wire plane's coordinate frame
-  Amg::Vector3D wire_direction(0., 1., 0.);
-
-  // Determine the sign of the distance, which is:
-  //  - negative if particle crosses the wire surface on the wire_number-1 side and
-  //  + positive if particle crosses the wire surface on the wire_number+1 side
-  double sign = 1.0;
-  if ((position.x() - wire_posX) < 0.) {
-    sign = -1.0;
-  }
-
-  // Distance of closest approach is the distance between the two lines:
-  //      - particle's segment
-  //      - wire line
-
-  // Find a line perpendicular to both hit direction and wire direction
-  Amg::Vector3D perp_line = direction.cross(wire_direction);
-  double norm_line = std::sqrt(perp_line.dot(perp_line));
-  if (norm_line < 1.0e-5) {
-    ATH_MSG_DEBUG("Unable to compute the distance of closest approach,"
-                    << " a negative value is assumed to indicate the error.");
-    return -9.99;
-  }
-  // Compute the distance of closest approach, which is given by the projection of
-  // the vector going from hit position to wire position onto the perpendicular line
-  double distance = std::abs((position - wire_position).dot(perp_line) / norm_line);
-
-  return (sign * distance);
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++
-sTgcDigitMaker::Ionization sTgcDigitMaker::pointClosestApproach(const Identifier& id, int wireNumber,
-                                                                Amg::Vector3D& preStepPos,
-                                                                Amg::Vector3D& postStepPos
-                                                                ) const
-{
+sTgcDigitMaker::Ionization sTgcDigitMaker::pointClosestApproach(const MuonGM::sTgcReadoutElement* detEl,
+                                                                const Identifier& id, 
+                                                                int wireNumber,
+                                                                const Amg::Vector3D& preStepPos,
+                                                                const Amg::Vector3D& postStepPos) const {
   // tolerance in mm
-  constexpr float tolerance = 0.001;
+  constexpr double tolerance = 0.001;
   // minimum segment length
-  constexpr float min_length = 0.1;
+  constexpr double min_length = 0.1;
 
   // Position of the ionization
   Ionization ionization;
 
   // Wire number should be one or greater
   if (wireNumber < 1) return ionization;
-
-  // Get the current sTGC element (a four-layer chamber)
-  const MuonGM::sTgcReadoutElement* detEl = m_mdManager->getsTgcReadoutElement(id);
 
   // Wire number too large
   if (wireNumber > detEl->numberOfWires(id)) return ionization;
@@ -760,12 +663,10 @@ sTgcDigitMaker::Ionization sTgcDigitMaker::pointClosestApproach(const Identifier
   const double wire_posX = detEl->positionFirstWire(id) + (wireNumber - 1) * wire_pitch;
   const Amg::Vector3D wire_position(wire_posX, postStepPos.y(), 0.);
   // The wires are parallel to Y in the wire plane's coordinate frame
-  const Amg::Vector3D wire_direction(0., 1., 0.);
+  const Amg::Vector3D wire_direction{Amg::Vector3D::UnitY()};
 
   // particle trajectory
-  Amg::Vector3D hit_direction(postStepPos.x() - preStepPos.x(),
-                              postStepPos.y() - preStepPos.y(),
-                              postStepPos.z() - preStepPos.z());
+  Amg::Vector3D hit_direction{postStepPos - preStepPos};
   const double seg_length = hit_direction.mag();
   if (seg_length > tolerance) hit_direction /= seg_length;
 
@@ -796,17 +697,17 @@ sTgcDigitMaker::Ionization sTgcDigitMaker::pointClosestApproach(const Identifier
   const double sin_theta_2 = 1.0 - cos_theta * cos_theta;
 
   //* Point on the hit segment
-  const float factor_hit = (-dist_wire_hit.dot(hit_direction)
+  const double factor_hit = (-dist_wire_hit.dot(hit_direction)
                            + dist_wire_hit.dot(wire_direction) * cos_theta) / sin_theta_2;
   Amg::Vector3D ionization_pos = postStepPos + factor_hit * hit_direction;
 
   // If the point is on the track segment, then compute the other point on the wire.
   // Otherwise, set the ionization at the pre-step position and compute where it
   // should be on the wire.
-  Amg::Vector3D pos_on_wire(0., 0., 0.);
+  Amg::Vector3D pos_on_wire{Amg::Vector3D::Zero()};
   if (factor_hit < seg_length) {
     //* Point on the wire line
-    const float factor_wire = (dist_wire_hit.dot(wire_direction)
+    const double factor_wire = (dist_wire_hit.dot(wire_direction)
                               - dist_wire_hit.dot(hit_direction) * cos_theta) / sin_theta_2;
     pos_on_wire = wire_position + factor_wire * wire_direction;
   } else {
@@ -823,163 +724,18 @@ sTgcDigitMaker::Ionization sTgcDigitMaker::pointClosestApproach(const Identifier
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++
-void sTgcDigitMaker::addDigit(sTgcDigitCollection* digits, const Identifier id, const uint16_t bctag, const float digittime, int channelType) const {
-
-  if((channelType!=sTgcIdHelper::sTgcChannelTypes::Pad) && (channelType!=sTgcIdHelper::sTgcChannelTypes::Wire)) {
-    ATH_MSG_WARNING("Wrong sTgcDigit object with channelType" << channelType );
+void sTgcDigitMaker::addDigit(sTgcDigitVec& digits, 
+                              const Identifier& id, 
+                              const uint16_t bctag, 
+                              const double digittime,
+                              const double charge) const {
+  
+  constexpr double tolerance = 0.1;
+  if (std::find_if(digits.begin(),digits.end(), [&](std::unique_ptr<sTgcDigit>& known) {
+      return known->identify() == id && std::abs(digittime - known->time()) < tolerance;
+  }) == digits.end()) {
+    digits.push_back(std::make_unique<sTgcDigit>(id, bctag, digittime, charge, 0, 0));
   }
-
-  bool duplicate = false;
-  for(sTgcDigitCollection::const_iterator it=digits->begin(); it!=digits->end(); ++it) {
-    if(id==(*it)->identify() && digittime==(*it)->time()) {
-      duplicate = true;
-      break;
-    }
-  }
-  if(!duplicate) {
-    digits->push_back(new sTgcDigit(id, bctag, digittime, -1, 0, 0));
-  }
-
-  return;
-}
-
-void sTgcDigitMaker::addDigit(sTgcDigitCollection* digits, const Identifier id, const uint16_t bctag, const float digittime, float charge, int channelType) const {
-
-  if ((channelType==sTgcIdHelper::sTgcChannelTypes::Pad) ||
-      (channelType==sTgcIdHelper::sTgcChannelTypes::Strip) ||
-      (channelType==sTgcIdHelper::sTgcChannelTypes::Wire))
-  {
-    ATH_MSG_VERBOSE("Adding to the collection a sTGC digit, channelType = " << channelType
-                    << " time = " << digittime << " charge = " << charge);
-  } else {
-    ATH_MSG_WARNING("Wrong sTgcDigit object with channelType" << channelType );
-  }
-
-  bool duplicate = false;
-  float tolerance = 0.1;
-  for(sTgcDigitCollection::iterator it=digits->begin(); it!=digits->end(); ++it) {
-    if(id==(*it)->identify() && (std::abs(digittime - (*it)->time()) < tolerance)) {
-      (*it)->set_charge(charge+(*it)->charge());
-      duplicate = true;
-      break;
-    }
-  }
-  if(!duplicate) {
-    digits->push_back(new sTgcDigit(id, bctag, digittime, charge, 0, 0));
-  }
-
-  return;
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++
-StatusCode sTgcDigitMaker::readFileOfEffChamber() {
-  // Indices to be used
-  int iStationName, stationEta, stationPhi, multiPlet, gasGap;
-  float eff;
-
-  for(iStationName=0; iStationName<2; iStationName++) { // Small - Large
-    for(stationEta=0; stationEta<4; stationEta++) { // 4 eta
-      for(stationPhi=0; stationPhi<8; stationPhi++) { // 8 phi sectors
-        for(multiPlet=0; multiPlet<2; multiPlet++) { // pivot- confirm
-          for(gasGap=0; gasGap<4; gasGap++) { // 4 layers
-            m_ChamberEfficiency[iStationName][stationEta][stationPhi][multiPlet][gasGap] = 1.;
-          }
-        }
-      }
-    }
-  }
-
-  // Find path to the sTGC_Digitization_EffChamber.dat file
-  const std::string fileName = "sTGC_Digitization_EffChamber.dat";
-  std::string fileWithPath = PathResolver::find_file(fileName, "DATAPATH");
-  if(fileWithPath.empty()) {
-    ATH_MSG_FATAL("readFileOfEffChamber(): Could not find file " << fileName.c_str() );
-    return StatusCode::FAILURE;
-  }
-
-  // Open the sTGC_Digitization_EffChamber.dat file
-  std::ifstream ifs;
-  ifs.open(fileWithPath.c_str(), std::ios::in);
-  if(ifs.bad()) {
-    ATH_MSG_FATAL("readFileOfEffChamber(): Could not open file " << fileName.c_str() );
-    return StatusCode::FAILURE;
-  }
-
-  // Read the sTGC_Digitization_EffChamber.dat file
-  /* Each line has 6 values:
-     value #1 : Large (0) or Small (1)
-     value #2 : Eta 0,1,2,3 : Mirroring A side efficiency to C side for now.
-     value #3 : Phi 1 to 8
-     value #4 : Multiplet 0 for Large pivot or small confirm.
-                Multiplet 1 for Large Confirm or Small Pivot
-     value #5 : gasGap (1-4)
-     value #6 : Efficiency
-  */
-  unsigned int nDeadChambers = 0;
-  std::string comment;
-  // This is just to skip the first line which describes the format
-  getline(ifs, comment);
-  while(ifs.good()) {
-    ifs >> iStationName >> stationEta >> stationPhi >> multiPlet >> gasGap >> eff;
-    bool valid = getline(ifs, comment).good();
-    if(!valid) break;
-
-    ATH_MSG_DEBUG( "sTgcDigitMaker::readFileOfEffChamber"
-                    << " stationName= " << iStationName
-                    << " stationEta= " << stationEta
-                    << " stationPhi= " << stationPhi
-                    << " multiPlet= "  << multiPlet
-                    << " gasGap= " << gasGap
-                    << " efficiency= " << eff
-                    << " comment= " << comment );
-
-    // Subtract offsets to use indices of efficiency array
-    stationPhi = stationPhi - 1;
-    gasGap = gasGap - 1;
-
-    // Check the indices are valid
-    if(iStationName<0 || iStationName>=2) continue;
-    if(stationEta  <0 || stationEta  >=4 ) continue;
-    if(stationPhi  <0 || stationPhi  >=8 ) continue;
-    if(multiPlet   <0 || multiPlet   >=2  ) continue;
-    if(gasGap      <0 || gasGap      >=4     ) continue;
-
-    m_ChamberEfficiency[iStationName][stationEta][stationPhi][multiPlet][gasGap] = eff;
-    if (eff==0) nDeadChambers++;
-
-    // If it is the end of the file, get out from while loop.
-    if(ifs.eof()) break;
-  }
-
-  // Close the sTGC_Digitization_deadChamber.dat file
-  ifs.close();
-
-  ATH_MSG_VERBOSE("sTgcDigitMaker::readFileOfEffChamber: the number of dead chambers = " << nDeadChambers );
-  return StatusCode::SUCCESS;
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++
-float sTgcDigitMaker::getChamberEfficiency(const int stationName, const int stationEta, const int stationPhi, const int multiPlet, const int gasGap) const {
-
-  // If the indices are valid, the energyThreshold array is fetched.
-  if((stationName>=0 && stationName<2 ) &&
-     (stationEta  >=0 && stationEta<4 ) &&
-     (stationPhi  >=0 && stationPhi<8 ) &&
-     (multiPlet   >=0 && multiPlet<2  ) &&
-     (gasGap      >=0 && gasGap<4     )) {
-    return m_ChamberEfficiency[stationName][stationEta][stationPhi][multiPlet][gasGap];
-  }
-  else ATH_MSG_INFO("sTGC getChamberEfficiency bug! Indexes not ok!");
-
-  return 1.;
-}
-
-int sTgcDigitMaker::getIStationName(const std::string& stationName) const {
-  int iStationName = 0;
-  if(     stationName=="STS") iStationName = 0;
-  else if(stationName=="STL") iStationName = 1;
-
-  return iStationName;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++
@@ -988,15 +744,14 @@ StatusCode sTgcDigitMaker::readFileOfTimeArrival() {
   const std::string file_name = "sTGC_Digitization_timeArrival.dat";
   std::string file_path = PathResolver::find_file(file_name, "DATAPATH");
   if(file_path.empty()) {
-    ATH_MSG_FATAL("readFileOfTimeWindowOffset(): Could not find file " << file_name.c_str() );
+    ATH_MSG_FATAL("readFileOfTimeWindowOffset(): Could not find file " << file_name );
     return StatusCode::FAILURE;
   }
 
   // Open the sTGC_Digitization_timeArrival.dat file
-  std::ifstream ifs;
-  ifs.open(file_path.c_str(), std::ios::in);
+  std::ifstream ifs{file_path, std::ios::in};
   if(ifs.bad()) {
-    ATH_MSG_FATAL("sTgcDigitMaker: Failed to open time of arrival file " << file_name.c_str() );
+    ATH_MSG_FATAL("sTgcDigitMaker: Failed to open time of arrival file " << file_name );
     return StatusCode::FAILURE;
   }
 
@@ -1013,7 +768,8 @@ StatusCode sTgcDigitMaker::readFileOfTimeArrival() {
       m_gammaParameter.push_back(param);
     } else if (key.compare("mpv") == 0)  {
       double mpt;
-      while (iss >> mpt) {m_mostProbableArrivalTime.push_back(mpt);}
+      int idx{0};
+      while (iss >> mpt) {m_mostProbableArrivalTime[idx++] = mpt;}
     }
   }
 
@@ -1025,13 +781,7 @@ StatusCode sTgcDigitMaker::readFileOfTimeArrival() {
 //+++++++++++++++++++++++++++++++++++++++++++++++
 sTgcDigitMaker::GammaParameter sTgcDigitMaker::getGammaParameter(double distance) const {
 
-  double d = distance;
-  if (d < 0.) {
-    ATH_MSG_DEBUG("getGammaParameter: expecting a positive distance, but got a negative value: " << d
-                     << ". Proceed to the calculation using its absolute value.");
-    d = -1.0 * d;
-  }
-
+  const double d = std::abs(distance); 
   // Find the parameters assuming the container is sorted in ascending order of 'lowEdge'
   int index{-1};
   for (auto& par: m_gammaParameter) {
@@ -1046,18 +796,11 @@ sTgcDigitMaker::GammaParameter sTgcDigitMaker::getGammaParameter(double distance
 //+++++++++++++++++++++++++++++++++++++++++++++++
 double sTgcDigitMaker::getMostProbableArrivalTime(double distance) const {
 
-  double d = distance;
-  if (d < 0.) {
-    ATH_MSG_DEBUG("getMostProbableArrivalTime: expecting a positive distance, but got a negative value: " << d
-                     << ". Proceed to the calculation using its absolute value.");
-    d = -1.0 * d;
+  const double d{std::abs(distance)};
+  double mpt{0};
+  for (size_t t = 0 ; t < m_mostProbableArrivalTime.size(); ++t){
+    mpt += m_mostProbableArrivalTime[t] * std::pow(d, t);
   }
-
-  double mpt = m_mostProbableArrivalTime.at(0)
-               + m_mostProbableArrivalTime.at(1) * d
-               + m_mostProbableArrivalTime.at(2) * d * d
-               + m_mostProbableArrivalTime.at(3) * d * d * d
-               + m_mostProbableArrivalTime.at(4) * d * d * d * d;
   return mpt;
 }
 
@@ -1067,15 +810,14 @@ StatusCode sTgcDigitMaker::readFileOfTimeOffsetStrip() {
   const std::string file_name = "sTGC_Digitization_timeOffsetStrip.dat";
   std::string file_path = PathResolver::find_file(file_name, "DATAPATH");
   if(file_path.empty()) {
-    ATH_MSG_FATAL("readFileOfTimeWindowOffset(): Could not find file " << file_name.c_str() );
+    ATH_MSG_FATAL("readFileOfTimeWindowOffset(): Could not find file " << file_name );
     return StatusCode::FAILURE;
   }
 
   // Open the sTGC_Digitization_timeOffsetStrip.dat file
-  std::ifstream ifs;
-  ifs.open(file_path.c_str(), std::ios::in);
+  std::ifstream ifs{file_path, std::ios::in};
   if(ifs.bad()) {
-    ATH_MSG_FATAL("sTgcDigitMaker: Failed to open time of arrival file " << file_name.c_str() );
+    ATH_MSG_FATAL("Failed to open time of arrival file " << file_name );
     return StatusCode::FAILURE;
   }
 
@@ -1083,12 +825,10 @@ StatusCode sTgcDigitMaker::readFileOfTimeOffsetStrip() {
   // The number of parameters, 6, corresponds to the number of lines to be read
   // from sTGC_Digitization_timeOffsetStrip.dat.
   // Setting the default offset to 0 ns.
-  const int N_PAR = 6;
-  m_timeOffsetStrip.resize(N_PAR, 0.0);
 
   // Read the input file
   std::string line;
-  int index{0};
+  size_t index{0};
   double value{0.0};
   while (std::getline(ifs, line)) {
     std::string key;
@@ -1096,31 +836,16 @@ StatusCode sTgcDigitMaker::readFileOfTimeOffsetStrip() {
     iss >> key;
     if (key.compare("strip") == 0) {
       iss >> index >> value;
-      if ((index < 0) || (index >= N_PAR)) continue;
+      if (index >= m_timeOffsetStrip.size()) continue;
       m_timeOffsetStrip.at(index) = value;
     }
   }
-
-  // Close the file
-  ifs.close();
   return StatusCode::SUCCESS;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++
-double sTgcDigitMaker::getTimeOffsetStrip(int neighbor_index) const {
-  if ((!m_timeOffsetStrip.empty()) && (neighbor_index >= 0)) {
-    // Return the last element if out of range
-    if (neighbor_index >= static_cast<int>(m_timeOffsetStrip.size()) ) {
-      return m_timeOffsetStrip.back();
-    }
-    return m_timeOffsetStrip.at(neighbor_index);
-  } else {
-    ATH_MSG_DEBUG("either attempting to get strip's time offset with negative "
-                  "neighbor index," << neighbor_index
-                  << ", or time offset container is empty: " << m_timeOffsetStrip.size()
-                  << ". Returning an offset of 0 ns.");
-  }
-  return 0.0;
+double sTgcDigitMaker::getTimeOffsetStrip(size_t neighbor_index) const {
+    return m_timeOffsetStrip.at(std::min(neighbor_index, m_timeOffsetStrip.size() -1));
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++
