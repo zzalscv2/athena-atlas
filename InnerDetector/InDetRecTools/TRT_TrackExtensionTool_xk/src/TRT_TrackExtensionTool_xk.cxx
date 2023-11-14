@@ -55,11 +55,9 @@ InDet::TRT_TrackExtensionTool_xk::TRT_TrackExtensionTool_xk
     m_usedriftrad     (true),
     m_parameterization(true),
     m_scale_error     (2.),
-    m_fieldmode       ("MapSolenoid"),
-    m_trtmanager      ("TRT")
+    m_fieldmode       ("MapSolenoid")
 {
   declareInterface<ITRT_TrackExtensionTool>(this);
-  declareProperty("TrtManagerLocation"     ,m_trtmanager      );
   declareProperty("RoadWidth"              ,m_roadwidth       );
   declareProperty("ZVertexHalfWidth"       ,m_zVertexWidth    );
   declareProperty("maxImpactParameter"     ,m_impact          );

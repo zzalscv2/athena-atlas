@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -160,7 +160,6 @@ namespace InDet{
       bool                             m_parameterization; // Use table of min number DCs
       double                           m_scale_error    ; // Scalefactor for hit uncertainty
       std::string                      m_fieldmode      ; // Mode of magnetic field
-      std::string                      m_trtmanager     ; // Name of TRT det. manager
 
       Trk::MagneticFieldProperties     m_fieldprop      ; // Magnetic field properties
       SG::ReadHandleKey<TRT_DriftCircleContainer> m_trtname {this,"TRT_ClustersContainer","TRT_DriftCircles","RHK to retrieve TRT_DriftCircleContainer"};

@@ -9,23 +9,11 @@ def TRT_TrackExtensionToolCosmicsCfg(
         flags, name='TRT_TrackExtensionToolCosmics', **kwargs):
     acc = ComponentAccumulator()
 
-    if 'Propagator' not in kwargs:
-        from TrkConfig.TrkExRungeKuttaPropagatorConfig import InDetPropagatorCfg
-        InDetPropagator = acc.popToolsAndMerge(InDetPropagatorCfg(flags))
-        acc.addPublicTool(InDetPropagator)
-        kwargs.setdefault("Propagator", InDetPropagator)
-
     if 'Extrapolator' not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
         InDetExtrapolator = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags))
         acc.addPublicTool(InDetExtrapolator)
         kwargs.setdefault("Extrapolator", InDetExtrapolator)
-
-    if 'RIOonTrackToolYesDr' not in kwargs:
-        from InDetConfig.TRT_DriftCircleOnTrackToolConfig import (
-            TRT_DriftCircleOnTrackUniversalToolCosmicsCfg)
-        kwargs.setdefault("RIOonTrackToolYesDr", acc.popToolsAndMerge(
-            TRT_DriftCircleOnTrackUniversalToolCosmicsCfg(flags)))
 
     if 'RIOonTrackToolNoDr' not in kwargs:
         from InDetConfig.TRT_DriftCircleOnTrackToolConfig import (
@@ -44,13 +32,6 @@ def TRT_TrackExtensionToolCosmicsCfg(
 def TRT_TrackExtensionToolPhaseCfg(
         flags, name='TRT_TrackExtensionToolPhase', **kwargs):
     acc = ComponentAccumulator()
-
-    if 'RIOonTrackToolYesDr' not in kwargs:
-        from InDetConfig.TRT_DriftCircleOnTrackToolConfig import (
-            TRT_DriftCircleOnTrackUniversalToolCfg)
-        kwargs.setdefault("RIOonTrackToolYesDr", acc.popToolsAndMerge(
-            TRT_DriftCircleOnTrackUniversalToolCfg(flags)))
-
     kwargs.setdefault("TRT_ClustersContainer", 'TRT_DriftCirclesUncalibrated')
     kwargs.setdefault("RoadWidth", 20.0)
     acc.setPrivateTools(acc.popToolsAndMerge(

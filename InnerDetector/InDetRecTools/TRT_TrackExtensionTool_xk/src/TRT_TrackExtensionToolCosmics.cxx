@@ -31,21 +31,15 @@
 InDet::TRT_TrackExtensionToolCosmics::TRT_TrackExtensionToolCosmics
 (const std::string& t,const std::string& n,const IInterface* p)
   : AthAlgTool(t,n,p),
-    m_minNumberDCs    (9),
     m_roadwidth       (10.),
-    m_roadwidth_locz  (10.),
-    m_trtmanager      ("TRT")
+    m_roadwidth_locz  (10.)
 {
 
   declareInterface<ITRT_TrackExtensionTool>(this);
 
-  declareProperty("TrtManagerLocation"   ,m_trtmanager     );
   declareProperty("RoadWidth"            ,m_roadwidth      );
   declareProperty("BoundaryLocZTolerance",m_roadwidth_locz );
   declareProperty("SearchNeighbour"      ,m_searchNeighbour=false);
-  declareProperty("MinNumberDriftCircles",m_minNumberDCs   );
-  declareProperty("BoundaryCheck"        ,m_boundarycheck=false);
-
 
  }
 
@@ -72,15 +66,6 @@ StatusCode InDet::TRT_TrackExtensionToolCosmics::initialize()
     return StatusCode::FAILURE;
   }
 
-
-  // Get RIO_OnTrack creator with drift time information
-  //
-  if(m_riontrackD.retrieve().isFailure()) {
-    ATH_MSG_FATAL("Failed to retrieve tool "<< m_riontrackD);
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_DEBUG("Retrieved tool " << m_riontrackD);
-
   // Get RIO_OnTrack creator without drift time information
   //
   if(m_riontrackN.retrieve().isFailure()) {
@@ -90,7 +75,6 @@ StatusCode InDet::TRT_TrackExtensionToolCosmics::initialize()
   ATH_MSG_DEBUG("Retrieved tool " << m_riontrackN);
 
   ATH_CHECK( m_extrapolator.retrieve() );
-  ATH_CHECK( m_propagator.retrieve() );
 
   if ((detStore()->retrieve(m_trtid)).isFailure()) {
     ATH_MSG_FATAL("Problem retrieving TRTID helper");

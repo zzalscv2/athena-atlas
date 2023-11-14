@@ -1271,14 +1271,8 @@ def getInDetTrackSummaryToolNoHoleSearch(name='InDetTrackSummaryToolNoHoleSearch
 def getInDetTRT_ExtensionToolCosmics(name='InDetTRT_ExtensionToolCosmics',**kwargs) :
     the_name = makeName( name, kwargs)
 
-    if 'Propagator' not in kwargs :
-        kwargs=setDefaults(kwargs, Propagator            = getInDetPropagator())
-
     if 'Extrapolator' not in kwargs :
         kwargs=setDefaults(kwargs, Extrapolator          = getInDetExtrapolator())
-
-    if 'RIOonTrackToolYesDr' not in kwargs :
-        kwargs=setDefaults(kwargs, RIOonTrackToolYesDr   = getInDetTRT_DriftCircleOnTrackUniversalToolCosmics())
 
     if 'RIOonTrackToolNoDr' not in kwargs :
         kwargs=setDefaults(kwargs, RIOonTrackToolNoDr    = getInDetTRT_DriftCircleOnTrackNoDriftTimeTool())
@@ -1293,9 +1287,6 @@ def getInDetTRT_ExtensionToolCosmics(name='InDetTRT_ExtensionToolCosmics',**kwar
     return InDet__TRT_TrackExtensionToolCosmics(name                  = the_name, **kwargs)
 
 def getInDetTRT_ExtensionToolPhase(name='InDetTRT_ExtensionToolPhase', **kwargs) :
-    if 'RIOonTrackToolYesDr' not in kwargs :
-        kwargs=setDefaults(kwargs, RIOonTrackToolYesDr   = getInDetTRT_DriftCircleOnTrackUniversalTool())
-
     from InDetRecExample.InDetKeys import InDetKeys
     return getInDetTRT_ExtensionToolCosmics( name,
                                              **setDefaults(kwargs,
