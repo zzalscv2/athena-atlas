@@ -31,8 +31,12 @@ namespace {
 }
 namespace MuonGM {
 
-    MuonReadoutElement::MuonReadoutElement(GeoVFullPhysVol* pv, MuonDetectorManager* mgr, Trk::DetectorElemType detType) :
-        TrkDetElementBase(pv), AthMessaging{to_string(detType)+"MuonReadoutElement"}, m_type{detType}, m_muon_mgr{mgr} {
+    MuonReadoutElement::MuonReadoutElement(GeoPVLink pv, MuonDetectorManager* mgr, Trk::DetectorElemType detType) :
+        TrkDetElementBase(dynamic_cast<GeoVFullPhysVol*>(pv.operator->())), 
+        AthMessaging{to_string(detType)+"MuonReadoutElement"}, 
+        m_physVol{pv},
+        m_type{detType}, 
+        m_muon_mgr{mgr} {
             if (!m_idHelperSvc.retrieve().isSuccess()) {
                 ATH_MSG_FATAL("Failed to retrieve the MuonIdHelperSvc");
                 throw std::runtime_error("Invalid MuonIdHelperSvc");
