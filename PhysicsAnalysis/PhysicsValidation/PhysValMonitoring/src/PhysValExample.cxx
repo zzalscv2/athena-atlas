@@ -51,6 +51,7 @@ namespace PhysVal {
     m_muonPlots(nullptr, "Summary/Muon/", "Muon"),
     m_tauPlots(nullptr, "Summary/Tau/", "Tau"),
     m_trkvtxPlots(nullptr, "Summary/TrackAndVertex/"),
+    m_evtPlots(nullptr, "EventInfo/"),
     m_metPlots(nullptr, "Summary/MET/", "RefFinal"),
     m_btagPlots(nullptr, "Summary/BTag/", "IP3D")
   {
@@ -95,24 +96,24 @@ namespace PhysVal {
     return StatusCode::SUCCESS;      
   }
 
-  StatusCode PhysValExample::bookHistograms()
- {
-      ATH_MSG_INFO ("Booking hists " << name() << "...");      
+  StatusCode PhysValExample::bookHistograms() {
+    ATH_MSG_INFO("Booking hists " << name() << "...");
 
-      if (m_detailLevel >= 10) {
-	ATH_CHECK(book(m_jetPlots));
-	ATH_CHECK(book(m_btagPlots));
- 	ATH_CHECK(book(m_elecPlots));
- 	ATH_CHECK(book(m_photonPlots));
- 	ATH_CHECK(book(m_muonPlots));
- 	ATH_CHECK(book(m_tauPlots));
- 	ATH_CHECK(book(m_trkvtxPlots));
- 	ATH_CHECK(book(m_metPlots));
-      }
+    if (m_detailLevel >= 10) {
+      ATH_CHECK(book(m_jetPlots));
+      ATH_CHECK(book(m_btagPlots));
+      ATH_CHECK(book(m_elecPlots));
+      ATH_CHECK(book(m_photonPlots));
+      ATH_CHECK(book(m_muonPlots));
+      ATH_CHECK(book(m_tauPlots));
+      ATH_CHECK(book(m_trkvtxPlots));
+      ATH_CHECK(book(m_evtPlots));
+      ATH_CHECK(book(m_metPlots));
+    }
 
-      return StatusCode::SUCCESS;      
- }
-  
+    return StatusCode::SUCCESS;
+  }
+
   StatusCode PhysValExample::fillHistograms()
   {
     ATH_MSG_INFO ("Filling hists " << name() << "...");
@@ -122,6 +123,7 @@ namespace PhysVal {
     // event Info
     const xAOD::EventInfo* event(nullptr);
     ATH_CHECK(evtStore()->retrieve(event, "EventInfo"));
+    m_evtPlots.fill(event);
     
     // Jets
     int nbtag(0);
@@ -177,7 +179,7 @@ namespace PhysVal {
     for (auto vtx : *vtxs) m_trkvtxPlots.fill(vtx,event);
 
 
-    m_trkvtxPlots.fill(trks->size(), vtxs->size(), event->averageInteractionsPerCrossing(),event);
+    m_trkvtxPlots.fill(trks->size(), vtxs->size(), event);
 
 
 

@@ -23,6 +23,7 @@
 #include "TrkAndVtxPlots.h"
 #include "METPlots.h"
 #include "BTagPlots.h"
+#include "EventInfoPlots.h"
 
 // Root includes
 #include "TH1.h"
@@ -90,6 +91,7 @@ class PhysValExample
   PhysVal::KinematicsPlots m_muonPlots;
   PhysVal::KinematicsPlots m_tauPlots;
   PhysVal::TrkAndVtxPlots m_trkvtxPlots;
+  PhysVal::EventInfoPlots m_evtPlots;
   PhysVal::METPlots m_metPlots;
   PhysVal::BTagPlots m_btagPlots;
 

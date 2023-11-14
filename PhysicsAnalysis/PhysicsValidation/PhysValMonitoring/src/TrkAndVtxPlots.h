@@ -18,7 +18,7 @@ class TrkAndVtxPlots:public PlotBase {
       TrkAndVtxPlots(PlotBase* pParent, const std::string& sDir);
       void fill(const xAOD::TrackParticle* trk,const xAOD::EventInfo* evt);
       void fill(const xAOD::Vertex* vtx,const xAOD::EventInfo* evt);
-      void fill(unsigned int ntrack, unsigned int nvertex, float pileup = 0,const xAOD::EventInfo* evt=NULL);
+      void fill(unsigned int ntrack, unsigned int nvertex, const xAOD::EventInfo* evt=NULL);
       
       // Reco only information
       TH1* ntrk = nullptr;
@@ -27,8 +27,6 @@ class TrkAndVtxPlots:public PlotBase {
       TH1* vtx_x = nullptr;
       TH1* vtx_y = nullptr;
       TH1* vtx_z = nullptr;
-
-      TH1* mu = nullptr;
 
     private:
       virtual void initializePlots();

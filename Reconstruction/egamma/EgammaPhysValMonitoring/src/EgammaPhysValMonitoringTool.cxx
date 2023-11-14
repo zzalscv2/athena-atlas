@@ -441,10 +441,7 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoElecHistograms(const xAOD::Truth
     }
   m_oElectronValidationPlots.m_oCentralElecPlots.nParticles->Fill(numofele);
   m_oElectronValidationPlots.m_oCentralElecPlots.nParticles_weighted->Fill(numofele,weight);
-  
-  m_oElectronValidationPlots.mu_average->Fill(eventInfo->averageInteractionsPerCrossing(), weight);
-  m_oElectronValidationPlots.mu_actual->Fill(eventInfo->actualInteractionsPerCrossing(), weight);
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -516,10 +513,7 @@ StatusCode EgammaPhysValMonitoringTool::fillLRTElecHistograms(const xAOD::TruthP
   
   m_oLRTElectronValidationPlots.m_oCentralElecPlots.nParticles->Fill(numofele);
   m_oLRTElectronValidationPlots.m_oCentralElecPlots.nParticles_weighted->Fill(numofele,weight);
-  
-  m_oLRTElectronValidationPlots.mu_average->Fill(eventInfo->averageInteractionsPerCrossing(), weight);
-  m_oLRTElectronValidationPlots.mu_actual->Fill(eventInfo->actualInteractionsPerCrossing(), weight);
-  
+
   return StatusCode::SUCCESS;
 }
 
