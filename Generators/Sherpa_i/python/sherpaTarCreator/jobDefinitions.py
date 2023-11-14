@@ -228,6 +228,7 @@ def mkIntegrateJob(options, ecm, prevJob):
                                           +sftlayer+"/MCGenerators/lhapdf/*/${LCG_PLATFORM}/lib:" \
                                           +sftlayer+"/fastjet/*/${LCG_PLATFORM}/lib:" \
                                           +olpath+"/lib:"+olpath+"/proclib:" \
+                                          +options.sherpaInstallPath+"/lib64/SHERPA-MC:" \
                                           +options.sherpaInstallPath+"/lib/SHERPA-MC:$LD_LIBRARY_PATH"]
 
     cmdLineOpts = "EVENTS=0 FRAGMENTATION=Off MI_HANDLER=None"
