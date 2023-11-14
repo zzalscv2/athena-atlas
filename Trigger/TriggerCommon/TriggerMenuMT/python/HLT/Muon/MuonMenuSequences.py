@@ -413,6 +413,7 @@ def muEFSAAlgSequenceCfg(flags, is_probe_leg=False):
     return (selAccMS, sequenceOut)
 
 
+@AccumulatorCache
 def muEFSASequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFSAAlgSequenceCfg(flags, is_probe_leg)
@@ -493,6 +494,7 @@ def muEFCBAlgSequenceCfg(flags, selCAName='', is_probe_leg=False):
     return (selAccCB, muNames.EFCBName)
 
 
+@AccumulatorCache
 def muEFCBSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFCBAlgSequenceCfg(flags, '', is_probe_leg)
