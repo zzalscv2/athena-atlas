@@ -32,8 +32,6 @@ class ElectronValidationPlots:public PlotBase {
       Egamma::KinematicsPlots         m_oTruthPromptElecPlots;
        
       TH1* author;
-      TH1* mu_average;
-      TH1* mu_actual;
       TProfile* res_et;
       TProfile* res_eta;
       TProfile* res_et_cut;
