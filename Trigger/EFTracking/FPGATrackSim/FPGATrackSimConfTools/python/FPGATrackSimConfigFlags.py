@@ -4,7 +4,8 @@ def createFPGATrackSimConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     cf = AthConfigFlags()
     cf.addFlag('algoTag', 'Hough')
-    cf.addFlag('wrapperFileName', "Wrapper.root")
+    cf.addFlag('wrapperFileName', [])
+    cf.addFlag('mapsDir', '__MUST_BE_SET__')
     cf.addFlag('wrapperMetaData', "Default Meta Data")
 
     def __httHough1DFlags():
@@ -113,7 +114,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('lrtDoubletQptBins', 216)
     cf.addFlag('lrtMonPhiRange', (0.2, 0.5))
     cf.addFlag('lrtMonD0Range', (-100,100))
-    cf.addFlag('lrtMonZ0Range', (-300,300))
+    cf.addFlag('lrtMonZ0Range', (-300,300)) 
 
     # FPGATrackSimLogicalHistProcessAlg
     # cf.addFlag('etaPatternRoadFilter', None) #TO DO (will be uncomment when the value is known)

@@ -53,11 +53,12 @@ void FPGATrackSimRegionMap::allocateMap(ifstream & fin)
     bool ok = true;
 
     ok = ok && getline(fin, line);
-    ANA_MSG_DEBUG(line);
+    ANA_MSG_DEBUG(line << " <  " << ok);
 
     istringstream sline(line);
     ok = ok && (sline >> towerKey >> m_nregions);
     ok = ok && (towerKey == "towers");
+
 
     if (!ok) ANA_MSG_FATAL("Error reading header");
 

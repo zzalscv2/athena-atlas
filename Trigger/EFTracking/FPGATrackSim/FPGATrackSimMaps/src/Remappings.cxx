@@ -4,9 +4,22 @@
 #include "FPGATrackSimMaps/Remappings.h"
 
 
+
+/**
+* @brief extracts geo version stirng from 'GeometryVersion':'ATLAS-P2-RUN4-03-00-00'
+*/
+// std::string getGeo(const std::string& line) {
+//     const size_t start = line.find(':')+2;
+//     const size_t end = line.rfind('\'');
+//     return line.substr(start, end-start);
+// }
+
 std::vector<uint32_t> Remappings::diskIndices(const std::string& geoKey) {
     const std::string recentKey("ATLAS-P2-RUN4");
     const std::vector<uint32_t> recentMapping({0, 15, 21, 44, 50, 61, 69, 77, 86});
+
+    // const std::string geoKey = getGeo(geoLine);
+
     if ( geoKey.compare(0, recentKey.size(), recentKey) == 0 ) {
         return recentMapping;        
     } else if ( geoKey == "ATLAS-P2-ITK-22-02-00" ) {
