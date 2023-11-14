@@ -21,7 +21,8 @@ CP::TrigGlobalEfficiencyAlg::TrigGlobalEfficiencyAlg(const std::string &name,
 StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
 {
 
-  if (m_trigList_2015.empty() && m_trigList_2016.empty() && m_trigList_2017.empty() && m_trigList_2018.empty() && m_trigList_2022.empty()) {
+  if (m_trigList_2015.empty() && m_trigList_2016.empty() && m_trigList_2017.empty() && m_trigList_2018.empty() 
+      && m_trigList_2022.empty() & m_trigList_2023.empty() & m_trigList_2024.empty() & m_trigList_2025.empty()) {
     ATH_MSG_ERROR("A list of triggers needs to be provided");
     return StatusCode::FAILURE;
   }
@@ -65,6 +66,9 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
   trigMap["2017"] = m_trigList_2017;
   trigMap["2018"] = m_trigList_2018;
   trigMap["2022"] = m_trigList_2022;
+  trigMap["2023"] = m_trigList_2023;
+  trigMap["2024"] = m_trigList_2024;
+  trigMap["2025"] = m_trigList_2025;
 
   // combine all the trigger legs in the expected format
   std::map<std::string, std::string> triggerCombination;

@@ -85,6 +85,9 @@ class TriggerAnalysisBlock (ConfigBlock):
         alg = config.createAlgorithm( 'CP::TrigGlobalEfficiencyAlg', 'TrigGlobalSFAlg' )
         if config.geometry() == LHCPeriod.Run3:
             alg.triggers_2022 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2022',[])]
+            alg.triggers_2023 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2023',[])]
+            alg.triggers_2024 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2024',[])]
+            alg.triggers_2025 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2025',[])]
         else:
             alg.triggers_2015 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2015',[])]
             alg.triggers_2016 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2016',[])]
