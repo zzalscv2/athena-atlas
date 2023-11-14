@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -30,7 +30,7 @@ public:
   void setText ( const QString &  );//Forbidden!! Only here since Designer generated code needs it in public.
   static void setColButtonProperties(QPushButton*,const QColor& col,int dim);
 
-public slots:
+public Q_SLOTS:
   void launchColorChooser();
   void setColor(const QColor&);
   void setDimension(int dim);
@@ -38,7 +38,7 @@ signals:
   void colorChanged(const QColor&);
   void aboutToShowColorDialog();
 
-protected slots:
+protected Q_SLOTS:
   void updateButton();
 private:
   class Imp;

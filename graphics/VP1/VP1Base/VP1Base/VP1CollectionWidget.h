@@ -93,7 +93,7 @@ signals:
   void visibleStdCollectionTypesChanged(const QList<qint32>&);
   void visibleStdCollectionsChanged(const QList<VP1StdCollection*>&);
   void visibleContentsChanged();//We need it to resize scroll areas
-protected slots:
+protected Q_SLOTS:
   void possibleChange_visibleStdCollections();
 
 private:

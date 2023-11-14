@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -47,7 +47,7 @@ public:
   QStringList viewIDs() const;
   QList<QPair<QString,QString> > viewIDsAndIconUrls() const;
 
-public slots:
+public Q_SLOTS:
   void setPickMode();
   void setChangeViewMode();
   void setSeekMode();
@@ -57,7 +57,7 @@ signals:
   void currentViewAboutToChange(VP1GraphicsView*);//Emitted just before the view changes. Parameter is the view which will be shown.
   void currentViewChanged();//Just after the view changed.
 
-private slots:
+private Q_SLOTS:
   void changeViewButtonClicked();
 private:
   VP12DExaminerViewer( const VP12DExaminerViewer & );

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1BASE_ANIMATIONSEQUENCER_H
@@ -45,7 +45,7 @@ signals:
   void animationFinishedSuccessfully();
   void clipVolumePercentOfATLAS(double);
 
-private slots:
+private Q_SLOTS:
 
   // Next animation frame:
   void nextAnimationFrame();

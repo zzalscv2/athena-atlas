@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -96,11 +96,11 @@ public:
 signals:
   void lastAppliedChanged(); // emitted when something changes
 
-public slots:
+public Q_SLOTS:
   void showEditMaterialDialog();
   void setMaterialText(const QString&);//If set to XXX, title will display "Edit Material XXX"
 
-protected slots:
+protected Q_SLOTS:
   void updatePreview();
   void updatePreviewSceneAndBgd();
   void apply();
