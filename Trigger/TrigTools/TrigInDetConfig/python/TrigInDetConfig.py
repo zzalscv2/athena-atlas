@@ -2,6 +2,7 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
@@ -62,6 +63,7 @@ def trackFTFConverterCfg(flags, signature):
                             flags.Tracking.ActiveConfig.tracks_FTF)
 
 
+@AccumulatorCache
 def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_view=True ):
 
   log = logging.getLogger("trigInDetFastTrackingCfg")
@@ -80,6 +82,7 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
   return acc
 
 
+@AccumulatorCache
 def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inputs=[]):
   from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
   viewname = "VDVInDetLRT" if in_view else None
@@ -113,6 +116,7 @@ def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inpu
 # precision tracking
 ############################################################################################################################
 
+@AccumulatorCache
 def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
  
   """ Generates precision tracking config, it is a primary config function """
