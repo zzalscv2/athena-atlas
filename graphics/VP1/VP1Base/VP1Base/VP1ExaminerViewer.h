@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -92,7 +92,7 @@ public:
 	float stereo_parallax_camera;
 	float stereo_offset_viewer;
 
-	//public slots:
+	//public Q_SLOTS:
 
 	// stereographic view slots
 	void setStereoOffsetSlot(float offset);
@@ -134,7 +134,7 @@ private:
 
 class VP1ExaminerViewer_SignalCatcher : public QObject {
 	Q_OBJECT
-	private slots:
+	private Q_SLOTS:
 	void catchSignal();
 	private:
 	VP1ExaminerViewer::Imp * m_d;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -67,7 +67,7 @@ public:
 
   //Node clicked stuff?
 
-public slots:
+public Q_SLOTS:
   void setVisible(bool);//will also update checkbox, etc.
   void possibleChangeMatTranspOrBrightness();
 protected:

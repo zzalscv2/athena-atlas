@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -33,7 +33,7 @@ public:
   virtual ~VisibleObjectToMaterialHelper_Base() {}
 signals:
   void visibleObjectsChanged();
-private slots:
+private Q_SLOTS:
   virtual void emitSignal() = 0;
 };
 

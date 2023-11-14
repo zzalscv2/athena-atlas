@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -37,7 +37,7 @@ public:
   enum Mode { PICK, CHANGEVIEW, SEEK, DRAGZOOM, DRAGZOOMHOLD };
   Mode mode() const;
 
-public slots:
+public Q_SLOTS:
 
   //What collections to show:
   void addItemCollection(VP1GraphicsItemCollection*);
@@ -98,7 +98,7 @@ private:
   friend class HighLightItem;
   void emitSelectionChanged(VP1GraphicsItemCollection*);
 
-private slots:
+private Q_SLOTS:
   void updateZoomAnimation();
 };
 
