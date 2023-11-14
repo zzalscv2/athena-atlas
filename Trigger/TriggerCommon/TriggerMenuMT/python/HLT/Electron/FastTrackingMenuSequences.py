@@ -4,9 +4,11 @@
 
 # menu components
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
-from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 
+
+@AccumulatorCache
 def fastTrackingSequenceCfg(flags, variant='', is_probe_leg = False):
     """ second step:  tracking....."""
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys

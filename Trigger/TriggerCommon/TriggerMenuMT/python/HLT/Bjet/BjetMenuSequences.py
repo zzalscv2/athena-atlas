@@ -1,26 +1,14 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-#
 
-# menu components
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
 from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
-# ====================================================================================================
-#    Get MenuSequences
-# ====================================================================================================
 
 
-# ====================================================================================================
-#    step 1: This is Jet code. Not here!
-# ====================================================================================================
-
-# ====================================================================================================
-#    step 2: Second stage of fast tracking, Precision tracking, and flavour tagging
-# ====================================================================================================
-
-# todo: pass in more information, i.e. jet collection name
+@AccumulatorCache
 def getBJetSequenceCfg(flags, jc_name=None):
     if not jc_name:
         raise ValueError("jet collection name is empty - pass the full HLT jet collection name to getBJetSequenceCfg().")
