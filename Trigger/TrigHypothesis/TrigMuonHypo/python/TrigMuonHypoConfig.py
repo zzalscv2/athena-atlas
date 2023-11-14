@@ -3,10 +3,6 @@
 
 # import Hypo Algs/Tools
 from AthenaConfiguration.ComponentFactory import CompFactory # tools are imported from the factory, (NewJO)
-from TrigMuonHypo.TrigMuonHypoConf import (  # noqa: F401 (import all into this module)
-    TrigMuonEFTrackIsolationHypoAlg, TrigMuonEFTrackIsolationHypoTool,
-    TrigMuonEFInvMassHypoTool, TrigMuonEFIdtpInvMassHypoTool,
-)
 
 # import monitoring
 from TrigMuonHypo.TrigMuonHypoMonitoring import (
@@ -933,9 +929,9 @@ def TrigMuonEFTrackIsolationHypoToolFromDict( flags, chainDict ) :
         thresholds = 'passthrough'
     else:
         thresholds = cparts[0]['isoInfo']
-    config = TrigMuonEFTrackIsolationHypoConfig()
 
-    tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds )
+    tool = TrigMuonEFTrackIsolationHypoCfg(flags, chainDict['chainName'], thresholds)
+
 
     if monitorAll:
         tool.MonTool = TrigMuonEFTrackIsolationMonitoring(flags, 'TrigMuonEFTrackIsolationHypoTool/'+chainDict['chainName'])
@@ -945,45 +941,37 @@ def TrigMuonEFTrackIsolationHypoToolFromDict( flags, chainDict ) :
 
     return tool
 
-class TrigMuonEFTrackIsolationHypoConfig(object) :
+def TrigMuonEFTrackIsolationHypoCfg(flags, name, isoCut, **kwargs) :
 
-    log = logging.getLogger('TrigMuonEFTrackIsolationHypoConfig')
+        
+    if(isoCut=='passthrough') :
+        kwargs.setdefault("AcceptAll", True)
 
-    def ConfigurationHypoTool(self, toolName, isoCut):
+    else:
+        ptcone03 = trigMuonEFTrkIsoThresholds[ isoCut ]
+        
+        kwargs.setdefault("PtCone02Cut", 0.0)
+        kwargs.setdefault("PtCone03Cut", ptcone03)
+        kwargs.setdefault("AcceptAll", False)
 
-        tool = CompFactory.TrigMuonEFTrackIsolationHypoTool(toolName)
-
-        try:
-            if(isoCut=='passthrough') :
-                tool.AcceptAll = True
-
-            else:
-                ptcone03 = trigMuonEFTrkIsoThresholds[ isoCut ]
-
-                tool.PtCone02Cut = 0.0
-                tool.PtCone03Cut = ptcone03
-                tool.AcceptAll = False
-
-                if 'ms' in isoCut:
-                    tool.RequireCombinedMuon = False
-                    tool.DoAbsCut = True
-                else:
-                    tool.RequireCombinedMuon = True
-                    tool.DoAbsCut = False
+    if 'ms' in isoCut:
+        kwargs.setdefault("RequireCombinedMuon", False)
+        kwargs.setdefault("DoAbsCut", True)
+    else:
+        kwargs.setdefault("RequireCombinedMuon", True)
+        kwargs.setdefault("DoAbsCut", False)
 
 
-                if 'var' in isoCut :
-                    tool.useVarIso = True
-                else :
-                    tool.useVarIso = False
-        except LookupError:
-            if(isoCut=='passthrough') :
-                log.debug('Setting passthrough')
-                tool.AcceptAll = True
-            else:
-                log.error('isoCut = %s', isoCut)
-                raise Exception('TrigMuonEFTrackIsolation Hypo Misconfigured')
-        return tool
+    if 'var' in isoCut :
+        kwargs.setdefault("useVarIso", True)
+    else :
+        kwargs.setdefault("useVarIso", False)
+
+    tool = CompFactory.TrigMuonEFTrackIsolationHypoTool(name, **kwargs)
+    return tool
+
+def TrigMuonEFTrackIsolationHypoAlgCfg(flags, name="TrigMuonEFTrackIsolationHypoAlg", **kwargs):
+    return CompFactory.TrigMuonEFTrackIsolationHypoAlg(name, **kwargs)
 
 def TrigMuonEFInvMassHypoToolFromDict( flags, chainDict ) :
     cparts = [i for i in chainDict['chainParts'] if i['signature']=='Muon']
@@ -993,8 +981,8 @@ def TrigMuonEFInvMassHypoToolFromDict( flags, chainDict ) :
         osCut=True
     else:
         osCut = False
-    config = TrigMuonEFInvMassHypoConfig()
-    tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds, osCut )
+
+    tool = TrigMuonEFInvMassHypoCfg( flags, chainDict['chainName'], thresholds, SelectOppositeSign=osCut )
 
     if monitorAll:
         tool.MonTool = TrigMuonEFInvMassHypoMonitoring(flags, "TrigMuonEFInvMassHypoTool/"+chainDict['chainName'])
@@ -1004,29 +992,15 @@ def TrigMuonEFInvMassHypoToolFromDict( flags, chainDict ) :
 
     return tool
 
-class TrigMuonEFInvMassHypoConfig(object) :
+def TrigMuonEFInvMassHypoCfg(flags, toolName, thresholds, **kwargs):
 
-    log = logging.getLogger('TrigMuonEFInvMassHypoConfig')
+        massWindow = trigMuonEFInvMassThresholds[thresholds]
 
-    def ConfigurationHypoTool(self, toolName, thresholds, osCut):
+        kwargs.setdefault("InvMassLow", massWindow[0])
+        kwargs.setdefault("InvMassHigh", massWindow[1])
+        kwargs.setdefault("AcceptAll", False)
 
-        tool = CompFactory.TrigMuonEFInvMassHypoTool(toolName)
-
-        try:
-            massWindow = trigMuonEFInvMassThresholds[thresholds]
-
-            tool.InvMassLow = massWindow[0]
-            tool.InvMassHigh = massWindow[1]
-            tool.AcceptAll = False
-            tool.SelectOppositeSign = osCut
-
-        except LookupError:
-            if(thresholds=='passthrough') :
-                log.debug('Setting passthrough')
-                tool.AcceptAll = True
-            else:
-                log.error('thresholds = %s', thresholds)
-                raise Exception('TrigMuonEFInvMass Hypo Misconfigured')
+        tool = CompFactory.TrigMuonEFInvMassHypoTool(toolName, **kwargs)
         return tool
 
 def TrigMuonEFIdtpHypoToolFromDict( flags, chainDict ) :

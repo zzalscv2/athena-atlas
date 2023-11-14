@@ -2,7 +2,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from ..Config.MenuComponents import MenuSequence, MenuSequenceCA, RecoFragmentsPool, algorithmCAToGlobalWrapper, SelectionCA, InViewRecoCA, InEventRecoCA
+from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, InEventRecoCA
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -10,9 +10,6 @@ from AthenaCommon.CFElements import parOR, seqAND
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 log = logging.getLogger(__name__)
-
-from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnIParticleROITool
 
 #muon container names (for RoI based sequences)
 from .MuonRecoSequences import muonNames
@@ -825,85 +822,76 @@ def efLateMuSequence(flags):
 ######################
 ### efMuiso step ###
 ######################
-def muEFIsoAlgSequence(flags, doMSiso=False):
+def muEFIsoAlgSequenceCfg(flags, doMSiso=False, is_probe_leg=False):
     name = ""
     if doMSiso:
         name = "MS"
-    efmuIsoViewsMaker = EventViewCreatorAlgorithm("IMefmuiso"+name)
-    newRoITool = ViewCreatorCentredOnIParticleROITool()
+
+
+    selAccIso = SelectionCA('EFMuIso'+name, isProbe=is_probe_leg)
+    
+    viewName="EFMuIsoReco"+name
+    if doMSiso:
+        roisWriteHandleKey = "Roi_MuonIsoMS"
+    else:
+        roisWriteHandleKey = recordable("HLT_Roi_MuonIso")
+
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
     IDConfig = getInDetTrigConfig("muonIso")
-    newRoITool.RoIEtaWidth=IDConfig.etaHalfWidth
-    newRoITool.RoIPhiWidth=IDConfig.phiHalfWidth
-    newRoITool.RoIZedWidth=IDConfig.zedHalfWidth
-    if doMSiso:
-        newRoITool.RoisWriteHandleKey = "Roi_MuonIsoMS"
-    else:
-        newRoITool.RoisWriteHandleKey = recordable("HLT_Roi_MuonIso")
-    #
-    efmuIsoViewsMaker.mergeUsingFeature = True
-    efmuIsoViewsMaker.RoITool = newRoITool
-    #
-    efmuIsoViewsMaker.Views = "MUEFIsoViewRoIs"+name
-    efmuIsoViewsMaker.InViewRoIs = "MUEFIsoRoIs"+name
-    #
-    efmuIsoViewsMaker.ViewFallThrough = True
-    # Muon specific
-    # TODO - this should be deprecated here and removed in the future, now that we mergeUsingFeature, each parent View should only have one muon.
-    # therefore the xAOD::Muon should be got via ViewFallThrough, rather than being copied in here as "IsoViewMuons"
-    efmuIsoViewsMaker.PlaceMuonInView = True
-    efmuIsoViewsMaker.InViewMuonCandidates = "IsoMuonCandidates"+name
-    efmuIsoViewsMaker.InViewMuons = "IsoViewMuons"+name
+
+    roiTool         = CompFactory.ViewCreatorCentredOnIParticleROITool(RoisWriteHandleKey = roisWriteHandleKey, RoIEtaWidth=IDConfig.etaHalfWidth,
+                                                                       RoIPhiWidth=IDConfig.phiHalfWidth,RoIZedWidth=IDConfig.zedHalfWidth)
+
+    recoIso = InViewRecoCA(name=viewName, RoITool = roiTool, isProbe=is_probe_leg, mergeUsingFeature=True,
+                          PlaceMuonInView=True, InViewMuons = "IsoViewMuons"+name, InViewMuonCandidates = "IsoMuonCandidates"+name)
+
 
     ### get EF reco sequence ###
-    from .MuonRecoSequences  import efmuisoRecoSequence
-    efmuisoRecoSequence, sequenceOut = efmuisoRecoSequence( flags, efmuIsoViewsMaker.InViewRoIs, efmuIsoViewsMaker.InViewMuons, doMSiso )
+    from .MuonRecoSequences  import efmuisoRecoSequenceCfg
+    sequenceOut = muNames.EFIsoMuonName+name
+    recoIso.mergeReco(efmuisoRecoSequenceCfg( flags, viewName+"RoIs", "IsoViewMuons"+name, doMSiso ))
 
-    efmuIsoViewsMaker.ViewNodeName = efmuisoRecoSequence.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=efmuIsoViewsMaker.name())[0]
+    robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix=viewName+'_probe' if is_probe_leg else viewName)
 
-    ### Define a Sequence to run for muIso ###
-    efmuIsoSequence = seqAND("efmuIsoSequence"+name, [ efmuIsoViewsMaker, robPrefetchAlg, efmuisoRecoSequence ] )
+    selAccIso.mergeReco(recoIso, robPrefetchCA = robPrefetchAlg)
 
-    return (efmuIsoSequence, efmuIsoViewsMaker, sequenceOut)
+    return (selAccIso, sequenceOut)
 
 def muEFIsoSequence(flags, is_probe_leg=False):
 
-    (efmuIsoSequence, efmuIsoViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(muEFIsoAlgSequence, flags)
+    (selAcc, sequenceOut) = muEFIsoAlgSequenceCfg(flags, False, is_probe_leg)
 
-    # set up hypo
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFTrackIsolationHypoAlg
-    trigmuefIsoHypo = TrigMuonEFTrackIsolationHypoAlg("EFMuisoHypoAlg")
-    trigmuefIsoHypo.EFMuonsName = sequenceOut
+    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFTrackIsolationHypoAlgCfg, TrigMuonEFTrackIsolationHypoToolFromDict
+    efmuisoHypo = TrigMuonEFTrackIsolationHypoAlgCfg( flags,
+                                                      name = 'EFMuisoHypoAlg',
+                                                      EFMuonsName = sequenceOut)
 
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFTrackIsolationHypoToolFromDict
+    selAcc.addHypoAlgo(efmuisoHypo)
+    
+    efmuisoSequence = MenuSequenceCA(flags, selAcc,
+                                     HypoToolGen = TrigMuonEFTrackIsolationHypoToolFromDict, isProbe=is_probe_leg)
 
-    return MenuSequence( flags,
-                         Sequence    = efmuIsoSequence,
-                         Maker       = efmuIsoViewsMaker,
-                         Hypo        = trigmuefIsoHypo,
-                         HypoToolGen = TrigMuonEFTrackIsolationHypoToolFromDict,
-                         IsProbe     = is_probe_leg )
+    return efmuisoSequence
+
 
 def muEFMSIsoSequence(flags, is_probe_leg=False):
 
-    (efmuIsoSequence, efmuIsoViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(muEFIsoAlgSequence, flags, doMSiso=True)
+    (selAcc, sequenceOut) = muEFIsoAlgSequenceCfg(flags, True, is_probe_leg)
 
-    # set up hypo
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFTrackIsolationHypoAlg
-    trigmuefIsoHypo = TrigMuonEFTrackIsolationHypoAlg("EFMuMSisoHypoAlg")
-    trigmuefIsoHypo.EFMuonsName = sequenceOut
+    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFTrackIsolationHypoAlgCfg, TrigMuonEFTrackIsolationHypoToolFromDict
+    efmuisoHypo = TrigMuonEFTrackIsolationHypoAlgCfg( flags,
+                                                      name = 'EFMuMSisoHypoAlg',
+                                                      EFMuonsName = sequenceOut)
 
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFTrackIsolationHypoToolFromDict
+    selAcc.addHypoAlgo(efmuisoHypo)
+    
+    efmuisoSequence = MenuSequenceCA(flags, selAcc,
+                                     HypoToolGen = TrigMuonEFTrackIsolationHypoToolFromDict, isProbe=is_probe_leg)
 
-    return MenuSequence( flags,
-                         Sequence    = efmuIsoSequence,
-                         Maker       = efmuIsoViewsMaker,
-                         Hypo        = trigmuefIsoHypo,
-                         HypoToolGen = TrigMuonEFTrackIsolationHypoToolFromDict,
-                         IsProbe     = is_probe_leg )
+    return efmuisoSequence
+
 
 ####################################################
 ##  Muon RoI Cluster Trigger for MS LLP Searches  ##
