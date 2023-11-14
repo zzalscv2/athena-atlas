@@ -50,7 +50,7 @@ namespace Amg {
         sstr<<"translation: "<<toString(transform.translation(), precision);
         printed = true;
     }
-    if (Amg::doesNotDeform(transform)) {
+    if (!Amg::doesNotDeform(transform)) {
         if (printed) sstr<<rotOffSet<<", ";
         sstr<<"rotation: {"<<toString(transform.linear()*Vector3D::UnitX(), precision)<<",";
         sstr<<toString(transform.linear()*Vector3D::UnitY(), precision)<<",";
