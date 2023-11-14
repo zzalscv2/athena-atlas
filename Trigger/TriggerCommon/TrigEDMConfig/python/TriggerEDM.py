@@ -428,7 +428,7 @@ def getHLTPreregistrationList():
     return l
 
 
-def getPreregistrationList(version=2):
+def getPreregistrationList(version=2, doxAODConversion=True):
     """
     List (Literally Python list) of trigger objects to be preregistered i.e. this objects we want for all levels
     version can be: '1 (Run1)', '2 (Run2)'
@@ -439,7 +439,10 @@ def getPreregistrationList(version=2):
         l = getHLTPreregistrationList()
     elif version==1:
         # remove duplicates while preserving order
-        l=list(dict.fromkeys(getL2PreregistrationList()+getEFPreregistrationList()+getHLTPreregistrationList()))
+        objs=getL2PreregistrationList()+getEFPreregistrationList()
+        if doxAODConversion:
+            objs += getHLTPreregistrationList()
+        l=list(dict.fromkeys(objs))
     else:
         raise RuntimeError("Invalid version=%s supplied to getPreregistrationList" % version)
     return l

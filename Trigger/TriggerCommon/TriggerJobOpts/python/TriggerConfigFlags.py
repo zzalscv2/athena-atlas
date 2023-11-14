@@ -172,6 +172,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.doEDMVersionConversion', False,
                   help='convert Run-1&2 EDM to Run-3 EDM')
 
+    flags.addFlag('Trigger.doxAODConversion', True,
+                  help=('convert Run-1 EDM to xAOD'))
+
     flags.addFlag('Trigger.doOnlineNavigationCompactification', True,
                   help='enable trigger Navigation compactification into a single collection')
 

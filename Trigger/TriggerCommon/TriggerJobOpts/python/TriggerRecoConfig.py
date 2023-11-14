@@ -254,7 +254,7 @@ def Run1Run2BSExtractionCfg( flags ):
 
     if flags.Trigger.decodeHLT:
         # Run-1: add xAOD conversion tool
-        if flags.Trigger.EDMVersion == 1:
+        if flags.Trigger.EDMVersion == 1 and flags.Trigger.doxAODConversion:
             extr.BStoxAOD = acc.popToolsAndMerge( Run1xAODConversionCfg(flags) )
 
         serialiserTool = CompFactory.TrigTSerializer()
@@ -266,7 +266,7 @@ def Run1Run2BSExtractionCfg( flags ):
         from TrigEDMConfig.TriggerEDM import getEDMLibraries
         extr.Navigation.Dlls = getEDMLibraries()            
         from TrigEDMConfig.TriggerEDM import getPreregistrationList
-        extr.Navigation.ClassesToPreregister = getPreregistrationList(flags.Trigger.EDMVersion)
+        extr.Navigation.ClassesToPreregister = getPreregistrationList(flags.Trigger.EDMVersion, flags.Trigger.doxAODConversion)
         from eformat import helper as efh
  
         if flags.Trigger.EDMVersion == 1:  # Run-1 has L2 and EF result
