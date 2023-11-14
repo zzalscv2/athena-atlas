@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -73,7 +73,7 @@ private:
   VP1AvailableToolsHelper( const VP1AvailableToolsHelper & );
   VP1AvailableToolsHelper & operator= ( const VP1AvailableToolsHelper & );
 
-private slots:
+private Q_SLOTS:
   void widgetDeleted(QObject*);//To automatically remove deleted widgets from internal lists.
   void update() const;//Called internally every 2 seconds. In future gaudi versions we can instead register callbacks to the toolSvc.
 };

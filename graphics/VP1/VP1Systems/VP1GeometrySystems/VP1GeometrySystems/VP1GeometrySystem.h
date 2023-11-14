@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1GEOMETRYSYSTEM_H
@@ -64,13 +64,13 @@ signals:
   //The Volname is either physical volume name, or, in case the former is absent, the logical volume name
   //The ::CopyNo suffix is added only when CopyNo is applicable
 
-public slots:
+public Q_SLOTS:
 
   void reiconizeToShowSpecificMuonChambers(const std::set<GeoPVConstLink>&);
   void orientViewToMuonChamber(const GeoPVConstLink& chamberPV);//Zooms/rotates to obtain orthogonal endview of to muon chamber
   void setCurvedSurfaceRealism(int);//Accepts values in the range 0..100.
   void muonChamberT0sChanged(const std::map<GeoPVConstLink, float>&,int);//!< The map is the dt0 per chamber, plus a label identifier, which by convention (!) is 0=Moore, 1=Muonboy
-protected slots:
+protected Q_SLOTS:
   void checkboxChanged();
   void updateTransparency();
   void adaptMuonChambersToEventData();

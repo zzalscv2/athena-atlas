@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -28,7 +28,7 @@ public:
   VP1GeoTreeView(QWidget * parent = 0);
   virtual ~VP1GeoTreeView();
 
-public slots:
+public Q_SLOTS:
   void updateAllNonHiddenIndices();//Useful, but not particularly inexpensive to call.
   void scheduleUpdateOfAllNonHiddenIndices();//Will call the previous
 					     //method after event
