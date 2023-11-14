@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -22,7 +22,6 @@
 #include "InDetRecToolInterfaces/ITRT_TrackExtensionTool.h"
 #include "InDetPrepRawData/TRT_DriftCircleContainer.h"
 #include "TrkEventUtils/EventDataBase.h"
-#include "TrkExInterfaces/IPropagator.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 
 #include "StoreGate/ReadHandleKey.h"
@@ -111,21 +110,14 @@ namespace InDet {
 
       PublicToolHandle<Trk::IExtrapolator>        m_extrapolator
         {this, "Extrapolator", "Trk::Extrapolator/InDetExtrapolator"};
-      PublicToolHandle<Trk::IPropagator>          m_propagator
-        {this, "Propagator", "Trk::RungeKuttaPropagator"};
-      ToolHandle<Trk::IRIO_OnTrackCreator>  m_riontrackD
-	{this, "RIOonTrackToolYesDr", "InDet::TRT_DriftCircleOnTrackTool/TRT_DriftCircleOnTrackToolUniversal"};
       ToolHandle<Trk::IRIO_OnTrackCreator>  m_riontrackN
 	{this, "RIOonTrackToolNoDr", "InDet::TRT_DriftCircleOnTrackNoDriftTimeTool/TRT_DriftCircleOnTrackNoDriftTimeTool"}; //
 
       int                              m_outputlevel{}    ; // Print level
       int                              m_nprint{}         ; // Kind of print
-      int                              m_minNumberDCs   ; // Min. number of DriftCircles
       double                           m_roadwidth      ; // Max width of the road
       double                           m_roadwidth_locz ; // Max width of the road along the straw
       bool                             m_searchNeighbour; // Also search neighbouring detector elements?
-      bool                             m_boundarycheck  ; // Do a boundary check in the extrapolation?
-      std::string                      m_trtmanager     ; // Name of TRT det. manager 
 
       SG::ReadHandleKey<TRT_DriftCircleContainer> m_trtname {this,"TRT_ClustersContainer","TRT_DriftCircles","RHK to retrieve TRT_DriftCircles"};
 
