@@ -173,19 +173,21 @@ TrigConf::HLTPrescaleCondAlg::execute(const EventContext& ctx) const {
 
       auto pssi = m_pssMap.find( hltPsk );
 
-      if( pssi == m_pssMap.end()) {
-         
+      if( pssi == m_pssMap.end()) { // key not found -> the prescale set is not yet in the internal map
+
          bool isRun3 = range.start().run_number()>350000;
 
-         const auto p = m_pssMap.insert(std::make_pair( hltPsk, createFromDB(hltPsk, isRun3) ));
-         pss = p.first->second;
-
+         pss = createFromDB(hltPsk, isRun3); // load the prescale set from the Trigger DB
+         
          if( pss == nullptr ) {
             ATH_MSG_ERROR( "Failed loading HLT prescales set from the database" );
             return StatusCode::FAILURE;
          }
 
-      } else {
+         const auto p = m_pssMap.insert(std::make_pair( hltPsk, pss ));
+         pss = p.first->second;
+
+      } else { // key found -> the prescale set is already in the internal map
       
          pss = pssi->second;
 
