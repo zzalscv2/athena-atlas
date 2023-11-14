@@ -8,8 +8,6 @@
 #include <cassert>
 #include <string>
 
-#include <fmt/format.h>
-
 #include "GaudiKernel/System.h"
 #include "GaudiKernel/StatusCode.h"
 
@@ -21,7 +19,7 @@
 namespace {
   template <typename KEY>
   std::string mkHSKey(const KEY& k) {
-    return fmt::format("HS{}", k);
+    return "HS" + std::string(k);
   }
 
   template <class DATALINK, typename KEY>
