@@ -142,9 +142,16 @@ TrigConf::BunchGroupCondAlg::execute(const EventContext& ctx) const {
 
       auto bgsi = m_BgsMap.find( l1Ggk );
 
-      if( bgsi == m_BgsMap.end()) {
+      if( bgsi == m_BgsMap.end()) { // key not found -> the bunchgroup set is not yet in the internal map
 
-         const auto p = m_BgsMap.insert(std::make_pair( l1Ggk, createFromDB(l1Ggk) ));
+         bgs = createFromDB(l1Ggk);
+
+         if( bgs == nullptr ) {
+            ATH_MSG_ERROR( "Failed loading bunchgroup set from the database" );
+            return StatusCode::FAILURE;
+         }
+
+         const auto p = m_BgsMap.insert(std::make_pair( l1Ggk, bgs ));
          bgs = p.first->second;
 
       } else {
