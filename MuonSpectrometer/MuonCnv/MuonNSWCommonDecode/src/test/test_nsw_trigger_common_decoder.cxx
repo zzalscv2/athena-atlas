@@ -163,11 +163,11 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
   else if ((m & 0xf0) == 0x50) {is_tp = true; is_mon = true;}
   
   
-  if (params.printout_level > 1 && is_nsw){
+  if (params.printout_level > 1){
     std::cout << "ROB source ID                = 0x" << std::hex << sid << std::dec << std::endl;
     std::cout << "ROB subdet ID                = 0x" << std::hex << s   << std::dec << std::endl;
     std::cout << "ROB module ID                = 0x" << std::hex << m   << std::dec << std::endl;
-    //std::cout << "is_nsw                = " << (is_nsw?"Yes":"No") << std::endl;
+    std::cout << "is_nsw                = " << (is_nsw?"Yes":"No") << std::endl;
     std::cout << "is_mmg                = " << (is_mmg?"Yes":"No") << std::endl;
     std::cout << "is_stg                = " << (is_stg?"Yes":"No") << std::endl;
     std::cout << "is_pt                 = " << (is_pt?"Yes":"No") << std::endl;
@@ -181,6 +181,9 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
     if (params.printout_level > 0) {
       std::cout << "NSW Trigger fragment found; length: " << r.rod_ndata () << std::endl;
     }
+  } else {
+    if (params.printout_level > 1) std::cout << "Not decoding this ROBFragment since it's not even NSW" << std::endl;
+    return 0;
   }
   
   const uint32_t *bs = r.rod_data ();
