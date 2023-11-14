@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -84,8 +84,7 @@ class muComb : public AthReentrantAlgorithm
   ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
 
   /** Handle to the G4 backExtrapolator tool */
-  //ToolHandle<Trk::IExtrapolator>  m_backExtrapolatorG4;
-  PublicToolHandle<Trk::IExtrapolator> m_backExtrapolatorG4 {this,
+  ToolHandle<Trk::IExtrapolator> m_backExtrapolatorG4 {this,
      "AtlasExtrapolator",
      "Trk::Extrapolator/AtlasExtrapolator",
      "Tool to backextrapolate muon from MS to IP (G4 based)"};
