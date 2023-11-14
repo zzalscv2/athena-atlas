@@ -106,9 +106,7 @@ def BPHY4Cfg(ConfigFlags):
     
     ## Pair/quad candidates 
     BPHY4StaticContent += ["xAOD::VertexContainer#%s"        % BPHY4_Reco_4mu.PairContainerName]
-    BPHY4StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY4_Reco_4mu.PairContainerName]
     BPHY4StaticContent += ["xAOD::VertexContainer#%s"        % BPHY4_Reco_4mu.QuadrupletContainerName]
-    BPHY4StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY4_Reco_4mu.QuadrupletContainerName]
     
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
     BPHY4StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY4_Reco_4mu.PairContainerName]
