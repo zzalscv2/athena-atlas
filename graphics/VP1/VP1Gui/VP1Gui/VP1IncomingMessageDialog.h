@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@ public:
   virtual ~VP1IncomingMessageDialog();
 
   void updatependinginfo();
-protected slots:
+protected Q_SLOTS:
   void request_gothere();
   void request_allclear();
   void request_allblock();

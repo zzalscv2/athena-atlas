@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -37,7 +37,7 @@ public:
 
   virtual void init();
 
-private slots:
+private Q_SLOTS:
   void fileInfoChanged();
   void fileInfoDownloadSuccessful( const QString& urltofile, const QString& localtargetfile );
   void fileInfoDownloadFailed( const QString& error, const QString& urltofile,const QString& localtargetfile );

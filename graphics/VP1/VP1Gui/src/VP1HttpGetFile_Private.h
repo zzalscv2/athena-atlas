@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -50,9 +50,9 @@ public:
 
 protected:
   void run();
-public slots:
+public Q_SLOTS:
   void checkForStall();
-private slots:
+private Q_SLOTS:
   void done(bool);
   void dataReadProgress();
 private:

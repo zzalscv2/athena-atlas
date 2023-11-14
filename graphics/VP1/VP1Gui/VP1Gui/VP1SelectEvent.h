@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ class VP1SelectEvent : public QDialog
 public:
     explicit VP1SelectEvent(int totEvtNr, int evtNr, QWidget *parent = 0);
 
-public slots:
+public Q_SLOTS:
 
 private:
     void passEvtNr();

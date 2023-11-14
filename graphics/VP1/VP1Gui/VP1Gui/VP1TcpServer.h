@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ public:
   bool listen(QString& err, const quint16& port = 4747);//Returns false (and fills the err string) if not successful.
   quint16 port() const;
   bool isListening();
-public slots:
+public Q_SLOTS:
   void close();
 
 signals:
@@ -49,7 +49,7 @@ signals:
 private:
   class Imp;
   Imp * m_d;
-private slots:
+private Q_SLOTS:
   void acceptConnection();
   void readData();
   void handleError(QAbstractSocket::SocketError);

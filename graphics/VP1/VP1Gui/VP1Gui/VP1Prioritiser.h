@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -37,7 +37,7 @@ public:
 
   double estimateRemainingCalcTime() const;
 
-public slots:
+public Q_SLOTS:
   void visibleChannelsChanged(const QSet<IVP1ChannelWidget*>&vis,const QSet<IVP1ChannelWidget*>&soonvis,const double& soonvisbonus);
   void channelCreated(IVP1ChannelWidget*);
   void channelUncreated(IVP1ChannelWidget*);

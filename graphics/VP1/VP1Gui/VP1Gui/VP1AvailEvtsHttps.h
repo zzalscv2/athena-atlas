@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -42,10 +42,10 @@ public:
 
   QString fileinfoLocation();
 
-public slots:
+public Q_SLOTS:
   void start(QNetworkAccessManager* netmanager);
 
-private slots:
+private Q_SLOTS:
   // ---- Https/SSL slots ----
   // Slots of the QNetworkReply
   void finished();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ public:
 //  void setAntiAliasingCurrentTab(bool);
 
   IVP1ChannelWidget * addChannelToTab( QString channelbasename, QString tabname );
-public slots:
+public Q_SLOTS:
   void addNewTab( QString, const int& index = -1 );
   void renameTab( QString tabname, QString newtabname );
   void removeTab( QString tabname );// -> Also removes channels obviously.
@@ -104,7 +104,7 @@ protected:
   void serializeChannelState(IVP1ChannelWidget*,ChanState&state);
   void unserializeChannelState(IVP1ChannelWidget*cw,ChanState tate);
 
-protected slots:
+protected Q_SLOTS:
   void currentVisibleChanged();
   void executePendingChannelRemoval();
 };

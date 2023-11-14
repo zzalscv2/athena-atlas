@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -27,14 +27,14 @@ class VP1GeoDBSelection : public QDialog
 public:
     explicit VP1GeoDBSelection(QWidget *parent = 0);
 
-private slots:
+private Q_SLOTS:
     //Open the file selection dialog
     void on_browseButton_clicked();
 
     //Check and Save the settings
     void loadDatabase();
 
-public slots:
+public Q_SLOTS:
 
 private:
     QString           m_fileName;
