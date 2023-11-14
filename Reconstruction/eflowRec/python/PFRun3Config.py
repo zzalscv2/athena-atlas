@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
@@ -102,7 +102,7 @@ def PFCfg(inputFlags,**kwargs):
       toESDAndAOD += ["xAOD::FlowElementContainer#EOverPNeutralParticleFlowObjects","xAOD::FlowElementAuxContainer#EOverPNeutralParticleFlowObjectsAux."]
     else:
       toESDAndAOD = ["xAOD::FlowElementContainer#JetETMissChargedParticleFlowObjects", "xAOD::FlowElementAuxContainer#JetETMissChargedParticleFlowObjectsAux."]
-      toESDAndAOD += ["xAOD::FlowElementContainer#JetETMissNeutralParticleFlowObjects","xAOD::FlowElementAuxContainer#JetETMissNeutralParticleFlowObjectsAux.-FEShowerSubtractedClusterLink."]
+      toESDAndAOD += ["xAOD::FlowElementContainer#JetETMissNeutralParticleFlowObjects","xAOD::FlowElementAuxContainer#JetETMissNeutralParticleFlowObjectsAux.-FEShowerSubtractedClusterLink"]
       toESDAndAOD += ["xAOD::FlowElementContainer#JetETMissLCNeutralParticleFlowObjects","xAOD::ShallowAuxContainer#JetETMissLCNeutralParticleFlowObjectsAux."]
 
     if inputFlags.PF.addCPData:
