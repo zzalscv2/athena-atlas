@@ -44,6 +44,7 @@ def commonInDetFullScanCfg(flags):
     return acc
 
 
+@AccumulatorCache
 def commonInDetLRTCfg(flags, std_cfg, lrt_cfg, rois=trkFSRoI):
     acc = ComponentAccumulator()
     seqname = 'TrigInDetLRT_'+lrt_cfg.name
