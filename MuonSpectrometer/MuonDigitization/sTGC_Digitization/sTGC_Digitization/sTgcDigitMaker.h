@@ -13,23 +13,20 @@
 #ifndef STGCDIGITMAKER_H
 #define STGCDIGITMAKER_H
 
-#include <memory>
-#include <vector>
-#include <string>
-
 #include "AthenaBaseComps/AthMessaging.h"
-#include "GaudiKernel/StatusCode.h"
-#include "Identifier/Identifier.h"
 #include "MuonSimEvent/sTGCSimHit.h"
-
+#include "MuonSimEvent/sTgcHitIdHelper.h"
+#include "MuonCondData/DigitEffiData.h"
+#include "MuonCondData/NswCalibDbThresholdData.h"
+#include "MuonReadoutGeometry/sTgcReadoutElement.h"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "CxxUtils/ArrayHelper.h"
+#include "MuonDigitContainer/sTgcDigit.h"
 namespace CLHEP {
   class HepRandomEngine;
   class HepRandom;
 }
 
-namespace MuonGM {
-  class MuonDetectorManager;
-}
 
 class sTgcDigitCollection;
 class sTgcHitIdHelper;
@@ -40,7 +37,10 @@ class sTgcDigitMaker : public AthMessaging {
   //------ for public
  public:
 
-  sTgcDigitMaker(const sTgcHitIdHelper* hitIdHelper, const MuonGM::MuonDetectorManager * mdManager, bool doEfficiencyCorrection, double meanGasGain, bool doPadChargeSharing);
+  sTgcDigitMaker(const Muon::IMuonIdHelperSvc* idHelperSvc,
+                 const int channelTypes,
+                 double meanGasGain, 
+                 bool doPadChargeSharing);
 
   virtual ~sTgcDigitMaker();
 
@@ -48,12 +48,20 @@ class sTgcDigitMaker : public AthMessaging {
      Initializes sTgcHitIdHelper and sTgcIdHelper,
      and call the functions to read files containing digitization parameters.
   */
-  StatusCode initialize(const int channelTypes);
+  StatusCode initialize();
 
   /**
      Digitize a given hit, determining the time and charge spread on wires, pads and strips.
   */
-  std::unique_ptr<sTgcDigitCollection> executeDigi(const sTGCSimHit* hit, const float globalHitTime, CLHEP::HepRandomEngine* rndmEngine) const;
+  struct DigiConditions {
+     const MuonGM::MuonDetectorManager* detMgr{nullptr};
+     const DigitEffiData* efficiencies{nullptr};
+     const NswCalibDbThresholdData* thresholdData{nullptr};
+     CLHEP::HepRandomEngine* rndmEngine{nullptr};
+  };
+
+  using sTgcDigitVec = std::vector<std::unique_ptr<sTgcDigit>>;
+  sTgcDigitVec executeDigi(const DigiConditions& condContainers, const sTGCSimHit& hit) const;
 
   //====== for private
  private:
@@ -73,35 +81,24 @@ class sTgcDigitMaker : public AthMessaging {
    */
   struct Ionization {
     double distance{-9.99}; //smallest distance bet the wire and particle trajectory
-    Amg::Vector3D posOnSegment{0.,0.,0.}; // Point of closest approach
-    Amg::Vector3D posOnWire{0.,0.,0.}; // Position on the wire
+    Amg::Vector3D posOnSegment{Amg::Vector3D::Zero()}; // Point of closest approach
+    Amg::Vector3D posOnWire{Amg::Vector3D::Zero()}; // Position on the wire
   };
 
-  //uint16_t bcTagging(const float digittime, const int channelType) const;
-  void addDigit(sTgcDigitCollection* digits, const Identifier id, const uint16_t bctag, const float digittime, int channelType) const;
-  void addDigit(sTgcDigitCollection* digits, const Identifier id, const uint16_t bctag, const float digittime, float charge, int channelType) const;
+  //uint16_t bcTagging(const double digittime, const int channelType) const;
+  void addDigit(sTgcDigitVec& digits, 
+                const Identifier& id, 
+                const uint16_t bctag, 
+                const double digittime, 
+                const double charge) const;
 
-  /** Read share/sTGC_Digitization_EffChamber.dat file */
-  StatusCode readFileOfEffChamber();
   /** Read share/sTGC_Digitization_timeArrival.dat */
   StatusCode readFileOfTimeArrival();
   /** Read share/sTGC_Digitization_timeOffsetStrip.dat */
   StatusCode readFileOfTimeOffsetStrip();
 
-  float getChamberEfficiency(const int stationName, const int stationEta, const int stationPhi, const int multiPlet, const int gasGap) const;
-  /** Get stationName integer from stationName string */
-  int getIStationName(const std::string& staionName) const;
-
-  /** Compute the distance between a track segment and a wire.
-   *  Expected distance is between zero and half of wire pitch (i.e. 0.9 mm),
-   *  but can be greater if particle passes through the edge of a chamber.
-   *  Assumig the hit is near wire k, the sign of the distance returned is:
-   *   - negative if particle crosses the wire surface between wire k and wire k-1
-   *   + positive if particle crosses the wire surface between wire k and wire k+1
-   *  In case of error, the function returns -9.99.
-   */
-  double distanceToWire(Amg::Vector3D& position, Amg::Vector3D& direction, Identifier id, int wire_number) const;
-
+  
+  
   /** Determine the points where the distance between two segments is smallest.
    *  Given two segments, e.g. a particle trajectory and a sTGC wire, solve for the
    *  two points, the point on the trajectory and the point on the wire, where the
@@ -110,14 +107,17 @@ class sTgcDigitMaker : public AthMessaging {
    *  Positions returned are in the local coordinate frame of the wire plane.
    *  Returns an object with distance of -9.99 in case of error.
    */
-  Ionization pointClosestApproach(const Identifier& id, int wireNumber, Amg::Vector3D& preStepPos,
-                                  Amg::Vector3D& postStepPos) const;
+  Ionization pointClosestApproach(const MuonGM::sTgcReadoutElement* readoutEle,
+                                  const Identifier& id, 
+                                  int wireNumber, 
+                                  const Amg::Vector3D& preStepPos,
+                                  const Amg::Vector3D& postStepPos) const;
 
   /** Get digit time offset of a strip depending on its relative position to
    *  the strip at the centre of the cluster.
    *  It returns 0 ns by default, as well as when it fails or container is empty.
    */
-  double getTimeOffsetStrip(int neighbor_index) const;
+  double getTimeOffsetStrip(size_t neighbor_index) const;
 
   double getPadChargeFraction(double distance) const;
 
@@ -126,21 +126,15 @@ class sTgcDigitMaker : public AthMessaging {
   /** Get the most probable time of arrival */
   double getMostProbableArrivalTime(double distance) const;
 
-  // sTGC chamber efficiency from HV tests
-  float m_ChamberEfficiency[2][4][8][2][4]{};
-
   // Parameters of the gamma pdf required for determining digit time
   std::vector<GammaParameter> m_gammaParameter;
   // 4th-order polymonial describing the most probable time as function of the distance of closest approach
-  std::vector<double> m_mostProbableArrivalTime;
+  std::array<double, 5> m_mostProbableArrivalTime{make_array<double, 5>(0.)};
 
   // Time offset to add to Strip timing
-  std::vector<double> m_timeOffsetStrip;
+  std::array<double, 6> m_timeOffsetStrip{make_array<double, 6>(0.)};
 
-  const sTgcHitIdHelper* m_hitIdHelper{}; // not owned here
-  const MuonGM::MuonDetectorManager* m_mdManager{}; // not owned here
-  const sTgcIdHelper* m_idHelper{}; // not owned here
-  bool m_doEfficiencyCorrection{false};
+  const Muon::IMuonIdHelperSvc* m_idHelperSvc{nullptr};
 
   /**
      define offsets and widths of time windows for signals from
@@ -163,7 +157,7 @@ class sTgcDigitMaker : public AthMessaging {
   double m_posResAngular{0.305/m_StripResolution};
   // Strip cluster charge profile: [0] = norm of inner Gaussian, [1] = sigma of inner Gaussian,
   //   [2] = norm of outer Gaussian, [3] = sigma of outer Gaussian
-  std::array<float, 4> m_clusterProfile{0.350, 0.573, 0.186, 1.092};
+  static constexpr std::array<double, 4> m_clusterProfile{0.350, 0.573, 0.186, 1.092};
   // Dependence of energy deposited on incident angle
   double m_chargeAngularFactor{4.0};
   // Overall factor to scale the total strip cluster charge

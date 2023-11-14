@@ -17,15 +17,12 @@
 
 #include "PileUpTools/PileUpMergeSvc.h"
 #include "PileUpTools/PileUpToolBase.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "HitManagement/TimedHitCollection.h"
 #include "MuonSimEvent/sTGCSimHitCollection.h"
 #include "MuonSimEvent/sTGCSimHit.h"
 #include "xAODEventInfo/EventInfo.h"
-#include "xAODEventInfo/EventAuxInfo.h"
 #include "MuonSimData/MuonSimDataCollection.h"
 #include "MuonDigitContainer/sTgcDigitContainer.h"
 #include "NSWCalibTools/INSWCalibSmearingTool.h"
@@ -36,15 +33,8 @@
 #include "CLHEP/Vector/ThreeVector.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "CLHEP/Units/PhysicalConstants.h"
-#include "MuonCondData/NswCalibDbThresholdData.h"
-
+#include "MuonCondData/DigitEffiData.h"
 #include "sTGC_Digitization/sTgcDigitMaker.h"
-
-#include <string>
-#include <sstream>
-#include <vector>
-#include <map>
-#include <memory>
 
 /*******************************************************************************/
 namespace MuonGM{
@@ -55,7 +45,6 @@ namespace CLHEP {
 }
 
 class sTgcHitIdHelper;
-class sTgcSimDigitData;
 
 /*******************************************************************************/
 class sTgcDigitizationTool : public PileUpToolBase {
@@ -97,8 +86,39 @@ public:
   */
   StatusCode digitize(const EventContext& ctx);
 
+  class sTgcSimDigitData {
+    public:
+        sTgcSimDigitData() = default;
+        sTgcSimDigitData(MuonSimData&& simData, sTgcDigit&& digit):
+            m_sTGCSimData{std::move(simData)},
+            m_sTGCDigit{std::move(digit)}{}
+      /// Get the SimData
+      const MuonSimData& getSimData() const { return m_sTGCSimData; }
+      MuonSimData& getSimData() {return m_sTGCSimData; }
+      /// Get the sTGC digit
+      const sTgcDigit& getDigit() const { return m_sTGCDigit; }
+      sTgcDigit& getDigit() { return m_sTGCDigit; }
+
+      Identifier identify() const { return getDigit().identify(); }
+      double time() const {return getDigit().time(); }   
+
+    private:
+        MuonSimData m_sTGCSimData;
+        sTgcDigit m_sTGCDigit;
+
+  };
+  using sTgcSimDigitVec = std::vector<sTgcSimDigitData>;
+  using sTgcSimDigitCont = std::vector<sTgcSimDigitVec>;
+
+  using DigiConditions = sTgcDigitMaker::DigiConditions;
+  using sTgcDigitVec = sTgcDigitMaker::sTgcDigitVec;
+  using sTgcDigtCont = std::vector<sTgcDigitVec>;
 private:
+
   CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName, const EventContext& ctx) const;
+  template <class CondType> StatusCode retrieveCondData(const EventContext& ctx,
+                                                        SG::ReadCondHandleKey<CondType>& key,
+                                                        const CondType* & condPtr) const;
 
   /** Get next event and extract collection of hit collections */
   StatusCode getNextEvent(const EventContext& ctx);
@@ -107,9 +127,15 @@ private:
 
   ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "MergeSvc", "PileUpMergeSvc", "Merge service used in digitization"};
   ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", "Random Number Service used in Muon digitization"};
-  const sTgcHitIdHelper* m_hitIdHelper{}; // not owned here
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-  const MuonGM::MuonDetectorManager* m_mdManager{}; // not owned here
+  
+  SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{this, "DetectorManagerKey", "MuonDetectorManager",
+                                                                            "Key of input MuonDetectorManager condition data"};
+  
+  SG::ReadCondHandleKey<DigitEffiData> m_effiKey{this, "EffiDigiKey", "sTgcDigitEff",
+                                                      "Key of the efficiency data in the CondStore"};
+
+  
   std::unique_ptr<sTgcDigitMaker> m_digitizer{};
   std::unique_ptr<TimedHitCollection<sTGCSimHit>> m_thpcsTGC{};
   std::vector<std::unique_ptr<sTGCSimHitCollection>> m_STGCHitCollList{};
@@ -141,31 +167,40 @@ private:
   Gaudi::Property<bool> m_doPadSharing{this,"padChargeSharing", false};
 
   // sTgc VMM configurables accessible by python steering
-  Gaudi::Property<float> m_deadtimeStrip{this,"deadtimeStrip", 250};
-  Gaudi::Property<float> m_deadtimePad{this,"deadtimePad"    , 250};
-  Gaudi::Property<float> m_deadtimeWire{this,"deadtimeWire" , 250};
+  Gaudi::Property<double> m_deadtimeStrip{this,"deadtimeStrip", 250};
+  Gaudi::Property<double> m_deadtimePad{this,"deadtimePad"    , 250};
+  Gaudi::Property<double> m_deadtimeWire{this,"deadtimeWire" , 250};
   Gaudi::Property<bool> m_doNeighborOn{this,"neighborOn", true};
 
   Gaudi::Property<double> m_energyDepositThreshold{this,"energyDepositThreshold",300.0*CLHEP::eV,"Minimum energy deposit for hit to be digitized"};
   Gaudi::Property<double> m_limitElectronKineticEnergy{this,"limitElectronKineticEnergy",5.0*CLHEP::MeV,"Minimum kinetic energy for electron hit to be digitized"};
 
-  Gaudi::Property<float> m_chargeThreshold{this,"chargeThreshold", 0.03, "vmm charge threshold in pC, need to set useCondThresholds to false if one wants to use this threshold value otherwise the one from the conditions database is used"};
+  Gaudi::Property<double> m_chargeThreshold{this,"chargeThreshold", 0.03, "vmm charge threshold in pC, need to set useCondThresholds to false if one wants to use this threshold value otherwise the one from the conditions database is used"};
 
-  const float m_timeJitterElectronicsStrip{2.f}; //ns
-  const float m_timeJitterElectronicsPad{2.f}; //ns
-  const float m_hitTimeMergeThreshold{30.f}; //30ns = resolution of peak finding descriminator
+  const double m_timeJitterElectronicsStrip{2.f}; //ns
+  const double m_timeJitterElectronicsPad{2.f}; //ns
+  const double m_hitTimeMergeThreshold{30.f}; //30ns = resolution of peak finding descriminator
 
-  uint16_t bcTagging(const float digittime, const int channelType) const;
+  uint16_t bcTagging(const double digittime) const;
 
-  float getChannelThreshold(const EventContext& ctx, const Identifier& channelID, const NswCalibDbThresholdData* thresholdData) const;
+  double getChannelThreshold(const EventContext& ctx, 
+                             const Identifier& channelID, 
+                             const NswCalibDbThresholdData& thresholdData) const;
 
-  std::map<Identifier, std::vector<sTgcSimDigitData> > processDigitsWithVMM(const EventContext& ctx, const float vmmDeadTime, const std::map<Identifier, std::vector<sTgcSimDigitData> >& inputLayerDigits, const NswCalibDbThresholdData* thresholdData, const bool isNeighborOn = false) const;
+  
+  StatusCode processDigitsWithVMM(const EventContext& ctx,
+                                  const DigiConditions& digiCond,
+                                  sTgcSimDigitCont& unmergedContainer,
+                                  const double vmmDeadTime,
+                                  const bool isNeighbourOn,
+                                  sTgcDigtCont& outDigitContainer,
+                                  MuonSimDataCollection& outSdoContainer) const;
 
-  bool neighborStripAboveThreshold(const float digitTime, const Identifier& neighborID, const float neighbor_threshold, const std::map<Identifier, std::vector<sTgcSimDigitData> >& savedDigits, const std::map<Identifier, std::vector<sTgcSimDigitData> >& layerStripDigits) const;
-
-
-
-
+  sTgcSimDigitVec processDigitsWithVMM(const EventContext& ctx,
+                                      const DigiConditions& digiCond, 
+                                      const double vmmDeadTime, 
+                                      sTgcSimDigitVec& unmergedDigits, 
+                                      const bool isNeighborOn) const;
 
 };
 

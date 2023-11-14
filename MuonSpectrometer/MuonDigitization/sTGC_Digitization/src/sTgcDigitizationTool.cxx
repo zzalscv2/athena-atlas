@@ -10,15 +10,16 @@
 //           Jiaming Yu  <jiaming.yu@cern.ch>
 ////////////////////////////////////////////////////////////////////////////////
 
+//sTGC digitization includes
+#include "sTGC_Digitization/sTgcDigitizationTool.h"
+
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "MuonSimData/MuonSimDataCollection.h"
 #include "MuonSimData/MuonSimData.h"
 
 //Outputs
 #include "MuonDigitContainer/sTgcDigitContainer.h"
 
-//sTGC digitization includes
-#include "sTGC_Digitization/sTgcDigitizationTool.h"
-#include "sTGC_Digitization/sTgcSimDigitData.h"
 
 //Geometry
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -44,10 +45,8 @@
 
 
 using namespace MuonGM;
+using sTgcSimDigitVec = sTgcDigitizationTool::sTgcSimDigitVec;
 
-inline bool sort_digitsEarlyToLate(const sTgcSimDigitData &a, const sTgcSimDigitData &b){
-  return a.getSTGCDigit().time() < b.getSTGCDigit().time();
-}
 
 /*******************************************************************************/
 sTgcDigitizationTool::sTgcDigitizationTool(const std::string& type, const std::string& name, const IInterface* parent) :
@@ -84,20 +83,17 @@ StatusCode sTgcDigitizationTool::initialize() {
   }
 
   // retrieve MuonDetctorManager from DetectorStore
-  ATH_CHECK(detStore()->retrieve(m_mdManager));
+  ATH_CHECK(m_detMgrKey.initialize());
   ATH_CHECK(m_idHelperSvc.retrieve());
+  ATH_CHECK(m_effiKey.initialize(m_doEfficiencyCorrection));
 
-  // sTgcHitIdHelper
-  m_hitIdHelper = sTgcHitIdHelper::GetHelper();
-
+ 
   // calibration tool
   ATH_CHECK(m_calibTool.retrieve());
-
   // initialize ReadCondHandleKey
   ATH_CHECK(m_condThrshldsKey.initialize());
-
   // Initialize ReadHandleKey
-  ATH_CHECK(m_hitsContainerKey.initialize(true));
+  ATH_CHECK(m_hitsContainerKey.initialize());
 
   //initialize the output WriteHandleKeys
   ATH_CHECK(m_outputDigitCollectionKey.initialize());
@@ -113,10 +109,10 @@ StatusCode sTgcDigitizationTool::initialize() {
     ATH_MSG_ERROR("STGC run voltage must be in kV and within fit domain of 2.3 kV to 3.2 kV");
     return StatusCode::FAILURE;
   }
-  double meanGasGain = 2.15 * 1E-4 * exp(6.88*m_runVoltage);
-  m_digitizer = std::make_unique<sTgcDigitMaker>(m_hitIdHelper, m_mdManager, m_doEfficiencyCorrection, meanGasGain, m_doPadSharing);
+  double meanGasGain = 2.15 * 1E-4 * std::exp(6.88*m_runVoltage);
+  m_digitizer = std::make_unique<sTgcDigitMaker>(m_idHelperSvc.get(), m_doChannelTypes, meanGasGain, m_doPadSharing);
   m_digitizer->setLevel(static_cast<MSG::Level>(msgLevel()));
-  ATH_CHECK(m_digitizer->initialize(m_doChannelTypes));
+  ATH_CHECK(m_digitizer->initialize());
 
   ATH_CHECK(m_rndmSvc.retrieve());
   // getting our random numbers stream
@@ -163,8 +159,7 @@ StatusCode sTgcDigitizationTool::processBunchXing(int bunchXing,
     auto hitCollPtr = std::make_unique<sTGCSimHitCollection>(*iColl->second);
     PileUpTimeEventIndex timeIndex(iColl->first);
 
-    ATH_MSG_DEBUG("sTGCSimHitCollection found with " << hitCollPtr->size() <<
-                  " hits");
+    ATH_MSG_DEBUG("sTGCSimHitCollection found with " << hitCollPtr->size() << " hits");
     ATH_MSG_VERBOSE("time index info. time: " << timeIndex.time()
                     << " index: " << timeIndex.index()
                     << " type: " << timeIndex.type());
@@ -213,7 +208,7 @@ StatusCode sTgcDigitizationTool::getNextEvent(const EventContext& ctx) {
   }
 
   //Perform null check on m_thpcsTGC. If pointer is not null throw error
-  if (m_thpcsTGC == nullptr) {
+  if (!m_thpcsTGC) {
     m_thpcsTGC = std::make_unique<TimedHitCollection<sTGCSimHit>>();
   }else{
   ATH_MSG_ERROR ( "m_thpcsTGC is not null" );
@@ -232,24 +227,16 @@ StatusCode sTgcDigitizationTool::getNextEvent(const EventContext& ctx) {
 
   return StatusCode::SUCCESS;
 }
+
 /*******************************************************************************/
 StatusCode sTgcDigitizationTool::mergeEvent(const EventContext& ctx) {
-
-  StatusCode status = StatusCode::SUCCESS;
-
   ATH_MSG_DEBUG ( "sTgcDigitizationTool::in mergeEvent()" );
-
-  status = doDigitization(ctx);
-  if (status.isFailure())  {
-    ATH_MSG_ERROR ( "doDigitization Failed" );
-  }
-
+  ATH_CHECK(doDigitization(ctx));
   // reset the pointer
   m_thpcsTGC.reset();
-
   m_STGCHitCollList.clear();
 
-  return status;
+  return StatusCode::SUCCESS;
 }
 /*******************************************************************************/
 StatusCode sTgcDigitizationTool::digitize(const EventContext& ctx) {
@@ -257,60 +244,68 @@ StatusCode sTgcDigitizationTool::digitize(const EventContext& ctx) {
 }
 /*******************************************************************************/
 StatusCode sTgcDigitizationTool::processAllSubEvents(const EventContext& ctx) {
-  StatusCode status = StatusCode::SUCCESS;
   ATH_MSG_DEBUG (" sTgcDigitizationTool::processAllSubEvents()" );
-
   //merging of the hit collection in getNextEvent method
-  if (m_thpcsTGC == nullptr) {
-    status = getNextEvent(ctx);
-    if (StatusCode::FAILURE == status) {
-      ATH_MSG_INFO ( "There are no sTGC hits in this event" );
-      return status;
-    }
+  if (!m_thpcsTGC ) {
+     ATH_CHECK(getNextEvent(ctx));
   }
-  status = doDigitization(ctx);
-  if (status.isFailure())  {
-    ATH_MSG_ERROR ( "doDigitization() Failed" );
-  }
-
+  ATH_CHECK(doDigitization(ctx));
   // reset the pointer
   m_thpcsTGC.reset();
 
-  return status;
+  return StatusCode::SUCCESS;
+}
+
+template <class CondType> StatusCode sTgcDigitizationTool::retrieveCondData(const EventContext& ctx,
+                                                                            SG::ReadCondHandleKey<CondType>& key,
+                                                                            const CondType* & condPtr) const{
+    if (key.empty()) {
+       ATH_MSG_DEBUG("No key has been configured for object "<<typeid(CondType).name()<<". Clear pointer");
+       condPtr = nullptr;
+       return StatusCode::SUCCESS;
+    }
+    SG::ReadCondHandle<CondType> readHandle{key, ctx};
+    if (!readHandle.isValid()){
+        ATH_MSG_FATAL("Failed to load conditions object "<<key.fullKey()<<".");
+        return StatusCode::FAILURE;
+    }
+    condPtr = readHandle.cptr();
+    return StatusCode::SUCCESS;
 }
 
 /*******************************************************************************/
 StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
 
   ATH_MSG_DEBUG ("sTgcDigitizationTool::doDigitization()" );
-
-  CLHEP::HepRandomEngine* rndmEngine = getRandomEngine(m_rndmEngineName, ctx);
+  const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+  
+  sTgcDigitMaker::DigiConditions digitCond{};
+  digitCond.rndmEngine = getRandomEngine(m_rndmEngineName, ctx);
+  ATH_CHECK(retrieveCondData(ctx, m_detMgrKey, digitCond.detMgr));
+  ATH_CHECK(retrieveCondData(ctx, m_effiKey, digitCond.efficiencies));
+  ATH_CHECK(retrieveCondData(ctx, m_condThrshldsKey , digitCond.thresholdData));
+  
 
   // create and record the Digit container in StoreGate
   SG::WriteHandle<sTgcDigitContainer> digitContainer(m_outputDigitCollectionKey, ctx);
-  ATH_CHECK(digitContainer.record(std::make_unique<sTgcDigitContainer>(m_idHelperSvc->stgcIdHelper().module_hash_max())));
+  ATH_CHECK(digitContainer.record(std::make_unique<sTgcDigitContainer>(idHelper.module_hash_max())));
   ATH_MSG_DEBUG ( "sTgcDigitContainer recorded in StoreGate." );
 
   // Create and record the SDO container in StoreGate
   SG::WriteHandle<MuonSimDataCollection> sdoContainer(m_outputSDO_CollectionKey, ctx);
   ATH_CHECK(sdoContainer.record(std::make_unique<MuonSimDataCollection>()));
-  ATH_MSG_DEBUG ( "sTgcSDOCollection recorded in StoreGate." );
+  ATH_MSG_DEBUG( "sTgcSDOCollection recorded in StoreGate." );
 
 
   TimedHitCollection<sTGCSimHit>::const_iterator i, e;
 
   // Collections of digits by digit type associated with a detector element
-  std::map< Identifier, std::map< Identifier, std::vector<sTgcSimDigitData> > > unmergedPadDigits;
-  std::map< Identifier, std::map< Identifier, std::vector<sTgcSimDigitData> > > unmergedStripDigits;
-  std::map< Identifier, std::map< Identifier, std::vector<sTgcSimDigitData> > > unmergedWireDigits;
+  sTgcSimDigitCont unmergedPadDigits{}, unmergedStripDigits{}, unmergedWireDigits{};
+  sTgcDigtCont outputDigits{};
+  
+  ATH_MSG_DEBUG("create Digit container of size " << idHelper.module_hash_max());
 
-  std::map< Identifier, std::map< Identifier, std::vector<sTgcDigit> > > outputDigits;
-
-  ATH_MSG_DEBUG("create Digit container of size " << m_idHelperSvc->stgcIdHelper().module_hash_max());
-
-  IdContext tgcContext = m_idHelperSvc->stgcIdHelper().module_context();
-
-  float earliestEventTime = 9999;
+  double earliestEventTime = 9999;
 
   // --nextDetectorElement>sets an iterator range with the hits of current detector element , returns a bool when done
   while(m_thpcsTGC->nextDetectorElement(i, e)) {
@@ -323,7 +318,7 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
       TimedHitPtr<sTGCSimHit> phit = *i++;
       const sTGCSimHit& hit = *phit;
       ATH_MSG_VERBOSE("Hit Particle ID : " << hit.particleEncoding() );
-      float eventTime = phit.eventTime();
+      double eventTime = phit.eventTime();
       if(eventTime < earliestEventTime) earliestEventTime = eventTime;
       // Cut on energy deposit of the particle
       if(hit.depositEnergy() < m_energyDepositThreshold) {
@@ -333,7 +328,7 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
       }
 
       // Old HITS format doesn't have kinetic energy (i.e it is set to -1).
-      float hit_kineticEnergy = hit.kineticEnergy();
+      double hit_kineticEnergy = hit.kineticEnergy();
 
       // Skip digitizing some problematic hits, if processing compatible HITS format
       if (hit_kineticEnergy > 0.) {
@@ -355,66 +350,61 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
       }
 
       if(eventTime != 0){
-         msg(MSG::DEBUG) << "Updated hit global time to include off set of " << eventTime << " ns from OOT bunch." << endmsg;
+         ATH_MSG_DEBUG("Updated hit global time to include off set of " << eventTime << " ns from OOT bunch.");
       }
       else {
-          msg(MSG::DEBUG) << "This hit came from the in time bunch." << endmsg;
+          ATH_MSG_DEBUG("This hit came from the in time bunch.");
       }
-      sTgcSimIdToOfflineId simToOffline(&m_idHelperSvc->stgcIdHelper());
+      sTgcSimIdToOfflineId simToOffline(&idHelper);
       const int idHit = hit.sTGCId();
       ATH_MSG_VERBOSE("Hit ID " << idHit );
       Identifier layid = simToOffline.convert(idHit);
-      ATH_MSG_VERBOSE("Layer ID[" << layid.getString() << "]");
       int eventId = phit.eventId();
-      std::string stationName= m_idHelperSvc->stgcIdHelper().stationNameString(m_idHelperSvc->stgcIdHelper().stationName(layid));
-      int isSmall = stationName[2] == 'S';
-      int gasGap = m_idHelperSvc->stgcIdHelper().gasGap(layid);
-      ATH_MSG_VERBOSE("Gas Gap " << gasGap );
-
+      
       /// apply the smearing tool to decide if the hit has to be digitized or not
       /// based on layer efficiency
-      if ( m_doSmearing ) {
+      if (m_doSmearing) {
         bool acceptHit = true;
-        ATH_CHECK(m_smearingTool->isAccepted(layid,acceptHit,rndmEngine));
+        ATH_CHECK(m_smearingTool->isAccepted(layid, acceptHit, digitCond.rndmEngine));
         if ( !acceptHit ) {
           ATH_MSG_DEBUG("Dropping the hit - smearing tool");
           continue;
         }
       }
 
-      const MuonGM::sTgcReadoutElement* detEL = m_mdManager->getsTgcReadoutElement(layid);  //retreiving the sTGC this hit is located in
-      if( !detEL ){
-        ATH_MSG_WARNING("Failed to retrieve detector element for: isSmall " << isSmall
-                         << " eta " << m_idHelperSvc->stgcIdHelper().stationEta(layid)
-                         << " phi " << m_idHelperSvc->stgcIdHelper().stationPhi(layid)
-                         << " ml " << m_idHelperSvc->stgcIdHelper().multilayer(layid));
+      const MuonGM::sTgcReadoutElement* detEL = digitCond.detMgr->getsTgcReadoutElement(layid);  //retreiving the sTGC this hit is located in
+      if(!detEL) {
+        ATH_MSG_WARNING("Failed to retrieve detector element for " 
+                      << m_idHelperSvc->toStringDetEl(layid));
         continue;
       }
 
       // project the hit position to wire surface (along the incident angle)
       ATH_MSG_VERBOSE("Projecting hit to Wire Surface" );
       const Amg::Vector3D& HPOS{hit.globalPosition()};  //Global position of the hit
-      const Amg::Vector3D GLOBAL_ORIG(0., 0., 0.);
-      const Amg::Vector3D GLOBAL_Z(0., 0., 1.);
+      const Amg::Vector3D GLOBAL_ORIG{Amg::Vector3D::Zero()};
+      const Amg::Vector3D GLOBAL_Z{Amg::Vector3D::UnitZ()};
       const Amg::Vector3D& GLODIRE{hit.globalDirection()};
       Amg::Vector3D global_preStepPos{hit.globalPrePosition()};
 
-      ATH_MSG_VERBOSE("Global Z " << GLOBAL_Z );
-      ATH_MSG_VERBOSE("Global Direction " << GLODIRE );
-      ATH_MSG_VERBOSE("Global Position " << HPOS );
+      ATH_MSG_VERBOSE("Global Z " << Amg::toString(GLOBAL_Z, 2) );
+      ATH_MSG_VERBOSE("Global Direction " << Amg::toString(GLODIRE, 2) );
+      ATH_MSG_VERBOSE("Global Position " << Amg::toString(HPOS, 2) );
 
-      int surfHash_wire =  detEL->surfaceHash(gasGap, 2);
+      int surfHash_wire =  detEL->surfaceHash(idHelper.gasGap(layid), 
+                                              sTgcIdHelper::sTgcChannelTypes::Wire);
       ATH_MSG_VERBOSE("Surface Hash for wire plane" << surfHash_wire );
       const Trk::PlaneSurface&  SURF_WIRE = detEL->surface(surfHash_wire);  //Plane of the wire surface in this gasGap
-      ATH_MSG_VERBOSE("Wire Surface Defined " << SURF_WIRE.center() );
+      ATH_MSG_VERBOSE("Wire Surface Defined " <<Amg::toString(SURF_WIRE.center(), 2) );
 
-      Amg::Vector3D LOCAL_Z = SURF_WIRE.transform().inverse()*GLOBAL_Z - SURF_WIRE.transform().inverse()*GLOBAL_ORIG;
-      Amg::Vector3D LOCDIRE = SURF_WIRE.transform().inverse()*GLODIRE - SURF_WIRE.transform().inverse()*GLOBAL_ORIG;
-      Amg::Vector3D LPOS = SURF_WIRE.transform().inverse() * HPOS;  //Position of the hit on the wire plane in local coordinates
+      const Amg::Transform3D wireTrans = SURF_WIRE.transform().inverse(); 
+      Amg::Vector3D LOCAL_Z = wireTrans*(GLOBAL_Z - GLOBAL_ORIG);
+      Amg::Vector3D LOCDIRE = wireTrans*(GLODIRE - GLOBAL_ORIG);
+      Amg::Vector3D LPOS = wireTrans * HPOS;  //Position of the hit on the wire plane in local coordinates
 
-      ATH_MSG_VERBOSE("Local Z: (" << LOCAL_Z.x() << ", " << LOCAL_Z.y() << ", " << LOCAL_Z.z() <<")" );
-      ATH_MSG_VERBOSE("Local Direction: (" << LOCDIRE.x() << ", " << LOCDIRE.y() << ", " << LOCDIRE.z() << ")" );
-      ATH_MSG_VERBOSE("Local Position: (" << LPOS.x() << ", " << LPOS.y() << ", " << LPOS.z() << ")" );
+      ATH_MSG_VERBOSE("Local Z: "<<Amg::toString(LOCAL_Z, 2) );
+      ATH_MSG_VERBOSE("Local Direction: "<<Amg::toString(LOCDIRE, 2));
+      ATH_MSG_VERBOSE("Local Position: " << Amg::toString(LPOS, 2));
 
       /* Backward compatibility with old sTGCSimHitCollection persistent class
        *  Two parameters (kinetic energy, pre-step position) are added in
@@ -475,14 +465,14 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
 
       // In the local frame of the wire plane, the z-component of the hit on the wire surface is zero
       if (hitOnSurf_wire.z() > e) {
-        ATH_MSG_DEBUG("Local Hit position on Wire surface (" << hitOnSurf_wire.x() << ", " << hitOnSurf_wire.y() << ", " << hitOnSurf_wire.z() << ") has non-zero z-component.");
+        ATH_MSG_DEBUG("Local Hit position on Wire surface "<<Amg::toString(hitOnSurf_wire, 2)<<" has non-zero z-component.");
       }
 
       //The hit on the wire in Global coordinates
       Amg::Vector3D glob_hitOnSurf_wire = SURF_WIRE.transform() * hitOnSurf_wire;
 
-      ATH_MSG_VERBOSE("Local Hit on Wire Surface: (" << hitOnSurf_wire.x() << ", " << hitOnSurf_wire.y() << ", " << hitOnSurf_wire.z() << ")"  );
-      ATH_MSG_VERBOSE("Global Hit on Wire Surface: (" << glob_hitOnSurf_wire.x() << ", " << glob_hitOnSurf_wire.y() << ", " << glob_hitOnSurf_wire.z() << ")" );
+      ATH_MSG_VERBOSE("Local Hit on Wire Surface: " << Amg::toString(hitOnSurf_wire, 2));
+      ATH_MSG_VERBOSE("Global Hit on Wire Surface: " <<Amg::toString(glob_hitOnSurf_wire, 2));
 
       ATH_MSG_DEBUG("sTgcDigitizationTool::doDigitization hits mapped");
 
@@ -497,23 +487,20 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
                                 hit.depositEnergy(),
                                 particleLink,
                                 hit_kineticEnergy,
-                                global_preStepPos
-                                );
+                                global_preStepPos);
 
 
-      float globalHitTime = temp_hit.globalTime() + eventTime;
-      float tof = temp_hit.globalPosition().mag()/CLHEP::c_light;
-      float bunchTime = globalHitTime - tof;
+      double globalHitTime = temp_hit.globalTime() + eventTime;
+      double tof = temp_hit.globalPosition().mag()/CLHEP::c_light;
+      double bunchTime = globalHitTime - tof;
 
       // Create all the digits for this particular Sim Hit
-      std::unique_ptr<sTgcDigitCollection> digiHits = m_digitizer->executeDigi(&temp_hit, globalHitTime, rndmEngine);
-      if (digiHits == nullptr) {
-        continue;
+      sTgcDigitVec digiHits = m_digitizer->executeDigi(digitCond, temp_hit);
+      if (digiHits.empty()) {
+          continue;
       }
-
-      sTgcDigitCollection::const_iterator it_digiHits;
-      ATH_MSG_VERBOSE("Hit produced " << digiHits->size() << " digits." );
-      for(it_digiHits=digiHits->begin(); it_digiHits!=digiHits->end(); ++it_digiHits) {
+      ATH_MSG_VERBOSE("Hit produced " << digiHits.size() << " digits." );
+      for( std::unique_ptr<sTgcDigit>& digit : digiHits) {
         /*
           NOTE:
           -----
@@ -522,87 +509,58 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
           in a loop of its own!
         */
         // make new sTgcDigit
-        Identifier newDigitId = (*it_digiHits)->identify(); //This Identifier should be sufficient to determine which RE the digit is from
-        float newTime = (*it_digiHits)->time();
-        int newChannelType = m_idHelperSvc->stgcIdHelper().channelType((*it_digiHits)->identify());
+        Identifier newDigitId = digit->identify(); //This Identifier should be sufficient to determine which RE the digit is from
+        double newTime = digit->time();
+        int newChannelType = idHelper.channelType(newDigitId);
 
-        float timeJitterElectronicsStrip = CLHEP::RandGaussZiggurat::shoot(rndmEngine, 0, m_timeJitterElectronicsStrip);
-        float timeJitterElectronicsPad = CLHEP::RandGaussZiggurat::shoot(rndmEngine, 0, m_timeJitterElectronicsPad);
-        if(newChannelType==1)
+        double timeJitterElectronicsStrip = CLHEP::RandGaussZiggurat::shoot(digitCond.rndmEngine, 0, m_timeJitterElectronicsStrip);
+        double timeJitterElectronicsPad = CLHEP::RandGaussZiggurat::shoot(digitCond.rndmEngine, 0, m_timeJitterElectronicsPad);
+        if(newChannelType== sTgcIdHelper::sTgcChannelTypes::Strip)
           newTime += timeJitterElectronicsStrip;
         else
           newTime += timeJitterElectronicsPad;
-        uint16_t newBcTag = bcTagging(newTime+bunchTime, newChannelType);
+        uint16_t newBcTag = bcTagging(newTime+bunchTime);
 
         if(m_doToFCorrection)
           newTime += bunchTime;
         else
           newTime += globalHitTime;
 
-        float newCharge = (*it_digiHits)->charge();
+        double newCharge = digit->charge();
 
-        if(newChannelType!=0 && newChannelType!=1 && newChannelType!=2) {
-          ATH_MSG_WARNING( "Wrong channelType " << newChannelType );
-        }
-
-        bool isDead = 0;
-        bool isPileup = 0;
+        bool isDead{false}, isPileup{eventId != 0};
         ATH_MSG_VERBOSE("Hit is from the main signal subevent if eventId is zero, eventId = " << eventId << " newTime: " << newTime);
-        if(eventId != 0)  //hit not from the main signal subevent
-          isPileup = 1;
+      
 
         // Create a new digit with updated time and BCTag
         sTgcDigit newDigit(newDigitId, newBcTag, newTime, newCharge, isDead, isPileup);
-        ATH_MSG_VERBOSE("Unmerged Digit") ;
-        ATH_MSG_VERBOSE(" BC tag = "    << newDigit.bcTag()) ;
-        ATH_MSG_VERBOSE(" digitTime = " << newDigit.time()) ;
-        ATH_MSG_VERBOSE(" charge = "    << newDigit.charge()) ;
+        ATH_MSG_VERBOSE("Unmerged Digit "<<m_idHelperSvc->toString(newDigitId)
+                      <<" BC tag = "    << newDigit.bcTag() 
+                      <<" digitTime = " << newDigit.time()
+                      <<" charge = "    << newDigit.charge()) ;
 
 
         // Create a MuonSimData (SDO) corresponding to the digit
         MuonSimData::Deposit deposit(particleLink, MuonMCData(hit.depositEnergy(), tof));
         std::vector<MuonSimData::Deposit> deposits;
-        deposits.push_back(deposit);
+        deposits.push_back(std::move(deposit));
         MuonSimData simData(std::move(deposits), hit.particleEncoding());
         // The sTGC SDO should be placed at the center of the gap, on the wire plane.
         // We use the position from the hit on the wire surface which is by construction in the center of the gap
         // glob_hitOnSurf_wire projects the whole hit to the center of the gap
         simData.setPosition(glob_hitOnSurf_wire);
         simData.setTime(globalHitTime);
-
-        Identifier layerID = m_idHelperSvc->stgcIdHelper().channelID(
-          newDigitId,
-          m_idHelperSvc->stgcIdHelper().multilayer(newDigitId),
-          m_idHelperSvc->stgcIdHelper().gasGap(newDigitId),
-          newChannelType, 1);
-
-        if(newChannelType == sTgcIdHelper::sTgcChannelTypes::Pad){ //Pad Digit
-          //Put the hit and digit in a vector associated with the RE
-          unmergedPadDigits[layerID][newDigitId].emplace_back(simData, newDigit);
-        }
-        else if(newChannelType == sTgcIdHelper::sTgcChannelTypes::Strip){ //Strip Digit
-          //Put the hit and digit in a vector associated with the RE
-          unmergedStripDigits[layerID][newDigitId].emplace_back(simData, newDigit);
-        }
-        else if(newChannelType == sTgcIdHelper::sTgcChannelTypes::Wire){ //Wire Digit
-          //Put the hit and digit in a vector associated with the RE
-          unmergedWireDigits[layerID][newDigitId].emplace_back(simData, newDigit);
-        }
+        const unsigned int modHash = static_cast<unsigned>(m_idHelperSvc->detElementHash(newDigitId));
+        sTgcSimDigitCont& contToPush = newChannelType == sTgcIdHelper::sTgcChannelTypes::Pad ? unmergedPadDigits :
+                                       newChannelType == sTgcIdHelper::sTgcChannelTypes::Strip ? unmergedStripDigits : unmergedWireDigits;                     
+        /// Resize the container accordingly
+        if (contToPush.size() <= modHash) contToPush.resize(modHash + 1);
+        contToPush[modHash].emplace_back(std::move(simData), std::move(newDigit));
       } // end of loop digiHits
     } // end of while(i != e)
   } //end of while(m_thpcsTGC->nextDetectorElement(i, e))
 
-  /***************************
-  * Retrieve conditions data *
-  ***************************/
-
-  // set up pointer to conditions object
-  SG::ReadCondHandle<NswCalibDbThresholdData> readThresholds{m_condThrshldsKey, ctx};
-  if(!readThresholds.isValid()){
-    ATH_MSG_ERROR("Cannot find conditions data container for VMM thresholds!");
-  }
-  const NswCalibDbThresholdData* thresholdData = readThresholds.cptr();
-
+  
   /*********************
   * Process Strip Digits *
   *********************/
@@ -622,145 +580,39 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
     direct neighbor strip to be above VMM threshold which triggers the VMM
     to read the strip digit.
   */
-  std::map<Identifier, std::vector<sTgcSimDigitData> > processedDigits;
-  // Loop through strip digits on each layer
-  // unmergedStripDigits is a map of [layer ID , map[channelID, vector<sTGCSimDigitData ]   ]
-  for (auto& it_LAYER : unmergedStripDigits) { // layer ID : map[channelID, vector<sTGCSimDigitData>]
-    processedDigits = processDigitsWithVMM(ctx, m_deadtimeStrip, it_LAYER.second, thresholdData, m_doNeighborOn);
-
-    // processedDigits is a map of <Identifier, pair< vector<sTgcDigit>, vector<MuonSimData> >
-    // Need to save to output digits with identifier of the detectorElement
-    // and not layer due to logic of how outputDigits if further processed.
-    const Identifier& elemId = m_idHelperSvc->stgcIdHelper().elementID(it_LAYER.first);
-    for (const auto& strip : processedDigits){
-      for (const auto& simDigit : strip.second){
-        sdoContainer->insert( std::make_pair(strip.first, simDigit.getSimData()) );
-        outputDigits[elemId][strip.first].push_back(simDigit.getSTGCDigit());
-      }
-    }
-
-  } // end of strip digit processing
-
+  ATH_CHECK(processDigitsWithVMM(ctx, digitCond, unmergedStripDigits, m_deadtimeStrip,
+                                 m_doNeighborOn, outputDigits, *sdoContainer));
   /*********************
   * Process Pad Digits *
   *********************/
-  // Loop through pads for each layer
-  // unmergedPadDigits is a map of [layer ID , map[channelID, vector<sTGCSimDigitData ]   ]
-  for (auto& it_LAYER : unmergedPadDigits) { // layer ID : map[channelID, vector<sTGCSimDigitData>]
-    processedDigits = processDigitsWithVMM(ctx, m_deadtimePad, it_LAYER.second, thresholdData, false);
-
-    const Identifier& elemId = m_idHelperSvc->stgcIdHelper().elementID(it_LAYER.first);
-    for (const auto& pad : processedDigits){
-      for (const auto& simDigit : pad.second){
-        sdoContainer->insert( std::make_pair(pad.first, simDigit.getSimData()) );
-        outputDigits[elemId][pad.first].push_back(simDigit.getSTGCDigit());
-      }
-    }
-
-  } // end of pad digit processing
-
+  ATH_CHECK(processDigitsWithVMM(ctx, digitCond, unmergedPadDigits, m_deadtimePad,
+                                 false, outputDigits, *sdoContainer));
   /*********************
   * Process Wire Digits *
   *********************/
-  // Loop through wire groups for each layer
-  // unmergedWireDigits is a map of [layer ID , map[channelID, vector<sTGCSimDigitData ]   ]
-  for (auto& it_LAYER : unmergedWireDigits) { // layer ID : map[channelID, vector<sTGCSimDigitData>]
-    processedDigits = processDigitsWithVMM(ctx, m_deadtimeWire, it_LAYER.second, thresholdData, false);
-
-    const Identifier& elemId = m_idHelperSvc->stgcIdHelper().elementID(it_LAYER.first);
-    for (const auto& wire : processedDigits){
-      for (const auto& simDigit : wire.second){
-        sdoContainer->insert( std::make_pair(wire.first, simDigit.getSimData()) );
-        outputDigits[elemId][wire.first].push_back(simDigit.getSTGCDigit());
-      }
-    }
-
-  } // end of wire digit processing
-
+  ATH_CHECK(processDigitsWithVMM(ctx, digitCond, unmergedWireDigits, m_deadtimeWire,
+                                 false, outputDigits, *sdoContainer));
   /*************************************************
    * Output the digits to the StoreGate collection *
   *************************************************/
-  for(std::map< Identifier, std::map< Identifier, std::vector<sTgcDigit> > >::iterator it_coll = outputDigits.begin(); it_coll != outputDigits.end(); ++it_coll){
-    Identifier elemId = it_coll->first;
-    IdentifierHash coll_hash;
-    m_idHelperSvc->stgcIdHelper().get_module_hash(elemId, coll_hash);
-    msg(MSG::VERBOSE) << "coll = "<< elemId << endmsg;
-    auto digitCollection = std::make_unique<sTgcDigitCollection>(elemId, coll_hash);
-
-    for(std::map< Identifier, std::vector<sTgcDigit> >::iterator it_REID = it_coll->second.begin(); it_REID != it_coll->second.end(); ++it_REID){
-      for(std::vector< sTgcDigit >::iterator it_digit = it_REID->second.begin(); it_digit != it_REID->second.end(); ++it_digit){
-
-  // apply the smearing before adding the digit
-  bool acceptDigit = true;
-  float chargeAfterSmearing(it_digit->charge());
-
-  if ( m_doSmearing ) {
-    ATH_CHECK(m_smearingTool->smearCharge(it_digit->identify(), chargeAfterSmearing, acceptDigit, rndmEngine) );
+  for (sTgcDigitVec& digits : outputDigits) {
+     if (digits.empty()) continue;
+     const Identifier elemID = m_idHelperSvc->chamberId(digits[0]->identify());
+     const IdentifierHash modHash = m_idHelperSvc->moduleHash(elemID);
+     std::unique_ptr<sTgcDigitCollection> collection = std::make_unique<sTgcDigitCollection>(elemID, modHash);
+     collection->insert(collection->end(), std::make_move_iterator(digits.begin()),
+                                           std::make_move_iterator(digits.end()));
+     ATH_CHECK(digitContainer->addCollection(collection.release(), modHash));
   }
-
-  if ( acceptDigit ) {
-
-    if ( m_idHelperSvc->stgcIdHelper().channelType(it_digit->identify()) == 1 ) {
-      // Select strips with charge > 0.001 pC to avoid having zero ADC count when converting
-      // charge [pC] to PDO [ADC count]
-      if (chargeAfterSmearing < 0.001) continue;
-    }
-
-    std::unique_ptr<sTgcDigit> finalDigit = std::make_unique<sTgcDigit>(it_digit->identify(),
-									      it_digit->bcTag(),
-									      it_digit->time(),
-									      chargeAfterSmearing,
-									      it_digit->isDead(),
-									      it_digit->isPileup());
-
-	  ATH_MSG_VERBOSE("Final Digit") ;
-	  ATH_MSG_VERBOSE(" BC tag = "    << finalDigit->bcTag()) ;
-	  ATH_MSG_VERBOSE(" digitTime = " << finalDigit->time()) ;
-	  ATH_MSG_VERBOSE(" charge = "    << finalDigit->charge()) ;
-    digitCollection->push_back(std::move(finalDigit));
-  }
-
-      } // end of loop for all the digit object of the same ReadoutElementID
-
-    } // end of loop for all the ReadoutElementID
-
-    if (!digitCollection->empty()){
-      const IdentifierHash hash = digitCollection->identifierHash();
-      ATH_MSG_VERBOSE("Adding collection to m_digitcontainer : HashId = " << hash << " of size " << digitCollection->size());
-
-      for(const sTgcDigit *digit : *digitCollection) {
-        ATH_MSG_VERBOSE(" BC tag = "       << digit->bcTag()) ;
-        ATH_MSG_VERBOSE(" digitTime = "    << digit->time()) ;
-        ATH_MSG_VERBOSE(" charge_6bit = "  << digit->charge_6bit()) ;
-        ATH_MSG_VERBOSE(" charge_10bit = " << digit->charge_10bit()) ;
-      }
-
-      if(digitContainer->addCollection(digitCollection.release(), hash).isFailure()) {
-        ATH_MSG_WARNING("Failed to add collection with hash " << hash);
-      }
-    }
-  }
-
   return StatusCode::SUCCESS;
 }
 
 /*******************************************************************************/
-uint16_t sTgcDigitizationTool::bcTagging(const float digitTime, const int channelType) const {
+uint16_t sTgcDigitizationTool::bcTagging(const double digitTime) const {
 
   uint16_t bctag = 0;
 
-  //double offset, window;
-  if(channelType == 0) { //pads
-    ATH_MSG_VERBOSE("Determining BC tag for pad channel");
-  }
-  else if(channelType == 1) { //strips
-    ATH_MSG_VERBOSE("Determining BC tag for strip channel");
-  }
-  else if (channelType == 2) { // wire groups
-    ATH_MSG_VERBOSE("Determining BC tag for wiregroup channel");
-  }
-
-   int bunchInteger;  //Define the absolute distance from t0 in units of BX
+   int bunchInteger{0};  //Define the absolute distance from t0 in units of BX
    if(digitTime > 0) bunchInteger = (int)(abs(digitTime/25.0));  //absolute bunch for future bunches
    else bunchInteger = (int)(abs(digitTime/25.0)) + 1; //The absolute bunch for negative time needs to be shifted by 1 as there is no negative zero bunch
    bctag = (bctag | bunchInteger);  //Store bitwise the abs(BX).  This should be equivalent to regular variable assignment
@@ -769,12 +621,13 @@ uint16_t sTgcDigitizationTool::bcTagging(const float digitTime, const int channe
   return bctag;
 }
 
-float sTgcDigitizationTool::getChannelThreshold(const EventContext& ctx, const Identifier& channelID, const NswCalibDbThresholdData* thresholdData) const {
+double sTgcDigitizationTool::getChannelThreshold(const EventContext& ctx, 
+                                                 const Identifier& channelID, 
+                                                 const NswCalibDbThresholdData& thresholdData) const {
 
-  float threshold = m_chargeThreshold;
-  float elecThrsld = 0;
+  float threshold = m_chargeThreshold, elecThrsld{0.f};
 
-  if(!thresholdData->getThreshold(channelID, elecThrsld))
+  if(!thresholdData.getThreshold(channelID, elecThrsld))
     ATH_MSG_ERROR("Cannot find retrieve VMM threshold from conditions data base!");
   if(!m_calibTool->pdoToCharge(ctx, true, elecThrsld, channelID, threshold))
     ATH_MSG_ERROR("Cannot convert VMM charge threshold via conditions data!");
@@ -793,154 +646,160 @@ CLHEP::HepRandomEngine* sTgcDigitizationTool::getRandomEngine(const std::string&
   return engine;
 }
 
-std::map<Identifier, std::vector<sTgcSimDigitData> > sTgcDigitizationTool::processDigitsWithVMM(const EventContext& ctx, const float vmmDeadTime, const std::map<Identifier, std::vector<sTgcSimDigitData> >& inputLayerDigits, const NswCalibDbThresholdData* thresholdData, const bool isNeighborOn) const {
+StatusCode sTgcDigitizationTool::processDigitsWithVMM(const EventContext& ctx,
+                                                      const DigiConditions& digiCond,
+                                                      sTgcSimDigitCont& unmergedDigits,
+                                                      const double vmmDeadTime,
+                                                      const bool isNeighbourOn,
+                                                      sTgcDigtCont& outDigitContainer,
+                                                      MuonSimDataCollection& outSdoContainer) const {
+  
+  const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+  /// Start the merging by looping over the digit container and grouping the hits from the same layer together.
+  for (sTgcSimDigitVec& digitsInCham : unmergedDigits) { 
+    
+    if (digitsInCham.empty()) continue;
+    /// Merge all digits 
+    sTgcSimDigitVec mergedDigits = processDigitsWithVMM(ctx, digiCond, vmmDeadTime, 
+                                                       digitsInCham, isNeighbourOn);
+    /// Update the container iterator to go to the next layer
+    if (mergedDigits.empty()) continue;
 
-  std::map<Identifier, std::vector<sTgcSimDigitData> > inputChannels = inputLayerDigits;
-  std::map<Identifier, std::vector<sTgcSimDigitData> > savedDigits;
+    const IdentifierHash hash = m_idHelperSvc->moduleHash(mergedDigits.front().identify());
+    const unsigned int hashIdx = static_cast<unsigned>(hash);
+    /// Assign enough space in the container vector
+    if (hash >= outDigitContainer.size()) {
+      outDigitContainer.resize(hash + 1);
+    }
+    for (sTgcSimDigitData& merged : mergedDigits) {
+        /// Push back the SDO
+        outSdoContainer.insert(std::make_pair(merged.identify(), std::move(merged.getSimData())));
+        /// apply the smearing before adding the digit
+        bool acceptDigit{true};
+        float chargeAfterSmearing = merged.getDigit().charge();
+        if (m_doSmearing) {
+            ATH_CHECK(m_smearingTool->smearCharge(merged.identify(), chargeAfterSmearing, acceptDigit, 
+                                                  digiCond.rndmEngine));
+        }
+        if (!acceptDigit) {
+            continue;
+        }
+        /// Select strips with charge > 0.001 pC to avoid having zero ADC count when converting
+        /// charge [pC] to PDO [ADC count]
+        if (idHelper.channelType(merged.identify()) == sTgcIdHelper::sTgcChannelTypes::Strip &&
+            chargeAfterSmearing < 0.001) {
+            continue;
+        }
+        std::unique_ptr<sTgcDigit> finalDigit = std::make_unique<sTgcDigit>(std::move(merged.getDigit()));
+        if (m_doSmearing) {
+            finalDigit->set_charge(chargeAfterSmearing);
+        }
+        ATH_MSG_VERBOSE("Final Digit "<<m_idHelperSvc->toString(finalDigit->identify())<<
+                        " BC tag = "    << finalDigit->bcTag()<<
+                        " digitTime = " << finalDigit->time() <<
+                        " charge = "    << finalDigit->charge());
+        outDigitContainer[hashIdx].push_back(std::move(finalDigit));
+    }
+  }
+  return StatusCode::SUCCESS; 
+}
+sTgcSimDigitVec sTgcDigitizationTool::processDigitsWithVMM(const EventContext& ctx,
+                                                          const DigiConditions& digiCond, 
+                                                          const double vmmDeadTime, 
+                                                          sTgcSimDigitVec& unmergedDigits,
+                                                          const bool isNeighborOn) const {
 
+  const MuonGM::MuonDetectorManager* detMgr{digiCond.detMgr};
+  const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+  /// Sort the unmerged digit vector per layer Id -> by channel -> time from early to late arrival
+  std::stable_sort(unmergedDigits.begin(), unmergedDigits.end(),  
+      [&idHelper](const sTgcSimDigitData& a, const sTgcSimDigitData& b) {
+        const int layA = idHelper.gasGap(a.identify()); 
+        const int layB = idHelper.gasGap(b.identify());
+        if (layA != layB) return layA < layB;
+        const int chA = idHelper.channel(a.identify());
+        const int chB = idHelper.channel(b.identify());
+        if (chA != chB) return chA < chB;
+        return a.time() < b.time();
+      });
+  sTgcSimDigitVec savedDigits{}, premerged{};
+
+  premerged.reserve(unmergedDigits.size());
+  savedDigits.reserve(premerged.capacity());
+
+      
+  auto passNeigbourLogic = [&](const sTgcSimDigitData& candidate) {
+      if (!isNeighborOn || savedDigits.empty()) return false;
+      if (savedDigits.back().identify() == candidate.identify() &&
+          std::abs(savedDigits.back().time() - candidate.time()) < vmmDeadTime) {
+            ATH_MSG_VERBOSE("Digits are too close in time ");
+            return false;
+      }
+      const Identifier digitId = candidate.identify();
+      const int channel = idHelper.channel(digitId);
+      const int maxChannel = detMgr->getsTgcReadoutElement(digitId)->numberOfStrips(digitId);
+      for (int neighbour : {std::max(1, channel -1), std::min(maxChannel, channel+1)}) {
+        /// Catch the cases where the channel is  1 or maxChannel
+        if (neighbour == channel) continue;
+        const Identifier neighbourId = idHelper.channelID(digitId, 
+                                                          idHelper.multilayer(digitId),
+                                                          idHelper.gasGap(digitId), 
+                                                          idHelper.channelType(digitId), neighbour);
+        const double threshold = m_useCondThresholds ? getChannelThreshold(ctx, neighbourId, *digiCond.thresholdData)  
+                                                     : m_chargeThreshold.value();          
+        if (std::find_if(savedDigits.begin(), savedDigits.end(), [&](const sTgcSimDigitData& known){
+            return known.identify() == neighbourId && 
+                   known.getDigit().charge() > threshold &&
+                   std::abs(known.time() - candidate.time()) <  m_hitTimeMergeThreshold;
+        }) != savedDigits.end()) return true;
+      
+      }
+      return false;
+  };
   // Sort digits on every channel by earliest to latest time
   // Also do hit merging to help with neighborOn logic
-  float threshold = m_chargeThreshold;
-  for (auto& channel : inputChannels){
-    std::stable_sort(channel.second.begin(), channel.second.end(), sort_digitsEarlyToLate);
-
-    if(m_useCondThresholds)
-      threshold = getChannelThreshold(ctx, channel.first, thresholdData);
-
-    // merge digits in time. Do weighed average to find time of
-    // digits originally below threshold. Follows what we expect from real VMM.
-    unsigned int nDigits = channel.second.size();
-    for (unsigned int i=0; i<nDigits; i++){
-      sTgcDigit digit1 = channel.second[i].getSTGCDigit();
-      float deltaT = 0.;
-      float totalCharge = digit1.charge();
-      float weightedTime = digit1.time();
-      // loop through subsequent digits that are close in time.
-      unsigned int j = i+1;
-      while (j < nDigits && deltaT < m_hitTimeMergeThreshold){
-        sTgcDigit digit2 = channel.second[j].getSTGCDigit();
-        deltaT = digit2.time() - digit1.time();
-        // If future digits are within window, digit1 absorbs its charge
-        if (deltaT < m_hitTimeMergeThreshold){
-          // If digit1 is not above threshold prior to merging, the new time is
-          // a weighted average. Do it for every merging pair.
-          weightedTime = (totalCharge >= threshold) ? weightedTime
-            : (weightedTime * totalCharge + digit2.time() * digit2.charge())
-            / (totalCharge + digit2.charge());
-          totalCharge += digit2.charge();
-        }
-        j++;
+  double threshold = m_chargeThreshold;
+  for (sTgcSimDigitVec::iterator merge_me = unmergedDigits.begin(); merge_me!= unmergedDigits.end(); ++merge_me) {
+    if(m_useCondThresholds) {
+      threshold = getChannelThreshold(ctx, (*merge_me).identify(), *digiCond.thresholdData);
+    }
+    /// merge digits in time. Do weighed average to find time of
+    /// digits originally below threshold. Follows what we expect from real VMM.
+    sTgcDigit& digit1{(*merge_me).getDigit()};
+    double totalCharge = digit1.charge();
+    double weightedTime = digit1.time();
+      
+    sTgcSimDigitVec::iterator merge_with = merge_me + 1;
+    for ( ; merge_with!= unmergedDigits.end(); ++merge_with) {
+      /// We reached another digit. No need to merge
+      if ((*merge_with).identify() != (*merge_me).identify()) {
+          break;
       }
-      digit1.set_charge(totalCharge);
-      digit1.set_time(weightedTime);
-      channel.second[i].setSTGCDigit(digit1);
-    } // End of loops over the i digits
-
+      const sTgcDigit& mergeDigit{(*merge_with).getDigit()};
+      // If future digits are within window, digit1 absorbs its charge
+      if (mergeDigit.time() - digit1.time() > m_hitTimeMergeThreshold) break;
+      // If digit1 is not above threshold prior to merging, the new time is
+      // a weighted average. Do it for every merging pair.
+      if (totalCharge < threshold) {
+         weightedTime = (weightedTime * totalCharge + mergeDigit.time() * mergeDigit.charge())
+                      / (totalCharge + mergeDigit.charge());
+      }
+      totalCharge += mergeDigit.charge();
+    }
+    digit1.set_charge(totalCharge);
+    digit1.set_time(weightedTime);
+    sTgcSimDigitData& mergedHit{*merge_me};
+    if (savedDigits.size() && 
+        savedDigits.back().identify() == digit1.identify() &&
+        std::abs(savedDigits.back().time() - digit1.time()) <= vmmDeadTime) continue;
+    if (digit1.charge() > threshold || passNeigbourLogic(mergedHit)){
+        savedDigits.emplace_back(std::move(mergedHit));
+    } else if (isNeighborOn) {
+        premerged.emplace_back(std::move(mergedHit));
+    }    
   } // end of time-ordering and hit merging loop
-
-  for (const auto& channel : inputChannels){
-    const Identifier& channelID = channel.first;
-    int ChannelType = m_idHelperSvc->stgcIdHelper().channelType(channelID);
-
-    // channel.second is a vector of time-order digits
-    for (auto& simDigit : channel.second ) {
-      sTgcDigit digit1 = simDigit.getSTGCDigit();
-
-      // If the digit is within deadTimeWindow of last saved digit, skip digit
-      auto it = savedDigits.find(channelID);
-      if (it != savedDigits.end()){ // Have digits saved to VMM
-        // By construction of the method, saved digits are time ordered.
-        if (digit1.time() < it->second.back().getSTGCDigit().time()) ATH_MSG_WARNING("sTGC Digits are not time ordered like expected!");
-        if (digit1.time() - it->second.back().getSTGCDigit().time() <= vmmDeadTime) continue;
-      }
-
-      float threshold = m_chargeThreshold;
-      if(m_useCondThresholds)
-        threshold = getChannelThreshold(ctx, channelID, thresholdData);
-
-      if (digit1.charge() >= threshold)
-        savedDigits[channelID].push_back(simDigit);
-
-      else if (isNeighborOn && ChannelType == sTgcIdHelper::sTgcChannelTypes::Strip){
-
-        int stripNumber = m_idHelperSvc->stgcIdHelper().channel(channelID);
-        int maxStripNumber = m_mdManager->getsTgcReadoutElement(channelID)->numberOfStrips(channelID);
-        float neighbor_threshold = m_chargeThreshold;
-
-        int multiplet = m_idHelperSvc->stgcIdHelper().multilayer(channelID);
-        int layer = m_idHelperSvc->stgcIdHelper().gasGap(channelID);
-
-        bool neighborAboveThreshold = false;
-        // Look at above strip if stripNumber != max
-        if (stripNumber >= 1 && stripNumber < maxStripNumber){
-          const Identifier& neighborID = m_idHelperSvc->stgcIdHelper().channelID(
-            channelID, multiplet, layer, sTgcIdHelper::sTgcChannelTypes::Strip, stripNumber+1);
-
-          // Neighbor must be above its own charge threshold
-          if(m_useCondThresholds)
-            neighbor_threshold = getChannelThreshold(ctx, neighborID, thresholdData);
-
-          // If the neighbor has a strip digit within time window, trigger VMM to save
-          neighborAboveThreshold = neighborStripAboveThreshold(digit1.time(), neighborID, neighbor_threshold, savedDigits, inputLayerDigits);
-        }
-
-        // Look at below strip if stripNumber != 1
-        // Also no point in repeating if above strip is already trigging the VMM
-        if (!neighborAboveThreshold && stripNumber > 1 && stripNumber <= maxStripNumber){ // Below strip neighbor
-          // Get neighbor strip identifier
-          const Identifier& neighborID = m_idHelperSvc->stgcIdHelper().channelID(
-            channelID, multiplet, layer, sTgcIdHelper::sTgcChannelTypes::Strip, stripNumber-1);
-
-          if(m_useCondThresholds)
-            neighbor_threshold = getChannelThreshold(ctx, neighborID, thresholdData);
-
-          // If the neighbor has a strip digit within time window, trigger VMM to save
-          neighborAboveThreshold = neighborStripAboveThreshold(digit1.time(), neighborID, neighbor_threshold, savedDigits, inputLayerDigits);
-        }
-
-        if (neighborAboveThreshold)
-          savedDigits[channelID].push_back(simDigit);
-      }
-
-    } // Looping through every digit on channel
-
-  } // Looping through every channel on Layer
-
+  std::copy_if(std::make_move_iterator(premerged.begin()),
+               std::make_move_iterator(premerged.end()),
+               std::back_inserter(savedDigits), passNeigbourLogic);
   return savedDigits;
-}
-
-bool sTgcDigitizationTool::neighborStripAboveThreshold(const float digitTime, const Identifier& neighborID, const float neighbor_threshold, const std::map<Identifier, std::vector<sTgcSimDigitData> >& savedDigits, const std::map<Identifier, std::vector<sTgcSimDigitData> >& layerStripDigits) const {
-
-
-  auto it = savedDigits.find(neighborID);
-  // If neighbor strip has saved output digits,
-  // check if any saved digit is within time and above threshold
-  if (it != savedDigits.end()) {
-    for (const sTgcSimDigitData& simDigit : it->second){
-      if (simDigit.getSTGCDigit().charge() >= neighbor_threshold)
-        if (std::abs(digitTime - simDigit.getSTGCDigit().time()) <= m_hitTimeMergeThreshold)
-          return true;
-    }
-    // If theres a digit, it means this strip has been processed already
-    // so dont look at the unprocessed strips
-    return false;
-  }
-
-  it = layerStripDigits.find(neighborID);
-  if (it  != layerStripDigits.end()){
-    // Strip was either not processed or all digits below threshold
-    // Check if neighborstrip has any unsaved digits above threshold
-    // and make sure the strips are not dead with simple logic
-    float timeOfPreviousLiveDigit = -1000.;
-    for (const sTgcSimDigitData& simDigit : it->second){
-      if (simDigit.getSTGCDigit().charge() >= neighbor_threshold &&
-          simDigit.getSTGCDigit().time() - timeOfPreviousLiveDigit >= m_deadtimeStrip){
-        // above threshold strip not in a deadtime window
-          if ( std::abs(digitTime - simDigit.getSTGCDigit().time()) <= m_hitTimeMergeThreshold)
-            return true;
-          timeOfPreviousLiveDigit = simDigit.getSTGCDigit().time();
-      }
-    }
-  }
-  return false;
 }

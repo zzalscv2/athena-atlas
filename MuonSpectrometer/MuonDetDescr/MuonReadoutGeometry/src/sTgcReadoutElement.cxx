@@ -740,7 +740,7 @@ namespace MuonGM {
             return channel;
         }
         MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
-        log << MSG::WARNING << "bad channelNumber" << endmsg;
+        log << MSG::WARNING <<__LINE__<< " bad channelNumber" <<pad.first<<" "<<pad.second << endmsg;
 
         return -1;
     }
