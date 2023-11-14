@@ -67,6 +67,9 @@ namespace CP
     Gaudi::Property<std::vector<std::string>> m_trigList_2017 {this, "triggers_2017", {}, "2017 trigger selection list"};
     Gaudi::Property<std::vector<std::string>> m_trigList_2018 {this, "triggers_2018", {}, "2018 trigger selection list"};
     Gaudi::Property<std::vector<std::string>> m_trigList_2022 {this, "triggers_2022", {}, "2022 trigger selection list"};
+    Gaudi::Property<std::vector<std::string>> m_trigList_2023 {this, "triggers_2023", {}, "2023 trigger selection list"};
+    Gaudi::Property<std::vector<std::string>> m_trigList_2024 {this, "triggers_2024", {}, "2024 trigger selection list"};
+    Gaudi::Property<std::vector<std::string>> m_trigList_2025 {this, "triggers_2025", {}, "2025 trigger selection list"};
 
     /// \brief whether to not apply an event filter
     Gaudi::Property<bool> m_noFilter {this, "noFilter", false, "whether to not apply an event filter"};
