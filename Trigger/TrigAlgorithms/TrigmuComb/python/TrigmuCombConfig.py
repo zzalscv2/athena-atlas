@@ -31,6 +31,7 @@ def muCombCfg(flags, postFix="", useBackExtrp=True, L2StandAloneMuonContainerNam
         idScanEndcap3Res = [0.036, 0.0000004]
         idScanEndcap4Res = [0.046, 0.0000002]
     from TrigmuComb.TrigmuCombMonitoring import TrigMuCombMonitoring
+    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
     muCombAlg = CompFactory.muComb(
                        name                  = "MuComb"+postFix,
                        MuCombStrategy        = 0,
@@ -48,6 +49,7 @@ def muCombCfg(flags, postFix="", useBackExtrp=True, L2StandAloneMuonContainerNam
                        L2StandAloneMuonContainerName = L2StandAloneMuonContainerName,
                        L2CombinedMuonContainerName = L2CombinedMuonContainerName,
                        TrackParticlesContainerName = TrackParticleContainerName,
+                       AtlasExtrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
                        MonTool = TrigMuCombMonitoring(flags))
 
     acc.addEventAlgo(muCombAlg)
