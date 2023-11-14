@@ -68,11 +68,11 @@ PhotonVertexSelectionWrapper::addBranches() const
   SG::WriteDecorHandle<xAOD::VertexContainer, float> vtxEta(m_vtxEta, ctx);
   SG::WriteDecorHandle<xAOD::VertexContainer, float> vtxPhi(m_vtxPhi, ctx);
   SG::WriteDecorHandle<xAOD::VertexContainer, float> vtxSumPt(m_vtxSumPt, ctx);
-  SG::WriteDecorHandle<xAOD::VertexContainer, float> vtxSumPt2(m_vtxSumPt2,
-                                                               ctx);
+  SG::WriteDecorHandle<xAOD::VertexContainer, float> vtxSumPt2(m_vtxSumPt2, ctx);
   bool isMomentum_available = vtxPt.isAvailable();
   bool isSumPt_available = vtxSumPt.isAvailable();
   bool isSumPt2_available = vtxSumPt2.isAvailable();
+  bool found_PV = false;
 
   // Loop over vertices and update auxdata
   for (const auto *vertex : *vertices) {
@@ -86,6 +86,7 @@ PhotonVertexSelectionWrapper::addBranches() const
     if(vertex->vertexType() == xAOD::VxType::VertexType::PriVtx or
        vertex->vertexType() == xAOD::VxType::VertexType::PileUp){
 
+      found_PV = true;
       // Get momentum vector of vertex and add it as a decoration
       TLorentzVector vmom = xAOD::PVHelpers::getVertexMomentum(vertex, isMomentum_available);
       pt = sqrt(vmom.Px() * vmom.Px() + vmom.Py() * vmom.Py());
@@ -104,7 +105,9 @@ PhotonVertexSelectionWrapper::addBranches() const
     vtxEta(*vertex) = eta;
     vtxPhi(*vertex) = phi;
     vtxSumPt(*vertex) = sumPt;
-    if(!isSumPt2_available) vtxSumPt2(*vertex) = sumPt2;
+    // For events where no PV is reconstructed, beamspot is saved and isSumPt2_available = False
+    // Need to also check found_PV to avoid modifying locked store
+    if(!isSumPt2_available && found_PV) vtxSumPt2(*vertex) = sumPt2;
 
   } // end loop o vertices
 
