@@ -175,6 +175,16 @@ Can be used for formatting expressions that using longs in py2.
     return repr(x)
 
 
+def boolvec (v):
+    out = ''
+    for x in v:
+        if x:
+            out = '1' + out
+        else:
+            out = '0' + out
+    return out
+
+
 # For root 6.08, need to use __cppname__ rather than __name__
 # for the name of a type if it's there.
 def typename(t):
@@ -1710,6 +1720,396 @@ def dump_RpcClusterOnTrack (p, f):
     return
     
 
+def dump_Attribute (p, f):
+    if isinstance (p, str):
+        fprint (f, p)
+    else:
+        ss = ROOT.std.ostringstream()
+        p.toOutputStream (ss)
+        fprint (f, ss.str())
+    return
+@nolist
+def dump_AttributeList (p, f):
+    #print ('yyy', p, type(p))
+    #for x in p:
+    #    print ('yyy1', type(x))
+    ss = ROOT.std.ostringstream()
+    getattr(p, 'print')(ss)
+    #print ('yyy2', ss.str())
+    #for i in range (p.size()):
+    #    print ('yyy3', i, p[i], type(p[i]))
+    s = ss.str()
+    if s[0] == '{': s = s[1:]
+    if s[-1] == '}': s = s[:-1]
+    for a in s.split(','):
+        fprint (f, '  ', a, '\n')
+    return
+
+
+def dump_InDetTime (p, f):
+    fprint (f, p.first, p.second)
+    return
+
+
+@nolist
+def dump_IDCInDetBSErrContainer (p, f):
+    for x in p.getAll():
+        fprint (f, '\n    ', x.first, x.second)
+    return
+
+
+@nolist
+def dump_TRT_BSErrContainer (p, f):
+    fprint (f, '  Missing errors:', list (p.getMissingErrorSet()))
+    fprint (f, '\n  Error errors:', list (p.getErrorErrorSet()))
+    fprint (f, '\n  Sid errors:', list (p.getSidErrorSet()))
+    fprint (f, '\n  L1 errors:', [(x.first, x.second) for x in p.getL1ErrorSet()])
+    fprint (f, '\n  BCID errors:', [(x.first, x.second) for x in p.getBCIDErrorSet()])
+    fprint (f, '\n  ROB errors:', [(x.first, x.second) for x in p.getRobErrorSet()])
+    return
+
+
+def dump_LArFebHeader (p, f):
+    fprint (f, 'feb', p.FEBId().getString(), p.FebELVL1Id(), p.FebBCId(),
+            'febh', p.FormatVersion(), p.SourceId(),
+            p.RunNumber(), p.ELVL1Id(), p.BCId(), p.LVL1TigType(),
+            p.DetEventType(),
+            'dsp', p.DspCodeVersion(), p.DspEventCounter(),
+            'res', p.RodResults1Size(), p.RodResults2Size(), p.RodRawDataSize(),
+            p.NbSamples(), p.NbSweetCells1(), p.NbSweetCells2(),
+            p.OnlineChecksum(), p.OfflineChecksum(), p.RodStatus(),
+            list(p.SCA()),
+            list(p.FebCtrl1()), list(p.FebCtrl2()), list(p.FebCtrl3()))
+    return
+
+
+def dump_LArRawChannel (p, f):
+    fprint (f, p.identify().getString(), p.energy(), p.time(),
+            p.quality(), p.provenance(), p.gain())
+    return
+
+
+def dump_TrigMonROB (p, f):
+    fprint (f, [(x.getROBId(), x.isStatusOk(), x.isStatusPrefetched(),
+                 x.getROBSize(), x.getEncodedState(), x.getHistory(),
+                 x.getStatus()) for x in p.getData()],
+            list(p.getWord()))
+    return
+
+def dump_TrigMonRoi (p, f):
+    fprint (f, list(p.getWord()), list(p.getVarKey()), list(p.getVarVal()))
+    return
+
+def dump_TrigMonAlg (p, f):
+    fprint (f, [ord(x) for x in p.getByte()], list(p.getWord()))
+    return
+
+def dump_TrigMonSeq (p, f):
+    fprint (f, p.getEncoded(), list(p.getVarKey()), list(p.getVarVal()))
+    for a in p.getAlg():
+        fprint (f, '\n        ')
+        dump_TrigMonAlg (p, f)
+    return
+
+def dump_TrigMonTE (p, f):
+    fprint (f, p.getId(),
+            p.getIndex(), p.getType(),
+            p.getActiveState(), p.getErrorState(), p.isTerminalNode(),
+            p.isOutputL2Node(), p.isOutputEFNode(), p.isTopologicalTE(),
+            list(p.getChildIndex()), list (p.getParentIndex()),
+            list(p.getRoiId()), list(p.getClid()),
+            list(p.getVarKey()), list(p.getVarVal()))
+    return
+
+def dump_TrigMonEvent (p, f):
+    fprint (f, 'r/e/lb/bc', p.getRun(), p.getEvent(), p.getLumi(), p.getBunchId(),
+            'tm', p.getSec(), p.getNanoSec(), 'addl', list(p.word()))
+    fprint (f, '\n    robs')
+    for r in p.getROBVec():
+        fprint (f, '\n      ')
+        dump_TrigMonROB (r, f)
+    fprint (f, '\n    rois')
+    for r in p.getRoiVec():
+        fprint (f, '\n      ')
+        dump_TrigMonRoi (r, f)
+    fprint (f, '\n    seq2')
+    for r in p.getSeqVec():
+        fprint (f, '\n      ')
+        dump_TrigMonSeq (r, f)
+    fprint (f, '\n    tes')
+    for r in p.getTEVec():
+        fprint (f, '\n      ')
+        dump_TrigMonTE (r, f)
+    fprint (f, '\n    l1', list(p.getL1Item()))
+    fprint (f, '\n    hlt', list(p.getChain()))
+    fprint (f, '\n    key', list(p.getVarKey()))
+    fprint (f, '\n    val', list(p.getVarVal()))
+    return
+
+
+def dump_TrigConfSig (p, f):
+    fprint (f, p.getCounter(), p.getLogic(), p.getLabel(),
+            list(p.getOutputTEs()))
+    return
+
+def dump_TrigConfChain (p, f):
+    fprint (f, p.getName(), p.getChainName(), p.getLowerName(),
+            p.getId(), p.getCounter(),
+            p.getLowerId(), p.getLowerCounter(),
+            p.getLevelId(), p.getPrescale(), p.getPassThrough())
+    fprint (f, '\n      lower ids', list(p.getLowerIds()))
+    fprint (f, '\n      stream ps', list(p.getStreamPS()))
+    fprint (f, '\n      stream name', list(p.getStream()))
+    fprint (f, '\n      group', list(p.getGroup()))
+    fprint (f, '\n      EB hypo', list(p.getEBHypo()))
+    fprint (f, '\n      sigs')
+    for s in p.getSignature():
+        fprint (f, '\n        ')
+        dump_TrigConfSig (p, f)
+        
+    return
+
+def dump_TrigConfAlg (p, f):
+    ss = ROOT.ostringstream()
+    getattr(p, 'print')(ss)
+    fprint (f, p.index(), ss.str())
+    return
+
+def dump_TrigConfSeq (p, f):
+    fprint (f, p.getName(), p.getIndex(), p.getId(), p.getTopoTE())
+    fprint (f, '\n      algs')
+    for s in p.getAlg():
+        fprint (f, '\n        ')
+        dump_TrigConfAlg (p, f)
+    fprint (f, '\n      input TE', list(p.getInputTEs()))
+    return
+
+def dump_TrigMonConfig (p, f):
+    fprint (f, 'r/e/lb', p.getRun(), p.getEvent(), p.getLumi(),
+            'tm', p.getSec(), p.getNanoSec(),
+            'keys', p.getMasterKey(), p.getHLTPrescaleKey(),
+            p.getLVL1PrescaleKey())
+    fprint (f, '\n    chains')
+    for r in p.getChainVec():
+        fprint (f, '\n      ')
+        dump_TrigConfChain (r, f)
+    fprint (f, '\n    seqs')
+    for r in p.getSeqVec():
+        fprint (f, '\n      ')
+        dump_TrigMonSeq (r, f)
+    fprint (f, '\n    key', list(p.getVarKey()))
+    fprint (f, '\n    val', list(p.getVarVal()))
+    fprint (f, '\n    pairkey', list(p.getPairKey()))
+    fprint (f, '\n    pairval', list(p.getPairVal()))
+    return
+
+
+@nolist
+def dump_BunchConfKey (p, f):
+    fprint (f, p.id())
+    return
+
+
+def dump_AFP_RawCollectionHead (p, f):
+    fprint (f, p.lvl1Id(), p.link(), p.frontendFlag(), p.bcId(), p.robId())
+    return
+
+def dump_AFP_RawDataCommonHead (p, f):
+    fprint (f, p.hitDiscConfig(), p.link())
+    return
+
+def dump_AFP_SiRawData (p, f):
+    dump_AFP_RawDataCommonHead (p, f)
+    fprint (f, p.column(), p.row(), p.timeOverThreshold())
+    return
+
+def dump_AFP_SiRawCollection (p, f):
+    dump_AFP_RawCollectionHead (p, f)
+    for r in p.dataRecords():
+        fprint (f, '\n      ')
+        dump_AFP_SiRawData (r, f)
+    return
+
+def dump_AFP_ToFRawData (p, f):
+    dump_AFP_RawDataCommonHead (p, f)
+    fprint (f, p.header(), p.edge(), p.channel())
+    if p.isTrigger():
+        fprint (f, p.delayedTrigger(), p.triggerPattern())
+    else:
+        fprint (f, p.time(), p.pulseLength())
+    return
+
+def dump_AFP_ToFRawCollection (p, f):
+    dump_AFP_RawCollectionHead (p, f)
+    for r in p.dataRecords():
+        fprint (f, '\n      ')
+        dump_AFP_ToFRawData (r, f)
+    return
+
+@nolist
+def dump_AFP_RawContainer (p, f):
+    fprint (f, p.lvl1Id(), p.bcId(), p.lumiBlock(),
+            p.timeStamp(), p.timeStampNS())
+    fprint (f, '\n  si collections')
+    for c in p.collectionsSi():
+        fprint (f, '\n    ')
+        dump_AFP_SiRawCollection (c, f)
+    fprint (f, '\n  tof collections')
+    for c in p.collectionsToF():
+        fprint (f, '\n    ')
+        dump_AFP_ToFRawCollection (c, f)
+    return
+
+
+def dump_ALFA_RawData (p, f):
+    fprint (f, p.GetWordId_PMF(), p.GetPMFId_PMF(), p.GetMBId_PMF(),
+            p.GetEventCount_PMF(), p.Get_bit16(), p.Get_bit18(),
+            p.Get_bit26_27(), p.Get_bit24_27(), p.Get_error_bit17(),
+            list(p.HitChan()), list (p.dataWords()))
+    return
+
+
+def dump_ALFA_RawDataCollection (p, f):
+    fprint (f, 'collection')
+    fprint (f, 'mb', p.GetMBId_POT(), 'mrod', p.GetMrodId_POT(),
+            'ec', p.GetEventCount_POT(),
+            'scid', p.Get_scaler_POT(),
+            'adc', p.Get_ADC1_POT(), p.Get_ADC2_POT(),
+            'err', p.GetTrigSyncErr(),
+            'pat', boolvec (p.Get_pattern_POT()))
+    fprint (f, '\n    data')
+    for r in p.Get_POT_DATA():
+        fprint (f, '\n    ')
+        dump_ALFA_RawData (r, f)
+    fprint (f, '\n    contents')
+    for r in p:
+        fprint (f, '\n    ')
+        dump_ALFA_RawData (r, f)
+    return
+
+
+@nolist
+def dump_ALFA_RawDataContainer (p, f):
+    if p.is_FullEVmarker(): fprint (f, 'fullev')
+    if p.is_ROBmarker(): fprint (f, 'rob')
+    if p.is_RODmarker(): fprint (f, 'rod')
+    fprint (f, 'sd/mrod/l1/ecr/bc', p.subdetId(), p.mrodId(), p.lvl1Id(),
+            p.ecrId(), p.bcId())
+    fprint (f, '\n  run/typ/tt/evtyp', p.runNum(), p.runType(),
+            p.trigtypeId(), p.DetEventType(),
+            'ts', p.GetTimeStamp(), p.GetTimeStampns(),
+            p.GetLumiBlock(), p.GetBCId())
+    fprint (f, '\n  lvl1', boolvec(p.GetLvl1Pattern_POT()))
+    fprint (f, '\n  lvl2', boolvec(p.GetLvl2Pattern_POT()))
+    fprint (f, '\n  ef', boolvec(p.GetEFPattern_POT()))
+    for c in p:
+        fprint (f, '\n    ')
+        dump_ALFA_RawDataCollection (c, f)
+    return
+
+
+def dump_TrigT2ZdcSignals (p, f):
+    fprint (f, list(p.triggerEnergies()), list(p.triggerTimes()))
+    return
+
+
+@nolist
+def dump_TauDetailsContainer (p, f):
+    fprint (f, '(Dumped as a part of Analysis::TauJetContainer)')
+    return
+
+
+@nolist
+def dump_egDetailContainer (p, f):
+    fprint (f, '(Dumped as a part of egamma)')
+    return
+
+
+@nolist
+def dump_JetMomentMapCollection (p, f):
+    fprint (f, '(Dumped as a part of jets)')
+    return
+
+
+@nolist
+def dump_JetKeyDescriptorCollection (p, f):
+    fprint (f, '(Dumped as a part of jets)')
+    return
+
+
+@nolist
+def dump_LArFebErrorSummary (p, f):
+    for x in p.get_all_febs():
+        fprint (f, '\n  ', x.first, x.second)
+    return
+
+
+@nolist
+def dump_ClusterSplitProbabilityContainer (p, f):
+    for x in p.splitProbMap():
+        fprint (f, '\n  ', x.first, x.second.first, x.second.second, x.second.isSplit())
+    return
+
+
+def dump_InDetSimData (p, f):
+    if not p:
+        fprint (f, '(null)')
+        return
+    fprint (f, p.word())
+    for d in p.getdeposits():
+        fprint (f, '[')
+        dump_HepMcParticleLink (d.first, f)
+        fprint (f, d.second)
+        fprint (f, ']')
+    return
+
+@nolist
+def dump_InDetSimDataCollection (p, f):
+    getData = ROOT.InDetSimDataHelpers.getData
+    for id in ROOT.InDetSimDataHelpers.identifiers(p):
+        fprint (f, '\n  ', id.getString())
+        dump_InDetSimData (getData (p, id), f)
+    return
+
+
+@nolist
+def dump_PRD_MultiTruthCollection (p, f):
+    for x in ROOT.TrkTruthDataHelpers.getData (p):
+        fprint (f, '\n  ', x.first.getString())
+        dump_HepMcParticleLink (x.second, f)
+    return
+
+
+@nolist
+def dump_TrackTruthCollection (p, f):
+    for x in p:
+        fprint (f, '\n  ', x.first.index())
+        dump_HepMcParticleLink (x.second.particleLink(), f)
+        fprint (f, x.second.probability())
+    return
+
+
+def dump_LArTTL1 (p, f):
+    fprint (f, p.ttOnlineID().getString(), p.ttOfflineID().getString(),
+            list (p.samples()))
+    return
+
+
+@nolist
+def dump_ComTime (p, f):
+    fprint (f, p.getTTCTime(), p.getTime())
+    dump_H3V (p.GetCounterPosition(), f)
+    dump_H3V (p.GetcosThetaDirection(), f)
+    return
+
+
+
+@nolist
+def dump_vector (p, f):
+    fprint (f, list(p))
+    return
+
+    
 def dump_TgcClusterOnTrack (p, f):
     dump_MuonClusterOnTrack (p, f)
     dump_EL (p.prepRawDataLink(), f)
@@ -2420,7 +2820,7 @@ def dump_GenVertex (v, f):
         ww = list(v.weights())
     fprintln (f, [w for w in ww])
     fprint (f, '     (')
-    if hasattr(v, 'particles_in_size'):
+    if hasattr(v, 'particles_in_const_begin'):
         barcodes(v.particles_in_const_begin(),
                  v.particles_in_const_end(),
                  v.particles_in_size(), f)
@@ -2430,7 +2830,7 @@ def dump_GenVertex (v, f):
         for bc in parts:
             fprint (f, bc)
     fprint (f, ')(')
-    if hasattr(v, 'particles_out_size'):
+    if hasattr(v, 'particles_out_const_begin'):
         barcodes(v.particles_out_const_begin(),
                  v.particles_out_const_end(),
                  v.particles_out_size(), f)
@@ -2637,6 +3037,21 @@ def dump_HLTResult (t, f):
     return
 
 
+@nolist
+def dump_HLTResultMT (p, f):
+    fprint (f, 'version', p.getVersion())
+    fprint (f, '\n    streamtags', list(p.getStreamTags()))
+    #fprint (f, '\n    passraw', list(p.getHltPassRawBits()))
+    #fprint (f, '\n    prescaled', list(p.getHltPrescaledBits()))
+    fprint (f, '\n    hltbits', list(p.getHltBitsAsWords()))
+    fprint (f, '\n    data size', p.getSerialisedData().size())
+    #fprint (f, '\n    robstatus size', p.getRobStatus().size())
+    fprint (f, '\n    status', list(p.getStatus()))
+    fprint (f, '\n    trunc', p.severeTruncation(), list(p.getTruncatedModuleIds()))
+    return
+
+
+@nolist
 def dump_Lvl1Result (t, f):
     fprint (f, t.isConfigured(),
             t.isAccepted(),
@@ -4227,7 +4642,7 @@ def dump_SCT_RDORawData (p, f):
     return
 
 
-def dump_IDC (payload_dumper, p, f):
+def dump_IDC (payload_dumper, p, f, extra_idc_dumper = None):
     beg = p.begin()
     end = p.end()
     if hasattr(beg.__class__, '__preinc__'):
@@ -4238,9 +4653,15 @@ def dump_IDC (payload_dumper, p, f):
         nextfunc = beg.next
     while beg != end:
         coll = beg.cptr()
-        fprint (f, 'IDC', beg.hashId().value(), coll.identifyHash().value(), coll.size())
+        if hasattr (coll, 'identifyHash'):
+            hash = coll.identifyHash().value()
+        else:
+            hash = coll.identifierHash().value()
+        fprint (f, 'IDC', beg.hashId().value(), hash, coll.size())
         if hasattr (coll, 'type'):
             fprint (f, coll.type())
+        if extra_idc_dumper:
+            extra_idc_dumper (coll, f)
         for x in coll:
             fprint (f, '\n  ')
             payload_dumper (x, f)
@@ -4474,9 +4895,23 @@ def dump_TileRawChannelContainer (data, f):
         fprint (f, 'Coll', beg.hashId().value(), coll.size())
         dump_TileRawChannelCollection (coll, f)
         fwrite (f, '\n')
-        beg.next()
+        beg.__preinc__()
     fwrite (f, '\n')
-  
+    return
+
+
+@nolist
+def dump_TileBeamElemContainer (data, f):
+    fprintln (f, data.get_unit(), data.get_type(), data.get_bsflags())
+    beg = data.begin()
+    end = data.end()
+    while beg != end:
+        coll = beg.cptr()
+        fprint (f, 'Coll', beg.hashId().value(), coll.size())
+        #dump_TileRawChannelCollection (coll, f)
+        fwrite (f, '\n')
+        beg.__preinc__()
+    fwrite (f, '\n')
     return
 
 
@@ -4494,6 +4929,12 @@ def dump_TileL2 (p, f):
 
 def dump_TileTTL1 (p, f):
     fprint (f, p.identify().getString(), list(p.fsamples()))
+    return
+
+
+def dump_TileMuonReceiverObj (p, f):
+    fprint (f, p.GetID(), list (p.GetDecision()),
+            list(p.GetThresholds()), list(p.GetEne()), list(p.GetTime()))
     return
 
 
@@ -4675,7 +5116,7 @@ def dump_L1TopoRDO (p, f):
 
 def dump_L1TopoResult (p, f):
     dump_ROIBHeader (p.header(), f)
-    dump_L1TopoRDO (p.rdo())
+    dump_L1TopoRDO (p.rdo(), f)
     dump_ROIBTrailer (p.trailer(), f)
     return
 
@@ -4787,6 +5228,246 @@ def dump_EventBookkeeper (p, f, level=0):
     for c in list(p.getChildrenEventBookkeepers()):
         fprint (f, '\n    ' + ('  '*level))
         dump_EventBookkeeper (c, f, level+1)
+    return
+
+
+def dump_RpcFiredChannel (p, f):
+    fprint (f, 'RpcFiredChannel', p.bcid(), p.time(), p.ijk(), p.channel(), p.ovl(), p.thr())
+    return
+
+
+def dump_RpcCoinMatrix (p, f):
+    fprint (f, p.identify().getString(), p.onlineId(), p.crc(), p.fel1Id(), p.febcId())
+    for chan in p:
+        fprint(f, '\n    ')
+        dump_RpcFiredChannel (chan, f)
+    return
+
+
+@nolist
+def dump_RpcPadContainer (p, f):
+    dump_IDC (dump_RpcCoinMatrix, p, f,
+              extra_idc_dumper = lambda p, f: \
+                fprint (f, p.identify().getString(), p.onlineId(), p.lvl1Id(), p.bcId(),
+                        p.sector(), p.status(), p.errorCode()))
+    return
+
+
+def dump_RpcSLTriggerHit (p, f):
+    fprint (f, 'hit', p.rowinBcid(), p.padId(), p.ptId(), p.roi(),
+            p.outerPlane(), p.overlapPhi(), p.overlapEta(),
+            p.triggerBcid(), p.isInput())
+    return
+
+def dump_RpcSectorLogic (p, f):
+    fprint (f, p.sectorId(), p.fel1Id(), p.bcid(), p.errorCode(), p.crc(),
+            p.hasMoreThan2TriggerCand(),
+            list (p.counters()),
+            list (p.triggerRates()))
+    for hit in p:
+        fprint (f, '\n    ')
+        dump_RpcSLTriggerHit (hit, f)
+    return
+
+
+def dump_CscRawData (p, f):
+    fprint (f, p.address(), p.hashId(), p.identify(), p.rpuID(),
+            p.time(), p.width(), p.isTimeComputed(), list(p.samples()))
+    return
+            
+@nolist
+def dump_CscRawDataContainer (p, f):
+    dump_IDC (dump_CscRawData, p, f,
+              extra_idc_dumper = lambda p, f: \
+              fprint (f, p.identify(), p.rodId(), p.subDetectorId(),
+                      p.samplingPhase(), p.triggerType(), p.firstBitSummary(),
+                      p.eventType(), p.scaAddress(),
+                      list(p.rpuID()), [ord(c) for c in p.dataType()]))
+    return
+
+
+def dump_TgcRawData (p, f):
+    fprint (f, p.bcTag(),
+            'ids',
+            p.subDetectorId(), p.rodId(), p.sswId(),
+            p.slbId(), p.l1Id(), p.bcId(), p.slbType(),
+            'hit', 
+            p.bitpos(), p.tracklet(), p.isAdjacent(),
+            'coin',
+            p.type(), p.isForward(), p.index(), p.position(),
+            p.delta(), p.segment(), p.subMatrix(),
+            'hipt',
+            p.sector(), p.chip(), p.isHipt(), p.hitId(), p.hsub(),
+            p.isStrip(), p.inner(),
+            'sl',
+            p.cand3plus(), p.isMuplus(), p.threshold(), p.isOverlap(),
+            p.isVeto(), p.roi(), p.innerflag(), p.coinflag(),
+            'nsw',
+            p.nsweta(), p.nswphi(), p.nswsl(), p.nswcand(), p.nswdtheta(),
+            p.nswphires(), p.nswlowres(), p.nswid(),
+            'rpc',
+            p.rpceta(), p.rpcphi(), p.rpcflag(), p.rpcdeta(), p.rpcdphi(),
+            'eifi',
+            p.ei(), p.fi(), p.cid(),
+            'tmdb',
+            p.tmdbmod(), p.tmdbbcid())
+            
+    return
+
+def dump_TgcBitmask (p, f, lab, fields):
+    mask = 0
+    val = 1
+    for ff in fields:
+        if getattr (p, ff): mask += val
+        val *= 2
+    fprint (f, lab, hex (mask))
+    return
+def dump_TgcRdo_Errors (p, f):
+    dump_TgcBitmask (p, f, 'err',
+                     ['badBcID',
+                      'badL1Id',
+                      'timedout',
+                      'badData',
+                      'overflow'])
+    return
+def dump_TgcRdo_RodStatus (p, f):
+    dump_TgcBitmask (p, f, 'rod',
+                     ['EC_RXsend',
+                      'EC_FELdown',
+                      'EC_frame',
+                      'EC_Glnk',
+                      'EC_xor',
+                      'EC_ovfl',
+                      'EC_timeout',
+                      'EC_xormezz',
+                      'EC_wc0',
+                      'EC_L1ID',
+                      'EC_nohdr',
+                      'EC_rectype',
+                      'EC_null',
+                      'EC_order',
+                      'EC_LDB',
+                      'EC_RXovfl',
+                      'EC_SSWerr',
+                      'EC_sbid',
+                      'EC_unxsbid',
+                      'EC_dupsb',
+                      'EC_ec4',
+                      'EC_bc',
+                      'EC_celladr',
+                      'EC_hitovfl',
+                      'EC_trgbit',
+                      'EC_badEoE',
+                      'EC_endWCnot0',
+                      'EC_noEoE'])
+    return
+def dump_TgcRdo_LocalStatus (p, f):
+    dump_TgcBitmask (p, f, 'local',
+                     ['mergedHitBCs',
+                      'mergedTrackletBCs',
+                      'sortedHits',
+                      'sortedTracklets',
+                      'hasRoI',
+                      'fakeSsw'])
+    return
+def dump_TgcRdo (p, f):
+    fprint (f, p.version(), p.identify(),
+            p.subDetectorId(), p.rodId(), p.triggerType(),
+            p.bcId(), p.l1Id(), p.orbit())
+    dump_TgcRdo_Errors (p.errors(), f)
+    dump_TgcRdo_RodStatus (p.rodStatus(), f)
+    dump_TgcRdo_LocalStatus (p.localStatus(), f)
+    return
+
+@nolist
+def dump_TgcRdoContainer (p, f):
+    dump_IDC (dump_TgcRawData, p, f,
+              extra_idc_dumper = dump_TgcRdo)
+    return
+
+
+def dump_MdtAmtHit (p, f):
+    fprint (f, p.tdcId(), p.channelId(), p.leading(), p.coarse(), p.fine(),
+            p.width(), p.isMasked(), list(p.dataWords()))
+    return
+  
+@nolist
+def dump_MdtCsmContainer (p, f):
+    dump_IDC (dump_MdtAmtHit, p, f,
+              extra_idc_dumper = lambda p, f: \
+                fprint (f, p.identify().getString(),
+                        p.SubDetId(), p.MrodId(), p.CsmId()))
+    return
+
+
+def dump_STGC_RawData (p, f):
+    fprint (f, p.identify().getString(), p.bcTag(), p.time(), p.tdo(), p.charge(),
+            p.isDead(), p.timeAndChargeInCounts())
+    return
+
+@nolist
+def dump_STGC_RawDataContainer (p, f):
+    dump_IDC (dump_STGC_RawData, p, f)
+    return
+
+
+def dump_MM_RawData (p, f):
+    fprint (f, p.identify().getString(), p.channel(), p.relBcid(),
+            p.time(), p.charge(),
+            p.timeAndChargeInCounts())
+    return
+
+@nolist
+def dump_MM_RawDataContainer (p, f):
+    dump_IDC (dump_MM_RawData, p, f)
+    return
+
+
+def dump_NSW_PadTriggerData (p, f):
+    fprint (f, p.getSourceid(), p.getFlags(), p.getEc(), p.getFragid(),
+            p.getSecid(), p.getSpare(), p.getOrbit(), p.getBcid(), p.getL1id(),
+            p.getOrbitid(), p.getOrbit1(), p.getStatus(),
+            p.getNumberOfHits(), p.getNumberOfPfebs(), p.getNumberOfTriggers(),
+            p.getNumberOfBcids(),
+            list(p.getHitRelBcids()),
+            list(p.getHitPfebs()),
+            list(p.getHitTdsChannels()),
+            list(p.getHitVmmChannels()),
+            list(p.getHitVmms()),
+            list(p.getHitPadChannels()),
+            list(p.getPfebAddrs()),
+            list(p.getPfebNChannels()),
+            list(p.getPfebDisconnecteds()),
+            list(p.getTriggerBandIds()),
+            list(p.getTriggerPhiIds()),
+            list(p.getTriggerRelBcids()),
+            list(p.getBcidRels()),
+            list(p.getBcidStatuses()),
+            list(p.getBcidMultZeros()),
+            list(p.getBcidMultiplicities()))
+    return
+
+@nolist
+def dump_NSW_PadTriggerDataContainer (p, f):
+    beg = p.begin()
+    end = p.end()
+    while beg != end:
+        dump_NSW_PadTriggerData (beg.cptr(), f)
+        fwrite (f, '\n')
+        beg.__preinc__()
+    fwrite (f, '\n')
+    return
+
+
+def dump_ZdcLucrod_Data (p, f):
+    fprint (f, 'ld', p.GetLucrodID(), 'bcid', p.GetBCID(),
+            'run', p.GetRunNumber(), 'l1id', p.GetLevel1ID(),
+            'nbc', p.GetNumBCs(), 'stat', p.GetStatus(),
+            'avga/c', p.GetTrigAvgA(), p.GetTrigAvgC(),
+            'data', list(p.GetTrigData()))
+    for i in range (p.GetChanDataSize()):
+        ch = p.GetChanData(i)
+        fprint (f, '\n    chan ', ch.id, list(ch.waveform))
     return
 
 
@@ -4952,6 +5633,9 @@ def dump_auxitem (x, auxid, f = sys.stdout):
 def dump_auxdata (x, exclude=[], f = sys.stdout):
     reg=ROOT.SG.AuxTypeRegistry.instance()
     #auxids = list(x.getAuxIDs())
+    if not x:
+        fprint (f, '<null pointer>')
+        return
     try:
         auxids = ROOT.PyDumper.Utils.getAuxIDVector (x)
     except TypeError:
@@ -5036,6 +5720,7 @@ dumpspecs = [
     ["DetailedTrackTruthCollection",         dump_DetailedTrackTruthCollection],
     ["Rec::MuonSpShowerContainer",           dump_MuonSpShower],
     ["HLT::HLTResult",                       dump_HLTResult],
+    ["HLT::HLTResultMT",                     dump_HLTResultMT],
     ["MissingETSig",                         dump_MissingETSig],
     ["INav4MomAssocs",                       dump_INav4MomAssocs],
     ["TrigInDetTrackTruthMap",               dump_TrigInDetTrackTruthMap],
@@ -5079,6 +5764,7 @@ dumpspecs = [
     ['TileHitVector',                        dump_TileHit],
     ['AtlasHitsVector<TileHit>',             dump_TileHit],
     ['TileRawChannelContainer',              dump_TileRawChannelContainer],
+    ['TileBeamElemContainer',                dump_TileBeamElemContainer],
     ['SiHitCollection',                      dump_SiHit],
     ['AtlasHitsVector<SiHit>',               dump_SiHit],
     ['TRTUncompressedHitCollection',         dump_TRTUncompressedHit],
@@ -5151,6 +5837,7 @@ dumpspecs = [
     ['TileDigitsContainer',                  dump_TileDigitsContainer],
     ['TileContainer<TileL2>',                dump_TileL2],
     ['TileContainer<TileTTL1>',              dump_TileTTL1],
+    ['TileContainer<TileMuonReceiverObj>',   dump_TileMuonReceiverObj],
     ['DataVector<LVL1::CMMCPHits>',          dump_CMMCPHits],
     ['DataVector<LVL1::CMMEtSums>',          dump_CMMEtSums],
     ['DataVector<LVL1::CMMJetHits>',         dump_CMMJetHits],
@@ -5171,6 +5858,40 @@ dumpspecs = [
     ['LArDigitContainer',                    dump_LArDigit],
     ['EventBookkeeperCollection',            dump_EventBookkeeper],
     ['ZdcDigitsCollection',                  dump_ZdcDigits],
+    ['RpcPadContainer',                      dump_RpcPadContainer],
+    ['RpcSectorLogicContainer',              dump_RpcSectorLogic],
+    ['CscRawDataContainer',                  dump_CscRawDataContainer],
+    ['TgcRdoContainer',                      dump_TgcRdoContainer],
+    ['MdtCsmContainer',                      dump_MdtCsmContainer],
+    ['Muon::STGC_RawDataContainer',          dump_STGC_RawDataContainer],
+    ['Muon::MM_RawDataContainer',            dump_MM_RawDataContainer],
+    ['Muon::NSW_PadTriggerDataContainer',    dump_NSW_PadTriggerDataContainer],
+    ['ZdcLucrodDataContainer',               dump_ZdcLucrod_Data],
+    ['AthenaAttributeList',                  dump_AttributeList],
+    ['InDetTimeCollection',                  dump_InDetTime],
+    ['std::vector<pair<unsigned int,unsigned int> >', dump_InDetTime],
+    ['IDCInDetBSErrContainer',               dump_IDCInDetBSErrContainer],
+    ['TRT_BSErrContainer',                   dump_TRT_BSErrContainer],
+    ['LArFebHeaderContainer',                dump_LArFebHeader],
+    ['LArRawChannelContainer',               dump_LArRawChannel],
+    ['TrigMonEventCollection',               dump_TrigMonEvent],
+    ['TrigMonConfigCollection',              dump_TrigMonConfig],
+    ['LVL1CTP::Lvl1Result',                  dump_Lvl1Result],
+    ['AFP_RawContainer',                     dump_AFP_RawContainer],
+    ['ALFA_RawDataContainer',                dump_ALFA_RawDataContainer],
+    ['TrigT2ZdcSignalsContainer',            dump_TrigT2ZdcSignals],
+    ['Analysis::TauDetailsContainer',        dump_TauDetailsContainer],
+    ['egDetailContainer',                    dump_egDetailContainer],
+    ['JetMomentMapCollection',               dump_JetMomentMapCollection],
+    ['JetKeyDescriptorCollection',           dump_JetKeyDescriptorCollection],
+    ['LArFebErrorSummary',                   dump_LArFebErrorSummary],
+    ['Trk::ClusterSplitProbabilityContainer', dump_ClusterSplitProbabilityContainer],
+    ['InDetSimDataCollection',               dump_InDetSimDataCollection],
+    ['PRD_MultiTruthCollection',             dump_PRD_MultiTruthCollection],
+    ['TrackTruthCollection',                 dump_TrackTruthCollection],
+    ['LArTTL1Container',                     dump_LArTTL1],
+    ['ComTime',                              dump_ComTime],
+    ['std::vector<unsigned int>',            dump_vector],
 
     ['DataVector<xAOD::BTagVertex_v1>',      dump_xAOD],
     ['xAOD::BTagVertexContainer',            dump_xAOD],
@@ -5311,6 +6032,64 @@ dumpspecs = [
     ['xAOD::RoiDescriptorStore',             dump_xAODObject],
     ['DataVector<xAODTruthParticleLink>',    dump_xAODTruthParticleLink],
     ['xAODTruthParticleLinkVector',          dump_xAODTruthParticleLink],
+    ['DataVector<xAOD::NSWTPRDO_v1>',        dump_xAOD],
+    ['xAOD::NSWTPRDOContainer',              dump_xAOD],
+    ['DataVector<xAOD::NSWMMTPRDO_v1>',      dump_xAOD],
+    ['xAOD::NSWMMTPRDOContainer',            dump_xAOD],
+    ['DataVector<xAOD::RODHeader_v2>',       dump_xAOD],
+    ['xAOD::RODHeaderContainer',             dump_xAOD],
+    ['DataVector<xAOD::CMXJetTob_v1>',       dump_xAOD],
+    ['xAOD::CMXJetTobContainer',             dump_xAOD],
+    ['DataVector<xAOD::JEMTobRoI_v1>',       dump_xAOD],
+    ['xAOD::JEMTobRoIContainer',             dump_xAOD],
+    ['DataVector<xAOD::CMXCPTob_v1>',        dump_xAOD],
+    ['xAOD::CMXCPTobContainer',              dump_xAOD],
+    ['DataVector<xAOD::CMXJetHits_v1>',      dump_xAOD],
+    ['xAOD::CMXJetHitsContainer',            dump_xAOD],
+    ['DataVector<xAOD::CMXEtSums_v1>',       dump_xAOD],
+    ['xAOD::CMXEtSumsContainer',             dump_xAOD],
+    ['DataVector<xAOD::CMXRoI_v1>',          dump_xAOD],
+    ['xAOD::CMXRoIContainer',                dump_xAOD],
+    ['DataVector<xAOD::CPMTobRoI_v1>',       dump_xAOD],
+    ['xAOD::CPMTobRoIContainer',             dump_xAOD],
+    ['DataVector<xAOD::JEMEtSums_v2>',       dump_xAOD],
+    ['xAOD::JEMEtSumsContainer',             dump_xAOD],
+    ['DataVector<xAOD::CMXCPHits_v1>',       dump_xAOD],
+    ['xAOD::CMXCPHitsContainer',             dump_xAOD],
+    ['DataVector<xAOD::L1TopoRawData_v1>',   dump_xAOD],
+    ['xAOD::L1TopoRawDataContainer',         dump_xAOD],
+    ['DataVector<xAOD::jFexFwdElRoI_v1>',    dump_xAOD],
+    ['xAOD::jFexFwdElRoIContainer',          dump_xAOD],
+    ['DataVector<xAOD::jFexSRJetRoI_v1>',    dump_xAOD],
+    ['xAOD::jFexSRJetRoIContainer',          dump_xAOD],
+    ['DataVector<xAOD::jFexSumETRoI_v1>',    dump_xAOD],
+    ['xAOD::jFexSumETRoIContainer',          dump_xAOD],
+    ['DataVector<xAOD::gFexGlobalRoI_v1>',   dump_xAOD],
+    ['xAOD::gFexGlobalRoIContainer',         dump_xAOD],
+    ['DataVector<xAOD::jFexLRJetRoI_v1>',    dump_xAOD],
+    ['xAOD::jFexLRJetRoIContainer',          dump_xAOD],
+    ['DataVector<xAOD::eFexTauRoI_v1>',      dump_xAOD],
+    ['xAOD::eFexTauRoIContainer',            dump_xAOD],
+    ['DataVector<xAOD::gFexJetRoI_v1>',      dump_xAOD],
+    ['xAOD::gFexJetRoIContainer',            dump_xAOD],
+    ['DataVector<xAOD::gFexTower_v1>',       dump_xAOD],
+    ['xAOD::gFexTowerContainer',             dump_xAOD],
+    ['DataVector<xAOD::eFexEMRoI_v1>',       dump_xAOD],
+    ['xAOD::eFexEMRoIContainer',             dump_xAOD],
+    ['DataVector<xAOD::jFexTauRoI_v1>',      dump_xAOD],
+    ['xAOD::jFexTauRoIContainer',            dump_xAOD],
+    ['DataVector<xAOD::jFexTower_v1>',       dump_xAOD],
+    ['xAOD::jFexTowerContainer',             dump_xAOD],
+    ['DataVector<xAOD::jFexMETRoI_v1>',      dump_xAOD],
+    ['xAOD::jFexMETRoIContainer',            dump_xAOD],
+    ['DataVector<xAOD::eFexTower_v1>',       dump_xAOD],
+    ['xAOD::eFexTowerContainer',             dump_xAOD],
+    ['DataVector<xAOD::AFPSiHit_v2>',        dump_xAOD],
+    ['xAOD::AFPSiHitContainer',              dump_xAOD],
+    ['DataVector<xAOD::AFPToFHit_v1>',       dump_xAOD],
+    ['xAOD::AFPToFHitContainer',             dump_xAOD],
+    ['xAOD::BunchConfKey_v1',                dump_BunchConfKey],
+    ['xAOD::BunchConfKey',                   dump_BunchConfKey],
 
     # Make some of these more compact?
 
