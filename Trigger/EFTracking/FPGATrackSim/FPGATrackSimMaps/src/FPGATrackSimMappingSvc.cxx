@@ -32,8 +32,6 @@ StatusCode FPGATrackSimMappingSvc::checkInputs()
         ATH_MSG_FATAL("Missing region map path");
     else if (m_modulelut_path.value().empty())
         ATH_MSG_FATAL("Module LUT file is missing");
-    else if (m_NNmap_path.value().empty())
-      ATH_MSG_FATAL("Missing NN weighting file path");
     else
         return StatusCode::SUCCESS;
 
@@ -53,8 +51,6 @@ StatusCode FPGATrackSimMappingSvc::checkAllocs()
         ATH_MSG_FATAL("Error creating region map for 2nd stage from: " << m_rmap_path);
     if (!m_subrmap)
         ATH_MSG_FATAL("Error creating sub-region map from: " << m_subrmap_path);
-    if (!m_NNmap)
-      ATH_MSG_FATAL("Error creating NN map from : " << m_NNmap_path);
 
     return StatusCode::SUCCESS;
 }
@@ -82,12 +78,16 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         ATH_MSG_DEBUG("Creating the sub-region map");
         m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_1st.get(), m_subrmap_path.value()));
 
-        ATH_MSG_DEBUG("Setting the Module LUT for Region Maps");
+        ATH_MSG_DEBUG("Setting the Modules LUT for Region Maps");
         m_rmap_1st->loadModuleIDLUT(m_modulelut_path.value().c_str());
         m_rmap_2nd->loadModuleIDLUT(m_modulelut_path.value().c_str());
 
 	ATH_MSG_DEBUG("Creating NN weighting map");
-	m_NNmap = std::unique_ptr<FPGATrackSimNNMap>(new FPGATrackSimNNMap(m_NNmap_path.value()));
+    if ( ! m_NNmap_path.empty() ) {
+    	m_NNmap = std::make_unique<FPGATrackSimNNMap>(m_NNmap_path.value());
+    } else {
+        m_NNmap = nullptr;
+    }
     }
 
     ATH_CHECK(checkAllocs());

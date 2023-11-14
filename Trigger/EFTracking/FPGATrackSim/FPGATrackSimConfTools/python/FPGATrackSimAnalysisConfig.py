@@ -2,22 +2,16 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.Logging import AthenaLogger
+log = AthenaLogger(__name__)
 
-
-def FPGATrackSimAnalysisConfig():
-    print('FPGATrackSimAnalysisConfig')
-
-
-def getNSubregions(path):
-    import os
-
-    from PyJobTransforms.trfUtils import findFile
-    path = findFile(os.environ['DATAPATH'], path)
-
-    with open(path, 'r') as f:
-        fields = f.readline().split()
-        assert(fields[0] == 'towers')
-        return int(fields[1])
+def getNSubregions(filePath):
+    with open(filePath, 'r') as f:
+        fields = f.readline()
+        assert(fields.startswith('towers'))
+        # towers 10 phi 16
+        n = fields.split()[1] 
+        return int(n)
 
 
 def FPGATrackSimEventSelectionCfg(flags, name="FPGATrackSimEventSelectionSvc", sampleType='skipTruth'):
@@ -32,18 +26,16 @@ def FPGATrackSimEventSelectionCfg(flags, name="FPGATrackSimEventSelectionSvc", s
 
 def FPGATrackSimMappingCfg(flags):
     result=ComponentAccumulator()
-    pathMapping = '/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/'
-    versionOverride="ATLAS-P2-ITK-22-02-00" # TODO prepare to switch to flags.GeoModel.AtlasVersion
 
-    FPGATrackSimMapping = CompFactory.FPGATrackSimMappingSvc()
-    FPGATrackSimMapping.mappingType = "FILE"
-    FPGATrackSimMapping.rmap = f'{pathMapping}map_file/rmaps/eta0103phi0305_{versionOverride}.rmap'
-    FPGATrackSimMapping.subrmap = f'{pathMapping}zslicemaps/{versionOverride}/eta0103phi0305_KeyLayer-strip_barrel_2_extra03_trim_0_001_NSlices-6.rmap'
-    FPGATrackSimMapping.pmap = f'{pathMapping}map_file/{versionOverride}.pmap'
-    FPGATrackSimMapping.modulemap = f'{pathMapping}map_file/ITk.global-to-local.moduleidmap'
-    FPGATrackSimMapping.NNmap = f'{pathMapping}map_file/NN_DNN_Region_0p1_0p3_HTTFake_HTTTrueMu_SingleP_8L_Nom_v6.json'
-    FPGATrackSimMapping.layerOverride = {}
-    result.addService(FPGATrackSimMapping, create=True, primary=True)
+    mappingSvc = CompFactory.FPGATrackSimMappingSvc()
+    mappingSvc.mappingType = "FILE"
+    mappingSvc.rmap = flags.Trigger.FPGATrackSim.mapsDir+"/eta0103phi0305.rmap" # we need more configurability here i.e. file choice should depend on some flag
+    mappingSvc.subrmap =  flags.Trigger.FPGATrackSim.mapsDir+"/eta0103phi0305.subrmap" # presumably also here we want to be able to change the slices definition file
+    mappingSvc.pmap = flags.Trigger.FPGATrackSim.mapsDir+"/pmap"
+    mappingSvc.modulemap = flags.Trigger.FPGATrackSim.mapsDir+"/moduleidmap"
+    mappingSvc.NNmap = ""
+    mappingSvc.layerOverride = {}
+    result.addService(mappingSvc, create=True, primary=True)
     return result
 
 def FPGATrackSimBankSvcCfg(flags):
@@ -98,7 +90,6 @@ def FPGATrackSimRoadUnionToolCfg(flags):
     tools = []
     
     FPGATrackSimMapping = result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
-
     for number in range(getNSubregions(FPGATrackSimMapping.subrmap)): 
         HoughTransform = CompFactory.FPGATrackSimHoughTransformTool("HoughTransform_0_" + str(number))
         HoughTransform.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
@@ -334,7 +325,7 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHistProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
     theFPGATrackSimLogicalHistProcessAlg.RawToLogicalHitsTool = result.getPrimaryAndMerge(FPGATrackSimRawLogicCfg(flags))
 
-    if flags.Trigger.FPGATrackSim.wrapperFileName:
+    if flags.Trigger.FPGATrackSim.wrapperFileName != []:
         theFPGATrackSimLogicalHistProcessAlg.InputTool = result.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))
     else:
         theFPGATrackSimLogicalHistProcessAlg.InputTool = ""
@@ -402,9 +393,16 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     flags = initConfigFlags()
-    flags.Trigger.FPGATrackSim.wrapperFileName = 'FPGATrackSimWrapper.singlemu_Pt10.root'
+    flags.fillFromArgs()
+    flags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-03-00-00"
+    if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
+        log.info("wrapperFile is string, converting to list")
+        flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
 
+    flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
+    flags.lock()
     acc=MainServicesCfg(flags)
+
     acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
     acc.merge(FPGATrackSimLogicalHistProcessAlgCfg(flags)) 
     acc.store(open('AnalysisConfig.pkl','wb'))

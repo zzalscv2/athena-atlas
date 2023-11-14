@@ -25,7 +25,7 @@ StatusCode FPGATrackSimMapMakerAlg::initialize()
         ATH_MSG_ERROR("Geometry version must be provided (vis GeometryVersion property of this alg)");
         return StatusCode::FAILURE;
     }
-    m_diskIndex =  Remappings::diskIndices(m_geo);
+    m_diskIndex =  Remappings::diskIndices(m_geo.value());
     std::stringstream ss(m_description);
     std::string line;    
     ATH_MSG_INFO("Tag config:");
@@ -163,7 +163,7 @@ StatusCode FPGATrackSimMapMakerAlg::writePmapAndRmap(std::vector<FPGATrackSimHit
     std::string pmap_path = m_outFileName.value() + "region" + std::to_string(m_region) + ".pmap";
     ATH_MSG_INFO("Creating pmap: " << pmap_path);
     m_pmap.open(pmap_path, std::ofstream::out);
-    m_pmap << m_geo << "\n" << m_planes[reg].size() << " logical_s1\n" << m_planes2[reg].size() << " logical_s2\n";
+    m_pmap << m_geo.value() << "\n" << m_planes[reg].size() << " logical_s1\n" << m_planes2[reg].size() << " logical_s2\n";
     m_pmap << m_pbmax+1 << " pixel barrel \n" << m_pemax[0]+1 << " pixel endcap+ \n" << m_pemax[1]+1 << " pixel endcap- \n"; 
     m_pmap << m_sbmax+1 << " SCT barrel \n" << m_semax[0]+1 << " SCT endcap+\n" << m_semax[1]+1 << " SCT endcap-\n";
     m_pmap << "! silicon endCap physDisk physLayer ['stereo' stripSide <strip only>] 'plane1' logiLayer1 'plane2' logiLayer2\n";
@@ -346,7 +346,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeSubrmap(std::vector<FPGATrackSimHit> co
 
     ATH_MSG_DEBUG("Creating subrmap: " << subrmap_path);
     m_subrmap.open(subrmap_path, std::ofstream::out);
-    m_subrmap << "towers " << m_nSlices << " phi 16\n\n";
+    m_subrmap << "towers " << m_nSlices.value() << " phi 16\n\n";
 
     // Resize numTracks vector to be equal to the number of slices 
     for (auto& pair: m_track2modules) 

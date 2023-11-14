@@ -80,7 +80,8 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK(m_writeOutputTool.retrieve());
 
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-    ATH_CHECK(m_evtSel.retrieve());
+    if ( m_doEvtSel )
+        ATH_CHECK(m_evtSel.retrieve());
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
     m_logicEventHeader_1st   = m_writeOutputTool->getLogicalEventInputHeader_1st();
@@ -130,12 +131,16 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
 
     // Apply truth track cuts
-    if (!m_evtSel->selectEvent(&m_eventHeader))
-    {
-        ATH_MSG_DEBUG("Event skipped by FPGATrackSimEventSelectionSvc");
-        return StatusCode::SUCCESS;
+    if ( m_doEvtSel ){
+        if (!m_evtSel->selectEvent(&m_eventHeader))
+        {
+            ATH_MSG_DEBUG("Event skipped by: " << m_evtSel->name());
+            return StatusCode::SUCCESS;
+        }
+        ATH_MSG_DEBUG("Event accepted by: " << m_evtSel->name());
+    } else {
+        ATH_MSG_DEBUG("No Event Election applied");
     }
-
     TIME(m_tread);
 
     // Map, cluster, and filter hits
@@ -374,18 +379,21 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::processInputs()
     m_hits_1st_miss.clear();
 
     // Map hits
+    ATH_MSG_DEBUG("Running hits conversion");
     m_logicEventHeader_1st->reset();
     ATH_CHECK(m_hitMapTool->convert(1, m_eventHeader, *m_logicEventHeader_1st));
     if (!m_runSecondStage) m_eventHeader.clearHits();
-
+    ATH_MSG_DEBUG("Hits conversion done");
     // Random removal of hits
     if (m_doHitFiltering) {
+        ATH_MSG_DEBUG("Running hits filtering");
         ATH_CHECK(m_hitFilteringTool->DoRandomRemoval(*m_logicEventHeader_1st, true));
     }
 
     // Clustering
     if (m_clustering)
     {
+        ATH_MSG_DEBUG("Running clustering");
         ATH_CHECK(m_clusteringTool->DoClustering(*m_logicEventHeader_1st, m_clusters_1st));
         m_clusters_1st_original = m_clusters_1st;
         // I think I also want to pass m_clusters to random removal (but won't work currently)

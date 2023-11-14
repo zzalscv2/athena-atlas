@@ -83,7 +83,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         ToolHandle<FPGATrackSimOverlapRemovalTool>       m_overlapRemovalTool_2nd {this, "OverlapRemoval_2nd", "FPGATrackSimOverlapRemovalTool/FPGATrackSimOverlapRemovalTool_2nd", "2nd stage overlap removal tool"};
         ToolHandle<FPGATrackSimDataFlowTool>             m_dataFlowTool {this, "DataFlowTool", "FPGATrackSimDataFlowTool/FPGATrackSimDataFlowTool", "Data Flow Tool"};
         ToolHandle<IFPGATrackSimEventOutputHeaderTool>   m_writeOutputTool {this, "OutputTool", "FPGATrackSimOutputHeaderTool/FPGATrackSimOutputHeaderTool", "Output tool"};
-        ServiceHandle<IFPGATrackSimMappingSvc>       m_FPGATrackSimMapping {this, "FPGATrackSimMapping", "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
+        ServiceHandle<IFPGATrackSimMappingSvc>           m_FPGATrackSimMapping {this, "FPGATrackSimMapping", "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<IFPGATrackSimEventSelectionSvc>    m_evtSel {this, "eventSelector", "FPGATrackSimEventSelectionSvc", "Event selection Svc"};
         
         // Flags
@@ -99,10 +99,11 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
 	Gaudi::Property<bool> m_runSecondStage {this, "RunSecondStage", false,  "flag to enable running the second stage fitting"};
 	Gaudi::Property<bool> m_doHoughRootOutput {this, "DoHoughRootOutput", false, "Dump output from the Hough Transform to flat ntuples"};
 	Gaudi::Property<bool> m_doNNTrack  {this, "DoNNTrack", false, "Run NN track filtering"};
-	Gaudi::Property<bool> m_doLRT {this, "doLRT", false, "Enable Large Radious Tracking"};
+	Gaudi::Property<bool> m_doLRT {this, "doLRT", false, "Enable Large Radius Tracking"};
 	Gaudi::Property<bool> m_doLRTHitFiltering {this, "LRTHitFiltering", false, "flag to enable hit/cluster filtering for LRT"};
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
 	Gaudi::Property<bool> m_outputHitTxt  {this, "outputHitTxt", false, "write out road hits to text file"};
+	Gaudi::Property<bool> m_doEvtSel {this, "doEvtSel", true, "do event selection"};
 	
         std::string m_outputHitTxtName = "outputRoadHits.txt";
         std::ofstream m_outputHitTxtStream;

@@ -26,7 +26,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     flags = initConfigFlags()
     flags.addFlag("OutFileName", "MMTest")
-    flags.addFlag("KeyString", "strip,barrel,2")
+    flags.addFlag("KeyString", "strip,barrel,0")
     flags.addFlag("nSlices", 10)
     flags.addFlag("trim", 0.1)
     flags.addFlag("region", 0)
