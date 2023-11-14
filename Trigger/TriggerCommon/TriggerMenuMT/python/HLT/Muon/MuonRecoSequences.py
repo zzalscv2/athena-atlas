@@ -11,7 +11,6 @@ from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg, TgcByt
 from MuonConfig.MuonRdoDecodeConfig import RpcRDODecodeCfg, TgcRDODecodeCfg, MdtRDODecodeCfg, CscRDODecodeCfg, CscClusterBuildCfg, StgcRDODecodeCfg, MMRDODecodeCfg
 from MuonConfig.MuonRdoDecodeConfig import MuonPrdCacheNames
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 CBTPname = recordable("HLT_CBCombinedMuon_RoITrackParticles")
@@ -115,7 +114,7 @@ def MuDataPrepViewDataVerifierCfg(flags):
     result.addEventAlgo(alg)
     return result
 
-@AccumulatorCache
+
 def muonDecodeCfg(flags, RoIs):
 
     acc = ComponentAccumulator()
@@ -278,7 +277,7 @@ def muCombVDVCfg( flags, postFix):
   result.addEventAlgo(ViewVerify)
   return result
 
-@AccumulatorCache
+
 def muCombRecoSequenceCfg( flags, RoIs, name, l2mtmode=False, l2CBname="" ):
 
   acc = ComponentAccumulator()
@@ -306,7 +305,6 @@ def EFMuSADataPrepViewDataVerifierCfg(flags, RoIs, roiName):
   return result
 
 
-@AccumulatorCache
 def muEFSARecoSequenceCfg( flags, RoIs, name ):
 
 
