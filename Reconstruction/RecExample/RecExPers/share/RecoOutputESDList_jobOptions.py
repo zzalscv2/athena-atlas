@@ -198,6 +198,15 @@ if recAlgs.doTrackParticleCellAssociation():
                                       "xAOD::TrackParticleClusterAssociationContainer#InDetTrackParticlesClusterAssociations",
                                       "xAOD::TrackParticleClusterAssociationAuxContainer#InDetTrackParticlesClusterAssociationsAux."]
     fullESDList += CfgItemList("trackParticleCellAssoEsd",items=trackParticleCellAssociationList)
+
+    from InDetRecExample.InDetJobProperties import InDetFlags
+    if InDetFlags.doR3LargeD0() and InDetFlags.storeSeparateLargeD0Container():
+        largeD0TrackParticleCellAssociationList=["xAOD::CaloClusterContainer#InDetLargeD0TrackParticlesAssociatedClusters",
+                                                 "xAOD::CaloClusterAuxContainer#InDetLargeD0TrackParticlesAssociatedClustersAux.",
+                                                 "CaloClusterCellLinkContainer#InDetLargeD0TrackParticlesAssociatedClusters_links",
+                                                 "xAOD::TrackParticleClusterAssociationContainer#InDetLargeD0TrackParticlesClusterAssociations",
+                                                 "xAOD::TrackParticleClusterAssociationAuxContainer#InDetLargeD0TrackParticlesClusterAssociationsAux."]
+        fullESDList += CfgItemList("largeD0TrackParticleCellAssoEsd",items=largeD0TrackParticleCellAssociationList)
     
 #CaloRinger
 if rec.doCaloRinger():

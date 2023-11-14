@@ -256,6 +256,15 @@ trackParticleCellAssociationList=["xAOD::CaloClusterContainer#InDetTrackParticle
                                   "xAOD::TrackParticleClusterAssociationAuxContainer#InDetTrackParticlesClusterAssociationsAux."]
 fullAODList += CfgItemList("trackParticleCellAssoAod",items=trackParticleCellAssociationList)
 
+from InDetRecExample.InDetJobProperties import InDetFlags
+if InDetFlags.doR3LargeD0() and InDetFlags.storeSeparateLargeD0Container():
+    largeD0TrackParticleCellAssociationList=["xAOD::CaloClusterContainer#InDetLargeD0TrackParticlesAssociatedClusters",
+                                             "xAOD::CaloClusterAuxContainer#InDetLargeD0TrackParticlesAssociatedClustersAux.",
+                                             "CaloClusterCellLinkContainer#InDetLargeD0TrackParticlesAssociatedClusters_links",
+                                             "xAOD::TrackParticleClusterAssociationContainer#InDetLargeD0TrackParticlesClusterAssociations",
+                                             "xAOD::TrackParticleClusterAssociationAuxContainer#InDetLargeD0TrackParticlesClusterAssociationsAux."]
+    fullAODList += CfgItemList("largeD0TrackParticleCellAssoAod",items=largeD0TrackParticleCellAssociationList)
+
 # Atlfast, note ESD and AOD lists are equal
 
 from RecExConfig.RecAlgsFlags import recAlgs

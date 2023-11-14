@@ -79,6 +79,17 @@ if rec.doESD() and recAlgs.doTrackParticleCellAssociation() and DetFlags.ID_on()
     topSequence += CfgMgr.TrackParticleCellAssociationAlg("TrackParticleCellAssociationAlg",
                                                           ParticleCaloCellAssociationTool=caloCellAssociationTool)
 
+    from InDetRecExample.InDetJobProperties import InDetFlags
+    if InDetFlags.doR3LargeD0() and InDetFlags.storeSeparateLargeD0Container():
+        topSequence += CfgMgr.TrackParticleCellAssociationAlg("LargeD0TrackParticleCellAssociationAlg",
+                                                              TrackParticleContainerName="InDetLargeD0TrackParticles",
+                                                              ClusterContainerName="InDetLargeD0TrackParticlesAssociatedClusters",
+                                                              CaloClusterCellLinkName="InDetLargeD0TrackParticlesAssociatedClusters_links",
+                                                              AssociationContainerName="InDetLargeD0TrackParticlesClusterAssociations",
+                                                              ParticleCaloCellAssociationTool=caloCellAssociationTool)
+    if DetFlags.Muon_on():
+        from AthenaCommon.CfgGetter import getPublicTool
+        getPublicTool("MuonCombinedInDetDetailedTrackSelectorTool")
 
 #
 # functionality : energy flow

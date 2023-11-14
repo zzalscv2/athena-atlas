@@ -99,6 +99,7 @@ def MuGirlStauAlg(name="MuGirlStauAlg",**kwargs):
     kwargs.setdefault("CombinedTrackCollection","MuGirlStauCombinedTracks")
     kwargs.setdefault("METrackCollection","")
     kwargs.setdefault("SegmentCollection","MuGirlStauSegments")
+    kwargs.setdefault("InDetCandidateLocation", "InDetCandidatesMerged" if InDetFlags.doR3LargeD0() else "InDetCandidates")
     return CfgMgr.MuonCombinedInDetExtensionAlg(name,**kwargs)
 
 def MuonCombinedInDetCandidateAlg( name="MuonCombinedInDetCandidateAlg",**kwargs ):    
@@ -123,6 +124,10 @@ def MuonCombinedInDetCandidateAlg_LRT( name="MuonCombinedInDetCandidateAlg_LRT",
     kwargs.setdefault("InDetForwardTrackSelector", getPublicTool("MuonCombinedInDetDetailedForwardTrackSelectorTool") )
     return CfgMgr.MuonCombinedInDetCandidateAlg(name,**kwargs)
 
+def MuonInDetExtensionMergerAlg(name="MuonInDetExtensionMergerAlg", **kwargs):
+    kwargs.setdefault("ToMerge", ["InDetCandidates", MuonCbKeys.InDetTrackParticlesLargeD0()]) # should be InDetCandidates and InDetCandidatesLRT?
+    kwargs.setdefault("ToWrite", "InDetCandidatesMerged")
+    return CfgMgr.MuonInDetExtensionMergerAlg(name, **kwargs)
 
 
 def MuonCombinedMuonCandidateAlg( name="MuonCombinedMuonCandidateAlg", **kwargs ):
@@ -217,6 +222,7 @@ def StauCreatorAlg( name="StauCreatorAlg", **kwargs ):
     kwargs.setdefault("TrackSegmentContainerName","TrkStauSegments")
     kwargs.setdefault("BuildSlowMuon",1)
     kwargs.setdefault("ClusterContainerName", "SlowMuonClusterCollection")
+    kwargs.setdefault("InDetCandidateLocation", "InDetCandidatesMerged" if InDetFlags.doR3LargeD0() else "InDetCandidates")
     kwargs.setdefault("TagMaps",["stauTagMap"])
     kwargs.setdefault("CopySegments", False)
     if not TriggerFlags.MuonSlice.doTrigMuonConfig:
@@ -251,6 +257,7 @@ class MuonCombinedReconstruction(ConfiguredMuonRec):
         if muonCombinedRecFlags.doMuGirl():
             topSequence += getAlgorithm("MuonInsideOutRecoAlg")
             if muonCombinedRecFlags.doMuGirlLowBeta():
+                if InDetFlags.doR3LargeD0(): topSequence += getAlgorithm("MuonInDetExtensionMergerAlg")
                 topSequence += getAlgorithm("MuGirlStauAlg")
             if InDetFlags.doR3LargeD0(): topSequence += getAlgorithm("MuGirlAlg_LRT")
 

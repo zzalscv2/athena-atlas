@@ -1,6 +1,7 @@
 from AthenaCommon.DetFlags import DetFlags
 from RecExConfig.RecFlags import rec
 from MuonRecExample.MuonRecFlags import muonRecFlags
+from InDetRecExample.InDetJobProperties import InDetFlags
 from AthenaCommon.BeamFlags import jobproperties
 
 from AtlasGeoModel.MuonGMJobProperties import MuonGeometryFlags
@@ -16,6 +17,13 @@ if DetFlags.detdescr.Muon_on() and (rec.doWriteAOD() or rec.doWriteESD()):
 
    MuonAODList+=[ "xAOD::MuonSegmentContainer#NCB_MuonSegments" ]
    MuonAODList+=[ "xAOD::MuonSegmentAuxContainer#NCB_MuonSegmentsAux." ]
+
+   if InDetFlags.doR3LargeD0():
+      MuonAODList+=[ "xAOD::MuonSegmentContainer#MuonSegments_LRT" ]
+      MuonAODList+=[ "xAOD::MuonSegmentAuxContainer#MuonSegments_LRTAux." ]
+
+      MuonAODList+=[ "xAOD::MuonSegmentContainer#NCB_MuonSegments_LRT" ]
+      MuonAODList+=[ "xAOD::MuonSegmentAuxContainer#NCB_MuonSegments_LRTAux." ]
 
    # TrackParticles 
    MuonAODList+=[ "xAOD::TrackParticleContainer#MuonSpectrometerTrackParticles" ]

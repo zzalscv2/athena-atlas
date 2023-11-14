@@ -236,6 +236,24 @@ eltisoBuilder = AlgFactory(IsolationBuilder, name = "ElectronTrackIsolationBuild
                            ElCorTypesExtra       = IsoCorEgExtra,
                            OutputLevel           = outLevel)
 
+# Calorimter iso for LRT electrons
+lrtelcisoBuilder = AlgFactory(IsolationBuilder, name = "LRTElCaloIsolationBuilder",
+                           CaloTopoIsolationTool = EgCaloIsolationTool,
+                           #storepileupCorrection = True,
+                           ElectronCollectionContainerName = "LRTElectrons",
+                           ElIsoTypes            = [] if not rec.doEgamma() else cIsoTypesEl,
+                           ElCorTypes            = cIsoCorEg,
+                           ElCorTypesExtra       = IsoCorElExtra,
+                           OutputLevel           = outLevel)
+
+# Track iso for LRT electrons
+#eltisoBuilder = AlgFactory(IsolationBuilder, name = "ElectronTrackIsolationBuilder",
+#                           TrackIsolationTool    = ElTrackIsolationTool,
+#                           ElIsoTypes            = [] if not rec.doEgamma() else tIsoTypesEl,
+#                           ElCorTypes            = tIsoCorEg,
+#                           ElCorTypesExtra       = IsoCorEgExtra,
+#                           OutputLevel           = outLevel)
+
 # Track iso for photons : different from above because of the LooseCone selection for track in electron track iso
 phtisoBuilder = AlgFactory(IsolationBuilder, name = "PhotonTrackIsolationBuilder",
                            TrackIsolationTool    = TrackIsolationTool,
@@ -265,7 +283,8 @@ class isoGetter ( Configured ) :
     
     # configure iso here:
     try:
-      self._isoBuilderHandle = [egcisoBuilder(),eltisoBuilder(),phtisoBuilder(),muisoBuilder()]
+      from InDetRecExample.InDetJobProperties import InDetFlags
+      self._isoBuilderHandle = [egcisoBuilder(),eltisoBuilder(),phtisoBuilder(),muisoBuilder()] + ([lrtelcisoBuilder()] if InDetFlags.doR3LargeD0() else [])
     except Exception:
       mlog.error("could not get handle to IsolationBuilder")
       import traceback
