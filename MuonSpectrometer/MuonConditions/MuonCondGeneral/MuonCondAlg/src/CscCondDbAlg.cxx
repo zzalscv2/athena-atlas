@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -128,7 +128,7 @@ StatusCode CscCondDbAlg::loadDataHv(writeHandle_t& writeHandle, CscCondDbData* w
 
             if ((hv_state != 1 or lv_state != 1 or hv_setpoint0 < 1000 or hv_setpoint1 < 1000) && !tokens.empty()) {
                 std::string_view layer = tokens[1];
-                std::string_view number_layer = tokens[1].substr(1, 2);
+                std::string number_layer = tokens[1].substr(1, 2);
                 int wirelayer = CxxUtils::atoi(number_layer);
 
                 int eta = 0;
@@ -142,7 +142,7 @@ StatusCode CscCondDbAlg::loadDataHv(writeHandle_t& writeHandle, CscCondDbData* w
                 else if (size_side == 'S') chamber_name = "CSS";
 
                 int phi = 0;
-                std::string_view sector_side = tokens[0].substr(2, 4);
+                std::string sector_side = tokens[0].substr(2, 4);
                 if (sector_side == "01" || sector_side == "02") phi = 1;
                 else if (sector_side == "03" || sector_side == "04") phi = 2;
                 else if (sector_side == "05" || sector_side == "06") phi = 3;
