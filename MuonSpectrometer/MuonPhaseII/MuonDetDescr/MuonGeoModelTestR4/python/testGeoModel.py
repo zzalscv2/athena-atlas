@@ -92,6 +92,7 @@ def setupGeoR4TestCfg(args):
     flags.Concurrency.NumConcurrentEvents = args.threads
     flags.Input.isMC = args.condTag.find("OFLCOND") != -1
     flags.Input.Files = args.inputFile 
+    flags.Exec.FPE= 500
     from os import path, system
     if args.geoModelFile.startswith("root://"):
         if not path.exists("MuonGeometryDB.db"):
