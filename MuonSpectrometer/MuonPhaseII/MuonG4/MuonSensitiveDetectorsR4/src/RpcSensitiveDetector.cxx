@@ -56,6 +56,10 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
     else if (currentTrack->GetDefinition()==G4ChargedGeantino::ChargedGeantinoDefinition()) return true;
   }
 
+  /// Reject secondary particles
+  constexpr double velCutOff = 10.*Gaudi::Units::micrometer / Gaudi::Units::second;
+  if (currentTrack->GetVelocity() < velCutOff) return true;
+
   const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(currentTrack->GetTouchable());
   const MuonGMR4::RpcReadoutElement* readOutEle = getReadoutElement(touchHist);
   if (!readOutEle) {
