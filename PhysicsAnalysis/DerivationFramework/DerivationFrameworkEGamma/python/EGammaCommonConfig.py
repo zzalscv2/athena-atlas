@@ -36,18 +36,9 @@ def EGammaCommonCfg(ConfigFlags):
 
     # ====================================================================
     # SHOWER SHAPE CORRECTIONS IN MC
-    # (TUNE23: FUDGE FACTORS RUN2 FULL DATA, derived with rel 21.2)
+    # TUNE26: e/gamma FUDGE FACTORS RUN2 FULL DATA, derived with
+    # rel 22 (e) or 21.2 (gamma)
     # ====================================================================
-
-    # TODO: following lines my not be needed depending on how we get the sim flavour
-    # from PyUtils import AthFile
-    # info from the ConfigFlags
-    # opens the first file from the InputCollections list
-    # af = AthFile.fopen(ConfigFlags.Input)
-    # this is a dict of dicts, take a look at what's available!
-    # Below are some examples:
-    # af.fileinfos
-
     isMC = ConfigFlags.Input.isMC
     isFullSim = False
     if isMC:
@@ -63,7 +54,7 @@ def EGammaCommonCfg(ConfigFlags):
         )
 
         configFile = (
-            "EGammaVariableCorrection/TUNE23/ElPhVariableNominalCorrection.conf"
+            "EGammaVariableCorrection/TUNE26/ElPhVariableNominalCorrection.conf"
         )
         EGVariableCorrectionTool = acc.popToolsAndMerge(
             ElectronPhotonVariableCorrectionToolCfg(
@@ -349,7 +340,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassLHVeryLoose",
             EGammaElectronLikelihoodTool=ElectronLHSelectorVeryLoose,
-            EGammaFudgeMCTool="",
+            EGammaFudgeMCTool=None,
             CutType="",
             StoreGateEntryName="DFCommonElectronsLHVeryLoose",
             ContainerName="Electrons",
@@ -363,7 +354,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassLHLoose",
             EGammaElectronLikelihoodTool=ElectronLHSelectorLoose,
-            EGammaFudgeMCTool="",
+            EGammaFudgeMCTool=None,
             CutType="",
             StoreGateEntryName="DFCommonElectronsLHLoose",
             ContainerName="Electrons",
@@ -377,7 +368,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassLHLooseBL",
             EGammaElectronLikelihoodTool=ElectronLHSelectorLooseBL,
-            EGammaFudgeMCTool="",
+            EGammaFudgeMCTool=None,
             CutType="",
             StoreGateEntryName="DFCommonElectronsLHLooseBL",
             ContainerName="Electrons",
@@ -391,7 +382,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassLHMedium",
             EGammaElectronLikelihoodTool=ElectronLHSelectorMedium,
-            EGammaFudgeMCTool="",
+            EGammaFudgeMCTool=None,
             CutType="",
             StoreGateEntryName="DFCommonElectronsLHMedium",
             ContainerName="Electrons",
@@ -405,7 +396,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassLHTight",
             EGammaElectronLikelihoodTool=ElectronLHSelectorTight,
-            EGammaFudgeMCTool="",
+            EGammaFudgeMCTool=None,
             CutType="",
             StoreGateEntryName="DFCommonElectronsLHTight",
             ContainerName="Electrons",
@@ -419,7 +410,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassDNNLoose",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorLoose,
-            EGammaFudgeMCTool="",
+            EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
             CutType="",
             StoreGateEntryName="DFCommonElectronsDNNLoose",
             ContainerName="Electrons",
@@ -442,7 +433,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassDNNMedium",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorMedium,
-            EGammaFudgeMCTool="",
+            EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
             CutType="",
             StoreGateEntryName="DFCommonElectronsDNNMedium",
             ContainerName="Electrons",
@@ -456,7 +447,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassDNNTight",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorTight,
-            EGammaFudgeMCTool="",
+            EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
             CutType="",
             StoreGateEntryName="DFCommonElectronsDNNTight",
             ContainerName="Electrons",
@@ -471,7 +462,7 @@ def EGammaCommonCfg(ConfigFlags):
                 ConfigFlags,
                 name="ElectronPassECIDS",
                 EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
-                EGammaFudgeMCTool="",
+                EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
                 CutType="",
                 StoreGateEntryName="DFCommonElectronsECIDS",
                 ContainerName="Electrons",
@@ -486,7 +477,7 @@ def EGammaCommonCfg(ConfigFlags):
                 ConfigFlags,
                 name="ForwardElectronPassLHLoose",
                 EGammaElectronLikelihoodTool=ForwardElectronLHSelectorLoose,
-                EGammaFudgeMCTool="",
+                EGammaFudgeMCTool=None,
                 CutType="",
                 StoreGateEntryName="DFCommonForwardElectronsLHLoose",
                 ContainerName="ForwardElectrons",
@@ -499,7 +490,7 @@ def EGammaCommonCfg(ConfigFlags):
                 ConfigFlags,
                 name="ForwardElectronPassLHMedium",
                 EGammaElectronLikelihoodTool=ForwardElectronLHSelectorMedium,
-                EGammaFudgeMCTool="",
+                EGammaFudgeMCTool=None,
                 CutType="",
                 StoreGateEntryName="DFCommonForwardElectronsLHMedium",
                 ContainerName="ForwardElectrons",
@@ -512,7 +503,7 @@ def EGammaCommonCfg(ConfigFlags):
                 ConfigFlags,
                 name="ForwardElectronPassLHTight",
                 EGammaElectronLikelihoodTool=ForwardElectronLHSelectorTight,
-                EGammaFudgeMCTool="",
+                EGammaFudgeMCTool=None,
                 CutType="",
                 StoreGateEntryName="DFCommonForwardElectronsLHTight",
                 ContainerName="ForwardElectrons",
@@ -522,58 +513,32 @@ def EGammaCommonCfg(ConfigFlags):
     # decorate photons with the output of IsEM loose
     # on MC, fudge the shower shapes before computing the ID (but the
     # original shower shapes are not overridden)
-    if isFullSim:
-        PhotonPassIsEMLoose = acc.getPrimaryAndMerge(
-            EGSelectionToolWrapperCfg(
-                ConfigFlags,
-                name="PhotonPassIsEMLoose",
-                EGammaSelectionTool=PhotonIsEMSelectorLoose,
-                EGammaFudgeMCTool=EGVariableCorrectionTool,
-                CutType="",
-                StoreGateEntryName="DFCommonPhotonsIsEMLoose",
-                ContainerName="Photons",
-            )
+    PhotonPassIsEMLoose = acc.getPrimaryAndMerge(
+        EGSelectionToolWrapperCfg(
+            ConfigFlags,
+            name="PhotonPassIsEMLoose",
+            EGammaSelectionTool=PhotonIsEMSelectorLoose,
+            EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
+            CutType="",
+            StoreGateEntryName="DFCommonPhotonsIsEMLoose",
+            ContainerName="Photons",
         )
-    else:
-        PhotonPassIsEMLoose = acc.getPrimaryAndMerge(
-            EGSelectionToolWrapperCfg(
-                ConfigFlags,
-                name="PhotonPassIsEMLoose",
-                EGammaSelectionTool=PhotonIsEMSelectorLoose,
-                EGammaFudgeMCTool=None,
-                CutType="",
-                StoreGateEntryName="DFCommonPhotonsIsEMLoose",
-                ContainerName="Photons",
-            )
-        )
+    )
 
     # decorate photons with the output of IsEM tight
     # on full-sim MC, fudge the shower shapes before computing the ID
     # (but the original shower shapes are not overridden)
-    if isFullSim:
-        PhotonPassIsEMTight = acc.getPrimaryAndMerge(
-            EGSelectionToolWrapperCfg(
-                ConfigFlags,
-                name="PhotonPassIsEMTight",
-                EGammaSelectionTool=PhotonIsEMSelectorTight,
-                EGammaFudgeMCTool=EGVariableCorrectionTool,
-                CutType="",
-                StoreGateEntryName="DFCommonPhotonsIsEMTight",
-                ContainerName="Photons",
-            )
+    PhotonPassIsEMTight = acc.getPrimaryAndMerge(
+        EGSelectionToolWrapperCfg(
+            ConfigFlags,
+            name="PhotonPassIsEMTight",
+            EGammaSelectionTool=PhotonIsEMSelectorTight,
+            EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
+            CutType="",
+            StoreGateEntryName="DFCommonPhotonsIsEMTight",
+            ContainerName="Photons",
         )
-    else:
-        PhotonPassIsEMTight = acc.getPrimaryAndMerge(
-            EGSelectionToolWrapperCfg(
-                ConfigFlags,
-                name="PhotonPassIsEMTight",
-                EGammaSelectionTool=PhotonIsEMSelectorTight,
-                EGammaFudgeMCTool=None,
-                CutType="",
-                StoreGateEntryName="DFCommonPhotonsIsEMTight",
-                ContainerName="Photons",
-            )
-        )
+    )
 
     # decorate photons with the output of IsEM tight pt-inclusive menu
     # Can be removed once pt-dependent cuts are fully supported.
@@ -595,26 +560,15 @@ def EGammaCommonCfg(ConfigFlags):
     # on MC, fudge the shower shapes before computing the flags
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGPhotonCleaningWrapperCfg
 
-    if isFullSim:
-        PhotonPassCleaning = acc.getPrimaryAndMerge(
-            EGPhotonCleaningWrapperCfg(
-                ConfigFlags,
-                name="PhotonPassCleaning",
-                EGammaFudgeMCTool=EGVariableCorrectionTool,
-                StoreGateEntryName="DFCommonPhotonsCleaning",
-                ContainerName="Photons",
-            )
+    PhotonPassCleaning = acc.getPrimaryAndMerge(
+        EGPhotonCleaningWrapperCfg(
+            ConfigFlags,
+            name="PhotonPassCleaning",
+            EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
+            StoreGateEntryName="DFCommonPhotonsCleaning",
+            ContainerName="Photons",
         )
-    else:
-        PhotonPassCleaning = acc.getPrimaryAndMerge(
-            EGPhotonCleaningWrapperCfg(
-                ConfigFlags,
-                name="PhotonPassCleaning",
-                EGammaFudgeMCTool=None,
-                StoreGateEntryName="DFCommonPhotonsCleaning",
-                ContainerName="Photons",
-            )
-        )
+    )
 
     # decorate central electrons and photons with a flag to tell if the
     # candidates are affected by the crack bug in mc16a and data 2015+2016
