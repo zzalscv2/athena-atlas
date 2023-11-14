@@ -70,7 +70,8 @@ def JETM2ExtraContentCfg(ConfigFlags):
     #=======================================
     # R = 1.0 truth WZ Dressed jets
     #=======================================
-    jetList += [AntiKt10TruthDressedWZSoftDrop]
+    if ConfigFlags.Input.isMC:
+        jetList += [AntiKt10TruthDressedWZSoftDrop]
 
     jetInternalFlags.isRecoJob = True
 
