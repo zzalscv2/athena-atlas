@@ -6,9 +6,12 @@
 ROOTNAME = 'root'
 
 import yaml
+import json
 import os
 import inspect
 from collections import namedtuple
+import pathlib
+
 
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
@@ -505,3 +508,83 @@ def makeSequence(configPath, dataType, algSeq, geometry=None, autoconfigFromFlag
         return configAccumulator.CA
     else:
         return None
+
+
+# Combine configuration files
+#
+# See the README for more info on how this works
+#
+def combineConfigFiles(local, config_path, fragment_key="include"):
+
+    # if this isn't an iterable there's nothing to combine
+    if isinstance(local, dict):
+        to_combine = local.values()
+    elif isinstance(local, list):
+        to_combine = local
+    else:
+        return
+
+    # otherwise descend into all the entries here
+    for sub in to_combine:
+        combineConfigFiles(sub, config_path, fragment_key=fragment_key)
+
+    # if there are no fragments to include we're done
+    if fragment_key not in local:
+        return
+
+    fragment_path = _find_fragment(
+        pathlib.Path(local[fragment_key]),
+        config_path)
+
+    with open(fragment_path) as fragment_file:
+        # once https://github.com/yaml/pyyaml/issues/173 is resolved
+        # pyyaml will support the yaml 1.2 spec, which is compatable
+        # with json. Until then yaml and json behave differently, so
+        # we have this override.
+        if fragment_path.suffix == '.json':
+            fragment = json.load(fragment_file)
+        else:
+            fragment = yaml.safe_load(fragment_file)
+
+    # fill out any sub-fragments, looking in the parent path of the
+    # fragment for local sub-fragments.
+    combineConfigFiles(
+        fragment,
+        fragment_path.parent,
+        fragment_key=fragment_key
+    )
+
+    # merge the fragment with this one
+    _merge_dicts(local, fragment)
+
+    # delete the fragment so we don't stumble over it again
+    del local[fragment_key]
+
+
+def _find_fragment(fragment_path, config_path):
+    paths_to_check = [
+        fragment_path,
+        config_path / fragment_path,
+        *[x / fragment_path for x in os.environ["DATAPATH"].split(":")]
+    ]
+    for path in paths_to_check:
+        if path.exists():
+            return path
+
+    raise FileNotFoundError(fragment_path)
+
+
+def _merge_dicts(local, fragment):
+    # in the list case append the fragment to the local list
+    if isinstance(local, list):
+        local += fragment
+        return
+    # In the dict case, append only missing values to local: the local
+    # values take precidence over the fragment ones.
+    if isinstance(local, dict):
+        for key, value in fragment.items():
+            if key in local:
+                _merge_dicts(local[key], value)
+            else:
+                local[key] = value
+        return
