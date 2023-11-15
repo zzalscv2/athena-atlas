@@ -490,10 +490,15 @@ def getTauClusterFinder():
 def getMvaTESVariableDecorator():
     _name = sPrefix + 'MvaTESVariableDecorator'
     from tauRecTools.tauRecToolsConf import MvaTESVariableDecorator
+    event_shape = "Kt4LCTopoOriginEventShape"
+    if 'PFlow' in tauFlags.tauRecSeedJetCollection():
+        event_shape = "Kt4EMPFlowEventShape"
+    elif 'EMTopo' in tauFlags.tauRecSeedJetCollection():
+        event_shape = "Kt4EMTopoOriginEventShape"
     MvaTESVariableDecorator = MvaTESVariableDecorator(name = _name,
                                                       Key_vertexInputContainer = _DefaultVertexContainer,
                                                       VertexCorrection = True,
-                                                      EventShapeKey = "Kt4LCTopoOriginEventShape" if not tauFlags.inAOD() else "")
+                                                      EventShapeKey = event_shape if not tauFlags.inAOD() else "")
 
     return MvaTESVariableDecorator
 
