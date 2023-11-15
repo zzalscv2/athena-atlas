@@ -21,8 +21,8 @@ namespace
 // Constructor
 //-----------------------------------------------------------------------------
 OverlapRemovalGenUseAlg::OverlapRemovalGenUseAlg(const std::string& name,
-		ISvcLocator* svcLoc)
-	: EL::AnaAlgorithm(name, svcLoc) { }
+    ISvcLocator* svcLoc)
+  : EL::AnaAlgorithm(name, svcLoc) { }
 
 
 //-----------------------------------------------------------------------------
@@ -30,15 +30,26 @@ OverlapRemovalGenUseAlg::OverlapRemovalGenUseAlg(const std::string& name,
 //-----------------------------------------------------------------------------
 StatusCode OverlapRemovalGenUseAlg::initialize()
 {
-	ATH_MSG_INFO("Initialize");
+  ATH_MSG_INFO("Initialize");
 
-	// Try to retrieve the tool
-	ATH_CHECK( m_orTool.retrieve() );
-  m_jetKey.declareDependency(m_bJetLabel);
-  m_electronKey.declareDependency(m_electronLabel);
-  m_photonKey.declareDependency(m_photonLabel);
-  m_muonKey.declareDependency(m_muonLabel);
-  m_tauKey.declareDependency(m_tauLabel);
+  // Try to retrieve the tool
+  ATH_CHECK( m_orTool.retrieve() );
+
+  if (!m_bJetLabel.empty()){
+    m_jetKey.declareDependency(m_bJetLabel);
+  }
+  if (!m_electronLabel.empty()){
+    m_electronKey.declareDependency(m_electronLabel);
+  }
+  if (!m_photonLabel.empty()){
+    m_photonKey.declareDependency(m_photonLabel);
+  }
+  if (!m_muonLabel.empty()){
+    m_muonKey.declareDependency(m_muonLabel);
+  }
+  if (!m_tauLabel.empty()){
+    m_tauKey.declareDependency(m_tauLabel);
+  }
   
   m_jetKey.declareOutput(m_overlapLabel);
   m_electronKey.declareOutput(m_overlapLabel);
@@ -52,7 +63,7 @@ StatusCode OverlapRemovalGenUseAlg::initialize()
   ATH_CHECK(m_photonKey.initialize(m_photonKey.empty()));
   ATH_CHECK(m_tauKey.initialize(m_tauKey.empty()));
   
-	return StatusCode::SUCCESS;
+  return StatusCode::SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
@@ -151,27 +162,27 @@ StatusCode OverlapRemovalGenUseAlg::execute()
 //---------------------------------------------------------------------------
 // Reset output decoration
 //---------------------------------------------------------------------------
-	template<class ContainerType>
+  template<class ContainerType>
 void OverlapRemovalGenUseAlg::setDefaultDecorations(const ContainerType& container) {
-	const static ort::inputDecorator_t defaultDec(m_overlapLabel);
-	for(auto obj : container){
-		defaultDec(*obj) = m_defaultValue; //default to all objects being overlaps if we can't get primary vertices. Ensures the event cleaning decision fails.
-	}
+  const static ort::inputDecorator_t defaultDec(m_overlapLabel);
+  for(auto obj : container){
+    defaultDec(*obj) = m_defaultValue; //default to all objects being overlaps if we can't get primary vertices. Ensures the event cleaning decision fails.
+  }
 }
 
 
 //-----------------------------------------------------------------------------
 // Apply selection to a container
 //-----------------------------------------------------------------------------
-	template<class ContainerType>
+  template<class ContainerType>
 void OverlapRemovalGenUseAlg::applySelection(const ContainerType& container)
 {
-	const ort::inputDecorator_t selDec(m_selectionLabel);
-	for(auto obj : container){
-		selDec(*obj) = selectObject(*obj);
+  const ort::inputDecorator_t selDec(m_selectionLabel);
+  for(auto obj : container){
+    selDec(*obj) = selectObject(*obj);
         ATH_MSG_VERBOSE("  Obj " << obj->index() << " of type " << obj->type()
                         << " selected? " << int(selDec(*obj)));
-	}
+  }
 }
 //-----------------------------------------------------------------------------
 template<class ObjType>
@@ -197,8 +208,8 @@ bool OverlapRemovalGenUseAlg::selectObject<xAOD::Jet>(const xAOD::Jet& obj)
 template<>
 bool OverlapRemovalGenUseAlg::selectObject<xAOD::Electron>(const xAOD::Electron& obj)
 {
-  const static SG::AuxElement::ConstAccessor<char> acc_ElectronPass(m_electronLabel);
   if(m_electronLabel.empty()) return true;    //disable selection for objects with empty labels
+  const static SG::AuxElement::ConstAccessor<char> acc_ElectronPass(m_electronLabel);
   if(obj.pt() < m_ptCut*GeV || std::abs(obj.eta()) > m_etaCut) return false;
   if(!acc_ElectronPass(obj)) return false;
   return true;
@@ -208,8 +219,8 @@ bool OverlapRemovalGenUseAlg::selectObject<xAOD::Electron>(const xAOD::Electron&
 template<>
 bool OverlapRemovalGenUseAlg::selectObject<xAOD::Photon>(const xAOD::Photon& obj)
 {
-  const static SG::AuxElement::ConstAccessor<char> acc_PhotonPass(m_photonLabel);
   if(m_photonLabel.empty()) return true;    //disable selection for objects with empty labels
+  const static SG::AuxElement::ConstAccessor<char> acc_PhotonPass(m_photonLabel);
   if(obj.pt() < m_ptCut*GeV || std::abs(obj.eta()) > m_etaCut) return false;
   if(!acc_PhotonPass(obj)) return false;
   return true;
@@ -219,8 +230,8 @@ bool OverlapRemovalGenUseAlg::selectObject<xAOD::Photon>(const xAOD::Photon& obj
 template<>
 bool OverlapRemovalGenUseAlg::selectObject<xAOD::Muon>(const xAOD::Muon& obj)
 {
-  const static SG::AuxElement::ConstAccessor<char> acc_MuonPass(m_muonLabel);
   if(m_muonLabel.empty()) return true;    //disable selection for objects with empty labels
+  const static SG::AuxElement::ConstAccessor<char> acc_MuonPass(m_muonLabel);
   if(obj.pt() < m_ptCut*GeV || std::abs(obj.eta()) > m_etaCut) return false;
   if(!acc_MuonPass(obj)) return false;
   return true;
@@ -230,8 +241,8 @@ bool OverlapRemovalGenUseAlg::selectObject<xAOD::Muon>(const xAOD::Muon& obj)
 template<>
 bool OverlapRemovalGenUseAlg::selectObject<xAOD::TauJet>(const xAOD::TauJet& obj)
 {
-  const static SG::AuxElement::ConstAccessor<char> acc_TauPass(m_tauLabel);
   if(m_tauLabel.empty()) return true;    //disable selection for objects with empty labels
+  const static SG::AuxElement::ConstAccessor<char> acc_TauPass(m_tauLabel);
   if(obj.pt() < m_ptCut*GeV || std::abs(obj.eta()) > m_etaCut) return false;
   if(!acc_TauPass(obj)) return false;
   return true;
