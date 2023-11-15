@@ -112,9 +112,9 @@ if [[ $rc1 -eq 0 ]] && [[ $rc2 -eq 0 ]]
 then
     acmd.py diff-root ${DigiOutFileNameSP} ${DigiOutFileNameMP0} \
         --mode=semi-detailed --error-mode resilient --order-trees \
-        --ignore-leaves index_ref xAOD::AuxContainerBase_Bkg_InTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_Bkg_InTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelPt xAOD::AuxContainerBase_Bkg_InTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_Bkg_InTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelPt xAOD::AuxContainerBase_Bkg_OutOfTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_Bkg_OutOfTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelPt xAOD::AuxContainerBase_Bkg_OutOfTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_Bkg_OutOfTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelPt
-    # Other than index_ref the listed leaves all have nan values. These leaves are not valid for truth jets, so should not have been written to the input HITS files. This should go away once the inputs are updated.
+        --ignore-leaves index_ref xAOD::AuxContainerBase_InTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_InTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelPt xAOD::AuxContainerBase_InTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_InTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelPt xAOD::AuxContainerBase_OutOfTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_OutOfTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelPt xAOD::AuxContainerBase_OutOfTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_OutOfTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelPt
     rc4=$?
+    # Other than index_ref the listed leaves all have nan values. These leaves are not valid for truth jets, so should not have been written to the input HITS files. This should go away once the inputs are updated.
     if [[ $status -eq 0 ]]; then
         status=$rc4
     fi
@@ -126,9 +126,9 @@ if [[ $rc1 -eq 0 ]] && [[ $rc3 -eq 0 ]]
 then
     acmd.py diff-root ${DigiOutFileNameSP} ${DigiOutFileNameMP1} \
         --mode=semi-detailed --error-mode resilient --order-trees \
-        --ignore-leaves index_ref xAOD::AuxContainerBase_Bkg_InTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_Bkg_InTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelPt xAOD::AuxContainerBase_Bkg_InTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_Bkg_InTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelPt xAOD::AuxContainerBase_Bkg_OutOfTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_Bkg_OutOfTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelPt xAOD::AuxContainerBase_Bkg_OutOfTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_Bkg_OutOfTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelPt
-    # Other than index_ref the listed leaves all have nan values. These leaves are not valid for truth jets, so should not have been written to the input HITS files. This should go away once the inputs are updated.
+        --ignore-leaves index_ref xAOD::AuxContainerBase_InTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_InTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelPt xAOD::AuxContainerBase_InTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_InTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelPt xAOD::AuxContainerBase_OutOfTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_OutOfTimeAntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelPt xAOD::AuxContainerBase_OutOfTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_OutOfTimeAntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelPt
     rc5=$?
+    # Other than index_ref the listed leaves all have nan values. These leaves are not valid for truth jets, so should not have been written to the input HITS files. This should go away once the inputs are updated.
     if [[ $status -eq 0 ]]; then
         status=$rc5
     fi
