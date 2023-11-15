@@ -24,7 +24,11 @@ namespace MuonGMR4{
           Amg::Vector3D stripPosition(unsigned int stripNum) const;
           /// Returns the position of the strip expressed in the local frame
           Amg::Vector3D localStripPos(unsigned int stripum) const;
-     
+          /// Returns the position of the left strip edge  (positive local y) expressed in the local frame
+          Amg::Vector3D localStripLeftEdge(unsigned int stripNum) const;
+          /// Returns the position of the right strip edge (negative local y) exoressed in the local frame
+          Amg::Vector3D localStripRightEdge(unsigned int stripNum) const;
+      
         private:
            Amg::Transform3D m_transform{Amg::Transform3D::Identity()};
            StripDesignPtr m_design{};

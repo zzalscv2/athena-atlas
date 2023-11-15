@@ -15,6 +15,8 @@ using namespace ActsTrk;
 namespace MuonGMR4 {
 using parameterBook = RpcReadoutElement::parameterBook;
 std::ostream& operator<<(std::ostream& ostr, const parameterBook& pars) {
+   ostr<<"chamber width/length/thickness [mm]: "<<(2.*pars.halfWidth)<<"/";
+   ostr<<(2.*pars.halfLength)<<"/"<<(2.*pars.halfThickness)<<std::endl;
    if (pars.etaDesign) ostr<<"Eta strips: "<<(*pars.etaDesign)<<std::endl;
    if (pars.phiDesign) ostr<<"Phi strips: "<<(*pars.phiDesign)<<std::endl;   
    return ostr;
@@ -34,8 +36,8 @@ StatusCode RpcReadoutElement::initElement() {
        return StatusCode::FAILURE;
     }
 #ifndef SIMULATIONBASE
-    ATH_CHECK(planeSurfaceFactory(geoTransformHash(), m_pars.layerBounds->make_bounds(m_pars.halfLength, 
-                                                                                      m_pars.halfWidth)));
+    ATH_CHECK(planeSurfaceFactory(geoTransformHash(), m_pars.layerBounds->make_bounds(m_pars.halfWidth, 
+                                                                                      m_pars.halfLength)));
 #endif
     for (unsigned int layer = 0; layer < m_pars.layers.size(); ++layer) {
       IdentifierHash layHash{layer};
@@ -79,6 +81,27 @@ Amg::Vector3D RpcReadoutElement::stripPosition(const ActsGeometryContext& ctx, c
                  <<" is out of range. Maximum range "<<m_pars.layers.size());
    return Amg::Vector3D::Zero();
 }
+Amg::Vector3D RpcReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const{
+    const IdentifierHash lHash = layerHash(measHash);
+    unsigned int layIdx = static_cast<unsigned int>(lHash);
+    if (layIdx < m_pars.layers.size()) {
+       return localToGlobalTrans(ctx, lHash) * m_pars.layers[layIdx].localStripLeftEdge(stripNumber(measHash));
+    }
+    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.layers.size());
+    return Amg::Vector3D::Zero();
+}
+Amg::Vector3D RpcReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+    const IdentifierHash lHash = layerHash(measHash);
+    unsigned int layIdx = static_cast<unsigned int>(lHash);
+    if (layIdx < m_pars.layers.size()) {
+       return localToGlobalTrans(ctx, lHash) * m_pars.layers[layIdx].localStripRightEdge(stripNumber(measHash));
+    }
+    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.layers.size());
+    return Amg::Vector3D::Zero();
+}
+
 Amg::Vector3D RpcReadoutElement::chamberStripPos(const IdentifierHash& measHash) const {
    const IdentifierHash lHash = layerHash(measHash);
    unsigned int layIdx = static_cast<unsigned int>(lHash);

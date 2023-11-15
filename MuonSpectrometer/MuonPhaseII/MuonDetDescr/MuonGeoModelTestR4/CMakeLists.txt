@@ -16,13 +16,13 @@ atlas_add_component( MuonGeoModelTestR4
 
 
 atlas_add_test( testR4Geometry
-                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers "BML1A3 T1E1A01" --noMM --noSTGC --noTgc
+                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers "BML1A3 T1E1A01" --noMM --noSTGC 
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
 
 
 atlas_add_test( testR4SensitiveDetectors
-                SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors --noMM --noSTGC --noTgc --nEvents 5 
+                SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors --noMM --noSTGC --nEvents 5 
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
 

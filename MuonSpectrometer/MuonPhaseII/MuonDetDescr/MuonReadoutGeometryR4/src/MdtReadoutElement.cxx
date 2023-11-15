@@ -135,14 +135,21 @@ Amg::Vector3D MdtReadoutElement::localTubePos(const IdentifierHash& hash) const 
   return toTubeFrame(hash).translation();
 }
 Amg::Vector3D MdtReadoutElement::readOutPos(const ActsGeometryContext& ctx,
-                                const IdentifierHash& hash) const {
+                                            const IdentifierHash& hash) const {
    const unsigned int layer = layerNumber(hash);
    const unsigned int tube  = tubeNumber(hash);
    const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]};
    const double length = zeroT.tubeHalfLength(tube) * m_pars.readoutSide;
    return localToGlobalTrans(ctx) * zeroT.tubeTransform(tube)*(length * Amg::Vector3D::UnitZ());
 }
-
+Amg::Vector3D MdtReadoutElement::highVoltPos(const ActsGeometryContext& ctx,
+                                             const IdentifierHash& hash) const {
+   const unsigned int layer = layerNumber(hash);
+   const unsigned int tube  = tubeNumber(hash);
+   const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]};
+   const double length = - zeroT.tubeHalfLength(tube) * m_pars.readoutSide;
+   return localToGlobalTrans(ctx) * zeroT.tubeTransform(tube)*(length * Amg::Vector3D::UnitZ());
+}
 Amg::Transform3D MdtReadoutElement::toChamberLayer(const IdentifierHash& hash) const {   
    const unsigned int layer = layerNumber(hash);
    const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]};

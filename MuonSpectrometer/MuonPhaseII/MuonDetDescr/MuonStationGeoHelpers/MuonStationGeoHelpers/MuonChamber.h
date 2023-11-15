@@ -30,46 +30,81 @@ namespace MuonGMR4 {
                 /// Pointer to the physical volume associated with the chamber.
                 PVConstLink chamberVol{nullptr};
                 /// Definition of the surrounding box
-                double halfX{0.};
-                double halfYLong{0.};
-                double halfYShort{0.};
+                double halfXLong{0.};
+                double halfXShort{0.};
+                double halfY{0.};
                 double halfZ{0.};
                 /// Transformation to the chamber volume
                 Amg::Transform3D centerTrans{Amg::Transform3D::Identity()};
             };
 
             MuonChamber(defineArgs&& args);
+            MuonChamber(const MuonChamber& other);
+            MuonChamber(MuonChamber&& other);
+            MuonChamber& operator=(const MuonChamber& other);
+            MuonChamber& operator=(MuonChamber&& other);
+
+            /// Returns the idHelperSvc
+            const Muon::IMuonIdHelperSvc* idHelperSvc() const;
             /// Returns the chamber index
             Muon::MuonStationIndex::ChIndex chamberIndex() const;
             // Returns the station name of the chamber
-            int stationName() const;
-            
+            int stationName() const;            
             /// Returns the station eta of the chamber
             int stationEta() const;
             /// Returns the station phi of the chamber
             int stationPhi() const;
+            /// Returns the detector type of the primary detector element
+            ActsTrk::DetectorType detectorType() const;
             /// Returns the list of all associated readout elements 
             const ReadoutSet& readOutElements() const;
             /// Returns the transformation of the MuonChamber
-            Amg::Transform3D localToGlobalTrans(const ActsGeometryContext& gctx) const;
-            Amg::Transform3D globalToLocalTrans(const ActsGeometryContext& gctx) const;
+            const Amg::Transform3D& localToGlobalTrans(const ActsGeometryContext& gctx) const;
+            const Amg::Transform3D& globalToLocalTrans(const ActsGeometryContext& gctx) const;
+            /// Applies the alignment transformations to the middle layers
+            /// Returns false if the alignment store does not cache the constants
+            /// for the correpsonding detector element
+            bool storeAlignment(ActsTrk::RawGeomAlignStore& store) const;
             /// Surrounding box dimensions
-            double halfYLong() const;
-            double halfYShort() const;
-            double halfX() const;
+            double halfXLong() const;
+            double halfXShort() const;
+            double halfY() const;
             double halfZ() const;
 
             std::shared_ptr<Acts::Volume> boundingVolume(const ActsGeometryContext& gctx) const;
             std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds() const;
 
+            const defineArgs& parameters() const;
+
         private:
-           const defineArgs m_args{};
+           defineArgs m_args{};
+           
+           Amg::Transform3D fromLayerToGlobal(ActsTrk::RawGeomAlignStore* store) const;
+
+           ActsTrk::TransformCache m_localToGlobal{IdentifierHash{0},
+                    [this](ActsTrk::RawGeomAlignStore* store, const IdentifierHash&){
+                        return fromLayerToGlobal(store);
+           }};
+           ActsTrk::TransformCache m_globalToLocal{IdentifierHash{0}, 
+                    [this](ActsTrk::RawGeomAlignStore* store, const IdentifierHash& hash){
+                        return m_localToGlobal.transformMaker()(store,hash).inverse();
+           }};
+
     };
 
     bool operator<(const MuonChamber& a, const MuonChamber& b);
+    bool operator<(const Identifier& a, const MuonChamber& b);
+    bool operator<(const MuonChamber& a, const Identifier& b);
     bool operator<(const MuonReadoutElement& a, const MuonChamber& b);
     bool operator<(const MuonChamber& a, const MuonReadoutElement& b);
     using ChamberSet = std::set<MuonChamber, std::less<>>;
+
+    std::ostream& operator<<(std::ostream& ostr, 
+                             const MuonChamber::defineArgs& args);
+
+    std::ostream& operator<<(std::ostream& ostr,
+                             const MuonChamber& chamber);
+
 }
 
 #endif

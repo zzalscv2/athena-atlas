@@ -13,6 +13,9 @@
 #include <StoreGate/ReadCondHandleKey.h>
 
 namespace MuonGMR4 { 
+
+class ChambBoundaryNote;
+
 class MuonChamberToolTest: public AthReentrantAlgorithm {
     public:
         MuonChamberToolTest(const std::string& name, ISvcLocator* pSvcLocator);
@@ -25,7 +28,19 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         bool isReEntrant() const override final {return false;}   
     
     private:
+        /// Test that all Mdts are inside the chamber volume
+        StatusCode testMdt(const ActsGeometryContext& gctx,
+                           const MdtReadoutElement& readOutEle,
+                           ChambBoundaryNote& chamb) const;
         
+        StatusCode testRpc(const ActsGeometryContext& gctx,
+                           const RpcReadoutElement& readoutEle,
+                           ChambBoundaryNote& chamber) const;
+
+        StatusCode testTgc(const ActsGeometryContext& gctx,
+                           const TgcReadoutElement& readoutEle,
+                           ChambBoundaryNote& chamber) const;
+                           
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 

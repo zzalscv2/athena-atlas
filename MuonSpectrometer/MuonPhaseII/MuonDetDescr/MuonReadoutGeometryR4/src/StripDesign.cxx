@@ -48,7 +48,7 @@ namespace MuonGMR4{
         ostr<<"Strip -- number: "<<numStrips()<<", ";        
         ostr<<"pitch: "<<stripPitch()<<", ";
         ostr<<"width: "<<stripWidth()<<", ";
-        ostr<<"Dimension  -- width x height:"<<halfWidth() * Gaudi::Units::mm<<" [mm] x ";
+        ostr<<"Dimension  -- width x height [mm]: "<<halfWidth() * Gaudi::Units::mm<<" x ";
         ostr<<shortHalfHeight()<<"/"<<longHalfHeight()<<" [mm], ";
         if (hasStereoAngle()) ostr<<"stereo angle: "<<stereoAngle() / Gaudi::Units::deg<<", ";
         ostr<<"position first strip "<<Amg::toString(center(firstStripNumber()).value_or(Amg::Vector2D::Zero()),1);

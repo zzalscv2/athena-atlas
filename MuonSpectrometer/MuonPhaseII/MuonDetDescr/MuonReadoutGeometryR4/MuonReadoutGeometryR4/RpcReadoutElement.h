@@ -93,10 +93,16 @@ class RpcReadoutElement : public MuonReadoutElement {
     double gasGapThickness() const;
 
 
-
+    /// Returns the position of the strip center
     Amg::Vector3D stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const;
     Amg::Vector3D stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
-
+    /// Returns the global position of the strip edge at negative local Y
+    Amg::Vector3D rightStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const;
+    Amg::Vector3D rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+    /// Returns the global posiition of the strip edge at positive local Y
+    Amg::Vector3D leftStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const;
+    Amg::Vector3D leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+    
 
 
     /// Constructs the identifier hash from the full measurement Identifier. The
