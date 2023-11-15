@@ -5,7 +5,7 @@
 from __future__ import print_function
 
 import sys, os
-import time
+import time, datetime
 import ROOT
 import logging
 from ROOT import TCanvas, TH1D, TH2D, TArrayD, TLegend
@@ -262,6 +262,75 @@ class TileDCSDataPlotter (object):
                     cut = cut.replace("ALL_HV",vv)
         cut = cut.replace("ALL",var)
         return cut
+
+
+    #_______________________________________________________________________________________
+    def scan(self):
+        """
+        Scan ROOT TTree and show all values on the screen
+
+        """
+
+        t = self.getTree()
+        if "ALL" in self.cutExp or self.varExp.count(',')>2 :
+            #=== extract the values
+            for var in self.varExp.split(","):
+                treevar="EvTime:"+var
+                cut=self.cutReplace(self.cutExp,var)
+                self.scantree(t,treevar,cut)
+        else:
+            treevar="EvTime:"+self.varExp.replace(",",":")
+            self.scantree(t,treevar,self.cutExp)
+
+        return
+
+
+    #_______________________________________________________________________________________
+    def scantree(self,t,treevar,cut):
+        """
+        Scan ROOT TTree and show up to 4 variables on the screen
+
+        """
+
+        #t.Scan("-1000000000+"+treevar,cut)
+        t.Draw(treevar,cut,"goff")
+        n = t.GetSelectedRows()
+        if n>0: # at least one point passed the cut
+            vars = treevar.split(":")
+            nv = len(vars)
+            fmt = [ "%d" ]
+            for i in range(1,nv):
+                if "DAQ" in vars[i]:
+                    fmt += [ "\t%6d\t\t" ]
+                else:
+                    fmt += [ "\t%6.2f\t" ]
+            x = t.GetV1()
+            v1 = None
+            v2 = None
+            v3 = None
+            v=vars[0]
+            if v=="EvTime": v += 13*" "
+            if nv>1:
+                v1 = t.GetV2()
+                v += "\t"+vars[1]
+                if nv>2:
+                    v2 = t.GetV3()
+                    v += "\t"+vars[2]
+                    if nv>3:
+                        v3 = t.GetV4()
+                        v += "\t"+vars[3]
+            print(v)
+            for i in range(n):
+                v=""
+                if v1 is not None:
+                    v += fmt[1] % v1[i]
+                    if v2 is not None:
+                        v += fmt[2] % v2[i]
+                        if v3 is not None:
+                            v += fmt[3] % v3[i]
+                dt = datetime.datetime.fromtimestamp(int(x[i])).strftime('%Y-%m-%d %H:%M:%S')
+                print(dt,v)
+        return
 
 
     #_______________________________________________________________________________________
@@ -727,8 +796,7 @@ class TileDCSDataPlotter (object):
 
 
 #==== interactive use
-callName = os.path.basename(sys.argv[0])
-if callName=="TileDCSDataPlotter.py":
+if __name__ == "__main__":
 
     #=== check if we are in batch mode
     batch = False
@@ -763,8 +831,8 @@ if callName=="TileDCSDataPlotter.py":
 
     #=== catch invalid commands
     cmd = sys.argv[1]
-    if not(cmd=="plot" or cmd=="diff" or cmd=="diffprof" or cmd=="prof" or cmd=="dist" or cmd=="tree"  or cmd=="mean"  or cmd=="last"):
-        print (""" Please use one of the following commands: plot, diff, dist, tree, mean, last !""")
+    if not(cmd=="plot" or cmd=="diff" or cmd=="diffprof" or cmd=="prof" or cmd=="dist" or cmd=="tree"  or cmd=="mean"  or cmd=="last"  or cmd=="scan"):
+        print (""" Please use one of the following commands: plot, diff, dist, tree, mean, last, scan !""")
         sys.exit(1)
 
     #=== command is recognized, we go on....
@@ -777,6 +845,9 @@ if callName=="TileDCSDataPlotter.py":
         f = ROOT.TFile(dp.outName+".root", "recreate")
         t.Write()
         f.Close()
+
+    elif cmd == "scan":
+        dp.scan()
 
     #=== distribution plot (using weights)
     elif cmd =="mean":

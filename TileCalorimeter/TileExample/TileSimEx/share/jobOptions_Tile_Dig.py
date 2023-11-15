@@ -42,7 +42,8 @@ if not 'FileSuffix' in dir():
     FileSuffix = ''
 
 if not 'TileTB' in dir():
-    TileTB = ('Geo' in dir() and (Geo=='5B' or Geo=='3B' or Geo=='2B2EB' or Geo=='2B1EB'))
+    Geo0 = Geo.split('-')[0] if 'Geo' in dir() else ''
+    TileTB = (Geo0=='5B' or Geo0=='3B' or Geo0=='2B2EB' or Geo0=='2B1EB')
 
 if TileTB:
     ConddbTag = 'OFLCOND-MC12-SDR-27'
@@ -50,7 +51,10 @@ if TileTB:
     DetDescrVersion = 'ATLAS-CTB-01'
     if not 'Geo' in dir():
         Geo = '5B'
-    TileVersionOverride = 'TileTB-%s-00' % Geo
+    if Geo.count('-')>0:
+        TileVersionOverride = 'TileTB-%s' % Geo
+    else:
+        TileVersionOverride = 'TileTB-%s-00' % Geo
     if not 'doHitNtuple' in dir():
         doHitNtuple = True
 

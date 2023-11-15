@@ -83,6 +83,16 @@ if 'TileUshape' in dir():
     from AtlasGeoModel import TileGM
     GeoModelSvc.DetectorTools[ "TileDetectorTool" ].Ushape = TileUshape
 
+#---- Select steel with 0.45% Manganse for absorber instead of pure Iron. Any value > 0 enables Steel
+if 'TileSteel' in dir():
+    from AtlasGeoModel import TileGM
+    GeoModelSvc.DetectorTools[ "TileDetectorTool" ].Steel = TileSteel
+
+#---- Use PVT instead of PS for scintillator material. Any value > 0 enables PVT
+if 'TilePVT' in dir():
+    from AtlasGeoModel import TileGM
+    GeoModelSvc.DetectorTools[ "TileDetectorTool" ].PVT = TilePVT
+
 #---- Special option to enable Cs tubes in simulation. Any value > 0 enables them
 if 'TileCsTube' in dir():
     from AtlasGeoModel import TileGM
@@ -187,6 +197,17 @@ SD = svcMgr.TileGeoG4SDCalc
 # Birks' law
 if 'DoBirk' in dir():
     SD.DoBirk = DoBirk
+if 'OldBirk' in dir() or 'Birk1' in dir() or 'Birk2' in dir():
+    import AthenaCommon.SystemOfUnits as Units
+    gramsPerMeVcmSq = Units.g/(Units.MeV*Units.cm2)
+    if 'OldBirk' in dir() and OldBirk:
+        ## exp. values from NIM 80 (1970) 239-244
+        SD.birk1 = 0.0130 * gramsPerMeVcmSq
+        SD.birk2 = 9.6e-6 * gramsPerMeVcmSq * gramsPerMeVcmSq
+    if 'Birk1' in dir():
+        SD.birk1 = Birk1 * gramsPerMeVcmSq
+    if 'Birk2' in dir():
+        SD.birk2 = Birk2 * gramsPerMeVcmSq * gramsPerMeVcmSq
 if 'TileUshape' in dir():
     SD.Ushape=TileUshape
 printfunc (SD)
