@@ -379,7 +379,7 @@ FitMeasurement::FitMeasurement(double radiationThickness, double deltaE,
   m_surface = &m_materialEffects->associatedSurface();
 
   m_intersection[FittedTrajectory] =
-      std::make_unique<TrackSurfaceIntersection>(position, direction, 0.);
+      std::make_optional<TrackSurfaceIntersection>(position, direction, 0.);
 }
 
 // constructor for adding (mis-)alignment effects
@@ -440,7 +440,7 @@ FitMeasurement::FitMeasurement(const AlignmentEffectsOnTrack* alignmentEffects,
     m_weight2 = 1. / m_sigmaPlus;
 
   m_intersection[FittedTrajectory] =
-      std::make_unique<TrackSurfaceIntersection>(position, direction, 0.);
+      std::make_optional<TrackSurfaceIntersection>(position, direction, 0.);
 }
 
 // constructor creating placeholder Surface for delimiting material aggregation
@@ -499,7 +499,7 @@ FitMeasurement::FitMeasurement(const TrackSurfaceIntersection& intersection,
   CurvilinearUVT uvt(intersection.direction());
   m_surface = new PlaneSurface(m_position, uvt);
 
-  m_intersection[FittedTrajectory] = std::make_unique<TrackSurfaceIntersection>(
+  m_intersection[FittedTrajectory] = std::make_optional<TrackSurfaceIntersection>(
       m_position, intersection.direction(), 0.);
 }
 
@@ -868,8 +868,8 @@ FitMeasurement::~FitMeasurement(void) {
 }
 
 void FitMeasurement::intersection(ExtrapolationType type,
-                                  const TrackSurfaceIntersection* value) {
-  m_intersection[type].reset(value);
+                                  const std::optional<TrackSurfaceIntersection>& value) {
+  m_intersection[type] = value;
 }
 
 void FitMeasurement::printHeading(MsgStream& log) {

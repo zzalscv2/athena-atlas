@@ -1781,17 +1781,19 @@ Trk::IntersectionSolution Trk::STEP_Propagator::intersect(const EventContext& ct
   Amg::Vector3D direction(cache.m_P[3], cache.m_P[4], cache.m_P[5]);
   auto intersectionSolution = Trk::IntersectionSolution();
   intersectionSolution.push_back(
-      std::make_unique<Trk::TrackSurfaceIntersection>(globalPosition, direction, path));
+      std::make_optional<Trk::TrackSurfaceIntersection>(globalPosition, direction, path));
   return intersectionSolution;
 }
 
-const Trk::TrackSurfaceIntersection* Trk::STEP_Propagator::intersectSurface(
+std::optional<Trk::TrackSurfaceIntersection>
+Trk::STEP_Propagator::intersectSurface(
     const EventContext& ctx, const Trk::Surface& surface,
-    const Trk::TrackSurfaceIntersection* trackIntersection, const double qOverP,
-    const Trk::MagneticFieldProperties& mft, ParticleHypothesis particle) const {
+    const Trk::TrackSurfaceIntersection& trackIntersection, const double qOverP,
+    const Trk::MagneticFieldProperties& mft,
+    ParticleHypothesis particle) const {
 
-  const Amg::Vector3D& origin = trackIntersection->position();
-  const Amg::Vector3D& direction = trackIntersection->direction();
+  const Amg::Vector3D& origin = trackIntersection.position();
+  const Amg::Vector3D& direction = trackIntersection.direction();
 
   auto perigeeSurface = PerigeeSurface(origin);
   perigeeSurface.setOwner(Trk::userOwn);  // tmp ones
@@ -1805,15 +1807,14 @@ const Trk::TrackSurfaceIntersection* Trk::STEP_Propagator::intersectSurface(
           : intersect(ctx, tmpTrackParameters, surface, mft, particle, nullptr);
 
   if (solution.empty()) {
-    return nullptr;
+    return std::nullopt;
   }
 
   Trk::IntersectionSolutionIter output_iter = solution.begin();
   if (*output_iter) {
-    Trk::TrackSurfaceIntersection* result = new Trk::TrackSurfaceIntersection(*(*output_iter));
-    return result;
+    return Trk::TrackSurfaceIntersection(*(*output_iter));
   }
-  return nullptr;
+  return std::nullopt;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

@@ -164,7 +164,7 @@ Trk::Perigee Trk::ExtrapolatorTest::generatePerigee() {
    double charge = (m_flatDist->shoot() > 0.5 ) ? -1. : 1.;
    double qOverP = charge/(p);
    const Trk::PerigeeSurface perSurface;
-   return Trk::Perigee(d0, z0, phi, theta, qOverP,perSurface); 
+   return {d0, z0, phi, theta, qOverP,perSurface}; 
 }
 
 //================ Execution ====================================================

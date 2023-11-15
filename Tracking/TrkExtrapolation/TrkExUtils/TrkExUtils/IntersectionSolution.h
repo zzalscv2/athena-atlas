@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,21 +14,16 @@
 #include <vector>
 #include <iosfwd>
 #include <memory>
+#include <optional>
 
 
 class MsgStream;
 
 namespace Trk {
 class TrackSurfaceIntersection;
-/** @class IntersectionSolution
-   @author Andreas.Salzburger@cern.ch
-   updated June 2021 (shaun roe) to be simple typedef
-  */
   
-typedef std::vector<std::unique_ptr<const Trk::TrackSurfaceIntersection>> 
-  IntersectionSolution;
-typedef std::vector<std::unique_ptr<const Trk::TrackSurfaceIntersection>>::const_iterator
-  IntersectionSolutionIter;
+using IntersectionSolution = std::vector<std::optional<Trk::TrackSurfaceIntersection>> ;
+using IntersectionSolutionIter = std::vector<std::optional<Trk::TrackSurfaceIntersection>>::const_iterator;
 
 
 /**Overload of << operator for both, MsgStream and std::ostream for debug

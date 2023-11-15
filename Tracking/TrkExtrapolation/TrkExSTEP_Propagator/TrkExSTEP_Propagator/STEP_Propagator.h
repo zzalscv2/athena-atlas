@@ -303,10 +303,10 @@ public:
 
   /** Intersection and propagation:
    */
-  virtual const TrackSurfaceIntersection* intersectSurface(
+  virtual std::optional<TrackSurfaceIntersection> intersectSurface(
     const EventContext& ctx,
     const Surface& surface,
-    const TrackSurfaceIntersection* trackIntersection,
+    const TrackSurfaceIntersection& trackIntersection,
     const double qOverP,
     const MagneticFieldProperties& mft,
     ParticleHypothesis particle) const override final;

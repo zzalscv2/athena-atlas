@@ -155,7 +155,7 @@ void MaterialAllocator::addLeadingMaterial(
   // delimiter)
   bool energyGain = false;
   bool haveDelimiter = false;
-  const TrackSurfaceIntersection* intersection = nullptr;
+  std::optional<TrackSurfaceIntersection> intersection = std::nullopt;
   int leadingScatterers = 0;
   Trk::FitMeasurement* leadingScatterer = nullptr;
   for (auto* measurement : measurements) {
@@ -195,7 +195,7 @@ void MaterialAllocator::addLeadingMaterial(
         } else {
           if (!firstMeasurementSurface && !intersection) {
             firstMeasurementSurface = (*measurement).surface();
-            intersection = new TrackSurfaceIntersection(
+            intersection = TrackSurfaceIntersection(
                 (*measurement).intersection(FittedTrajectory));
           }
           if (!haveDelimiter)
@@ -332,32 +332,29 @@ void MaterialAllocator::addLeadingMaterial(
 
         if (leadingScatterers++ || !firstMeasurementSurface) {
           if (m_useStepPropagator == 99) {
-            const TrackSurfaceIntersection* newIntersectionSTEP =
+            std::optional<TrackSurfaceIntersection> newIntersectionSTEP =
                 m_stepPropagator->intersectSurface(
                     ctx, (**r).trackParameters()->associatedSurface(),
-                    intersection, qOverP,
+                    *intersection, qOverP,
                     Trk::MagneticFieldProperties(Trk::FullField), Trk::muon);
             intersection = m_intersector->intersectSurface(
-                (**r).trackParameters()->associatedSurface(), intersection,
+                (**r).trackParameters()->associatedSurface(), *intersection,
                 qOverP);
-            if (newIntersectionSTEP && intersection) {
-              delete newIntersectionSTEP;
-            }
           } else {
             intersection =
                 m_useStepPropagator >= 1
                     ? m_stepPropagator->intersectSurface(
                           ctx, (**r).trackParameters()->associatedSurface(),
-                          intersection, qOverP, m_stepField, Trk::muon)
+                          *intersection, qOverP, m_stepField, Trk::muon)
                     : m_intersector->intersectSurface(
                           (**r).trackParameters()->associatedSurface(),
-                          intersection, qOverP);
+                          *intersection, qOverP);
           }
 
           // quit if tracking problem
           if (!intersection) {
             intersection =
-                &measurements.front()->intersection(FittedTrajectory);
+                measurements.front()->intersection(FittedTrajectory);
             break;
           }
           leadingMeas =
@@ -422,27 +419,23 @@ void MaterialAllocator::addLeadingMaterial(
     // final step to give intersection at perigee surface plus memory management
     if (leadingMeas) {
       if (m_useStepPropagator == 99) {
-        const TrackSurfaceIntersection* newIntersectionSTEP =
+        std::optional<TrackSurfaceIntersection> newIntersectionSTEP =
             m_stepPropagator->intersectSurface(
-                ctx, perigee.associatedSurface(), intersection, qOverP,
+                ctx, perigee.associatedSurface(), *intersection, qOverP,
                 Trk::MagneticFieldProperties(Trk::FullField), Trk::muon);
         intersection = m_intersector->intersectSurface(
-            perigee.associatedSurface(), intersection, qOverP);
-        if (newIntersectionSTEP && intersection) {
-          delete newIntersectionSTEP;
-        }
+            perigee.associatedSurface(), *intersection, qOverP);
       } else {
         intersection =
             m_useStepPropagator >= 1
                 ? m_stepPropagator->intersectSurface(
-                      ctx, perigee.associatedSurface(), intersection, qOverP,
+                      ctx, perigee.associatedSurface(), *intersection, qOverP,
                       m_stepField, Trk::muon)
                 : m_intersector->intersectSurface(perigee.associatedSurface(),
-                                                  intersection, qOverP);
+                                                  *intersection, qOverP);
       }
     } else {
-      delete intersection;
-      intersection = nullptr;
+      intersection = std::nullopt;
     }
     deleteMaterial(indetMaterial, garbage);
     indetMaterial = nullptr;
@@ -506,7 +499,6 @@ void MaterialAllocator::addLeadingMaterial(
   if (intersection) {
     fitParameters.update(intersection->position(), intersection->direction(),
                          qOverP, leadingCovariance);
-    delete intersection;
   }
   // or pre-existing leading material
   else {
@@ -1094,19 +1086,19 @@ void MaterialAllocator::indetMaterial(
       if (!endIndetMeasurement && (**m).hasIntersection(FittedTrajectory) &&
           ((**m).surface()->type() == Trk::SurfaceType::Plane ||
            (**m).surface()->type() == Trk::SurfaceType::Disc)) {
-        const TrackSurfaceIntersection* intersection =
-            &(**m).intersection(FittedTrajectory);
+        std::optional<TrackSurfaceIntersection> intersection =
+            (**m).intersection(FittedTrajectory);
         Amg::Vector3D offset = intersection->direction() * tolerance;
         CurvilinearUVT uvt(intersection->direction());
         PlaneSurface plane(intersection->position() - offset, uvt);
 
         if (m_useStepPropagator == 99) {
-          const TrackSurfaceIntersection* newIntersectionSTEP =
+          std::optional<TrackSurfaceIntersection> newIntersectionSTEP =
               m_stepPropagator->intersectSurface(
-                  ctx, plane, intersection, qOverP,
+                  ctx, plane, *intersection, qOverP,
                   Trk::MagneticFieldProperties(Trk::FullField), Trk::muon);
           intersection =
-              m_intersector->intersectSurface(plane, intersection, qOverP);
+              m_intersector->intersectSurface(plane, *intersection, qOverP);
           if (newIntersectionSTEP && intersection) {
             //                    double dist =
             //                    1000.*(newIntersectionSTEP->position()-intersection->position()).mag();
@@ -1115,7 +1107,6 @@ void MaterialAllocator::indetMaterial(
             //                    if(dist>10.) std::cout << " iMat 3 ALARM
             //                    distance STEP and Intersector " << dist <<
             //                    std::endl;
-            delete newIntersectionSTEP;
           } else {
             //                    if(intersection) std::cout << " iMat 3 ALARM
             //                    STEP did not intersect! " << std::endl;
@@ -1123,10 +1114,10 @@ void MaterialAllocator::indetMaterial(
         } else {
           intersection = m_useStepPropagator >= 1
                              ? m_stepPropagator->intersectSurface(
-                                   ctx, plane, intersection, qOverP,
+                                   ctx, plane, *intersection, qOverP,
                                    m_stepField, Trk::muon)
                              : m_intersector->intersectSurface(
-                                   plane, intersection, qOverP);
+                                   plane, *intersection, qOverP);
         }
         Amg::Vector2D localPos;
         if (intersection &&
@@ -1139,7 +1130,6 @@ void MaterialAllocator::indetMaterial(
           startDirection = intersection->direction();
           startPosition = intersection->position();
         }
-        delete intersection;
       }
 
       // save the last indet measurement, signal any out-of-order meas
@@ -1352,14 +1342,13 @@ void MaterialAllocator::indetMaterial(
     MaterialEffectsOnTrack* meot = new MaterialEffectsOnTrack(
         materialEffects->thicknessInX0(), std::move(energyLoss),
         *(**m).surface(), typePattern);
-    const TrackSurfaceIntersection* intersection =
-        new TrackSurfaceIntersection((**m).intersection(FittedTrajectory));
+    const TrackSurfaceIntersection& intersection = (**m).intersection(FittedTrajectory);
     if (++m == measurements.end())
       --m;
     m = measurements.insert(
         m,
         new FitMeasurement(meot, Trk::ParticleMasses::mass[particleHypothesis],
-                           intersection->position()));
+                           intersection.position()));
     (**m).intersection(FittedTrajectory, intersection);
     (**m).qOverP(materialParameters->parameters()[Trk::qOverP]);
     (**m).setMaterialEffectsOwner();
@@ -1444,7 +1433,7 @@ void MaterialAllocator::indetMaterial(
         m, new FitMeasurement((**s).materialEffectsOnTrack(),
                               Trk::ParticleMasses::mass[particleHypothesis],
                               (**s).trackParameters()->position()));
-    const TrackSurfaceIntersection* intersection = new TrackSurfaceIntersection(
+    TrackSurfaceIntersection intersection = TrackSurfaceIntersection(
         (**s).trackParameters()->position(),
         (**s).trackParameters()->momentum().unit(), 0.);
     (**m).intersection(FittedTrajectory, intersection);

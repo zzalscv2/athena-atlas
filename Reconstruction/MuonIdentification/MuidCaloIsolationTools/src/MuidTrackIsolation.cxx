@@ -160,8 +160,8 @@ namespace Rec {
             } else if (cotTheta < -m_barrelCotTheta) {
                 surface = m_caloBackwardDisc.get();
             }
-            std::unique_ptr<const Trk::TrackSurfaceIntersection> caloIntersection(
-                m_intersector->intersectSurface(*surface, &idIntersection, qOverP));
+            std::optional<Trk::TrackSurfaceIntersection> caloIntersection(
+                m_intersector->intersectSurface(*surface, idIntersection, qOverP));
 
             // no intersection - should never happen !
             if (!caloIntersection) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017, 2019, 2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -28,7 +28,7 @@ StraightLineIntersector::StraightLineIntersector (const std::string&	type,
 						  const std::string&	name, 
 						  const IInterface*	parent)
     :	base_class		(type, name, parent),
-	m_countExtrapolations	(0)
+    m_countExtrapolations	(0)
 {
 }
 
@@ -36,14 +36,13 @@ StatusCode
 StraightLineIntersector::finalize()
 {
     ATH_MSG_DEBUG( "finalized after " << m_countExtrapolations << " extrapolations" );
-
     return StatusCode::SUCCESS;
 }
 
 /**IIntersector interface method for general Surface type */
-const Trk::TrackSurfaceIntersection*
+std::optional<Trk::TrackSurfaceIntersection>
 StraightLineIntersector::intersectSurface(const Surface&	surface,
-					  const TrackSurfaceIntersection*	trackIntersection,
+					  const TrackSurfaceIntersection&	trackIntersection,
 					  const double      	qOverP) const
 {
     const PlaneSurface* plane			= dynamic_cast<const PlaneSurface*>(&surface);
@@ -62,92 +61,91 @@ StraightLineIntersector::intersectSurface(const Surface&	surface,
     if (perigee)	return approachPerigeeSurface(*perigee,trackIntersection,qOverP);
     
     ATH_MSG_WARNING( " unrecognized Surface" );
-    return nullptr;
+    return std::nullopt;
 }
                                     
 /**IIntersector interface method for specific Surface type : PerigeeSurface */
-const Trk::TrackSurfaceIntersection*
+std::optional<Trk::TrackSurfaceIntersection>
 StraightLineIntersector::approachPerigeeSurface(const PerigeeSurface&	surface,
-						const TrackSurfaceIntersection*	trackIntersection,
+						const TrackSurfaceIntersection&	trackIntersection,
 						const double      	/*qOverP*/) const
 {
-  auto isect = std::make_unique<TrackSurfaceIntersection> (*trackIntersection);
+  TrackSurfaceIntersection isect = trackIntersection;
   ++m_countExtrapolations;
 
   // straight line distance along track to closest approach to line
   const Amg::Vector3D&	lineDirection = surface.transform().rotation().col(2);
-  double stepLength = distanceToLine (*isect, surface.center(),lineDirection);
-  step(*isect, stepLength);
+  double stepLength = distanceToLine (isect, surface.center(),lineDirection);
+  step(isect, stepLength);
     
-  return isect.release();
+  return isect;
 }
 	
 /**IIntersector interface method for specific Surface type : StraightLineSurface */
-const Trk::TrackSurfaceIntersection*
+std::optional<Trk::TrackSurfaceIntersection>
 StraightLineIntersector::approachStraightLineSurface(const StraightLineSurface& surface,
-						     const TrackSurfaceIntersection*	trackIntersection,
+						     const TrackSurfaceIntersection&	trackIntersection,
 						     const double      		/*qOverP*/) const
 {
-  auto isect = std::make_unique<TrackSurfaceIntersection> (*trackIntersection);
+  TrackSurfaceIntersection isect = trackIntersection;
   ++m_countExtrapolations;
 
   // straight line distance along track to closest approach to line
   const Amg::Vector3D&	lineDirection = surface.transform().rotation().col(2);
-  double stepLength = distanceToLine (*isect, surface.center(),lineDirection);
-  step(*isect, stepLength);
+  double stepLength = distanceToLine (isect, surface.center(),lineDirection);
+  step(isect, stepLength);
 
-  return isect.release();
+  return isect;
 }
             
 /**IIntersector interface method for specific Surface type : CylinderSurface */
-const Trk::TrackSurfaceIntersection*
+std::optional<Trk::TrackSurfaceIntersection>
 StraightLineIntersector::intersectCylinderSurface (const CylinderSurface&	surface,
-						   const TrackSurfaceIntersection*		trackIntersection,
+						   const TrackSurfaceIntersection&		trackIntersection,
 						   const double      		/*qOverP*/) const
 {
-  auto isect = std::make_unique<TrackSurfaceIntersection> (*trackIntersection);
+  TrackSurfaceIntersection isect = trackIntersection;
   ++m_countExtrapolations;
   
   // calculate straight line distance along track to intersect with cylinder radius
   double cylinderRadius = surface.globalReferencePoint().perp();
-  double stepLength = distanceToCylinder(*isect, cylinderRadius);
-  step(*isect, stepLength);
+  double stepLength = distanceToCylinder(isect, cylinderRadius);
+  step(isect, stepLength);
 
-  return isect.release();
+  return isect;
 }
 
 /**IIntersector interface method for specific Surface type : DiscSurface */
-const Trk::TrackSurfaceIntersection*
+std::optional<Trk::TrackSurfaceIntersection>
 StraightLineIntersector::intersectDiscSurface (const DiscSurface&	surface,
-					       const TrackSurfaceIntersection*	trackIntersection,
+					       const TrackSurfaceIntersection&	trackIntersection,
 					       const double      	/*qOverP*/) const
 {
-  auto isect = std::make_unique<TrackSurfaceIntersection> (*trackIntersection);
+  TrackSurfaceIntersection isect = trackIntersection;
   ++m_countExtrapolations;
 
   // straight line distance along track to intersect with disc
-  double stepLength = distanceToDisc(*isect, surface.center().z());
-  step(*isect, stepLength);
+  double stepLength = distanceToDisc(isect, surface.center().z());
+  step(isect, stepLength);
   
-  return isect.release();
+  return isect;
 }
 
 /**IIntersector interface method for specific Surface type : PlaneSurface */
-const Trk::TrackSurfaceIntersection*
+std::optional<Trk::TrackSurfaceIntersection>
 StraightLineIntersector::intersectPlaneSurface(const PlaneSurface&	surface,
-					       const TrackSurfaceIntersection*	trackIntersection,
+					       const TrackSurfaceIntersection&	trackIntersection,
 					       const double      	/*qOverP*/) const
 {
-  auto isect = std::make_unique<TrackSurfaceIntersection> (*trackIntersection);
+  TrackSurfaceIntersection isect = trackIntersection;
   ++m_countExtrapolations;
 
   // straight line distance along track to intersect with plane
-  double stepLength = distanceToPlane (*isect, surface.center(),surface.normal());
-  step(*isect, stepLength);
-  stepLength = distanceToPlane (*isect, surface.center(),surface.normal());
+  double stepLength = distanceToPlane (isect, surface.center(),surface.normal());
+  step(isect, stepLength);
+  stepLength = distanceToPlane (isect, surface.center(),surface.normal());
 
-  return isect.release();
+  return isect;
 }
-
 
 } // end of namespace
