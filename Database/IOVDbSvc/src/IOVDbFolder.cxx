@@ -251,7 +251,6 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     // Get a vector of pairs retrieved from crest
     //  <IOV_SINCE(string),HASH(string)>
     auto crestIOVs = cfunctions.getIovsForTag(completeTag);
-
     typedef std::pair<cool::ValidityKey,size_t> IOV2Index; // <CREST_IOV(converted to ull),Index_in_crestIOVs>
     std::vector<IOV2Index> iov2IndexVect;                  // Temporary vector for sorting IOV_SINCE values
     iov2IndexVect.reserve(crestIOVs.size());
@@ -283,35 +282,26 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     // End of the CREST IOV conversion routine
     // *** *** *** *** *** ***
 
-    if(vkey < iovHashVect[0].first.first) {
-      ATH_MSG_FATAL("Load cache failed for " << m_foldername << ". No valid IOV retrieved from the DB");
-      return false;
-    }
-
-    size_t indIOV = 0;
+    int indIOV = 0;
     for(const auto& iovhash : iovHashVect) {
       if(vkey >= iovhash.first.second) {
 	++indIOV;
 	continue;
       }
-      else if(vkey >= iovhash.first.first) {
-	break;
+      if(vkey < iovhash.first.first) {
+	ATH_MSG_WARNING("Load cache failed for " << m_foldername
+			<< ". VKey " << vkey << " is earlier than the start of the first IOV retrieved from the DB");
+	indIOV = -1;
       }
-      else {
-	ATH_MSG_FATAL("Load cache failed for " << m_foldername << ". No valid IOV retrieved from the DB");
-	return false;
-      }
+      break;
     }
 
-    if(indIOV==iovHashVect.size()) {
-      ATH_MSG_FATAL("Load cache failed for " << m_foldername << ". No valid IOV retrieved from the DB");
-      return false;
+    if(indIOV>=0) {
+      ATH_MSG_DEBUG("Found IOV for " << m_foldername << " and VKEY " << vkey << " "
+		   << iovHashVect[indIOV].first);
     }
 
-    ATH_MSG_DEBUG("Found IOV for " << m_foldername << " and VKEY " << vkey
-		  << " " << iovHashVect[indIOV].first);
-
-    std::string reply = cfunctions.getPayloadForHash(iovHashVect[indIOV].second);
+    std::string reply = indIOV==-1? std::string{} : cfunctions.getPayloadForHash(iovHashVect[indIOV].second);
 
     if (m_crestToFile){
      
@@ -345,13 +335,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
       }
     }
 
-    if (reply.empty()){
-      ATH_MSG_FATAL("Reading channel data from "<<m_foldername<<" failed.");
-      return false;
-    }
     //
-    std::istringstream ss(reply);
- 
     if (m_crest_tag != completeTag){
       m_crest_tag = completeTag;
       m_tag_info = cfunctions.getTagInfo(completeTag);
@@ -369,13 +353,16 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     }
 
     //basic folder now contains the info
-    Json2Cool inputJson(ss, basicFolder, specString, &(iovHashVect[indIOV].first));
-    if (basicFolder.empty()){
-      ATH_MSG_FATAL("Reading channel data from "<<m_foldername<<" failed.");
-      return false;
+    if(!reply.empty()) {
+      std::istringstream ss(reply);
+      Json2Cool inputJson(ss, basicFolder, specString, &(iovHashVect[indIOV].first));
+      if (basicFolder.empty()){
+        ATH_MSG_FATAL("Reading channel data from "<<m_foldername<<" failed.");
+        return false;
+      }
     }
   }
-  
+
   ATH_MSG_DEBUG( "Load cache for folder " << m_foldername << " validitykey " << vkey);
   // if not first time through, and limit not reached,and cache was not reset, 
   // and we are going forwards in time, double cachesize
@@ -451,7 +438,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     }
     // access COOL inside try/catch in case of using stale connection
     unsigned int attempts=0;
-    
+
     ATH_MSG_DEBUG( "loadCache: Expecting to see " << nChannelsExpected << " channels" );
     //
     while (attempts<2 && !retrievedone) {
@@ -768,7 +755,6 @@ IOVDbFolder::getAddress(const cool::ValidityKey reftime,
                              const unsigned int poolSvcContext,
                              std::unique_ptr<IOpaqueAddress>& address,
                              IOVRange& range, bool& poolPayloadReq) {
-
   ++m_ncacheread;
   // will produce strAddress and one pointer type depending on folder data
   std::string strAddress;
