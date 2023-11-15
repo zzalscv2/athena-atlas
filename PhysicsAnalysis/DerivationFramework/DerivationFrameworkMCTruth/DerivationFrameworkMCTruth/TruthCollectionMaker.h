@@ -40,7 +40,7 @@ namespace DerivationFramework {
       SG::ReadHandleKey<xAOD::TruthParticleContainer> m_particlesKey
          {this, "ParticlesKey", "TruthParticles", "ReadHandleKey for input TruthParticleContainer"};
       SG::WriteHandleKey<xAOD::TruthParticleContainer> m_outputParticlesKey
-         {this, "NewCollectionName", "", "WriteHandleKey for new TruthParticleContainer"};
+         {this, "NewCollectionName", "OutputTruthCollection", "WriteHandleKey for new TruthParticleContainer"};
       // Non-handle properties
       Gaudi::Property<std::string> m_partString
          {this, "ParticleSelectionString", "", "ExpressionEvaluation string for particle selection"};
@@ -52,21 +52,32 @@ namespace DerivationFramework {
          {this, "KeepNavigationInfo", true, "m_do_sherpa currently only works for W+jets"}; 
       // Decor handles
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_linkDecoratorKey
-         {this, "originalTruthParticle", "TruthParticles.originalTruthParticle", "Name of the decoration linking to the orgiginal truth particle"};
+         {this, "originalTruthParticle", m_outputParticlesKey, "originalTruthParticle", "Name of the decoration linking to the original truth particle"};
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_originDecoratorKey
-         {this, "classifierParticleOrigin", "TruthParticles.classifierParticleOrigin", "Name of the decoration which records the particle origin as determined by the MCTruthClassifier"};
+         {this, "classifierParticleOrigin", m_outputParticlesKey, "classifierParticleOrigin", "Name of the decoration which records the particle origin as determined by the MCTruthClassifier"};
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_typeDecoratorKey
-         {this, "classifierParticleType", "TruthParticles.classifierParticleType", "Name of the decoration which records the particle type as determined by the MCTruthClassifier"};
+         {this, "classifierParticleType", m_outputParticlesKey, "classifierParticleType", "Name of the decoration which records the particle type as determined by the MCTruthClassifier"};
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_outcomeDecoratorKey
-         {this, "classifierParticleOutCome", "TruthParticles.classifierParticleOutCome", "Name of the decoration which records the particle outcome as determined by the MCTruthClassifier"};
+         {this, "classifierParticleOutCome", m_outputParticlesKey, "classifierParticleOutCome", "Name of the decoration which records the particle outcome as determined by the MCTruthClassifier"};
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_classificationDecoratorKey
-         {this, "Classification", "TruthParticles.Classification", "Name of the decoration which records the particle classification as determined by the MCTruthClassifier"};
+         {this, "Classification", m_outputParticlesKey, "Classification", "Name of the decoration which records the particle classification as determined by the MCTruthClassifier"};
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_motherIDDecoratorKey
-         {this, "motherID", "TruthParticles.motherID", "Name of the decoration which records the ID of the particle's mother"};
+         {this, "motherID", m_outputParticlesKey, "motherID", "Name of the decoration which records the ID of the particle's mother"};
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_daughterIDDecoratorKey
-         {this, "daughterID", "TruthParticles.daughterID", "Name of the decoration which records the ID of the particle's daughter"};
+         {this, "daughterID", m_outputParticlesKey, "daughterID", "Name of the decoration which records the ID of the particle's daughter"};
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_hadronOriginDecoratorKey
-         {this, "TopHadronOriginFlag", "TruthParticles.TopHadronOriginFlag", "Name of the decoration which records the origin of hadrons from top decays"};
+         {this, "TopHadronOriginFlag", m_outputParticlesKey, "TopHadronOriginFlag", "Name of the decoration which records the origin of hadrons from top decays"};
+
+      // Decorations to be read from elements of the "TruthParticles" container 
+      // to be copied onto elements of the output container.
+      SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_originReadDecorKey
+         {this, "inputClassifierParticleOrigin", m_particlesKey, "classifierParticleOrigin", "Particle origin"};
+      SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_typeReadDecorKey
+         {this, "inputClassifierParticleType", m_particlesKey, "classifierParticleType", "Particle type"};
+      SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_outcomeReadDecorKey
+         {this, "inputClassifierParticleOutCome", m_particlesKey, "classifierParticleOutCome", "Particle outcome"};
+      SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_classificationReadDecorKey
+         {this, "inputClassification", m_particlesKey, "Classification", "Classification code"};
 
       ServiceHandle<StoreGateSvc> m_metaStore; //!< Handle on the metadata store for init
   }; 

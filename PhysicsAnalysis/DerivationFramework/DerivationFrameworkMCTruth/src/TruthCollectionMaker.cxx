@@ -62,22 +62,20 @@ StatusCode DerivationFramework::TruthCollectionMaker::initialize()
        ATH_CHECK( initializeParser(m_partString) );
     }
 
+    // Initialise read handle keys
+    ATH_CHECK(m_originReadDecorKey.initialize());
+    ATH_CHECK(m_typeReadDecorKey.initialize());
+    ATH_CHECK(m_outcomeReadDecorKey.initialize());
+    ATH_CHECK(m_classificationReadDecorKey.initialize());
+
     // Initialise decorator handle keys
-    m_linkDecoratorKey = m_particlesKey.key()+".originalTruthParticle";
     ATH_CHECK(m_linkDecoratorKey.initialize());
-    m_originDecoratorKey = m_outputParticlesKey.key()+".classifierParticleOrigin";
     ATH_CHECK(m_originDecoratorKey.initialize());
-    m_typeDecoratorKey = m_outputParticlesKey.key()+".classifierParticleType";
     ATH_CHECK(m_typeDecoratorKey.initialize());
-    m_outcomeDecoratorKey = m_outputParticlesKey.key()+".classifierParticleOutCome";
     ATH_CHECK(m_outcomeDecoratorKey.initialize());
-    m_classificationDecoratorKey = m_outputParticlesKey.key()+".Classification";
     ATH_CHECK(m_classificationDecoratorKey.initialize());
-    m_motherIDDecoratorKey = m_outputParticlesKey.key()+".motherID"; 
     ATH_CHECK(m_motherIDDecoratorKey.initialize());
-    m_daughterIDDecoratorKey = m_outputParticlesKey.key()+".daughterID";
     ATH_CHECK(m_daughterIDDecoratorKey.initialize());
-    m_hadronOriginDecoratorKey = m_outputParticlesKey.key()+".TopHadronOriginFlag";
     ATH_CHECK(m_hadronOriginDecoratorKey.initialize());
 
     return StatusCode::SUCCESS;
@@ -142,6 +140,12 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
     // Set up a mask with the same entries as the full collections
     unsigned int nParticles = truthParticles->size();
     m_ntotpart += nParticles;
+
+    // Set up decor readers
+    SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > originReadDecor(m_originReadDecorKey, ctx);  
+    SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeReadDecor(m_typeReadDecorKey, ctx);
+    SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeReadDecor(m_outcomeReadDecorKey, ctx);
+    SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationReadDecor(m_classificationReadDecorKey, ctx);
 
     // Set up decorators
     SG::WriteDecorHandle<xAOD::TruthParticleContainer, ElementLink<xAOD::TruthParticleContainer> > linkDecorator(m_linkDecoratorKey, ctx);
@@ -329,23 +333,28 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                     xTruthParticle->setPz(theParticle->pz());
                     xTruthParticle->setE(theParticle->e());
                     // Copy over the decorations if they are available
-                    if (theParticle->isAvailable<unsigned int>("classifierParticleType")) {
-                        typeDecorator(*xTruthParticle) = theParticle->auxdata< unsigned int >( "classifierParticleType" );
+                    if (typeReadDecor.isAvailable()) {
+                        typeDecorator(*xTruthParticle) = typeReadDecor(*theParticle);
                     } else {typeDecorator(*xTruthParticle) = 0;}
-                    if (theParticle->isAvailable<unsigned int>("classifierParticleOrigin")) {
-                        originDecorator(*xTruthParticle) = theParticle->auxdata< unsigned int >( "classifierParticleOrigin" );
+
+                    if (originReadDecor.isAvailable()) {
+                        originDecorator(*xTruthParticle) = originReadDecor(*theParticle);
                     } else {originDecorator(*xTruthParticle) = 0;}
-                    if (theParticle->isAvailable<unsigned int>("classifierParticleOutCome")) {
-                        outcomeDecorator(*xTruthParticle) = theParticle->auxdata< unsigned int >( "classifierParticleOutCome" );
+
+                    if (outcomeReadDecor.isAvailable()) {
+                        outcomeDecorator(*xTruthParticle) = outcomeReadDecor(*theParticle);
                     } else {outcomeDecorator(*xTruthParticle) = 0;}
-                    if (theParticle->isAvailable<unsigned int>("Classification")) {
-                        classificationDecorator(*xTruthParticle) = theParticle->auxdata< unsigned int >( "Classification" );
+
+                    if (classificationReadDecor.isAvailable()) {
+                        classificationDecorator(*xTruthParticle) = classificationReadDecor(*theParticle);
                     } else {classificationDecorator(*xTruthParticle) = 0;}
+
                     if (m_outputParticlesKey.key()=="TruthHFHadrons"){
                         if (theParticle->isAvailable<int>("TopHadronOriginFlag")) {
                             hadronOriginDecorator(*xTruthParticle) = theParticle->auxdata< int >( "TopHadronOriginFlag" );
                         } else {hadronOriginDecorator(*xTruthParticle) = 0;}
                     }
+
                     if(m_keep_navigation_info) linkDecorator(*xTruthParticle) = eltp;
                 }
             }
