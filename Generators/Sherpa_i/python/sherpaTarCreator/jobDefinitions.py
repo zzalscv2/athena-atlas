@@ -168,7 +168,6 @@ def mkIntegrateJob(options, ecm, prevJob):
 
     if os.environ["SHERPAVER"].startswith('3.'):
         # write base fragment into Base.yaml
-        job.cmds += [options.Sherpa_i.BaseFragment]
         job.cmds += ["cat > Base.yaml <<EOL"]
         job.cmds += [options.Sherpa_i.BaseFragment]
         job.cmds += ["EOL"]
@@ -229,6 +228,7 @@ def mkIntegrateJob(options, ecm, prevJob):
                                           +sftlayer+"/MCGenerators/lhapdf/*/${LCG_PLATFORM}/lib:" \
                                           +sftlayer+"/fastjet/*/${LCG_PLATFORM}/lib:" \
                                           +olpath+"/lib:"+olpath+"/proclib:" \
+                                          +options.sherpaInstallPath+"/lib64/SHERPA-MC:" \
                                           +options.sherpaInstallPath+"/lib/SHERPA-MC:$LD_LIBRARY_PATH"]
 
     cmdLineOpts = "EVENTS=0 FRAGMENTATION=Off MI_HANDLER=None"
