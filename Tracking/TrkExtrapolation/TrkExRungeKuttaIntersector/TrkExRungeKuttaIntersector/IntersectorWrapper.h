@@ -171,16 +171,16 @@ public:
   }
 
   // unimplemented intersectSurface
-  virtual const TrackSurfaceIntersection* intersectSurface(
+  virtual std::optional<TrackSurfaceIntersection> intersectSurface(
     const EventContext&,
     const Surface&,
-    const TrackSurfaceIntersection*,
+    const TrackSurfaceIntersection&,
     const double,
     const MagneticFieldProperties&,
     ParticleHypothesis) const override final
   {
     ATH_MSG_ERROR("Call to non-implemented intersectSurface");
-    return nullptr;
+    return std::nullopt;
   }
   /** unimplemented propagateM*/
   virtual std::unique_ptr<Trk::TrackParameters> propagateM(
@@ -230,7 +230,7 @@ private:
   {
     double m_charge;
     double m_qOverP;
-    std::unique_ptr<const TrackSurfaceIntersection> m_intersection;
+    std::optional<TrackSurfaceIntersection> m_intersection;
     std::unique_ptr<TrackParameters> m_parameters;
     Amg::Vector3D m_position;
     Amg::Vector3D m_momentum;
@@ -238,7 +238,7 @@ private:
     Cache()
       : m_charge{}
       , m_qOverP{}
-      , m_intersection{ nullptr }
+      , m_intersection{ std::nullopt }
       , m_parameters{ nullptr }
       , m_position{}
       , m_momentum{}

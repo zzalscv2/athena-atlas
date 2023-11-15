@@ -1860,7 +1860,7 @@ Trk::RungeKuttaPropagator::intersect(const ::EventContext& ctx,
   const Amg::Vector3D Glo(P[0], P[1], P[2]);
   const Amg::Vector3D Dir(P[3], P[4], P[5]);
   auto Int = Trk::IntersectionSolution();
-  Int.push_back(std::make_unique<const Trk::TrackSurfaceIntersection>(Glo, Dir, Step));
+  Int.push_back(std::make_optional<const Trk::TrackSurfaceIntersection>(Glo, Dir, Step));
   return Int;
 }
 

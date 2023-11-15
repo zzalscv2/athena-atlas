@@ -205,14 +205,12 @@ IntersectorWrapper::findIntersection (Cache& cache,
   cache.m_parameters= nullptr;
   cache.m_position	=  Amg::Vector3D(parameters.position());
   cache.m_qOverP	=  1./cache.m_momentum.mag();
-  cache.m_intersection = std::make_unique<TrackSurfaceIntersection>(cache.m_position,cache.m_momentum*cache.m_qOverP,0.);
+  cache.m_intersection = std::make_optional<TrackSurfaceIntersection>(cache.m_position,cache.m_momentum*cache.m_qOverP,0.);
   cache.m_qOverP	*= cache.m_charge;
 
-  const TrackSurfaceIntersection* oldIntersection = cache.m_intersection.release();
-  cache.m_intersection.reset( m_intersector->intersectSurface(surface,
-                                                              oldIntersection,
-                                                              cache.m_qOverP));
-  delete oldIntersection;
+  const TrackSurfaceIntersection oldIntersection = (*cache.m_intersection);
+  cache.m_intersection =
+      m_intersector->intersectSurface(surface, oldIntersection, cache.m_qOverP);
   if (! cache.m_intersection)
   {
     ATH_MSG_DEBUG( " no intersection found " );
@@ -236,7 +234,7 @@ IntersectorWrapper::findIntersection (Cache& cache,
                        << cache.m_intersection->pathlength() );
       }
     }
-    cache.m_intersection=nullptr;
+    cache.m_intersection=std::nullopt;
     return;
   }
 
@@ -246,7 +244,7 @@ IntersectorWrapper::findIntersection (Cache& cache,
                  << std::setw(9)  << std::setprecision(4) << cache.m_intersection->position().phi()
                  << std::setw(10) << std::setprecision(1) << cache.m_intersection->position().z()
                  << " momentum "
-                 << std::setw(9) << std::setprecision(3) << 1./fabs(cache.m_qOverP*Gaudi::Units::GeV) );
+                 << std::setw(9) << std::setprecision(3) << 1./std::abs(cache.m_qOverP*Gaudi::Units::GeV) );
 }
 
 } // end of namespace

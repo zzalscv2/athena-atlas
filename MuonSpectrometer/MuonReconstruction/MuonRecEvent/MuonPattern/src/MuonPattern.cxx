@@ -17,6 +17,6 @@ namespace Muon {
 
     MuonPattern::MuonPattern(const Amg::Vector3D& pos, const Amg::Vector3D& dir) : m_globalPosition(pos), m_globalDirection(dir) {}
 
-    MuonPattern::~MuonPattern() {}
+    MuonPattern::~MuonPattern() = default;
 
 }  // namespace Muon

@@ -10,7 +10,6 @@
 #define TRKEXUTILS_TRACKSURFACEINTERSECTION_H
 
 // Trk
-#include <atomic>
 #include <memory>
 
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -43,6 +42,7 @@ class TrackSurfaceIntersection final {
   /**Constructor*/
   TrackSurfaceIntersection(const Amg::Vector3D& pos, const Amg::Vector3D& dir,
                            double path);
+  TrackSurfaceIntersection() = default;
   /**Destructor*/
   ~TrackSurfaceIntersection() = default;
 

@@ -343,16 +343,16 @@ public:
   }
 
   /** unimplemented intersectSurface*/
-  virtual const Trk::TrackSurfaceIntersection* intersectSurface(
+  virtual std::optional<Trk::TrackSurfaceIntersection> intersectSurface(
     const EventContext&,
     const Surface&,
-    const TrackSurfaceIntersection*,
+    const TrackSurfaceIntersection&,
     const double,
     const MagneticFieldProperties&,
     ParticleHypothesis) const override final
   {
     ATH_MSG_ERROR("Call to non-implemented intersectSurface");
-    return nullptr;
+    return std::nullopt;
   }
 
   virtual Trk::ExtrapolationCode propagate(

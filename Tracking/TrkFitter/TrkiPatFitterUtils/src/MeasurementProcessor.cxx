@@ -57,7 +57,8 @@ MeasurementProcessor::MeasurementProcessor(
       m_sinPhi0(parameters->sinPhi()),
       m_sinTheta0(parameters->sinTheta()),
       // m_toroidTurn			(0.1),
-      m_vertexIntersect(nullptr),
+      m_vertexIntersect(),
+      m_intersectStartingValue(),
       m_x0(parameters->position().x()),
       m_y0(parameters->position().y()),
       m_z0(parameters->position().z())
@@ -114,10 +115,7 @@ MeasurementProcessor::MeasurementProcessor(
 }
 
 // destructor
-MeasurementProcessor::~MeasurementProcessor(void) {
-  delete m_intersectStartingValue;
-  delete m_vertexIntersect;
-}
+MeasurementProcessor::~MeasurementProcessor(void) = default;
 
 bool MeasurementProcessor::calculateDerivatives(void) {
   // extrapolate to all measurement surfaces to compute intersects for momentum
@@ -136,41 +134,41 @@ bool MeasurementProcessor::calculateDerivatives(void) {
     m_delta[DeltaPhi0] = 0.0001 + 2.0 * ptInv;
     m_delta[DeltaTheta0] = 0.0005 + 2.0 * ptInv;
 
-    const TrackSurfaceIntersection* intersection = m_vertexIntersect;
-    m_vertexIntersect = new TrackSurfaceIntersection(
+    TrackSurfaceIntersection intersection = m_vertexIntersect;
+    m_vertexIntersect = TrackSurfaceIntersection(
         Amg::Vector3D(m_x0 - m_delta[DeltaD0] * m_sinPhi0,
                       m_y0 + m_delta[DeltaD0] * m_cosPhi0, m_z0),
-        intersection->direction(), 0.);
-    if (!extrapolateToMeasurements(DeltaD0))
+        intersection.direction(), 0.);
+    if (!extrapolateToMeasurements(DeltaD0)) {
       return false;
-    delete m_vertexIntersect;
-    m_vertexIntersect = new TrackSurfaceIntersection(
+    }
+    m_vertexIntersect = TrackSurfaceIntersection(
         Amg::Vector3D(m_x0, m_y0, m_z0 + m_delta[DeltaZ0]),
-        intersection->direction(), 0.);
-    if (!extrapolateToMeasurements(DeltaZ0))
+        intersection.direction(), 0.);
+    if (!extrapolateToMeasurements(DeltaZ0)) {
       return false;
-    double sinTheta = intersection->direction().perp();
+    }
+    double sinTheta = intersection.direction().perp();
     double delCF = 1. - (0.5 * m_delta[DeltaPhi0] * m_delta[DeltaPhi0]);
     Amg::Vector3D direction(
         sinTheta * (m_cosPhi0 * delCF - m_sinPhi0 * m_delta[DeltaPhi0]),
         sinTheta * (m_sinPhi0 * delCF + m_cosPhi0 * m_delta[DeltaPhi0]),
-        intersection->direction().z());
-    delete m_vertexIntersect;
+        intersection.direction().z());
     m_vertexIntersect =
-        new TrackSurfaceIntersection(intersection->position(), direction, 0.);
-    if (!extrapolateToMeasurements(DeltaPhi0))
+        TrackSurfaceIntersection(intersection.position(), direction, 0.);
+    if (!extrapolateToMeasurements(DeltaPhi0)) {
       return false;
+    }
     double cotTheta =
-        m_vertexIntersect->direction().z() / sinTheta + m_delta[DeltaTheta0];
+        m_vertexIntersect.direction().z() / sinTheta + m_delta[DeltaTheta0];
     sinTheta = 1. / std::sqrt(1. + cotTheta * cotTheta);
     Amg::Vector3D directionTheta(sinTheta * m_cosPhi0, sinTheta * m_sinPhi0,
                                  sinTheta * cotTheta);
-    delete m_vertexIntersect;
-    m_vertexIntersect = new TrackSurfaceIntersection(intersection->position(),
-                                                     directionTheta, 0.);
-    if (!extrapolateToMeasurements(DeltaTheta0))
+    m_vertexIntersect =
+        TrackSurfaceIntersection(intersection.position(), directionTheta, 0.);
+    if (!extrapolateToMeasurements(DeltaTheta0)) {
       return false;
-    delete m_vertexIntersect;
+    }
     m_vertexIntersect = intersection;
   }
 
@@ -184,16 +182,16 @@ bool MeasurementProcessor::calculateDerivatives(void) {
     {
       const TrackSurfaceIntersection& intersection =
           m->intersection(FittedTrajectory);
-      Amg::Vector3D driftDirection = Amg::Vector3D(
-          m->sensorDirection().cross(intersection.direction()));
+      Amg::Vector3D driftDirection =
+          Amg::Vector3D(m->sensorDirection().cross(intersection.direction()));
       driftDirection = driftDirection.unit();
       m->minimizationDirection(driftDirection);
       driftDerivatives(m->numberDoF(), *m);
     } else if (m->isVertex()) {
       const TrackSurfaceIntersection& intersection =
           m->intersection(FittedTrajectory);
-      Amg::Vector3D minimizationDirection = Amg::Vector3D(
-          m->sensorDirection().cross(intersection.direction()));
+      Amg::Vector3D minimizationDirection =
+          Amg::Vector3D(m->sensorDirection().cross(intersection.direction()));
       minimizationDirection = minimizationDirection.unit();
       m->minimizationDirection(minimizationDirection);
       m->derivative(D0,
@@ -247,7 +245,6 @@ bool MeasurementProcessor::calculateFittedTrajectory(int /*iteration*/) {
   m_z0 = m_parameters->position().z();
 
   // start with intersection placed at perigee
-  delete m_vertexIntersect;
   m_vertexIntersect = m_parameters->intersection();
 
   // increments for momentum derivatives (Mev^-1 : X-over at 30GeV)
@@ -458,9 +455,7 @@ void MeasurementProcessor::fieldIntegralUncertainty(MsgStream& log,
     sinTheta = 1. / std::sqrt(1. + cotTheta * cotTheta);
     startDirection = Amg::Vector3D(sinTheta * cosPhi, sinTheta * sinPhi,
                                    sinTheta * cotTheta);
-    delete m_vertexIntersect;
-    m_vertexIntersect =
-        new TrackSurfaceIntersection(vertex, startDirection, 0.);
+    m_vertexIntersect = TrackSurfaceIntersection(vertex, startDirection, 0.);
     if (!extrapolateToMeasurements(DeltaPhi0))
       return;
 
@@ -507,9 +502,7 @@ void MeasurementProcessor::fieldIntegralUncertainty(MsgStream& log,
     cotTheta -= covariance(1, 3) / (shiftZ0 * sinTheta * sinTheta);
     startDirection = Amg::Vector3D(sinTheta * cosPhi, sinTheta * sinPhi,
                                    sinTheta * cotTheta);
-    delete m_vertexIntersect;
-    m_vertexIntersect =
-        new TrackSurfaceIntersection(vertex, startDirection, 0.);
+    m_vertexIntersect = TrackSurfaceIntersection(vertex, startDirection, 0.);
     if (!extrapolateToMeasurements(DeltaD0))
       return;
 
@@ -722,8 +715,8 @@ void MeasurementProcessor::clusterDerivatives(int derivativeFlag,
              intersection.position();
     measurement.derivative2(
         Phi0, weight * sensorDirection.dot(offset) / m_delta[DeltaPhi0]);
-    // 	offset			= measurement.intersection(DeltaTheta0).position() -
-    // intersection.position(); 	measurement.derivative2(Theta0,
+    // 	offset			= measurement.intersection(DeltaTheta0).position()
+    // - intersection.position(); 	measurement.derivative2(Theta0,
     // 				weight*sensorDirection.dot(offset)/m_delta[DeltaTheta0]);
   } else {
     measurement.derivative2(D0, m_cosPhi0 * weightedProjection.y() -
@@ -802,13 +795,14 @@ void MeasurementProcessor::driftDerivatives(int derivativeFlag,
       // measurement.intersection(DeltaTheta0).position() -
       // intersection.position();
       // 	    measurement.derivative(Theta0,weight*driftDirection.dot(offset)/m_delta[DeltaTheta0]);
-    } else if (m_phiInstability
-               // 		 &&
-               // std::abs(intersection.direction().z()*m_vertexIntersect->direction().perp()
-               // -
-               // 			 m_vertexIntersect->direction().z()*intersection.direction().perp())
-               // > m_toroidTurn
-               && !measurement.isPseudo()) {
+    } else if (
+        m_phiInstability
+        // 		 &&
+        // std::abs(intersection.direction().z()*m_vertexIntersect->direction().perp()
+        // -
+        // 			 m_vertexIntersect->direction().z()*intersection.direction().perp())
+        // > m_toroidTurn
+        && !measurement.isPseudo()) {
       measurement.derivative(D0, 0.);
       measurement.derivative(Phi0, 0.);
     } else {
@@ -981,23 +975,23 @@ bool MeasurementProcessor::extrapolateToMeasurements(ExtrapolationType type) {
   // extrapolate to all measurement surfaces
   int nScat = 0;
   double qOverP = m_qOverP[type];
-  const TrackSurfaceIntersection* intersection = m_vertexIntersect;
+  std::optional<TrackSurfaceIntersection> intersection = m_vertexIntersect;
   const Surface* surface = nullptr;
   const EventContext& ctx = Gaudi::Hive::currentContext();
   // careful: use RungeKutta for extrapolation to vertex measurement
   std::vector<FitMeasurement*>::iterator m = m_measurements.begin();
   if ((**m).isVertex()) {
     if (m_useStepPropagator == 99) {
-      const TrackSurfaceIntersection* newIntersectionSTEP =
+      std::optional<TrackSurfaceIntersection> newIntersectionSTEP =
           m_stepPropagator->intersectSurface(ctx, *(**m).surface(),
-                                             intersection, qOverP, m_stepField,
+                                             *intersection, qOverP, m_stepField,
                                              Trk::muon);
       double exdist = 0;
       if (newIntersectionSTEP)
         exdist =
             (newIntersectionSTEP->position() - intersection->position()).mag();
       intersection = m_rungeKuttaIntersector->intersectSurface(
-          *(**m).surface(), intersection, qOverP);
+          *(**m).surface(), *intersection, qOverP);
       if (newIntersectionSTEP) {
         double dist =
             1000. *
@@ -1007,7 +1001,6 @@ bool MeasurementProcessor::extrapolateToMeasurements(ExtrapolationType type) {
         if (dist > 10.)
           std::cout << " iMeasProc 1 ALARM distance STEP and Intersector "
                     << dist << " ex dist " << exdist << std::endl;
-        delete newIntersectionSTEP;
       } else {
         if (intersection)
           std::cout << " iMeasProc 1 ALARM STEP did not intersect! "
@@ -1016,14 +1009,15 @@ bool MeasurementProcessor::extrapolateToMeasurements(ExtrapolationType type) {
     } else {
       intersection = m_useStepPropagator == 0
                          ? m_rungeKuttaIntersector->intersectSurface(
-                               *(**m).surface(), intersection, qOverP)
+                               *(**m).surface(), *intersection, qOverP)
                          : m_stepPropagator->intersectSurface(
-                               ctx, *(**m).surface(), intersection, qOverP,
+                               ctx, *(**m).surface(), *intersection, qOverP,
                                m_stepField, Trk::muon);
     }
     surface = (**m).surface();
-    if (!intersection)
+    if (!intersection) {
       return false;
+    }
     (**m).intersection(type, intersection);
     if (type == FittedTrajectory)
       (**m).qOverP(qOverP);
@@ -1035,7 +1029,7 @@ bool MeasurementProcessor::extrapolateToMeasurements(ExtrapolationType type) {
       if (type == DeltaQOverP0)
         continue;
     } else if (type == DeltaQOverP1) {
-      intersection = &(**m).intersection(FittedTrajectory);
+      intersection = (**m).intersection(FittedTrajectory);
       qOverP = (**m).qOverP();
       if ((**m).numberDoF() && (**m).isScatterer())
         ++nScat;
@@ -1045,9 +1039,9 @@ bool MeasurementProcessor::extrapolateToMeasurements(ExtrapolationType type) {
     // to avoid rounding: copy intersection if at previous surface
     if ((**m).surface() != surface) {
       if (m_useStepPropagator == 99) {
-        const TrackSurfaceIntersection* newIntersectionSTEP =
+        std::optional<TrackSurfaceIntersection> newIntersectionSTEP =
             m_stepPropagator->intersectSurface(ctx, *(**m).surface(),
-                                               intersection, qOverP,
+                                               *intersection, qOverP,
                                                m_stepField, Trk::muon);
         double exdist = 0;
         if (newIntersectionSTEP)
@@ -1055,7 +1049,7 @@ bool MeasurementProcessor::extrapolateToMeasurements(ExtrapolationType type) {
                        .mag();
 
         intersection = m_intersector->intersectSurface(*(**m).surface(),
-                                                       intersection, qOverP);
+                                                       *intersection, qOverP);
         if (newIntersectionSTEP) {
           double dist = 1000. * (newIntersectionSTEP->position() -
                                  intersection->position())
@@ -1065,7 +1059,6 @@ bool MeasurementProcessor::extrapolateToMeasurements(ExtrapolationType type) {
           if (dist > 10.)
             std::cout << " iMeasProc 2 ALARM distance STEP and Intersector "
                       << dist << " ex dist " << exdist << std::endl;
-          delete newIntersectionSTEP;
         } else {
           if (intersection)
             std::cout << " iMeasProc 2 ALARM STEP did not intersect! "
@@ -1074,17 +1067,18 @@ bool MeasurementProcessor::extrapolateToMeasurements(ExtrapolationType type) {
       } else {
         intersection = m_useStepPropagator == 0
                            ? m_intersector->intersectSurface(
-                                 *(**m).surface(), intersection, qOverP)
+                                 *(**m).surface(), *intersection, qOverP)
                            : m_stepPropagator->intersectSurface(
-                                 ctx, *(**m).surface(), intersection, qOverP,
+                                 ctx, *(**m).surface(), *intersection, qOverP,
                                  m_stepField, Trk::muon);
       }
       surface = (**m).surface();
     } else {
-      intersection = new TrackSurfaceIntersection(*intersection);
+      intersection = TrackSurfaceIntersection(*intersection);
     }
-    if (!intersection)
+    if (!intersection) {
       return false;
+    }
 
     // alignment and material effects (energy loss and trajectory deviations)
     if ((**m).isEnergyDeposit() || (**m).isScatterer()) {
@@ -1098,9 +1092,8 @@ bool MeasurementProcessor::extrapolateToMeasurements(ExtrapolationType type) {
             qOverP = m_qOverPafterCalo;
             (**m).qOverP(qOverP);
           } else if (type == DeltaQOverP1) {
-            delete intersection;
-            intersection = new TrackSurfaceIntersection(
-                (**m).intersection(FittedTrajectory));
+            intersection =
+                TrackSurfaceIntersection((**m).intersection(FittedTrajectory));
             qOverP = m_qOverPafterCalo + m_delta[DeltaQOverP1];
           } else {
             qOverP = m_qOverPafterCalo;
@@ -1128,11 +1121,9 @@ bool MeasurementProcessor::extrapolateToMeasurements(ExtrapolationType type) {
                             (1. + trackDirection.z() * tanDeltaTheta);
           trackDirection = Amg::Vector3D(cosPhi, sinPhi, cotTheta);
           trackDirection = trackDirection.unit();
-          const TrackSurfaceIntersection* oldIntersection = intersection;
-          intersection = new TrackSurfaceIntersection(
-              intersection->position(), trackDirection,
-              intersection->pathlength());
-          delete oldIntersection;
+          intersection =
+              TrackSurfaceIntersection(intersection->position(), trackDirection,
+                                       intersection->pathlength());
           ++nScat;
         }
       }

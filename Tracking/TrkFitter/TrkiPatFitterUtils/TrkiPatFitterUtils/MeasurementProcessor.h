@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -12,14 +12,14 @@
 
 //<<<<<< INCLUDES                                                       >>>>>>
 
-#include <list>
+#include <optional>
 #include <vector>
 
 #include "EventPrimitives/EventPrimitives.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "TrkExUtils/TrackSurfaceIntersection.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
 #include "TrkiPatFitterUtils/ExtrapolationType.h"
-
 //<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
 namespace Trk {
@@ -27,7 +27,6 @@ class FitMeasurement;
 class FitParameters;
 class IIntersector;
 class IPropagator;
-class TrackSurfaceIntersection;
 
 class MeasurementProcessor {
  public:
@@ -67,7 +66,6 @@ class MeasurementProcessor {
   double m_energyResidual;
   int m_firstScatteringParameter;
   // bool				m_havePhiPseudo;
-  const TrackSurfaceIntersection* m_intersectStartingValue;
   const ToolHandle<IIntersector>& m_intersector;
   double m_largeDeltaD0;
   double m_largeDeltaPhi0;
@@ -86,7 +84,8 @@ class MeasurementProcessor {
   double m_sinPhi0;
   double m_sinTheta0;
   // double				m_toroidTurn;
-  const TrackSurfaceIntersection* m_vertexIntersect;
+  TrackSurfaceIntersection m_vertexIntersect;
+  TrackSurfaceIntersection m_intersectStartingValue;
   double m_x0;
   double m_y0;
   double m_z0;

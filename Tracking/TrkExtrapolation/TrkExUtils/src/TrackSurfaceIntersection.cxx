@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -30,6 +30,7 @@ Trk::TrackSurfaceIntersection::TrackSurfaceIntersection(
   : m_position(other.m_position)
   , m_direction(other.m_direction)
   , m_pathlength(other.m_pathlength)
+  , m_cache(other.m_cache ? other.m_cache->clone() : nullptr)
 {
 }
 
@@ -50,7 +51,7 @@ Trk::TrackSurfaceIntersection::operator=(const TrackSurfaceIntersection& other)
     m_position = other.m_position;
     m_direction = other.m_direction;
     m_pathlength = other.m_pathlength;
-    m_cache = other.m_cache->clone();
+    m_cache = other.m_cache ? other.m_cache->clone() : nullptr;
   }
   return *this;
 }

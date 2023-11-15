@@ -192,8 +192,8 @@ void FitParameters::fitMomentum(bool value) {
   m_fitMomentum = value;
 }
 
-TrackSurfaceIntersection* FitParameters::intersection(void) const {
-  return new TrackSurfaceIntersection(
+TrackSurfaceIntersection FitParameters::intersection(void) const {
+  return TrackSurfaceIntersection(
       m_position,
       Amg::Vector3D(m_cosPhi * m_sinTheta, m_sinPhi * m_sinTheta, m_cosTheta),
       0.);

@@ -59,28 +59,28 @@ void test_plane (Trk::IIntersector& tool)
   Trk::TrackSurfaceIntersection isect0
     (Amg::Vector3D{0,0,0}, unit(1,1,1), 0);
 
-  std::unique_ptr<const Trk::TrackSurfaceIntersection> isect1
-    (tool.intersectSurface (plane1, &isect0, 1));
+  std::optional<Trk::TrackSurfaceIntersection> isect1
+    (tool.intersectSurface (plane1, isect0, 1));
   assertVec3D (isect1->position(), {50, 50, 50});
   assertVec3D (isect1->direction(), {1/sqrt(3.), 1/sqrt(3.), 1/sqrt(3.)});
   FLOAT_EQassert (isect1->pathlength(), 50*sqrt(3.));
 
-  std::unique_ptr<const Trk::TrackSurfaceIntersection> isect1a
-    (tool.intersectSurface (plane2, isect1.get(), 1));
+  std::optional<Trk::TrackSurfaceIntersection> isect1a
+    (tool.intersectSurface (plane2, *isect1, 1));
   assertVec3D (isect1a->position(), {100, 100, 100});
   assertVec3D (isect1a->direction(), {1/sqrt(3.), 1/sqrt(3.), 1/sqrt(3.)});
   FLOAT_EQassert (isect1a->pathlength(), 100*sqrt(3.));
 
   Trk::TrackSurfaceIntersection isect2
     (Amg::Vector3D{0,0,0}, unit(0,0,-1), 0);
-  std::unique_ptr<const Trk::TrackSurfaceIntersection> isect3
-    (tool.intersectSurface (plane1, &isect2, 1));
+  std::optional<Trk::TrackSurfaceIntersection> isect3
+    (tool.intersectSurface (plane1, isect2, 1));
   assertVec3D (isect3->position(), {0, 0, 100});
   assertVec3D (isect3->direction(), {0, 0, -1});
   FLOAT_EQassert (isect3->pathlength(), -100);
 
-  std::unique_ptr<const Trk::TrackSurfaceIntersection> isect3a
-    (tool.intersectSurface (plane2, isect3.get(), 1));
+  std::optional<Trk::TrackSurfaceIntersection> isect3a
+    (tool.intersectSurface (plane2, *isect3, 1));
   assertVec3D (isect3a->position(), {0, 0, 200});
   assertVec3D (isect3a->direction(), {0, 0, -1});
   FLOAT_EQassert (isect3a->pathlength(), -200);
@@ -99,14 +99,14 @@ void test_line (Trk::IIntersector& tool)
   Trk::TrackSurfaceIntersection isect0
     (Amg::Vector3D{0,0,0}, unit(1,0,1), 0);
 
-  std::unique_ptr<const Trk::TrackSurfaceIntersection> isect1
-    (tool.intersectSurface (line1, &isect0, 1));
+  std::optional<Trk::TrackSurfaceIntersection> isect1
+    (tool.intersectSurface (line1, isect0, 1));
   assertVec3D (isect1->position(), {50, 0, 50});
   assertVec3D (isect1->direction(), {1/sqrt(2.), 0, 1/sqrt(2.)});
   FLOAT_EQassert (isect1->pathlength(), 50*sqrt(2.));
 
-  std::unique_ptr<const Trk::TrackSurfaceIntersection> isect2
-    (tool.intersectSurface (line2, isect1.get(), 1));
+  std::optional<Trk::TrackSurfaceIntersection> isect2
+    (tool.intersectSurface (line2, *isect1, 1));
   assertVec3D (isect2->position(), {100, 0, 100});
   assertVec3D (isect2->direction(), {1/sqrt(2.), 0, 1/sqrt(2.)});
   FLOAT_EQassert (isect2->pathlength(), 100*sqrt(2.));
@@ -125,14 +125,14 @@ void test_cylinder (Trk::IIntersector& tool)
   Trk::TrackSurfaceIntersection isect0
     (Amg::Vector3D{0,0,0}, unit(1,0,1), 0);
 
-  std::unique_ptr<const Trk::TrackSurfaceIntersection> isect1
-    (tool.intersectSurface (cyl1, &isect0, 1));
+  std::optional<Trk::TrackSurfaceIntersection> isect1
+    (tool.intersectSurface (cyl1, isect0, 1));
   assertVec3D (isect1->position(), {50, 0, 50});
   assertVec3D (isect1->direction(), {1/sqrt(2.), 0, 1/sqrt(2.)});
   FLOAT_EQassert (isect1->pathlength(), 50*sqrt(2.));
 
-  std::unique_ptr<const Trk::TrackSurfaceIntersection> isect2
-    (tool.intersectSurface (cyl2, isect1.get(), 1));
+  std::optional<Trk::TrackSurfaceIntersection> isect2
+    (tool.intersectSurface (cyl2, *isect1, 1));
   assertVec3D (isect2->position(), {200, 0, 200});
   assertVec3D (isect2->direction(), {1/sqrt(2.), 0, 1/sqrt(2.)});
   FLOAT_EQassert (isect2->pathlength(), 200*sqrt(2.));
@@ -152,14 +152,14 @@ void test_disc (Trk::IIntersector& tool)
   Trk::TrackSurfaceIntersection isect0
     (Amg::Vector3D{0,0,0}, unit(1,0,1), 0);
 
-  std::unique_ptr<const Trk::TrackSurfaceIntersection> isect1
-    (tool.intersectSurface (disc1, &isect0, 1));
+  std::optional<Trk::TrackSurfaceIntersection> isect1
+    (tool.intersectSurface (disc1, isect0, 1));
   assertVec3D (isect1->position(), {75, 0, 75});
   assertVec3D (isect1->direction(), {1/sqrt(2.), 0, 1/sqrt(2.)});
   FLOAT_EQassert (isect1->pathlength(), 75*sqrt(2.));
 
-  std::unique_ptr<const Trk::TrackSurfaceIntersection> isect2
-    (tool.intersectSurface (disc2, isect1.get(), 1));
+  std::optional<Trk::TrackSurfaceIntersection> isect2
+    (tool.intersectSurface (disc2, *isect1, 1));
   assertVec3D (isect2->position(), {200, 0, 200});
   assertVec3D (isect2->direction(), {1/sqrt(2.), 0, 1/sqrt(2.)});
   FLOAT_EQassert (isect2->pathlength(), 200*sqrt(2.));
@@ -179,14 +179,14 @@ void test_perigee (Trk::IIntersector& tool)
   Trk::TrackSurfaceIntersection isect0
     (Amg::Vector3D{0,0,0}, unit(1,0,1), 0);
 
-  std::unique_ptr<const Trk::TrackSurfaceIntersection> isect1
-    (tool.intersectSurface (perigee1, &isect0, 1));
+  std::optional<Trk::TrackSurfaceIntersection> isect1
+    (tool.intersectSurface (perigee1, isect0, 1));
   assertVec3D (isect1->position(), {40, 0, 40});
   assertVec3D (isect1->direction(), {1/sqrt(2.), 0, 1/sqrt(2.)});
   FLOAT_EQassert (isect1->pathlength(), 40*sqrt(2.));
 
-  std::unique_ptr<const Trk::TrackSurfaceIntersection> isect2
-    (tool.intersectSurface (perigee2, isect1.get(), 1));
+  std::optional<Trk::TrackSurfaceIntersection> isect2
+    (tool.intersectSurface (perigee2, *isect1, 1));
   assertVec3D (isect2->position(), {100, 0, 100});
   assertVec3D (isect2->direction(), {1/sqrt(2.), 0, 1/sqrt(2.)});
   FLOAT_EQassert (isect2->pathlength(), 100*sqrt(2.));

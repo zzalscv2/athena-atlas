@@ -560,24 +560,23 @@ void iPatFitter::addMeasurements(const EventContext& ctx,
   Amg::Vector3D startDirection = parameters.direction();
   Amg::Vector3D startPosition = parameters.position();
   ExtrapolationType type = FittedTrajectory;
-  std::unique_ptr<const TrackSurfaceIntersection> intersection{
-      parameters.intersection()};
+  TrackSurfaceIntersection intersection = parameters.intersection();
 
-  const TrackSurfaceIntersection* startIntersection{intersection.get()};
+  TrackSurfaceIntersection startIntersection = intersection ;
   int hit = measurements.size();
   for (MeasurementSet::const_iterator m = measurementSet.begin();
        m != measurementSet.end(); ++m, ++hit) {
-    std::unique_ptr<const TrackSurfaceIntersection> newIntersection{
+    std::optional<TrackSurfaceIntersection> newIntersection{
         m_stepPropagator->intersectSurface(ctx, (**m).associatedSurface(),
                                            startIntersection, qOverP,
                                            m_stepField, Trk::muon)};
     if (newIntersection) {
-      intersection = std::move(newIntersection);
+      intersection = std::move(*newIntersection);
 
       // check if ordering OK
       if (!reorder) {
         double distance =
-            startDirection.dot(intersection->position() - startPosition);
+            startDirection.dot(intersection.position() - startPosition);
         Amg::Vector3D positionMst = (**m).globalPosition();
         double distanceR = std::sqrt((positionMst.x() - startPosition.x()) *
                                          (positionMst.x() - startPosition.x()) +
@@ -606,11 +605,11 @@ void iPatFitter::addMeasurements(const EventContext& ctx,
       continue;      
     }
     auto measurement = std::make_unique<FitMeasurement>(hit, nullptr, *m);
-    measurement->intersection(type, intersection.release());
+    measurement->intersection(type, intersection);
     measurement->qOverP(qOverP);
     measurements.push_back(measurement.release());
     // remember the last intersection for the next loop iteration
-    startIntersection = &(measurements.back()->intersection(type));
+    startIntersection = (measurements.back()->intersection(type));
   }
 
   // reorder if necessary
@@ -663,8 +662,8 @@ bool iPatFitter::addMeasurements(
   const bool skipVertexMeasurement = !measurements.empty();
   const Amg::Vector3D startDirection = parameters.direction();
   const Amg::Vector3D& startPosition = parameters.position();
-  const TrackSurfaceIntersection* vertex = parameters.intersection();
-  const TrackSurfaceIntersection* intersection = vertex;
+  const TrackSurfaceIntersection& vertex = parameters.intersection();
+  TrackSurfaceIntersection intersection = vertex;
   bool measurementsFlipped = false;
   double qOverP = parameters.qOverP();
   const ExtrapolationType type = FittedTrajectory;
@@ -834,10 +833,10 @@ bool iPatFitter::addMeasurements(
         }
       }
       qOverP = s.trackParameters()->parameters()[Trk::qOverP];
-      intersection = new TrackSurfaceIntersection(
+      intersection = TrackSurfaceIntersection(
           s.trackParameters()->position(), direction, 0.);
     } else if (surface) {
-      const TrackSurfaceIntersection* newIntersection =
+      std::optional<TrackSurfaceIntersection> newIntersection =
           m_stepPropagator->intersectSurface(ctx, *surface, intersection,
                                              qOverP, m_stepField, Trk::muon);
 
@@ -847,19 +846,15 @@ bool iPatFitter::addMeasurements(
         continue;
       }
 
-      if (newIntersection == intersection) {
-        intersection = new TrackSurfaceIntersection(*intersection);
-      } else {
-        intersection = newIntersection;
-      }
+      intersection = std::move(*newIntersection);
       if (s.materialEffectsOnTrack()) {
-        const Amg::Vector3D& position = intersection->position();
+        const Amg::Vector3D& position = intersection.position();
         bool calo = (!m_indetVolume->inside(position) &&
                      m_calorimeterVolume->inside(position));
         measurement1 = std::make_unique<FitMeasurement>(
             s.materialEffectsOnTrack(),
             Trk::ParticleMasses::mass[particleHypothesis],
-            intersection->position(), qOverP, calo);
+            intersection.position(), qOverP, calo);
         if (!calo && !haveMaterial && haveMeasurement) {
           haveMaterial = true;
         }
@@ -874,7 +869,7 @@ bool iPatFitter::addMeasurements(
     // check if ordering OK
     if (!reorder) {
       double distance =
-          startDirection.dot(intersection->position() - startPosition);
+          startDirection.dot(intersection.position() - startPosition);
       Amg::Vector3D positionMst = startPosition;
       if (s.measurementOnTrack()) {
         positionMst = s.measurementOnTrack()->globalPosition();
@@ -906,9 +901,7 @@ bool iPatFitter::addMeasurements(
     // insert measurement(s) in list
     if (measurement1) {
       if (measurement2) {
-        const TrackSurfaceIntersection* intersectionCopy =
-            new TrackSurfaceIntersection(*intersection);
-
+        TrackSurfaceIntersection intersectionCopy = intersection;
         measurement1->intersection(type, intersectionCopy);
         measurements.push_back(measurement1.release());
       } else {
@@ -934,7 +927,6 @@ bool iPatFitter::addMeasurements(
   }
 
   // flag whether material has already been allocated
-  delete vertex;
   return haveMaterial;
 }
 

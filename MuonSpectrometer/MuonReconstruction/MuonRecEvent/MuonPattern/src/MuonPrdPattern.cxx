@@ -20,5 +20,5 @@ namespace Muon {
     MuonPrdPattern::MuonPrdPattern(const Amg::Vector3D& pos, const Amg::Vector3D& dir, const PrdVector& prds) :
         MuonPattern(pos, dir), m_prds(prds) {}
 
-    MuonPrdPattern::~MuonPrdPattern() {}
+    MuonPrdPattern::~MuonPrdPattern() = default;
 }  // namespace Muon

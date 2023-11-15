@@ -67,7 +67,7 @@ class FitParameters {
   bool fitMomentum(void) const;
   void fitMomentum(bool value);
   const Amg::MatrixX* fullCovariance(void) const;
-  TrackSurfaceIntersection* intersection(void) const;
+  TrackSurfaceIntersection  intersection(void) const;
   int numberAlignments(void) const;
   void numberAlignments(int numberAlignments);
   int numberOscillations(void) const;
