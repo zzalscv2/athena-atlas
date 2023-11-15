@@ -67,6 +67,10 @@ inline Amg::Vector3D MdtReadoutElement::readOutPos(const ActsGeometryContext& ct
                                                    const Identifier& measId) const{
     return readOutPos(ctx, measurementHash(measId));
 }
+inline  Amg::Vector3D MdtReadoutElement::highVoltPos(const ActsGeometryContext& ctx,
+                                                     const Identifier& measId) const {
+    return highVoltPos(ctx, measurementHash(measId));
+}
 inline double MdtReadoutElement::distanceToReadout(const ActsGeometryContext& ctx,
                                                    const Identifier& measId,
                                                    const Amg::Vector3D& globPoint) const {

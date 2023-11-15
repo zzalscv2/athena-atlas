@@ -126,6 +126,11 @@ class MdtReadoutElement : public MuonReadoutElement {
 
     Amg::Vector3D readOutPos(const ActsGeometryContext& ctx,
                              const IdentifierHash& measId) const;
+    /// Returns the global position of the High Voltage connectors
+    Amg::Vector3D highVoltPos(const ActsGeometryContext& ctx,
+                              const Identifier& measId) const;
+    Amg::Vector3D highVoltPos(const ActsGeometryContext& ctx,
+                              const IdentifierHash& measId) const;
     /// Returns the distance along the wire from the readout card
     /// The distance is given as the delta z of the readout card in the local tube frame
     double distanceToReadout(const ActsGeometryContext& ctx,

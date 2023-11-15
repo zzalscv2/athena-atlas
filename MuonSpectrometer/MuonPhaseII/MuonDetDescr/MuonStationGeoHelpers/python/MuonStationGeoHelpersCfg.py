@@ -4,6 +4,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def MuonLaySurfaceToolCfg(flags, name = "MuonStationLayerSurfaceTool", **kwargs):
     result = ComponentAccumulator()
+    kwargs.setdefault("ChamberBuilder", result.getPrimaryAndMerge(ActsMuonChamberToolCfg(flags)))
     the_tool = CompFactory.MuonGMR4.MuonStationLayerSurfaceTool(name, **kwargs)
     result.addPublicTool(the_tool, primary = True)
     return result

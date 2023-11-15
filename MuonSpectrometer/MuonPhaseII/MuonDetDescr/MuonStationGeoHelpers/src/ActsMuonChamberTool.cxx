@@ -37,12 +37,26 @@ namespace MuonGMR4{
      /// Next loop over all volumes and group them by their mother
      std::map<PVConstLink, ReadoutSet> chamberConstituents{};
      for (const MuonReadoutElement* readOut: allElements) {
+        const Identifier id = readOut->identify();
         chamberConstituents[readOut->getMaterialGeom()->getParent()].push_back(readOut);
      }
      for (auto& [motherVol, readoutEles] : chamberConstituents){
         /// Sort the chambers within the mother such that mdts are sorted first by distance to IP
         /// then the rpcs are sorted by distance to IP
-        const Amg::Transform3D motherTrans = motherVol->getX().inverse();        
+
+        /// Orientation of the chamber coordinate systems
+        ///   x-axis: Points towards the sky
+        ///   y-axis: Points along the chamber plane
+        ///   z-axis: Points along the beam axis
+        /// --> Transform into the coordinate system of the chamber
+        /// x-axis: Parallel to the eta channels
+        /// y-axis: Along the beam axis
+        /// z-axis: Towards the sky
+        /// Record the thickness for the top and bottom of the chamber
+        const Amg::Transform3D axisRotation{Amg::getRotateX3D(90. * Gaudi::Units::deg)*
+                                            Amg::getRotateZ3D(90. * Gaudi::Units::deg)};
+        
+        const Amg::Transform3D motherTrans = axisRotation * motherVol->getX().inverse();        
         std::sort(readoutEles.begin(),readoutEles.end(), 
                     [&motherTrans, &gctx](const MuonReadoutElement*a, const MuonReadoutElement* b) {
                       if (a->detectorType() != b->detectorType()) {
@@ -50,104 +64,107 @@ namespace MuonGMR4{
                       }
                       const Amg::Vector3D aPos = motherTrans * a->center(gctx);
                       const Amg::Vector3D bPos = motherTrans * b->center(gctx);
-                      if (std::abs(aPos.x() - bPos.x()) > tolerance) {
-                            return aPos.x() < bPos.x();
-                        }
-                      return aPos.z() < bPos.z();
+                      if (std::abs(aPos.z() - bPos.z()) > tolerance) {
+                            return aPos.z() < bPos.z();
+                      }
+                      return aPos.y() < bPos.y();
                 });
+        /// Small check that everything worked out as expected
         if (msgLvl(MSG::VERBOSE)) {
             std::stringstream sstr{};
             for (const MuonReadoutElement* readOut: readoutEles) {
-                sstr<<"*** "<<m_idHelperSvc->toString(readOut->identify())
-                    <<" "<<Amg::toString(motherTrans * readOut->center(gctx))<<std::endl;                
+                sstr<<"*** "<<m_idHelperSvc->toStringDetEl(readOut->identify())
+                    <<" "<<Amg::toString(motherTrans * readOut->center(gctx))<<std::endl;
             }
             ATH_MSG_VERBOSE(m_geoUtilTool->dumpVolume(motherVol)<<std::endl<<
                             "Associated readout elements: "<<std::endl<<sstr.str());
         }
-        const MuonReadoutElement* primRE = readoutEles[0];
-        /// Origin of the volume is shifted to the center of the edge closest to the IP
-        const GeoShape* shape = m_geoUtilTool->extractShape(motherVol);
-        if (!shape) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" There is no shape for chamber "
-                                  <<m_idHelperSvc->toStringChamber(primRE->identify()));
-            throw std::logic_error("Shapeless volume");
-        }
-        double xMin{10e5}, xMax{-10e5}, yMinS{10e5}, yMaxS{-10e5}, yMinL{10.e5}, yMaxL{-10.e5}, zMin{10e5}, zMax{-10e5};
-        defineArgs define{};
 
-        /// Record the thickness for the top and bottom of the chamber
-        for(const MuonReadoutElement* ele: readoutEles){
-          const Amg::Vector3D center{motherTrans * ele->center(gctx)};
-          ATH_MSG_DEBUG("Center of readout element: "<<m_idHelperSvc->toStringDetEl(ele->identify())<<Amg::toString(center, 2));
-          if(ele->detectorType() == ActsTrk::DetectorType::Mdt){
+        const MuonReadoutElement* primRE = readoutEles[0];
+        /// Determine the minimal surrounding trapezoid box
+        double xMinS{10.e5}, xMaxS{-10.e5}, xMinL{10.e5}, xMaxL{-10.e5}, 
+               yMin{10.e5}, yMax{-10.e5}, zMin{10.e5}, zMax{-10.e5};
+        defineArgs define{};
+        for(const MuonReadoutElement* ele: readoutEles) {
+          const Amg::Vector3D center{motherTrans* ele->center(gctx)};
+          ATH_MSG_VERBOSE("Center of readout element "<<m_idHelperSvc->toStringDetEl(ele->identify())
+                        <<" located at "<<Amg::toString(center, 2));
+          if(ele->detectorType() == ActsTrk::DetectorType::Mdt) {
             const MdtReadoutElement* mdtReadoutEle = static_cast<const MdtReadoutElement*>(ele);
-            const auto parameters = mdtReadoutEle->getParameters();
-            xMax = std::max(center.x() + 2.*parameters.halfHeight, xMax);
-            xMin = std::min(center.x(), xMin);
-            yMinS = std::min(center.y() - parameters.shortHalfX, yMinS);
-            yMaxS = std::max(center.y() + parameters.shortHalfX, yMaxS);
-            yMinL = std::min(center.y() - parameters.longHalfX, yMinL);
-            yMaxL = std::max(center.y() + parameters.longHalfX, yMaxL);
-            zMin =  std::min(center.z(), zMin);
-            zMax = std::max(center.z() + 2.*parameters.halfY, zMax);
-          } else if(ele->detectorType() == ActsTrk::DetectorType::Rpc){
+            const MdtReadoutElement::parameterBook& parameters{mdtReadoutEle->getParameters()};
+            xMinS = std::min(center.x() - parameters.shortHalfX, xMinS);
+            xMaxS = std::max(center.x() + parameters.shortHalfX, xMaxS);
+            xMinL = std::min(center.x() - parameters.longHalfX, xMinL);
+            xMaxL = std::max(center.x() + parameters.longHalfX, xMaxL);
+            yMin = std::min(center.y() - 2.*parameters.halfY, yMin);
+            yMax = std::max(center.y(), yMax);
+            zMin = std::min(center.z(), zMin);
+            zMax = std::max(center.z() + 2.*parameters.halfHeight, zMax);
+          } else if(ele->detectorType() == ActsTrk::DetectorType::Rpc) {
               const RpcReadoutElement* rpcReadoutEle = static_cast<const RpcReadoutElement*>(ele);
-              const auto parameters = rpcReadoutEle->getParameters();
+              const RpcReadoutElement::parameterBook& parameters{rpcReadoutEle->getParameters()};
+              xMinS = std::min(center.x() - parameters.halfWidth, xMinS);
+              xMaxS = std::max(center.x() + parameters.halfWidth, xMaxS);
+              /// Recall the Mdts are rectangles as well
+              xMinL = xMinS;
+              xMaxL = xMaxS;
+              yMax = std::max(center.y(), yMax);
+              yMin = std::min(center.y() - 2.* parameters.halfLength, yMin);
               if(parameters.isUpsideDown) {
-                xMax = std::max(center.x(), xMax);
-                xMin = std::min(center.x() - 2.* parameters.halfThickness, xMin);
-                yMinS = std::min(center.y() + parameters.halfLength, yMinS);
-                yMaxS = std::max(center.y() - parameters.halfLength, yMaxS);
-                yMinL = yMinS;
-                yMaxL = yMaxS;
-                zMin =  std::min(center.z(), zMin);
-                zMax = std::max(center.z() + 2.*parameters.halfWidth, zMax);
-              } else{
-                xMax = std::max(center.x() + 2.* parameters.halfThickness, xMax);
-                xMin = std::min(center.x(), xMin);
-                yMinS = std::min(center.y() - parameters.halfLength, yMinS);
-                yMaxS = std::max(center.y() + parameters.halfLength, yMaxS);
-                yMinL = yMinS;
-                yMaxL = yMaxS;
-                zMin =  std::min(center.z(), zMin);
-                zMax = std::max(center.z() + 2.*parameters.halfWidth, zMax);
+                zMin = std::min(center.z() - 2.*parameters.halfThickness, zMin);
+                zMax = std::max(center.z(), zMax);
+              } else {
+                zMin = std::min(center.z(), zMin);
+                zMax = std::max(center.z() + 2.*parameters.halfThickness, zMax);
               }
+          } else if (ele->detectorType() == ActsTrk::DetectorType::Tgc) {
+              const TgcReadoutElement* tgcReadoutEle{static_cast<const TgcReadoutElement*>(ele)};              
+              xMinL = std::min(center.x() - 0.5*tgcReadoutEle->moduleWidthL(), xMinL);
+              xMaxL = std::max(center.x() + 0.5*tgcReadoutEle->moduleWidthL(), xMaxL);
+              xMinS = std::min(center.x() - 0.5*tgcReadoutEle->moduleWidthS(), xMinS);
+              xMaxS = std::max(center.x() + 0.5*tgcReadoutEle->moduleWidthS(), xMaxS);
+              yMin  = std::min(center.y()- tgcReadoutEle->moduleHeight(), yMin);
+              yMax  = std::max(center.y(), yMax);
+              zMin  = std::min(center.z(), zMin);
+              zMax  = std::max(center.z() + tgcReadoutEle->moduleThickness(), zMax);
           } else {
-              ATH_MSG_FATAL("Only MDT chambers can be used right now.");
+              ATH_MSG_FATAL("Only Mdt, Rpc & Tgc chambers can be used right now.");
               throw std::logic_error("Detector type not supported");
           }
+          ATH_MSG_VERBOSE("Chamber dimensions: yMin: "<<yMin<<" yMax: "<<yMax
+                      <<" xMinS: "<<xMinS<<" xMaxS: "<<xMaxS<<" xMinL: "<<xMinL<<" xMaxL: "<<xMaxL<<" zMin: "<<zMin<<" zMax: "<<zMax);
         }
-        ATH_MSG_VERBOSE("Chamber dimensions: xMin: "<<xMin<<" xMax: "<<xMax
-                      <<" yMinS: "<<yMinS<<" yMaxS: "<<yMaxS<<" yMinL: "<<yMinL<<" yMaxL: "<<yMaxL<<" zMin: "<<zMin<<" zMax: "<<zMax);
-        constexpr double tolerance = 0.1 * Gaudi::Units::mm;
-        define.halfX = ((xMax - xMin) / 2.);
-        define.halfYShort = ((yMaxS - yMinS) / 2.);
-        define.halfYLong = ((yMaxL - yMinL) / 2.);
-        define.halfZ = ((zMax - zMin) / 2.);
-
-        const Amg::Vector3D boxCenter {xMin + define.halfX, 
-                                       yMinS + define.halfYShort, 
-                                       zMin + define.halfZ};
-        define.halfX += tolerance;
-        define.halfYShort += tolerance;
-        define.halfYLong += tolerance;
-        define.halfZ += tolerance;
-        std::swap(define.halfX, define.halfZ);
-        define.readoutEles = std::move(readoutEles);
-        ATH_MSG_DEBUG("Chamber "<<m_idHelperSvc->toStringChamber(primRE->identify())<<" has volume "
-                                <<m_geoUtilTool->dumpShape(shape)<<". Extracted minimal box at "
-                                <<Amg::toString(boxCenter, 2)<<" with dimensions (halfYShort/ halfYLong/ halfX/ halfZ): "
-                                <<define.halfYShort<<"/"<<define.halfYLong<<"/"<<define.halfX<<"/"<<define.halfZ);
         
-        define.centerTrans = primRE->globalToLocalTrans(gctx) * motherTrans.inverse() * Amg::Translation3D{boxCenter} * Amg::getRotateZ3D(-M_PI_2) * Amg::getRotateX3D(M_PI_2);
+        constexpr double tolerance = 0.1 * Gaudi::Units::mm;
+        define.halfXShort = (xMaxS - xMinS) / 2.;
+        define.halfXLong = (xMaxL - xMinL) / 2.;
+        define.halfY = (yMax - yMin) / 2.;
+        define.halfZ = (zMax - zMin) / 2.;
+        if (define.halfY <=0. || define.halfXShort<=0. ||define.halfXLong <=0. ||  define.halfZ<=0.) {
+          ATH_MSG_WARNING("Invalid trapezoid boundaries "<<m_idHelperSvc->toStringDetEl(primRE->identify())<<
+                  	      " "<<define);
+
+        }
+        const Amg::Vector3D boxCenter{xMinS + define.halfXShort, 
+                                      yMin + define.halfY, 
+                                      zMin + define.halfZ};
+        /// Add a small tolerance to ensure that the detector elements are all inside the chamber
+        define.halfY += tolerance;
+        define.halfXShort += tolerance;
+        define.halfXLong += tolerance;
+        define.halfZ += tolerance;
+
+        define.readoutEles = std::move(readoutEles);
+        
+        define.centerTrans = primRE->globalToLocalTrans(gctx) * 
+                             motherTrans.inverse() *
+                             Amg::Translation3D{boxCenter};
+        ATH_MSG_DEBUG("Chamber "<<m_idHelperSvc->toStringChamber(primRE->identify())
+                      <<" has surrounding box "<<define);
+
         MuonChamber muonChamb{std::move(define)};
-        /// Internal consistency check that we did not mess up the transformations
-        ATH_MSG_VERBOSE("Chamber center in global frame "<<Amg::toString(motherTrans.inverse() * boxCenter)<<" from the box: "<<Amg::toString(muonChamb.localToGlobalTrans(gctx) * Amg::Vector3D::Zero()));
         chambers.insert(std::move(muonChamb));
     }
     return chambers;
   }
-
-  
-
 }   

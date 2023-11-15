@@ -87,8 +87,8 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
 
     const GeoBox* box = static_cast<const GeoBox*>(shape);   
     define.halfThickness = box->getXHalfLength() * Gaudi::Units::mm;
-    define.halfLength = box->getYHalfLength() * Gaudi::Units::mm;
-    define.halfWidth = box->getZHalfLength() * Gaudi::Units::mm;
+    define.halfLength = box->getZHalfLength() * Gaudi::Units::mm;
+    define.halfWidth = box->getYHalfLength() * Gaudi::Units::mm;
    
     /// Navigate through the GeoModel tree to find all gas volume leaves
     std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "StripLayer");

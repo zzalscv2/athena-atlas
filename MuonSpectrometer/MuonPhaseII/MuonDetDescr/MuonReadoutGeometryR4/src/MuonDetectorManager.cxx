@@ -59,7 +59,7 @@ MuonDetectorManager::MuonDetectorManager()
     : AthMessaging{"MuonDetectorManagerR4"} {
     if (!m_idHelperSvc.retrieve().isSuccess()) {
         ATH_MSG_FATAL(__func__<< "()  -- Failed to retrieve the Identifier service");
-        throw std::runtime_error("MuonIdHelperSvc does not exists");
+        throw std::runtime_error("MuonIdHelperSvc does not exist");
     }
     setName("MuonR4");
 }
@@ -97,6 +97,14 @@ std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const
     if (!m_rpcEles.empty()) types.push_back(ActsTrk::DetectorType::Rpc);
     if (!m_sTgcEles.empty()) types.push_back(ActsTrk::DetectorType::sTgc);
     return types;
+}
+const MuonReadoutElement* MuonDetectorManager::getReadoutElement(const Identifier& id) const {
+    if (m_idHelperSvc->isMdt(id)) return getMdtReadoutElement(id);
+    else if (m_idHelperSvc->isRpc(id)) return getRpcReadoutElement(id);
+    else if (m_idHelperSvc->isTgc(id)) return getTgcReadoutElement(id);
+    else if (m_idHelperSvc->issTgc(id)) return getsTgcReadoutElement(id);
+    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Not a muon detector element "<<m_idHelperSvc->toString(id));
+    return nullptr;
 }
 
 }  // namespace MuonGMR4

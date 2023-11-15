@@ -1,25 +1,26 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef MUONSTATIONLAYERSURFACESVC_MuonStationLayerSurfaceSvc_H
-#define MUONSTATIONLAYERSURFACESVC_MuonStationLayerSurfaceSvc_H
+#ifndef MUONSTATIONLAYERSURFACETOOL_H
+#define MUONSTATIONLAYERSURFACETOOL_H
 
 #include <MuonStationGeoHelpers/IMuonStationLayerSurfaceTool.h>
+#include <MuonStationGeoHelpers/IActsMuonChamberTool.h>
+
 #include <AthenaBaseComps/AthAlgTool.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-#include <MuonStationGeoHelpers/StationCenterCache.h>
 
 #include <set>
 #include <memory>
 
 namespace MuonGMR4{
   
-    class MuonStationLayerSurfaceTool: public AthAlgTool,  virtual public IMuonStationLayerSurfaceTool {        
+    class MuonStationLayerSurfaceTool: public AthAlgTool, virtual public IMuonStationLayerSurfaceTool {        
         
         public:
           /** @brief Standard tool constructor **/
-          MuonStationLayerSurfaceTool( const std::string& type, 
+          MuonStationLayerSurfaceTool(const std::string& type, 
                                       const std::string& name, 
                                       const IInterface* parent );
 
@@ -37,12 +38,11 @@ namespace MuonGMR4{
 
           unsigned int storeAlignment(ActsTrk::RawGeomAlignStore& alignStore) const override;
       private:
-          const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
+         PublicToolHandle<MuonGMR4::IActsMuonChamberTool> m_chambTool{this, "ChamberBuilder", ""};
+         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
+                                                             "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-          ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
-                              "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-
-          StationCacheSet m_cenCache{};
+          ChamberSet m_cenCache{};
           
          
 };  

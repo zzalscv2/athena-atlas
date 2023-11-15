@@ -12,12 +12,34 @@ namespace MuonGMR4{
     inline Amg::Vector3D StripLayer::localStripPos(unsigned int stripNum) const {
       Amg::Vector3D stripPos{Amg::Vector3D::Zero()};
       std::optional<Amg::Vector2D> planePos = m_design->center(stripNum);
-      if (!planePos) {          
+      if (!planePos) {
         return stripPos;
       }
       stripPos.block<2,1>(0,0) = std::move(*planePos);
       return stripPos;
     }
+             /// Returns the position of the left strip edge  (positive local y) expressed in the local frame
+    inline Amg::Vector3D StripLayer::localStripLeftEdge(unsigned int stripNum) const {
+      Amg::Vector3D edgePos{Amg::Vector3D::Zero()};
+      std::optional<Amg::Vector2D> planePos = m_design->leftEdge(stripNum);
+      if (!planePos) {
+        return edgePos;
+      }
+      edgePos.block<2,1>(0,0) = std::move(*planePos);
+      return edgePos;
+    }
+          /// Returns the position of the right strip edge (negative local y) exoressed in the local frame
+    inline Amg::Vector3D StripLayer::localStripRightEdge(unsigned int stripNum) const {
+      Amg::Vector3D edgePos{Amg::Vector3D::Zero()};
+      std::optional<Amg::Vector2D> planePos = m_design->rightEdge(stripNum);
+      if (!planePos) {
+        return edgePos;
+      }
+      edgePos.block<2,1>(0,0) = std::move(*planePos);
+      return edgePos;
+    }
+ 
+
     inline Amg::Vector3D StripLayer::stripPosition(unsigned int stripNum) const {
         return toOrigin() * localStripPos(stripNum);
     }

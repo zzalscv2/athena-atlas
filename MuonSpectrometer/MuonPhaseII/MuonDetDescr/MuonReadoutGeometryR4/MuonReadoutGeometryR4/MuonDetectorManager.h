@@ -64,7 +64,8 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     using ElementPtr = std::unique_ptr<MuonDetectorType>;
     template <class MuonDetectorType>
     using ElementStorage = std::vector<ElementPtr<MuonDetectorType>>;
-
+    
+    /// Access specifically the individual readout element technologies
     DECLARE_ELEMENT(MdtReadoutElement)
     DECLARE_ELEMENT(TgcReadoutElement)    
     DECLARE_ELEMENT(RpcReadoutElement)
@@ -82,6 +83,8 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     
     /// Returns the list of all detector elements
     std::vector<const MuonReadoutElement*> getAllReadoutElements() const;
+    /// Returns a generic Muon readout element
+    const MuonReadoutElement* getReadoutElement(const Identifier& id) const;
     /// Returns a list of all detector types
     std::vector<ActsTrk::DetectorType> getDetectorTypes() const;
    private:
