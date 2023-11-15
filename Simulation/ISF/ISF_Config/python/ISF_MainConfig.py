@@ -5,7 +5,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from SimulationConfig.SimulationMetadata import writeSimulationParametersMetadata, readSimulationParameters
-from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg, AFIIGeoIDSvcCfg
+from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
 from ISF_Services.ISF_ServicesConfig import (
     InputConverterCfg, TruthServiceCfg,
     LongLivedInputConverterCfg, AFIIParticleBrokerSvcCfg
@@ -17,7 +17,6 @@ from ISF_Tools.ISF_ToolsConfig import (
 from ISF_SimulationSelectors.ISF_SimulationSelectorsConfig import (
     DefaultAFIIGeant4SelectorCfg,
     DefaultAFII_QS_Geant4SelectorCfg,
-    DefaultLegacyAFIIFastCaloSimSelectorCfg,
     DefaultParticleKillerSelectorCfg,
     EtaGreater5ParticleKillerSimSelectorCfg,
     FullGeant4SelectorCfg,
@@ -36,8 +35,6 @@ from ISF_SimulationSelectors.ISF_SimulationSelectorsConfig import (
     KLongATLFAST3Geant4SelectorCfg,
     KLongATLFAST3_QS_Geant4SelectorCfg,
     DefaultFatrasSelectorCfg,
-    MuonFatrasSelectorCfg,
-    DefaultFastCaloSimSelectorCfg,
     DefaultActsSelectorCfg
 )
 from ISF_Geant4Tools.ISF_Geant4ToolsConfig import (
@@ -185,58 +182,6 @@ def Kernel_PassBackG4MTCfg(flags, name="ISF_Kernel_PassBackG4MT", **kwargs):
     return acc
 
 
-def Kernel_ATLFASTIIMTCfg(flags, name="ISF_Kernel_ATLFASTIIMT", **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("GeoIDSvc", acc.getPrimaryAndMerge(AFIIGeoIDSvcCfg(flags)).name)
-    kwargs.setdefault("EntryLayerTool",
-                    acc.addPublicTool(acc.popToolsAndMerge(AFIIEntryLayerToolMTCfg(flags)))) # public ToolHandle
-    acc.merge(Kernel_GenericSimulatorMTCfg(flags, name, **kwargs)) # Workaround
-
-    pubTool = acc.addPublicTool(acc.popToolsAndMerge(DefaultAFIIGeant4SelectorCfg(flags)))
-    kwargs.setdefault("BeamPipeSimulationSelectors", [pubTool])
-    kwargs.setdefault("IDSimulationSelectors", [pubTool])
-    kwargs.setdefault("MSSimulationSelectors", [pubTool])
-
-    kwargs.setdefault("CaloSimulationSelectors", [
-        acc.addPublicTool(acc.popToolsAndMerge(MuonAFIIGeant4SelectorCfg(flags))),
-        acc.addPublicTool(acc.popToolsAndMerge(EtaGreater5ParticleKillerSimSelectorCfg(flags))),
-        acc.addPublicTool(acc.popToolsAndMerge(DefaultLegacyAFIIFastCaloSimSelectorCfg(flags)))
-    ])
-
-    kwargs.setdefault("CavernSimulationSelectors",
-                      [acc.addPublicTool(acc.popToolsAndMerge(DefaultParticleKillerSelectorCfg(flags)))])
-
-    from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import LegacyAFIIFastCaloToolCfg
-    kwargs.setdefault("SimulationTools", [
-        acc.popToolsAndMerge(ParticleKillerToolCfg(flags)),
-        acc.popToolsAndMerge(LegacyAFIIFastCaloToolCfg(flags)),
-        acc.popToolsAndMerge(AFIIGeant4ToolCfg(flags))
-    ])
-
-    kwargs.setdefault("ParticleOrderingTool", acc.popToolsAndMerge(EnergyParticleOrderingToolCfg(flags)))
-
-    # not migrated simFlags.SimulationFlavour = "ATLFASTII"
-    acc.merge(Kernel_GenericSimulatorMTCfg(flags, name, **kwargs))
-    return acc
-
-
-def Kernel_ATLFASTIIFMTCfg(flags, name="ISF_Kernel_ATLFASTIIFMT", **kwargs):
-    acc = ComponentAccumulator()
-    acc.merge(Kernel_GenericSimulatorNoG4MTCfg(flags, name, **kwargs)) # Workaround
-
-    from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastCaloToolBaseCfg
-    from ISF_FatrasServices.ISF_FatrasConfig import fatrasTransportToolCfg
-    kwargs.setdefault("SimulationTools", [
-        acc.popToolsAndMerge(ParticleKillerToolCfg(flags)),
-        acc.popToolsAndMerge(FastCaloToolBaseCfg(flags)),
-        acc.popToolsAndMerge(fatrasTransportToolCfg(flags))
-    ])
-
-    # not migrated 'simFlags.SimulationFlavour = "ATLFASTIIF"'
-    acc.merge(Kernel_GenericSimulatorNoG4MTCfg(flags, name, **kwargs))
-    return acc
-
-
 def Kernel_ATLFAST3MTCfg(flags, name="ISF_Kernel_ATLFAST3MT", **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("ParticleOrderingTool", acc.popToolsAndMerge(ParticleOrderingToolCfg(flags)))
@@ -355,26 +300,6 @@ def Kernel_GenericSimulatorCfg(flags, name="ISF_Kernel_GenericSimulator", **kwar
     return acc
 
 
-def Kernel_ATLFASTIIF_G4MSCfg(flags, name="ISF_Kernel_ATLFASTIIF_G4MS", **kwargs):
-    acc = ComponentAccumulator()
-    acc.merge(Kernel_GenericSimulatorCfg(flags, name, **kwargs)) # Force the SimKernel to be before the CollectionMerger by adding it here
-
-    kwargs.setdefault("BeamPipeSimulationSelectors", [ acc.addPublicTool(acc.popToolsAndMerge(DefaultParticleKillerSelectorCfg(flags))) ])
-    kwargs.setdefault("IDSimulationSelectors", [ acc.addPublicTool(acc.popToolsAndMerge(DefaultFatrasSelectorCfg(flags))) ])
-    kwargs.setdefault("CaloSimulationSelectors", [
-        acc.addPublicTool(acc.popToolsAndMerge(MuonFatrasSelectorCfg(flags))),
-        acc.addPublicTool(acc.popToolsAndMerge(EtaGreater5ParticleKillerSimSelectorCfg(flags))),
-        acc.addPublicTool(acc.popToolsAndMerge(DefaultFastCaloSimSelectorCfg(flags)))
-    ])
-    kwargs.setdefault("MSSimulationSelectors", [ acc.addPublicTool(acc.popToolsAndMerge(DefaultAFIIGeant4SelectorCfg(flags))) ])
-    kwargs.setdefault("CavernSimulationSelectors", [ acc.addPublicTool(acc.popToolsAndMerge(DefaultParticleKillerSelectorCfg(flags))) ])
-    # not migrated simFlags.SimulationFlavour = "ATLFASTIIF_MS"
-    # simFlags.SimulationFlavour = "ATLFASTIIF_G4MS"
-
-    acc.merge(Kernel_GenericSimulatorCfg(flags, name, **kwargs)) # Merge properly configured SimKernel here and let deduplication sort it out.
-    return acc
-
-
 def Kernel_ATLFAST3F_G4MSCfg(flags, name="ISF_Kernel_ATLFAST3F_G4MS", **kwargs):
     acc = ComponentAccumulator()
     acc.merge(Kernel_GenericSimulatorCfg(flags, name, **kwargs)) # Force the SimKernel to be before the CollectionMerger by adding it here
@@ -457,12 +382,6 @@ def ISF_KernelCfg(flags):
         cfg.merge(Kernel_FullG4MT_QSCfg(flags))
     elif flags.Sim.ISF.Simulator is SimulationFlavour.PassBackG4MT:
         cfg.merge(Kernel_PassBackG4MTCfg(flags))
-    elif flags.Sim.ISF.Simulator is SimulationFlavour.ATLFASTIIMT:
-        cfg.merge(Kernel_ATLFASTIIMTCfg(flags))
-    elif flags.Sim.ISF.Simulator is SimulationFlavour.ATLFASTIIFMT:
-        cfg.merge(Kernel_ATLFASTIIFMTCfg(flags))
-    elif flags.Sim.ISF.Simulator is SimulationFlavour.ATLFASTIIF_G4MS:
-        cfg.merge(Kernel_ATLFASTIIF_G4MSCfg(flags))
     elif flags.Sim.ISF.Simulator is SimulationFlavour.ATLFAST3MT:
         cfg.merge(Kernel_ATLFAST3MTCfg(flags))
     elif flags.Sim.ISF.Simulator is SimulationFlavour.ATLFAST3MT_QS:

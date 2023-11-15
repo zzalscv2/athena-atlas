@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
+// USED IN ATLFAST3
 #ifndef FASTCALOSIM_EMPTYCELLBUILDERTOOL_H
 #define FASTCALOSIM_EMPTYCELLBUILDERTOOL_H
 

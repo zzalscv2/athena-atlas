@@ -5,21 +5,25 @@ import subprocess
 import unittest
 import os
 
-class TestATLFASTII(unittest.TestCase):
+class TestATLFAST3(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         os.environ["TRF_ECHO"] = "1"
-        config_picklefilename = 'ATLFASTII_config.pkl'
+        config_picklefilename = 'ATLFAST3_config.pkl'
         command = [
             'Sim_tf.py',
-            '--simulator', 'ATLFASTII',
+            '--CA', 'False',
+            '--simulator', 'ATLFAST3MT_QS',
             '--athenaopts', '"--config-only={}"'.format(config_picklefilename),
-            '--conditionsTag', 'default:OFLCOND-RUN12-SDR-19',
-            '--geometryVersion', 'default:ATLAS-R2-2015-03-01-00_VALIDATION',
+            '--postInclude', 'PyJobTransforms/UseFrontier.py',
+            '--preInclude', 'Campaigns/MC23aSimulationMultipleIoV.py',
+            '--conditionsTag', 'default:OFLCOND-MC23-SDR-RUN3-01',
+            '--geometryVersion', 'default:ATLAS-R3S-2021-03-02-00',
             '--inputEVNTFile', '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc12_valid.110401.PowhegPythia_P2012_ttbar_nonallhad.evgen.EVNT.e3099.01517252._000001.pool.root.1',
             '--outputHITSFile', 'Hits.pool.root',
             '--maxEvents', '2',
+            '--jobNumber', '1',
             # would otherwise fail due to missing HITS file:
             '--outputFileValidation', 'False',
         ]

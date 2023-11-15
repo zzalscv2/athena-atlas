@@ -3,6 +3,7 @@
 /*
   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
+// Used in ATLFAST3
 
 
 #ifndef CALOCELLCONTAINERFCSFINALIZERTOOL_H

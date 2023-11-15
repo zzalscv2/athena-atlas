@@ -1,6 +1,7 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
+// Used in ATLFAST3
 
 /********************************************************************
 
@@ -15,7 +16,7 @@ PURPOSE:  Apply necessary finalising operation to CaloCellContainer
 	  and ordered from the beginning
 ********************************************************************/
 
-#include "FastCaloSim/CaloCellContainerFCSFinalizerTool.h"
+#include "CaloCellContainerFCSFinalizerTool.h"
 
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/MsgStream.h"
@@ -29,6 +30,7 @@ PURPOSE:  Apply necessary finalising operation to CaloCellContainer
 #include "CaloEvent/CaloConstCellContainer.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloIdentifier/CaloCell_ID.h"
+
 
 
 /////////////////////////////////////////////////////////////////////
