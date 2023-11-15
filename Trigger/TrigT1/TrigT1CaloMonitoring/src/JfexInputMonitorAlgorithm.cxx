@@ -29,7 +29,10 @@ StatusCode JfexInputMonitorAlgorithm::initialize() {
     ATH_CHECK( m_SCellEtMeVdecorKey.initialize()  );
     ATH_CHECK( m_TileEtMeVdecorKey.initialize()   );
     ATH_CHECK( m_jTowerEtdecorKey.initialize()    );
-    
+
+    // error counter
+    m_nJFexWarnVar = 0;
+
     return AthMonitorAlgorithm::initialize();
 }
 
@@ -145,7 +148,9 @@ StatusCode JfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                 dataTowers_map[ code ] = dataTower;
             }
             else{
-                ATH_MSG_WARNING("DataTower: "<<TTID<< " with Calosource: "<<source<< "is repeated. It shouldn't! ");
+                if ( m_nJFexWarnVar++ < m_nJFexWarnMax ) {
+                    ATH_MSG_WARNING("DataTower: "<<TTID<< " with Calosource: "<<source<< "is repeated. It shouldn't! ");
+                }
             }
             
             DataEt         = jTowerEtMeV(*dataTower);
@@ -177,8 +182,9 @@ StatusCode JfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                 } 
                 
                 if( (dataTower->et_count()).at(0) != m_InvalidCode ){
-                    ATH_MSG_WARNING("Tower:"<< TTID << " source:"<< +dataTower->Calosource() << " for eventNumber:"<< GetEventInfo(ctx)->eventNumber()<< " and LB:"<<GetEventInfo(ctx)->lumiBlock() << ". DataTower Et:"<< (dataTower->et_count()).at(0) <<"/"<< DataEt<<" MeV vs EmulatedTower Et:" << emulated_jtowerEt(*dataTower)<<"/"<< EmulatedEt<< " MeV");
-                    
+		    if ( m_nJFexWarnVar++ < m_nJFexWarnMax ) {
+                        ATH_MSG_WARNING("Tower:"<< TTID << " source:"<< +dataTower->Calosource() << " for eventNumber:"<< GetEventInfo(ctx)->eventNumber()<< " and LB:"<<GetEventInfo(ctx)->lumiBlock() << ". DataTower Et:"<< (dataTower->et_count()).at(0) <<"/"<< DataEt<<" MeV vs EmulatedTower Et:" << emulated_jtowerEt(*dataTower)<<"/"<< EmulatedEt<< " MeV");
+		    }
                     frac_SCellSum = DataEt != 0 ? (EmulatedEt - DataEt)/DataEt : 0;
                     fill(m_Grouphist+"_decorated",Towereta,Towerphi,DataEt,EmulatedEt,frac_SCellSum);
                     genError("Input_Mismatch", location);
@@ -282,7 +288,9 @@ StatusCode JfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
             auto it_TTower2SCells = dataTowers_map.find( codedVal(emulTower->jFEXtowerID(), emulTower->Calosource() ) );
             
             if(it_TTower2SCells == dataTowers_map.end() ){
-                ATH_MSG_WARNING("DataTower: "<<emulTower->jFEXtowerID()<< " with Calosource: "<<emulTower->Calosource()<< " does not exists. It should! Investigate ");
+                if ( m_nJFexWarnVar++ < m_nJFexWarnMax ) {
+                    ATH_MSG_WARNING("DataTower: "<<emulTower->jFEXtowerID()<< " with Calosource: "<<emulTower->Calosource()<< " does not exists. It should! Investigate ");
+                }
                 continue;
             }
             

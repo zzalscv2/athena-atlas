@@ -35,7 +35,6 @@ cd ../
 echo  "art-result: $rc2 simOLD"
 
 mkdir -p CA && cd CA
-cp ../OLD/SLHA_INPUT.DAT ../OLD/PhysicsConfiguration.txt ../OLD/PYTHIA8_COMMANDS.TXT ./
 Sim_tf.py \
     --CA True \
     --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \

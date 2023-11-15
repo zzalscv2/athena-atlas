@@ -14,6 +14,8 @@
 #include "xAODTrigL1Calo/jFexTowerContainer.h"
 #include "xAODTrigL1Calo/jFexTower.h"
 
+#include <atomic>
+
 class JfexInputMonitorAlgorithm : public AthMonitorAlgorithm {
     public:
         JfexInputMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
@@ -43,5 +45,8 @@ class JfexInputMonitorAlgorithm : public AthMonitorAlgorithm {
 
         int codedVal(int, int) const;
 
+	// number of warnings counter
+	mutable std::atomic<int> m_nJFexWarnVar;
+	const int m_nJFexWarnMax = 10;
 };
 #endif
