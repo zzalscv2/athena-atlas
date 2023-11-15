@@ -5633,8 +5633,8 @@ def dump_auxitem (x, auxid, f = sys.stdout):
 def dump_auxdata (x, exclude=[], f = sys.stdout):
     reg=ROOT.SG.AuxTypeRegistry.instance()
     #auxids = list(x.getAuxIDs())
-    if not x:
-        fprint (f, '<null pointer>')
+    if cppyy.addressof (x) == 0:
+        fprint (f, '<null pointer>', x, type(x))
         return
     try:
         auxids = ROOT.PyDumper.Utils.getAuxIDVector (x)
