@@ -1430,13 +1430,14 @@ namespace Trk {
 	const bool SCTECA8   = (thisIdentifier == SCT_ECA_8_Identifier);
 	const bool SCTECA8_n = (thisName.find(SCT_ECA_8_Name)!= std::string::npos);
 
-	if (m_DeactivateSCT_ECA_LastDisk) 
+	if (m_DeactivateSCT_ECA_LastDisk){ 
 	  if (SCTECA8)
 	    {ATH_MSG_INFO( "SCT ECA Last Disk DoF have been skipped in the solving because DeactivateSCT_ECA_LastDisk is set to True");
 	      continue;}
-	if (SCTECA8_n)
-	  {ATH_MSG_INFO( "SCT ECA Last Disk DoF have been skipped in the solving because DeactivateSCT_ECA_LastDisk is set to True");
-	    continue;}
+	  if (SCTECA8_n)
+	    {ATH_MSG_INFO( "SCT ECA Last Disk DoF have been skipped in the solving because DeactivateSCT_ECA_LastDisk is set to True");
+	      continue;}
+	}
 
 	if (m_AlignIBLbutNotPixel) //If m_AlignIBLbutNotPixel is set to True, Pixel will be skipped in the solving.
 	  if  (oldPixel)  
