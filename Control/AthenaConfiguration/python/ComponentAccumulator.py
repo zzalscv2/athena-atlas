@@ -1240,7 +1240,8 @@ def startInteractive(localVarDic):
     import os
     
     # collect all global and local variables
-    vars = globals()
+    vars = sys.modules['__main__'].__dict__
+    vars.update(globals())
     vars.update(localVarDic)
 
     # setup the autocompletion
