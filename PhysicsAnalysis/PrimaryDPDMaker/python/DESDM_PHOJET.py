@@ -55,7 +55,7 @@ def DESDM_PHOJETCfg(configFlags):
              'xAOD::ElectronContainer#Electrons','xAOD::ElectronAuxContainer#ElectronsAux.',
              'xAOD::MuonContainer#Muons','xAOD::MuonAuxContainer#MuonsAux.',
              'xAOD::PhotonContainer#Photons','xAOD::PhotonAuxContainer#PhotonsAux.',
-             'xAOD::TauJetContainer#TauJets','xAOD::TauJetAuxContainer#TauJetsAux.-VertexedClusters.',
+             'xAOD::TauJetContainer#TauJets','xAOD::TauJetAuxContainer#TauJetsAux.-VertexedClusters',
              'xAOD::VertexContainer#PrimaryVertices','xAOD::VertexAuxContainer#PrimaryVerticesAux.-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV',
              'xAOD::JetContainer#AntiKt4EMPFlowJets','xAOD::JetAuxContainer#AntiKt4EMPFlowJetsAux.-PseudoJet',
              'xAOD::JetContainer#AntiKt4EMTopoJets','xAOD::JetAuxContainer#AntiKt4EMTopoJetsAux.-PseudoJet',
