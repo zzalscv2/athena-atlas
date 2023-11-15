@@ -19,6 +19,12 @@ except ImportError:
     class DataHandle: pass  # for analysis releases
 
 
+class NotHashable(Exception):
+    """Exception thrown when AccumulatorCache is applied to non-hashable function call"""
+    def __init__(self, value):
+        self.value = value
+
+
 class AccumulatorCachable(ABC):
     """Abstract base for classes needing custom AccumulatorCache behavior."""
 
@@ -52,21 +58,9 @@ class AccumulatorDecorator:
 
     _stats = defaultdict(CacheStats)
 
-    def __init__(self , func , size , verify , deepCopy): 
-        """The constructor is typically called in a function returning a decorator.
+    def __init__(self, func, size, verify, deepCopy):
+        """See AccumulatorCache decorator for documentation of arguments."""
 
-        Args:
-            func:       function for memoization
-            size:       maximum size for the cache of function results
-            verify:     takes two possible values
-                        
-                        AccumulatorDecorator.VERIFY_NOTHING -   the cached function result is returned with no verification
-                        AccumulatorDecorator.VERIFY_HASH -      before returning the cached function value, the hash of the
-                                                                result is checked to verify if this object was not modified
-                                                                between function calls
-            deepCopy:   if True a deep copy of the function result will be stored in the cache.
-
-        """
         functools.update_wrapper(self , func)
         self._maxSize = size
         self._func = func
@@ -112,13 +106,6 @@ class AccumulatorDecorator:
         """Resume memoization for all instances of AccumulatorDecorator."""
         cls._memoize = True
 
-    def _hasHash(x):
-        if hasattr(x, "athHash"):
-            return True
-        elif isinstance(x, (Hashable, DataHandle)):
-            return True
-        return False
-
     def _getHash(x):
         if hasattr(x, "athHash"):
             return x.athHash()
@@ -126,7 +113,7 @@ class AccumulatorDecorator:
             return hash(x)
         elif isinstance(x, DataHandle):
             return hash(repr(x))
-        return None
+        raise NotHashable(x)
 
     def _evict(x):
         if isinstance(x, AccumulatorCachable):
@@ -136,12 +123,17 @@ class AccumulatorDecorator:
         """Support instance methods."""
         return functools.partial(self.__call__, obj)
 
-    def __call__(self , *args , **kwargs):
+    def __call__(self, *args, **kwargs):
         cacheHit = None
         try:
             t0 = time.perf_counter()
             res, cacheHit = self._callImpl(*args, **kwargs)
             return res
+        except NotHashable as e:
+            _msg.warning(f"Argument value '{repr(e.value)}' in {self._func} is not hashable. "
+                         "No caching is performed!")
+            cacheHit = False
+            return self._func(*args, **kwargs)  # perform regular function call
         finally:
             t1 = time.perf_counter()
             if cacheHit is True:
@@ -151,88 +143,65 @@ class AccumulatorDecorator:
                 self._stats[self._func].misses += 1
                 self._stats[self._func].t_misses += (t1-t0)
 
-    def _callImpl(self , *args , **kwargs):
+    def _callImpl(self, *args, **kwargs):
         """Implementation of __call__.
 
         Returns: (result, cacheHit)
         """
-        if(AccumulatorDecorator._memoize):
-            hashable_args = True
-            for a in args:
-                if(not AccumulatorDecorator._hasHash(a)):
-                    hashable_args = False
-                    _msg.warning("Positional argument '%r' in %s is not hashable.", a, self._func)
-                    break
-            for k , v in kwargs.items():
-                if(not AccumulatorDecorator._hasHash(v)):
-                    hashable_args = False
-                    _msg.warning("Value '%r' of keyword argument '%s' in %s is not hashable.", v, k, self._func)
-                    break
-            if(hashable_args):
-                # frozen set makes the order of keyword arguments irrelevant
-                hsh = hash(tuple((tuple(AccumulatorDecorator._getHash(a) for a in args) , frozenset((hash(k) , AccumulatorDecorator._getHash(v)) for k , v in kwargs.items()))))
 
-                if(hsh in self._cache):
-                    res = self._cache[hsh]
-                    cacheHit = None
-                    if(AccumulatorDecorator.VERIFY_HASH == self._verify):
-                        resHsh = self._resultCache[hsh]
-                        chkHsh = None
-                        if(AccumulatorDecorator._hasHash(res)):
-                            chkHsh = AccumulatorDecorator._getHash(res)
-                        if((not (chkHsh is None)) and (not (resHsh is None))): 
-                            # hashes are available and can be compared
-                            if(chkHsh != resHsh):
-                                _msg.debug("Hash of function result, cached using AccumulatorDecorator, changed.")
-                        else:
-                                _msg.debug("Hash of function result, cached using AccumulatorDecorator, not available for verification.")
-                        if((chkHsh is None) or (resHsh is None) or resHsh != chkHsh): 
-                            # at least one hash is not available (None) so no verification can be performed 
-                            # or hashes are different
-                            cacheHit = False
-                            res = self._func(*args , **kwargs)
-                            self._cache[hsh] = res
-                            self._resultCache[hsh] = None
-                            if(AccumulatorDecorator._hasHash(res)):
-                                self._resultCache[hsh] = AccumulatorDecorator._getHash(res)
-                        else:
-                            cacheHit = True
-                    else:
-                        cacheHit = True
-                
-                    if self._deepcopy:
-                        return deepcopy(res), cacheHit
-                    else:
-                        # shallow copied CA still needs to undergo merging
-                        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-                        if isinstance(res, ComponentAccumulator):
-                            res._wasMerged=False
-                        return res, cacheHit
-
-                else:
-                    _msg.debug('Hash not found in AccumulatorCache for function %s' , self._func)
-                    if(len(self._cache) >= self._maxSize):
-                        _msg.warning("Cache limit (%d) reached for %s.%s", self._maxSize, self._func.__module__, self._func.__name__)
-                        oldest = self._cache.pop(next(iter(self._cache)))
-                        AccumulatorDecorator._evict(oldest)
-
-                    res = self._func(*args , **kwargs)
-
-                    if(AccumulatorDecorator.VERIFY_HASH == self._verify):
-                        if(len(self._resultCache) >= self._maxSize):
-                            del self._resultCache[next(iter(self._resultCache))]
-                        self._resultCache[hsh] = None
-                        if(AccumulatorDecorator._hasHash(res)):
-                            self._resultCache[hsh] = AccumulatorDecorator._getHash(res)
-                        self._cache[hsh] = res
-                    else:
-                        self._cache[hsh] = res
-
-                    return (deepcopy(res) if self._deepcopy else res, False)
-            else:
-                return (self._func(*args , **kwargs), False)
-        else:
+        # AccumulatorCache enabled?
+        if not AccumulatorDecorator._memoize:
             return (self._func(*args , **kwargs), None)
+
+        # frozen set makes the order of keyword arguments irrelevant
+        hsh = hash( (tuple(AccumulatorDecorator._getHash(a) for a in args),
+                     frozenset((hash(k), AccumulatorDecorator._getHash(v)) for k,v in kwargs.items())) )
+
+        res = self._cache.get(hsh, None)
+        if res is not None:
+            cacheHit = None
+            if AccumulatorDecorator.VERIFY_HASH == self._verify:
+                resHsh = self._resultCache[hsh]
+                chkHsh = AccumulatorDecorator._getHash(res)
+                if chkHsh != resHsh:
+                    _msg.debug("Hash of function result, cached using AccumulatorDecorator, changed.")
+                    cacheHit = False
+                    res = self._func(*args , **kwargs)
+                    self._cache[hsh] = res
+                    self._resultCache[hsh] = AccumulatorDecorator._getHash(res)
+                else:
+                    cacheHit = True
+            else:
+                cacheHit = True
+
+            if self._deepcopy:
+                return deepcopy(res), cacheHit
+            else:
+                # shallow copied CA still needs to undergo merging
+                from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+                if isinstance(res, ComponentAccumulator):
+                    res._wasMerged=False
+                return res, cacheHit
+
+        else:
+            _msg.debug('Hash not found in AccumulatorCache for function %s' , self._func)
+            if len(self._cache) >= self._maxSize:
+                _msg.warning("Cache limit (%d) reached for %s.%s",
+                             self._maxSize, self._func.__module__, self._func.__name__)
+                oldest = self._cache.pop(next(iter(self._cache)))
+                AccumulatorDecorator._evict(oldest)
+
+            res = self._func(*args , **kwargs)
+
+            if AccumulatorDecorator.VERIFY_HASH == self._verify:
+                if len(self._resultCache) >= self._maxSize:
+                    del self._resultCache[next(iter(self._resultCache))]
+                self._resultCache[hsh] = AccumulatorDecorator._getHash(res)
+                self._cache[hsh] = res
+            else:
+                self._cache[hsh] = res
+
+            return (deepcopy(res) if self._deepcopy else res, False)
 
     def __del__(self):
         for v in self._cache.values():
