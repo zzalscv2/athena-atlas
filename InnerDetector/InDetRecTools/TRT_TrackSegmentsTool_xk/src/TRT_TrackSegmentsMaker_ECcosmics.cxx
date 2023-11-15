@@ -36,12 +36,10 @@
 InDet::TRT_TrackSegmentsMaker_ECcosmics::TRT_TrackSegmentsMaker_ECcosmics
 (const std::string& t,const std::string& n,const IInterface* p)
   : AthAlgTool(t,n,p),
-    m_multiTruthCollectionTRTName("PRD_MultiTruthTRT"),
     m_phaseMode(false),
     m_riomakerD ("InDet::TRT_DriftCircleOnTrackTool/TRT_DriftCircleOnTrackTool"                      ),
     m_riomakerN ("InDet::TRT_DriftCircleOnTrackNoDriftTimeTool/TRT_DriftCircleOnTrackNoDriftTimeTool"),
     m_useDriftTime(false),
-    m_removeSuspicious(false),
     m_scaleTube(2.0),
     m_scaleFactorDrift(1.0),
     m_scaleTubeNoise(1.0),
@@ -52,17 +50,10 @@ InDet::TRT_TrackSegmentsMaker_ECcosmics::TRT_TrackSegmentsMaker_ECcosmics
 {
   declareInterface<ITRT_TrackSegmentsMaker>(this);
 
-  declareProperty("TrtManagerLocation"   ,m_ntrtmanager);
-  
-  
   declareProperty("RIOonTrackToolYesDr"  ,m_riomakerD  );
   declareProperty("RIOonTrackToolNoDr"   ,m_riomakerN  );
-
-  declareProperty("TruthName",m_multiTruthCollectionTRTName);
   declareProperty("Phase",m_phaseMode);
-
   declareProperty("UseDriftTime", m_useDriftTime);
-  declareProperty("RemoveSuspicious",m_removeSuspicious);
   declareProperty("ScaleFactorTube", m_scaleTube);
   declareProperty("ScaleFactorDrift", m_scaleFactorDrift);
   declareProperty("ScaleFactorTubeNoise", m_scaleTubeNoise);
@@ -70,10 +61,8 @@ InDet::TRT_TrackSegmentsMaker_ECcosmics::TRT_TrackSegmentsMaker_ECcosmics
   declareProperty("ToTCutTight",m_cutToTTight);
   declareProperty("ToTCutUpper",m_cutToTUpper);
   declareProperty("MinDCperSeed",m_minDCSeed);
-
   declareProperty("HitLimit",m_hitLimit=2000);
   
-  m_truthCollectionTRT = false;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -756,7 +745,7 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
 	if(std::abs(phidiff(pred_phi,corr))<=4./650.){
 	  if(sc.z()>zmin && sc.z()<zmax){
 	    seed->push_back(*lit);
-	    ATH_MSG_VERBOSE("\t\t noise hit matched seed! z="<< sc.z() <<"MC : "<<isTrueHit(*lit));
+	    ATH_MSG_VERBOSE("\t\t noise hit matched seed! z="<< sc.z());
 	  }
 	}
 	
@@ -939,7 +928,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
 	}
       }
       if(new_hit){
-	ATH_MSG_VERBOSE("\t\t good hit matched! fitted_phi="<<fitted_phi<<" z=" <<sc.z()<<"MC : "<<isTrueHit(*lit));
+	ATH_MSG_VERBOSE("\t\t good hit matched! fitted_phi="<<fitted_phi<<" z=" <<sc.z());
 
 	if(sc.z()>zmin-200 && sc.z()<zmax+200){
 	  if(sc.z()<zmin) zmin=sc.z();
@@ -1104,10 +1093,10 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
       }
       if(new_hit){
 	if(sc.z()>zmin-50 && sc.z()<zmax+50){
-	  ATH_MSG_VERBOSE("\t\t noise hit matched! fitted_phi="<<fitted_phi<<" z=" <<sc.z()<<"MC : "<<isTrueHit(*lit));
+	  ATH_MSG_VERBOSE("\t\t noise hit matched! fitted_phi="<<fitted_phi<<" z=" <<sc.z());
 	  seed->push_back(*lit);
 	}else{
-	  ATH_MSG_VERBOSE("\t\t noise hit matched but too far away! fitted_phi="<<fitted_phi<<" z=" <<sc.z()<<"MC : "<<isTrueHit(*lit));
+	  ATH_MSG_VERBOSE("\t\t noise hit matched but too far away! fitted_phi="<<fitted_phi<<" z=" <<sc.z());
 	}
       }
     }
@@ -1295,7 +1284,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
       return; // a seed cannot contain that many hits
       }
 
-      if (msgLvl(MSG::VERBOSE)) msg()<<"z="<<sc.z()<<" phi="<<sc.phi()<<" fitted_phi = "<<fitted_phi<<" MC : "<<isTrueHit(*vit)<<endmsg;
+      if (msgLvl(MSG::VERBOSE)) msg()<<"z="<<sc.z()<<" phi="<<sc.phi()<<" fitted_phi = "<<fitted_phi<<endmsg;
       if(std::abs(phidiff(fitted_phi,sc.phi()-dphi)) < m_scaleFactorDrift* drifte/straw_r){
         if (msgLvl(MSG::VERBOSE)) msg()<<"\t\t matched!!!"<<endmsg;
 
@@ -1347,7 +1336,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
       double dphi=sign*driftr/straw_r;
 
       
-      ATH_MSG_VERBOSE("z="<<sc.z()<<" phi="<<sc.phi()<<" fitted_phi = "<<fitted_phi<<" MC : "<<isTrueHit(*vit));
+      ATH_MSG_VERBOSE("z="<<sc.z()<<" phi="<<sc.phi()<<" fitted_phi = "<<fitted_phi);
       if(std::abs(phidiff(fitted_phi,sc.phi()-dphi)) <  m_scaleFactorDrift* drifte/straw_r){
         ATH_MSG_VERBOSE("\t\t matched!!!");
         count++;
@@ -1603,13 +1592,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::retrieveHits(TRT_TrackSegmentsMake
   }
   
   const InDet::TRT_DriftCircleContainer*   mjo_trtcontainer = trtcontainer.get();
-  
- 
   if (!mjo_trtcontainer) return;
-
-
-  int realhits[2];
-  realhits[0]=realhits[1]=0;
 
   InDet::TRT_DriftCircleContainer::const_iterator
     w = trtcontainer->begin(),we = trtcontainer->end();
@@ -1624,15 +1607,6 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::retrieveHits(TRT_TrackSegmentsMake
     for(; c!=ce; ++c) {
 
       if(prd_to_track_map_cptr &&  prd_to_track_map_cptr->isUsed(*(*c))) continue; //don't use hits that have already been used
-      if(isTrueHit(*c)){
-        //which endcap:
-
-        if(m_trtid->barrel_ec((*c)->identify())==-2){
-          realhits[0]++;
-        }else{
-          realhits[1]++;
-        }
-      }
  
       if( (*c)->isNoise() || (*c)->timeOverThreshold()<m_cutToTLoose) {
         event_data.m_noiseHits.push_back(*c);
@@ -1642,10 +1616,6 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::retrieveHits(TRT_TrackSegmentsMake
 
     }
   }
-
-
-  ATH_MSG_DEBUG("hits in endcap C: "<<realhits[0]<<" Hits in endcap A: "<<realhits[1]);
-  if(realhits[0]>19 || realhits[1]>19) { ATH_MSG_DEBUG( "This event should be reconstructed !!!!" ); }
 
   ATH_MSG_DEBUG("good hits in endcap: "<<event_data.m_goodHits.size());
   ATH_MSG_DEBUG("noise hits in endcap: "<<event_data.m_noiseHits.size());
@@ -1725,7 +1695,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::retrieveHits(TRT_TrackSegmentsMake
     }
     const bool accept=accepted(it, event_data.m_goodHits, 0.25,  200.);
     if(!accept){
-      ATH_MSG_DEBUG("Removing hit in 2nd pass isolation: "<<isTrueHit(*it));
+      ATH_MSG_DEBUG("Removing hit in 2nd pass isolation");
       event_data.m_noiseHits.push_back(*it);
       it_remove=it;
       remove=true;
@@ -1777,19 +1747,6 @@ InDet::TRT_TrackSegmentsMaker_ECcosmics::accepted(
   } //end inner loop
   return accept;
 }
-
-///////////////////////////////////////////////////////////////////
-// MC performance test: check if hit is from MC particle or noise
-///////////////////////////////////////////////////////////////////
-
-
-bool InDet::TRT_TrackSegmentsMaker_ECcosmics::isTrueHit(const InDet::TRT_DriftCircle*) const
-{
-  if(!m_truthCollectionTRT) return false;
-  
-  return false; 
-}
-
 
 ///////////////////////////////////////////////////////////////////
 // Perform the actual track fit to the coordinates
@@ -1877,36 +1834,6 @@ TF1 *InDet::TRT_TrackSegmentsMaker_ECcosmics::perform_fit(int count,
 
 }
 
-
-///////////////////////////////////////////////////////////////////
-// Check how many real and how many fake segments we have
-///////////////////////////////////////////////////////////////////
-
-double InDet::TRT_TrackSegmentsMaker_ECcosmics::classify_segment(Trk::TrackSegment* seg, int &total) const
-{
-  int real=0;
-  total=0;
-
-  for(unsigned int i=0;i<seg->numberOfMeasurementBases();++i){
-    const Trk::RIO_OnTrack* rot=dynamic_cast<const Trk::RIO_OnTrack*>(seg->measurement(i));
-    if(rot){
-      const Trk::PrepRawData* prd=rot->prepRawData();
-      if(prd!=nullptr){
-        const InDet::TRT_DriftCircle *dc=dynamic_cast<const InDet::TRT_DriftCircle*>(prd);
-        if(dc!=nullptr){
-          if(isTrueHit(dc))
-            real++;
-          total++;
-
-        }
-      }
-    }
-  }
-  if(total==0) total = 1;
-  return double(real)/double(total);
-}
-
-
 ///////////////////////////////////////////////////////////////////
 // Provide the proper subtraction of two phi values
 ///////////////////////////////////////////////////////////////////
@@ -1978,13 +1905,11 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::is_suspicious(const InDet::TRT_Dri
     if(index>=0) {
     ATH_MSG_VERBOSE("Hit is suspicious, remove it! "<<std::abs(zmin_sel-mean)<<" , "<<2*var<<" -> "<<zmin_sel<< " : "<<dcz[index]<<" <-> "<<meanz<<" ("<<varz<<")");
     }
-    ATH_MSG_VERBOSE("\t -> "<<isTrueHit(dc));
     return true;
   }else{
     if(index>=0) {
       ATH_MSG_VERBOSE("Hit seems to be ok: "<<std::abs(zmin_sel-mean)<<" < "<<2*var<<" && "<<std::abs(dcz[index]-meanz)<<" < "<<1.5*varz);
     }
-    ATH_MSG_VERBOSE("\t -> "<<isTrueHit(dc));
   }
   return false;
 }

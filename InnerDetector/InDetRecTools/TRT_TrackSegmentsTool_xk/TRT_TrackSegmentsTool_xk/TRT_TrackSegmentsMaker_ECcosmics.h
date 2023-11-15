@@ -163,11 +163,8 @@ namespace InDet{
       ///////////////////////////////////////////////////////////////////
       // Protected data and methods
       ///////////////////////////////////////////////////////////////////
-      
 
-      std::string                              m_multiTruthCollectionTRTName; //!< Name of TRT TruthCollection
       bool                                     m_phaseMode   ; //!< Switch to destinguish between phase calculation and full reco
-      std::string                              m_ntrtmanager ; //!< Name of TRT det. manager 
       const TRT_ID*                            m_trtid{}       ; 
 
       SG::ReadHandleKey<InDet::TRT_DriftCircleContainer> m_trtname{this,"TRT_ClustersContainer","TRT_DriftCircles","RHK to retrieve TRT_DriftCircles"}; //!< TRTs   container 
@@ -178,8 +175,6 @@ namespace InDet{
       ToolHandle<Trk::IRIO_OnTrackCreator>     m_riomakerN   ; //!< RI0_onTrack creator without drift information
 
       bool                                     m_useDriftTime; //!< Shall the drifttime be used or only tube hits?
-      bool                                     m_removeSuspicious; //!< Remove hits from segments that are suspicious
-      bool                                     m_truthCollectionTRT;
       double                                   m_scaleTube   ; //!< Scalefactor for uncertainty of tube hits   
       double                                   m_scaleFactorDrift ; //!< Scalefactor for uncertainty of drifttime hits   
       double                                   m_scaleTubeNoise; //!< Scalefactor for uncertainty of tube hits flagged as noise
@@ -189,16 +184,6 @@ namespace InDet{
       int                                      m_minDCSeed   ; //!< Minimum number of driftcircles to form a seed      
       int                                      m_hitLimit    ; //!< Maximum number of good hits (i.e. after noise cut) in endcap
 
-
-       //      int m_real_counter; //!< Counter of events with enough hits in the endcap to be able to reconstruct a track
-       //      int m_seg_counter; //!< Counter of events with at least one segment
-
-      // mutable std::mutex m_counterMutex ATLAS_THREAD_SAFE;
-      // mutable int m_classification ATLAS_THREAD_SAFE [3]; //!< Classification of segments: 0 - real, 1 - fake, 2 - mixture
-
-      // mutable int m_nHits ATLAS_THREAD_SAFE [3][400];     //!< Count the numer of segments per classification and per number of hits
-
-      //      int m_counter = 0;
       static std::mutex s_fitMutex;  // @TODO not sufficient need a global root lock
 
       ///////////////////////////////////////////////////////////////////
@@ -222,20 +207,11 @@ namespace InDet{
       void create_segment(std::vector<const InDet::TRT_DriftCircle*> *seed,
                           TRT_TrackSegmentsMaker_ECcosmics::EventData &event_data) const;
 
-      /** Check if given hit originates from true particle
-       */
-      bool isTrueHit(const InDet::TRT_DriftCircle* dc) const;
-
-
       void setFitFunctions(TRT_TrackSegmentsMaker_ECcosmics::EventData &event_data) const;
 
       /** Perform the fit and return a function that provides the fitted phi information
        */
       TF1 *perform_fit(int count,TRT_TrackSegmentsMaker_ECcosmics::EventData &event_data) const;
-
-      /** Clasify a segment as noise or real
-       */
-      double classify_segment(Trk::TrackSegment* seg, int &num) const;
 
       /** checks if a hit that matches the segment looks suspicious (i.e. isolated)
        */

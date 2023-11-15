@@ -22,7 +22,6 @@
 #include "InDetRIO_OnTrack/TRT_DriftCircleOnTrack.h"
 #include "TRT_ReadoutGeometry/TRT_Numerology.h"
 #include "InDetRecToolInterfaces/ITRT_TrackExtensionTool.h"
-#include "TrkExInterfaces/IPropagator.h"
 #include "StoreGate/ReadHandle.h"
 #include <cmath>
 ///////////////////////////////////////////////////////////////////
@@ -33,9 +32,6 @@ InDet::TRT_TrackSegmentsMaker_ATLxk::TRT_TrackSegmentsMaker_ATLxk
 (const std::string& t,const std::string& n,const IInterface* p)
   : AthAlgTool(t,n,p),
   m_fieldmode    ("MapSolenoid"                                ),
-  m_propTool     ("Trk::RungeKuttaPropagator"                  ),
-  m_build        (false                                        ),
-  m_gupdate      (false                                        ),
   m_removeNoise  (true                                         ),
   m_clustersCut  (10                                           ),
   m_pTmin        (500.                                         ),
@@ -45,7 +41,6 @@ InDet::TRT_TrackSegmentsMaker_ATLxk::TRT_TrackSegmentsMaker_ATLxk
 {
   declareInterface<ITRT_TrackSegmentsMaker>(this);
 
-  declareProperty("PropagatorTool"         ,m_propTool     );
   declareProperty("MagneticFieldMode"      ,m_fieldmode    );
   declareProperty("NumberAzimuthalChannel" ,m_nPhi         ); 
   declareProperty("NumberMomentumChannel"  ,m_nMom         ); 
@@ -87,15 +82,6 @@ StatusCode InDet::TRT_TrackSegmentsMaker_ATLxk::initialize()
   // Initialize ReadHandle
   //
   ATH_CHECK(m_trtname.initialize());
-  
-
-  // Get propagator tool
-  //
-  if(m_propTool.retrieve().isFailure()) {
-    ATH_MSG_FATAL("Failed to retrieve tool "<< m_propTool);
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_DEBUG("Retrieved tool " << m_propTool);
 
   // Get tool for track extension to TRT
   //
@@ -456,9 +442,6 @@ MsgStream& InDet::TRT_TrackSegmentsMaker_ATLxk::dumpConditions( MsgStream& out )
   n     = 62-m_trtname.key().size();
   std::string s4; for(int i=0; i<n; ++i) s4.append(" "); s4.append("|");
 
-  n     = 62-m_propTool.type().size();
-  std::string s1; for(int i=0; i<n; ++i) s1.append(" "); s1.append("|");
-
   n     = 62-m_extensionTool.type().size();
   std::string s7; for(int i=0; i<n; ++i) s7.append(" "); s7.append("|");
 
@@ -466,7 +449,6 @@ MsgStream& InDet::TRT_TrackSegmentsMaker_ATLxk::dumpConditions( MsgStream& out )
   out<<"|----------------------------------------------------------------------"
      <<"-------------------|"
        <<std::endl;
-  out<<"| Tool for propagation    | "<<m_propTool     .type()<<s1<<std::endl;
   out<<"| Tool tracks extension   | "<<m_extensionTool.type()<<s7<<std::endl;    
   out<<"| Magnetic field mode     | "<<fieldmode[mode]       <<s3<<std::endl;
   out<<"| TRT container           | "<<m_trtname.key().size()             <<s4<<std::endl;

@@ -33,8 +33,7 @@ InDet::TRT_TrackSegmentsMaker_BarrelCosmics::TRT_TrackSegmentsMaker_BarrelCosmic
     m_nBinsInPhi(10),
     m_minSeedTOT(10.),
     m_magneticField(true),
-    m_mergeSegments(false),
-    m_useAthenaFieldService(true)
+    m_mergeSegments(false)
     //Endcap Trigger Hack
 {
 
@@ -53,9 +52,6 @@ InDet::TRT_TrackSegmentsMaker_BarrelCosmics::TRT_TrackSegmentsMaker_BarrelCosmic
   declareProperty("IsMagneticFieldOn", m_magneticField);
   declareProperty("TrtManagerLocation", m_TRTManagerName);
   declareProperty("MergeSegments", m_mergeSegments);
-
-  declareProperty( "UseAthenaFieldService",     m_useAthenaFieldService);
-
 
 }
 

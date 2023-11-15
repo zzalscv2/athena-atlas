@@ -97,7 +97,6 @@ class ConfiguredTRTSegmentFinding:
       from TRT_TrackSegmentsTool_xk.TRT_TrackSegmentsTool_xkConf import InDet__TRT_TrackSegmentsMaker_ATLxk
       InDetTRT_TrackSegmentsMaker = InDet__TRT_TrackSegmentsMaker_ATLxk(name                    = 'InDetTRT_SeedsMaker'+extension,
                                                                         TRT_ClustersContainer   = InDetKeys.TRT_DriftCircles(),
-                                                                        PropagatorTool          = InDetPatternPropagator,
                                                                         TrackExtensionTool      = InDetTRTExtensionTool,
                                                                         PRDtoTrackMap           = prefix+'PRDtoTrackMap'+suffix \
                                                                                                     if usePrdAssociationTool else '',

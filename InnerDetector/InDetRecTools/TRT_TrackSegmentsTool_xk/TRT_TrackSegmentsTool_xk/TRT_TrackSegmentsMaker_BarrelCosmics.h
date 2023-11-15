@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -55,7 +55,6 @@ namespace InDet{
       ///////////////////////////////////////////////////////////////////////////////
 
       virtual StatusCode               initialize() override;
-//      StatusCode magneticFieldInit(IOVSVC_CALLBACK_ARGS);
       virtual StatusCode               finalize  () override;
 
       virtual std::unique_ptr<InDet::ITRT_TrackSegmentsMaker::IEventData> newEvent(const EventContext& ctx) const override;
@@ -152,8 +151,6 @@ namespace InDet{
       double m_minSeedTOT; // minimal time over threshold for seed search - default ~ 10 ns
       bool m_magneticField; // search for lines (if False) or circles (if True)
       bool m_mergeSegments; // default: False, should not be turned on yet
-
-      bool m_useAthenaFieldService;
 
   };
 

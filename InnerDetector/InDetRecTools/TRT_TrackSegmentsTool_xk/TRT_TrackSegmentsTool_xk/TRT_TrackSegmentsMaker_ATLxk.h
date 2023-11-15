@@ -37,11 +37,6 @@
 
 class MsgStream;
 
-namespace Trk {
-
-  class IPropagator;
-}
-
 namespace InDet{
 
   class ITRT_TrackExtensionTool;
@@ -141,7 +136,6 @@ namespace InDet{
       ///////////////////////////////////////////////////////////////////
       
       std::string                            m_fieldmode       ; // Mode of magnetic field
-      ToolHandle<Trk::IPropagator>           m_propTool        ; // Propagator            tool
       ToolHandle<ITRT_TrackExtensionTool>    m_extensionTool
          {this, "TrackExtensionTool", "InDet::TRT_TrackExtensionTool_xk"} ; // TRT track extension   tool
 
@@ -152,8 +146,6 @@ namespace InDet{
       SG::ReadHandleKey<Trk::PRDtoTrackMap>          m_prdToTrackMap
          {this,"PRDtoTrackMap",""};
 
-      bool                                   m_build           ;
-      bool                                   m_gupdate         ;
       bool                                   m_removeNoise     ;
       int                                    m_outputlevel{}     ;
       int                                    m_clustersCut     ;
