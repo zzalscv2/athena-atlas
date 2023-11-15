@@ -19,7 +19,6 @@
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "InDetRecToolInterfaces/IInDetEtaDependentCutsSvc.h"
 
-#include "TrkSpacePoint/SpacePointContainer.h" 
 #include "TrkTrack/TrackCollection.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "TrkExInterfaces/IPatternParametersPropagator.h"
@@ -67,10 +66,8 @@ namespace InDet {
     ///////////////////////////////////////////////////////////////////     
     //@{
 
-    FloatProperty m_RoIWidth{this, "RoIWidth", 1.0, "Fixed width of RoI along z-axis"}; 
+    BooleanProperty m_useRoIWidth{this, "useRoIWidth", true, "Use width of RoI along z-axis"};
     IntegerProperty m_maxNumberSeeds{this, "maxNumberSeeds", 3000000, "Max. number used seeds"};
-    IntegerProperty m_maxPIXsp{this, "maxNumberPIXsp", 150000, "Max. number pixels space points"};
-    IntegerProperty m_maxSCTsp{this, "maxNumberSCTsp", 500000, "Max. number sct    space points"};
     IntegerProperty m_nfreeCut{this, "FreeClustersCut", 1, "Min number free clusters"};
     BooleanProperty m_doRandomSpot{this, "doRandomSpot", false, "Low-pT tracking setting the RoI in a random position"};
 
@@ -84,10 +81,7 @@ namespace InDet {
     SG::WriteHandleKey<TrackCollection> m_outputTracksKey{this, "TracksLocation", "SiSPSeededTracksRoI", "Output track collection"};
     SG::WriteHandleKey<xAOD::VertexContainer> m_vxOutputKey{this, "VxOutputName", "LowPtRoIVertices", "Output Vertex collection with per-event RoI information"};
 
-    SG::ReadHandleKey<SpacePointContainer> m_SpacePointsPixelKey{this, "SpacePointsPixelName", "PixelSpacePoints"};
-    SG::ReadHandleKey<SpacePointContainer> m_SpacePointsSCTKey{this, "SpacePointsSCTName", "SCT_SpacePoints"};
     SG::ReadHandleKey<Trk::PRDtoTrackMap> m_prdToTrackMap{this,"PRDtoTrackMap",""};
-
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
     SG::ReadHandleKey<xAOD::EventInfo> m_evtKey{this, "EventInfoKey", "EventInfo"};
     //@}

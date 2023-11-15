@@ -79,8 +79,6 @@ StatusCode InDet::SiSPSeededTrackFinderRoI::initialize()
   // Initialize read/write handles
   ATH_CHECK( m_outputTracksKey.initialize() );
   ATH_CHECK( m_vxOutputKey.initialize() );
-  ATH_CHECK( m_SpacePointsPixelKey.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_SpacePointsSCTKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_prdToTrackMap.initialize( !m_prdToTrackMap.key().empty() ) );
   ATH_CHECK( m_beamSpotKey.initialize() );
   ATH_CHECK(m_evtKey.initialize());
@@ -222,12 +220,11 @@ StatusCode InDet::SiSPSeededTrackFinderRoI::execute(const EventContext& ctx) con
   m_seedsmaker->newEvent(ctx, seedEventData, -1); 
   if (not listRoIs.empty()) {
     std::list<Trk::Vertex> VZ; 
-    if(m_RoIWidth >= 0.) m_seedsmaker->find3Sp(ctx, seedEventData, VZ, ZBoundary); 
-    //If you want to disable the RoI but still have a separate container for low-pt tracks, 
-    // make the RoI input width a negative value.  The RoI "vertex" container will still be 
-    // there in case you want to use that information for whatever reason (ie where the RoI 
-    // would have been centered).
-    if(m_RoIWidth < 0.) m_seedsmaker->find3Sp(ctx, seedEventData, VZ); 
+    if(m_useRoIWidth) m_seedsmaker->find3Sp(ctx, seedEventData, VZ, ZBoundary);
+    //If you want to disable the RoI but still have a separate container for low-pt tracks
+    // The RoI "vertex" container will still be there in case you want to use
+    // that information for whatever reason (ie where the RoI would have been centered).
+    else m_seedsmaker->find3Sp(ctx, seedEventData, VZ);
     if(m_doRandomSpot) m_seedsmaker->find3Sp(ctx, seedEventData, VZ, RandZBoundary);
   }
 
