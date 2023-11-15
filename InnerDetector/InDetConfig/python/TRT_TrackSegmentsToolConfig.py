@@ -42,12 +42,6 @@ def TRT_TrackSegmentsMaker_ATLxkCfg(
         name = 'InDetTRT_SeedsMakerCondAlg',
         pTmin = flags.Tracking.ActiveConfig.minSecondaryPt)
 
-    if "PropagatorTool" not in kwargs:
-        from TrkConfig.TrkExRungeKuttaPropagatorConfig import (
-            RungeKuttaPropagatorCfg)
-        kwargs.setdefault("PropagatorTool", acc.popToolsAndMerge(
-            RungeKuttaPropagatorCfg(flags)))
-
     if "TrackExtensionTool" not in kwargs:
         from InDetConfig.TRT_TrackExtensionToolConfig import (
             TRT_TrackExtensionToolCfg)
