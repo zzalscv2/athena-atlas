@@ -32,8 +32,6 @@ namespace InDet {
          {this, "ConditionsSummaryTool", "", "Tool to retrieve e.g. Pixel or SCT Conditions summary"};
       SG::WriteCondHandleKey<InDet::SiDetectorElementStatus> m_writeKey
          {this, "WriteKey", "", "Key of output SiDetectorElementStatus data"};
-      Gaudi::Property< bool> m_activeOnly
-         {this, "ActiveOnly", false, "Module and chip status will only reflect whether the modules or chips are active not necessarily whether the signals are good."};
       mutable std::atomic<unsigned int> m_maxSize{};
    };
 }
