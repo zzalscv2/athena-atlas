@@ -9,6 +9,9 @@
 # art-output: mc20e_SP.RDO.pool.root
 # art-output: mc20e_MP_fork_evt0.RDO.pool.root
 # art-output: mc20e_MP_fork_evt1.RDO.pool.root
+# art-output: log.HITtoRDO_SP
+# art-output: log.HITtoRDO_MPf0
+# art-output: log.HITtoRDO_MPf1
 
 export ATHENA_CORE_NUMBER=8
 
@@ -40,6 +43,7 @@ Digi_tf.py \
 rc=$?
 status=$rc
 echo "art-result: $rc Digi_tf.py SP"
+cp log.HITtoRDO log.HITtoRDO_SP
 
 Digi_tf.py \
 --multiprocess --athenaMPEventsBeforeFork 0 \
@@ -65,6 +69,7 @@ if [ $status -eq 0 ]; then
   status=$rc2
 fi
 echo "art-result: $rc2 Digi_tf.py MP fork after 0"
+cp log.HITtoRDO log.HITtoRDO_MPf0
 
 Digi_tf.py \
 --multiprocess --athenaMPEventsBeforeFork 1 \
@@ -90,13 +95,14 @@ if [[ $status -eq 0 ]]; then
     status=$rc3
 fi
 echo "art-result: $rc3 Digi_tf.py MP fork after 1"
+cp log.HITtoRDO log.HITtoRDO_MPf1
 
 rc4=-9999
 if [[ $rc -eq 0 ]] && [[ $rc2 -eq 0 ]]
 then
     acmd.py diff-root ${DigiOutFileNameSP} ${DigiOutFileNameMP0} \
         --mode=semi-detailed --error-mode resilient --order-trees \
-        --ignore-leaves RecoTimingObj_p1_HITStoRDO_timings McEventCollection_p5_TruthEvent.m_genParticles.m_m index_ref
+        --ignore-leaves McEventCollection_p5_TruthEvent.m_genParticles.m_m index_ref
     rc4=$?
     if [[ $status -eq 0 ]]; then
         status=$rc4
@@ -109,7 +115,7 @@ if [[ $rc -eq 0 ]] && [[ $rc3 -eq 0 ]]
 then
     acmd.py diff-root ${DigiOutFileNameSP} ${DigiOutFileNameMP1} \
         --mode=semi-detailed --error-mode resilient --order-trees \
-        --ignore-leaves RecoTimingObj_p1_HITStoRDO_timings McEventCollection_p5_TruthEvent.m_genParticles.m_m index_ref
+        --ignore-leaves McEventCollection_p5_TruthEvent.m_genParticles.m_m index_ref
     rc5=$?
     if [[ $status -eq 0 ]]; then
         status=$rc5
