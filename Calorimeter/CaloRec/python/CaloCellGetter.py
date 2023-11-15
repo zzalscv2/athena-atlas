@@ -254,25 +254,6 @@ class CaloCellGetter (Configured)  :
                 return False
 
 
-            doFastCaloSimNoise=jobproperties.CaloCellFlags.doFastCaloSimNoise()
-            if doFastCaloSimNoise:
-                try:
-                    from FastCaloSim.AddNoiseCellBuilderToolDefault import AddNoiseCellBuilderToolDefault
-                    theAddNoiseCellBuilderTool=AddNoiseCellBuilderToolDefault()
-                    
-                    print(theAddNoiseCellBuilderTool)
-
-                    theCaloCellMaker += theAddNoiseCellBuilderTool
-                    theCaloCellMaker.CaloCellMakerToolNames += [ theAddNoiseCellBuilderTool ]
-                    mlog.info("configure AddNoiseCellBuilderTool worked")
-                except Exception:
-                    mlog.error("could not get handle to AddNoiseCellBuilderTool Quit")
-                    print(traceback.format_exc())
-                    return False
-
-
-
-
         #
         # CaloCellContainerFinalizerTool : closing container and setting up iterators
         #

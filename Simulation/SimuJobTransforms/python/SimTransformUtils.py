@@ -183,6 +183,7 @@ def addSimulationSubstep(executorSet, overlayTransform = False):
         SimExe.inputDataTypeCountCheck = ['EVNT']
     executorSet.add(SimExe)
 
+
 def addReSimulationSubstep(executorSet):
     SimExe = athenaExecutor(name = 'ReSim',
                             skeletonFile = 'SimuJobTransforms/skeleton.ReSim.py',
@@ -194,6 +195,7 @@ def addReSimulationSubstep(executorSet):
                             outData=['HITS_RSM'],
                             inputDataTypeCountCheck = ['HITS'] )
     executorSet.add(SimExe)
+
 
 def addAtlasG4Substep(executorSet):
     executorSet.add(athenaExecutor(name = 'AtlasG4TfTRIn', skeletonFile = 'SimuJobTransforms/skeleton.EVGENtoHIT_MC12.py',
@@ -207,22 +209,19 @@ def addAtlasG4Substep(executorSet):
                                    inData=['NULL','EVNT'],
                                    outData=['EVNT_TR','HITS','NULL'] ))
 
+
 def addConfigurableSimSubstep(executorSet, confName, extraSkeleton, confSubStep, confInData, confOutData, confExtraRunargs, confRuntimeRunargs):
     executorSet.add(athenaExecutor(name = confName, skeletonFile = extraSkeleton + ['SimuJobTransforms/skeleton.EVGENtoHIT_MC12.py'],
                                    substep = confSubStep, tryDropAndReload = False,
                                    inData = confInData,
                                    outData = confOutData, extraRunargs = confExtraRunargs, runtimeRunargs = confRuntimeRunargs ))
 
+
 def addStandardHITSMergeSubstep(executorSet):
     executorSet.add(athenaExecutor(name = 'HITSMerge', substep="hitsmerge", skeletonFile = 'SimuJobTransforms/skeleton.HITSMerge.py',
                                    skeletonCA = 'SimuJobTransforms.HITSMerge_Skeleton',
                                    tryDropAndReload = False, inputDataTypeCountCheck = ['HITS']))
 
-def addAFII_HITSMergeSubstep(executorSet):
-    executorSet.add(athenaExecutor(name = 'HITSMerge', substep="hitsmerge", skeletonFile = 'SimuJobTransforms/skeleton.HITSMerge.py',
-                                   tryDropAndReload = False,
-                                   extraRunargs = {'preInclude': ['FastSimulationJobTransforms/jobConfig.v14_Parametrisation.py','FastCaloSimHit/preInclude.AF2Hit.py'],
-                                                   'postInclude': ['FastCaloSimHit/postInclude.AF2FilterHitItems.py','FastSimulationJobTransforms/jobConfig.FastCaloSim_ID_cuts.py','FastSimulationJobTransforms/jobConfig.egamma_lateral_shape_tuning.config20.py']} ))
 
 def addDigitizationSubstep(executorSet, in_reco_chain=False):
     executorSet.add(athenaExecutor(name = 'HITtoRDO', skeletonFile = 'SimuJobTransforms/skeleton.HITtoRDO.py',
@@ -237,10 +236,12 @@ def addDigitizationSubstep(executorSet, in_reco_chain=False):
                                                 'inputBeamGasHitsFile']
                                               if in_reco_chain else None))
 
+
 def addSimValidationSubstep(executorSet):
     executorSet.add(athenaExecutor(name = 'SimValidation',
                                            skeletonFile = 'SimuJobTransforms/skeleton.HITStoHIST_SIM.py',
                                            inData = ['HITS'], outData = ['HIST_SIM'],))
+
 
 def addDigiValidationSubstep(executorSet):
     executorSet.add(athenaExecutor(name = 'DigiValidation',
@@ -279,11 +280,6 @@ def appendConfigurableSimSubstep(trf, confName = 'AtlasG4Tf',
 def appendHITSMergeSubstep(trf):
     executor = set()
     addStandardHITSMergeSubstep(executor)
-    trf.appendToExecutorSet(executor)
-
-def appendAFII_HITSMergeSubstep(trf):
-    executor = set()
-    addAFII_HITSMergeSubstep(executor)
     trf.appendToExecutorSet(executor)
 
 def appendDigitizationSubstep(trf):

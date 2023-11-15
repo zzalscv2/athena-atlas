@@ -1,19 +1,18 @@
 #!/usr/bin/bash
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 FastChain_tf.py \
-    --simulator ATLFASTIIF_G4MS \
+    --CA \
+    --simulator ATLFAST3F_G4MS \
     --useISF True \
     --randomSeed 123 \
-    --enableLooperKiller True \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc12_valid.110401.PowhegPythia_P2012_ttbar_nonallhad.evgen.EVNT.e3099.01517252._000001.pool.root.1" \
+    --inputRDO_BKGFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/PresampledPileUp/22.0/Run2/large/mc20_13TeV.900149.PG_single_nu_Pt50.digit.RDO.e8307_s3482_s3136_d1713/RDO.26811885._035498.pool.root.1" \
     --outputRDOFile RDO_CG.pool.root \
     --maxEvents 2 \
     --skipEvents 0 \
-    --geometryVersion default:ATLAS-R2-2016-01-00-01 \
-    --conditionsTag default:OFLCOND-MC16-SDR-16 \
-    --preSimExec 'from TrkDetDescrSvc.TrkDetDescrJobProperties import TrkDetFlags;TrkDetFlags.TRT_BuildStrawLayers=True;from Digitization.DigitizationFlags import digitizationFlags;digitizationFlags.experimentalDigi=["NewMerge"]' \
-    --postInclude='PyJobTransforms/UseFrontier.py' \
-    --postExec 'from IOVDbSvc.CondDB import conddb;conddb.addOverride("/TILE/OFL02/CALIB/SFR","TileOfl02CalibSfr-SIM-05");conddb.addOverride("/PIXEL/ChargeCalibration","PixelChargeCalibration-SIM-MC16-000-18");' \
-    --DataRunNumber '284500' \
+    --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
+    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-09'  \
+    --preInclude 'Campaigns.MC20a' 'Campaigns.MC16SimulationNoIoV' \
+    --postInclude 'PyJobTransforms.UseFrontier' \
     --imf False
