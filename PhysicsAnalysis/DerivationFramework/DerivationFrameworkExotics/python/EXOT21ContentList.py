@@ -20,7 +20,7 @@ EXOT21AllVariablesContent = [
 ]
 
 EXOT21ExtraVariables = [
-    "InDetTrackParticles.numberOfTRTHighThresholdHits.numberOfInnermostPixelLayerHits.numberOfNextToInnermostPixelLayerHits",
+    "InDetTrackParticles.numberOfTRTHighThresholdHits.numberOfInnermostPixelLayerHits.numberOfNextToInnermostPixelLayerHits.vx.vy.vz",
     "Electrons.etcone30.etcone40.e255.e335.e333.e337.e377.widths1.widths2.poscs1.poscs2.asy1.pos.pos7.barys1.r33over37allcalo.ecore.deltaEta0.deltaEta2.deltaEta3.deltaPhi0.deltaPhi3.deltaPhiRescaled0.deltaPhiRescaled1.deltaPhiRescaled3.eProbabilityHT.deltaPoverP",
     "Muons.etcone20.etcone30.etcone40",
     "egammaClusters.rawE",

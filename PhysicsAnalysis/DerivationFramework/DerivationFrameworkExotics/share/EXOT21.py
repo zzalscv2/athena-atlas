@@ -29,7 +29,9 @@ triggerNavChains += "HLT_mu20_msonly_mu6noL1_msonly_nscan05 | HLT_mu20_msonly_mu
 triggerNavChains += "HLT_g15_loose_2mu10_msonly |"
 triggerNavChains += "HLT_e60_lhmedium_nod0 | HLT_e24_lhtight_nod0_ivarloose | HLT_e26_lhtight_nod0_ivarloose | HLT_e120_lhloose | HLT_e140_lhloose_nod0 | HLT_e24_lhmedium_L1EM20VH | HLT_e26_lhtight_nod0 | HLT_e300_etcut | HLT_e60_lhmedium | HLT_e60_medium |"
 triggerNavChains += "HLT_2e15_lhvloose_nod0_L12EM13VH | HLT_2e17_lhvloose_nod0 | HLT_2e12_lhvloose_L12EM10VH | HLT_2e17_lhvloose_nod0_L12EM15VHI | HLT_2e24_lhvloose_nod0 | HLT_2e24_lhvloose_nod0_L12EM20VH |"
-triggerNavChains += "HLT_e17_lhloose_nod0_2e9_lhloose_nod0 | HLT_g35_loose_g25_loose | HLT_e17_lhloose_2e9_lhloose | HLT_e17_lhloose_nod0_2e10_lhloose_nod0_L1EM15VH_3EM8VH | HLT_e24_lhvloose_nod0_2e12_lhvloose_nod0_L1EM20VH_3EM10VH"
+triggerNavChains += "HLT_e17_lhloose_nod0_2e9_lhloose_nod0 | HLT_g35_loose_g25_loose | HLT_e17_lhloose_2e9_lhloose | HLT_e17_lhloose_nod0_2e10_lhloose_nod0_L1EM15VH_3EM8VH | HLT_e24_lhvloose_nod0_2e12_lhvloose_nod0_L1EM20VH_3EM10VH |"
+triggerNavChains += "HLT_e17_lhloose_nod0_mu14 | HLT_e26_lhmedium_nod0_mu8noL1 | HLT_e7_lhmedium_nod0_mu24 | HLT_e12_lhloose_nod0_2mu10 | HLT_2e12_lhloose_nod0_mu10 | HLT_e24_lhmedium_nod0_L1EM20VHI_mu8noL1  | HLT_e26_lhmedium_nod0_L1EM22VHI_mu8noL1  | HLT_e17_lhloose_mu14  | HLT_e7_lhmedium_mu24 | HLT_2e12_lhloose_mu10  | HLT_e12_lhloose_2mu10"
+
 
 
 from DerivationFrameworkCore.ThinningHelper import ThinningHelper
