@@ -33,7 +33,6 @@ class BcmCollisionTimeAlg : public AthReentrantAlgorithm {
       this, "BcmContainerName", "BCM_RDOs", ""};
   SG::WriteHandleKey<BcmCollisionTime> m_bcmCollisionTimeName{
       this, "BcmCollisionTimeName", "BcmCollisionTime", ""};
-  Gaudi::Property<float> m_timeCut{this, "TimeCut", 6.25, ""};
 };
 
 class deltat_data {
