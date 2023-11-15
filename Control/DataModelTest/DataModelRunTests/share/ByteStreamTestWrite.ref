@@ -1,25 +1,27 @@
-Py:Athena            INFO executing ROOT6Setup
 ApplicationMgr       INFO Application Manager Configured successfully
-AthDictLoaderSvc     INFO in initialize...
-AthDictLoaderSvc     INFO acquired Dso-registry
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
+EventInfoCnvAlg      INFO Initializing EventInfoCnvAlg
+EventI...foCnvTool   INFO Beam spot information not available
+EventI...foCnvTool   INFO Will not fill beam spot information into xAOD::EventInfo
 PyComponentMgr       INFO Initializing PyComponentMgr...
 LoadWriteDicts       INFO Initializing LoadWriteDicts...
-TrigSerializeCn...   INFO initialize()
-ToolSvc.TrigSer...   INFO Initializing
-DecisionSvc          INFO Inserting stream: StreamBSFileOutput with no Algs
-StreamBSFileOut...   INFO Initializing StreamBSFileOutput.DefaultNameTool
-ByteStreamEvent...   INFO Initializing
-ByteStreamEvent...   INFO eformat version to use: " 'EformatVersion':'current'"
-ByteStreamEvent...   INFO event storage (BS) version to use: " 'EventStorageVersion':'current'"
-ByteStreamEvent...   INFO Reinitialization...
-StreamBSFileOutput   INFO Data output: ByteStreamEventStorageOutputSvc
-StreamBSFileOutput   INFO ../O reinitialization...
+TrigSe...izeCnvSvc   INFO initialize()
+To...TrigSerTPTool   INFO Initializing
+AthDictLoaderSvc     INFO in initialize...
+AthDictLoaderSvc     INFO acquired Dso-registry
+DecisionSvc          INFO Inserting stream: BSOutputStreamAlg with no Algs
+BSOutp...amAlgTool   INFO Initializing BSOutputStreamAlg.BSOutputStreamAlgTool
+ByteSt...OutputSvc   INFO Initializing
+ByteSt...OutputSvc   INFO eformat version to use: " 'EformatVersion':'current'"
+ByteSt...OutputSvc   INFO event storage (BS) version to use: " 'EventStorageVersion':'current'"
+ByteSt...OutputSvc   INFO Reinitialization...
+BSOutputStreamAlg    INFO Data output: ByteStreamEventStorageOutputSvc
+BSOutputStreamAlg    INFO ../O reinitialization...
 EventSelector        INFO  Enter McEventSelector Initialization 
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr       INFO Application Manager Started successfully
-EventPersistenc...   INFO Added successfully Conversion service:McCnvSvc
+EventP...stencySvc   INFO Added successfully Conversion service:McCnvSvc
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
 MetaDataSvc          INFO Initializing MetaDataSvc
@@ -27,7 +29,7 @@ ROBDataProviderSvc   INFO Initializing
 ROBDataProviderSvc   INFO  ---> Filter out empty ROB fragments                               =  'filterEmptyROB':False
 ROBDataProviderSvc   INFO  ---> Filter out specific ROBs by Status Code: # ROBs = 0
 ROBDataProviderSvc   INFO  ---> Filter out Sub Detector ROBs by Status Code: # Sub Detectors = 0
-ByteStreamEvent...WARNING failed to retrieve ByteStreamMetaData
+ByteSt...OutputSvcWARNING failed to retrieve ByteStreamMetaData
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
@@ -68,11 +70,10 @@ AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #0 19 events 
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #20, run #0 19 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
 ApplicationMgr       INFO Application Manager Stopped successfully
-ByteStreamEvent...   INFO number of events written: 20
+ByteSt...OutputSvc   INFO number of events written: 20
 AthDictLoaderSvc     INFO in finalize...
 ToolSvc              INFO Removing all tools created by ToolSvc
-ToolSvc.TrigTSe...   INFO ToolSvc.TrigTSerializer no problems encountered
-ChronoStatSvc.f...   INFO  Service finalized successfully 
+ToolSv...erializer   INFO ToolSvc.TrigTSerializer no problems encountered
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
-Py:Athena            INFO leaving with code 0: "successful run"
+leaving with code 0: "successful run"

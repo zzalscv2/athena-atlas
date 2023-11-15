@@ -1,11 +1,7 @@
-Py:Athena            INFO executing ROOT6Setup
 ApplicationMgr       INFO Application Manager Configured successfully
-AthDictLoaderSvc     INFO in initialize...
-AthDictLoaderSvc     INFO acquired Dso-registry
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 PyComponentMgr       INFO Initializing PyComponentMgr...
 LoadReadDicts        INFO Initializing LoadReadDicts...
-MetaDataSvc          INFO Initializing MetaDataSvc
 EventSelector        INFO EventSelection with query 
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
@@ -607,10 +603,6 @@ xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Ba
 xAODTestReadCInfo    INFO cinfo  anInt1 21111 aFloat: 113.1 anInt2: 42111 dInt1: 63111 cEL: cvec[1]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
 ApplicationMgr       INFO Application Manager Stopped successfully
-XMLCatalog           INFO File 'xAODTestReadFilterRead_catalog.xml' does not exist. New file created.
-AthDictLoaderSvc     INFO in finalize...
-ToolSvc              INFO Removing all tools created by ToolSvc
-ChronoStatSvc.f...   INFO  Service finalized successfully 
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
-Py:Athena            INFO leaving with code 0: "successful run"
+leaving with code 0: "successful run"
