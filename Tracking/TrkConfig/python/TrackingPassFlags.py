@@ -3,9 +3,14 @@
 from __future__ import print_function
 
 import AthenaCommon.SystemOfUnits as Units
-from AthenaConfiguration.Enums import BeamType
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum
 from TrkConfig.TrkConfigFlags import PrimaryPassConfig
+
+class RoIStrategy(FlagEnum):
+    LeadTracks = 'LeadTracks'
+    Random = 'Random'
+    File = 'File'
+    TruthHS = 'TruthHS'
 
 def select( selInd, valuesmap ):
     for k,v in valuesmap.items():    
@@ -638,7 +643,7 @@ def createLowPtRoITrackingPassFlags():
     # Add custom flags valid for this pass only
     icf.addFlag("z0WindowRoI", 30.0) # mm
     icf.addFlag("doRandomSpot", False)
-    icf.addFlag("RoIStrategy", "LeadTracksRoISeedTool")
+    icf.addFlag("RoIStrategy", RoIStrategy.LeadTracks)
     icf.addFlag("inputLowPtRoIfile","")
 
     return icf
