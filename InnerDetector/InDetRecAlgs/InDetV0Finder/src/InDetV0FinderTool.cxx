@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -153,48 +153,43 @@ StatusCode InDetV0FinderTool::initialize()
 {
   ATH_CHECK( m_trackParticleKey.initialize() );
 
-// Get the right vertex fitting tool from ToolSvc 
+  // Get the right vertex fitting tool from ToolSvc
   if (m_useV0Fitter) {
     ATH_CHECK( m_iVertexFitter.retrieve() );
     ATH_MSG_DEBUG( "Retrieved tool " << m_iVertexFitter);
- 
-    ATH_CHECK( m_iGammaFitter.retrieve() );
-    ATH_MSG_DEBUG("Retrieved tool " << m_iGammaFitter);
-
   } else {
     ATH_CHECK( m_iVKVertexFitter.retrieve() );
     ATH_MSG_DEBUG("Retrieved tool " << m_iVKVertexFitter);
 
-// Get the VKalVrt Ks vertex fitting tool from ToolSvc
+    // Get the VKalVrt Ks vertex fitting tool from ToolSvc
     ATH_CHECK( m_iKshortFitter.retrieve() );
     ATH_MSG_DEBUG("Retrieved tool " << m_iKshortFitter);
 
-// Get the VKalVrt Lambda vertex fitting tool from ToolSvc
+    // Get the VKalVrt Lambda vertex fitting tool from ToolSvc
     ATH_CHECK( m_iLambdaFitter.retrieve() );
     ATH_MSG_DEBUG( "Retrieved tool " << m_iLambdaFitter);
 
-// Get the VKalVrt Lambdabar vertex fitting tool from ToolSvc
+    // Get the VKalVrt Lambdabar vertex fitting tool from ToolSvc
     ATH_CHECK( m_iLambdabarFitter.retrieve() );
     ATH_MSG_DEBUG("Retrieved tool " << m_iLambdabarFitter);
-
-// Get the VKalVrt Gamma vertex fitting tool from ToolSvc
-    ATH_CHECK( m_iGammaFitter.retrieve() );
-    ATH_MSG_DEBUG( "Retrieved tool " << m_iGammaFitter );
   }
 
-// get the Particle Properties Service
+  ATH_CHECK( m_iGammaFitter.retrieve() );
+  ATH_MSG_DEBUG("Retrieved tool " << m_iGammaFitter);
+
+  // get the Particle Properties Service
   IPartPropSvc* partPropSvc = nullptr;
   ATH_CHECK( service("PartPropSvc", partPropSvc, true) );
   m_particleDataTable = partPropSvc->PDT();
 
-// uploading the V0 tools
+  // uploading the V0 tools
   ATH_CHECK( m_V0Tools.retrieve() );
   ATH_MSG_DEBUG("Retrieved tool " << m_V0Tools);
 
-// Get the TrackToVertex extrapolator tool
+  // Get the TrackToVertex extrapolator tool
   ATH_CHECK( m_trackToVertexTool.retrieve() );
 
-// Get the extrapolator
+  // Get the extrapolator
   ATH_CHECK( m_extrapolator.retrieve() );
   ATH_MSG_DEBUG("Retrieved tool ");
 
@@ -529,7 +524,6 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
                         if (myKshort) {
                           if (m_V0Tools->vertexProbability(myKshort.get()) >= m_minConstrVertProb) {
                             myKshort->setVertexType(xAOD::VxType::V0Vtx);
-                            //myKshort->setVertexType(xAOD::VxType::V0KShort);
                             foundKshort = true;
                           }
                         }
@@ -743,7 +737,8 @@ bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::Tr
     double sig_d0_1 = sqrt((*per1->covariance())(0,0));
     double d0_2 = per2->parameters()[Trk::d0];
     double sig_d0_2 = sqrt((*per2->covariance())(0,0));
-    if (fabs(d0_1/sig_d0_1) > m_d0_cut && fabs(d0_2/sig_d0_2) > m_d0_cut) return true;
+    if (std::abs(d0_1/sig_d0_1) > m_d0_cut &&
+	std::abs(d0_2/sig_d0_2) > m_d0_cut) return true;
     if (++count >= m_maxPV) break;
   }
   return pass;
@@ -762,7 +757,8 @@ bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::Tr
   double sig_d0_1 = sqrt((*per1->covariance())(0,0));
   double d0_2 = per2->parameters()[Trk::d0];
   double sig_d0_2 = sqrt((*per2->covariance())(0,0));
-  if (fabs(d0_1/sig_d0_1) > m_d0_cut && fabs(d0_2/sig_d0_2) > m_d0_cut) pass = true; 
+  if (std::abs(d0_1/sig_d0_1) > m_d0_cut &&
+      std::abs(d0_2/sig_d0_2) > m_d0_cut) pass = true;
   return pass;
 }
 
@@ -779,7 +775,7 @@ bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::Tr
   double sig_d0_1 = sqrt((*per1->covariance())(0,0));
   double d0_2 = per2->parameters()[Trk::d0];
   double sig_d0_2 = sqrt((*per2->covariance())(0,0));
-  if (fabs(d0_1/sig_d0_1) > m_d0_cut && fabs(d0_2/sig_d0_2) > m_d0_cut) pass = true; 
+  if (std::abs(d0_1/sig_d0_1) > m_d0_cut && std::abs(d0_2/sig_d0_2) > m_d0_cut) pass = true; 
   return pass;
 }
 
@@ -788,17 +784,11 @@ bool InDetV0FinderTool::pointAtVertex(const xAOD::Vertex* v0, const xAOD::Vertex
   bool pass = false;
   double v0lxy = m_V0Tools->lxy(v0,PV);
   double v0lxyError = m_V0Tools->lxyError(v0,PV);
-  double cos = -1;
-  //if (PV->vxTrackAtVertexAvailable()) {
-  //  double prod = m_V0Tools->V0Momentum(v0).dot(m_V0Tools->V0Momentum(PV));
-  //  cos = prod/(m_V0Tools->V0Momentum(v0).mag()*m_V0Tools->V0Momentum(PV).mag());
-  //} else {
-    cos = m_V0Tools->cosTheta(v0,PV);
-  //}
+  double cos = m_V0Tools->cosTheta(v0,PV);
   double v0a0xy = m_V0Tools->a0xy(v0,PV);
   double v0a0z = m_V0Tools->a0z(v0,PV);
   if (v0lxy/v0lxyError > m_vert_lxy_sig && cos > 0. &&
-      fabs(v0a0xy) < m_vert_a0xy_cut && fabs(v0a0z) < m_vert_a0z_cut &&
+      std::abs(v0a0xy) < m_vert_a0xy_cut && std::abs(v0a0z) < m_vert_a0z_cut &&
       v0lxy < m_vert_lxy_cut) pass = true;
   return pass;
 }
