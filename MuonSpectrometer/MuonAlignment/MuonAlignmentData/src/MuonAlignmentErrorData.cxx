@@ -4,16 +4,25 @@
 
 #include "MuonAlignmentData/MuonAlignmentErrorData.h"
 
-MuonAlignmentErrorData::MuonAlignmentErrorData() : m_test(0), m_vec(0) {}
+void MuonAlignmentErrorData::setDeviations(std::vector<Deviation> vec) {
+    m_deviations = std::move(vec);
+}
 
-MuonAlignmentErrorData::~MuonAlignmentErrorData() = default;
+const std::vector<MuonAlignmentErrorData::Deviation>& MuonAlignmentErrorData::getDeviations() const {
+    return m_deviations;
+}
 
-deviationStr::deviationStr() : traslation(0.), rotation(0.), stationName(""), multilayer("") {}
+void MuonAlignmentErrorData::setClobVersion(std::string clobVersion) {
+    m_clobVersion = std::move(clobVersion);
+}
+const std::string& MuonAlignmentErrorData::getClobVersion() const {
+    return m_clobVersion;
+}
 
-deviationStr::~deviationStr() = default;
+void MuonAlignmentErrorData::setHasNswHits(bool val) {
+    m_hasNswHits = val;
+}
+bool MuonAlignmentErrorData::hasNswHits() const {
+    return m_hasNswHits;
+}
 
-void MuonAlignmentErrorData::setVec(const std::vector<deviationStr>& vec) { m_vec = vec; }
-
-void MuonAlignmentErrorData::getVec(std::vector<deviationStr>& vec) const { vec = m_vec; }
-
-void MuonAlignmentErrorData::clearVec() { m_vec.clear(); }

@@ -37,6 +37,21 @@ namespace MuonAlign {
          */
         virtual void print(std::ostream& out) const;
 
+        /**
+        * Get the rotation center
+        */
+        const Amg::Vector3D& getCenter() const { return m_center; }
+
+        /**
+        * Get the rotation axis
+        */
+        const Amg::Vector3D& getAxis() const { return m_axis; }
+
+        /**
+        * Get the error to apply to this NP
+        */
+        double getSigma() const { return m_sigma; }
+
     private:
         Amg::Vector3D m_center;
         Amg::Vector3D m_axis;

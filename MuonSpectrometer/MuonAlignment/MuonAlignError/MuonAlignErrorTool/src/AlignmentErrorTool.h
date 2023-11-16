@@ -5,9 +5,9 @@
 #ifndef MUONALIGNERRORTOOL_ALIGNMENTERRORTOOL_H
 #define MUONALIGNERRORTOOL_ALIGNMENTERRORTOOL_H
 
-#include <boost/regex.hpp>
 #include <iosfwd>
 #include <string>
+#include <boost/regex.hpp>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -28,10 +28,15 @@ namespace MuonAlign {
 
     class AlignmentErrorTool : public Trk::ITrkAlignmentDeviationTool, virtual public AthAlgTool {
     public:
-        AlignmentErrorTool(const std::string&, const std::string&, const IInterface*);
-        virtual ~AlignmentErrorTool() = default;
-        virtual StatusCode initialize();
-        virtual void makeAlignmentDeviations(const Trk::Track& track, std::vector<Trk::AlignmentDeviation*>& deviations) const;
+
+     AlignmentErrorTool(const std::string&, const std::string&,
+                        const IInterface*);
+      ~AlignmentErrorTool() override = default;
+
+      StatusCode initialize() override;
+      void makeAlignmentDeviations(
+         const Trk::Track& track,
+         std::vector<Trk::AlignmentDeviation*>& deviations) const override;
 
     private:
         ToolHandle<MuonCalib::IIdToFixedIdTool> m_idTool{this, "idTool", "MuonCalib::IdToFixedIdTool"};
@@ -39,34 +44,30 @@ namespace MuonAlign {
 
         // Struct for per-Station Deviations Information //
         struct deviationSummary_t {
-            deviationSummary_t();
-            ~deviationSummary_t() = default;
-            // static int i_instance; // TMP DEBUG
-
             // SYSTEMATIC UNCERTAINTIES
-            double traslation;
-            double rotation;
+            double translation{0.0};
+            double rotation{0.0};
             // RULE
-            boost::regex stationName;
-            boost::regex multilayer;
+            boost::regex stationName{""};
+            boost::regex multilayer{""};
             // SET OF HITS SATISFYING THE RULE
-            std::vector<const Trk::RIO_OnTrack*> hits;
+            std::vector<const Trk::RIO_OnTrack*> hits{};
             // USEFUL NUMBERS
-            Amg::Vector3D sumP;
-            Amg::Vector3D sumU;
-            Amg::Vector3D sumV;
-            double sumW2;
+            Amg::Vector3D sumP{Amg::Vector3D::Zero()};
+            Amg::Vector3D sumU{Amg::Vector3D::Zero()};
+            Amg::Vector3D sumV{Amg::Vector3D::Zero()};
+            double sumW2{0.0};
         };
 
         // SOME USEFUL METHODS //
         // GET STATION EXACT NAME, FROM:
-        // https://svnweb.cern.ch/cern/wsvn/atlas-giraudpf/giraudpf/MuonSpectrometer/MuonAlignment/MuonAlignTrk/trunk/MuonAlignTrk/MuonFixedId.h
-        std::string hardwareName(MuonCalib::MuonFixedId calibId) const;
-        std::string side(MuonCalib::MuonFixedId calibId) const;
-        std::string sectorString(MuonCalib::MuonFixedId calibId) const;
-        int sector(MuonCalib::MuonFixedId calibId) const;
-        int hardwareEta(MuonCalib::MuonFixedId calibId) const;
-        bool isSmallSector(MuonCalib::MuonFixedId calibId) const;
+        // https://gitlab.cern.ch/Asap/AsapModules/Track/MuonAlignTrk/-/blob/master/MuonAlignTrk/MuonFixedLongId.h?ref_type=heads
+        std::string hardwareName(MuonCalib::MuonFixedLongId calibId) const;
+        std::string_view side(MuonCalib::MuonFixedLongId calibId) const;
+        std::string sectorString(MuonCalib::MuonFixedLongId calibId) const;
+        int sector(MuonCalib::MuonFixedLongId calibId) const;
+        int hardwareEta(MuonCalib::MuonFixedLongId calibId) const;
+        bool isSmallSector(MuonCalib::MuonFixedLongId calibId) const;
 
         SG::ReadCondHandleKey<MuonAlignmentErrorData> m_readKey{this, "ReadKey", "MuonAlignmentErrorData", "Key of MuonAlignmentErrorData"};
     };

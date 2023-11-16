@@ -36,6 +36,16 @@ namespace MuonAlign {
          */
         virtual void print(std::ostream& out) const;
 
+        /**
+        * Get the translation direction vector
+        */
+        const Amg::Vector3D& getU() const { return m_u; }
+
+        /**
+        * Get the error to apply to this NP
+        */
+        double getSigma() const { return m_sigma; }
+
     private:
         Amg::Vector3D m_u;  // unit vector
         double m_sigma;
