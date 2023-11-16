@@ -388,9 +388,9 @@ def generateSubDetectorList(flags):
     if flags.Detector.GeometryLucid:
         toolLucid = result.popToolsAndMerge(LucidGeoDetectorToolCfg(flags))
         SubDetectorList += [ toolLucid ]
-    if flags.Detector.GeometryForward:
-        toolForward = result.popToolsAndMerge(ForwardRegionEnvelopeCfg(flags))
-        SubDetectorList += [ toolForward ]
+    if flags.Detector.GeometryFwdRegion or flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryZDC:
+        toolFwdRegion = result.popToolsAndMerge(ForwardRegionEnvelopeCfg(flags))
+        SubDetectorList += [ toolFwdRegion ]
 
     #if DetFlags.Muon_on(): #HACK
     #    SubDetectorList += ['MUONQ02'] #FIXME rename to MUON when safe #HACK
