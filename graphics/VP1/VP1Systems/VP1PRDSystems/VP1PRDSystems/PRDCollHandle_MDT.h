@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PRDCOLLHANDLE_MDT_H
@@ -25,7 +25,7 @@ public:
   PROJECTION projection() const { return m_projection; }
 
 
-public slots:
+public Q_SLOTS:
   void setMinNHitsPerStation(unsigned);
   void setAllowedADCValues(const VP1Interval&);
   void setExcludeMaskedHits(bool);

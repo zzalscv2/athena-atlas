@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PRDCOLLHANDLE_PIXEL_H
@@ -19,7 +19,7 @@ public:
   PRDCollHandle_Pixel(PRDSysCommonData *,const QString& key);
   virtual ~PRDCollHandle_Pixel();
 
-public slots:
+public Q_SLOTS:
   void setPartsFlags(PRDCommonFlags::InDetPartsFlags);//BarrelA, BarrelC, EndcapA, EndcapC
   void setMinNRDOPerCluster(unsigned);
 

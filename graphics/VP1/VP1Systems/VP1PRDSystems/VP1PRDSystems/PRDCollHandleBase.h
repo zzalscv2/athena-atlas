@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PRDCOLLECTIONHANDLEBASE_H
@@ -73,7 +73,7 @@ public:
   bool simpleDetailLevel() const { return detailLevel()==SIMPLE; }
 signals:
   void detailLevelChanged();
-public slots:
+public Q_SLOTS:
   void setGeneralPRDDetailLevel(DETAIL);
   void setColourMethod(PRDCollHandleBase::COLOURMETHOD);
   void setDrawErrors(bool);
@@ -83,7 +83,7 @@ public slots:
   void setAllowedEta(const VP1Interval&);
   void setAllowedPhi(const QList<VP1Interval>&);
 
-private slots:
+private Q_SLOTS:
   void detailComboBoxItemChanged();
 
 protected:
@@ -129,7 +129,7 @@ protected:
   QList<QWidget*> provideExtraWidgetsForGuiRow() const;
   QByteArray extraWidgetsState() const;
   void setExtraWidgetsState(const QByteArray&);
-private slots:
+private Q_SLOTS:
   void collVisibilityChanged(bool);
 private:
 

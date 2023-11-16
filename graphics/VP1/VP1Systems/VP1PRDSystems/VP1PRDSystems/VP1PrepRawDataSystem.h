@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1PREPRAWDATASYSTEM_H
@@ -45,7 +45,7 @@ public:
   QByteArray saveState();
   void restoreFromState(QByteArray);
 
-public slots:
+public Q_SLOTS:
   void visibleTracksChanged(const std::vector< std::pair<const Trk::Track*, const SoMaterial*> >&);
   void visibleSegmentsChanged(const std::vector< std::pair<const Trk::Segment*, const SoMaterial*> >&);
   void appropriateMDTProjectionsChanged(int);//0: No projections, 1: Project to end of tubes, 2: Project to end of chamber volume.
@@ -60,7 +60,7 @@ signals:
   void usedIDProjectionsChanged( InDetProjFlags::DetTypeFlags );
   void selectedPRDsChanged(const QList<const Trk::PrepRawData*>&);
 
-private slots:
+private Q_SLOTS:
   void emitTouchedMuonChambersChanged(const std::set<GeoPVConstLink>&);//for TouchedMuonChamberHelper
   void emitUsedIDProjectionsChanged(InDetProjFlags::DetTypeFlags);//for controller
   void selectionModeChanged();
