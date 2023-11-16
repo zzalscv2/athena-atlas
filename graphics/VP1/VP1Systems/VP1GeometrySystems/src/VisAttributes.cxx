@@ -144,7 +144,7 @@ float VisAttributes::getValFromRGB(const int rgb)
     return rgb/255.0;
 }
 
-void VisAttributes::setColorFromRGB(SoMaterial* mat, std::string type, const int r, const int g, const int b)
+void VisAttributes::setColorFromRGB(SoMaterial* mat, const std::string& type, const int r, const int g, const int b)
 {
     const float fr = getValFromRGB(r);
     const float fg = getValFromRGB(g);

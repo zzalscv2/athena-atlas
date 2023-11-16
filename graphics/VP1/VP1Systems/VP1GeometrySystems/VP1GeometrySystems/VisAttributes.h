@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1GEOMETRYSYSTEMS_GEOVISATTRIBUTES_H
@@ -40,7 +40,7 @@ class VisAttributes {
   void add(const std::string & name, SoMaterial *);
 
   // set SoMaterial color from RGB values
-  void setColorFromRGB(SoMaterial* mat, std::string type, const int r, const int g, const int b);
+  void setColorFromRGB(SoMaterial* mat, const std::string& type, const int r, const int g, const int b);
 
  private:
 
