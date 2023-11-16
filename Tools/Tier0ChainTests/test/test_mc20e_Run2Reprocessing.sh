@@ -44,6 +44,7 @@ echo "art-result: $rc1 Reco"
 
 rc2=-9999
 if [ ${rc1} -eq 0 ]
+then
     ArtRef=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/$1/TCT_22.0-mc20_references/$2
     art.py compare ref . $ArtRef --entries 30 --mode=semi-detailed --order-trees --ignore-exit-code diff-pool --ignore-leave '(.*)TrackParticleAuxContainer_v5_HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Bjet_FTF(.*)' --ignore-leave '(.*)TrackParticleAuxContainer_v5_HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Bphysics_FTF(.*)' --ignore-leave '(.*)TrackParticleAuxContainer_v5_HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Muon_FTF(.*)' --ignore-leave '(.*)TrackParticleAuxContainer_v5_HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_FTF(.*)' --ignore-leave '(.*)TrackParticleAuxContainer_v5_HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Tau_FTF(.*)'
     rc2=$?
