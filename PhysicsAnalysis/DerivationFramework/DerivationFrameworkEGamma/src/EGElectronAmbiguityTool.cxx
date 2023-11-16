@@ -140,11 +140,13 @@ EGElectronAmbiguityTool::addBranches() const
   // retrieve primary vertex
   const xAOD::Vertex* pvtx(nullptr);
   SG::ReadHandle<xAOD::VertexContainer> inputVtx{ m_VtxContainerName, ctx };
-  const xAOD::VertexContainer* vtxC = inputVtx.ptr();
-  for (const auto* vertex : *vtxC) {
-    if (vertex->vertexType() == xAOD::VxType::VertexType::PriVtx) {
-      pvtx = vertex;
-      break;
+  if (inputVtx.ptr()){
+    const xAOD::VertexContainer* vtxC = inputVtx.ptr();
+    for (const auto* vertex : *vtxC) {
+      if (vertex->vertexType() == xAOD::VxType::VertexType::PriVtx) {
+        pvtx = vertex;
+        break;
+      }
     }
   }
 
