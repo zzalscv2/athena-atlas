@@ -4,6 +4,26 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ForwardRegionProperties.ForwardRegionPropertiesConfig import resolveTwissBeamFilePath, buildTwissFilePath
 
+def ForwardTransportBeta055mPreInclude(flags): # TODO think of a better name for this preInclude
+    flags.Sim.TwissFileBeam1="3.5TeV/0000.55m/nominal/v01/beam1.tfs"
+    flags.Sim.TwissFileBeam2="3.5TeV/0000.55m/nominal/v01/beam2.tfs"
+    from AthenaCommon.SystemOfUnits import TeV,m
+    flags.Beam.Energy=3.5*TeV
+    flags.Sim.TwissFileBeta=0.55*m
+    flags.Sim.TwissFileNomReal='nominal'
+    flags.Sim.TwissFileVersion="v01"
+
+
+def ForwardTransportBeta90mPreInclude(flags): # TODO think of a better name for this preInclude
+    flags.Sim.TwissFileBeam1="3.5TeV/0090.00m/nominal/v02/beam1.tfs"
+    flags.Sim.TwissFileBeam2="3.5TeV/0090.00m/nominal/v02/beam2.tfs"
+    from AthenaCommon.SystemOfUnits import TeV,m
+    flags.Beam.Energy=3.5*TeV
+    flags.Sim.TwissFileBeta=90.*m
+    flags.Sim.TwissFileNomReal='nominal'
+    flags.Sim.TwissFileVersion="v02"
+
+
 def ForwardTransportSvcCfg(flags, name="ForwardTransportSvc", **kwargs):
     from AthenaCommon.Logging import logging
     msg = logging.getLogger("ForwardTransportSvcCfg")
