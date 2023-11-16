@@ -79,7 +79,7 @@ StreamAOD.ItemList+=["xAOD::JetRoIAuxContainer#*"]
 StreamAOD.ItemList+=["xAOD::ElectronContainer#Electrons"]
 StreamAOD.ItemList+=["xAOD::ElectronAuxContainer#ElectronsAux."]
 StreamAOD.ItemList+=["xAOD::TauJetContainer#TauJets"]
-StreamAOD.ItemList+=["xAOD::TauJetAuxContainer#TauJetsAux.-VertexedClusters."]
+StreamAOD.ItemList+=["xAOD::TauJetAuxContainer#TauJetsAux.-VertexedClusters"]
 
 
 

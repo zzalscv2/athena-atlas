@@ -227,7 +227,7 @@ PIXELVALIDStream.AddItem("xAOD::VertexAuxContainer#PrimaryVerticesAux.-vxTrackAt
 PIXELVALIDStream.AddItem("xAOD::ElectronContainer#Electrons")
 PIXELVALIDStream.AddItem("xAOD::ElectronAuxContainer#ElectronsAux.")
 PIXELVALIDStream.AddItem("xAOD::TauJetContainer#TauJets")
-PIXELVALIDStream.AddItem("xAOD::TauJetAuxContainer#TauJetsAux.-VertexedClusters.")
+PIXELVALIDStream.AddItem("xAOD::TauJetAuxContainer#TauJetsAux.-VertexedClusters")
 PIXELVALIDStream.AddItem("xAOD::JetContainer#AntiKt4LCTopoJets")
 PIXELVALIDStream.AddItem("xAOD::JetAuxContainer#AntiKt4LCTopoJetsAux.-PseudoJet")
 PIXELVALIDStream.AddItem("xAOD::BTaggingContainer#BTagging_AntiKt4LCTopo")
