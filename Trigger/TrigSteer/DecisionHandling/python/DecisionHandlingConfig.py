@@ -2,6 +2,9 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # 
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+
 EnableFilterMonitoring = False  # Can be changed in a precommand/preExec
 
 def setupFilterMonitoring( flags, filterAlg ):
@@ -31,7 +34,12 @@ def TriggerSummaryAlg( flags, name ):
     alg.MonTool = monTool
     return alg
 
-def ComboHypoCfg( name ):    
-    alg = CompFactory.ComboHypo( name )
-    return alg
+def ComboHypoCfg(name ):    
+    alg = CompFactory.ComboHypo( name ) 
+    if isComponentAccumulatorCfg():         
+        acc= ComponentAccumulator()  
+        acc.addEventAlgo(alg)
+        return acc
+    else:
+        return alg
 

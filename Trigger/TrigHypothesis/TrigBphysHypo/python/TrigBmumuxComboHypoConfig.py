@@ -137,9 +137,5 @@ def TrigBmumuxComboHypoToolFromDict(flags, chainDict):
     tool.isBmux = True if 'bBmux' in chainDict['topo'] else False
     monGroups = ['bphysMon:online']
     if any(group in monGroups for group in chainDict['monGroups']):
-        tool.MonTool = TrigBmumuxComboHypoToolMonitoring(flags, 'MonTool')
-    if isComponentAccumulatorCfg():
-        acc = ComponentAccumulator()
-        acc.setPrivateTools(tool)
-        return acc
-    else:  return tool
+        tool.MonTool = TrigBmumuxComboHypoToolMonitoring(flags, 'MonTool')    
+    return tool

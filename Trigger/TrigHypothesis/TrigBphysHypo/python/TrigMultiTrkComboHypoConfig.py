@@ -275,10 +275,5 @@ def ConfigurationComboHypoTool(flags, chainDict):
    monGroups = ['bphysMon:online']
    if any(group in monGroups for group in chainDict['monGroups']):
         tool.MonTool = TrigMultiTrkComboHypoToolMonitoring(flags, 'MonTool')
-   if isComponentAccumulatorCfg():
-        acc = ComponentAccumulator()
-        acc.setPrivateTools(tool)
-        return acc
-   else:
-        return tool
+   return tool
 
