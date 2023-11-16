@@ -301,9 +301,9 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
 		   << iovHashVect[indIOV].first);
     }
 
-    std::string reply = indIOV==-1? std::string{} : cfunctions.getPayloadForHash(iovHashVect[indIOV].second);
+    const std::string & reply = indIOV==-1? std::string{} : cfunctions.getPayloadForHash(iovHashVect[indIOV].second);
 
-    if (m_crestToFile){
+    if (m_crestToFile and (indIOV>=0)){ //indIOV must be >=0, it's used as a vector index in this block
      
       unsigned long long sinceT =  iovHashVect[indIOV].first.first;
 
@@ -353,7 +353,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     }
 
     //basic folder now contains the info
-    if(!reply.empty()) {
+    if(!reply.empty()) { //this also takes care of the case if indIOV<0, since reply is empty in this case
       std::istringstream ss(reply);
       Json2Cool inputJson(ss, basicFolder, specString, &(iovHashVect[indIOV].first));
       if (basicFolder.empty()){
