@@ -136,20 +136,12 @@ def PhotonIsEMSelectorsCfg(ConfigFlags):
 
     if isFullSim:
         from EGammaVariableCorrection.EGammaVariableCorrectionConfig import (
-            ElectronPhotonVariableCorrectionToolCfg,
+            PhotonVariableCorrectionToolCfg,
         )
 
-        configFile = (
-            "EGammaVariableCorrection/TUNE23/ElPhVariableNominalCorrection.conf"
-        )
-        EGVariableCorrectionTool = acc.popToolsAndMerge(
-            ElectronPhotonVariableCorrectionToolCfg(
-                ConfigFlags,
-                name="EGVariableCorrectionTool",
-                ConfigFile=configFile,
-            )
-        )
-        acc.addPublicTool(EGVariableCorrectionTool)
+        PhotonVariableCorrectionTool = acc.popToolsAndMerge(
+            PhotonVariableCorrectionToolCfg(ConfigFlags))
+        acc.addPublicTool(PhotonVariableCorrectionTool)
 
     PhotonIsEMSelectorMedium = acc.popToolsAndMerge(
         AsgPhotonIsEMSelectorCfg(
@@ -160,7 +152,7 @@ def PhotonIsEMSelectorsCfg(ConfigFlags):
 
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGSelectionToolWrapperCfg
 
-    EGFudgeMCTool = EGVariableCorrectionTool if isFullSim else None
+    EGFudgeMCTool = PhotonVariableCorrectionTool if isFullSim else None
 
     PhotonPassIsEMMedium = acc.getPrimaryAndMerge(
         EGSelectionToolWrapperCfg(

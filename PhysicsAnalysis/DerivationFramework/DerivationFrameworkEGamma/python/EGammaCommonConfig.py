@@ -50,20 +50,16 @@ def EGammaCommonCfg(ConfigFlags):
 
     if isFullSim:
         from EGammaVariableCorrection.EGammaVariableCorrectionConfig import (
-            ElectronPhotonVariableCorrectionToolCfg,
+            ElectronVariableCorrectionToolCfg, PhotonVariableCorrectionToolCfg
         )
 
-        configFile = (
-            "EGammaVariableCorrection/TUNE26/ElPhVariableNominalCorrection.conf"
-        )
-        EGVariableCorrectionTool = acc.popToolsAndMerge(
-            ElectronPhotonVariableCorrectionToolCfg(
-                ConfigFlags,
-                name="EGVariableCorrectionTool",
-                ConfigFile=configFile,
-            )
-        )
-        acc.addPublicTool(EGVariableCorrectionTool)
+        ElectronVariableCorrectionTool = acc.popToolsAndMerge(
+            ElectronVariableCorrectionToolCfg(ConfigFlags))
+        acc.addPublicTool(ElectronVariableCorrectionTool)
+
+        PhotonVariableCorrectionTool = acc.popToolsAndMerge(
+            PhotonVariableCorrectionToolCfg(ConfigFlags))
+        acc.addPublicTool(PhotonVariableCorrectionTool)
 
     # ====================================================================
     # ELECTRON LH SELECTORS
@@ -410,7 +406,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassDNNLoose",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorLoose,
-            EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
+            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isFullSim else None),
             CutType="",
             StoreGateEntryName="DFCommonElectronsDNNLoose",
             ContainerName="Electrons",
@@ -433,7 +429,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassDNNMedium",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorMedium,
-            EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
+            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isFullSim else None),
             CutType="",
             StoreGateEntryName="DFCommonElectronsDNNMedium",
             ContainerName="Electrons",
@@ -447,7 +443,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="ElectronPassDNNTight",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorTight,
-            EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
+            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isFullSim else None),
             CutType="",
             StoreGateEntryName="DFCommonElectronsDNNTight",
             ContainerName="Electrons",
@@ -462,7 +458,7 @@ def EGammaCommonCfg(ConfigFlags):
                 ConfigFlags,
                 name="ElectronPassECIDS",
                 EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
-                EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
+                EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isFullSim else None),
                 CutType="",
                 StoreGateEntryName="DFCommonElectronsECIDS",
                 ContainerName="Electrons",
@@ -518,7 +514,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="PhotonPassIsEMLoose",
             EGammaSelectionTool=PhotonIsEMSelectorLoose,
-            EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
+            EGammaFudgeMCTool=(PhotonVariableCorrectionTool if isFullSim else None),
             CutType="",
             StoreGateEntryName="DFCommonPhotonsIsEMLoose",
             ContainerName="Photons",
@@ -533,7 +529,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="PhotonPassIsEMTight",
             EGammaSelectionTool=PhotonIsEMSelectorTight,
-            EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
+            EGammaFudgeMCTool=(PhotonVariableCorrectionTool if isFullSim else None),
             CutType="",
             StoreGateEntryName="DFCommonPhotonsIsEMTight",
             ContainerName="Photons",
@@ -549,7 +545,7 @@ def EGammaCommonCfg(ConfigFlags):
             ConfigFlags,
             name="PhotonPassIsEMTightPtIncl",
             EGammaSelectionTool=PhotonIsEMSelectorTightPtIncl,
-            EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
+            EGammaFudgeMCTool=(PhotonVariableCorrectionTool if isFullSim else None),
             CutType="",
             StoreGateEntryName="DFCommonPhotonsIsEMTightPtIncl",
             ContainerName="Photons",
@@ -564,7 +560,7 @@ def EGammaCommonCfg(ConfigFlags):
         EGPhotonCleaningWrapperCfg(
             ConfigFlags,
             name="PhotonPassCleaning",
-            EGammaFudgeMCTool=(EGVariableCorrectionTool if isFullSim else None),
+            EGammaFudgeMCTool=(PhotonVariableCorrectionTool if isFullSim else None),
             StoreGateEntryName="DFCommonPhotonsCleaning",
             ContainerName="Photons",
         )
