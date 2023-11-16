@@ -27,6 +27,7 @@ echo "art-result: $rc1 Reco_tf_data16_mt"
 
 rc2=-9999
 if [ ${rc1} -eq 0 ]
+then
     ArtRef=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/$1/TCT_22.0-mc20_references/$2
     art.py compare ref . $ArtRef --entries 30 --mode=semi-detailed --order-trees --ignore-exit-code diff-pool --ignore-leave '(.*)HLTResult_p1_HLTResult_HLT(.*)' --ignore-leave 'TrigNavigationAux(.*)'
     rc2=$?
