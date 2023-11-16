@@ -13,29 +13,18 @@
 #include <fstream>
 #include <sstream>
 
-#include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "MuonAlignErrorBase/AlignmentRotationDeviation.h"
 #include "MuonAlignErrorBase/AlignmentTranslationDeviation.h"
-#include "PathResolver/PathResolver.h"
 #include "TrkCompetingRIOsOnTrack/CompetingRIOsOnTrack.h"
 #include "TrkPrepRawData/PrepRawData.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "TrkTrack/Track.h"
 
-using namespace MuonAlign;
+namespace MuonAlign {
 
 AlignmentErrorTool::AlignmentErrorTool(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t, n, p) {
     declareInterface<Trk::ITrkAlignmentDeviationTool>(this);
 }
-
-AlignmentErrorTool::deviationSummary_t::deviationSummary_t() :
-    traslation(0.),
-    rotation(0.),
-    stationName(""),
-    sumP(Amg::Vector3D(0., 0., 0.)),
-    sumU(Amg::Vector3D(0., 0., 0.)),
-    sumV(Amg::Vector3D(0., 0., 0.)),
-    sumW2(0.) {}
 
 StatusCode AlignmentErrorTool::initialize() {
     ATH_MSG_INFO("*****************************************");
@@ -57,22 +46,16 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
         ATH_MSG_ERROR("nullptr to the read conditions object");
         return;
     }
-    std::vector<deviationStr> devStrVec;
-    readCdo->getVec(devStrVec);
-    std::vector<deviationSummary_t*> devSumVec;
-    for (auto & i : devStrVec) {
-        deviationSummary_t* tmp = new deviationSummary_t;
-        tmp->traslation = i.traslation;
-        tmp->rotation = i.rotation;
-        tmp->stationName = i.stationName;
-        tmp->multilayer = i.multilayer;
-        tmp->hits.clear();
-        Amg::Vector3D nullvec(0., 0., 0.);
-        tmp->sumP = nullvec;
-        tmp->sumU = nullvec;
-        tmp->sumV = nullvec;
-        tmp->sumW2 = 0.;
-        devSumVec.push_back(tmp);
+    const auto& deviationVec = readCdo->getDeviations();
+    std::vector<deviationSummary_t> devSumVec;
+    devSumVec.reserve(deviationVec.size());
+    deviationSummary_t aDevSumm;
+    for (auto & i : deviationVec) {
+        aDevSumm.translation = i.translation;
+        aDevSumm.rotation = i.rotation;
+        aDevSumm.stationName = i.stationName;
+        aDevSumm.multilayer = i.multilayer;
+        devSumVec.emplace_back(std::move(aDevSumm));
     }
 
     typedef Trk::TrackStates tsosc_t;
@@ -81,207 +64,225 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
     // LOOP ON HITS ON TRACK //
     unsigned int nPrecisionHits = 0;
     for (const auto *tsos : *tsosc) {
-        if (tsos->type(Trk::TrackStateOnSurface::Measurement)) {
-            const Trk::MeasurementBase* meas = tsos->measurementOnTrack();
-            const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(meas);
+        if (!tsos->type(Trk::TrackStateOnSurface::Measurement)) {
+            continue;
+        }
+        const Trk::MeasurementBase* meas = tsos->measurementOnTrack();
+        const auto* rot = dynamic_cast<const Trk::RIO_OnTrack*>(meas);
 
-            if (!rot) {
-                const Trk::CompetingRIOsOnTrack* crot = dynamic_cast<const Trk::CompetingRIOsOnTrack*>(meas);
-                if (crot) {
-                    unsigned int index = crot->indexOfMaxAssignProb();
-                    rot = &(crot->rioOnTrack(index));
-                }
+        if (!rot) {
+            const auto* crot = dynamic_cast<const Trk::CompetingRIOsOnTrack*>(meas);
+            if (crot) {
+                unsigned int index = crot->indexOfMaxAssignProb();
+                rot = &(crot->rioOnTrack(index));
             }
-            if (!rot) continue;
+        }
+        if (!rot) continue;
 
-            Identifier channelId = rot->identify();
-            if (!m_idHelperSvc->isMuon(channelId)) {
-                // the RIO_OnTrack Identifiers could also come from ID or Calo, but this tool is only interested in MS hits
-                ATH_MSG_VERBOSE("Given Identifier " << channelId.get_compact() << " is no muon Identifier, continuing");
+        Identifier channelId = rot->identify();
+        if (!m_idHelperSvc->isMuon(channelId)) {
+            // the RIO_OnTrack Identifiers could also come from ID or Calo, but this tool is only interested in MS hits
+            ATH_MSG_VERBOSE("Given Identifier " << channelId.get_compact() << " is not a muon Identifier, continuing");
+            continue;
+        }
+
+        // Keep only the precision coordinate hits
+        if (m_idHelperSvc->isRpc(channelId)
+            || m_idHelperSvc->isTgc(channelId)
+            || (m_idHelperSvc->isCsc(channelId) && m_idHelperSvc->cscIdHelper().measuresPhi(channelId) == 1)
+            || (m_idHelperSvc->issTgc(channelId) && m_idHelperSvc->stgcIdHelper().channelType(channelId) != sTgcIdHelper::sTgcChannelTypes::Strip)) {
+            continue;
+        }
+
+        // To maintain backward compatibility with the old error CLOBs, activate
+        // the NSW hits only if specified in the CLOB, else disccard them
+        if (!readCdo->hasNswHits()
+            && (m_idHelperSvc->issTgc(channelId) || m_idHelperSvc->isMM(channelId))) {
+            continue;
+        }
+
+        MuonCalib::MuonFixedLongId calibId = m_idTool->idToFixedLongId(channelId);
+        if (!calibId.isValid()) continue;
+
+        // GATHERING INFORMATION TO PUT TOGETHER THE STATION NAME //
+        std::string alignStationName = hardwareName(calibId);
+        int multilayer = 1;
+        if (calibId.is_mdt()) {
+            multilayer = calibId.mdtMultilayer();
+        } else if (calibId.is_mmg()) {
+            multilayer = calibId.mmgMultilayer();
+        } else if (calibId.is_stg()) {
+            multilayer = calibId.stgMultilayer();
+        }
+        std::string multilayerName = std::to_string(multilayer);
+
+        ATH_MSG_DEBUG("Hit is in station " << alignStationName << " multilayer " << multilayerName);
+        ++nPrecisionHits;
+
+        // FOR CROSS-CHECK
+        bool is_matched = false;
+
+        // LOOP ON STATION DEVIATIONS EXTRACTED FROM INPUT FILE //
+        for (auto & iDev : devSumVec) {
+            // try to regexp-match the station name and the multilayer name
+            if (!boost::regex_match(alignStationName, iDev.stationName)) {
                 continue;
             }
-            if (m_idHelperSvc->isMM(channelId) || m_idHelperSvc->issTgc(channelId) || 
-                (m_idHelperSvc->isRpc(channelId) && m_idHelperSvc->stationIndex(channelId) == Muon::MuonStationIndex::BI)) continue;  // needs to be still implemented for the NSW
+            if (!boost::regex_match(multilayerName, iDev.multilayer)) {
+                continue;
+            }
 
-            MuonCalib::MuonFixedId calibId = m_idTool->idToFixedId(channelId);
-            if (!calibId.isValid()) continue;
+            // ASSOCIATE EACH NUISANCE TO A LIST OF HITS
+            iDev.hits.push_back(rot);
 
-            // GATHERING INFORMATION TO PUT TOGETHER THE STATION NAME //
-            std::string completename = hardwareName(calibId);
-            std::stringstream multilayer_stream;
-            multilayer_stream << calibId.mdtMultilayer();
-            std::string multilayer_sstring = multilayer_stream.str();
+            // COMPUTE RELEVANT NUMBERS
+            const Trk::PrepRawData* prd = rot->prepRawData();
+            const Trk::Surface& sur = prd->detectorElement()->surface(prd->identify());
 
-            if (m_idHelperSvc->isMdt(channelId) ||
-                (m_idHelperSvc->isCsc(channelId) && m_idHelperSvc->cscIdHelper().measuresPhi(channelId) == 0)) {
-                ATH_MSG_DEBUG("Hit is in station " << completename << " multilayer " << multilayer_sstring);
-                ++nPrecisionHits;
+            // Keep the old math until a further MR TODO(giraudpf)
+            // double w2 = 1.0 / (rot->localCovariance()(Trk::loc1, Trk::loc1));
+            double w2 = sqrt(rot->localCovariance()(Trk::loc1, Trk::loc1));
+            w2 = 1. / (w2 * w2);
 
-                // FOR CROSS-CHECK
-                bool is_matched = false;
+            iDev.sumW2 += w2;
+            iDev.sumP += w2 * tsos->trackParameters()->position();
+            iDev.sumU += w2 * tsos->trackParameters()->momentum().unit();
 
-                // LOOP ON STATION DEVIATIONS EXTRACTED FROM INPUT FILE //
-                for (auto & iDev : devSumVec) {
-                    // find a match to the reg exp //
-                    boost::regex tmp_stationName = iDev->stationName;
+            // CHECK 1 //
+            Amg::Vector3D zATLAS(0., 0., 1.);
+            Amg::Vector3D v1 = (tsos->trackParameters()->position()).cross(zATLAS);
+            v1 /= v1.mag();
+            Amg::Vector3D v2 = sur.transform().rotation().col(2) / (sur.transform().rotation().col(2)).mag();
+            double sign = (v1.dot(v2) > 0.) ? 1. : -1.;
 
-                    if (boost::regex_match(completename, tmp_stationName)) {
-                        if (!boost::regex_match(multilayer_sstring, iDev->multilayer) && !m_idHelperSvc->isCsc(channelId)) {
-                            continue;
-                        }
+            // ARTIFICIALLY ORIENTATE EVERYTHING TOWARDS THE SAME DIRECTION
+            iDev.sumV += sign * w2 * sur.transform().rotation().col(2);
 
-                        // ASSOCIATE EACH NUISANCE TO A LIST OF HITS
-                        iDev->hits.push_back(rot);
+            // FOR CROSS-CHECK
+            is_matched = true;
 
-                        // COMPUTE RELEVANT NUMBERS
-                        const Trk::PrepRawData* prd = rot->prepRawData();
-                        const Trk::Surface& sur = prd->detectorElement()->surface(prd->identify());
-                        double w2 = sqrt(rot->localCovariance()(Trk::loc1, Trk::loc1));
-                        w2 = 1. / (w2 * w2);
-                        iDev->sumW2 += w2;
-                        iDev->sumP += w2 * tsos->trackParameters()->position();
-                        iDev->sumU += w2 * tsos->trackParameters()->momentum().unit();
 
-                        // CHECK 1 //
-                        Amg::Vector3D zATLAS(0., 0., 1.);
-                        Amg::Vector3D v1 = (tsos->trackParameters()->position()).cross(zATLAS);
-                        v1 /= v1.mag();
-                        Amg::Vector3D v2 = sur.transform().rotation().col(2) / (sur.transform().rotation().col(2)).mag();
-                        double sign = (v1.dot(v2) > 0.) ? 1. : -1.;
+        }  // LOOP ON DEVIATIONS
 
-                        // ARTIFICIALLY ORIENTATE EVERYTHING TOWARDS THE SAME DIRECTION
-                        iDev->sumV += sign * w2 * sur.transform().rotation().col(2);
-
-                        // FOR CROSS-CHECK
-                        is_matched = true;
-
-                    }  // match the station name to the deviation regexp
-
-                }  // LOOP ON DEVIATIONS
-
-                if (is_matched == false)
-                    ATH_MSG_WARNING("The hits in the station " << completename << ", multilayer " << multilayer_sstring
-                                                               << " couldn't be matched to any deviation regexp in the list.");
-
-            }  // CHECK IF IT'S MDT OR CSC HIT
-
-        }  // CHECK TSOS OF TYPE 'MEASUREMENT'
+        if (!is_matched) {
+            ATH_MSG_WARNING("The hits in the station " << alignStationName << ", multilayer " << multilayerName
+                            << " couldn't be matched to any deviation regexp in the list.");
+        }
 
     }  // LOOP ON TSOS
 
     // Nuisance parameters covering the complete track are not wanted. (MS/ID
     // error treated differently for now). Removing the deviations covering the
     // full track in further processing.
-    for (deviationSummary_t* dev : devSumVec) {
-        if (dev->hits.size() == nPrecisionHits) dev->hits.clear();
+    for (auto& dev : devSumVec) {
+        if (dev.hits.size() == nPrecisionHits) {
+            dev.hits.clear();
+        }
     }
 
-    // CHECK HIT LISTS OVERLAP
-    // FIRST CREATE AN INDEPENDENT COPY OF THE STRUCT VECTOR
-    std::vector<deviationSummary_t*> new_deviationsVec;
-    for (auto & iDev : devSumVec) {
-        deviationSummary_t* tmp = new deviationSummary_t();
-        (*tmp) = (*iDev);
-        new_deviationsVec.push_back(tmp);
-    }
+    // GET RID OF PERFECT OVERLAPS BY COMBINING ERRORS
+    std::vector<const Trk::RIO_OnTrack*> v1, v2;
+    for (auto iti = devSumVec.begin(); iti != devSumVec.end(); ++iti) {
 
-    for (unsigned int iDev = 0; iDev < devSumVec.size(); iDev++) {
-        if (!new_deviationsVec[iDev]) continue;
-
-        std::vector<const Trk::RIO_OnTrack*> v1 = devSumVec[iDev]->hits;
-        if (v1.empty()) continue;
+        v1 = iti->hits;
+        if (v1.empty()) {
+            continue;
+        }
 
         std::stable_sort(v1.begin(), v1.end());
 
-        for (unsigned int jDev = iDev + 1; jDev < devSumVec.size(); jDev++) {
-            if (!new_deviationsVec[jDev]) continue;
+        for (auto itj = iti+1; itj != devSumVec.end(); ++itj) {
 
-            bool match = false;
+            if (iti->hits.size() != itj->hits.size()) {
+                continue;
+            }
 
-            if (devSumVec[iDev]->hits.size() != devSumVec[jDev]->hits.size()) continue;
-
-            std::vector<const Trk::RIO_OnTrack*> v2 = devSumVec[jDev]->hits;
+            v2 = itj->hits;
             std::stable_sort(v2.begin(), v2.end());
 
-            match = (v1 == v2);
-
-            if (match) {
+            if (v1 == v2) {
+                auto iDev = std::distance(devSumVec.begin(), iti);
+                auto jDev = std::distance(devSumVec.begin(), itj);
                 ATH_MSG_DEBUG("Found deviations " << iDev << " and " << jDev << " related to the same list of hits. Merging...");
-                ATH_MSG_DEBUG("old (traslation, rotation) systematic uncertainties for "
-                              << iDev << ": " << new_deviationsVec[iDev]->traslation << ", " << new_deviationsVec[iDev]->rotation);
-                ATH_MSG_DEBUG("old (traslation, rotation) systematic uncertainties for " << jDev << ": " << devSumVec[jDev]->traslation
-                                                                                         << ", " << devSumVec[jDev]->rotation);
+                ATH_MSG_DEBUG("old (translation, rotation) systematic uncertainties for "
+                              << iDev << ": " << iti->translation << ", " << iti->rotation);
+                ATH_MSG_DEBUG("old (translation, rotation) systematic uncertainties for "
+                              << jDev << ": " << itj->translation << ", " << itj->rotation);
 
                 // MERGE THE TWO DEVIATIONS ASSOCIATED TO THE SAME LIST OF HITS //
-                double new_traslation = sqrt(new_deviationsVec[iDev]->traslation * new_deviationsVec[iDev]->traslation +
-                                             devSumVec[jDev]->traslation * devSumVec[jDev]->traslation);
-                double new_rotation = sqrt(new_deviationsVec[iDev]->rotation * new_deviationsVec[iDev]->rotation +
-                                           devSumVec[jDev]->rotation * devSumVec[jDev]->rotation);
+
+                // Keep the old math until a further MR TODO(giraudpf)
+                // double new_translation = std::hypot(iti->translation, itj->translation);
+                // double new_rotation = std::hypot(iti->rotation, itj->rotation);
+                double new_translation = sqrt(iti->translation * iti->translation +
+                                             itj->translation * itj->translation);
+                double new_rotation = sqrt(iti->rotation * iti->rotation +
+                                           itj->rotation * itj->rotation);
+
 
                 // NOW PREPARE TO ERASE ONE OF THE TWO COPIES //
-                delete new_deviationsVec[jDev];
-                new_deviationsVec[jDev] = nullptr;
+                itj->hits.clear();
 
                 // ASSIGN NEW TRASLATION/ROTATION TO THE REMAINING COPY //
-                new_deviationsVec[iDev]->traslation = new_traslation;
-                new_deviationsVec[iDev]->rotation = new_rotation;
-                ATH_MSG_DEBUG("New combined (traslation, rotation) systematic uncertainties: " << new_traslation << ", " << new_rotation);
+                iti->translation = new_translation;
+                iti->rotation = new_rotation;
+                ATH_MSG_DEBUG("New combined (translation, rotation) systematic uncertainties: " << new_translation << ", " << new_rotation);
 
             }  // FIND AN OVERLAP IN THE HITS LISTS
         }      // SECOND LOOP ON DEVIATIONS
     }          // FIRST LOOP ON DEVIATIONS
 
+
     // NOW BUILD THE DEVIATIONS
     deviations.clear();
     ATH_MSG_DEBUG("************************************");
     ATH_MSG_DEBUG("FINAL LIST OF DEVIATIONS");
-    for (auto & iDev : new_deviationsVec) {
-        // THIS HAPPENS IF A MERGING HAD BEEN DONE
-        if (!iDev) { continue; }
-
-        // SKIP IF NO HITS ARE ASSOCIATED TO THIS DEVIATION
-        if (iDev->hits.size() == 0) {
-            // ATH_MSG_DEBUG("No hits found associated to the rule " << new_deviationsVec[iDev]->stationName.str() << ", skip");
+    for (const auto & iDev : devSumVec) {
+        if (iDev.hits.empty()) {
             continue;
         }
 
-        double rotation = iDev->rotation;
-        double traslation = iDev->traslation;
+        double rotation = iDev.rotation;
+        double translation = iDev.translation;
 
-        Amg::Vector3D sumP = iDev->sumP;
-        Amg::Vector3D sumU = iDev->sumU;
-        Amg::Vector3D sumV = iDev->sumV;
-        double sumW2 = iDev->sumW2;
+        Amg::Vector3D sumP = iDev.sumP;
+        Amg::Vector3D sumU = iDev.sumU;
+        Amg::Vector3D sumV = iDev.sumV;
+        double sumW2 = iDev.sumW2;
 
         sumP *= (1. / sumW2);
         sumU *= (1. / sumW2);
         sumV *= (1. / sumW2);
 
-        if (traslation >= 0.001 * Gaudi::Units::mm) {
+        if (translation >= 0.001 * Gaudi::Units::mm) {
             std::size_t hitshash = 0;
-            for (const auto *it : iDev->hits) boost::hash_combine(hitshash, (it->identify()).get_compact());
+            for (const auto *it : iDev.hits) {
+                boost::hash_combine(hitshash, (it->identify()).get_compact());
+            }
             deviations.push_back(
-                new AlignmentTranslationDeviation(sumU.cross(sumV), traslation * Gaudi::Units::mm, iDev->hits));
+                new AlignmentTranslationDeviation(sumU.cross(sumV), translation * Gaudi::Units::mm, iDev.hits));
             deviations.back()->setHashOfHits(hitshash);
 
             ATH_MSG_DEBUG("A translation along ("
-                          << sumU.x() << ", " << sumU.y() << ", " << sumU.z() << ") with sigma=" << traslation * Gaudi::Units::mm
-                          << " mm was applied to " << iDev->hits.size()
-                          << " hits matching the station: " << iDev->stationName.str() << " and the multilayer "
-                          << iDev->multilayer.str());
+                          << sumU.x() << ", " << sumU.y() << ", " << sumU.z() << ") with sigma=" << translation * Gaudi::Units::mm
+                          << " mm was applied to " << iDev.hits.size()
+                          << " hits matching the station: " << iDev.stationName.str() << " and the multilayer "
+                          << iDev.multilayer.str());
         }
         if (rotation >= 0.000001 * Gaudi::Units::rad) {
             std::size_t hitshash = 0;
-            for (const auto *it : iDev->hits) boost::hash_combine(hitshash, (it->identify()).get_compact());
-            deviations.push_back(new AlignmentRotationDeviation(sumP, sumV, rotation * Gaudi::Units::rad, iDev->hits));
+            for (const auto *it : iDev.hits) {
+                boost::hash_combine(hitshash, (it->identify()).get_compact());
+            }
+            deviations.push_back(new AlignmentRotationDeviation(sumP, sumV, rotation * Gaudi::Units::rad, iDev.hits));
             deviations.back()->setHashOfHits(hitshash);
 
             ATH_MSG_DEBUG("A rotation around the center = (" << sumP.x() << ", " << sumP.y() << ", " << sumP.z() << ") and axis = ("
                                                              << sumV.x() << ", " << sumV.y() << ", " << sumV.z()
                                                              << ") with sigma=" << rotation / Gaudi::Units::mrad << " mrad was applied to "
-                                                             << iDev->hits.size() << " hits matching the station "
-                                                             << iDev->stationName.str() << " and the multilayer "
-                                                             << iDev->multilayer.str());
+                                                             << iDev.hits.size() << " hits matching the station "
+                                                             << iDev.stationName.str() << " and the multilayer "
+                                                             << iDev.multilayer.str());
         }
 
     }  // LOOP ON NUISANCES
@@ -291,13 +292,6 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
     ATH_MSG_DEBUG("Found " << deviations.size() << " nuisances after duplicates merging");
     ATH_MSG_DEBUG("******************************");
 
-    // NOW EMPTY THE LOCAL DEVIATIONS VECTOR //
-    for (auto & iDev : new_deviationsVec) { delete iDev; }
-
-    for (auto & iDev : devSumVec) { delete iDev; }
-
-    // ATH_MSG_DEBUG("Currently we have " << AlignmentErrorTool::deviationSummary_t::i_instance << " deviation vectors");
-
     return;
 }
 
@@ -305,93 +299,121 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
 // RECOGNIZE STATION NAME //
 ////////////////////////////
 
-inline std::string AlignmentErrorTool::hardwareName(MuonCalib::MuonFixedId calibId) const {
-    if (sector(calibId) == 13) {
-        if (calibId.eta() == 7 && calibId.stationName() == 5) return "BOE1A13";   // BOE1A13 not BOL7A13
-        if (calibId.eta() == -7 && calibId.stationName() == 5) return "BOE1C13";  // BOE1C13 not BOL7C13
-    }
-    std::string etaString = "0";
-    etaString[0] += std::abs(hardwareEta(calibId));
-    return calibId.stationNameString() + etaString + side(calibId) + sectorString(calibId);
-}
+inline std::string AlignmentErrorTool::hardwareName(MuonCalib::MuonFixedLongId calibId) const {
+    using StationName = MuonCalib::MuonFixedLongId::StationName;
 
-inline std::string AlignmentErrorTool::side(MuonCalib::MuonFixedId calibId) const {
-    return calibId.eta() > 0 ? "A" : calibId.eta() < 0 ? "C" : "B";
-}
-
-inline std::string AlignmentErrorTool::sectorString(MuonCalib::MuonFixedId calibId) const {
-    std::string ret = "00";
-    int sec = sector(calibId);
-    if (sec >= 10) {
-        ret[0] = '1';
-        sec -= 10;
+    // The only exception that cannot be caught by hardwareEta() above
+    if (sector(calibId)==13) {
+        if (calibId.eta()== 7 && calibId.stationName()==StationName::BOL) return "BOE1A13"; // BOE1A13 not BOL7A13
+        if (calibId.eta()==-7 && calibId.stationName()==StationName::BOL) return "BOE1C13"; // BOE1C13 not BOL7C13
+        if (calibId.eta()== 8 && calibId.stationName()==StationName::BOL) return "BOE2A13"; // BOE2A13 not BOL8A13
+        if (calibId.eta()==-8 && calibId.stationName()==StationName::BOL) return "BOE2C13"; // BOE2C13 not BOL8C13
     }
-    ret[1] += sec;
+
+    std::string ret { calibId.stationNameString() };
+    ret.push_back(static_cast<char>('0'+std::abs(hardwareEta(calibId))));
+    ret.append(side(calibId)).append(sectorString(calibId));
+
     return ret;
 }
 
-inline int AlignmentErrorTool::sector(MuonCalib::MuonFixedId calibId) const {
-    return isSmallSector(calibId) ? 2 * calibId.phi() : 2 * calibId.phi() - 1;
+inline std::string_view AlignmentErrorTool::side(MuonCalib::MuonFixedLongId calibId) const {
+    return calibId.eta()>0 ? "A" : calibId.eta()<0 ? "C" : "B";
 }
 
-inline bool AlignmentErrorTool::isSmallSector(MuonCalib::MuonFixedId calibId) const {
-    switch (calibId.stationName()) {
-        case 2: return true;
-        case 4: return true;
-        case 6: return true;
-        case 7: return true;
-        case 9: return true;
-        case 10: return true;
-        case 11: return true;
-        case 17: return true;
-        case 20: return true;
-        case 23: return true;
-        case 24: return true;
-        case 33: return true;
-        default: return false;
+inline std::string AlignmentErrorTool::sectorString(MuonCalib::MuonFixedLongId calibId) const {
+    int sec = sector(calibId);
+    if (sec<0 || sec > 99) {
+        throw std::runtime_error("Unhandled sector number");
+    }
+    std::string ret = "00";
+    ret[0] += (sec/10);
+    ret[1] += (sec%10);
+    return ret;
+}
+
+inline int AlignmentErrorTool::sector(MuonCalib::MuonFixedLongId calibId) const {
+    if (calibId.is_tgc()) {
+        // TGC sector convention is special
+        return calibId.phi();
+    } else {
+        return isSmallSector(calibId) ? 2*calibId.phi() : 2*calibId.phi()-1;
     }
 }
 
-inline int AlignmentErrorTool::hardwareEta(MuonCalib::MuonFixedId calibId) const {
+inline bool AlignmentErrorTool::isSmallSector(MuonCalib::MuonFixedLongId calibId) const {
+    using StationName = MuonCalib::MuonFixedLongId::StationName;
     switch (calibId.stationName()) {
-        case 3: {
-            if (sector(calibId) == 13) {
-                switch (calibId.eta()) {
-                    case 4: return 5;
-                    case 5: return 6;
-                    case 6: return 7;
-                    case -4: return -5;
-                    case -5: return -6;
-                    case -6: return -7;
+        case StationName::BIS:
+        case StationName::BMS:
+        case StationName::BOS:
+        case StationName::BEE:
+        case StationName::BMF:
+        case StationName::BOF:
+        case StationName::BOG:
+        case StationName::EES:
+        case StationName::EMS:
+        case StationName::EOS:
+        case StationName::EIS:
+        case StationName::CSS:
+        case StationName::BMG:
+        case StationName::MMS:
+        case StationName::STS:
+            return true;
+        default:
+            return false;
+    }
+}
+
+inline int AlignmentErrorTool::hardwareEta(MuonCalib::MuonFixedLongId calibId) const {
+    using StationName = MuonCalib::MuonFixedLongId::StationName;
+    switch (calibId.stationName()) {
+        case StationName::BML:
+            {
+                if (sector(calibId)==13) {
+                    switch (calibId.eta()) {
+                        case 4: return 5;
+                        case 5: return 6;
+                        case 6: return 7;
+                        case -4: return -5;
+                        case -5: return -6;
+                        case -6: return -7;
+                    }
                 }
+                return calibId.eta();
             }
-            return calibId.eta();
-        }
-        case 5: {
-            if (sector(calibId) == 13) {
-                if (calibId.eta() == 7) return 1;    // BOE1A13 not BOL7A13
-                if (calibId.eta() == -7) return -1;  // BOE1C13 not BOL7C13
-            }
-            return calibId.eta();
-        }
-        case 10: return calibId.eta() > 0 ? calibId.eta() * 2 - 1 : calibId.eta() * 2 + 1;
-        case 11: return calibId.eta() * 2;
-        case 15: {
-            if ((sector(calibId) == 1) || (sector(calibId) == 9)) {
-                switch (calibId.eta()) {
-                    case 4: return 5;
-                    case 5: return 4;
-                    case -4: return -5;
-                    case -5: return -4;
+        case StationName::BOL:
+            {
+                if (sector(calibId)==13) {
+                    if (calibId.eta()== 7) return 1; // BOE1A13 not BOL7A13
+                    if (calibId.eta()==-7) return -1; // BOE1C13 not BOL7C13
                 }
+                return calibId.eta();
             }
-            return calibId.eta();
-        }
-        case 16: {
-            if ((sector(calibId) == 5) && (calibId.eta() == 1)) return 2;
-            if ((sector(calibId) == 5) && (calibId.eta() == -1)) return -2;
-            return calibId.eta();
-        }
+        case StationName::BOF:
+            return calibId.eta()>0 ? calibId.eta()*2-1 : calibId.eta()*2+1;
+        case StationName::BOG:
+            return calibId.eta()*2;
+        case StationName::EIL:
+            {
+                if ((sector(calibId) == 1) || (sector(calibId) == 9)) {
+                    switch (calibId.eta()) {
+                        case 4: return 5;
+                        case 5: return 4;
+                        case -4: return -5;
+                        case -5: return -4;
+                    }
+                }
+                return calibId.eta();
+            }
+        case StationName::EEL:
+            {
+                if ((sector(calibId) == 5) && (calibId.eta() == 1)) return 2;
+                if ((sector(calibId) == 5) && (calibId.eta() == -1)) return -2;
+                return calibId.eta();
+            }
         default: return calibId.eta();
     }
 }
+
+}  // namespace MuonAlign

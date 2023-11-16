@@ -4,3 +4,6 @@
 #include "../AlignmentErrorTool.h"
 
 DECLARE_COMPONENT(MuonAlign::AlignmentErrorTool)
+
+#include "../tests/AlignmentErrorTestAlg.h"
+DECLARE_COMPONENT(MuonAlign::AlignmentErrorTestAlg)
