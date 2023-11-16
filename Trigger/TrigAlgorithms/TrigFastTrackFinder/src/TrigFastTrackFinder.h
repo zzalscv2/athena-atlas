@@ -56,7 +56,6 @@
 
 #include "TrigInDetAccelerationTool/ITrigInDetAccelerationTool.h"
 #include "TrigInDetAccelerationService/ITrigInDetAccelerationSvc.h"
-#include "TrigAccelEvent/TrigInDetAccelEDM.h"
 #include "TrigAccelEvent/TrigInDetAccelCodes.h"
 
 #include <string>

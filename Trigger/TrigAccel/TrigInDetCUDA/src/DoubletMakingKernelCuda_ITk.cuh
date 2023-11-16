@@ -2,37 +2,40 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETCUDA_DOUBLETCOUNTINGKERNELCUDA_CUH
-#define TRIGINDETCUDA_DOUBLETCOUNTINGKERNELCUDA_CUH
+#ifndef TRIGINDETCUDA_DOUBLETMAKINGKERNELCUDA_ITK_CUH
+#define TRIGINDETCUDA_DOUBLETMAKINGKERNELCUDA_ITK_CUH
 
 #include <cuda_runtime.h>
+#include "SeedMakingDataStructures_ITk.h"
 
-#include "SeedMakingDataStructures.h"
-
-__global__ static void doubletCountingKernel(TrigAccel::SEED_FINDER_SETTINGS* dSettings, 
-					     TrigAccel::SPACEPOINT_STORAGE* dSpacepoints, 
-					     TrigAccel::DETECTOR_MODEL* dDetModel,
-					     DOUBLET_INFO* d_Info, 
-					     int nLayers, int nSlices) {
+__global__ static void doubletMakingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTINGS* dSettings, 
+					   TrigAccel::ITk::SPACEPOINT_STORAGE* dSpacepoints, 
+					   TrigAccel::ITk::DETECTOR_MODEL* dDetModel, 
+					   TrigAccel::ITk::OUTPUT_SEED_STORAGE* d_Out, 
+					   DOUBLET_INFO_ITk* d_Info,
+					   DOUBLET_STORAGE_ITk* d_Storage, 
+					   int nLayers, int nSlices) {
 
   __shared__ int spBegin;
   __shared__ int spEnd;
   __shared__ int nMiddleSPs;
-  
-  __shared__ int nInner[NUM_MIDDLE_THREADS];
-  __shared__ int nOuter[NUM_MIDDLE_THREADS];
+
+  __shared__ bool hasDoublets;
+
+  __shared__ int outerPos[NUM_MIDDLE_THREADS_ITk];
+  __shared__ int innerPos[NUM_MIDDLE_THREADS_ITk];
 
   const float zTolerance = 3.0; 
   const float maxEta = dSettings->m_maxEta;
   const float maxDoubletLength = dSettings->m_maxDoubletLength;
   const float minDoubletLength = dSettings->m_minDoubletLength;
   const float maxOuterRadius = 550.0;
-   
+  
   const int sliceIdx = blockIdx.x;
   const int layerIdx = blockIdx.y;
 
   if(threadIdx.x == 0 && threadIdx.y == 0) {
-    const TrigAccel::SPACEPOINT_LAYER_RANGE& slr = dSpacepoints->m_phiSlices[sliceIdx];
+    const TrigAccel::ITk::SPACEPOINT_LAYER_RANGE& slr = dSpacepoints->m_phiSlices[sliceIdx];
     spBegin = slr.m_layerBegin[layerIdx];
     spEnd = slr.m_layerEnd[layerIdx];
     nMiddleSPs = spEnd-spBegin;
@@ -58,22 +61,36 @@ __global__ static void doubletCountingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
 
   //1. get a tile of middle spacepoints
 
-  for(int spmIdx=threadIdx.x+spBegin;spmIdx<spEnd;spmIdx+=blockDim.x) {
- 
-    int spmType = dSpacepoints->m_type[spmIdx];
-    float zm = dSpacepoints->m_z[spmIdx];
-    float rm = dSpacepoints->m_r[spmIdx];
+  __syncthreads();
 
-    bool isPixel = (spmType == 1);
+  for(int spmIdx=threadIdx.x+spBegin;spmIdx<spEnd;spmIdx+=blockDim.x) {
 
     if(threadIdx.y ==0) {
-      nInner[threadIdx.x] = 0;
-      nOuter[threadIdx.x] = 0; 
-      d_Info->m_nInner[spmIdx] = 0;
-      d_Info->m_nOuter[spmIdx] = 0;
+       hasDoublets = d_Info->m_good[spmIdx] == 1;
+    }
+    __syncthreads();
+
+    if(!hasDoublets) continue;
+
+    if(threadIdx.y ==0) {//loading pre-calculated numbers of doublets ...
+
+      int nInner = d_Info->m_nInner[spmIdx];
+      int nOuter = d_Info->m_nOuter[spmIdx];
+
+      outerPos[threadIdx.x] = atomicAdd(&d_Storage->m_nO, nOuter);
+      innerPos[threadIdx.x] = atomicAdd(&d_Storage->m_nI, nInner);
+      int k = atomicAdd(&d_Storage->m_nItems, 1);
+      d_Storage->m_spmIdx[k] = spmIdx;
+      d_Storage->m_innerStart[k] = innerPos[threadIdx.x];
+      d_Storage->m_outerStart[k] = outerPos[threadIdx.x];
     }
 
     __syncthreads();
+    
+    int spmType = dSpacepoints->m_type[spmIdx];
+    float zm = dSpacepoints->m_z[spmIdx];
+    float rm = dSpacepoints->m_r[spmIdx];
+    bool isPixel = (spmType == 1);
 
     //2. loop over other phi-bins / layers
 
@@ -81,9 +98,10 @@ __global__ static void doubletCountingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
       int nextPhiIdx = sliceIdx + deltaPhiIdx;
       if(nextPhiIdx>=nSlices) nextPhiIdx = 0;
       if(nextPhiIdx<0) nextPhiIdx=nSlices-1;
-      const TrigAccel::SPACEPOINT_LAYER_RANGE& next_slr = dSpacepoints->m_phiSlices[nextPhiIdx];
+      const TrigAccel::ITk::SPACEPOINT_LAYER_RANGE& next_slr = dSpacepoints->m_phiSlices[nextPhiIdx];
 
       for(int nextLayerIdx=0;nextLayerIdx<nLayers;nextLayerIdx++) {
+
 	if(nextLayerIdx == layerIdx) continue;
 
 	int next_spBegin = next_slr.m_layerBegin[nextLayerIdx];
@@ -91,13 +109,11 @@ __global__ static void doubletCountingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
 
 	if(next_spEnd == next_spBegin) continue;//no spacepoints in this layer
 
-	const TrigAccel::SILICON_LAYER& layerGeo =  dDetModel->m_layers[nextLayerIdx];
+	const TrigAccel::ITk::SILICON_LAYER& layerGeo =  dDetModel->m_layers[nextLayerIdx];
 	bool isBarrel = (layerGeo.m_type == 0);
-
-	
 	float refCoord = layerGeo.m_refCoord;
 	
-	if(isBarrel && fabs(refCoord-rm)>maxDoubletLength) continue;
+	if(isBarrel && std::abs(refCoord-rm)>maxDoubletLength) continue;
 
 	//boundaries for nextLayer
 
@@ -133,37 +149,57 @@ __global__ static void doubletCountingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
 	  bool isPixel2 = (dSpacepoints->m_type[spIdx] == 1);
 	  float dr = rsp - rm;
 
-	  if(fabs(dr)>maxDoubletLength || fabs(dr)<minDoubletLength) continue;
+	  if(std::abs(dr)>maxDoubletLength || std::abs(dr)<minDoubletLength) continue;
 
 	  if(!DoPSS && dr<0 && !isPixel && isPixel2) continue; 
-          
-    if(isPixel && !isPixel2) {// i.e. xPS (or SPx)
+          if(isPixel && !isPixel2) {// i.e. xPS (or SPx)
            if(NoPPS) continue;//no mixed PPS seeds allowed	    
 	  }
           
 	  float dz = zsp - zm;
 	  float tau = dz/dr;
 
-	  if(fabs(tau)>maxCtg) continue;
+	  if(std::abs(tau)>maxCtg) continue;
     float outZ = zsp + (maxOuterRadius-rsp)*tau; 
     if(outZ < minOuterZ || outZ > maxOuterZ) continue;
 
-	  if(dr > 0) //outer doublet
-	    atomicAdd(&nOuter[threadIdx.x],1);
-	  else 
-	    atomicAdd(&nInner[threadIdx.x],1);
-	 }
+    // Cut on curvature
+    float xm = dSpacepoints->m_x[spmIdx];
+    float ym = dSpacepoints->m_y[spmIdx];
+    float xsp = dSpacepoints->m_x[spIdx];
+    float ysp = dSpacepoints->m_y[spIdx];
+
+    float dx = xsp - xm;
+    float dy = ysp - ym;
+    float L2 = 1/(dx*dx+dy*dy);
+    float D = (ysp*xm - ym*xsp)/(rm*rsp);
+    float kappa = D*D*L2;
+
+    if (std::abs(tau) < 4.0) {//eta = 2.1
+      if (kappa > maxKappa_low_eta) {
+        continue;
+      }
+    } else {
+      if (kappa > maxKappa_high_eta) {
+        continue;
       }
     }
 
-    __syncthreads();
-         
-    if(threadIdx.y == 0) {
-      d_Info->m_nInner[spmIdx] = nInner[threadIdx.x];
-      d_Info->m_nOuter[spmIdx] = nOuter[threadIdx.x];
-      d_Info->m_good[spmIdx] =  (nInner[threadIdx.x] > 0 && nOuter[threadIdx.x] > 0) ? 1 : 0; 
+	  if(dr > 0) { //outer doublet
+	    int k = atomicAdd(&outerPos[threadIdx.x],1);
+	    d_Storage->m_outer[k] = spIdx;
+	  }
+	  else {
+	    int k = atomicAdd(&innerPos[threadIdx.x],1);
+	    d_Storage->m_inner[k] = spIdx;
+	  }
+	}
+      }
     }
-    __syncthreads();
+  }
+  
+  if(threadIdx.x == 0 && threadIdx.y == 0) {
+    atomicAdd(&d_Out->m_nMiddleSps, nMiddleSPs);
   }
 
 }

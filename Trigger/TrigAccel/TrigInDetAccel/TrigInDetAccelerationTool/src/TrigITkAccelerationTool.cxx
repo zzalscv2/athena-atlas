@@ -2,12 +2,12 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrigInDetAccelerationTool.h"
+#include "TrigITkAccelerationTool.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h" 
 #include "AthenaBaseComps/AthCheckMacros.h"
-#include "TrigAccelEvent/TrigInDetAccelEDM.h"
+#include "TrigAccelEvent/TrigITkAccelEDM.h"
 
-TrigInDetAccelerationTool::TrigInDetAccelerationTool(const std::string& t, 
+TrigITkAccelerationTool::TrigITkAccelerationTool(const std::string& t, 
 						     const std::string& n,
 						     const IInterface*  p ): base_class(t,n,p),
 									     m_accelSvc("TrigInDetAccelerationSvc",this->name()) {
@@ -15,13 +15,13 @@ TrigInDetAccelerationTool::TrigInDetAccelerationTool(const std::string& t,
   declareInterface< ITrigInDetAccelerationTool >( this );
 }
 
-StatusCode TrigInDetAccelerationTool::initialize() {
+StatusCode TrigITkAccelerationTool::initialize() {
 
   ATH_CHECK(m_accelSvc.retrieve());
   return StatusCode::SUCCESS;
 }
 
-size_t TrigInDetAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSettings& tcs, const IRoiDescriptor* roi, const std::vector<TrigSiSpacePointBase>& vsp, TrigAccel::DATA_EXPORT_BUFFER& output) const {
+size_t TrigITkAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSettings& tcs, const IRoiDescriptor* roi, const std::vector<TrigSiSpacePointBase>& vsp, TrigAccel::DATA_EXPORT_BUFFER& output) const {
 
   typedef struct SpIndexPair {
   public:
@@ -52,17 +52,17 @@ size_t TrigInDetAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSet
 
   //1. check buffer size
 
-  size_t dataTypeSize = sizeof(TrigAccel::SEED_MAKING_JOB);
+  size_t dataTypeSize = sizeof(TrigAccel::ITk::SEED_MAKING_JOB);
   const size_t bufferOffset = 256;
   size_t totalSize = bufferOffset+dataTypeSize;//make room for the header
   if(!output.fit(totalSize)) output.reallocate(totalSize);
 
-  TrigAccel::SEED_MAKING_JOB* pJ = reinterpret_cast<TrigAccel::SEED_MAKING_JOB*>(output.m_buffer+bufferOffset);
+  TrigAccel::ITk::SEED_MAKING_JOB* pJ = reinterpret_cast<TrigAccel::ITk::SEED_MAKING_JOB*>(output.m_buffer+bufferOffset);
 
   // cppcheck-suppress memsetClassFloat; deliberate
   memset(pJ,0,dataTypeSize);
 
-  TrigAccel::SEED_FINDER_SETTINGS& sfs = pJ->m_settings; 
+  TrigAccel::ITk::SEED_FINDER_SETTINGS& sfs = pJ->m_settings; 
 
   sfs.m_maxBarrelPix = tcs.m_maxBarrelPix;
   sfs.m_minEndcapPix = tcs.m_minEndcapPix;
@@ -87,11 +87,11 @@ size_t TrigInDetAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSet
   sfs.m_zedMinus = roi->zedMinus();
   sfs.m_zedPlus =  roi->zedPlus();
 
-  TrigAccel::SPACEPOINT_STORAGE& sps = pJ->m_data;
+  TrigAccel::ITk::SPACEPOINT_STORAGE& sps = pJ->m_data;
 
   unsigned int nSP = vsp.size();
-  if(nSP >= TrigAccel::MAX_NUMBER_SPACEPOINTS) {
-    nSP = TrigAccel::MAX_NUMBER_SPACEPOINTS-1;
+  if(nSP >= TrigAccel::ITk::MAX_NUMBER_SPACEPOINTS) {
+    nSP = TrigAccel::ITk::MAX_NUMBER_SPACEPOINTS-1;
     ATH_MSG_WARNING("MAX_NUMBER_SPACEPOINTS exceeded, exported data truncated ...");
   }
 
@@ -175,8 +175,8 @@ size_t TrigInDetAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSet
 
 }
 
-int TrigInDetAccelerationTool::extractTripletsFromOutput(std::shared_ptr<TrigAccel::OffloadBuffer> gpu_buffer, const std::vector<TrigSiSpacePointBase>& vsp, std::vector<TrigInDetTriplet>& output) const{
-  TrigAccel::OUTPUT_SEED_STORAGE* pOutput = reinterpret_cast<TrigAccel::OUTPUT_SEED_STORAGE *>(gpu_buffer->m_rawBuffer);
+int TrigITkAccelerationTool::extractTripletsFromOutput(std::shared_ptr<TrigAccel::OffloadBuffer> gpu_buffer, const std::vector<TrigSiSpacePointBase>& vsp, std::vector<TrigInDetTriplet>& output) const{
+  TrigAccel::ITk::OUTPUT_SEED_STORAGE* pOutput = reinterpret_cast<TrigAccel::ITk::OUTPUT_SEED_STORAGE *>(gpu_buffer->m_rawBuffer);
 
   int nTriplets = pOutput->m_nSeeds;
 

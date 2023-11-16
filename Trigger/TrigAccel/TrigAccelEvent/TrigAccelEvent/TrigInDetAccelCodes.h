@@ -10,7 +10,8 @@ namespace TrigAccel {
   constexpr unsigned int TrigInDetModuleID_CPU  = 0x10000000;
 
   constexpr unsigned int TrigInDetModuleID_CUDA = 0x10100000;
-  
+  constexpr unsigned int TrigITkModuleID_CUDA =   0x10200000;
+
   enum InDetJobControlCode {
     PIXBS              = 11001, 
     SCTBS              = 12001, 

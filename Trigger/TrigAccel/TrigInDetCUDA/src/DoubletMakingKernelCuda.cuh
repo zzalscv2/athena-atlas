@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETCUDA_DOUBLETMAKINGKERNELCUDA_CUH
@@ -113,7 +113,7 @@ __global__ static void doubletMakingKernel(TrigAccel::SEED_FINDER_SETTINGS* dSet
 	bool isBarrel = (layerGeo.m_type == 0);
 	float refCoord = layerGeo.m_refCoord;
 	
-	if(isBarrel && fabs(refCoord-rm)>maxDoubletLength) continue;
+	if(isBarrel && std::abs(refCoord-rm)>maxDoubletLength) continue;
 
 	//boundaries for nextLayer
 
@@ -149,7 +149,7 @@ __global__ static void doubletMakingKernel(TrigAccel::SEED_FINDER_SETTINGS* dSet
 	  bool isPixel2 = (dSpacepoints->m_type[spIdx] == 1);
 	  float dr = rsp - rm;
 
-	  if(fabs(dr)>maxDoubletLength || fabs(dr)<minDoubletLength) continue;
+	  if(std::abs(dr)>maxDoubletLength || std::abs(dr)<minDoubletLength) continue;
 
 	  if(!DoPSS && dr<0 && !isPixel && isPixel2) continue; 
           if(isPixel && !isPixel2) {// i.e. xPS (or SPx)
@@ -159,31 +159,10 @@ __global__ static void doubletMakingKernel(TrigAccel::SEED_FINDER_SETTINGS* dSet
 	  float dz = zsp - zm;
 	  float tau = dz/dr;
 
-	  if(fabs(tau)>maxCtg) continue;
+	  if(std::abs(tau)>maxCtg) continue;
     float outZ = zsp + (maxOuterRadius-rsp)*tau; 
     if(outZ < minOuterZ || outZ > maxOuterZ) continue;
 
-    // Cut on curvature
-    float xm = dSpacepoints->m_x[spmIdx];
-    float ym = dSpacepoints->m_y[spmIdx];
-    float xsp = dSpacepoints->m_x[spIdx];
-    float ysp = dSpacepoints->m_y[spIdx];
-
-    float dx = xsp - xm;
-    float dy = ysp - ym;
-    float L2 = 1/(dx*dx+dy*dy);
-    float D = (ysp*xm - ym*xsp)/(rm*rsp);
-    float kappa = D*D*L2;
-
-    if (fabs(tau) < 4.0) {//eta = 2.1
-      if (kappa > maxKappa_low_eta) {
-        continue;
-      }
-    } else {
-      if (kappa > maxKappa_high_eta) {
-        continue;
-      }
-    }
 
 	  if(dr > 0) { //outer doublet
 	    int k = atomicAdd(&outerPos[threadIdx.x],1);

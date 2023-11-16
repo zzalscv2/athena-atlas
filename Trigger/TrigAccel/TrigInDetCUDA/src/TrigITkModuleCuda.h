@@ -2,13 +2,13 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETCUDA_TRIGINDETMODULECUDA_H
-#define TRIGINDETCUDA_TRIGINDETMODULECUDA_H
+#ifndef TRIGINDETCUDA_TRIGITkMODULECUDA_H
+#define TRIGINDETCUDA_TRIGITkMODULECUDA_H
 
 #include <map>
 #include <atomic>
 #include "TrigAccelEvent/WorkFactory.h"
-#include "TrigAccelEvent/TrigInDetAccelEDM.h"
+#include "TrigAccelEvent/TrigITkAccelEDM.h"
 #include "TrigAccelEvent/TrigInDetAccelCodes.h"
 
 #include "device_context.h"
@@ -16,13 +16,13 @@
 #include "tbb/concurrent_queue.h"
 #include "tbb/concurrent_vector.h"
 
-class TrigInDetModuleCuda : public TrigAccel::WorkFactory {
+class TrigITkModuleCuda : public TrigAccel::WorkFactory {
 
  public:
 
-  TrigInDetModuleCuda();
+  TrigITkModuleCuda();
 
-  ~TrigInDetModuleCuda();
+  ~TrigITkModuleCuda();
 
   bool configure();
 
@@ -31,7 +31,7 @@ class TrigInDetModuleCuda : public TrigAccel::WorkFactory {
   const std::vector<int> getProvidedAlgs();
 
   virtual int getFactoryId() {
-    return TrigAccel::TrigInDetModuleID_CUDA;
+    return TrigAccel::TrigITkModuleID_CUDA;
   }
     
   private:

@@ -17,6 +17,7 @@
 #include "StoreGate/StoreGateSvc.h" 
 
 #include "TrigAccelEvent/WorkFactory.h"
+#include "TrigAccelEvent/Module.h"
 
 #include<vector>
 #include<map>
@@ -71,6 +72,7 @@ class TrigInDetAccelerationSvc : public extends<AthService, ITrigInDetAccelerati
   bool m_useITkGeometry;
   void* m_libHandle; //for OffloadFactory
   TrigAccel::WorkFactory* m_pWF;
+  TrigAccel::Module* m_module;
   ServiceHandle<StoreGateSvc> m_detStore; 
   ServiceHandle<StoreGateSvc> m_evtStore;   
 

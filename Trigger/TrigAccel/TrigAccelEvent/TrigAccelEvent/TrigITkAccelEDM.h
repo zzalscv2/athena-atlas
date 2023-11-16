@@ -1,13 +1,15 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGACCELEVENT_TRIGINDETACCELEDM_H
-#define TRIGACCELEVENT_TRIGINDETACCELEDM_H
+#ifndef TRIGACCELEVENT_TRIGINDETACCELEDM_ITK_H
+#define TRIGACCELEVENT_TRIGINDETACCELEDM_ITK_H
 
 #include<cstdint>
 
 namespace TrigAccel {
+
+namespace ITk {
 
   //A. GPU-accelerated track seeding
   
@@ -20,7 +22,7 @@ namespace TrigAccel {
   
   typedef struct SiliconLayer {
   public:
-    int m_subdet;//1 : Pixel, 2 : SCT
+    int m_subdet;//1 : Pixel, 2 : Strips
     int m_type;//0: barrel, +/-n : endcap
     float m_refCoord;
     int m_nElements;
@@ -399,6 +401,7 @@ namespace TrigAccel {
     
   } DECODED_SCT_DATA;
   
+}
 }
 
 #endif

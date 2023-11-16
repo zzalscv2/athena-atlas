@@ -11,6 +11,8 @@
 #include "TrigInDetEvent/TrigSiSpacePointBase.h"
 #include "TrigInDetPattRecoTools/TrigCombinatorialSettings.h"
 #include "TrigAccelEvent/DataExportBuffer.h"
+#include "TrigInDetPattRecoEvent/TrigInDetTriplet.h"
+#include "TrigAccelEvent/OffloadBuffer.h"
 
 static const InterfaceID IID_ITrigInDetAccelerationTool("ITrigInDetAccelerationTool", 1 , 0); 
 
@@ -23,7 +25,7 @@ class ITrigInDetAccelerationTool: virtual public IAlgTool
   }
 
   virtual size_t exportSeedMakingJob(const TrigCombinatorialSettings&, const IRoiDescriptor*, const std::vector<TrigSiSpacePointBase>&, TrigAccel::DATA_EXPORT_BUFFER&) const = 0;
-
+  virtual int extractTripletsFromOutput(std::shared_ptr<TrigAccel::OffloadBuffer>, const std::vector<TrigSiSpacePointBase>&, std::vector<TrigInDetTriplet>&) const = 0;
 };
 
 #endif

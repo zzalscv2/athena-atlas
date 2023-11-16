@@ -1493,25 +1493,11 @@ void TrigFastTrackFinder::makeSeedsOnGPU(const TrigCombinatorialSettings& tcs, c
 
     pJob->run();
 
-
     std::shared_ptr<TrigAccel::OffloadBuffer> pOB = pJob->getOutput();
 
-    TrigAccel::OUTPUT_SEED_STORAGE* pOutput = reinterpret_cast<TrigAccel::OUTPUT_SEED_STORAGE *>(pOB->m_rawBuffer);
+    int nTriplets = m_accelTool->extractTripletsFromOutput(pOB,vsp, output);
 
-    ATH_MSG_DEBUG("Found "<<pOutput->m_nSeeds<<" triplets on GPU");
-
-    int nTriplets = pOutput->m_nSeeds;
-
-    //copy seeds into the output buffer
-
-    output.clear();
-
-    for(int k=0;k<nTriplets;k++) {
-      const TrigSiSpacePointBase& SPi = vsp[pOutput->m_innerIndex[k]];
-      const TrigSiSpacePointBase& SPm = vsp[pOutput->m_middleIndex[k]];
-      const TrigSiSpacePointBase& SPo = vsp[pOutput->m_outerIndex[k]];
-      output.emplace_back(SPi, SPm, SPo, pOutput->m_Q[k]);
-    }
+    ATH_MSG_DEBUG("Found "<<nTriplets<<" triplets on GPU");
   }
 
   delete pJob;

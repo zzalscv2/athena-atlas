@@ -13,6 +13,7 @@
 #include "TrigInDetAccelerationSvc.h"
 #include "TrigAccelEvent/TrigInDetAccelCodes.h"
 #include "TrigAccelEvent/TrigInDetAccelEDM.h"
+#include "TrigAccelEvent/TrigITkAccelEDM.h"
 #include "CxxUtils/checker_macros.h"
 
 #include <dlfcn.h>
@@ -61,12 +62,27 @@ StatusCode TrigInDetAccelerationSvc::initialize() {
   dlerror();
 
   //declare library interface methods 
+  TrigAccel::Module* (*getModule)();
 
-  TrigAccel::WorkFactory* (*getFactory)();
+  getModule = (TrigAccel::Module* (*)()) dlsym(m_libHandle, "getModule");
 
-  getFactory   = (TrigAccel::WorkFactory* (*)()) dlsym(m_libHandle, "getFactory");
+  m_module = getModule();
 
-  m_pWF = getFactory();
+  int factory_id_to_load = 0;
+
+  if(m_useITkGeometry){
+    factory_id_to_load = TrigAccel::TrigITkModuleID_CUDA;
+  }else{
+    factory_id_to_load = TrigAccel::TrigInDetModuleID_CUDA;
+  }
+
+  m_pWF = m_module->getFactoryById(factory_id_to_load);
+
+  if(m_pWF == nullptr){
+    ATH_MSG_INFO("OffloadFactory with id "<<std::hex<<factory_id_to_load<<" not available from the module");
+    m_factoryConfigured = false;
+    return StatusCode::SUCCESS;
+  }
   
   bool cfgResult = m_pWF->configure();
 
@@ -102,10 +118,7 @@ StatusCode TrigInDetAccelerationSvc::initialize() {
 ///// 
 StatusCode TrigInDetAccelerationSvc::finalize() {
 
-  void (*deleteFactory)(TrigAccel::WorkFactory*);
-  deleteFactory = (void (*)(TrigAccel::WorkFactory*)) dlsym(m_libHandle, "deleteFactory");
-
-  deleteFactory(m_pWF);
+  delete m_pWF;
 
   dlclose(m_libHandle);
 
@@ -180,7 +193,7 @@ bool TrigInDetAccelerationSvc::exportITkGeometryInformation(const std::map<std::
 
   //export layer structure
 
-  size_t dataTypeSize = sizeof(TrigAccel::DETECTOR_MODEL);
+  size_t dataTypeSize = sizeof(TrigAccel::ITk::DETECTOR_MODEL);
   const size_t bufferOffset = 256; 
   size_t totalSize = bufferOffset + dataTypeSize;
 
@@ -188,7 +201,7 @@ bool TrigInDetAccelerationSvc::exportITkGeometryInformation(const std::map<std::
   
   if(!pBG->fit(totalSize)) pBG->reallocate(totalSize);
 
-  TrigAccel::DETECTOR_MODEL* pArray = reinterpret_cast<TrigAccel::DETECTOR_MODEL*>(pBG->m_buffer + bufferOffset);
+  TrigAccel::ITk::DETECTOR_MODEL* pArray = reinterpret_cast<TrigAccel::ITk::DETECTOR_MODEL*>(pBG->m_buffer + bufferOffset);
 
   // cppcheck-suppress memsetClassFloat; deliberate
   memset(pArray,0,dataTypeSize);

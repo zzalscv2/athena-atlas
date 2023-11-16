@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETCUDA_SEEDMAKINGWORKCUDA_H
-#define TRIGINDETCUDA_SEEDMAKINGWORKCUDA_H
+#ifndef TRIGINDETCUDA_SEEDMAKINGWORKCUDA_ITK_H
+#define TRIGINDETCUDA_SEEDMAKINGWORKCUDA_ITK_H
 
 #include <vector>
 
@@ -13,12 +13,12 @@
 #include "TrigAccelEvent/WorkFactory.h"
 
 
-class SeedMakingWorkCuda : public TrigAccel::Work{
+class SeedMakingWorkCudaITk : public TrigAccel::Work{
 
 public:
-  SeedMakingWorkCuda(unsigned int, SeedMakingDeviceContext*, std::shared_ptr<TrigAccel::OffloadBuffer>, 
+  SeedMakingWorkCudaITk(unsigned int, SeedMakingDeviceContext*, std::shared_ptr<TrigAccel::OffloadBuffer>, 
   tbb::concurrent_vector<WorkTimeStamp>*);
-  ~SeedMakingWorkCuda();
+  ~SeedMakingWorkCudaITk();
   std::shared_ptr<TrigAccel::OffloadBuffer> getOutput();
   bool run();
   unsigned int getId() const {
@@ -43,12 +43,12 @@ private:
   float m_CovMS, m_ptCoeff, m_minPt2, m_ptCoeff2, m_maxD0; 
 };
 
-class SeedMakingWorkCudaManaged : public TrigAccel::Work{
+class SeedMakingWorkCudaManagedITk : public TrigAccel::Work{
 
 public:
-  SeedMakingWorkCudaManaged(unsigned int, SeedMakingManagedDeviceContext*, std::shared_ptr<TrigAccel::OffloadBuffer>, 
+  SeedMakingWorkCudaManagedITk(unsigned int, SeedMakingManagedDeviceContext*, std::shared_ptr<TrigAccel::OffloadBuffer>, 
   tbb::concurrent_vector<WorkTimeStamp>*);
-  ~SeedMakingWorkCudaManaged();
+  ~SeedMakingWorkCudaManagedITk();
   std::shared_ptr<TrigAccel::OffloadBuffer> getOutput();
   bool run();
   unsigned int getId() const {
