@@ -1346,7 +1346,6 @@ def getInDetTRT_TrackExtensionTool_xk(name='InDetTRT_ExtensionTool', TrackingCut
     from InDetRecExample.InDetKeys import InDetKeys
     kwargs=setDefaults(kwargs,
                        TRT_ClustersContainer = InDetKeys.TRT_DriftCircles(),
-                       TrtManagerLocation    = InDetKeys.TRT_Manager(),
                        UseDriftRadius        = not InDetFlags.noTRTTiming(),
                        MinNumberDriftCircles = InDetNewTrackingCuts.minTRTonTrk(),
                        ScaleHitUncertainty   = 2.,
