@@ -90,7 +90,7 @@ std::ostream& operator<<(std::ostream& ostr, const MdtChamber& chamb) {
         {2, "BML"}, {3, "BMS"}, {8, "BMF"}, {53, "BME"}, {54, "BMG"}, {52, "BIM"},
         {4, "BOL"}, {5, "BOS"}, {9, "BOF"}, {10, "BOG"},
         {6, "BEE"}, {14, "EEL"}, {15, "EES"}, 
-        {13, "EIL"}, 
+        {13, "EIL"}, {49, "EIS"},
         {17, "EML"}, {18, "EMS"}, 
         {20, "EOL"}, {21, "EOS"}
     };
@@ -281,7 +281,7 @@ int main( int argc, char** argv ) {
         /// We do not care whether the orientation of the coordinate system along the wire flips for negative
         /// chambers or not
         bool flippedChamb = {reference.id.eta < 0 && Amg::doesNotDeform(distortion * Amg::getRotateX3D(M_PI))};
-        if (Amg::doesNotDeform(distortion) && !flippedChamb) {   
+        if (!Amg::doesNotDeform(distortion) && !flippedChamb) {   
             std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": The chamber coordinate systems rotate differently for  "
                      <<reference<<". Difference in the coordinate transformation: "
                      <<Amg::toString(distortion)<<std::endl;
