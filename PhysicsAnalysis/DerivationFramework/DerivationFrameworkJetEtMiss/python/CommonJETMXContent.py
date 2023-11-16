@@ -9,7 +9,7 @@ FlowElementVariables = ["pt.eta.phi.m.charge.signalType.chargedObjectLinks.other
 
 UFOVariables = ["pt.eta.phi.m.signalType.otherObjectLinks.chargedObjectLinks"]
 
-TrackingVariables = ["particleHypothesis.vx.vy.vz.",
+TrackingVariables = ["particleHypothesis.vx.vy.vz",
                      "btagIp_d0Uncertainty.btagIp_z0SinThetaUncertainty.btagIp_z0SinTheta.btagIp_trackMomentum.btagIp_trackDisplacement.btagIp_invalidIp",
                      "expectInnermostPixelLayerHit",
                      "numberOfInnermostPixelLayerHits.numberOfInnermostPixelLayerSharedHits.numberOfInnermostPixelLayerSplitHits.numberOfInnermostPixelLayerOutliers",
