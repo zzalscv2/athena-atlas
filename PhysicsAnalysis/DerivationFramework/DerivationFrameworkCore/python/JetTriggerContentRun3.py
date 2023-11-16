@@ -20,7 +20,7 @@ JetTriggerContentRun3 = [
 "HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes",
 "HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jesAux.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.JetEtaJESScaleMomentum_pt.JetEtaJESScaleMomentum_eta.JetEtaJESScaleMomentum_phi.JetEtaJESScaleMomentum_m",
 "HLT_IDVertex_FS",
-"HLT_IDVertex_FSAux.x.y.z.vertexType",
+"HLT_IDVertex_FSAux.",
 "HLT_TCEventInfo_jet",
 "HLT_TCEventInfo_jetAux.JetDensityEMPFlow.AvgMu.NumPV",
 ]
