@@ -67,12 +67,12 @@ namespace MuonGM {
         void addTreeTop(PVLink);
 
         // Add a XxxReadoutElement to the Collection
-        void addMdtReadoutElement(MdtReadoutElement*);    //!< store the MdtReadoutElement using as "key" the identifier
-        void addRpcReadoutElement(RpcReadoutElement*);    //!< store the RpcReadoutElement using as "key" the identifier
-        void addTgcReadoutElement(TgcReadoutElement*);    //!< store the TgcReadoutElement using as "key" the identifier
-        void addCscReadoutElement(CscReadoutElement*);    //!< store the CscReadoutElement using as "key" the identifier
-        void addsTgcReadoutElement(sTgcReadoutElement*);  //!< store the sTGCReadoutElement using as "key" the identifier
-        void addMMReadoutElement(MMReadoutElement*);      //!< store the MMReadoutElement using as "key" the identifier
+        void addMdtReadoutElement(std::unique_ptr<MdtReadoutElement>&& reEle);    //!< store the MdtReadoutElement using as "key" the identifier
+        void addRpcReadoutElement(std::unique_ptr<RpcReadoutElement>&& reEle);    //!< store the RpcReadoutElement using as "key" the identifier
+        void addTgcReadoutElement(std::unique_ptr<TgcReadoutElement>&& reEle);    //!< store the TgcReadoutElement using as "key" the identifier
+        void addCscReadoutElement(std::unique_ptr<CscReadoutElement>&& reEle);    //!< store the CscReadoutElement using as "key" the identifier
+        void addsTgcReadoutElement(std::unique_ptr<sTgcReadoutElement>&& reEle);  //!< store the sTGCReadoutElement using as "key" the identifier
+        void addMMReadoutElement(std::unique_ptr<MMReadoutElement>&& reEle);      //!< store the MMReadoutElement using as "key" the identifier
 
 
         // access to Readout Elements
@@ -200,7 +200,7 @@ namespace MuonGM {
         };
 
         // Add a MuonStation to the list
-        void addMuonStation(MuonStation* mst);
+        void addMuonStation(std::unique_ptr<MuonStation>&& mst);
         const MuonStation* getMuonStation(const std::string& stName, int eta, int phi) const;
         MuonStation* getMuonStation(const std::string& stName, int eta, int phi);
         //<! access to the MuonStation by StationName, Jzz, Jff (amdb indices!!!! not stationPhi and Eta)

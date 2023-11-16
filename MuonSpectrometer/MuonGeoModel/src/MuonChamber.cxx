@@ -450,7 +450,7 @@ namespace MuonGM {
             mstat = new MuonStation(stName.substr(0, 3), width, length, totthick, longWidth, length, totthick, zi, fi + 1,
                                     (zi < 0 && !is_mirrored)); //!< fi here goes from 0 to 7; in amdb from 1 to 8;
         }
-        manager->addMuonStation(mstat);
+        manager->addMuonStation(std::unique_ptr<MuonStation>(mstat));
         ATH_MSG_DEBUG( " Building a MuonStation for this MuonChamber " 
                       << m_station->GetName() << " at zi, fi " << zi << " " << fi + 1 << " is_mirrored " << is_mirrored);
       
@@ -1009,9 +1009,9 @@ namespace MuonGM {
                 ptrd->add(xfaligncomponent);
                 ptrd->add(lvm);
                 const MdtIdHelper *mdt_id = manager->mdtIdHelper();
-                MdtReadoutElement *det = new MdtReadoutElement(lvm, stName, manager);
+                std::unique_ptr<MdtReadoutElement> det = std::make_unique<MdtReadoutElement>(lvm, stName, manager);
                 Position ip = mysql.GetStationPosition(stName.substr(0, 3), fi, zi);
-                setMdtReadoutGeom(mysql, det, (MdtComponent *)c, ip);
+                setMdtReadoutGeom(mysql, det.get(), (MdtComponent *)c, ip);
                 det->setHasCutouts(ncutouts > 0);
                 det->setNMdtInStation(nMdt);
                 Identifier id = mdt_id->channelID(stationType, stationEta, stationPhi, ml, tubel, tube);
@@ -1032,12 +1032,12 @@ namespace MuonGM {
 
                 int jobIndex = c->index;
 
-                mstat->addMuonReadoutElementWithAlTransf(det, xfaligncomponent, jobIndex);                
+                mstat->addMuonReadoutElementWithAlTransf(det.get(), xfaligncomponent, jobIndex);                
                 ATH_MSG_DEBUG( std::string(stName + techname) << " trying to build a MDT Id from stType/eta/phi/ml/tl/t " << stationType << "/" << stationEta << "/"
                         << stationPhi << "/" << ml << "/" << tubel << "/" << tube << endmsg << " Copy number is " << c->index << " tagName " << stag );
                 
                 
-                manager->addMdtReadoutElement(det);
+                manager->addMdtReadoutElement(std::move(det));
             }
 
             if (lvc && manager->cscIdHelper()) {
@@ -1057,9 +1057,9 @@ namespace MuonGM {
                 ptrd->add(xfaligncomponent);
                 ptrd->add(lvc);
 
-                CscReadoutElement *det = new CscReadoutElement(lvc, stName, manager);
+                std::unique_ptr<CscReadoutElement> det = std::make_unique<CscReadoutElement>(lvc, stName, manager);
                 Position ip = mysql.GetStationPosition(stName.substr(0, 3), fi, zi);
-                setCscReadoutGeom(mysql, det, cs, ip);
+                setCscReadoutGeom(mysql, det.get(), cs, ip);
 
                 const CscIdHelper *csc_id = manager->cscIdHelper();
                 det->setHasCutouts(ncutouts > 0);
@@ -1071,12 +1071,12 @@ namespace MuonGM {
 
                 int jobIndex = c->index;
                 // mstat->addMuonReadoutElement(det,jobIndex);
-                mstat->addMuonReadoutElementWithAlTransf(det, xfaligncomponent, jobIndex);
-                ATH_MSG_DEBUG( std::string(stName + techname) << " trying to build a CSC Id from stType/eta/phi/ml " << stationType << "/" << stationEta << "/"
+                mstat->addMuonReadoutElementWithAlTransf(det.get(), xfaligncomponent, jobIndex);
+                ATH_MSG_DEBUG( stName << techname << " trying to build a CSC Id from stType/eta/phi/ml " << stationType << "/" << stationEta << "/"
                         << stationPhi << "/" << chamberLayer << "/ and /1/0/1" << endmsg << " Copy number is " << c->index << " tagName " << stag );
 
                 // set alignment parameters for the wire layers
-                manager->addCscReadoutElement(det);
+                manager->addCscReadoutElement(std::move(det));
             }
 
             if (lvt && manager->tgcIdHelper()) {
@@ -1112,9 +1112,9 @@ namespace MuonGM {
                 ptrd->add(xfaligncomponent);
                 ptrd->add(lvt);
 
-                TgcReadoutElement *det = new TgcReadoutElement(lvt, stName, manager);
+                std::unique_ptr<TgcReadoutElement> det = std::make_unique<TgcReadoutElement>(lvt, stName, manager);
                 Position ip = mysql.GetStationPosition(stName.substr(0, 3), fi, zi);
-                setTgcReadoutGeom(mysql, det, tg, ip, stName);
+                setTgcReadoutGeom(mysql, det.get(), tg, ip, stName);
                 det->setHasCutouts(ncutouts > 0);
                 Identifier id = tgc_id->channelID(stationType, stationEta, stationPhi, 1, false, 1);
                 det->setIdentifier(id);
@@ -1123,11 +1123,11 @@ namespace MuonGM {
 
                 int jobIndex = c->index;
 
-                mstat->addMuonReadoutElementWithAlTransf(det, xfaligncomponent, jobIndex);
+                mstat->addMuonReadoutElementWithAlTransf(det.get(), xfaligncomponent, jobIndex);
 
-                ATH_MSG_DEBUG( std::string(stName + techname) << " trying to build a TGC Id from stType/eta/phi " << stationType << "/" << stationEta << "/" << stationPhi
+                ATH_MSG_DEBUG( stName << techname << " trying to build a TGC Id from stType/eta/phi " << stationType << "/" << stationEta << "/" << stationPhi
                         << "/ and /1/0/1" << endmsg << " Copy number is " << geoid << " tagName = " << stag );
-                manager->addTgcReadoutElement(det);
+                manager->addTgcReadoutElement(std::move(det));
             }
 
             if (lvr && RPCON && manager->rpcIdHelper()) {
@@ -1244,9 +1244,9 @@ namespace MuonGM {
                 ptrd->add(xfaligncomponent);
                 ptrd->add(lvr);
 
-                RpcReadoutElement *det = new RpcReadoutElement(lvr, stName, zi, fi + 1, is_mirrored, manager);
+                std::unique_ptr<RpcReadoutElement> det = std::make_unique<RpcReadoutElement>(lvr, stName, zi, fi + 1, is_mirrored, manager);
                 Position ip = mysql.GetStationPosition(stName.substr(0, 3), fi, zi);
-                setRpcReadoutGeom(mysql, det, rp, ip, geometry_version, manager);
+                setRpcReadoutGeom(mysql, det.get(), rp, ip, geometry_version, manager);
                 Identifier id = rpc_id->channelID(stationType, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, measuresPhi, strip);
                 det->setIdentifier(id);
                 det->setHasCutouts(ncutouts > 0);
@@ -1254,7 +1254,7 @@ namespace MuonGM {
                 det->setDoubletZ(doubletZ);
                 det->setDoubletPhi(doubletPhi);
 
-                ATH_MSG_DEBUG( std::string(stName + techname) << " trying to build a RPC Id from stType/eta/phi/dbR/dbZ/dbP " << stationType << "/" << stationEta << "/"
+                ATH_MSG_DEBUG( stName << techname << " trying to build a RPC Id from stType/eta/phi/dbR/dbZ/dbP " << stationType << "/" << stationEta << "/"
                         << stationPhi << "/" << doubletR << "/" << doubletZ << "/" << doubletPhi << "///" << gasGap << "/" << measuresPhi << "/" << strip << endmsg
                         << " Copy number " << geoid << " tagName= " << stag );
                 if (stName.find("BI") != std::string::npos)
@@ -1264,7 +1264,7 @@ namespace MuonGM {
 
                 int jobIndex = c->index;
 
-                mstat->addMuonReadoutElementWithAlTransf(det, xfaligncomponent, jobIndex);
+                mstat->addMuonReadoutElementWithAlTransf(det.get(), xfaligncomponent, jobIndex);
                 
 
                 if (stName.find("BI") != std::string::npos) {
@@ -1279,7 +1279,7 @@ namespace MuonGM {
                 det->fillCache();  // fill temporary cache (global position on known yet)
                 det->initDesign(); ///  init design : design uses  global (converting back to local) positions
                 det->clearCache(); // clear temporary cache
-                manager->addRpcReadoutElement(det);
+                manager->addRpcReadoutElement(std::move(det));
             } // if (lvr && RPCON && manager->rpcIdHelper()) {
 
             if (lvs && RPCON) {

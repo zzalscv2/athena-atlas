@@ -72,18 +72,18 @@ namespace MuonGM {
       int ec = AC=='C' ? -1 : 1;
       std::string vName = pV->getLogVol()->getName();
       if (key.substr(0,3)=="sMD") {
-	std::string sName = vName.substr(4,4);
-	MuonGM::MMReadoutElement *re=new MuonGM::MMReadoutElement(pV, sName, ec*eta,phi,ml,m_manager,nullptr);
-	re->initDesign();
-	re->fillCache();
-	m_manager->addMMReadoutElement(re);
+	      std::string sName = vName.substr(4,4);
+	      std::unique_ptr<MuonGM::MMReadoutElement> re = std::make_unique<MuonGM::MMReadoutElement>(pV, sName, ec*eta,phi,ml,m_manager,nullptr);
+	      re->initDesign();
+	      re->fillCache();
+	      m_manager->addMMReadoutElement(std::move(re));
       }
       else if (key.substr(0,3)=="sTG") {
-	std::string sName = vName.substr(7,4);
-	sTgcReadoutElement* re = new sTgcReadoutElement(pV, sName, ec*eta, phi, ml, m_manager);
-	re->initDesign(-999., -999., -999., 3.2, -999., 2.7, -999., 2.6);
-	re->fillCache();
-	m_manager->addsTgcReadoutElement(re);
+	      std::string sName = vName.substr(7,4);
+	      std::unique_ptr<sTgcReadoutElement> re = std::make_unique<sTgcReadoutElement>(pV, sName, ec*eta, phi, ml, m_manager);
+	      re->initDesign(-999., -999., -999., 3.2, -999., 2.7, -999., 2.6);
+	      re->fillCache();
+	      m_manager->addsTgcReadoutElement(std::move(re));
       }
     }
 

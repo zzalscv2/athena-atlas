@@ -53,16 +53,16 @@ bool BuildNSWReadoutGeometry::BuildReadoutGeometry(MuonGM::MuonDetectorManager* 
             std::string sName = vName.substr(vName.find('-') + 1);
                 
             if (chTag.substr(0, 3) == "sMD") {
-                MMReadoutElement* re = new MMReadoutElement(vol, sName, etaIndex, phiIndex, mLayer, mgr, passivData);
+                std::unique_ptr<MMReadoutElement> re = std::make_unique<MMReadoutElement>(vol, sName, etaIndex, phiIndex, mLayer, mgr, passivData);
                 re->initDesign();
                 re->fillCache();
-                mgr->addMMReadoutElement(re);
+                mgr->addMMReadoutElement(std::move(re));
             } else if (chTag.substr(0, 3) == "sTG") {
-                sTgcReadoutElement* re = new sTgcReadoutElement(vol, sName, etaIndex, phiIndex, mLayer, mgr);
+                std::unique_ptr<sTgcReadoutElement> re = std::make_unique<sTgcReadoutElement>(vol, sName, etaIndex, phiIndex, mLayer, mgr);
                 std::string myVolName = (chTag.substr(0, 8)).c_str();
                 re->initDesign(-999., -999., -999., 3.2, -999., 2.7, -999., 2.6);
                 re->fillCache();
-                mgr->addsTgcReadoutElement(re);
+                mgr->addsTgcReadoutElement(std::move(re));
             }
         }
     }
