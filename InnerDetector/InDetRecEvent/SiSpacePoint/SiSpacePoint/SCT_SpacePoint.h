@@ -50,13 +50,12 @@ class SCT_SpacePoint final : public Trk::SpacePoint {
                                  const Trk::PrepRawData*>& clusList);
   //@}
 
-  /** Copy Constructor */
+  /** default move,copy,dtor*/
   SCT_SpacePoint(const SCT_SpacePoint&) = default;
-  /** Assignment Operator */
   SCT_SpacePoint& operator=(const SCT_SpacePoint&) = default;
-  /** Destructor */
+  SCT_SpacePoint(SCT_SpacePoint&&) noexcept = default;
+  SCT_SpacePoint& operator=(SCT_SpacePoint&&) noexcept = default;
   virtual ~SCT_SpacePoint() = default;
-
 
   /** Clones */
   virtual Trk::SpacePoint* clone() const override final;
