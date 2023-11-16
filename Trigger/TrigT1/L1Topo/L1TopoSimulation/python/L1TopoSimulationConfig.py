@@ -1,27 +1,9 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from L1TopoSimulation.L1TopoSimulationConf import LVL1__L1TopoSimulation, LVL1__RoiB2TopoInputDataCnv
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appendCAtoAthena
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-
-class L1TopoSimulation ( LVL1__L1TopoSimulation ):
-
-    def __init__( self, name = "L1TopoSimulation" ):
-        super( L1TopoSimulation, self ).__init__( name )
-
-        enableDebugOutput = False
-        if enableDebugOutput:
-            from AthenaCommon.Constants import DEBUG
-            self.OutputLevel = DEBUG
-            self.TopoOutputLevel = DEBUG
-            self.TopoSteeringOutputLevel = DEBUG
-
-class RoiB2TopoInputDataCnv ( LVL1__RoiB2TopoInputDataCnv ):
-
-    def __init__( self, name = "RoiB2TopoInputDataCnv" ):
-        super( RoiB2TopoInputDataCnv, self ).__init__( name )
 
 def L1LegacyTopoSimulationCfg(flags):
     
@@ -124,42 +106,6 @@ def L1TopoSimulationCfg(flags, doMonitoring=True):
         acc.addEventAlgo(TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoSimDecisions'))
 
     return acc
-
-def L1TopoSimulationOldStyleCfg(flags, isLegacy):
-    from L1TopoSimulation.L1TopoSimulationConfig import L1TopoSimulation
-    key = 'Legacy' if isLegacy else 'Phase1'
-    topoSimSeq = L1TopoSimulation('L1'+key+'TopoSimulation')
-    topoSimSeq.UseBitwise = False # Need to switch true (probably will change the counts)
-    topoSimSeq.InputDumpFile = 'inputdump_' + key.lower() + '.txt'
-    topoSimSeq.EnableInputDump = flags.Trigger.enableL1TopoDump
-    topoSimSeq.IsLegacyTopo = isLegacy
-    topoSimSeq.MonHistBaseDir = 'L1/L1'+key+'TopoAlgorithms'
-
-    # Calo inputs
-    if flags.Trigger.enableL1CaloPhase1 and not isLegacy:
-        topoSimSeq.EMTAUInputProvider = 'LVL1::eFexInputProvider/eFexInputProvider'
-        # Need further test from inputs.
-        topoSimSeq.JetInputProvider = 'LVL1::jFexInputProvider/jFexInputProvider'
-        # Need further test from inputs. Reverting back to Run 2 MET 
-        topoSimSeq.EnergyInputProvider = 'LVL1::gFexInputProvider/gFexInputProvider'
-
-    # Muon inputs only for phase-1 Topo
-    if isLegacy:
-        topoSimSeq.MuonInputProvider.locationMuCTPItoL1Topo = ""
-        topoSimSeq.MuonInputProvider.locationMuCTPItoL1Topo1 = ""
-        topoSimSeq.MuonInputProvider.locationMuonRoI = ""
-        topoSimSeq.MuonInputProvider.locationMuonRoI1 = ""
-    else:
-
-        from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
-        acc = ComponentAccumulator()
-        topoSimSeq.MuonInputProvider.RecRpcRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
-        topoSimSeq.MuonInputProvider.RecTgcRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
-        topoSimSeq.MuonInputProvider.locationMuonRoI = ""
-        topoSimSeq.MuonInputProvider.locationMuonRoI1 = ""
-        appendCAtoAthena(acc)
-
-    return topoSimSeq
 
 def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
 
