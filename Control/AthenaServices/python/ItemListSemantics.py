@@ -70,7 +70,7 @@ class OutputStreamItemListSemantics(SequenceSemantics):
             # multiple selections fun
             if negsel:
                 # multiple different negative selections are usually logically incompatible, report error
-                raise ValueError(f"Multiiple (different) negative selection are not supported: for {k} : {str(sel)}")
+                raise ValueError(f"Multiple (different) negative selection are not supported: for {k} : {str(sel)}")
             if '' in sel or '*' in sel:
                 msg.info(f"Multiple Aux attribute selections for {k} - will write all attributes." +
                          f" Original selection was: {str(sel)}")
