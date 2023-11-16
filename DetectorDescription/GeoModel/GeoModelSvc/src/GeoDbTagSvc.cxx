@@ -102,7 +102,7 @@ StatusCode GeoDbTagSvc::setupTags()
     else if(configVal=="RUN2")
       m_geoConfig = GeoModel::GEO_RUN2;
     else if(configVal=="RUN3")
-      m_geoConfig = GeoModel::GEO_RUN2;
+      m_geoConfig = GeoModel::GEO_RUN3;
     else if(configVal=="RUN4")
       m_geoConfig = GeoModel::GEO_RUN4;
     else if(configVal=="TESTBEAM")
