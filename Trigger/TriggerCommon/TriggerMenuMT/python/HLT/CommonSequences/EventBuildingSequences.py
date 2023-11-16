@@ -144,12 +144,6 @@ def pebInfoWriterToolCfg(flags, name, eventBuildType):
                        SubDetector.TDAQ_CALO_JET_PROC_ROI # = 0x75
                        ] )
 
-    elif 'AlfaPEB' == eventBuildType:
-        acc = StaticPEBInfoWriterToolCfg(
-            flags, name,
-            subDets = [SubDetector.FORWARD_ALPHA,
-                       SubDetector.TDAQ_CTP] )
-
     elif 'LArPEBNoise' == eventBuildType:
         acc = RoIPEBInfoWriterToolCfg(
             flags, name,

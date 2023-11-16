@@ -55,26 +55,10 @@ def getL1BackgroundSeed():
         ]
 
 ##############################
-def getL1_ALFA_Diff_Phys_Seeds():
-    return [
-        'L1_MBTS_1_A_ALFA_C','L1_MBTS_1_C_ALFA_A',
-        'L1_EM3_ALFA_ANY',
-        'L1_TE5_ALFA_ANY',
-    ]
-
-##############################
-def getL1_ALFA_CDiff_Phys_Seeds():
-    return ['L1_EM3_ALFA_EINE','L1_TE5_ALFA_EINE']
-
-##############################
-def getL1_ALFA_Jet_Phys_Seeds():
-    return ['L1_J12_ALFA_ANY','L1_J12_ALFA_ANY_UNPAIRED_ISO']
-
-##############################
 def getL1StandbySeed(l1items):
     standby_seeds = [ x for x in l1items if \
         "_EMPTY" not in x and "CALREQ" not in x and "ZB" not in x and \
-        "-" not in x and "CMU" not in x and "ALFA" not in x  and "RD" not in x and \
+        "-" not in x and "CMU" not in x and "RD" not in x and \
         "BCM" not in x and "BGRP12" not in x
     ]
     return standby_seeds
@@ -178,55 +162,6 @@ def getEBnoL1PSSeed(l1items, l1seedname):
 
     return l1EBitems
 
-##############################
-def getL1_ALFA_Phys():
-    return [
-        'L1_ALFA_ELAST1',  'L1_ALFA_ELAST2',
-        'L1_ALFA_ELAST11', 'L1_ALFA_ELAST12', 
-        'L1_ALFA_ELAST13', 'L1_ALFA_ELAST14',
-        'L1_ALFA_ELAST15', 'L1_ALFA_ELAST16',
-        'L1_ALFA_ELAST17', 'L1_ALFA_ELAST18',
-        'L1_ALFA_SHOWSYST5',
-        'L1_ALFA_ANY_A_EMPTY', 'L1_ALFA_ANY_C_EMPTY'
-    ]            
-
-##############################
-def getL1_ALFA_Phys_Any():
-    return [
-        'L1_ALFA_ANY', 'L1_ALFA_ANY_EMPTY', 'L1_ALFA_ANY_FIRSTEMPTY',
-        'L1_ALFA_ANY_UNPAIRED_ISO', 'L1_ALFA_ANY_UNPAIRED_NONISO', 'L1_ALFA_ANY_BGRP10'
-    ]
-
-##############################
-def getL1ALFA_Calib():
-    return [
-        'L1_ALFA_B7L1U', 'L1_ALFA_B7L1L',
-        'L1_ALFA_A7L1U', 'L1_ALFA_A7L1L',
-        'L1_ALFA_A7R1U', 'L1_ALFA_A7R1L',
-        'L1_ALFA_B7R1U', 'L1_ALFA_B7R1L'
-    ]
-
-##############################
-def getL1ALFA_CEP():
-    return [
-        'L1_ALFA_ELAST15', 'L1_ALFA_ELAST18',
-        'L1_ALFA_SYST17',  'L1_ALFA_SYST18',
-        'L1_ALFA_ELASTIC_UNPAIRED_ISO', 'L1_ALFA_ANTI_ELASTIC_UNPAIRED_ISO'
-    ]
-
-##############################
-def getL1ALFA_SYS():
-    l1items = [
-        'L1_ALFA_SYST17', 'L1_ALFA_SYST18'
-    ]
-    return l1items
-
-##############################
-def getL1ALFA_ELAS():
-    return [
-        'L1_ALFA_ELAST15', 'L1_ALFA_ELAST18'
-    ]
-
 #####################################
 def getL1LowLumi():
     return [
@@ -327,15 +262,6 @@ L1_multiseed_simple_getters = {
     'L1_J': getL1JetBS,
     'L1_Bkg': getL1BackgroundSeed,
     'L1_BS': getL1BSSeed,
-    'L1_ALFA_Diff_Phys': getL1_ALFA_Diff_Phys_Seeds,
-    'L1_ALFA_CDiff_Phys': getL1_ALFA_CDiff_Phys_Seeds,
-    'L1_ALFA_Jet_Phys': getL1_ALFA_Jet_Phys_Seeds,
-    'L1_ALFA_Phys': getL1_ALFA_Phys,
-    'L1_ALFA_PhysAny': getL1_ALFA_Phys_Any,
-    'L1_ALFA_Calib': getL1ALFA_Calib,
-    'L1_ALFA_ELAS': getL1ALFA_ELAS,
-    'L1_ALFA_CEP': getL1ALFA_CEP,
-    'L1_ALFA_SYS': getL1ALFA_SYS,
     'L1_LowLumi': getL1LowLumi,
     'L1_BKeePrimary': getL1BKeePrimary,
     'L1_BKeePrescaled': getL1BKeePrescaled,

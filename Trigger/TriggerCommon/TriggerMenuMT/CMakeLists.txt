@@ -93,20 +93,20 @@ endfunction()
 atlas_test_lvl1_trigger_menu( Dev_pp_run3_v1 )
 atlas_test_lvl1_trigger_menu( Physics_pp_run3_v1 )
 atlas_test_lvl1_trigger_menu( PhysicsP1_pp_run3_v1 )
-atlas_test_lvl1_trigger_menu( PhysicsP1_pp_lowMu_run3_v1 Trigger.L1.doAlfaCtpin=True )
+atlas_test_lvl1_trigger_menu( PhysicsP1_pp_lowMu_run3_v1 )
 atlas_test_lvl1_trigger_menu( MC_pp_run3_v1 )
 atlas_test_lvl1_trigger_menu( Cosmic_run3_v1 )
-atlas_test_lvl1_trigger_menu( PhysicsP1_HI_run3_v1 Trigger.L1.doAlfaCtpin=True )
-atlas_test_lvl1_trigger_menu( Dev_HI_run3_v1 Trigger.L1.doAlfaCtpin=True )
+atlas_test_lvl1_trigger_menu( PhysicsP1_HI_run3_v1 )
+atlas_test_lvl1_trigger_menu( Dev_HI_run3_v1 )
 
 # Test only most comprehensive HLT menus:
 atlas_test_hlt_trigger_menu( Dev_pp_run3_v1_BulkMCProd_prescale )
 atlas_test_hlt_trigger_menu( Cosmic_run3_v1 )
-atlas_test_hlt_trigger_menu( Dev_HI_run3_v1 ConfigFlags.Trigger.L1.doAlfaCtpin=True )
+atlas_test_hlt_trigger_menu( Dev_HI_run3_v1 )
 atlas_test_hlt_trigger_menu( PhysicsP1_pp_run3_v1_HLTReprocessing_prescale )
 
 # Test other HLT menus not included above
-atlas_test_l1defined_menu( PhysicsP1_pp_lowMu_run3_v1 Trigger.L1.doAlfaCtpin=True )
+atlas_test_l1defined_menu( PhysicsP1_pp_lowMu_run3_v1 )
 atlas_test_l1defined_menu( Dev_pp_run4_v1 )
 
 function( atlas_test_ca_trigger_menu menu )
@@ -120,8 +120,8 @@ endfunction()
 
 # test for CA menu
 atlas_test_ca_trigger_menu( Dev_pp_run3_v1 )
-atlas_test_ca_trigger_menu( PhysicsP1_pp_lowMu_run3_v1 Trigger.L1.doAlfaCtpin=True Trigger.disabledSignatures=["Cosmics"] )
-atlas_test_ca_trigger_menu( Dev_HI_run3_v1 Trigger.L1.doAlfaCtpin=True )
+atlas_test_ca_trigger_menu( PhysicsP1_pp_lowMu_run3_v1 Trigger.disabledSignatures=["Cosmics"] )
+atlas_test_ca_trigger_menu( Dev_HI_run3_v1 )
 
 # test for menu name consistency
 atlas_add_test( test_menu_dump

@@ -29,7 +29,6 @@ _PartialEventBuildingIdentifiers = {
     'LATOMEPEB' : False,
     'SCTPEB' : False,
     'TilePEB' : False,
-    'AlfaPEB' : False,
     'ZDCPEB' : False,
     'AFPPEB' : False,
     'LumiPEB' : False,

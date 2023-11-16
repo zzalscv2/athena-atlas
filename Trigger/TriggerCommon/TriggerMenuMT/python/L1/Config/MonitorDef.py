@@ -92,7 +92,7 @@ class MonitorDef:
 
 
     @staticmethod
-    def applyItemCounter( menuName, items, do_alfa=False ):
+    def applyItemCounter( menuName, items ):
         """
         this functions marks the items that should be monitored by setting the corresponding monitoring flags
         e.g. to "LF:000|HF:111" for high frequency monitoring of TBP, TAP, and TAV.
@@ -106,9 +106,6 @@ class MonitorDef:
         monItemsHF = { 1 :[], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] }
 
         # definitions hardcoded at the moment
-#        monItems[TBP] = [
-#            "L1_ALFA_B7L1U", "L1_ALFA_B7L1L", "L1_ALFA_A7L1U", "L1_ALFA_A7L1L", "L1_ALFA_A7R1U", "L1_ALFA_A7R1L", "L1_ALFA_B7R1U", "L1_ALFA_B7R1L"
-#            ]
 
         if 'HI' not in menuName:
             monItems[TBP|TAP|TAV] = [
@@ -189,13 +186,6 @@ class MonitorDef:
                 "L1_DPHI-M70-2eEM12M",
             ]
 
-            alfa_monitems = [
-                # "L1_ALFA_ANY",
-                # "L1_ALFA_B7L1U", "L1_ALFA_B7L1L",
-                # "L1_ALFA_A7L1U", "L1_ALFA_A7L1L",
-                "L1_ALFA_A7R1U", "L1_ALFA_A7R1L",
-                "L1_ALFA_B7R1U", "L1_ALFA_B7R1L",
-            ]
             topo3_monitems = [
                 "L1_ZAFB-25DPHI-eEM18M",
                 "L1_SC111-CjJ40",
@@ -445,30 +435,9 @@ class MonitorDef:
                 "L1_XE35_VTE200", "L1_XE50_VTE200",
                 ]
 
-            alfa_monitems = [
-                # ALFA
-                # "L1_ALFA_ANY",
-                # "L1_ALFA_A7L1L", "L1_ALFA_A7L1U",
-                # "L1_ALFA_A7R1L", "L1_ALFA_A7R1U",
-                "L1_ALFA_B7L1L", "L1_ALFA_B7L1U", "L1_ALFA_B7R1L", "L1_ALFA_B7R1U",
-                "L1_ALFA_ELAST15", "L1_ALFA_ELAST18",
-                "L1_ALFA_SYST9", "L1_ALFA_SYST10", "L1_ALFA_SYST11",
-                "L1_ALFA_SYST12", "L1_ALFA_SYST17", "L1_ALFA_SYST18",
-                "L1_MBTS_1_A_ALFA_C", "L1_MBTS_1_C_ALFA_A",
-                "L1_MU3V_ALFA_ANY",
-                "L1_MU3V_ALFA_EINE",
-                "L1_J12_ALFA_ANY", "L1_J12_ALFA_EINE", "L1_J12_VTE200",
-                #
-                "L1_TE5_ALFA_ANY",
-                "L1_TE5_ALFA_EINE",
-            ]
             topo3_monitems = []
 
-        # Switch between active CTP input connections
-        if do_alfa:
-            monItems[TBP|TAP|TAV] += alfa_monitems
-        else:
-            monItems[TBP|TAP|TAV] += topo3_monitems
+        monItems[TBP|TAP|TAV] += topo3_monitems
 
 
         monItemsHF[TBP|TAP|TAV] = [

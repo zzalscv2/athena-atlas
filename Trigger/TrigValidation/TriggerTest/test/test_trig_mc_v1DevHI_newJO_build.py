@@ -18,7 +18,6 @@ ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'ttbar' # TODO restore to once HI MC has supercells 'pbpb'
 ex.flags = ['Trigger.triggerMenuSetup="Dev_HI_run3_v1_TriggerValidation_prescale"',
             'Trigger.doRuntimeNaviVal=True',
-            'Trigger.L1.doAlfaCtpin=True',
             'Trigger.L1.doHeavyIonTobThresholds=True']
 
 test = Test.Test()

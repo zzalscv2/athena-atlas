@@ -20,7 +20,6 @@ precommand = ''.join([
   "doWriteBS=False;",
   "doWriteRDOTrigger=True;",
   "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
-  "ConfigFlags.Trigger.L1.doAlfaCtpin=True;",
   # TODO restore/fix once switching back to HI data "from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.IOVDb.GlobalTag='OFLCOND-MC16-SDR-RUN2-09'"
 ])
 ex.args = '-c "{:s}"'.format(precommand)

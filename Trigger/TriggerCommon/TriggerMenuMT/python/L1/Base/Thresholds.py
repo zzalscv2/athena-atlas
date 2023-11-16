@@ -64,7 +64,7 @@ class MenuThresholdsCollection( object ):
 
     def json(self):
         confObj = odict()
-        for ttype in (ThrType.Run3Types() + ThrType.NIMTypes() + [ThrType.TOPO, ThrType.MUTOPO] + [ThrType.ALFA, ThrType.LArSat, ThrType.NSWMon]):
+        for ttype in (ThrType.Run3Types() + ThrType.NIMTypes() + [ThrType.TOPO, ThrType.MUTOPO] + [ThrType.LArSat, ThrType.NSWMon]):
             confObj[ttype.name] = odict()
             confObj[ttype.name]["type"] = ttype.name
             confObj[ttype.name]["thresholds"] = odict()

@@ -408,17 +408,3 @@ class ThresholdDef:
         NimThreshold('NIMTGC',  'NIM', mapping=12)
         NimThreshold('NIMRPC',  'NIM', mapping=13)
         NimThreshold('NIMTRT',  'NIM', mapping=14)
-
-        # ALFA
-        LUT1offset =  2 # this is needed because the first 4 direct inputs are in a LUT with 8 PITs so the OR with the next inputs would not work
-        LUT2offset =  8
-        LUT3offset = 14
-        LUT4offset = 20
-        LUT5offset = 26
-        for i, alfa in enumerate( ['B7R1L', 'B7R1U', 'A7R1L', 'A7R1U', 'A7L1L', 'A7L1U', 'B7L1L', 'B7L1U'] ):
-            phaseOffset = 32 * (i%2)
-            NimThreshold('ALFA_%s'    % alfa, 'ALFA', mapping = LUT1offset + i/2 + phaseOffset )
-            NimThreshold('ALFA2_%s'   % alfa, 'ALFA', mapping = LUT2offset + i/2 + phaseOffset )
-            NimThreshold('ALFA3_%s'   % alfa, 'ALFA', mapping = LUT3offset + i/2 + phaseOffset )
-            NimThreshold('ALFA4_%s'   % alfa, 'ALFA', mapping = LUT4offset + i/2 + phaseOffset )
-            NimThreshold('ALFA_%s_OD' % alfa, 'ALFA', mapping = LUT5offset + i/2 + phaseOffset )

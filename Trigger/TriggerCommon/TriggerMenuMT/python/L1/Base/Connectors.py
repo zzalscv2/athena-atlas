@@ -221,7 +221,7 @@ class ElectricalConnector(Connector):
                     if signal is None:
                         startbit += nbits
                         continue
-                    # use a single flatindex value for ALFA and Topo legacy boards
+                    # use a single flatindex value for the Topo legacy boards
                     flatindex = 2*startbit + clock
                     tl = TriggerLine( name = signal, startbit = startbit, flatindex = flatindex, nbits = nbits, fpga = None, clock = clock)
                     startbit += nbits

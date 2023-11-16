@@ -19,8 +19,7 @@ ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'minbias'
 ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_lowMu_run3_v1"',
             'Trigger.disableChains=[]',  # Do not disable any chains
-            'Trigger.doRuntimeNaviVal=True',
-            'Trigger.L1.doAlfaCtpin=True']
+            'Trigger.doRuntimeNaviVal=True']
 
 test = Test.Test()
 test.art_type = 'build'

@@ -50,10 +50,6 @@ HLT_2g15_loose_ion_L12eEM12:
     1: 56
     2: 41
     3: 6
-HLT_2j10_L1ALFA_ELAS:
-  eventCount: 0
-HLT_2j10_L1ALFA_SYS:
-  eventCount: 0
 HLT_2mu4_L12MU3V:
   eventCount: 2
   stepCounts:
@@ -1182,8 +1178,6 @@ HLT_j150_ion_L1jJ90:
     0: 4
   stepFeatures:
     0: 6
-HLT_j15_L1ALFA_Jet_Phys:
-  eventCount: 0
 HLT_j15a_L11ZDC_NZDC_TE5_VTE200:
   eventCount: 0
 HLT_j15a_L15ZDC_A_5ZDC_C_TE5_VTE200:
@@ -1496,22 +1490,6 @@ HLT_j85_ion_L1jJ60:
     0: 16
   stepFeatures:
     0: 24
-HLT_mb_alfaperf_L1ALFA_ANY:
-  eventCount: 0
-HLT_mb_alfaperf_L1All:
-  eventCount: 0
-  stepCounts:
-    0: 20
-  stepFeatures: {}
-HLT_mb_alfaperf_L1RD0_BGRP10:
-  eventCount: 0
-HLT_mb_alfaperf_L1RD0_EMPTY:
-  eventCount: 0
-HLT_mb_alfaperf_L1RD0_FILLED:
-  eventCount: 0
-  stepCounts:
-    0: 20
-  stepFeatures: {}
 HLT_mb_excl_1trk2_pt1_L1TRT_VTE20:
   eventCount: 0
 HLT_mb_excl_1trk5_pt10_hi_FgapAC5_L11ZDC_A_1ZDC_C_VTE200:
@@ -2358,10 +2336,6 @@ HLT_mu4_j60_ion_dRAB05_L1MU3V_jJ40:
     2: 12
     3: 12
     4: 19
-HLT_mu4_mu2noL1_L1MU3V_ALFA_ANY:
-  eventCount: 0
-HLT_mu4_mu2noL1_L1MU3V_ALFA_EINE:
-  eventCount: 0
 HLT_mu4_mu4_idperf_1invmAB5_L12MU3V:
   eventCount: 0
   stepCounts:

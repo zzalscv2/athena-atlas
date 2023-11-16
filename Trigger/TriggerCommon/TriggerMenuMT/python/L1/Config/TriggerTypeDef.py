@@ -14,7 +14,7 @@ class TT(object):
     muon        = 1 << 3  # Used by TGC
     lardigital  = 1 << 4  # Used by LAr/LATOME
     nsw         = 1 << 5  # Used on NSW FEs
-    nim = alfa  = 1 << 6  # Used by TGC Burst, and by ALFA in special runs
+    nim         = 1 << 6  # Used by TGC Burst
     phys        = 1 << 7  # Used in conjunction with the other bits
 
     # Calibration requests

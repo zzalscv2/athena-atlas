@@ -22,8 +22,6 @@ class BoardType(Enum):
     def fromBoardName(name):
         if 'muctpi' in name.lower():
             btype = BoardType.MUCTPI
-        elif 'alfactpin' in name.lower():
-            btype = BoardType.MERGER
         elif 'merger' in name.lower():
             btype = BoardType.MERGER
         elif 'topo' in name.lower():            

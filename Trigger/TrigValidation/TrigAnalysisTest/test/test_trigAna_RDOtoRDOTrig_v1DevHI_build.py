@@ -16,7 +16,6 @@ preExec = ';'.join([
   'doWriteRDOTrigger=True',
   'flags.Trigger.AODEDMSet=\'AODFULL\'',
   'flags.Trigger.enableL1CaloPhase1=False',
-  'flags.Trigger.L1.doAlfaCtpin=True',
   'flags.Trigger.L1.doHeavyIonTobThresholds=True',
 ])
 

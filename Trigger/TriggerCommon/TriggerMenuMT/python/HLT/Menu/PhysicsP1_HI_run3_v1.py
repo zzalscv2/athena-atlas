@@ -100,10 +100,6 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_mu8_L1MU5VF_VjTE50',       stream=[UPCStream], groups=SingleMuonGroup+PrimaryL1MuGroup+PrimaryPhIGroup+['PS:NoHLTRepro']),
         ChainProp(name='HLT_2mu4_L12MU3V_VjTE50',      stream=[UPCStream], groups=MultiMuonGroup+PrimaryL1MuGroup+PrimaryPhIGroup+['PS:NoHLTRepro']),
         ChainProp(name='HLT_mu4_mu4noL1_L1MU3V_VjTE50',stream=[UPCStream], l1SeedThresholds=['MU3V','FSNOSEED'], groups=MultiMuonGroup+PrimaryL1MuGroup+PrimaryPhIGroup+['PS:NoHLTRepro']),
-
-        # ALFA + dimuon triggers
-        ChainProp(name='HLT_mu4_mu2noL1_L1MU3V_ALFA_ANY', l1SeedThresholds=['MU3V','FSNOSEED'], stream=['MinBias'], groups=['PS:Online','PS:NoHLTRepro']+SingleMuonGroup),
-        ChainProp(name='HLT_mu4_mu2noL1_L1MU3V_ALFA_EINE', l1SeedThresholds=['MU3V','FSNOSEED'], stream=['MinBias'], groups=['PS:Online','PS:NoHLTRepro']+SingleMuonGroup),
     ]
     chains['Bphysics'] += [
 
@@ -366,11 +362,6 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_j0_HT300XX15ptXX0eta490XXveto_j20a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE10_VTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream, 'express'], groups=SingleJetGroup+PrimaryLegGroup, monGroups=['jetMon:t0','jetMon:online']),
         ChainProp(name='HLT_j0_HT300XX15ptXX0eta490XXveto_j30a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE10_VTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+PrimaryLegGroup),
         ChainProp(name='HLT_j0_HT300XX15ptXX0eta490XXveto_j40a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE10_VTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+PrimaryLegGroup),
-
-        # ALFA + jet triggers
-        ChainProp(name='HLT_j15_L1ALFA_Jet_Phys', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:Online','PS:NoHLTRepro']+SingleJetGroup+SupportLegGroup),
-        ChainProp(name='HLT_2j10_L1ALFA_ELAS', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:Online','PS:NoHLTRepro']+SingleJetGroup),
-        ChainProp(name='HLT_2j10_L1ALFA_SYS', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:Online','PS:NoHLTRepro']+SingleJetGroup),
     ]
 
 
@@ -699,14 +690,6 @@ def getPhysicsHISignatures():
 
         #OVERLAY
         ChainProp(name='HLT_mb_sptrk_L1ZDC_A_C_VTE50_OVERLAY', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasOverlayStream], groups=MinBiasGroup+SupportLegGroup),
-
-        # ALFA perf
-        ChainProp(name='HLT_mb_alfaperf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'],     groups=LowMuGroup+MinBiasGroup),
-        ChainProp(name='HLT_mb_alfaperf_L1RD0_EMPTY',  l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'],     groups=LowMuGroup+MinBiasGroup),
-        ChainProp(name='HLT_mb_alfaperf_L1ALFA_ANY',   l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'],     groups=LowMuGroup+MinBiasGroup),
-        ChainProp(name='HLT_mb_alfaperf_L1All',        l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'],     groups=LowMuGroup+MinBiasGroup),
-        ChainProp(name='HLT_mb_alfaperf_L1RD0_BGRP10', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'],     groups=LowMuGroup+MinBiasGroup),
-
     ]
 
 

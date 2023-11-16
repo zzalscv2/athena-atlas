@@ -12,7 +12,7 @@ class CTPInputConfig:
     """
 
     @staticmethod
-    def cablingLayout(do_alfa=False):
+    def cablingLayout():
         inputLayout = odict()
         inputLayout["optical"] = odict([
             ( "connector0", "MuCTPiOpt0" ),
@@ -22,8 +22,7 @@ class CTPInputConfig:
             ( "connector4", "Topo1Opt3" )
         ])
         inputLayout["electrical"] = odict([
-            # Either Topo3El or AlfaCtpin
-            ( "connector0", "AlfaCtpin" if do_alfa else "Topo3El"),
+            ( "connector0", "Topo3El" ),
             ( "connector1", "LegacyTopoMerged" ),
             ( "connector2", "Topo2El" ),
         ])
