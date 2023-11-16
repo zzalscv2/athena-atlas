@@ -22,9 +22,17 @@ caloRingerAODList = []
 
 # Add itens into lists
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
-from CaloRingerAlgs.CaloRingerAlgsConfig import caloRingerOutputList
+from AthenaCommon.Configurable import ConfigurableCABehavior
+from CaloRingerAlgs.CaloRingerAlgsConfig import CaloRingerOutputCfg
 
-toOuput = caloRingerOutputList(ConfigFlags)
+caloRingerFlags = ConfigFlags.clone()
+caloRingerFlags.Output.doWriteESD = True
+caloRingerFlags.Output.doWriteAOD = True
+caloRingerFlags.lock()
+with ConfigurableCABehavior():
+    toOutput = CaloRingerOutputCfg(caloRingerFlags)
 
-caloRingerESDList = toOuput
-caloRingerAODList = toOuput
+caloRingerESDList = list(toOutput.getEventAlgo('OutputStreamESD').ItemList)
+caloRingerAODList = list(toOutput.getEventAlgo('OutputStreamAOD').ItemList)
+
+toOutput.wasMerged()
