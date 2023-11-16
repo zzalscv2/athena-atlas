@@ -3379,18 +3379,18 @@ namespace AtlasRoot {
       return getAlphaLeakage(cl_eta, ptype, var, varSF);
     }
 
+    // No correction for electron
+    if (ptype == PATCore::ParticleType::Electron &&
+	var != egEnergyCorr::Scale::LeakageElecDown &&
+	var != egEnergyCorr::Scale::LeakageElecUp)
+      return 0.;
+
     // Outside acceptance. Should never happen
     double aeta = std::abs(cl_eta);
     if (aeta > 2.47) {
       ATH_MSG_WARNING("Very high |eta| object, eta = " << cl_eta);
       return 0.;
     }
-
-    // No correction for electron
-    if (ptype == PATCore::ParticleType::Electron &&
-	var != egEnergyCorr::Scale::LeakageElecDown &&
-	var != egEnergyCorr::Scale::LeakageElecUp)
-      return 0.;
 
     // If no correction applied, can only be the egEnergyCorr::Scale::LeakageXXX syst
     if (!m_useLeakageCorrection &&
