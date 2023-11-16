@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PRDCOLLHANDLE_CSC_H
@@ -20,7 +20,7 @@ public:
 
   bool project() const { return m_project; }
 
-public slots:
+public Q_SLOTS:
   void setProjectionMode( bool );
 
 protected:
