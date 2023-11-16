@@ -48,9 +48,10 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     kwargs.setdefault("RandomGenerator", "athena")
 
     # Multi-threading settinggs
-    #is_hive = (concurrencyProps.ConcurrencyFlags.NumThreads() > 0)
     is_hive = flags.Concurrency.NumThreads > 0
     kwargs.setdefault("MultiThreading", is_hive)
+    if is_hive:
+        kwargs.setdefault('Cardinality', flags.Concurrency.NumThreads)
 
     kwargs.setdefault("TruthRecordService", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
     kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name)
@@ -90,10 +91,6 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
 
     # Set commands for the G4AtlasAlg
     kwargs.setdefault("G4Commands", flags.Sim.G4Commands)
-    from SimulationConfig.SimEnums import CalibrationRun
-    if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile]:
-        # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
-        kwargs.setdefault("ExtraOutputs", [( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitActive_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitDeadMaterial_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitInactive_DEAD' )])
 
     result.addEventAlgo(CompFactory.G4AtlasAlg(name, **kwargs))
 
