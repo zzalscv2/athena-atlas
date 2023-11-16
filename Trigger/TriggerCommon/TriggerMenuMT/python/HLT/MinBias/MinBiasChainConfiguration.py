@@ -12,7 +12,6 @@ from TriggerMenuMT.HLT.MinBias.MinBiasMenuSequences import (MinBiasSPSequenceCfg
                                                             MinBiasTrkSequenceCfg,
                                                             MinBiasMbtsSequenceCfg,
                                                             MinBiasZVertexFinderSequenceCfg)
-from TriggerMenuMT.HLT.MinBias.ALFAMenuSequences import ALFAPerfSequence
 from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import AFPTrkSequence, AFPGlobalSequence
 
 #----------------------------------------------------------------
@@ -41,10 +40,6 @@ def AFPGlobalSequenceCfgWrap(flags):
 def AFPTrkSequenceCfgWrap(flags):
     from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
     return menuSequenceCAToGlobalWrapper(AFPTrkSequence, flags)
-
-def ALFAPerfSequenceCfgWrap(flags):
-    from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
-    return menuSequenceCAToGlobalWrapper(ALFAPerfSequence, flags)
 
 def MinBiasZVertexFinderCfgWrap(flags):
     from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
@@ -97,9 +92,6 @@ class MinBiasChainConfig(ChainConfigurationBase):
                 steps.append(self.getMinBiasZFindStep(flags))
                 steps.append(self.getMinBiasTrkStep(flags))
 
-            if "_alfaperf" in self.chainName:
-                steps.append(self.getALFAPerfStep(flags))
-
         return self.buildChain(steps)
 
     def getMinBiasMbtsStep(self, flags):
@@ -125,6 +117,3 @@ class MinBiasChainConfig(ChainConfigurationBase):
 
     def getAFPGlobalStep(self, flags):
          return self.getStep(flags,1,'AFPGlobal',[AFPGlobalSequenceCfgWrap])
-
-    def getALFAPerfStep(self, flags):
-        return self.getStep(flags,1,'ALFAPerf',[ALFAPerfSequenceCfgWrap])

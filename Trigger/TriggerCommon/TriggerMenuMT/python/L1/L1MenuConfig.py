@@ -156,7 +156,7 @@ class L1MenuConfig(object):
             self._registeredThresholdsStats[thr.algCategory] += 1
             return
 
-        isNIM = thr.ttype in ['NIM','CALREQ','MBTSSI', 'MBTS', 'LUCID', 'BCM', 'BCMCMB', 'ZDC', 'ALFA', 'BPTX', 'ZB']
+        isNIM = thr.ttype in ['NIM','CALREQ','MBTSSI', 'MBTS', 'LUCID', 'BCM', 'BCMCMB', 'ZDC', 'BPTX', 'ZB']
         if thr.isLegacy():
             self._registeredThresholdsStats["legacy"] += 1
         elif isNIM:
@@ -564,7 +564,7 @@ class L1MenuConfig(object):
                     pass
 
 
-        # signals from merger boards like AlfaCtpin
+        # signals from merger boards
         for (boardName, boardDef) in L1MenuFlags.boards().items():
             for connDef in boardDef["connectors"]:
                 if connDef["format"] != "simple":

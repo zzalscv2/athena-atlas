@@ -21,7 +21,6 @@ precommand = ''.join([
   "doWriteBS=False;",
   "doWriteRDOTrigger=True;",
   "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
-  "ConfigFlags.Trigger.L1.doAlfaCtpin=True;",
 ])
 ex.args = '-c "{:s}"'.format(precommand)
 

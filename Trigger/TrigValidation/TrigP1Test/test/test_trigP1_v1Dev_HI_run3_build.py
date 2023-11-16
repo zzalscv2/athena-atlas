@@ -22,8 +22,7 @@ hlt.args = f'-c "setMenu=\'{triggermenu}\';'
 hlt.args += ';'.join(['flags.Trigger.L1MuonSim.NSWVetoMode=False',
                      'flags.Trigger.L1MuonSim.doMMTrigger=False',
                      'flags.Trigger.L1MuonSim.doPadTrigger=False',
-                     'flags.Trigger.L1MuonSim.doStripTrigger=False',
-                     'flags.Trigger.L1.doAlfaCtpin=True']) + '"'
+                     'flags.Trigger.L1MuonSim.doStripTrigger=False']) + '"'
 hlt.fpe_auditor = True
 hlt.max_events = -1
 hlt.args += ' -o output'

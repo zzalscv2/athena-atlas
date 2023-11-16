@@ -234,9 +234,6 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.L1.doCTP', True,
                   help='enable CTP ByteStream conversion/simulation')
 
-    flags.addFlag('Trigger.L1.doAlfaCtpin', False,
-                  help='replace Topo3 with ALFA in CTP inputs')
-
     flags.addFlag('Trigger.L1.doHeavyIonTobThresholds', lambda prevFlags:
                   'HI' in prevFlags.Trigger.triggerMenuSetup,
                   help='modify min-pt-to-Topo threshold for TOBs to HI values')

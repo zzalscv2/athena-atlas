@@ -41,7 +41,7 @@ class L1Menu(object):
         self.boards = MenuBoardsCollection()
 
         # CTP Info in the menu
-        self.ctp = CTP(do_alfa = flags.Trigger.L1.doAlfaCtpin)
+        self.ctp = CTP()
 
         if self.menuName:
             smk_psk_Name = get_smk_psk_Name(self.menuName)
@@ -281,7 +281,7 @@ class L1Menu(object):
                 thrset = 'legacyCalo'
             elif thrName[:2]=='MU':
                 thrset = 'muon'
-            elif thrName[:3] in ['ALF', 'MBT','AFP','BCM','CAL','NIM','ZDC','BPT','LUC','BMA']:
+            elif thrName[:3] in ['MBT','AFP','BCM','CAL','NIM','ZDC','BPT','LUC','BMA']:
                 thrset = 'detector'
             elif thrName[:6]=='R2TOPO':
                 thrset = 'legacyTopo'
@@ -309,7 +309,7 @@ class L1Menu(object):
                 thrset = 'legacyCalo'
             elif thrName[:2]=='MU':
                 thrset = 'muon'
-            elif thrName[:3] in ['ALF', 'MBT','AFP','BCM','CAL','NIM','ZDC','BPT','LUC']:
+            elif thrName[:3] in ['MBT','AFP','BCM','CAL','NIM','ZDC','BPT','LUC']:
                 thrset = 'detector'
             elif thrName[:6]=='R2TOPO':
                 thrset = 'legacyTopo'

@@ -79,7 +79,7 @@ class ItemDef:
         bgrp12cond          = d.BGRP0 & d.BGRP12
         bgrp13cond          = d.BGRP0 & d.BGRP13 #UNPAIREDB1
         bgrp14cond          = d.BGRP0 & d.BGRP14 #UNPAIREDB2
-        alfacalib           = d.BGRP0 & d.BGRP10
+        bgrp10cond          = d.BGRP0 & d.BGRP10
         firstintrain        = d.BGRP0 & d.BGRP8
         physcond_or_unpaired_isocond    = d.BGRP0 & (d.BGRP1 | d.BGRP4)
 
@@ -1549,14 +1549,14 @@ class ItemDef:
         MenuItem('L1_RD0_BGRP0'          ).setLogic( d.RNDM0 & d.BGRP0            ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_BGRP7'          ).setLogic( d.RNDM0 & bgrp7cond          ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_BGRP9'          ).setLogic( d.RNDM0 & bgrp9cond          ).setTriggerType(TT.rand)
-        MenuItem('L1_RD0_BGRP10'         ).setLogic( d.RNDM0 & alfacalib          ).setTriggerType(TT.rand)
+        MenuItem('L1_RD0_BGRP10'         ).setLogic( d.RNDM0 & bgrp10cond         ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_BGRP11'         ).setLogic( d.RNDM0 & bgrp11cond         ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_BGRP15'         ).setLogic( d.RNDM0 & d.BGRP0 & d.BGRP15 ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_FIRSTINTRAIN'   ).setLogic( d.RNDM0 & firstintrain       ).setTriggerType(TT.rand)
 
         MenuItem('L1_RD1_FILLED'         ).setLogic( d.RNDM1 & physcond           ).setTriggerType(TT.zerobs) # used to be TT.rand
         MenuItem('L1_RD1_EMPTY'          ).setLogic( d.RNDM1 & cosmiccond         ).setTriggerType(TT.zerobs)
-        MenuItem('L1_RD1_BGRP10'         ).setLogic( d.RNDM1 & alfacalib          ).setTriggerType(TT.zerobs)
+        MenuItem('L1_RD1_BGRP10'         ).setLogic( d.RNDM1 & bgrp10cond         ).setTriggerType(TT.zerobs)
 
         MenuItem('L1_RD2_FILLED'         ).setLogic( d.RNDM2 & physcond           ).setTriggerType(TT.rand)
         MenuItem('L1_RD2_EMPTY'          ).setLogic( d.RNDM2 & cosmiccond         ).setTriggerType(TT.rand)
@@ -1599,53 +1599,6 @@ class ItemDef:
         MenuItem('L1_LHCF').setLogic( d.NIMLHCF & physcond).setTriggerType(TT.nim)
         MenuItem('L1_LHCF_UNPAIRED_ISO').setLogic( d.NIMLHCF & unpaired_isocond).setTriggerType(TT.nim)
         MenuItem('L1_LHCF_EMPTY').setLogic( d.NIMLHCF & cosmiccond).setTriggerType(TT.nim)
-
-        # ALFA
-
-        # LUT 22 (12 Outputs)
-        # ALFA LUT output #1-8 are the single thresholds
-        ALFA_ANY_A    = d.ALFA_B7L1U | d.ALFA_B7L1L | d.ALFA_A7L1U | d.ALFA_A7L1L  #  9
-        ALFA_ANY_C    = d.ALFA_A7R1U | d.ALFA_A7R1L | d.ALFA_B7R1U | d.ALFA_B7R1L  # 10
-        ALFA_ANY_U    = d.ALFA_B7L1U | d.ALFA_A7L1U | d.ALFA_A7R1U | d.ALFA_B7R1U  # 11
-        ALFA_ANY_L    = d.ALFA_A7R1L | d.ALFA_B7R1L | d.ALFA_B7L1L | d.ALFA_A7L1L  # 12
-
-        # LUT 23 (12 Outputs)
-        ALFA_LU       = d.ALFA2_A7L1U | d.ALFA2_B7L1U #  0
-        ALFA_RL       = d.ALFA2_A7R1L | d.ALFA2_B7R1L #  1
-        ALFA_LL       = d.ALFA2_B7L1L | d.ALFA2_A7L1L #  2
-        ALFA_RU       = d.ALFA2_A7R1U | d.ALFA2_B7R1U #  3
-
-        ALFA_A_UL_AA  = d.ALFA2_A7L1L | d.ALFA2_A7L1U #  4
-        ALFA_A_UL_AB  = d.ALFA2_A7L1U | d.ALFA2_B7L1L #  5
-        ALFA_A_UL_BA  = d.ALFA2_A7L1L | d.ALFA2_B7L1U #  6
-        ALFA_A_UL_BB  = d.ALFA2_B7L1L | d.ALFA2_B7L1U #  7
-
-        ALFA_C_UL_AA  = d.ALFA2_A7R1L | d.ALFA2_A7R1U #  8
-        ALFA_C_UL_AB  = d.ALFA2_A7R1U | d.ALFA2_B7R1L #  9
-        ALFA_C_UL_BA  = d.ALFA2_A7R1L | d.ALFA2_B7R1U # 10
-        ALFA_C_UL_BB  = d.ALFA2_B7R1L | d.ALFA2_B7R1U # 11
-
-        # LUT 24 (9 Outputs)
-        ALFA_ANY          = d.ALFA3_B7L1U | d.ALFA3_B7L1L | d.ALFA3_A7L1U | d.ALFA3_A7L1L | d.ALFA3_A7R1U | d.ALFA3_A7R1L | d.ALFA3_B7R1U | d.ALFA3_B7R1L # 0
-        ALFA_B1           = d.ALFA3_B7L1U | d.ALFA3_B7L1L | d.ALFA3_A7L1U | d.ALFA3_A7L1L  # 0
-        ALFA_B2           = d.ALFA3_A7R1U | d.ALFA3_A7R1L | d.ALFA3_B7R1U | d.ALFA3_B7R1L # 0
-        #NOT_ALFA_ANY_A    = Not(ALFA3_B7L1U | d.ALFA3_B7L1L | d.ALFA3_A7L1U | d.ALFA3_A7L1L)  #  1-4
-        #NOT_ALFA_ANY_C    = Not(ALFA3_A7R1U | d.ALFA3_A7R1L | d.ALFA3_B7R1U | d.ALFA3_B7R1L)  #  5-8
-
-        # LUT 25 (4 outputs)
-        ALFA_AE1          = d.ALFA4_B7L1U | d.ALFA4_A7L1U | d.ALFA4_B7L1L | d.ALFA4_A7L1L
-        ALFA_AE2          = d.ALFA4_B7L1U | d.ALFA4_A7L1U | d.ALFA4_A7R1L | d.ALFA4_B7R1L
-        ALFA_AE3          = d.ALFA4_A7R1U | d.ALFA4_B7R1U | d.ALFA4_B7L1L | d.ALFA4_A7L1L
-        ALFA_AE4          = d.ALFA4_A7R1U | d.ALFA4_B7R1U | d.ALFA4_A7R1L | d.ALFA4_B7R1L
-
-
-        # further simplification (in CAM)
-        ALFA_A            = ALFA_A_UL_AA & ALFA_A_UL_AB & ALFA_A_UL_BA & ALFA_A_UL_BB
-        ALFA_C            = ALFA_C_UL_AA & ALFA_C_UL_AB & ALFA_C_UL_BA & ALFA_C_UL_BB
-        ALFA_ELASTIC      = ALFA_ANY_A & ALFA_ANY_C & ALFA_ANY_U & ALFA_ANY_L
-        ALFA_EINE         = ALFA_ANY_A & ALFA_ANY_C
-        ALFA_ANTI_ELASTIC = ALFA_AE1 & ALFA_AE2 & ALFA_AE3 & ALFA_AE4
-
 
         MBTS_INNER = (d.MBTS_A0 | d.MBTS_A1 |  d.MBTS_A2 | d.MBTS_A3 | d.MBTS_A4 | d.MBTS_A5 | d.MBTS_A6 | d.MBTS_A7 | d.MBTS_C0 | d.MBTS_C1 | d.MBTS_C2 | d.MBTS_C3 | d.MBTS_C4 | d.MBTS_C5 | d.MBTS_C6 | d.MBTS_C7)
 
@@ -1716,175 +1669,6 @@ class ItemDef:
         MenuItem('L1_AFP_A_AND_C_TOF_T0T1_jJ90').setLogic( (d.AFP_FSA_TOF_T0 | d.AFP_FSA_TOF_T1) & (d.AFP_FSC_TOF_T0 | d.AFP_FSC_TOF_T1) & d.jJ90 & physcond )
         MenuItem('L1_AFP_A_AND_C_TOF_jJ125').setLogic( AFP_TOF_A & AFP_TOF_C & d.jJ125 & physcond )
         MenuItem('L1_AFP_A_AND_C_TOF_T0T1_jJ125').setLogic( (d.AFP_FSA_TOF_T0 | d.AFP_FSA_TOF_T1) & (d.AFP_FSC_TOF_T0 | d.AFP_FSC_TOF_T1) & d.jJ125 & physcond )
-
-        ## ALFA Single items
-        MenuItem('L1_ALFA_B7L1U').setLogic(d.ALFA_B7L1U & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_B7L1L').setLogic(d.ALFA_B7L1L & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7L1U').setLogic(d.ALFA_A7L1U & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7L1L').setLogic(d.ALFA_A7L1L & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7R1U').setLogic(d.ALFA_A7R1U & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7R1L').setLogic(d.ALFA_A7R1L & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_B7R1U').setLogic(d.ALFA_B7R1U & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_B7R1L').setLogic(d.ALFA_B7R1L & bgrp12cond).setTriggerType(TT.alfa)
-
-
-        MenuItem('L1_ALFA_ELAST1').setLogic( d.ALFA_B7L1U & d.ALFA_A7L1U & d.ALFA_A7R1L & d.ALFA_B7R1L &
-                                                Not(d.ALFA3_B7L1L | d.ALFA3_A7L1L | d.ALFA3_A7R1U | d.ALFA3_B7R1U)
-                                                & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_ELAST2').setLogic( d.ALFA_B7L1L & d.ALFA_A7L1L & d.ALFA_A7R1U & d.ALFA_B7R1U &
-                                                Not(d.ALFA3_B7L1U | d.ALFA3_A7L1U | d.ALFA3_A7R1L | d.ALFA3_B7R1L)
-                                                & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_ELAST11').setLogic( d.ALFA_B7L1U & d.ALFA_A7L1U & d.ALFA_A7R1L & d.ALFA_B7R1L    & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ELAST12').setLogic( d.ALFA_B7L1L & d.ALFA_A7L1L & d.ALFA_A7R1U & d.ALFA_B7R1U    & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ELAST13').setLogic( ALFA_LU & (d.ALFA_A7R1L & d.ALFA_B7R1L)                  & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ELAST14').setLogic( (d.ALFA_B7L1U & d.ALFA_A7L1U) & ALFA_RL & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ELAST15').setLogic( ALFA_LU & ALFA_RL & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ELAST15_Calib').setLogic( ALFA_LU & ALFA_RL &  alfacalib).setTriggerType(TT.alfa) ## CHECK
-        MenuItem('L1_ALFA_ELAST16').setLogic( ALFA_LL & (d.ALFA_A7R1U & d.ALFA_B7R1U) & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ELAST17').setLogic((d.ALFA_B7L1L & d.ALFA_A7L1L) & ALFA_RU & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ELAST18').setLogic( ALFA_LL & ALFA_RU & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ELAST18_Calib').setLogic( ALFA_LL & ALFA_RU & alfacalib).setTriggerType(TT.alfa)
-
-
-        MenuItem('L1_ALFA_SDIFF1').setLogic( d.ALFA_B7L1U & d.ALFA_A7L1U &
-                                                Not(d.ALFA3_B7L1L | d.ALFA3_A7L1L | d.ALFA3_A7R1U | d.ALFA3_A7R1L | d.ALFA3_B7R1U | d.ALFA3_B7R1L)
-                                                & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_SDIFF2').setLogic( d.ALFA_A7R1L & d.ALFA_B7R1L &
-                                                Not(d.ALFA3_B7L1U | d.ALFA3_B7L1L | d.ALFA3_A7L1U | d.ALFA3_A7L1L | d.ALFA3_A7R1U | d.ALFA3_B7R1U)
-                                                & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_SDIFF3').setLogic( d.ALFA_B7L1L & d.ALFA_A7L1L &
-                                                Not(d.ALFA3_B7L1U | d.ALFA3_A7L1U | d.ALFA3_A7R1U | d.ALFA3_A7R1L | d.ALFA3_B7R1U | d.ALFA3_B7R1L)
-                                                & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_SDIFF4').setLogic( d.ALFA_A7R1U & d.ALFA_B7R1U &
-                                                Not(d.ALFA3_B7L1U | d.ALFA3_B7L1L | d.ALFA3_A7L1U | d.ALFA3_A7L1L | d.ALFA3_A7R1L | d.ALFA3_B7R1L)
-                                                & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_SDIFF5').setLogic( d.ALFA_B7L1U & d.ALFA_A7L1U &  physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_SDIFF6').setLogic( d.ALFA_A7R1L & d.ALFA_B7R1L &  physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_SDIFF7').setLogic( d.ALFA_B7L1L & d.ALFA_A7L1L &  physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_SDIFF8').setLogic( d.ALFA_A7R1U & d.ALFA_B7R1U &  physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_MBTS_1_A_ALFA_C').setLogic( d.MBTS_A & ALFA_C  & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_MBTS_1_C_ALFA_A').setLogic( d.MBTS_C & ALFA_A & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_MBTS_1_A_ALFA_C_UNPAIRED_ISO').setLogic( d.MBTS_A & ALFA_C & unpaired_isocond).setTriggerType(TT.alfa)
-        MenuItem('L1_MBTS_1_C_ALFA_A_UNPAIRED_ISO').setLogic( d.MBTS_C & ALFA_A & unpaired_isocond).setTriggerType(TT.alfa)
-        MenuItem('L1_MBTS_1_ALFA_ANY').setLogic( MBTS_1 & ALFA_ANY  & physcond).setTriggerType(TT.alfa) ##should be called L1_MBTS_1_ALFA_ANY
-
-        ## check definition of MBTS_2
-        MenuItem('L1_MBTS_2_A_ALFA_C').setLogic( d.MBTS_A.x(2) & ALFA_C & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_MBTS_2_C_ALFA_A').setLogic( d.MBTS_C.x(2) & ALFA_A & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_MBTS_2_A_ALFA_C_UNPAIRED_ISO').setLogic( d.MBTS_A.x(2) & ALFA_C & unpaired_isocond).setTriggerType(TT.alfa)
-        MenuItem('L1_MBTS_2_C_ALFA_A_UNPAIRED_ISO').setLogic( d.MBTS_C.x(2) & ALFA_A & unpaired_isocond).setTriggerType(TT.alfa)
-        MenuItem('L1_MBTS_2_ALFA').setLogic( MBTS_2 & ALFA_ANY & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_LUCID_A_ALFA_C').setLogic( d.LUCID_A & ALFA_C & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_LUCID_C_ALFA_A').setLogic( d.LUCID_C & ALFA_A & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_LUCID_A_ALFA_C_UNPAIRED_ISO').setLogic( d.LUCID_A & ALFA_C & unpaired_isocond).setTriggerType(TT.alfa)
-        MenuItem('L1_LUCID_C_ALFA_A_UNPAIRED_ISO').setLogic( d.LUCID_C & ALFA_A & unpaired_isocond).setTriggerType(TT.alfa)
-        MenuItem('L1_LUCID_ALFA').setLogic( (d.LUCID_A | d.LUCID_C) & ALFA_ANY & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_EM3_ALFA_ANY'             ).setLogic( d.EM3 & ALFA_ANY & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_EM3_ALFA_EINE'          ).setLogic( d.EM3 & ALFA_EINE & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_2EM3_ALFA_EINE'          ).setLogic( d.EM3.x(2) & ALFA_EINE & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_J12_ALFA_ANY'             ).setLogic( d.J12 & ALFA_ANY & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_J12_ALFA_ANY_UNPAIRED_ISO').setLogic( d.J12 & ALFA_ANY & unpaired_isocond).setTriggerType(TT.alfa)
-        MenuItem('L1_J12_ALFA_EINE'            ).setLogic( d.J12 & ALFA_EINE & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_MU3V_ALFA_ANY'             ).setLogic( d.MU3V & ALFA_ANY  & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_MU3V_ALFA_ANY_UNPAIRED_ISO').setLogic( d.MU3V & ALFA_ANY  & unpaired_isocond).setTriggerType(TT.alfa)
-        MenuItem('L1_MU3V_ALFA_ANY_PAIRED_UNPAIRED_ISO').setLogic( d.MU3V & ALFA_ANY  & physcond_or_unpaired_isocond).setTriggerType(TT.alfa)
-        MenuItem('L1_MU3V_ALFA_EINE'            ).setLogic( d.MU3V & ALFA_EINE & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_TE5_ALFA_ANY'             ).setLogic( d.TE5 & ALFA_ANY  & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_TE5_ALFA_ANY_UNPAIRED_ISO').setLogic( d.TE5 & ALFA_ANY  & unpaired_isocond).setTriggerType(TT.alfa)
-        MenuItem('L1_TE5_ALFA_EINE'            ).setLogic( d.TE5 & ALFA_EINE & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_TRT_ALFA_ANY'             ).setLogic( d.NIMTRT & ALFA_ANY & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_TRT_ALFA_ANY_UNPAIRED_ISO').setLogic( d.NIMTRT & ALFA_ANY & unpaired_isocond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_TRT_ALFA_ANY_VETO_MBTS'           ).setLogic( d.NIMTRT & Not(MBTS_INNER) & ALFA_ANY & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_EINE'                    ).setLogic( ALFA_EINE & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_TRT_ALFA_EINE'                    ).setLogic( d.NIMTRT & ALFA_EINE & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_TRT_ALFA_EINE_VETO_MBTS'          ).setLogic( d.NIMTRT & Not(MBTS_INNER) & ALFA_EINE & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_ELASTIC_VETO_MBTS'           ).setLogic( Not(MBTS_INNER) & ALFA_ELASTIC & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ELASTIC_UNPAIRED_ISO'        ).setLogic( ALFA_ELASTIC & unpaired_isocond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_ANTI_ELASTIC_VETO_MBTS'      ).setLogic( Not(MBTS_INNER) & ALFA_ANTI_ELASTIC & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ANTI_ELASTIC_UNPAIRED_ISO'   ).setLogic( ALFA_ANTI_ELASTIC & unpaired_isocond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_ANY_VETO_MBTS'               ).setLogic( Not(MBTS_INNER) & ALFA_ANY & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ANY_VETO_MBTS_UNPAIRED_ISO'  ).setLogic( Not(MBTS_INNER) & ALFA_ANY & unpaired_isocond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_LHCF_ALFA_ANY_A'             ).setLogic( d.NIMLHCF & ALFA_ANY_A & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_LHCF_ALFA_ANY_C'             ).setLogic( d.NIMLHCF & ALFA_ANY_C & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_LHCF_ALFA_ANY_A_UNPAIRED_ISO').setLogic( d.NIMLHCF & ALFA_ANY_A & unpaired_isocond).setTriggerType(TT.alfa)
-        MenuItem('L1_LHCF_ALFA_ANY_C_UNPAIRED_ISO').setLogic( d.NIMLHCF & ALFA_ANY_C & unpaired_isocond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_BGT' ).setLogic(d.RNDM3 & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_BGT_UNPAIRED_ISO' ).setLogic(d.RNDM3 & unpaired_isocond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_BGT_BGRP1').setLogic(d.RNDM3 & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_BGT_BGRP4').setLogic(d.RNDM3 & unpaired_isocond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_BGT_BGRP10').setLogic(d.RNDM3 & alfacalib).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_SHOWSYST5').setLogic( (ALFA_ANY_A & ALFA_ANY_C) & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_SYST9' ).setLogic( d.ALFA_B7L1U & d.ALFA_A7L1U & d.ALFA_A7R1U & d.ALFA_B7R1U & Not(d.ALFA3_B7L1L | d.ALFA3_A7L1L | d.ALFA3_A7R1L | d.ALFA3_B7R1L) & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_SYST10').setLogic( d.ALFA_B7L1L & d.ALFA_A7L1L & d.ALFA_A7R1L & d.ALFA_B7R1L & Not(d.ALFA3_B7L1U | d.ALFA3_A7L1U | d.ALFA3_A7R1U | d.ALFA3_B7R1U) & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_SYST11').setLogic( d.ALFA_B7L1U & d.ALFA_A7L1U & d.ALFA_A7R1U & d.ALFA_B7R1U & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_SYST12').setLogic( d.ALFA_B7L1L & d.ALFA_A7L1L & d.ALFA_A7R1L & d.ALFA_B7R1L & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_SYST17').setLogic( ALFA_LU & ALFA_RU & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_SYST18').setLogic( ALFA_LL & ALFA_RL & physcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_ANY').setLogic(ALFA_ANY & physcond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_B1_EMPTY').setLogic(ALFA_B1 & cosmiccond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_B2_EMPTY').setLogic(ALFA_B2 & cosmiccond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ANY_EMPTY').setLogic(ALFA_ANY & cosmiccond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ANY_FIRSTEMPTY').setLogic(ALFA_ANY & firstempty).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ANY_UNPAIRED_ISO').setLogic(ALFA_ANY & unpaired_isocond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ANY_UNPAIRED_NONISO').setLogic(ALFA_ANY & unpaired_nonisocond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ANY_BGRP10').setLogic(ALFA_ANY & alfacalib).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ANY_CALIB').setLogic( ALFA_ANY & calibcond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_ANY_A_EMPTY').setLogic(ALFA_ANY_A & cosmiccond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_ANY_C_EMPTY').setLogic(ALFA_ANY_C & cosmiccond).setTriggerType(TT.alfa)
-
-        ## ALFA _OD items (LUT 26, 12 Outputs)
-        MenuItem('L1_ALFA_B7L1U_OD').setLogic(d.ALFA_B7L1U_OD & d.BGRP0).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_B7L1L_OD').setLogic(d.ALFA_B7L1L_OD & d.BGRP0).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7L1U_OD').setLogic(d.ALFA_A7L1U_OD & d.BGRP0).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7L1L_OD').setLogic(d.ALFA_A7L1L_OD & d.BGRP0).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7R1U_OD').setLogic(d.ALFA_A7R1U_OD & d.BGRP0).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7R1L_OD').setLogic(d.ALFA_A7R1L_OD & d.BGRP0).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_B7R1U_OD').setLogic(d.ALFA_B7R1U_OD & d.BGRP0).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_B7R1L_OD').setLogic(d.ALFA_B7R1L_OD & d.BGRP0).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_B7L1_OD').setLogic( (d.ALFA_B7L1U_OD & d.ALFA_B7L1L_OD) & d.BGRP0).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7L1_OD').setLogic( (d.ALFA_A7L1U_OD & d.ALFA_A7L1L_OD) & d.BGRP0).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_B7R1_OD').setLogic( (d.ALFA_B7R1U_OD & d.ALFA_B7R1L_OD) & d.BGRP0).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7R1_OD').setLogic( (d.ALFA_A7R1U_OD & d.ALFA_A7R1L_OD) & d.BGRP0).setTriggerType(TT.alfa)
-
-        # BGRP0 is vetoed due to clash with CALREQ2, use BGRP12 instead
-        MenuItem('L1_ALFA_B7L1U_OD_BGRP12').setLogic(d.ALFA_B7L1U_OD & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_B7L1L_OD_BGRP12').setLogic(d.ALFA_B7L1L_OD & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7L1U_OD_BGRP12').setLogic(d.ALFA_A7L1U_OD & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7L1L_OD_BGRP12').setLogic(d.ALFA_A7L1L_OD & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7R1U_OD_BGRP12').setLogic(d.ALFA_A7R1U_OD & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7R1L_OD_BGRP12').setLogic(d.ALFA_A7R1L_OD & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_B7R1U_OD_BGRP12').setLogic(d.ALFA_B7R1U_OD & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_B7R1L_OD_BGRP12').setLogic(d.ALFA_B7R1L_OD & bgrp12cond).setTriggerType(TT.alfa)
-
-        MenuItem('L1_ALFA_B7L1_OD_BGRP12').setLogic( (d.ALFA_B7L1U_OD & d.ALFA_B7L1L_OD) & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7L1_OD_BGRP12').setLogic( (d.ALFA_A7L1U_OD & d.ALFA_A7L1L_OD) & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_B7R1_OD_BGRP12').setLogic( (d.ALFA_B7R1U_OD & d.ALFA_B7R1L_OD) & bgrp12cond).setTriggerType(TT.alfa)
-        MenuItem('L1_ALFA_A7R1_OD_BGRP12').setLogic( (d.ALFA_A7R1U_OD & d.ALFA_A7R1L_OD) & bgrp12cond).setTriggerType(TT.alfa)
 
         try:
 
@@ -2043,7 +1827,6 @@ class ItemDef:
             MenuItem('L1_DPHI-2eEM5').setLogic( d.TOPO_27DPHI32_eEMs1_eEMs6 & physcond)
             # Need to redefine these wrt Phase-I TE
             MenuItem('L1_DPHI-2eEM5_VTE5p24ETA49').setLogic( d.TOPO_27DPHI32_eEMs1_eEMs6 & Not(d.TE524ETA49) & physcond).setTriggerType(TT.calo) 
-            MenuItem('L1_DPHI-2eEM5_VTE5p24ETA49_ALFA_EINE').setLogic( d.TOPO_27DPHI32_eEMs1_eEMs6 & Not(d.TE524ETA49) & ALFA_EINE & physcond).setTriggerType(TT.alfa)
             MenuItem('L1_DPHI-2eEM5_VTE10').setLogic( d.TOPO_27DPHI32_eEMs1_eEMs6 & Not(d.TE10) & physcond).setTriggerType(TT.calo)
             MenuItem('L1_DPHI-2eEM9_VTE50').setLogic( d.eEM9.x(2) & d.TOPO_27DPHI32_eEMs1_eEMs6 & Not(d.TE50) & physcond).setTriggerType(TT.calo)
             MenuItem('L1_BTAG-MU3VjJ40').setLogic( d.TOPO_0DR04_MU3Vab_CjJ40ab & physcond)
@@ -2152,8 +1935,7 @@ class ItemDef:
                     MenuItem(itemname).setLogic(eval(item_str) & physcond)
 
 
-                # ALFA and LegacyTopoMerged have a different convention
-                elif conn['name'] in ['AlfaCtpin','LegacyTopoMerged']:
+                elif conn['name'] == 'LegacyTopoMerged':
                     # Accumulate list of thresholds for the connector
                     thresholds = []
                     for g in conn['signalGroups']:

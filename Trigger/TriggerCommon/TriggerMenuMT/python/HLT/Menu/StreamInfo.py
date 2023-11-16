@@ -70,7 +70,6 @@ _all_streams = [
     StreamInfo('SCTNoise', 'calibration', False, False),
     StreamInfo('PixelNoise', 'calibration', False, False),
     StreamInfo('Tile', 'calibration', False, False),
-    StreamInfo('ALFACalib', 'calibration', False, False),
     StreamInfo('LArPEB', 'calibration', False, False),
     StreamInfo('LArPEBDigitalTrigger', 'calibration', False, False),
     StreamInfo('L1TopoMismatches', 'calibration', False, True),

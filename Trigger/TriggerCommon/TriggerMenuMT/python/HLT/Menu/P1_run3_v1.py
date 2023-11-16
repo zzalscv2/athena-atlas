@@ -571,49 +571,9 @@ def addHeavyIonP1Signatures(chains):
         ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ1', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
         ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ2', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
         
-        # ALFA streamers for alignment (ATR-23602)
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ANY',     l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ELAST15', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ELAST18', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_SYST17',  l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_SYST18',  l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        # ALFA single counters
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_B7L1U_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_B7L1L_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_A7L1U_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_A7L1L_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_A7R1U_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_A7R1L_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_B7R1U_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_B7R1L_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        # Upper/lower coincidence
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_B7L1_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_A7L1_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_B7R1_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_A7R1_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        # For high beta* data-taking (ATR-27683)
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ANY_A_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ANY_C_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ANY_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_AlfaPEB_L1RD0_BGRP10', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
-
         # Lumi
         ChainProp(name='HLT_noalg_vdm_LumiPEB_L1LUCID_A', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=['PS:Online']+SupportGroup),
         ChainProp(name='HLT_noalg_vdm_LumiPEB_L1LUCID_C', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=['PS:Online']+SupportGroup),
-    ]
-
-    # ALFA Diffractive triggers
-    chainsP1['MinBias'] = [
-        ChainProp(name='HLT_noalg_L1ALFA_Diff_Phys', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1ALFA_CDiff_Phys', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1J12_ALFA_EINE', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup+SupportLegGroup),
-
-        # ATR-23602: ALFA Minbias track triggers with/without TRT
-        ChainProp(name='HLT_mb_sptrk_vetombts2in_L1ALFA_ANY', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
-        ChainProp(name='HLT_mb_sptrk_vetombts2in_L1ALFA_EINE', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
-
-        ChainProp(name='HLT_mb_sptrk_vetombts2in_L1TRT_ALFA_EINE', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
-        ChainProp(name='HLT_mb_sptrk_vetombts2in_L1TRT_ALFA_ANY', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
     ]
 
     addP1Signatures(chains,chainsP1)

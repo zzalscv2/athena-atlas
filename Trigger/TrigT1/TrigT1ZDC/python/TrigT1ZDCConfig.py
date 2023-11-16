@@ -30,7 +30,6 @@ if __name__ == '__main__':
     flags.Trigger.triggerMenuSetup='Dev_HI_run3_v1'
     flags.Trigger.EDMVersion=3
     flags.Trigger.doZDC=True
-    flags.Trigger.L1.doAlfaCtpin=True
     flags.Trigger.enableL1CaloPhase1 = False # FIXME: ATR-27095
     flags.lock()
 
