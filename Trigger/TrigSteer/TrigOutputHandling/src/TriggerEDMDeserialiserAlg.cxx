@@ -33,6 +33,25 @@
 #include <cstring>
 #include <regex>
 
+namespace {
+const SG::BaseInfoBase* getBaseInfo(CLID clid) {
+  const SG::BaseInfoBase* bi = SG::BaseInfoBase::find(clid);
+  if (bi){
+    return bi;
+  }
+  // Try to force a dictionary load to get it defined.
+  ServiceHandle<IClassIDSvc> clidsvc("ClassIDSvc", "ProxyProviderSvc");
+  if (!clidsvc.retrieve()){
+    return nullptr;
+  }
+  std::string name;
+  if (!clidsvc->getTypeNameOfID(clid, name).isSuccess()) {
+    return nullptr;
+  }
+  (void)TClass::GetClass(name.c_str());
+  return SG::BaseInfoBase::find(clid);
+}
+}  // anonymous namespace
 
 class TriggerEDMDeserialiserAlg::WritableAuxStore : public SG::AuxStoreInternal {
 public:
@@ -370,21 +389,26 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
           ATH_MSG_DEBUG("Container with key " << previousKey << " is missing its Aux store");
           xAODInterfaceContainer->setStore( DataLink<SG::IConstAuxStore>(previousKey+"Aux.") );
         }
-
-        static const RootType vbase = RootType::ByNameNoQuiet( "SG::AuxVectorBase" );
         currentAuxStore = nullptr; // the store will be following, setting it to nullptr assure we catch issue with of missing Aux
+        const SG::BaseInfoBase* bib = getBaseInfo(clid);
+        if(!bib){
+          ATH_MSG_WARNING("No BaseInfoBase for CLID "<< clid << " and name " << outputName); 
+        }
         xAODInterfaceContainer =
-          reinterpret_cast<SG::AuxVectorBase*>(classDesc.Cast (vbase, dataBucket->object(), true));
-      } else if ( isxAODAuxContainer )  {
+            bib ? reinterpret_cast<SG::AuxVectorBase*>(
+                      bib->cast(dataBucket->object(),
+                                ClassID_traits<SG::AuxVectorBase>::ID()))
+                : nullptr;
+      } else if (isxAODAuxContainer) {
         // key contains exactly one '.' at the end
         ATH_CHECK( key.find('.') == key.size()-1 );
         ATH_CHECK( currentAuxStore == nullptr and xAODInterfaceContainer != nullptr );
-
-        static const RootType auxinterface = RootType::ByNameNoQuiet( "SG::IAuxStore" );
+        const SG::BaseInfoBase* bib = getBaseInfo(clid);
         xAOD::AuxContainerBase* auxHolder =
-          reinterpret_cast<xAOD::AuxContainerBase*>(classDesc.Cast (auxinterface, dataBucket->object(), true));
-        ATH_CHECK( auxHolder != nullptr );
-        xAODInterfaceContainer->setStore( auxHolder );
+            reinterpret_cast<xAOD::AuxContainerBase*>(
+                bib->cast(dataBucket->object(), ClassID_traits<SG::IAuxStore>::ID()));
+        ATH_CHECK(auxHolder != nullptr);
+        xAODInterfaceContainer->setStore(auxHolder);
         currentAuxStore = new WritableAuxStore();
         auxHolder->setStore( currentAuxStore );
       } else {

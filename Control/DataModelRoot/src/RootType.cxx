@@ -873,7 +873,7 @@ size_t TScopeAdapter::TemplateArgumentSize() const
 //____________________________________________________________________________
 TScopeAdapter::operator Bool_t() const
 {
-// check the validity of this scope (class)
+   // check the validity of this scope (class)
    if( fName.empty() )      return false;
    if( fIsFundamental )     return true;
 
@@ -884,40 +884,20 @@ TScopeAdapter::operator Bool_t() const
 
    // cout << "RootType: (Debug warning)  Type " << fName << " has no dictionary!" << endl;
    return false;
-   
-   /*
-   Bool_t b = kFALSE;
-
-   Int_t oldEIL = gErrorIgnoreLevel;
-   gErrorIgnoreLevel = 3000;
-   std::string scname = Name( Reflex::SCOPED );
-   TClass* klass = TClass::GetClass( scname.c_str() );
-   if ( klass && klass->GetClassInfo() )     // works for normal case w/ dict
-      b = gInterpreter->ClassInfo_IsValid( klass->GetClassInfo() );
-   else {      // special case for forward declared classes
-      cout << "RootType: checking validity for fwd decl type: " << fName << endl;
-      ClassInfo_t* ci = gInterpreter->ClassInfo_Factory( scname.c_str() );
-      if ( ci ) {
-         b = gInterpreter->ClassInfo_IsValid( ci );
-         gInterpreter->ClassInfo_Delete( ci );    // we own the fresh class info
-      }
-   }
-   gErrorIgnoreLevel = oldEIL;
-   return b;
-   */
 }
 
 //____________________________________________________________________________
 Bool_t TScopeAdapter::IsComplete() const
 {
-// verify whether the dictionary of this class is fully available
+  // verify whether the dictionary of this class is fully available
    Bool_t b = kFALSE;
-
    std::string scname = Name( Reflex::SCOPED );
    TClass* klass = TClass::GetClass( scname.c_str(), true, true );
-   if ( klass && klass->GetClassInfo() )     // works for normal case w/ dict
-      b = gInterpreter->ClassInfo_IsLoaded( klass->GetClassInfo() );
-   else {      // special case for forward declared classes
+
+   if ( klass)  {// works for normal case w/ dict
+      b = klass->HasDictionary();
+   }
+   else {       // special case for forward declared classes
       ClassInfo_t* ci = gInterpreter->ClassInfo_Factory( scname.c_str() );
       if ( ci ) {
          b = gInterpreter->ClassInfo_IsLoaded( ci );
@@ -976,12 +956,6 @@ Bool_t TScopeAdapter::IsAbstract() const
 }
 
 //____________________________________________________________________________
-void* TScopeAdapter::Cast (const TScopeAdapter& cl, void* obj, bool up) const
-{
-  return fClass->DynamicCast (cl.Class(), obj, up);
-}
-
-//____________________________________________________________________________
 bool TScopeAdapter::operator==( const TScopeAdapter& rh ) const
 {
 // comparison operator, used for STL containers (implementation debatable)
@@ -998,5 +972,4 @@ bool TScopeAdapter::operator<( const TScopeAdapter& rh ) const
    return Name( Reflex::FINAL | Reflex::SCOPED )
       < rh.Name( Reflex::FINAL | Reflex::SCOPED );
 }
-
 
