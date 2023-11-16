@@ -282,16 +282,6 @@ def create_dir_and_copy_refs(test, actually_update=False):
         commands.append("mkdir " + test.new_version_directory)
         dirs_created.append(test.new_version_directory)
                 
-    # Create a file with some information about the test
-    if actually_update:
-        f = open(test.new_version_directory+'/info.txt', 'w')
-        f.write('Merge URL: https://gitlab.cern.ch/atlas/athena/-/merge_requests/{}\n'.format(test.mr))
-        f.write('Date: {}\n'.format(test.date))
-        f.write('AMI: {}\n'.format(test.tag))
-        f.write('Test name: {}\n'.format(test.name)) 
-        f.write('Files copied from: {}\n'.format(test.copied_file_path))
-        f.close()
-
     # Copy new directory first, then copy old (in case the new MR did not touch all files)
     # Important! Use no-clobber for second copy or we will overwrite the new data with old!
     commands.append("cp " + test.copied_file_path + "* "+ test.new_version_directory+"/")
@@ -308,6 +298,15 @@ def create_dir_and_copy_refs(test, actually_update=False):
         except Exception as e:
             print('FATAL: Unable to copy files due to:', e)
             exit(1)
+
+        f = open(test.new_version_directory+'/info.txt', 'w')
+        f.write('Merge URL: https://gitlab.cern.ch/atlas/athena/-/merge_requests/{}\n'.format(test.mr))
+        f.write('Date: {}\n'.format(test.date))
+        f.write('AMI: {}\n'.format(test.tag))
+        f.write('Test name: {}\n'.format(test.name)) 
+        f.write('Files copied from: {}\n'.format(test.copied_file_path))
+        f.close()
+
     return commands
 
 def process_CI_Tests_json(data):
