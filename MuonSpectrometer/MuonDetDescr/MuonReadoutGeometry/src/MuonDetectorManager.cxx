@@ -120,9 +120,9 @@ namespace MuonGM {
         m_envelope.push_back(pV);
     }
 
-    void MuonDetectorManager::addMuonStation(MuonStation* mst) {
+    void MuonDetectorManager::addMuonStation(std::unique_ptr<MuonStation>&& mst) {
         std::string key = muonStationKey(mst->getStationType(), mst->getEtaIndex(), mst->getPhiIndex());
-        m_MuonStationMap[key] = std::unique_ptr<MuonStation>(mst);
+        m_MuonStationMap[key] = std::move(mst);
     }
 
     std::string MuonDetectorManager::muonStationKey(const std::string& stName, int statEtaIndex, int statPhiIndex) const {
@@ -156,7 +156,7 @@ namespace MuonGM {
             return nullptr;
     }
 
-    void MuonDetectorManager::addRpcReadoutElement(RpcReadoutElement* x) {
+    void MuonDetectorManager::addRpcReadoutElement(std::unique_ptr<RpcReadoutElement>&& x) {
         const Identifier id = x->identify();
         // add RE to map by RE hash
         const IdentifierHash Idhash = x->detectorElementHash();
@@ -170,7 +170,7 @@ namespace MuonGM {
                               m_idHelperSvc->toStringDetEl(m_rpcArrayByHash[Idhash]->identify()));
                 throw std::runtime_error("Double assignment of the Hash");
             }
-            m_rpcArrayByHash[Idhash] = x;
+            m_rpcArrayByHash[Idhash] = x.get();
         }
         int dbz_index{-1};
         int idx = rpcIdentToArrayIdx(id, dbz_index);
@@ -178,7 +178,7 @@ namespace MuonGM {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" which has been already added.");
             throw std::runtime_error("Double readout element assignment");               
         }
-        m_rpcArray[idx] = std::unique_ptr<RpcReadoutElement>(x);
+        m_rpcArray[idx] = std::move(x);
         ++m_n_rpcRE;
     }
 
@@ -187,27 +187,27 @@ namespace MuonGM {
         return m_rpcArray[idx].get();
     }
 
-    void MuonDetectorManager::addMMReadoutElement(MMReadoutElement* x) {
+    void MuonDetectorManager::addMMReadoutElement(std::unique_ptr<MMReadoutElement>&& x) {
         const int array_idx = mmIdenToArrayIdx(x->identify());
         if (m_mmcArray[array_idx]) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(x->identify())<<" which has been already added.");
             throw std::runtime_error("Double readout element assignment"); 
         }
-        m_mmcArray[array_idx] = std::unique_ptr<MMReadoutElement>(x);
+        m_mmcArray[array_idx] = std::move(x);
         ++m_n_mmcRE;
     }
     
-    void MuonDetectorManager::addsTgcReadoutElement(sTgcReadoutElement* x) {       
+    void MuonDetectorManager::addsTgcReadoutElement(std::unique_ptr<sTgcReadoutElement>&& x) {       
         const int array_idx = stgcIdentToArrayIdx(x->identify());
         if (m_stgArray[array_idx]) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(x->identify())<<" which has been already added.");
             throw std::runtime_error("Double readout element assignment"); 
         }
-        m_stgArray[array_idx] = std::unique_ptr<sTgcReadoutElement>(x);
+        m_stgArray[array_idx] = std::move(x);
         ++m_n_stgRE;
     }
 
-    void MuonDetectorManager::addMdtReadoutElement(MdtReadoutElement* x) {       
+    void MuonDetectorManager::addMdtReadoutElement(std::unique_ptr<MdtReadoutElement>&& x) {       
        const Identifier id = x->identify();
         // add here the MdtReadoutElement to the array by RE hash
         // use already known RE hash
@@ -222,7 +222,7 @@ namespace MuonGM {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" which has been already added.");
             throw std::runtime_error("Double readout element assignment");
         }
-        m_mdtArray[arrayIdx] = std::unique_ptr<MdtReadoutElement>(x);
+        m_mdtArray[arrayIdx] = std::move(x);
         ++m_n_mdtRE;
     }
 
@@ -236,7 +236,7 @@ namespace MuonGM {
         return arrayIdx < 0 ? nullptr :  m_mdtArray[arrayIdx].get();
     }
 
-    void MuonDetectorManager::addCscReadoutElement(CscReadoutElement* x) {
+    void MuonDetectorManager::addCscReadoutElement(std::unique_ptr<CscReadoutElement>&& x) {
         const Identifier id = x->identify();
         // add here RE to array by hash
         const IdentifierHash Idhash = x->detectorElementHash();
@@ -250,7 +250,7 @@ namespace MuonGM {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Trying to add ReadoutElement "<<m_idHelperSvc->toStringDetEl(id)<<" which has been already added.");
             throw std::runtime_error("Double readout element assignment");
         }
-        m_cscArray[array_idx] = std::unique_ptr<CscReadoutElement>(x);
+        m_cscArray[array_idx] = std::move(x);
         ++m_n_cscRE;
     }
 
@@ -264,7 +264,7 @@ namespace MuonGM {
         return array_idx < 0 ? nullptr : m_cscArray[array_idx].get();
     }
     
-    void MuonDetectorManager::addTgcReadoutElement(TgcReadoutElement* x) {
+    void MuonDetectorManager::addTgcReadoutElement(std::unique_ptr<TgcReadoutElement>&& x) {
         const Identifier id = x->identify();
         // add RE to array by RE hash
         const IdentifierHash Idhash = x->detectorElementHash();
@@ -279,7 +279,7 @@ namespace MuonGM {
             throw std::runtime_error("Double readout element assignment");
         }
 
-        m_tgcArray[array_idx] = std::unique_ptr<TgcReadoutElement>(x);
+        m_tgcArray[array_idx] = std::move(x);
         ++m_n_tgcRE;
     }
 

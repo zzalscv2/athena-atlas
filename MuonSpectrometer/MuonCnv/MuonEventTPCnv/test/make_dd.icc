@@ -88,7 +88,7 @@ void MuonChamber::makeCsc (const Identifier& id)
   elt->setIdentifier (id);
   elt->m_ngasgaps = 2;
   elt->fillCache();
-  m_muo_dd.addCscReadoutElement (elt.release());
+  m_muo_dd.addCscReadoutElement (std::move(elt));
 }
 
 
@@ -99,7 +99,7 @@ void MuonChamber::makeRpc (const Identifier& id)
   elt->m_nphistrippanels = 1;
   elt->m_netastrippanels = 1;
   elt->fillCache();
-  m_muo_dd.addRpcReadoutElement (elt.release());
+  m_muo_dd.addRpcReadoutElement (std::move(elt));
 }
 
 
@@ -110,7 +110,7 @@ void MuonChamber::makeTgc (const Identifier& id)
   elt->setIdentifier (id);
   elt->m_ngasgaps = 2;
   elt->fillCache();
-  m_muo_dd.addTgcReadoutElement (elt.release());
+  m_muo_dd.addTgcReadoutElement (std::move(elt));
 }
 
 
@@ -121,7 +121,7 @@ void MuonChamber::makeMdt (const Identifier& id)
   elt->setIdentifier (id);
   //elt->m_ngasgaps = 2;
   elt->fillCache();
-  m_muo_dd.addMdtReadoutElement (elt.release());
+  m_muo_dd.addMdtReadoutElement (std::move(elt));
 }
 
 
@@ -133,7 +133,7 @@ void MuonChamber::makesTgc (const Identifier& id)
   
   //elt->m_ngasgaps = 2;
   elt->fillCache();
-  m_muo_dd.addsTgcReadoutElement(elt.release());
+  m_muo_dd.addsTgcReadoutElement(std::move(elt));
 }
 
 
@@ -146,7 +146,7 @@ void MuonChamber::makeMm (const Identifier& id)
   
   //elt->m_ngasgaps = 2;
   elt->fillCache();
-  m_muo_dd.addMMReadoutElement(elt.release());
+  m_muo_dd.addMMReadoutElement(std::move(elt));
 }
 
 
