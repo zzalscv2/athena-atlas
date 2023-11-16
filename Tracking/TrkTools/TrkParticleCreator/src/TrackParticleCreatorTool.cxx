@@ -914,7 +914,7 @@ TrackParticleCreatorTool::setTrackSummary(xAOD::TrackParticle& tp, const TrackSu
     }
 
     int value = summary.get(static_cast<Trk::SummaryType>(i));
-    uint8_t uvalue = static_cast<uint8_t>(value);
+    uint8_t uvalue = static_cast<uint8_t>(std::min(value,255));
     // coverity[first_enum_type]
     if (value > 0) {
       tp.setSummaryValue(uvalue, static_cast<xAOD::SummaryType>(i));
