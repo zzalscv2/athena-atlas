@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -47,7 +47,7 @@ public:
   InDetProjFlags::InDetProjPartsFlags shownParts() const;
   SoMaterial * material();
 
-public slots:
+public Q_SLOTS:
   //Use this slot to control what parts are shown (default is none):
   void setSurfaces(InDetProjFlags::InDetProjPartsFlags);
 

@@ -175,7 +175,7 @@ private:
   class Imp;
   Imp * m_d;
 
-private slots:
+private Q_SLOTS:
   void updateProjPartsCheckboxStates_Pixel();
   void updateProjPartsCheckboxStates_SCT();
   void updateProjPartsCheckboxStates_TRT();
