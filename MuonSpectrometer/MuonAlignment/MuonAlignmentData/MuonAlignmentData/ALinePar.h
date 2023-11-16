@@ -41,10 +41,13 @@ public:
     /// @brief  Returns true if at least one of the payload parameters is set
     operator bool () const {
       constexpr float validityCutOff = 1.e-5;
-      return std::accumulate(m_payload.begin(),m_payload.end(),0.,
-                        [](const float a, const float b){
-                          return std::abs(a)+ std::abs(b);
-                        }) >validityCutOff;
+      constexpr float rotWeight =1.e3;
+      return std::abs(getParameter(Parameter::transS)) + std::abs(getParameter(Parameter::transZ)) + 
+              std::abs(getParameter(Parameter::transT)) +
+              rotWeight * (std::abs(getParameter(Parameter::rotS)) + 
+                          std::abs(getParameter(Parameter::rotZ)) + 
+                          std::abs(getParameter(Parameter::rotT)))
+            > validityCutOff;
     }
 private:
     std::array<float, static_cast<unsigned int>(Parameter::numPars)> m_payload{};
