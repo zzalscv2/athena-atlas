@@ -34,7 +34,7 @@ public:
 	      IVP1System * sys,QObject * parent = 0);
   virtual ~VP1People();
 
-public slots:
+public Q_SLOTS:
   void setShown(bool);//will attach/detach itself from attachsep depending on this
   void setZPos(const double&);
   void setVerticalPosition(const double&);

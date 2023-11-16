@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1GUIDELINESYSTEM_H
@@ -47,7 +47,7 @@ public:
   //  Signals/slots for InDet Projections:  //
   ////////////////////////////////////////////
 
-public slots:
+public Q_SLOTS:
 
   //To automatically show projection surfaces depending on data
   //projected to those (NB: Several senders can connect to this slot,

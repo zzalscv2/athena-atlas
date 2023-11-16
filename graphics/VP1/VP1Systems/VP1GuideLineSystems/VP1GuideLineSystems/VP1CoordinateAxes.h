@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -36,7 +36,7 @@ public:
 		     IVP1System * sys,QObject * parent = 0);
   virtual ~VP1CoordinateAxes();
 
-public slots:
+public Q_SLOTS:
   void setShown(bool);//will attach/detach itself from attachsep depending on this
   void setLength(const double&);//A negative value means that negative parts will be shown as well
   void setPosition(const SbVec3f&);
