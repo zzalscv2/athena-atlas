@@ -48,8 +48,9 @@ def TriggerRecoCfgData(flags):
         from TrigDecisionMaker.TrigDecisionMakerConfig import Run3DecisionMakerCfg
         acc.merge(Run3DecisionMakerCfg(flags))
 
-        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTCfg
-        acc.merge(TrigNavSlimmingMTCfg(flags))
+        if flags.Trigger.doNavigationSlimming:
+            from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTCfg
+            acc.merge(TrigNavSlimmingMTCfg(flags))
 
     # Run 1+2
     elif flags.Trigger.EDMVersion in [1, 2]:
@@ -211,7 +212,7 @@ def Run2Run1NavigationSlimmingCfg(flags):
         return acc
 
     if flags.Trigger.EDMVersion >= 3:
-        log.debug("Run2Run1NavigationSlimingCfg: Nothing to do for EDMVersion >= 3.")
+        log.debug("Run2Run1NavigationSlimmingCfg: Nothing to do for EDMVersion >= 3.")
         return acc
 
     def _flatten(edm):

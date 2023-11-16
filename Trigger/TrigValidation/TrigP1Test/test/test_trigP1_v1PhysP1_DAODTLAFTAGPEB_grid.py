@@ -24,7 +24,7 @@ from TrigValTools.TrigValSteering.Common import find_file
 from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 
 # Specify trigger menu once here:
-triggermenu = 'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale'
+triggermenu = 'Dev_pp_run3_v1_HLTReprocessing_prescale'
 
 # HLT step (BS->BS)
 hlt = ExecStep.ExecStep()
@@ -37,12 +37,12 @@ hlt.input = 'data_Main'
 hlt.args = f'-c "setMenu=\'{triggermenu}\';doL1Sim=True;"'
 hlt.args += ' -o output'
 
-# Extract the physics_Main stream out of the BS file with many streams
+# Extract the physics_FTagPEBTLA stream out of the BS file with many streams
 filter_bs = ExecStep.ExecStep('FilterBS')
 filter_bs.type = 'other'
 filter_bs.executable = 'trigbs_extractStream.py'
 filter_bs.input = ''
-filter_bs.args = '-s TLA ' + find_file('*_HLTMPPy_output.*.data')
+filter_bs.args = '-s FTagPEBTLA ' + find_file('*_HLTMPPy_output.*.data')
 
 # Tier-0 reco step (BS->AOD)
 tlarecoPreExec = f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\';"
@@ -53,8 +53,8 @@ tlareco.threads = 4
 tlareco.concurrent_events = 4
 tlareco.input = ''
 tlareco.explicit_input = True
-tlareco.args = '--inputBSFile=' + find_file('*.physics_TLA*._athenaHLT*.data')  # output of the previous step
-tlareco.args += ' --outputDAOD_TLAFile=DAOD_TLA.pool.root'
+tlareco.args = '--inputBSFile=' + find_file('*.physics_FTagPEBTLA*._athenaHLT*.data')  # output of the previous step
+tlareco.args += ' --outputDAOD_TLAFTAGPEBFile=DAOD_TLAFTAGPEB.pool.root'
 tlareco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-08\' --geometryVersion=\'ATLAS-R3S-2021-03-00-00\''
 tlareco.args += ' --preExec="{:s}"'.format(tlarecoPreExec)
 tlareco.args += ' --CA'

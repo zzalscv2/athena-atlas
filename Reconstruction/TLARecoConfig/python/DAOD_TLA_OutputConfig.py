@@ -8,7 +8,7 @@ log = logging.getLogger('decodeBS_TLA_AOD.py')
 
 
 # Configure AOD output
-def outputCfg(flags):
+def DAOD_TLA_OutputCfg(flags,additional_items=[]):
     """ Configure AOD output """
     acc = ComponentAccumulator()
 
@@ -24,6 +24,7 @@ def outputCfg(flags):
     ItemList += [ 'xAOD::TrigCompositeAuxContainer#*' ]
     ItemList += [ 'xAOD::TrigDecision#*' ]
     ItemList += [ 'xAOD::TrigDecisionAuxInfo#*']
+    ItemList += additional_items
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     acc.merge(OutputStreamCfg(flags, "AOD", ItemList=ItemList))

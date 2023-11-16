@@ -36,7 +36,8 @@ _PartialEventBuildingIdentifiers = {
     # DataScouting identifiers from TrigEDMConfig.DataScoutingInfo:
     'CostMonDS': False,
     'PhysicsTLA': False,
-    'JetPEBPhysicsTLA' : True,
+    'DarkJetPEBTLA' : True,
+    'FTagPEBTLA' : True,
 }
 
 

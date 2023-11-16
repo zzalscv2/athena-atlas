@@ -86,6 +86,9 @@ def addStandardRecoFiles(parser):
     parser.add_argument('--outputDAOD_TLAFile', nargs='+',
                         type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output'),
                         help='Output DAOD_TLA file', group='Reco Files')
+    parser.add_argument('--outputDAOD_TLAFTAGPEBFile', nargs='+',
+                        type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output'),
+                        help='Output DAOD_TLAFTAGPEB file', group='Reco Files')
 
 
 ## @brief Add reconstruction substeps to a set object
@@ -101,8 +104,10 @@ def addRecoSubsteps(executorSet):
                                    skeletonCA = 'RecJobTransforms.RAWtoALL_Skeleton',
                                    substep = 'r2a', inData = ['BS', 'RDO', 'DRAW_ZMUMU', 'DRAW_ZEE', 'DRAW_EMU', 'DRAW_RPVLL'], 
                                    outData = ['ESD', 'AOD', 'HIST_R2A', 'TXT_JIVEXMLTGZ'],))
-    executorSet.add(athenaExecutor(name = 'RAWtoDAOD_TLA', skeletonCA = 'RecJobTransforms.RAWtoDAOD_TLA_Skeleton',
+    executorSet.add(athenaExecutor(name = 'RAWtoDAODTLA', skeletonCA = 'RecJobTransforms.RAWtoDAOD_TLA_Skeleton',
                                    substep = 'r2tla', inData = ['BS'], outData = ['DAOD_TLA'], ))
+    executorSet.add(athenaExecutor(name = 'RAWtoDAODTLAFTAGPEB', skeletonCA = 'RecJobTransforms.RAWtoDAOD_TLA_Skeleton',
+                                   substep = 'r2TLAFTAGPEB', inData = ['BS'], outData = ['DAOD_TLAFTAGPEB'], ))
     executorSet.add(athenaExecutor(name = 'RAWtoESD', skeletonFile = 'RecJobTransforms/skeleton.RAWtoESD_tf.py',
                                    substep = 'r2e', inData = [], outData = [],))
     executorSet.add(athenaExecutor(name = 'ESDtoAOD', skeletonFile = 'RecJobTransforms/skeleton.ESDtoAOD_tf.py',
