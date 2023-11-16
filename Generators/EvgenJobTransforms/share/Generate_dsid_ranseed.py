@@ -43,8 +43,12 @@ else:
     genSeq.Hijing.RandomSeed=seed
     genSeq.Hijing.Dsid=dsid
   if 'Starlight' in evgenConfig.generators:
-    genSeq.Starlight.RandomSeed=seed
-    genSeq.Starlight.Dsid=dsid
+    if hasattr(genSeq, 'Starlight'):
+       genSeq.Starlight.RandomSeed=seed
+       genSeq.Starlight.Dsid=dsid
+    if hasattr(genSeq, 'ParticleDecayer'):
+       genSeq.ParticleDecayer.RandomSeed=seed
+       genSeq.ParticleDecayer.Dsid=dsid
   if 'CosmicGenerator' in evgenConfig.generators:
     genSeq.CosmicGenerator.RandomSeed=seed
     genSeq.CosmicGenerator.Dsid=dsid
