@@ -73,23 +73,32 @@ SolenoidalIntersector::intersectSurface(const Surface&		surface,
 					const TrackSurfaceIntersection&	trackIntersection,
 					const double      	qOverP) const
 {
-    const PlaneSurface* plane			= dynamic_cast<const PlaneSurface*>(&surface);
-    if (plane)		return intersectPlaneSurface(*plane,trackIntersection,qOverP);
-    
-    const StraightLineSurface* straightLine	= dynamic_cast<const StraightLineSurface*>(&surface);
-    if (straightLine)	return m_rungeKuttaIntersector->approachStraightLineSurface
-			    (*straightLine, trackIntersection, qOverP);
-    
-    const CylinderSurface* cylinder		= dynamic_cast<const CylinderSurface*>(&surface);
-    if (cylinder)	return intersectCylinderSurface(*cylinder,trackIntersection,qOverP);
 
-    const DiscSurface* disc			= dynamic_cast<const DiscSurface*>(&surface);
-    if (disc)		return intersectDiscSurface(*disc,trackIntersection,qOverP);
+    const auto surfaceType = surface.type();
+    if (surfaceType == Trk::SurfaceType::Plane) {
+      return intersectPlaneSurface(static_cast<const PlaneSurface&>(surface),
+                                   trackIntersection, qOverP);
+    }
+    if (surfaceType == Trk::SurfaceType::Line) {
+      return m_rungeKuttaIntersector->approachStraightLineSurface(
+          static_cast<const StraightLineSurface&>(surface), trackIntersection,
+          qOverP);
+    }
+    if (surfaceType == Trk::SurfaceType::Cylinder) {
+      return intersectCylinderSurface(
+          static_cast<const CylinderSurface&>(surface), trackIntersection,
+          qOverP);
+    }
+    if (surfaceType == Trk::SurfaceType::Disc) {
+      return intersectDiscSurface(static_cast<const DiscSurface&>(surface),
+                                  trackIntersection, qOverP);
+    }
+    if (surfaceType == Trk::SurfaceType::Perigee) {
+      return m_rungeKuttaIntersector->approachPerigeeSurface(
+          static_cast<const PerigeeSurface&>(surface), trackIntersection,
+          qOverP);
+    }
 
-    const PerigeeSurface* perigee		= dynamic_cast<const PerigeeSurface*>(&surface);
-    if (perigee)	return m_rungeKuttaIntersector->approachPerigeeSurface
-			    (*perigee, trackIntersection, qOverP);
-    
     ATH_MSG_WARNING( " unrecognized Surface" );
     return std::nullopt;
 }
@@ -391,12 +400,14 @@ SolenoidalIntersector::newIntersection (const TrackSurfaceIntersection& isect,
   const TrackSurfaceIntersection::IIntersectionCache* oldCache = isect.cache();
   std::unique_ptr<Constants> cache;
   const Amg::Vector3D* lastPosition = nullptr;
-  if (oldCache && typeid(*oldCache) == typeid(Constants)) {
-    cache = std::make_unique<Constants> (*static_cast<const Constants*> (oldCache));
-    lastPosition = &cache->m_lastPosition;
-  }
-  else {
-    cache = std::make_unique<Constants> (solpar, isect, qOverP);
+
+  if (oldCache) {
+      assert(typeid(*oldCache) == typeid(Constants));
+      cache =
+          std::make_unique<Constants>(*static_cast<const Constants*>(oldCache));
+      lastPosition = &cache->m_lastPosition;
+  } else {
+      cache = std::make_unique<Constants>(solpar, isect, qOverP);
   }
 
   com = cache.get();

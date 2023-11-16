@@ -162,21 +162,31 @@ RungeKuttaIntersector::intersectSurface(const Surface&		surface,
       ATH_MSG_DEBUG(" trapped as below momentum threshold" );
       return std::nullopt;
     }
-    const PlaneSurface* plane			= dynamic_cast<const PlaneSurface*>(&surface);
-    if (plane)		return intersectPlaneSurface(*plane,trackIntersection,qOverP);
-    
-    const StraightLineSurface* straightLine	= dynamic_cast<const StraightLineSurface*>(&surface);
-    if (straightLine)	return approachStraightLineSurface(*straightLine,trackIntersection,qOverP);
 
-    const CylinderSurface* cylinder		= dynamic_cast<const CylinderSurface*>(&surface);
-    if (cylinder)	return intersectCylinderSurface(*cylinder,trackIntersection,qOverP);
-	
-    const DiscSurface* disc			= dynamic_cast<const DiscSurface*>(&surface);
-    if (disc)		return intersectDiscSurface(*disc,trackIntersection,qOverP);
-    
-    const PerigeeSurface* perigee		= dynamic_cast<const PerigeeSurface*>(&surface);
-    if (perigee)	return approachPerigeeSurface(*perigee,trackIntersection,qOverP);
-    
+    const auto surfaceType = surface.type();
+    if (surfaceType == Trk::SurfaceType::Plane) {
+      return intersectPlaneSurface(static_cast<const PlaneSurface&>(surface),
+                                   trackIntersection, qOverP);
+    }
+    if (surfaceType == Trk::SurfaceType::Line) {
+      return approachStraightLineSurface(
+          static_cast<const StraightLineSurface&>(surface), trackIntersection,
+          qOverP);
+    }
+    if (surfaceType == Trk::SurfaceType::Cylinder) {
+      return intersectCylinderSurface(
+          static_cast<const CylinderSurface&>(surface), trackIntersection,
+          qOverP);
+    }
+    if (surfaceType == Trk::SurfaceType::Disc) {
+      return intersectDiscSurface(static_cast<const DiscSurface&>(surface),
+                                  trackIntersection, qOverP);
+    }
+    if (surfaceType == Trk::SurfaceType::Perigee) {
+      return approachPerigeeSurface(static_cast<const PerigeeSurface&>(surface),
+                                    trackIntersection, qOverP);
+    }
+
     ATH_MSG_WARNING( " unrecognized Surface" );
     return std::nullopt;
 }
