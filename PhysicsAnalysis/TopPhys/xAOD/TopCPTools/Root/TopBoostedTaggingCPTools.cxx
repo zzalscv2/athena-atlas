@@ -171,7 +171,7 @@ namespace top {
       // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BoostedJetTaggingRecommendationFullRun2#UFO_jets
       m_taggersCalibAreas["SmoothedWZTagger"] = "SmoothedWZTaggers/Rel21/February2022/";
       m_taggersCalibAreas["JSSWTopTaggerDNN"] = "JSSWTopTaggerDNN/Rel21/February2022/";
-      m_taggersCalibAreas["JSSWTopTaggerANN"] = "JSSWTopTaggerANN/Rel21/February2022/";
+      m_taggersCalibAreas["JSSWTopTaggerANN"] = "JSSWTopTaggerANN/Rel21/March2023/";
 
       // 3-Var
       std::string taggerType="SmoothedWZTagger";
@@ -182,8 +182,11 @@ namespace top {
       
       // ANN
       taggerType="JSSWTopTaggerANN";
-      setConfig(taggerType,"JSSANN50","JSSANN50Tagger_AntiKt10UFOCSSKSoftDrop_Jan22.dat");
-      setConfig(taggerType,"JSSANN80","JSSANN80Tagger_AntiKt10UFOCSSKSoftDrop_Jan22.dat");
+      setConfig(taggerType,"JSSANN50","JSSANN50Tagger_AntiKt10UFOCSSKSoftDrop_Mar23pol3.dat");
+      setConfig(taggerType,"JSSANN60","JSSANN60Tagger_AntiKt10UFOCSSKSoftDrop_Mar23pol3.dat");
+      setConfig(taggerType,"JSSANN70","JSSANN70Tagger_AntiKt10UFOCSSKSoftDrop_Mar23pol3.dat");
+      setConfig(taggerType,"JSSANN80","JSSANN80Tagger_AntiKt10UFOCSSKSoftDrop_Mar23pol3.dat");
+      setConfig(taggerType,"JSSANN90","JSSANN90Tagger_AntiKt10UFOCSSKSoftDrop_Mar23pol3.dat");
 
       // DNN
       taggerType="JSSWTopTaggerDNN";
