@@ -116,6 +116,6 @@ class LumiDBHandler:
             print('LumiDBHandler.closeAllDB called')
 
         # Can't use iterkeys here as we are deleting the elements
-        for dbstring in self.__class__.dbDict.keys():
+        for dbstring in list(self.__class__.dbDict.keys()):
             self.closeDB(dbstring)
             
