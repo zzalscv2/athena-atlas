@@ -195,7 +195,7 @@ def pebInfoWriterToolCfg(flags, name, eventBuildType):
                        SubDetector.TDAQ_CALO_JET_PROC_ROI,
                        SubDetector.TDAQ_CTP] )
 
-    elif 'JetPEBPhysicsTLA' == eventBuildType:
+    elif 'DarkJetPEBTLA' == eventBuildType:
         acc = RoIPEBInfoWriterToolCfg(
             flags, name,
             # Add subdetectors within a ROI for PEB
@@ -206,6 +206,18 @@ def pebInfoWriterToolCfg(flags, name, eventBuildType):
             EtaWidth = 0.6, # half-width (the RoI is between etaJet-EtaWidth and etaJet+EtaWidth)
             PhiWidth = 0.6,
             MaxRoIs = 3 )
+
+    elif 'FTagPEBTLA' == eventBuildType:
+        acc = RoIPEBInfoWriterToolCfg(
+            flags, name,
+            # Add subdetectors within a ROI for PEB
+            regSelDets = ['Pixel', 'SCT'],
+            # DS HLT result
+            ROBs = [SourceIdentifier(SubDetector.TDAQ_HLT,
+                                     DataScoutingInfo.getDataScoutingResultID(eventBuildType))],
+            EtaWidth = 0.4, # half-width (the RoI is between etaJet-EtaWidth and etaJet+EtaWidth)
+            PhiWidth = 0.4,
+            MaxRoIs = 6 )
 
     elif eventBuildType in DataScoutingInfo.getAllDataScoutingIdentifiers():
         # Pure DataScouting configuration

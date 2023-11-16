@@ -51,7 +51,8 @@ _all_streams = [
     StreamInfo('Mistimed', 'physics', True, True),
     # TLA/PEB/DATA SCOUTING (physics) STREAMS
     StreamInfo('TLA','physics',True,False),
-    StreamInfo('TLAJetPEB', 'physics', True, False),
+    StreamInfo('DarkJetPEBTLA', 'physics', True, False),
+    StreamInfo('FTagPEBTLA', 'physics', True, False),
     StreamInfo('AFPPEB','physics',True,False),
     # EXPRESS STREAM
     StreamInfo('express', 'express', True, True),

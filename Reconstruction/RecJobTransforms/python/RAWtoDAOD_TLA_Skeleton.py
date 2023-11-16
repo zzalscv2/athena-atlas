@@ -21,29 +21,40 @@ def configureFlags(runArgs):
         log.warning("Enters the inputBSFile if")
         flags.Input.Files = runArgs.inputBSFile
 
-    # Output 
+    # Output
     if hasattr(runArgs, 'outputDAOD_TLAFile'):
         flags.Output.AODFileName = runArgs.outputDAOD_TLAFile
         log.info("---------- Configured DAOD_TLA output")
-
+        flags.Trigger.AODEDMSet='PhysicsTLA'
+        from AthenaConfiguration.DetectorConfigFlags import allDetectors
+        disabled_detectors = allDetectors
+    elif hasattr(runArgs, 'outputDAOD_TLAFTAGPEBFile'):
+        flags.Output.AODFileName = runArgs.outputDAOD_TLAFTAGPEBFile
+        log.info("---------- Configured DAOD_TLAFTAGPEB output")
+        flags.Trigger.AODEDMSet='FTagPEBTLA'
+        disabled_detectors = [
+            'TRT',
+            'LAr', 'Tile', 'MBTS',
+            'CSC', 'MDT', 'RPC', 'TGC',
+            'sTGC', 'MM',
+            'Lucid', 'ZDC', 'ALFA', 'AFP',
+        ]
 
     # Set non-default flags 
-    flags.Trigger.decodeHLT=False
     flags.Trigger.doLVL1=False
     flags.Trigger.DecisionMakerValidation.Execute = False
     flags.Trigger.doNavigationSlimming = False
     flags.Trigger.L1.doCalo=False
     flags.Trigger.L1.doCTP=False
-    flags.Trigger.AODEDMSet='PhysicsTLA'
 
     from AthenaConfiguration.Enums import ProductionStep
     flags.Common.ProductionStep=ProductionStep.Reconstruction
 
     # Setup detector flags
-    from AthenaConfiguration.DetectorConfigFlags import disableDetectors, allDetectors
+    from AthenaConfiguration.DetectorConfigFlags import disableDetectors
     disableDetectors(
         flags, toggle_geometry=True,
-        detectors=allDetectors,
+        detectors=disabled_detectors,
     )
 
     # Print reco domain status
@@ -86,8 +97,20 @@ def fromRunArgs(runArgs):
 
     # import the TLA decoding
     cfg.flagPerfmonDomain('Trigger')
-    from TrigTLAMonitoring.decodeBS_TLA_AOD import outputCfg
-    cfg.merge( outputCfg(flags) )
+    additional_output_items = {
+        'PhysicsTLA': [],
+        'FTagPEBTLA':
+        [
+            'xAOD::BTaggingContainer#BTagging_HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',
+            'xAOD::BTaggingAuxContainer#BTagging_HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.',
+        ],
+    }[flags.Trigger.AODEDMSet]
+    from TLARecoConfig.DAOD_TLA_OutputConfig import DAOD_TLA_OutputCfg
+    cfg.merge( DAOD_TLA_OutputCfg(flags, additional_output_items) )
+
+    if flags.Trigger.AODEDMSet == 'FTagPEBTLA':
+        from TLARecoConfig.FTagPEBRecoConfig import FTagPEBJetTagConfig
+        cfg.merge(FTagPEBJetTagConfig(flags))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)
