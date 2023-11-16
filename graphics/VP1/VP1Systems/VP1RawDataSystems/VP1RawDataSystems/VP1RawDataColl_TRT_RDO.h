@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -37,7 +37,7 @@ public:
 
   bool useSpecialHTMat();
 
-public slots:
+public Q_SLOTS:
   void setRequireHT(bool);
   void setAllowedToT(const VP1Interval&);
   void setUseSpecialTRTHTMaterial(bool);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -37,7 +37,7 @@ public:
   int moduleID(int channelID) const { return channelID % 8; }
 
   bool useSpecialBCMHighAttMaterial() const;
-public slots:
+public Q_SLOTS:
   void setUseSpecialBCMHighAttMaterial(bool);
 
 protected:
