@@ -7,14 +7,8 @@
 #
 # This is also a useful example of how to use the CoolLumiUtilities tools
 #
-import os
 import sys
-import glob
-import array
-import shutil
-import subprocess
-
-from optparse import OptionParser
+from argparse import ArgumentParser
 
 # Get our global DB handler object
 from CoolLumiUtilities.CoolDataReader import CoolDataReader
@@ -24,38 +18,79 @@ class RunLumiTime:
 
     def __init__(self):
 
-        # Control output level
-        self.verbose = False
+        # online luminosity database
+        self.onlLumiDB = 'COOLONL_TRIGGER/CONDBR2'
 
-        # Online luminosity database
-        self.onlLumiDB = 'COOLONL_TRIGGER/COMP200'
-        
-        # Convert LB -> time
+        # folder with LB -> time conversion
         self.onlLBLBFolder = '/TRIGGER/LUMI/LBLB'
 
+        # the LumiDBHandler
+        self.dbHandler = None
+
+        # parse command-line input
+        args = self.parseArgs()
+
+        # output level
+        self.verbose = args.verbose
+
+        # output file (default stdout)
+        self.outFile = args.outfile
+
         # List of (integer) run numbers specified on the command line
-        self.runList = []
+        self.runList = args.runlist
 
-        # Instantiate the LumiDBHandler, so we can cleanup all COOL connections in the destructor
+        print(f"Finished parsing run list: {', '.join([str(run) for run in self.runList])}")
+
+    def __enter__(self):
+        # Instantiate the LumiDBHandler, so we can cleanup all COOL connections at exit
         self.dbHandler = LumiDBHandler()
+        return self
 
-        # Output file (default stdout)
-        self.outFile = None
-        
-    # Explicitly clean up our DB connections
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.closeDb()
+
     def __del__(self):
-        self.dbHandler.closeAllDB()
-        
-    # Called in command-line mode
-    def execute(self):
+        self.closeDb()
 
-        # Handle command-line switches
-        self.parseOpts()
+    def closeDb(self):
+        if self.dbHandler is not None:
+            self.dbHandler.closeAllDB()
+
+    def parseArgs(self):
+        parser = ArgumentParser()
+
+        parser.add_argument("-v", "--verbose",
+                            action="store_true", dest="verbose",
+                            help="turn on verbose output")
+
+        parser.add_argument("-r", "--run", nargs='*', required=True, type=int,
+                            dest="runlist", metavar="RUN",
+                            help="show specific run(s)")
+
+        parser.add_argument('-o', '--output',
+                            dest='outfile', metavar = "FILE", default=None, type=str,
+                            help="write results to output file (default stdout). If filename ends in csv or json those formats are used.")
+        
+        return parser.parse_args()
+
+    def execute(self):
+        # Instantiate the LumiDBHandler, so we can cleanup all COOL connections in the destructor
+        if self.dbHandler is None:
+            self.dbHandler = LumiDBHandler()
 
         # Open outfile if desired
-        if self.outFile != None:
-            f = open(self.outFile, 'w')
-            
+        fp = None
+        format = "stdout"
+        if self.outFile is not None:
+            fp = open(self.outFile, 'w')
+            format = "txt"
+            if self.outFile.endswith(".json"):
+                format = "json"
+                output = {}
+            if self.outFile.endswith(".csv"):
+                format = "csv"
+
+
         # Get our COOL folder
         lblb = CoolDataReader(self.onlLumiDB, self.onlLBLBFolder)
         
@@ -64,7 +99,7 @@ class RunLumiTime:
 
             lblb.setIOVRangeFromRun(run)
             if not lblb.readData():
-                print 'RunLumiTime - No LBLB data found for run %d!' % run
+                print(f'RunLumiTime - No LBLB data found for run {run}!')
                 continue
 
             for obj in lblb.data:
@@ -74,78 +109,33 @@ class RunLumiTime:
                 # Time is UTC nanoseconds
                 startTime = obj.payload()['StartTime']
                 endTime = obj.payload()['EndTime']
-
-                # Write this out as seconds
-                outstr = "%d %d %f %f" % (run, lb, float(startTime)/1E9, float(endTime)/1E9)
-                if self.outFile != None:
-                    f.write(outstr+'\n')
+                if format == "json":
+                    if not run in output:
+                        output[run] = []
+                    output[run] += [{
+                        "lb":lb,
+                        "begin": startTime/1.e9,
+                        "end": endTime/1.e9
+                    }]
                 else:
-                    print outstr
+                    entry = (run, lb, startTime/1.e9, endTime/1.e9)
+                    separator = ',' if format=='csv' else ' '
+                    print(separator.join([str(v) for v in entry]), file=fp)
 
-    def parseOpts(self):
-
-        parser = OptionParser(usage="usage: %prog [options]", add_help_option=False)
-
-        parser.add_option("-?", "--usage", action="store_true", default=False, dest="help",
-                          help="show this help message and exit")
+        if format=="json":
+            import json
+            json.dump(output, fp, indent=4)
         
-        parser.add_option("-v", "--verbose",
-                     action="store_true", default=self.verbose, dest="verbose",
-                     help="turn on verbose output")
-
-        parser.add_option("-r", "--run",
-                          dest="runlist", metavar="RUN",
-                          help="update specific run, or comma separated list")
-
-        parser.add_option('-o', '--output',
-                          dest='outfile', metavar = "FILE", default=self.outFile,
-                          help="write results to output file")
-        
-        (options, args) = parser.parse_args()
-
-        if options.help:
-            parser.print_help()
-            sys.exit()
-
-        self.outFile = options.outfile
-        
-        # Parse run list
-        if options.runlist != None:
-
-            # Clear the old one
-            self.runList = []
-            
-            # Can be comma-separated list of run ranges
-            runlist = options.runlist.split(',')
-            if len(runlist) == 0:
-                print 'Invalid run list specified!'
-                sys.exit()
-
-            # Go through and check for run ranges
-            for runstr in runlist:
-                subrunlist = runstr.split('-')
-                
-                if len(subrunlist) == 1: # Single run
-                    self.runList.append(int(subrunlist[0]))
-                    
-                elif len(subrunlist) == 2: # Range of runs
-                    for runnum in range(int(subrunlist[0]), int(subrunlist[1])+1):
-                        self.runList.append(runnum)
-
-                else: # Too many parameters
-                    print 'Invalid run list segment found:', runstr
-                    sys.exit()
-
-            self.runList.sort()
-            if self.verbose:
-                print 'Finished parsing run list:',
-                for runnum in self.runList:
-                    print runnum,
-                print
+        # close the file
+        if fp is not None:
+            fp.close()
+            print(f"Wrote file {self.outFile}")
 
 # Executed from the command line
 if __name__ == '__main__':
-    rlt = RunLumiTime()
-    rlt.execute()
+    # rlt = RunLumiTime()
+    # sys.exit(rlt.execute())
 
-                
+    with RunLumiTime() as rlt:
+        rlt.execute()
+      
