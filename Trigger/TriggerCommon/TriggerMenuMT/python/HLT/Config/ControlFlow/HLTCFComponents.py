@@ -214,9 +214,9 @@ class CFSequenceCA(CFSequence):
             self.mergeStepSequences(chainStep)
             
         CFSequence.__init__(self, chainStep, filterAlg)
-        if self.combo is not None:             
-            self.ca.addEventAlgo(self.step.combo.Alg, sequenceName=seqAndWithFilter.getName())  
-
+        if self.combo is not None:    
+            self.ca.merge(self.step.combo.acc, sequenceName=seqAndWithFilter.getName())          
+            
     def mergeStepSequences(self, chainStep):
         for menuseq in chainStep.sequences:
             try:

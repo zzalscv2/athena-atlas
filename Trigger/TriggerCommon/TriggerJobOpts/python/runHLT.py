@@ -53,8 +53,8 @@ def set_flags(flags):
    ### TEMPORARY settings:
    # FIXME: disable coherent prescales during development phase to allow menu with single-chain CPS groups
    flags.Trigger.disableCPS = True
-
-
+  
+  
 def runHLTCfg(flags):
    """Main function to configure the HLT in athena and athenaHLT"""
    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator

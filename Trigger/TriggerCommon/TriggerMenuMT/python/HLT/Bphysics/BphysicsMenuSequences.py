@@ -50,7 +50,7 @@ def dimuL2Sequence(flags):
     from ..Muon.MuonMenuSequences import muCombAlgSequenceCfg
     from TrigBphysHypo.TrigBphysStreamerHypoConfig import TrigBphysStreamerHypoToolFromDict
 
-    sequence, combinedMuonContainerName = muCombAlgSequenceCfg(flags)
+    sequence, combinedMuonContainerName = muCombAlgSequenceCfg(flags, "Bphys")
     hypo = CompFactory.TrigBphysStreamerHypo('DimuL2StreamerHypoAlg', 
                                              triggerList = getNoL2CombChainNames(),
                                              triggerLevel = 'L2')

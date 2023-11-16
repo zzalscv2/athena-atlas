@@ -21,6 +21,7 @@ from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from TrigCompositeUtils.TrigCompositeUtils import legName
 from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena, conf2toConfigurable
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 from collections.abc import MutableSequence
 import collections.abc
@@ -230,8 +231,17 @@ class ComboMaker(AlgNode):
     def __init__(self, name, comboHypoCfg):
         self.prop1 = "MultiplicitiesMap"
         self.prop2 = "LegToInputCollectionMap"
-        self.comboHypoCfg = comboHypoCfg
-        Alg = self.create( name )
+        self.comboHypoCfg = comboHypoCfg        
+        self.acc = self.create( name )        
+        if isComponentAccumulatorCfg(): 
+            thealgs= self.acc.getEventAlgos()
+            if thealgs is None:
+                log.error("ComboMaker: Combo alg %s not found", name)
+            if len(thealgs) != 1: 
+                log.error("ComboMaker: Combo alg %s len is %d",name, len(thealgs))
+            Alg=thealgs[0]
+        else:
+            Alg=self.acc
         log.debug("ComboMaker init: Alg %s", name)
         AlgNode.__init__(self,  Alg, 'HypoInputDecisions', 'HypoOutputDecisions')
         self.resetInput()
@@ -241,8 +251,8 @@ class ComboMaker(AlgNode):
         setattr(self.Alg, self.prop2, {})
 
     def create (self, name):
-        log.debug("ComboMaker.create %s",name)
-        return self.comboHypoCfg(name=name)        
+        log.debug("ComboMaker.create %s",name)        
+        return self.comboHypoCfg(name=name)  
 
     """
     AlgNode automatically de-duplicates input ReadHandles upon repeated calls to addInput.
@@ -606,10 +616,12 @@ class MenuSequenceCA(MenuSequence):
             self._globalCA.wasMerged()
 
 class EmptyMenuSequenceCA(EmptyMenuSequence):
+    ''' EmptyMenuSequence with Component Accumulator '''
     def __init__(self, the_name):
-        self.ca=ComponentAccumulator()
         EmptyMenuSequence.__init__(self,the_name )
-        self.ca.addEventAlgo(self._maker.Alg)
+        self.ca=ComponentAccumulator()
+        self.ca.addSequence(seqAND(the_name))
+        self.ca.addEventAlgo(self._maker.Alg, sequenceName=the_name)
 
     @property
     def maker(self):
