@@ -231,6 +231,15 @@ def SimHitContainerListCfg(flags):
        writtenContainers += [("SiHitCollection", "PixelHits")]
     if flags.Detector.EnableSCT:
        writtenContainers += [("SiHitCollection", "SCT_Hits")]
+    from SimulationConfig.SimEnums import CalibrationRun
+    if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile]:
+        # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
+        writtenContainers += [
+            ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitActive_DEAD' ),
+            ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitDeadMaterial_DEAD' ),
+            ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitInactive_DEAD' )
+        ]
+
     return writtenContainers
 
 def SensitiveDetectorListCfg(flags):
