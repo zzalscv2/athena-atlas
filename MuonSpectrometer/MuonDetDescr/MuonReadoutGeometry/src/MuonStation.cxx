@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -12,16 +12,19 @@
 #include <iomanip>
 #include <utility>
 
-#include "AthenaKernel/getMessageSvc.h"
-#include "GaudiKernel/MsgStream.h"
+
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonReadoutGeometry/MuonReadoutElement.h"
-
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+#include "EventPrimitives/EventPrimitivesToStringConverter.h"
 #include "CxxUtils/inline_hints.h"
 namespace MuonGM {
 
-    MuonStation::MuonStation(std::string_view stName, double Ssize, double Rsize, double Zsize, double LongSsize, double LongRsize,
-                             double LongZsize, int zi, int fi, bool descratzneg) :
+    MuonStation::MuonStation(std::string_view stName, 
+                             double Ssize, double Rsize, double Zsize, 
+                             double LongSsize, double LongRsize, double LongZsize, 
+                             int zi, int fi, bool descratzneg) :       
+        AthMessaging{"MuonStation"},
         m_statname(stName) {
         m_Ssize = Ssize;
         m_Rsize = Rsize;
@@ -37,35 +40,24 @@ namespace MuonGM {
     MuonStation::~MuonStation() = default;
 
     void MuonStation::setNominalAmdbLRSToGlobal(HepGeom::Transform3D xf) {
-        if (!m_amdbl_to_global)
-            m_amdbl_to_global = std::make_unique<HepGeom::Transform3D>(xf);
-        else
-            *m_amdbl_to_global = xf;
-#ifndef NDEBUG
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        if (log.level() <= MSG::DEBUG)
-            log << MSG::DEBUG << "setNominalAmdbLRSToGlobal: stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "
-                << getEtaIndex() << " Origin of AmdbLocalFrame= " << (*m_amdbl_to_global) * HepGeom::Point3D<double>(0., 0., 0.) << endmsg;
-#endif
+        m_amdbl_to_global = std::make_unique<HepGeom::Transform3D>(xf);
+        ATH_MSG_DEBUG("setNominalAmdbLRSToGlobal: stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "<< getEtaIndex() 
+                    << " Origin of AmdbLocalFrame= " << Amg::toString((*m_amdbl_to_global) * HepGeom::Point3D<double>(0., 0., 0.)));
     }
     void MuonStation::setBlineFixedPointInAmdbLRS(double s0, double z0, double t0) {
-#ifndef NDEBUG
-        if ((std::abs(s0) + std::abs(z0) + std::abs(t0)) > 0.01) {
-            MsgStream log(Athena::getMessageSvc(), "MuonStation");
-            if (log.level() <= MSG::DEBUG)
-                log << MSG::DEBUG << "Station " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
-                    << " setting fixed point for B-lines at s0,z0,t0 =     " << s0 << " " << z0 << " " << t0 << endmsg;
-        }
-#endif
+       
+        ATH_MSG_DEBUG("Station " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
+                    << " setting fixed point for B-lines at s0,z0,t0 =     " << s0 << " " << z0 << " " << t0 );
+        
+
         m_BlineFixedPointInAmdbLRS.setX(s0);
         m_BlineFixedPointInAmdbLRS.setY(z0);
         m_BlineFixedPointInAmdbLRS.setZ(t0);
-#ifndef NDEBUG
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        if (log.level() <= MSG::DEBUG)
-            log << MSG::DEBUG << "setBlineFixedPointInAmdbLRS: stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "
-                << getEtaIndex() << " nominal(i.e. from-station-envelop-only) B-line fixed point " << m_BlineFixedPointInAmdbLRS << endmsg;
-#endif
+
+        ATH_MSG_DEBUG("setBlineFixedPointInAmdbLRS: stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "
+                << getEtaIndex() << " nominal(i.e. from-station-envelop-only) B-line fixed point " 
+                << Amg::toString(m_BlineFixedPointInAmdbLRS));
+
     }
 
     HepGeom::Point3D<double> MuonStation::getBlineFixedPointInAmdbLRS() const {
@@ -76,9 +68,7 @@ namespace MuonGM {
     HepGeom::Point3D<double> MuonStation::getUpdatedBlineFixedPointInAmdbLRS() const { return m_BlineFixedPointInAmdbLRS; }
 
     void MuonStation::updateBlineFixedPointInAmdbLRS() {
-        if (!m_firstRequestBlineFixedP) return;
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-
+        if (!m_firstRequestBlineFixedP) return;        
         // Before correction m_BlineFixedPointInAmdbLRS has a z set at the edge of
         // lowest-z tube of the first layer of one of the two multilayers.
         // For endcap A, endcap C, and barrel A, this is correct, given the tube staggering
@@ -86,78 +76,48 @@ namespace MuonGM {
         // edge at the second layer, i.e. the z should be corrected by a half tube
         // pitch. Correction is thus computed only for barrel side C.
         if (barrel() && (getEtaIndex() < 0)) {
-            std::map<int, pairRE_AlignTransf>::const_iterator it = m_REwithAlTransfInStation.begin();
-            for (; it != m_REwithAlTransfInStation.end(); ++it) {
-                const MuonReadoutElement* muonRE = ((*it).second).first;
-                if (muonRE->getTechnologyType() == "MDT") {
-                    const MdtReadoutElement* mdtRE = dynamic_cast<const MdtReadoutElement*>(muonRE);
-                    if (mdtRE) {
-                        // Correct for tube staggering on barrel side C
-                        double shiftInZ = -0.5 * mdtRE->tubePitch();
-
-                        // in addition, correct for 35microm glue width incorrectly applied
-                        double multilayerRealSize = 0;
-                        for (int ilayer = 1; ilayer <= 2; ++ilayer) {
-                            double val;
-                            bool wellDefined = mdtRE->getWireFirstLocalCoordAlongZ(ilayer, val);
-                            if (!wellDefined) {
-                                if (log.level() <= MSG::WARNING)
-                                    log << MSG::WARNING << "getUpdatedBlineFixedPointInAmdbLRS: stationName/Jff/Jzz " << getStationType()
-                                        << " " << getPhiIndex() << " " << getEtaIndex()
-                                        << " cannot get wire coordinates for second tube layer" << endmsg;
-                                val = 0.;
-                            }
-                            if ((ilayer == 1) || (val > multilayerRealSize)) multilayerRealSize = val;
-                        }
-                        multilayerRealSize += (mdtRE->getNtubesperlayer() - 1) * mdtRE->tubePitch();
-                        multilayerRealSize += mdtRE->outerTubeRadius();  // last tube: no glue width
-                        shiftInZ += mdtRE->getZsize() - multilayerRealSize;
-
-                        m_BlineFixedPointInAmdbLRS.setY(m_BlineFixedPointInAmdbLRS.y() + shiftInZ);
-                        if (log.level() <= MSG::DEBUG)
-                            log << MSG::DEBUG << "getUpdatedBlineFixedPointInAmdbLRS: stationName/Jff/Jzz " << getStationType() << " "
-                                << getPhiIndex() << " " << getEtaIndex() << " shiftInZ = " << shiftInZ << " re-set B-line fixed point "
-                                << m_BlineFixedPointInAmdbLRS.x() << "," << m_BlineFixedPointInAmdbLRS.y() << ","
-                                << m_BlineFixedPointInAmdbLRS.z() << endmsg;
-                        break;
-                    } else {
-                        if (log.level() <= MSG::WARNING)
-                            log << MSG::WARNING << "getUpdatedBlineFixedPointInAmdbLRS: stationName/Jff/Jzz " << getStationType() << " "
-                                << getPhiIndex() << " " << getEtaIndex() << " failing to cast to const MdtReadoutElement* the RE named "
-                                << muonRE->getStationName() << " with tech=" << muonRE->getTechnologyName() << endmsg;
-                    }
+            for (auto&[jobId, alignPair] :m_REwithAlTransfInStation) {
+                const MuonReadoutElement* muonRE = alignPair.first;
+                
+                if (muonRE->detectorType() !=Trk::DetectorElemType::Mdt) {
+                    continue;
                 }
+                const MdtReadoutElement* mdtRE = dynamic_cast<const MdtReadoutElement*>(muonRE);
+                // Correct for tube staggering on barrel side C
+                double shiftInZ = -0.5 * mdtRE->tubePitch();
+                // in addition, correct for 35microm glue width incorrectly applied
+                double multilayerRealSize{0};
+                for (int ilayer = 1; ilayer <= 2; ++ilayer) {
+                    double val{0.};
+                    bool wellDefined = mdtRE->getWireFirstLocalCoordAlongZ(ilayer, val);
+                    if (!wellDefined) {
+                       ATH_MSG_WARNING("getUpdatedBlineFixedPointInAmdbLRS: stationName/Jff/Jzz " << getStationType()
+                                << " " << getPhiIndex() << " " << getEtaIndex()
+                                << " cannot get wire coordinates for second tube layer");
+                        val = 0.;
+                    }
+                    if ((ilayer == 1) || (val > multilayerRealSize)) multilayerRealSize = val;
+                }
+                multilayerRealSize += (mdtRE->getNtubesperlayer() - 1) * mdtRE->tubePitch();
+                multilayerRealSize += mdtRE->outerTubeRadius();  // last tube: no glue width
+                shiftInZ += mdtRE->getZsize() - multilayerRealSize;
+
+                m_BlineFixedPointInAmdbLRS.setY(m_BlineFixedPointInAmdbLRS.y() + shiftInZ);
+                ATH_MSG_DEBUG("getUpdatedBlineFixedPointInAmdbLRS: stationName/Jff/Jzz " << getStationType() << " "
+                        << getPhiIndex() << " " << getEtaIndex() << " shiftInZ = " << shiftInZ << " re-set B-line fixed point "
+                        <<Amg::toString(m_BlineFixedPointInAmdbLRS));
+                break;
             }
         }
-
         m_firstRequestBlineFixedP = false;
     }
 
     void MuonStation::setDeltaAmdbLRS(HepGeom::Transform3D xf) {
-        if (!m_delta_amdb_frame)
-            m_delta_amdb_frame = std::make_unique<HepGeom::Transform3D>(xf);
-        else
-            *m_delta_amdb_frame = xf;
-
-#ifndef NDEBUG
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        if (log.level() <= MSG::DEBUG) {
-            log << MSG::DEBUG << "Station " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
-                << " adding Aline     " << endmsg;
-            log << MSG::DEBUG << "  native_to_amdbl computed from A-line " << endmsg << (*m_native_to_amdbl)[0][0] << " "
-                << (*m_native_to_amdbl)[0][1] << " " << (*m_native_to_amdbl)[0][2] << " " << (*m_native_to_amdbl)[0][3] << " " << endmsg
-                << (*m_native_to_amdbl)[1][0] << " " << (*m_native_to_amdbl)[1][1] << " " << (*m_native_to_amdbl)[1][2] << " "
-                << (*m_native_to_amdbl)[1][3] << " " << endmsg << (*m_native_to_amdbl)[2][0] << " " << (*m_native_to_amdbl)[2][1] << " "
-                << (*m_native_to_amdbl)[2][2] << " " << (*m_native_to_amdbl)[2][3] << " " << endmsg;
-            log << MSG::DEBUG << "Station "
-                << "  amdbl_to_global " << endmsg << (*m_amdbl_to_global)[0][0] << " " << (*m_amdbl_to_global)[0][1] << " "
-                << (*m_amdbl_to_global)[0][2] << " " << (*m_amdbl_to_global)[0][3] << " " << endmsg << (*m_amdbl_to_global)[1][0] << " "
-                << (*m_amdbl_to_global)[1][1] << " " << (*m_amdbl_to_global)[1][2] << " " << (*m_amdbl_to_global)[1][3] << " " << endmsg
-                << (*m_amdbl_to_global)[2][0] << " " << (*m_amdbl_to_global)[2][1] << " " << (*m_amdbl_to_global)[2][2] << " "
-                << (*m_amdbl_to_global)[2][3] << " " << endmsg;
-        }
-#endif
-
+        m_delta_amdb_frame = std::make_unique<HepGeom::Transform3D>(xf);
+        ATH_MSG_DEBUG("Station " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
+                << " adding Aline     " << std::endl
+                 << "  native_to_amdbl computed from A-line " << Amg::toString(*m_native_to_amdbl) << std::endl 
+                << "Station  amdbl_to_global " << endmsg << Amg::toString(*m_amdbl_to_global));
         m_transform->setDelta(Amg::CLHEPTransformToEigen(m_native_to_amdbl->inverse() * (*m_delta_amdb_frame) * (*m_native_to_amdbl)));
     }
 
@@ -178,95 +138,47 @@ namespace MuonGM {
         // store the delta transform in the local AMDB frame
         setDeltaAmdbLRS(delta_amdb);
 
-// debugging session
-#ifndef NDEBUG
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        if (log.level() <= MSG::DEBUG) {
-            log << MSG::DEBUG << "Station " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
-                << " adding Aline     " << setiosflags(std::ios::fixed) << std::setprecision(6) << std::setw(12) << tras << " " << traz
-                << " " << trat << " " << rots << " " << rotz << " " << rott << endmsg;
-            log << MSG::DEBUG << "  delta_amdb computed from A-line " << endmsg << (delta_amdb)[0][0] << " " << (delta_amdb)[0][1] << " "
-                << (delta_amdb)[0][2] << " " << (delta_amdb)[0][3] << " " << endmsg << (delta_amdb)[1][0] << " " << (delta_amdb)[1][1]
-                << " " << (delta_amdb)[1][2] << " " << (delta_amdb)[1][3] << " " << endmsg << (delta_amdb)[2][0] << " "
-                << (delta_amdb)[2][1] << " " << (delta_amdb)[2][2] << " " << (delta_amdb)[2][3] << " " << endmsg;
-        }
-#endif
+        ATH_MSG_DEBUG("Station " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
+                << " adding Aline     " << setiosflags(std::ios::fixed) << std::setprecision(6) << std::setw(12) 
+                << tras << " " << traz << " " << trat << " " << rots << " " << rotz << " " << rott << std::endl
+                << "  delta_amdb computed from A-line " << Amg::toString(delta_amdb));
     }
 
     const MuonReadoutElement* MuonStation::getMuonReadoutElement(int jobIndex) const {
         std::map<int, pairRE_AlignTransf>::const_iterator itr = m_REwithAlTransfInStation.find(jobIndex);
-        if (itr == m_REwithAlTransfInStation.end()) return nullptr;
-#ifndef NDEBUG
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        if (log.level() <= MSG::DEBUG)
-            log << MSG::DEBUG << "getMuonReadoutElement at Job=" << jobIndex << " for station " << getStationName()
-                << " at zi/fi = " << getEtaIndex() << "/" << getPhiIndex() << endmsg;
-#endif
-        return itr->second.first;
+        return itr !=m_REwithAlTransfInStation.end() ? itr->second.first : nullptr;
     }
 
     MuonReadoutElement* MuonStation::getMuonReadoutElement(int jobIndex) {
         std::map<int, pairRE_AlignTransf>::const_iterator itr = m_REwithAlTransfInStation.find(jobIndex);
-
-        if (itr == m_REwithAlTransfInStation.end()) return nullptr;
-#ifndef NDEBUG
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        if (log.level() <= MSG::DEBUG)
-            log << MSG::DEBUG << "getMuonReadoutElement at Job=" << jobIndex << " for station " << getStationName()
-                << " at zi/fi = " << getEtaIndex() << "/" << getPhiIndex() << endmsg;
-#endif
-        return itr->second.first;
+        return itr !=m_REwithAlTransfInStation.end() ?  itr->second.first : nullptr;
     }
 
     GeoAlignableTransform* MuonStation::getComponentAlTransf(int jobIndex) const {
         std::map<int, pairRE_AlignTransf>::const_iterator itr = m_REwithAlTransfInStation.find(jobIndex);
-        if (itr == m_REwithAlTransfInStation.end()) return nullptr;
-#ifndef NDEBUG
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        if (log.level() <= MSG::DEBUG)
-            log << MSG::DEBUG << "getComponentAlTransf at Job=" << jobIndex << " for station " << getStationName()
-                << " at zi/fi = " << getEtaIndex() << "/" << getPhiIndex() << endmsg;
-#endif
-        return itr->second.second;
+        return itr != m_REwithAlTransfInStation.end() ? itr->second.second : nullptr;
     }
 
     void MuonStation::addMuonReadoutElementWithAlTransf(MuonReadoutElement* a, GeoAlignableTransform* ptrsf, int jobIndex) {
-#ifndef NDEBUG
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-#endif
-
-#ifndef NDEBUG
-        if (log.level() <= MSG::DEBUG)
-            log << MSG::DEBUG << "addMuonReadoutElementWithAlTransf for station " << getStationName() << " at zi/fi = " << getEtaIndex()
+        ATH_MSG_DEBUG("addMuonReadoutElementWithAlTransf for station " << getStationName() << " at zi/fi = " << getEtaIndex()
                 << "/" << getPhiIndex() << " adding new component with Alignable transf... " << a->getStationName()
-                << " job ondex = " << jobIndex << endmsg;
-#endif
+                << " job ondex = " << jobIndex );
+        m_REwithAlTransfInStation[jobIndex] = std::make_pair(a, ptrsf);
 
-        m_REwithAlTransfInStation[jobIndex] = pairRE_AlignTransf{a, ptrsf};
-
-#ifndef NDEBUG
-        if (log.level() <= MSG::DEBUG)
-            log << MSG::DEBUG << "addMuonReadoutElementWithAlTransf for station " << getStationName() << " at zi/fi = " << getEtaIndex()
-                << "/" << getPhiIndex() << " added new component - now size of map is  " << m_REwithAlTransfInStation.size() << endmsg;
-#endif
+        ATH_MSG_DEBUG("addMuonReadoutElementWithAlTransf for station " << getStationName() << " at zi/fi = " << getEtaIndex()
+                  << "/" << getPhiIndex() << " added new component - now size of map is  " << m_REwithAlTransfInStation.size());
     }
 
     void MuonStation::setDelta_fromAline_forComp(int jobindex, double tras, double traz, double trat, double rots, double rotz,
                                                  double rott) {
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
         GeoAlignableTransform* parentToChild = getComponentAlTransf(jobindex);
         if (!parentToChild) {
-            if (log.level() <= MSG::WARNING)
-                log << MSG::WARNING << "setDelta_fromAline_forComp: WARNING: component for index " << jobindex
-                    << " not found in MuonStation named " << getStationName() << " at zi/fi = " << getEtaIndex() << "/" << getPhiIndex()
-                    << endmsg;
+            ATH_MSG_WARNING( "setDelta_fromAline_forComp: WARNING: component for index " << jobindex
+                    << " not found in MuonStation named " << getStationName() << " at zi/fi = " << getEtaIndex() << "/" << getPhiIndex());
             return;
         }
         if (std::abs(tras) + std::abs(traz) + std::abs(trat) + (std::abs(rots) + std::abs(rotz) + std::abs(rott)) * 1000. < 0.01) {
-            if (log.level() <= MSG::DEBUG)
-                log << MSG::DEBUG
-                    << "setDelta_fromAline_forComp: A-line ignored --- too small (translations < 10microns & rotations <10microrad)"
-                    << endmsg;
+            ATH_MSG_DEBUG("setDelta_fromAline_forComp: A-line ignored --- too small (translations < 10microns & rotations <10microrad)");
             return;
         }
 
@@ -278,92 +190,59 @@ namespace MuonGM {
                                           HepGeom::RotateX3D(rots) * HepGeom::RotateY3D(rotz) * HepGeom::RotateZ3D(rott);
         // The station to component transform is static and must be computed in terms of "nominal geometry parameters"; fixing here bug
         // 87693 - SS 9/11/2011 HepGeom::Point3D<double> thisREcenter = getMuonReadoutElement(jobindex)->center();
-        HepGeom::Point3D<double> thisREnominalCenter =
-            (HepGeom::Transform3D(Amg::EigenTransformToCLHEP(getMuonReadoutElement(jobindex)->defTransform()))) *
-            HepGeom::Point3D<double>(0., 0., 0.);
+        HepGeom::Point3D<double> thisREnominalCenter = Amg::EigenTransformToCLHEP(getMuonReadoutElement(jobindex)->defTransform()) * HepGeom::Point3D<double>(0., 0., 0.);
         double Rcomp = thisREnominalCenter.perp() - (getMuonReadoutElement(jobindex)->getRsize()) / 2.;
         double DZcomp = std::abs(thisREnominalCenter.z()) - std::abs(((*m_amdbl_to_global) * HepGeom::Point3D<double>(0., 0., 0)).z()) -
                         std::abs((getMuonReadoutElement(jobindex)->getZsize()) / 2.);
 
-        HepGeom::Transform3D childToLocAmdbComponent;
-        HepGeom::Transform3D childToLocAmdbStation = HepGeom::Transform3D(*m_native_to_amdbl) * parentToChildT;
+        HepGeom::Transform3D childToLocAmdbStation = (*m_native_to_amdbl) * parentToChildT;
         HepGeom::Transform3D locAmdbStatToLocAmdbComp = HepGeom::Transform3D::Identity;
         // the following line is needed to go for scenario B in last slide of
         // http://www.fisica.unisalento.it/~spagnolo/allow_listing/TGC_Alines/TGC-ALines_2011_03_01.pdf COMMENT next line            to go
         // for scenario A in last slide of http://www.fisica.unisalento.it/~spagnolo/allow_listing/TGC_Alines/TGC-ALines_2011_03_01.pdf
-        if (getStationType().substr(0, 1) == "T") locAmdbStatToLocAmdbComp = HepGeom::TranslateY3D(-Rcomp) * HepGeom::TranslateZ3D(-DZcomp);
-        childToLocAmdbComponent = locAmdbStatToLocAmdbComp * childToLocAmdbStation;
+        if (getStationType()[0] == 'T') locAmdbStatToLocAmdbComp = HepGeom::TranslateY3D(-Rcomp) * HepGeom::TranslateZ3D(-DZcomp);
+        HepGeom::Transform3D childToLocAmdbComponent = locAmdbStatToLocAmdbComp * childToLocAmdbStation;
 
-#ifndef NDEBUG
-        if (log.level() <= MSG::DEBUG)
-            log << MSG::DEBUG << "setDelta_fromAline_forComp: stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "
+        ATH_MSG_DEBUG("setDelta_fromAline_forComp: stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "
                 << getEtaIndex() << " Job " << jobindex << " Origin of component/station AmdbLocalFrame= "
-                << (*m_amdbl_to_global) * locAmdbStatToLocAmdbComp.inverse() * HepGeom::Point3D<double>(0., 0., 0.) << " / "
-                << (*m_amdbl_to_global) * HepGeom::Point3D<double>(0., 0., 0.) << endmsg;
-#endif
+                <<Amg::toString((*m_amdbl_to_global) * locAmdbStatToLocAmdbComp.inverse() * HepGeom::Point3D<double>(0., 0., 0.)) << " / "
+                << Amg::toString((*m_amdbl_to_global) * HepGeom::Point3D<double>(0., 0., 0.)));
+
         parentToChild->setDelta(Amg::CLHEPTransformToEigen(childToLocAmdbComponent.inverse() * delta_amdb * childToLocAmdbComponent));
-#ifndef NDEBUG
-        if (log.level() <= MSG::DEBUG)
-            log << MSG::DEBUG << "setDelta_fromAline_forComp2:stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "
+        ATH_MSG_DEBUG("setDelta_fromAline_forComp2:stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "
                 << getEtaIndex() << " Job " << jobindex << " Origin of component/station AmdbLocalFrame= "
-                << (*m_amdbl_to_global) * locAmdbStatToLocAmdbComp.inverse() * HepGeom::Point3D<double>(0., 0., 0.) << " / "
-                << (*m_amdbl_to_global) * HepGeom::Point3D<double>(0., 0., 0.) << endmsg;
-#endif
+                << Amg::toString((*m_amdbl_to_global) * locAmdbStatToLocAmdbComp.inverse() * HepGeom::Point3D<double>(0., 0., 0.)) << " / "
+                << Amg::toString((*m_amdbl_to_global) * HepGeom::Point3D<double>(0., 0., 0.)));
 
-// debugging session
-#ifndef NDEBUG
-        if (log.level() <= MSG::DEBUG) {
-            log << MSG::DEBUG << "Station " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
-                << " adding Aline     " << tras << " " << traz << " " << trat << " " << rots << " " << rotz << " " << rott
-                << " for component with index =" << jobindex << endmsg;
-            log << MSG::DEBUG << "Station " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
-                << "  delta_amdb computed from A-line " << endmsg << (delta_amdb)[0][0] << " " << (delta_amdb)[0][1] << " "
-                << (delta_amdb)[0][2] << " " << (delta_amdb)[0][3] << " " << endmsg << (delta_amdb)[1][0] << " " << (delta_amdb)[1][1]
-                << " " << (delta_amdb)[1][2] << " " << (delta_amdb)[1][3] << " " << endmsg << (delta_amdb)[2][0] << " "
-                << (delta_amdb)[2][1] << " " << (delta_amdb)[2][2] << " " << (delta_amdb)[2][3] << " " << endmsg;
-        }
-#endif
+        ATH_MSG_DEBUG("Station " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
+                    << " adding Aline     " << tras << " " << traz << " " << trat << " " << rots << " " << rotz << " " << rott
+                    << " for component with index =" << jobindex << std::endl 
+                    << "  delta_amdb computed from A-line " <<Amg::toString(delta_amdb));
     }
 
-    void MuonStation::clearCache() {
-        std::map<int, pairRE_AlignTransf>::iterator it = m_REwithAlTransfInStation.begin();
-        std::map<int, pairRE_AlignTransf>::iterator itEnd = m_REwithAlTransfInStation.end();
-
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "n. of RE in this station is " << m_REwithAlTransfInStation.size() << endmsg;
-
-        int i = 0;
-        for (; it != itEnd; ++it) {
-            ++i;
-            if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Clearing cache .... for RE ... iteration n. " << i << endmsg;
-            MuonReadoutElement* re = ((*it).second).first;
-            if (re == nullptr) {
-                if (log.level() <= MSG::WARNING)
-                    log << MSG::WARNING << " in MuonStation:clearCache " << getStationType() << " at zi/fi " << getEtaIndex() << "/"
-                        << getPhiIndex() << " trying to get a not existing RE (iteration n. )   " << i << " RE is null, skipping" << endmsg;
+    void MuonStation::clearCache() {   
+        ATH_MSG_DEBUG("n. of RE in this station is " << m_REwithAlTransfInStation.size());
+        for (auto& [jobId, readAlignPair] : m_REwithAlTransfInStation) {
+            ATH_MSG_DEBUG("Clearing cache .... for RE ... iteration n. " << jobId);
+            MuonReadoutElement* re = readAlignPair.first;
+            if (!re) {
+                ATH_MSG_WARNING(" in MuonStation:clearCache " << getStationType() << " at zi/fi " << getEtaIndex() << "/"
+                        << getPhiIndex() << " trying to get a not existing RE (iteration n. )   " << jobId << " RE is null, skipping" );
                 continue;
             }
             re->clearCache();
-            if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "cache cleared " << endmsg;
+            ATH_MSG_DEBUG("cache cleared ");
         }
     }
 
     void MuonStation::refreshCache() {
-        std::map<int, pairRE_AlignTransf>::iterator it = m_REwithAlTransfInStation.begin();
-        std::map<int, pairRE_AlignTransf>::iterator itEnd = m_REwithAlTransfInStation.end();
-
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "n. of RE in this station is " << m_REwithAlTransfInStation.size() << endmsg;
-
-        int i = 0;
-        for (; it != itEnd; ++it) {
-            ++i;
-            if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Refreshing cache .... for RE ... iteration n. " << i << endmsg;
-            MuonReadoutElement* re = ((*it).second).first;
-            if (re == nullptr) {
-                if (log.level() <= MSG::WARNING)
-                    log << MSG::WARNING << " in MuonStation:refreshCache " << getStationType() << " at zi/fi " << getEtaIndex() << "/"
-                        << getPhiIndex() << " trying to get a not existing RE (iteration n. )   " << i << " RE is null, skipping" << endmsg;
+        ATH_MSG_DEBUG("n. of RE in this station is " << m_REwithAlTransfInStation.size());
+        for (auto& [jobId, readAlignPair] : m_REwithAlTransfInStation) {
+            ATH_MSG_DEBUG("refreshCache cache .... for RE ... iteration n. " << jobId);
+            MuonReadoutElement* re = readAlignPair.first;
+            if (!re) {
+                ATH_MSG_WARNING(" in MuonStation:refreshCache " << getStationType() << " at zi/fi " << getEtaIndex() << "/"
+                        << getPhiIndex() << " trying to get a not existing RE (iteration n. )   " << jobId << " RE is null, skipping" );
                 continue;
             }
             re->refreshCache();
@@ -371,15 +250,12 @@ namespace MuonGM {
     }
 
     void MuonStation::fillCache() {
-        std::map<int, pairRE_AlignTransf>::iterator it = m_REwithAlTransfInStation.begin();
-        std::map<int, pairRE_AlignTransf>::iterator itEnd = m_REwithAlTransfInStation.end();
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        for (; it != itEnd; ++it) {
-            MuonReadoutElement* re = ((*it).second).first;
-            if (re == nullptr) {
-                if (log.level() <= MSG::WARNING)
-                    log << MSG::WARNING << " in MuonStation:fillCache " << getStationType() << " at zi/fi " << getEtaIndex() << "/"
-                        << getPhiIndex() << " trying to get a not existing RE, skipping" << endmsg;
+        for (auto& [jobId, readAlignPair] : m_REwithAlTransfInStation) {
+            ATH_MSG_DEBUG("fillCache cache .... for RE ... iteration n. " << jobId);
+            MuonReadoutElement* re = readAlignPair.first;
+            if (!re) {
+                ATH_MSG_WARNING(" in MuonStation:fillCache " << getStationType() << " at zi/fi " << getEtaIndex() << "/"
+                        << getPhiIndex() << " trying to get a not existing RE (iteration n. )   " << jobId << " RE is null, skipping" );
                 continue;
             }
             re->fillCache();
@@ -388,60 +264,50 @@ namespace MuonGM {
 
     void MuonStation::setBline(const BLinePar* bline) {
         m_hasBLines = true;
-        std::map<int, pairRE_AlignTransf>::iterator it = m_REwithAlTransfInStation.begin();
-        std::map<int, pairRE_AlignTransf>::iterator itEnd = m_REwithAlTransfInStation.end();
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        for (; it != itEnd; ++it) {
-            MuonReadoutElement* re = ((*it).second).first;
-            if (re == nullptr) {
-                if (log.level() <= MSG::WARNING)
-                    log << MSG::WARNING << " in setBLine " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
-                        << " trying to get a null MuonReadoutElement, skipping" << endmsg;
+        for (auto& [jobId, readAlignPair] : m_REwithAlTransfInStation) {
+            ATH_MSG_DEBUG("fillCache cache .... for RE ... iteration n. " << jobId);
+            MuonReadoutElement* re = readAlignPair.first;
+            if (!re) {                
+                ATH_MSG_WARNING(" in setBLine " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
+                             << " trying to get a null MuonReadoutElement, skipping");
                 continue;
             }
-            if (re->getTechnologyType().substr(0, 3) == "MDT") {
-                MdtReadoutElement* mdt = dynamic_cast<MdtReadoutElement*>(re);
-                mdt->setBLinePar(bline);
+            if (re->detectorType() !=Trk::DetectorElemType::Mdt) {
+                continue;
             }
+            MdtReadoutElement* mdt = dynamic_cast<MdtReadoutElement*>(re);
+            mdt->setBLinePar(bline);
         }
     }
 
     void MuonStation::clearBLineCache() {
-        std::map<int, pairRE_AlignTransf>::iterator it = m_REwithAlTransfInStation.begin();
-        std::map<int, pairRE_AlignTransf>::iterator itEnd = m_REwithAlTransfInStation.end();
-        int i = 0;
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        for (; it != itEnd; ++it) {
-            ++i;
-            MuonReadoutElement* re = ((*it).second).first;
-            if (re == nullptr) {
-                if (log.level() <= MSG::WARNING)
-                    log << MSG::WARNING << " in MuonStation:clearBLineCache " << getStationType() << " at zi/fi " << getEtaIndex() << "/"
-                        << getPhiIndex() << " trying to get a not existing RE (iteration n. )   " << i << " RE is null, skipping" << endmsg;
+        for (auto& [jobId, readAlignPair] : m_REwithAlTransfInStation) {
+            MuonReadoutElement* re = readAlignPair.first;
+            if (!re) {
+               ATH_MSG_WARNING(" in MuonStation:clearBLineCache " << getStationType() << " at zi/fi " << getEtaIndex() << "/"
+                            << getPhiIndex() << " trying to get a not existing RE (iteration n. )   " << jobId << " RE is null, skipping");
                 continue;
             }
-            if (re->getTechnologyType().substr(0, 3) == "MDT") {
-                MdtReadoutElement* mdt = dynamic_cast<MdtReadoutElement*>(re);
-                mdt->clearBLineCache();
+            if (re->detectorType() !=Trk::DetectorElemType::Mdt) {
+                continue;
             }
+            MdtReadoutElement* mdt = dynamic_cast<MdtReadoutElement*>(re);
+            mdt->clearBLineCache();           
         }
     }
     void MuonStation::fillBLineCache() {
-        std::map<int, pairRE_AlignTransf>::iterator it = m_REwithAlTransfInStation.begin();
-        std::map<int, pairRE_AlignTransf>::iterator itEnd = m_REwithAlTransfInStation.end();
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        for (; it != itEnd; ++it) {
-            MuonReadoutElement* re = ((*it).second).first;
-            if (re == nullptr) {
-                if (log.level() <= MSG::WARNING)
-                    log << MSG::WARNING << " in MuonStation:fillBLineCache " << getStationType() << " at zi/fi " << getEtaIndex() << "/"
-                        << getPhiIndex() << " trying to get a non existing RE, skipping" << endmsg;
+        for (auto& [jobId, readAlignPair] : m_REwithAlTransfInStation) {
+            MuonReadoutElement* re = readAlignPair.first;
+            if (!re) {
+                ATH_MSG_WARNING(" in MuonStation:fillBLineCache " << getStationType() << " at zi/fi " << getEtaIndex() << "/"
+                        << getPhiIndex() << " trying to get a non existing RE, skipping "<<jobId);
                 continue;
             }
-            if (re->getTechnologyType().substr(0, 3) == "MDT") {
-                MdtReadoutElement* mdt = dynamic_cast<MdtReadoutElement*>(re);
-                mdt->fillBLineCache();
+            if (re->detectorType() !=Trk::DetectorElemType::Mdt) {
+                continue;
             }
+            MdtReadoutElement* mdt = dynamic_cast<MdtReadoutElement*>(re);
+            mdt->fillBLineCache();            
         }
     }
 
@@ -455,79 +321,68 @@ namespace MuonGM {
 #endif
     double
     MuonStation::RsizeMdtStation() const {
-        if (getStationName().substr(0, 1) == "T" || getStationName().substr(0, 1) == "C") return 0.;  // TGC and CSC stations
+        if (getStationName()[0] == 'T' || getStationName()[0] == 'C') return 0.;  // TGC and CSC stations
         double Rsize = 0.;
 
-        Amg::Vector3D RposFirst;
-        RposFirst.setZero();
-        Amg::Vector3D Rpos;
+        Amg::Vector3D RposFirst{Amg::Vector3D::Zero()}, Rpos{Amg::Vector3D::Zero()};
         bool first = true;
         int nmdt = 0;
-
-#ifndef NDEBUG
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        if (log.level() <= MSG::DEBUG)
-            log << MSG::DEBUG << "RsizeMdtStation for " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
-                << " nRE = " << nMuonReadoutElements() << endmsg;
-#endif
-
+        ATH_MSG_DEBUG("RsizeMdtStation for " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
+                << " nRE = " << nMuonReadoutElements());
+        
         for (int j = 1; j < 30; ++j) {
             const MuonReadoutElement* activeComponent = getMuonReadoutElement(j);
-            if (activeComponent == nullptr) continue;
-            if (activeComponent->getTechnologyType() == "MDT") {
-                ++nmdt;
-
-                Rsize += activeComponent->getRsize() / 2.;
-                Rpos = activeComponent->toParentStation() * Amg::Vector3D(0., 0., 0.);
-                if (first) {
-                    RposFirst = Rpos;
-                    first = false;
-                } else {
-                    if (barrel())
-                        Rsize += std::abs(Rpos.x() - RposFirst.x());
-                    else
-                        Rsize += std::abs(Rpos.y() - RposFirst.y());
-                }
+            if (!activeComponent) continue;
+            if (activeComponent->detectorType() !=Trk::DetectorElemType::Mdt) {
+                continue;
             }
+            ++nmdt;
+            Rsize += activeComponent->getRsize() / 2.;
+            Rpos = activeComponent->toParentStation().translation();
+            if (first) {
+                RposFirst = Rpos;
+                first = false;
+            } else {
+                if (barrel())
+                    Rsize += std::abs(Rpos.x() - RposFirst.x());
+                else
+                    Rsize += std::abs(Rpos.y() - RposFirst.y());
+            }            
         }
         if (nmdt == 1) Rsize = 2. * Rsize;
         return Rsize;
     }
     double MuonStation::ZsizeMdtStation() const {
-        if (getStationName().substr(0, 1) == "T" || getStationName().substr(0, 1) == "C") return 0.;  // TGC and CSC stations
+        if (getStationName()[0] == 'T' || getStationName()[0] == 'C') return 0.;  // TGC and CSC stations
         double Zsize = 0.;
 
-        Amg::Vector3D ZposFirst;
-        ZposFirst.setZero();
-        Amg::Vector3D Zpos;
+        Amg::Vector3D ZposFirst{Amg::Vector3D::Zero()}, Zpos{Amg::Vector3D::Zero()};
         bool first = true;
         int nmdt = 0;
 
-#ifndef NDEBUG
-        MsgStream log(Athena::getMessageSvc(), "MuonStation");
-        if (log.level() <= MSG::DEBUG)
-            log << MSG::DEBUG << "ZsizeMdtStation for " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
-                << " nRE = " << nMuonReadoutElements() << endmsg;
-#endif
 
-        for (int j = 1; j < 30; ++j) {
+        ATH_MSG_DEBUG("ZsizeMdtStation for " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
+                << " nRE = " << nMuonReadoutElements());
+
+         for (int j = 1; j < 30; ++j) {
             const MuonReadoutElement* activeComponent = getMuonReadoutElement(j);
-            if (activeComponent == nullptr) continue;
-            if (activeComponent->getTechnologyType() == "MDT") {
-                ++nmdt;
-
-                Zsize += activeComponent->getZsize() / 2.;
-                Zpos = activeComponent->toParentStation() * Amg::Vector3D(0., 0., 0.);
-                if (first) {
-                    ZposFirst = Zpos;
-                    first = false;
-                } else {
-                    if (barrel())
-                        Zsize += std::abs(Zpos.z() - ZposFirst.z());
-                    else
-                        Zsize += std::abs(Zpos.x() - ZposFirst.x());
-                }
+            if (!activeComponent) continue;
+            if (activeComponent->detectorType() !=Trk::DetectorElemType::Mdt) {
+                continue;
             }
+            ++nmdt;
+
+            Zsize += activeComponent->getZsize() / 2.;
+            Zpos = activeComponent->toParentStation() * Amg::Vector3D(0., 0., 0.);
+            if (first) {
+                ZposFirst = Zpos;
+                first = false;
+            } else {
+                if (barrel())
+                    Zsize += std::abs(Zpos.z() - ZposFirst.z());
+                else
+                    Zsize += std::abs(Zpos.x() - ZposFirst.x());
+            }        
         }
         if (nmdt == 1) Zsize = 2. * Zsize;
 
@@ -535,16 +390,12 @@ namespace MuonGM {
     }
 
     bool MuonStation::barrel() const {
-        if (getStationName().substr(0, 1) == "B") return true;
-        return false;
+        return getStationName()[0] == 'B';
     }
     bool MuonStation::endcap() const { return !barrel(); }
 
     const MdtAsBuiltPar* MuonStation::getMdtAsBuiltParams() const {
-        if (!hasMdtAsBuiltParams()) {
-            MsgStream log(Athena::getMessageSvc(), "MuonStation");
-            if (log.level() <= MSG::WARNING) log << MSG::WARNING << "No Mdt AsBuilt parameters for chamber " << getStationName() << endmsg;
-        }
+        ATH_MSG_WARNING("No Mdt AsBuilt parameters for chamber " << getStationName());
         return m_XTomoData;
     }
 

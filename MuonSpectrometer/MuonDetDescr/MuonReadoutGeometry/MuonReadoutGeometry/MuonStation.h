@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MuonStation_H
-#define MuonStation_H
+#ifndef MuonReadoutGeometry_MuonStation_H
+#define MuonReadoutGeometry_MuonStation_H
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
@@ -14,7 +14,7 @@
 
 #include "GeoModelKernel/GeoAlignableTransform.h"
 #include "MuonReadoutGeometry/GlobalUtilities.h"
-
+#include "AthenaBaseComps/AthMessaging.h"
 class BLinePar;
 class MdtAsBuiltPar;
 
@@ -47,10 +47,12 @@ namespace MuonGM {
 
     class MuonReadoutElement;
 
-    class MuonStation {
+    class MuonStation: public AthMessaging {
     public:
-        MuonStation(std::string_view stName, double m_Ssize, double m_Rsize, double m_Zsize, double m_LongSsize, double m_LongRsize,
-                    double m_LongZsize, int zi, int fi, bool m_descratzneg);
+        MuonStation(std::string_view stName, 
+                    double Ssize, double Rsize, double Zsize, 
+                    double LongSsize, double LongRsize, double LongZsize, 
+                    int zi, int fi, bool m_descratzneg);
         ~MuonStation();
 
         inline int getPhiIndex() const;  //!< a la AMDB
@@ -60,7 +62,7 @@ namespace MuonGM {
         inline std::string getKey() const;
         inline std::string getStationType() const;  //!< like BMS, T1F, CSL
 
-        inline std::string getStationName() const;  //!< like BMS5, T1F1, CSL1
+        inline const  std::string& getStationName() const;  //!< like BMS5, T1F1, CSL1
 
         inline void setEtaPhiIndices(int eta, int phi);  //!< a la AMDB
 
@@ -91,13 +93,11 @@ namespace MuonGM {
         void setDelta_fromAline_forComp(int, double, double, double, double, double, double);
         void setDelta_fromAline(double, double, double, double, double, double);
         //!< set the delta transform in the amdb frame and update the geoModel Delta
-
-        // inline void addMuonReadoutElement(const MuonReadoutElement* a);
-        // inline void addMuonReadoutElement(const MuonReadoutElement* a, int jobIndex);
         void addMuonReadoutElementWithAlTransf(MuonReadoutElement* a, GeoAlignableTransform* ptrsf, int jobIndex);
         const MuonReadoutElement* getMuonReadoutElement(int jobIndex) const;
         MuonReadoutElement* getMuonReadoutElement(int jobIndex);
         GeoAlignableTransform* getComponentAlTransf(int jobIndex) const;
+        
         inline int nMuonReadoutElements() const;
         void clearCache();
         void refreshCache();
@@ -134,15 +134,15 @@ namespace MuonGM {
         double m_LongRsize{0.};
         double m_LongZsize{0.};
         double m_xAmdbCRO{0.};
-        bool m_descratzneg;
+        bool m_descratzneg{false};
         int m_statPhiIndex{0};
         int m_statEtaIndex{0};
         std::string m_key;
         GeoAlignableTransform* m_transform{nullptr};
 
-        std::unique_ptr<HepGeom::Transform3D> m_delta_amdb_frame;
-        std::unique_ptr<HepGeom::Transform3D> m_native_to_amdbl;
-        std::unique_ptr<HepGeom::Transform3D> m_amdbl_to_global;  // nominal
+        std::unique_ptr<HepGeom::Transform3D> m_delta_amdb_frame{};
+        std::unique_ptr<HepGeom::Transform3D> m_native_to_amdbl{};
+        std::unique_ptr<HepGeom::Transform3D> m_amdbl_to_global{};  // nominal
         double m_rots{0.};
         double m_rotz{0.};
         double m_rott{0.};
@@ -151,17 +151,15 @@ namespace MuonGM {
         HepGeom::Point3D<double> m_BlineFixedPointInAmdbLRS{0., 0., 0.};
         const MdtAsBuiltPar* m_XTomoData{nullptr};
 
-        typedef std::pair<MuonReadoutElement*, GeoAlignableTransform*> pairRE_AlignTransf;
-        std::map<int, pairRE_AlignTransf> m_REwithAlTransfInStation;  //!< keep track of the REs in this station
+        using pairRE_AlignTransf =  std::pair<MuonReadoutElement*, GeoAlignableTransform*>;
+        std::map<int, pairRE_AlignTransf> m_REwithAlTransfInStation{};  //!< keep track of the REs in this station
 
-        MuonStation& operator=(const MuonStation& right) = delete;
-        MuonStation(const MuonStation&) = delete;
     };
 
     int MuonStation::getPhiIndex() const { return m_statPhiIndex; }
     int MuonStation::getEtaIndex() const { return m_statEtaIndex; }
     std::string MuonStation::getStationType() const { return m_statname.substr(0, 3); }
-    std::string MuonStation::getStationName() const { return m_statname; }
+    const std::string& MuonStation::getStationName() const { return m_statname; }
     void MuonStation::setEtaPhiIndices(int eta, int phi) {
         m_statEtaIndex = eta;
         m_statPhiIndex = phi;
