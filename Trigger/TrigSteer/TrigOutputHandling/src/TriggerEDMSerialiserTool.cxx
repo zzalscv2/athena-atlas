@@ -8,6 +8,7 @@
 #include "Gaudi/Interfaces/IOptionsSvc.h"
 #include "GaudiKernel/IToolSvc.h"
 #include "GaudiKernel/System.h"
+#include "AthenaKernel/BaseInfo.h"
 #include "AthenaKernel/StorableConversions.h"
 #include "AthContainersInterfaces/IAuxStoreIO.h"
 #include "AthContainers/AuxTypeRegistry.h"
@@ -310,7 +311,8 @@ StatusCode TriggerEDMSerialiserTool::serialiseContainer( void* data, const Addre
   return StatusCode::SUCCESS;
 }
 
-StatusCode TriggerEDMSerialiserTool::serialisexAODAuxContainer( void* data,
+StatusCode TriggerEDMSerialiserTool::serialisexAODAuxContainer(
+  void* data,
   const Address& address,
   std::vector<uint32_t>& buffer,
   SGImplSvc* evtStore) const
@@ -319,16 +321,18 @@ StatusCode TriggerEDMSerialiserTool::serialisexAODAuxContainer( void* data,
 
   void* copy = data;
   RootType classDesc = RootType::ByNameNoQuiet( address.persType );
-  static const RootType interface = RootType::ByNameNoQuiet( "SG::IAuxStore" );
-  static const RootType interface_c = RootType::ByNameNoQuiet( "xAOD::AuxContainerBase" );
-
-  void* data_interface = classDesc.Cast (interface_c, data, true);
+  //Get the Base Info given clid.
+  const SG::BaseInfoBase* bib = SG::BaseInfoBase::find (address.clid);
+  //cast data to xAOD::AuxContainerBase
+  void* data_interface = bib->cast (data, ClassID_traits<xAOD::AuxContainerBase>::ID());
   if (data_interface != nullptr) {
     const xAOD::AuxContainerBase* store = reinterpret_cast<const xAOD::AuxContainerBase*> (data_interface);
     copy = classDesc.Construct();
-    void* copy_interface = classDesc.Cast (interface, copy, true);
+    //cast copy to xAOD::AuxContainerBase
+    void* copy_interface = bib->cast (copy, ClassID_traits<xAOD::AuxContainerBase>::ID());
+    xAOD::AuxContainerBase* copy_store = reinterpret_cast<xAOD::AuxContainerBase*> (copy_interface);
     SG::copyAuxStoreThinned (*store,
-                             *reinterpret_cast<SG::IAuxStore*> (copy_interface),
+                             *copy_store,
                              nullptr);
   }
 

@@ -176,7 +176,7 @@ public:
    Bool_t IsStruct() const;
    Bool_t IsNamespace() const;
 
-// note: in Reflex, part of Type, not Scope
+   // note: in Reflex, part of Type, not Scope
    Bool_t IsAbstract() const;
 
    void* Id() const { return fClass.GetClass(); }
@@ -185,13 +185,7 @@ public:
    TTypeAdapter ToType() const { return *this; }
    TScopeAdapter TypeOf() const { return *this; }
 
-   /// Cast obj of this class type up to baseclass cl if up is true.
-   /// Cast obj of this class type down from baseclass cl if up is false.
-   /// If this class is not a baseclass of cl return 0, else the pointer
-   /// to the cl part of this (up) or to this (down).
-   void* Cast (const TScopeAdapter& cl, void* obj, bool up) const;
-
-// for STL containers
+   // for STL containers
    bool operator==( const TScopeAdapter& rh ) const;
    bool operator!=( const TScopeAdapter& rh ) const {
       return ! (*this == rh);
