@@ -1760,6 +1760,13 @@ class ItemDef:
             MenuItem('L1_DPHI12-M70-2eEM12L').setLogic(d.TOPO_0INVM70_0DPHI12_eEM12sl1_eEM12sl6 & physcond)
             MenuItem('L1_2DR15-M70-2eEM9L').setLogic(d.TOPO_0INVM70_2DR15_eEM9sl1_eEM9sl6 & physcond)
             MenuItem('L1_2DR15-M70-2eEM12L').setLogic(d.TOPO_0INVM70_2DR15_eEM12sl1_eEM12sl6 & physcond)
+            # dr-m ranges
+            MenuItem('L1_13DR25-25M70-2eEM12L').setLogic(d.TOPO_25INVM70_13DR25_eEM12sl1_eEM12sl6 & physcond)
+            MenuItem('L1_2DR15-0M30-2eEM12L').setLogic(d.TOPO_0INVM30_2DR15_eEM12sl1_eEM12sl6 & physcond)
+            # asymmetric et + ranges
+            MenuItem('L1_13DR25-25M70-eEM12LeEM9L').setLogic(d.TOPO_25INVM70_13DR25_eEM12sl1_eEM9sl6 & physcond)
+            MenuItem('L1_2DR15-0M30-eEM12LeEM9L').setLogic(d.TOPO_0INVM30_2DR15_eEM12sl1_eEM12sl6 & physcond)
+
             #ATR-19376
             MenuItem('L1_10DR-MU14FCH-MU5VF'             ).setLogic( d.TOPO_10DR99_2MU5VFab & d.MU14FCH & physcond) 
             MenuItem('L1_10DR-MU14FCH-MU5VF_EMPTY'       ).setLogic( d.TOPO_10DR99_2MU5VFab & d.MU14FCH & cosmiccond) 

@@ -759,6 +759,121 @@ class TopoAlgoDef:
             
             tm.registerTopoAlgo(alg)    
 
+        # DM/DR Ranges for eEM12
+         # output lines = 0INVM30-2DR15-eEM12sl1-eEM12sl6, 
+        #                 25INVM70-13DR25-eEM12sl1-eEM12sl6, 
+        #                
+        # Parameter ordering
+        # 1. MinEt1
+        # 2. MinEt2
+        # 3. MinMSqr
+        # 4. MaxMSqr
+        # 5. MinDeltaR
+        # 6. MaxDeltaR
+        eINVM_Ranges_DRMap = [
+        {  
+            "algoname"  : "INVM_BOOSTDR_Ranges_eEM12sl6",
+            "minInvm"   : [0, 25],
+            "maxInvm"   : [30,70],
+            "minDR"     : [2,13],
+            "maxDR"     : [15,25],
+            "otype1"    : "eEM",
+            "olist1"    : "sl",
+            "ocut1List" : [12,12],
+            "nleading1" : 1,
+            "otype2"    : "eEM",
+            "ocut2List" : [12,12],
+            "olist2"    : "sl",
+            "nleading2" : 6
+        }
+        ]
+
+        for x in eINVM_Ranges_DRMap:
+            class d:
+                pass
+            for k in x:
+                setattr (d, k, x[k])
+            inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
+            toponames=[]
+            for bitId, ocut1Value in enumerate(d.ocut1List):
+                toponames.append ("%iINVM%i-%iDR%i-%s%s%s%s-%s%s%s%s"  % (d.minInvm[bitId], d.maxInvm[bitId], d.minDR[bitId], d.maxDR[bitId],
+                                                                d.otype1, str(ocut1Value) , d.olist1, str(d.nleading1) if d.olist1=="sl" else "",
+                                                                d.otype2, str(d.ocut2List[bitId]) , d.olist2, str(d.nleading2) if d.olist2=="sl" else ""))
+           
+            alg = AlgConf.InvariantMassInclusiveDeltaRSqrIncl2( name = d.algoname, inputs = inputList, outputs =  toponames )
+            alg.addgeneric('InputWidth1', HW.eEmOutputWidthSort)
+            alg.addgeneric('InputWidth2', HW.eEmOutputWidthSort)
+            alg.addgeneric('MaxTob1', d.nleading1)
+            alg.addgeneric('MaxTob2', d.nleading2)
+            alg.addgeneric('NumResultBits', len(toponames))
+            for bitId in range(len(toponames)):
+                alg.addvariable('MinET1', get_threshold_cut(d.otype1, d.ocut1List[bitId]) * _et_conversion, bitId)
+                alg.addvariable('MinET2', get_threshold_cut(d.otype1, d.ocut2List[bitId]) * _et_conversion, bitId)
+                alg.addvariable('MinMSqr', d.minInvm[bitId] * d.minInvm[bitId] * _et_conversion * _et_conversion, bitId)
+                alg.addvariable('MaxMSqr', d.maxInvm[bitId] * d.maxInvm[bitId] * _et_conversion * _et_conversion, bitId)
+                alg.addvariable('DeltaRMin', d.minDR[bitId]*d.minDR[bitId]*_dr_conversion*_dr_conversion, bitId)
+                alg.addvariable('DeltaRMax', d.maxDR[bitId]*d.maxDR[bitId]*_dr_conversion*_dr_conversion, bitId)
+            
+            tm.registerTopoAlgo(alg)    
+
+
+        # DM/DR Ranges for asymmetric eEM12LeEM9L
+         # output lines = 0INVM30-2DR15-eEM12sl1-eEM9sl6, 
+        #                 25INVM70-13DR25-eEM12sl1-eEM9sl6, 
+        #                
+        # Parameter ordering
+        # 1. MinEt1
+        # 2. MinEt2
+        # 3. MinMSqr
+        # 4. MaxMSqr
+        # 5. MinDeltaR
+        # 6. MaxDeltaR
+        eINVM_Ranges_Asymm_DRMap = [
+        {  
+            "algoname"  : "INVM_BOOSTDR_Ranges_Asymm_eEMsl6",
+            "minInvm"   : [0, 25],
+            "maxInvm"   : [30,70],
+            "minDR"     : [2,13],
+            "maxDR"     : [15,25],
+            "otype1"    : "eEM",
+            "olist1"    : "sl",
+            "ocut1List" : [12,12],
+            "nleading1" : 1,
+            "otype2"    : "eEM",
+            "ocut2List" : [9,9],
+            "olist2"    : "sl",
+            "nleading2" : 6
+        }
+        ]
+
+        for x in eINVM_Ranges_Asymm_DRMap:
+            class d:
+                pass
+            for k in x:
+                setattr (d, k, x[k])
+            inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
+            toponames=[]
+            for bitId, ocut1Value in enumerate(d.ocut1List):
+                toponames.append ("%iINVM%i-%iDR%i-%s%s%s%s-%s%s%s%s"  % (d.minInvm[bitId], d.maxInvm[bitId], d.minDR[bitId], d.maxDR[bitId],
+                                                                d.otype1, str(ocut1Value) , d.olist1, str(d.nleading1) if d.olist1=="sl" else "",
+                                                                d.otype2, str(d.ocut2List[bitId]) , d.olist2, str(d.nleading2) if d.olist2=="sl" else ""))
+
+            alg = AlgConf.InvariantMassInclusiveDeltaRSqrIncl2( name = d.algoname, inputs = inputList, outputs =  toponames )
+            alg.addgeneric('InputWidth1', HW.eEmOutputWidthSort)
+            alg.addgeneric('InputWidth2', HW.eEmOutputWidthSort)
+            alg.addgeneric('MaxTob1', d.nleading1)
+            alg.addgeneric('MaxTob2', d.nleading2)
+            alg.addgeneric('NumResultBits', len(toponames))
+            for bitId in range(len(toponames)):
+                alg.addvariable('MinET1', get_threshold_cut(d.otype1, d.ocut1List[bitId]) * _et_conversion, bitId)
+                alg.addvariable('MinET2', get_threshold_cut(d.otype1, d.ocut2List[bitId]) * _et_conversion, bitId)
+                alg.addvariable('MinMSqr', d.minInvm[bitId] * d.minInvm[bitId] * _et_conversion * _et_conversion, bitId)
+                alg.addvariable('MaxMSqr', d.maxInvm[bitId] * d.maxInvm[bitId] * _et_conversion * _et_conversion, bitId)
+                alg.addvariable('DeltaRMin', d.minDR[bitId]*d.minDR[bitId]*_dr_conversion*_dr_conversion, bitId)
+                alg.addvariable('DeltaRMax', d.maxDR[bitId]*d.maxDR[bitId]*_dr_conversion*_dr_conversion, bitId)
+            
+            tm.registerTopoAlgo(alg)    
+
 
         # INVM_DR for 2MU5VFab
         # output lines = 2INVM9-2DR15-2MU5VFab and 8INVM15-0DR22-2MU5VFab
