@@ -23,6 +23,8 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
     inDetAccelSvc.useITkGeometry = True # Allows to read and export the ITk geometry
     acc.addService(inDetAccelSvc)
 
+    acc.addPublicTool(CompFactory.TrigITkAccelerationTool(name = "TrigITkAccelerationTool_FTF"))
+
     acc.addPublicTool( CompFactory.TrigL2LayerNumberToolITk( name = "TrigL2LayerNumberTool_FTF",UseNewLayerScheme = True) )
 
     acc.addPublicTool( CompFactory.TrigSpacePointConversionTool( "TrigSpacePointConversionTool",

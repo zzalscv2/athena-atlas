@@ -343,7 +343,15 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
   
   # GPU offloading config begins - perhaps set from configure
   if flags.Trigger.InDetTracking.doGPU:
-    acc.addPublicTool(CompFactory.TrigInDetAccelerationTool(name = "TrigInDetAccelerationTool_FTF"))
+    
+    inDetAccelSvc = CompFactory.TrigInDetAccelerationSvc("TrigInDetAccelerationSvc")
+    inDetAccelSvc.useITkGeometry = flags.Detector.GeometryITk
+    acc.addService(inDetAccelSvc)
+
+    if flags.Detector.GeometryITk:
+        acc.addPublicTool(CompFactory.TrigITkAccelerationTool(name = "TrigITkAccelerationTool_FTF"))
+    else:
+        acc.addPublicTool(CompFactory.TrigInDetAccelerationTool(name = "TrigInDetAccelerationTool_FTF"))
   # GPU offloading config ends
 
   useNewLayerNumberScheme = True

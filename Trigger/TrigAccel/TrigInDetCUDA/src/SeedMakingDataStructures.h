@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETCUDA_SEEDMAKINGDATASTRUCTURES_H
 #define TRIGINDETCUDA_SEEDMAKINGDATASTRUCTURES_H
 
-constexpr unsigned int MAX_MIDDLE_SP             = 300000;
-constexpr unsigned int MAX_DOUBLET               = 50000000;
-constexpr unsigned int NUM_MIDDLE_THREADS        = 32;
-constexpr unsigned int OUTER_THREADS_MULTIPLIER  = 4; // i.e thread block is 32 x 4*192/32
-constexpr unsigned int MAX_NUMBER_DOUBLETS       = 1500;
-constexpr unsigned int NUM_TRIPLET_BLOCKS        = 1024;
-constexpr unsigned int NUM_TRIPLET_THREADS       = 1024;
-constexpr unsigned int NUM_DOUBLET_THREADS       = 16;
-constexpr unsigned int MAX_TRIPLETS              = 300;
-constexpr unsigned int TRIPLET_BUFFER_DEPTH      = 3;
+static constexpr unsigned int MAX_MIDDLE_SP             = 300000;
+static constexpr unsigned int MAX_DOUBLET               = 50000000;
+static constexpr unsigned int NUM_MIDDLE_THREADS        = 32;
+static constexpr unsigned int OUTER_THREADS_MULTIPLIER  = 4; // i.e thread block is 32 x 4*192/32
+static constexpr unsigned int MAX_NUMBER_DOUBLETS       = 1500;
+static constexpr unsigned int NUM_TRIPLET_BLOCKS        = 1024;
+static constexpr unsigned int NUM_TRIPLET_THREADS       = 1024;
+static constexpr unsigned int NUM_DOUBLET_THREADS       = 16;
+static constexpr unsigned int MAX_TRIPLETS              = 300;
+static constexpr unsigned int TRIPLET_BUFFER_DEPTH      = 3;
 
 typedef struct doubletInfo {
 public:
@@ -35,11 +35,7 @@ public:
   int m_outer[MAX_DOUBLET];
 } DOUBLET_STORAGE;
 
-typedef struct gpuParameters {
-  int m_nSMX;
-  int m_nNUM_SMX_CORES;
-  int m_nNUM_TRIPLET_BLOCKS;
-} GPU_PARAMETERS;
+#include "CommonStructures.h"
 
 
 #endif

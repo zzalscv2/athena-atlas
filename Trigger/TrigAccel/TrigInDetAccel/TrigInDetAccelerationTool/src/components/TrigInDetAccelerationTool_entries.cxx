@@ -3,5 +3,7 @@
 */
 
 #include "../TrigInDetAccelerationTool.h"
+#include "../TrigITkAccelerationTool.h"
 
 DECLARE_COMPONENT( TrigInDetAccelerationTool )
+DECLARE_COMPONENT( TrigITkAccelerationTool )

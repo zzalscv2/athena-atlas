@@ -2,25 +2,25 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETCUDA_DOUBLETCOUNTINGKERNELCUDA_CUH
-#define TRIGINDETCUDA_DOUBLETCOUNTINGKERNELCUDA_CUH
+#ifndef TRIGINDETCUDA_DOUBLETCOUNTINGKERNELCUDA_ITK_CUH
+#define TRIGINDETCUDA_DOUBLETCOUNTINGKERNELCUDA_ITK_CUH
 
 #include <cuda_runtime.h>
 
-#include "SeedMakingDataStructures.h"
+#include "SeedMakingDataStructures_ITk.h"
 
-__global__ static void doubletCountingKernel(TrigAccel::SEED_FINDER_SETTINGS* dSettings, 
-					     TrigAccel::SPACEPOINT_STORAGE* dSpacepoints, 
-					     TrigAccel::DETECTOR_MODEL* dDetModel,
-					     DOUBLET_INFO* d_Info, 
+__global__ static void doubletCountingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTINGS* dSettings, 
+					     TrigAccel::ITk::SPACEPOINT_STORAGE* dSpacepoints, 
+					     TrigAccel::ITk::DETECTOR_MODEL* dDetModel,
+					     DOUBLET_INFO_ITk* d_Info, 
 					     int nLayers, int nSlices) {
 
   __shared__ int spBegin;
   __shared__ int spEnd;
   __shared__ int nMiddleSPs;
   
-  __shared__ int nInner[NUM_MIDDLE_THREADS];
-  __shared__ int nOuter[NUM_MIDDLE_THREADS];
+  __shared__ int nInner[NUM_MIDDLE_THREADS_ITk];
+  __shared__ int nOuter[NUM_MIDDLE_THREADS_ITk];
 
   const float zTolerance = 3.0; 
   const float maxEta = dSettings->m_maxEta;
@@ -32,7 +32,7 @@ __global__ static void doubletCountingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
   const int layerIdx = blockIdx.y;
 
   if(threadIdx.x == 0 && threadIdx.y == 0) {
-    const TrigAccel::SPACEPOINT_LAYER_RANGE& slr = dSpacepoints->m_phiSlices[sliceIdx];
+    const TrigAccel::ITk::SPACEPOINT_LAYER_RANGE& slr = dSpacepoints->m_phiSlices[sliceIdx];
     spBegin = slr.m_layerBegin[layerIdx];
     spEnd = slr.m_layerEnd[layerIdx];
     nMiddleSPs = spEnd-spBegin;
@@ -81,7 +81,7 @@ __global__ static void doubletCountingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
       int nextPhiIdx = sliceIdx + deltaPhiIdx;
       if(nextPhiIdx>=nSlices) nextPhiIdx = 0;
       if(nextPhiIdx<0) nextPhiIdx=nSlices-1;
-      const TrigAccel::SPACEPOINT_LAYER_RANGE& next_slr = dSpacepoints->m_phiSlices[nextPhiIdx];
+      const TrigAccel::ITk::SPACEPOINT_LAYER_RANGE& next_slr = dSpacepoints->m_phiSlices[nextPhiIdx];
 
       for(int nextLayerIdx=0;nextLayerIdx<nLayers;nextLayerIdx++) {
 	if(nextLayerIdx == layerIdx) continue;
@@ -91,13 +91,13 @@ __global__ static void doubletCountingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
 
 	if(next_spEnd == next_spBegin) continue;//no spacepoints in this layer
 
-	const TrigAccel::SILICON_LAYER& layerGeo =  dDetModel->m_layers[nextLayerIdx];
+	const TrigAccel::ITk::SILICON_LAYER& layerGeo =  dDetModel->m_layers[nextLayerIdx];
 	bool isBarrel = (layerGeo.m_type == 0);
 
 	
 	float refCoord = layerGeo.m_refCoord;
 	
-	if(isBarrel && fabs(refCoord-rm)>maxDoubletLength) continue;
+	if(isBarrel && std::abs(refCoord-rm)>maxDoubletLength) continue;
 
 	//boundaries for nextLayer
 
@@ -133,26 +133,48 @@ __global__ static void doubletCountingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
 	  bool isPixel2 = (dSpacepoints->m_type[spIdx] == 1);
 	  float dr = rsp - rm;
 
-	  if(fabs(dr)>maxDoubletLength || fabs(dr)<minDoubletLength) continue;
+	  if(std::abs(dr)>maxDoubletLength || std::abs(dr)<minDoubletLength) continue;
 
 	  if(!DoPSS && dr<0 && !isPixel && isPixel2) continue; 
           
-    if(isPixel && !isPixel2) {// i.e. xPS (or SPx)
+          if(isPixel && !isPixel2) {// i.e. xPS (or SPx)
            if(NoPPS) continue;//no mixed PPS seeds allowed	    
 	  }
           
 	  float dz = zsp - zm;
 	  float tau = dz/dr;
 
-	  if(fabs(tau)>maxCtg) continue;
+	  if(std::abs(tau)>maxCtg) continue;
     float outZ = zsp + (maxOuterRadius-rsp)*tau; 
     if(outZ < minOuterZ || outZ > maxOuterZ) continue;
+
+    // Cut on curvature
+    float xm = dSpacepoints->m_x[spmIdx];
+    float ym = dSpacepoints->m_y[spmIdx];
+    float xsp = dSpacepoints->m_x[spIdx];
+    float ysp = dSpacepoints->m_y[spIdx];
+
+    float dx = xsp - xm;
+    float dy = ysp - ym;
+    float L2 = 1/(dx*dx+dy*dy);
+    float D = (ysp*xm - ym*xsp)/(rm*rsp);
+    float kappa = D*D*L2;
+
+    if (std::abs(tau) < 4.0) {//eta = 2.1
+      if (kappa > maxKappa_low_eta) {
+        continue;
+      }
+    } else {
+      if (kappa > maxKappa_high_eta) {
+        continue;
+      }
+    }
 
 	  if(dr > 0) //outer doublet
 	    atomicAdd(&nOuter[threadIdx.x],1);
 	  else 
 	    atomicAdd(&nInner[threadIdx.x],1);
-	 }
+	}
       }
     }
 

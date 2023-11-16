@@ -19,7 +19,7 @@ find_package( TBB )
 
 # Add a component library that has some CUDA code in it.
 atlas_add_component( TrigInDetCUDA
-   src/*.h src/*.cuh src/*.cu
+   src/*.h src/*.cuh src/*.cu src/*.cxx
    INCLUDE_DIRS ${TBB_INCLUDE_DIRS}
    LINK_LIBRARIES TrigAccelEvent ${TBB_LIBRARIES})
 

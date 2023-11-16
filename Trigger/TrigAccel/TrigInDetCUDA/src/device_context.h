@@ -1,25 +1,17 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETCUDA_TRIGINDETDATACONTEXTS_H
-#define TRIGINDETCUDA_TRIGINDETDATACONTEXTS_H
+#ifndef TRIGINDETCUDA_DEVCONTEXTS_H
+#define TRIGINDETCUDA_DEVCONTEXTS_H
 
 #include "TrigAccelEvent/TrigInDetAccelEDM.h"
 
-#include "SeedMakingDataStructures.h"
+//#include "SeedMakingDataStructures.h"
 #include <cuda_runtime.h>
 #include <tbb/tick_count.h>
 
-class WorkTimeStamp {
-public:
-  WorkTimeStamp(unsigned int id, int ev, const tbb::tick_count& t) :
-    m_workId(id), m_eventType(ev), m_time(t) {};
-  WorkTimeStamp(const WorkTimeStamp& w) : m_workId(w.m_workId), m_eventType(w.m_eventType), m_time(w.m_time) {};
-  unsigned int m_workId;
-  int m_eventType;
-  tbb::tick_count m_time;
-};
+#include "CommonStructures.h"
 
 
 struct SeedMakingDeviceContext {

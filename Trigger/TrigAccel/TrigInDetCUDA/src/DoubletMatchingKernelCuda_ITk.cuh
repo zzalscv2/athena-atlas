@@ -2,20 +2,20 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETCUDA_DOUBLETMATCHINGKERNELCUDA_CUH
-#define TRIGINDETCUDA_DOUBLETMATCHINGKERNELCUDA_CUH
+#ifndef TRIGINDETCUDA_DOUBLETMATCHINGKERNELCUDA_ITK_CUH
+#define TRIGINDETCUDA_DOUBLETMATCHINGKERNELCUDA_ITK_CUH
 
 
 #include <cuda_runtime.h>
-#include "SeedMakingDataStructures.h"
+#include "SeedMakingDataStructures_ITk.h"
 
 
-__global__ static void doubletMatchingKernel(TrigAccel::SEED_FINDER_SETTINGS* dSettings, 
-					     TrigAccel::SPACEPOINT_STORAGE* dSpacepoints, 
-					     TrigAccel::DETECTOR_MODEL* dDetModel, 
-					     DOUBLET_INFO* d_Info,
-					     DOUBLET_STORAGE* d_Storage,
-					     TrigAccel::OUTPUT_SEED_STORAGE* d_Out, int maxItem) {
+__global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTINGS* dSettings, 
+					     TrigAccel::ITk::SPACEPOINT_STORAGE* dSpacepoints, 
+					     TrigAccel::ITk::DETECTOR_MODEL* dDetModel, 
+					     DOUBLET_INFO_ITk* d_Info,
+					     DOUBLET_STORAGE_ITk* d_Storage,
+					     TrigAccel::ITk::OUTPUT_SEED_STORAGE* d_Out, int maxItem) {
 
   __shared__ int nInner;
   __shared__ int nOuter;
@@ -39,22 +39,22 @@ __global__ static void doubletMatchingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
   __shared__ bool isPixel;
 
   //  __shared__ float R2inv_array[MAX_NUMBER_DOUBLETS];
-  __shared__ float Rinv_array[MAX_NUMBER_DOUBLETS];
-  __shared__ float t_array[MAX_NUMBER_DOUBLETS];
-  __shared__ int spIdx_array[MAX_NUMBER_DOUBLETS];
-  __shared__ float u_array[MAX_NUMBER_DOUBLETS];
-  __shared__ float v_array[MAX_NUMBER_DOUBLETS];
-  __shared__ bool isSCT_array[MAX_NUMBER_DOUBLETS];
+  __shared__ float Rinv_array[MAX_NUMBER_DOUBLETS_ITk];
+  __shared__ float t_array[MAX_NUMBER_DOUBLETS_ITk];
+  __shared__ int spIdx_array[MAX_NUMBER_DOUBLETS_ITk];
+  __shared__ float u_array[MAX_NUMBER_DOUBLETS_ITk];
+  __shared__ float v_array[MAX_NUMBER_DOUBLETS_ITk];
+  __shared__ bool isSCT_array[MAX_NUMBER_DOUBLETS_ITk];
 
   //  __shared__ float covZ_array[MAX_NUMBER_DOUBLETS];
   // __shared__ float covR_array[MAX_NUMBER_DOUBLETS];
 
-  __shared__ float tCov_array[MAX_NUMBER_DOUBLETS];
+  __shared__ float tCov_array[MAX_NUMBER_DOUBLETS_ITk];
 
 
-  __shared__ int PairIdx_array[MAX_TRIPLETS];
-  __shared__ float Q_array[MAX_TRIPLETS];
-  __shared__ int sortedIdx[MAX_TRIPLETS];
+  __shared__ int PairIdx_array[MAX_TRIPLETS_ITk];
+  __shared__ float Q_array[MAX_TRIPLETS_ITk];
+  __shared__ int sortedIdx[MAX_TRIPLETS_ITk];
 
 
   __shared__ int iDoublet;
@@ -114,7 +114,7 @@ __global__ static void doubletMatchingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
      
       int k = atomicAdd(&iDoublet,1);  
       
-      if(k<MAX_NUMBER_DOUBLETS) {
+      if(k<MAX_NUMBER_DOUBLETS_ITk) {
 
 	int spiIdx = d_Storage->m_inner[innerStart + innerIdx];
 
@@ -143,7 +143,7 @@ __global__ static void doubletMatchingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
     __syncthreads();
 
     if(threadIdx.x==0) {
-      if(iDoublet>MAX_NUMBER_DOUBLETS) iDoublet = MAX_NUMBER_DOUBLETS;
+      if(iDoublet>MAX_NUMBER_DOUBLETS_ITk) iDoublet = MAX_NUMBER_DOUBLETS_ITk;
       startOfOuter=iDoublet;
     }	
 
@@ -153,7 +153,7 @@ __global__ static void doubletMatchingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
     	  
       int k = atomicAdd(&iDoublet,1);
       
-      if(k<MAX_NUMBER_DOUBLETS) {
+      if(k<MAX_NUMBER_DOUBLETS_ITk) {
 
 	int spoIdx = d_Storage->m_outer[outerStart + outerIdx];
 
@@ -186,7 +186,7 @@ __global__ static void doubletMatchingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
     int doublet_i = pairIdx / nOuter; // inner doublet
     int doublet_j = startOfOuter + pairIdx % nOuter; //outer doublet
     
-    if(doublet_i >= MAX_NUMBER_DOUBLETS || doublet_j >=MAX_NUMBER_DOUBLETS ) continue;
+    if(doublet_i >= MAX_NUMBER_DOUBLETS_ITk || doublet_j >=MAX_NUMBER_DOUBLETS_ITk ) continue;
 
     //int spiIdx = spIdx_array[doublet_i];
     //int spoIdx = spIdx_array[doublet_j];
@@ -249,7 +249,7 @@ __global__ static void doubletMatchingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
     Q += isSCT_3*(1000.0*isSCT_1 + (1-isSCT_1)*10000.0);
 
     int l = atomicAdd(&nTriplets, 1);
-    if(l<MAX_TRIPLETS) {
+    if(l<MAX_TRIPLETS_ITk) {
       PairIdx_array[l] = pairIdx;
       Q_array[l] = Q;
       sortedIdx[l] = 0;
@@ -260,11 +260,11 @@ __global__ static void doubletMatchingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
   __syncthreads();
 
 
-  if(nTriplets>TRIPLET_BUFFER_DEPTH) {//sorting
+  if(nTriplets>TRIPLET_BUFFER_DEPTH_ITk) {//sorting
     
     if(threadIdx.x == 0){
-      if(nTriplets>MAX_TRIPLETS)  {
-	nTriplets = MAX_TRIPLETS;
+      if(nTriplets>MAX_TRIPLETS_ITk)  {
+	nTriplets = MAX_TRIPLETS_ITk;
       }      
     }
  
@@ -283,11 +283,11 @@ __global__ static void doubletMatchingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
   if(threadIdx.x == 0) {
     if(nTriplets>0) {
       int nT = nTriplets;
-      if(nT>TRIPLET_BUFFER_DEPTH) {nT = TRIPLET_BUFFER_DEPTH;}
+      if(nT>TRIPLET_BUFFER_DEPTH_ITk) {nT = TRIPLET_BUFFER_DEPTH_ITk;}
       int k = atomicAdd(&d_Out->m_nSeeds, nT);    
       int nStored=0;
       for(int tIdx=0;tIdx<nTriplets;tIdx++) {
-	if(sortedIdx[tIdx]<TRIPLET_BUFFER_DEPTH) {//store this triplet
+	if(sortedIdx[tIdx]<TRIPLET_BUFFER_DEPTH_ITk) {//store this triplet
 
 	  int pairIdx = PairIdx_array[tIdx];
 	  int doublet_i = pairIdx / nOuter; // inner doublet

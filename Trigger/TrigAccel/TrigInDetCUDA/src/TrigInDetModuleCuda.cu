@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cuda.h>
@@ -13,57 +13,13 @@
 #include "TrigAccelEvent/TrigInDetAccelCodes.h"
 
 #include <sstream>
-
-extern "C" TrigAccel::WorkFactory* getFactory() {
-  return new TrigInDetModuleCuda();
-}
-
-extern "C" int getFactoryId() { 
-  return TrigAccel::TrigInDetModuleID_CUDA; 
-} 	  
-
-extern "C" void deleteFactory(TrigAccel::WorkFactory* c){
-  TrigInDetModuleCuda* mod=reinterpret_cast<TrigInDetModuleCuda*>(c);
-  delete mod;
-}
-
-void TrigInDetModuleCuda::getNumberOfGPUs() {
-  pid_t childpid;
-  int fd[2];
-  // create pipe descriptors
-  pipe(fd);
-
-  childpid = fork();
-  if(childpid != 0) {  // parent
-    close(fd[1]);
-    // read the data (blocking operation)
-    read(fd[0], &m_maxDevice, sizeof(m_maxDevice));
-    // close the read-descriptor
-    close(fd[0]);
-  }
-  else {  // child
-    // writing only, no need for read-descriptor
-    close(fd[0]);
-    int maxDevice = 0;
-    cudaGetDeviceCount(&maxDevice);
-    cudaError_t error = cudaGetLastError();
-    if(error != cudaSuccess) {
-      maxDevice = 0;
-      std::cout << "ERROR: " << cudaGetErrorString( error ) << std::endl;
-    }
-    // send the value on the write-descriptor
-    write(fd[1], &maxDevice, sizeof(maxDevice)); 
-    // close the write descriptor
-    close(fd[1]);
-    exit(0);
-  }
-}
+#include "gpu_helpers.h"
 
 TrigInDetModuleCuda::TrigInDetModuleCuda() : m_maxDevice(0), m_dumpTimeLine(false) {
 
   m_h_detmodel = 0;
 
-  getNumberOfGPUs();
+  m_maxDevice = GPUHelpers::getNumberOfGPUs();
 
   for(unsigned int i=0;i<getProvidedAlgs().size();i++) {
     m_workItemCounters[i] = 0;
@@ -107,25 +63,6 @@ bool TrigInDetModuleCuda::configure() {
   return true;
 }
 
-int TrigInDetModuleCuda::getNumberOfCores(int major, int minor) const {
-    
-    int ncores = 0;
-    
-    if ((major == 7) && (minor == 5)) {
-       ncores = 64;//Turing
-    }
-    if ((minor == 1) || (minor == 2)) ncores = 128;
-    else if (minor == 0) ncores = 64;
-    else if ((major == 8) && (minor == 6) ){
-       ncores = 32;
-    }
-
-    if(ncores == 0) {
-       printf("Cannot determine the number of cores: unknown device type, major=%d minor=%d\n", major, minor);
-    }
-    return ncores;
-}
-
 SeedMakingDeviceContext* TrigInDetModuleCuda::createSeedMakingContext(int id) const {
 
   cudaSetDevice(id);
@@ -145,7 +82,7 @@ SeedMakingDeviceContext* TrigInDetModuleCuda::createSeedMakingContext(int id) co
 
   p->m_gpuParams.m_nSMX = deviceProp.multiProcessorCount;
 
-  int ncores = getNumberOfCores(deviceProp.major, deviceProp.minor);
+  int ncores = GPUHelpers::getNumberOfCores(deviceProp.major, deviceProp.minor);
   
   p->m_gpuParams.m_nNUM_SMX_CORES = ncores;//_ConvertSMVer2Cores_local(deviceProp.major, deviceProp.minor);
   p->m_gpuParams.m_nNUM_TRIPLET_BLOCKS = NUM_TRIPLET_BLOCKS;
@@ -196,7 +133,7 @@ SeedMakingManagedDeviceContext* TrigInDetModuleCuda::createManagedSeedMakingCont
 
   p->m_gpuParams.m_nSMX = deviceProp.multiProcessorCount;
 
-  int ncores = getNumberOfCores(deviceProp.major, deviceProp.minor);
+  int ncores = GPUHelpers::getNumberOfCores(deviceProp.major, deviceProp.minor);
 
   p->m_gpuParams.m_nNUM_SMX_CORES = ncores;//_ConvertSMVer2Cores_local(deviceProp.major, deviceProp.minor);
   p->m_gpuParams.m_nNUM_TRIPLET_BLOCKS = NUM_TRIPLET_BLOCKS;
