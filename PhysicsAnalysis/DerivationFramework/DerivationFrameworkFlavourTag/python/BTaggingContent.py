@@ -52,30 +52,18 @@ BTaggingStandardRun3Aux = \
     , "dipsLoose20220314v2flip_pc"
     , "dipsLoose20220314v2flip_pb"
 
-    , "GN120220509_pb"
-    , "GN120220509_pc"
-    , "GN120220509_pu"
     , "GN2v00_pb"
     , "GN2v00_pc"
     , "GN2v00_pu"
 
-    , "GN120220509Flip_pb"
-    , "GN120220509Flip_pc"
-    , "GN120220509Flip_pu"
     , "GN2v00Flip_pb"
     , "GN2v00Flip_pc"
     , "GN2v00Flip_pu"
 
-    , "GN120220509Neg_pb"
-    , "GN120220509Neg_pc"
-    , "GN120220509Neg_pu"
     , "GN2v00Neg_pb"
     , "GN2v00Neg_pc"
     , "GN2v00Neg_pu"
 
-    , "GN120220509Simple_pb"
-    , "GN120220509Simple_pc"
-    , "GN120220509Simple_pu"
     , "GN2v00Simple_pb"
     , "GN2v00Simple_pc"
     , "GN2v00Simple_pu"
@@ -166,7 +154,20 @@ BTaggingHighLevelRun3Aux = BTaggingHighLevelAux \
 
                                , "DL1d20210824r22_pu"
                                , "DL1d20210824r22_pc"
-                               , "DL1d20210824r22_pb" ]
+                               , "DL1d20210824r22_pb" 
+
+                               , "GN120220509_pb"
+                               , "GN120220509_pc"
+                               , "GN120220509_pu"
+                               , "GN120220509Flip_pb"
+                               , "GN120220509Flip_pc"
+                               , "GN120220509Flip_pu"
+                               , "GN120220509Neg_pb"
+                               , "GN120220509Neg_pc"
+                               , "GN120220509Neg_pu"
+                               , "GN120220509Simple_pb"
+                               , "GN120220509Simple_pc"
+                               , "GN120220509Simple_pu"]
 
 BTaggingHighLevelRun4Aux = BTaggingHighLevelAux
 
