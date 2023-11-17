@@ -39,10 +39,10 @@ namespace MuonGM {
 
     MuonStation::~MuonStation() = default;
 
-    void MuonStation::setNominalAmdbLRSToGlobal(HepGeom::Transform3D xf) {
-        m_amdbl_to_global = std::make_unique<HepGeom::Transform3D>(xf);
+    void MuonStation::setNominalAmdbLRSToGlobal(Amg::Transform3D xf) {
+        m_amdbl_to_global = std::move(xf);
         ATH_MSG_DEBUG("setNominalAmdbLRSToGlobal: stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "<< getEtaIndex() 
-                    << " Origin of AmdbLocalFrame= " << Amg::toString((*m_amdbl_to_global) * HepGeom::Point3D<double>(0., 0., 0.)));
+                    << " Origin of AmdbLocalFrame= " << Amg::toString(m_amdbl_to_global.translation()));
     }
     void MuonStation::setBlineFixedPointInAmdbLRS(double s0, double z0, double t0) {
        
@@ -50,9 +50,9 @@ namespace MuonGM {
                     << " setting fixed point for B-lines at s0,z0,t0 =     " << s0 << " " << z0 << " " << t0 );
         
 
-        m_BlineFixedPointInAmdbLRS.setX(s0);
-        m_BlineFixedPointInAmdbLRS.setY(z0);
-        m_BlineFixedPointInAmdbLRS.setZ(t0);
+        m_BlineFixedPointInAmdbLRS[Amg::x] = s0;
+        m_BlineFixedPointInAmdbLRS[Amg::y] = z0;
+        m_BlineFixedPointInAmdbLRS[Amg::z] = t0;
 
         ATH_MSG_DEBUG("setBlineFixedPointInAmdbLRS: stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "
                 << getEtaIndex() << " nominal(i.e. from-station-envelop-only) B-line fixed point " 
@@ -60,12 +60,12 @@ namespace MuonGM {
 
     }
 
-    HepGeom::Point3D<double> MuonStation::getBlineFixedPointInAmdbLRS() const {
+    const Amg::Vector3D& MuonStation::getBlineFixedPointInAmdbLRS() const {
         // needed to update the station-level BlineFixedPoint with data from second multilayer
         return m_BlineFixedPointInAmdbLRS;
     }
 
-    HepGeom::Point3D<double> MuonStation::getUpdatedBlineFixedPointInAmdbLRS() const { return m_BlineFixedPointInAmdbLRS; }
+    const Amg::Vector3D& MuonStation::getUpdatedBlineFixedPointInAmdbLRS() const { return m_BlineFixedPointInAmdbLRS; }
 
     void MuonStation::updateBlineFixedPointInAmdbLRS() {
         if (!m_firstRequestBlineFixedP) return;        
@@ -102,7 +102,7 @@ namespace MuonGM {
                 multilayerRealSize += mdtRE->outerTubeRadius();  // last tube: no glue width
                 shiftInZ += mdtRE->getZsize() - multilayerRealSize;
 
-                m_BlineFixedPointInAmdbLRS.setY(m_BlineFixedPointInAmdbLRS.y() + shiftInZ);
+                m_BlineFixedPointInAmdbLRS[Amg::y] = m_BlineFixedPointInAmdbLRS.y() + shiftInZ;
                 ATH_MSG_DEBUG("getUpdatedBlineFixedPointInAmdbLRS: stationName/Jff/Jzz " << getStationType() << " "
                         << getPhiIndex() << " " << getEtaIndex() << " shiftInZ = " << shiftInZ << " re-set B-line fixed point "
                         <<Amg::toString(m_BlineFixedPointInAmdbLRS));
@@ -112,13 +112,13 @@ namespace MuonGM {
         m_firstRequestBlineFixedP = false;
     }
 
-    void MuonStation::setDeltaAmdbLRS(HepGeom::Transform3D xf) {
-        m_delta_amdb_frame = std::make_unique<HepGeom::Transform3D>(xf);
+    void MuonStation::setDeltaAmdbLRS(Amg::Transform3D xf) {
+        m_delta_amdb_frame = std::move(xf);
         ATH_MSG_DEBUG("Station " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
                 << " adding Aline     " << std::endl
-                 << "  native_to_amdbl computed from A-line " << Amg::toString(*m_native_to_amdbl) << std::endl 
-                << "Station  amdbl_to_global " << endmsg << Amg::toString(*m_amdbl_to_global));
-        m_transform->setDelta(Amg::CLHEPTransformToEigen(m_native_to_amdbl->inverse() * (*m_delta_amdb_frame) * (*m_native_to_amdbl)));
+                 << "  native_to_amdbl computed from A-line " << Amg::toString(m_native_to_amdbl) << std::endl 
+                << "Station  amdbl_to_global " << endmsg << Amg::toString(m_amdbl_to_global));
+        m_transform->setDelta(m_native_to_amdbl.inverse() * m_delta_amdb_frame * m_native_to_amdbl);
     }
 
     void MuonStation::setDelta_fromAline(double tras, double traz, double trat, double rots, double rotz, double rott) {
@@ -127,11 +127,11 @@ namespace MuonGM {
         m_rotz = rotz;
         m_rott = rott;
 
-        HepGeom::Transform3D delta_amdb = HepGeom::Transform3D::Identity;
+        Amg::Transform3D delta_amdb{Amg::Transform3D::Identity()};
         if (std::abs(tras) + std::abs(traz) + std::abs(trat) + (std::abs(rots) + std::abs(rotz) + std::abs(rott)) * 1000. > 0.01) {
             // compute the delta transform in the local AMDB frame
-            delta_amdb = HepGeom::TranslateX3D(tras) * HepGeom::TranslateY3D(traz) * HepGeom::TranslateZ3D(trat) *
-                         HepGeom::RotateX3D(rots) * HepGeom::RotateY3D(rotz) * HepGeom::RotateZ3D(rott);
+            delta_amdb = Amg::Translation3D{tras, traz, trat} *
+                         Amg::getRotateX3D(rots) * Amg::getRotateY3D(rotz) * Amg::getRotateZ3D(rott);
             m_hasALines = true;
         }
 
@@ -183,36 +183,35 @@ namespace MuonGM {
         }
 
         //////////////////// this is what happens for a full station :    m_transform->setDelta( m_native_to_amdbl->inverse() *
-        ///(*m_delta_amdb_frame) * (*m_native_to_amdbl) );
+        ///m_delta_amdb_frame * m_native_to_amdbl );
 
-        HepGeom::Transform3D parentToChildT = Amg::EigenTransformToCLHEP(parentToChild->getTransform());
-        HepGeom::Transform3D delta_amdb = HepGeom::TranslateX3D(tras) * HepGeom::TranslateY3D(traz) * HepGeom::TranslateZ3D(trat) *
-                                          HepGeom::RotateX3D(rots) * HepGeom::RotateY3D(rotz) * HepGeom::RotateZ3D(rott);
+        Amg::Transform3D parentToChildT = parentToChild->getTransform();
+        Amg::Transform3D delta_amdb = Amg::Translation3D{tras, traz, trat} *
+                                          Amg::getRotateX3D(rots) * Amg::getRotateY3D(rotz) * Amg::getRotateZ3D(rott);
         // The station to component transform is static and must be computed in terms of "nominal geometry parameters"; fixing here bug
-        // 87693 - SS 9/11/2011 HepGeom::Point3D<double> thisREcenter = getMuonReadoutElement(jobindex)->center();
-        HepGeom::Point3D<double> thisREnominalCenter = Amg::EigenTransformToCLHEP(getMuonReadoutElement(jobindex)->defTransform()) * HepGeom::Point3D<double>(0., 0., 0.);
+        const Amg::Vector3D thisREnominalCenter{getMuonReadoutElement(jobindex)->defTransform().translation()};
         double Rcomp = thisREnominalCenter.perp() - (getMuonReadoutElement(jobindex)->getRsize()) / 2.;
-        double DZcomp = std::abs(thisREnominalCenter.z()) - std::abs(((*m_amdbl_to_global) * HepGeom::Point3D<double>(0., 0., 0)).z()) -
+        double DZcomp = std::abs(thisREnominalCenter.z()) - std::abs((m_amdbl_to_global.translation()).z()) -
                         std::abs((getMuonReadoutElement(jobindex)->getZsize()) / 2.);
 
-        HepGeom::Transform3D childToLocAmdbStation = (*m_native_to_amdbl) * parentToChildT;
-        HepGeom::Transform3D locAmdbStatToLocAmdbComp = HepGeom::Transform3D::Identity;
+        Amg::Transform3D childToLocAmdbStation = m_native_to_amdbl * parentToChildT;
+        Amg::Transform3D locAmdbStatToLocAmdbComp{Amg::Transform3D::Identity()};
         // the following line is needed to go for scenario B in last slide of
         // http://www.fisica.unisalento.it/~spagnolo/allow_listing/TGC_Alines/TGC-ALines_2011_03_01.pdf COMMENT next line            to go
         // for scenario A in last slide of http://www.fisica.unisalento.it/~spagnolo/allow_listing/TGC_Alines/TGC-ALines_2011_03_01.pdf
-        if (getStationType()[0] == 'T') locAmdbStatToLocAmdbComp = HepGeom::TranslateY3D(-Rcomp) * HepGeom::TranslateZ3D(-DZcomp);
-        HepGeom::Transform3D childToLocAmdbComponent = locAmdbStatToLocAmdbComp * childToLocAmdbStation;
+        if (getStationType()[0] == 'T') locAmdbStatToLocAmdbComp = Amg::Translation3D{0,-Rcomp, -DZcomp};
+        Amg::Transform3D childToLocAmdbComponent = locAmdbStatToLocAmdbComp * childToLocAmdbStation;
 
         ATH_MSG_DEBUG("setDelta_fromAline_forComp: stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "
                 << getEtaIndex() << " Job " << jobindex << " Origin of component/station AmdbLocalFrame= "
-                <<Amg::toString((*m_amdbl_to_global) * locAmdbStatToLocAmdbComp.inverse() * HepGeom::Point3D<double>(0., 0., 0.)) << " / "
-                << Amg::toString((*m_amdbl_to_global) * HepGeom::Point3D<double>(0., 0., 0.)));
+                <<Amg::toString(m_amdbl_to_global * locAmdbStatToLocAmdbComp.inverse().translation()) << " / "
+                << Amg::toString(m_amdbl_to_global.translation()));
 
-        parentToChild->setDelta(Amg::CLHEPTransformToEigen(childToLocAmdbComponent.inverse() * delta_amdb * childToLocAmdbComponent));
+        parentToChild->setDelta(childToLocAmdbComponent.inverse() * delta_amdb * childToLocAmdbComponent);
         ATH_MSG_DEBUG("setDelta_fromAline_forComp2:stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "
                 << getEtaIndex() << " Job " << jobindex << " Origin of component/station AmdbLocalFrame= "
-                << Amg::toString((*m_amdbl_to_global) * locAmdbStatToLocAmdbComp.inverse() * HepGeom::Point3D<double>(0., 0., 0.)) << " / "
-                << Amg::toString((*m_amdbl_to_global) * HepGeom::Point3D<double>(0., 0., 0.)));
+                << Amg::toString(m_amdbl_to_global * locAmdbStatToLocAmdbComp.inverse().translation()) << " / "
+                << Amg::toString(m_amdbl_to_global.translation()));
 
         ATH_MSG_DEBUG("Station " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
                     << " adding Aline     " << tras << " " << traz << " " << trat << " " << rots << " " << rotz << " " << rott

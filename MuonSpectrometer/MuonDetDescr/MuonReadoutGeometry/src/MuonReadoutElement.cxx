@@ -131,7 +131,7 @@ namespace MuonGM {
     const MuonStation* MuonReadoutElement::parentMuonStation() const { return m_parentMuonStation; }
 
     Amg::Vector3D MuonReadoutElement::parentMuonStationPos() const {
-        return Amg::CLHEPTransformToEigen(parentMuonStation()->getTransform()).translation();       
+        return parentMuonStation()->getTransform().translation();       
     }
 
     Amg::Vector3D MuonReadoutElement::AmdbLRSToGlobalCoords(const Amg::Vector3D& x) const {       
@@ -139,9 +139,7 @@ namespace MuonGM {
     }
 
     Amg::Transform3D MuonReadoutElement::AmdbLRSToGlobalTransform() const {
-        HepGeom::Transform3D msToGlobal = parentMuonStation()->getTransform();             // native_MuonStation to global
-        const HepGeom::Transform3D* msToAmdb = parentMuonStation()->getNativeToAmdbLRS();  // native_MuonStation to Amdb local (szt)
-        return Amg::CLHEPTransformToEigen(msToGlobal * (msToAmdb->inverse()));
+        return parentMuonStation()->getTransform() * parentMuonStation()->getNativeToAmdbLRS().inverse();
     }
 
     Amg::Vector3D MuonReadoutElement::GlobalToAmdbLRSCoords(const Amg::Vector3D& x) const {       
@@ -149,9 +147,7 @@ namespace MuonGM {
     }
 
     Amg::Transform3D MuonReadoutElement::GlobalToAmdbLRSTransform() const {
-        HepGeom::Transform3D msToGlobal = parentMuonStation()->getTransform();             // native_MuonStation to global
-        const HepGeom::Transform3D* msToAmdb = parentMuonStation()->getNativeToAmdbLRS();  // native_MuonStation to Amdb local (szt)
-        return Amg::CLHEPTransformToEigen((*msToAmdb) * (msToGlobal.inverse()));
+        return parentMuonStation()->getNativeToAmdbLRS() * parentMuonStation()->getTransform().inverse();
     }
     void MuonReadoutElement::setIdentifier(const Identifier& id) {
         m_id = id;

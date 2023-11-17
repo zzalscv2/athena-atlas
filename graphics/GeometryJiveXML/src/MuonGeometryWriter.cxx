@@ -178,7 +178,7 @@ namespace JiveXML {
 	  int phi1 = station1->getPhiIndex();
 	  double dphi1 = getDeltaPhi(pos1, maxPhi);
 	  double shift1 = getShift(pos1, dphi1);
-	  double alpha1 = getAlpha(station1->getTransform());
+	  double alpha1 = getAlpha(Amg::EigenTransformToCLHEP(station1->getTransform()));
 
 	  // Now determine the dimensions of a station of this station.
 	  double signed_dz = station1->Zsize()/2.;
@@ -204,7 +204,7 @@ namespace JiveXML {
 	    int phi2 = (*it)->getPhiIndex();
 	    double dphi2 = getDeltaPhi(pos2, maxPhi);
 	    double shift2 = getShift(pos2, dphi2);
-	    double alpha2 = getAlpha((*it)->getTransform());
+	    double alpha2 = getAlpha(Amg::EigenTransformToCLHEP((*it)->getTransform()));
 
 	    double signed_dz2 = (*it)->Zsize()/2.;
 	    if (pos2.z()<0) signed_dz2 *= -1;
@@ -300,7 +300,7 @@ namespace JiveXML {
   HepGeom::Point3D<double> MuonGeometryWriter::getPosition(const MuonGM::MuonStation *station, int maxPhi) const {
 
     // Take the position of the station.
-    HepGeom::Point3D<double> pos = station->getTransform() * HepGeom::Point3D<double>(0., 0., 0.);
+    HepGeom::Point3D<double> pos = Amg::EigenTransformToCLHEP(station->getTransform()) * HepGeom::Point3D<double>(0., 0., 0.);
 
     double phi = 2.*M_PI * ((double) station->getPhiIndex()-1.) / maxPhi;
 

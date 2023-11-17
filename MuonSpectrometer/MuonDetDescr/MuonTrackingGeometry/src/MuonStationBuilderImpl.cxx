@@ -695,8 +695,7 @@ Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumesImpl(
              0 == msTypeName.compare(0, stName.size(), stName)) ||
             (stName.compare(0, 1, "T") != 0 && stName == msTypeName)) {
           if (msTV && gmStation) {
-            Amg::Transform3D transf =
-                Amg::CLHEPTransformToEigen(gmStation->getTransform());
+            Amg::Transform3D transf =gmStation->getTransform();
             Identifier stId(0);
             bool is_valid{false};
             if (m_idHelperSvc->hasCSC() && stName.compare(0, 1, "C") == 0) {
@@ -1021,7 +1020,7 @@ Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumeTypes(
                      name.compare(0, 1, "E") == 0))
                   identifyPrototype(
                       newType, eta, phi,
-                      Amg::CLHEPTransformToEigen(gmStation->getTransform()),
+                       gmStation->getTransform(),
                       muonMgr);
 
                 // create layer representation
