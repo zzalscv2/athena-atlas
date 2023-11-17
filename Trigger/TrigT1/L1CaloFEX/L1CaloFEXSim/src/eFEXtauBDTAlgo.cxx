@@ -30,6 +30,7 @@ StatusCode LVL1::eFEXtauBDTAlgo::initialize() {
   ATH_CHECK(m_eTowerContainerKey.initialize());
   std::string configPath = PathResolver::find_file(
       m_bdtJsonConfigPath, "DATAPATH", PathResolver::RecursiveSearch);
+  ATH_MSG_INFO("Using BDT config file " << configPath);
   if (configPath.size() == 0) {
     ATH_MSG_ERROR("Cannot locate BDT config file " << m_bdtJsonConfigPath);
     return StatusCode::FAILURE;

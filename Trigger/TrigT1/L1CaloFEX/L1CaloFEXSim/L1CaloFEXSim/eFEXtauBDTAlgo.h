@@ -83,7 +83,7 @@ private:
   std::vector<std::vector<unsigned int *>> m_bdtVarComputeSCellPointers;
 
   Gaudi::Property<std::string> m_bdtJsonConfigPath{
-      this, "BDTJsonConfigPath", "bdt_config_v13.json",
+      this, "BDTJsonConfigPath", "bdt_config_v16.json",
       "Path to BDT json config file"};
   std::unique_ptr<eFEXtauBDT> m_bdtAlgoImpl;
 
