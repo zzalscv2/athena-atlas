@@ -54,11 +54,13 @@ void SCT_SpacePoint::setupLocalCovarianceSCT() {
       numbers are taken from
       Trigger/TrigTools/TrigOfflineSpacePointTool/OfflineSpacePointProviderTool
    */
-  double deltaY = 0.0004;  // roughly pitch of SCT (80 mu) / sqrt(12)
+  constexpr double deltaY = 0.0004;  // roughly pitch of SCT (80 mu) / sqrt(12)
+  constexpr double offdiag = 25. * deltaY;
+  constexpr double elem11 = 1600. * deltaY;
   Amg::MatrixX cov(2, 2);
-  cov << 1. * deltaY, 25. * deltaY,
+  cov << deltaY, offdiag,
       // cppcheck-suppress constStatement; false positive
-      25. * deltaY, 1600. * deltaY;
+      offdiag, elem11;
 
   Trk::MeasurementBase::m_localCovariance = std::move(cov);
 }
