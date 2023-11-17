@@ -14,29 +14,27 @@
 export ATHENA_CORE_NUMBER=8
 
 AtlasG4_tf.py \
---multithreaded \
---inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/ttbar_muplusjets-pythia6-7000.evgen.pool.root' \
---outputHITSFile 'test.MT.HITS.pool.root' \
---maxEvents '10' \
---skipEvents '0' \
---randomSeed '10' \
---geometryVersion 'ATLAS-R2-2016-01-00-01' \
---conditionsTag 'OFLCOND-MC16-SDR-14' \
---DataRunNumber '284500' \
---physicsList 'FTFP_BERT_ATL' \
---postInclude 'PyJobTransforms/UseFrontier.py' \
---preExec 'AtlasG4Tf:simFlags.ReleaseGeoModel=False;' \
---imf False
+    --CA \
+    --multithreaded \
+    --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/ttbar_muplusjets-pythia6-7000.evgen.pool.root' \
+    --outputHITSFile 'test.MT.HITS.pool.root' \
+    --maxEvents '10' \
+    --skipEvents '0' \
+    --randomSeed '10' \
+    --geometryVersion 'ATLAS-R2-2016-01-00-01' \
+    --conditionsTag 'OFLCOND-MC16-SDR-14' \
+    --DataRunNumber '284500' \
+    --physicsList 'FTFP_BERT_ATL' \
+    --postInclude 'PyJobTransforms.UseFrontier' \
+    --imf False
 
 rc=$?
 echo  "art-result: $rc MTsim"
-rc2=-9999
-if [ $rc -eq 0 ]
-then
-    ArtPackage=$1
-    ArtJobName=$2
-    unset ATHENA_CORE_NUMBER
-    AtlasG4_tf.py \
+status=$rc
+
+unset ATHENA_CORE_NUMBER
+AtlasG4_tf.py \
+    --CA \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/ttbar_muplusjets-pythia6-7000.evgen.pool.root' \
     --outputHITSFile 'test.ST.HITS.pool.root' \
     --maxEvents '10' \
@@ -46,16 +44,21 @@ then
     --conditionsTag 'OFLCOND-MC16-SDR-14' \
     --DataRunNumber '284500' \
     --physicsList 'FTFP_BERT_ATL' \
-    --postInclude 'PyJobTransforms/UseFrontier.py' \
-    --preExec 'AtlasG4Tf:simFlags.ReleaseGeoModel=False;' \
+    --postInclude 'PyJobTransforms.UseFrontier' \
     --imf False
-    rc2=$?
-fi
+rc2=$?
 echo  "art-result: $rc2 STsim"
-rc3=-9999
-if [ $rc2 -eq 0 ]
+if [ $status -eq 0 ]
 then
-    acmd.py diff-root test.MT.HITS.pool.root test.ST.HITS.pool.root --error-mode resilient --mode=semi-detailed --order-trees --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
+    status=$rc2
+fi
+
+rc3=-9999
+if [ $status -eq 0 ]
+then
+    acmd.py diff-root test.MT.HITS.pool.root test.ST.HITS.pool.root --error-mode resilient --mode=semi-detailed --order-trees
     rc3=$?
+    status=$rc3
 fi
 echo  "art-result: $rc3 comparision"
+exit $status
