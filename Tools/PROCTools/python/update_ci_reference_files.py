@@ -82,8 +82,8 @@ def process_log_file(url, branch, test_name):
             ami_tag = match_attempt_2.group('ami_tag')
     
     if not ami_tag:
-       print('FATAL: Did not find an AMI tag in this test {}. Aborting.'.format(test_name))
-       exit(1)
+       print('WARNING: Did not find an AMI tag in the test "{}". Ignoring.'.format(test_name))
+       return
 
     mr_match = re.search(r'NICOS_TestLog_MR-(?P<mr_number>\d+)-(?P<date>\d{4}-\d{2}-\d{2}-\d{2}-\d{2})', url)
     if not mr_match:
