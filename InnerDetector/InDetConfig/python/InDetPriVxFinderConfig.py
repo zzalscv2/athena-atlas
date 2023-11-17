@@ -70,8 +70,9 @@ def InDetTrigPriVxFinderCfg(flags, inputTracks, outputVtx, name="InDetTrigPriVxF
     return acc
 
 
-def primaryVertexFindingCfg(flags, **kwargs):
-    acc = InDetPriVxFinderCfg(flags)
+def primaryVertexFindingCfg(flags, vxCandidatesOutputName="PrimaryVertices"):
+
+    acc = InDetPriVxFinderCfg(flags, VxCandidatesOutputName=vxCandidatesOutputName)
 
     if flags.Tracking.perigeeExpression == "Vertex":
         from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgCfg
@@ -87,8 +88,8 @@ def primaryVertexFindingCfg(flags, **kwargs):
 
     excludedVtxAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
     verticesContainer = [
-        "xAOD::VertexContainer#PrimaryVertices",
-        "xAOD::VertexAuxContainer#PrimaryVerticesAux." + excludedVtxAuxData,
+        f"xAOD::VertexContainer#{vxCandidatesOutputName}",
+        f"xAOD::VertexAuxContainer#{vxCandidatesOutputName}Aux." + excludedVtxAuxData,
     ]
 
     acc.merge(addToAOD(flags, verticesContainer))
