@@ -128,6 +128,7 @@ namespace ActsTrk
     std::vector<float> summed_contribution;
     const T_MeasurementCollection *measurements = measurementHandle.cptr();
     for ( const auto *measurement : *measurements ) {
+       summed_contribution.clear();
        for (const auto& a_rdo : getRDOList(*measurement) ) {
           typename T_SimDataCollection::const_iterator sim_data_iter(simData->find(a_rdo));
 
@@ -153,18 +154,23 @@ namespace ActsTrk
                                                  truth_particle );
                    if (   particle_iter == (*association)[ measurement->index() ].end()
                        || *particle_iter != truth_particle) {
-                      (*association)[ measurement->index() ].insert( particle_iter, truth_particle);
-                     if constexpr(IsDebug) {
-                         std::unordered_map<const xAOD::TruthParticle *,unsigned int>::iterator
-                            part_hits_iter = hits_per_truthparticle.find(truth_particle);
-                         if (part_hits_iter == hits_per_truthparticle.end()) {
-                            hits_per_truthparticle.insert(std::make_pair(truth_particle,1));
-                         }
-                         else {
-                            ++(part_hits_iter->second);
-                         }
-                      }
+                      particle_iter  = (*association)[ measurement->index() ].insert( particle_iter, truth_particle);
                       ++n_particles;
+                   }
+                   unsigned int idx = (/*dest_iter*/ particle_iter - (*association)[ measurement->index() ].begin());
+                   if (idx >= summed_contribution.size() ) {
+                      summed_contribution.resize(idx+1, 0.);
+                   }
+                   summed_contribution[idx] += getDepositedEnergy(deposit);
+                   if constexpr(IsDebug) {
+                      std::unordered_map<const xAOD::TruthParticle *,unsigned int>::iterator
+                         part_hits_iter = hits_per_truthparticle.find(truth_particle);
+                      if (part_hits_iter == hits_per_truthparticle.end()) {
+                         hits_per_truthparticle.insert(std::make_pair(truth_particle,1));
+                      }
+                      else {
+                         ++(part_hits_iter->second);
+                      }
                    }
                 }
              }
@@ -176,6 +182,15 @@ namespace ActsTrk
           }
           else {
              ++truth_stat[kNoTruth];
+          }
+       }
+       if ( (*association)[ measurement->index() ].size()>1) {
+          // move truth particle with largest contribution to the measurement to the beginning of the list
+          std::vector<float>::const_iterator iter_max=std::max_element(summed_contribution.begin(),summed_contribution.end());
+          unsigned int idx = iter_max - summed_contribution.begin();
+          if (idx>0) {
+             std::swap((*association)[ measurement->index() ][0],
+                       (*association)[ measurement->index() ][idx]);
           }
        }
     }
