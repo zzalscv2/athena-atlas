@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtRegionDefiner.h"
@@ -8,7 +8,6 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonReadoutGeometry/MuonStation.h"
-#include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "xAODTrigMuon/TrigMuonDefs.h"
 #include <cmath>
 
@@ -105,10 +104,9 @@ StatusCode TrigL2MuonSA::MdtRegionDefiner::getMdtRegions(const TrigRoiDescriptor
           const MuonGM::MdtReadoutElement* mdtReadout = muDetMgr->getMdtReadoutElement(id);
           const MuonGM::MuonStation* muonStation = mdtReadout->parentMuonStation();
 	  
-	  Amg::Transform3D trans = Amg::CLHEPTransformToEigen(*muonStation->getNominalAmdbLRSToGlobal());
+	  Amg::Transform3D trans =muonStation->getNominalAmdbLRSToGlobal();
 	  
-	  Amg::Vector3D OrigOfMdtInAmdbFrame = 
-	    Amg::Hep3VectorToEigen( muonStation->getBlineFixedPointInAmdbLRS() );
+	  Amg::Vector3D OrigOfMdtInAmdbFrame = muonStation->getBlineFixedPointInAmdbLRS() ;
 	  
 	  tmp_rMin = (trans*OrigOfMdtInAmdbFrame).perp();
 	  tmp_rMax = tmp_rMin+muonStation->Rsize();
@@ -274,10 +272,9 @@ StatusCode TrigL2MuonSA::MdtRegionDefiner::getMdtRegions(const TrigRoiDescriptor
     
 	  float scale = 10.;
 	  
-	  Amg::Transform3D trans = Amg::CLHEPTransformToEigen(*muonStation->getNominalAmdbLRSToGlobal());
+	  Amg::Transform3D trans = muonStation->getNominalAmdbLRSToGlobal();
 	  
-	  Amg::Vector3D OrigOfMdtInAmdbFrame = 
-	    Amg::Hep3VectorToEigen( muonStation->getBlineFixedPointInAmdbLRS() );
+	  Amg::Vector3D OrigOfMdtInAmdbFrame =  muonStation->getBlineFixedPointInAmdbLRS();
 	  
 	  tmp_zMin = (trans*OrigOfMdtInAmdbFrame).z();
 	  if(tmp_zMin < 0) sign = -1;

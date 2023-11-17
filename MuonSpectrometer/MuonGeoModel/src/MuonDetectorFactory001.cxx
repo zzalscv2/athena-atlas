@@ -517,9 +517,9 @@ namespace MuonGM {
                 mst->setTransform(xf);
                 GeoTrf::Transform3D tsz_to_szt = GeoTrf::RotateZ3D(-90 * Gaudi::Units::degree) * GeoTrf::RotateY3D(-90 * Gaudi::Units::degree);
 
-                mst->setNativeToAmdbLRS(Amg::EigenTransformToCLHEP(tsz_to_szt * station->native_to_tsz_frame(*mysql, (*pit).second)));
+                mst->setNativeToAmdbLRS(tsz_to_szt * station->native_to_tsz_frame(*mysql, (*pit).second));
 
-                mst->setNominalAmdbLRSToGlobal(Amg::EigenTransformToCLHEP(station->tsz_to_global_frame(*mysql, (*pit).second) * tsz_to_szt.inverse()));
+                mst->setNominalAmdbLRSToGlobal(station->tsz_to_global_frame(*mysql, (*pit).second) * tsz_to_szt.inverse());
 
                 // find correct alignment information for this position
                 // xf->setDelta(DummyAline); // just in case we don't find one

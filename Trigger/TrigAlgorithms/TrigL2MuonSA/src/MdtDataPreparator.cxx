@@ -16,7 +16,6 @@
 
 #include "MuonReadoutGeometry/MuonStation.h"
 
-#include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "GeoModelUtilities/GeoGetIds.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
 namespace {
@@ -266,20 +265,20 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::collectMdtHitsFromPrepData(const std
       R = mdtReadout->center(TubeLayer, Tube).perp();
       Z = mdtReadout->center(TubeLayer, Tube).z();
 
-      Amg::Transform3D trans = Amg::CLHEPTransformToEigen(*muonStation->getNominalAmdbLRSToGlobal());
+      Amg::Transform3D trans = muonStation->getNominalAmdbLRSToGlobal();
       if(muonStation->endcap()==0){
-    cXmid = (trans*Amg::Vector3D(0.,0.,0.)).z();
+    cXmid = (trans.translation()).z();
     double halfRadialThicknessOfMultilayer = muonStation->RsizeMdtStation()/2.;
-    cYmid = ((trans*Amg::Vector3D(0.,0.,0.)).perp()+halfRadialThicknessOfMultilayer);
+    cYmid = ((trans.translation()).perp()+halfRadialThicknessOfMultilayer);
       }
       else{
-    cXmid = (trans*Amg::Vector3D(0.,0.,0.)).perp();
+    cXmid = (trans.translation()).perp();
     double halfZThicknessOfMultilayer = muonStation->ZsizeMdtStation()/2.;
-    cYmid = (trans*Amg::Vector3D(0.,0.,0.)).z();
+    cYmid = (trans.translation()).z();
     if(cYmid>0) cYmid += halfZThicknessOfMultilayer;
     else cYmid -= halfZThicknessOfMultilayer;
       }
-      cPhip = (trans*Amg::Vector3D(0.,0.,0.)).phi();
+      cPhip = (trans.translation()).phi();
 
       double dphi  = 0;
       double cphi  = muonRoad.phi[chamber][0];
@@ -297,10 +296,9 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::collectMdtHitsFromPrepData(const std
       }
 
       if(muonStation->endcap()==1)
-    R = std::sqrt(R*R+R*R*std::tan(dphi)*std::tan(dphi));
+    R = R *std::hypot(1, std::tan(dphi));
 
-      Amg::Vector3D OrigOfMdtInAmdbFrame =
-    Amg::Hep3VectorToEigen( muonStation->getBlineFixedPointInAmdbLRS() );
+      Amg::Vector3D OrigOfMdtInAmdbFrame =  muonStation->getBlineFixedPointInAmdbLRS() ;
       double Rmin =(trans*OrigOfMdtInAmdbFrame).perp();
 
       float cInCo = 1./std::cos(std::abs(std::atan(OrtoRadialPos/Rmin)));

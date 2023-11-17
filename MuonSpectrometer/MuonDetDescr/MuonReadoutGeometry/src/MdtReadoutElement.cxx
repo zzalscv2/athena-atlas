@@ -15,7 +15,6 @@
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/GeoTube.h"
 #include "GeoModelUtilities/GeoGetIds.h"
-#include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
 #include "MuonAlignmentData/BLinePar.h"
@@ -231,7 +230,7 @@ namespace MuonGM {
             const MuonStation* ms = parentMuonStation();
             if (std::abs(ms->xAmdbCRO()) > 10.) {
                 Amg::Vector3D tem = ms->xAmdbCRO()* Amg::Vector3D::UnitX();
-                Amg::Transform3D amdbToGlobal = Amg::CLHEPTransformToEigen(ms->getAmdbLRSToGlobal());
+                Amg::Transform3D amdbToGlobal{ms->getAmdbLRSToGlobal()};
                 Amg::Vector3D temGlo = amdbToGlobal * tem;
                 Amg::Vector3D ROtubeFrame = nodeform_globalToLocalTransf(tubeLayer, tube) * temGlo;
                 if (ROtubeFrame.z() < 0)
@@ -468,7 +467,7 @@ namespace MuonGM {
             return Amg::Transform3D::Identity();
         }
         
-        const Amg::Vector3D fixedPoint = Amg::Hep3VectorToEigen(ms->getUpdatedBlineFixedPointInAmdbLRS());
+        const Amg::Vector3D fixedPoint = ms->getUpdatedBlineFixedPointInAmdbLRS();
 
         int ntot_tubes = m_nlayers * m_ntubesperlayer;
         int itube = (tubeLayer - 1) * m_ntubesperlayer + tube - 1;
@@ -497,7 +496,7 @@ namespace MuonGM {
         height -= glue;
 
         // Calculate transformation from native to AMDB.
-        const Amg::Transform3D toAMDB = Amg::CLHEPTransformToEigen(*ms->getNativeToAmdbLRS()) * toParentStation();
+        const Amg::Transform3D toAMDB = ms->getNativeToAmdbLRS() * toParentStation();
         const Amg::Transform3D fromAMDB = toAMDB.inverse();
 
         // Get positions of the wire center and end without deformations
@@ -737,7 +736,7 @@ namespace MuonGM {
                 zref = -m_Rsize / 2. + xmin;
             }
             Amg::Vector3D reference_point(xref, yref, zref);
-            Amg::Transform3D toAMDB = Amg::CLHEPTransformToEigen(*parentMuonStation()->getNativeToAmdbLRS()) * toParentStation();
+            Amg::Transform3D toAMDB = parentMuonStation()->getNativeToAmdbLRS() * toParentStation();
             reference_point = toAMDB * reference_point;
             if (isid == 0)
                 reference_point = reference_point + 0.5 * getNominalTubeLengthWoCutouts(ref_layer, 1) * Amg::Vector3D::UnitX();

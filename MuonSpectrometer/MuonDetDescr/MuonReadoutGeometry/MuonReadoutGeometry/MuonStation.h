@@ -59,7 +59,7 @@ namespace MuonGM {
 
         inline int getEtaIndex() const;  //!< a la AMDB
 
-        inline std::string getKey() const;
+        inline const std::string& getKey() const;
         inline std::string getStationType() const;  //!< like BMS, T1F, CSL
 
         inline const  std::string& getStationName() const;  //!< like BMS5, T1F1, CSL1
@@ -82,12 +82,12 @@ namespace MuonGM {
 
         inline void setTransform(GeoAlignableTransform* xf);
         void setBlineFixedPointInAmdbLRS(double s0, double z0, double t0);
-        HepGeom::Point3D<double> getBlineFixedPointInAmdbLRS() const;
-        HepGeom::Point3D<double> getUpdatedBlineFixedPointInAmdbLRS() const;
+        const Amg::Vector3D& getBlineFixedPointInAmdbLRS() const;
+        const Amg::Vector3D& getUpdatedBlineFixedPointInAmdbLRS() const;
         void updateBlineFixedPointInAmdbLRS();
-        inline void setNativeToAmdbLRS(HepGeom::Transform3D xf);
-        void setNominalAmdbLRSToGlobal(HepGeom::Transform3D xf);
-        void setDeltaAmdbLRS(HepGeom::Transform3D xf);
+        inline void setNativeToAmdbLRS(Amg::Transform3D xf);
+        void setNominalAmdbLRSToGlobal(Amg::Transform3D xf);
+        void setDeltaAmdbLRS(Amg::Transform3D xf);
         //!< set the delta transform in the amdb frame and update the geoModel Delta
 
         void setDelta_fromAline_forComp(int, double, double, double, double, double, double);
@@ -106,10 +106,10 @@ namespace MuonGM {
         void fillBLineCache();
         void setBline(const BLinePar* bline);
         inline GeoAlignableTransform* getGeoTransform() const;
-        inline HepGeom::Transform3D getTransform() const;
-        inline const HepGeom::Transform3D* getNativeToAmdbLRS() const;
-        inline HepGeom::Transform3D getAmdbLRSToGlobal() const;
-        inline const HepGeom::Transform3D* getNominalAmdbLRSToGlobal() const;
+        inline Amg::Transform3D getTransform() const;
+        inline const Amg::Transform3D& getNativeToAmdbLRS() const;
+        inline Amg::Transform3D getAmdbLRSToGlobal() const;
+        inline const Amg::Transform3D& getNominalAmdbLRSToGlobal() const;
         inline double getALine_tras() const;
         inline double getALine_traz() const;
         inline double getALine_trat() const;
@@ -137,18 +137,18 @@ namespace MuonGM {
         bool m_descratzneg{false};
         int m_statPhiIndex{0};
         int m_statEtaIndex{0};
-        std::string m_key;
+        std::string m_key{};
         GeoAlignableTransform* m_transform{nullptr};
 
-        std::unique_ptr<HepGeom::Transform3D> m_delta_amdb_frame{};
-        std::unique_ptr<HepGeom::Transform3D> m_native_to_amdbl{};
-        std::unique_ptr<HepGeom::Transform3D> m_amdbl_to_global{};  // nominal
+        Amg::Transform3D m_delta_amdb_frame{Amg::Transform3D::Identity()};
+        Amg::Transform3D m_native_to_amdbl{Amg::Transform3D::Identity()};
+        Amg::Transform3D m_amdbl_to_global{Amg::Transform3D::Identity()};  // nominal
         double m_rots{0.};
         double m_rotz{0.};
         double m_rott{0.};
         bool m_hasALines{false};
         bool m_hasBLines{false};
-        HepGeom::Point3D<double> m_BlineFixedPointInAmdbLRS{0., 0., 0.};
+        Amg::Vector3D m_BlineFixedPointInAmdbLRS{Amg::Vector3D::Zero()};
         const MdtAsBuiltPar* m_XTomoData{nullptr};
 
         using pairRE_AlignTransf =  std::pair<MuonReadoutElement*, GeoAlignableTransform*>;
@@ -169,9 +169,9 @@ namespace MuonGM {
 
     GeoAlignableTransform* MuonStation::getGeoTransform() const { return m_transform; }
 
-    HepGeom::Transform3D MuonStation::getTransform() const { return Amg::EigenTransformToCLHEP(m_transform->getTransform()); }
+    Amg::Transform3D MuonStation::getTransform() const { return m_transform->getTransform(); }
 
-    std::string MuonStation::getKey() const { return m_key; }
+    const std::string& MuonStation::getKey() const { return m_key; }
 
     double MuonStation::Rsize() const { return m_Rsize; }
     double MuonStation::Ssize() const { return m_Ssize; }
@@ -184,33 +184,27 @@ namespace MuonGM {
 
     void MuonStation::setxAmdbCRO(double xpos) { m_xAmdbCRO = xpos; }
 
-    void MuonStation::setNativeToAmdbLRS(HepGeom::Transform3D xf) {
-        if (!m_native_to_amdbl)
-            m_native_to_amdbl = std::make_unique<HepGeom::Transform3D>(xf);
-        else
-            *m_native_to_amdbl = xf;
+    void MuonStation::setNativeToAmdbLRS(Amg::Transform3D xf) {
+        m_native_to_amdbl = std::move(xf);
     }
 
-    const HepGeom::Transform3D* MuonStation::getNativeToAmdbLRS() const { return m_native_to_amdbl.get(); }
+    const Amg::Transform3D& MuonStation::getNativeToAmdbLRS() const { return m_native_to_amdbl; }
 
-    const HepGeom::Transform3D* MuonStation::getNominalAmdbLRSToGlobal() const { return m_amdbl_to_global.get(); }
+    const Amg::Transform3D& MuonStation::getNominalAmdbLRSToGlobal() const { return m_amdbl_to_global; }
 
-    HepGeom::Transform3D MuonStation::getAmdbLRSToGlobal() const { return (*m_amdbl_to_global) * (*m_delta_amdb_frame); }
+    Amg::Transform3D MuonStation::getAmdbLRSToGlobal() const { return m_amdbl_to_global * m_delta_amdb_frame; }
 
     int MuonStation::nMuonReadoutElements() const { return m_REwithAlTransfInStation.size(); }
 
-    double MuonStation::getALine_tras() const { return (*m_delta_amdb_frame)[0][3]; }
-    double MuonStation::getALine_traz() const { return (*m_delta_amdb_frame)[1][3]; }
-    double MuonStation::getALine_trat() const { return (*m_delta_amdb_frame)[2][3]; }
-    double MuonStation::getALine_rots() const { return m_rots; /*return (*_delta_amdb_frame)[2][1];*/ }
-    double MuonStation::getALine_rotz() const { return m_rotz; /*return (*_delta_amdb_frame)[0][2];*/ }
-    double MuonStation::getALine_rott() const { return m_rott; /*return (*_delta_amdb_frame)[1][0];*/ }
+    double MuonStation::getALine_tras() const { return m_delta_amdb_frame.translation()[0]; }
+    double MuonStation::getALine_traz() const { return m_delta_amdb_frame.translation()[1]; }
+    double MuonStation::getALine_trat() const { return m_delta_amdb_frame.translation()[2]; }
+    double MuonStation::getALine_rots() const { return m_rots; }
+    double MuonStation::getALine_rotz() const { return m_rotz; }
+    double MuonStation::getALine_rott() const { return m_rott; }
     bool MuonStation::hasALines() const { return m_hasALines; }
     bool MuonStation::hasBLines() const { return m_hasBLines; }
-    bool MuonStation::hasMdtAsBuiltParams() const {
-        if (m_XTomoData == NULL) return false;
-        return true;
-    }
+    bool MuonStation::hasMdtAsBuiltParams() const { return m_XTomoData != nullptr; }
 
 }  // namespace MuonGM
 

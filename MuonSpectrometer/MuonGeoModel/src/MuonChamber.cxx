@@ -1025,7 +1025,7 @@ namespace MuonGM {
                     // set fixed point for MDT deformations: s0,z0,t0 for the point at lowest t,z (z,y amdb) and s=x=0
                     mstat->setBlineFixedPointInAmdbLRS(c->posx, c->posy, c->posz);
                 } else {
-                    HepGeom::Point3D<double> b0 = mstat->getBlineFixedPointInAmdbLRS();
+                    Amg::Vector3D b0 = mstat->getBlineFixedPointInAmdbLRS();
                     if (c->posy < b0.y())
                         mstat->setBlineFixedPointInAmdbLRS(b0.x(), c->posy, b0.z());
                 }
