@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -87,7 +87,7 @@ private:
   void unregisterAscObj(SoSeparator*simple,SoSeparator *detailed);
   //Fixme: When a handle changes pickable state to unpickable it
   //must be removed from selection list if selected!
-private slots:
+private Q_SLOTS:
 //  void ascObjDetailLevelAboutToChange();
   void ascObjDetailLevelChanged();
 private:

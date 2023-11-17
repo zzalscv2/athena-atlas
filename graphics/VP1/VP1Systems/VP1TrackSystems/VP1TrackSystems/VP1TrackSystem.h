@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -60,7 +60,7 @@ public:
   SoCooperativeSelection * selAscs(); //!< Needed in TrackSystemController::objectBrowserClicked(QTreeWidgetItem * item, int)
   SoMaterial* materialFromVertex(const TrackHandleBase* trk) const; //!< Returns the material for the vertex which knows this trackhandle (if known)
 
-  public slots:
+  public Q_SLOTS:
 
   //Fixme: Use this or use the prd system directly? The thing to
   //remember is that we have CSC's/TGC's and RPC's also, so it might
@@ -87,7 +87,7 @@ signals:
   void newTrackSelected( const TrackHandleBase&);
   void muonChamberT0sChanged(const std::map<GeoPVConstLink, float>& , int );//!< The map is the dt0 per chamber, plus a label identifier, which by convention (!) is 0=Moore, 1=Muonboy
 
-private slots:
+private Q_SLOTS:
   void emitTouchedMuonChambersChanged(const std::set<GeoPVConstLink>&);
   void visibleObjectsChanged();
   void updateSelectionMode();
