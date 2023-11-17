@@ -444,7 +444,7 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
     AODMoments.append("CellLink") #Add data-link to cell-link container
     if flags.Calo.TopoCluster.addCalibrationHitDecoration: #Add calib hit deco if requried 
-        AODMoments.append("."+flags.Calo.TopoCluster.CalibrationHitDecorationName)
+        AODMoments.append(flags.Calo.TopoCluster.CalibrationHitDecorationName)
 
     if flags.Calo.TopoCluster.addCPData:
         AODMoments += ["ClusterWidthEta","ClusterWidthPhi"]

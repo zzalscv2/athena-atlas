@@ -438,17 +438,6 @@ def getOfflinePFAlgorithm(inputFlags):
     result.addEventAlgo(PFAlgorithm)
     return result
 
-def PFTauFlowElementLinkingCfg(inputFlags, algName="", **kwargs):
-    result=ComponentAccumulator()
-
-    kwargs.setdefault("neutral_FE_cont_name", "")
-    kwargs.setdefault("charged_FE_cont_name", "")    
-    kwargs.setdefault("doTCC", False)
-    kwargs.setdefault("useGlobal", False)
-
-    result.addEventAlgo(getTauFlowElementAssocAlgorithm(inputFlags, algName, **kwargs))
-    return result
-
 def PFGlobalFlowElementLinkingCfg(inputFlags, **kwargs):
     result=ComponentAccumulator()
 
