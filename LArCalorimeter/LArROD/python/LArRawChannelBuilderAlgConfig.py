@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 from LArRecUtils.LArADC2MeVCondAlgConfig import LArADC2MeVCondAlgCfg
@@ -54,7 +54,7 @@ def LArRawChannelBuilderAlgCfg(configFlags, **kwargs):
         dbInstance="LAR_ONL"
         acc.merge(addFolders(configFlags,fld, dbInstance, className=obj, db=dbString))
 
-    if configFlags.GeoModel.Run is not LHCPeriod.Run1:
+    if len (dspkey) > 0:
         kwargs.setdefault(dspkey, sgkey)
 
     if configFlags.LAr.ROD.forceIter or configFlags.LAr.RawChannelSource is RawChannelSource.Calculated:
