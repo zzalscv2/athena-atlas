@@ -28,217 +28,63 @@ def _make_jobo(job):
 
 def _gen_jobo(dct):
     import textwrap
-    if dct['input-type'] == 'ANY':
-        job = textwrap.dedent("""\
-        # automatically generated joboptions file
+    job = textwrap.dedent("""\
+    #!/usr/bin/env athena.py
+    # automatically generated joboptions file
 
-        # percolate through the autoconfiguration...
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.Enums import Format
+    from PyDumper.DumpConfig import DumpCfg
 
-        # input files configuration
-        from AthenaCommon.AthenaCommonFlags import athenaCommonFlags as acf
-        _input_files = %(input-files)s
-        acf.FilesInput = _input_files
-        del _input_files
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        ConfigFlags.Input.Files = acf.FilesInput()
+    flags = initConfigFlags()
+    flags.GeoModel.Align.Dynamic = False
+    flags.Input.Files = %(input-files)s
+    flags.Exec.MaxEvents = %(evts)s
+    flags.Exec.SkipEvents = %(skip)s
 
-        from RecExConfig.InputFilePeeker import inputFileSummary
-        file_geo = inputFileSummary.get('geometry')
-        if file_geo and file_geo.find('-GEO-') >= 0:
-            inputFileSummary['geometry'] = 'ATLAS-R1-2012-03-02-00'
-
-        from RecExConfig.RecFlags import rec
-        # Don't try to rebuild truth.
-        # Need to set this here or autoconfig may lock it on.
-        rec.doTruth.set_Value_and_Lock(False)
-        # Skip auto-config for EVNT files.
-        if inputFileSummary['stream_names'] == ['StreamEVGEN']:
-            rec.AutoConfiguration.set_Value_and_Lock ([])
-        else:
-            rec.AutoConfiguration = ['everything']
-        import RecExConfig.AutoConfiguration as auto
-        auto.ConfigureFromListOfKeys(rec.AutoConfiguration())
-
-
-        # import the rec flags...
-        from RecExConfig.RecFlags import rec
-        rec.runUnsupportedLegacyReco=True
-        # check we have been configured to read...
-        for item in ('readRDO',
-                     #'readBS' ?!?!
-                     'readESD',
-                     'readAOD',
-                     'readTAG',
-                     ):
-            value = getattr (rec, item)()
-            getattr (rec, item).set_Value_and_Lock(value)
-
-        for item in ('doCBNT', 'doWriteBS',
-                     'doWriteRDO', 'doWriteESD',
-                     'doWriteAOD', 'doWriteTAG', 'doWriteTAGCOM',
-                     'doESD',
-                     'doAOD',
-                     'doDPD',
-                     'doEgamma',  # avoid dict clash
-                     'doCaloRinger', # avoid loading Ath libs too early
-                     ):
-            getattr (rec, item).set_Value_and_Lock(False)
-
-        # disable the time consuming stuff we don't care about
-        for item in ('doDumpTDS', 'doDumpTES',
-                     'doMonitoring',
-                     'doHist',
-                     'doNameAuditor', 'doDetailedAuditor',
-                     'doSGAuditor',
-                     'doPerfMon', 'doDetailedPerfMon',
-                     ):
-            getattr (rec, item).set_Value_and_Lock(False)
-
-        # Disables more stuff we don't need.
-        rec.doAODMerging.set_Value_and_Lock(True)
-
-        # events to process
-        acf.EvtMax = %(evts)s
-        acf.SkipEvents = %(skip)s
-
-        # prevent AthFile from using the cache
-        import PyUtils.AthFile as af
-        af.server.flush_cache()
-        try:
-            af.server.disable_pers_cache()
-        except AttributeError: # backward compat...
+    if flags.Input.Format is Format.BS:
+        # BS files don't contain the conditions/geometry tags.
+        # Try to give some reasonable defaults here, depending on the run.
+        # These may still be overridden from the command line.
+        if flags.Input.DataYear < 2000:
             pass
-            
-        # main jobos
-        include ('RecExCond/RecExCommon_flags.py')
-        # FIXME: work-around for bug #56185
-        from AthenaCommon.DetFlags import DetFlags
-        DetFlags.makeRIO.all_setOff()
-        # FIXME: Without this, we get crashes reading ESDs from conditions algs.
-        DetFlags.readRIOPool.all_setOff()
-        # FIXME -- end
-        include ('RecExCommon/RecExCommon_topOptions.py')
-
-        # Needed to get MuonIdHlpers properly initialized.
-        from MuonIdHelpers.MuonIdHelpersConfigLegacy import MuonIdHelperSvc
-        svcMgr += MuonIdHelperSvc()
-
-        svcMgr.GeoModelSvc.IgnoreTagDifference = True
-        %(conditions_tag_frag)s
-
-        # adding the python dumper algorithm
-        from AthenaCommon.AlgSequence import AlgSequence
-        job = AlgSequence()
-        from %(pyalg_pkg)s import %(pyalg_cls)s as pyalg
-        job += pyalg('pyalg',
-                     ofile='%(ofile-name)s',
-                     items='%(include)s',
-                     exclude='%(exclude)s',
-                     OutputLevel=Lvl.INFO)
-        """) % dct
+        elif flags.Input.DataYear < 2015:
+            flags.GeoModel.AtlasVersion = 'ATLAS-R1-2012-03-00-00'
+            flags.IOVDb.GlobalTag = 'COMCOND-BLKPA-RUN1-09'
+            flags.Trigger.doxAODConversion = False
+        elif flags.Input.DataYear < 2020:
+            flags.GeoModel.AtlasVersion = 'ATLAS-R2-2016-01-00-01'
+            flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-RUN2-09'
+        else:
+            flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00'
+            flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-03'
     else:
-        dct['is-input-pool'] = dct['input-type'] != 'BS'
-        job = textwrap.dedent("""\
-        # automatically generated joboptions file
+        if flags.GeoModel.AtlasVersion.find ('ATLAS-GEO-18') >= 0:
+            flags.GeoModel.AtlasVersion = 'ATLAS-R1-2012-03-00-00'
 
-        # input files configuration
-        from AthenaCommon.AthenaCommonFlags import athenaCommonFlags as acf
-        _input_files = %(input-files)s
-        acf.FilesInput = _input_files
-        del _input_files
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        ConfigFlags.Input.Files = acf.FilesInput()
+    flags.fillFromArgs()
+    flags.lock()
 
-        from RecExConfig.InputFilePeeker import inputFileSummary
-        file_geo = inputFileSummary.get('geometry')
-        if file_geo and file_geo.find('-GEO-') >= 0:
-            inputFileSummary['geometry'] = 'ATLAS-R1-2012-03-02-00'
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    cfg = MainServicesCfg(flags)
 
-        # disable (most of) auto-cfg
-        #from RecExConfig.RecFlags import rec
-        #rec.AutoConfiguration.set_Value_and_Lock([
-        #    'ProjectName',
-        #    'RealOrSim',
-        #    'FieldAndGeo',
-        #    'BeamType',
-        #    'ConditionsTag',
-        #    'TriggerStream',
-        #    'LumiFlags',
-        #    ])
-        
-        # import the rec flags...
-        from RecExConfig.RecFlags import rec
-        for item in ('doCBNT', 'doWriteBS',
-                     'doWriteRDO', 'doWriteESD',
-                     'doWriteAOD', 'doWriteTAG', 'doWriteTAGCOM',
-                     'doESD', 'doAOD',
-                     'doEgamma',  # avoid dict clash
-                     ):
-            getattr(rec, item).set_Value_and_Lock(False)
+    if flags.Input.Format is Format.BS:
+        from PyDumper.BSReadConfig import BSReadCfg
+        cfg.merge (BSReadCfg (flags))
+    else:
+        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+        cfg.merge(PoolReadCfg(flags))
 
-        # disable the time consuming stuff we don't give a damn about
-        for item in ('doDumpTDS', 'doDumpTES',
-                     'doMonitoring',
-                     'doHist',
-                     'doNameAuditor', 'doDetailedAuditor',
-                     'doSGAuditor',
-                     'doPerfMon', 'doDetailedPerfMon',
-                     ):
-            getattr(rec, item).set_Value_and_Lock(False)
+    cfg.merge (DumpCfg (flags,
+                        ofile='%(ofile-name)s',
+                        items='%(include)s',
+                        exclude='%(exclude)s'))
 
-        # tell RecExCommon which input file(s) type we are dealing with
-        #getattr (rec, 'read%(input-type)s').set_Value_and_Lock(True)
-        globals()['read%(input-type)s'] = True
+    sc = cfg.run (%(evts)s)
+    import sys
+    sys.exit (sc.isFailure())
+    """) % dct
 
-        # input files configuration
-        from AthenaCommon.GlobalFlags import globalflags
-        from AthenaCommon.AthenaCommonFlags import athenaCommonFlags as acf
-        _input_files = %(input-files)s
-        if %(is-input-pool)s:
-            globalflags.InputFormat = 'pool'
-            _item = 'Pool%(input-type)sInput'
-            globals()[_item] = _input_files
-            setattr(acf, _item, _input_files)
-            del _item
-        else:
-            globalflags.InputFormat = 'bytestream'
-            BSRDOInput = _input_files
-            getattr(acf, 'BSRDOInput').set_Value_and_Lock(_input_files)
-            getattr(acf, 'PoolRDOInput').set_Value_and_Lock([])
-            rec.readRDO.set_Value_and_Lock(True)
-            readRDO = True
-        del _input_files
-
-        # events to process
-        acf.EvtMax = %(evts)s
-        acf.SkipEvents = %(skip)s
-    
-        # prevent AthFile from using the cache
-        import PyUtils.AthFile as af
-        af.server.flush_cache()
-        try:
-            af.server.disable_pers_cache()
-        except AttributeError: # backward compat...
-            pass
-        
-        # main jobos
-        include ('RecExCond/RecExCommon_flags.py')
-        include ('RecExCommon/RecExCommon_topOptions.py')
-
-        svcMgr.GeoModelSvc.IgnoreTagDifference = True
-        %(conditions_tag_frag)s
-
-        # adding the python dumper algorithm
-        from AthenaCommon.AlgSequence import AlgSequence
-        job = AlgSequence()
-        from %(pyalg_pkg)s import %(pyalg_cls)s as pyalg
-        job += pyalg('pyalg',
-                     ofile='%(ofile-name)s',
-                     items='%(include)s',
-                     exclude='%(exclude)s',
-                     OutputLevel=Lvl.INFO)
-        """) % dct
-        
     return job
 
 def _run_jobo(job, msg, options):
@@ -310,7 +156,7 @@ def _run_jobo(job, msg, options):
     if options.athena_opts:
         import shlex
         athena_opts = shlex.split(options.athena_opts)
-    cmd = [sh, app,] + athena_opts + [jobo.name,]
+    cmd = [sh, app,] + athena_opts + ['--CA'] + [jobo.name,]
     import subprocess as sub
     app_handle = sub.Popen (args=cmd,
                             stdout=logfile,
@@ -318,7 +164,10 @@ def _run_jobo(job, msg, options):
                             env=env)
     pos = 0
     import re
-    pat = re.compile (r'^Py:pyalg .*')
+    if options.full_log:
+        pat = re.compile ('.*')
+    else:
+        pat = re.compile (r'^Py:pyalg .*')
     evt_pat = re.compile (
         r'^Py:pyalg .*? ==> processing event \[(?P<evtnbr>\d*?)\].*'
         )
@@ -379,10 +228,10 @@ def run_sg_dump(files, output,
                 pyalg_cls='PyDumper.PyComps:PySgDumper',
                 include='*',
                 exclude='',
-                file_type=None,
                 do_clean_up=False,
                 athena_opts=None,
                 conditions_tag=None,
+                full_log=False,
                 msg=None):
     """API for the sg-dump script.
      `files` a list of input filenames to be dumped by SgDump
@@ -395,7 +244,6 @@ def run_sg_dump(files, output,
      `pyalg_cls` the fully qualified name of the PyAthena.Alg class to process the file(s) content (PySgDumper or DataProxyLoader)
      `include`: comma-separates list of type#key container names to dump.
      `exclude`: comma-separated list of glob patterns for keys/types to ignore.
-     `file_type` the input file's type (RDO,BS,ESD,AOD,DPD or ANY)
      `do_clean_up` flag to enable the attempt at removing all the files sg-dump
                    produces during the course of its execution
      `athena_opts` a space-separated list of athena command-line options (e.g '--perfmon --stdcmalloc --nprocs=-1')
@@ -433,17 +281,6 @@ def run_sg_dump(files, output,
         raise ValueError(err)
     pyalg_pkg,pyalg_cls = pyalg_cls.split(':')
 
-    _allowed_values = ('rdo', 'bs', 'esd', 'aod', 'dpd', 'any')
-    if file_type is None:
-        file_type = 'any'
-    if not (file_type.lower() in _allowed_values):
-        err = "'file_type' allowed values are: %s. got: [%s]" % (
-            _allowed_values,
-            file_type)
-        msg.error(err)
-        raise ValueError(err)
-    file_type = file_type.lower()
-
     conditions_tag_frag = ''
     if conditions_tag:
         conditions_tag_frag = "conddb.setGlobalTag('%s')" % conditions_tag
@@ -456,7 +293,6 @@ def run_sg_dump(files, output,
         'exclude' :    exclude,
         'pyalg_pkg':   pyalg_pkg,
         'pyalg_cls':   pyalg_cls,
-        'input-type':  file_type.upper(),
         'conditions_tag_frag' : conditions_tag_frag,
         })
 
@@ -466,10 +302,9 @@ def run_sg_dump(files, output,
     msg.info('skip:            %s', skip)
     msg.info('out (ascii):     %s', output)
     msg.info('pyalg-class:     %s:%s', pyalg_pkg, pyalg_cls)
-    msg.info('file_type:       %s', file_type)
     msg.info('include:         %s', include)
     msg.info('exclude:         %s', exclude)
-    msg.info('condtions_tag:   %s', conditions_tag)
+    msg.info('conditions_tag:  %s', conditions_tag)
     
     if dump_jobo and isinstance(dump_jobo, str):
         try:
@@ -481,9 +316,10 @@ def run_sg_dump(files, output,
 
     from collections import namedtuple
     Options = namedtuple('Options',
-                         'oname do_clean_up athena_opts')
+                         'oname do_clean_up athena_opts full_log')
     opts = Options(oname=output,
                    do_clean_up=do_clean_up,
+                   full_log=full_log,
                    athena_opts=athena_opts)
     
     sc, out = 1, "<N/A>"
