@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -176,9 +176,9 @@ protected:
   QList<QWidget*> provideExtraWidgetsForGuiRow() const;
   QByteArray extraWidgetsState() const;
   void setExtraWidgetsState(const QByteArray&);
-private slots:
+private Q_SLOTS:
   void colourByComboBoxItemChanged();
-public slots:
+public Q_SLOTS:
   void rerandomiseRandomTrackColours();
   void trackSelectionChanged();
   void setShownTSOSParts(TrackCommonFlags::TSOSPartsFlags);
@@ -233,7 +233,7 @@ private:
   void fillObjectBrowser();
   void updateObjectBrowserVisibilityCounts();
 
-private slots:
+private Q_SLOTS:
   void collVisibilityChanged(bool);
   void setPropagator(Trk::IExtrapolator *);
   void setPropagationOptions(TrackSystemController::PropagationOptionFlags);

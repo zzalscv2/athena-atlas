@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -43,7 +43,7 @@ protected:
   virtual bool cut(TrackHandleBase*);
   virtual QColor defaultColor() const { return QColor::fromRgbF(0.42f, 0.96f, 0.16f); }
 
-private slots:
+private Q_SLOTS:
   void setCutExcludeBarcodeZero(bool);
   void setCutExcludeNeutrals(bool);
   void setShowAscObjs(bool);
