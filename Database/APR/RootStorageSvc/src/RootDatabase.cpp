@@ -24,6 +24,7 @@
 
 #include <string>
 #include <cerrno>
+#include <sys/stat.h>
 
 // Root include files
 #include "TFile.h"
@@ -311,10 +312,14 @@ DbStatus RootDatabase::close(DbAccessMode /* mode */ )  {
             TDirectory::TContext dirCtxt(0);
             m_file->ResetErrno();
             m_file->Write("0", m_defWritePolicy);
-            if (errno != ENOENT) {
+            if (errno != ENOENT && errno != EINVAL) {
                // As of 6.20.02, ROOT may search for libraries during the Write()
                // call, possibly setting errno to ENOENT.  This isn't an error
                // of the write.
+               // In that process, it may also call readlinkat() on paths
+               // that aren't links, setting EINVAL.
+               // (This latter situation was only observed on aarch64
+               // hosts with ROOT 6.28.08.)
                printErrno(log, nam, m_file->GetErrno());
             }
             m_file->ResetErrno();
