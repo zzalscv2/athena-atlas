@@ -176,9 +176,9 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(const EventContext& ct
         std::unique_ptr<MMPrepData> mpd =
           std::make_unique<MMPrepData>(prdId,
                                        hash,
-                                       localPos,
-                                       rdoList,
-                                       cov,
+                                       std::move(localPos),
+                                       std::move(rdoList),
+                                       std::move(cov),
                                        detEl,
                                        calibStrip.time,
                                        calibStrip.charge,
@@ -187,15 +187,15 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(const EventContext& ct
         prdColl->push_back(std::move(mpd));
 
     } else {
-      MMPrepData mpd = MMPrepData(prdId,
-                                  hash,
-                                  localPos,
-                                  rdoList,
-                                  cov,
-                                  detEl,
-                                  calibStrip.time,
-                                  calibStrip.charge,
-                                  calibStrip.distDrift);
+      MMPrepData mpd(prdId,
+                     hash,
+                     std::move(localPos),
+                     std::move(rdoList),
+                     std::move(cov),
+                     detEl,
+                     calibStrip.time,
+                     calibStrip.charge,
+                     calibStrip.distDrift);
       if (mpd.charge() < m_singleStripChargeCut) continue;
       // set the hash of the MMPrepData such that it contains the correct value
       // in case it gets used in SimpleMMClusterBuilderTool::getClusters
@@ -209,7 +209,7 @@ StatusCode Muon::MmRdoToPrepDataToolMT::processCollection(const EventContext& ct
     std::vector<std::unique_ptr<Muon::MMPrepData>>  clusters;
 
     /// reconstruct the clusters
-    ATH_CHECK(m_clusterBuilderTool->getClusters(MMprds,clusters));
+    ATH_CHECK(m_clusterBuilderTool->getClusters(ctx, std::move(MMprds), clusters));
 
     for (std::unique_ptr<Muon::MMPrepData>& prdN : clusters ) {
       prdN->setHashAndIndex(prdColl->identifyHash(), prdColl->size());

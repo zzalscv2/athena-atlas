@@ -100,9 +100,9 @@ StatusCode MuonAlignmentCondAlg::attachDependencies(const EventContext& ctx,
     return StatusCode::SUCCESS;
 }
 StatusCode MuonAlignmentCondAlg::loadCoolFolder(const EventContext& ctx,
-                                                  const SG::ReadCondHandleKey<CondAttrListCollection>& key,
-                                                  ALineContainer& writeALineCdo, 
-                                                  BLineContainer& writeBLineCdo) const {
+                                                const SG::ReadCondHandleKey<CondAttrListCollection>& key,
+                                                ALineContainer& writeALineCdo, 
+                                                BLineContainer& writeBLineCdo) const {
     
     SG::ReadCondHandle<CondAttrListCollection> readHandle{key, ctx};
     if (!readHandle.isValid()){

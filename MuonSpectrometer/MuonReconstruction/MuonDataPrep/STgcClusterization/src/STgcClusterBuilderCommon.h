@@ -31,10 +31,10 @@ namespace Muon
       STgcClusterBuilderCommon(const sTgcIdHelper& idHelper);
 
       /// Separate the sTGC PRDs by layer, from 0 to 7, and sort the PRDs per layer in ascending order of strip number
-      std::array<std::vector<sTgcPrepData>, 8> sortSTGCPrdPerLayer(const std::vector<sTgcPrepData>& stripPrds) const;
+      std::array<std::vector<sTgcPrepData>, 8> sortSTGCPrdPerLayer(std::vector<sTgcPrepData>&& stripPrds) const;
 
       /// Find strip clusters, assuming the input vector of PRDs are sorted in ascending order of strip number
-      std::vector<std::vector<sTgcPrepData>> findStripCluster(const std::vector<sTgcPrepData>& strips,
+      std::vector<std::vector<sTgcPrepData>> findStripCluster(std::vector<sTgcPrepData>&& strips,
                                                               const int maxMissingStrip) const;
 
       /// Compute the cluster position using the weighted average method

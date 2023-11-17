@@ -26,33 +26,31 @@ StatusCode Muon::SimpleSTgcClusterBuilderTool::initialize() {
 
 //============================================================================
 // Build the clusters given a vector of single-hit PRD
-StatusCode Muon::SimpleSTgcClusterBuilderTool::getClusters(std::vector<Muon::sTgcPrepData>& stripsVect, 
-							   std::vector<Muon::sTgcPrepData*>& clustersVect) const {
+StatusCode Muon::SimpleSTgcClusterBuilderTool::getClusters(const EventContext& /*ctx*/,
+                                                           std::vector<Muon::sTgcPrepData>&& stripsVect, 
+                                                           std::vector<std::unique_ptr<Muon::sTgcPrepData>>& clustersVect) const {
 
     ATH_MSG_DEBUG("Size of the input vector: " << stripsVect.size()); 
 
     if (stripsVect.empty()) return StatusCode::SUCCESS;
   
-    Muon::STgcClusterBuilderCommon stgcClusterCommon(m_idHelperSvc->stgcIdHelper());
-    std::array<std::vector<Muon::sTgcPrepData>, 8> stgcPrdsPerLayer = stgcClusterCommon.sortSTGCPrdPerLayer(stripsVect);
 
     // define the identifier hash
-    IdentifierHash hash;
-  
     Identifier chanId = stripsVect.at(0).identify();
+    IdentifierHash hash = m_idHelperSvc->moduleHash(chanId);
+  
     double resolution = Amg::error(stripsVect.at(0).localCovariance(), Trk::locX);
     bool isStrip = ( m_idHelperSvc->stgcIdHelper().channelType(chanId) == sTgcIdHelper::Strip );
     ATH_MSG_DEBUG(" channelType " << m_idHelperSvc->stgcIdHelper().channelType(chanId));
     ATH_MSG_DEBUG(" isStrip: " << isStrip << "Single channel resolution: " << resolution);
 
-    // now add the clusters to the PRD container
-    clustersVect.clear();
-
-    for (unsigned int i_layer = 0; i_layer < stgcPrdsPerLayer.size(); ++i_layer) {
+    Muon::STgcClusterBuilderCommon stgcClusterCommon(m_idHelperSvc->stgcIdHelper());
+    std::array<std::vector<Muon::sTgcPrepData>, 8> stgcPrdsPerLayer = stgcClusterCommon.sortSTGCPrdPerLayer(std::move(stripsVect));
+ 
+    for (std::vector<Muon::sTgcPrepData>& layPrds : stgcPrdsPerLayer) {
         // Get the strip clusters of the layer.
-        std::vector<std::vector<Muon::sTgcPrepData>> layerClusters = stgcClusterCommon.findStripCluster(
-                                                                         stgcPrdsPerLayer.at(i_layer),
-                                                                         m_maxHoleSize);
+        std::vector<std::vector<Muon::sTgcPrepData>> layerClusters = stgcClusterCommon.findStripCluster(std::move(layPrds),
+                                                                                                        m_maxHoleSize);
 
         // Loop on the clusters of that gap
         for (const std::vector<Muon::sTgcPrepData>& cluster: layerClusters) {
@@ -64,7 +62,7 @@ StatusCode Muon::SimpleSTgcClusterBuilderTool::getClusters(std::vector<Muon::sTg
               if (msgLvl(MSG::VERBOSE)) {
                 std::stringstream sstr{};
                 for (const Muon::sTgcPrepData& prd : cluster) {
-                    sstr << m_idHelperSvc->stgcIdHelper().print_to_string(prd.identify())
+                    sstr << m_idHelperSvc->toString(prd.identify())
                          << ", local pos: ("<< prd.localPosition().x() << "," << prd.localPosition().y()
                          << "), charge: " << prd.charge() << ", time: " << static_cast<int>(prd.time())
                          << std::endl;
@@ -94,21 +92,22 @@ StatusCode Muon::SimpleSTgcClusterBuilderTool::getClusters(std::vector<Muon::sTg
             // memory allocated dynamically for the PrepRawData is managed by Event Store in the converters
             ATH_MSG_DEBUG("error on cluster " << std::sqrt((covN)(0,0)) << " added error " <<  m_addError);
 
-            sTgcPrepData* prdN = new sTgcPrepData(
-              clusterId,
-              hash,
-              localPosition,
-              rdoList,
-              covN,
-              cluster.at(0).detectorElement(),
-              std::accumulate(elementsCharge.begin(), elementsCharge.end(), 0),
-              (short int)0,
-              (uint16_t)0,
-              elementsChannel,
-              elementsTime,
-              elementsCharge);
+            std::unique_ptr<sTgcPrepData> prdN =  std::make_unique<sTgcPrepData>(
+                                                      clusterId,
+                                                      hash,
+                                                      std::move(localPosition),
+                                                      std::move(rdoList),
+                                                      std::move(covN),
+                                                      cluster.at(0).detectorElement(),
+                                                      std::accumulate(elementsCharge.begin(), elementsCharge.end(), 0),
+                                                      (short int)0,
+                                                      (uint16_t)0,
+                                                      std::move(elementsChannel),
+                                                      std::move(elementsTime),
+                                                      std::move(elementsCharge));
             
-            clustersVect.push_back(prdN);
+            prdN->setAuthor(sTgcPrepData::Author::SimpleClusterBuilder);
+            clustersVect.push_back(std::move(prdN));
         }
     }
 
@@ -120,7 +119,7 @@ StatusCode Muon::SimpleSTgcClusterBuilderTool::getClusters(std::vector<Muon::sTg
 
 //============================================================================
 /// sort the strips if needed
-void SimpleSTgcClusterBuilderTool::dumpStrips( std::vector<Muon::sTgcPrepData>& stripsVect, std::vector<Muon::sTgcPrepData*>& clustersVect ) const {
+void SimpleSTgcClusterBuilderTool::dumpStrips(std::vector<Muon::sTgcPrepData>& stripsVect, std::vector<Muon::sTgcPrepData*>& clustersVect ) const {
     ATH_MSG_INFO("====> Dumping all strips:  ");
     for ( const auto& it : stripsVect ) {
         Identifier stripId = it.identify(); 

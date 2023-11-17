@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -10,25 +10,22 @@
 
 #include "MuonPrepRawData/TgcPrepData.h"
 #include "MuonEventTPCnv/MuonPrepRawData/sTgcPrepDataCnv_p1.h"
+namespace{
+   template <class T> T copy(const T& obj) { return T{obj}; }
+}
 
-Muon::sTgcPrepData
-sTgcPrepDataCnv_p1::
-createsTgcPrepData( const Muon::sTgcPrepData_p1 *persObj,
-                    const Identifier clusId,
-                    const MuonGM::sTgcReadoutElement* detEl,
-                    MsgStream & /**log*/ ) 
-{
-  Amg::Vector2D localPos;
-  localPos[Trk::locX] = persObj->m_locX; 
-  localPos[Trk::locY] = 0.0;
-
+Muon::sTgcPrepData sTgcPrepDataCnv_p1::createsTgcPrepData(const Muon::sTgcPrepData_p1 *persObj,
+                                                          const Identifier clusId,
+                                                          const MuonGM::sTgcReadoutElement* detEl,
+                                                          MsgStream & /**log*/ )  {
+  Amg::Vector2D localPos{persObj->m_locX, 0.};
   // copy the list of identifiers of the cluster
   std::vector<Identifier> rdoList;
   unsigned int clusIdCompact = clusId.get_identifier32().get_compact();
   std::vector<signed char> rdoListPers = persObj->m_rdoList;
   for ( auto& diff : rdoListPers ) {
     Identifier rdoId (clusIdCompact + diff);
-    rdoList.push_back(rdoId);
+    rdoList.push_back(std::move(rdoId));
   }
 
   auto cmat = Amg::MatrixX(1,1);
@@ -36,33 +33,33 @@ createsTgcPrepData( const Muon::sTgcPrepData_p1 *persObj,
     
   Muon::sTgcPrepData data (clusId,
                            0, // collectionHash
-                           localPos,
+                           std::move(localPos),
                            std::move(rdoList),
                            std::move(cmat),
                            detEl,
-			   persObj->m_charge,
-			   persObj->m_time,
-			   persObj->m_bcBitMap,
-			   persObj->m_stripNumbers,
-			   persObj->m_stripTimes,
-			   persObj->m_stripCharges);
+			                     copy(persObj->m_charge),
+			                     copy(persObj->m_time),
+			                     copy(persObj->m_bcBitMap),
+			                     copy(persObj->m_stripNumbers),
+			                     copy(persObj->m_stripTimes),
+			                     copy(persObj->m_stripCharges));
 
   return data;
 }
 
-void sTgcPrepDataCnv_p1::
-persToTrans( const Muon::sTgcPrepData_p1 *persObj, Muon::sTgcPrepData *transObj,MsgStream & log ) 
-{
+void sTgcPrepDataCnv_p1::persToTrans(const Muon::sTgcPrepData_p1 *persObj, 
+                                     Muon::sTgcPrepData *transObj,
+                                     MsgStream & log ) {
   *transObj = createsTgcPrepData (persObj,
                                   transObj->identify(),
                                   transObj->detectorElement(),
                                   log);
 }
 
-void sTgcPrepDataCnv_p1::
-transToPers( const Muon::sTgcPrepData *transObj, Muon::sTgcPrepData_p1 *persObj, MsgStream & )
-{
-    //log << MSG::DEBUG << "sTgcPrepDataCnv_p1::transToPers" << endmsg;
+void sTgcPrepDataCnv_p1::transToPers(const Muon::sTgcPrepData *transObj, 
+                                     Muon::sTgcPrepData_p1 *persObj, 
+                                     MsgStream & ) {
+
   persObj->m_locX         = transObj->localPosition()[Trk::locX];
   persObj->m_errorMat     = transObj->localCovariance()(0,0);
   

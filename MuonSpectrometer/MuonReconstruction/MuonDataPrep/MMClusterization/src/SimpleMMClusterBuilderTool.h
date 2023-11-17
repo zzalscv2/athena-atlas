@@ -1,19 +1,16 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SimpleMMClusterBuilderTool_h
 #define SimpleMMClusterBuilderTool_h
 
-#include <string>
-#include <vector>
-
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
 #include "MMClusterization/IMMClusterBuilderTool.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonPrepRawData/MMPrepData.h"
-
+#include "MuonCondData/NswErrorCalibData.h"
+#include "StoreGate/ReadCondHandleKey.h"
 //
 // Simple clusterization tool for MicroMegas
 //
@@ -26,23 +23,36 @@ namespace Muon {
         
         StatusCode initialize() override;
 
-        StatusCode getClusters(std::vector<Muon::MMPrepData>& stripsVect,
+        StatusCode getClusters(const EventContext& ctx,
+                               std::vector<Muon::MMPrepData>&& stripsVect,
                                std::vector<std::unique_ptr<Muon::MMPrepData>>& clustersVect) const override;
 
         
 
-        StatusCode getCalibratedClusterPosition(const Muon::MMPrepData* cluster, std::vector<NSWCalib::CalibratedStrip>&, const float theta,
-                                                Amg::Vector2D& clusterLocalPosition, Amg::MatrixX& covMatrix) const override;
+        RIO_Author getCalibratedClusterPosition(const EventContext& ctx, 
+                                                const std::vector<NSWCalib::CalibratedStrip>& calibratedStrips,
+                                                const Amg::Vector3D& directionEstimate, 
+                                                Amg::Vector2D& clusterLocalPosition,
+                                                Amg::MatrixX& covMatrix) const override;
 
     private:
-        void getClusterPosition(std::vector<Muon::MMPrepData>& stripsVect, Amg::Vector2D& clusterLocalPosition,
+        StatusCode getClusterPosition(const EventContext& ctx,
+                                      const Identifier& clustId, 
+                                      std::vector<Muon::MMPrepData>& stripsVect, 
+                                      Amg::Vector2D& clusterLocalPosition,
                                       Amg::MatrixX& covMatrix) const;
         
 
-        ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+        ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", 
+                                                            "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+        
+        SG::ReadCondHandleKey<NswErrorCalibData> m_uncertCalibKey{this, "ErrorCalibKey", "NswUncertData",
+                                                                 "Key of the parametrized NSW uncertainties"};
+    
+
         Gaudi::Property<bool> m_writeStripProperties{this, "writeStripProperties", true};
-        Gaudi::Property<double> m_scaleClusterError{this, "scaleClusterError", 5.0};
         Gaudi::Property<uint> m_maxHoleSize{this, "maxHoleSize", 1};
+        Gaudi::Property<unsigned int> m_maxClusSize{this, "maxClusSize", 50};
     };
 
 }  // namespace Muon

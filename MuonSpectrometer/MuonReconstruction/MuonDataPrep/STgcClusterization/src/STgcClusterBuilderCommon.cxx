@@ -16,16 +16,16 @@ Muon::STgcClusterBuilderCommon::STgcClusterBuilderCommon(const sTgcIdHelper& idH
 
 //=============================================================================
 std::array<std::vector<Muon::sTgcPrepData>, 8>
-Muon::STgcClusterBuilderCommon::sortSTGCPrdPerLayer(const std::vector<Muon::sTgcPrepData>& stripPrds) const
-{
+Muon::STgcClusterBuilderCommon::sortSTGCPrdPerLayer(std::vector<Muon::sTgcPrepData>&& stripPrds) const {
 
-  std::array<std::vector<Muon::sTgcPrepData>, 8> stgcPrdsPerLayer;
-    for (const Muon::sTgcPrepData& prd : stripPrds) {
-      Identifier id = prd.identify();
+    
+    std::array<std::vector<Muon::sTgcPrepData>, 8> stgcPrdsPerLayer;
+    for (Muon::sTgcPrepData& prd : stripPrds) {
+      const Identifier id = prd.identify();
       int layer = 4 * (m_stgcIdHelper.multilayer(id) - 1) + (m_stgcIdHelper.gasGap(id) - 1);
       ATH_MSG_DEBUG("Sorting PRD into layer, layer: " << layer << " gas_gap: " << m_stgcIdHelper.gasGap(id)
                     << "multilayer: " << m_stgcIdHelper.multilayer(id));
-      stgcPrdsPerLayer.at(layer).push_back(prd);
+      stgcPrdsPerLayer.at(layer).push_back(std::move(prd));
     }
     
     // sort prds by channel
@@ -34,17 +34,14 @@ Muon::STgcClusterBuilderCommon::sortSTGCPrdPerLayer(const std::vector<Muon::sTgc
                 [this](const sTgcPrepData& a, const sTgcPrepData& b) {
                   return m_stgcIdHelper.channel(a.identify()) < m_stgcIdHelper.channel(b.identify());
                 });
-    }
-  
-  return stgcPrdsPerLayer;
+    }  
+    return stgcPrdsPerLayer;
 }
 
 
 //=============================================================================
-std::vector<std::vector<Muon::sTgcPrepData>> Muon::STgcClusterBuilderCommon::findStripCluster(
-        const std::vector<Muon::sTgcPrepData>& strips,
-        const int maxMissingStrip) const
-{
+std::vector<std::vector<Muon::sTgcPrepData>> Muon::STgcClusterBuilderCommon::findStripCluster(std::vector<Muon::sTgcPrepData>&& strips,
+                                                                                              const int maxMissingStrip) const {
   std::vector<std::vector<Muon::sTgcPrepData>> clusters;
 
   if (strips.empty()) return clusters;
@@ -52,18 +49,16 @@ std::vector<std::vector<Muon::sTgcPrepData>> Muon::STgcClusterBuilderCommon::fin
   // Get the Id of the first strip to verify all the strips are from the same layer
   const Identifier& firstStripId = strips.front().identify();
 
-  for (const Muon::sTgcPrepData& prd : strips) {
+  for (Muon::sTgcPrepData& prd : strips) {
     // If no element has been added to the vector of clusters yet
     if (clusters.empty()) {
-      clusters.push_back(std::vector<Muon::sTgcPrepData>{prd});
+      clusters.emplace_back();
+      clusters.back().push_back(std::move(prd));
       continue;
     }
 
-    Identifier prd_id = prd.identify();
-    if (m_stgcIdHelper.stationName(firstStripId) != m_stgcIdHelper.stationName(prd_id) ||
-        m_stgcIdHelper.stationEta(firstStripId) != m_stgcIdHelper.stationEta(prd_id) ||
-        m_stgcIdHelper.stationPhi(firstStripId) != m_stgcIdHelper.stationPhi(prd_id) ||
-        m_stgcIdHelper.multilayer(firstStripId) != m_stgcIdHelper.multilayer(prd_id) ||
+    const Identifier prd_id = prd.identify();
+    if (m_stgcIdHelper.multilayerID(firstStripId) != m_stgcIdHelper.multilayerID(prd_id) ||
         m_stgcIdHelper.gasGap(firstStripId) != m_stgcIdHelper.gasGap(prd_id) ||
         m_stgcIdHelper.channelType(firstStripId) != m_stgcIdHelper.channelType(prd_id)) {
       ATH_MSG_WARNING("Strips must be separated by layer before attempting to build clusters,"
@@ -72,13 +67,11 @@ std::vector<std::vector<Muon::sTgcPrepData>> Muon::STgcClusterBuilderCommon::fin
     }
 
     // Add another strip to a  vector of clusters
-    std::vector<Muon::sTgcPrepData>& previousCluster = clusters.back();
     if (std::abs(m_stgcIdHelper.channel(prd.identify()) - 
-                 m_stgcIdHelper.channel(previousCluster.back().identify())) <= maxMissingStrip + 1) {
-      previousCluster.push_back(prd);
-    } else {
-      clusters.push_back(std::vector<Muon::sTgcPrepData>{prd});
+                 m_stgcIdHelper.channel(clusters.back().back().identify())) > maxMissingStrip + 1) {
+      clusters.emplace_back();
     }
+    clusters.back().push_back(std::move(prd));   
   }
 
   return clusters;

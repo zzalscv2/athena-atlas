@@ -16,6 +16,7 @@
 #include "MuonCondAlg/NswCalibDbAlg.h"
 #include "MuonCondAlg/NswDcsDbAlg.h"
 #include "MuonCondAlg/NswPassivationDbAlg.h"
+#include "MuonCondAlg/NswUncertDbAlg.h"
 #include "MuonCondAlg/NswAsBuiltCondAlg.h"
 #include "MuonCondAlg/MdtAsBuiltCondAlg.h"
 #include "MuonCondAlg/CscILinesCondAlg.h"
@@ -39,3 +40,4 @@ DECLARE_COMPONENT(NswPassivationDbAlg)
 DECLARE_COMPONENT(NswAsBuiltCondAlg)
 DECLARE_COMPONENT(MdtAsBuiltCondAlg)
 DECLARE_COMPONENT(CscILinesCondAlg)
+DECLARE_COMPONENT(NswUncertDbAlg)

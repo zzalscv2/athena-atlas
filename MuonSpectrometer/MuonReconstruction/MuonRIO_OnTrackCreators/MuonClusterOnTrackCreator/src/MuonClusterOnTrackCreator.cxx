@@ -58,11 +58,8 @@ namespace Muon {
 
         ATH_CHECK(m_idHelperSvc.retrieve());
 
-        if (!m_calibToolNSW.empty()) {        
-            ATH_CHECK(m_clusterBuilderToolMM.retrieve());
-            ATH_CHECK(m_calibToolNSW.retrieve());
-        }
-
+        ATH_CHECK(m_clusterBuilderToolMM.retrieve(DisableTool{m_calibToolNSW.empty()}));
+        ATH_CHECK(m_calibToolNSW.retrieve(DisableTool{m_calibToolNSW.empty()}));
         return StatusCode::SUCCESS;
     }
 
@@ -278,7 +275,7 @@ namespace Muon {
             //***************************
             
             const MMPrepData* mmPRD = static_cast<const MMPrepData*>(&RIO);
-            return new MMClusterOnTrack(mmPRD, locpar, loce, positionAlongStrip);
+            return new MMClusterOnTrack(mmPRD, std::move(locpar), std::move(loce), positionAlongStrip, {}, {});
         }
         
         return MClT;
@@ -315,7 +312,7 @@ namespace Muon {
  
     //================================================================================
     MuonClusterOnTrack* MuonClusterOnTrackCreator::calibratedClusterMMG(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
-        
+        const EventContext& ctx{Gaudi::Hive::currentContext()};
         // Make sure RIO has a detector element
         const MuonGM::MMReadoutElement* mmEL = static_cast<const MuonGM::MMReadoutElement*>(RIO.detectorElement());
         if (!mmEL) {
@@ -343,16 +340,21 @@ namespace Muon {
         // * B-Field correction
         //   calibrate the input strips
         const MMPrepData* mmPRD = static_cast<const MMPrepData*>(&RIO);
+
         std::vector<NSWCalib::CalibratedStrip> calibratedStrips;
-        StatusCode sc = m_calibToolNSW->calibrateClus(Gaudi::Hive::currentContext(), mmPRD, GP, calibratedStrips);
+        StatusCode sc = m_calibToolNSW->calibrateClus(ctx, mmPRD, GP, calibratedStrips);
         if (sc != StatusCode::SUCCESS) {
             ATH_MSG_WARNING("Could not calibrate the MM Cluster in the RIO on track creator");
             return nullptr;
         }
 
         //   calibrate the cluster position along the precision coordinate (updates lp.x())
-        sc = m_clusterBuilderToolMM->getCalibratedClusterPosition(mmPRD, calibratedStrips, GD.theta(), lp, loce);
-        if (sc != StatusCode::SUCCESS) {
+        IMMClusterBuilderTool::RIO_Author rotAuthor = m_clusterBuilderToolMM->getCalibratedClusterPosition(ctx, 
+                                                                                               calibratedStrips, 
+                                                                             NswClustering::toLocal(*mmPRD, GD), 
+                                                                                                      lp, loce);
+                                                                                                                
+        if (rotAuthor == IMMClusterBuilderTool::RIO_Author::unKnownAuthor) {
             ATH_MSG_WARNING("Could not calibrate the MM Cluster in the RIO on track creator");
             return nullptr;
         }
@@ -377,7 +379,8 @@ namespace Muon {
         locpar[Trk::locX] = x_projected;
     
         ATH_MSG_VERBOSE("generating MMClusterOnTrack in MMClusterBuilder");
-        MuonClusterOnTrack* cluster = new MMClusterOnTrack(mmPRD, locpar, loce, lp[Trk::locY]);
+        MMClusterOnTrack* cluster = new MMClusterOnTrack(mmPRD, std::move(locpar), std::move(loce), lp[Trk::locY], {}, {});
+        cluster->setAuthor(rotAuthor);
     
         return cluster;
     }

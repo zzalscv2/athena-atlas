@@ -76,11 +76,11 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   Muon::MMPrepData trans1 (Identifier (1234),
                            IdentifierHash (1234),
-                           locpos,
-                           rdoList,
-                           cov,
+                           std::move(locpos),
+                           std::move(rdoList),
+                           std::move(cov),
                            nullptr);
-  trans1.setAuthor (Muon::MMPrepData::ConstraintuTPCClusterBuilder);
+  trans1.setAuthor (Muon::MMPrepData::Author::SimpleClusterBuilder);
                           
   testit (trans1);
 }

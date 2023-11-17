@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -12,13 +12,16 @@
 #include "MuonEventTPCnv/MuonRIO_OnTrack/MM_ClusterOnTrackCnv_p1.h"
 #include "TrkEventTPCnv/helpers/EigenHelpers.h"
 
-void MM_ClusterOnTrackCnv_p1::
-persToTrans( const Muon::MM_ClusterOnTrack_p1 *persObj,
-	     Muon::MMClusterOnTrack *transObj, MsgStream &log )
-{
-   ElementLinkToIDC_MM_Container rio;
-   m_elCnv.persToTrans(&persObj->m_prdLink,&rio,log);  
+namespace{
+   template <class T> T copy(const T& obj) { return T{obj}; }
+}
 
+void MM_ClusterOnTrackCnv_p1::persToTrans(const Muon::MM_ClusterOnTrack_p1 *persObj,
+	                                        Muon::MMClusterOnTrack *transObj, 
+                                          MsgStream &log ) {
+   
+   ElementLinkToIDC_MM_Container rio;
+   m_elCnv.persToTrans(&persObj->m_prdLink,&rio,log);
    Trk::LocalParameters localParams;
    fillTransFromPStore( &m_localParCnv, persObj->m_localParams, &localParams, log );
 
@@ -38,14 +41,13 @@ persToTrans( const Muon::MM_ClusterOnTrack_p1 *persObj,
 
 
    *transObj = Muon::MMClusterOnTrack (rio,
-                                       localParams,
-                                       localCovariance,
+                                       std::move(localParams),
+                                       std::move(localCovariance),
                                        Identifier (persObj->m_id),
                                        nullptr,
-                                       persObj->m_positionAlongStrip,
-                                       persObj->m_stripDriftDists,
-                                       stripDriftDistErrors
-                                       );
+                                       copy(persObj->m_positionAlongStrip),
+                                       copy(persObj->m_stripDriftDists),
+                                       std::move(stripDriftDistErrors));
 
    // Attempt to call supertool to fill in detElements
    m_eventCnvTool->recreateRIO_OnTrack(transObj);
@@ -56,13 +58,10 @@ persToTrans( const Muon::MM_ClusterOnTrack_p1 *persObj,
 }
 
 
-void MM_ClusterOnTrackCnv_p1::
-transToPers( const Muon::MMClusterOnTrack *transObj,
-	     Muon::MM_ClusterOnTrack_p1 *persObj, MsgStream &log ) 
-{
+void MM_ClusterOnTrackCnv_p1::transToPers(const Muon::MMClusterOnTrack *transObj,
+	                                        Muon::MM_ClusterOnTrack_p1 *persObj, 
+                                          MsgStream &log ) {
   // Prepare ELs
-  // std::cout<<"BLAH! MM_ClusterOnTrackCnv_p1::transToPers"<<std::endl;
-  
    Trk::IEventCnvSuperTool::ELKey_t key;
    Trk::IEventCnvSuperTool::ELIndex_t index;
    m_eventCnvTool->prepareRIO_OnTrackLink(transObj, key, index);

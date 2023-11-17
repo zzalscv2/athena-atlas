@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -9,17 +9,16 @@
 //-----------------------------------------------------------------------------
 
 #include "MuonEventTPCnv/MuonPrepRawData/sTgcPrepDataCnv_p2.h"
+namespace {
+   template <class T> T copy(const T& obj) { return T{obj}; }
+}
 
-Muon::sTgcPrepData
-sTgcPrepDataCnv_p2::
-createsTgcPrepData( const Muon::sTgcPrepData_p2 *persObj,
-                    const Identifier clusId,
-                    const MuonGM::sTgcReadoutElement* detEl,
-                    MsgStream & /**log*/ ) 
-{
-  Amg::Vector2D localPos;
-  localPos[Trk::locX] = persObj->m_locX; 
-  localPos[Trk::locY] = persObj->m_locY;
+Muon::sTgcPrepData sTgcPrepDataCnv_p2::createsTgcPrepData(const Muon::sTgcPrepData_p2 *persObj,
+                                                          const Identifier clusId,
+                                                          const MuonGM::sTgcReadoutElement* detEl,
+                                                          MsgStream & /**log*/ ) {
+  Amg::Vector2D localPos{persObj->m_locX, persObj->m_locY};
+
 
   // copy the list of identifiers of the cluster
   std::vector<Identifier> rdoList;
@@ -35,32 +34,32 @@ createsTgcPrepData( const Muon::sTgcPrepData_p2 *persObj,
     
   Muon::sTgcPrepData data (clusId,
                            0, // collectionHash
-                           localPos,
+                           std::move(localPos),
                            std::move(rdoList),
                            std::move(cmat),
                            detEl,
-			   persObj->m_charge,
-			   persObj->m_time,
-			   persObj->m_bcBitMap,
-			   persObj->m_stripNumbers,
-			   persObj->m_stripTimes,
-			   persObj->m_stripCharges);
+			                     copy(persObj->m_charge),
+			                     copy(persObj->m_time),
+			                     copy(persObj->m_bcBitMap),
+			                     copy(persObj->m_stripNumbers),
+			                     copy(persObj->m_stripTimes),
+			                     copy(persObj->m_stripCharges));
 
   return data;
 }
 
-void sTgcPrepDataCnv_p2::
-persToTrans( const Muon::sTgcPrepData_p2 *persObj, Muon::sTgcPrepData *transObj,MsgStream & log ) 
-{
+void sTgcPrepDataCnv_p2::persToTrans(const Muon::sTgcPrepData_p2 *persObj, 
+                                     Muon::sTgcPrepData *transObj,
+                                     MsgStream & log ) {
   *transObj = createsTgcPrepData (persObj,
                                   transObj->identify(),
                                   transObj->detectorElement(),
                                   log);
 }
 
-void sTgcPrepDataCnv_p2::
-transToPers( const Muon::sTgcPrepData *transObj, Muon::sTgcPrepData_p2 *persObj, MsgStream & )
-{
+void sTgcPrepDataCnv_p2::transToPers(const Muon::sTgcPrepData *transObj, 
+                                     Muon::sTgcPrepData_p2 *persObj, 
+                                     MsgStream & ) {
   persObj->m_locX         = transObj->localPosition()[Trk::locX];
   persObj->m_locY         = transObj->localPosition()[Trk::locY];
   persObj->m_errorMat     = transObj->localCovariance()(0,0);

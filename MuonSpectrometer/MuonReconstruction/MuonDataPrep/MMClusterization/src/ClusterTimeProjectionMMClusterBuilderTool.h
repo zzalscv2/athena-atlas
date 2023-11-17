@@ -1,17 +1,17 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ClusterTimeProjectionMMClusterBuilderTool_h
 #define ClusterTimeProjectionMMClusterBuilderTool_h
 
-#include <string>
-#include <vector>
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
 #include "MMClusterization/IMMClusterBuilderTool.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonPrepRawData/MMPrepData.h"
+#include "MuonCondData/NswErrorCalibData.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include <array>
 
 namespace Muon {
     class ClusterTimeProjectionMMClusterBuilderTool : virtual public IMMClusterBuilderTool, public AthAlgTool {
@@ -21,33 +21,40 @@ namespace Muon {
         virtual ~ClusterTimeProjectionMMClusterBuilderTool() = default;
         StatusCode initialize() override;
 
-        StatusCode getClusters(std::vector<Muon::MMPrepData>& MMprds,
-                               std::vector<std::unique_ptr<Muon::MMPrepData>>& clustersVec) const override;
+        StatusCode getClusters(const EventContext& ctx,
+                              std::vector<Muon::MMPrepData>&& stripsVect,
+                              std::vector<std::unique_ptr<Muon::MMPrepData>>& clustersVect) const override;
 
-        virtual StatusCode getCalibratedClusterPosition(const Muon::MMPrepData* cluster, std::vector<NSWCalib::CalibratedStrip>&,
-                                                        const float theta, Amg::Vector2D& clusterLocalPosition,
+        virtual RIO_Author getCalibratedClusterPosition(const EventContext& ctx, 
+                                                        const std::vector<NSWCalib::CalibratedStrip>& calibratedStrips,
+                                                        const Amg::Vector3D& directionEstimate, 
+                                                        Amg::Vector2D& clusterLocalPosition,
                                                         Amg::MatrixX& covMatrix) const override;
 
     private:
+        using LaySortedPrds = std::array<std::vector<Muon::MMPrepData>, 8>;
         /// Muon Detector Descriptor
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-        bool m_writeStripProperties;
-        uint m_maxHoleSize;
+        
+        SG::ReadCondHandleKey<NswErrorCalibData> m_uncertCalibKey{this, "ErrorCalibKey", "NswUncertData",
+                                                                 "Key of the parametrized NSW uncertainties"};
 
-        StatusCode sortHitsToLayer(const std::vector<Muon::MMPrepData>& MMprds,
-                                   std::vector<std::vector<Muon::MMPrepData>>& prdsPerLayer) const;
+        Gaudi::Property<bool> m_writeStripProperties{this, "writeStripProperties" , true};
+        Gaudi::Property<uint> m_maxHoleSize{this, "maxHoleSize", 1};
 
-        StatusCode clusterLayer(const std::vector<Muon::MMPrepData>& MMPrdsPerLayer, std::vector<std::vector<uint>>& idxClusters) const;
+        LaySortedPrds sortHitsToLayer(std::vector<Muon::MMPrepData>&& MMprds) const;
 
-        StatusCode getClusterPositionPRD(const std::vector<Identifier>& ids, const std::vector<float>& stripsPos,
-                                         const std::vector<float>& driftDists, const std::vector<Amg::MatrixX>& driftDistErrors,
-                                         const std::vector<int>& charges, const float thetaEstimate, double& clusterPosition,
-                                         double& clusterPositionErrorSq) const;
+        std::vector<std::vector<uint>> clusterLayer(const std::vector<Muon::MMPrepData>& MMPrdsPerLayer) const;
 
-        StatusCode writeClusterPrd(const std::vector<Muon::MMPrepData>& MMPrdsOfLayer, const std::vector<uint>& idxCluster,
-                                   const double& clustersPosition, const double& clustersPositionErrorSq,
-                                   std::vector<std::unique_ptr<Muon::MMPrepData>>& clustersVec) const;
+        std::pair<double, double> getClusterPositionPRD(const std::vector<NSWCalib::CalibratedStrip>& features, 
+                                                        const Amg::Vector3D& thetaEstimate) const;
+
+        StatusCode writeClusterPrd(const EventContext& ctx,
+                                   const std::vector<Muon::MMPrepData>& constituents, 
+                                   const double clustersPosition, 
+                                   const double clustersPositionErrorSq,
+                                   std::vector<std::unique_ptr<Muon::MMPrepData>>& mergedClust) const;
 
         uint channel(const Identifier& id) const { return m_idHelperSvc->mmIdHelper().channel(id); }
         uint channel(const MMPrepData& strip) const { return channel(strip.identify()); }
