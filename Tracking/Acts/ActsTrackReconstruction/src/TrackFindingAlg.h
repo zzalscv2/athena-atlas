@@ -40,7 +40,7 @@
 #include <mutex>
 
 // Handle Keys
-#include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/CondHandleKeyArray.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "ActsEvent/TrackContainerHandle.h"
 
@@ -76,17 +76,12 @@ namespace ActsTrk
     ToolHandle<ActsTrk::ITrackStatePrinter> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
 
     // Handle Keys
-    SG::ReadHandleKey<xAOD::PixelClusterContainer> m_pixelClusterContainerKey{this, "PixelClusterContainerKey", "", "input pixel clusters"};
-    SG::ReadHandleKey<xAOD::StripClusterContainer> m_stripClusterContainerKey{this, "StripClusterContainerKey", "", "input strip clusters"};
+    SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_uncalibratedMeasurementContainerKeys{this, "UncalibratedMeasurementContainerKeys", {}, "input cluster collections"};
     /// To get detector elements condition data
-    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetectorElements", "", "input SiDetectorElementCollection for Pixel"};
-    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey{this, "StripDetectorElements", "", "input SiDetectorElementCollection for Strip"};
+    SG::ReadCondHandleKeyArray<InDetDD::SiDetectorElementCollection> m_detEleCollKeys{this, "DetectorElementCollectionKeys", {}, "input SiDetectorElementCollection"};
 
-    SG::ReadHandleKey<ActsTrk::SeedContainer> m_pixelSeedsKey{this, "PixelSeeds", "", "Pixel Seeds"};
-    SG::ReadHandleKey<ActsTrk::SeedContainer> m_stripSeedsKey{this, "StripSeeds", "", "Strip Seeds"};
-
-    SG::ReadHandleKey<ActsTrk::BoundTrackParametersContainer> m_pixelEstimatedTrackParametersKey{this, "PixelEstimatedTrackParameters", "", "estimated track parameters from pixel seeding"};
-    SG::ReadHandleKey<ActsTrk::BoundTrackParametersContainer> m_stripEstimatedTrackParametersKey{this, "StripEstimatedTrackParameters", "", "estimated track parameters from strip seeding"};
+    SG::ReadHandleKeyArray<ActsTrk::SeedContainer> m_seedContainerKeys{this, "SeedContainerKeys", {}, "Seed containers"};
+    SG::ReadHandleKeyArray<ActsTrk::BoundTrackParametersContainer> m_estimatedTrackParametersKeys{this, "EstimatedTrackParametersKeys", {}, "containers of estimated track parameters from seeding"};
 
     ActsTrk::MutableTrackContainerHandle<ActsTrk::TrackFindingAlg> m_tracksBackendHandle{this, "", "Tracks"};
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer", "Output track collection (ActsTrk variant)"};
@@ -113,7 +108,7 @@ namespace ActsTrk
 
     // configuration of statistics tables
     Gaudi::Property<std::vector<float>> m_statEtaBins{this, "StatisticEtaBins", {-4, -2.6, -2, 0, 2., 2.6, 4}, "Gather statistics separately for these bins."};
-    Gaudi::Property<std::vector<std::string>> m_seedLables{this, "SeedLabels", {"Pixel", "Strip"}, "Empty or one label per seed key used in outputs"};
+    Gaudi::Property<std::vector<std::string>> m_seedLabels{this, "SeedLabels", {}, "One label per seed key used in outputs"};
     Gaudi::Property<bool> m_dumpAllStatEtaBins{this, "DumpEtaBinsForAll", false, "Dump eta bins of all statistics counter."};
 
     enum EStat : std::size_t
@@ -172,16 +167,9 @@ namespace ActsTrk
     void copyStats(const EventStats &event_stat) const;
     void printStatTables() const;
 
-    enum ECategories : std::size_t
+    std::size_t nSeedCollections() const
     {
-      kPixelSeeds,
-      kStripSeeds,
-      kNCategories
-    };
-
-    static std::size_t nSeedCollections()
-    {
-      return kNCategories;
+      return m_seedLabels.size();
     }
     std::size_t seedCollectionStride() const
     {

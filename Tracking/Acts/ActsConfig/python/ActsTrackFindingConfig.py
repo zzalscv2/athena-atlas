@@ -7,21 +7,21 @@ from ActsInterop import UnitConstants
 
 # Tools
 
+def isdet(flags, pixel, strip):
+    keys = []
+    if flags.Detector.EnableITkPixel:
+        keys += pixel
+    if flags.Detector.EnableITkStrip:
+        keys += strip
+    return keys
 
 def ActsTrackStatePrinterCfg(
     flags, name: str = "TrackStatePrinter", **kwargs
 ) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    kwargs.setdefault(
-        "InputSpacePoints",
-        [
-            "ITkPixelSpacePoints",
-            "ITkStripSpacePoints",
-            "ITkStripOverlapSpacePoints",
-        ],
-    )
-    kwargs.setdefault("spacePointType", [0, 1, 1])
+    kwargs.setdefault("InputSpacePoints", isdet(flags, ["ITkPixelSpacePoints"], ["ITkStripSpacePoints", "ITkStripOverlapSpacePoints"]))
+    kwargs.setdefault("spacePointType", isdet(flags, [0], [1, 1] if flags.Detector.EnableITkPixel else [0, 0]))
 
     from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
     kwargs.setdefault(
@@ -40,21 +40,11 @@ def ActsTrackFindingCfg(flags,
                         **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    if flags.Detector.EnableITkPixel:
-        kwargs.setdefault("PixelClusterContainerKey", "ITkPixelClusters")
-        kwargs.setdefault("PixelDetectorElements",
-                          "ITkPixelDetectorElementCollection")
-        kwargs.setdefault("PixelEstimatedTrackParameters",
-                          "ITkPixelEstimatedTrackParams")
-        kwargs.setdefault('PixelSeeds', 'ITkPixelSeeds')
-
-    if flags.Detector.EnableITkStrip:
-        kwargs.setdefault("StripClusterContainerKey", "ITkStripClusters")
-        kwargs.setdefault("StripDetectorElements",
-                          "ITkStripDetectorElementCollection")
-        kwargs.setdefault("StripEstimatedTrackParameters",
-                          "ITkStripEstimatedTrackParams")
-        kwargs.setdefault('StripSeeds', 'ITkStripSeeds')
+    kwargs.setdefault("SeedLabels", isdet(flags, ["PPP"], ["SSS"]))
+    kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, ["ITkPixelClusters"], ["ITkStripClusters"]))
+    kwargs.setdefault("DetectorElementCollectionKeys", isdet(flags, ["ITkPixelDetectorElementCollection"], ["ITkStripDetectorElementCollection"]))
+    kwargs.setdefault("EstimatedTrackParametersKeys", isdet(flags, ["ITkPixelEstimatedTrackParams"], ["ITkStripEstimatedTrackParams"]))
+    kwargs.setdefault("SeedContainerKeys", isdet(flags, ["ITkPixelSeeds"], ["ITkStripSeeds"]))
 
     kwargs.setdefault('ACTSTracksLocation', 'ActsTracks')
 
@@ -111,7 +101,6 @@ def ActsTrackFindingCfg(flags,
             "TrackStatePrinter",
             acc.popToolsAndMerge(ActsTrackStatePrinterCfg(flags)),
         )
-    kwargs.setdefault("SeedLabels", ["PPP", "SSS"])
     # there is always an over and underflow bin so the first bin will be 0. - 0.5 the last bin 3.5 - inf.
     # if all eta bins are >=0. the counter will be categorized by abs(eta) otherwise eta
     kwargs.setdefault("StatisticEtaBins", [eta/10. for eta in range(5, 40, 5)]) # eta 0.0 - 4.0 in steps of 0.5

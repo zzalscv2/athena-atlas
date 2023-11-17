@@ -81,18 +81,42 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_ptMin);
     ATH_MSG_DEBUG("   " << m_ptMax);
     ATH_MSG_DEBUG("   " << m_minMeasurements);
+    ATH_MSG_DEBUG("   " << m_statEtaBins);
+    ATH_MSG_DEBUG("   " << m_seedLabels);
+    ATH_MSG_DEBUG("   " << m_dumpAllStatEtaBins);
 
     // Read and Write handles
-    ATH_CHECK(m_pixelSeedsKey.initialize(SG::AllowEmpty));
-    ATH_CHECK(m_stripSeedsKey.initialize(SG::AllowEmpty));
-    ATH_CHECK(m_pixelClusterContainerKey.initialize(SG::AllowEmpty));
-    ATH_CHECK(m_stripClusterContainerKey.initialize(SG::AllowEmpty));
-    ATH_CHECK(m_pixelDetEleCollKey.initialize(SG::AllowEmpty));
-    ATH_CHECK(m_stripDetEleCollKey.initialize(SG::AllowEmpty));
-    ATH_CHECK(m_pixelEstimatedTrackParametersKey.initialize(SG::AllowEmpty));
-    ATH_CHECK(m_stripEstimatedTrackParametersKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_seedContainerKeys.initialize());
+    ATH_CHECK(m_uncalibratedMeasurementContainerKeys.initialize());
+    ATH_CHECK(m_detEleCollKeys.initialize());
+    ATH_CHECK(m_estimatedTrackParametersKeys.initialize());
     ATH_CHECK(m_tracksBackendHandle.initialize());
     ATH_CHECK(m_trackContainerKey.initialize());
+
+    if (m_estimatedTrackParametersKeys.size() != m_seedLabels.size())
+    {
+      ATH_MSG_FATAL("There are " << m_seedLabels.size() << " SeedLabels, but " << m_estimatedTrackParametersKeys.size() << " EstimatedTrackParametersKeys");
+      return StatusCode::FAILURE;
+    }
+
+    if (m_seedContainerKeys.size() != m_estimatedTrackParametersKeys.size())
+    {
+      ATH_MSG_FATAL("There are " << m_estimatedTrackParametersKeys.size() << " EstimatedTrackParametersKeys, but " << m_seedContainerKeys.size() << " SeedContainerKeys");
+      return StatusCode::FAILURE;
+    }
+
+    // @TODO can we remove this requirement to allow PPP seeds with pixel+strip measurements, or even PPS seeds?
+    if (m_seedContainerKeys.size() != m_uncalibratedMeasurementContainerKeys.size())
+    {
+      ATH_MSG_FATAL("There are " << m_uncalibratedMeasurementContainerKeys.size() << " UncalibratedMeasurementContainerKeys, but " << m_seedContainerKeys.size() << " SeedContainerKeys");
+      return StatusCode::FAILURE;
+    }
+
+    if (m_detEleCollKeys.size() != m_uncalibratedMeasurementContainerKeys.size())
+    {
+      ATH_MSG_FATAL("There are " << m_uncalibratedMeasurementContainerKeys.size() << " UncalibratedMeasurementContainerKeys, but " << m_detEleCollKeys.size() << " DetEleCollKeys");
+      return StatusCode::FAILURE;
+    }
 
     ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
     ATH_CHECK(m_trackingGeometryTool.retrieve());
@@ -204,152 +228,103 @@ namespace ActsTrk
     // ================================================== //
 
     // SEED PARAMETERS
-    const ActsTrk::BoundTrackParametersContainer *pixelEstimatedTrackParameters = nullptr;
-    if (!m_pixelEstimatedTrackParametersKey.empty())
+    std::vector<const ActsTrk::BoundTrackParametersContainer *> estimatedTrackParametersContainers;
+    estimatedTrackParametersContainers.reserve(m_estimatedTrackParametersKeys.size());
+    for (const auto &estimatedTrackParametersKey : m_estimatedTrackParametersKeys)
     {
-      ATH_MSG_DEBUG("Reading input collection with key " << m_pixelEstimatedTrackParametersKey.key());
-      SG::ReadHandle<ActsTrk::BoundTrackParametersContainer> pixelEstimatedTrackParametersHandle = SG::makeHandle(m_pixelEstimatedTrackParametersKey, ctx);
-      ATH_CHECK(pixelEstimatedTrackParametersHandle.isValid());
-      pixelEstimatedTrackParameters = pixelEstimatedTrackParametersHandle.get();
-      ATH_MSG_DEBUG("Retrieved " << pixelEstimatedTrackParameters->size() << " input elements from key " << m_pixelEstimatedTrackParametersKey.key());
-    }
-
-    const ActsTrk::BoundTrackParametersContainer *stripEstimatedTrackParameters = nullptr;
-    if (!m_stripEstimatedTrackParametersKey.empty())
-    {
-      ATH_MSG_DEBUG("Reading input collection with key " << m_stripEstimatedTrackParametersKey.key());
-      SG::ReadHandle<ActsTrk::BoundTrackParametersContainer> stripEstimatedTrackParametersHandle = SG::makeHandle(m_stripEstimatedTrackParametersKey, ctx);
-      ATH_CHECK(stripEstimatedTrackParametersHandle.isValid());
-      stripEstimatedTrackParameters = stripEstimatedTrackParametersHandle.get();
-      ATH_MSG_DEBUG("Retrieved " << stripEstimatedTrackParameters->size() << " input elements from key " << m_stripEstimatedTrackParametersKey.key());
+      ATH_MSG_DEBUG("Reading input collection with key " << estimatedTrackParametersKey.key());
+      SG::ReadHandle<ActsTrk::BoundTrackParametersContainer> estimatedTrackParametersHandle = SG::makeHandle(estimatedTrackParametersKey, ctx);
+      ATH_CHECK(estimatedTrackParametersHandle.isValid());
+      estimatedTrackParametersContainers.push_back(estimatedTrackParametersHandle.cptr());
+      ATH_MSG_DEBUG("Retrieved " << estimatedTrackParametersContainers.back()->size() << " input elements from key " << estimatedTrackParametersKey.key());
     }
 
     // SEED TRIPLETS
-    const ActsTrk::SeedContainer *pixelSeeds = nullptr;
-    if (!m_pixelSeedsKey.empty())
+    std::vector<const ActsTrk::SeedContainer *> seedContainers;
+    seedContainers.reserve(m_seedContainerKeys.size());
+    std::size_t total_seeds = 0;
+    for (const auto &seedContainerKey : m_seedContainerKeys)
     {
-      ATH_MSG_DEBUG("Reading input collection with key " << m_pixelSeedsKey.key());
-      SG::ReadHandle<ActsTrk::SeedContainer> pixelSeedsHandle = SG::makeHandle(m_pixelSeedsKey, ctx);
-      ATH_CHECK(pixelSeedsHandle.isValid());
-      pixelSeeds = pixelSeedsHandle.get();
-      ATH_MSG_DEBUG("Retrieved " << pixelSeeds->size() << " input elements from key " << m_pixelSeedsKey.key());
-    }
-
-    const ActsTrk::SeedContainer *stripSeeds = nullptr;
-    if (!m_stripSeedsKey.empty())
-    {
-      ATH_MSG_DEBUG("Reading input collection with key " << m_stripSeedsKey.key());
-      SG::ReadHandle<ActsTrk::SeedContainer> stripSeedsHandle = SG::makeHandle(m_stripSeedsKey, ctx);
-      ATH_CHECK(stripSeedsHandle.isValid());
-      stripSeeds = stripSeedsHandle.get();
-      ATH_MSG_DEBUG("Retrieved " << stripSeeds->size() << " input elements from key " << m_stripSeedsKey.key());
+      ATH_MSG_DEBUG("Reading input collection with key " << seedContainerKey.key());
+      SG::ReadHandle<ActsTrk::SeedContainer> seedsHandle = SG::makeHandle(seedContainerKey, ctx);
+      ATH_CHECK(seedsHandle.isValid());
+      seedContainers.push_back(seedsHandle.cptr());
+      ATH_MSG_DEBUG("Retrieved " << seedContainers.back()->size() << " input elements from key " << seedContainerKey.key());
+      total_seeds += seedContainers.back()->size();
     }
 
     // MEASUREMENTS
-    const xAOD::PixelClusterContainer *pixelClusterContainer = nullptr;
-    if (!m_pixelClusterContainerKey.empty())
+    std::vector<const xAOD::UncalibratedMeasurementContainer *> uncalibratedMeasurementContainers;
+    uncalibratedMeasurementContainers.reserve(m_uncalibratedMeasurementContainerKeys.size());
+    std::vector<xAOD::DetectorIDHashType> max_hash;
+    xAOD::DetectorIDHashType total_hash = 0;
+    max_hash.reserve(m_uncalibratedMeasurementContainerKeys.size());
+    for (const auto &uncalibratedMeasurementContainerKey : m_uncalibratedMeasurementContainerKeys)
     {
-      ATH_MSG_DEBUG("Reading input collection with key " << m_pixelClusterContainerKey.key());
-      SG::ReadHandle<xAOD::PixelClusterContainer> pixelClusterContainerHandle = SG::makeHandle(m_pixelClusterContainerKey, ctx);
-      ATH_CHECK(pixelClusterContainerHandle.isValid());
-      pixelClusterContainer = pixelClusterContainerHandle.get();
-      ATH_MSG_DEBUG("Retrieved " << pixelClusterContainer->size() << " input elements from key " << m_pixelClusterContainerKey.key());
-    }
+      ATH_MSG_DEBUG("Reading input collection with key " << uncalibratedMeasurementContainerKey.key());
+      SG::ReadHandle<xAOD::UncalibratedMeasurementContainer> uncalibratedMeasurementContainerHandle = SG::makeHandle(uncalibratedMeasurementContainerKey, ctx);
+      ATH_CHECK(uncalibratedMeasurementContainerHandle.isValid());
+      uncalibratedMeasurementContainers.push_back(uncalibratedMeasurementContainerHandle.cptr());
+      ATH_MSG_DEBUG("Retrieved " << uncalibratedMeasurementContainers.back()->size() << " input elements from key " << uncalibratedMeasurementContainerKey.key());
 
-    const xAOD::StripClusterContainer *stripClusterContainer = nullptr;
-    if (!m_stripClusterContainerKey.empty())
-    {
-      ATH_MSG_DEBUG("Reading input collection with key " << m_stripClusterContainerKey.key());
-      SG::ReadHandle<xAOD::StripClusterContainer> stripClusterContainerHandle = SG::makeHandle(m_stripClusterContainerKey, ctx);
-      ATH_CHECK(stripClusterContainerHandle.isValid());
-      stripClusterContainer = stripClusterContainerHandle.get();
-      ATH_MSG_DEBUG("Retrieved " << stripClusterContainer->size() << " input elements from key " << m_stripClusterContainerKey.key());
-    }
-
-    const InDetDD::SiDetectorElementCollection *pixelDetEleColl = nullptr;
-    if (!m_pixelDetEleCollKey.empty())
-    {
-      ATH_MSG_DEBUG("Reading input condition data with key " << m_pixelDetEleCollKey.key());
-      SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleCollHandle(m_pixelDetEleCollKey, ctx);
-      ATH_CHECK(pixelDetEleCollHandle.isValid());
-      pixelDetEleColl = pixelDetEleCollHandle.retrieve();
-      if (pixelDetEleColl == nullptr)
-      {
-        ATH_MSG_FATAL(m_pixelDetEleCollKey.fullKey() << " is not available.");
-        return StatusCode::FAILURE;
-      }
-      ATH_MSG_DEBUG("Retrieved " << pixelDetEleColl->size() << " input condition elements from key " << m_pixelDetEleCollKey.key());
-    }
-
-    const InDetDD::SiDetectorElementCollection *stripDetEleColl = nullptr;
-    if (!m_stripDetEleCollKey.empty())
-    {
-      ATH_MSG_DEBUG("Reading input condition data with key " << m_stripDetEleCollKey.key());
-      SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> stripDetEleCollHandle(m_stripDetEleCollKey, ctx);
-      ATH_CHECK(stripDetEleCollHandle.isValid());
-      stripDetEleColl = stripDetEleCollHandle.retrieve();
-      if (stripDetEleColl == nullptr)
-      {
-        ATH_MSG_FATAL(m_stripDetEleCollKey.fullKey() << " is not available.");
-        return StatusCode::FAILURE;
-      }
-      ATH_MSG_DEBUG("Retrieved " << stripDetEleColl->size() << " input condition elements from key " << m_stripDetEleCollKey.key());
-    }
-
-    std::array<xAOD::DetectorIDHashType, 3> max_hash{};
-    {
-      std::pair<xAOD::DetectorIDHashType, bool> max_hash_ordered = getMaxHashAndCheckOrder(*pixelClusterContainer);
+      std::pair<xAOD::DetectorIDHashType, bool> max_hash_ordered = getMaxHashAndCheckOrder(*uncalibratedMeasurementContainers.back());
       if (!max_hash_ordered.second)
       {
-        ATH_MSG_ERROR("Measurements " << m_pixelClusterContainerKey.key() << " not ordered by identifier hash.");
+        ATH_MSG_ERROR("Measurements " << uncalibratedMeasurementContainerKey.key() << " not ordered by identifier hash.");
         return StatusCode::FAILURE;
       }
-      static_assert(static_cast<std::size_t>(xAOD::UncalibMeasType::PixelClusterType) < max_hash.size());
-      max_hash[static_cast<std::size_t>(xAOD::UncalibMeasType::PixelClusterType)] = max_hash_ordered.first;
+      max_hash.push_back(max_hash_ordered.first);
+      total_hash += max_hash_ordered.first;
     }
+
+    std::vector<const InDetDD::SiDetectorElementCollection *> detEleColl;
+    detEleColl.reserve(m_detEleCollKeys.size());
+    for (const auto &detEleCollKey : m_detEleCollKeys)
     {
-      std::pair<xAOD::DetectorIDHashType, bool> max_hash_ordered = getMaxHashAndCheckOrder(*stripClusterContainer);
-      if (!max_hash_ordered.second)
+      ATH_MSG_DEBUG("Reading input condition data with key " << detEleCollKey.key());
+      SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> detEleCollHandle(detEleCollKey, ctx);
+      ATH_CHECK(detEleCollHandle.isValid());
+      detEleColl.push_back(detEleCollHandle.retrieve());
+      if (detEleColl.back() == nullptr)
       {
-        ATH_MSG_ERROR("Measurements " << m_stripClusterContainerKey.key() << " not ordered by identifier hash.");
+        ATH_MSG_FATAL(detEleCollKey.fullKey() << " is not available.");
         return StatusCode::FAILURE;
       }
-      static_assert(static_cast<std::size_t>(xAOD::UncalibMeasType::StripClusterType) < max_hash.size());
-      max_hash[static_cast<std::size_t>(xAOD::UncalibMeasType::StripClusterType)] = max_hash_ordered.first;
+      ATH_MSG_DEBUG("Retrieved " << detEleColl.back()->size() << " input condition elements from key " << detEleCollKey.key());
     }
 
     // @TODO make this condition data
-    std::vector<Acts::GeometryIdentifier> geo_ids;
     std::array<std::vector<const Acts::Surface *>, 4> acts_surfaces;
-    geo_ids.reserve(max_hash[static_cast<std::size_t>(xAOD::UncalibMeasType::PixelClusterType)] + max_hash[static_cast<std::size_t>(xAOD::UncalibMeasType::StripClusterType)]);
-    acts_surfaces.at(static_cast<std::size_t>(xAOD::UncalibMeasType::PixelClusterType))
-        .reserve(max_hash[static_cast<std::size_t>(xAOD::UncalibMeasType::PixelClusterType)]);
-    acts_surfaces.at(static_cast<std::size_t>(xAOD::UncalibMeasType::StripClusterType))
-        .reserve(max_hash[static_cast<std::size_t>(xAOD::UncalibMeasType::StripClusterType)]);
-    gatherGeoIds(*m_ATLASConverterTool, *pixelDetEleColl, geo_ids, acts_surfaces.at(static_cast<std::size_t>(xAOD::UncalibMeasType::PixelClusterType)));
-    gatherGeoIds(*m_ATLASConverterTool, *stripDetEleColl, geo_ids, acts_surfaces.at(static_cast<std::size_t>(xAOD::UncalibMeasType::StripClusterType)));
+    std::vector<Acts::GeometryIdentifier> geo_ids;
+    geo_ids.reserve(total_hash);
+    std::vector<xAOD::UncalibMeasType> measType(uncalibratedMeasurementContainers.size(), xAOD::UncalibMeasType::Other);
+    for (std::size_t icontainer = 0; icontainer < uncalibratedMeasurementContainers.size(); ++icontainer)
+    {
+      if (uncalibratedMeasurementContainers[icontainer]->empty())
+        continue;
+      // @TODO can we get the type from the container base?
+      xAOD::UncalibMeasType typ = uncalibratedMeasurementContainers[icontainer]->at(0)->type();
+      measType[icontainer] = typ;
+      auto ind = static_cast<std::size_t>(typ);
+      acts_surfaces.at(ind).reserve(max_hash[icontainer]);
+      gatherGeoIds(*m_ATLASConverterTool, *detEleColl[icontainer], geo_ids, acts_surfaces.at(ind));
+    }
     std::sort(geo_ids.begin(), geo_ids.end());
 
     TrackingSurfaceHelper tracking_surface_helper(std::move(acts_surfaces));
-    TrackFindingMeasurements measurements(geo_ids,
-                                          !m_trackStatePrinter.empty());
 
-    DuplicateSeedDetector duplicateSeedDetector(((pixelSeeds ? pixelSeeds->size() : 0u) +
-                                                 (stripSeeds ? stripSeeds->size() : 0u)),
-                                                m_skipDuplicateSeeds);
+    TrackFindingMeasurements measurements(geo_ids, !m_trackStatePrinter.empty());
 
-    if (pixelClusterContainer && pixelDetEleColl)
+    DuplicateSeedDetector duplicateSeedDetector(total_seeds, m_skipDuplicateSeeds);
+
+    for (std::size_t icontainer = 0; icontainer < uncalibratedMeasurementContainers.size(); ++icontainer)
     {
-      ATH_MSG_DEBUG("Create " << pixelClusterContainer->size() << " source links from pixel measurements");
-      tracking_surface_helper.setSiDetectorElements(xAOD::UncalibMeasType::PixelClusterType, pixelDetEleColl);
-      measurements.addMeasurements(0, *pixelClusterContainer, *pixelDetEleColl, pixelSeeds,
-                                   m_ATLASConverterTool, m_trackStatePrinter, duplicateSeedDetector, ctx);
-    }
-    if (stripClusterContainer && stripDetEleColl)
-    {
-      ATH_MSG_DEBUG("Create " << stripClusterContainer->size() << " source links from strip measurements");
-      tracking_surface_helper.setSiDetectorElements(xAOD::UncalibMeasType::StripClusterType, stripDetEleColl);
-      measurements.addMeasurements(1, *stripClusterContainer, *stripDetEleColl, stripSeeds,
+      if (measType[icontainer] != xAOD::UncalibMeasType::Other)
+      {
+        tracking_surface_helper.setSiDetectorElements(measType[icontainer], detEleColl[icontainer]);
+      }
+      ATH_MSG_DEBUG("Create " << uncalibratedMeasurementContainers[icontainer]->size() << " source links from measurements in " << m_uncalibratedMeasurementContainerKeys[icontainer].key());
+      measurements.addMeasurements(icontainer, *uncalibratedMeasurementContainers[icontainer], *detEleColl[icontainer], seedContainers[icontainer],
                                    m_ATLASConverterTool, m_trackStatePrinter, duplicateSeedDetector, ctx);
     }
 
@@ -372,31 +347,19 @@ namespace ActsTrk
     // Until the CKF can do a backward search, start with the pixel seeds
     // (will become relevant when we can remove pixel/strip duplicates).
     // Afterwards, we could start with strips where the occupancy is lower.
-    if (pixelEstimatedTrackParameters && !pixelEstimatedTrackParameters->empty())
+    for (std::size_t icontainer = 0; icontainer < estimatedTrackParametersContainers.size(); ++icontainer)
     {
+      if (estimatedTrackParametersContainers[icontainer]->empty())
+        continue;
       ATH_CHECK(findTracks(ctx,
                            measurements,
                            tracking_surface_helper,
                            duplicateSeedDetector,
-                           *pixelEstimatedTrackParameters,
-                           pixelSeeds,
+                           *estimatedTrackParametersContainers[icontainer],
+                           seedContainers[icontainer],
                            tracksContainer,
-                           0,
-                           "pixel",
-                           event_stat));
-    }
-
-    if (stripEstimatedTrackParameters && !stripEstimatedTrackParameters->empty())
-    {
-      ATH_CHECK(findTracks(ctx,
-                           measurements,
-                           tracking_surface_helper,
-                           duplicateSeedDetector,
-                           *stripEstimatedTrackParameters,
-                           stripSeeds,
-                           tracksContainer,
-                           1,
-                           "strip",
+                           icontainer,
+                           icontainer < m_seedLabels.size() ? m_seedLabels[icontainer].c_str() : m_seedContainerKeys[icontainer].key().c_str(),
                            event_stat));
     }
 
@@ -605,12 +568,6 @@ namespace ActsTrk
       }
     }
     m_stat.resize(nSeedCollections() * seedCollectionStride());
-    if (!m_seedLables.empty() && m_seedLables.size() != nSeedCollections())
-    {
-      ATH_MSG_FATAL("SeedLabels should be an empty vector or a vector with "
-                    << nSeedCollections()
-                    << " enries. But it is a vector with " << m_seedLables.size() << " entries.");
-    }
   }
 
   // copy statistics
@@ -646,10 +603,10 @@ namespace ActsTrk
                                           std::make_pair(kNSelectedTracks, "selected tracks"),
                                       });
       assert(stat_labels.size() == kNStat);
-      std::vector<std::string> categories{
-          m_seedLables.empty() ? m_pixelEstimatedTrackParametersKey.key() : m_seedLables.value().at(0),
-          m_seedLables.empty() ? m_stripEstimatedTrackParametersKey.key() : m_seedLables.value().at(1),
-          "ALL"};
+      std::vector<std::string> categories;
+      categories.reserve(m_seedLabels.size() + 1);
+      categories.insert(categories.end(), m_seedLabels.begin(), m_seedLabels.end());
+      categories.push_back("ALL");
 
       std::vector<std::string> eta_labels;
       eta_labels.reserve(m_statEtaBins.size() + 2);
