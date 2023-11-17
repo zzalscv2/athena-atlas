@@ -159,8 +159,8 @@ class PhotonWorkingPointConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
-        # The setup below is inappropriate for Run 1 and we don't have a use case for Run 4 (yet)
-        if config.geometry() not in [LHCPeriod.Run2, LHCPeriod.Run3]:
+        # The setup below is inappropriate for Run 1
+        if config.geometry() is LHCPeriod.Run1:
             raise ValueError ("Can't set up the PhotonWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
 
         postfix = self.postfix

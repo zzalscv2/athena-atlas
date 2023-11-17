@@ -135,7 +135,7 @@ class ConfigAccumulator :
             generatorInfo = None
         # allow possible string argument for `geometry` and convert it to enum
         geometry = LHCPeriod(geometry)
-        if geometry not in [LHCPeriod.Run2, LHCPeriod.Run3] :
+        if geometry is LHCPeriod.Run1:
             raise ValueError ("invalid Run geometry: %s" % geometry.value)
         self._dataType = dataType
         self._isPhyslite = isPhyslite
