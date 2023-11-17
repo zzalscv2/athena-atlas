@@ -50,6 +50,11 @@ def configureFlags(runArgs):
     from AthenaConfiguration.Enums import ProductionStep
     flags.Common.ProductionStep=ProductionStep.Reconstruction
 
+    from AthenaConfiguration.AutoConfigFlags import GetFileMD
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    if GetFileMD(flags.Input.Files)["GeoAtlas"] is None:
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    
     # Setup detector flags
     from AthenaConfiguration.DetectorConfigFlags import disableDetectors
     disableDetectors(
@@ -111,6 +116,10 @@ def fromRunArgs(runArgs):
     if flags.Trigger.AODEDMSet == 'FTagPEBTLA':
         from TLARecoConfig.FTagPEBRecoConfig import FTagPEBJetTagConfig
         cfg.merge(FTagPEBJetTagConfig(flags))
+
+    # setup Metadata writer
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    cfg.merge(SetupMetaDataForStreamCfg(flags,'AOD'))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)
