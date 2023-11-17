@@ -155,7 +155,9 @@ namespace IOVDbNamespace{
           continue;
         }
 	cool::StorageType::TypeId typespec = f.storageType().id();
-        std::string strVal=thisVal.get<std::string>();
+        std::string strVal = to_string(thisVal);
+        if(strVal.size()>2&& strVal[0]=='"'&& strVal[strVal.size()-1]=='"')
+          strVal=strVal.substr(1,strVal.size()-2);
 
         if((strVal.compare("NULL")==0||strVal.compare("null")==0)&&
 	  (typespec==StorageType::Bool || typespec==StorageType::Int16 || typespec==StorageType::UInt16
