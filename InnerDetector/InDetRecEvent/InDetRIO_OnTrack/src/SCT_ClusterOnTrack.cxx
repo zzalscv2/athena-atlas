@@ -7,20 +7,18 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
-#include "InDetReadoutGeometry/SiDetectorElement.h"
-#include "InDetPrepRawData/SCT_Cluster.h"
+
+#include <limits>
+#include <ostream>
 
 #include "GaudiKernel/MsgStream.h"
-#include <ostream>
-#include <limits>
+#include "InDetPrepRawData/SCT_Cluster.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 
 // Constructor with parameters - no global position assigned
 InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(
-    const InDet::SCT_Cluster* RIO,
-    const Trk::LocalParameters& locpars,
-    const Amg::MatrixX& locerr,
-    const IdentifierHash& idDE,
-    bool isbroad)
+    const InDet::SCT_Cluster* RIO, const Trk::LocalParameters& locpars,
+    const Amg::MatrixX& locerr, const IdentifierHash& idDE, bool isbroad)
     : SiClusterOnTrack(locpars, locerr, idDE, RIO->identify(),
                        isbroad)  // call base class constructor
 {
@@ -33,15 +31,13 @@ InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(
 }
 
 // Constructor with parameters - no global position assigned
-InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(
-    const InDet::SCT_Cluster* RIO,
-    Trk::LocalParameters&& locpars,
-    Amg::MatrixX&& locerr,
-    const IdentifierHash& idDE,
-    bool isbroad)
-    : SiClusterOnTrack(locpars, locerr, idDE, RIO->identify(),
-                       isbroad)  // call base class constructor
-{
+InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(const InDet::SCT_Cluster* RIO,
+                                              Trk::LocalParameters&& locpars,
+                                              Amg::MatrixX&& locerr,
+                                              const IdentifierHash& idDE,
+                                              bool isbroad)
+    : SiClusterOnTrack(std::move(locpars), std::move(locerr), idDE,
+                       RIO->identify(), isbroad) {
   m_detEl = RIO->detectorElement();
   m_positionAlongStrip = std::numeric_limits<double>::quiet_NaN();
   m_rio.setElement(RIO);
@@ -49,7 +45,6 @@ InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(
   Amg::Vector2D lpos(localParameters().get(Trk::locX), m_positionAlongStrip);
   m_globalPosition = detectorElement()->surface(identify()).localToGlobal(lpos);
 }
-
 
 // Constructor with parameters
 InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(
@@ -74,14 +69,11 @@ InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(
 
 // Constructor with parameters
 InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(
-    const InDet::SCT_Cluster* RIO,
-    Trk::LocalParameters&& locpars,
-    Amg::MatrixX&& locerr,
-    const IdentifierHash& idDE,
-    const Amg::Vector3D& globalPosition,
-    bool isbroad)
-    : SiClusterOnTrack(locpars, locerr, idDE, RIO->identify(), globalPosition,
-                       isbroad),  // call base class constructor
+    const InDet::SCT_Cluster* RIO, Trk::LocalParameters&& locpars,
+    Amg::MatrixX&& locerr, const IdentifierHash& idDE,
+    const Amg::Vector3D& globalPosition, bool isbroad)
+    : SiClusterOnTrack(std::move(locpars), std::move(locerr), idDE,
+                       RIO->identify(), globalPosition, isbroad),
       m_detEl(RIO->detectorElement()) {
   m_rio.setElement(RIO);
 
@@ -92,7 +84,6 @@ InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(
   // storing the position along the strip if available
   m_positionAlongStrip = (lpos) ? (*lpos)[Trk::locY] : 0.;
 }
-
 
 InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(
     const ElementLinkToIDCSCT_ClusterContainer& RIO,
@@ -118,29 +109,28 @@ InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack():
 
 const Trk::Surface& InDet::SCT_ClusterOnTrack::associatedSurface() const
 {
-    return ( detectorElement()->surface());
+  return (detectorElement()->surface());
 }
 
 void InDet::SCT_ClusterOnTrack::setValues(const Trk::TrkDetElementBase* detEl, const Trk::PrepRawData* )
 {
-    m_detEl = dynamic_cast< const InDetDD::SiDetectorElement* >(detEl);
-    if (m_detEl) {
-      // Set global position after setting the detector element
-      Amg::Vector2D lpos(localParameters().get(Trk::locX),
-                         m_positionAlongStrip);
-      m_globalPosition =
+  m_detEl = dynamic_cast<const InDetDD::SiDetectorElement*>(detEl);
+  if (m_detEl) {
+    // Set global position after setting the detector element
+    Amg::Vector2D lpos(localParameters().get(Trk::locX), m_positionAlongStrip);
+    m_globalPosition =
         detectorElement()->surface(identify()).localToGlobal(lpos);
-    }
+  }
 }
 
 MsgStream& InDet::SCT_ClusterOnTrack::dump( MsgStream& sl ) const
 {
-  SiClusterOnTrack::dump(sl);// use dump(...) from SiClusterOnTrack
+  SiClusterOnTrack::dump(sl);  // use dump(...) from SiClusterOnTrack
   return sl;
 }
 
 std::ostream& InDet::SCT_ClusterOnTrack::dump( std::ostream& sl ) const
 {
-  SiClusterOnTrack::dump(sl);// use dump(...) from SiClusterOnTrack
+  SiClusterOnTrack::dump(sl);  // use dump(...) from SiClusterOnTrack
   return sl;
 }
