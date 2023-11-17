@@ -141,16 +141,18 @@ class FTagConfig (ConfigBlock):
             elif "VR" in jetCollection:
                 minPt = 10e3
 
-        # special setting: allow for on-the-fly look up of the generator information
-        if self.generator == "autoconfig":
-            self.generator = self.resolveMCMCgenerator(config, generatorDict=config.generatorInfo())
+        # MC/MC scale factors defined only for Run 2 and Run 3
+        if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
+            # special setting: allow for on-the-fly look up of the generator information
+            if self.generator == "autoconfig":
+                self.generator = self.resolveMCMCgenerator(config, generatorDict=config.generatorInfo())
 
-        if config.geometry() == LHCPeriod.Run2:
-            if self.generator not in ["default", "Pythia8", "Sherpa221", "Sherpa2210", "Sherpa2212", "Herwig713", "Herwig721", "amcAtNLOPythia", "amcAtNLOHerwig"]:
-                raise ValueError ("invalid generator type: " + self.generator)
-        elif config.geometry() == LHCPeriod.Run3:
-            if self.generator not in ["default", "Pythia8", "Sherpa2212", "Herwig713"]:
-                raise ValueError ("invalid generator type: " + self.generator)
+            if config.geometry() == LHCPeriod.Run2:
+                if self.generator not in ["default", "Pythia8", "Sherpa221", "Sherpa2210", "Sherpa2212", "Herwig713", "Herwig721", "amcAtNLOPythia", "amcAtNLOHerwig"]:
+                    raise ValueError ("invalid generator type: " + self.generator)
+            elif config.geometry() == LHCPeriod.Run3:
+                if self.generator not in ["default", "Pythia8", "Sherpa2212", "Herwig713"]:
+                    raise ValueError ("invalid generator type: " + self.generator)
 
         # MC/MC scale factors configuration
         DSID = "default"
