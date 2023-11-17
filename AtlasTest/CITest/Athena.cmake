@@ -250,10 +250,8 @@ atlas_add_citest( ACTS_ValidateAmbiguityResolution
 atlas_add_citest( ACTS_ActsKfRefitting
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsKfRefitting.sh )
 
-# Temporary disabling this while we investigate an issue
-# we'll add it back asap
-#atlas_add_citest( ACTS_ActsGSFRefitting
-#   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsGSFRefitting.sh )
+atlas_add_citest( ACTS_ActsGSFRefitting
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsGSFRefitting.sh )
 
 atlas_add_citest( ACTS_ActsBenchmarkWithSpot
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsBenchmarkWithSpot.sh 8 100

@@ -19,6 +19,7 @@
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/Surfaces/Surface.hpp"
+#include "Acts/TrackFitting/GsfMixtureReduction.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
@@ -76,6 +77,7 @@ StatusCode ActsGaussianSumFitter::initialize() {
 
   m_surfaceAccessor.m_converterTool = &(*m_ATLASConverterTool);
   m_gsfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&m_surfaceAccessor);
+  m_gsfExtensions.mixtureReducer.connect<&Acts::reduceMixtureWithKLDistance>();
   
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
   m_gsfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::MutableTrackStateBackend>>(&m_outlierFinder);
