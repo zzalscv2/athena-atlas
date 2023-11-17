@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfJobOptions
 #
@@ -68,6 +68,9 @@ class JobOptionsTemplate(object):
         
         with open(self._runArgsFile, 'w') as runargsFile:
             try:
+                if self._exe._isCAEnabled():
+                    # Write a shebang to identify CA files.
+                    print("#!/usr/bin/env athena.py --CA", file=runargsFile)
                 # First write a little header
                 print(os.linesep.join(("# Run arguments file auto-generated on {0} by:".format(time.asctime()),
                                                      "# JobTransform: {0}".format(self._exe.name),
