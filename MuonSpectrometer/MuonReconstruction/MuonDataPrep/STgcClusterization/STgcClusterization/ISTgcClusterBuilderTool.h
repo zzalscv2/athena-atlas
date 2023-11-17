@@ -10,29 +10,23 @@
 #include <vector>
 #include "GaudiKernel/IAlgTool.h"
 
+class EventContext;
 namespace Muon {
   class sTgcPrepData;
 }
 
-class IdentifierHash;
-
-static const InterfaceID IID_ISTgcClusterBuilderTool("Muon::ISTgcClusterBuilderTool", 1, 0);
-
 namespace Muon {
   class ISTgcClusterBuilderTool : virtual public IAlgTool {
-    
-  public:    // static methods
-    
-    static const InterfaceID& interfaceID()  { return IID_ISTgcClusterBuilderTool; } 
-  
-  public:    // interface methods
+    public:  
+      DeclareInterfaceID(Muon::ISTgcClusterBuilderTool, 1 , 0);
     
     //
     // build clusters having as input the hashId of the collection, the
     // resolution of the single channel, and the vector of firing strips
     //
-    virtual StatusCode getClusters(std::vector<Muon::sTgcPrepData>& stripsVect, 
-				   std::vector<Muon::sTgcPrepData*>& clustersVect)const=0;
+    virtual StatusCode getClusters(const EventContext& ctx,
+                                   std::vector<Muon::sTgcPrepData>&&  stripsVect, 
+				                           std::vector<std::unique_ptr<Muon::sTgcPrepData>>& clustersVect)const=0;
     
   };
 }

@@ -269,18 +269,24 @@ def MuonRefitToolCfg(flags, name="MuonRefitTool", **kwargs):
 
 def SimpleMMClusterBuilderToolCfg(flags, name = "SimpleMMClusterBuilderTool", **kwargs):
     result = ComponentAccumulator()
+    from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
+    result.merge(NswErrorCalibDbAlgCfg(flags))
     the_tool = CompFactory.Muon.SimpleMMClusterBuilderTool(name,**kwargs)
     result.setPrivateTools(the_tool)   
     return result
 
 def UTPCMMClusterBuilderToolCfg(flags, name = "UTPCMMClusterBuilderTool", **kwargs):
     result = ComponentAccumulator()
+    from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
+    result.merge(NswErrorCalibDbAlgCfg(flags))
     the_tool = CompFactory.Muon.UTPCMMClusterBuilderTool(name,**kwargs)
     result.setPrivateTools(the_tool)   
     return result
 
 def ClusterTimeProjectionMMClusterBuilderToolCfg(flags, name = "ClusterTimeProjectionMMClusterBuilderTool", **kwargs):
     result = ComponentAccumulator()
+    from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
+    result.merge(NswErrorCalibDbAlgCfg(flags))  
     the_tool = CompFactory.Muon.ClusterTimeProjectionMMClusterBuilderTool(name,**kwargs)
     result.setPrivateTools(the_tool)   
     return result

@@ -110,9 +110,9 @@ makeclusts (const MuonGM::MuonDetectorManager& muo_dd)
       auto cl = std::make_unique<Muon::sTgcPrepData>
         (clusId,
          clusHash,
-         locpos,
-         rdoList,
-         cov,
+         std::move(locpos),
+         std::move(rdoList),
+         std::move(cov),
          muo_dd.getsTgcReadoutElement (clusId),
          123+offs,
          78+i,

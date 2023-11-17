@@ -32,10 +32,11 @@ namespace Muon
     virtual ~SimpleSTgcClusterBuilderTool()=default;
 
     /** standard initialize method */
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override;
 
-    StatusCode getClusters(std::vector<Muon::sTgcPrepData>& stripsVect, 
-			   std::vector<Muon::sTgcPrepData*>& clustersVect)const;
+    StatusCode getClusters(const EventContext& ctx,
+                           std::vector<Muon::sTgcPrepData>&& stripsVect, 
+			                     std::vector<std::unique_ptr<Muon::sTgcPrepData>>& clustersVect) const override;
 
   private: 
 

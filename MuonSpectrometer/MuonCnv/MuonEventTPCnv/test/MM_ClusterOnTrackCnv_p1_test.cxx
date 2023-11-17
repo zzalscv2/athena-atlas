@@ -134,11 +134,11 @@ void test1 ATLAS_NOT_THREAD_SAFE (const MuonGM::MuonDetectorManager& muo_dd)
   Identifier clusId = muo_dd.mmIdHelper()->channelID (55, 1, 2, 1, 1, 1);
 
   Muon::MMClusterOnTrack trans1 (rio,
-                                 locpos,
-                                 cov,
+                                 std::move(locpos),
+                                 std::move(cov),
                                  clusId,
                                  muo_dd.getMMReadoutElement (clusId),
-                                 2.5);
+                                 2.5, {}, {});
 
   testit (trans1);
   Athena_test::Leakcheck check;

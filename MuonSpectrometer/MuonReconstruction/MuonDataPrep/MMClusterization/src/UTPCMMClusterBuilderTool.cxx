@@ -1,80 +1,67 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "UTPCMMClusterBuilderTool.h"
 
 #include <cmath>
-#include <memory>
 #include <numeric>
 
-#include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
+
+#define DEFINE_VECTOR(dType, varName, nEles)  \
+    std::vector<dType> varName{};             \
+    varName.reserve(nEles);   
 
 namespace {
 
     bool sortTracks(std::tuple<int, double>& a, std::tuple<int, double>& b) {
-        if (std::get<0>(a) == std::get<0>(b)) {
-            if (std::get<1>(a) < std::get<1>(b)) { return true; }
-        } else if (std::get<0>(a) > std::get<0>(b)) {
-            return true;
+        if (std::get<0>(a) != std::get<0>(b)) {
+            return std::get<0>(a) < std::get<0>(b);
         }
-        return false;
+        return std::get<1>(a) < std::get<1>(b);
     }
 }  // namespace
 
-Muon::UTPCMMClusterBuilderTool::UTPCMMClusterBuilderTool(const std::string& t, const std::string& n, const IInterface* p) :
+namespace Muon{
+
+using RIO_Author = IMMClusterBuilderTool::RIO_Author;
+
+UTPCMMClusterBuilderTool::UTPCMMClusterBuilderTool(const std::string& t, const std::string& n, const IInterface* p) :
     AthAlgTool(t, n, p) {
     declareInterface<IMMClusterBuilderTool>(this);
-    declareProperty("writeStripProperties",
-                    m_writeStripProperties = true);                    // true  for debugging; needs to become false for large productions
-    declareProperty("HoughAlphaMin", m_alphaMin = -90);                // degree
-    declareProperty("HoughAlphaMax", m_alphaMax = 0);                  // degree
-    declareProperty("HoughAlphaResolution", m_alphaResolution = 1.0);  // degree
-    declareProperty("HoughDMax", m_dMax = 0);
-    declareProperty("HoughDMin", m_dMin = 0);
-    declareProperty("HoughExpectedDriftRange", m_driftRange = 12);  // mm
-    declareProperty("HoughDResolution", m_dResolution = 0.125);
-    declareProperty("HoughMinCounts", m_houghMinCounts = 3);
-    declareProperty("HoughSelectionCut", m_selectionCut = 1.0);          // mm
-    declareProperty("outerChargeRatioCut", m_outerChargeRatioCut = 0.);  // charge ratio cut to supress cross talk
-    declareProperty("maxStripRemove", m_maxStripsCut = 4);               // max number of strips cut by cross talk cut
-    declareProperty("digiHasNegativeAngle", m_digiHasNegativeAngles = true);
-    declareProperty("scaleClusterError", m_scaleClusterError = 2);
-
-    ATH_MSG_INFO("outerChargeRatioCut: " << m_outerChargeRatioCut);
-    ATH_MSG_INFO("maxStripRemove " << m_maxStripsCut);
-    ATH_MSG_INFO("scale cluster error: " << m_scaleClusterError);
 }
 
-StatusCode Muon::UTPCMMClusterBuilderTool::initialize() {
+StatusCode UTPCMMClusterBuilderTool::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::UTPCMMClusterBuilderTool::getClusters(std::vector<Muon::MMPrepData>& MMprds,
-                                                       std::vector<std::unique_ptr<Muon::MMPrepData>>& clustersVect) const {
-    std::vector<std::vector<Muon::MMPrepData>> MMprdsPerLayer(8, std::vector<Muon::MMPrepData>(0));
-    for (const auto& MMprd : MMprds) {
+StatusCode UTPCMMClusterBuilderTool::getClusters(const EventContext& /*ctx*/,
+                                                       std::vector<MMPrepData>&& MMprds,
+                                                       std::vector<std::unique_ptr<MMPrepData>>& clustersVect) const  {
+    
+    LaySortedPrds MMprdsPerLayer{};
+    for (MMPrepData& MMprd : MMprds) {
         Identifier id = MMprd.identify();
         int layer = 4 * (m_idHelperSvc->mmIdHelper().multilayer(id) - 1) + (m_idHelperSvc->mmIdHelper().gasGap(id) - 1);
         ATH_MSG_DEBUG("Sorting PRD into layer layer: " << layer << " gas_gap " << m_idHelperSvc->mmIdHelper().gasGap(id) << "multilayer "
                                                        << m_idHelperSvc->mmIdHelper().multilayer(id));
-        MMprdsPerLayer.at(layer).push_back(MMprd);
+        MMprdsPerLayer.at(layer).push_back(std::move(MMprd));
     }
 
     // sort MMPrds by channel
-    for (unsigned int i_layer = 0; i_layer < MMprdsPerLayer.size(); i_layer++) {
-        std::sort(MMprdsPerLayer.at(i_layer).begin(), MMprdsPerLayer.at(i_layer).end(), [this](const MMPrepData& a, const MMPrepData& b) {
-            return this->m_idHelperSvc->mmIdHelper().channel(a.identify()) < this->m_idHelperSvc->mmIdHelper().channel(b.identify());
+    for (std::vector<MMPrepData>& prdInLay :  MMprdsPerLayer) {
+        std::sort(prdInLay.begin(), prdInLay.end(), [this](const MMPrepData& a, const MMPrepData& b) {
+            return m_idHelperSvc->mmIdHelper().channel(a.identify()) < m_idHelperSvc->mmIdHelper().channel(b.identify());
         });
     }
 
-    for (const auto& MMprdsOfLayer : MMprdsPerLayer) {
+    for (std::vector<MMPrepData>& MMprdsOfLayer : MMprdsPerLayer) {
         std::vector<double> stripsLocalPosX;
         stripsLocalPosX.reserve(MMprdsOfLayer.size());
 
-        for (const auto& MMprd : MMprdsOfLayer) {
+        for (MMPrepData& MMprd : MMprdsOfLayer) {
             Identifier id_prd = MMprd.identify();
             int gasGap = m_idHelperSvc->mmIdHelper().gasGap(id_prd);
             stripsLocalPosX.push_back(
@@ -82,17 +69,13 @@ StatusCode Muon::UTPCMMClusterBuilderTool::getClusters(std::vector<Muon::MMPrepD
                 MMprd.localPosition().x());  // flip local positions for even gas gaps to reduce hough space to positiv angles
 
             // determine angle to IP for debug reasons
-            double globalR = std::sqrt(std::pow(MMprd.globalPosition().x(), 2) + std::pow(MMprd.globalPosition().y(), 2));
+            double globalR = MMprd.globalPosition().perp();
             double Tan = globalR / MMprd.globalPosition().z();
             double angleToIp = std::atan(Tan) / Gaudi::Units::degree;
 
-            ATH_MSG_DEBUG("Hit channel: " << m_idHelperSvc->mmIdHelper().channel(id_prd) << " time " << MMprd.time() << " drift dist "
-                                          << MMprd.driftDist() << " localPosX " << MMprd.localPosition().x() << " angleToIp " << angleToIp
-                                          << " gas_gap " << m_idHelperSvc->mmIdHelper().gasGap(id_prd) << " multiplet "
-                                          << m_idHelperSvc->mmIdHelper().multilayer(id_prd) << " stationname "
-                                          << m_idHelperSvc->mmIdHelper().stationName(id_prd) << " stationPhi "
-                                          << m_idHelperSvc->mmIdHelper().stationPhi(id_prd) << " stationEta "
-                                          << m_idHelperSvc->mmIdHelper().stationEta(id_prd));
+            ATH_MSG_DEBUG("Hit channel: " << m_idHelperSvc->toString(id_prd) << " time " << MMprd.time() << " drift dist "
+                                          << MMprd.driftDist() << " localPosX " <<Amg::toString(MMprd.localPosition()) 
+                                          << " angleToIp " << angleToIp);
         }
         if (MMprdsOfLayer.size() < 2) continue;
 
@@ -181,18 +164,25 @@ StatusCode Muon::UTPCMMClusterBuilderTool::getClusters(std::vector<Muon::MMPrepD
 
             float driftDist = 0.0;
 
-            std::unique_ptr<Muon::MMPrepData> prdN = std::make_unique<MMPrepData>(
-                MMprdsOfLayer.at(idx).identify(), MMprdsOfLayer.at(idx).collectionHash(), localClusterPositionV, stripsOfCluster,
-                std::move(covN), MMprdsOfLayer.at(idx).detectorElement(), (short int)0,
-                std::accumulate(stripsOfClusterCharges.begin(), stripsOfClusterCharges.end(), 0), driftDist, stripsOfClusterChannels,
-                stripsOfClusterTimes, stripsOfClusterCharges);
+            std::unique_ptr<MMPrepData> prdN = std::make_unique<MMPrepData>(MMprdsOfLayer.at(idx).identify(), 
+                                                                            MMprdsOfLayer.at(idx).collectionHash(), 
+                                                                            std::move(localClusterPositionV), 
+                                                                            std::move(stripsOfCluster),
+                                                                            std::move(covN), 
+                                                                            MMprdsOfLayer.at(idx).detectorElement(), 
+                                                                            0,
+                                                                            std::accumulate(stripsOfClusterCharges.begin(), stripsOfClusterCharges.end(), 0), 
+                                                                            driftDist, 
+                                                                            std::move(stripsOfClusterChannels),
+                                                                            std::move(stripsOfClusterTimes), 
+                                                                            std::move(stripsOfClusterCharges));
 
             ATH_MSG_DEBUG("Did create new prd");
 
             ATH_MSG_DEBUG("Setting prd angle: " << finalFitAngle << " chi2 Prob: " << finalFitChiSqProb);
 
-            prdN->setAuthor(Muon::MMPrepData::Author::uTPCClusterBuilder);
-            prdN->setDriftDist(stripsOfClusterDriftDists, stripsOfClusterDriftDistErrors);
+            prdN->setAuthor(MMPrepData::Author::uTPCClusterBuilder);
+            prdN->setDriftDist(std::move(stripsOfClusterDriftDists), std::move(stripsOfClusterDriftDistErrors));
 
             prdN->setMicroTPC(finalFitAngle, finalFitChiSqProb);
             ATH_MSG_DEBUG("Reading back prd angle: " << prdN->angle() << " chi2 Prob: " << prdN->chisqProb());
@@ -210,7 +200,7 @@ StatusCode Muon::UTPCMMClusterBuilderTool::getClusters(std::vector<Muon::MMPrepD
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::UTPCMMClusterBuilderTool::runHoughTrafo(const std::vector<Muon::MMPrepData>& mmPrd, std::vector<double>& xpos,
+StatusCode UTPCMMClusterBuilderTool::runHoughTrafo(const std::vector<MMPrepData>& mmPrd, std::vector<double>& xpos,
                                                          std::vector<int>& flag, std::vector<int>& idx_selected) const {
     ATH_MSG_DEBUG("beginning of runHoughTrafo() with: " << xpos.size() << " hits");
     double maxX = *std::max_element(xpos.begin(), xpos.end());
@@ -231,7 +221,7 @@ StatusCode Muon::UTPCMMClusterBuilderTool::runHoughTrafo(const std::vector<Muon:
     if (sc.isFailure()) return sc;
     return StatusCode::SUCCESS;
 }
-StatusCode Muon::UTPCMMClusterBuilderTool::houghInitCummulator(std::unique_ptr<TH2D>& h_hough, double xmax, double xmin) const {
+StatusCode UTPCMMClusterBuilderTool::houghInitCummulator(std::unique_ptr<TH2D>& h_hough, double xmax, double xmin) const {
     ATH_MSG_VERBOSE("xmax: " << xmax << " xmin: " << xmin << " m_dResolution " << m_dResolution << " m_alphaMin " << m_alphaMin
                              << " m_alphaMax: " << m_alphaMax << " m_alphaResolution: " << m_alphaResolution);
     double dmax = std::max(std::fabs(xmin), std::fabs(xmax));
@@ -248,7 +238,7 @@ StatusCode Muon::UTPCMMClusterBuilderTool::houghInitCummulator(std::unique_ptr<T
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::UTPCMMClusterBuilderTool::fillHoughTrafo(const std::vector<Muon::MMPrepData>& mmPrd, std::vector<double>& xpos,
+StatusCode UTPCMMClusterBuilderTool::fillHoughTrafo(const std::vector<MMPrepData>& mmPrd, std::vector<double>& xpos,
                                                           std::vector<int>& flag, std::unique_ptr<TH2D>& h_hough) const {
     for (size_t i_hit = 0; i_hit < mmPrd.size(); i_hit++) {
         if (flag.at(i_hit) != 0) continue;  // skip hits which have been already used or been rejected as cross talk
@@ -262,9 +252,9 @@ StatusCode Muon::UTPCMMClusterBuilderTool::fillHoughTrafo(const std::vector<Muon
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::UTPCMMClusterBuilderTool::findAlphaMax(std::unique_ptr<TH2D>& h_hough,
+StatusCode UTPCMMClusterBuilderTool::findAlphaMax(std::unique_ptr<TH2D>& h_hough,
                                                         std::vector<std::tuple<double, double>>& maxPos) const {
-    int cmax = h_hough->GetMaximum();
+    unsigned int cmax = h_hough->GetMaximum();
     if (cmax < m_houghMinCounts) {
         ATH_MSG_DEBUG("cmax " << cmax << "smaller then m_houghMinCounts " << m_houghMinCounts);
         return StatusCode::FAILURE;
@@ -283,7 +273,7 @@ StatusCode Muon::UTPCMMClusterBuilderTool::findAlphaMax(std::unique_ptr<TH2D>& h
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::UTPCMMClusterBuilderTool::selectTrack(const std::vector<Muon::MMPrepData>& mmPrd, std::vector<double>& xpos,
+StatusCode UTPCMMClusterBuilderTool::selectTrack(const std::vector<MMPrepData>& mmPrd, std::vector<double>& xpos,
                                                        std::vector<int>& flag, std::vector<std::tuple<double, double>>& tracks,
                                                        std::vector<int>& idxGoodStrips) const {
     std::vector<double> chi2;
@@ -344,7 +334,7 @@ StatusCode Muon::UTPCMMClusterBuilderTool::selectTrack(const std::vector<Muon::M
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::UTPCMMClusterBuilderTool::transformParameters(double alpha, double d, double dRMS, double& slope, double& intercept,
+StatusCode UTPCMMClusterBuilderTool::transformParameters(double alpha, double d, double dRMS, double& slope, double& intercept,
                                                                double& interceptRMS) const {
     slope = 1. / std::tan(alpha);
     intercept = -d / std::sin(alpha);
@@ -354,7 +344,7 @@ StatusCode Muon::UTPCMMClusterBuilderTool::transformParameters(double alpha, dou
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::UTPCMMClusterBuilderTool::applyCrossTalkCut(std::vector<int>& idxSelected, const std::vector<MMPrepData>& MMPrdsOfLayer,
+StatusCode UTPCMMClusterBuilderTool::applyCrossTalkCut(std::vector<int>& idxSelected, const std::vector<MMPrepData>& MMPrdsOfLayer,
                                                              std::vector<int>& flag, int& nStripsCut) const {
     int N = idxSelected.size();
     bool removedStrip = false;
@@ -394,7 +384,7 @@ StatusCode Muon::UTPCMMClusterBuilderTool::applyCrossTalkCut(std::vector<int>& i
     return (!removedStrip ? StatusCode::FAILURE : StatusCode::SUCCESS);  // return success if at least one strip was removed
 }
 
-StatusCode Muon::UTPCMMClusterBuilderTool::finalFit(const std::vector<Identifier>& ids, const std::vector<float>& stripsPos,
+StatusCode UTPCMMClusterBuilderTool::finalFit(const std::vector<Identifier>& ids, const std::vector<float>& stripsPos,
                                                     const std::vector<float>& driftDists, const std::vector<Amg::MatrixX>& driftDistErrors,
                                                     double& x0, double& sigmaX0, double& fitAngle, double& chiSqProb) const {
     std::unique_ptr<TGraphErrors> fitGraph = std::make_unique<TGraphErrors>();
@@ -432,10 +422,9 @@ StatusCode Muon::UTPCMMClusterBuilderTool::finalFit(const std::vector<Identifier
     double dHalfGap = 2.52;  // half the thickness of the gas gap
     double interceptCorr = dHalfGap - ffit->GetParameter(0);
     x0 = interceptCorr / fitSlope;
-    sigmaX0 =
-        pow(m_scaleClusterError, 2) *
-        (pow(ffit->GetParError(0) / interceptCorr, 2) + pow(ffit->GetParError(1) / fitSlope, 2) - 2. / (fitSlope * interceptCorr) * cov) *
-        pow(x0, 2);
+    sigmaX0 =       
+        (std::pow(ffit->GetParError(0) / interceptCorr, 2) + std::pow(ffit->GetParError(1) / fitSlope, 2) - 2. / (fitSlope * interceptCorr) * cov) *
+        std::pow(x0, 2);
     x0 += xmean;  // adding back mean value after error was calculated
     fitAngle = std::tan(-1 / fitSlope);
     chiSqProb = ffit->GetProb();
@@ -470,18 +459,18 @@ StatusCode Muon::UTPCMMClusterBuilderTool::finalFit(const std::vector<Identifier
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::UTPCMMClusterBuilderTool::getCalibratedClusterPosition(const Muon::MMPrepData* cluster,
-                                                                        std::vector<NSWCalib::CalibratedStrip>& strips, const float theta,
-                                                                        Amg::Vector2D& clusterLocalPosition,
-                                                                        Amg::MatrixX& covMatrix) const {
-    (void)cluster;
-    (void)theta;  // avoid unused parameter warning
+RIO_Author UTPCMMClusterBuilderTool::getCalibratedClusterPosition(const EventContext& /*ctx*/, 
+                                                                  const std::vector<NSWCalib::CalibratedStrip>& calibratedStrips,
+                                                                  const Amg::Vector3D& /*directionEstimate*/, 
+                                                                  Amg::Vector2D& clusterLocalPosition,
+                                                                  Amg::MatrixX& covMatrix) const {
+ 
     std::vector<Identifier> ids;
     std::vector<float> stripsPos;
     std::vector<float> driftDists;
     std::vector<Amg::MatrixX> driftDistErrors;
 
-    for (const NSWCalib::CalibratedStrip& strip : strips) {
+    for (const NSWCalib::CalibratedStrip& strip : calibratedStrips) {
         ids.push_back(strip.identifier);
         stripsPos.push_back(strip.locPos.x());
         driftDists.push_back(strip.distDrift);
@@ -499,13 +488,13 @@ StatusCode Muon::UTPCMMClusterBuilderTool::getCalibratedClusterPosition(const Mu
 
     StatusCode sc = finalFit(ids, stripsPos, driftDists, driftDistErrors, localClusterPosition, sigmaLocalClusterPosition, finalFitAngle,
                              finalFitChiSqProb);
-    if (sc == StatusCode::FAILURE) return sc;
+    if (sc == StatusCode::FAILURE) return RIO_Author::unKnownAuthor;
 
     clusterLocalPosition[Trk::locX] = localClusterPosition;
 
     Amg::MatrixX covN(1, 1);
     covN.coeffRef(0, 0) = sigmaLocalClusterPosition;
     covMatrix = covN;
-
-    return StatusCode::SUCCESS;
+    return RIO_Author::uTPCClusterBuilder;
+}
 }

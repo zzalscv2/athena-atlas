@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRIOONTRACK_MMCLUSTERONTRACK_H
 #define MUONRIOONTRACK_MMCLUSTERONTRACK_H
-
-#include <vector>
 
 // Base classes
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
@@ -16,11 +14,6 @@
 
 typedef ElementLink<Muon::MMPrepDataContainer> ElementLinkToIDC_MM_Container;
 
-namespace MuonGM
-{
-  class MMReadoutElement;
-}
-
 namespace Trk 
 {
   class ITrkEventCnvTool;
@@ -30,45 +23,45 @@ namespace Muon
 {
 
   /** @brief Class to represent calibrated clusters formed from TGC strips*/
-  class MMClusterOnTrack :  public MuonClusterOnTrack
-  {
+  class MMClusterOnTrack final:  public MuonClusterOnTrack {
 
   public:
     friend class  Trk::ITrkEventCnvTool;
 
-    MMClusterOnTrack();
-    MMClusterOnTrack(const MMClusterOnTrack &);
-    MMClusterOnTrack &operator=(const MMClusterOnTrack &);
+    MMClusterOnTrack() = default;
+    MMClusterOnTrack(const MMClusterOnTrack &) = default;
+    MMClusterOnTrack &operator=(const MMClusterOnTrack &) = default;
+    MMClusterOnTrack(MMClusterOnTrack &&) = default;
+    MMClusterOnTrack &operator=(MMClusterOnTrack &&) = default;
+
 
     /** Constructor with parameters :
-	The base class owns local position, error matrix.
-	Everything else has ownership elsewhere.
-	@param[in] RIO <b>Required</b> (i.e. must not be NULL). Ownership is not taken.
-	@param[in] locpos <b>Required</b> (i.e. must not be NULL). Ownership is taken.
-	@param[in] locerr <b>Required</b> (i.e. must not be NULL). Ownership is taken.
-	@param[in] positionAlongStrip  <b>Required</b> Used to calculate global position.  
-    */
-    MMClusterOnTrack(
-           const MMPrepData* RIO,
-           const Trk::LocalParameters& locpos,
-           const Amg::MatrixX& locerr,
-           double positionAlongStrip,
-           const std::vector<float>& stripDriftDists = std::vector<float>(0),
-           const std::vector<Amg::MatrixX>& stripDriftDistErrors = std::vector<Amg::MatrixX>(0));
+        The base class owns local position, error matrix.
+        Everything else has ownership elsewhere.
+        @param[in] RIO <b>Required</b> (i.e. must not be NULL). Ownership is not taken.
+        @param[in] locpos <b>Required</b> (i.e. must not be NULL). Ownership is taken.
+        @param[in] locerr <b>Required</b> (i.e. must not be NULL). Ownership is taken.
+        @param[in] positionAlongStrip  <b>Required</b> Used to calculate global position.  
+     */
+    MMClusterOnTrack(const MMPrepData* RIO,
+                     Trk::LocalParameters&& locpos,
+                     Amg::MatrixX&& locerr,
+                     double positionAlongStrip,
+                     std::vector<float>&& stripDriftDists,
+                     std::vector<Amg::MatrixX>&& stripDriftDistErrors);
 
     // Alternate constructor that doesn't dereference the RIO link.
-    MMClusterOnTrack(
-           const ElementLinkToIDC_MM_Container& RIO,
-           const Trk::LocalParameters& locpos,
-           const Amg::MatrixX& locerr,
-           const Identifier& id,
-           const MuonGM::MMReadoutElement* detEl,
-           double positionAlongStrip,
-           const std::vector<float>& stripDriftDists = std::vector<float>(0),
-           const std::vector<Amg::MatrixX>& stripDriftDistErrors = std::vector<Amg::MatrixX>(0));
+    MMClusterOnTrack(const ElementLinkToIDC_MM_Container& RIO,
+                     Trk::LocalParameters&& locpos,
+                     Amg::MatrixX&& locerr,
+                     const Identifier& id,
+                     const MuonGM::MMReadoutElement* detEl,
+                     double positionAlongStrip,
+                     std::vector<float>&& stripDriftDists,
+                     std::vector<Amg::MatrixX>&& stripDriftDistErrors);
 
     /** @brief Destructor*/
-    virtual ~MMClusterOnTrack();
+    virtual ~MMClusterOnTrack() = default;
 
     /** @brief Clone this ROT */
     virtual MMClusterOnTrack* clone() const ;
@@ -81,7 +74,7 @@ namespace Muon
     virtual const MuonGM::MMReadoutElement* detectorElement() const;
 
     /** @brief Returns the surface on which this measurement was taken. 
-	(i.e. a surface of a detector element) */
+    (i.e. a surface of a detector element) */
     virtual const Trk::Surface& associatedSurface() const;
 
     const std::vector<float> stripDriftDists() const;
@@ -93,26 +86,40 @@ namespace Muon
     /** @brief Dumps information about the PRD*/
     virtual std::ostream& dump( std::ostream& stream) const;
     
+    enum Author{
+      unKnownAuthor = 64,
+      SimpleClusterBuilder,
+      ClusterTimeProjectionClusterBuilder,
+      uTPCClusterBuilder,
+    };
+    void setAuthor(Author a);
+
+    Author getAuthor() const;
+
   private:
     /**@brief Sets the DetElement and Trk::PrepRawData pointers after reading from disk.
        @warning Only intended for use by persistency convertors.
        @todo Throw exception if TrkDetElementBase isn't correct concrete type*/
     virtual void setValues(const Trk::TrkDetElementBase*, const Trk::PrepRawData*);
     /** PrepRawData object assoicated with this measurement*/
-    ElementLinkToIDC_MM_Container              m_rio;
+    ElementLinkToIDC_MM_Container              m_rio{};
 
     /** The detector element, assoicated with this measurement*/
-    const MuonGM::MMReadoutElement*            m_detEl;
+    const MuonGM::MMReadoutElement*            m_detEl{nullptr};
 
-    std::vector<float> m_stripDriftDists;
-    std::vector<Amg::MatrixX> m_stripDriftDistErrors;
+    std::vector<float> m_stripDriftDists{};
+    std::vector<Amg::MatrixX> m_stripDriftDistErrors{};
+    Author m_author{Author::unKnownAuthor};
   };
 
   ///////////////////////////////////////////////////////////////////
   // Inline methods:
   ///////////////////////////////////////////////////////////////////
 
-
+  inline void MMClusterOnTrack::setAuthor(Author a) {
+      m_author = a;
+  }
+  inline MMClusterOnTrack::Author MMClusterOnTrack::getAuthor() const { return m_author; }
   inline MMClusterOnTrack* MMClusterOnTrack::clone() const
   {
     return new MMClusterOnTrack(*this);
@@ -121,7 +128,7 @@ namespace Muon
   inline const MMPrepData* MMClusterOnTrack::prepRawData() const
   {
     if (m_rio.isValid()) return m_rio.cachedElement(); 
-    else return 0;
+    else return nullptr;
   }
 
   inline const ElementLinkToIDC_MM_Container& MMClusterOnTrack::prepRawDataLink() const
@@ -152,7 +159,7 @@ namespace Muon
 
 
   inline void MMClusterOnTrack::setValues(const Trk::TrkDetElementBase* detEl,
-					    const  Trk::PrepRawData* /*rio*/)
+                        const  Trk::PrepRawData* /*rio*/)
   {
     // m_rio = dynamic_cast<const MMPrepData*>(rio);
     //assert(0!=m_rio);

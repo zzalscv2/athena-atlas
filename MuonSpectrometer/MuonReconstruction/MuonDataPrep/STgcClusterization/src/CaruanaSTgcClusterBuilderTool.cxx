@@ -25,7 +25,9 @@ StatusCode Muon::CaruanaSTgcClusterBuilderTool::initialize()
 //
 // Build the clusters given a vector of single-hit PRD
 //
-StatusCode Muon::CaruanaSTgcClusterBuilderTool::getClusters(std::vector<Muon::sTgcPrepData>& stripsVect, std::vector<Muon::sTgcPrepData*>& clustersVect) const
+StatusCode Muon::CaruanaSTgcClusterBuilderTool::getClusters(const EventContext& ctx,
+                                                            std::vector<Muon::sTgcPrepData>&& stripsVect, 
+                                                            std::vector<std::unique_ptr<Muon::sTgcPrepData>>& clustersVect) const
 {
 
   ATH_MSG_DEBUG("Size of the input vector: " << stripsVect.size());
@@ -36,36 +38,32 @@ StatusCode Muon::CaruanaSTgcClusterBuilderTool::getClusters(std::vector<Muon::sT
   }
 
   Muon::STgcClusterBuilderCommon stgcClusterCommon(m_idHelperSvc->stgcIdHelper());
-  // Separate hits by layer (using index = 0 to 7) and sort them
-  std::array<std::vector<Muon::sTgcPrepData>, 8> stgcPrdsPerLayer = stgcClusterCommon.sortSTGCPrdPerLayer(stripsVect);
 
   // define the identifier hash
-  IdentifierHash hash;
-
+  Identifier chanId = stripsVect.at(0).identify();
+  IdentifierHash hash = m_idHelperSvc->moduleHash(chanId);
+  
   int channelType = m_idHelperSvc->stgcIdHelper().channelType(stripsVect.at(0).identify());
   double resolution = Amg::error(stripsVect.at(0).localCovariance(), Trk::locX);
   ATH_MSG_DEBUG("ChannelType: " << channelType << " Single channel resolution: " << resolution);
 
+  // Separate hits by layer (using index = 0 to 7) and sort them
+  std::array<std::vector<Muon::sTgcPrepData>, 8> stgcPrdsPerLayer = stgcClusterCommon.sortSTGCPrdPerLayer(std::move(stripsVect));
 
-  // now add the clusters to the PRD container
-  clustersVect.clear();
-
-  SG::ReadCondHandle<MuonGM::MuonDetectorManager> DetectorManagerHandle{m_DetectorManagerKey};
-  const MuonGM::MuonDetectorManager* detManager = DetectorManagerHandle.cptr();
-  if(!detManager){
+  SG::ReadCondHandle<MuonGM::MuonDetectorManager> detManager{m_DetectorManagerKey, ctx};
+  if(!detManager.isValid()){
     ATH_MSG_ERROR("Null pointer to the read MuonDetectorManager conditions object");
     return StatusCode::FAILURE;
   }
 
   // Loop over the 8 layers, from 0 to 7
-  for (unsigned int i_layer = 0; i_layer < stgcPrdsPerLayer.size(); ++i_layer) {
+  for (std::vector<sTgcPrepData>& unmerged : stgcPrdsPerLayer) {
       // Get the strip clusters of the layer.
-      std::vector<std::vector<Muon::sTgcPrepData>> layerClusters = stgcClusterCommon.findStripCluster(
-                                                                       stgcPrdsPerLayer.at(i_layer),
-                                                                       m_maxHoleSize);
+      std::vector<std::vector<Muon::sTgcPrepData>> layerClusters = stgcClusterCommon.findStripCluster(std::move(unmerged),
+                                                                                                       m_maxHoleSize);
 
       // Loop over the clusters of that gap
-      for (const std::vector<Muon::sTgcPrepData>& cluster: layerClusters) {
+      for (std::vector<Muon::sTgcPrepData>& cluster: layerClusters) {
         std::vector<Identifier> rdoList;
         //vectors to hold the properties of the elements of a cluster
         std::vector<int> elementsCharge;
@@ -76,7 +74,7 @@ StatusCode Muon::CaruanaSTgcClusterBuilderTool::getClusters(std::vector<Muon::sT
         double posY = (cluster.at(0)).localPosition().y();
 
         // loop on the strips and set the cluster weighted position and charge
-        for ( const auto& it : cluster ){
+        for (const sTgcPrepData& it : cluster ){
           rdoList.push_back(it.identify());
           elementsCharge.push_back(it.charge());
           elementsChannel.push_back(m_idHelperSvc->stgcIdHelper().channel(it.identify()));
@@ -88,13 +86,12 @@ StatusCode Muon::CaruanaSTgcClusterBuilderTool::getClusters(std::vector<Muon::sT
         // Use the Caruana method to reconstruct clusters, determining the cluster mean position and error.
         // If the Caruana method fails at some point, the reconstruction reverts to the weighted average method.
         Identifier clusterId;
-        double reconstructedPosX;
-        double sigmaSq;
-        std::optional<Muon::STgcClusterPosition> optStripCluster = stgcClusterCommon.caruanaGaussianFitting(
-                                                                           cluster,
-                                                                           m_positionStripResolution,
-                                                                           m_angularStripResolution,
-                                                                           detManager);
+        double reconstructedPosX{0};
+        double sigmaSq{0};
+        std::optional<Muon::STgcClusterPosition> optStripCluster = stgcClusterCommon.caruanaGaussianFitting(cluster,
+                                                                                                            m_positionStripResolution,
+                                                                                                            m_angularStripResolution,
+                                                                                                            detManager.cptr());
         if (optStripCluster.has_value()) {
           clusterId = (*optStripCluster).getClusterId();
           reconstructedPosX = (*optStripCluster).getMeanPosition();
@@ -133,20 +130,20 @@ StatusCode Muon::CaruanaSTgcClusterBuilderTool::getClusters(std::vector<Muon::sT
         ATH_MSG_DEBUG("Reconstructed a cluster at mean local position: (" << localPosition.x() << ", " << localPosition.y()
                        << ") with error on cluster: " << std::sqrt((covN)(0,0)) << " and added error: " <<  m_addError);
 
-        sTgcPrepData* prdN = new sTgcPrepData(
-          clusterId,
-          hash,
-          localPosition,
-          rdoList,
-          covN,
-          cluster.at(0).detectorElement(),
-          std::accumulate(elementsCharge.begin(), elementsCharge.end(), 0),
-          (short int)0,
-          (uint16_t)0,
-          elementsChannel,
-          elementsTime,
-          elementsCharge);
-        clustersVect.push_back(prdN);
+        std::unique_ptr<sTgcPrepData> prdN = std::make_unique<sTgcPrepData>(clusterId,
+                                                                            hash,
+                                                                            std::move(localPosition),
+                                                                            std::move(rdoList),
+                                                                            std::move(covN),
+                                                                            cluster.at(0).detectorElement(),
+                                                                            std::accumulate(elementsCharge.begin(), elementsCharge.end(), 0),
+                                                                            (short int)0,
+                                                                            (uint16_t)0,
+                                                                            std::move(elementsChannel),
+                                                                            std::move(elementsTime),
+                                                                            std::move(elementsCharge));
+        prdN->setAuthor(sTgcPrepData::Author::Caruana);
+        clustersVect.push_back(std::move(prdN));
       }
   }
 

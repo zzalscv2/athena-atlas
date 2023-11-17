@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRIOONTRACK_STGCCLUSTERONTRACK_H
@@ -12,14 +12,10 @@
 #include "MuonPrepRawData/sTgcPrepDataContainer.h"
 #include "AthLinks/ElementLink.h"
 
-typedef ElementLink<Muon::sTgcPrepDataContainer> ElementLinkToIDC_STGC_Container;
+using ElementLinkToIDC_STGC_Container = ElementLink<Muon::sTgcPrepDataContainer> ;
 
 class STGC_ClusterOnTrackCnv_p1;
 
-namespace MuonGM
-{
-  class sTgcReadoutElement;
-}
 
 namespace Trk 
 {

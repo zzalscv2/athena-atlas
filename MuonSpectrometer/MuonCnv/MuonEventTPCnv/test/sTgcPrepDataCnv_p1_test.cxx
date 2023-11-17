@@ -74,9 +74,9 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   Muon::sTgcPrepData trans1 (Identifier (1234),
                              IdentifierHash (1234),
-                             locpos,
-                             rdoList,
-                             cov,
+                             std::move(locpos),
+                             std::move(rdoList),
+                             std::move(cov),
                              nullptr,
                              123);
                             

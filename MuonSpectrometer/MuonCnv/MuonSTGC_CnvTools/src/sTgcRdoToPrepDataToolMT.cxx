@@ -171,26 +171,29 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
                                                   (channelType == sTgcIdHelper::Strip ? sTgcStripPrds : sTgcWirePrds);
         
             // check if the same RdoId is already present; keep the one with the smallest time
-            auto it = std::find_if(sTgcPrds.begin(), sTgcPrds.end(), [&rdoId](auto prd) { return (prd.identify() == rdoId); });
+            auto it = std::find_if(sTgcPrds.begin(), sTgcPrds.end(), [&rdoId](const sTgcPrepData& prd) { 
+                                                                        return (prd.identify() == rdoId); 
+                                                                    });
             if (it == sTgcPrds.end()) {
-                sTgcPrds.emplace_back(rdoId, hash, localPos, rdoList, cov, detEl, calibratedCharge, calibStrip.time, bcTag);
+                sTgcPrds.emplace_back(rdoId, hash, std::move(localPos), std::move(rdoList), std::move(cov), detEl, calibratedCharge, calibStrip.time, bcTag);
             } else if (it->time() > calibStrip.time) {
-                *it = sTgcPrepData(rdoId, hash, localPos, rdoList, cov, detEl, calibratedCharge, calibStrip.time, bcTag);
+                *it = sTgcPrepData(rdoId, hash, std::move(localPos), std::move(rdoList), std::move(cov), detEl, calibratedCharge, calibStrip.time, bcTag);
             }
         } else {
             // if not merging just add the PRD to the collection
-            prdColl->push_back(new sTgcPrepData(rdoId,hash,localPos,rdoList,cov,detEl, calibratedCharge, calibStrip.time, bcTag));
+            prdColl->push_back(new sTgcPrepData(rdoId,hash, std::move(localPos), std::move(rdoList), std::move(cov), 
+                                                detEl, calibratedCharge, calibStrip.time, bcTag));
         } 
     }
 
     if(m_merge) {
         // merge strip prds that fire closeby channels (not clusterizing wires and pads)
-        std::vector<Muon::sTgcPrepData*> sTgcStripClusters;
-        ATH_CHECK(m_clusterBuilderTool->getClusters(sTgcStripPrds, sTgcStripClusters)); // Clusterize strips
+        std::vector<std::unique_ptr<Muon::sTgcPrepData>> sTgcStripClusters;
+        ATH_CHECK(m_clusterBuilderTool->getClusters(ctx, std::move(sTgcStripPrds), sTgcStripClusters)); // Clusterize strips
 
-        for ( auto it : sTgcStripClusters ) {
+        for ( std::unique_ptr<Muon::sTgcPrepData>& it : sTgcStripClusters ) {
             it->setHashAndIndex(prdColl->identifyHash(), prdColl->size());
-            prdColl->push_back(it);
+            prdColl->push_back(std::move(it));
         } 
         for ( Muon::sTgcPrepData& prd : sTgcWirePrds ) {
             prd.setHashAndIndex(prdColl->identifyHash(), prdColl->size());

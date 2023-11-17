@@ -13,7 +13,7 @@
 #include <vector>
 #include "float.h"
 
-#include "TF1.h"
+
 
 namespace NSWCalib { 
 
@@ -25,7 +25,7 @@ namespace NSWCalib {
     double resTransDistDrift{0};
     double resLongDistDrift{0};
     double dx{0};      
-    Amg::Vector2D locPos{-FLT_MAX,FLT_MAX};
+    Amg::Vector2D locPos{Amg::Vector2D::Zero()};
     Identifier identifier{0};
   };
 

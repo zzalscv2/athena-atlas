@@ -115,11 +115,11 @@ makeclusts (const MuonGM::MuonDetectorManager& muo_dd)
       auto cl = std::make_unique<Muon::MMPrepData>
         (clusId,
          clusHash,
-         locpos,
-         rdoList,
-         cov,
+         std::move(locpos),
+         std::move(rdoList),
+         std::move(cov),
          muo_dd.getMMReadoutElement (clusId));
-      cl->setAuthor (Muon::MMPrepData::ProjectionClusterBuilder);
+      cl->setAuthor (Muon::MMPrepData::Author::SimpleClusterBuilder);
       coll->push_back (std::move (cl));
     }
     assert(cont->addCollection (coll.release(), hash));
