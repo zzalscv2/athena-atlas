@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1HVLEGOSYSTEM_H
@@ -30,7 +30,7 @@ class VP1HVLegoSystem: public IVP13DSystemSimple
   QByteArray saveState();
   void restoreFromState(QByteArray ba);
 
-  protected slots:
+  protected Q_SLOTS:
     void checkboxChanged();
 
  private:
