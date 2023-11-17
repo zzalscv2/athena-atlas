@@ -140,7 +140,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         #     eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauAlgoTool.DumpSuperCells = True
         #       and/or
         #     eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauBDTAlgoTool.DumpSuperCells = True
-        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauBDTAlgoTool = CompFactory.LVL1.eFEXtauBDTAlgo("eFEXtauBDTAlgo", BDTJsonConfigPath="bdt_config_v13.json")
+        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauBDTAlgoTool = CompFactory.LVL1.eFEXtauBDTAlgo("eFEXtauBDTAlgo", BDTJsonConfigPath="bdt_config_v16.json")
         # load noise cuts and dm corrections when running on data
         if not flags.Input.isMC:
             from IOVDbSvc.IOVDbSvcConfig import addFolders#, addFoldersSplitOnline
