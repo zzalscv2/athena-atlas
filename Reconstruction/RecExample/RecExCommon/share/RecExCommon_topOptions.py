@@ -578,14 +578,6 @@ if globalflags.InputFormat.is_bytestream():
 ################################################################"
 
 
-#pdr.flag_domain('aod')
-if rec.doAOD():
-    try:
-        include( "ParticleBuilderOptions/AOD_Builder_jobOptions.py")
-    except Exception:
-        treatException("Could not load AOD_Builder_joboptions. Switched off !" )
-        rec.doAOD=False
-
 #
 # possible user code and property modifiers should come here
 # could be several algorithms, or python lines
