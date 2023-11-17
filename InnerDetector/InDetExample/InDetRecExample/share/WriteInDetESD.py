@@ -3,7 +3,7 @@
 from InDetRecExample.InDetKeys import InDetKeys
 InDetESDList = []
 
-from InDetConfig.TrackRecoConfig import FTAG_AUXDATA
+from InDetConfig.InDetTrackOutputConfig import FTAG_AUXDATA
 
 # Save full and zero-suppressed BCM rdos
 # (the latter is needed to allow writting to AOD and the former will hopefully be removed in future):

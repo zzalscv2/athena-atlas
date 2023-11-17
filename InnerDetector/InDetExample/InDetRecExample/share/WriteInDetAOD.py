@@ -3,7 +3,7 @@
 from InDetRecExample.InDetKeys import InDetKeys
 InDetAODList = []
 
-from InDetConfig.TrackRecoConfig import FTAG_AUXDATA
+from InDetConfig.InDetTrackOutputConfig import FTAG_AUXDATA
 
 # Add Vertices and Particles.
 # -----------------------------
