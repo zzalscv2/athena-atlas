@@ -2,12 +2,14 @@ TileROD_Decoder_test
 
 
 ApplicationMgr       INFO Application Manager Configured successfully
+ClassIDSvc           INFO getRegistryEntries: read 11455 CLIDRegistry entries for module ALL
 EventLoopMgr      WARNING Unable to locate service "EventSelector" 
 EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 TileHWID             INFO initialize_from_dictionary 
 TileTBID             INFO initialize_from_dictionary 
+ClassIDSvc           INFO getRegistryEntries: read 568 CLIDRegistry entries for module ALL
 test1 (fillCollection)
 TileDigitsCollection: 16
 TileRawDataCollection of TileDigits Id = 0x100 size = 16
@@ -206,7 +208,7 @@ TileCell Id = 5/1/-1/0/8/0 ener = 0 gain = -12 time = 0 qual = 255 prov = 0 E1 =
 TileCell Id = 5/1/-1/0/8/1 ener = 31 gain = -3 time = 0 qual = 65280 prov = 0 E1 = 31 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/0/9/0 ener = -22 gain = -12 time = 0 qual = 255 prov = 0 E1 = 0 G1 = 0 T1 = 0 Q1 = 255 0 E2 = -22 G2 = 1 T2 = 0 Q2 = 0 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/0/0 ener = 6.5 gain = -3 time = 0 qual = 65280 prov = 0 E1 = 6.5 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
-TileCell Id = 5/1/-1/1/0/1 ener = 136 gain = -12 time = 27.8125 qual = 255 prov = 0 E1 = 0 G1 = 0 T1 = 27.8125 Q1 = 255 0 E2 = 136 G2 = 1 T2 = 27.8125 Q2 = 0 0 eta = 0 phi = 0 r = 0
+TileCell Id = 5/1/-1/1/0/1 ener = 136 gain = -12 time = 27.8125 qual = 255 prov = 40960 E1 = 0 G1 = 0 T1 = 27.8125 Q1 = 255 0 E2 = 136 G2 = 1 T2 = 27.8125 Q2 = 0 160 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/1/0 ener = -7.5 gain = -3 time = 0 qual = 65280 prov = 0 E1 = -7.5 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/1/1 ener = -7 gain = -12 time = 0 qual = 255 prov = 0 E1 = 0 G1 = 0 T1 = 0 Q1 = 255 0 E2 = -7 G2 = 1 T2 = 0 Q2 = 0 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/2/0 ener = 47 gain = -3 time = 0 qual = 65280 prov = 0 E1 = 47 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
@@ -218,7 +220,7 @@ TileCell Id = 5/1/-1/1/4/0 ener = 1.5 gain = -12 time = 0 qual = 255 prov = 0 E1
 TileCell Id = 5/1/-1/1/4/1 ener = -87 gain = -3 time = 0 qual = 65280 prov = 0 E1 = -87 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/4/2 ener = -23 gain = -12 time = 0 qual = 255 prov = 0 E1 = 0 G1 = 0 T1 = 0 Q1 = 255 0 E2 = -23 G2 = 1 T2 = 0 Q2 = 0 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/5/0 ener = -10.5 gain = -3 time = 0 qual = 65280 prov = 0 E1 = -10.5 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
-TileCell Id = 5/1/-1/1/5/1 ener = 169.5 gain = -12 time = -30.5 qual = 767 prov = 0 E1 = 0 G1 = 0 T1 = -30.5 Q1 = 255 0 E2 = 169.5 G2 = 1 T2 = -30.5 Q2 = 2 0 eta = 0 phi = 0 r = 0
+TileCell Id = 5/1/-1/1/5/1 ener = 169.5 gain = -12 time = -30.5 qual = 767 prov = 40960 E1 = 0 G1 = 0 T1 = -30.5 Q1 = 255 0 E2 = 169.5 G2 = 1 T2 = -30.5 Q2 = 2 160 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/6/0 ener = 23 gain = -3 time = 0 qual = 65280 prov = 0 E1 = 23 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/6/1 ener = 1.5 gain = -12 time = 0 qual = 255 prov = 0 E1 = 0 G1 = 0 T1 = 0 Q1 = 255 0 E2 = 1.5 G2 = 1 T2 = 0 Q2 = 0 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/6/2 ener = -18 gain = -3 time = 0 qual = 65280 prov = 0 E1 = -18 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
@@ -323,7 +325,7 @@ TileCell Id = 5/1/-1/0/8/0 ener = 0 gain = -12 time = 0 qual = 255 prov = 0 E1 =
 TileCell Id = 5/1/-1/0/8/1 ener = 31 gain = -3 time = 0 qual = 65280 prov = 0 E1 = 31 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/0/9/0 ener = -22 gain = -12 time = 0 qual = 255 prov = 0 E1 = 0 G1 = 0 T1 = 0 Q1 = 255 0 E2 = -22 G2 = 1 T2 = 0 Q2 = 0 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/0/0 ener = 6.5 gain = -3 time = 0 qual = 65280 prov = 0 E1 = 6.5 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
-TileCell Id = 5/1/-1/1/0/1 ener = 136 gain = -12 time = 27.8125 qual = 255 prov = 0 E1 = 0 G1 = 0 T1 = 27.8125 Q1 = 255 0 E2 = 136 G2 = 1 T2 = 27.8125 Q2 = 0 0 eta = 0 phi = 0 r = 0
+TileCell Id = 5/1/-1/1/0/1 ener = 136 gain = -12 time = 27.8125 qual = 255 prov = 40960 E1 = 0 G1 = 0 T1 = 27.8125 Q1 = 255 0 E2 = 136 G2 = 1 T2 = 27.8125 Q2 = 0 160 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/1/0 ener = -7.5 gain = -3 time = 0 qual = 65280 prov = 0 E1 = -7.5 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/1/1 ener = -7 gain = -12 time = 0 qual = 255 prov = 0 E1 = 0 G1 = 0 T1 = 0 Q1 = 255 0 E2 = -7 G2 = 1 T2 = 0 Q2 = 0 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/2/0 ener = 47 gain = -3 time = 0 qual = 65280 prov = 0 E1 = 47 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
@@ -335,7 +337,7 @@ TileCell Id = 5/1/-1/1/4/0 ener = 1.5 gain = -12 time = 0 qual = 255 prov = 0 E1
 TileCell Id = 5/1/-1/1/4/1 ener = -87 gain = -3 time = 0 qual = 65280 prov = 0 E1 = -87 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/4/2 ener = -23 gain = -12 time = 0 qual = 255 prov = 0 E1 = 0 G1 = 0 T1 = 0 Q1 = 255 0 E2 = -23 G2 = 1 T2 = 0 Q2 = 0 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/5/0 ener = -10.5 gain = -3 time = 0 qual = 65280 prov = 0 E1 = -10.5 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
-TileCell Id = 5/1/-1/1/5/1 ener = 169.5 gain = -12 time = -30.5 qual = 767 prov = 0 E1 = 0 G1 = 0 T1 = -30.5 Q1 = 255 0 E2 = 169.5 G2 = 1 T2 = -30.5 Q2 = 2 0 eta = 0 phi = 0 r = 0
+TileCell Id = 5/1/-1/1/5/1 ener = 169.5 gain = -12 time = -30.5 qual = 767 prov = 40960 E1 = 0 G1 = 0 T1 = -30.5 Q1 = 255 0 E2 = 169.5 G2 = 1 T2 = -30.5 Q2 = 2 160 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/6/0 ener = 23 gain = -3 time = 0 qual = 65280 prov = 0 E1 = 23 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/6/1 ener = 1.5 gain = -12 time = 0 qual = 255 prov = 0 E1 = 0 G1 = 0 T1 = 0 Q1 = 255 0 E2 = 1.5 G2 = 1 T2 = 0 Q2 = 0 0 eta = 0 phi = 0 r = 0
 TileCell Id = 5/1/-1/1/6/2 ener = -18 gain = -3 time = 0 qual = 65280 prov = 0 E1 = -18 G1 = 1 T1 = 0 Q1 = 0 0 E2 = 0 G2 = -1 T2 = 0 Q2 = 255 0 eta = 0 phi = 0 r = 0
