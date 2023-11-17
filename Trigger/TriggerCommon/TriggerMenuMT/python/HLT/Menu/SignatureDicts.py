@@ -262,7 +262,10 @@ JetChainParts = {
                       'DJMASS1000j50', # alias
                       'DJMASS1000j50dphi240', # alias
                       'DJMASS1000j50dphi200x400deta', # alias
-
+                      'DJMASS900j50dphi200x400deta', # alias
+                      'DJMASS1000j50dphi250x260deta', # alias
+                      'DJMASS900j50dphi250x260deta', # alias
+  
                       'DIJET70j12etXX1000djmassXXdjdphi200XX400djdeta', # needed for hypoToolTests.py
                       'DIJET80j12etXX0j12eta240XX700djmass', # needed for hypoToolTests.py
 

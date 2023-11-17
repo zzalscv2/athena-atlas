@@ -2115,6 +2115,18 @@ HLT_2mu6_muonqual_L12MU5VF:
     1: 2
     2: 2
     3: 2
+HLT_2mu6noL1_msonly_nscan_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1MJJ-500-NFF:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 20
+HLT_2mu6noL1_msonly_nscan_j70_j50a_j0_DJMASS900j50dphi200x400deta_L1MJJ-500-NFF:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 20
 HLT_3j190_pf_ftf_L1J100:
   eventCount: 0
   stepCounts:
@@ -14777,6 +14789,24 @@ HLT_j70_j50a_j0_DJMASS1000j50dphi240_xe90_tcpufit_xe50_cell_L1jMJJ-500-NFF:
     0: 1
   stepFeatures:
     0: 22
+HLT_j70_j50a_j0_DJMASS1000j50dphi250x260deta_L1MJJ-500-NFF:
+  eventCount: 1
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 20
+HLT_j70_j50a_j0_DJMASS900j50dphi200x400deta_L1MJJ-500-NFF:
+  eventCount: 1
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 20
+HLT_j70_j50a_j0_DJMASS900j50dphi250x260deta_L1MJJ-500-NFF:
+  eventCount: 1
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 20
 HLT_j70a_j50a_2j30a_SHARED_2j30_0eta290_020jvt_bdl1d70_j0_DJMASS1000j50_pf_ftf_presela60XXa40XX2a25_L1MJJ-500-NFF:
   eventCount: 0
   stepCounts:
@@ -22563,6 +22593,8 @@ HLT_mu6_msonly_L1MU5VF:
   stepFeatures:
     0: 11
     1: 11
+HLT_mu6_msonly_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1MJJ-500-NFF:
+  eventCount: 0
 HLT_mu6_mu4_L1BPH-7M14-MU5VFMU3VF:
   eventCount: 0
 HLT_mu6_mu4_PhysicsTLA_L1BPH-7M22-MU5VFMU3VF:
