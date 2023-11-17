@@ -24,9 +24,11 @@ namespace GeoModel {
         Obj& operator*() { return *m_ptr; }
 
         /// Constructor from unique_ptr
-        TransientConstSharedPtr(std::unique_ptr<Obj> ptr) : m_ptr{std::move(ptr)} {}
+        template <typename ObjGrp>
+        TransientConstSharedPtr(std::unique_ptr<ObjGrp> ptr) : m_ptr{std::move(ptr)} {}
         /// Constructor from shared_ptr
-        TransientConstSharedPtr(std::shared_ptr<Obj> ptr) : m_ptr{std::move(ptr)} {}
+        template <typename ObjGrp>
+        TransientConstSharedPtr(std::shared_ptr<ObjGrp> ptr) : m_ptr{std::move(ptr)} {}
         /// Constructor from raw ptr
         TransientConstSharedPtr(Obj* ptr) : m_ptr{ptr} {}
 
@@ -60,16 +62,20 @@ namespace GeoModel {
             m_ptr = std::move(other.m_ptr);
             return *this;
         }
-        TransientConstSharedPtr& operator=(std::unique_ptr<Obj>&& other) {
+        template <typename ObjGrp>
+        TransientConstSharedPtr& operator=(std::unique_ptr<ObjGrp>&& other) {
             m_ptr = std::move(other);
             return *this;
         }
-        TransientConstSharedPtr& operator=(std::shared_ptr<Obj>&& other) {
+        template <typename ObjGrp>
+        TransientConstSharedPtr& operator=(std::shared_ptr<ObjGrp>&& other) {
             m_ptr = std::move(other);
             return *this;
         }
         /// Overload the pointer
-        void reset(std::unique_ptr<Obj> newObj = nullptr) { m_ptr = std::move(newObj); }
+        template <typename ObjGrp>
+        void reset(std::unique_ptr<ObjGrp> newObj) { m_ptr = std::move(newObj); }
+        void reset() { m_ptr.reset(); }
         /// Release the memory
         std::shared_ptr<const Obj> release() { return std::move(m_ptr); }
         /// Is the pointer defined
