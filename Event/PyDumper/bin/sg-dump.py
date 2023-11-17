@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # @file: PyDumper/bin/sg-dump.py
 # @purpose: a simple python script to run pyathena and use PySgDumper to dump
 #           a (set of) event(s) from a POOL (esd/aod) file into an ASCII file
@@ -98,11 +98,6 @@ if __name__ == "__main__":
          default  = "PyDumper.PyComps:PySgDumper",
          help     = "name of the class to use to process the file(s) content (default: '%default'. validation uses: 'PyDumper.PyComps:DataProxyLoader')")
 
-    _add("--type",
-         dest = "file_type",
-         default = "any",
-         help = "(optional) input file type (RDO,BS,ESD,AOD,DPD, or ANY)")
-
     _add("--include",
          dest = "include",
          default = "*",
@@ -117,6 +112,12 @@ if __name__ == "__main__":
          dest = "conditions_tag",
          default = "",
          help = "override setting of global conditions tag")
+         
+    _add("--full-log",
+         dest = "full_log",
+         action = "store_true",
+         default = False,
+         help = "preserve full log file")
          
     (options, args) = parser.parse_args()
 
@@ -148,10 +149,10 @@ if __name__ == "__main__":
             pyalg_cls=options.pyalg_cls,
             include=options.include,
             exclude=options.exclude,
-            file_type=options.file_type,
             do_clean_up=options.do_clean_up,
             athena_opts=options.athena_opts,
             conditions_tag = options.conditions_tag,
+            full_log = options.full_log,
             msg=msg
             )
     except Exception as err:

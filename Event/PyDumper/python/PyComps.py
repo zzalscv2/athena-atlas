@@ -13,6 +13,7 @@ from fnmatch import fnmatch
 from io import IOBase
 import AthenaPython.PyAthena as PyAthena
 from AthenaPython.PyAthena import StatusCode
+import traceback
 
 def _gen_key_from_type(t):
     "helper function to generate a storegate key from a typename"
@@ -315,6 +316,7 @@ class PySgDumper (PyAthena.Alg):
                 if n == 'Input': continue
                 if n.endswith('Aux.'): continue
                 if n.endswith('_DELETED'): continue
+                if not p.isValid(): continue
                 excluded = False
                 for exc in elist:
                     if fnmatch (n, exc) or (tp and fnmatch(tp, exc)):
@@ -356,7 +358,7 @@ class PySgDumper (PyAthena.Alg):
                     dumper = self._dumper_fct (klass=o.__class__,
                                                ofile=self.ofile)
                 except RuntimeError as err:
-                    _add_fail ((cont_key, cont_type, 'dump failed'))
+                    _add_fail ((cont_key, cont_type, 'dump failed ' + str(err)))
                     if self._evt_nbr==1:
                         _warn (err)
                     continue
@@ -373,6 +375,7 @@ class PySgDumper (PyAthena.Alg):
                 dumper (o)
                 self.ofile.flush()
             except Exception as err:
+                traceback.print_exc()
                 _add_fail ((cont_key, cont_type, 'sg-retrieve failed'))
                 if self._evt_nbr==1:
                     _warn ('caught exception:\n%s', err)
