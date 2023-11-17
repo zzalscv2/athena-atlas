@@ -304,6 +304,16 @@ namespace IOVDbNamespace{
     return nullptr;
   }
 
+  nlohmann::json CrestFunctions::getTagProperties(const std::string & tag){
+    try{
+      auto crestClient = Crest::CrestClient(getURLBase());
+      return crestClient.findTag(tag)[0];
+
+    } catch (std::exception & e){
+      std::cout<<__FILE__<<":"<<__LINE__<< ": " << e.what() << " Cannot get a tag Properties of " << tag << std::endl;
+    }
+    return nullptr;
+  }
 
   std::string CrestFunctions::getTagInfoElement(nlohmann::json tag_info, const std::string & key){
     if (tag_info.contains(key)){
