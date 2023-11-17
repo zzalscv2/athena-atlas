@@ -31,6 +31,8 @@ static const InterfaceID IID_ITileROD_Decoder("TileROD_Decoder", 1, 0);
 bool chan_order (TileRawData * a, TileRawData * b) { return (a->adc_HWID() < b->adc_HWID()); }
 bool chan_order1 (const TileFastRawChannel& a, const TileFastRawChannel& b) { return (a.channel() < b.channel()); }
 
+inline unsigned char qbitfun(float t, float a, float b) { return ((t!=0.0F) ? ((t>a && t<b) ? TileCell::MASK_AMPL+TileCell::MASK_TIME : TileCell::MASK_AMPL) : 0); }
+
 /** constructor
  */
 
@@ -3590,10 +3592,11 @@ uint32_t TileROD_Decoder::make_copyHLT(bool of2,
               ener *= TileRawChannelBuilder::correctAmp(time,of2);
             }
           }
+          unsigned char qbit = qbitfun(time,m_allowedTimeMin,m_allowedTimeMax);
           if (pCell->time() != -100.0F) pCell->setTime(time, m_Rw2Pmt[sec][idxraw]);
           else pCell->setTime_nonvirt(time);
           
-          pCell->setQuality_nonvirt(std::min(255, abs((int) qual)), 0, m_Rw2Pmt[sec][idxraw]);
+          pCell->setQuality_nonvirt(std::min(255, abs((int) qual)), qbit, m_Rw2Pmt[sec][idxraw]);
           pCell->addEnergy(ener, m_Rw2Pmt[sec][idxraw], adcIdx);
           
           if (pCell->caloDDE()->onl2() == TileHWID::NOT_VALID_HASH)
@@ -3655,7 +3658,8 @@ uint32_t TileROD_Decoder::make_copyHLT(bool of2,
         }
         pCell->setEnergy(ener, 0.0F);
         pCell->setTime_nonvirt(time);
-        pCell->setQuality_nonvirt(std::min(255, abs((int) qual)), 0, 0);
+        unsigned char qbit = qbitfun(time,m_allowedTimeMin,m_allowedTimeMax);
+        pCell->setQuality_nonvirt(std::min(255, abs((int) qual)), qbit, 0);
       } // End of if idx
       
     } // End of if MBTS
@@ -3668,12 +3672,16 @@ uint32_t TileROD_Decoder::make_copyHLT(bool of2,
     //    int gain = 0;
     //    if ((*d_it)->gain1() == 1 || (*d_it)->gain2() == 1) gain = 1;
     int gain = (*d_it)->gain1() | (*d_it)->gain2();
-    int qual = (*d_it)->qual1() & (*d_it)->qual2();
+    unsigned char qual = (*d_it)->qual1() & (*d_it)->qual2();
+
+    float ener = (*d_it)->e();
+    float time = (*d_it)->time();
+    unsigned char qbit = qbitfun(time,m_allowedTimeMin,m_allowedTimeMax);
     
-    (*d_it)->setEnergy_nonvirt((*d_it)->e(), (*d_it)->e(), gain, gain);
-    (*d_it)->setQuality_nonvirt(static_cast<unsigned char>(qual), 0, 0);
-    (*d_it)->setQuality_nonvirt(static_cast<unsigned char>(qual), 0, 1);
-    if ((*d_it)->time() == -100.0F) (*d_it)->setTime_nonvirt(0.0F);
+    (*d_it)->setEnergy_nonvirt(ener, ener, gain, gain);
+    (*d_it)->setQuality_nonvirt(qual, qbit, 0);
+    (*d_it)->setQuality_nonvirt(qual, qbit, 1);
+    if (time == -100.0F) (*d_it)->setTime_nonvirt(0.0F);
   }
 
   return error;
@@ -4056,25 +4064,62 @@ void TileROD_Decoder::mergeD0cellsHLT(const D0CellsHLT& d0cells,
   int drawer = (frag_id & 0xFF);
   TileCell* pCell  = d0cells.m_cells[drawer];
   if ( !pCell ) return;
-  double amp1(0.0), amp2(0.0);
-  amp1 = d0cells.m_D0chanpos[drawer].amplitude();
-  amp2 = d0cells.m_D0channeg[drawer].amplitude();
-  int gain1 = d0cells.m_D0chanpos[drawer].adc();
-  int gain2 = d0cells.m_D0channeg[drawer].adc();
-  if ((!d0cells.m_D0Maskneg[drawer]) && (!d0cells.m_D0Maskpos[drawer])) {
-    (pCell)->setEnergy(amp1, amp2, gain1, gain2);
-    (pCell)->setTime(d0cells.m_D0chanpos[drawer].time());
-    (pCell)->setTime(d0cells.m_D0channeg[drawer].time(), 1);
-    (pCell)->setQuality(static_cast<unsigned char>(d0cells.m_D0chanpos[drawer].quality()), 0, 0);
-    (pCell)->setQuality(static_cast<unsigned char>(d0cells.m_D0channeg[drawer].quality()), 0, 1);
+
+  if (d0cells.m_D0Maskpos[drawer] && d0cells.m_D0Maskneg[drawer]) {
+
+    // both channels are bad - mask whole cell
+    (pCell)->setEnergy_nonvirt(0.0F, 0.0F, 0, 0);
+    (pCell)->setTime_nonvirt(0.0F);
+    (pCell)->setQuality_nonvirt(static_cast<unsigned char>(255), 0, 0);
+    (pCell)->setQuality_nonvirt(static_cast<unsigned char>(255), 0, 1);
+
   } else if (d0cells.m_D0Maskpos[drawer]) {
-    (pCell)->setEnergy(amp2, amp2, gain1, gain2);
-    (pCell)->setTime(d0cells.m_D0channeg[drawer].time());
-    (pCell)->setQuality(static_cast<unsigned char>(d0cells.m_D0channeg[drawer].quality()), 0, 0);
+
+    // first(positive) channel is bad, second(negative) is good
+    float amp2 = d0cells.m_D0channeg[drawer].amplitude();
+    float time2 = d0cells.m_D0channeg[drawer].time();
+    int gain2 = d0cells.m_D0channeg[drawer].adc();
+    unsigned char qual2 = d0cells.m_D0channeg[drawer].quality();
+    unsigned char qbit2 = qbitfun(time2,m_allowedTimeMin,m_allowedTimeMax);
+
+    (pCell)->setEnergy(amp2, amp2, gain2, gain2);
+    (pCell)->setTime(time2);
+    (pCell)->setQuality(qual2, qbit2, 0);
+    (pCell)->setQuality(qual2, qbit2, 1);
+
   } else {
-    (pCell)->setEnergy(amp1, amp1, gain1, gain1);
-    (pCell)->setTime(d0cells.m_D0chanpos[drawer].time());
-    (pCell)->setQuality(static_cast<unsigned char>(d0cells.m_D0chanpos[drawer].quality()), 0, 0);
+
+    // first(positive) channel is good
+    float amp1 = d0cells.m_D0chanpos[drawer].amplitude();
+    float time1 = d0cells.m_D0chanpos[drawer].time();
+    int gain1 = d0cells.m_D0chanpos[drawer].adc();
+    unsigned char qual1 = d0cells.m_D0chanpos[drawer].quality();
+    unsigned char qbit1 = qbitfun(time1,m_allowedTimeMin,m_allowedTimeMax);
+
+    if (d0cells.m_D0Maskneg[drawer]) {
+
+      // second channel is bad, first is good
+      (pCell)->setEnergy(amp1, amp1, gain1, gain1);
+      (pCell)->setTime(time1);
+      (pCell)->setQuality(qual1, qbit1, 0);
+      (pCell)->setQuality(qual1, qbit1, 1);
+
+    } else {
+
+      // second(negative) channel is good
+      float amp2 = d0cells.m_D0channeg[drawer].amplitude();
+      float time2 = d0cells.m_D0channeg[drawer].time();
+      int gain2 = d0cells.m_D0channeg[drawer].adc();
+      unsigned char qual2 = d0cells.m_D0channeg[drawer].quality();
+      unsigned char qbit2 = qbitfun(time2,m_allowedTimeMin,m_allowedTimeMax);
+
+      // both channels are good
+      (pCell)->setEnergy(amp1, amp2, gain1, gain2);
+      (pCell)->setTime(time1);
+      (pCell)->setTime(time2, 1);
+      (pCell)->setQuality(qual1, qbit1, 0);
+      (pCell)->setQuality(qual2, qbit2, 1);
+    }
   }
 }
 
