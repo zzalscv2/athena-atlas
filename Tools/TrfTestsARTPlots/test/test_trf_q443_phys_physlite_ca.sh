@@ -9,19 +9,34 @@
 # art-html: dcube_physlite
 
 export ATHENA_CORE_NUMBER=8
-Reco_tf.py \
+Reco_tf.py --CA "all:True" "RDOtoRDOTrigger:False" \
   --AMI q443 \
-  --steering doRDO_TRIG doTRIGtoALL  \
+  --steering doRDO_TRIG doTRIGtoALL \
   --outputAODFile myAOD.pool.root \
   --athenaopts "HITtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" \
-  --postExec 'from AthenaAuditors.AthenaAuditorsConf import FPEAuditor;FPEAuditor.NStacktracesOnFPE=10;' \
-  --preExec 'HITtoRDO:from RecExConfig.RecFlags import rec;rec.runUnsupportedLegacyReco=True' 'RAWtoALL:from RecExConfig.RecFlags import rec;rec.runUnsupportedLegacyReco=True' \
+  --preExec 'HITtoRDO:flags.Exec.FPE=10' 'RAWtoALL:flags.Exec.FPE=10' \
+  --postExec 'RDOtoRDOTrigger:from AthenaAuditors.AthenaAuditorsConf import FPEAuditor;FPEAuditor.NStacktracesOnFPE=10;' \
   --runNumber=310000 \
   --DataRunNumber=310000 \
   --maxEvents 2000
 
 rc1=$?
 echo "art-result: ${rc1} Reco_tf_q443_phys_physlite_mt_mp" 
+
+# Fail-over if 21.0/RDOtoRDOTrigger container within a container does not work switch it off
+if [ "$rc1" -ne "0" ]; then
+Reco_tf.py --CA \
+  --AMI q443 \
+  --steering doRAWtoALL \
+  --outputAODFile myAOD.pool.root \
+  --athenaopts "HITtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" \
+  --preExec 'flags.Exec.FPE=10' \
+  --runNumber=310000 \
+  --DataRunNumber=310000 \
+  --maxEvents 2000
+  rcfail=$?
+  echo "art-result: ${rcfail} Reco_tf_q443_phys_physlite_mt_mp_fail"
+fi
 
 Derivation_tf.py \
   --CA \
