@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // USED IN ATLFAST3
 #ifndef FASTCALOSIM_EMPTYCELLBUILDERTOOL_H
@@ -9,7 +9,7 @@
  * @file   EmptyCellBuilderTool.h
  * @class  EmptyCellBuilderTool
  * @brief  Building Cells objects from Atlfast
- * @author Michael Duehrssen 
+ * @author Michael Duehrssen
  */
 
 #include "CaloInterface/ICaloCellMakerTool.h"
@@ -19,11 +19,11 @@
 
 class EmptyCellBuilderTool: public extends<AthAlgTool, ICaloCellMakerTool>
 {
-public:    
-  EmptyCellBuilderTool(const std::string& type, 
-		       const std::string& name, 
-		       const IInterface* parent);
-  
+public:
+  EmptyCellBuilderTool(const std::string& type,
+                       const std::string& name,
+                       const IInterface* parent);
+
   virtual StatusCode initialize() override;
 
   // update theCellContainer
@@ -35,9 +35,9 @@ private:
 
 
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey { this
-      , "CaloDetDescrManager"
-      , "CaloDetDescrManager"
-      , "SG Key for CaloDetDescrManager in the Condition Store" };
+    , "CaloDetDescrManager"
+    , "CaloDetDescrManager"
+    , "SG Key for CaloDetDescrManager in the Condition Store" };
 };
 
 #endif

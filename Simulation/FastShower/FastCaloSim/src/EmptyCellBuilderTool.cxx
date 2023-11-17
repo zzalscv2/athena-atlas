@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // USED IN ATLFAST3
 #include "EmptyCellBuilderTool.h"
@@ -11,8 +11,8 @@
 #include "TileEvent/TileCell.h"
 
 EmptyCellBuilderTool::EmptyCellBuilderTool(const std::string& type,
-					   const std::string& name,
-					   const IInterface* parent)
+                                           const std::string& name,
+                                           const IInterface* parent)
   : base_class(type, name, parent)
 {
 }
@@ -37,7 +37,7 @@ void EmptyCellBuilderTool::create_empty_calo(const EventContext& ctx,
                                              CaloCellContainer * theCellContainer) const
 {
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,ctx};
-  if(!caloMgrHandle.isValid()) {
+  if (!caloMgrHandle.isValid()) {
     ATH_MSG_FATAL("Failed to retrieve CaloDetDescrManager!");
     std::abort();
   }
@@ -60,16 +60,16 @@ void EmptyCellBuilderTool::create_empty_calo(const EventContext& ctx,
   ATH_MSG_DEBUG("before: CellsPTile.capacity()="<<CellsPTile.capacity()<<" CellsPTile.allocated()="<<CellsPTile.allocated());
   ATH_MSG_DEBUG("before: CellsPCalo.capacity()="<<CellsPCalo.capacity()<<" CellsPCalo.allocated()="<<CellsPCalo.allocated());
 
-  for(const CaloDetDescrElement* theDDE : caloDDM->element_range()) {
-    if(theDDE) {
+  for (const CaloDetDescrElement* theDDE : caloDDM->element_range()) {
+    if (theDDE) {
       CaloCell* theCaloCell=0;
 
-      if(check_exist) theCaloCell=(CaloCell*)(theCellContainer->findCell(theDDE->calo_hash()));
+      if (check_exist) { theCaloCell = (CaloCell*)(theCellContainer->findCell(theDDE->calo_hash())); }
 
-      if(theCaloCell) {
+      if (theCaloCell) {
         theCaloCell->setGain(CaloGain::INVALIDGAIN);
-        E_tot+=theCaloCell->energy();
-        Et_tot+=theCaloCell->energy()/cosh(theCaloCell->eta());
+        E_tot += theCaloCell->energy();
+        Et_tot += theCaloCell->energy() / cosh(theCaloCell->eta());
         ++nfound;
       } else {
         CaloCell_ID::SUBCALO calo=theDDE->getSubCalo();
@@ -94,18 +94,18 @@ void EmptyCellBuilderTool::create_empty_calo(const EventContext& ctx,
   ATH_MSG_DEBUG(ncreate<<" cells created, "<<nfound<<" cells already found: size="<<theCellContainer->size()<<" e="<<E_tot<<" ; et="<<Et_tot<<". Now initialize and order calo...");
 
   // check whether has max hash id size
-  const CaloCell_ID * theCaloCCIDM   = caloDDM->getCaloCell_ID() ;
-  unsigned int hashMax=theCaloCCIDM->calo_cell_hash_max();
-  if (theCellContainer->size()<hashMax) {
+  const CaloCell_ID * theCaloCCIDM = caloDDM->getCaloCell_ID() ;
+  unsigned int hashMax = theCaloCCIDM->calo_cell_hash_max();
+  if (theCellContainer->size() < hashMax) {
     ATH_MSG_DEBUG("CaloCellContainer size " << theCellContainer->size() << " smaller than hashMax: " << hashMax);
   }
-  else if (theCellContainer->size()==hashMax)  {
+  else if (theCellContainer->size() == hashMax)  {
     ATH_MSG_DEBUG("CaloCellContainer size " << theCellContainer->size() << " correspond to hashMax : " << hashMax);
     theCellContainer->setHasTotalSize(true);
   }
   else {
     ATH_MSG_WARNING("CaloCellContainer size " << theCellContainer->size()
-	<< " larger than hashMax ! Too many cells ! " << hashMax);
+                    << " larger than hashMax ! Too many cells ! " << hashMax);
 
   }
 
@@ -127,9 +127,9 @@ void EmptyCellBuilderTool::create_empty_calo(const EventContext& ctx,
     }
   }
 
-  if (!theCellContainer->isOrdered()) theCellContainer->order();
+  if (!theCellContainer->isOrdered()) {theCellContainer->order();}
 
-    ATH_MSG_DEBUG("before: CellsPTile.capacity()="<<CellsPTile.capacity()<<" CellsPTile.allocated()="<<CellsPTile.allocated());
-    ATH_MSG_DEBUG("before: CellsPCalo.capacity()="<<CellsPCalo.capacity()<<" CellsPCalo.allocated()="<<CellsPCalo.allocated());
+  ATH_MSG_DEBUG("before: CellsPTile.capacity()="<<CellsPTile.capacity()<<" CellsPTile.allocated()="<<CellsPTile.allocated());
+  ATH_MSG_DEBUG("before: CellsPCalo.capacity()="<<CellsPCalo.capacity()<<" CellsPCalo.allocated()="<<CellsPCalo.allocated());
 }
 

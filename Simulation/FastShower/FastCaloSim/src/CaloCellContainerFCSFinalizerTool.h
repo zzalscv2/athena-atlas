@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // Used in ATLFAST3
 
@@ -17,10 +17,10 @@
 class CaloCellContainerFCSFinalizerTool
   : public extends<AthAlgTool, ICaloCellMakerTool, ICaloConstCellMakerTool>
 {
-public:    
-  CaloCellContainerFCSFinalizerTool(const std::string& type, 
-                                 const std::string& name, 
-				 const IInterface* parent) ;
+public:
+  CaloCellContainerFCSFinalizerTool(const std::string& type,
+                                    const std::string& name,
+                                    const IInterface* parent) ;
 
 
   // update theCellContainer
@@ -35,4 +35,3 @@ private:
 };
 
 #endif
-
