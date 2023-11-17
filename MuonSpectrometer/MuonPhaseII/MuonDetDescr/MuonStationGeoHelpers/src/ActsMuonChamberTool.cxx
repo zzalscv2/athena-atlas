@@ -37,7 +37,6 @@ namespace MuonGMR4{
      /// Next loop over all volumes and group them by their mother
      std::map<PVConstLink, ReadoutSet> chamberConstituents{};
      for (const MuonReadoutElement* readOut: allElements) {
-        const Identifier id = readOut->identify();
         chamberConstituents[readOut->getMaterialGeom()->getParent()].push_back(readOut);
      }
      for (auto& [motherVol, readoutEles] : chamberConstituents){
