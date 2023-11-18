@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RVersion.h"
@@ -24,8 +24,9 @@ template <class T>
 inline void Flex1DHisto<T>::destroy(Flex1DHisto<T> *h)
 {
   if (h) {
+    unsigned nx = h->getNBins();
     h->~Flex1DHisto<T>();
-    LWPools::release(reinterpret_cast<char*>(h),sizeof(Flex1DHisto<T>)+extraAllocSize(h->getNBins()));
+    LWPools::release(reinterpret_cast<char*>(h),sizeof(Flex1DHisto<T>)+extraAllocSize(nx));
   }
 }
 
