@@ -5,7 +5,7 @@ from AthenaConfiguration.Enums import Format
 
 
 #This configures pflow + everything it needs
-def PFFullCfg(inputFlags,**kwargs):
+def PFFullCfg(inputFlags,runTauReco=False,**kwargs):
   
     result=ComponentAccumulator()
 
@@ -43,7 +43,10 @@ def PFFullCfg(inputFlags,**kwargs):
     toESDAndAOD += ["xAOD::ElectronContainer#Electrons","xAOD::ElectronAuxContainer#ElectronsAux."]
     toESDAndAOD += ["xAOD::PhotonContainer#Photons","xAOD::PhotonAuxContainer#PhotonsAux."]
     toESDAndAOD += ["xAOD::MuonContainer#Muons","xAOD::MuonAuxContainer#MuonsAux."]
-    toESDAndAOD += ["xAOD::TauJetContainer#TauJets","xAOD::TauJetAuxContainer#TauJetsAux."]
+    #If we rerun tau reco then it adds taus to the output itself, which results in an error message
+    #because you cannot mix +ve and -ve aux attributes (the below is considered +ve as a default).
+    if not runTauReco:
+      toESDAndAOD += ["xAOD::TauJetContainer#TauJets","xAOD::TauJetAuxContainer#TauJetsAux."]
 
     result.merge(addToESD(inputFlags, toESDAndAOD))
     result.merge(addToAOD(inputFlags, toESDAndAOD))
