@@ -258,6 +258,9 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     // Get a vector of pairs retrieved from crest
     //  <IOV_SINCE(string),HASH(string)>
     auto crestIOVs = cfunctions.getIovsForTag(completeTag);
+    if(crestIOVs.empty()){
+      ATH_MSG_WARNING("Load cache failed for " << m_foldername << ". No IOVs retrieved from the DB");
+    }
     typedef std::pair<cool::ValidityKey,size_t> IOV2Index; // <CREST_IOV(converted to ull),Index_in_crestIOVs>
     std::vector<IOV2Index> iov2IndexVect;                  // Temporary vector for sorting IOV_SINCE values
     iov2IndexVect.reserve(crestIOVs.size());
@@ -277,19 +280,22 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     std::vector<IOVHash> iovHashVect;                       // Vector of non-overlapping IOVs + corresponding Hashes
     size_t nIOVs = iov2IndexVect.size();
     iovHashVect.reserve(nIOVs);
-    for(size_t ind=0; ind<nIOVs-1; ++ind) {
-      iovHashVect.emplace_back(IovStore::Iov_t(iov2IndexVect[ind].first
-						    , iov2IndexVect[ind+1].first)
-				    , crestIOVs[iov2IndexVect[ind].second].second);
+    if(nIOVs>0) {
+      if(nIOVs>1) {
+    	  for(size_t ind=0; ind<nIOVs-1; ++ind) {
+      	 	  iovHashVect.emplace_back(IovStore::Iov_t(iov2IndexVect[ind].first
+							   , iov2IndexVect[ind+1].first)
+					   , crestIOVs[iov2IndexVect[ind].second].second);
+    	  }
+      }
+      iovHashVect.emplace_back(IovStore::Iov_t(iov2IndexVect[nIOVs-1].first
+					       , cool::ValidityKeyMax)
+			       , crestIOVs[iov2IndexVect[nIOVs-1].second].second);
     }
-    iovHashVect.emplace_back(IovStore::Iov_t(iov2IndexVect[nIOVs-1].first
-						  , cool::ValidityKeyMax)
-				  , crestIOVs[iov2IndexVect[nIOVs-1].second].second);
-    
     // End of the CREST IOV conversion routine
     // *** *** *** *** *** ***
 
-    int indIOV = 0;
+    int indIOV = iovHashVect.empty() ? -1 : 0;
     for(const auto& iovhash : iovHashVect) {
       if(vkey >= iovhash.first.second) {
 	++indIOV;
