@@ -27,7 +27,7 @@ if __name__=="__main__":
     cfg.merge(PoolReadCfg(cfgFlags))
 
     from eflowRec.PFRun3Config import PFFullCfg
-    cfg.merge(PFFullCfg(cfgFlags))
+    cfg.merge(PFFullCfg(cfgFlags,runTauReco=True))
 
     from eflowRec.PFRun3Config import PFTauFELinkCfg
     cfg.merge(PFTauFELinkCfg(cfgFlags))
