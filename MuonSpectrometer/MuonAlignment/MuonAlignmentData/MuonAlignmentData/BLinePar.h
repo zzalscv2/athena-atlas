@@ -9,6 +9,7 @@
 #include <array>
 #include <climits>
 #include <iostream>
+#include <algorithm>
 
 class BLinePar : public MuonAlignmentPar {
 public:
