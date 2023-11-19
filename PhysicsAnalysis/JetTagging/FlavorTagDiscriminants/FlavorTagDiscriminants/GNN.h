@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GNN_H
@@ -31,7 +31,7 @@ namespace FlavorTagDiscriminants {
   class GNN
   {
   public:
-    GNN(const std::string nnFile, const GNNOptions& opts);
+    GNN(const std::string& nnFile, const GNNOptions& opts);
     GNN(const std::string& nnFile,
         const FlipTagConfig& flip_config = FlipTagConfig::STANDARD,
         const std::map<std::string, std::string>& variableRemapping = {},

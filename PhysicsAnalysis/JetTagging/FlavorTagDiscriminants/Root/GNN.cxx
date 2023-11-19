@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/GNN.h"
@@ -23,7 +23,7 @@ namespace {
 
 namespace FlavorTagDiscriminants {
 
-  GNN::GNN(const std::string nn_file, const GNNOptions& o):
+  GNN::GNN(const std::string& nn_file, const GNNOptions& o):
     m_onnxUtil(nullptr),
     m_jetLink(jetLinkName),
     m_defaultValue(o.default_output_value),
