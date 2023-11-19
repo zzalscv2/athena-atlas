@@ -524,7 +524,7 @@ NswDcsDbAlg::buildChannelIdForEltx(Identifier& channelId, const DcsTechType tech
 			isOK = true;
 			return false;
 		}	
-		else if(layer%1==1){// for odd layers (counting 1-8 here) the boards on even positions are reading the strips. https://mattermost.web.cern.ch/files/bdh8wwjzf7yiiggtad3u8bttrr/public?h=2fFnVki1EUefrMEa3tb8AZkTiC-tF3L11qdq43dBbJc 
+		else if((layer&1)==1){// for odd layers (counting 1-8 here) the boards on even positions are reading the strips. https://mattermost.web.cern.ch/files/bdh8wwjzf7yiiggtad3u8bttrr/public?h=2fFnVki1EUefrMEa3tb8AZkTiC-tF3L11qdq43dBbJc 
 			if(board%2==0){
 				channelType=sTgcIdHelper::sTgcChannelTypes::Strip;
 			} else {
