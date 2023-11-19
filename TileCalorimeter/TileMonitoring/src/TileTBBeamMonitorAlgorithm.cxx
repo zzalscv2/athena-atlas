@@ -132,8 +132,10 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
         case ADDR_ADC_FRAG:
 
-           if(channel >= 0 && channel < 6) {
-            muonWall[8 + channel] = amplitude;
+          if(channel >= 0 && channel < 6) {
+            if (8 + channel < N_MUON_WALL_PMT) {
+              muonWall[8 + channel] = amplitude;
+            }
           } else {
             errorWrongChannel(frag, channel);
           }
@@ -230,7 +232,7 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
           if (run < 2211445) {
 
-            if(channel >= 0 && channel < 16) {
+            if(channel >= 0 && channel < N_MUON_WALL_PMT) {
               muonWall[channel] = amplitude;
             } else if (channel > 31) {
               errorWrongChannel(frag, channel);
