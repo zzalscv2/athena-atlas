@@ -24,6 +24,7 @@
 #include <memory>
 #include "JpsiUpsilonTools/JpsiUpsilonCommon.h"
 #include "xAODEgamma/ElectronContainer.h"
+#include <limits>
 
 namespace Analysis {
 
@@ -93,7 +94,8 @@ namespace Analysis {
     m_trkTrippletPt(-1.0),
     m_trkDeltaZ(-1.0),
     m_TrkParticleGSFCollection(""),
-    m_electronCollectionKey("")
+    m_electronCollectionKey(""),
+    m_candidateLimit(std::numeric_limits<size_t>::max())
     {
         declareInterface<JpsiPlus1Track>(this);
         declareProperty("pionHypothesis",m_piMassHyp);
@@ -128,6 +130,7 @@ namespace Analysis {
         declareProperty("GSFCollection",         m_TrkParticleGSFCollection);
         declareProperty("ElectronCollection",    m_electronCollectionKey);
         declareProperty("SkipNoElectron",    m_skipNoElectron);
+        declareProperty("CandidateLimit", m_candidateLimit);
     }
     
     JpsiPlus1Track::~JpsiPlus1Track() {}
@@ -313,6 +316,10 @@ namespace Analysis {
 
             // Loop over ID tracks, call vertexing
             for (auto trkItr=theIDTracksAfterSelection.cbegin(); trkItr!=theIDTracksAfterSelection.cend(); ++trkItr) {
+                if(bContainer.size() >= m_candidateLimit ){
+                    ATH_MSG_WARNING("Hard Limit exceeded N=" << bContainer.size());
+                    return StatusCode::SUCCESS;
+                }
                 if (!m_excludeJpsiMuonsOnly && JpsiUpsilonCommon::isContainedIn(*trkItr,jpsiTracks)) continue; // remove tracks which were used to build J/psi
                 int linkedMuonTrk = 0;
                 if (m_excludeJpsiMuonsOnly) {

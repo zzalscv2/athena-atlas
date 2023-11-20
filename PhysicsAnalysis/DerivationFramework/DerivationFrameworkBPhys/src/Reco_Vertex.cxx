@@ -135,10 +135,16 @@ namespace DerivationFramework {
 
     if(m_refitPV){ 
        if(vtxContainer->size() >0){
-         StatusCode SC = helper.FillCandwithRefittedVertices(vtxContainer.get(),  pvContainer.cptr(), refPvContainer.get(), &(*m_pvRefitter) , m_PV_max, m_DoVertexType);
+        if(vtxContainer->size() > 10000){
+          ATH_MSG_WARNING("Number of candidates is very high N=" << vtxContainer->size() << " this may crash the sharedwriter");
+        }
+        StatusCode SC = helper.FillCandwithRefittedVertices(vtxContainer.get(),  pvContainer.cptr(), refPvContainer.get(), &(*m_pvRefitter) , m_PV_max, m_DoVertexType);
         if(SC.isFailure()){
             ATH_MSG_FATAL("refitting failed - check the vertices you passed");
             return SC;
+        }
+        if(refPvContainer->size() > 10000){
+          ATH_MSG_WARNING("Number of refitted vertices is very high N=" << refPvContainer->size() << " this may crash the sharedwriter");
         }
         }
     }else{

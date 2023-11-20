@@ -113,6 +113,7 @@ namespace Analysis {
         std::vector<double>  m_mumupkMasses;
         std::vector<int>     m_useGSFTrackIndices;
         std::bitset<4>       m_useGSFTrack;
+        size_t m_candidateLimit;
 
     };
 } // end of namespace
