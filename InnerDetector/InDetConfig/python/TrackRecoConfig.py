@@ -213,9 +213,9 @@ def SiSubDetTrackRecoCfg(flags, detector="",
             TracksTruth=TrackContainer+"TruthCollection"))
 
     from xAODTrackingCnv.xAODTrackingCnvConfig import (
-        TrackParticleCnvAlgNoPIDCfg)
-    result.merge(TrackParticleCnvAlgNoPIDCfg(
-        flags,
+        TrackParticleCnvAlgPIDCheckCfg)
+    result.merge(TrackParticleCnvAlgPIDCheckCfg(
+        flagsDet,
         name=TrackContainer+"CnvAlg",
         TrackContainerName=TrackContainer,
         xAODTrackParticlesFromTracksContainerName=(
