@@ -37,7 +37,7 @@ TCS::MuonSelect::~MuonSelect() {}
 
 TCS::StatusCode
 TCS::MuonSelect::initialize() {
-  m_numberOfMuons = parameter("InputWidth").value();
+  m_numberOfMuons = parameter("OutputWidth").value();
   m_minEta = parameter("MinEta").value();
   m_maxEta = parameter("MaxEta").value();
   m_MinEtTGC = parameter("MinEtTGC").value();	    
