@@ -1088,25 +1088,51 @@ namespace CP {
         // ::
         if (mu.muonType() != xAOD::Muon::Combined) return false;
         // ::
-        double start_cut = 2.5;
+        double start_cut = 3.0;
+        double end_cut = 1.6;
         double abs_eta = std::abs(mu.eta());
-
+        
         // parametrization of expected q/p error as function of pT
-        double p0(8.0), p1(0.034), p2(0.00011);
-        if (abs_eta > 1.05 && abs_eta < 1.3) {
-            p1 = 0.036;
-            p2 = 0.00012;
-        } else if (abs_eta > 1.3 && abs_eta < 1.7) {
-            p1 = 0.051;
-            p2 = 0.00014;
-            start_cut = 2.0;
-        } else if (abs_eta > 1.7 && abs_eta < 2.0) {
-            p1 = 0.042;
-            p2 = 0.00010;
-        } else if (abs_eta > 2.0) {
-            p1 = 0.034;
-            p2 = 0.00013;
-            start_cut = 2.0;
+        double p0(8.0), p1(0.), p2(0.);
+        if(isRun3()) //MC21 optimization
+        {
+          if(abs_eta<=1.05){
+              p1=0.046;
+              p2=0.00005;
+          }
+          else if (abs_eta > 1.05 && abs_eta <= 1.3) {
+              p1 = 0.052;
+              p2 = 0.00008;
+          } else if (abs_eta > 1.3 && abs_eta <= 1.7) {
+              p1 = 0.068;
+              p2 = 0.00006;
+          } else if (abs_eta > 1.7 && abs_eta <= 2.0) {
+              p1 = 0.048;
+              p2 = 0.00006;
+          } else if (abs_eta > 2.0) {
+              p1 = 0.037;
+              p2 = 0.00006;
+          }
+        }
+        else
+        {
+          if(abs_eta<=1.05){
+              p1=0.039;
+              p2=0.00006;
+          }
+          else if (abs_eta > 1.05 && abs_eta <= 1.3) {
+              p1 = 0.040;
+              p2 = 0.00009;
+          } else if (abs_eta > 1.3 && abs_eta <= 1.7) {
+              p1 = 0.056;
+              p2 = 0.00008;
+          } else if (abs_eta > 1.7 && abs_eta <= 2.0) {
+              p1 = 0.041;
+              p2 = 0.00006;
+          } else if (abs_eta > 2.0) {
+              p1 = 0.031;
+              p2 = 0.00006;
+          }
         }
         // ::
         hitSummary summary{};
@@ -1114,6 +1140,8 @@ namespace CP {
 
         // independent parametrization for 2-station muons
         if (m_use2stationMuonsHighPt && summary.nprecisionLayers == 2) {
+            start_cut = 1.1;
+            end_cut=0.7; 
             p1 = 0.0739568;
             p2 = 0.00012443;
             if (abs_eta > 1.05 && abs_eta < 1.3) {
@@ -1140,14 +1168,11 @@ namespace CP {
             double qOverPerr_CB = std::sqrt(cbtrack->definingParametersCovMatrix()(4, 4));
             // sigma represents the average expected error at the muon's pt/eta
             double sigma = std::sqrt(std::pow(p0 / pt_CB, 2) + std::pow(p1, 2) + std::pow(p2 * pt_CB, 2));
-            // cutting at 2.5*sigma or 2.0*sigma for pt <=1 TeV depending on eta region,
-            // then linearly tightening untill 1*sigma is reached at pt >= 5TeV.
-            double a = (1.0 - start_cut) / 4000.0;
-            double b = 1.0 - a * 5000.0;
+            // cutting at start_cut*sigma for pt <=1 TeV depending on eta region,
+            // then linearly tightening until end_cut*sigma is reached at pt >= 5TeV.
+            double a = (end_cut - start_cut) / 4000.0;
+            double b = end_cut - a * 5000.0;
             double coefficient = (pt_CB > 1000.) ? (a * pt_CB + b) : start_cut;
-            if (m_use2stationMuonsHighPt && summary.nprecisionLayers == 2)
-                coefficient = (pt_CB > 1000.) ? (1.2 - 0.0001 * pt_CB) : 1.1;  // for 2-station muons 1.1*sigma -> 0.7*sigma @ 5 TeV
-            // ::
             if (std::abs(qOverPerr_CB / qOverP_CB) < coefficient * sigma) { passErrorCutCB = true; }
         }
         // ::
