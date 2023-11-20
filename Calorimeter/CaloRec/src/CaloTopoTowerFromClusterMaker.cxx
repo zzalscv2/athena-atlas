@@ -257,22 +257,19 @@ StatusCode CaloTopoTowerFromClusterMaker::execute(const EventContext& ctx,
   xAOD::CaloCluster::ClusterSize csize = CaloTopoTowerFromClusterMaker::getClusterSize(numberOfTowers);
   // loop proto-clusters
   for ( uint_t ipc(0); ipc<pProtoCont.size(); ++ipc ) {
-    CaloProtoCluster& pProto  = pProtoCont.at(ipc);                     // pick up proto-cluster
-    CaloClusterCellLink* lptr = pProto.releaseCellLinks();              // take over CaloClusterCellLink object
-    this->cleanupCells(towerGeo,lptr,ipc);                                       // clean up cell links 
-    if ( CaloTopoTowerFromClusterMaker::filterProtoCluster(*lptr) ) {                            // ignore empty proto-clusters (no cells assigned)
-      xAOD::CaloCluster* clptr = new xAOD::CaloCluster();               // new empty cluster
-      pClusCont->push_back(clptr);                                      // put into container
-      clptr->addCellLink(lptr);                                         // transfer cell links to CaloCluster
-      clptr->setClusterSize(csize);                                     // set the cluster size spec
-      CaloRec::Helpers::calculateKine(clptr,false);                     // calculate kinematics and other signals from cells
-      if ( m_removeSamplingData ) {                                     // remove sampling data and invalidate tower center 
+    CaloProtoCluster& pProto  = pProtoCont.at(ipc);                              // pick up proto-cluster
+    std::unique_ptr<CaloClusterCellLink> lptr(pProto.releaseCellLinks());        // take over CaloClusterCellLink object
+    this->cleanupCells(towerGeo,lptr.get(),ipc);                                 // clean up cell links 
+    if ( CaloTopoTowerFromClusterMaker::filterProtoCluster(*lptr.get()) ) {      // ignore empty proto-clusters (no cells assigned)
+      xAOD::CaloCluster* clptr = pClusCont->push_back(new xAOD::CaloCluster());  // new empty cluster
+      clptr->addCellLink(std::move(lptr));                                       // transfer cell links to CaloCluster
+      clptr->setClusterSize(csize);                                              // set the cluster size spec
+      CaloRec::Helpers::calculateKine(clptr,false);                              // calculate kinematics and other signals from cells
+      if ( m_removeSamplingData ) {                                              // remove sampling data and invalidate tower center 
 	clptr->clearSamplingData(); clptr->setEta0(0.);	clptr->setPhi0(0.); 
-      } else {                                                          // keep sampling data and valid tower center
+      } else {                                                                   // keep sampling data and valid tower center
 	clptr->setEta0(towerGeo->towerEta(ipc)); clptr->setPhi0(towerGeo->towerPhi(ipc));              
       }
-    } else {
-      delete lptr;
     }
   } // proto-cluster loop
 
@@ -327,7 +324,7 @@ CaloTopoTowerFromClusterMaker::uint_t CaloTopoTowerFromClusterMaker::buildEMTopo
     } // end cluster loop
   } else { 
     // selected topo-towers for combined signal
-    std::vector<std::tuple<const CaloCell*,double> > cellList(towerGeo->totalNumberCells(),std::tuple<const CaloCell*,double>(0,0.));
+    std::vector<std::tuple<const CaloCell*,double> > cellList(towerGeo->totalNumberCells(),std::tuple<const CaloCell*,double>(nullptr,0.));
     for ( const auto *pClus : pClusCont ) { 
       if ( std::abs(pClus->eta()) > m_clusterRange ) { 
 	for ( auto fCell(pClus->cell_begin()); fCell != pClus->cell_end(); ++fCell ) { 
