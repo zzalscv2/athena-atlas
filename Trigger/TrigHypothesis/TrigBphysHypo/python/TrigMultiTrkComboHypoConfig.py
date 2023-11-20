@@ -90,30 +90,6 @@ def StreamerDimuEFComboHypoCfg(flags, name):
     else:
         return ConfigurationComboHypo(flags, **kwargs)
 
-def DiElecPrecisionComboHypoCfg(flags, name):
-    log.debug('DiElecPrecisionComboHypoCfg.name = %s ', name)
-    kwargs = {"isStreamer" : False,
-        "trigSequenceName" : 'DiElecPrecision',
-        "trigLevel" : 'EF',
-        "doElectrons" : True,
-        "TrigBphysCollectionKey" : 'HLT_DiElecPrecision'}
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
-    else:
-        return ConfigurationComboHypo(flags, **kwargs)
-
-def NoMuonDiElecPrecisionComboHypoCfg(flags, name):
-    log.debug('NoMuonDiElecPrecisionComboHypoCfg.name = %s ', name)
-    kwargs = {"isStreamer" : False,
-        "trigSequenceName" : 'NoMuonDiElecPrecision',
-        "trigLevel" : 'EF',
-        "doElectrons" : True,
-        "TrigBphysCollectionKey" : 'HLT_NoMuonDiElecPrecision'}
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
-    else:
-        return ConfigurationComboHypo(flags, **kwargs)
-
 def DiElecPrecisionGSFComboHypoCfg(flags, name):
     log.debug('DiElecPrecisionGSFComboHypoCfg.name = %s ', name)
     kwargs = {"isStreamer" : False,
@@ -204,7 +180,7 @@ def ConfigurationComboHypo(flags, trigSequenceName = 'Dimu', **kwargs):
        kwargs.setdefault("nTracks", [ 2 ])
        kwargs.setdefault("trackPtThresholds", [ [ -1., -1. ] ])
        kwargs.setdefault("massRange",   [ (100., 20000.) ])
-       kwargs.setdefault("mergedElectronChains", [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000', 'HLT_e5_lhvloose_noringer_bBeeM6000' ])
+       kwargs.setdefault("mergedElectronChains", [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000' ])
        kwargs.setdefault("caloClusterEtThreshold", 5.)
        alg = CompFactory.TrigMultiTrkComboHypo(
          name = baseName+'ComboHypo',

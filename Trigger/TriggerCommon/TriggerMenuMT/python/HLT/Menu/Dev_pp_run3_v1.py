@@ -29,7 +29,6 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                                                  TauBJetGroup,
                                                                  TauMETGroup,                        
                                                                  BphysicsGroup,
-                                                                 BphysElectronGroup,
                                                                  EgammaMETGroup,
                                                                  EgammaMuonGroup,
                                                                  MuonJetGroup,
@@ -50,7 +49,6 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                                                  Topo3Group,
                                                                  EOFL1MuGroup,
                                                                  EOFBPhysL1MuGroup,
-                                                                 EOFBeeLegGroup,
                                                                  )
 
 DevGroup = ['Development']
@@ -129,26 +127,6 @@ def getDevSignatures():
         # ChainProp(name='HLT_e140_dnnloose_L1EM22VHI', groups=PrimaryLegGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
         # test 
         ChainProp(name='HLT_e5_etcut_L1eEM5' , groups=SingleElectronGroup+SupportPhIGroup+['RATE:CPS_eEM5']+['PS:NoBulkMCProd']),
-
-
-        #ATR-22749
-        #ChainProp(name='HLT_2e5_lhvloose_nogsf_bBeeM6000_L12EM3', l1SeedThresholds=['EM3'], stream=['BphysDelayed'], groups=BphysElectronGroup+DevGroup),
-        ChainProp(name='HLT_e9_lhvloose_nogsf_e5_lhvloose_nogsf_bBeeM6000_L1BPH-0M9-EM7-EM5', l1SeedThresholds=['EM7','EM3'], stream=['BphysDelayed'], groups=BphysElectronGroup+DevGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_e5_lhvloose_nogsf_bBeeM6000_L1BPH-0DR3-EM7J15', l1SeedThresholds=['EM7'], stream=['BphysDelayed'], groups=BphysElectronGroup+DevGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_e9_lhvloose_nogsf_bBeeM6000_L1BPH-0DR3-EM7J15', l1SeedThresholds=['EM7'], stream=['BphysDelayed'], groups=BphysElectronGroup+DevGroup+LegacyTopoGroup),
-
-        #ATR-27201, noringer version for BeeX triggers
-        ChainProp(name='HLT_e5_lhvloose_noringer_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['EM3'], stream=['BphysDelayed','express'], groups=PrimaryLegGroup+BphysElectronGroup),
-        ChainProp(name='HLT_2e5_lhvloose_noringer_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['EM3'], stream=['BphysDelayed','express'], groups=PrimaryLegGroup+BphysElectronGroup),
-        ChainProp(name='HLT_e5_lhvloose_noringer_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['EM3'], stream=['BphysDelayed'], groups=EOFBeeLegGroup+BphysElectronGroup),
-        ChainProp(name='HLT_2e5_lhvloose_noringer_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['EM3'], stream=['BphysDelayed'], groups=EOFBeeLegGroup+BphysElectronGroup),
-        ChainProp(name='HLT_e5_lhvloose_noringer_bBeeM6000_L1All', l1SeedThresholds=['EM3'], stream=['BphysDelayed'], groups=BphysElectronGroup),
-        ChainProp(name='HLT_2e5_lhvloose_noringer_bBeeM6000_L1All', l1SeedThresholds=['EM3'], stream=['BphysDelayed'], groups=BphysElectronGroup),
-        # ChainProp(name='HLT_e5_lhvloose_noringer_bBeeM6000_L1EM22VHI', l1SeedThresholds=['EM3'], stream=['BphysDelayed'], groups=BphysElectronGroup),
-        # ChainProp(name='HLT_2e5_lhvloose_noringer_bBeeM6000_L1EM22VHI', l1SeedThresholds=['EM3'], stream=['BphysDelayed'], groups=BphysElectronGroup),
-        ChainProp(name='HLT_e5_lhvloose_noringer_bBeeM6000_L14J15', l1SeedThresholds=['EM3'], stream=['BphysDelayed'], groups=BphysElectronGroup),
-        ChainProp(name='HLT_2e5_lhvloose_noringer_bBeeM6000_L14J15', l1SeedThresholds=['EM3'], stream=['BphysDelayed'], groups=BphysElectronGroup),
-
 
         # ChainProp(name='HLT_g20_loose_noiso_L1EM15VH', groups=SupportLegGroup+SinglePhotonGroup+['RATE:CPS_EM15VH']),
 
