@@ -13,16 +13,12 @@
 #include "TrkDistortedSurfaces/SaggedLineSurface.h"
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 class BLinePar;
+class MuonReadoutGeomCnvAlg;
 
 namespace Trk {
     class CylinderBounds;
     class SurfaceBounds;
 }  // namespace Trk
-
-namespace Muon {
-    class MdtAlignModule;
-    class CombinedMuonAlignModule;
-}  // namespace Muon
 
 namespace MuonGM {
 
@@ -52,8 +48,7 @@ namespace MuonGM {
     constexpr int maxnsteps = 10;
 
     class MdtReadoutElement final : public MuonReadoutElement {
-        friend class Muon::MdtAlignModule;
-        friend class Muon::CombinedMuonAlignModule;
+        friend class ::MuonReadoutGeomCnvAlg;
         friend class MuonChamber;
         friend class MuonChamberLite;
 
@@ -215,10 +210,6 @@ namespace MuonGM {
         void wireEndpointsAsBuilt(Amg::Vector3D& locAMDBWireEndP, Amg::Vector3D& locAMDBWireEndN, const int tubelayer,
                                   const int tube) const;
 
-        // methods used only by friend class MdtAlignModule to shift chambers
-        void shiftTube(const Identifier& id);
-        void restoreTubes();
-
         const MdtIdHelper& m_idHelper{idHelperSvc()->mdtIdHelper()};
         const int m_stIdx_BIS{m_idHelper.stationNameIndex("BIS")};
         const int m_stIdx_BOL{m_idHelper.stationNameIndex("BOL")};
@@ -263,7 +254,6 @@ namespace MuonGM {
         std::vector<CxxUtils::CachedUniquePtr<GeoInfo> > m_tubeGeo{};                      // one per tube
         std::vector<CxxUtils::CachedUniquePtr<GeoInfo> > m_backupTubeGeo{};                // one per tube
         std::vector<CxxUtils::CachedUniquePtr<Amg::Transform3D> > m_deformTransf{};        // one per tube
-        std::vector<CxxUtils::CachedUniquePtr<Amg::Transform3D> > m_backupDeformTransf{};  // one per tube
 
         const BLinePar* m_BLinePar{nullptr};
         CxxUtils::CachedValue<Amg::Vector3D> m_elemNormal{};                               // one

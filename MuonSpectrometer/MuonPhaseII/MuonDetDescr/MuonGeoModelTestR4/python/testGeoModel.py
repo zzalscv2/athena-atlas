@@ -145,11 +145,8 @@ def setupGeoR4TestCfg(args):
 
 
     cfg = setupServicesCfg(flags)
-    from AtlasGeoModel.GeoModelConfig import GeoModelCfg
-    geoModelSvc = cfg.getPrimaryAndMerge(GeoModelCfg(flags))
-    from MuonGeoModelR4.MuonGeoModelConfig import MuonDetectorToolCfg
-    geoModelSvc.DetectorTools =[cfg.popToolsAndMerge(MuonDetectorToolCfg(flags))]    
-
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    cfg.merge(MuonGeoModelCfg(flags))
     return flags, cfg
 
 def executeTest(cfg, num_events = 1):
@@ -163,11 +160,6 @@ def executeTest(cfg, num_events = 1):
 if __name__=="__main__":
     args = SetupArgParser().parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
-    from MuonCondTest.AlignmentTester import ALineInjectorAlgCfg
-    cfg.merge(ALineInjectorAlgCfg(flags, WriteKey="InjectedALines"))
-    from MuonCondAlgR4.ConditionsConfig import ActsMuonAlignCondAlgCfg, ActsGeomContextAlgCfg
-    cfg.merge(ActsMuonAlignCondAlgCfg(flags, ReadKeyALines="InjectedALines", applyALines = False))  
-    cfg.merge(ActsGeomContextAlgCfg(flags,AlignKeys=[]))  
     #### 
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []

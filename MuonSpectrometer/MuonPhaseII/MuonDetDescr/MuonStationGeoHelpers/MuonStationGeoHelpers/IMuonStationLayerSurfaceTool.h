@@ -23,6 +23,7 @@ namespace MuonGMR4{
      *  The instances of the tool are required to be public. i.e.
      *  Include it via PublicToolHandle<IMuonStationLayerSurfaceTool> m_surfTool{};
     */  
+    class MuonChamber;
     class IMuonStationLayerSurfaceTool: virtual public IAlgTool {        
         public:
         virtual ~IMuonStationLayerSurfaceTool() = default;
@@ -39,7 +40,8 @@ namespace MuonGMR4{
         /// Load the aligned transformations into the GeoModel store. To be called after the
         /// Muon stations are aligned. Returns the number of aligned objects
         virtual unsigned int storeAlignment(ActsTrk::RawGeomAlignStore& alignStore) const = 0;
-
+        /// Returns the pointer to a chamber object
+        virtual const MuonChamber* getChamber(const Identifier& id) const = 0;
     };
 }
 #endif

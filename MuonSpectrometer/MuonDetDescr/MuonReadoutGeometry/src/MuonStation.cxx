@@ -399,5 +399,7 @@ namespace MuonGM {
     }
 
     void MuonStation::setMdtAsBuiltParams(const MdtAsBuiltPar* xtomo) { m_XTomoData = xtomo; }
-
+    void MuonStation::setPhysVol(PVLink vol) { m_physVol = vol; }
+    PVConstLink MuonStation::getPhysVol() const {return m_physVol; }
+    PVLink MuonStation::getPhysVol() { return m_physVol; }
 }  // namespace MuonGM

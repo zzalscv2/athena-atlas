@@ -13,6 +13,7 @@
 #include <memory>
 
 #include "GeoModelKernel/GeoAlignableTransform.h"
+#include "GeoModelKernel/GeoFullPhysVol.h"
 #include "MuonReadoutGeometry/GlobalUtilities.h"
 #include "AthenaBaseComps/AthMessaging.h"
 class BLinePar;
@@ -122,6 +123,9 @@ namespace MuonGM {
         const MdtAsBuiltPar* getMdtAsBuiltParams() const;
         void setMdtAsBuiltParams(const MdtAsBuiltPar* xtomo);
 
+        void setPhysVol(PVLink vol);
+        PVConstLink getPhysVol() const;
+        PVLink getPhysVol();
     private:
         // Declaring private message stream member.
         bool m_firstRequestBlineFixedP{true};
@@ -153,7 +157,8 @@ namespace MuonGM {
 
         using pairRE_AlignTransf =  std::pair<MuonReadoutElement*, GeoAlignableTransform*>;
         std::map<int, pairRE_AlignTransf> m_REwithAlTransfInStation{};  //!< keep track of the REs in this station
-
+        /// Link the full physical volume associated with the station
+        PVLink m_physVol{nullptr};
     };
 
     int MuonStation::getPhiIndex() const { return m_statPhiIndex; }

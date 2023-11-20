@@ -126,7 +126,12 @@ namespace MuonGM {
         return GeoTrf::Transform3D::Identity();
     }
 
-    void MuonReadoutElement::setParentMuonStation(const MuonStation* mstat) { m_parentMuonStation = mstat; }
+    void MuonReadoutElement::setParentMuonStation(const MuonStation* mstat) { 
+        m_parentMuonStation = mstat; 
+        if (mstat->getPhysVol()) {
+            setParentStationPV(mstat->getPhysVol());
+        }
+    }
 
     const MuonStation* MuonReadoutElement::parentMuonStation() const { return m_parentMuonStation; }
 
