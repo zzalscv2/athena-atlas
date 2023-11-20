@@ -139,11 +139,7 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
             const Trk::PrepRawData* prd = rot->prepRawData();
             const Trk::Surface& sur = prd->detectorElement()->surface(prd->identify());
 
-            // Keep the old math until a further MR TODO(giraudpf)
-            // double w2 = 1.0 / (rot->localCovariance()(Trk::loc1, Trk::loc1));
-            double w2 = sqrt(rot->localCovariance()(Trk::loc1, Trk::loc1));
-            w2 = 1. / (w2 * w2);
-
+            double w2 = 1.0 / (rot->localCovariance()(Trk::loc1, Trk::loc1));
             iDev.sumW2 += w2;
             iDev.sumP += w2 * tsos->trackParameters()->position();
             iDev.sumU += w2 * tsos->trackParameters()->momentum().unit();
@@ -210,15 +206,8 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
                               << jDev << ": " << itj->translation << ", " << itj->rotation);
 
                 // MERGE THE TWO DEVIATIONS ASSOCIATED TO THE SAME LIST OF HITS //
-
-                // Keep the old math until a further MR TODO(giraudpf)
-                // double new_translation = std::hypot(iti->translation, itj->translation);
-                // double new_rotation = std::hypot(iti->rotation, itj->rotation);
-                double new_translation = sqrt(iti->translation * iti->translation +
-                                             itj->translation * itj->translation);
-                double new_rotation = sqrt(iti->rotation * iti->rotation +
-                                           itj->rotation * itj->rotation);
-
+                double new_translation = std::hypot(iti->translation, itj->translation);
+                double new_rotation = std::hypot(iti->rotation, itj->rotation);
 
                 // NOW PREPARE TO ERASE ONE OF THE TWO COPIES //
                 itj->hits.clear();
