@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -143,7 +143,12 @@ def TrigTRT_ElectronPidToolCfg(flags, name="InDetTrigTRT_ElectronPidTool", **kwa
     acc.setPrivateTools(acc.popToolsAndMerge(TRT_ElectronPidToolCfg(flags,name,**kwargs)))
     return acc
 
-def GSFBuildTRT_ElectronPidToolCfg(flags, name="GSFBuildTRT_ElectronPidTool", **kwargs):
+def GSFBuildTRT_ElectronPidToolCfg(flags, name="GSFBuildTRT_ElectronPidTool", isTrigger=False, **kwargs):
     kwargs.setdefault("CalculateNNPid", False)
     kwargs.setdefault("MinimumTrackPtForNNPid", 0.)
-    return TRT_ElectronPidToolCfg(flags, name, **kwargs)
+    if isTrigger:
+        return TrigTRT_ElectronPidToolCfg(flags, name="TrigGSFBuildTRT_ElectronPidTool", **kwargs)
+    else:
+        return TRT_ElectronPidToolCfg(flags, name, **kwargs)
+
+

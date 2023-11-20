@@ -31,7 +31,7 @@ def precisionTracks_GSFRefittedSequence(flags, ion=False, variant=''):
     
     # calling precision tracking
     from TriggerMenuMT.HLT.Electron.PrecisionTracks_GSFRefittedSequence import precisionTracks_GSFRefitted
-    precisionTracks_GSFRefittedInViewSequence, trackParticles = precisionTracks_GSFRefitted(InViewRoIs, ion, variant)
+    precisionTracks_GSFRefittedInViewSequence, trackParticles = precisionTracks_GSFRefitted(flags, InViewRoIs, ion, variant)
 
     precisionTracks_GSFRefittedInViewAlgs = parOR(tag(ion) + "InViewAlgs" + variant, [precisionTracks_GSFRefittedInViewSequence])
     precisionTracks_GSFRefittedViewsMaker.ViewNodeName = tag(ion) + "InViewAlgs" + variant

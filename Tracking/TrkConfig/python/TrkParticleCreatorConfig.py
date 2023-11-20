@@ -236,6 +236,7 @@ def ITkTrackParticleCreatorToolCfg(flags,
 # egamma : Used to create TrackParticels from GSF Tracks after refit
 def GSFBuildInDetParticleCreatorToolCfg(flags,
                                         name="GSFBuildInDetParticleCreatorTool",
+                                        isTrigger = False,
                                         **kwargs):
     result = ComponentAccumulator()
 
@@ -259,7 +260,7 @@ def GSFBuildInDetParticleCreatorToolCfg(flags,
         from InDetConfig.TRT_ElectronPidToolsConfig import (
             GSFBuildTRT_ElectronPidToolCfg)
         kwargs.setdefault("TRT_ElectronPidTool", result.popToolsAndMerge(
-            GSFBuildTRT_ElectronPidToolCfg(flags)))
+            GSFBuildTRT_ElectronPidToolCfg(flags, isTrigger = isTrigger)))
 
     if ((flags.Detector.EnablePixel or flags.Detector.EnableITkPixel)
             and "TestPixelLayerTool" not in kwargs):
