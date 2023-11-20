@@ -247,7 +247,7 @@ constexpr void MutableTrackStorageContainer::addColumn_impl(
   }
   m_decorations.push_back(DecorationAccess(
       name,
-      ActsTrk::detail::decorationGetter<xAOD::TrackStorageContainer, T>,
+      ActsTrk::detail::constDecorationGetter<xAOD::TrackStorageContainer, T>,
       ActsTrk::detail::decorationCopier<xAOD::TrackStorageContainer, T>,
       ActsTrk::detail::decorationSetter<xAOD::TrackStorageContainer, T>
       ));
