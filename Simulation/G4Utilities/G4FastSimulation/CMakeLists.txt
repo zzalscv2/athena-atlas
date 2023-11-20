@@ -13,7 +13,7 @@ find_package( XercesC )
 # Possible extra dependencies:
 set( extra_lib )
 if( NOT SIMULATIONBASE )
-   set( extra_lib ISF_FastCaloSimInterfaces ISF_FastCaloSimParametrizationLib FastCaloSimHitLib TruthUtils )
+   set( extra_lib ISF_FastCaloSimInterfaces ISF_FastCaloSimParametrizationLib TruthUtils )
 endif()
 # FastCaloSim G4VFastSimulationModel should only be used in Athena builds
 set ( extra_src )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header
@@ -14,7 +14,7 @@
 #include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
 
 
-CaloCellContainerSD::CaloCellContainerSD(const std::string& name, const std::string& CaloCellContainerName, PublicToolHandle<FastHitConvertTool> FastHitConvertTool)
+CaloCellContainerSD::CaloCellContainerSD(const std::string& name, const std::string& CaloCellContainerName, PublicToolHandle<ICaloCellMakerTool> FastHitConvertTool)
   : G4VSensitiveDetector( name ),
     m_EmptyCellBuilderTool("EmptyCellBuilderTool/EmptyCellBuilderTool"),
     m_caloCellContainer (CaloCellContainerName),
@@ -41,7 +41,7 @@ void CaloCellContainerSD::StartOfAthenaEvent(const EventContext& ctx){
 }
 
 void CaloCellContainerSD::EndOfAthenaEvent(const EventContext& ctx){
-  
+
   // Update the calo iterators of the calo cell container
   m_caloCellContainer->updateCaloIterators();
 
@@ -67,7 +67,7 @@ void CaloCellContainerSD::recordCells(TFCSSimulationState& simState)
   // Add the energies from the simulation state to the CaloCellContainer
   for(const auto& icell : simState.cells()) {
     CaloCell* caloCell = (CaloCell*)m_caloCellContainer->findCell(icell.first->calo_hash());
-    caloCell->addEnergy(icell.second); 
+    caloCell->addEnergy(icell.second);
   }
 
 }
