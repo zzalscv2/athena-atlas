@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMPARAMETRIZATION_CALOCELLCONTAINERTOOL_H
@@ -9,7 +9,7 @@
 #include "G4AtlasTools/SensitiveDetectorBase.h"
 
 /* Fast hit converter include to take into account sampling fractions */
-#include "FastCaloSimHit/FastHitConvertTool.h"
+#include "CaloInterface/ICaloCellMakerTool.h"
 
 class G4VSensitiveDetector;
 
@@ -22,14 +22,14 @@ public:
   ~CaloCellContainerSDTool() {}
 
   /** Beginning of an athena event.  This is where collection initialization should happen. **/
-  StatusCode SetupEvent() override final; 
+  StatusCode SetupEvent() override final;
   /** End of an athena event **/
   StatusCode Gather() override final;
 
 protected:
   // Make me an SD!
-  G4VSensitiveDetector* makeSD() const override final; 
-  PublicToolHandle<FastHitConvertTool> m_FastHitConvertTool; 
+  G4VSensitiveDetector* makeSD() const override final;
+  PublicToolHandle<ICaloCellMakerTool> m_FastHitConvertTool;
 
 };
 

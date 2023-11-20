@@ -6,7 +6,7 @@
 // FastHitConvertTool.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
-#include "FastCaloSimHit/FastHitConvertTool.h"
+#include "FastHitConvertTool.h"
 
 #include "GaudiKernel/ConcurrencyFlags.h"
 
@@ -101,16 +101,16 @@ StatusCode FastHitConvertTool::initialize()
 StatusCode FastHitConvertTool::process(CaloCellContainer* theCellCont, const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("initEvent()");
-  auto embHitContainer  = SG::makeHandle<LArHitContainer>( m_embHitContainerKey, ctx );
+  auto embHitContainer = SG::makeHandle<LArHitContainer>( m_embHitContainerKey, ctx );
   auto emecHitContainer = SG::makeHandle<LArHitContainer>( m_emecHitContainerKey, ctx );
   auto fcalHitContainer = SG::makeHandle<LArHitContainer>( m_fcalHitContainerKey, ctx );
-  auto hecHitContainer  = SG::makeHandle<LArHitContainer>( m_hecHitContainerKey, ctx );
-  auto tileHitVector    = SG::makeHandle<TileHitVector>(   m_tileHitVectorKey, ctx );
-  embHitContainer  = std::make_unique<LArHitContainer>( m_embHitContainerKey.key() );
+  auto hecHitContainer = SG::makeHandle<LArHitContainer>( m_hecHitContainerKey, ctx );
+  auto tileHitVector = SG::makeHandle<TileHitVector>(   m_tileHitVectorKey, ctx );
+  embHitContainer = std::make_unique<LArHitContainer>( m_embHitContainerKey.key() );
   emecHitContainer = std::make_unique<LArHitContainer>( m_emecHitContainerKey.key() );
   fcalHitContainer = std::make_unique<LArHitContainer>( m_fcalHitContainerKey.key() );
-  hecHitContainer  = std::make_unique<LArHitContainer>( m_hecHitContainerKey.key() );
-  tileHitVector    = std::make_unique<TileHitVector>(   m_tileHitVectorKey.key() );
+  hecHitContainer = std::make_unique<LArHitContainer>( m_hecHitContainerKey.key() );
+  tileHitVector = std::make_unique<TileHitVector>(   m_tileHitVectorKey.key() );
 
   ATH_MSG_DEBUG("ATLFASTIIDigi "<<this->name()<<" hitConstruction");
   const double minEnergy=1e-9;

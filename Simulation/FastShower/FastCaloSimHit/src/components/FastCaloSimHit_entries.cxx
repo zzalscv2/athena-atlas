@@ -1,4 +1,4 @@
-#include "FastCaloSimHit/FastHitConvertTool.h"
+#include "../FastHitConvertTool.h"
 
 DECLARE_COMPONENT( FastHitConvertTool )
 

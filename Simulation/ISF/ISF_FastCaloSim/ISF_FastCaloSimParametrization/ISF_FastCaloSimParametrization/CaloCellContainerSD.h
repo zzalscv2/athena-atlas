@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMPARAMETRIZATION_CALOCELLCONTAINERSD_H
@@ -11,8 +11,6 @@
 #include "StoreGate/WriteHandle.h"
 /* Empty cell builder interface include */
 #include "CaloInterface/ICaloCellMakerTool.h"
-/* Fast hit converter include to take into account sampling fractions */
-#include "FastCaloSimHit/FastHitConvertTool.h"
 /* CaloCellContainer include */
 #include "CaloEvent/CaloCellContainer.h"
 
@@ -23,7 +21,7 @@ class TFCSSimulationState;
 class CaloCellContainerSD : public G4VSensitiveDetector
 {
 public:
-  CaloCellContainerSD(const std::string& name, const std::string& CaloCellContainerName, PublicToolHandle<FastHitConvertTool> FastHitConvertTool);
+  CaloCellContainerSD(const std::string& name, const std::string& CaloCellContainerName, PublicToolHandle<ICaloCellMakerTool> FastHitConvertTool);
   ~CaloCellContainerSD() {}
 
   // Start of *ATHENA* event
@@ -34,7 +32,7 @@ public:
 
   // Needs to be implemented, but is not used for this SD
   G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
-  
+
   // Method to record the cells from a TFCSSimulationState
   void recordCells(TFCSSimulationState&);
 
@@ -43,13 +41,10 @@ protected:
   PublicToolHandle<ICaloCellMakerTool> m_EmptyCellBuilderTool;
   // The write handle to the CaloCellContainer
   SG::WriteHandle<CaloCellContainer> m_caloCellContainer;
-  // The empty cell builder tool to initialize an empty calo cell container
-  PublicToolHandle<FastHitConvertTool> m_FastHitConvertTool;
+  // Fast hit converter - converts CaloCells into LAr and Tile Hits - takes into account sampling fractions
+  PublicToolHandle<ICaloCellMakerTool> m_FastHitConvertTool;
 
 
 };
 
 #endif // ISF_FASTCALOSIMPARAMETRIZATION_CALOCELLCONTAINERSD_H
-
-
-
