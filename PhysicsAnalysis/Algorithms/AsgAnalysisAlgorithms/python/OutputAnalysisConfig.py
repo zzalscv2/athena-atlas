@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 import copy, re
 
 class OutputAnalysisConfig (ConfigBlock):
@@ -48,7 +49,7 @@ class OutputAnalysisConfig (ConfigBlock):
                     if re.match (words[1], name) :
                         outputConfigs[name].enabled = True
                         used = True
-                if not used :
+                if not used and config.dataType() is not DataType.Data:
                     raise KeyError ('unknown branch pattern for enable: ' + words[1])
             elif words[0] == 'disable' :
                 if len (words) != 2 :
@@ -58,7 +59,7 @@ class OutputAnalysisConfig (ConfigBlock):
                     if re.match (words[1], name) :
                         outputConfigs[name].enabled = False
                         used = True
-                if not used :
+                if not used and config.dataType() is not DataType.Data:
                     raise KeyError ('unknown branch pattern for disable: ' + words[1])
             else :
                 raise KeyError ('unknown command for "commands" option: ' + words[0])
