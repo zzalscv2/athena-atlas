@@ -56,8 +56,8 @@ __global__ static void doubletMakingKernel(TrigAccel::SEED_FINDER_SETTINGS* dSet
   const double ptCoeff = 0.29997*dSettings->m_magFieldZ/2.0;// ~0.3*B/2 - assumes nominal field of 2*T
   const float tripletPtMin = dSettings->m_tripletPtMin; // Retrieve from settings
   const float minR_squ = tripletPtMin*tripletPtMin/std::pow(ptCoeff,2);
-  const float maxKappa_high_eta          = 0.8/minR_squ;
-  const float maxKappa_low_eta           = 0.6/minR_squ;
+ 
+ 
 
   //1. get a tile of middle spacepoints
 
