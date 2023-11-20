@@ -26,7 +26,7 @@ _allowedEDMPrefixes = ['HLT_', 'L1_', 'LVL1']
 # ------------------------------------------------------------
 # AllowedOutputFormats
 # ------------------------------------------------------------
-AllowedOutputFormats = ['BS', 'ESD', 'AODFULL', 'AODSLIM', 'AODCOMM', 'AODBLSSLIM', 'AODLARGE', 'AODSMALL', ]
+AllowedOutputFormats = ['BS', 'ESD', 'AODFULL', 'AODSLIM', 'AODCOMM', 'AODBLSSLIM' ]
 AllowedOutputFormats.extend(DataScoutingInfo.getAllDataScoutingIdentifiers())
 
 # ------------------------------------------------------------
