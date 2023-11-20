@@ -56,24 +56,31 @@ class OutputStreamItemListSemantics(SequenceSemantics):
         newauxlist=[]
         for k,sel in auxitems.items():
             allsel = set()    # gather all selection items in this set
+            negsel = set()    # set of negative ("-") selections
             for line in sel:
-                allsel.update( line.split('.') )
                 if ".." in line or line.startswith(".") or line.endswith('.'):
-                    raise ValueError(f"ItemList AuxAttribute selection syntax error - extra dot in '{line}'")
-            negsel = [s for s in allsel if s[:1]=='-']
+                    raise ValueError(f"ItemList AuxAttribute selection syntax error for {k} - extra dot in '{line}'")
+                newsel = set(line.split('.'))
+                newneg = {s for s in newsel if s[:1]=='-'}
+                if newneg:
+                    if not negsel:
+                        negsel = newneg
+                    else:
+                        # if they are the same it's OK, but different negative selections are ambiguous
+                        if newneg != negsel:
+                            raise ValueError(f"Multiple (different) negative selection are not supported: for {k} : {str(sel)}")
+                allsel.update( newsel )
             if negsel and len(negsel) != len(allsel):
                 raise ValueError(f"Mixing up negative and positive Aux selections is not supported: {k} : {str(sel)}")
             if len(sel) == 1:
-                # single selection, just pass it on (cleaned)
-                newauxlist.append( k + ".".join(sorted(allsel)))
+                # single selection, just pass it on
+                newauxlist.append( k + next(iter(sel)) )
                 continue
             # multiple selections fun
-            if negsel:
-                # multiple different negative selections are usually logically incompatible, report error
-                raise ValueError(f"Multiple (different) negative selection are not supported: for {k} : {str(sel)}")
-            if '' in sel or '*' in sel:
-                msg.info(f"Multiple Aux attribute selections for {k} - will write all attributes." +
-                         f" Original selection was: {str(sel)}")
+            if '' in sel or '*' in allsel:
+                if len(allsel) > 1:
+                    msg.info(f"Multiple Aux attribute selections for {k} - will write all attributes." +
+                             f" Original selection was: {str(sel)}")
                 newauxlist.append( k + '*')
                 continue
             # 2 or more positive selections - merge them into one
@@ -83,4 +90,5 @@ class OutputStreamItemListSemantics(SequenceSemantics):
             msg.info(f"  New selection: {newitem}")
 
         return newitemlist + newauxlist
+
 

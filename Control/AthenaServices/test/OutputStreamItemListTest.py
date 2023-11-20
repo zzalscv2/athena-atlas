@@ -72,6 +72,10 @@ class TestOutpputStreamItemListSemantics(unittest.TestCase):
       list = [ 'xAOD::AuxInfoBase!#EventShapeAux.-.Bla' ] 
       self.assertRaises(ValueError, self.semantics.merge, [], list );
 
+   def test_negative_diffrnt_order(self):
+      list1 = ['xAOD::AuxInfoBase!#EventShapeAux.-one.-two']
+      list2 = ['xAOD::AuxInfoBase!#EventShapeAux.-two.-one']
+      self.assertEqual(self.semantics.merge(list1, list2), list1)
 
 if __name__ == "__main__":
     unittest.main()
