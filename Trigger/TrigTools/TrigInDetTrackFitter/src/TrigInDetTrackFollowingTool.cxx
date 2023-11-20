@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -269,7 +269,7 @@ const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDe
     
     double bestChi2Dist = m_maxChi2Dist_Pixels;
 
-    for(const auto& pPRD : *pColl) {
+    for(const auto pPRD : *pColl) {
 
       double dchi2 = processHit(pPRD, resid, invcov, ets);
 
@@ -325,7 +325,7 @@ const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDe
 
     double bestChi2Dist = m_maxChi2Dist_Strips;
 
-    for(const auto& pPRD : *pColl) {
+    for(const auto pPRD : *pColl) {
 
       double dchi2 = processHit(pPRD, shape, resid, invcov, H, ets);
 
