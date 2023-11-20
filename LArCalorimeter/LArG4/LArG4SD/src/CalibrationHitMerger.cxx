@@ -83,7 +83,7 @@ StatusCode LArG4::CalibrationHitMerger::execute()
   }
 
   // Loop through the hits...
-  for(auto hit : calibrationHits)
+  for(auto *hit : calibrationHits)
   {
     // Can we actually do this with move?
     outputHandle->push_back(hit);

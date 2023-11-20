@@ -51,9 +51,9 @@ LArTTL1Calib::LArTTL1Calib(const std::string& name, ISvcLocator* pSvcLocator) :
   m_maxNtt                = 8000; 
   //  m_maxNtt                = 500; 
 
-  m_pnt                   = 0;
+  m_pnt                   = nullptr;
 
-  m_lvl1Helper            = 0;
+  m_lvl1Helper            = nullptr;
 
 //
   return;
@@ -81,7 +81,7 @@ StatusCode LArTTL1Calib::initialize()
 //
   ATH_MSG_DEBUG ( "in initialize()" );
 
-  NTuple::Directory* dir = 0;
+  NTuple::Directory* dir = nullptr;
   NTupleFilePtr file1(ntupleSvc(), "/NTUPLES/FILE1");
 
   if ( file1 != 0) {

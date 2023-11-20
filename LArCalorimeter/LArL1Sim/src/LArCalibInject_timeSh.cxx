@@ -97,7 +97,7 @@ StatusCode LArCalibInject_timeSh::execute(const EventContext& context) const
   ATH_CHECK(caloMgrHandle.isValid());
 
 
-  auto cabling = this->retrieve(context,m_cablingKey) ;
+  const auto *cabling = this->retrieve(context,m_cablingKey) ;
 
   SG::WriteHandle<LArHitEMap> hitEMapOutHandle( m_hitMapOutKey, context);
   auto hitEMapOut = std::make_unique<LArHitEMap> (cabling,m_calocell_id,*caloMgrHandle,false);
@@ -115,13 +115,13 @@ StatusCode LArCalibInject_timeSh::execute(const EventContext& context) const
   // Copy what exist
   if ( !m_hitMapKey.empty() ){
     SG::ReadHandle<LArHitEMap> hitmap(m_hitMapKey,context);
-    auto hitmapPtr = hitmap.cptr();
+    const auto *hitmapPtr = hitmap.cptr();
     it_end = hitmapPtr->GetNbCells();
     
     for( ; it!=it_end;++it) {
       const LArHitList& hitlist = hitmapPtr->GetCell(it);
       const std::vector<std::pair<float,float> >& timeE = hitlist.getData();
-      if (timeE.size() > 0 ) {
+      if (!timeE.empty() ) {
         const IdentifierHash idhash(it);
         for (size_t i=0;i<timeE.size();i++){
 	  std::pair<float,float> energy_time = timeE[i];

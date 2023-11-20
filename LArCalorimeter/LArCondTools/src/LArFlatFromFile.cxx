@@ -17,7 +17,7 @@ LArFlatFromFile::LArFlatFromFile( const std::string& name,
 			  ISvcLocator* pSvcLocator ) : 
   ::AthAlgorithm( name, pSvcLocator ),
   m_hashMax(0),
-  m_onlineID(0), m_onlineSCID(0)
+  m_onlineID(nullptr), m_onlineSCID(nullptr)
 {
   
 }
@@ -265,7 +265,7 @@ void LArFlatFromFile::errIfConnected(const HWIdentifier chid, const int gain, co
   if (cabling->isOnlineConnected(chid)) {
     if (! (gain==2 && m_onlineID->isEMBPS(chid))) { //No LG Presampler calibration
       ATH_MSG_ERROR( "No valid " << objName << " found for channel "  << m_onlineID->channel_name(chid) << ", gain " << gain << ". ");
-      if (message.size()>0) ATH_MSG_ERROR( message );
+      if (!message.empty()) ATH_MSG_ERROR( message );
       ATH_MSG_ERROR( " Filling with default value." );
     }
   }

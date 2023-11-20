@@ -43,19 +43,19 @@ StatusCode LArG4SDTool::initialize()
   const CaloIdManager* caloIdManager=nullptr;
   ATH_CHECK( detStore()->retrieve(caloIdManager) );
   m_larEmID = caloIdManager->getEM_ID();
-  if(m_larEmID==0)
+  if(m_larEmID==nullptr)
     {
       ATH_MSG_ERROR("LArG4SDTool: Invalid LAr EM ID helper");
       return StatusCode::FAILURE;
     }
   m_larFcalID = caloIdManager->getFCAL_ID();
-  if(m_larFcalID==0)
+  if(m_larFcalID==nullptr)
     {
       ATH_MSG_ERROR("LArG4SDTool: Invalid FCAL ID helper");
       return StatusCode::FAILURE;
     }
   m_larHecID = caloIdManager->getHEC_ID();
-  if(m_larHecID==0)
+  if(m_larHecID==nullptr)
     {
       ATH_MSG_ERROR("LArG4SDTool: Invalid HEC ID helper");
       return StatusCode::FAILURE;
@@ -105,7 +105,7 @@ void LArG4SDTool::setupAllSDs(const std::map<G4VSensitiveDetector*,std::vector<s
     G4LogicalVolumeStore * logicalVolumeStore = G4LogicalVolumeStore::GetInstance();
     for (auto myvol : *(iter.second)){
       int found = 0;
-      for (auto ilv : *logicalVolumeStore ){
+      for (auto *ilv : *logicalVolumeStore ){
         if ( match(myvol.data(),ilv->GetName() ) ){
           ++found; // Do not break on found to protect against multiple volumes with the same name
           //dc->SetSensitiveDetector( ilv , anSD );

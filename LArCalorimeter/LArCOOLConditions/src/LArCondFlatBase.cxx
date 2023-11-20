@@ -19,7 +19,7 @@
 LArCondFlatBase::LArCondFlatBase (const std::string& name) :
   AthMessaging(name),
   m_isInitialized(false),
-  m_onlineHelper(NULL)
+  m_onlineHelper(nullptr)
 {
 }
 

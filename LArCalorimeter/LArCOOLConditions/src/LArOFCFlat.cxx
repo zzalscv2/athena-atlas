@@ -76,12 +76,12 @@ LArOFCFlat::LArOFCFlat(const CondAttrListCollection* attrList)
 }
 
 LArOFCFlat::OFCRef_t LArOFCFlat::OFC_a(const HWIdentifier&  onId, int gain, int tbin) const {
-  if (tbin!=0) return OFCRef_t(NULL,NULL);
+  if (tbin!=0) return OFCRef_t(nullptr,nullptr);
   return this->OFC_a(m_onlineHelper->channel_Hash(onId),gain);  
 }
 
 LArOFCFlat::OFCRef_t LArOFCFlat::OFC_b(const HWIdentifier&  onId, int gain, int tbin) const {
-  if (tbin!=0) return OFCRef_t(NULL,NULL);
+  if (tbin!=0) return OFCRef_t(nullptr,nullptr);
   return this->OFC_b(m_onlineHelper->channel_Hash(onId),gain);  
 }
 

@@ -26,14 +26,14 @@ void LArPedestalMC::set(const std::vector<float>& vPedestal,
  */
 float LArPedestalMC::pedestal(const HWIdentifier& /*CellID*/, int /*gain*/) const 
 { 
-  if (m_vPedestal.size()>0) return m_vPedestal[0];
+  if (!m_vPedestal.empty()) return m_vPedestal[0];
   else  return LArElecCalib::ERRORCODE;
 }
 
 float LArPedestalMC::pedestalRMS(const HWIdentifier& /*CellID*/, int /*gain*/) const 
 { 
 
-  if (m_vPedestalRMS.size()>0) return m_vPedestalRMS[0];
+  if (!m_vPedestalRMS.empty()) return m_vPedestalRMS[0];
   else  return LArElecCalib::ERRORCODE;
 
 }

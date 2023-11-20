@@ -40,23 +40,23 @@ StatusCode LArG4H62004InactiveSDTool::initializeCalculators()
 StatusCode LArG4H62004InactiveSDTool::initializeSD()
 {
   // Setup calculator and collection
-  if (m_emecVolumes.size()>0) m_emecSD  = new LArG4H62004CalibSD( "LAr::EMEC::InnerModule::Inactive::H6" , &*m_emepiwcalc , m_doPID );
-  if (m_hecVolumes.size()>0)  m_hecSD  = new LArG4H62004CalibSD( "LAr::HEC::Local::Inactive::H6" , &*m_heccalc , m_doPID );
-  if (m_fcal1Volumes.size()>0) m_fcal1SD  = new LArG4H62004CalibSD( "LAr::FCAL::Inactive1::H6" , &*m_fcal1calc , m_doPID );
-  if (m_fcal2Volumes.size()>0) m_fcal2SD  = new LArG4H62004CalibSD( "LAr::FCAL::Inactive2::H6" , &*m_fcal2calc , m_doPID );
+  if (!m_emecVolumes.empty()) m_emecSD  = new LArG4H62004CalibSD( "LAr::EMEC::InnerModule::Inactive::H6" , &*m_emepiwcalc , m_doPID );
+  if (!m_hecVolumes.empty())  m_hecSD  = new LArG4H62004CalibSD( "LAr::HEC::Local::Inactive::H6" , &*m_heccalc , m_doPID );
+  if (!m_fcal1Volumes.empty()) m_fcal1SD  = new LArG4H62004CalibSD( "LAr::FCAL::Inactive1::H6" , &*m_fcal1calc , m_doPID );
+  if (!m_fcal2Volumes.empty()) m_fcal2SD  = new LArG4H62004CalibSD( "LAr::FCAL::Inactive2::H6" , &*m_fcal2calc , m_doPID );
 
   std::map<G4VSensitiveDetector*,std::vector<std::string>*> configuration;
-  if (m_emecVolumes.size()>0) configuration[m_emecSD]  = &m_emecVolumes;
-  if (m_hecVolumes.size()>0)  configuration[m_hecSD]   = &m_hecVolumes;
-  if (m_fcal1Volumes.size()>0) configuration[m_fcal1SD]  = &m_fcal1Volumes;
-  if (m_fcal2Volumes.size()>0) configuration[m_fcal2SD]  = &m_fcal2Volumes;
+  if (!m_emecVolumes.empty()) configuration[m_emecSD]  = &m_emecVolumes;
+  if (!m_hecVolumes.empty())  configuration[m_hecSD]   = &m_hecVolumes;
+  if (!m_fcal1Volumes.empty()) configuration[m_fcal1SD]  = &m_fcal1Volumes;
+  if (!m_fcal2Volumes.empty()) configuration[m_fcal2SD]  = &m_fcal2Volumes;
   setupAllSDs(configuration);
 
   // make sure they have the identifiers they need
-  if (m_emecVolumes.size()>0) setupHelpers(m_emecSD);
-  if (m_hecVolumes.size()>0)  setupHelpers(m_hecSD);
-  if (m_fcal1Volumes.size()>0) setupHelpers(m_fcal1SD);
-  if (m_fcal2Volumes.size()>0) setupHelpers(m_fcal2SD);
+  if (!m_emecVolumes.empty()) setupHelpers(m_emecSD);
+  if (!m_hecVolumes.empty())  setupHelpers(m_hecSD);
+  if (!m_fcal1Volumes.empty()) setupHelpers(m_fcal1SD);
+  if (!m_fcal2Volumes.empty()) setupHelpers(m_fcal2SD);
 
   return StatusCode::SUCCESS;
 }
@@ -65,9 +65,9 @@ StatusCode LArG4H62004InactiveSDTool::Gather()
 {
   // In this case, *unlike* other SDs, the *tool* owns the collection
   if (!m_HitColl.isValid()) m_HitColl = std::make_unique<CaloCalibrationHitContainer>(m_HitColl.name());
-  if (m_emecVolumes.size()>0) m_emecSD ->EndOfAthenaEvent( &*m_HitColl );
-  if (m_hecVolumes.size()>0)  m_hecSD  ->EndOfAthenaEvent( &*m_HitColl );
-  if (m_fcal1Volumes.size()>0) m_fcal1SD ->EndOfAthenaEvent( &*m_HitColl );
-  if (m_fcal2Volumes.size()>0) m_fcal2SD ->EndOfAthenaEvent( &*m_HitColl );
+  if (!m_emecVolumes.empty()) m_emecSD ->EndOfAthenaEvent( &*m_HitColl );
+  if (!m_hecVolumes.empty())  m_hecSD  ->EndOfAthenaEvent( &*m_HitColl );
+  if (!m_fcal1Volumes.empty()) m_fcal1SD ->EndOfAthenaEvent( &*m_HitColl );
+  if (!m_fcal2Volumes.empty()) m_fcal2SD ->EndOfAthenaEvent( &*m_HitColl );
   return StatusCode::SUCCESS;
 }

@@ -115,11 +115,11 @@ public:
 SingleTrackValidation::SingleTrackValidation (const std::string & name, ISvcLocator * pSvcLocator) :
   AthAlgorithm(name,pSvcLocator),m_c(new Clockwork())
 {
-  for (unsigned int i=0;i<162;++i) m_histos[i] = 0;
+  for (unsigned int i=0;i<162;++i) m_histos[i] = nullptr;
 }
 
 SingleTrackValidation::~SingleTrackValidation () {
-  if (m_c!=0){ delete m_c; m_c=0; }
+  if (m_c!=nullptr){ delete m_c; m_c=nullptr; }
 }
 
 StatusCode SingleTrackValidation::initialize() {

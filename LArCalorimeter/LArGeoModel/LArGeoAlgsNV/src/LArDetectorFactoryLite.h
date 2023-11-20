@@ -55,11 +55,11 @@ namespace LArGeo {
 
   private:
 
-    LArDetectorManager*       m_detectorManager;
-    StoreGateSvc*             m_detStore;
-    IRDBAccessSvc*            m_paramSvc;
-    GeoModelIO::ReadGeoModel* m_sqliteReader;
-    const LArHVManager*       m_hvManager;
+    LArDetectorManager*       m_detectorManager = nullptr;
+    StoreGateSvc*             m_detStore = nullptr;
+    IRDBAccessSvc*            m_paramSvc = nullptr;
+    GeoModelIO::ReadGeoModel* m_sqliteReader = nullptr;
+    const LArHVManager*       m_hvManager = nullptr;
 
     bool m_barrelSagging;
     int  m_testBeam;

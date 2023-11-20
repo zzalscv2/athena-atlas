@@ -19,7 +19,7 @@ using namespace LArSamples;
 
 
 EventData::EventData() :
-  m_runData(0)
+  m_runData(nullptr)
 { 
   ClassCounts::incrementInstanceCount("EventData");
   m_eventData.push_back(0);  // event
@@ -40,7 +40,7 @@ EventData::EventData(const EventData& other, int newRunIndex)
              
 
 EventData::EventData(int event, int run, int lumiBlock, int bunchId) :
-  m_runData(0)
+  m_runData(nullptr)
 {
   ClassCounts::incrementInstanceCount("EventData");
   m_eventData.push_back(event);

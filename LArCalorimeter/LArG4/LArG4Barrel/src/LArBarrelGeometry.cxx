@@ -333,7 +333,7 @@ namespace LArG4 {
       // Fill it once
       static const Geo g = []() {
         const LArVG4DetectorParameters* parameters = LArVG4DetectorParameters::GetInstance();
-        Geo g;
+        Geo g{};
 
         // maximum eta barrel 1.475 (at r=1500.024)
         g.Eta_max = parameters->GetValue("LArEMBMaxEtaAcceptance");

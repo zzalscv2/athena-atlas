@@ -43,7 +43,7 @@ namespace LArG4
     m_heccalc->initializeForSDCreation();
 
     // Create the wrapper
-    auto sdWrapper = new SimpleSDWrapper("LArHECSDWrapper", m_outputCollectionNames[0]);
+    auto *sdWrapper = new SimpleSDWrapper("LArHECSDWrapper", m_outputCollectionNames[0]);
 
     // Add the SDs
     //sdWrapper->addSD( makeOneSD("LAr::HEC::Module::Depth::Slice",

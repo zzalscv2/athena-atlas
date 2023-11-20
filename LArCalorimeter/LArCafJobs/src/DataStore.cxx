@@ -114,19 +114,19 @@ bool DataStore::writeTrees(const char* fileName)
   for (unsigned int i = 0; i < nRuns(); i++) {
     RunData*& r = runData(i);
     acc->addRun(r);
-    delete r; r = 0;
+    delete r; r = nullptr;
   }
 
   for (unsigned int i = 0; i < nEvents(); i++) {
     EventData*& ev = eventData(i);
     acc->addEvent(ev);
-    delete ev; ev = 0;
+    delete ev; ev = nullptr;
   }
   
   for (unsigned int i = 0; i < nChannels(); i++) {
     HistoryContainer*& hc = hist_cont(i);
     acc->add(hc);	
-    delete hc; hc = 0;
+    delete hc; hc = nullptr;
   }
 
   bool result = acc->save();

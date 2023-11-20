@@ -19,7 +19,7 @@
 LArDigitThinnerFromEMClust::LArDigitThinnerFromEMClust(const std::string& name,
 				 ISvcLocator* pSvcLocator) :
     AthReentrantAlgorithm(name, pSvcLocator)
-    , m_onlineID(0)
+    , m_onlineID(nullptr)
     , m_inputContainerKey("FREE")
     , m_outputContainerKey("LArDigitContainer_EMClust")
     , m_larCablingKey("LArOnOffIdMap") 

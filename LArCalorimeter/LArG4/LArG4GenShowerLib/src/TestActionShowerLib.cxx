@@ -46,7 +46,7 @@ namespace G4UA
 
   void TestActionShowerLib::BeginOfEventAction(const G4Event*)
   {
-    if (m_current_transform == 0) {
+    if (m_current_transform == nullptr) {
       m_current_transform = new G4AffineTransform();
     }
 
@@ -152,7 +152,7 @@ namespace G4UA
        return;
     }
 
-    if (m_current_transform == 0) {
+    if (m_current_transform == nullptr) {
       m_current_transform = new G4AffineTransform ();
     }
   }
@@ -268,7 +268,7 @@ namespace G4UA
       std::vector<LArHitData> results;
       if (m_current_calculator->Process(aStep, results))
         {
-          for (auto larhit: results)
+          for (const auto& larhit: results)
             {
               et += larhit.energy;
             }

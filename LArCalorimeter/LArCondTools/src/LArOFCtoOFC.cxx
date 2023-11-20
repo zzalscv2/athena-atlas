@@ -118,7 +118,7 @@ StatusCode LArOFCtoOFC::stop()
          }
       } // over phases
       if(m_numAdd > 0)  ofc_cont->set(id,(int)gain,OFC_a,OFC_b,timeOffset,timeBinWidth); 
-      else if(OFC_a.size() > 0) ofc_cont->set(id,CaloGain::LARLOWGAIN,OFC_a,OFC_b,timeOffset,timeBinWidth); 
+      else if(!OFC_a.empty()) ofc_cont->set(id,CaloGain::LARLOWGAIN,OFC_a,OFC_b,timeOffset,timeBinWidth); 
     } // over channels
 
     if(m_doShape) { // if also shape needed
@@ -172,7 +172,7 @@ StatusCode LArOFCtoOFC::stop()
         if(m_numAdd > 0) {  
            shape_cont->set(id,(int)gain,Shape,ShapeDer,timeOffset,timeBinWidth); 
         } else {
-           if(Shape.size() > 0) shape_cont->set(id,CaloGain::LARLOWGAIN,Shape,ShapeDer,timeOffset,timeBinWidth); 
+           if(!Shape.empty()) shape_cont->set(id,CaloGain::LARLOWGAIN,Shape,ShapeDer,timeOffset,timeBinWidth); 
         }
       } // over channels
     } // if m_doShape

@@ -37,7 +37,7 @@ namespace LArG4
   G4VSensitiveDetector* H62004DeadSDTool::makeSD() const
   {
     // Create the wrapper
-    auto sdWrapper = new CalibSDWrapper("LArH62004DeadSDWrapper", m_hitCollName);
+    auto *sdWrapper = new CalibSDWrapper("LArH62004DeadSDWrapper", m_hitCollName);
 
     // Add the SDs
     sdWrapper->addSD( makeOneSD( "LArDead::Dead::H6", &*m_calculator, m_volumeNames ) );

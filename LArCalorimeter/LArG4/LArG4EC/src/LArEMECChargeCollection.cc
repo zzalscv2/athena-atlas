@@ -387,7 +387,7 @@ void LArG4::EC::EnergyCalculator::IniGeomforFieldMaps(void){
 }
 
 // ***********************************************************
-void LArG4::EC::EnergyCalculator::LoadFieldMaps(const G4String fname){
+void LArG4::EC::EnergyCalculator::LoadFieldMaps(const G4String& fname){
   // ***********************************************************
 
   G4int foldtypemx=0;
@@ -397,7 +397,7 @@ void LArG4::EC::EnergyCalculator::LoadFieldMaps(const G4String fname){
 
   FILE *lun = fopen(fname, "r");
 
-  if(lun == 0){
+  if(lun == nullptr){
     ATH_MSG_FATAL("GetFieldMaps - file '" << fname << "' not found!");
     throw std::runtime_error("LArEMECChargeCollection: File not found!");
   }
@@ -480,7 +480,7 @@ void LArG4::EC::EnergyCalculator::LoadFieldMaps(const G4String fname){
       const G4int length=ChCollFoldType->pLayer[nlayer-1]+3*ChCollFoldType->NofPointsinLayer[nlayer-1];
       ChCollFoldType->FieldMap = new G4double [length];
 
-      if(ChCollFoldType->FieldMap == 0 ) {
+      if(ChCollFoldType->FieldMap == nullptr ) {
 
         ATH_MSG_FATAL(" ***GetFieldMaps: FATAL  FieldMap array cannot be created");
       }
@@ -773,7 +773,7 @@ G4double LArG4::EC::EnergyCalculator::_interpolateCurrentSubStep(G4double rforal
 
 // **********************************************************************
 G4double LArG4::EC::EnergyCalculator::GetCurrent(
-                                                 G4double StartofStep[],G4double EndofStep[],G4double edep, G4double Barret_PhiStart) const {
+                                                 const G4double StartofStep[],const G4double EndofStep[],G4double edep, G4double Barret_PhiStart) const {
   // **********************************************************************
   G4double v1b[3],v2b[3],hvpoint[3];
   G4double v1[3],v2[3],vstep[3];

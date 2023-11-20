@@ -19,7 +19,7 @@ using namespace LArSamples;
 CellInfo::CellInfo()
   : m_calo(UNKNOWN_CALO), m_layer(-1),
     m_iEta(-1), m_iPhi(-1), m_feedThrough(-1), 
-    m_slot(-1), m_channel(-1), m_shapeL(0), m_shapeM(0), m_shapeH(0),
+    m_slot(-1), m_channel(-1), m_shapeL(nullptr), m_shapeM(nullptr), m_shapeH(nullptr),
     m_rt(0), m_eta(0), m_phi(0), m_onlid(-1) 
 { 
   ClassCounts::incrementInstanceCount("CellInfo"); 
@@ -43,7 +43,7 @@ CellInfo::CellInfo(const CellInfo& other, bool withShapes)
   : m_calo(other.m_calo), m_layer(other.m_layer), 
     m_iEta(other.m_iEta), m_iPhi(other.m_iPhi), 
     m_feedThrough(other.m_feedThrough), m_slot(other.m_slot), m_channel(other.m_channel),
-    m_shapeL(0), m_shapeM(0), m_shapeH(0), 
+    m_shapeL(nullptr), m_shapeM(nullptr), m_shapeH(nullptr), 
     m_rt(other.m_rt), m_eta(other.m_eta), m_phi(other.m_phi),  m_onlid(other.m_onlid)
 { 
   ClassCounts::incrementInstanceCount("CellInfo"); 
@@ -55,7 +55,7 @@ CellInfo::CellInfo(const CellInfo& other, bool withShapes)
 CellInfo::CellInfo(CellInfo&& other) noexcept : m_calo(other.m_calo), m_layer(other.m_layer), 
     m_iEta(other.m_iEta), m_iPhi(other.m_iPhi), 
     m_feedThrough(other.m_feedThrough), m_slot(other.m_slot), m_channel(other.m_channel),
-    m_shapeL(0), m_shapeM(0), m_shapeH(0), 
+    m_shapeL(nullptr), m_shapeM(nullptr), m_shapeH(nullptr), 
     m_rt(other.m_rt), m_eta(other.m_eta), m_phi(other.m_phi),  m_onlid(other.m_onlid)
 {
     ClassCounts::incrementInstanceCount("CellInfo");
@@ -81,9 +81,9 @@ const ShapeInfo* CellInfo::shape(CaloGain::CaloGain gain) const
     case CaloGain::LARLOWGAIN    : return m_shapeL;
     case CaloGain::LARMEDIUMGAIN : return m_shapeM;
     case CaloGain::LARHIGHGAIN   : return m_shapeH;
-    default : return 0;
+    default : return nullptr;
   }
-  return 0;
+  return nullptr;
 }
 
 

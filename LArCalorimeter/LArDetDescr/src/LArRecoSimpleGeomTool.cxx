@@ -54,7 +54,7 @@ LArRecoSimpleGeomTool::initialize()
   // Decode tag ( via GeoModel ) and fix it for TestBeam :
   m_tag = "ATLAS-00";
   m_node = "ATLAS";
-  m_geoModelSvc  = 0;
+  m_geoModelSvc  = nullptr;
 
   StatusCode status = this->service("GeoModelSvc",m_geoModelSvc);
   if (status.isFailure()) {
@@ -135,7 +135,7 @@ LArRecoSimpleGeomTool::get_cylinder_surface (CaloSubdetNames::ALIGNVOL alvol,
   double rad,dep,len;
   //double nb;
 
-  StoredPhysVol* storedPV = 0;
+  StoredPhysVol* storedPV = nullptr;
   std::string key = map_av(alvol);
   if(detStore()->contains<StoredPhysVol>(key))
   {
@@ -313,7 +313,7 @@ LArRecoSimpleGeomTool::get_disk_surface (CaloSubdetNames::ALIGNVOL alvol,
 
   // Tracking geometry convention : z is the center of the layer, it is signed 
   //                                and "depth" is actually the half depth
-  StoredPhysVol* storedPV = 0;
+  StoredPhysVol* storedPV = nullptr;
   std::string key = map_av(alvol);
   if(detStore()->contains<StoredPhysVol>(key))
   {
@@ -580,7 +580,7 @@ LArRecoSimpleGeomTool::ScanBarrelCryo(CaloSubdetNames::ALIGNVOL alvol,
 				      std::vector<double>& depth, 
 				      std::vector<double>& hlength )
 {
-  StoredPhysVol* storedPV = 0;
+  StoredPhysVol* storedPV = nullptr;
   std::string key = map_av(alvol);
   if(detStore()->contains<StoredPhysVol>(key))
   {
@@ -612,7 +612,7 @@ LArRecoSimpleGeomTool::ScanEMB(CaloSubdetNames::ALIGNVOL alvol,
 			       std::vector<double>& depth, 
 			       std::vector<double>& hlength )
 {
-  StoredPhysVol* storedPV = 0;
+  StoredPhysVol* storedPV = nullptr;
   std::string key = map_av(alvol);
   if(detStore()->contains<StoredPhysVol>(key))
   {

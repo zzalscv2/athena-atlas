@@ -3,12 +3,14 @@
 */
 
 #include "LArG4H62004CalibSD.h"
+
 #include "LArG4Code/ILArCalibCalculatorSvc.h"
+#include <utility>
 
 #undef DEBUG_SD
 
 LArG4H62004CalibSD::LArG4H62004CalibSD(G4String a_name, ILArCalibCalculatorSvc* calc,bool doPID):
-  LArG4CalibSD(a_name,calc,doPID)
+  LArG4CalibSD(std::move(a_name),calc,doPID)
 {
 #ifdef DEBUG_SD
   std::cout << " in LArG4H62004CalibSD:::LArG4H62004CalibSD a_name " << a_name << std::endl;

@@ -26,10 +26,10 @@
 
 #undef DEBUG_ME
 
-LArG4H6WarmTCSD::LArG4H6WarmTCSD(G4String name, G4String colname)
+LArG4H6WarmTCSD::LArG4H6WarmTCSD(const G4String& name, const G4String& colname)
   : G4VSensitiveDetector(name)
   , m_Collection(colname)
-  , m_CalibSD(0)
+  , m_CalibSD(nullptr)
 {
   if(name.find("::Abs")!=std::string::npos){
     m_isABS = true;

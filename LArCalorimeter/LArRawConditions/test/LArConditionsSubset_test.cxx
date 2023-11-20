@@ -29,7 +29,7 @@ struct Copier
 
 struct TestPayload
 {
-  TestPayload (int x=0) : m_x(x), m_y(x+1) {}
+  explicit TestPayload (int x=0) : m_x(x), m_y(x+1) {}
   int m_x;
   int m_y;
 };

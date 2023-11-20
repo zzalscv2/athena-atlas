@@ -196,7 +196,7 @@ StatusCode LArFlatConditionSvc::preLoadAddresses(StoreID::type storeID,tadList& 
   if (!m_doRegularCells) minIdx=8;
   
   for (size_t i=minIdx;i<maxIdx;++i) {
-    if (m_objInfo[i].m_outputKey.size()==0 || m_objInfo[i].m_inputKey.size()==0) {
+    if (m_objInfo[i].m_outputKey.empty() || m_objInfo[i].m_inputKey.empty()) {
       ATH_MSG_DEBUG("No input/output key set for obj " << m_objInfo[i].m_classname << ". Ignored.");
       continue;
     }
@@ -265,7 +265,7 @@ StatusCode LArFlatConditionSvc::updateAddress(StoreID::type,
   switch (index) { 
   case 0: 
     {
-      if (this->createFlatObj<LAruA2MeVFlat>(attrlist,tad)==0) {
+      if (this->createFlatObj<LAruA2MeVFlat>(attrlist,tad)==nullptr) {
       	msg(MSG::ERROR) << "Problem creating LAruA2MeVFlat object" << endmsg;
 	return StatusCode::FAILURE; 
       }
@@ -274,7 +274,7 @@ StatusCode LArFlatConditionSvc::updateAddress(StoreID::type,
    
   case 1:
     {
-      if (this->createFlatObj<LArDAC2uAFlat>(attrlist,tad)==0) {
+      if (this->createFlatObj<LArDAC2uAFlat>(attrlist,tad)==nullptr) {
 	msg(MSG::ERROR) << "Problem creating LArDAC2uAFlat object" << endmsg;
 	return StatusCode::FAILURE; 
       }
@@ -282,7 +282,7 @@ StatusCode LArFlatConditionSvc::updateAddress(StoreID::type,
     break;
   case 2:
     {
-      if (this->createFlatObj<LArHVScaleCorrFlat>(attrlist,tad)==0) {
+      if (this->createFlatObj<LArHVScaleCorrFlat>(attrlist,tad)==nullptr) {
 	msg(MSG::ERROR) << "Problem creating LArHVScaleCorrFlat object " << endmsg;
 	return StatusCode::FAILURE; 
       }
@@ -290,7 +290,7 @@ StatusCode LArFlatConditionSvc::updateAddress(StoreID::type,
     break;
   case 3:
     {
-      if (this->createFlatObj<LArPedestalFlat>(attrlist,tad)==0) {
+      if (this->createFlatObj<LArPedestalFlat>(attrlist,tad)==nullptr) {
 	msg(MSG::ERROR) << "Problem creating LArPedestalFlat object" << endmsg;
 	return StatusCode::FAILURE; 
       }
@@ -298,7 +298,7 @@ StatusCode LArFlatConditionSvc::updateAddress(StoreID::type,
     break;
   case 4:
     {
-      if (this->createFlatObj<LArRampFlat>(attrlist,tad)==0) {
+      if (this->createFlatObj<LArRampFlat>(attrlist,tad)==nullptr) {
 	msg(MSG::ERROR) << "Problem creating LArRampFlat object" << endmsg;
 	return StatusCode::FAILURE; 
       }
@@ -306,7 +306,7 @@ StatusCode LArFlatConditionSvc::updateAddress(StoreID::type,
     break;
   case 5:
     {
-      if (this->createFlatObj<LArMphysOverMcalFlat>(attrlist,tad)==0) {
+      if (this->createFlatObj<LArMphysOverMcalFlat>(attrlist,tad)==nullptr) {
 	msg(MSG::ERROR) << "Problem creating LArMphysOverMcalFlat object" << endmsg;
 	return StatusCode::FAILURE; 
       }
@@ -314,7 +314,7 @@ StatusCode LArFlatConditionSvc::updateAddress(StoreID::type,
     break;
   case 6:
     {
-      if (this->createFlatObj<LArOFCFlat>(attrlist,tad)==0) {
+      if (this->createFlatObj<LArOFCFlat>(attrlist,tad)==nullptr) {
 	msg(MSG::ERROR) << "Problem creating LArOFCFlat object" << endmsg;
 	return StatusCode::FAILURE; 
       }
@@ -322,7 +322,7 @@ StatusCode LArFlatConditionSvc::updateAddress(StoreID::type,
     break;
   case 7:      
     {
-      if (this->createFlatObj<LArShapeFlat>(attrlist,tad)==0) {
+      if (this->createFlatObj<LArShapeFlat>(attrlist,tad)==nullptr) {
 	msg(MSG::ERROR) << "Problem creating LArShapeFlat object" << endmsg;
 	return StatusCode::FAILURE; 
       }
@@ -332,7 +332,7 @@ StatusCode LArFlatConditionSvc::updateAddress(StoreID::type,
 
   case 8:      
     {
-      if (this->createFlatObj<LArAutoCorrSC>(attrlist,tad)==0) {
+      if (this->createFlatObj<LArAutoCorrSC>(attrlist,tad)==nullptr) {
 	msg(MSG::ERROR) << "Problem creating LArAutoCorrSC object" << endmsg;
 	return StatusCode::FAILURE; 
       }
@@ -340,7 +340,7 @@ StatusCode LArFlatConditionSvc::updateAddress(StoreID::type,
     break;
   case 9:      
     {
-      if (this->createFlatObj<LAruA2MeVSC>(attrlist,tad)==0) {
+      if (this->createFlatObj<LAruA2MeVSC>(attrlist,tad)==nullptr) {
 	msg(MSG::ERROR) << "Problem creating LAruA2MeVSC object" << endmsg;
 	return StatusCode::FAILURE; 
       }
@@ -348,7 +348,7 @@ StatusCode LArFlatConditionSvc::updateAddress(StoreID::type,
     break;
   case 10:      
     {
-      if (this->createFlatObj<LArDAC2uASC>(attrlist,tad)==0) {
+      if (this->createFlatObj<LArDAC2uASC>(attrlist,tad)==nullptr) {
 	msg(MSG::ERROR) << "Problem creating LArDAC2uASC object" << endmsg;
 	return StatusCode::FAILURE; 
       }
@@ -356,42 +356,42 @@ StatusCode LArFlatConditionSvc::updateAddress(StoreID::type,
     break;
     
   case 11:      
-      if (this->createFlatObj<LArfSamplSC>(attrlist,tad)==0) {
+      if (this->createFlatObj<LArfSamplSC>(attrlist,tad)==nullptr) {
 	msg(MSG::ERROR) << "Problem creating LArfSamplSC object" << endmsg;
 	return StatusCode::FAILURE; 
       }
     break;
 
   case 12:      
-    if (this->createFlatObj<LArNoiseSC>(attrlist,tad)==0) {
+    if (this->createFlatObj<LArNoiseSC>(attrlist,tad)==nullptr) {
       msg(MSG::ERROR) << "Problem creating LArNoiseSC object" << endmsg;
       return StatusCode::FAILURE; 
     }
     break;
 
   case 13:      
-    if (this->createFlatObj<LArPedestalSC>(attrlist,tad)==0) {
+    if (this->createFlatObj<LArPedestalSC>(attrlist,tad)==nullptr) {
       msg(MSG::ERROR) << "Problem creating LArPedestal object" << endmsg;
       return StatusCode::FAILURE; 
     }
     break;
     
   case 14:      
-    if (this->createFlatObj<LArRampSC>(attrlist,tad)==0) {
+    if (this->createFlatObj<LArRampSC>(attrlist,tad)==nullptr) {
       msg(MSG::ERROR) << "Problem creating LArRampSC object" << endmsg;
       return StatusCode::FAILURE; 
     }
     break;
 
   case 15:      
-    if (this->createFlatObj<LArShapeSC>(attrlist,tad)==0) {
+    if (this->createFlatObj<LArShapeSC>(attrlist,tad)==nullptr) {
       msg(MSG::ERROR) << "Problem creating LArShapeSC object" << endmsg;
       return StatusCode::FAILURE; 
     }
     break;
 
   case 16:      
-    if (this->createFlatObj<LArMinBiasSC>(attrlist,tad)==0) {
+    if (this->createFlatObj<LArMinBiasSC>(attrlist,tad)==nullptr) {
       msg(MSG::ERROR) << "Problem creating LArMinBiasSC object" << endmsg;
       return StatusCode::FAILURE; 
     }
@@ -437,7 +437,7 @@ T* LArFlatConditionSvc::createFlatObj(const CondAttrListCollection* attr,  SG::T
     msg(MSG::ERROR) << "Failed to covert AthenaAttributeList to flat LAr conditions object with clid/key " 
 		    << clid << "/" << key << endmsg;
     delete flat;
-    return 0;
+    return nullptr;
   }
   else {
     SG::DataProxy* proxy=m_detStore->proxy(clid,key);

@@ -10,7 +10,7 @@
 #include "LArIdentifier/LArOnlineID.h"
 
 LArCalibParams::LArCalibParams():
-  m_onlineHelper(0),  
+  m_onlineHelper(nullptr),  
   m_uniqueConfig(false)
 {} 
 
@@ -127,7 +127,7 @@ unsigned LArCalibParams::CalibBoard::DAC(const unsigned event) const
 
 unsigned LArCalibParams::Delay(const unsigned event, const HWIdentifier calibLineID) const
 {if (calibLineID.get_compact()==0) return 0; //Disconnected channel
- if (m_uniqueConfig &&  m_mCalibBoards.size()>=1)
+ if (m_uniqueConfig &&  !m_mCalibBoards.empty())
    return m_mCalibBoards.begin()->second.Delay(event);
  else {
    if (!m_onlineHelper) {
@@ -146,7 +146,7 @@ unsigned LArCalibParams::Delay(const unsigned event, const HWIdentifier calibLin
 
 unsigned LArCalibParams::DAC(const unsigned event, const HWIdentifier calibLineID) const
 {if (calibLineID.get_compact()==0) return 0; //Disconnected channel
- if (m_uniqueConfig &&  m_mCalibBoards.size()>=1)
+ if (m_uniqueConfig &&  !m_mCalibBoards.empty())
    return m_mCalibBoards.begin()->second.DAC(event);
  else {
    if (!m_onlineHelper) {
@@ -173,7 +173,7 @@ bool LArCalibParams::isPulsed(const unsigned event, const HWIdentifier calibLine
    return false; 
  }
  const int line=m_onlineHelper->channel(calibLineID);
- if (m_uniqueConfig &&  m_mCalibBoards.size()>=1) 
+ if (m_uniqueConfig &&  !m_mCalibBoards.empty()) 
     return m_mCalibBoards.begin()->second.isPulsed(event, line);
  else
    {const HWIdentifier calibModuleID=m_onlineHelper->calib_module_Id(calibLineID);
@@ -189,7 +189,7 @@ bool LArCalibParams::isPulsed(const unsigned event, const HWIdentifier calibLine
 
 unsigned LArCalibParams::getNumberConfig(const HWIdentifier calibModuleID) const
 { //Number of configurations is nDAC*nDelay*nPattern
-  if (m_uniqueConfig &&  m_mCalibBoards.size()>=1) {
+  if (m_uniqueConfig &&  !m_mCalibBoards.empty()) {
     const unsigned nConfig=m_mCalibBoards.begin()->second.m_DAC.size()*
       m_mCalibBoards.begin()->second.m_Delay.size()*m_mCalibBoards.begin()->second.m_Pattern.size()/4;
     return nConfig;
@@ -210,7 +210,7 @@ unsigned LArCalibParams::getNumberConfig(const HWIdentifier calibModuleID) const
 
 unsigned LArCalibParams::NTrigger(const HWIdentifier calibModuleID) const
 {
- if (m_uniqueConfig &&  m_mCalibBoards.size()>=1) 
+ if (m_uniqueConfig &&  !m_mCalibBoards.empty()) 
    return m_mCalibBoards.begin()->second.m_nTrigger;
  else {
    const std::map<HWIdentifier, CalibBoard>::const_iterator map_it=m_mCalibBoards.find(calibModuleID);

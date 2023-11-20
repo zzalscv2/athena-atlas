@@ -78,12 +78,12 @@ LArOFCSC::LArOFCSC(const CondAttrListCollection* attrList) :
 }
 
 LArOFCSC::OFCRef_t LArOFCSC::OFC_a(const HWIdentifier&  onId, int gain, int tbin) const {
-  if (tbin!=0) return OFCRef_t(NULL,NULL);
+  if (tbin!=0) return OFCRef_t(nullptr,nullptr);
   return this->OFC_a(m_scOnlineID->channel_Hash(onId),gain);  
 }
 
 LArOFCSC::OFCRef_t LArOFCSC::OFC_b(const HWIdentifier&  onId, int gain, int tbin) const {
-  if (tbin!=0) return OFCRef_t(NULL,NULL);
+  if (tbin!=0) return OFCRef_t(nullptr,nullptr);
   return this->OFC_b(m_scOnlineID->channel_Hash(onId),gain);  
 }
 

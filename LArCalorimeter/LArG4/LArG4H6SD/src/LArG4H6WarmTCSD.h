@@ -24,7 +24,7 @@ class LArG4H6WarmTCSD : public G4VSensitiveDetector
 public:
 
   // Constructor and destructor.
-  LArG4H6WarmTCSD(G4String name, G4String colname);
+  LArG4H6WarmTCSD(const G4String& name, const G4String& colname);
   ~LArG4H6WarmTCSD() {}
 
   void Initialize(G4HCofThisEvent*);

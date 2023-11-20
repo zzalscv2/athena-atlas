@@ -2,6 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <utility>
+
 #include "LArG4Code/LArG4CalibSD.h"
 
 #include "LArG4Code/ILArCalibCalculatorSvc.h"
@@ -18,7 +20,7 @@
 #include "G4Step.hh"
 
 LArG4CalibSD::LArG4CalibSD(G4String a_name, ILArCalibCalculatorSvc* calc, bool doPID)
-  : G4VSensitiveDetector(a_name)
+  : G4VSensitiveDetector(std::move(a_name))
   , m_calculator(calc)
   , m_numberInvalidHits(0)
   , m_doPID(doPID)
@@ -173,7 +175,7 @@ void LArG4CalibSD::EndOfAthenaEvent( CaloCalibrationHitContainer * hitContainer,
   }
   if(hitContainer) {
     // Loop through the hits...
-    for(auto hit : m_calibrationHits) {
+    for(auto *hit : m_calibrationHits) {
       // Because of the design, we are sure this is going into the right hit container
       // Can we actually do this with move?
       hitContainer->push_back(hit);
@@ -183,7 +185,7 @@ void LArG4CalibSD::EndOfAthenaEvent( CaloCalibrationHitContainer * hitContainer,
   m_calibrationHits.clear();
   if(deadHitContainer) {
     // Loop through the hits...
-    for(auto hit : m_deadCalibrationHits) {
+    for(auto *hit : m_deadCalibrationHits) {
       // Because of the design, we are sure this is going into the right hit container
       // Can we actually do this with move?
       deadHitContainer->push_back(hit);

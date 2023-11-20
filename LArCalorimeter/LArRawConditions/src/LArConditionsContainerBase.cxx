@@ -33,16 +33,16 @@
 LArConditionsContainerBase::LArConditionsContainerBase( )
 	:
 	m_groupType(SubDetectorGrouping),
-	m_onlineHelper(0),
-	m_offlineHelper(0),
+	m_onlineHelper(nullptr),
+	m_offlineHelper(nullptr),
 	m_isInitialized(false)
 {}
 
 LArConditionsContainerBase::LArConditionsContainerBase(GroupingType type)
 	:
 	m_groupType(type),
-	m_onlineHelper(0),
-	m_offlineHelper(0),
+	m_onlineHelper(nullptr),
+	m_offlineHelper(nullptr),
 	m_isInitialized(false)
 {}
 

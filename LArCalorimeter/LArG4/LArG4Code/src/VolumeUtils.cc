@@ -54,8 +54,8 @@ namespace LArG4
     std::set<std::string> foundVolumes;
 
     // Iterate over the G4 volumes and look for matches
-    auto logicalVolumeStore = G4LogicalVolumeStore::GetInstance();
-    for(auto logvol : *logicalVolumeStore) {
+    auto *logicalVolumeStore = G4LogicalVolumeStore::GetInstance();
+    for(auto *logvol : *logicalVolumeStore) {
       if( matchStrings( pattern.data(), logvol->GetName() ) ) {
         foundVolumes.insert( logvol->GetName() );
       }

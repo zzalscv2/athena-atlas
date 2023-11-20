@@ -59,7 +59,7 @@ public:
 class  stepInfoDistCompare{
 public:
   enum CompareType {RHO,R,Z};
-  stepInfoDistCompare(const CompareType type) : m_type(type) {}
+  explicit stepInfoDistCompare(const CompareType type) : m_type(type) {}
   bool operator()( const ShowerLib::StepInfo * first,  const ShowerLib::StepInfo * second) const {
     return sortFunction(first, second, m_type );
   }
@@ -104,7 +104,7 @@ StatusCode LArG4GenShowerLib::initialize()
 {
   ATH_MSG_INFO ( "Initializing" );
 
-  ShowerLib::IShowerLib* library = NULL;
+  ShowerLib::IShowerLib* library = nullptr;
 
   std::vector< std::string >::const_iterator nameiter;
 
@@ -115,7 +115,7 @@ StatusCode LArG4GenShowerLib::initialize()
 
     library = ShowerLib::iterateStruct(*nameiter);
 
-    if (library == NULL) {
+    if (library == nullptr) {
       ATH_MSG_WARNING ( "Library structure file " << (*nameiter) << " doesn't describe a valid library" );
       continue;
     }
@@ -275,23 +275,23 @@ StatusCode LArG4GenShowerLib::execute()
 HepMC::ConstGenParticlePtr LArG4GenShowerLib::getParticleFromMC()
 {
   const McEventCollection* mcEvent;
-  if (evtStore()->retrieve(mcEvent,"GEN_EVENT").isFailure()) return 0;
+  if (evtStore()->retrieve(mcEvent,"GEN_EVENT").isFailure()) return nullptr;
 
   // Return the last particle of the event.
   if (mcEvent)
 #ifdef HEPMC3
-    return mcEvent->at(0)->particles().size() ? mcEvent->at(0)->particles().back() : NULL;
+    return !mcEvent->at(0)->particles().empty() ? mcEvent->at(0)->particles().back() : nullptr;
 #else
     return ( * (* mcEvent->begin())->particles_end());
 #endif
 
-  return NULL;
+  return nullptr;
 }
 
 const ShowerLib::StepInfoCollection* LArG4GenShowerLib::getStepInfo()
 {
   const ShowerLib::StepInfoCollection* eventStepsES;
-  if (evtStore()->retrieve(eventStepsES, "EventSteps").isFailure()) return NULL;
+  if (evtStore()->retrieve(eventStepsES, "EventSteps").isFailure()) return nullptr;
 
   return eventStepsES;
 
@@ -300,7 +300,7 @@ const ShowerLib::StepInfoCollection* LArG4GenShowerLib::getStepInfo()
 ShowerLib::StepInfoList* LArG4GenShowerLib::copyStepInfo(const ShowerLib::StepInfoCollection* stepinfo)
 {
   ShowerLib::StepInfoList *rez = new ShowerLib::StepInfoList();
-  ShowerLib::StepInfo *copy = NULL;
+  ShowerLib::StepInfo *copy = nullptr;
 
   for (ShowerLib::StepInfoCollection::const_iterator iter = stepinfo->begin(); iter!=stepinfo->end(); ++iter) {
     copy = new ShowerLib::StepInfo(*(*iter));
@@ -315,11 +315,11 @@ ShowerLib::StepInfoList* LArG4GenShowerLib::copyStepInfoZeroCleanup(const Shower
   ShowerLib::StepInfoList *rez = new ShowerLib::StepInfoList();
 
   const double dsame = 1.; // 1mm^2
-  ShowerLib::StepInfo *i1 = NULL;
-  ShowerLib::StepInfo *i2 = NULL;
+  ShowerLib::StepInfo *i1 = nullptr;
+  ShowerLib::StepInfo *i2 = nullptr;
 
   for (ShowerLib::StepInfoCollection::const_iterator i = stepinfo->begin(); i!=stepinfo->end(); ++i) {
-    if(i1 == NULL) {
+    if(i1 == nullptr) {
       i1 = new ShowerLib::StepInfo(*(*i));
       rez->push_back(i1);
     }

@@ -158,7 +158,7 @@ StatusCode LArAlignDbAlg::printCondObjects()
 
   if(sc.isFailure()) 
     ATH_MSG_WARNING( " Could not find DetCondKeyTrans"  );
-  else if(0 == align) 
+  else if(nullptr == align) 
     ATH_MSG_WARNING(" DetCondKeyTrans ptr is 0"  );
   else {
     std::cout << " \n\n**************************************************** \n";

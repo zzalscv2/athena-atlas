@@ -51,7 +51,7 @@ EndcapFastSimDedicatedSD::EndcapFastSimDedicatedSD(StoreGateSvc* detStore)
   ISvcLocator* svcLocator = Gaudi::svcLocator();
 
   // Access the GeoModelSvc:                                                                                                                                                         
-  IGeoModelSvc *geoModel=0;
+  IGeoModelSvc *geoModel=nullptr;
   if (svcLocator->service ("GeoModelSvc",geoModel) !=StatusCode::SUCCESS) {
     G4Exception(
 		"LArWheelSliceSolid", "AccessGeoModel", FatalException,
@@ -66,7 +66,7 @@ EndcapFastSimDedicatedSD::EndcapFastSimDedicatedSD(StoreGateSvc* detStore)
   }
 
   // Access the geometry database:                                                                                                                                                   
-  IRDBAccessSvc *pAccessSvc=0;
+  IRDBAccessSvc *pAccessSvc=nullptr;
   if ( svcLocator->service(geoDbTagSvc->getParamSvcName(),pAccessSvc)!=StatusCode::SUCCESS) {
     G4Exception(
 		"LArWheelSliceSolid", "AccessAccessSvc", FatalException,
@@ -129,7 +129,7 @@ void EndcapFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot){
 
         // But now we are more sophisticated...:
 
-        LArWheelCalculator *wheelCalc=NULL;
+        LArWheelCalculator *wheelCalc=nullptr;
         int nGaps= region->getRadialIndex()==0 ? 768:256;
         int nBins= phiBinning.getNumDivisions();
         int gapsPerBin = nGaps/nBins;

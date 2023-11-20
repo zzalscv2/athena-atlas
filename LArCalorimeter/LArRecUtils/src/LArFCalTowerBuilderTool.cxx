@@ -74,7 +74,7 @@ LArFCalTowerBuilderTool::addTower (const tower_iterator& t,
     unsigned int ci = firstC->first;
     double weightC = firstC->second;
     int cndx = cells->findIndex(ci);
-    const CaloCell* cellPtr = 0;
+    const CaloCell* cellPtr = nullptr;
     if (cndx >= 0)
       cellPtr = (*cells)[cndx];
     // get weights

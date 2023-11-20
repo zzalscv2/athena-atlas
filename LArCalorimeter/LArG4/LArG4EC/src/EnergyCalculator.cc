@@ -267,14 +267,14 @@ StatusCode EnergyCalculator::initialize()
   ISvcLocator *svcLocator=Gaudi::svcLocator();
 
   // Access the GeoModelSvc:
-  IGeoModelSvc *geoModel=0;
+  IGeoModelSvc *geoModel=nullptr;
   ATH_CHECK(svcLocator->service ("GeoModelSvc",geoModel));
 
   IGeoDbTagSvc *geoDbTagSvc(nullptr);
   ATH_CHECK(svcLocator->service ("GeoDbTagSvc",geoDbTagSvc));
 
   // Access the geometry database:
-  IRDBAccessSvc *pAccessSvc=0;
+  IRDBAccessSvc *pAccessSvc=nullptr;
   ATH_CHECK(svcLocator->service(geoDbTagSvc->getParamSvcName(),pAccessSvc));
 
   DecodeVersionKey larVersionKey(geoModel, "LAr");
@@ -487,7 +487,7 @@ StatusCode EnergyCalculator::initialize()
                 << "\n"
                 << "default method for computation of folding angle (param) - compiled in");
   // Aug 2007 AMS, lost Aug 2008, restored May 2009
-  m_electrode_calculator = 0;
+  m_electrode_calculator = nullptr;
   if(m_correction_type == EMEC_ECOR_CHCL1 && !lwc()->GetisBarrette()){
     LArG4::LArWheelCalculator_t t = LArG4::OuterElectrodWheel;
     if(lwc()->GetisModule()){
@@ -498,7 +498,7 @@ StatusCode EnergyCalculator::initialize()
     } else if(lwc()->GetisInner()) t = LArG4::InnerElectrodWheel;
 
     m_electrode_calculator = new LArWheelCalculator(emecData, t, lwc()->GetAtlasZside());
-    if(m_electrode_calculator == 0){
+    if(m_electrode_calculator == nullptr){
       ATH_MSG_FATAL("cannot create helper electrode calculator");
       G4Exception("EnergyCalculator", "NoElectrodeCalculator", FatalException,
                   "cannot create helper electrode calculator");
@@ -640,7 +640,7 @@ G4bool EnergyCalculator::FindIdentifier_Default(
   const G4ThreeVector startPoint = pre_step_point->GetPosition();
   const G4ThreeVector endPoint   = post_step_point->GetPosition();
   //	p = (startPoint + endPoint) * 0.5;
-  const G4ThreeVector p = startPoint;  // middle point may be out of volume
+  const G4ThreeVector& p = startPoint;  // middle point may be out of volume
 
   const G4AffineTransform transformation =
     pre_step_point->GetTouchable()->GetHistory()->GetTopTransform();

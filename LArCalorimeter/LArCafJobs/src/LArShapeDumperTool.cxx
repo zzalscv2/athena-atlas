@@ -88,12 +88,12 @@ CellInfo* LArShapeDumperTool::makeCellInfo(const HWIdentifier& channelID, const 
 		      << " (FT: " << m_onlineHelper->feedthrough(channelID) << " FEBSlot: " 
 		      << m_onlineHelper->slot(channelID) << " Chan: " << m_onlineHelper->channel(channelID)
 		      << ") appears to be neither EM nor HEC nor FCAL." << endmsg;
-    return 0;
+    return nullptr;
   }
 
-  ShapeInfo* shapeL = 0;
-  ShapeInfo* shapeM = 0;
-  ShapeInfo* shapeH = 0;
+  ShapeInfo* shapeL = nullptr;
+  ShapeInfo* shapeM = nullptr;
+  ShapeInfo* shapeH = nullptr;
             
   if (m_doAllShapes) {
     shapeL = retrieveShape(channelID, CaloGain::LARLOWGAIN);
@@ -122,17 +122,17 @@ ShapeInfo* LArShapeDumperTool::retrieveShape(const HWIdentifier& channelID, Calo
   const LArShapeComplete* shapeObj = dynamic_cast<const LArShapeComplete*>(ishape);
   if (!shapeObj) {
     msg(MSG::INFO) << "Shape object is not of type LArShapeComplete!" << endmsg;
-    return 0;
+    return nullptr;
   }
   //const std::vector< std::vector<float> >& fullShape = shapeObj->get(channelID, gain).m_vShape;
   //ILArShape::ShapeRef_t shapeder=shapeObj->Shape(chid,igain,iphase);
 
-  ShapeInfo* shape = 0;
+  ShapeInfo* shape = nullptr;
   const size_t nPhases=shapeObj->nTimeBins(channelID,gain);
   if (nPhases == 0) {
     msg(MSG::WARNING) << "Shape object for channel " << channelID << " and gain " << gain 
              << " has 0 phases !" << endmsg;
-    return 0;
+    return nullptr;
   }    
 
   for (unsigned int iPhase = 0; iPhase < nPhases; iPhase++) {
@@ -142,7 +142,7 @@ ShapeInfo* LArShapeDumperTool::retrieveShape(const HWIdentifier& channelID, Calo
        msg(MSG::WARNING) << "Shape object for channel " << channelID << " and gain " << gain 
 			 << " has no data in phase " << iPhase << " !" << endmsg;
        delete shape;
-       return 0;
+       return nullptr;
      }
      for (unsigned int iSample = 0; iSample < shape_i.size(); iSample++) {
        if (iSample == 0 && iPhase == 0)

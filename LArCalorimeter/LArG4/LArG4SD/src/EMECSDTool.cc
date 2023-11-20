@@ -62,7 +62,7 @@ namespace LArG4
   G4VSensitiveDetector* EMECSDTool::makeSD() const
   {
     // Create the wrapper
-    auto sdWrapper = new SimpleSDWrapper("LArEMECSDWrapper", m_outputCollectionNames[0]);
+    auto *sdWrapper = new SimpleSDWrapper("LArEMECSDWrapper", m_outputCollectionNames[0]);
 
     // Add the SDs
     sdWrapper->addSD(

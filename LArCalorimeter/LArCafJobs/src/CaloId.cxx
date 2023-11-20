@@ -42,7 +42,7 @@ TString Id::str(CaloId id)
   return "UNKNOWN_CALO";
 }
 
-CaloId Id::caloId(TString str)
+CaloId Id::caloId(const TString& str)
 {
   if (str == "FCAL_C") return FCAL_C;
   if (str == "HEC_C")  return HEC_C;
@@ -120,7 +120,7 @@ TString Id::str(PartitionId id)
 }
 
 
-PartitionId Id::partitionId(TString str)
+PartitionId Id::partitionId(const TString& str)
 {
   if (str == "FCAL_C_PARTITION") return FCAL_C_PARTITION;
   if (str == "HEC_C_PARTITION")  return HEC_C_PARTITION;

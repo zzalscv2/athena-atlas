@@ -60,16 +60,16 @@ namespace ShowerLib {
       TParameter<int>* ver;
       ver = (TParameter<int>*)source->Get("version");
 
-      if ((ver == NULL) || (ver->GetVal() != LIB_VERSION)) 
+      if ((ver == nullptr) || (ver->GetVal() != LIB_VERSION)) 
 #ifndef __FSLIB_NO_BACKWARD_COMPAT__
-           if ((ver == NULL) || (ver->GetVal() != LIB_VERSION_OLD))
+           if ((ver == nullptr) || (ver->GetVal() != LIB_VERSION_OLD))
 #endif
-             return NULL;
+             return nullptr;
 
       TTree* TTreeMeta = (TTree*)source->Get("meta");
       TTree* TTreeLib  = (TTree*)source->Get("library");
 
-      if ((TTreeMeta == NULL) || (TTreeLib == NULL)) return NULL;
+      if ((TTreeMeta == nullptr) || (TTreeLib == nullptr)) return nullptr;
 
       std::cout << "FCALDistEtaEnergyShowerLib header found." << std::endl;
 
@@ -84,7 +84,7 @@ namespace ShowerLib {
 	  if (!(newlib->readMeta(TTreeMeta)) || !(newlib->read(TTreeLib))) {
 		  delete newlib;
 	      std::cout << "FCALDistEtaEnergyShowerLib read unsuccessful." << std::endl;
-		  return NULL;
+		  return nullptr;
 	  }
 
 	  return newlib;
@@ -117,7 +117,7 @@ namespace ShowerLib {
 
 	  if (!filestr.is_open()) {
 		  std::cout << "FCALDistEtaEnergyShowerLib    " << inputFile << ": bad file!" << std::endl;
-		  return NULL;
+		  return nullptr;
 	  }
 
 	  std::string instr;
@@ -135,11 +135,11 @@ namespace ShowerLib {
 #ifndef __FSLIB_NO_BACKWARD_COMPAT__
 		  if (ver == LIB_VERSION_OLD) {
 			  std::cout << "FCALDistEtaEnergyShowerLib: you are trying to create the old version of this library. Use the new one." << std::endl;
-			  return NULL;
+			  return nullptr;
 		  }
 #endif
 		  if (ver != LIB_VERSION) {
-			  return NULL;
+			  return nullptr;
 		  }
 
 		  ss >> part >> det;
@@ -166,12 +166,12 @@ namespace ShowerLib {
 		  if (etaold == 0) {
 			  if (eta > 3.0001) {
 				  std::cout << "First eta should be 3.0 (have " << eta << ")" << std::endl;
-				  return NULL;
+				  return nullptr;
 			  }
 			  eta = 3.0;
 		  } else if (eta <= etaold) {
 			  std::cout << "eta is not correct: " << eta << "<=" << etaold << std::endl;
-			  return NULL;
+			  return nullptr;
 		  }
 		  etaold = eta;
 
@@ -184,13 +184,13 @@ namespace ShowerLib {
 
 		  if (ss.fail()) {
 			  std::cout << "file reading failed! (not enough data)" << std::endl;
-			  return NULL;
+			  return nullptr;
 		  }
 
 		  if (dist != 0.) {
 			  if (dist < 0) {
 				  std::cout << "no negative dists allowed (" << eta << ")" << std::endl;
-				  return NULL;
+				  return nullptr;
 			  }
 			  distlist->push_back(0.);
 		  }
@@ -204,7 +204,7 @@ namespace ShowerLib {
 			  ss >> dist;
 			  if ((ss.fail()) || (dist <= distold)) {
 				  std::cout << "screwed dists! (" << dist << "<=" << distold << ")" << std::endl;
-				  return NULL;
+				  return nullptr;
 			  }
 			  if (dist < maxdist) {
 				  distlist->push_back(dist);
@@ -216,7 +216,7 @@ namespace ShowerLib {
 		  std::getline(filestr,instr);
 		  if (filestr.fail()) {
 			  std::cout << "file reading failed! (not enough data)" << std::endl;
-			  return NULL;
+			  return nullptr;
 		  }
 	  }
 
@@ -226,7 +226,7 @@ namespace ShowerLib {
 	  if (!newlib->readStructure(libstruct)) {
 		  std::cout << "this structure is not valid" << std::endl;
 		  delete newlib;
-		  return NULL;
+		  return nullptr;
 	  }
 
 	  newlib->m_detector = det;
@@ -248,7 +248,7 @@ namespace ShowerLib {
   {
 	  if (!m_filled) {
 		  std::cout << "Library is not created for production use" << std::endl;
-		  return NULL;
+		  return nullptr;
 	  }
 
 	  //std::cout << "Starting getShower()" << std::endl;
@@ -267,11 +267,11 @@ namespace ShowerLib {
 
 	  if ( particleCode != m_particle ) {
 		  std::cout << "wrong particle: " << particleCode << "!=" << m_particle << std::endl;
-		  return NULL;
+		  return nullptr;
 	  }
 	  if (eta < 3.0) {
 		  std::cout << "wrong eta: |eta|=" << eta << " is not inside FCAL" << std::endl;
-		  return NULL;
+		  return nullptr;
 	  }
 
 	  //std::cout << "Extracted particle parameters: " << eta << std::endl;
@@ -295,9 +295,9 @@ namespace ShowerLib {
 
 	  //std::cout << "Found eta bin" << std::endl;
 
-	  if ((*etait).second.size() == 0) {
+	  if ((*etait).second.empty()) {
 		  std::cout << "The bin corresponding to the eta/dist pair is empty" << std::endl;
-		  return NULL;
+		  return nullptr;
 	  }
 	  double trenergy = track->GetKineticEnergy();
 	  //std::cout << "Energy: " << trenergy << std::endl;
@@ -349,7 +349,7 @@ namespace ShowerLib {
 		  //(*iter).SetEnergy((*iter).GetEnergy() * energyScale);
 	  }
 	  //std::cout << "Scaled" << std::endl;
-	  if (stats != NULL) {
+	  if (stats != nullptr) {
 		  stats->recordShowerLibUse(calcKey((*libit).first,(*etait).first));
 	  }
 	  //std::cout << "Done" << std::endl;
@@ -404,7 +404,7 @@ namespace ShowerLib {
 
 	  //std::cout << "Found eta bin" << std::endl;
 
-	  if ((*etait).second.size() == 0) {
+	  if ((*etait).second.empty()) {
 		  std::cout << "The etabin corresponding to the eta is empty" << std::endl;
 		  return 0;
 	  }
@@ -500,7 +500,7 @@ namespace ShowerLib {
 
 	  //std::cout << "Found eta bin" << std::endl;
 
-	  if ((*etait).second.size() == 0) {
+	  if ((*etait).second.empty()) {
 		  std::cout << "The etabin corresponding to the eta is empty" << std::endl;
 		  return 0;
 	  }

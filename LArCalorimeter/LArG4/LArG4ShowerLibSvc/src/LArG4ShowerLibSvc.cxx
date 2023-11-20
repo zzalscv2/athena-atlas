@@ -234,7 +234,7 @@ LArG4ShowerLibSvc::getContainmentZ(const G4FastTrack& track, int detectorTag)
   // get shower lib from the map
   const ShowerLib::IShowerLib* library = getShowerLib(track.GetPrimaryTrack()->GetDefinition()->GetPDGEncoding(), detectorTag);
 
-  if (library == 0) {
+  if (library == nullptr) {
     return 0.0;
   }
 
@@ -247,7 +247,7 @@ LArG4ShowerLibSvc::getContainmentR(const G4FastTrack& track, int detectorTag)
   // get shower lib from the map
   const ShowerLib::IShowerLib* library = getShowerLib(track.GetPrimaryTrack()->GetDefinition()->GetPDGEncoding(), detectorTag);
 
-  if (library == 0) {
+  if (library == nullptr) {
     return 0.0;
   }
 

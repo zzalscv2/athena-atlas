@@ -80,7 +80,7 @@ namespace LArG4
   {
     const std::string deadHitCollName=m_hitCollName+"_DEAD";
     // Create the wrapper
-    auto sdWrapper = new CalibSDWrapper("LArInactiveSDWrapper", m_hitCollName, deadHitCollName);
+    auto *sdWrapper = new CalibSDWrapper("LArInactiveSDWrapper", m_hitCollName, deadHitCollName);
 
     sdWrapper->addSD(
       makeOneSD("LAr::Barrel::Presampler::Inactive", &*m_embpscalc, m_barPreVolumes)

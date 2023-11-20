@@ -125,8 +125,8 @@ LArCompactSubsetVector::getData (unsigned int which,
 {
   assert (which < nWaves);
   int slot = m_slots[chan * m_chanSize + tbin];
-  const float* beg = 0;
-  const float* end = 0;
+  const float* beg = nullptr;
+  const float* end = nullptr;
   if (slot >= 0) {
     size_t nsamp = m_nSamples;
     const float* chanstart = &m_data[slot * nWaves * nsamp];

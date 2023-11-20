@@ -38,12 +38,12 @@ namespace ShowerLib {
       TParameter<int>* ver;
       ver = (TParameter<int>*)source->Get("version");
 
-      if ((ver == NULL) || (ver->GetVal() != LIB_VERSION)) return NULL; //Eta Energy library header = 1
+      if ((ver == nullptr) || (ver->GetVal() != LIB_VERSION)) return nullptr; //Eta Energy library header = 1
 
       TTree* TTreeMeta = (TTree*)source->Get("meta");
       TTree* TTreeLib  = (TTree*)source->Get("library");
 
-      if ((TTreeMeta == NULL) || (TTreeLib == NULL)) return NULL;
+      if ((TTreeMeta == nullptr) || (TTreeLib == nullptr)) return nullptr;
 
       std::cout << "EtaEnergyShowerLib header found." << std::endl;
 
@@ -52,7 +52,7 @@ namespace ShowerLib {
 	  if (!(newlib->readMeta(TTreeMeta)) || !(newlib->read(TTreeLib))) {
 		  delete newlib;
 	      std::cout << "EtaEnergyShowerLib read unsuccessful." << std::endl;
-		  return NULL;
+		  return nullptr;
 	  }
 
 	  return newlib;
@@ -79,7 +79,7 @@ namespace ShowerLib {
 
 	  if (!filestr.is_open()) {
 		  std::cout << "EtaEnergyShowerLib    " << inputFile << ": bad file!" << std::endl;
-		  return NULL;
+		  return nullptr;
 	  }
 
 	  std::string instr;
@@ -91,7 +91,7 @@ namespace ShowerLib {
 	  ss >> ver;
 
 	  if (ver != LIB_VERSION) {
-		  return NULL;
+		  return nullptr;
 	  }
 
 
@@ -109,7 +109,7 @@ namespace ShowerLib {
 
 	  if (ss.fail()) {
 		  std::cout << "file reading failed! (not enough data)" << std::endl;
-		  return NULL;
+		  return nullptr;
 	  }
 
 	  float mineta = eta;
@@ -118,7 +118,7 @@ namespace ShowerLib {
 	  while (!ss.eof()) {
 		  if ((ss.fail()) || (eta <= etaold)) {
 			  std::cout << "screwed etas! (" << eta << "<=" << etaold << ")" << std::endl;
-			  return NULL;
+			  return nullptr;
 		  }
 		  etalist.push_back(eta);
 		  etaold = eta;
@@ -130,7 +130,7 @@ namespace ShowerLib {
 	  if (!newlib->readStructure(etalist)) {
 		  std::cout << "this structure is not valid" << std::endl;
 		  delete newlib;
-		  return NULL;
+		  return nullptr;
 	  }
 
 	  newlib->m_detector = det;
@@ -150,7 +150,7 @@ namespace ShowerLib {
 
   std::vector<EnergySpot>* EtaEnergyShowerLib::getShower(const G4Track* track, ShowerLibStatistics* stats, int randomShift) const
   {
-	  if (!checkEtaAndStuff(track)) return NULL;
+	  if (!checkEtaAndStuff(track)) return nullptr;
 	  
 	  double eta = track->GetPosition().eta();
 
@@ -167,9 +167,9 @@ namespace ShowerLib {
 
 	  //std::cout << "Found eta bin" << std::endl;
 
-	  if ((*libit).second.size() == 0) {
+	  if ((*libit).second.empty()) {
 		  std::cout << "The etabin corresponding to the eta is empty" << std::endl;
-		  return NULL;
+		  return nullptr;
 	  }
 	  double trenergy = track->GetKineticEnergy();
 	  //std::cout << "Energy: " << trenergy << std::endl;
@@ -221,7 +221,7 @@ namespace ShowerLib {
         //(*iter).SetEnergy((*iter).GetEnergy() * energyScale);
 	  }
 	  //std::cout << "Scaled" << std::endl;
-	  if (stats != NULL) {
+	  if (stats != nullptr) {
 		  stats->recordShowerLibUse(calcKey((*libit).first));
 	  }
 	  //std::cout << "Done" << std::endl;
@@ -245,7 +245,7 @@ namespace ShowerLib {
 		  --libit;
 	  }
 
-	  if ((*libit).second.size() == 0) {
+	  if ((*libit).second.empty()) {
 		  std::cout << "The etabin corresponding to the eta is empty" << std::endl;
 		  return 0.0;
 	  }
@@ -309,7 +309,7 @@ namespace ShowerLib {
 		  --libit;
 	  }
 
-	  if ((*libit).second.size() == 0) {
+	  if ((*libit).second.empty()) {
 		  std::cout << "The etabin corresponding to the eta is empty" << std::endl;
 		  return 0.0;
 	  }

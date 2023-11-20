@@ -35,7 +35,7 @@ LArRecoMaterialTool::LArRecoMaterialTool(const std::string& type,
 				   const std::string& name, 
 				   const IInterface* parent) :
   AthAlgTool(type, name, parent),
-  m_calo_id(0),m_dm_id(0)
+  m_calo_id(nullptr),m_dm_id(nullptr)
 {
   declareInterface<LArRecoMaterialTool>( this );
 }
@@ -412,7 +412,7 @@ LArRecoMaterialTool::ScanPS(CaloSubdetNames::ALIGNVOL alvol,
     double       childAverageZ       = 0.;
     double       childRho            = 0.;
     
-    StoredPhysVol* storedPV = 0;
+    StoredPhysVol* storedPV = nullptr;
     std::string key = map_av(alvol);
     if(detStore()->contains<StoredPhysVol>(key))
     {
@@ -562,7 +562,7 @@ LArRecoMaterialTool::ScanEMB(CaloSubdetNames::ALIGNVOL alvol,
     double       childAverageZ       = 0.;
     double       childRho            = 0.;
     
-    StoredPhysVol* storedPV = 0;
+    StoredPhysVol* storedPV = nullptr;
     std::string key = map_av(alvol);
     if(detStore()->contains<StoredPhysVol>(key))
     {
@@ -758,7 +758,7 @@ LArRecoMaterialTool::ScanHEC(CaloSubdetNames::ALIGNVOL alvol,
     double       childAverageZ       = 0.;
     double       childRho            = 0.;
     
-    StoredPhysVol* storedPV = 0;
+    StoredPhysVol* storedPV = nullptr;
     std::string key = map_av(alvol);
     if(detStore()->contains<StoredPhysVol>(key))
     {
@@ -936,7 +936,7 @@ LArRecoMaterialTool::ScanFCAL(CaloSubdetNames::ALIGNVOL alvol,
     double       childAverageZ       = 0.;
     double       childRho            = 0.;
     
-    StoredPhysVol* storedPV = 0;
+    StoredPhysVol* storedPV = nullptr;
     std::string key = map_av(alvol);
     if(detStore()->contains<StoredPhysVol>(key))
     {

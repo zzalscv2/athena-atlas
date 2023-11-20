@@ -74,17 +74,17 @@ LArTTL1Maker::LArTTL1Maker(const std::string& name, ISvcLocator* pSvcLocator) :
 //
 // ........ default values of private data
 //
-  m_chronSvc              = 0;
+  m_chronSvc              = nullptr;
   m_useTriggerTime        = false;
   //m_triggerTimeToolName   = "CosmicTriggerTimeTool";
   //p_triggerTimeTool       = 0;
 
   m_BeginRunPriority      = 100;
 
-  m_lvl1Helper            = 0;
-  m_emHelper              = 0;
-  m_hecHelper             = 0;
-  m_fcalHelper            = 0;
+  m_lvl1Helper            = nullptr;
+  m_emHelper              = nullptr;
+  m_hecHelper             = nullptr;
+  m_fcalHelper            = nullptr;
 
   m_NoiseOnOff               = true;
   m_PileUp                   = false;
@@ -372,9 +372,9 @@ StatusCode LArTTL1Maker::execute()
   SG::WriteHandle<LArTTL1Container> ttL1ContainerHad(m_HadTTL1ContainerName);
   ATH_CHECK(ttL1ContainerHad.record(std::make_unique<LArTTL1Container>()));
   
-   LArTTL1Container *truth_ttL1ContainerEm=0;
-   LArTTL1Container *truth_ttL1ContainerHad=0;
-   if(m_truthHitsContainer.size()>0) {
+   LArTTL1Container *truth_ttL1ContainerEm=nullptr;
+   LArTTL1Container *truth_ttL1ContainerHad=nullptr;
+   if(!m_truthHitsContainer.empty()) {
       truth_ttL1ContainerEm = new LArTTL1Container();
       truth_ttL1ContainerHad = new LArTTL1Container();
    }
@@ -427,7 +427,7 @@ StatusCode LArTTL1Maker::execute()
   for( ; it!=it_end;++it) {
     const LArHitList& hitlist = hitmap->GetCell(it);      
       const std::vector<std::pair<float,float> >& timeE = hitlist.getData();
-      if (timeE.size() > 0 ) {
+      if (!timeE.empty() ) {
 	Identifier cellId = m_OflHelper->cell_id(IdentifierHash(it));
 	int specialCase=0;
 	bool skipCell=false;
@@ -839,7 +839,7 @@ StatusCode LArTTL1Maker::execute()
 	if (emHad) { ttL1ContainerHad->push_back(ttL1); }
 	else       { ttL1ContainerEm->push_back(ttL1); }
 
-         if(m_truthHitsContainer.size()>0) {
+         if(!m_truthHitsContainer.empty()) {
             std::vector<float> et(3);et[0] = sumTTE[refTime-1]; et[1] = sumTTE[refTime]; et[2] = sumTTE[refTime+1];
             LArTTL1* truth_ttL1 = new LArTTL1(ttChannel,towerId,et);
             if (emHad) { truth_ttL1ContainerHad->push_back(truth_ttL1); }
@@ -1120,7 +1120,7 @@ std::vector<float> LArTTL1Maker::computeNoise(const Identifier towerId, const in
   //
 
   float sigmaNoise  = 0; 
-  std::vector<float>* autoC = 0; 
+  std::vector<float>* autoC = nullptr; 
   std::vector<float> noiseRms(4) ;
 
   bool emb = m_lvl1Helper->is_emb(towerId);
@@ -1269,7 +1269,7 @@ StatusCode LArTTL1Maker::readAuxiliary()
 
 
   std::string pulsedataname=PathResolver::find_file ("LArEmLvl1.data", "DATAPATH");
-  if (pulsedataname == "") {
+  if (pulsedataname.empty()) {
     ATH_MSG_ERROR ( "Could not locate LArEmLvl1.data file" );
     return StatusCode::FAILURE;
   }
@@ -1449,7 +1449,7 @@ StatusCode LArTTL1Maker::readAuxiliary()
   //
 
   pulsedataname=PathResolver::find_file ("LArHecLvl1.data", "DATAPATH");
-  if (pulsedataname == "") {
+  if (pulsedataname.empty()) {
     ATH_MSG_ERROR ( "Could not locate LArHecLvl1.data file" );
     return StatusCode::FAILURE;
   }
@@ -1602,7 +1602,7 @@ StatusCode LArTTL1Maker::readAuxiliary()
   //
 
   pulsedataname=PathResolver::find_file ("LArFcalLvl1.data", "DATAPATH");
-  if (pulsedataname == "") {
+  if (pulsedataname.empty()) {
     ATH_MSG_ERROR ( "Could not locate LArFcalLvl1.data file" );
     return StatusCode::FAILURE;
   }
@@ -1764,7 +1764,7 @@ StatusCode LArTTL1Maker::readAuxiliary()
 
   // now the relative gains
   pulsedataname=PathResolver::find_file ("Fcal_ptweights_table7.data", "DATAPATH");
-  if (pulsedataname == "") {
+  if (pulsedataname.empty()) {
     ATH_MSG_ERROR ( "Could not locate Fcal_ptweights_table7.data file" );
     return StatusCode::FAILURE;
   }

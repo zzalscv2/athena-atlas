@@ -320,7 +320,7 @@ void LArHVIdMapping::getHVLineInCell( const Identifier& offId, std::vector<HWIde
 			  << endmsg;
 	}
         */
-	if( hvlineIdVec.size() == 0 ){
+	if( hvlineIdVec.empty() ){
 	  //ATH_MSG_DEBUG("[getHVLineInCell] -> first fill of vector..." );
 	  hvlineIdVec.push_back(hvlineId);
 	}

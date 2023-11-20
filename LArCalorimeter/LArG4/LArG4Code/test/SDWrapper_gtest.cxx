@@ -146,7 +146,7 @@ TEST_F(SDWrappertest, ProcessHits)
 
 int main( int argc, char** argv ) {
 
-  auto g=new GaudiEnvironment;
+  auto *g=new GaudiEnvironment;
   ::testing::AddGlobalTestEnvironment(g);
   ::testing::InitGoogleTest( &argc, argv );
   return RUN_ALL_TESTS();

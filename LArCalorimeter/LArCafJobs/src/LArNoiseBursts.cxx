@@ -85,15 +85,15 @@ std::vector<Identifier> v_cellIdentifier;
 LArNoiseBursts::LArNoiseBursts(const std::string& name,
 			 ISvcLocator* pSvcLocator) 
   : AthAlgorithm(name, pSvcLocator),
-    m_thistSvc(0),
-    m_tree(0),
+    m_thistSvc(nullptr),
+    m_tree(nullptr),
     m_trigDec( "Trig::TrigDecisionTool/TrigDecisionTool" ),
-    m_LArOnlineIDHelper(0),
-    m_LArHVLineIDHelper(0),
-    m_LArElectrodeIDHelper(0),
-    m_LArEM_IDHelper(0),
-    m_LArFCAL_IDHelper(0),
-    m_LArHEC_IDHelper(0),
+    m_LArOnlineIDHelper(nullptr),
+    m_LArHVLineIDHelper(nullptr),
+    m_LArElectrodeIDHelper(nullptr),
+    m_LArEM_IDHelper(nullptr),
+    m_LArFCAL_IDHelper(nullptr),
+    m_LArHEC_IDHelper(nullptr),
     m_CosmicCaloStream(false),
     m_nb_sat(0),
     m_lowqfactor(0),
@@ -912,7 +912,7 @@ StatusCode LArNoiseBursts::doEventProperties(){
   //      << endmsg;
 
   // Retrieve LArCollision Timing information
-  const LArCollisionTime *  larTime=0;
+  const LArCollisionTime *  larTime=nullptr;
   if (evtStore()->contains<LArCollisionTime>("LArCollisionTime")) {
      StatusCode sc =  evtStore()->retrieve(larTime,"LArCollisionTime");
      if( sc.isFailure()){
@@ -964,9 +964,9 @@ StatusCode LArNoiseBursts::doLArNoiseBursts(){
 
  // Retrieve LAr calocells container
  // or LArRawChannel container, whatsever available...
-  const CaloCellContainer* caloTES=0;
-  const LArRawChannelContainer* LArTES=0;
-  const LArRawChannelContainer* LArTES_dig=0;
+  const CaloCellContainer* caloTES=nullptr;
+  const LArRawChannelContainer* LArTES=nullptr;
+  const LArRawChannelContainer* LArTES_dig=nullptr;
   if(evtStore()->contains<CaloCellContainer>("AllCalo")) {
      ATH_CHECK(evtStore()->retrieve( caloTES, "AllCalo"));
   } else if (evtStore()->contains<LArRawChannelContainer>("LArRawChannels") || evtStore()->contains<LArRawChannelContainer>("LArRawChannels_fB")) {
@@ -978,7 +978,7 @@ StatusCode LArNoiseBursts::doLArNoiseBursts(){
          }
   }
 
-  if (caloTES==0 && LArTES==0) {
+  if (caloTES==nullptr && LArTES==nullptr) {
     ATH_MSG_WARNING ( "Neither CaloCell nor LArRawChannel Containers found!" );
     return StatusCode::SUCCESS;
   }
@@ -1085,7 +1085,7 @@ StatusCode LArNoiseBursts::doLArNoiseBursts(){
     }   
   }
 
-  const LArDigitContainer* LArDigitCont=0;
+  const LArDigitContainer* LArDigitCont=nullptr;
   if (evtStore()->contains<LArDigitContainer>("FREE")) ATH_CHECK(evtStore()->retrieve( LArDigitCont, "FREE"));
   if(!LArDigitCont) {
      if (evtStore()->contains<LArDigitContainer>("LArDigitContainer_Thinned")) ATH_CHECK(evtStore()->retrieve( LArDigitCont, "LArDigitContainer_Thinned"));

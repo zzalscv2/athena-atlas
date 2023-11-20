@@ -11,7 +11,7 @@ using std::endl;
 
 using namespace LArSamples;
 
-std::map<TString, int>* ClassCounts::m_counts = 0;
+std::map<TString, int>* ClassCounts::m_counts = nullptr;
 
 ClassCounts::ClassCounts(const TString& className)
   : m_className(className)
@@ -23,9 +23,9 @@ ClassCounts::ClassCounts(const TString& className)
 ClassCounts::~ClassCounts()
 {
   m_counts->erase(className());
-  if (m_counts->size() == 0) {
+  if (m_counts->empty()) {
     delete m_counts;
-    m_counts = 0;
+    m_counts = nullptr;
   }
 }
 

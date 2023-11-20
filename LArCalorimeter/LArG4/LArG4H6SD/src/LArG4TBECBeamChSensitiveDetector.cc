@@ -17,7 +17,7 @@
 #include <map>
 #include <vector>
 
-LArG4TBECBeamChSensitiveDetector::LArG4TBECBeamChSensitiveDetector(G4String a_name)
+LArG4TBECBeamChSensitiveDetector::LArG4TBECBeamChSensitiveDetector(const G4String& a_name)
   : G4VSensitiveDetector(a_name)
   , m_calculator(new LArG4TBECBeamChCalculator())
   , m_detectorName(a_name)

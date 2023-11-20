@@ -80,7 +80,7 @@ namespace LArG4 {
       G4bool FindIdentifier_Default(const G4Step *, std::vector<LArHitData>&, G4ThreeVector &, G4ThreeVector &) const;
       G4bool FindIdentifier_Barrett(const G4Step *, G4double, std::vector<LArHitData>&, G4ThreeVector &, G4ThreeVector &) const;
       G4bool FindDMIdentifier_Barrett(const G4Step* step, std::vector<LArHitData>&) const;
-      G4bool GetCompartment_Barrett(G4ThreeVector,G4double,G4double,G4double,
+      G4bool GetCompartment_Barrett(const G4ThreeVector&,G4double,G4double,G4double,
                                     G4int &, G4int &) const;
 
       G4double GetHV_Value(const G4ThreeVector& p, G4double PhiStartOfPhiDiv) const;
@@ -110,7 +110,7 @@ namespace LArG4 {
       static const G4double s_S3_Etalim[21];
       static const G4double s_Rmeas_outer[50];
       static const G4double s_Zmeas_outer[2];
-      G4double m_RefzDist; // = dElecFocaltoWRP+dWRPtoFrontFace+WheelThickness+  // used as const after
+      G4double m_RefzDist = 0.0; // = dElecFocaltoWRP+dWRPtoFrontFace+WheelThickness+  // used as const after
       // +dWRPtoFrontFace+ LongBarThickness                 // initialization
       // -DistOfEndofCuFromBack
 
@@ -214,7 +214,7 @@ namespace LArG4 {
         G4double  GridShift;
       };
 
-      Wheel_Efield_Map m_ChCollInner,m_ChCollOuter; // used as const after init
+      Wheel_Efield_Map m_ChCollInner{},m_ChCollOuter{}; // used as const after init
       Wheel_Efield_Map* m_ChCollWheelType = nullptr;             // used as const after init
 
       inline const Wheel_Efield_Map* ChCollWheelType() const { return m_ChCollWheelType; };
@@ -278,9 +278,9 @@ namespace LArG4 {
       //  functions specific for charge coll.
 
       void     IniGeomforFieldMaps(void);      // called only at init phase
-      void     LoadFieldMaps(const G4String);  // called only at init phase
+      void     LoadFieldMaps(const G4String&);  // called only at init phase
       void     PrepareFieldMap(Wheel_Efield_Map* ChCollWheelType);  // called only at init phase
-      G4double GetCurrent(G4double *,G4double *,G4double, G4double Barret_PhiStart) const;
+      G4double GetCurrent(const G4double *,const G4double *,G4double, G4double Barret_PhiStart) const;
       void     TransformWheeltoFieldMap(const G4double *,G4double *, const WheelGeometry & wg, const FoldArea & fa) const;
       void     SetYlimitsofPhigapinFieldMap(G4int, const WheelGeometry & wg, G4double * Ylimits) const;
       void     TransFromBarrtoWheel(const G4double*, G4double PhiStartOfPhiDiv, G4double*) const;

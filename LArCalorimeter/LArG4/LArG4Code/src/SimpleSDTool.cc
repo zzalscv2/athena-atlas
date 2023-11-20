@@ -75,7 +75,7 @@ namespace LArG4
   StatusCode SimpleSDTool::Gather()
   {
     ATH_MSG_DEBUG("Gathering hits to write out in " << name());
-    auto sdWrapper = dynamic_cast<SimpleSDWrapper*>( getSD() );
+    auto *sdWrapper = dynamic_cast<SimpleSDWrapper*>( getSD() );
     if(!sdWrapper) {
       ATH_MSG_ERROR("Failed to cast SD to SimpleSDWrapper");
       return StatusCode::FAILURE;

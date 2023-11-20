@@ -30,8 +30,8 @@ using CLHEP::GeV;
 
 MakeLArCellFromRaw::MakeLArCellFromRaw()
   : m_poolMaxSize(0),
-    m_msgSvc (0),
-    m_onlineID (0),
+    m_msgSvc (nullptr),
+    m_onlineID (nullptr),
     m_ethreshold(-1.e5) 
 {
 }
@@ -120,7 +120,7 @@ void MakeLArCellFromRaw::initialize ( const LArRoIMap& roiMap,
   info0.fcal=false; 
   info0.tt=0; 
   info0.eCorr=1.; 
-  info0.elem = 0 ; 
+  info0.elem = nullptr ; 
 
   // EM
   std::vector<Identifier>::const_iterator it = emIds.begin();
@@ -135,7 +135,7 @@ void MakeLArCellFromRaw::initialize ( const LArRoIMap& roiMap,
       HWIdentifier feb   = m_onlineID->feb_Id(sigId);
       CELL_VEC::size_type chan  = m_onlineID->channel(sigId);   
       CELL_VEC& cellVec= m_cellMap[ feb.get_identifier32().get_compact() ] ; 
-      if (cellVec.size()==0)cellVec.resize(128,info0); 
+      if (cellVec.empty())cellVec.resize(128,info0); 
 
       CellInfo& cell = cellVec[chan] ;
 
@@ -178,7 +178,7 @@ void MakeLArCellFromRaw::initialize ( const LArRoIMap& roiMap,
       HWIdentifier feb   = m_onlineID->feb_Id(sigId);
       CELL_VEC::size_type chan  = m_onlineID->channel(sigId);  
       CELL_VEC& cellVec= m_cellMap[ feb.get_identifier32().get_compact() ] ; 
-      if (cellVec.size()==0)cellVec.resize(128,info0); 
+      if (cellVec.empty())cellVec.resize(128,info0); 
 
       CellInfo& cell = cellVec[chan] ;
 
@@ -218,7 +218,7 @@ void MakeLArCellFromRaw::initialize ( const LArRoIMap& roiMap,
       HWIdentifier feb   = m_onlineID->feb_Id(sigId);
       CELL_VEC::size_type chan  = m_onlineID->channel(sigId);  
       CELL_VEC& cellVec= m_cellMap[ feb.get_identifier32().get_compact() ] ; 
-      if (cellVec.size()==0)cellVec.resize(128,info0); 
+      if (cellVec.empty())cellVec.resize(128,info0); 
 
       CellInfo& cell = cellVec[chan] ;
 
@@ -290,7 +290,7 @@ LArCell* MakeLArCellFromRaw::getLArCell(unsigned int feb, unsigned int chan ,
 	log << MSG::ERROR <<" MakeLArCellFromRaw ERROR, failed to find existing cells. "<< endmsg; 
 	std::cout <<std::hex<<"FEBID = "<< feb <<std::dec<< std::endl ; 
 	//DR	assert(0); 
-	return 0;
+	return nullptr;
   }
 
   const CELL_VEC& cellVec = (*it).second; 
@@ -298,16 +298,16 @@ LArCell* MakeLArCellFromRaw::getLArCell(unsigned int feb, unsigned int chan ,
 	MsgStream log(m_msgSvc, "MakeLArCellFromRaw");
 	log << MSG::FATAL <<" MakeLArCellFromRaw ERROR, channel number= "<<chan<< endmsg ;
 	assert(0);
-	return 0;
+	return nullptr;
   }
   
   const CellInfo& info = cellVec[chan] ; 
   // do not create cell if it is not connected. 
-  if(info.elem == 0) return 0; 
+  if(info.elem == nullptr) return nullptr; 
 
   //remove /1000 (GeV->MeV)
   double de = e * info.eCorr; 
-  LArCell* cell =0;
+  LArCell* cell =nullptr;
 
   // DR convert time from ps (in LArRawChannel ) to ns
   double time = t/1000.0;

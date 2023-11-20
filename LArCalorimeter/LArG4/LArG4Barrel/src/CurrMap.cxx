@@ -24,10 +24,10 @@ CurrMap::CurrMap(const std::string& filename,double xnorm)
   m_ymax=0.;
   m_dy=0.;
 
-  m_gap=0;
-  m_curr0=0;
-  m_curr1=0;
-  m_curr2=0;
+  m_gap=nullptr;
+  m_curr0=nullptr;
+  m_curr1=nullptr;
+  m_curr2=nullptr;
 
 
   FILE * fp = fopen(filename.c_str(),"r");

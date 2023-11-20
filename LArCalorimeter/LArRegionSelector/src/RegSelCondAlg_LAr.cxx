@@ -291,7 +291,7 @@ std::unique_ptr<RegSelectorHashMap> RegSelCondAlg_LAr::createTable (const LArRoI
     const std::vector<HWIdentifier>& vROBID = roiMap.collectionID((unsigned int)hashid);
  
     // skip the TT that does not have readout, i.e., invalid.
-    if( vROBID.size() > 0 ) { 
+    if( !vROBID.empty() ) { 
 
       if( vROBID.size() > 1 ) {
         ATH_MSG_DEBUG ( "More than 1  (" << vROBID.size()

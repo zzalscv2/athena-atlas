@@ -19,7 +19,7 @@
 LArCondSuperCellBase::LArCondSuperCellBase(const std::string& name) :
   AthMessaging(name),
   m_isInitialized(false),
-  m_scOnlineID(NULL)
+  m_scOnlineID(nullptr)
 {
 }
 

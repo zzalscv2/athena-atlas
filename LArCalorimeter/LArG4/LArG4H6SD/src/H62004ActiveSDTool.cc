@@ -51,28 +51,28 @@ namespace LArG4
   G4VSensitiveDetector* H62004ActiveSDTool::makeSD() const
   {
     // Create the wrapper
-    auto sdWrapper = new CalibSDWrapper("LArH62004ActiveSDWrapper", m_hitCollName);
+    auto *sdWrapper = new CalibSDWrapper("LArH62004ActiveSDWrapper", m_hitCollName);
 
     // Add the SDs.
     // Lots of singleton calculators !!!
 
-    if (m_emecVolumes.size() > 0) {
+    if (!m_emecVolumes.empty()) {
       sdWrapper->addSD( makeOneSD(
                                   "EMEC::InnerModule::Calibration::H6", &*m_emepiwcalc, m_emecVolumes ) );
     }
-    if (m_hecVolumes.size() > 0) {
+    if (!m_hecVolumes.empty()) {
       sdWrapper->addSD( makeOneSD(
                                   "HEC::Module::Depth::Slice::Local::Calibration::H6", &*m_heccalc, m_hecVolumes ) );
     }
-    if (m_fcal1Volumes.size() > 0) {
+    if (!m_fcal1Volumes.empty()) {
       sdWrapper->addSD( makeOneSD(
                                   "LAr::FCAL::Module1::Gap::Calibration::H6", &*m_fcal1calc, m_fcal1Volumes ) );
     }
-    if (m_fcal2Volumes.size() > 0) {
+    if (!m_fcal2Volumes.empty()) {
       sdWrapper->addSD( makeOneSD(
                                   "LAr::FCAL::Module2::Gap::Calibration::H6", &*m_fcal2calc, m_fcal2Volumes ) );
     }
-    if (m_fcalColdVolumes.size() > 0) {
+    if (!m_fcalColdVolumes.empty()) {
       sdWrapper->addSD( makeOneSD(
                                   "LAr::FCAL::ColdTC::Gap::Calibration::H6", &*m_fcalcoldcalc, m_fcalColdVolumes ) );
     }
