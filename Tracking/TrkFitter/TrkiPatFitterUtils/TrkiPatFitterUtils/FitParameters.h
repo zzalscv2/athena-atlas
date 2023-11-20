@@ -33,10 +33,11 @@ class FitParameters {
   FitParameters(double d0, double z0, double cosPhi, double sinPhi,
                 double cotTheta, double ptInv0, const PerigeeSurface& surface);
 
-  FitParameters(const FitParameters& parameters);  // copy constructor
-  // forbidden assignment operator
-
-  ~FitParameters(void);  // destructor
+  FitParameters(const FitParameters& parameters) = default;
+  FitParameters(FitParameters&&) = default;
+  FitParameters& operator=(const FitParameters&) = default;
+  FitParameters& operator=(FitParameters&&) = default;
+  ~FitParameters(void) = default;
 
   void addAlignment(bool constrained, double localAngle, double localOffset);
   void addScatterer(double phi, double theta);
@@ -109,9 +110,6 @@ class FitParameters {
   double z0(void) const;
 
  private:
-  // assignment: no semantics, no implementation
-  FitParameters& operator=(const FitParameters&);
-
   std::vector<double> m_alignmentAngle;
   std::vector<double> m_alignmentAngleConstraint;
   std::vector<double> m_alignmentOffset;
@@ -125,19 +123,19 @@ class FitParameters {
   Amg::VectorX m_differences{};
   bool m_eigen{};
   bool m_extremeMomentum;
-  Amg::MatrixX* m_finalCovariance;//not owning ptr
+  Amg::MatrixX* m_finalCovariance;//not owning plain ptr
   int m_firstAlignmentParameter;
   int m_firstScatteringParameter;
   bool m_fitEnergyDeposit;
   bool m_fitMomentum;
-  const Amg::MatrixX* m_fullCovariance;//not owning ptr
+  const Amg::MatrixX* m_fullCovariance;//not owning plain ptr
   double m_minEnergyDeposit;
   int m_numberAlignments;
   int m_numberOscillations;
   int m_numberParameters;
   int m_numberScatterers;
   double m_oldDifference;
-  const Perigee* m_perigee;
+  const Perigee* m_perigee; //not owning plain ptr
   bool m_phiInstability;
   Amg::Vector3D m_position;
   double m_qOverP;
@@ -148,7 +146,7 @@ class FitParameters {
   double m_sinPhi1;
   double m_sinTheta;
   double m_sinTheta1;
-  const Surface* m_surface;
+  const Surface* m_surface; //not owning plain ptr
   Amg::Vector3D m_vertex;
   double m_z0;
 };

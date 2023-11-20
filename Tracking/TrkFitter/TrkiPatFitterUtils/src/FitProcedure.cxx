@@ -387,7 +387,7 @@ const FitProcedureQuality& FitProcedure::execute(
 
   // keep best (original if not reasonable quality) results
   double bestChiSq = cache.chiSqCut;
-  FitParameters* bestParameters = nullptr;
+  std::optional<FitParameters> bestParameters = std::nullopt;
 
   // iteration loop to fit track parameters
   while (!fitCode && !cache.convergence) {
@@ -417,10 +417,9 @@ const FitProcedureQuality& FitProcedure::execute(
         if (cache.debug)
           *cache.log << MSG::DEBUG << " extremeMomentum " << endmsg;
         parameters->extremeMomentum(true);
-        delete bestParameters;
         fitCode = cache.fitMatrices->setDimensions(measurements, parameters);
         bestChiSq = cache.chiSqCut;
-        bestParameters = nullptr;
+        bestParameters = std::nullopt;
         forceIteration = true;
         cache.chiSq = 0.;
         cache.chiSqWorst = 0.;
@@ -469,7 +468,6 @@ const FitProcedureQuality& FitProcedure::execute(
       if (!measurementProcessor.calculateFittedTrajectory(cache.iteration) ||
           !measurementProcessor.calculateDerivatives()) {
         fitCode = 5;  //  fail as trapped
-        delete bestParameters;
         cache.fitQuality = std::make_unique<FitProcedureQuality>(
             cache.chiSq, cache.chiSqWorst, cache.fitProbability, fitCode,
             cache.iteration, parameters->numberAlignments(),
@@ -544,8 +542,7 @@ const FitProcedureQuality& FitProcedure::execute(
         // keep current best parameters
         if (!bestParameters || cache.chiSq < bestChiSq) {
           bestChiSq = cache.chiSq;
-          delete bestParameters;
-          bestParameters = new FitParameters(*parameters);
+          bestParameters = *parameters;
           parameters->resetOscillations();
         }
 
@@ -636,7 +633,6 @@ const FitProcedureQuality& FitProcedure::execute(
     }
   }
 
-  delete bestParameters;
   cache.fitQuality = std::make_unique<FitProcedureQuality>(
       cache.chiSq, cache.chiSqWorst, cache.fitProbability, fitCode,
       cache.iteration, parameters->numberAlignments(), cache.numberDoF,
