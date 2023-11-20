@@ -814,42 +814,12 @@ namespace MuonGM {
         return geoInfo(tubeLayer, tube).m_transform;
     }
 
-    void MdtReadoutElement::restoreTubes() {
-        if (m_backupTubeGeo.empty()) return;
-        m_tubeGeo = std::move(m_backupTubeGeo);
-        m_haveTubeGeo = true;
-        m_deformTransf = std::move(m_backupDeformTransf);
-        m_haveDeformTransf = true;
-    }
-
-    void MdtReadoutElement::shiftTube(const Identifier& id) {
-        
-        int tubeLayer = m_idHelper.tubeLayer(id);
-        int tube = m_idHelper.tube(id);
-        int ntot_tubes = m_nlayers * m_ntubesperlayer;
-
-        // check for valid tube
-        if (tubeLayer < 1 || tubeLayer > getNLayers() || tube < 1 || tube > getNtubesperlayer()) return;
-
-        int itube = (tubeLayer - 1) * m_ntubesperlayer + tube - 1;
-
-        if (m_backupTubeGeo.empty()) { m_backupTubeGeo.resize(ntot_tubes); }
-
-        if (!m_backupTubeGeo[itube]) {
-            m_backupTubeGeo[itube].store(m_tubeGeo[itube].release());
-            m_tubeGeo[itube].store(makeGeoInfo(tubeLayer, tube));
-            m_haveTubeGeo = true;
-        }
-
-        if (m_backupDeformTransf.empty()) { m_backupDeformTransf.resize(ntot_tubes); }
-
-        if (!m_backupDeformTransf[itube]) { m_backupDeformTransf[itube].store(m_deformTransf[itube].release()); }
-
-        return;
-    }
-
     const Trk::SaggedLineSurface& MdtReadoutElement::surface(const int tubeLayer, const int tube) const {
         
+        
+        
+
+  
         
 
         int ntot_tubes = m_nlayers * m_ntubesperlayer;

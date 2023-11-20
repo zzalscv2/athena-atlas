@@ -31,7 +31,7 @@ namespace MuonGMR4{
   }
   
   const Amg::Transform3D& MuonStationLayerSurfaceTool::chambCenterToGlobal(const ActsGeometryContext& gctx, 
-                                                                          const Identifier& id) const {
+                                                                           const Identifier& id) const {
         const ChamberSet::const_iterator cache_itr = m_cenCache.find(id);
         if (cache_itr != m_cenCache.end()){
           return cache_itr->localToGlobalTrans(gctx);
@@ -40,8 +40,15 @@ namespace MuonGMR4{
                         << m_idHelperSvc->toString(id));
         return dummy;
   }
+  const MuonChamber* MuonStationLayerSurfaceTool::getChamber(const Identifier& id) const {
+     const ChamberSet::const_iterator cache_itr = m_cenCache.find(id);
+     if (cache_itr != m_cenCache.end()){
+          return &(*cache_itr);
+     }
+     return nullptr;
+  }
   const Amg::Transform3D& MuonStationLayerSurfaceTool::globalToChambCenter(const ActsGeometryContext& gctx,
-                                                      const Identifier& id) const {
+                                                                           const Identifier& id) const {
       const ChamberSet::const_iterator cache_itr = m_cenCache.find(id);
       if (cache_itr != m_cenCache.end()){
         return cache_itr->globalToLocalTrans(gctx);

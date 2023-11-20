@@ -31,6 +31,8 @@ def MuonGeoModelCfg(flags):
     if flags.Muon.setupGeoModelXML:
         from MuonGeoModelR4.MuonGeoModelConfig import MuonGeoModelCfg as MuonGeoModelCfgR4
         result.merge(MuonGeoModelCfgR4(flags))
+        from MuonGeometryCnv.MuonReadoutGeomCnvCfg import MuonReadoutGeometryCnvAlgCfg
+        result.merge(MuonReadoutGeometryCnvAlgCfg(flags))
         return result
     
     result.merge(MuonGeoModelToolCfg(flags))

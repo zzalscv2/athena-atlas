@@ -36,7 +36,9 @@ namespace MuonGMR4{
           const Amg::Transform3D& globalToChambCenter(const ActsGeometryContext& gctx,
                                                       const Identifier& id) const override final;
 
-          unsigned int storeAlignment(ActsTrk::RawGeomAlignStore& alignStore) const override;
+          unsigned int storeAlignment(ActsTrk::RawGeomAlignStore& alignStore) const override final;
+
+          const MuonChamber* getChamber(const Identifier& id) const override final;
       private:
          PublicToolHandle<MuonGMR4::IActsMuonChamberTool> m_chambTool{this, "ChamberBuilder", ""};
          ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
