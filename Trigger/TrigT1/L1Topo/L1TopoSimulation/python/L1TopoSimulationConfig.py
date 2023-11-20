@@ -253,7 +253,7 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
 if __name__ == '__main__':
   from AthenaConfiguration.AllConfigFlags import initConfigFlags
   from AthenaCommon.Logging import logging
-  from AthenaCommon.Constants import VERBOSE,DEBUG,WARNING
+  from AthenaCommon.Constants import VERBOSE,DEBUG,WARNING,INFO
   import argparse
   from argparse import RawTextHelpFormatter
   import sys
@@ -285,17 +285,19 @@ if __name__ == '__main__':
 
   if len(subsystem)==0:
       log.warning(f'subsystem not given or the given subsystem not supported with one of the: {supportedSubsystems}')
-  
+
+  if args.log == 'info': algLogLevel = INFO  
   if args.log == 'warning': algLogLevel = WARNING
   if args.log == 'debug': algLogLevel = DEBUG
   if args.log == 'verbose': algLogLevel = VERBOSE
 
   flags = initConfigFlags()
 
-  flags.Exec.OutputLevel = WARNING
+  flags.Exec.OutputLevel = algLogLevel
   if(args.nevent > 0):
     flags.Exec.MaxEvents = args.nevent
   flags.Trigger.triggerMenuSetup = 'PhysicsP1_pp_run3_v1'
+  flags.Trigger.triggerConfig = 'DB'
   flags.Input.Files = args.inputs
   flags.Concurrency.NumThreads = 1
   flags.Concurrency.NumConcurrentEvents = 1
