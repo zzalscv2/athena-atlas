@@ -5,7 +5,6 @@ import subprocess
 
 from .Helpers import warnings_count
 from .Inputs import references_CVMFS_path
-from .References import references_map
 from .Test import TestSetup, WorkflowCheck, WorkflowTest, WorkflowType
 
 
@@ -116,24 +115,24 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
         self.logger.info("---------------------------------------------------------------------------------------")
         self.logger.info(f"Running {test.ID} Frozen Tier0 Policy Check on {self.format} for {self.max_events} events")
 
-        reference_path: Path = test.reference_path
         diff_rules_path: Path = self.setup.diff_rules_path
         diff_rules_exclusion_filename: str = f"{test.ID}_{self.format}_diff-exclusion-list.txt"
         diff_rules_interest_filename: str = f"{test.ID}_{self.format}_diff-interest-list.txt"
         diff_rules_file = None
 
-        # Read references from CVMFS
-        if self.setup.validation_only:
-            # Resolve the subfolder first. Results are stored like: main_folder/branch/test/version/.
-            reference_revision = references_map[f"{test.ID}"]
-            cvmfs_path = Path(references_CVMFS_path)
-            reference_path = cvmfs_path / self.setup.release_ID / test.ID / reference_revision
-            diff_rules_path = cvmfs_path / self.setup.release_ID / test.ID
-            if not reference_path.exists():
-                self.logger.error(f"CVMFS reference location {reference_path} does not exist!")
-                return False
+        file_name = f"my{self.format}.pool.root"
+        if test.type == WorkflowType.Derivation:
+            file_name = f"{self.format}.myOutput.pool.root"
+        reference_file = self.reference_file(test, file_name)
+        if reference_file is None:
+            self.logger.error(f"Reference file {file_name} not found")
+            return False
 
-        self.logger.info(f"Reading the reference file from location {reference_path}")
+        if self.setup.validation_only:
+            cvmfs_path = Path(references_CVMFS_path)
+            diff_rules_path = cvmfs_path / self.setup.release_ID / test.ID
+
+        self.logger.info(f"Reading the reference file from location {reference_file}")
 
         # try to get the exclusion list or the list of branches of interest
         branches_of_interest = False
@@ -169,10 +168,6 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
             self.logger.info("No diff rules file exists, using the default list")
             diff_root_list = [r"'index_ref'", r"'(.*)_timings(.*)'", r"'(.*)_mems(.*)'"]
 
-        file_name = f"my{self.format}.pool.root"
-        if test.type == WorkflowType.Derivation:
-            file_name = f"{self.format}.myOutput.pool.root"
-        reference_file = reference_path / file_name
         validation_file = test.validation_path / file_name
         log_file = test.validation_path / f"diff-root-{test.ID}.{self.format}.log"
         diff_root_list = " ".join(diff_root_list)
@@ -245,25 +240,19 @@ class MetadataCheck(WorkflowCheck):
         self.logger.info("---------------------------------------------------------------------------------------")
         self.logger.info(f"Running {test.ID} metadata check on {self.format}")
 
-        reference_path: Path = test.reference_path
-        # Read references from CVMFS
-        if self.setup.validation_only:
-            # Resolve the subfolder first. Results are stored like: main_folder/branch/test/version/.
-            reference_revision = references_map[f"{test.ID}"]
-            cvmfs_path = Path(references_CVMFS_path)
-            reference_path = cvmfs_path / self.setup.release_ID / test.ID / reference_revision
-            if not reference_path.exists():
-                self.logger.error(f"CVMFS reference location {reference_path} does not exist!")
-                return False
-
-        self.logger.info(f"Reading the reference file from location {reference_path}")
-
-        exclusion_list = " ".join(["file_guid", "file_size", "/TagInfo/AtlasRelease", "FileMetaData/productionRelease", "StreamDAOD_PHYS/eventTypes"])
-
         file_name = f"my{self.format}.pool.root"
         if test.type == WorkflowType.Derivation:
             file_name = f"{self.format}.myOutput.pool.root"
-        reference_file = reference_path / file_name
+
+        reference_file = self.reference_file(test, file_name)
+        if reference_file is None:
+            self.logger.error(f"Reference file {file_name} not found")
+            return False
+
+        self.logger.info(f"Reading the reference file from location {reference_file}")
+
+        exclusion_list = " ".join(["file_guid", "file_size", "/TagInfo/AtlasRelease", "FileMetaData/productionRelease", "StreamDAOD_PHYS/eventTypes"])
+
         validation_file = test.validation_path / file_name
         log_file = test.validation_path / f"meta-diff-{test.ID}.{self.format}.log"
 

@@ -1,7 +1,9 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+import os
 
 # corresponding EOS path: /eos/atlas/atlascerngroupdisk/data-art/grid-input/WorkflowReferences
-references_CVMFS_path = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences"
+references_CVMFS_path = os.environ.get("ATLAS_WORKFLOW_REFERENCES_PATH", "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences")
+references_override_url = os.environ.get("ATLAS_WORKFLOW_REFERENCES_OVERRIDE_URL")
 
 #####
 # CI special input files

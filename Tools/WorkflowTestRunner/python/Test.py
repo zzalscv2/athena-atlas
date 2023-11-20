@@ -3,11 +3,13 @@ from enum import Enum
 from logging import Logger
 from os import environ
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 from uuid import uuid4
 import subprocess
 
 from .Helpers import get_release_setup, list_changed_packages
+from .Inputs import references_CVMFS_path, references_override_url
+from .References import references_map
 
 
 class TestSetup:
@@ -83,6 +85,43 @@ class WorkflowCheck:
     def __init__(self, setup: TestSetup) -> None:
         self.setup = setup
         self.logger = setup.logger
+
+    def reference_file(self, test: "WorkflowTest", file_name: str) -> Optional[Path]:
+        reference_path: Path = test.reference_path
+        reference_file = reference_path / file_name
+
+        # Read references from CVMFS
+        if self.setup.validation_only:
+            # Resolve the subfolder first. Results are stored like: main_folder/branch/test/version/.
+            reference_revision = references_map[f"{test.ID}"]
+            cvmfs_path = Path(references_CVMFS_path)
+            rel_path = Path(self.setup.release_ID) / test.ID / reference_revision
+            reference_path = cvmfs_path / rel_path
+            reference_file = reference_path / file_name
+
+            if not reference_path.exists():
+                self.logger.error(f"CVMFS reference location {reference_path} does not exist!")
+                return None
+
+            if references_override_url is not None:
+                import requests
+
+                url = references_override_url
+                if not url.endswith("/"): url += "/"
+                url += str(rel_path / file_name)
+                self.logger.info("Checking for reference override at %s", url)
+                if requests.head(url).ok: # file exists at url
+                    reference_file = Path.cwd() / f"reference_{file_name}"
+                    self.logger.info("Downloading reference from %s to %s", url, reference_file)
+                    r = requests.get(url, stream=True)
+                    with reference_file.open('wb') as f:
+                        for chunk in r.iter_content(chunk_size=1024):
+                            if chunk: # filter out keep-alive new chunks
+                                f.write(chunk)
+                else:
+                    self.logger.info("No reference override found")
+
+        return reference_file
 
 
 class WorkflowTest:
