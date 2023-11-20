@@ -89,6 +89,7 @@ namespace Analysis {
         std::bitset<3>      m_useGSFTrack;
         SG::ReadHandleKey<xAOD::ElectronContainer>    m_electronCollectionKey;
         bool m_skipNoElectron = false;
+        size_t m_candidateLimit;
 
     };
 } // end of namespace

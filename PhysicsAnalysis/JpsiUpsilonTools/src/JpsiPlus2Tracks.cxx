@@ -22,6 +22,7 @@
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include <memory>
 #include "JpsiUpsilonTools/JpsiUpsilonCommon.h"
+#include <limits>
 
 namespace Analysis {
 
@@ -118,7 +119,8 @@ namespace Analysis {
     m_finalDiTrackMassLower(-1.0),
     m_finalDiTrackPt(-1.0),
     m_trkDeltaZ(-1.0),
-    m_requiredNMuons(0)
+    m_requiredNMuons(0),
+    m_candidateLimit(std::numeric_limits<size_t>::max())
     {
         declareInterface<JpsiPlus2Tracks>(this);
         declareProperty("pionpionHypothesis",m_pipiMassHyp);
@@ -160,6 +162,7 @@ namespace Analysis {
         declareProperty("AlternativeMassConstraintTrack", m_altMassMuonTracks);
         declareProperty("UseGSFTrackIndices", m_useGSFTrackIndices);
         declareProperty("GSFCollection", m_TrkParticleGSFCollection);
+        declareProperty("CandidateLimit", m_candidateLimit);
     }
     
     JpsiPlus2Tracks::~JpsiPlus2Tracks() {}
@@ -314,6 +317,10 @@ namespace Analysis {
                     continue;
                 
                 for (TrackBag::iterator trkItr2=trkItr1+1; trkItr2!=theIDTracksAfterSelection.end(); ++trkItr2) { // inner loop
+                    if(bContainer.size() >= m_candidateLimit ){
+                        ATH_MSG_WARNING("Hard Limit exceeded N=" << bContainer.size());
+                        return StatusCode::SUCCESS;
+                    }
                     if (!m_excludeJpsiMuonsOnly && JpsiUpsilonCommon::isContainedIn(*trkItr2,jpsiTracks)) continue; // remove tracks which were used to build J/psi
 
                     if (m_excludeJpsiMuonsOnly) {

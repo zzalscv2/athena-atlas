@@ -107,6 +107,7 @@ def BPHY12Cfg(ConfigFlags):
         TrkVertexFitterTool     = vkalvrt,
         TrackSelectorTool       = trackselect,
         UseMassConstraint       = False,
+        CandidateLimit          = 5000
         )
     
     BPHY12_SelectAndWrite_BdKstarKpiMuMu  = CompFactory.DerivationFramework.Reco_Vertex(
