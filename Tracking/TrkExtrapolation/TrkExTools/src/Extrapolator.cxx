@@ -135,7 +135,6 @@ Trk::Extrapolator::Extrapolator(const std::string& t, const std::string& n, cons
   , m_returnPassiveLayers(false)
   , m_meotpIndex(0)
   , m_numOfValidPropagators(INVALIDPROPAGATORS)
-  , m_searchLevel(10)
   , m_initialLayerAttempts(3)
   , m_successiveLayerAttempts(1)
   , m_maxMethodSequence(2000)
@@ -189,8 +188,6 @@ Trk::Extrapolator::Extrapolator(const std::string& t, const std::string& n, cons
   declareProperty("RequireMaterialDestinationHit", m_requireMaterialDestinationHit);
   declareProperty("SubMEUpdators", m_updatNames);
   declareProperty("CacheLastMaterialLayer", m_cacheLastMatLayer);
-  // general behavior navigation
-  declareProperty("SearchLevelClosestParameters", m_searchLevel);
   // muon system specifics
   declareProperty("UseMuonMatApproximation", m_useMuonMatApprox);
   declareProperty("UseDenseVolumeDescription", m_useDenseVolumeDescription);
@@ -241,8 +238,8 @@ Trk::Extrapolator::initialize()
   if (m_updaters.empty()) {
     m_updaters.push_back("Trk::MaterialEffectsUpdator/DefaultMaterialEffectsUpdator");
   }
- 
- 
+
+
   if (!m_propagators.empty()) {
     ATH_CHECK(m_propagators.retrieve());
   }
@@ -673,7 +670,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           } else {
             if (!m_resolveMultilayers || (*iTer)->multilayerRepresentation().empty()) {
               cache.addOneNavigationLayer((*iTer)->trackingVolume(), layR);
-              
+
             } else {
               const auto& multi = (*iTer)->multilayerRepresentation();
               for (const auto *i : multi) {
@@ -965,10 +962,10 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
         // layers ?
         if (detVol->confinedLayers()) {
           const Trk::Layer* lay = detVol->associatedLayer(gp);
-          
+
           if (lay) {
             cache.addOneNavigationLayer(detVol, lay);
-            
+
           }
           const Trk::Layer* nextLayer =
             detVol->nextLayer(currPar->position(), dir * currPar->momentum().unit(), true);
@@ -985,7 +982,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
     }
   }
   cache.copyToNavigationSurfaces();
-  
+
   // current dense
   cache.m_currentDense = cache.m_highestVolume;
   if (cache.m_dense && cache.m_denseVols.empty()) {
@@ -1227,7 +1224,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                 } else {
                   ATH_MSG_DEBUG(cache.elossPointerErrorMsg(__LINE__));
                 }
-                
+
               }
 
               if (cache.m_matstates) {
@@ -1737,7 +1734,7 @@ Trk::Extrapolator::extrapolateInAlignableTV(const EventContext& ctx,
                       false,
                       cache.m_currentDense,
                       cache.m_extrapolationCache)));
-   
+
 
     if (nextPar) {
       ATH_MSG_DEBUG("  [+] Position after propagation -   at "
@@ -2039,14 +2036,8 @@ Trk::Extrapolator::extrapolateTrack(
   MaterialUpdateMode matupmode,
   Trk::ExtrapolationCache* extrapolationCache) const
 {
-  const IPropagator* searchProp = nullptr;
-  // use global propagator for the search
-  if (m_searchLevel < 2 && not m_subPropagators.empty()) {
-    searchProp = m_subPropagators[Trk::Global];
-  }
-
   const Trk::TrackParameters* closestTrackParameters =
-    m_navigator->closestParameters(ctx, trk, sf, searchProp);
+      m_navigator->closestParameters(trk, sf);
   if (closestTrackParameters) {
     return (extrapolate(
       ctx, *closestTrackParameters, sf, dir, bcheck, particle, matupmode, extrapolationCache));
@@ -2056,8 +2047,6 @@ Trk::Extrapolator::extrapolateTrack(
       return (extrapolate(
         ctx, *closestTrackParameters, sf, dir, bcheck, particle, matupmode, extrapolationCache));
     }
-
-
   return nullptr;
 }
 
@@ -3996,7 +3985,7 @@ Trk::Extrapolator::overlapSearch(const EventContext& ctx,
     if (surfaceHit && detSurface != startSurface && detSurface != cache.m_destinationSurface) {
       ATH_MSG_VERBOSE("  [H] Hit with detector surface recorded ! ");
       // push into the temporary vector
-      detParametersOnLayer.emplace_back(detParameters.release()); 
+      detParametersOnLayer.emplace_back(detParameters.release());
     } else if (detParameters) {
       // no hit -> fill into the garbage bin
       ATH_MSG_VERBOSE(
@@ -4457,7 +4446,7 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
     // push it to the material states
     cache.m_matstates->push_back(
       new TrackStateOnSurface(nullptr, parsOnLayer.to_unique(), std::move(meot)));
- 
+
   }
 }
 
@@ -5030,7 +5019,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
 
       cache.m_matstates->push_back(
         new TrackStateOnSurface(nullptr, ManagedTrackParmPtr(nextPar).to_unique(), std::move(mefot)));
- 
+
       ATH_MSG_DEBUG("  [M] Collecting material from dense volume '"
                     << cache.m_currentDense->volumeName() << "', t/X0 = " << dInX0);
     }

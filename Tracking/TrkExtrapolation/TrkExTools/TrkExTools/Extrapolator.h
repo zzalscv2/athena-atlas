@@ -69,11 +69,11 @@ using ManagedTrackParmPtr = ObjPtr<Trk::TrackParameters>;
 /**
 @class Extrapolator
 
-@brief  Extrapolation of track parameters and their 
+@brief  Extrapolation of track parameters and their
 associated covariances to destination surfaces
 
-It combines 
-- The mathematical propagation of track 
+It combines
+- The mathematical propagation of track
 parameters to a destination surface via the configured propagators
 RungeKuttaPropagator or STEP_propagator.
 
@@ -89,9 +89,9 @@ or continuously via the STEP_propagator for dense volumes.
 There are always one  Navigator
 and one STEP_Propagator (forced for muon like workload inside dense volumes)
 
-There are also arrays of Propagators, MaterialEffects updators 
+There are also arrays of Propagators, MaterialEffects updators
 and possible of EnergyLoss and MultipleScattering Updators.
-These must have at least one entry [Global] . 
+These must have at least one entry [Global] .
 The default / Global propagator is a RungeKuttaPropator
 for most typical cases.
 
@@ -101,12 +101,12 @@ of varying complexity.
 As an example:
 In one side there
 is ExtrapolateDirectly which is a thinwrapper
-over the [Global] Propagator call (can be replaced completely by a call 
+over the [Global] Propagator call (can be replaced completely by a call
 to it in client code).
 In the other side there is an extrapolate overload
 that allows to find and collect all intersections
 for a particle (typically muon) traversing the
-ATLAS calorimeters. 
+ATLAS calorimeters.
 
 @author Andreas.Salzburger@cern.ch
 @authors (Athena MT) G. Gaycken, S. Roe , C. Anastopoulos
@@ -128,8 +128,8 @@ public:
   /** AlgTool finalize method */
   virtual StatusCode finalize() override;
 
-  /** Extrapolate directly: Forwards directly the call to the 
-   * configured "Global" propagator. No navigation and no 
+  /** Extrapolate directly: Forwards directly the call to the
+   * configured "Global" propagator. No navigation and no
    * material effecs. Useful when we need fast propagation
    * without these. */
   virtual std::unique_ptr<TrackParameters> extrapolateDirectly(
@@ -140,7 +140,7 @@ public:
     const BoundaryCheck& bcheck = true,
     ParticleHypothesis particle = pion) const override final;
 
-  /** Main extrapolation Interface starting from neutral parameters 
+  /** Main extrapolation Interface starting from neutral parameters
    * and aiming at surface.*/
   virtual std::unique_ptr<NeutralParameters> extrapolate(
     const NeutralParameters& parameters,
@@ -162,7 +162,7 @@ public:
 
   /** Extrapolation method where a step-wise navigation to the
     destination surface is performed. Returns a vector
-    parameters on all detector elements. Used mainly by the 
+    parameters on all detector elements. Used mainly by the
     hole-search*/
   virtual TrackParametersUVector extrapolateStepwise(
     const EventContext& ctx,
@@ -187,7 +187,7 @@ public:
 
   /** extrapolateBlindly like step-wise extrapolation, but without
    * a destination surface.  Blind inside the given tracking Volume (boundaryVol).
-   * If none is give stops at last boundary surface of the known 
+   * If none is give stops at last boundary surface of the known
    * TrackingGeometry
    */
   virtual TrackParametersUVector extrapolateBlindly(
@@ -213,7 +213,7 @@ public:
 
   /** Extrapolation method collecting intersections with subdetector
    * boundaries and active volumes/layers. Destination
-   * (subdetector boundary) : geoID (+ entry, -exit) 
+   * (subdetector boundary) : geoID (+ entry, -exit)
    * ( default Calo = 3 exit see GeometrySignature.h)
    * Employs the STEP_propagator, used to create ParticleCaloExtensions
    * mainly for muons and Particle Flow.
@@ -579,7 +579,7 @@ private:
   /** Access the subPropagator to the given volume*/
   const IMaterialEffectsUpdator* subMaterialEffectsUpdator(const TrackingVolume& tvol) const;
 
- 
+
   /** Private method to return from extrapolate() main method,
       cleans up, calls model action or validation action, empties garbage bin and leaves */
   const Trk::TrackParameters* returnResult(Cache& cache, const Trk::TrackParameters* result) const;
@@ -597,7 +597,7 @@ private:
                                  Trk::PropDirection propDir,
                                  Trk::ParticleHypothesis) const;
 
-  
+
 
   /** Private method for conversion of the synchronized geometry signature to
    * the natural subdetector ordering */
@@ -636,9 +636,9 @@ private:
   // ---------------- For Extrapolation handling ------------ //
 
    //!< Propagators to chose from (steered by signature)
-  std::vector<const IPropagator*> m_subPropagators; 
-  //!< updaters to chose from (steered by signature) 
-  std::vector<const IMaterialEffectsUpdator*> m_subupdaters; 
+  std::vector<const IPropagator*> m_subPropagators;
+  //!< updaters to chose from (steered by signature)
+  std::vector<const IMaterialEffectsUpdator*> m_subupdaters;
 
   // ---------------- For Extrapolator configuration ------------ //
 
@@ -666,7 +666,6 @@ private:
   //!< number of sub valid propagators in the m_subPropagators array
   //if we have no valid subpropagatos it will be set to an INVALID value
   unsigned int m_numOfValidPropagators;
-  unsigned int m_searchLevel;        //!< see the supported search levels above
   unsigned int m_initialLayerAttempts; //!< allowed layer intersection attempts at the start of a volume
   unsigned int m_successiveLayerAttempts; //!< layer intersection attemps after one layer has been
                                           //!< hit sucessfully

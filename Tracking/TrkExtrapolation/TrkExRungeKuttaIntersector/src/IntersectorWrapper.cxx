@@ -11,7 +11,6 @@
 #include "TrkExRungeKuttaIntersector/IntersectorWrapper.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "TrkExInterfaces/IIntersector.h"
-#include "TrkExUtils/IntersectionSolution.h"
 #include "TrkExUtils/TrackSurfaceIntersection.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
 #include "TrkParameters/TrackParameters.h"
@@ -149,7 +148,7 @@ IntersectorWrapper::propagateParameters (const EventContext&              /*ctx*
   return std::move(cache.m_parameters);
 }
 
-IntersectionSolution
+std::optional<Trk::TrackSurfaceIntersection>
 IntersectorWrapper::intersect (const EventContext&              /*ctx*/,
                                const TrackParameters&		parameters,
                                const Surface&			surface,
@@ -159,10 +158,7 @@ IntersectorWrapper::intersect (const EventContext&              /*ctx*/,
 {
   Cache cache{};
   findIntersection(cache,parameters,surface);
-  auto solution = IntersectionSolution();
-  if (cache.m_intersection) {
-    solution.push_back(std::move(cache.m_intersection));
-  }
+  auto solution = cache.m_intersection;
   return solution;
 }
 

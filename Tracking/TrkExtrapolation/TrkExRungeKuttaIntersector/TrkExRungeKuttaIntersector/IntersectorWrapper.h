@@ -148,7 +148,7 @@ public:
     The intersection interface might be used by the material service as well to
     estimate the surfaces (sensitive and nonesensitive) while propagation
     */
-  virtual IntersectionSolution intersect(
+  virtual std::optional<Trk::TrackSurfaceIntersection> intersect(
     const EventContext& ctx,
     const TrackParameters& parm,
     const Surface& sf,

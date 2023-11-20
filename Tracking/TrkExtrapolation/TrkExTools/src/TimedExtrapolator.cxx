@@ -13,7 +13,6 @@
 #include "TrkExInterfaces/IPropagator.h"
 #include "TrkExInterfaces/IMultipleScatteringUpdator.h"
 #include "TrkExInterfaces/IEnergyLossUpdator.h"
-#include "TrkExUtils/IntersectionSolution.h"
 #include "TrkSurfaces/SurfaceBounds.h"
 #include "TrkSurfaces/DiscBounds.h"
 #include "TrkSurfaces/PerigeeSurface.h"
@@ -70,7 +69,6 @@ Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::strin
   m_updatNames(),
   m_meotpIndex(0),
   m_configurationLevel(10),
-  m_searchLevel(10),
   m_includeMaterialEffects(true),
   m_requireMaterialDestinationHit(false),
   m_stopWithNavigationBreak(false),
@@ -117,7 +115,6 @@ Trk::TimedExtrapolator::TimedExtrapolator(const std::string &t, const std::strin
   declareProperty("SubMEUpdators", m_updatNames);
   //  declareProperty("CacheLastMaterialLayer", m_cacheLastMatLayer);
   // general behavior navigation
-  declareProperty("SearchLevelClosestParameters", m_searchLevel);
   declareProperty("Navigator", m_navigator);
   declareProperty("UseDenseVolumeDescription", m_useDenseVolumeDescription);
   // muon system specifics
@@ -164,7 +161,7 @@ Trk::TimedExtrapolator::initialize() {
   if (m_msupdators.empty()) {
     m_msupdators.push_back("Trk::MultipleScatteringUpdator/AtlasMultipleScatteringUpdator");
   }
-  
+
 
   if (!m_propagators.empty()) {
     if (m_propagators.retrieve().isFailure()) {

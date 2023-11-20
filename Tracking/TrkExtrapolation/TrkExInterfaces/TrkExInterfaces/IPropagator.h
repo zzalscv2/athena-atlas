@@ -19,7 +19,6 @@
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkExInterfaces/HelperStructs.h"
 #include "TrkExUtils/ExtrapolationCache.h"
-#include "TrkExUtils/IntersectionSolution.h"
 #include "TrkExUtils/TargetSurfaces.h"
 #include "TrkExUtils/TrackSurfaceIntersection.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
@@ -187,7 +186,7 @@ public:
      The intersection interface might be used by the material service as well
      to estimate the surfaces (sensitive and nonesensitive) while propagation
     */
-  virtual IntersectionSolution intersect(
+  virtual std::optional<TrackSurfaceIntersection> intersect(
     const EventContext& ctx,
     const TrackParameters& parm,
     const Surface& sf,

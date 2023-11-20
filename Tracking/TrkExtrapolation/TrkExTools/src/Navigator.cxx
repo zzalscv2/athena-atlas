@@ -10,7 +10,6 @@
 #include "TrkExTools/Navigator.h"
 #include "TrkExInterfaces/IPropagator.h"
 #include "TrkEventUtils/TrkParametersComparisonFunction.h"
-#include "TrkExUtils/IntersectionSolution.h"
 #include "TrkExUtils/RungeKuttaUtils.h"
 #include "TrkDetDescrInterfaces/IGeometryBuilder.h"
 #include "TrkDetDescrUtils/ObjectAccessor.h"
@@ -148,7 +147,6 @@ Trk::Navigator::nextBoundarySurface(const EventContext& ctx,
     const Trk::Surface& currentSurface =
       currentBoundary->surfaceRepresentation();
 
-    //const Trk::TrackParameters* trackPar = nullptr;
     // do either RungeKutta (always after first unsuccessful try) or straight
     // line
     auto trackPar =
@@ -281,10 +279,6 @@ Trk::Navigator::atVolumeBoundary(const Trk::TrackParameters* parms,
   for (unsigned int ib = 0; ib < bounds.size(); ib++) {
     const Trk::Surface &surf = bounds[ib]->surfaceRepresentation();
     if (surf.isOnSurface(parms->position(), true, tol, tol)) {
-      // isAtBoundary = true;
-      // const Trk::TrackingVolume* attachedVol =
-      //  (bounds[ib].get())->attachedVolume(parms->position(),parms->momentum(),dir);
-      // if (!nextVol && attachedVol ) nextVol = attachedVol;
 
       // sanity check to enforce the desired tolerance
       Trk::DistanceSolution distSol = surf.straightLineDistanceEstimate(parms->position(),
@@ -309,7 +303,8 @@ Trk::Navigator::atVolumeBoundary(const Trk::TrackParameters* parms,
                               "look at ATLASRECTS-7147");
            continue;
           }
-          //surfing the beampipe seems to happen particularly often in a Trigger test, see https://its.cern.ch/jira/browse/ATR-24234
+          //surfing the beampipe seems to happen particularly often in a Trigger test.
+          //see https://its.cern.ch/jira/browse/ATR-24234
           //in this case, I downgrade the 'warning' to 'verbose'
           const bool surfingTheBeamPipe = (vol->geometrySignature() == Trk::BeamPipe) or (nextVol->geometrySignature() == Trk::BeamPipe);
           if (not surfingTheBeamPipe) {
@@ -332,46 +327,13 @@ Trk::Navigator::atVolumeBoundary(const Trk::TrackParameters* parms,
 }
 
 const Trk::TrackParameters*
-Trk::Navigator::closestParameters(const EventContext& ctx,
-                                  const Trk::Track& trk,
-                                  const Trk::Surface& sf,
-                                  const Trk::IPropagator* propptr) const
+Trk::Navigator::closestParameters(const Trk::Track& trk,
+                                  const Trk::Surface& sf) const
 {
-  // -- corresponds to Extrapolator::m_searchLevel = 2/3 - search with Propagation
-  if (propptr && !m_searchWithDistance) {
-    const Trk::TrackParameters *closestTrackParameters = nullptr;
 
-    double distanceToSurface = 10e10;
-
-    // policy change --- only measured parameters are taken
-    DataVector<const TrackParameters>::const_iterator it = trk.trackParameters()->begin();
-
-    for (; it != trk.trackParameters()->end(); ++it) {
-      // change in policy --- only measured parameters are taken
-      const Trk::TrackParameters *mtp = *it;
-      if (!mtp || !mtp->covariance()) {
-        continue;
-      }
-
-      Trk::IntersectionSolution interSolutions = propptr->intersect(ctx,**it, sf, m_fieldProperties);
-      if (interSolutions.empty()) {
-        return nullptr;
-      }
-      double currentDistance = std::abs((interSolutions[2])->pathlength());
-      if (currentDistance < distanceToSurface) {
-        // assign new distance to surface
-        distanceToSurface = currentDistance;
-        // set current TrackParmaters as closest
-        closestTrackParameters = *it;
-      }
-    }
-    return closestTrackParameters;
-  }
-
-  // -- corresponds to Extrapolator::m_searchLevel = 1 - search with dedicated algorithms for cylinder/sl/perigee
+  // search with dedicated algorithms for cylinder/sl/perigee
   // surface
   const Trk::TrackParameters *closestTrackParameters = nullptr;
-
 
   // policy change --- only measured parameters are taken
   DataVector<const TrackParameters>::const_iterator it = trk.trackParameters()->begin();
