@@ -1008,7 +1008,7 @@ namespace ST {
 
       // the SF are only applied for HS jets and implicitely requires the presense of the isHS decoration
       CP::CorrectionCode result;
-      if (acc_passJvt(*jet)) {
+      if (acc_passFJvt(*jet)) {
         result = m_jetfJvtEfficiencyTool->getEfficiencyScaleFactor(*jet,current_sf);
       }
       else {
