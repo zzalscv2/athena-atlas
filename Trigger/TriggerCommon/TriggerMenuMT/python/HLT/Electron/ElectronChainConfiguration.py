@@ -13,20 +13,11 @@ from ..Electron.FastTrackingMenuSequences import fastTrackingMenuSequence, fastT
 from ..Electron.PrecisionCaloMenuSequences import precisionCaloMenuSequence, precisionCaloMenuSequence_LRT
 from ..Electron.PrecisionElectronMenuSequences import precisionElectronMenuSequence, precisionElectronMenuSequence_LRT
 from ..Electron.PrecisionElectronMenuSequences_GSF import precisionElectronMenuSequence_GSF, precisionElectronMenuSequence_LRTGSF
+from TrigBphysHypo.TrigMultiTrkComboHypoConfig import NoMuonDiElecPrecisionGSFComboHypoCfg, DiElecPrecisionGSFComboHypoCfg, TrigMultiTrkComboHypoToolFromDict
 
-if isComponentAccumulatorCfg():
-    def StreamerNoMuonDiElecFastComboHypoCfg() : pass
-    def StreamerDiElecFastComboHypoCfg() : pass
-    def StreamerDiElecNoringerFastComboHypoCfg() : pass
-    def NoMuonDiElecPrecisionComboHypoCfg() : pass
-    def DiElecPrecisionComboHypoCfg() : pass
-    def TrigMultiTrkComboHypoToolFromDict() : pass
-    def NoMuonDiElecPrecisionGSFComboHypoCfg() : pass
-    def DiElecPrecisionGSFComboHypoCfg() : pass
-else:
+if not isComponentAccumulatorCfg():
     from ..Electron.PrecisionTrackingMenuSequences     import precisionTrackingMenuSequence, precisionTrackingMenuSequence_LRT
     from ..Electron.PrecisionTracks_GSFRefittedMenuSequences   import precisionTracks_GSFRefittedMenuSequence, precisionTracks_GSFRefittedMenuSequence_LRT 
-    from TrigBphysHypo.TrigMultiTrkComboHypoConfig import NoMuonDiElecPrecisionComboHypoCfg, DiElecPrecisionComboHypoCfg, NoMuonDiElecPrecisionGSFComboHypoCfg, DiElecPrecisionGSFComboHypoCfg, TrigMultiTrkComboHypoToolFromDict
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 #----------------------------------------------------------------
@@ -366,14 +357,6 @@ class ElectronChainConfiguration(ChainConfigurationBase):
         elif "Heg" in  self.chainDict['topo']:
             stepName = "precision_electron_Heg"+str(isocut)
             return self.getStep(flags,7,stepName,sequenceCfgArray=[precisionElectronSequenceCfg], comboTools=[diEgammaHegMassComboHypoToolFromDict], is_probe_leg=is_probe_leg)
-        elif "bBeeM6000" in  self.chainDict['topo']:
-            signatures = self.chainDict['signatures']
-            if signatures.count(signatures[0]) == len(signatures):
-                stepName = "noMuon_precision_electron_bBee"+str(isocut)
-                return self.getStep(flags,7,stepName,sequenceCfgArray=[precisionElectronSequenceCfg], comboHypoCfg=NoMuonDiElecPrecisionComboHypoCfg, comboTools=[TrigMultiTrkComboHypoToolFromDict], is_probe_leg=is_probe_leg)
-            else:
-                stepName = "precision_electron_bBee"+str(isocut)
-                return self.getStep(flags,7,stepName,sequenceCfgArray=[precisionElectronSequenceCfg], comboHypoCfg=DiElecPrecisionComboHypoCfg, comboTools=[TrigMultiTrkComboHypoToolFromDict], is_probe_leg=is_probe_leg)
         elif self.chainPart['extra'] == 'ion':
             stepName = "precision_ion_electron" + str(isocut)
             return self.getStep(flags,7,stepName,[precisionElectronSequenceCfg_ion], is_probe_leg=is_probe_leg)
