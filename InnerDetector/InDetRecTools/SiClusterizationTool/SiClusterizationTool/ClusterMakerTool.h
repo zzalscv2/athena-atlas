@@ -9,7 +9,7 @@
 ///////////////////////////////////////////////////////////////////
 // Fill the global position fields of the PrepRawData
 ///////////////////////////////////////////////////////////////////
-// 
+//
 /////////////////////////////////////////////////////////////////////////
 // First version 04/08/2003 Tommaso Lari
 //
@@ -64,27 +64,27 @@ public:
                    const std::string &name,
                    const IInterface *parent);
   ~ClusterMakerTool() = default;
-  
+
   static const InterfaceID& interfaceID() { return IID_ClusterMakerTool; };
 
   StatusCode initialize();
-  
 
-  // Compute the pixel cluster global position, and the error associated 
+
+  // Compute the pixel cluster global position, and the error associated
   // to the position.
   // Called by the pixel clustering tools
-  // 
+  //
   // Input parameters
-  // - the cluster Identifier 
-  // - the position in local reference frame 
+  // - the cluster Identifier
+  // - the position in local reference frame
   // - the list of identifiers of the Raw Data Objects belonging to the cluster
   // - the width of the cluster
-  // - the module the cluster belongs to  
+  // - the module the cluster belongs to
   // - wheter the cluster contains ganged pixels
   // - the error strategy, currently
   //    0: cluster width/sqrt(12.)
   //    1: pixel pitch/sqrt(12.)
-  //    2: parametrized as a function ofpseudorapidity and cluster size 
+  //    2: parametrized as a function ofpseudorapidity and cluster size
   //       (default)
   //   10: CTB parametrization (as a function of module and cluster size)
   //       no magnetic field
@@ -111,7 +111,7 @@ public:
 				       const int lvl1a,
 				       const std::vector<int>& totList,
 				       const SiWidth& width,
-				       const InDetDD::SiDetectorElement* element, 
+				       const InDetDD::SiDetectorElement* element,
 				       bool ganged,
 				       int errorStrategy,
 				       const PixelID& pixelID,
@@ -123,20 +123,20 @@ public:
 
   // Computes global position and errors for SCT cluster.
   // Called by SCT Clustering tools
-  // 
+  //
   // Input parameters
-  // - the cluster Identifier 
-  // - the position in local reference frame 
+  // - the cluster Identifier
+  // - the position in local reference frame
   // - the list of identifiers of the Raw Data Objects belonging to the cluster
   // - the width of the cluster
-  // - the module the cluster belongs to  
+  // - the module the cluster belongs to
   // - the error strategy, currently
   //    0: Cluster Width/sqrt(12.)
   //    1: Set to a different values for one and two-strip clusters (def.)
 
   SCT_Cluster sctCluster(const Identifier& clusterID,
                          const Amg::Vector2D& localPos,
-                         const std::vector<Identifier>& rdoList,
+                         std::vector<Identifier>&& rdoList,
                          const SiWidth& width,
                          const InDetDD::SiDetectorElement* element,
                          int errorStrategy) const;
@@ -170,14 +170,7 @@ private:
   ToolHandle<ISiLorentzAngleTool> m_sctLorentzAngleTool
   {this, "SCTLorentzAngleTool", "SiLorentzAngleTool/SCTLorentzAngleTool", "Tool to retreive Lorentz angle of SCT"};
 
-  // These std::atomic_bool may be dropped.
-  // m_issueErrorA and m_issueErrorB are changed in pixelCluster but do not affect any computation.
-  // The default values of m_forceErrorStrategy1A and m_forceErrorStrategy1B are unchanged.
-  // If they are changed in event processing and affect some computation, they are not thread-safe.
-  mutable std::atomic_bool m_issueErrorA{true};
-  mutable std::atomic_bool m_forceErrorStrategy1A{false};
-  mutable std::atomic_bool m_issueErrorB{true};
-  mutable std::atomic_bool m_forceErrorStrategy1B{false};
+  bool m_forceErrorStrategy1B{false};
 
   // Parametrization of the Pixel errors
   // now moved in PixelConditionsData, except for CTB parametrization

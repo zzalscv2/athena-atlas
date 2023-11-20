@@ -813,7 +813,7 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
                 potentialClusterUniq = std::make_unique<InDet::SCT_Cluster>(
                     m_clusterMaker->sctCluster(
                         potentialClusterId, potentialClusterPosition,
-                        potentialClusterRDOList, siWidth, hitSiDetElement,
+                        std::vector<Identifier>(potentialClusterRDOList), siWidth, hitSiDetElement,
                         m_sctErrorStrategy));
             }
           else
@@ -853,7 +853,7 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
                 SCT_DetElClusterMap.insert(SCT_detElement_RIO_map::value_type(
                     waferID, potentialClusterUniq.release()));
 
-            //since we use this later 
+            //since we use this later
             const InDet::SCT_Cluster*  potentialCluster = it->second;
 
             // Build Truth info for current cluster
@@ -947,7 +947,7 @@ Amg::Vector3D SCT_FastDigitizationTool::stepToStripBorder(
                                                           double slopeYX,
                                                           double slopeZX,
                                                           const Amg::Vector2D& stripCenter,
-                                                          int direction) 
+                                                          int direction)
 {
   double stepExitX = 0.;
   double stepExitY = 0.;
