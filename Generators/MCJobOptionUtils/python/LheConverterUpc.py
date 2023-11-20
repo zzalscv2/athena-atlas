@@ -9,35 +9,42 @@ from GeneratorModules.EvgenAlg import EvgenAlg
 from AthenaPython.PyAthena import StatusCode
 
 
-class LheConverter(EvgenAlg):
+class LheConverterUpc(EvgenAlg):
     '''
-    Class for converting output LHE file from SuperChic to LHE recognised by Pythia.
+    Class for modifying output LHE file from Superchic and Madgraph + ensuring compatibility with Tauola
+    Intended for ultraperipheral collision (UPC) processes i.e. y y -> l+ l-
     '''
 
-    def __init__(self, name='LheConverter'):
-        super(LheConverter, self).__init__(name=name)
-
-    inFileName = 'evrecs/evrecout.dat'
+    def __init__(self, name='LheConverterUpc', generator='Superchic', mode='Pythia8'):
+        super(LheConverterUpc, self).__init__(name=name)
+        self.generator = generator # options: 'Superchic' (default), 'Madgraph5'
+        self.mode = mode # options: 'Pythia8' (default), 'Tauolapp'
+    
     outFileName = 'events.lhe'
     done = False
     leptons = ['11', '-11', '13', '-13', '15', '-15']  # e, µ, τ
 
     def initialize(self):
+
+        self.inFileName = self.fileName
+
+        if self.inFileName==self.outFileName:
+            import shutil
+            shutil.move('./events.lhe','events.lhe_tmpconverter')
+            self.inFileName = 'events.lhe_tmpconverter'
         if(os.path.isfile(self.inFileName)):
             print(self.fileName)
-
             return self.convert()
         else:
             return StatusCode.Failure
 
     def convert(self):
         '''
-        Converts `evrecs/evrecout.dat` input file to `events.lhe` recognised by the Pythia:
+        Modifies `events.lhe` output file from Madgraph by doing the following:
             - Replaces init block
             - Changes photon px and py to zero and energy to pz
             - Recalculates energy scales as an average of lepton pair transverse momentum
         '''
-
         if not self.done:
             DOMTree = xml.dom.minidom.parse(self.inFileName)
             collection = DOMTree.documentElement
@@ -50,13 +57,23 @@ class LheConverter(EvgenAlg):
  '''
             init[0].firstChild.data = init_repl
 
-            #                                        1 -- energy scale
+            # The comment line below indicates which part of the regex grabs the parton-level information that's to be modified. The index in list(header.groups()) is also shown
+            #                                        energy scale [1]
             event_header = r'^(\s*\S*\s*\S*\s*\S*\s*)(\S*)(.*)$'
-            #                          pdgid                                                           px        py        pz        e
+
+            # The comment line below indicates which part of the regex grabs the parton-level information that's to be modified. The index in list(particle) is also shown
+            #                          pdgid [1]                                                       px [3]    py [5]    pz [7]    e [9]
             event_particle = r'^(\s*)([0-9-]+)(\s+[0-9-]+\s+[0-9-]+\s+[0-9-]+\s+[0-9-]+\s+[0-9-]+\s+)(\S+)(\s+)(\S+)(\s+)(\S+)(\s+)(\S+)(.*)$'
 
             events = collection.getElementsByTagName('event')
             for i, event in enumerate(events):
+
+                # Remove the <mgrwt> block in case of Madgraph (not needed in UPC)
+                nodes = event.getElementsByTagName('mgrwt')
+                for node in nodes:
+                    parent = node.parentNode
+                    parent.removeChild(node)
+
                 new_particles = []
                 lepton_mom = []
 
@@ -68,6 +85,12 @@ class LheConverter(EvgenAlg):
                         particle[3] = '0.'
                         particle[5] = '0.'
                         particle[9] = particle[7]
+                        # If Tauolapp requested, change PID of photons to electrons (hack recommended by Tauola authors)
+                        if self.mode == 'Tauolapp':
+                            if i%2 == 0:
+                                particle[1] = '11' if float(particle[7]) > 0.0 else '-11'
+                            else:
+                                particle[1] = '-11' if float(particle[7]) > 0.0 else '11'
                         new_particles.append(''.join(particle))
                     elif particle[1] in self.leptons:
                         # Read leptons px and py
@@ -87,7 +110,10 @@ class LheConverter(EvgenAlg):
                 header = list(header.groups())
                 header[1] = energy_scale
 
-                event.firstChild.data = '\n'.join([''.join(header)] + new_particles) + '\n '
+                if self.generator == 'Superchic': 
+                    event.firstChild.data = '\n'.join([''.join(header)] + new_particles) + '\n'
+                if self.generator == 'Madgraph5':
+                    event.firstChild.data = '\n'.join([''.join(header)] + new_particles)
 
             with open(self.outFileName, 'w') as output:
                 output.write(DOMTree.toxml().replace('<?xml version="1.0" ?>', ' '))
@@ -95,3 +121,4 @@ class LheConverter(EvgenAlg):
             self.done = True
 
         return StatusCode.Success
+
