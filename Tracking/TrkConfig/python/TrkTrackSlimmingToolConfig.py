@@ -9,3 +9,11 @@ def TrackSlimmingToolCfg(flags, name="TrackSlimmingTool", **kwargs):
     kwargs.setdefault("KeepOutliers", True)
     acc.setPrivateTools(CompFactory.Trk.TrackSlimmingTool(name, **kwargs))
     return acc
+
+def GSFTrackSlimmingToolCfg(flags, name="GSFBuildInDetTrackSlimmingTool", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("KeepParameters", False)
+    kwargs.setdefault("KeepOutliers", True)
+    acc.setPrivateTools(CompFactory.Trk.TrackSlimmingTool(name, **kwargs))
+    return acc
+

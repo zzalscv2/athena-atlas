@@ -4,12 +4,14 @@
 
 from AthenaCommon.CFElements import parOR
 import AthenaCommon.CfgMgr as CfgMgr
+from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 
 #logging
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 
-def precisionTracks_GSFRefitted(RoIs, ion=False, variant=''):
+def precisionTracks_GSFRefitted(flags, RoIs, ion=False, variant=''):
     """
     Takes precision Tracks as input and applies GSF refits on top
     """
@@ -52,9 +54,15 @@ def precisionTracks_GSFRefitted(RoIs, ion=False, variant=''):
     
     ## TrigEMBremCollectionBuilder ##
     
-    track_GSF = TrigEMBremCollectionBuilderCfg(variant,TrigEgammaKeys)
-    thesequence_GSF += track_GSF
+    from PixelConditionsAlgorithms.PixelConditionsConfig import PixeldEdxAlgCfg
+    CAtoGlobalWrapper(PixeldEdxAlgCfg, flags)
+    thesequence_GSF  += algorithmCAToGlobalWrapper(TrigEMBremCollectionBuilderCfg, flags,
+                                                   name = "TrigEMBremCollectionBuilder"+variant,
+                                                   TrackParticleContainerName=TrigEgammaKeys.precisionTrackingContainer,
+                                                   SelectedTrackParticleContainerName=TrigEgammaKeys.precisionTrackingContainer,
+                                                   OutputTrkPartContainerName=TrigEgammaKeys.precisionElectronTrackParticleContainerGSF,
+                                                   OutputTrackContainerName=TrigEgammaKeys.precisionElectronTrkCollectionGSF)
 
      ## TrigEMTrackMatchBuilder_GSF ##
-    trackParticles_GSF= track_GSF.OutputTrkPartContainerName
+    trackParticles_GSF= TrigEgammaKeys.precisionElectronTrackParticleContainerGSF
     return thesequence_GSF, trackParticles_GSF

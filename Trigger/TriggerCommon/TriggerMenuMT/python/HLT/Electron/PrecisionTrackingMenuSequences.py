@@ -3,62 +3,51 @@
 #
 
 # menu components
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
-from AthenaCommon.CFElements import parOR, seqAND
-from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
+from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Tracking'
 
 
-def precisionTrackingSequence(flags, ion=False, variant=''):
+def precisionTrackingMenuSequenceCfg(flags, ion=False, variant='', is_probe_leg = False):
     """ fourth step:  precision electron....."""
 
-    from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-    TrigEgammaKeys = getTrigEgammaKeys(variant, ion=ion)
-    caloClusters = TrigEgammaKeys.precisionElectronCaloClusterContainer
- 
+    inViewRoIs = "precisionTracking" + variant
 
-    InViewRoIs = "precisionTracking" + variant
-    # EVCreator:
-    precisionTrackingViewsMaker = EventViewCreatorAlgorithm("IM" + tag(ion) + variant)
-    precisionTrackingViewsMaker.mergeUsingFeature=True # Merge inputs based on their Precision Calo feature
-    precisionTrackingViewsMaker.RoITool = ViewCreatorPreviousROITool()
-    precisionTrackingViewsMaker.InViewRoIs = InViewRoIs
-    precisionTrackingViewsMaker.Views = tag(ion) + "Views" + variant
-    precisionTrackingViewsMaker.ViewFallThrough = True
-    precisionTrackingViewsMaker.RequireParentView = True
-    
-    # calling precision tracking
     from TriggerMenuMT.HLT.Electron.PrecisionTrackingRecoSequences import precisionTracking
-    precisionTrackInViewSequence, trackParticles = precisionTracking(flags, InViewRoIs, ion, variant)
+    precisionTrackingReco = precisionTracking(flags, inViewRoIs, ion, variant)
 
-    precisionTrackingInViewAlgs = parOR(tag(ion) + "InViewAlgs" + variant, [precisionTrackInViewSequence])
-    precisionTrackingViewsMaker.ViewNodeName = tag(ion) + "InViewAlgs" + variant
+    # preparing roiTool
+    roiTool = CompFactory.ViewCreatorPreviousROITool()
 
-    # connect EVC and reco
-    theSequence = seqAND(tag(ion) + "Sequence" + variant, [precisionTrackingViewsMaker, precisionTrackingInViewAlgs] )
-    return (theSequence,precisionTrackingViewsMaker,caloClusters,trackParticles)
+    viewName = tag(ion)+variant
+    precisionInDetReco = InViewRecoCA(viewName,
+                                      RoITool=roiTool, # view maker args
+                                      ViewFallThrough = True,
+                                      RequireParentView=True,
+                                      mergeUsingFeature=True,
+                                      InViewRoIs=inViewRoIs,
+                                      isProbe=is_probe_leg)
+
+    precisionInDetReco.mergeReco(precisionTrackingReco)
+    selAcc=SelectionCA(viewName, isProbe=is_probe_leg)
+    selAcc.mergeReco(precisionInDetReco)
 
 
+    precisionElectronHypoAlg = CompFactory.TrigStreamerHypoAlg("Electron"+tag(ion)+"Hypo"+variant)
+    precisionElectronHypoAlg.FeatureIsROI = False
+    selAcc.addHypoAlgo(precisionElectronHypoAlg)
+    def acceptAllHypoToolGen(chainDict):
+        return CompFactory.TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
+    return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen,isProbe=is_probe_leg)
 
 def precisionTrackingMenuSequence(flags, name, is_probe_leg=False, ion=False, variant=''):
-    """ Creates precisionCalo MENU sequence """
-    (sequence, precisionTrackingViewsMaker, caloClusters, trackParticles) = RecoFragmentsPool.retrieve(precisionTrackingSequence, flags, ion=ion, variant=variant)
-
-    from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg, TrigStreamerHypoTool
-    thePrecisionTrackingHypo = TrigStreamerHypoAlg(name + tag(ion) + "Hypo" + variant)
-    thePrecisionTrackingHypo.FeatureIsROI = False
-    def acceptAllHypoToolGen(chainDict):
-        return TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
-    return MenuSequence( flags,
-                         Sequence    = sequence,
-                         Maker       = precisionTrackingViewsMaker, 
-                         Hypo        = thePrecisionTrackingHypo,
-                         HypoToolGen = acceptAllHypoToolGen, # Note: TrigEgammaPrecisionTrackingHypoAlg does not use HypoTools
-                         IsProbe     = is_probe_leg)
-
+    """Creates fifth step of electron sequence"""
+    if isComponentAccumulatorCfg():
+        return precisionTrackingMenuSequenceCfg(flags, ion=ion, variant=variant, is_probe_leg=is_probe_leg)
+    else: 
+        return menuSequenceCAToGlobalWrapper(precisionTrackingMenuSequenceCfg, flags, ion=ion, variant=variant, is_probe_leg=is_probe_leg)
 
 def precisionTrackingMenuSequence_LRT(flags, name, is_probe_leg=False):
     return precisionTrackingMenuSequence(flags, name, is_probe_leg=is_probe_leg, ion=False, variant='_LRT')
