@@ -230,8 +230,26 @@ JetChainParts = {
        #beamspot preselction option
        'presel2c20b85',
        #DIPZ preselection
-       'presel4c20Z50',
-       'presel4c20Z50MAXMULT20'
+       'presel4c20Z110',
+       'presel4c20Z102',
+       'presel4c20Z98',
+       'presel4c20Z98',
+       'presel4c20Z98MAXMULT20',
+       'presel4c20Z119MAXMULT5',
+       'presel3c20Z71',
+       'presel3c20Z71MAXMULT20',
+       'presel4c20Z110XX2c20b85',
+       'presel3c20Z71XX2c20b85',
+       'presel4c20Z110XX1c20bg85',
+       'presel4c20Z98XX1c20bg85',
+       'presel4c85Z110',
+       'presel4c85Z110MAXMULT20',
+       'presel5c50Z110',
+       'presel5c50Z110MAXMULT20',
+       'presel6c40Z110',
+       'presel6c40Z110MAXMULT20',
+       'presel7c30Z110',
+       'presel7c30Z110MAXMULT20',
      ],
     # Hypo information
     #   If hypoScenario is 'simple', then hypo configuration is handled based on the
@@ -293,10 +311,6 @@ JetChainParts = {
                       'HT1000XX020jvt',
                       'HT1000XX0eta240XX020jvt',
                       'HT50XX10etXX0eta320',  # needed for hypoToolTests.py
-
-                      # DIPZ category applies a cut on a group of n jets
-                      'Z50XX4j20',
-                      'Z50XX4j20_MAXMULT20',
                       ],
 
     'exotHypo' : ['emergingPTF0p2dR1p2', 'emergingPTF0p1dR1p2', 'emergingPTF0p09dR1p2', 'emergingPTF0p08dR1p2', 'emergingPTF0p075dR1p2', 'emergingPTF0p07dR1p2', 'emergingPTF0p0dR1p2',
