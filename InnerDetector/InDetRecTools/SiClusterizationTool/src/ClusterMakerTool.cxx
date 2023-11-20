@@ -3,7 +3,7 @@
 */
 
 //***************************************************************************
-// 
+//
 // Implementation for ClusterMaker
 //
 //****************************************************************************
@@ -143,7 +143,7 @@ ClusterMakerTool::ClusterMakerTool(const std::string& t,
                                    const std::string& n,
                                    const IInterface* p) :
   AthAlgTool(t,n,p)
-{ 
+{
   declareInterface<ClusterMakerTool>(this);
 }
 
@@ -174,21 +174,21 @@ StatusCode  ClusterMakerTool::initialize(){
 }
 
 
-// Compute the pixel cluster global position, and the error associated 
+// Compute the pixel cluster global position, and the error associated
 // to the position.
 // Called by the pixel clustering tools
-// 
+//
 // Input parameters
-// - the cluster Identifier 
-// - the position in local reference frame 
+// - the cluster Identifier
+// - the position in local reference frame
 // - the list of identifiers of the Raw Data Objects belonging to the cluster
 // - the width of the cluster
-// - the module the cluster belongs to  
+// - the module the cluster belongs to
 // - wheter the cluster contains ganged pixels
 // - the error strategy, currently
 //    0: cluster width/sqrt(12.)
 //    1: pixel pitch/sqrt(12.)
-//    2: parametrized as a function ofpseudorapidity and cluster size 
+//    2: parametrized as a function ofpseudorapidity and cluster size
 //       (default)
 //   10: CTB parametrization (as a function of module and cluster size)
 //       no magnetic field
@@ -212,12 +212,9 @@ ClusterType ClusterMakerTool::makePixelCluster(
                          CreatorType clusterCreator,
                          const PixelChargeCalibCondData *calibData,
                          const PixelOfflineCalibData *offlineCalibData) const{
-	
- 
+
+
   ATH_MSG_VERBOSE("ClusterMakerTool called, number ");
-  if ( errorStrategy==2 && m_issueErrorB ) {
-    m_issueErrorB=false;
-  }
   if ( errorStrategy==2 && m_forceErrorStrategy1B ) errorStrategy=1;
 
   // Fill vector of charges and compute charge balance
@@ -234,7 +231,7 @@ ClusterType ClusterMakerTool::makePixelCluster(
   std::vector<float> chargeList;
   int nRDO=rdoList.size();
   if (calibData) {
-    chargeList.reserve(nRDO); 
+    chargeList.reserve(nRDO);
     for (int i=0; i<nRDO; i++) {
       Identifier pixid=rdoList[i];
       int ToT=totList[i];
@@ -263,8 +260,8 @@ ClusterType ClusterMakerTool::makePixelCluster(
     int row = pixelID.phi_index(pixid);
     int col = pixelID.eta_index(pixid);
     if (row == rowMin) qRowMin += charge;
-    if (row < rowMin){ 
-      rowMin = row; 
+    if (row < rowMin){
+      rowMin = row;
       qRowMin = charge;
     }
 
@@ -292,8 +289,8 @@ ClusterType ClusterMakerTool::makePixelCluster(
   float omegax = -1;
   float omegay = -1;
   if(qRowMin+qRowMax > 0) omegax = qRowMax/float(qRowMin+qRowMax);
-  if(qColMin+qColMax > 0) omegay = qColMax/float(qColMin+qColMax);   
-    
+  if(qColMin+qColMax > 0) omegay = qColMax/float(qColMin+qColMax);
+
   ATH_MSG_VERBOSE("omega =  " << omegax << " " << omegay);
 
 // ask for Lorentz correction, get global position
@@ -309,19 +306,19 @@ ClusterType ClusterMakerTool::makePixelCluster(
   Amg::Vector3D globalPos(M[0]*Ax[0]+M[1]*Ay[0]+R[0],M[0]*Ax[1]+M[1]*Ay[1]+R[1],M[0]*Ax[2]+M[1]*Ay[2]+R[2]);
 
   // error matrix
-  const Amg::Vector2D& colRow = width.colRow();// made ref to avoid 
+  const Amg::Vector2D& colRow = width.colRow();// made ref to avoid
                                              // unnecessary copy EJWM
   auto errorMatrix = Amg::MatrixX(2,2);
   errorMatrix.setIdentity();
-	
+
   // switches are more readable **OPT**
   // actually they're slower as well (so I'm told) so perhaps
   // this should be re-written at some point EJWM
   double eta = std::abs(globalPos.eta());
   double zPitch = width.z()/colRow.y();
-  
+
   const AtlasDetectorID* aid = element->getIdHelper();
-  
+
   if (aid->helper() != AtlasDetectorID::HelperType::Pixel){
     throw std::runtime_error( "Wrong helper type in ClusterMakerTool.cxx.");
   }
@@ -337,8 +334,8 @@ ClusterType ClusterMakerTool::makePixelCluster(
     errorMatrix.fillSymmetric(0,0,square(width.phiR()/colRow.x())*ONE_TWELFTH);
     errorMatrix.fillSymmetric(1,1,square(width.z()/colRow.y())*ONE_TWELFTH);
     break;
-  case 2:                  
-    // use parameterization only if the cluster does not 
+  case 2:
+    // use parameterization only if the cluster does not
     // contain long pixels or ganged pixels
     // Also require calibration service is available....
     if (!ganged && zPitch>399*micrometer && zPitch<401*micrometer) {
@@ -363,19 +360,19 @@ ClusterType ClusterMakerTool::makePixelCluster(
       errorMatrix.fillSymmetric(1,1,square(zPitch)*ONE_TWELFTH);
     }
     break;
-    
+
   case 10:
     errorMatrix.fillSymmetric(0,0,square( getPixelCTBPhiError(layer,phimod,int(colRow.x()))));
     errorMatrix.fillSymmetric(1,1,square(width.z()/colRow.y())*ONE_TWELFTH);
     break;
-    
+
   default:
     errorMatrix.fillSymmetric(0,0,square(width.phiR()/colRow.x())*ONE_TWELFTH);
     errorMatrix.fillSymmetric(1,1,square(width.z()/colRow.y())*ONE_TWELFTH);
     break;
   }
 
-  return clusterCreator(newClusterID, 
+  return clusterCreator(newClusterID,
 			locpos,
 			globalPos,
 			rdoList,
@@ -399,7 +396,7 @@ PixelCluster ClusterMakerTool::pixelCluster(
     const int lvl1a,
     const std::vector<int>& totList,
     const SiWidth& width,
-    const InDetDD::SiDetectorElement* element, 
+    const InDetDD::SiDetectorElement* element,
     bool ganged,
     int errorStrategy,
     const PixelID& pixelID,
@@ -416,7 +413,7 @@ PixelCluster ClusterMakerTool::pixelCluster(
 	lvl1a,
 	totList,
 	width,
-	element, 
+	element,
 	ganged,
 	errorStrategy,
 	pixelID,
@@ -436,7 +433,7 @@ xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
     const int lvl1a,
     const std::vector<int>& totList,
     const SiWidth& width,
-    const InDetDD::SiDetectorElement* element, 
+    const InDetDD::SiDetectorElement* element,
     bool ganged,
     int errorStrategy,
     const PixelID& pixelID,
@@ -453,7 +450,7 @@ xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
 	lvl1a,
 	totList,
 	width,
-	element, 
+	element,
 	ganged,
 	errorStrategy,
 	pixelID,
@@ -483,7 +480,7 @@ xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
 SCT_Cluster
 ClusterMakerTool::sctCluster(const Identifier& clusterID,
                              const Amg::Vector2D& localPos,
-                             const std::vector<Identifier>& rdoList,
+                             std::vector<Identifier>&& rdoList,
                              const SiWidth& width,
                              const InDetDD::SiDetectorElement* element,
                              int errorStrategy) const
@@ -491,9 +488,6 @@ ClusterMakerTool::sctCluster(const Identifier& clusterID,
 
   double shift =
     m_sctLorentzAngleTool->getLorentzShift(element->identifyHash());
-  //        const InDetDD::SiLocalPosition& localPosition =
-  //                        InDetDD::SiLocalPosition(localPos[Trk::locY),
-  //                                        localPos[Trk::locX)+shift,0);
   Amg::Vector2D locpos(localPos[Trk::locX] + shift, localPos[Trk::locY]);
 
   // error matrix
@@ -506,7 +500,7 @@ ClusterMakerTool::sctCluster(const Identifier& clusterID,
 	// switches are more readable **OPT**
 	// actually they're slower as well (so I'm told) so perhaps
 	// this should be re-written at some point EJWM
-    
+
 	switch (errorStrategy){
 	case 0:
 	  errorMatrix.fillSymmetric(0,0,square(width.phiR())*ONE_TWELFTH);
@@ -543,13 +537,13 @@ ClusterMakerTool::sctCluster(const Identifier& clusterID,
 	  break;
 	}
 
-    auto designShape = element->design().shape();
+  auto designShape = element->design().shape();
 	// rotation for endcap SCT
 	if(designShape == InDetDD::Trapezoid || designShape == InDetDD::Annulus) {
-          double sn      = element->sinStereoLocal(localPos); 
+          double sn      = element->sinStereoLocal(localPos);
           double sn2     = sn*sn;
           double cs2     = 1.-sn2;
-          double w       = element->phiPitch(localPos)/element->phiPitch(); 
+          double w       = element->phiPitch(localPos)/element->phiPitch();
           double v0      = (errorMatrix)(0,0)*w*w;
           double v1      = (errorMatrix)(1,1);
           errorMatrix.fillSymmetric(0,0,cs2*v0+sn2*v1);
@@ -557,13 +551,13 @@ ClusterMakerTool::sctCluster(const Identifier& clusterID,
           errorMatrix.fillSymmetric(1,1,sn2*v0+cs2*v1);
 	} //else if (designShape == InDetDD::PolarAnnulus) {// Polar rotation for endcap}
 
-  return SCT_Cluster(clusterID, locpos, rdoList, width, element, errorMatrix);
-        
+  return SCT_Cluster(clusterID, locpos, std::move(rdoList), width, element, std::move(errorMatrix));
+
 }
 
 //---------------------------------------------------------------------------
 // CTB parameterization, B field off
-double ClusterMakerTool::getPixelCTBPhiError(int layer, int phi, 
+double ClusterMakerTool::getPixelCTBPhiError(int layer, int phi,
 			                     int phiClusterSize) const{
 
  double sigmaL0Phi1[3] = { 8.2*micrometer,  9.7*micrometer, 14.6*micrometer};

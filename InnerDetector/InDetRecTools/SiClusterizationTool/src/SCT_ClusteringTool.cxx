@@ -32,7 +32,7 @@
 #include <cmath>
 
 namespace InDet {
-  
+
   // Functor to enable sorting of RDOs by first strip
   class strip_less_than {
   public:
@@ -43,20 +43,20 @@ namespace InDet {
 
   // Are two strips adjacent?
   bool adjacent(unsigned int strip1, unsigned int strip2) {
-    return ((1 == (strip2-strip1)) or (1 == (strip1-strip2))); 
+    return ((1 == (strip2-strip1)) or (1 == (strip1-strip2)));
   }
 
   //version for when using rows
   bool adjacent(const unsigned int strip1, const int row1, const unsigned int strip2, const int row2){
-    return ((row1==row2) and ((1 == (strip2-strip1)) or (1 == (strip1-strip2)))); 
+    return ((row1==row2) and ((1 == (strip2-strip1)) or (1 == (strip1-strip2))));
   }
-  
+
   // Constructor with parameters:
   SCT_ClusteringTool::SCT_ClusteringTool(const std::string& type, const std::string& name, const IInterface* parent) :
     base_class(type, name, parent)
   {
   }
-  
+
   StatusCode SCT_ClusteringTool::decodeTimeBins() {
     // Decode time bins from string of form e.g. "01X" to integer bits (-1 means X)
     m_timeBinBits[0] = -1;
@@ -74,7 +74,7 @@ namespace InDet {
       int timeBin(-999);
       if (decodeTimeBin(m_timeBinStr[i], timeBin).isFailure()) return StatusCode::FAILURE;
       m_timeBinBits[i] = timeBin;
-    }    
+    }
 
     return StatusCode::SUCCESS;
   }
@@ -108,18 +108,18 @@ namespace InDet {
     if (timePattern.test(2)) pass=false;
     if (!timePattern.test(1)) pass=false;
     return pass;
-  } 
-  
+  }
+
   bool SCT_ClusteringTool::testTimeBinsX1X(int timeBin) {
     // Convert the given timebin to a bit set and test each bit
     // if bit is -1 (i.e. X) it always passes, otherwise require exact match of 0/1
     // N.B bitset has opposite order to the bit pattern we define
-    
+
     bool pass(true);
     const std::bitset<3> timePattern(static_cast<unsigned long>(timeBin));
     if (!timePattern.test(1)) pass=false;
     return pass;
-  }  
+  }
 
   StatusCode SCT_ClusteringTool::initialize() {
     ATH_MSG_INFO("Initialize clustering tool");
@@ -132,7 +132,7 @@ namespace InDet {
     } else {
       m_conditionsTool.disable();
     }
-    
+
     if (m_doFastClustering and not m_lorentzAngleTool.empty()) {
       ATH_CHECK(m_lorentzAngleTool.retrieve());
     } else {
@@ -185,10 +185,10 @@ namespace InDet {
       clusterVector.push_back(stripId);
     }
   }
-  
+
   /**
    * Beware of corner cases: what if all strips are bad? the vector is empty?
-   * What if the last strip is bad and contiguous with the next group which is coming? 
+   * What if the last strip is bad and contiguous with the next group which is coming?
    * What if its good and contiguous, but there are also some bad?
    **/
   void SCT_ClusteringTool::addStripsToClusterWithChecks(const Identifier& firstStripId,
@@ -216,7 +216,7 @@ namespace InDet {
       }
       clusterVector.push_back(stripId);
     }
-    
+
     // Maybe all the strips are bad, clear the cluster vector
     if (clusterVector.size() == nBadStrips) {
       clusterVector.clear();
@@ -226,7 +226,7 @@ namespace InDet {
 
     // Now we have one vector of stripIds, some of which may be 'bad'
     if (nBadStrips != 0) {
-      
+
       clusterVector=recluster(clusterVector, idGroups);
       // After this, the cluster vector is either empty or has the last good cluster
     }
@@ -257,7 +257,7 @@ namespace InDet {
       }
       clusterVector.push_back(stripId);
     }
-    
+
     // Maybe all the strips are bad, clear the cluster vector
     if (clusterVector.size() == nBadStrips) {
       clusterVector.clear();
@@ -270,9 +270,9 @@ namespace InDet {
       clusterVector=recluster(clusterVector, idGroups);
       // After this, the cluster vector is either empty or has the last good cluster
     }
-  } 
+  }
 
-  
+
   /**
    * recluster starts with a vector of Ids, some of which may be invalid due to them being bad strips,
    * and a vector of these vectors. We recursively split the original clustervector, adding to idGroups as we go.
@@ -303,11 +303,11 @@ namespace InDet {
     return recluster(clusterVector, idGroups);
   }
 
-  
-  SCT_ClusterCollection * 
+
+  SCT_ClusterCollection *
   SCT_ClusteringTool::clusterize(const InDetRawDataCollection<SCT_RDORawData>& collection,
                                  const SCT_ID& idHelper,
-                                 const InDet::SiDetectorElementStatus *sctDetElStatus, 
+                                 const InDet::SiDetectorElementStatus *sctDetElStatus,
                                  DataPool<SCT_Cluster>* dataItemsPool,
                                  const EventContext& ctx) const
   {
@@ -408,8 +408,8 @@ namespace InDet {
         // Gives the last strip number in the cluster
         previousStrip = idHelper.strip(currentVector.back());
       }
-    } 
-    
+    }
+
     // Still need to add this last vector
     if (not currentVector.empty()) {
       if ((not m_majority01X) or (n01X >= n11X)) {
@@ -453,13 +453,13 @@ namespace InDet {
 
     // All strips are assumed to be the same width.
     std::vector<uint16_t>::iterator tbinIter(tbinGroups.begin());
-    
+
     /// If clusters have been split due to bad strips, would require a whole lot
     /// of new logic to recalculate hitsInThirdTimeBin word - instead, just find
     /// when this is the case here, and set hitsInThirdTimeBin to zero later on
     const bool badStripInClusterOnThisModuleSide = (idGroups.size() != tbinGroups.size());
 
-    for (const IdVec_t& stripGroup: idGroups) {
+    for (IdVec_t& stripGroup: idGroups) {
       const int nStrips(stripGroup.size());
       if (nStrips == 0) continue;
       //
@@ -489,9 +489,9 @@ namespace InDet {
 
       (*cluster) =
           (m_clusterMaker)
-              ? (m_clusterMaker->sctCluster(clusterId, localPos, stripGroup,
+              ? (m_clusterMaker->sctCluster(clusterId, localPos, std::move(stripGroup),
                                             siWidth, element, m_errorStrategy))
-              : (SCT_Cluster(clusterId, localPos, stripGroup, siWidth, element,
+              : (SCT_Cluster(clusterId, localPos, std::move(stripGroup), siWidth, element,
                              {}));
 
       cluster->setHashAndIndex(clusterCollection->identifyHash(),
@@ -501,7 +501,7 @@ namespace InDet {
         ++tbinIter;
       }
       /// clusters had been split - recalculating HitsInThirdTimeBin too difficult to be worthwhile for this rare corner case..
-      if (badStripInClusterOnThisModuleSide) cluster->setHitsInThirdTimeBin(0);       
+      if (badStripInClusterOnThisModuleSide) cluster->setHitsInThirdTimeBin(0);
       clusterCollection->push_back(cluster);
     }
 
@@ -510,7 +510,7 @@ namespace InDet {
 
   SCT_ClusterCollection* SCT_ClusteringTool::fastClusterize(const InDetRawDataCollection<SCT_RDORawData>& collection,
                                                             const SCT_ID& idHelper,
-                                                            const InDet::SiDetectorElementStatus *sctDetElStatus, 
+                                                            const InDet::SiDetectorElementStatus *sctDetElStatus,
                                                             DataPool<SCT_Cluster>* dataItemsPool,
                                                             const EventContext& ctx) const
   {
@@ -549,7 +549,7 @@ namespace InDet {
       // Flushes the vector every time a non-adjacent strip is found
       //
       if (not currentVector.empty() and
-          ((m_useRowInformation and !adjacent(thisStrip, thisRow, previousStrip, previousRow)) or 
+          ((m_useRowInformation and !adjacent(thisStrip, thisRow, previousStrip, previousRow)) or
            (not m_useRowInformation and !adjacent(thisStrip, previousStrip)))) {
 
         // Add this group to existing groups (and flush)
@@ -770,12 +770,12 @@ namespace InDet {
     return clusterCollection;
   }
 
-  SCT_ClusteringTool::DimensionAndPosition 
+  SCT_ClusteringTool::DimensionAndPosition
   SCT_ClusteringTool::clusterDimensions(int firstStrip, int lastStrip,
                                         const InDetDD::SiDetectorElement* pElement,
                                         const SCT_ID& /*idHelper*/) {  //since a range check on strip numbers was removed, idHelper is no longer needed here
-    const int                      nStrips(lastStrip - firstStrip + 1); 
-    // Consider strips before and after (in case nStrips=1), both are guaranteed 
+    const int                      nStrips(lastStrip - firstStrip + 1);
+    // Consider strips before and after (in case nStrips=1), both are guaranteed
     // to return sensible results, even for end strips
     const InDetDD::SiCellId        cell1(firstStrip - 1);
     const InDetDD::SiCellId        cell2(lastStrip + 1);
@@ -786,19 +786,19 @@ namespace InDet {
     return SCT_ClusteringTool::DimensionAndPosition(centre, width);
   }
 
-  SCT_ClusteringTool::DimensionAndPosition 
+  SCT_ClusteringTool::DimensionAndPosition
   SCT_ClusteringTool::clusterDimensionsInclRow(int firstStrip, int lastStrip, int row,
                                                const InDetDD::SiDetectorElement* pElement, const InDetDD::SCT_ModuleSideDesign* design) {
-    const int                      nStrips(lastStrip - firstStrip + 1); 
+    const int                      nStrips(lastStrip - firstStrip + 1);
     const int firstStrip1D = design->strip1Dim(firstStrip, row);
     const int lastStrip1D = design->strip1Dim(lastStrip, row);
     const double stripPitch = design->stripPitch();
-    const InDetDD::SiCellId        cell1(firstStrip1D); 
-    const InDetDD::SiCellId        cell2(lastStrip1D);  
+    const InDetDD::SiCellId        cell1(firstStrip1D);
+    const InDetDD::SiCellId        cell2(lastStrip1D);
     const InDetDD::SiLocalPosition firstStripPos(pElement->rawLocalPositionOfCell(cell1));
     const InDetDD::SiLocalPosition lastStripPos(pElement->rawLocalPositionOfCell(cell2));
     const double                   width(nStrips*stripPitch);
     const InDetDD::SiLocalPosition centre((firstStripPos+lastStripPos)*0.5);
     return SCT_ClusteringTool::DimensionAndPosition(centre, width);
-  } 
+  }
 }
