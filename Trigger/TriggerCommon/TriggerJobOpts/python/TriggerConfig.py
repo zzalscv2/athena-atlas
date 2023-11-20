@@ -476,7 +476,7 @@ def triggerPOOLOutputCfg(flags):
                                      ( flags.Output.doWriteAOD, 'AOD', flags.Trigger.AODEDMSet)]:
         if not doit: continue
 
-        edmList = getTriggerEDMList(edmSet, flags.Trigger.EDMVersion)
+        edmList = getTriggerEDMList(edmSet, flags.Trigger.EDMVersion, flags.Trigger.ExtraEDMList)
 
         # Build the output ItemList
         itemsToRecord = []
@@ -688,6 +688,12 @@ def triggerRunCfg( flags, menu=None ):
     addHLTNavigationToEDMList(flags, TriggerHLTListRun3, decObj, decObjHypoOut)
     __log.info( "Number of EDM items after adding navigation: %d", len(TriggerHLTListRun3))
 
+    # Add Extra to EDM list
+    if flags.Trigger.ExtraEDMList:
+        from TrigEDMConfig.TriggerEDMRun3 import addExtraCollectionsToEDMList
+        __log.info( "Adding extra collections to EDM: %s", str(flags.Trigger.ExtraEDMList))
+        addExtraCollectionsToEDMList(TriggerHLTListRun3, flags.Trigger.ExtraEDMList)
+
     # Configure output writing
     outputAcc, edmSet = triggerOutputCfg( flags, hypos )
     acc.merge( outputAcc, sequenceName="HLTTop" )
@@ -699,11 +705,6 @@ def triggerRunCfg( flags, menu=None ):
         acc.addEventAlgo(costFinalizeAlg, sequenceName="HLTFinalizeSeq" )
 
     if edmSet:
-        if flags.Trigger.ExtraEDMList:
-            from TrigEDMConfig.TriggerEDMRun3 import addExtraCollectionsToEDMList
-            __log.info( "Adding extra collections to EDM: %s", str(flags.Trigger.ExtraEDMList))
-            addExtraCollectionsToEDMList(TriggerHLTListRun3, flags.Trigger.ExtraEDMList)
-
         # The order is important: 1) view merging, 2) gap filling
         acc.merge( triggerMergeViewsCfg(flags, viewMakers), sequenceName="HLTFinalizeSeq" )
         # For BS output, the EDM gap-filling is done in Reco. Online we only ensure a

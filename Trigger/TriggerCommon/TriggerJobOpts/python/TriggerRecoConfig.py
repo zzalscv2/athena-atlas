@@ -161,8 +161,8 @@ def TriggerEDMCfg(flags):
         acc.merge(addToAOD(flags, edmDictToList(getLvl1AODList())))
 
     edmVersion = max(2, flags.Trigger.EDMVersion)
-    _TriggerESDList = getTriggerEDMList(flags.Trigger.ESDEDMSet,  edmVersion)
-    _TriggerAODList = getTriggerEDMList(flags.Trigger.AODEDMSet,  edmVersion)
+    _TriggerESDList = getTriggerEDMList(flags.Trigger.ESDEDMSet, edmVersion, flags.Trigger.ExtraEDMList)
+    _TriggerAODList = getTriggerEDMList(flags.Trigger.AODEDMSet, edmVersion, flags.Trigger.ExtraEDMList)
     log.debug("ESD EDM list: %s", _TriggerESDList)
     log.debug("AOD EDM list: %s", _TriggerAODList)
     
@@ -214,6 +214,9 @@ def Run2Run1NavigationSlimmingCfg(flags):
     if flags.Trigger.EDMVersion >= 3:
         log.debug("Run2Run1NavigationSlimmingCfg: Nothing to do for EDMVersion >= 3.")
         return acc
+
+    if flags.Trigger.ExtraEDMList:
+        log.warning("Run2Run1NavigationSlimmingCfg: ExtraEDMList only works for Run 3 and beyond")
 
     def _flatten(edm):
         return list(y.split('-')[0] for x in edm.values() for y in x)
