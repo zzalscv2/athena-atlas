@@ -9,7 +9,7 @@
 
 from TrigEDMConfig.TriggerEDMRun1 import TriggerL2List,TriggerEFList,TriggerResultsRun1List
 from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerIDTruth,TriggerHLTList,EDMDetails,EDMLibraries,TriggerL2EvolutionList,TriggerEFEvolutionList
-from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,AllowedOutputFormats,varToRemoveFromAODSLIM
+from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,AllowedOutputFormats,varToRemoveFromAODSLIM,addExtraCollectionsToEDMList
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TriggerEDM')
 
@@ -20,7 +20,7 @@ log = logging.getLogger('TriggerEDM')
 #
 #************************************************************
 
-def getTriggerEDMList(key, runVersion):
+def getTriggerEDMList(key, runVersion, extraEDMList=[]):
     """
     List (Literally Python dict) of trigger objects to be placed with flags:
     key can be" 'ESD', 'AODSLIM', 'AODFULL', 'DS'
@@ -43,6 +43,12 @@ def getTriggerEDMList(key, runVersion):
             Run3TrigEDM = {}
             Run3TrigEDMCOMM = {}
             Run3TrigEDMSLIM = {}
+
+            if extraEDMList:
+                log.info( "Adding extra collections to EDM: %s", str(extraEDMList))
+                # TODO - This function is currently changing a global state.
+                # Should re-work it to return a copy of TriggerHLTListRun3 with the additional content added.
+                addExtraCollectionsToEDMList(TriggerHLTListRun3, extraEDMList)
 
             if "AODFULL" in key: 
                 #Containers marked with AODCOMM to be added to AODFULL

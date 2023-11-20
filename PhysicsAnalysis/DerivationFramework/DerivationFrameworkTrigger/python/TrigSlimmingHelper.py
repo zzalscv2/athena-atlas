@@ -19,7 +19,7 @@ def addTrigEDMSetToOutput(flags, helper: SlimmingHelper, edmSet: str, edmVersion
     if edmVersion == -1:
         return
 
-    edmList = getTriggerEDMList(edmSet, edmVersion)
+    edmList = getTriggerEDMList(edmSet, edmVersion, flags.Trigger.ExtraEDMList)
     # This list is a mapping from container type to a list of required container names
     # This includes the Aux containers and their lists of aux variables.
     # The SlimmingHelper however requires the list of *interface* (non-Aux) containers with
