@@ -228,7 +228,7 @@ public:
 
   /** Global position together with direction of the trajectory on the surface
    */
-  virtual IntersectionSolution intersect(
+  virtual std::optional<Trk::TrackSurfaceIntersection> intersect(
     const EventContext& ctx,
     const TrackParameters&,
     const Surface&,

@@ -209,7 +209,7 @@ public:
 
   /** Return the TrackingGeometry used by the Extrapolator (forward information
    * from Navigator)*/
-  virtual const TrackingGeometry* trackingGeometry() const override; 
+  virtual const TrackingGeometry* trackingGeometry() const override;
 
   /** Validation Action:
       Can be implemented optionally, outside access to internal validation steps
@@ -317,7 +317,6 @@ private:
                                           //!< steer which one to use
   unsigned int m_configurationLevel;      //!< see the supported levels of
                                           //!< configuration above
-  unsigned int m_searchLevel;             //!< see the supported search levels above
   bool m_includeMaterialEffects;          //!< boolean to switch on/off material effects
   bool m_requireMaterialDestinationHit;   //!< require the destination surface
                                           //!< hit for material collection
@@ -428,7 +427,7 @@ private:
   bool m_fastField;
   Trk::MagneticFieldProperties m_fieldProperties;
 
-  
+
 };
 
 inline const TrackingGeometry*

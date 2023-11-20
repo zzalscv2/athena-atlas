@@ -21,7 +21,6 @@
 //
 #include "TrkGeometry/MagneticFieldProperties.h"
 //
-#include "TrkExUtils/IntersectionSolution.h"
 #include "TrkEventPrimitives/TransportJacobian.h"
 //
 #include "TrkPatternParameters/PatternTrackParameters.h"
@@ -1829,7 +1828,7 @@ Trk::RungeKuttaPropagator::globalPositions(const ::EventContext& ctx,
 /////////////////////////////////////////////////////////////////////////////////
 //  Global position together with direction of the trajectory on the surface
 /////////////////////////////////////////////////////////////////////////////////
-Trk::IntersectionSolution
+std::optional<Trk::TrackSurfaceIntersection>
 Trk::RungeKuttaPropagator::intersect(const ::EventContext& ctx,
                                      const Trk::TrackParameters& Tp,
                                      const Trk::Surface& Su,
@@ -1850,18 +1849,16 @@ Trk::RungeKuttaPropagator::intersect(const ::EventContext& ctx,
 
   double P[64];
   if (!Trk::RungeKuttaUtils::transformLocalToGlobal(false, Tp, P)){
-    return {};
+    return std::nullopt;
   }
   double Step = 0.;
   if (!propagateWithJacobianSwitch(cache, (*su), nJ, P, Step)) {
-    return{};
+    return std::nullopt;
   }
 
   const Amg::Vector3D Glo(P[0], P[1], P[2]);
   const Amg::Vector3D Dir(P[3], P[4], P[5]);
-  auto Int = Trk::IntersectionSolution();
-  Int.push_back(std::make_optional<const Trk::TrackSurfaceIntersection>(Glo, Dir, Step));
-  return Int;
+  return std::make_optional<Trk::TrackSurfaceIntersection>(Glo, Dir, Step);
 }
 
 /////////////////////////////////////////////////////////////////////////////////

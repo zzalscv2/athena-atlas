@@ -20,7 +20,6 @@
 
 #include "TrkExInterfaces/ITimedMatEffUpdator.h"
 #include "TrkExUtils/ExtrapolationCache.h"
-#include "TrkExUtils/IntersectionSolution.h"
 #include "TrkExUtils/RungeKuttaUtils.h"
 #include "TrkExUtils/TrackSurfaceIntersection.h"
 #include "TrkEventPrimitives/TransportJacobian.h"
@@ -1645,12 +1644,13 @@ std::unique_ptr<Trk::TrackParameters> Trk::STEP_Propagator::propagateParameters(
 /////////////////////////////////////////////////////////////////////////////////
 // Function for finding the intersection point with a surface
 /////////////////////////////////////////////////////////////////////////////////
-Trk::IntersectionSolution Trk::STEP_Propagator::intersect(const EventContext& ctx,
-                                                          const Trk::TrackParameters& trackParameters,
-                                                          const Trk::Surface& targetSurface,
-                                                          const Trk::MagneticFieldProperties& mft,
-                                                          ParticleHypothesis particle,
-                                                          const Trk::TrackingVolume* tVol) const {
+std::optional<Trk::TrackSurfaceIntersection> Trk::STEP_Propagator::intersect(
+  const EventContext& ctx,
+  const Trk::TrackParameters& trackParameters,
+  const Trk::Surface& targetSurface,
+  const Trk::MagneticFieldProperties& mft,
+  ParticleHypothesis particle,
+  const Trk::TrackingVolume* tVol) const {
 
   Cache cache(ctx);
 
@@ -1677,13 +1677,13 @@ Trk::IntersectionSolution Trk::STEP_Propagator::intersect(const EventContext& ct
 
   // Check inputvalues
   if (cache.m_tolerance <= 0.) {
-    return {};
+    return std::nullopt;
   }
   if (cache.m_momentumCutOff < 0.) {
-    return {};
+    return std::nullopt;
   }
   if (std::abs(1. / trackParameters.parameters()[Trk::qOverP]) <= cache.m_momentumCutOff) {
-    return {};
+    return std::nullopt;
   }
 
   // Check for empty volumes. If x != x then x is not a number.
@@ -1694,7 +1694,7 @@ Trk::IntersectionSolution Trk::STEP_Propagator::intersect(const EventContext& ct
 
   // double P[45];
   if (!Trk::RungeKuttaUtils::transformLocalToGlobal(false, trackParameters, cache.m_P)) {
-    return {};
+      return std::nullopt;
   }
   double path = 0.;
 
@@ -1716,15 +1716,16 @@ Trk::IntersectionSolution Trk::STEP_Propagator::intersect(const EventContext& ct
       s[2] = -T(2, 2);
       s[3] = -d;
     }
-    if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path))
-      return {};
+    if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)){
+      return std::nullopt;
+    }
   }
 
   else if (ty == Trk::SurfaceType::Line) {
 
     double s[6] = {T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2)};
     if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)) {
-      return {};
+      return std::nullopt;
     }
   }
 
@@ -1734,7 +1735,7 @@ Trk::IntersectionSolution Trk::STEP_Propagator::intersect(const EventContext& ct
     double s[9] = {
         T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2), cyl->bounds().r(), Trk::alongMomentum, 0.};
     if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)) {
-      return {};
+      return std::nullopt;
     }
   }
 
@@ -1744,7 +1745,7 @@ Trk::IntersectionSolution Trk::STEP_Propagator::intersect(const EventContext& ct
     k = k * k + 1.;
     double s[9] = {T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2), k, Trk::alongMomentum, 0.};
     if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)) {
-      return {};
+      return std::nullopt;
     }
   }
 
@@ -1752,7 +1753,7 @@ Trk::IntersectionSolution Trk::STEP_Propagator::intersect(const EventContext& ct
 
     double s[6] = {T(0, 3), T(1, 3), T(2, 3), 0., 0., 1.};
     if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)) {
-      return {};
+      return std::nullopt;
     }
   }
 
@@ -1773,16 +1774,13 @@ Trk::IntersectionSolution Trk::STEP_Propagator::intersect(const EventContext& ct
       s[3] = -d;
     }
     if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)) {
-      return {};
+      return std::nullopt;
     }
   }
 
   Amg::Vector3D globalPosition(cache.m_P[0], cache.m_P[1], cache.m_P[2]);
   Amg::Vector3D direction(cache.m_P[3], cache.m_P[4], cache.m_P[5]);
-  auto intersectionSolution = Trk::IntersectionSolution();
-  intersectionSolution.push_back(
-      std::make_optional<Trk::TrackSurfaceIntersection>(globalPosition, direction, path));
-  return intersectionSolution;
+  return std::make_optional<Trk::TrackSurfaceIntersection>(globalPosition, direction, path);
 }
 
 std::optional<Trk::TrackSurfaceIntersection>
@@ -1801,20 +1799,13 @@ Trk::STEP_Propagator::intersectSurface(
   auto tmpTrackParameters =
       Trk::Perigee(0., 0., direction.phi(), direction.theta(), qOverP, perigeeSurface, std::nullopt);
 
-  Trk::IntersectionSolution solution =
+  std::optional<Trk::TrackSurfaceIntersection> solution =
       qOverP == 0
-          ? intersect(ctx, tmpTrackParameters, surface, Trk::MagneticFieldProperties(Trk::NoField), particle)
+          ? intersect(ctx, tmpTrackParameters, surface,
+                      Trk::MagneticFieldProperties(Trk::NoField), particle)
           : intersect(ctx, tmpTrackParameters, surface, mft, particle, nullptr);
 
-  if (solution.empty()) {
-    return std::nullopt;
-  }
-
-  Trk::IntersectionSolutionIter output_iter = solution.begin();
-  if (*output_iter) {
-    return Trk::TrackSurfaceIntersection(*(*output_iter));
-  }
-  return std::nullopt;
+  return solution;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

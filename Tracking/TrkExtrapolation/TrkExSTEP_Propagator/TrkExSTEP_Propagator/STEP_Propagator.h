@@ -293,7 +293,7 @@ public:
     const Trk::TrackingVolume* tVol = nullptr) const override final;
 
   /** Propagate parameters and return path (Similar to propagateParameters */
-  virtual IntersectionSolution intersect(
+  virtual std::optional<TrackSurfaceIntersection> intersect(
     const EventContext& ctx,
     const Trk::TrackParameters& trackParameters,
     const Trk::Surface& targetSurface,
