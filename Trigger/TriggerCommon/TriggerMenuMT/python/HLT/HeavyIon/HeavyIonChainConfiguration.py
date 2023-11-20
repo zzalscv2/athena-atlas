@@ -32,7 +32,7 @@ class HeavyIonChainConfig(ChainConfigurationBase):
         steps.append(self.getStep(flags,1, 'Fgap', [HIFwdGapMenuSequenceCfg]))
     else:
       if 'Fgap' in self.chainPart['hypoFgapInfo'][0]:
-        steps.append(self.getHIFwdGapStep(flags))
+        steps.append(self.getStep(flags, 1, 'Fgap', [HIFwdGapMenuSequence]))
 
     return self.buildChain(steps)
 
