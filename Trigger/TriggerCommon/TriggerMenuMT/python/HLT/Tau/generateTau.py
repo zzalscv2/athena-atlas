@@ -6,7 +6,9 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
-from TrigInDetConfig.utils import getInDetFlagsForSignature
+from TrigInDetConfig.utils import getFlagsForActiveConfig
+from AthenaCommon.Logging import logging
+log = logging.getLogger(__name__)
 
 @AccumulatorCache
 def _caloSeq(flags, is_probe_leg=False):
@@ -123,14 +125,14 @@ def _ftfCoreSeq(flags,name,is_probe_leg=False):
     return (selAcc , menuCA)
 
 def tauFTFTauCoreSeq(flags, is_probe_leg=False):
-    newflags = getInDetFlagsForSignature(flags,'tauCore')
+    newflags = getFlagsForActiveConfig(flags,'tauCore',log)
 
     name='Core'
     (selAcc , menuCA) = _ftfCoreSeq(newflags,name,is_probe_leg)
     return menuCA 
 
 def tauFTFTauLRTSeq(flags, is_probe_leg=False):
-    newflags = getInDetFlagsForSignature(flags,'tauLRT')
+    newflags = getFlagsForActiveConfig(flags,'tauLRT',log)
     name='LRT'
     (selAcc , menuCA) = _ftfCoreSeq(newflags,name,is_probe_leg)
     return menuCA 
@@ -169,7 +171,7 @@ def _ftfTauIsoSeq(flags,name,is_probe_leg=False):
     return (selAcc , menuCA)
 
 def tauFTFTauIsoSeq(flags, is_probe_leg=False):
-    newflags = getInDetFlagsForSignature(flags,'tauIso')
+    newflags = getFlagsForActiveConfig(flags,'tauIso',log)
     name = 'Iso'
     (selAcc , menuCA) = _ftfTauIsoSeq(newflags,name,is_probe_leg)
     return menuCA
@@ -216,13 +218,13 @@ def _precTrackSeq(flags,name,is_probe_leg=False):
     return (selAcc , menuCA)
 
 def tauPrecTrackIsoSeq(flags, is_probe_leg=False):
-    newflags = getInDetFlagsForSignature(flags,'tauIso')
+    newflags = getFlagsForActiveConfig(flags,'tauIso',log)
     name = 'Iso'
     (selAcc , menuCA) = _precTrackSeq(newflags,name,is_probe_leg)
     return menuCA
 
 def tauPrecTrackLRTSeq(flags, is_probe_leg=False):
-    newflags = getInDetFlagsForSignature(flags,'tauLRT')
+    newflags = getFlagsForActiveConfig(flags,'tauLRT',log)
     name = 'LRT'
     (selAcc , menuCA) = _precTrackSeq(newflags,name,is_probe_leg)
     return menuCA
@@ -263,19 +265,19 @@ def _tauPrecSeq(flags,name,is_probe_leg=False):
     return (selAcc , menuCA)
 
 def tauTrackTwoMVASeq(flags, is_probe_leg=False):
-    newflags = getInDetFlagsForSignature(flags,'tauIso')
+    newflags = getFlagsForActiveConfig(flags,'tauIso',log)
     name = 'MVA'
     (selAcc , menuCA) = _tauPrecSeq(newflags,name,is_probe_leg)
     return menuCA
 
 def tauTrackTwoLLPSeq(flags, is_probe_leg=False):
-    newflags = getInDetFlagsForSignature(flags,'tauIso')
+    newflags = getFlagsForActiveConfig(flags,'tauIso',log)
     name = 'LLP'
     (selAcc , menuCA) = _tauPrecSeq(newflags,name,is_probe_leg)
     return menuCA
 
 def tauTrackLRTSeq(flags, is_probe_leg=False):
-    newflags = getInDetFlagsForSignature(flags,'tauLRT')
+    newflags = getFlagsForActiveConfig(flags,'tauLRT',log)
     name = 'LRT'
     (selAcc , menuCA) = _tauPrecSeq(newflags,name,is_probe_leg)
     return menuCA
