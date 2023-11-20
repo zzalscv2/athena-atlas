@@ -50,7 +50,7 @@ class FixLArElecSCCalib : public AthAlgorithm
 
 
   int  m_fixFlag ; 
-  double m_fixFactor;
+  double m_fixFactor = 0.0;
 
   std::string m_infile; 
 

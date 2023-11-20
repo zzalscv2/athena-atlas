@@ -54,24 +54,24 @@ namespace ShowerLib {
 
     IShowerLib * iterateTTree(TFile *fname)
     {
-    	IShowerLib* library = NULL;
+    	IShowerLib* library = nullptr;
     	vectorTTree ttreeVector = vectorTTreeFull();
 		vectorTTree::const_iterator libiter;
 		for (libiter = ttreeVector.begin(); libiter != ttreeVector.end(); ++libiter) {
 			library = (**libiter)(fname);
-			if (library != NULL) break;
+			if (library != nullptr) break;
 		}
 		return library;
     }
 
     IShowerLib * iterateStruct(const std::string & fname)
     {
-    	IShowerLib* library = NULL;
+    	IShowerLib* library = nullptr;
     	vectorStruct structVector = vectorStructFull();
 		vectorStruct::const_iterator libiter;
 		for (libiter = structVector.begin(); libiter != structVector.end(); ++libiter) {
 			library = (**libiter)(fname);
-			if (library != NULL) break;
+			if (library != nullptr) break;
 		}
 		return library;
     }

@@ -51,7 +51,7 @@ ShapeInfo::~ShapeInfo()
 
 bool ShapeInfo::isValid() const
 {
-  return (m_values.size() > 0);
+  return (!m_values.empty());
 }
 
 

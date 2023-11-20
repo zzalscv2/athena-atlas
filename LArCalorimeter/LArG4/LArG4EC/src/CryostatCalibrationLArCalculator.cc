@@ -32,7 +32,6 @@
 #include <climits>
 
 
-namespace Units = Athena::Units;
 
 
 namespace LArG4 {

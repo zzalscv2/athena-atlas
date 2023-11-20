@@ -23,12 +23,12 @@ LArShapeFlat::LArShapeFlat(const CondAttrListCollection* attrList)
 
 
 LArShapeFlat::ShapeRef_t LArShapeFlat::Shape(const HWIdentifier&  onId, int gain, int tbin, int/* mode*/) const {
-  if (tbin!=0) return ShapeRef_t(NULL,NULL);
+  if (tbin!=0) return ShapeRef_t(nullptr,nullptr);
   return this->ShapeByHash(m_onlineHelper->channel_Hash(onId),gain);  
 }
 
 LArShapeFlat::ShapeRef_t LArShapeFlat::ShapeDer(const HWIdentifier&  onId, int gain, int tbin, int /*mode*/) const {
-  if (tbin!=0) return ShapeRef_t(NULL,NULL);
+  if (tbin!=0) return ShapeRef_t(nullptr,nullptr);
   return this->ShapeDerByHash(m_onlineHelper->channel_Hash(onId),gain);  
 }
 

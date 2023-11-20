@@ -96,7 +96,7 @@ namespace LArG4
   G4VSensitiveDetector* DeadSDTool::makeSD() const
   {
     // Create the wrapper
-    auto sdWrapper = new CalibSDWrapper("LArDeadSDWrapper", m_hitCollName);
+    auto *sdWrapper = new CalibSDWrapper("LArDeadSDWrapper", m_hitCollName);
 
     // Create the SDs.
     sdWrapper->addSD( makeOneSD("LArDead::BarrelCryostat::Dead", &*m_embccalc, m_barCryVolumes ) );

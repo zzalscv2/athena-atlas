@@ -11,7 +11,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 //g++ -g -o mergetest.exe `root-config --libs --cflags` -L InstallArea/i686-slc5-gcc43-opt/lib/ -l DataQualityUtils LArHistMerge.version2.cxx
 
 // This file uses thread-unsafe classes from DataQualityUtils.
-#include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "TSystem.h"
@@ -32,7 +31,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #define MAXSKIPPEDFILESFRACTION 0.1
 
 TFile* openWithRetry(const char* path, const unsigned nTrys=3) {
-  TFile* f=NULL;
+  TFile* f=nullptr;
   unsigned iTry=0;
   unsigned sleepSeconds=30;
   while (!f && iTry<nTrys) {
@@ -43,7 +42,7 @@ TFile* openWithRetry(const char* path, const unsigned nTrys=3) {
       if (iTry<nTrys) {
 	std::cout << "Will re-try after " << sleepSeconds << " seconds..." << std::endl;
 	sleep(sleepSeconds);
-	f=NULL;
+	f=nullptr;
 	sleepSeconds*=2;
       }
       else {//no more attempts
@@ -58,8 +57,8 @@ class histCollection {
   
 public:
   
-  histCollection(bool debug=false) : m_dbg(debug) {};
-  void addDirectory(TDirectory* dir, std::string dirName);
+  explicit histCollection(bool debug=false) : m_dbg(debug) {};
+  void addDirectory(TDirectory* dir, const std::string& dirName);
   size_t size() {return m_data.size();};
   void addFile(TFile* in);
   void print();
@@ -77,7 +76,7 @@ private:
   };
 
   struct histDir_t {
-    histDir_t(TTree* mdIn): md(mdIn) {};
+    explicit histDir_t(TTree* mdIn): md(mdIn) {};
     std::vector<histPerDir_t> histos;
     TTree* md;
   };
@@ -232,7 +231,7 @@ void identical(TObject* a, const TObject* b) {
 histCollection::histPerDir_t::histPerDir_t(const std::string& nameIn, TObject* objIn, TTree* md, bool dbg) : 
   name (nameIn),
   obj(objIn),
-  mergeMethod(0)
+  mergeMethod(nullptr)
 {
 
   //Some sanity checks:
@@ -258,7 +257,7 @@ histCollection::histPerDir_t::histPerDir_t(const std::string& nameIn, TObject* o
   }
 
   if (dbg) std::cout << "Name:" << mdName << " mergeMethod=" << howToMerge << std::endl;
-  if (NULL!=dynamic_cast<TH1*>(obj)) {
+  if (nullptr!=dynamic_cast<TH1*>(obj)) {
     if (!strcmp(howToMerge,"<default>")) 
       mergeMethod=&defaultMerge<TH1>;
     else if (!strcmp(howToMerge,"weightedAverage")) 
@@ -278,28 +277,28 @@ histCollection::histPerDir_t::histPerDir_t(const std::string& nameIn, TObject* o
 
     else {
       std::cout << "ERROR: Unknown merging method (" << howToMerge << ") for object of type TH1 named " << nameIn << std::endl;
-      obj=NULL;
+      obj=nullptr;
     }
   }// end if TH1
-  else if (NULL!=dynamic_cast<TH2*>(obj)) {
+  else if (nullptr!=dynamic_cast<TH2*>(obj)) {
      if (!strcmp(howToMerge,"<default>")) 
       mergeMethod=&defaultMerge<TH2>;
     else if (!strcmp(howToMerge,"weightedAverage")) 
       mergeMethod=&weightedAverageTH2;
     else {
       std::cout << "ERROR: Unknown merging method (" << howToMerge << ") for object of type TH2 named " << nameIn << std::endl;
-      obj=NULL;
+      obj=nullptr;
     }
      
   }// end if TH2
   else {
     std::cout << "Object "<< name  << " has unkown type" << std::endl;  
-    obj=NULL;
+    obj=nullptr;
   }
 }
 
 
-void histCollection::addDirectory(TDirectory* dir, std::string dirName) {
+void histCollection::addDirectory(TDirectory* dir, const std::string& dirName) {
   
   TIter next( dir->GetListOfKeys() );
   TKey* key;
@@ -374,7 +373,7 @@ void histCollection::addFile(TFile* in) {
 void histCollection::write(TFile* out) {
   unsigned nWritten=0;
   unsigned nIgnored=0;
-  TDirectory* histDir=NULL;
+  TDirectory* histDir=nullptr;
   std::string lastDir;
   std::map<std::string,histDir_t>::const_iterator it=m_data.begin();
   std::map<std::string,histDir_t>::const_iterator it_e=m_data.end();
@@ -400,7 +399,7 @@ void histCollection::write(TFile* out) {
     //std::cout << "Done creating " << fulldir << std::endl;
     out->cd(fulldir.c_str());
     it->second.md->SetDirectory(histDir);
-    it->second.md->Write(0,TObject::kOverwrite);
+    it->second.md->Write(nullptr,TObject::kOverwrite);
     std::vector<histPerDir_t>::const_iterator ith=it->second.histos.begin();
     std::vector<histPerDir_t>::const_iterator ith_e=it->second.histos.end();
     for (;ith!=ith_e;++ith) {
@@ -430,7 +429,7 @@ std::vector<std::string> splitString(const std::string& in, const std::string& d
   while (pos2!=std::string::npos) {
     pos2=in.find_first_of(delim,pos1);
     const std::string sub=in.substr(pos1,pos2-pos1);
-    if (sub.size())
+    if (!sub.empty())
       retvec.push_back(sub);
     pos1=pos2+1;
   }
@@ -509,14 +508,14 @@ int main(int argc, char** argv) {
       readFromTextFile(argv[iArg],inFileNames);
       continue;
     }
-    if (!outFileName.size())
+    if (outFileName.empty())
       outFileName=argv[iArg];
     else
       inFileNames.push_back(std::string(argv[iArg]));
   }//end loop over arguments
   
   
-  if (!outFileName.size()) {
+  if (outFileName.empty()) {
     std::cout << "ERROR: No output file name given!" << std::endl;
     return -1;
   }
@@ -526,7 +525,7 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  if (!inFileNames.size()) {
+  if (inFileNames.empty()) {
     std::cout << "WARNING: No input files given! Will produce empty output file" << std::endl;
   }
 
@@ -534,7 +533,7 @@ int main(int argc, char** argv) {
   std::cout << "Number of input files: " << inFileNames.size() << std::endl;
   std::cout << "Output file: " << outFileName << std::endl;
   
-  if (baseDirs.size()==0) {
+  if (baseDirs.empty()) {
     baseDirs.push_back("LAr");
     baseDirs.push_back("CaloMonitoring/LArCellMon_NoTrigSel");
     baseDirs.push_back("CaloTopoClusters/CalBAR");
@@ -549,7 +548,7 @@ int main(int argc, char** argv) {
     //clean superfluos slash characters
     for (size_t i=0;i<baseDirs.size();++i) {
       std::vector<std::string> dirtok=splitString(baseDirs[i],std::string("/"));
-      if (dirtok.size()==0) {
+      if (dirtok.empty()) {
 	baseDirs[i].clear();
 	continue;
       }
@@ -564,7 +563,7 @@ int main(int argc, char** argv) {
   histCollection listOfHists(debug);
   listOfHists.addExclusion("/CaloMonitoring/LArCellMon_NoTrigSel/Sporadic");
 
-  TFile* in1=NULL;
+  TFile* in1=nullptr;
   std::string runDir("/");
   size_t fileIndex=0;
   unsigned nSkippedFiles=0;

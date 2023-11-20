@@ -154,7 +154,7 @@ namespace LArG4
       }
       // Gather frozen shower hits
       if(!m_fastSimSDName.empty()) {
-        auto fastSD = dynamic_cast<LArG4CalibSD*>
+        auto *fastSD = dynamic_cast<LArG4CalibSD*>
           ( G4SDManager::GetSDMpointer()->FindSensitiveDetector(m_fastSimSDName) );
         if(fastSD) {
           fastSD->EndOfAthenaEvent( &*m_hitColl, deadHitCollPtr );

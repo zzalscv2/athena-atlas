@@ -2,6 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <utility>
+
 #include "LArG4Code/LArG4SimpleSD.h"
 
 #include "LArG4Code/ILArCalculatorSvc.h"
@@ -22,7 +24,7 @@
 #endif
 
 LArG4SimpleSD::LArG4SimpleSD(G4String a_name, ILArCalculatorSvc* calc, const std::string& type, const float width)
-  : G4VSensitiveDetector(a_name)
+  : G4VSensitiveDetector(std::move(a_name))
   , m_calculator(calc)
   , m_numberInvalidHits(0)
   , m_timeBinType(LArG4SimpleSD::HitTimeBinDefault)
@@ -37,7 +39,7 @@ LArG4SimpleSD::LArG4SimpleSD(G4String a_name, ILArCalculatorSvc* calc, const std
 }
 
 LArG4SimpleSD::LArG4SimpleSD(G4String a_name, StoreGateSvc* detStore)
-  : G4VSensitiveDetector(a_name)
+  : G4VSensitiveDetector(std::move(a_name))
   , m_calculator(nullptr)
   , m_numberInvalidHits(0)
   , m_timeBinType(LArG4SimpleSD::HitTimeBinDefault)
@@ -53,15 +55,15 @@ LArG4SimpleSD::LArG4SimpleSD(G4String a_name, StoreGateSvc* detStore)
   }
 
   const LArEM_ID* larEmID = caloIdManager->getEM_ID();
-  if(larEmID==0)
+  if(larEmID==nullptr)
     throw std::runtime_error("IFastSimDedicatedSD: Invalid LAr EM ID helper");
 
   const LArFCAL_ID* larFcalID = caloIdManager->getFCAL_ID();
-  if(larFcalID==0)
+  if(larFcalID==nullptr)
     throw std::runtime_error("IFastSimDedicatedSD: Invalid FCAL ID helper");
 
   const LArHEC_ID* larHecID = caloIdManager->getHEC_ID();
-  if(larHecID==0)
+  if(larHecID==nullptr)
     throw std::runtime_error("IFastSimDedicatedSD: Invalid HEC ID helper");
 
   setupHelpers( larEmID, larFcalID, larHecID );
@@ -138,7 +140,7 @@ G4bool LArG4SimpleSD::SimpleHit( const LArG4Identifier& lar_id , G4double time ,
   // Find the set of hits for this time bin.  If this is the
   // first hit in this bin, create a new set.
     
-  hits_t* hitCollection = 0;
+  hits_t* hitCollection = nullptr;
   auto setForThisBin = m_timeBins.find( timeBin );
     
   if (setForThisBin == m_timeBins.end()) {
@@ -248,7 +250,7 @@ void LArG4SimpleSD::EndOfAthenaEvent( LArHitContainer * hitContainer )
     const hits_t* hitSet = i.second;
       
     // For each hit in the set...
-    for(auto hit : *hitSet){
+    for(auto *hit : *hitSet){
       // Because of the design, we are sure this is going into the right hit container
       hit->finalize();
       hitContainer->push_back(hit);

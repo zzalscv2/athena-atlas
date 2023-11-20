@@ -15,7 +15,7 @@ using std::endl;
 
 using namespace LArSamples;
 
-TH2D* Geo::partitionHist(PartitionId part, TString name, TString title)
+TH2D* Geo::partitionHist(PartitionId part, const TString& name, const TString& title)
 {
   TH2D* h = new TH2D(name, title, nFEBs(part), -0.5, nFEBs(part) - 0.5, nPartitionChannels(part), -0.5, nPartitionChannels(part) - 0.5);
   setBinLabels(h, part);
@@ -23,7 +23,7 @@ TH2D* Geo::partitionHist(PartitionId part, TString name, TString title)
 }
 
 
-TProfile2D* Geo::partitionProfileHist(PartitionId part, TString name, TString title)
+TProfile2D* Geo::partitionProfileHist(PartitionId part, const TString& name, const TString& title)
 {
   TProfile2D* h = new TProfile2D(name, title, nFEBs(part), -0.5, nFEBs(part) - 0.5, nPartitionChannels(part), -0.5, nPartitionChannels(part) - 0.5);
   setBinLabels(h, part);
@@ -546,7 +546,7 @@ TArrayD Geo::etaBins(CaloId calo, short layer)
 }
 
 
-TH2D* Geo::etaPhiHist(CaloId calo, short layer, TString name, TString title)
+TH2D* Geo::etaPhiHist(CaloId calo, short layer, const TString& name, const TString& title)
 {
   TArrayD etaBinArray = etaBins(calo, layer);
   short nPhiBins = nPhi(calo, layer);

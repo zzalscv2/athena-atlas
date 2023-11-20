@@ -167,7 +167,7 @@ StatusCode LArHVCondAlg::makeHVScaleCorr (const EventContext& ctx,
         IdentifierHash idHash = m_larem_id->channel_hash(id);
         unsigned int index = (unsigned int)(idHash);
         if (index<hasPathologyEM.size()) {
-          if(hasPathologyEM[index].size()) {
+          if(!hasPathologyEM[index].empty()) {
             if(hasPathologyEM[index].size()<static_cast<size_t>(abs(electPath.electInd+1)))
               hasPathologyEM[index].resize(electPath.electInd+1);
             hasPathologyEM[index][electPath.electInd]=electPath.pathologyType;
@@ -183,7 +183,7 @@ StatusCode LArHVCondAlg::makeHVScaleCorr (const EventContext& ctx,
         IdentifierHash idHash = m_larhec_id->channel_hash(id);
         unsigned int index = (unsigned int)(idHash);
         if (index<hasPathologyHEC.size()) {
-          if(hasPathologyHEC[index].size()) {
+          if(!hasPathologyHEC[index].empty()) {
             if(hasPathologyHEC[index].size()<static_cast<size_t>(abs(electPath.electInd+1)))
               hasPathologyHEC[index].resize(electPath.electInd+1);
             hasPathologyHEC[index][electPath.electInd]=electPath.pathologyType;
@@ -199,7 +199,7 @@ StatusCode LArHVCondAlg::makeHVScaleCorr (const EventContext& ctx,
         IdentifierHash idHash = m_larfcal_id->channel_hash(id);
         unsigned int index = (unsigned int)(idHash);
         if (index<hasPathologyFCAL.size()) {
-          if(hasPathologyFCAL[index].size()) {
+          if(!hasPathologyFCAL[index].empty()) {
             if(hasPathologyFCAL[index].size()<static_cast<size_t>(abs(electPath.electInd+1)))
               hasPathologyFCAL[index].resize(electPath.electInd+1);
             hasPathologyFCAL[index][electPath.electInd]=electPath.pathologyType;
@@ -313,7 +313,7 @@ StatusCode LArHVCondAlg::makeAffectedRegionInfo (const EventContext& ctx,
 
 StatusCode LArHVCondAlg::getVoltagePerLine (const EventContext& ctx,
                                             voltagePerLine_t& voltagePerLine,
-                                            addDepFcn_t addDep) const
+                                            const addDepFcn_t& addDep) const
 {
   // Do this bit unconditionally, so that dependencies are propagated correctly.
   std::vector<const CondAttrListCollection*> attrvec;
@@ -365,7 +365,7 @@ StatusCode LArHVCondAlg::fillPathAndCellHV(const CaloDetDescrManager* calodetdes
       unsigned int index = (unsigned int)(m_larem_id->channel_hash(id));
       bool hasPathology=false; 
       if (index<hasPathologyEM.size()) {
-	if (hasPathologyEM[index].size()) {
+	if (!hasPathologyEM[index].empty()) {
 	  hasPathology=true;
 	  listElec = getElecList(id,pathologies);
 	}
@@ -464,7 +464,7 @@ StatusCode LArHVCondAlg::fillPathAndCellHV(const CaloDetDescrManager* calodetdes
       unsigned int index = (unsigned int)(m_larem_id->channel_hash(id));
       bool hasPathology=false;
       if (index<hasPathologyEM.size()) {
-	if (hasPathologyEM[index].size()) {
+	if (!hasPathologyEM[index].empty()) {
 	  hasPathology=true;
 	  listElec = getElecList(id, pathologies);
 	}
@@ -570,7 +570,7 @@ StatusCode LArHVCondAlg::fillPathAndCellHV(const CaloDetDescrManager* calodetdes
     unsigned int index = (unsigned int)(m_larhec_id->channel_hash(id));
     bool hasPathology=false;
     if (index<hasPathologyHEC.size()) {
-     if (hasPathologyHEC[index].size()) {
+     if (!hasPathologyHEC[index].empty()) {
       hasPathology=true;
       listElec = getElecList(id, pathologies);
      }
@@ -633,7 +633,7 @@ StatusCode LArHVCondAlg::fillPathAndCellHV(const CaloDetDescrManager* calodetdes
     const IdentifierHash hash=m_calocellID->calo_cell_hash(id);
     bool hasPathology=false;
     if (index<hasPathologyFCAL.size()) {
-      if (hasPathologyFCAL[index].size()) {
+      if (!hasPathologyFCAL[index].empty()) {
         hasPathology=true;
         listElec = getElecList(id, pathologies);
       }
@@ -741,7 +741,7 @@ StatusCode LArHVCondAlg::dcs2LineVoltage(voltagePerLine_t& result, const std::ve
   result.clear();
 
   ATH_MSG_DEBUG("Got "<<fldvec.size()<<" DCS HV folders");
-  for(auto attrlist : fldvec) { // loop over all DCS folders
+  for(const auto *attrlist : fldvec) { // loop over all DCS folders
     CondAttrListCollection::const_iterator citr=attrlist->begin(); 
     CondAttrListCollection::const_iterator citr_e=attrlist->end();
     ATH_MSG_DEBUG("Length: "<<std::distance(citr,citr_e));

@@ -43,12 +43,12 @@ namespace ShowerLib {
       TParameter<int>* ver;
       ver = (TParameter<int>*)source->Get("version");
 
-      if ((ver == NULL) || (ver->GetVal() != LIB_VERSION)) return NULL; //Test library header = 10
+      if ((ver == nullptr) || (ver->GetVal() != LIB_VERSION)) return nullptr; //Test library header = 10
 
       TTree* TTreeMeta = (TTree*)source->Get("meta");
       TTree* TTreeLib  = (TTree*)source->Get("library");
 
-      if ((TTreeMeta == NULL) || (TTreeLib == NULL)) return NULL;
+      if ((TTreeMeta == nullptr) || (TTreeLib == nullptr)) return nullptr;
 
       std::cout << "TestShowerLib header found." << std::endl;
 
@@ -57,7 +57,7 @@ namespace ShowerLib {
 	  if (!(newlib->readMeta(TTreeMeta)) || !(newlib->read(TTreeLib))) {
 		  delete newlib;
 	      std::cout << "TestShowerLib read unsuccessful." << std::endl;
-		  return NULL;
+		  return nullptr;
 	  }
 
 	  return newlib;
@@ -80,7 +80,7 @@ namespace ShowerLib {
 
 	  if (!filestr.is_open()) {
 		  std::cout << "TestShowerLib         " << inputFile << ": bad file!" << std::endl;
-		  return NULL;
+		  return nullptr;
 	  }
 
 	  std::string instr;
@@ -92,7 +92,7 @@ namespace ShowerLib {
 	  ss >> ver;
 
 	  if (ver != LIB_VERSION) {
-		  return NULL;
+		  return nullptr;
 	  }
 
 
@@ -119,11 +119,11 @@ namespace ShowerLib {
   {
 	  if (!m_filled) {
 		  std::cout << "Library is not created for production use" << std::endl;
-		  return NULL;
+		  return nullptr;
 	  }
 
 	  std::cout << "Library is only for testing, not for production use" << std::endl;
-	  return NULL;
+	  return nullptr;
   }
 
   double TestShowerLib::getContainmentZ(const G4Track* ) const
@@ -280,7 +280,7 @@ bool TestShowerLib::storeShower(HepMC::ConstGenParticlePtr genParticle, const Sh
 
   ShowerLibStatistics* TestShowerLib::createStatistics() const
   {
-	  return NULL;
+	  return nullptr;
   }
 
 } // namespace ShowerLib

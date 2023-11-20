@@ -26,8 +26,8 @@ namespace LArSamples {
     public:
             
       static TString feedThroughName(PartitionId part, short feedThrough);
-      static TH2D* partitionHist(PartitionId part, TString name, TString title);
-      static TProfile2D* partitionProfileHist(PartitionId part, TString name, TString title);
+      static TH2D* partitionHist(PartitionId part, const TString& name, const TString& title);
+      static TProfile2D* partitionProfileHist(PartitionId part, const TString& name, const TString& title);
       static bool setBinLabels(TH2* hist, PartitionId part);
       static short nFeedThroughs(PartitionId part);
       static short nSlots(PartitionId part);
@@ -59,7 +59,7 @@ namespace LArSamples {
 
       static short etaIndex(CaloId calo, short layer, short region, short iEta);
       static TArrayD etaBins(CaloId calo, short layer);
-      static TH2D* etaPhiHist(CaloId calo, short layer, TString name, TString title);
+      static TH2D* etaPhiHist(CaloId calo, short layer, const TString& name, const TString& title);
 
       static int nChannels(CaloId calo, short layer, short region);
       static int nChannels(CaloId calo, short layer);

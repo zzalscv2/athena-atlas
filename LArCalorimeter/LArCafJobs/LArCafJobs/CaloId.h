@@ -39,11 +39,11 @@ namespace LArSamples {
       typedef LArSamples::CaloId CaloId;
       typedef LArSamples::PartitionId PartitionId;
 
-      static CaloId caloId(TString str);
+      static CaloId caloId(const TString& str);
       static TString str(CaloId id);
       static CaloId summary(CaloId id);
 
-      static PartitionId partitionId(TString str);
+      static PartitionId partitionId(const TString& str);
       static TString str(PartitionId id);
       static CaloId summary(PartitionId id);
             

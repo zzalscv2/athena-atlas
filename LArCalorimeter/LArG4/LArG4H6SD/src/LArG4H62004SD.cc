@@ -13,7 +13,7 @@
 
 #undef DEBUG_ME
 
-LArG4H62004SD::LArG4H62004SD(G4String a_name, ILArCalculatorSvc* calc, const std::string& type, const float width)
+LArG4H62004SD::LArG4H62004SD(const G4String& a_name, ILArCalculatorSvc* calc, const std::string& type, const float width)
   : LArG4SimpleSD(a_name,calc,type,width)
 {
 
@@ -59,7 +59,7 @@ G4bool LArG4H62004SD::ProcessHits(G4Step* a_step,G4TouchableHistory* /*ROhist*/)
   // A calculator can determine that a given energy deposit results
   // in more than one hit in the simulation.  FOr each such hit...
   bool result = true;
-  for(auto larhit : hdata)
+  for(const auto& larhit : hdata)
     {
       LArG4Identifier ident = larhit.id;
       if(ident[0] == 10) { // dead hit, where to put it ?

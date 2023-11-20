@@ -116,7 +116,7 @@ LArG4Identifier::element_type & LArG4Identifier::operator [] (size_type index)
 void LArG4Identifier::set (const std::string& text)
 {
   clear ();
-  if (text.size () == 0) return;
+  if (text.empty()) return;
   const char* ctext = text.c_str ();
 
   for (;;)
@@ -133,7 +133,7 @@ void LArG4Identifier::set (const std::string& text)
 
       add ((element_type) value);
 
-      if (sep == 0) break;
+      if (sep == nullptr) break;
       
       ctext = sep + 1;
     }

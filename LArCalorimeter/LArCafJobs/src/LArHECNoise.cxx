@@ -59,9 +59,9 @@ using xAOD::EventInfo;
 LArHECNoise::LArHECNoise(const std::string& name,
 			 ISvcLocator* pSvcLocator) 
   : AthAlgorithm(name, pSvcLocator),
-    m_thistSvc(0),
-    m_tree(0),
-    m_LArOnlineIDHelper(0),
+    m_thistSvc(nullptr),
+    m_tree(nullptr),
+    m_LArOnlineIDHelper(nullptr),
     m_calocell_id(nullptr),
     m_nt_run(0),
     m_nt_evtId(0),
@@ -203,12 +203,12 @@ StatusCode LArHECNoise::execute() {
          }
   }
 
-  const xAOD::EventInfo* eventInfo = 0;
+  const xAOD::EventInfo* eventInfo = nullptr;
   ATH_CHECK( evtStore()->retrieve(eventInfo) );
 
   m_nt_evtCount = 0;
-  const CaloCellContainer* cc = 0;
-  const LArRawChannelContainer* lraw = 0;
+  const CaloCellContainer* cc = nullptr;
+  const LArRawChannelContainer* lraw = nullptr;
   if (evtStore()->contains<CaloCellContainer>("AllCalo")) {
      ATH_CHECK(evtStore()->retrieve(cc, "AllCalo"));
   } else if (evtStore()->contains<LArRawChannelContainer>("LArRawChannels")){
@@ -235,7 +235,7 @@ StatusCode LArHECNoise::execute() {
   const CaloDetDescrManager* caloMgr = *caloMgrHandle;
 
 
-  const LArDigitContainer* ld = 0;
+  const LArDigitContainer* ld = nullptr;
   if (evtStore()->contains<LArDigitContainer>("LArDigitContainer")) {
       ATH_CHECK(evtStore()->retrieve(ld, "LArDigitContainer"));
   } else if (evtStore()->contains<LArDigitContainer>("LArDigitContainer_Thinned")) {

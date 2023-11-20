@@ -25,7 +25,7 @@ using namespace LArSamples;
 
 PersistentAccessor::PersistentAccessor(TTree& cellTree, TTree& eventTree, TTree* runTree, TFile* file)
   : m_cellTree(&cellTree), m_eventTree(&eventTree), m_runTree(runTree), m_file(file), 
-    m_historyCont(0), m_eventData(0), m_runData(0)
+    m_historyCont(nullptr), m_eventData(nullptr), m_runData(nullptr)
 {
   ClassCounts::incrementInstanceCount("PersistentAccessor"); 
   m_cellTree->SetBranchAddress("history", &m_historyCont);
@@ -43,12 +43,12 @@ PersistentAccessor::PersistentAccessor(TTree& cellTree, TTree& eventTree, TTree*
 
 
 PersistentAccessor::PersistentAccessor(const TString& fileName)
-  : m_cellTree(0), m_eventTree(0), m_runTree(0), m_file(0), 
-    m_historyCont(0), m_eventData(0), m_runData(0)
+  : m_cellTree(nullptr), m_eventTree(nullptr), m_runTree(nullptr), m_file(nullptr), 
+    m_historyCont(nullptr), m_eventData(nullptr), m_runData(nullptr)
 {
   ClassCounts::incrementInstanceCount("PersistentAccessor"); 
   if (TString(fileName) != "") m_file = new TFile(fileName, "RECREATE");
-  if (m_file && !m_file->IsOpen()) { delete m_file; m_file = 0; }
+  if (m_file && !m_file->IsOpen()) { delete m_file; m_file = nullptr; }
   m_cellTree = new TTree("cells", "");
   m_eventTree = new TTree("events", "");
   m_runTree = new TTree("runs", "");
@@ -65,12 +65,12 @@ PersistentAccessor::PersistentAccessor(const TString& fileName)
 PersistentAccessor* PersistentAccessor::open(const TString& fileName) 
 {
   TFile* file = TFile::Open(fileName);
-  if (!file) return 0;
-  if (!file->IsOpen()) { delete file; return 0; }
+  if (!file) return nullptr;
+  if (!file->IsOpen()) { delete file; return nullptr; }
   TTree* cellTree = (TTree*)file->Get("cells");
-  if (!cellTree) return 0;
+  if (!cellTree) return nullptr;
   TTree* eventTree = (TTree*)file->Get("events");
-  if (!eventTree) return 0;
+  if (!eventTree) return nullptr;
   TTree* runTree = (TTree*)file->Get("runs");
   PersistentAccessor* accessor = new PersistentAccessor(*cellTree, *eventTree, runTree, file);
   return accessor;
@@ -112,7 +112,7 @@ unsigned int PersistentAccessor::historySize(unsigned int i) const
 
 const EventData* PersistentAccessor::eventData(unsigned int i) const
 {
-  if (i >= nEvents()) return 0;
+  if (i >= nEvents()) return nullptr;
   m_eventTree->GetEntry(i);
   m_eventData->setRunData(runData(m_eventData->runIndex()));
   return m_eventData;
@@ -121,7 +121,7 @@ const EventData* PersistentAccessor::eventData(unsigned int i) const
 
 const RunData* PersistentAccessor::runData(unsigned int i) const
 {
-  if (i >= nRuns()) return 0;
+  if (i >= nRuns()) return nullptr;
   std::map<unsigned int, const RunData*>::const_iterator cache = m_runCache.find(i);
   if (cache != m_runCache.end()) return cache->second;
 
@@ -142,7 +142,7 @@ void PersistentAccessor::add(HistoryContainer* cont)
 {
   m_historyCont = cont;
   m_cellTree->Fill();
-  m_historyCont = 0;
+  m_historyCont = nullptr;
 }
 
 
@@ -150,7 +150,7 @@ void PersistentAccessor::addEvent(EventData* eventData)
 {
   m_eventData = eventData;
   m_eventTree->Fill();
-  m_eventData = 0;
+  m_eventData = nullptr;
 }
 
 
@@ -158,7 +158,7 @@ void PersistentAccessor::addRun(RunData* runData)
 {
   m_runData = runData;
   m_runTree->Fill();
-  m_runData = 0;
+  m_runData = nullptr;
 }
 
 
@@ -183,7 +183,7 @@ PersistentAccessor* PersistentAccessor::merge(const std::vector<const Persistent
 {
   PersistentAccessor* newAcc = new PersistentAccessor(fileName);
   unsigned int size = 0;
-  CellInfo* info = 0;
+  CellInfo* info = nullptr;
 
   int evtIndex = 0, runIndex = 0;
   std::map<std::pair<int, int>, int> evtMap;
@@ -195,7 +195,7 @@ PersistentAccessor* PersistentAccessor::merge(const std::vector<const Persistent
     if (!accessor) {
       cout << "Cannot merge: one of the inputs is null!" << endl;
       delete newAcc;
-      return 0;
+      return nullptr;
     }
     for (unsigned int i = 0; i < accessor->nRuns(); i++) {
       int run = accessor->runData(i)->run();
@@ -240,7 +240,7 @@ PersistentAccessor* PersistentAccessor::merge(const std::vector<const Persistent
       cout << "Merging channel " << i << "/" << Definitions::nChannels << " (current size = " << size << ")" << endl;
       //ClassCounts::printCountsTable();
     }
-    HistoryContainer* newHistory = 0;
+    HistoryContainer* newHistory = nullptr;
     for (const PersistentAccessor* accessor : accessors) {
       const HistoryContainer* history = accessor->historyContainer(i);
       if (!history || !history->isValid()) continue;
@@ -259,7 +259,7 @@ PersistentAccessor* PersistentAccessor::merge(const std::vector<const Persistent
          const ShapeInfo* shape = history->cellInfo()->shape(history->dataContainer(j)->gain());
          if (!shape) 
            cout << "Shape not filled for hash = " << i << ", index = " << j << ", gain = " << history->dataContainer(j)->gain() << endl;
-         info->setShape(history->dataContainer(j)->gain(), (shape ? new ShapeInfo(*shape) : 0));
+         info->setShape(history->dataContainer(j)->gain(), (shape ? new ShapeInfo(*shape) : nullptr));
         }
       }
     }
@@ -281,7 +281,7 @@ PersistentAccessor* PersistentAccessor::merge(const std::vector<TString>& inputF
     PersistentAccessor* accessor = open(inputFile);
     if (!accessor) {
       cout << "ERROR : could not open file " << inputFile << endl;
-      return 0;
+      return nullptr;
     }
     accessors.push_back(accessor);
   }

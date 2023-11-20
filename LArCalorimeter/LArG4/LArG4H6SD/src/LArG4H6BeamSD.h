@@ -23,7 +23,7 @@ class G4TouchableHistory;
 class LArG4H6BeamSD : public G4VSensitiveDetector
 {
   public:
-      LArG4H6BeamSD(G4String name, G4String colname);
+      LArG4H6BeamSD(G4String name, const G4String& colname);
       ~LArG4H6BeamSD() {}
 //
       void Initialize(G4HCofThisEvent*) override final;

@@ -34,7 +34,7 @@ namespace LArG4
   G4VSensitiveDetector* H62004EMECSDTool::makeSD() const
   {
     // Create the wrapper
-    auto sdWrapper = new SimpleSDWrapper("LArH62004EMECSDWrapper", m_hitCollName);
+    auto *sdWrapper = new SimpleSDWrapper("LArH62004EMECSDWrapper", m_hitCollName);
 
     // Add the SDs. In this case there is actually only one SD.
     sdWrapper->addSD(

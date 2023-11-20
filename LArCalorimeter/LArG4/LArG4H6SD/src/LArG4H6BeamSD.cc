@@ -4,14 +4,15 @@
 
 #include "LArG4H6BeamSD.h"
 
-#include "G4VTouchable.hh"
-#include "G4TouchableHistory.hh"
 #include "G4NavigationHistory.hh"
-#include "G4VPhysicalVolume.hh"
 #include "G4Step.hh"
 #include "G4ThreeVector.hh"
+#include "G4TouchableHistory.hh"
+#include "G4VPhysicalVolume.hh"
+#include "G4VTouchable.hh"
 #include "G4ios.hh"
 #include <iomanip>
+#include <utility>
 
 #undef DEBUG_HITS
 
@@ -22,8 +23,8 @@ const float LArG4H6BeamSD::BPC_DW = 0.6*CLHEP::mm;
 const float LArG4H6BeamSD::BPCO_WDIM = 6.0*CLHEP::cm;
 const float LArG4H6BeamSD::BPCO_DW = 0.6*CLHEP::mm;
 
-LArG4H6BeamSD::LArG4H6BeamSD(G4String name, G4String colname)
-  : G4VSensitiveDetector(name)
+LArG4H6BeamSD::LArG4H6BeamSD(G4String name, const G4String& colname)
+  : G4VSensitiveDetector(std::move(name))
   , m_FrontCollection(colname)
 {
 }

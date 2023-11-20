@@ -46,7 +46,7 @@ namespace LArG4
     m_embcalc->initializeForSDCreation();
 
     // Create the wrapper
-    auto sdWrapper = new SimpleSDWrapper("LArEMBSDWrapper", m_outputCollectionNames[0]);
+    auto *sdWrapper = new SimpleSDWrapper("LArEMBSDWrapper", m_outputCollectionNames[0]);
 
     // Add the SDs
     sdWrapper->addSD( makeOneSD("LAr::Barrel::Presampler::Module", &*m_pscalc, m_presVolumes) );

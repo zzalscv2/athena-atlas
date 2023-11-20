@@ -43,7 +43,7 @@ G4bool LArG4H6COLDTCMod0CalibCalculator::Process( const G4Step* a_step, LArG4Ide
       std::vector<LArHitData> hdata;
       if(m_Calculator->Process(a_step, hdata))
         {
-          if(hdata.size()>0) identifier = hdata[0].id;
+          if(!hdata.empty()) identifier = hdata[0].id;
         }
     }
 

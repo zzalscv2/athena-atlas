@@ -98,7 +98,7 @@ namespace G4UA
       G4cout<<"Energy dep.: "<<theStep->GetTotalEnergyDeposit()*theStep->GetTrack()->GetWeight()<<G4endl;
 
 
-      LArG4SimpleSD* lsd = 0;
+      LArG4SimpleSD* lsd = nullptr;
       if((!strncmp(vname,"LArMgr::LAr::EMEC",17)) || (!strncmp(vname,"LArMgr::LAr::HEC::Module",24)) ) {
         lsd=(LArG4SimpleSD*)tacka->GetPhysicalVolume()->GetLogicalVolume()->GetSensitiveDetector();
       }

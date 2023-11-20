@@ -76,7 +76,7 @@ namespace LArG4
   //---------------------------------------------------------------------------
   StatusCode CalibSDTool::Gather()
   {
-    auto sdWrapper = dynamic_cast<CalibSDWrapper*>( getSD() );
+    auto *sdWrapper = dynamic_cast<CalibSDWrapper*>( getSD() );
     if(!sdWrapper) {
       ATH_MSG_ERROR("Failed to cast SD to CalibSDWrapper");
       return StatusCode::FAILURE;

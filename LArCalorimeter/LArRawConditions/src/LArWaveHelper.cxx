@@ -599,7 +599,7 @@ std::vector<double> LArWaveHelper::polyfit(const std::vector<double>& X,
 {
     // to be implemented - return to avoid compiler warning RDS
     std::vector<double> dummy;
-    if(Ndeg > 2 || (Y.size() == 0) || (X.size() != Y.size())) {
+    if(Ndeg > 2 || (Y.empty()) || (X.size() != Y.size())) {
       return dummy;
     }
     switch (Ndeg) {

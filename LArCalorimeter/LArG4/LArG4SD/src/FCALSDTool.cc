@@ -46,7 +46,7 @@ namespace LArG4
   G4VSensitiveDetector* FCALSDTool::makeSD() const
   {
     // Create the wrapper
-    auto sdWrapper = new SimpleSDWrapper("LArFCALSDWrapper", m_outputCollectionNames[0]);
+    auto *sdWrapper = new SimpleSDWrapper("LArFCALSDWrapper", m_outputCollectionNames[0]);
 
     // Add the SDs
     sdWrapper->addSD( makeOneSD("LAr::FCAL::Module1::Gap", &*m_fcal1calc, m_fcal1Volumes) );

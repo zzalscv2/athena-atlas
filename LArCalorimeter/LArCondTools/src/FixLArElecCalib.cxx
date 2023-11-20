@@ -83,12 +83,11 @@
 #include "Gaudi/Property.h"
 #include "GaudiKernel/IToolSvc.h"
 
-#include "StoreGate/StoreGateSvc.h"
-#include "LArIdentifier/LArOnlineID.h"
-#include "CaloIdentifier/LArEM_ID.h"
-#include "LArIdentifier/LArOnline_SuperCellID.h"
-#include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
+#include "CaloIdentifier/LArEM_ID.h"
+#include "LArIdentifier/LArOnlineID.h"
+#include "LArIdentifier/LArOnline_SuperCellID.h"
+#include "StoreGate/StoreGateSvc.h"
 
 #include "LArRawConditions/LArDAC2uAMC.h"
 #include "LArRawConditions/LArShape32MC.h"
@@ -112,15 +111,15 @@
 FixLArElecCalib::FixLArElecCalib(const std::string& name, ISvcLocator* pSvcLocator) : 
   AthAlgorithm(name,pSvcLocator),
   m_fixFlag(0),
-  m_em_idhelper(0),
-  m_hec_idhelper(0),
-  m_fcal_idhelper(0),
-  m_online_idhelper(0),
-  m_sem_idhelper(0),
-  m_shec_idhelper(0),
-  m_sfcal_idhelper(0),
-  m_sonline_idhelper(0),
-  m_scell_idhelper(0)
+  m_em_idhelper(nullptr),
+  m_hec_idhelper(nullptr),
+  m_fcal_idhelper(nullptr),
+  m_online_idhelper(nullptr),
+  m_sem_idhelper(nullptr),
+  m_shec_idhelper(nullptr),
+  m_sfcal_idhelper(nullptr),
+  m_sonline_idhelper(nullptr),
+  m_scell_idhelper(nullptr)
 { 
 
     declareProperty("FixFlag",      m_fixFlag);
@@ -829,7 +828,7 @@ StatusCode FixLArElecCalib::fix5 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping 
      while ( infile>>str_id >>vol>>noise_p>>noise_h>>noise_m>>noise_l )
      {
        const char* ch_id = str_id.c_str();
-       if(str_id.find("A")!=0){
+       if(str_id.find('A')!=0){
 	 ATH_MSG_DEBUG(" skipping string"<<str_id);
          continue;  
        }

@@ -43,7 +43,7 @@ namespace LArG4
   G4VSensitiveDetector* H62004FCALSDTool::makeSD() const
   {
     // Create the wrapper
-    auto sdWrapper = new SimpleSDWrapper("LArH62004FCALSDWrapper", m_hitCollName);
+    auto *sdWrapper = new SimpleSDWrapper("LArH62004FCALSDWrapper", m_hitCollName);
 
     // Add the SDs
     sdWrapper->addSD( makeOneSD( "LAr::FCAL::Module1::Gap::H6", &*m_fcal1calc, m_fcal1Volumes ) );

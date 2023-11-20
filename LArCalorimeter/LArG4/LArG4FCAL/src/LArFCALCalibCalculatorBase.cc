@@ -158,7 +158,7 @@ namespace LArG4 {
       // S.M.      TransformPoint(p);
 
 
-      G4ThreeVector theLocalPoint(p);
+      const G4ThreeVector& theLocalPoint(p);
 
       // we've shifted the endcap, we have to project the geometry to a
       // different point).

@@ -11,18 +11,18 @@
 LArDSPThresholdsFlat::LArDSPThresholdsFlat():
   LArCondFlatBase("LArDSPThresholdsFlat"),
   m_nChannels(0),
-  m_ptQThr(NULL),
-  m_psamplesThr(NULL),
-  m_ptrigSumThr(NULL)
+  m_ptQThr(nullptr),
+  m_psamplesThr(nullptr),
+  m_ptrigSumThr(nullptr)
   
 {}
 
 LArDSPThresholdsFlat::LArDSPThresholdsFlat(const AthenaAttributeList* attrList):
   LArCondFlatBase("LArDSPThresholdsFlat"),
   m_nChannels(0),
-  m_ptQThr(NULL),
-  m_psamplesThr(NULL),
-  m_ptrigSumThr(NULL) 
+  m_ptQThr(nullptr),
+  m_psamplesThr(nullptr),
+  m_ptrigSumThr(nullptr) 
 {
   if (initializeBase().isFailure()) return;
   readBlob(attrList);

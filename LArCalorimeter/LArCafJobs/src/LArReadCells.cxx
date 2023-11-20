@@ -108,7 +108,7 @@ StatusCode LArReadCells::execute() {
   const ILArPedestal* larPedestal=*pedHdl;
 
 
-  const xAOD::EventInfo* eventInfo = 0;
+  const xAOD::EventInfo* eventInfo = nullptr;
   ATH_CHECK( evtStore()->retrieve( eventInfo) );
   ATH_MSG_INFO( " run number " << eventInfo->runNumber() );
   
@@ -121,7 +121,7 @@ StatusCode LArReadCells::execute() {
 
   std::vector<const LArDigit*> IndexDigit;
   int nCell = m_calo_id->calo_cell_hash_max();
-  IndexDigit.resize(nCell,NULL);
+  IndexDigit.resize(nCell,nullptr);
 
   const LArDigitContainer* digit_container;
   if (evtStore()->contains<LArDigitContainer>("FREE")) {

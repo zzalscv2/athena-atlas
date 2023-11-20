@@ -12,7 +12,7 @@
 
 LArSimpleShapeDumper::LArSimpleShapeDumper(const std::string & name, ISvcLocator * pSvcLocator) : 
   AthAlgorithm(name, pSvcLocator),
-  m_onlineHelper(0)
+  m_onlineHelper(nullptr)
 {
 }
 

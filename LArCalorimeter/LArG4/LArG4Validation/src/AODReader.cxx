@@ -18,7 +18,7 @@
 
 AODReader::AODReader (const std::string& name, ISvcLocator* pSvcLocator) 
   : AthAlgorithm(name, pSvcLocator),
-    m_nt(0)
+    m_nt(nullptr)
 {
 
 }
@@ -107,7 +107,7 @@ StatusCode AODReader::execute()
   StatusCode sc = StatusCode::SUCCESS;
 
   /// read the AOD electron container from persistecy storage
-  const ElectronContainer* elecTES = 0;
+  const ElectronContainer* elecTES = nullptr;
   sc=evtStore()->retrieve( elecTES, "ElectronAODCollection");
   if( sc.isFailure()  ||  !elecTES ) {
     msg(MSG::WARNING) << "No AOD electron container found in TDS" << endmsg;
@@ -115,7 +115,7 @@ StatusCode AODReader::execute()
   }
   msg(MSG::INFO) << "ElectronContainer successfully retrieved" << endmsg;
 
-  const McEventCollection * mcEvtColl = 0;
+  const McEventCollection * mcEvtColl = nullptr;
 
   if (( mcEvtColl = evtStore()->retrieve<const McEventCollection>() )) {
 	  msg(MSG::INFO) << "TruthParticleContainer successfully retrieved" << endmsg;
@@ -131,7 +131,7 @@ StatusCode AODReader::execute()
 	  McEventCollection::const_iterator mcTrPart = mcEvtColl->begin();
 	  if (mcTrPart != mcEvtColl->end()) {
 #ifdef HEPMC3
-		  trPart = (*mcTrPart)->particles().size()?(*mcTrPart)->particles().front():nullptr;
+		  trPart = !(*mcTrPart)->particles().empty()?(*mcTrPart)->particles().front():nullptr;
 #else
 		  trPart = (*mcTrPart)->particles_size()?*((*mcTrPart)->particles_begin()):nullptr;
 #endif
@@ -143,7 +143,7 @@ StatusCode AODReader::execute()
 	  }
   }
 
-  const Analysis::Electron * primElec = 0;
+  const Analysis::Electron * primElec = nullptr;
   
   
   /// loop over the AOD electron container,

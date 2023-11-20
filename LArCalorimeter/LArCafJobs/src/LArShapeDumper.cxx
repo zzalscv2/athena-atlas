@@ -134,7 +134,8 @@ StatusCode LArShapeDumper::start()
 
   if (m_doTrigger) {
     std::vector<std::regex> regexs;
-    for (const std::string& name : m_triggerNames) {
+    regexs.reserve(m_triggerNames.size());
+for (const std::string& name : m_triggerNames) {
       regexs.push_back(std::regex(name));
     }
 
@@ -210,7 +211,7 @@ StatusCode LArShapeDumper::execute()
 
   ATH_MSG_VERBOSE ( "======== executing event "<< m_count << " ========" );
 
-  const xAOD::EventInfo* eventInfo = 0;
+  const xAOD::EventInfo* eventInfo = nullptr;
   ATH_CHECK( evtStore()->retrieve(eventInfo) );
   
   int event     = eventInfo->eventNumber();
@@ -246,7 +247,7 @@ StatusCode LArShapeDumper::execute()
    }
 
 
-  EventData* eventData = 0;
+  EventData* eventData = nullptr;
   int eventIndex = -1;
   if (m_doAllEvents) {
     eventIndex = makeEvent(eventData, run, event, lumiBlock, bunchId);
@@ -254,18 +255,18 @@ StatusCode LArShapeDumper::execute()
   }
 
   const LArDigitContainer* larDigitContainer;
-  if (m_digitsKey != "")
+  if (!m_digitsKey.empty())
     ATH_CHECK( evtStore()->retrieve(larDigitContainer, m_digitsKey) );
   else
     ATH_CHECK( evtStore()->retrieve(larDigitContainer) );
 
-  if (larDigitContainer->size() == 0) {
+  if (larDigitContainer->empty()) {
     ATH_MSG_WARNING ( "LArDigitContainer with key=" << m_digitsKey << " is empty!" );
     m_nNoDigits++;
     return StatusCode::SUCCESS;
   }
 
-  const LArRawChannelContainer* rawChannelContainer = 0;
+  const LArRawChannelContainer* rawChannelContainer = nullptr;
   ATH_CHECK( evtStore()->retrieve(rawChannelContainer, m_channelsKey) );
   
   
@@ -297,7 +298,7 @@ StatusCode LArShapeDumper::execute()
      return StatusCode::FAILURE;
   }
   
-  const LArOFIterResultsContainer* ofIterResult = 0;
+  const LArOFIterResultsContainer* ofIterResult = nullptr;
   if (m_doOFCIter) {
     if (evtStore()->contains<LArOFIterResultsContainer> ("LArOFIterResult")) {
        ATH_CHECK( evtStore()->retrieve(ofIterResult, "LArOFIterResult") );
@@ -306,7 +307,7 @@ StatusCode LArShapeDumper::execute()
     }
   }
 
-  const LArFebErrorSummary* larFebErrorSummary = 0;
+  const LArFebErrorSummary* larFebErrorSummary = nullptr;
   ATH_CHECK( evtStore()->retrieve(larFebErrorSummary, "LArFebErrorSummary") );
   const std::map<unsigned int,uint16_t>& febErrorMap = larFebErrorSummary->get_all_febs();
   std::map<unsigned int, const LArRawChannel*> channelsToKeep;
@@ -327,7 +328,7 @@ StatusCode LArShapeDumper::execute()
     channelsToKeep[hash] = &*channel;
     if (m_dumpChannelInfos) {
       HistoryContainer* histCont = m_samples->hist_cont(hash);
-      CellInfo* info = 0;
+      CellInfo* info = nullptr;
       if (!histCont) {
         HWIdentifier channelID = channel->hardwareID();
         const Identifier id = cabling->cnvToIdentifier(channelID);
@@ -389,10 +390,10 @@ StatusCode LArShapeDumper::execute()
     }
    
     const Identifier id = cabling->cnvToIdentifier(channelID);
-    const CaloDetDescrElement* caloDetElement = 0;
+    const CaloDetDescrElement* caloDetElement = nullptr;
   
     HistoryContainer* histCont = m_samples->hist_cont(hash);
-    CellInfo* info = 0;
+    CellInfo* info = nullptr;
     if (!histCont) {
       if (!caloDetElement) caloDetElement = caloMgr->get_element(id);
       info = m_dumperTool->makeCellInfo(channelID, id, caloDetElement);
@@ -485,7 +486,7 @@ StatusCode LArShapeDumper::finalize()
   int n = 0;
   for (unsigned int i = 0; i < m_samples->nChannels(); i++)
     if (m_samples->historyContainer(i)) {
-      if (m_samples->historyContainer(i)->cellInfo() == 0)
+      if (m_samples->historyContainer(i)->cellInfo() == nullptr)
 	ATH_MSG_INFO ( "Cell with no cellInfo at index " << i << " !!" );
       //else if (m_samples->historyContainer(i)->cellInfo()->shape() == 0)
 	//msg() << MSG::INFO << "Cell with no ShapeInfo at index " << i << " !!" << endmsg;
@@ -523,7 +524,7 @@ int LArShapeDumper::makeEvent(EventData*& eventData,
 {
   std::vector<unsigned int> triggerWords;
   if (m_doTrigger) {
-    const ROIB::RoIBResult* l1Result = 0;
+    const ROIB::RoIBResult* l1Result = nullptr;
     if (evtStore()->retrieve(l1Result).isFailure() || !l1Result) {
       ATH_MSG_FATAL ( "Could not retrieve RoIBResult!" );
       return -1;

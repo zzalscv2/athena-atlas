@@ -236,7 +236,7 @@ StatusCode LArOFCCondAlg::execute() {
                 //:::::::::::::::::::::::::::::::
                 //protection against missing data
                 //:::::::::::::::::::::::::::::::
-                if(Shape.size()==0 || ShapeDer.size()==0 || AutoCorr.size()==0)
+                if(Shape.size()==0 || ShapeDer.size()==0 || AutoCorr.empty())
                 {
                     ATH_MSG_WARNING("Some data are missing -> OFC will be empty for "
                             <<chid<<" at gain "<<igain );

@@ -22,7 +22,7 @@ class LArG4TBECBeamChCalculator;
 class LArG4TBECBeamChSensitiveDetector : public G4VSensitiveDetector
 {
 public:
-  LArG4TBECBeamChSensitiveDetector(G4String name);//,
+  LArG4TBECBeamChSensitiveDetector(const G4String& name);//,
   ~LArG4TBECBeamChSensitiveDetector();
 
   // The required functions for all sensitive detectors:

@@ -48,24 +48,24 @@ namespace LArG4
   G4VSensitiveDetector* H62004InactiveSDTool::makeSD() const
   {
     // Create the wrapper
-    auto sdWrapper = new CalibSDWrapper("LArH62004InactiveSDWrapper", m_hitCollName);
+    auto *sdWrapper = new CalibSDWrapper("LArH62004InactiveSDWrapper", m_hitCollName);
 
     // Add the SDs.
     // Lots of singleton calculators !!!
 
-    if (m_emecVolumes.size() > 0) {
+    if (!m_emecVolumes.empty()) {
       sdWrapper->addSD( makeOneSD(
                                   "LAr::EMEC::InnerModule::Inactive::H6", &*m_emepiwcalc, m_emecVolumes ) );
     }
-    if (m_hecVolumes.size() > 0) {
+    if (!m_hecVolumes.empty()) {
       sdWrapper->addSD( makeOneSD(
                                   "LAr::HEC::Local::Inactive::H6", &*m_heccalc, m_hecVolumes ) );
     }
-    if (m_fcal1Volumes.size() > 0) {
+    if (!m_fcal1Volumes.empty()) {
       sdWrapper->addSD( makeOneSD(
                                   "LAr::FCAL::Inactive1::H6", &*m_fcal1calc, m_fcal1Volumes ) );
     }
-    if (m_fcal2Volumes.size() > 0) {
+    if (!m_fcal2Volumes.empty()) {
       sdWrapper->addSD( makeOneSD(
                                   "LAr::FCAL::Inactive2::H6", &*m_fcal2calc, m_fcal2Volumes ) );
     }

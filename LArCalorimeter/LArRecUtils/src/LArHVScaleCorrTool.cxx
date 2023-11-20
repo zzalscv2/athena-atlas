@@ -316,7 +316,7 @@ void LArHVScaleCorrTool::buildFixHVList(const std::vector<std::string>& fixHVStr
   m_HVfix.clear();
   std::vector<std::string>::const_iterator itrStringID=fixHVStrings.begin();
   for (;itrStringID!=fixHVStrings.end();++itrStringID) {
-    std::string theString=*itrStringID;
+    const std::string& theString=*itrStringID;
     std::stringstream is;
     is << theString << std::endl;
   

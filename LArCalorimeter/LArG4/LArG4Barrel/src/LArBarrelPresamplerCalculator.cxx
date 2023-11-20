@@ -352,7 +352,7 @@ G4bool LArBarrelPresamplerCalculator::Process(const G4Step* a_step, std::vector<
 #endif
   }
 
-  if (hdata.size()>0) return true;
+  if (!hdata.empty()) return true;
   else           return false;
 
 }

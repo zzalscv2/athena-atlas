@@ -57,13 +57,13 @@ FILE * HVHelper::OpenFileAndCheckVersion(const G4String &version)
     ATH_MSG_INFO("reading maps from file: " << mapLocation);
 
     FILE *F = fopen(mapLocation.c_str(), "r");
-    if(F == 0){
+    if(F == nullptr){
         ATH_MSG_ERROR("cannot open EMEC HV Map file " << mapLocation);
         ATH_MSG_ERROR("trying to read the map from local file"
                       << localFile);
         F = fopen(localFile.c_str(), "r");
     }
-    if(F == 0){
+    if(F == nullptr){
         ATH_MSG_ERROR("Cannot open map file " << localFile);
         ATH_MSG_FATAL("Cannot obtain HV maps");
         G4Exception("LArG4::EC::HVHelper", "NoHVMap", FatalException,
@@ -203,7 +203,7 @@ void HVHelper::GetMapFromDB(void)
 
   const G4bool isInner = lwc()->GetisInner();
   // get EMECHV Manager
-  const LArHVManager *manager = 0;
+  const LArHVManager *manager = nullptr;
   if(pDetStore->retrieve(manager) == StatusCode::SUCCESS){
     const EMECHVManager& hvManager = manager->getEMECHVManager(
       isInner? EMECHVModule::INNER: EMECHVModule::OUTER

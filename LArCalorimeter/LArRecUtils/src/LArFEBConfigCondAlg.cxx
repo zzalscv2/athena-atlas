@@ -18,7 +18,7 @@ StatusCode LArFEBConfigCondAlg::initialize() {
 
   ATH_CHECK(detStore()->retrieve(m_onlineID,"LArOnlineID"));
 
-  if (m_listOfFolders.size()==0) {
+  if (m_listOfFolders.empty()) {
     ATH_MSG_WARNING( "List of folders is emtpy, do nothing");
     return StatusCode::SUCCESS;
   }
@@ -61,7 +61,7 @@ StatusCode LArFEBConfigCondAlg::execute(const EventContext& ctx) const {
   LArFebConfig* p_febConfig = febConfig.get();
 
   unsigned nFebs=0;
-  for(auto dh: attrvec){
+  for(const auto *dh: attrvec){
     CondAttrListCollection::const_iterator chanit=dh->begin();
     CondAttrListCollection::const_iterator chanit_e=dh->end();
     for (;chanit!=chanit_e;++chanit) {

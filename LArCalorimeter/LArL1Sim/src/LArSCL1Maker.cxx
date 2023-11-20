@@ -61,15 +61,15 @@ LArSCL1Maker::LArSCL1Maker(const std::string& name, ISvcLocator* pSvcLocator) :
   AthReentrantAlgorithm(name, pSvcLocator)
   //, p_triggerTimeTool()
   , m_scidtool("CaloSuperCellIDTool")
-  , m_scHelper(0)
-  , m_OnlSCHelper(0)
+  , m_scHelper(nullptr)
+  , m_OnlSCHelper(nullptr)
   , m_incSvc("IncidentSvc",name)
 {
 //
 // ........ default values of private data
 //
 
-  m_chronSvc              = 0;
+  m_chronSvc              = nullptr;
   m_useTriggerTime        = false;
   //m_triggerTimeToolName   = "CosmicTriggerTimeTool";
 
@@ -77,7 +77,7 @@ LArSCL1Maker::LArSCL1Maker(const std::string& name, ISvcLocator* pSvcLocator) :
   m_BeginRunPriority      = 100;
 
   //m_ttSvc                 = 0;
-  m_scHelper            = 0;
+  m_scHelper            = nullptr;
 
   m_NoiseOnOff               = true;
   m_PileUp                   = false;
@@ -236,7 +236,7 @@ StatusCode LArSCL1Maker::execute(const EventContext& context) const
   SG::ReadHandle<LArDigitContainer> bkgDigits(m_bkgDigitsKey,context);
   bkgDigitsPtr = bkgDigits.cptr();
   unsigned int digitCount(0);
-  for( const auto bkgDigit : *bkgDigitsPtr ){
+  for( const auto *const bkgDigit : *bkgDigitsPtr ){
         IDtoIndexMap.insert({bkgDigit->channelID(),digitCount});
 	digitCount++;
   }
@@ -257,11 +257,11 @@ StatusCode LArSCL1Maker::execute(const EventContext& context) const
   ATH_MSG_DEBUG("Trigger time used : " << trigtime);
 */
 
-  auto fracS = this->retrieve(context,m_fracSKey);
-  auto pedestal = this->retrieve(context,m_pedestalSCKey);
-  auto larnoise = this->retrieve(context,m_noiseSCKey);
-  auto autoCorrNoise = this->retrieve(context,m_autoCorrNoiseSCKey);
-  auto adc2mev = this->retrieve(context,m_adc2mevSCKey);
+  const auto *fracS = this->retrieve(context,m_fracSKey);
+  const auto *pedestal = this->retrieve(context,m_pedestalSCKey);
+  const auto *larnoise = this->retrieve(context,m_noiseSCKey);
+  const auto *autoCorrNoise = this->retrieve(context,m_autoCorrNoiseSCKey);
+  const auto *adc2mev = this->retrieve(context,m_adc2mevSCKey);
 
 
   SG::WriteHandle<LArDigitContainer> scContainerHandle( m_sLArDigitsContainerKey, context);
@@ -333,7 +333,7 @@ StatusCode LArSCL1Maker::execute(const EventContext& context) const
   for( ; it!=it_end;++it) {
     const LArHitList& hitlist = hitmapPtr->GetCell(it);
     const std::vector<std::pair<float,float> >& timeE = hitlist.getData();
-    if (timeE.size() > 0 ) {
+    if (!timeE.empty() ) {
       Identifier cellId = m_OflHelper->cell_id(IdentifierHash(it));
       Identifier scId = m_scidtool->offlineToSuperCellID(cellId);
       IdentifierHash scHash = m_scHelper->calo_cell_hash(scId) ;
@@ -472,7 +472,7 @@ void LArSCL1Maker::ConvertHits2Samples(const EventContext& context, const HWIden
 
 // ........ retrieve data (1/2) ................................
 //
-   auto shapes = this->retrieve(context,m_shapesKey);
+   const auto *shapes = this->retrieve(context,m_shapesKey);
    ILArShape::ShapeRef_t Shape = shapes->Shape(hwSC,igain);
    ILArShape::ShapeRef_t ShapeDer = shapes->ShapeDer(hwSC,igain);
 

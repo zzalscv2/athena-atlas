@@ -17,10 +17,10 @@ MapEta::MapEta(int isampling)
     m_init (0),
     m_nx (0),
     m_ny (0),
-    m_resp (0),
-    m_xt0 (0),
-    m_xt1 (0),
-    m_xt2 (0)
+    m_resp (nullptr),
+    m_xt0 (nullptr),
+    m_xt1 (nullptr),
+    m_xt2 (nullptr)
 {
   Initialize(isampling);
 }

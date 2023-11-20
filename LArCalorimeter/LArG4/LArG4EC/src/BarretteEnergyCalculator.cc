@@ -216,7 +216,7 @@ void EnergyCalculator::SetConst_OuterBarrett(void){
 }
 // ****************************************************************************
 G4bool EnergyCalculator::GetCompartment_Barrett(
-                                                G4ThreeVector pforcell, G4double r_inb, G4double z_inb, G4double eta_inb,
+                                                const G4ThreeVector& pforcell, G4double r_inb, G4double z_inb, G4double eta_inb,
                                                 G4int &b_compartment, G4int &etabin) const {
   // ****************************************************************************
 
@@ -602,7 +602,7 @@ G4bool EnergyCalculator::FindIdentifier_Barrett(
   const G4ThreeVector startPoint =  pre_step_point->GetPosition();
   const G4ThreeVector   endPoint = post_step_point->GetPosition();
   //	G4ThreeVector          p = 0.5 *(startPoint+endPoint);
-  const G4ThreeVector p = startPoint; // bec. middle point maybe out of volume
+  const G4ThreeVector& p = startPoint; // bec. middle point maybe out of volume
 
   // transform point to the coord system of Barrett::Module::Phidiv (alias local)
 

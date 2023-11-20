@@ -244,7 +244,7 @@ SimpleShape* AbsShape::resample(unsigned int nPts) const
   for (unsigned int i = 0; i < nPts; i++, t += dT) {
     double val, err;
     int inRange = interpolate(t, val, err);
-    if (inRange != 0) return 0;
+    if (inRange != 0) return nullptr;
     values.push_back(val);
     errors.push_back(err);
   }

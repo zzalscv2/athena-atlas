@@ -144,7 +144,7 @@ private:
   using addDepFcn_t = std::function<const EventIDRange& (SG::ReadCondHandle<CondAttrListCollection>& h)>;
   StatusCode getVoltagePerLine (const EventContext& ctx,
                                 voltagePerLine_t& voltagePerLine,
-                                addDepFcn_t addDep) const;
+                                const addDepFcn_t& addDep) const;
 
   /// Add voltage/weight for a sub-gap of a cell 
   void addHV(voltageCell_t& v, float hv, float weight) const;

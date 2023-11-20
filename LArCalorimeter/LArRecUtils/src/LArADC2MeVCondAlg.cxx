@@ -43,10 +43,10 @@ StatusCode LArADC2MeVCondAlg::initialize() {
   ATH_CHECK(m_lArRampKey.initialize());
 
   //The following two are optional (not used for MC and/or SuperCells)
-  if (m_lArMphysOverMcalKey.key().size()) {
+  if (!m_lArMphysOverMcalKey.key().empty()) {
     ATH_CHECK(m_lArMphysOverMcalKey.initialize()); 
   }
-  if (m_lArHVScaleCorrKey.key().size()) {
+  if (!m_lArHVScaleCorrKey.key().empty()) {
     ATH_CHECK(m_lArHVScaleCorrKey.initialize());   
   }
 
@@ -100,14 +100,14 @@ StatusCode LArADC2MeVCondAlg::execute(const EventContext& ctx) const{
   }
   //The following two are optional (not used for MC and/or SuperCells)
   const ILArMphysOverMcal* larmPhysOverMCal=nullptr;
-  if (m_lArMphysOverMcalKey.key().size()) {
+  if (!m_lArMphysOverMcalKey.key().empty()) {
     SG::ReadCondHandle<ILArMphysOverMcal> mphysOverMcalHdl{m_lArMphysOverMcalKey,ctx};
     larmPhysOverMCal=*mphysOverMcalHdl;
     writeHandle.addDependency(mphysOverMcalHdl);
   }//end if have MphysOverMcal
 
   const ILArHVScaleCorr* larHVScaleCorr=nullptr;
-  if (m_lArHVScaleCorrKey.key().size()) {
+  if (!m_lArHVScaleCorrKey.key().empty()) {
     SG::ReadCondHandle<ILArHVScaleCorr> HVScaleCorrHdl{m_lArHVScaleCorrKey,ctx};
     larHVScaleCorr=*HVScaleCorrHdl;
     writeHandle.addDependency(HVScaleCorrHdl);
