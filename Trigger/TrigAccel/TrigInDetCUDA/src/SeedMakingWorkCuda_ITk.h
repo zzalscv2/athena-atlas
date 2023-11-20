@@ -5,12 +5,17 @@
 #ifndef TRIGINDETCUDA_SEEDMAKINGWORKCUDA_ITK_H
 #define TRIGINDETCUDA_SEEDMAKINGWORKCUDA_ITK_H
 
-#include <vector>
 
-#include "tbb/concurrent_vector.h"
-#include "device_context.h"
-#include "TrigAccelEvent/Work.h"
-#include "TrigAccelEvent/WorkFactory.h"
+
+#include "tbb/concurrent_vector.h" 
+
+#include "TrigAccelEvent/Work.h" //base class
+
+#include <cstdio> // for printf
+#include <memory> // for shared_ptr
+
+class SeedMakingDeviceContext;
+class SeedMakingManagedDeviceContext;
 
 
 class SeedMakingWorkCudaITk : public TrigAccel::Work{
@@ -70,7 +75,7 @@ private:
   std::shared_ptr<TrigAccel::OffloadBuffer> m_input, m_output;
   tbb::concurrent_vector<WorkTimeStamp>* m_timeLine;
 
-  float m_CovMS, m_ptCoeff, m_minPt2, m_ptCoeff2, m_maxD0; 
+  float m_CovMS{}, m_ptCoeff{}, m_minPt2{}, m_ptCoeff2{}, m_maxD0{}; 
 };
 
 #endif

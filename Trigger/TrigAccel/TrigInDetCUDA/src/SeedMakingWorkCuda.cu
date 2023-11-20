@@ -13,6 +13,8 @@
 #include <cmath>
 #include <iostream>
 #include <algorithm>
+#include "device_context.h" //for SeedMakingDeviceContext
+
 
 #include "DoubletCountingKernelCuda.cuh"
 #include "DoubletMakingKernelCuda.cuh"

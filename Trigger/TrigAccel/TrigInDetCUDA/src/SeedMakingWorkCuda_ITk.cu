@@ -9,7 +9,7 @@
 #include "TrigAccelEvent/TrigITkAccelEDM.h"
 #include "SeedMakingWorkCuda_ITk.h"
 
-#include "device_context.h"
+#include "device_context.h" //for SeedMakingDeviceContext
 #include "tbb/tick_count.h"
 #include <cstring>
 #include <cmath>
@@ -173,8 +173,7 @@ SeedMakingWorkCudaManagedITk::SeedMakingWorkCudaManagedITk(unsigned int id, Seed
   m_workId(id),
   m_context(ctx), 
   m_input(data),
-  m_timeLine(TL)
- {
+  m_timeLine(TL){
   
   m_output = std::make_shared<TrigAccel::OffloadBuffer>(sizeof(TrigAccel::ITk::OUTPUT_SEED_STORAGE));//output data
 }
