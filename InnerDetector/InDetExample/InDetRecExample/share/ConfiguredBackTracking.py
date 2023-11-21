@@ -177,7 +177,6 @@ class ConfiguredBackTracking:
                                                                    OutputSegments        = False,
                                                                    InputSegmentsLocation = InDetKeys.TRT_Segments(),
                                                                    OutputTracksLocation  = self.__TRTSeededTracks,
-                                                                   CaloClusterEt         = NewTrackingCuts.minRoIClusterEt(),
                                                                    EMROIPhiRZContainer   = "InDetCaloClusterROIPhiRZ%.0fGeVUnordered" % (NewTrackingCuts.minRoIClusterEt()/Units.GeV)
                                                                    )
          

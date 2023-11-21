@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -81,12 +81,9 @@ protected:
   ///////////////////////////////////////////////////////////////////
   /* Protected data                                                */
   ///////////////////////////////////////////////////////////////////
-  int m_nprint;
-  int m_ntracks;      /** Number of tracks found */
   bool m_doRefit;     /** Do final careful refit of tracks */
   bool m_doExtension; /** Find the TRT extension of the Si track segment */
-  bool
-    m_rejectShortExten; /** use extension only if better than original track */
+  bool m_rejectShortExten; /** use extension only if better than original track */
   bool m_doStat;        /** Statistics of final tracks */
   bool m_saveTRT;       /** Output stand-alone TRT segments */
   int m_MaxSegNum;      /** Maximum number of segments to be handled */
@@ -143,7 +140,6 @@ protected:
     "Region selector service instance"
   };
 
-  float m_clusterEt; //!< min Et of CaloCluster for ROISeeding
   float m_deltaEta;  //!< delta Eta used for RoI creation
   float m_deltaPhi;  //!< delta Phi used for RoI creation
   float m_deltaZ;    //!< delta Z used for RoI creation
