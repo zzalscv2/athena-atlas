@@ -93,12 +93,13 @@ PixelClusterCnv_p3::createPixelCluster (const InDet::PixelCluster_p3* persObj,
   else 
     totalToT    = (persObj->m_properties & 0xFFFFFF); 
 
+  auto chargeList = persObj->m_chargeList;
   InDet::PixelCluster clus (clusId,
                             localPos,
                             std::move(rdoList),
                             ((persObj->m_properties)>>28) & 0xF, // lvl1a
                             totalToT,
-                            persObj->m_chargeList,
+                            std::move(chargeList),
                             totalCharge,
                             width,
                             detEl,

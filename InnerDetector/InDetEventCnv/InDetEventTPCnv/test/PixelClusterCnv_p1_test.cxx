@@ -109,10 +109,10 @@ void test1()
 
   InDet::PixelCluster trans1 (Identifier (1234),
                               locpos,
-                              rdoList,
+                              std::vector<Identifier>(rdoList),
                               13,  // lvl1
-                              totList,
-                              chargeList,
+                              std::vector<int>(totList),
+                              std::vector<float>(chargeList),
                               width,
                               nullptr,
                               Amg::MatrixX(cov),
@@ -127,10 +127,10 @@ void test1()
 
   InDet::PixelCluster trans2 (Identifier (1234),
                               locpos,
-                              rdoList,
+                              std::vector<Identifier>(rdoList),
                               13,  // lvl1
                               std::vector<int>(),
-                              chargeList,
+                              std::vector<float>(chargeList),
                               width,
                               nullptr,
                               Amg::MatrixX(cov),

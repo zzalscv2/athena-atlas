@@ -48,13 +48,13 @@ constexpr double ONE_TWELFTH = 1./12.;
 InDet::PixelCluster newInDetpixelCluster(const Identifier& RDOId,
 					  const Amg::Vector2D& locpos,
 					  const Amg::Vector3D& globpos,
-					  const std::vector<Identifier>& rdoList,
+					  std::vector<Identifier>&& rdoList,
 					  const int lvl1a,
-					  const std::vector<int>& totList,
-					  const std::vector<float>& chargeList,
+					  std::vector<int>&& totList,
+					  std::vector<float>&& chargeList,
 					  const InDet::SiWidth& width,
 					  const InDetDD::SiDetectorElement* detEl,
-					  const Amg::MatrixX& locErrMat,
+					  Amg::MatrixX&& locErrMat,
 					  const float omegax,
 					  const float omegay,
 					  bool split,
@@ -64,13 +64,13 @@ InDet::PixelCluster newInDetpixelCluster(const Identifier& RDOId,
     return InDet::PixelCluster(RDOId,
 				   locpos,
 				   globpos,
-				   rdoList,
+				   std::move(rdoList),
 				   lvl1a,
-				   totList,
-				   chargeList,
+				   std::move(totList),
+				   std::move(chargeList),
 				   width,
 				   detEl,
-				   locErrMat,
+				   std::move(locErrMat),
 				   omegax,
 				   omegay,
 				   split,
@@ -194,13 +194,13 @@ StatusCode  ClusterMakerTool::initialize(){
 //       no magnetic field
 // - const reference to a PixelID helper class
 
-template <typename ClusterType, typename CreatorType>
+template <typename ClusterType, typename  IdentifierVec, typename ToTList>
 ClusterType ClusterMakerTool::makePixelCluster(
                          const Identifier& clusterID,
                          const Amg::Vector2D& localPos,
-                         const std::vector<Identifier>& rdoList,
+                         IdentifierVec&& rdoList,
                          const int lvl1a,
-                         const std::vector<int>& totList,
+                         ToTList&& totList,
                          const SiWidth& width,
                          const InDetDD::SiDetectorElement* element,
                          bool  ganged,
@@ -209,10 +209,9 @@ ClusterType ClusterMakerTool::makePixelCluster(
                          bool split,
                          double splitProb1,
                          double splitProb2,
-                         CreatorType clusterCreator,
                          const PixelChargeCalibCondData *calibData,
-                         const PixelOfflineCalibData *offlineCalibData) const{
-
+                         const PixelOfflineCalibData *offlineCalibData,
+                         xAOD::PixelCluster* cluster) const{
 
   ATH_MSG_VERBOSE("ClusterMakerTool called, number ");
   if ( errorStrategy==2 && m_forceErrorStrategy1B ) errorStrategy=1;
@@ -372,12 +371,36 @@ ClusterType ClusterMakerTool::makePixelCluster(
     break;
   }
 
-  return clusterCreator(newClusterID,
+  //1) We want to move always for the Trk::PixelCluster
+  //2) We forward the  rdoList and chargeList that could have be passed
+  // different ways.
+  //
+  static_assert(std::is_same_v<ClusterType, PixelCluster> ||
+                    std::is_same_v<std::remove_pointer_t<ClusterType>,
+                                   xAOD::PixelCluster>,
+                "Not an InDet::PixelCluster or xAOD::PixelCluster");
+  if constexpr (std::is_same<ClusterType, InDet::PixelCluster>::value) {
+  return newInDetpixelCluster(newClusterID, locpos,
+                              globalPos,
+                              std::forward<IdentifierVec>(rdoList),
+                              lvl1a,
+                              std::forward<ToTList>(totList),
+                              std::move(chargeList),
+                              width,
+                              element,
+                              std::move(errorMatrix),
+                              omegax,
+                              omegay,
+                              split,
+                              splitProb1,
+                              splitProb2);
+  } else{
+  return AddNewxAODpixelCluster(*cluster)(newClusterID,
 			locpos,
 			globalPos,
-			rdoList,
+			std::forward<IdentifierVec>(rdoList),
 			lvl1a,
-			totList,
+			std::forward<ToTList>(totList),
 			chargeList,
 			width,
 			element,
@@ -387,14 +410,15 @@ ClusterType ClusterMakerTool::makePixelCluster(
 			split,
 			splitProb1,
 			splitProb2);
+  }
 }
 
 PixelCluster ClusterMakerTool::pixelCluster(
     const Identifier& clusterID,
     const Amg::Vector2D& localPos,
-    const std::vector<Identifier>& rdoList,
+    std::vector<Identifier>&& rdoList,
     const int lvl1a,
-    const std::vector<int>& totList,
+    std::vector<int>&& totList,
     const SiWidth& width,
     const InDetDD::SiDetectorElement* element,
     bool ganged,
@@ -406,25 +430,23 @@ PixelCluster ClusterMakerTool::pixelCluster(
     const PixelChargeCalibCondData *calibData,
     const PixelOfflineCalibData *offlineCalibData) const
 {
-    return makePixelCluster<PixelCluster>(
-	clusterID,
-	localPos,
-	rdoList,
-	lvl1a,
-	totList,
-	width,
-	element,
-	ganged,
-	errorStrategy,
-	pixelID,
-	split,
-	splitProb1,
-	splitProb2,
-	newInDetpixelCluster,
-  calibData,
-  offlineCalibData);
+  return makePixelCluster<PixelCluster>(
+      clusterID,
+      localPos,
+      std::move(rdoList),
+      lvl1a,
+      std::move(totList),
+      width,
+      element,
+      ganged,
+      errorStrategy,
+      pixelID,
+      split,
+      splitProb1,
+      splitProb2,
+      calibData,
+      offlineCalibData);
 }
-
 
 xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
     xAOD::PixelCluster& cluster,
@@ -457,9 +479,9 @@ xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
 	split,
 	splitProb1,
 	splitProb2,
-	AddNewxAODpixelCluster(cluster),
 	calibData,
-	offlineCalibData);
+	offlineCalibData,
+  &cluster);
 }
 
 // Computes global position and errors for SCT cluster.
