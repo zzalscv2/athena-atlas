@@ -9,7 +9,7 @@ from TriggerMenuMT.HLT.Config.MenuComponents import InEventRecoCA, SelectionCA, 
 
 
 @AccumulatorCache
-def AFPTrkRecoBaseSequenceCA(flags):
+def AFPTrkRecoBaseSequenceCfg(flags):
     recoAcc = InEventRecoCA(name='AFPTrackingFS')
 
     if not flags.Input.isMC:
@@ -39,11 +39,11 @@ def AFPTrkRecoBaseSequenceCA(flags):
 
 
 @AccumulatorCache
-def AFPTrkSequence(flags):
+def AFPTrkSequenceCfg(flags):
     def trigStreamerAFPHypoTool(chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict['chainName'])
 
-    recoAcc = AFPTrkRecoBaseSequenceCA(flags)
+    recoAcc = AFPTrkRecoBaseSequenceCfg(flags)
 
     hypo = CompFactory.TrigStreamerHypoAlg('AFPPassThroughHypo')
 
@@ -98,7 +98,7 @@ def TrigAFPDijetComboHypoToolCfg(flags, chainDict):
 
 
 @AccumulatorCache
-def AFPGlobalRecoSequenceCA(flags):
+def AFPGlobalRecoSequenceCfg(flags):
     recoAcc = InEventRecoCA(name='AFPGlobalFS')
 
     # ToF Tracks reconstruction
@@ -120,11 +120,11 @@ def AFPGlobalRecoSequenceCA(flags):
 
 
 @AccumulatorCache
-def AFPGlobalSequence(flags):
+def AFPGlobalSequenceCfg(flags):
     def AFPTOFHypoToolGen(chain_dict):
         return CompFactory.TrigAFPToFHypoTool(chain_dict['chainName'])
 
-    recoAcc = AFPGlobalRecoSequenceCA(flags)
+    recoAcc = AFPGlobalRecoSequenceCfg(flags)
 
     hypo = CompFactory.TrigAFPToFHypoAlg('TrigAFPToFHypoAlg', AFPVertexContainer='HLT_AFPVertexContainer', VertexContainer='HLT_IDVertex_FS')
 
@@ -144,10 +144,10 @@ if __name__ == '__main__':
 
     from TriggerMenuMT.HLT.Config.MenuComponents import menuSequenceCAToGlobalWrapper
 
-    afp_trk = AFPTrkSequence(flags)
+    afp_trk = AFPTrkSequenceCfg(flags)
     afp_trk.ca.printConfig(withDetails=True)
-    afp_trk_gw = menuSequenceCAToGlobalWrapper(AFPTrkSequence, flags)
+    afp_trk_gw = menuSequenceCAToGlobalWrapper(AFPTrkSequenceCfg, flags)
 
-    afp_glob = AFPGlobalSequence(flags)
+    afp_glob = AFPGlobalSequenceCfg(flags)
     afp_glob.ca.printConfig(withDetails=True)
-    afp_glob_gw = menuSequenceCAToGlobalWrapper(AFPGlobalSequence, flags)
+    afp_glob_gw = menuSequenceCAToGlobalWrapper(AFPGlobalSequenceCfg, flags)
