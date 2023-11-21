@@ -4,6 +4,7 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from AthenaConfiguration.Enums import LHCPeriod
+from Campaigns.Utils import Campaign
 
 
 class TriggerAnalysisBlock (ConfigBlock):
@@ -88,11 +89,26 @@ class TriggerAnalysisBlock (ConfigBlock):
             alg.triggers_2023 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2023',[])]
             alg.triggers_2024 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2024',[])]
             alg.triggers_2025 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2025',[])]
+            if config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
+                if not alg.triggers_2022:
+                    raise ValueError( 'TriggerAnalysisConfig: you must provide a set of triggers for the year 2022!' )
+            elif config.campaign() is Campaign.MC23c:
+                if not alg.triggers_2023:
+                    raise ValueError( 'TriggerAnalysisConfig: you must provide a set of triggers for the year 2023!' )
         else:
             alg.triggers_2015 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2015',[])]
             alg.triggers_2016 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2016',[])]
             alg.triggers_2017 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2017',[])]
             alg.triggers_2018 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2018',[])]
+            if config.campaign() is Campaign.MC20a:
+                if not (alg.triggers_2015 and alg.triggers_2016):
+                    raise ValueError( 'TriggerAnalysisConfig: you must provide a set of triggers for the years 2015 and 2016!' )
+            elif config.campaign() is Campaign.MC20d:
+                if not alg.triggers_2017:
+                    raise ValueError( 'TriggerAnalysisConfig: you must provide a set of triggers for the year 2017!' )
+            elif config.campaign() is Campaign.MC20e:
+                if not alg.triggers_2018:
+                    raise ValueError( 'TriggerAnalysisConfig: you must provide a set of triggers for the year 2018!' )
         alg.decisionTool = '%s/%s' % ( decisionTool.getType(), decisionTool.getName() )
         alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
         alg.isRun3Geo = config.geometry() == LHCPeriod.Run3
@@ -111,6 +127,8 @@ class TriggerAnalysisBlock (ConfigBlock):
             alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         if self.photons:
             alg.photons, alg.photonSelection = config.readNameAndSelection(self.photons)
+        if not (self.electrons or self.muons or self.photons):
+            raise ValueError ('TriggerAnalysisConfig: at least one object collection must be provided! (electrons, muons, photons)' )
 
         if config.dataType() != DataType.Data and not alg.doMatchingOnly:
             config.addOutputVar ('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF')
