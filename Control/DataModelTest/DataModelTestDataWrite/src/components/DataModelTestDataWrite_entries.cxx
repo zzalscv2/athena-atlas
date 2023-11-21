@@ -1,13 +1,14 @@
-// $Id: DataModelTestDataWrite_entries.cxx,v 1.2 2006-04-07 18:34:15 ssnyder Exp $
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
 /**
- * @file  src/components/DataModelTestDataWrite_entries.cxx
+ * @file DataModelTestDataWrite/src/components/DataModelTestDataWrite_entries.cxx
  * @author snyder@bnl.gov
  * @date Nov 2005
  * @brief Gaudi algorithm factory declarations.
  */
 
 #include "../DMTestWrite.h"
-#include "../AuxDataTestWrite.h"
 #include "../xAODTestWrite.h"
 #include "../xAODTestWriteHVec.h"
 #include "../xAODTestWriteCView.h"
@@ -19,7 +20,6 @@
 #include "../AllocTestWriteWithoutAlloc.h"
 
 DECLARE_COMPONENT( DMTest::DMTestWrite )
-DECLARE_COMPONENT( DMTest::AuxDataTestWrite )
 DECLARE_COMPONENT( DMTest::xAODTestWrite )
 DECLARE_COMPONENT( DMTest::xAODTestWriteHVec )
 DECLARE_COMPONENT( DMTest::xAODTestWriteCView )

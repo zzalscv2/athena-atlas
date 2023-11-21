@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataModelRunTests )
@@ -33,11 +33,6 @@ endfunction (datamodel_run_test)
 datamodel_run_test (DataModelTestWrite)
 datamodel_run_test (DataModelTestRead DEPENDS DataModelTestWrite)
 datamodel_run_test (DataModelTestRead2 DEPENDS DataModelTestRead)
-datamodel_run_test (AuxDataTestWrite) #i:auxdata.root
-datamodel_run_test (AuxDataTestRead DEPENDS AuxDataTestWrite)
-datamodel_run_test (AuxDataTestRead2 DEPENDS AuxDataTestRead)
-datamodel_run_test (AuxDataTestTypelessRead DEPENDS AuxDataTestWrite)
-datamodel_run_test (AuxDataTestRead3 DEPENDS AuxDataTestTypelessRead)
 datamodel_run_test (xAODTestWrite) # in:xaoddata.root
 datamodel_run_test (xAODTestRead DEPENDS xAODTestWrite) #i:xaoddata.root o:xaoddata2.root
 datamodel_run_test (xAODTestRead2 DEPENDS xAODTestRead) #i:xaoddata2.root o:xaoddata2x.root

@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file DataModelTestDataCommon/src/setConverterLibrary.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -49,10 +47,6 @@ void setConverterLibrary ATLAS_NOT_THREAD_SAFE (const std::string& lib)
   setConverterLibrary (9633, lib); // DataVector<DMTest::B>
   setConverterLibrary (9634, lib); // DataVector<DMTest::D>
   setConverterLibrary (9639, lib); // DMTest::ELVec
-  setConverterLibrary (9701, lib); // DataVector<DMTest::BAux>
-  setConverterLibrary (9702, lib); // DMTest::BAux
-  setConverterLibrary (9703, lib); // DMTest::BAuxStandalone
-  setConverterLibrary (9711, lib); // DMTest::BAuxVec
   setConverterLibrary (9721, lib); // DMTest::CVec_v1
   setConverterLibrary (9722, lib); // DMTest::CAuxContainer_v1
   setConverterLibrary (9723, lib); // DMTest::CInfoAuxContainer_v1

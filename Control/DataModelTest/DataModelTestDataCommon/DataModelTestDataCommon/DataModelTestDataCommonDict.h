@@ -22,9 +22,6 @@
 #include "DataModelTestDataCommon/S1.h"
 #include "DataModelTestDataCommon/S2.h"
 #include "DataModelTestDataCommon/S3.h"
-#include "DataModelTestDataCommon/BAux.h"
-#include "DataModelTestDataCommon/BAuxStandalone.h"
-#include "DataModelTestDataCommon/BAuxVec.h"
 #include "DataModelTestDataCommon/C.h"
 #include "DataModelTestDataCommon/CVec.h"
 #include "DataModelTestDataCommon/CVecWithData.h"
@@ -45,7 +42,6 @@ namespace DataModelTestDataCommonDict {
 
 std::vector<DMTest::B> xa;
 DMTest::CView::Pers_t xb;
-std::vector<ElementLink<DMTest::BAuxVec> > xc;
 
 }
 
