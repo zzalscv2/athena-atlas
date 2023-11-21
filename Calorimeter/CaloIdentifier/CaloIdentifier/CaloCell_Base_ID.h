@@ -375,7 +375,8 @@ public:
                         const LArNeighbours::neighbourOption& option,
                         std::vector<IdentifierHash>& neighbourList) const;
 
-
+  /** Returns the cell-location in a human readable form */
+  std::string cell_name(const Identifier id) const;
 
 private:
   SUBCALO get_subcalo (Identifier id) const;
