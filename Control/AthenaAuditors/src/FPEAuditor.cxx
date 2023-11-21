@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // FPEAuditor.cxx
@@ -121,6 +121,12 @@ void FPEAuditor::InstallHandler()
   // Save the current FP environment.
   fegetenv (&m_env);
 
+#ifdef __aarch64__
+  ATH_MSG_WARNING("Collecting stack traces for FPES is not supported on aarch64");
+  m_NstacktracesOnFPE = 0;
+  FPEAudit::s_handlerDisabled = true;
+  FPEAudit::s_handlerInstalled = true;
+#else
   memset(&act, 0, sizeof act);
   act.sa_sigaction = FPEAudit::fpe_sig_action;
   act.sa_flags = SA_SIGINFO;
@@ -139,6 +145,7 @@ void FPEAuditor::InstallHandler()
   FPEAudit::s_tlsdata.s_array_D[0]=NULL;
 
   FPEAudit::s_handlerInstalled = true;
+#endif
 }
 
 void FPEAuditor::UninstallHandler()
