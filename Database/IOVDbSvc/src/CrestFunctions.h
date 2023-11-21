@@ -84,6 +84,8 @@ namespace IOVDbNamespace{
 
     nlohmann::json getTagInfo(const std::string & tag);
 
+    nlohmann::json getTagProperties(const std::string & tag);
+
     std::string 
     extractPayloadSpecification(const std::string & tag, nlohmann::json tagMeta);
 
