@@ -1014,7 +1014,8 @@ def createPixelTrackingPassFlags():
     icf.nWeightedClustersMin = 6
     icf.doBremRecoverySi        = False
 
-    icf.RunPixelPID      = False
+    icf.RunPixelPID      = lambda pcf: (
+        pcf.Tracking.PrimaryPassConfig is PrimaryPassConfig.UPC)
     icf.RunTRTPID        = False
     return icf
 
