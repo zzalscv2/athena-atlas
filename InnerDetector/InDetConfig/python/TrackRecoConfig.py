@@ -228,10 +228,8 @@ def InDetTrackRecoCfg(flags):
                 DetailedTruth=PixelTrackContainer+"DetailedTruth",
                 TracksTruth=PixelTrackContainer+"TruthCollection"))
 
-        from xAODTrackingCnv.xAODTrackingCnvConfig import (
-            TrackParticleCnvAlgNoPIDCfg)
-        result.merge(TrackParticleCnvAlgNoPIDCfg(
-            flags,
+        result.merge(TrackParticleCnvAlgPIDCheckCfg(
+            flagsPixel,
             name=PixelTrackContainer+"CnvAlg",
             TrackContainerName=PixelTrackContainer,
             xAODTrackParticlesFromTracksContainerName=(
@@ -256,10 +254,8 @@ def InDetTrackRecoCfg(flags):
             "InDetAmbiguityProcessorSplitProb" +
             flagsSCT.Tracking.ActiveConfig.extension)
 
-        from xAODTrackingCnv.xAODTrackingCnvConfig import (
-            TrackParticleCnvAlgNoPIDCfg)
-        result.merge(TrackParticleCnvAlgNoPIDCfg(
-            flags,
+        result.merge(TrackParticleCnvAlgPIDCheckCfg(
+            flagsSCT,
             name=SCTTrackContainer+"CnvAlg",
             TrackContainerName=SCTTrackContainer,
             xAODTrackParticlesFromTracksContainerName=(
@@ -325,8 +321,10 @@ def InDetTrackRecoCfg(flags):
             StatTrackTruthCollections += [TRTTrackContainer+"TruthCollection"]
 
             if flags.Tracking.doTrackSegmentsTRT:
+                from xAODTrackingCnv.xAODTrackingCnvConfig import (
+                    TrackParticleCnvAlgNoPIDCfg)
                 result.merge(TrackParticleCnvAlgNoPIDCfg(
-                    flags,
+                    current_flags,
                     name=TRTTrackContainer+"CnvAlg",
                     TrackContainerName=TRTTrackContainer,
                     xAODTrackParticlesFromTracksContainerName=(
