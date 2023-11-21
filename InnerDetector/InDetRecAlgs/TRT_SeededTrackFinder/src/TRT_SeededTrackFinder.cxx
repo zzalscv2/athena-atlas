@@ -38,8 +38,6 @@ using namespace std;
 InDet::TRT_SeededTrackFinder::TRT_SeededTrackFinder
 (const std::string& name, ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator),
-    m_nprint(0),
-    m_ntracks(0),
     m_trackmaker("InDet::TRT_SeededTrackFinderTool"),
     m_fitterTool("Trk::GlobalChi2Fitter/InDetTrackFitter"),
     m_SegmentsKey("TRTSegments"),
@@ -72,7 +70,6 @@ InDet::TRT_SeededTrackFinder::TRT_SeededTrackFinder
   declareProperty("maxZImp"           ,m_maxZImp            = 250. );
   declareProperty("Extrapolator"      ,m_extrapolator              );
   declareProperty("CaloSeededRoI"     ,m_caloSeededRoI=false       );
-  declareProperty("CaloClusterEt"     ,m_clusterEt=3000.           );
   declareProperty("dEtaCaloRoI"       ,m_deltaEta=0.1              );
   declareProperty("dPhiCaloRoI"       ,m_deltaPhi=0.25             );
   declareProperty("dZCaloRoI"         ,m_deltaZ=300                );
