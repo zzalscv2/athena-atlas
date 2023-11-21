@@ -89,10 +89,10 @@ const InDet::PixelClusterContainer& makeclusts (StoreGateSvc* sg)
       auto cl = std::make_unique<InDet::PixelCluster>
         (Identifier (offs+1234),
          locpos,
-         rdoList,
+         std::vector<Identifier>(rdoList),
          13,  // lvl1
-         totList,
-         chargeList,
+         std::vector<int>(totList),
+         std::vector<float>(chargeList),
          width,
          nullptr,
          Amg::MatrixX(cov),
@@ -122,7 +122,7 @@ int main ATLAS_NOT_THREAD_SAFE ()
   if (!Athena_test::initGaudi("InDetEventTPCnv_test.txt", pSvcLoc)) {
     std::cerr << "This test can not be run" << std::endl;
     return 0;
-  }  
+  }
 
   ISvcLocator* svcLoc = Gaudi::svcLocator();
   StoreGateSvc* sg = nullptr;

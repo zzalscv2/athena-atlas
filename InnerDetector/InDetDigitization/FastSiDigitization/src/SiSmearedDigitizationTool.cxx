@@ -472,7 +472,7 @@ StatusCode SiSmearedDigitizationTool::retrieveTruth(){
       }
     }
   }
-  
+
 
   return StatusCode::SUCCESS;
 
@@ -631,10 +631,10 @@ StatusCode SiSmearedDigitizationTool::mergeClusters(Pixel_detElement_RIO_map * c
 
             InDet::PixelCluster* pixelCluster = new InDet::PixelCluster(intersectionId,
                                                                         intersection,
-                                                                        rdoList,
+                                                                        std::move(rdoList),
                                                                         siWidth,
                                                                         hitSiDetElement,
-                                                                        clusterErr);
+                                                                        std::move(clusterErr));
             ((*inner_iter).second) = pixelCluster;
 
             cluster_map->erase(iter);
@@ -786,16 +786,16 @@ StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx,
         hitSiDetElement = hitSiDetElement_temp;
       }
 
-      // untangling the logic: if not using custom geometry, hitSiDetElement 
+      // untangling the logic: if not using custom geometry, hitSiDetElement
       // gets dereferenced (and should be checked)
       //
-      // if using custom geometry, hitPlanarDetElement gets dereferenced 
+      // if using custom geometry, hitPlanarDetElement gets dereferenced
       // (and should be checked)
       if (not hitSiDetElement) {
         ATH_MSG_FATAL("hitSiDetElement is null in SiSmearedDigitizationTool:"<<__LINE__);
         throw std::runtime_error(std::string("hitSiDetElement is null in SiSmearedDigitizationTool::digitize() "));
       }
-      
+
       if (m_SmearPixel && !(hitSiDetElement->isPixel())) continue;
       if (!m_SmearPixel && !(hitSiDetElement->isSCT())) continue;
 
@@ -989,7 +989,7 @@ StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx,
         // create the cluster
         pixelCluster = new InDet::PixelCluster(intersectionId,
                                                intersection,
-                                               rdoList,
+                                               std::vector<Identifier>(rdoList),
                                                siWidth,
                                                hitSiDetElement,
                                                Amg::MatrixX(covariance));
@@ -1001,7 +1001,7 @@ StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx,
         }
 
         if (m_checkSmear) {
-          
+
             ATH_MSG_DEBUG( "--- SiSmearedDigitizationTool: pixelCluster --> " << *pixelCluster);
             //Take info to store in the tree
             m_x_pixel = temp_X;
@@ -1036,7 +1036,7 @@ StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx,
 
         design_sct = dynamic_cast<const InDetDD::SCT_ModuleSideDesign*>(&hitSiDetElement->design());
 
-        if (!design_sct) { 
+        if (!design_sct) {
            ATH_MSG_INFO ( "Could not get design"<< design_sct) ;
            continue;
         }
@@ -1060,7 +1060,7 @@ StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx,
         // two-strip hits: better resolution, approx. 40% lower
 
         InDetDD::DetectorShape elShape = hitSiDetElement->design().shape();
-        if(m_emulateAtlas && elShape == InDetDD::Trapezoid) 
+        if(m_emulateAtlas && elShape == InDetDD::Trapezoid)
         { // rotation for endcap SCT
 
           if(colRow.x() == 1) {
@@ -1101,7 +1101,7 @@ StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx,
         }
 
         if (m_checkSmear) {
-          
+
             ATH_MSG_DEBUG( "--- SiSmearedDigitizationTool: SCT_Cluster --> " << *sctCluster);
 
             //Take info to store in the tree

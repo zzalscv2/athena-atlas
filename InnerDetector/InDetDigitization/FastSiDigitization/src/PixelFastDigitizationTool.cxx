@@ -126,7 +126,7 @@ StatusCode PixelFastDigitizationTool::initialize()
 
   if (m_pixModuleDistortion) {
     ATH_CHECK(m_distortionKey.initialize());
-  } 
+  }
 
   //locate the PileUpMergeSvc and initialize our local ptr
   if (!m_mergeSvc.retrieve().isSuccess()) {
@@ -753,7 +753,8 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
         // use the cluster maker from the offline software
         pixelCluster =
             std::make_unique<PixelCluster>(m_clusterMaker->pixelCluster(
-                clusterId, clusterPosition, rdoList, lvl1a, totList, siWidth,
+                clusterId, clusterPosition, std::vector<Identifier>(rdoList),
+                lvl1a, std::vector<int>(totList), siWidth,
                 hitSiDetElement, isGanged, m_pixErrorStrategy, *m_pixel_ID,
                 false, 0.0, 0.0, calibData, *offlineCalibData));
         if (isGanged) {
@@ -880,7 +881,7 @@ bool PixelFastDigitizationTool::areNeighbours
 (const std::vector<Identifier>& group,
  const Identifier& rdoID,
  const InDetDD::SiDetectorElement* /*element*/,
- const PixelID& pixelID) 
+ const PixelID& pixelID)
 {
   // note: in the PixelClusteringToolBase, m_splitClusters is a variable; here
   // splitClusters was explicitly set to zero, acceptDiagonalClusters = 1
@@ -976,7 +977,7 @@ Trk::DigitizationModule* PixelFastDigitizationTool::buildDetectorModule(const In
 }
 
 
-Amg::Vector3D PixelFastDigitizationTool::CalculateIntersection(const Amg::Vector3D & Point, const Amg::Vector3D & Direction, Amg::Vector2D PlaneBorder, double halfthickness) 
+Amg::Vector3D PixelFastDigitizationTool::CalculateIntersection(const Amg::Vector3D & Point, const Amg::Vector3D & Direction, Amg::Vector2D PlaneBorder, double halfthickness)
 {
   Amg::Vector3D Intersection(0.,0.,0.);
 

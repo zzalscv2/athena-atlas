@@ -91,9 +91,9 @@ public:
   // - const reference to a PixelID helper class
   PixelCluster  pixelCluster(const Identifier& clusterID,
                              const Amg::Vector2D& localPos,
-                             const std::vector<Identifier>& rdoList,
+                             std::vector<Identifier>&& rdoList,
                              const int lvl1a,
-                             const std::vector<int>& totList,
+                             std::vector<int>&& totList,
                              const SiWidth& width,
                              const InDetDD::SiDetectorElement* element,
                              bool ganged,
@@ -115,11 +115,11 @@ public:
 				       bool ganged,
 				       int errorStrategy,
 				       const PixelID& pixelID,
-                                       bool split,
-                                       double splitProb1,
-                                       double splitProb2,
-                                       const PixelChargeCalibCondData *calibData,
-                                       const PixelCalib::PixelOfflineCalibData *offlineCalibData) const;
+               bool split,
+               double splitProb1,
+               double splitProb2,
+               const PixelChargeCalibCondData *calibData,
+               const PixelCalib::PixelOfflineCalibData *offlineCalibData) const;
 
   // Computes global position and errors for SCT cluster.
   // Called by SCT Clustering tools
@@ -143,12 +143,12 @@ public:
 
 private:
 
-  template <typename ClusterType, typename CreatorType>
+  template <typename ClusterType, typename  IdentifierVec, typename ToTList>
   ClusterType makePixelCluster(const Identifier& clusterID,
              const Amg::Vector2D& localPos,
-             const std::vector<Identifier>& rdoList,
+             IdentifierVec&& rdoList,
              const int lvl1a,
-             const std::vector<int>& totList,
+             ToTList&& totList,
              const SiWidth& width,
              const InDetDD::SiDetectorElement* element,
              bool ganged,
@@ -157,9 +157,9 @@ private:
              bool split,
              double splitProb1,
              double splitProb2,
-             CreatorType clusterCreator,
              const PixelChargeCalibCondData *calibData,
-             const PixelCalib::PixelOfflineCalibData *offlineCalibData) const;
+             const PixelCalib::PixelOfflineCalibData *offlineCalibData,
+             xAOD::PixelCluster* cluster = nullptr) const;
 
   ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout
   {this, "PixelReadoutManager", "PixelReadoutManager", "Pixel readout manager" };
