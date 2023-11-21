@@ -104,9 +104,9 @@
   <region group="ZDC" name = "zdc">
     <range field="part"    value="ZDC" />
     <range field="side"    values="negative positive"/>
-    <range field="module"  minvalue="0" maxvalue="3"/>
+    <range field="module"  minvalue="0" maxvalue="7"/>
     <range field="type"    minvalue="0" maxvalue="1" />
-    <range field="channel" minvalue="0" maxvalue="63" />
+    <range field="channel" minvalue="0" maxvalue="127" />
   </region>
 
   <!-- ZDC - online -->

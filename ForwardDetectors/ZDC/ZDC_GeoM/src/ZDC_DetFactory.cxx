@@ -1,374 +1,293 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDC_DetFactory.h"
+#include "ZDC_ZDCModule.h"
+#include "ZDC_RPDModule.h"
 
-#include "GeoModelKernel/GeoMaterial.h"  
-#include "GeoModelKernel/GeoElement.h"  
-#include "GeoModelKernel/GeoBox.h"  
-#include "GeoModelKernel/GeoTube.h"  
-#include "GeoModelKernel/GeoLogVol.h"  
-#include "GeoModelKernel/GeoNameTag.h"  
-#include "GeoModelKernel/GeoPhysVol.h"  
-#include "GeoModelKernel/GeoFullPhysVol.h"  
-#include "GeoModelKernel/GeoTransform.h"  
-#include "GeoModelKernel/GeoSerialDenominator.h"  
-#include "GeoModelKernel/GeoIdentifierTag.h"  
-#include "GeoModelKernel/GeoAlignableTransform.h"  
-#include "GeoModelKernel/GeoSerialTransformer.h"
+#include "GeoModelKernel/GeoMaterial.h"
+#include "GeoModelKernel/GeoElement.h"
+#include "GeoModelKernel/GeoBox.h"
+#include "GeoModelKernel/GeoNameTag.h"
+#include "GeoModelKernel/GeoPhysVol.h"
+#include "GeoModelKernel/GeoFullPhysVol.h"
+#include "GeoModelKernel/GeoTransform.h"
+#include "GeoModelKernel/GeoIdentifierTag.h"
+#include "GeoModelKernel/GeoAlignableTransform.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/Units.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
-#include "GeoModelInterfaces/StoredMaterialManager.h"
 
-// Author Soumya Mohapatra
-// soumya@cern.ch
+#include "GeoModelKernel/GeoMaterial.h"
+#include "GeoModelUtilities/GeoExtendedMaterial.h"
+#include "AthenaKernel/getMessageSvc.h"
+#include "CLHEP/Geometry/Transform3D.h"
+
+// Author Chad Lantz
+// chad.stephen.lantz@cern.ch
 
 // This is the ZDC Geomodel description :: see some details at
 // https://atlasop.cern.ch/atlas-point1/twiki/pub/Main/ZDCOperationManualShifter/zdc_layout.png
- 
-//I mave assumed that each module is 154mm which is 4 mm longer than the ones shown in the above webpage
+
+// Each mod is located at centered at 141.580 m
+// I have assumed that each module is 154mm which is 4 mm longer than the ones shown in the above webpage
 // thus my modules are 13.4cm tungsten +1cm steel on either side
 
-//I have assumed that the cavity is 1016mm (4*4=16mm larger than the one in the above webpage)
-//Ionization chamber material is air currently
+// I have assumed that the cavity is 1016mm (4*4=16mm larger than the one in the above webpage)
+// Ionization chamber material is air currently
+// Note: C side (side 0) EM module has pixels, A side (side 1) doesn't
 
-using namespace GeoGenfun;
-using namespace GeoXF;
-
-ZDC_DetFactory::ZDC_DetFactory(StoreGateSvc* detStore)
-  : AthMessaging ("ZDC_DetFactory"),
-    m_detectorManager(nullptr) , m_detectorStore(detStore)
-{}
+ZDC_DetFactory::ZDC_DetFactory(StoreGateSvc *detStore) :
+    AthMessaging("ZDC_DetFactory"),
+    m_detectorManager(NULL),
+    m_detectorStore(detStore)
+{
+    if (m_detectorStore->retrieve( m_zdcID ).isFailure() ) {
+        MsgStream LogStream(Athena::getMessageSvc(), "ZDC_DetectorFactory::ZDC_DetFactory");
+        LogStream << MSG::ERROR << "execute: Could not retrieve ZdcID object from the detector store" << endmsg;
+    }
+}
 
 ZDC_DetFactory::~ZDC_DetFactory() {}
 
-void ZDC_DetFactory::create(GeoPhysVol* world)
-{
-  m_detectorManager = new ZDC_DetManager();
-
-  StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != m_detectorStore->retrieve(materialManager, std::string("MATERIALS"))) return;
-
-  //------------------------------------------------------------------------------------------------------------
-  //List of materials
-
-  const GeoMaterial* air = materialManager->getMaterial("std::Air");
-
-  GeoElement*  Oxygen   = new GeoElement ("Oxygen"  ,"O"  ,  8.0 ,  16.0*GeoModelKernelUnits::g/Gaudi::Units::mole);
-  GeoElement*  Sillicon = new GeoElement ("Sillicon","Si" , 14.0 ,  28.085*GeoModelKernelUnits::g/Gaudi::Units::mole);
-  GeoElement*  Tung     = new GeoElement ("Tungsten","W"  , 74.0 , 183.84*GeoModelKernelUnits::g/Gaudi::Units::mole);
-  GeoElement*  Iron     = new GeoElement ("Iron"    ,"Fe" , 26.0 ,  55.845 *GeoModelKernelUnits::g/Gaudi::Units::mole);
-  GeoElement*  Carbon   = new GeoElement ("Carbon"  ,"C"  ,  6.0 ,  12.0107*GeoModelKernelUnits::g/Gaudi::Units::mole);
-  GeoElement*  Nickel   = new GeoElement ("Nickel"  ,"Ni" , 28.0 ,  58.6934*GeoModelKernelUnits::g/Gaudi::Units::mole);
-
-
-  GeoMaterial* Quartz   = new GeoMaterial("Quartz",2.20*GeoModelKernelUnits::gram/Gaudi::Units::cm3);
-  Quartz->add(Sillicon,0.467);
-  Quartz->add(Oxygen,0.533);
-  Quartz->lock();
-  
-  // Absorber composition:  savannah.cern.ch/task/download.php?file_id=22925
-  GeoMaterial* Tungsten = new GeoMaterial("Tungsten",18.155*GeoModelKernelUnits::g/Gaudi::Units::cm3);
-  Tungsten->add(Tung,   0.948);
-  Tungsten->add(Nickel, 0.037);
-  Tungsten->add(Iron,   0.015);
-  Tungsten->lock();
-
-  GeoMaterial* Steel  = new GeoMaterial("Steel", 7.9*GeoModelKernelUnits::gram/Gaudi::Units::cm3);
-  Steel->add(Iron  , 0.98);
-  Steel->add(Carbon, 0.02);
-  Steel->lock();
-
-  //------------------------------------------------------------------------------------------------------------
-  //List of shapes and logical volumes
-  //https://atlasop.cern.ch/atlas-point1/twiki/pub/Main/ZDCOperationManualShifter/zdc_layout.png
-
-  GeoBox*  Envelope_Box    = new GeoBox (10.0*Gaudi::Units::cm/2.0 ,20.0*Gaudi::Units::cm/2.0  ,100.0*Gaudi::Units::cm/2.0);
-  GeoBox*  Module_Box      = new GeoBox ( 9.0*Gaudi::Units::cm/2.0 ,18.0*Gaudi::Units::cm/2.0  , 13.4*Gaudi::Units::cm/2.0);
-  GeoBox*  Steel_Plate_Box = new GeoBox ( 9.0*Gaudi::Units::cm/2.0 ,18.0*Gaudi::Units::cm/2.0  ,  1.0*Gaudi::Units::cm/2.0); 
-  GeoTube* Pixel_Tube      = new GeoTube( 0.0*Gaudi::Units::mm     , 1.0*Gaudi::Units::mm/2.0  , 13.4*Gaudi::Units::cm/2.0);
-  GeoTube* Strip_Tube      = new GeoTube( 0.0*Gaudi::Units::mm     , 1.5*Gaudi::Units::mm/2.0  , 18.0*Gaudi::Units::cm/2.0);
-
-  GeoLogVol* Envelope_Logical    = new GeoLogVol("Envelope_Logical"   ,Envelope_Box    ,air);
-  GeoLogVol* Steel_Plate_Logical = new GeoLogVol("Steel_Plate_Logical",Steel_Plate_Box ,Steel);
-  GeoLogVol* Module_Logical      = new GeoLogVol("Module_Logical"     ,Module_Box      ,Tungsten);
-  GeoLogVol* Pixel_Logical       = new GeoLogVol("Pixel_Logical"      ,Pixel_Tube      ,Quartz);
-  GeoLogVol* Strip_Logical       = new GeoLogVol("Strip_Logical"      ,Strip_Tube      ,Quartz);
-  //------------------------------------------------------------------------------------------------------------
-
-  GeoAlignableTransform* RotateX;
-  GeoAlignableTransform* ShiftZ;
-
-  //------------------------------------------------------------------------------------------------------------
-  //List of Physical Volumes
-
-  GeoFullPhysVol* Module_Physical[2][4];   //First Index is for A-side or C-side, 2nd index labels the 4 modules
-
-  for(int I=0;I<2;I++) for(int J=0;J<4;J++)
-    Module_Physical[I][J] =new GeoFullPhysVol(Module_Logical);
-
-  //Here we add the pixels into the XY modules
-  //C -Side has Pixels in both Em and HM0
-  //Here we are adding to EM module only (so only C-Side)
-
-  GeoAlignableTransform* ShiftX;
-  GeoAlignableTransform* ShiftY;
-
-  for(int K=1;K<=8;K++) for(int L=1;L<=8;L++) { //8*8 Grid of pixels
-      
-    int K1 = 8-K; 
-    int L1 = L-1;
-
-    //So the pixel is numbered 1000+X where "X" is the channel number from the ZDC-twiki (0-63)
-    GeoIdentifierTag* Pixel_ID       = new GeoIdentifierTag( 11000+L1*8+K1);  
-    GeoFullPhysVol*   Pixel_Physical = new GeoFullPhysVol(Pixel_Logical);
-
-    ShiftX = new GeoAlignableTransform(GeoTrf::TranslateX3D((4.5-K)*Gaudi::Units::cm));
-    ShiftY = new GeoAlignableTransform(GeoTrf::TranslateY3D((4.5-L)*Gaudi::Units::cm));
-	
-    Module_Physical[0][0]->add(Pixel_ID);
-    Module_Physical[0][0]->add(ShiftX);
-    Module_Physical[0][0]->add(ShiftY);
-    Module_Physical[0][0]->add(Pixel_Physical);
-  }
-
-  // Here we add 8*10 grid of pixels to the First Hadonic Module on both sides 
-  for(int I=1; I<=2; I++)      // A side or C side
-    for(int K=1;K<=8;K++)      // 8*10 Grid of pixels ( 8 along X-Axis)  
-      for(int L=1;L<=10;L++) { // 8*10 Grid of pixels(10 along Y-Axis)
-
-	int K1,L1;
-	  
-	// The pixel location is the same in Y for the two sides but the X is the opposite
-	if (I==1) {K1=8-K; L1=L-1;}
-	else      {K1=K-1; L1=L-1;}
-          
-	// So the Pixel is numbered 10000+X or 20000+X (10000 for A-side) and (20000 for C-Side)
-	int Pix_id_raw = (L1*8+K1);  
-	int Pix_id=Make_Pixel_ID(Pix_id_raw); // this merges the 80 pixels into 24 readouts
-  
-	GeoIdentifierTag* Pixel_ID       = new GeoIdentifierTag( I*10000+2000+ Pix_id);
-	GeoFullPhysVol*   Pixel_Physical = new GeoFullPhysVol(Pixel_Logical);
-
-	ShiftX = new GeoAlignableTransform(GeoTrf::TranslateX3D( (4.5-K)*Gaudi::Units::cm ));
-	ShiftY = new GeoAlignableTransform(GeoTrf::TranslateY3D( (5.5-L)*Gaudi::Units::cm ));
-	
-	Module_Physical[I-1][1]->add(Pixel_ID);
-	Module_Physical[I-1][1]->add(ShiftX);
-	Module_Physical[I-1][1]->add(ShiftY);
-	Module_Physical[I-1][1]->add(Pixel_Physical);
-      }	
-
-  //Here we add the strips into the XY modules
-
-  for(int I=1;I<=2;I++) {         // A side or C side
-    for(int J=1;J<=2;J++) {       // XY Modules (Only the first two modules have gaps for Pixels, for these there must be a 1mm gap after 6 stirps)
-      for(int K=1;K<=12;K++) {    // 12 layers of strips 
-	for(int L=1;L<=9;L++) {   // each layer has 9 sets of strips
-	  for(int M=1;M<=6;M++) { // each set has 6 strips
-		    
-	    GeoFullPhysVol*   Strip_Physical = new GeoFullPhysVol  (Strip_Logical);
-	    GeoIdentifierTag* Strip_ID       = new GeoIdentifierTag(I*10000+J*1000+K*12+L*10+M);
-	    
-	    RotateX = new GeoAlignableTransform(GeoTrf::RotateX3D   (90*Gaudi::Units::deg));
-	    ShiftX  = new GeoAlignableTransform(GeoTrf::TranslateX3D((L-5.5)*Gaudi::Units::cm + (M-0.75)*1.5*Gaudi::Units::mm +0.75*Gaudi::Units::mm));
-	    ShiftZ  = new GeoAlignableTransform(GeoTrf::TranslateZ3D((K*1.2 - 7.8)*Gaudi::Units::cm));
-	
-	    Module_Physical[I-1][J-1]->add(Strip_ID);
-	    Module_Physical[I-1][J-1]->add(ShiftZ);
-	    Module_Physical[I-1][J-1]->add(RotateX);
-	    Module_Physical[I-1][J-1]->add(ShiftX);
-	    Module_Physical[I-1][J-1]->add(Strip_Physical);
-	  }  
-	}	
-      }  
-    }
-  }
-
-  //Here we add the strips into the Hadronic modules
-  for(int I=1;I<=2;I++) {         // A side or C side
-    for(int J=3;J<=4;J++) {       // XY Modules (Only the first two modules have gaps for Pixels, for these there must be a 1mm gap after 6 stirps)
-      for(int K=1;K<=12;K++) {    // 12 layers of strips 
-	for(int L=1;L<=9;L++) {   // each layer has 9 sets of strips
-	  for(int M=1;M<=6;M++) { // each set has 6 strips
-
-	    GeoFullPhysVol*   Strip_Physical = new GeoFullPhysVol(Strip_Logical);
-	    GeoIdentifierTag* Strip_ID       = new GeoIdentifierTag(I*10000 + J*1000 + K*12 + L*10 + M);
-
-	    RotateX = new GeoAlignableTransform(GeoTrf::RotateX3D   (90*Gaudi::Units::deg));
-	    ShiftX  = new GeoAlignableTransform(GeoTrf::TranslateX3D((L-5.5)*Gaudi::Units::cm + (M-0.75)*1.5*Gaudi::Units::mm + 0.75*Gaudi::Units::mm));
-	    ShiftZ  = new GeoAlignableTransform(GeoTrf::TranslateZ3D((K*1.2-7.8)*Gaudi::Units::cm ));
-	
-	    Module_Physical[I-1][J-1]->add(Strip_ID);
-	    Module_Physical[I-1][J-1]->add(ShiftZ);
-	    Module_Physical[I-1][J-1]->add(RotateX);
-	    Module_Physical[I-1][J-1]->add(ShiftX);
-	    Module_Physical[I-1][J-1]->add(Strip_Physical);
-	  }  
-	}	
-      }  
-    }
-  }
-  
-  //------------------------------------------------------------------------------------------------------------
-  //The Top Volumes
-  GeoFullPhysVol* Envelope_Physical[2]; //First Index is for A-side or C-side
-  GeoFullPhysVol* Steel_Plate_Physical;   
-  GeoNameTag*     tag;
-
-  for (int I=0;I<2;I++) {
-
-    std::string Vol_Name, Vol_Name_append = "";
-    float sgn = 1.0;
-   
-    if (I==0) {sgn =-1.0; Vol_Name_append="_A"; }
-    else      {sgn = 1.0; Vol_Name_append="_C"; }
-
-    Envelope_Physical[I] = new GeoFullPhysVol(Envelope_Logical);
-    Steel_Plate_Physical = new GeoFullPhysVol(Steel_Plate_Logical);
-
-    ShiftZ  = new GeoAlignableTransform(GeoTrf::TranslateZ3D((-47.2 + 0.5)*Gaudi::Units::cm*sgn));
-    Envelope_Physical[I]->add(ShiftZ);
-    Envelope_Physical[I]->add(Steel_Plate_Physical);
-
-    Vol_Name = "EM_XY"; Vol_Name = Vol_Name + Vol_Name_append;
-
-    ShiftZ = new GeoAlignableTransform(GeoTrf::TranslateZ3D ((-47.2 + 1 + 6.7)*Gaudi::Units::cm*sgn));
-
-    tag = new GeoNameTag(Vol_Name.c_str());
-    Envelope_Physical[I]->add(tag);
-    Envelope_Physical[I]->add(ShiftZ);
-    Envelope_Physical[I]->add(Module_Physical[I][0]);
-
-    Steel_Plate_Physical = new GeoFullPhysVol(Steel_Plate_Logical);
-    ShiftZ = new GeoAlignableTransform(GeoTrf::TranslateZ3D((-47.2 + 1 + 13.4 +.5)*Gaudi::Units::cm*sgn));
-    Envelope_Physical[I]->add(ShiftZ);
-    Envelope_Physical[I]->add(Steel_Plate_Physical);
-  
-    Steel_Plate_Physical = new GeoFullPhysVol(Steel_Plate_Logical);
-    ShiftZ = new GeoAlignableTransform(GeoTrf::TranslateZ3D((-47.2 + 1 + 13.4 + 1 + 6 + 10 + .5)*Gaudi::Units::cm*sgn));
-    Envelope_Physical[I]->add(ShiftZ);
-    Envelope_Physical[I]->add(Steel_Plate_Physical);
-
-    Vol_Name = "HM_XY"; Vol_Name = Vol_Name + Vol_Name_append;
-    ShiftZ = new GeoAlignableTransform(GeoTrf::TranslateZ3D((-47.2 + 1 + 13.4 + 1 + 6 + 10 + 1 + 6.7)*Gaudi::Units::cm*sgn));
-    tag = new GeoNameTag(Vol_Name.c_str());
-    Envelope_Physical[I]->add(tag);
-    Envelope_Physical[I]->add(ShiftZ);
-    Envelope_Physical[I]->add(Module_Physical[I][1]);
-  
-    Steel_Plate_Physical = new GeoFullPhysVol(Steel_Plate_Logical);
-    ShiftZ = new GeoAlignableTransform(GeoTrf::TranslateZ3D((-47.2 + 1 + 13.4 + 1 + 6 + 10 + 1 + 13.4 + .5)*Gaudi::Units::cm*sgn));
-    Envelope_Physical[I]->add(ShiftZ);
-    Envelope_Physical[I]->add(Steel_Plate_Physical);
- 
-    Steel_Plate_Physical = new GeoFullPhysVol(Steel_Plate_Logical);
-    ShiftZ = new GeoAlignableTransform(GeoTrf::TranslateZ3D((-47.2 + 1 + 13.4 + 1 + 6 + 10 + 1 + 13.4 + 1 + 3 +.5)*Gaudi::Units::cm*sgn));
-    Envelope_Physical[I]->add(ShiftZ);
-    Envelope_Physical[I]->add(Steel_Plate_Physical);
-
-    Vol_Name = "HM_01"; Vol_Name = Vol_Name + Vol_Name_append;
-    ShiftZ = new GeoAlignableTransform(GeoTrf::TranslateZ3D((-47.2 + 1 + 13.4 + 1 + 6 + 10 + 1 + 13.4 + 1 + 3 + 1 + 6.7)*Gaudi::Units::cm*sgn ));
-    tag = new GeoNameTag(Vol_Name.c_str());
-    Envelope_Physical[I]->add(tag);
-    Envelope_Physical[I]->add(ShiftZ);
-    Envelope_Physical[I]->add(Module_Physical[I][2]);
-  
-    Steel_Plate_Physical = new GeoFullPhysVol(Steel_Plate_Logical);
-    ShiftZ = new GeoAlignableTransform(GeoTrf::TranslateZ3D((-47.2 + 1 + 13.4 + 1 + 6 + 10 + 1 + 13.4 + 1 + 3 + 1 + 13.4 + .5)*Gaudi::Units::cm*sgn));
-    Envelope_Physical[I]->add(ShiftZ);
-    Envelope_Physical[I]->add(Steel_Plate_Physical);
-
-    Steel_Plate_Physical = new GeoFullPhysVol(Steel_Plate_Logical);
-    ShiftZ = new GeoAlignableTransform(GeoTrf::TranslateZ3D((-47.2 + 1 + 13.4 + 1 + 6 + 10 + 1 + 13.4 + 1 + 3 + 1 + 13.4 + 1 + .5)*Gaudi::Units::cm*sgn));
-    Envelope_Physical[I]->add(ShiftZ);
-    Envelope_Physical[I]->add(Steel_Plate_Physical);
-
-    Vol_Name = "HM_02"; Vol_Name = Vol_Name + Vol_Name_append;
-    ShiftZ = new GeoAlignableTransform(GeoTrf::TranslateZ3D((-47.2 + 1 + 13.4 + 1 + 6 + 10 + 1 + 13.4 + 1 + 3 + 1 + 13.4 + 1 + 1 + 6.7)*Gaudi::Units::cm*sgn ));
-    tag = new GeoNameTag(Vol_Name.c_str());
-    Envelope_Physical[I]->add(tag);
-    Envelope_Physical[I]->add(ShiftZ);
-    Envelope_Physical[I]->add(Module_Physical[I][3]);
-  
-    Steel_Plate_Physical = new GeoFullPhysVol(Steel_Plate_Logical);
-    ShiftZ = new GeoAlignableTransform(GeoTrf::TranslateZ3D((-47.2 + 1 + 13.4 + 1 + 6 + 10 + 1 + 13.4 + 1 + 3 + 1 + 13.4 + 1 + 1 + 13.4 + .5)*Gaudi::Units::cm*sgn));
-    Envelope_Physical[I]->add(ShiftZ);
-    Envelope_Physical[I]->add(Steel_Plate_Physical);
-  }
- 
-  //------------------------------------------------------------------------------------------------------------
-  //Insert into World
-  
-  tag = new GeoNameTag("ZDC_A");
-
-  world->add(tag);
-
-  ShiftZ = new GeoAlignableTransform(GeoTrf::TranslateZ3D(-141.580*Gaudi::Units::m));
-
-  world->add(ShiftZ);
-  world->add(Envelope_Physical[0]);
-
-  m_detectorManager->addTreeTop(Envelope_Physical[0]);
-
-  ATH_MSG_DEBUG( " ZDC DetFactory ADDED TOP VOLUME "
-                 << Envelope_Physical[0]->getAbsoluteName() );
-  
-  tag = new GeoNameTag("ZDC_C");
-  
-  world->add(tag);
-  
-  ShiftZ = new GeoAlignableTransform(GeoTrf::TranslateZ3D(141.580 *Gaudi::Units::m));
-
-  world->add(ShiftZ);
-  world->add(Envelope_Physical[1]);
-
-  m_detectorManager->addTreeTop(Envelope_Physical[1]);
-
-  ATH_MSG_DEBUG( " ZDC DetFactory ADDED TOP VOLUME "
-                 << Envelope_Physical[1]->getAbsoluteName() );
+void ZDC_DetFactory::initializePbPb2015(){
+    m_RPDs_On = false; //Flag for both RPD modules
+    m_zdcOn = {{true, true, true, true}, //If the given ZDC is on
+               {true, true, true, true}};
+    m_zdcPos = {{-397.0, -27.0, 153.0, 303.0}, //Positions of the ZDC modules
+                {-397.0, -27.0, 153.0, 303.0}};
+    m_zdcPixelStart_Stop = {{{1,8}, {0,9}, {0,0}, {0,0}}, //Pixel start and stop layers for each ZDC
+                            {{0,0}, {0,9}, {0,0}, {0,0}}};
 }
 
-const ZDC_DetManager* ZDC_DetFactory::getDetectorManager() const { return m_detectorManager; }
+void ZDC_DetFactory::initializePbPb2023(){
+    m_RPDs_On = true; //Flag for both RPD modules
+    m_zdcOn = {{true, true, true, true}, //If the given ZDC is on
+               {true, true, true, true}};
+    m_zdcPos = {{-397.0, -27.0, 153.0, 303.0}, //Positions of the ZDC modules
+                {-397.0, -27.0, 153.0, 303.0}};
+    m_zdcPixelStart_Stop = {{{1,8}, {0,9}, {0,0}, {0,0}}, //Pixel start and stop layers for each ZDC
+                            {{0,0}, {0,9}, {0,0}, {0,0}}};
+    m_rpdPos = {-190,-190}; //Positions of the RPD modules
+}
 
-// if you change this function then also make changes in PixelSD::EndOfEvent
-// CHANGE Kmax=80 THERE, IF YOU WANT EACH PIXEL IN HMXY TO BE READ OUT SEPARATELY
+void ZDC_DetFactory::create(GeoPhysVol *world)
+{
+    m_detectorManager = new ZDC_DetManager();
+    MsgStream LogStream(Athena::getMessageSvc(), "ZDC_DetectorFactory::create");
 
-int ZDC_DetFactory::Make_Pixel_ID( int Pid ) {
+    StoredMaterialManager *theMaterialManager;
+    if (StatusCode::SUCCESS != m_detectorStore->retrieve(theMaterialManager, "MATERIALS")) {
+        MsgStream LogStream(Athena::getMessageSvc(), "ZDC_DetectorFactory::create");
+        LogStream << MSG::ERROR << "execute: Could not retrieve StoredMaterialManager object from the detector store" << endmsg;
+        return;
+    }
 
-  if (Pid==0  || Pid==1  || Pid==8  || Pid==9 ) return  0;
-  if (Pid==2  || Pid==3  || Pid==10 || Pid==11) return  1;  
-  if (Pid==4  || Pid==5  || Pid==12 || Pid==13) return  2;  
-  if (Pid==6  || Pid==7  || Pid==14 || Pid==15) return  3;  
+    buildMaterials(theMaterialManager);
 
-  if (Pid==16 || Pid==17 || Pid==25           ) return  4;  
-  if (Pid==18 || Pid==19 || Pid==27           ) return  5;  
-  if (Pid==20 || Pid==21 || Pid==29           ) return  6;  
-  if (Pid==22 || Pid==23 || Pid==31           ) return  7;  
+    //Create the TAN/TAXN slot
+    const GeoMaterial *Air = theMaterialManager->getMaterial("std::Air");
+    GeoBox *Envelope_Box = new GeoBox(91 * Gaudi::Units::mm * 0.5, 181 * Gaudi::Units::mm * 0.5, 94.3 * Gaudi::Units::cm * 0.5);
+    GeoLogVol *Envelope_Logical = new GeoLogVol("Envelope_Logical", Envelope_Box, Air);
 
-  if (Pid==24 || Pid==32 || Pid==33           ) return  8;  
-  if (Pid==26 || Pid==34 || Pid==35           ) return  9;  
-  if (Pid==28 || Pid==36 || Pid==37           ) return 10;  
-  if (Pid==30 || Pid==38 || Pid==39           ) return 11;
-  
-  if (Pid==40 || Pid==41 || Pid==49           ) return 12;  
-  if (Pid==42 || Pid==43 || Pid==51           ) return 13;  
-  if (Pid==44 || Pid==45 || Pid==53           ) return 14;  
-  if (Pid==46 || Pid==47 || Pid==55           ) return 15;  
+    Identifier id;
 
-  if (Pid==48 || Pid==56 || Pid==57           ) return 16;  
-  if (Pid==50 || Pid==58 || Pid==59           ) return 17;  
-  if (Pid==52 || Pid==60 || Pid==61           ) return 18;  
-  if (Pid==54 || Pid==62 || Pid==63           ) return 19;  
+    char volName[256];
+    for(int side : {0, 1}){
+        int sideSign = (side == 0) ? -1 : 1;
+        GeoFullPhysVol *Envelope_Physical = new GeoFullPhysVol(Envelope_Logical);
 
-  if (Pid==64 || Pid==65 || Pid==72 || Pid==73) return 20;
-  if (Pid==66 || Pid==67 || Pid==74 || Pid==75) return 21;  
-  if (Pid==68 || Pid==69 || Pid==76 || Pid==77) return 22;  
-  if (Pid==70 || Pid==71 || Pid==78 || Pid==79) return 23;  
+        /*************************************************
+         * Place ZDC modules
+         **************************************************/
+        for(int module = 0; module < 4; ++module){
+            if(!m_zdcOn[side][module]) continue;
+            id = m_zdcID->channel_id(sideSign,module,ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
+            ZDC_ZDCModule *zdcMod = new ZDC_ZDCModule(m_detectorStore, sideSign ,module, m_zdcID, m_zdcPixelStart_Stop[side][module].first, m_zdcPixelStart_Stop[side][module].second);
+            sprintf(volName, "Zdc::Steel_Mod %s", id.getString().c_str());
+            Envelope_Physical->add(new GeoNameTag(volName));
+            Envelope_Physical->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
+            Envelope_Physical->add(new GeoAlignableTransform(GeoTrf::TranslateZ3D(m_zdcPos[side][module] * Gaudi::Units::mm)));
+            Envelope_Physical->add(zdcMod->create());
+        }
 
-  return -1;
-} 
+        /*************************************************
+         * Place RPD
+         **************************************************/
+        if(m_RPDs_On){
+            id = m_zdcID->channel_id(sideSign, 4, ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
+            ZDC_RPDModule *rpdMod = new ZDC_RPDModule(m_detectorStore, sideSign, 4, m_zdcID);
+            sprintf(volName, "Zdc::RPD_Mod %s", id.getString().c_str());
+            Envelope_Physical->add(new GeoNameTag(volName));
+            Envelope_Physical->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
+            Envelope_Physical->add(new GeoAlignableTransform(GeoTrf::TranslateZ3D(m_rpdPos[side] * Gaudi::Units::mm)));
+            Envelope_Physical->add(rpdMod->create());
+        }
+
+        /*************************************************
+         * Place TAN/TAXN slot
+         **************************************************/
+        sprintf(volName, "Zdc::ZDC_Air_Envelope %c", (side == 0) ? 'C' : 'A');
+        world->add(new GeoNameTag(volName));
+        world->add(new GeoIdentifierTag(m_zdcID->channel_id(sideSign, 0, ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR).get_identifier32().get_compact()));
+        world->add(new GeoAlignableTransform(GeoTrf::TranslateZ3D(sideSign*141.580 * CLHEP::m)));
+        if(side == 0) world->add(new GeoAlignableTransform(GeoTrf::RotateY3D(180 * Gaudi::Units::deg)));
+        world->add(Envelope_Physical);
+
+        m_detectorManager->addTreeTop(Envelope_Physical);
+    }
+}
+
+void ZDC_DetFactory::buildMaterials(StoredMaterialManager *materialManager){
+
+    const GeoElement *Oxygen   = materialManager->getElement("Oxygen");
+    const GeoElement *Silicon  = materialManager->getElement("Silicon");
+    const GeoElement *Hydrogen = materialManager->getElement("Hydrogen");
+    const GeoElement *Nitrogen = materialManager->getElement("Nitrogen");
+    const GeoElement *Carbon   = materialManager->getElement("Carbon");
+    const GeoElement *Argon    = materialManager->getElement("Argon");
+    const GeoElement *Tung     = materialManager->getElement("Wolfram");
+    const GeoElement *Iron     = materialManager->getElement("Iron");
+    const GeoElement *Nickel   = materialManager->getElement("Nickel");
+
+    const int nEntries = 50; // Number of data points in each array
+    double eV = Gaudi::Units::eV;
+    double cm = Gaudi::Units::cm;
+
+    //Evenly distributed photon energy bins for the coming arrays of material properties. Range is selected for a PMT which is sensitive from 300-650nm wavelength
+    double photonEnergy[nEntries] = {0};
+    double minEnergy = 1.90769 * eV; double maxEnergy = 4.08882 * eV;
+    double step = (maxEnergy-minEnergy)/nEntries;
+    for(int i=0; i<nEntries; ++i){
+       photonEnergy[i] = minEnergy + i*step;
+    }
+
+    // Optical Air density and composition obtained from
+    // From https://physics.nist.gov/cgi-bin/Star/compos.pl?matno=104
+    GeoExtendedMaterial *OpAir = new GeoExtendedMaterial("ZDC::opticalAir", 1.2e-3 * GeoModelKernelUnits::g / Gaudi::Units::cm3, stateGas, Gaudi::Units::STP_Temperature);
+    OpAir->add(Nitrogen, 0.755);
+    OpAir->add(Oxygen  , 0.232);
+    OpAir->add(Argon   , 0.013);
+
+    // The air in the modules must have refractive index defined for total internal reflection to work
+    // From NIST https://emtoolbox.nist.gov/wavelength/documentation.asp
+    double RefractiveIndexAir[nEntries];
+    for(int i=0; i<nEntries; ++i)
+        RefractiveIndexAir[i] = 1.000271800;
+
+    GeoMaterialPropertiesTable *airMPT = new GeoMaterialPropertiesTable();
+    airMPT->AddProperty("RINDEX", photonEnergy, RefractiveIndexAir, nEntries);
+    OpAir->SetMaterialPropertiesTable(airMPT);
+    OpAir->lock();
+    materialManager->addMaterial("ZDC", OpAir);
+
+    // RPD fiber core and ZDC rod material
+    // Composition from https://physics.nist.gov/cgi-bin/Star/compos.pl?matno=245
+    GeoExtendedMaterial *OpSilicaCore = new GeoExtendedMaterial("ZDC::opticalSilica", 2.320 * GeoModelKernelUnits::g / Gaudi::Units::cm3, stateSolid, Gaudi::Units::STP_Temperature);
+    OpSilicaCore->add(Silicon, 0.467);
+    OpSilicaCore->add(Oxygen, 0.533);
+
+    // Refractive index of fused silica obtained from 
+    // https://www.heraeus.com/media/media/hca/doc_hca/products_and_solutions_8/optics/Data_and_Properties_Optics_fused_silica_EN.pdf
+    double silica_RIND[] = {1.45656, 1.45694, 1.45737, 1.45781, 1.45825, 1.4587 , 1.45914, 1.45959, 1.46003, 1.46048,
+                            1.46095, 1.46145, 1.46194, 1.46242, 1.46289, 1.4634 , 1.46394, 1.46448, 1.46502, 1.46556,
+                            1.46608, 1.46666, 1.46725, 1.46784, 1.46843, 1.46902, 1.46961, 1.47024, 1.4709 , 1.47155,
+                            1.4722 , 1.47288, 1.47356, 1.47425, 1.47494, 1.47566, 1.4764 , 1.47715, 1.4779 , 1.47864,
+                            1.47935, 1.48014, 1.48093, 1.48172, 1.48254, 1.48339, 1.48424, 1.4851 , 1.48598, 1.48689};
+
+    // Absorption length index of fused silica derrived from 
+    // https://www.heraeus.com/media/media/hca/doc_hca/products_and_solutions_8/optics/Data_and_Properties_Optics_fused_silica_EN.pdf
+    double silica_ABSL[nEntries] = {302.163 * cm};
+    silica_ABSL[nEntries - 1] = silica_ABSL[nEntries - 2] = 204.542 * cm;
+
+    GeoMaterialPropertiesTable *silicaCoreMPT = new GeoMaterialPropertiesTable();
+    silicaCoreMPT->AddProperty("RINDEX"   , photonEnergy, silica_RIND, nEntries); // index of refraction
+    silicaCoreMPT->AddProperty("ABSLENGTH", photonEnergy, silica_ABSL, nEntries); // absorption length
+    OpSilicaCore->SetMaterialPropertiesTable(silicaCoreMPT);
+    OpSilicaCore->lock();
+    materialManager->addMaterial("ZDC", OpSilicaCore);
+
+    // RPD fiber cladding
+    // Composition from https://physics.nist.gov/cgi-bin/Star/compos.pl?matno=245
+    GeoExtendedMaterial *OpSilicaClad = new GeoExtendedMaterial("ZDC::opticalSilicaClad", 2.320 * GeoModelKernelUnits::g / Gaudi::Units::cm3, stateSolid, Gaudi::Units::STP_Temperature);
+    OpSilicaClad->add(Silicon, 0.467);
+    OpSilicaClad->add(Oxygen, 0.533);
+
+    // Numerical aperture is given by data sheet as 0.22 and NA = sqrt( n1^2 - n2^2 ), so n2 = sqrt( n1^2 - NA^2 ) where n1 is silica_RIND
+    // https://www.content.molex.com/dxdam/literature/987650-8936.pdf
+    double silica_clad_RIND[] = {1.43985, 1.44023, 1.44067, 1.44112, 1.44156, 1.44201, 1.44246, 1.44291, 1.44336, 1.44381,
+                                 1.44429, 1.4448 , 1.44529, 1.44577, 1.44625, 1.44677, 1.44731, 1.44786, 1.44841, 1.44895,
+                                 1.44948, 1.45007, 1.45067, 1.45126, 1.45186, 1.45245, 1.45305, 1.45369, 1.45435, 1.45501,
+                                 1.45567, 1.45635, 1.45705, 1.45774, 1.45844, 1.45916, 1.45992, 1.46067, 1.46143, 1.46219,
+                                 1.4629 , 1.4637 , 1.46449, 1.46529, 1.46612, 1.46698, 1.46785, 1.46871, 1.4696 , 1.47052};
+
+    // Silica cladding
+    GeoMaterialPropertiesTable *silicaCladMPT = new GeoMaterialPropertiesTable();
+    silicaCladMPT->AddProperty("RINDEX"   , photonEnergy, silica_clad_RIND, nEntries); // index of refraction
+    silicaCladMPT->AddProperty("ABSLENGTH", photonEnergy, silica_ABSL     , nEntries); // absorption length
+    OpSilicaClad->SetMaterialPropertiesTable(silicaCladMPT);
+    OpSilicaClad->lock();
+    materialManager->addMaterial("ZDC", OpSilicaClad);
+
+    // Kapton fiber optic buffer material
+    // Composition from https://physics.nist.gov/cgi-bin/Star/compos.pl?matno=179
+    GeoExtendedMaterial *OpKapton = new GeoExtendedMaterial("ZDC::opticalKapton", 1.42 * GeoModelKernelUnits::g / Gaudi::Units::cm3, stateSolid, Gaudi::Units::STP_Temperature);
+    OpKapton->add(Hydrogen, 0.026362);
+    OpKapton->add(Carbon  , 0.691133);
+    OpKapton->add(Nitrogen, 0.073270);
+    OpKapton->add(Oxygen  , 0.209235);
+
+    // Refractive index obtained from
+    // https://engineering.case.edu/centers/sdle/sites/engineering.case.edu.centers.sdle/files/optical_properties_of_materials.pdf
+    double kapton_RIND[] = {1.7095 , 1.7111 , 1.7143 , 1.7191, 1.7207 , 1.7255 , 1.7271 , 1.73157, 1.7351 , 1.7383 ,
+                            1.7416 , 1.7464 , 1.74978, 1.7545, 1.7593 , 1.766  , 1.7692 , 1.7758 , 1.78179, 1.79009,
+                            1.794  , 1.80245, 1.8074 , 1.8157, 1.82184, 1.82659, 1.8344 , 1.84222, 1.8514 , 1.8584 ,
+                            1.86392, 1.8723 , 1.88251, 1.8959, 1.90567, 1.92604, 1.93911, 1.95036, 1.96867, 1.97804,
+                            1.9905 , 1.99755, 2.00821, 2.0146, 2.03435, 2.05705, 2.08078, 2.10021, 2.12912, 2.14333};
+
+    // Reflectivity obtained from
+    // https://amostech.com/TechnicalPapers/2018/Poster/Bengtson.pdf
+    double kapton_REFL[] = {0.502195  , 0.473894  , 0.446164  , 0.413816  , 0.375095 , 0.336845  , 0.293879  , 0.239299  , 0.200573  , 0.141596  ,
+                            0.0949924 , 0.0590249 , 0.0353952 , 0.0206475 , 0.01305  , 0.00915075, 0.00722501, 0.00551299, 0.00552271, 0.00553177,
+                            0.00554062, 0.00554942, 0.00555642, 0.00556579, 0.0083157, 0.011944  , 0.0172255 , 0.0225071 , 0.0277887 , 0.0330702 ,
+                            0.0383518 , 0.0436334 , 0.0489149 , 0.0541965 , 0.0594781, 0.0647597 , 0.0700412 , 0.0753228 , 0.0806044 , 0.0858859 ,
+                            0.0911675 , 0.0964491 , 0.101731  , 0.107012  , 0.112294 , 0.117575  , 0.122857  , 0.128139  , 0.13342   , 0.138702  };
+
+    // Absorption length obtained from
+    // https://pubs.rsc.org/fa/content/articlehtml/2018/ra/c7ra12101f
+    double kapton_ABSL[] = {0.00867389  * cm, 0.00842316  * cm, 0.00818715  * cm, 0.00798542  * cm, 0.00774517  * cm, 0.00751684  * cm, 0.00729959  * cm, 0.00709258  * cm, 0.00685686  * cm, 0.0066337   * cm,
+                            0.00642212  * cm, 0.00616231  * cm, 0.00587855  * cm, 0.00561968  * cm, 0.00541849  * cm, 0.0052337   * cm, 0.00504545  * cm, 0.00487671  * cm, 0.00474623  * cm, 0.00461459  * cm,
+                            0.00449314  * cm, 0.00437628  * cm, 0.0042637   * cm, 0.00413695  * cm, 0.00401798  * cm, 0.00382827  * cm, 0.003625    * cm, 0.00335813  * cm, 0.00303474  * cm, 0.00264672  * cm,
+                            0.00226016  * cm, 0.00185863  * cm, 0.00146109  * cm, 0.00116967  * cm, 0.000901973 * cm, 0.000721492 * cm, 0.000559526 * cm, 0.000463349 * cm, 0.00034795  * cm, 0.000317447 * cm,
+                            0.000317447 * cm, 0.000317447 * cm, 0.000317447 * cm, 0.000317447 * cm, 0.000317447 * cm, 0.000317447 * cm, 0.000317447 * cm, 0.000317447 * cm, 0.000317447 * cm, 0.000317447 * cm};
+
+    // Kapton
+    GeoMaterialPropertiesTable *kaptonMPT = new GeoMaterialPropertiesTable();
+    kaptonMPT->AddProperty("RINDEX"      , photonEnergy, kapton_RIND, nEntries);
+    kaptonMPT->AddProperty("ABSLENGTH"   , photonEnergy, kapton_ABSL, nEntries);
+    kaptonMPT->AddProperty("REFLECTIVITY", photonEnergy, kapton_REFL, nEntries);
+    OpKapton->SetMaterialPropertiesTable(kaptonMPT);
+    OpKapton->lock();
+    materialManager->addMaterial("ZDC", OpKapton);
+
+    // Absorber composition:  savannah.cern.ch/task/download.php?file_id=22925
+    GeoMaterial *Tungsten = new GeoMaterial("ZDC::Tungsten", 18.155 * GeoModelKernelUnits::g / Gaudi::Units::cm3);
+    Tungsten->add(Tung  , 0.948);
+    Tungsten->add(Nickel, 0.037);
+    Tungsten->add(Iron  , 0.015);
+    Tungsten->lock();
+    materialManager->addMaterial("ZDC", Tungsten);
+
+    // ZDC housing material
+    GeoMaterial *Steel = new GeoMaterial("ZDC::Steel", 7.9 * GeoModelKernelUnits::g / Gaudi::Units::cm3);
+    Steel->add(Iron  , 0.98);
+    Steel->add(Carbon, 0.02);
+    Steel->lock();
+    materialManager->addMaterial("ZDC", Steel);
+
+}
+
+const ZDC_DetManager *ZDC_DetFactory::getDetectorManager() const { return m_detectorManager; }

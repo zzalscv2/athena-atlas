@@ -40,6 +40,8 @@ typedef struct _FWD_CONFIGURATION
     double posAFPL2;
     double posAFPR1;
     double posAFPR2;
+    double posZDC1;
+    double posZDC2;
 
     void clear();
 } FWD_CONFIGURATION, *PFWD_CONFIGURATION;

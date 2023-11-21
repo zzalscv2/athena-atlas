@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDC_DetTool.h"
@@ -8,6 +8,7 @@
 #include "GeoModelUtilities/GeoModelExperiment.h"
 #include "GaudiKernel/IService.h"
 #include "GaudiKernel/ISvcLocator.h"
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaKernel/getMessageSvc.h"
 
@@ -44,9 +45,30 @@ StatusCode ZDC_DetTool::create()
     if (msgLevel(MSG::ERROR)) msg(MSG::ERROR) << " Could not find GeoModelExperiment ATLAS " << endmsg; 
     return (StatusCode::FAILURE); 
   } 
+
   
   ZDC_DetFactory theZDCFactory(detStore().operator->());
+
+  IGeoDbTagSvc *geoDbTag;
+  StatusCode sc = service ("GeoDbTagSvc",geoDbTag);
+  if (sc.isFailure()) {
+    msg(MSG::FATAL) << "Could not locate GeoDbTagSvc" << endmsg;
+    return StatusCode::FAILURE;
+  }
+
+  GeoModel::GeoConfig geoConfig = geoDbTag->geoConfig();
   
+  //Set the geometry configuration
+  if(geoConfig==GeoModel::GEO_RUN2){ 
+    msg(MSG::INFO) << "Initializing ZDC geometry for PbPb2015" << endmsg;
+    theZDCFactory.initializePbPb2015();
+  }else if(geoConfig==GeoModel::GEO_RUN3){ 
+    msg(MSG::INFO) << "Initializing ZDC geometry for PbPb2023" << endmsg;
+    theZDCFactory.initializePbPb2023();
+  }else if(geoConfig==GeoModel::GEO_RUN4){
+    msg(MSG::ERROR) << "No ZDC geometry defined for RUN4" << endmsg;
+  }
+
   if (nullptr == m_detector) { // Create the ZDCDetectorNode instance
     
     try { 
@@ -62,8 +84,6 @@ StatusCode ZDC_DetTool::create()
     
     // Register the ZDC DetectorNode instance with the Transient Detector Store
     theExpt->addManager(theZDCFactory.getDetectorManager());
-    //detStore->record(theZDCFactory.getDetectorManager(),theZDCFactory.getDetectorManager()->getName());
-    //return StatusCode::SUCCESS;
     if(detStore()->record(theZDCFactory.getDetectorManager(),theZDCFactory.getDetectorManager()->getName())==StatusCode::SUCCESS){
       return StatusCode::SUCCESS;}
     else{
