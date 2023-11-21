@@ -62,7 +62,7 @@ public:
   SoMaterial * material;
   SoSeparator * attachSep;
 
-  SoSeparator* loadModel(std::string fpath);
+  SoSeparator* loadModel(const std::string& fpath);
   double getScaleFactor(SoNode* node, double desiredHeight);
 
   bool shown;
@@ -112,7 +112,7 @@ VP1People::Imp::Imp(VP1People *tc,SoMaterial * mat,SoSeparator * as)
 
 
 //____________________________________________________________________
-SoSeparator* VP1People::Imp::loadModel(std::string fpath) 
+SoSeparator* VP1People::Imp::loadModel(const std::string& fpath) 
 {
     SoDB::init();
     SoInput myInput;
