@@ -670,7 +670,8 @@ class ComponentAccumulator(AccumulatorCachable):
 
         if len( selcomps ) == 1:
             return selcomps[0]
-        raise ConfigurationError("Number of {} available {} which is != 1 expected by this API".format(typename, len(selcomps)) )
+        nmstr = f'with name {name} ' if name else ''
+        raise ConfigurationError("Number of {} available {}{} which is != 1 expected by this API".format(typename, nmstr, len(selcomps)) )
 
     def getPublicTools(self):
         return self._publicTools
