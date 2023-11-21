@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1CALOCELLSYSTEM_H
@@ -26,7 +26,7 @@ public:
   QByteArray saveState();
   void restoreFromState(QByteArray ba);
 
-protected slots:
+protected Q_SLOTS:
 //  void digitsOn(bool flag);
   void energyMode();
 

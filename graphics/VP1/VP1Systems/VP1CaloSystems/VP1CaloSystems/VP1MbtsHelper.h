@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1MBTSHELPER_H
@@ -34,7 +34,7 @@ class VP1MbtsHelper : public QObject
   // Selection feedback
   std::vector<std::string> userPickedNode(SoNode* pickedNode);
 
-  public slots:
+  public Q_SLOTS:
     void selectionUpdated(const VP1Interval& interval);
     void outlineUpdate(const bool& outline);
     void clipVolumeRadiusChanged(double radius);
