@@ -41,6 +41,8 @@ ForwardRegionGeoModelTool::ForwardRegionGeoModelTool( const std::string& type, c
     declareProperty("posAFPR1",m_Config.posAFPR1=-204500*Gaudi::Units::mm);
     declareProperty("posAFPL2",m_Config.posAFPL2=212675*Gaudi::Units::mm);
     declareProperty("posAFPR2",m_Config.posAFPR2=-212675*Gaudi::Units::mm);
+    declareProperty("posZDC1",m_Config.posZDC1=141580*Gaudi::Units::mm);
+    declareProperty("posZDC2",m_Config.posZDC2=-141580*Gaudi::Units::mm);
 }
 
 /**

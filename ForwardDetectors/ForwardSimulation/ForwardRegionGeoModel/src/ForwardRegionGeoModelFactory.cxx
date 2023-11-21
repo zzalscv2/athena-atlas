@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardRegionGeoModelFactory.h"
@@ -68,6 +68,8 @@ void FWD_CONFIGURATION::clear()
     posAFPL2 = 212675*Gaudi::Units::mm;
     posAFPR1 = -204500*Gaudi::Units::mm;
     posAFPL2 = -212675*Gaudi::Units::mm;
+    posZDC1 = 141580*Gaudi::Units::mm;
+    posZDC2 = -141580*Gaudi::Units::mm;
 }
 
 
@@ -427,7 +429,13 @@ void ForwardRegionGeoModelFactory::create(GeoPhysVol *world)
   GeoTrf::Transform3D shiftAfpR1 = GeoTrf::Translate3D(0,0,m_Config.posAFPR1);
   GeoTrf::Transform3D shiftAfpL2 = GeoTrf::Translate3D(0,0,m_Config.posAFPL2);
   GeoTrf::Transform3D shiftAfpR2 = GeoTrf::Translate3D(0,0,m_Config.posAFPR2);
-  const GeoShapeSubtraction& fwrTube = fwrTube2.subtract((*afp)<<shiftAfpL1).subtract((*afp)<<shiftAfpR1).subtract((*afp2)<<shiftAfpL2).subtract((*afp2)<<shiftAfpR2);
+  const GeoShapeSubtraction& fwrTube3 = fwrTube2.subtract((*afp)<<shiftAfpL1).subtract((*afp)<<shiftAfpR1).subtract((*afp2)<<shiftAfpL2).subtract((*afp2)<<shiftAfpR2);
+
+  // cut out slots for ZDC
+  const GeoBox     *zdc    = new GeoBox( 9.1*Gaudi::Units::cm/2.0 ,18.1*Gaudi::Units::cm/2.0  , 94.4*Gaudi::Units::cm/2.0);
+  GeoTrf::Transform3D shiftZdcL1 = GeoTrf::Translate3D(0,0, m_Config.posZDC1);
+  GeoTrf::Transform3D shiftZdcR1 = GeoTrf::Translate3D(0,0, m_Config.posZDC2);
+  const GeoShapeSubtraction& fwrTube = fwrTube3.subtract((*zdc)<<shiftZdcL1).subtract((*zdc)<<shiftZdcR1);
 
 
   const GeoLogVol   *fwrLog    = new GeoLogVol("ForwardRegionGeoModel", &fwrTube, m_MapMaterials[std::string("std::Vacuum")]);
