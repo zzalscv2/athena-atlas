@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -23,6 +23,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <cassert>
 #include <signal.h>
 #include <setjmp.h>
+#include <fenv.h>
 
 
 float blam = 0;
@@ -70,7 +71,11 @@ int main()
 
   //  flags.push_back ("divbyzero");
   //  svc->setProperty ("Exceptions", flags);
-  testit (true);
+#ifdef __aarch64__
+  // Some aarch64 implementations do not support trapping on FPEs :(...
+  if (fegetexcept() & FE_DIVBYZERO)
+#endif
+    testit (true);
 
   flags.push_back ("!divbyzero");
   assert(svc->setProperty ("Exceptions", flags).isSuccess());
@@ -78,7 +83,11 @@ int main()
 
   flags.push_back ("divbyzero");
   assert(svc->setProperty ("Exceptions", flags).isSuccess());
-  testit (true);
+#ifdef __aarch64__
+  // Some aarch64 implementations do not support trapping on FPEs :(...
+  if (fegetexcept() & FE_DIVBYZERO)
+#endif
+    testit (true);
 
   flags.push_back ("fooo");
   assert(svc->setProperty ("Exceptions", flags).isSuccess());
