@@ -438,9 +438,8 @@ def addDefaultAlgs(config, dataType, isPhyslite, noPhysliteBroken, noSystematics
         defaults={'configName': 'Trigger'})
 
     # event selection
-    from EventSelectionAlgorithms.EventSelectionConfig import EventSelectionConfig, EventSelectionMergerConfig
-    config.addAlgConfigBlock(algName='EventSelection', alg=EventSelectionConfig)
-    config.addAlgConfigBlock(algName='EventSelectionMerger', alg=EventSelectionMergerConfig)
+    from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
+    config.addAlgConfigBlock(algName='EventSelection', alg=makeMultipleEventSelectionConfigs)
 
     # event-based cutflow
     from AsgAnalysisAlgorithms.AsgAnalysisConfig import EventCutFlowBlock

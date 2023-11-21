@@ -105,7 +105,7 @@ class ConfigAccumulator :
     used.
     """
 
-    def __init__ (self, algSeq, dataType=None, isPhyslite=False, geometry=None, dsid=0, campaign=None,
+    def __init__ (self, algSeq, dataType=None, isPhyslite=False, geometry=None, dsid=0, campaign=None, runNumber=None,
                   autoconfigFromFlags=None, noSysSuffix=False):
         if autoconfigFromFlags is not None:
             if autoconfigFromFlags.Input.isMC:
@@ -122,6 +122,8 @@ class ConfigAccumulator :
                 dsid = autoconfigFromFlags.Input.MCChannelNumber
             if campaign is None:
                 campaign = autoconfigFromFlags.Input.MCCampaign
+            if runNumber is None:
+                runNumber = int(autoconfigFromFlags.Input.RunNumber[0])
             generatorInfo = autoconfigFromFlags.Input.GeneratorsInfo
         else:
             # legacy mappings of string arguments
@@ -133,6 +135,8 @@ class ConfigAccumulator :
                 else:
                     dataType = DataType(dataType)
             generatorInfo = None
+            if runNumber is None:
+                runNumber = 284500
         # allow possible string argument for `geometry` and convert it to enum
         geometry = LHCPeriod(geometry)
         if geometry is LHCPeriod.Run1:
@@ -142,6 +146,7 @@ class ConfigAccumulator :
         self._geometry = geometry
         self._dsid = dsid
         self._campaign = campaign
+        self._runNumber = runNumber
         self._generatorInfo = generatorInfo
         self._algSeq = algSeq
         self._noSysSuffix = noSysSuffix
@@ -186,6 +191,10 @@ class ConfigAccumulator :
     def campaign(self) :
         """the MC campaign we run on"""
         return self._campaign
+
+    def runNumber(self) :
+        """the MC runNumber"""
+        return self._runNumber
 
     def generatorInfo(self) :
         """the dictionary of MC generators and their versions for the sample we run on"""

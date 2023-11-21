@@ -37,7 +37,9 @@ def getMCCampaign(files):
         mc_campaign = campaign_runs.get(run_numbers[0], Campaign.Unknown)
 
     # MC-equivalent projects for data
-    if 'data22' in project_name:
+    if 'data23' in project_name:
+        return Campaign.MC23c
+    elif 'data22' in project_name:
         return Campaign.MC21a
     elif 'data18' in project_name:
         return Campaign.MC20e
