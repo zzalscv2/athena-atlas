@@ -48,7 +48,6 @@ StatusCode ClusterTimeProjectionMMClusterBuilderTool::getClusters(const EventCon
             DEFINE_VECTOR(MMPrepData, clustConstituents, clustIds.size());
             DEFINE_VECTOR(NSWCalib::CalibratedStrip, stripFeatures, clustIds.size());
             
-            double totalCharge{0.};
             Amg::Vector3D clustDir{Amg::Vector3D::Zero()};
             for (unsigned idx : clustIds) {
                 MMPrepData& toMerge{prdsOfLayer[idx]};
@@ -57,7 +56,6 @@ StatusCode ClusterTimeProjectionMMClusterBuilderTool::getClusters(const EventCon
                 const double q = toMerge.charge();
 
                 clustDir += q * lDir;
-                totalCharge += q;
                 NSWCalib::CalibratedStrip clusFeat{};
                 clusFeat.identifier = toMerge.identify();
                 clusFeat.locPos = toMerge.localPosition();
