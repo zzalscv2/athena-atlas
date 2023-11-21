@@ -132,7 +132,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
     def __init__ (self) :
         super (GeneratorAnalysisBlock, self).__init__ ('Generator')
         self.addOption ('saveCutBookkeepers', True, type=bool)
-        self.addOption ('runNumber', 284500, type=int)
+        self.addOption ('runNumber', None, type=int)
         self.addOption ('cutBookkeepersSystematics', True, type=bool)
 
     def makeAlgs (self, config) :
@@ -140,6 +140,9 @@ class GeneratorAnalysisBlock (ConfigBlock):
         if config.dataType() is DataType.Data:
             # there are no generator weights in data!
             return
+
+        if self.runNumber is None:
+            self.runNumber = config.runNumber()
 
         if self.saveCutBookkeepers and not self.runNumber:
             raise ValueError ("invalid run number: " + str(self.runNumber))
