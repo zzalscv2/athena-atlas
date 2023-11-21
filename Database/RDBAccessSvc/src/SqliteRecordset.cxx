@@ -93,6 +93,10 @@ void SqliteRecordset::getData(sqlite3* db, const std::string& nodeName)
 	  inpType = SQLITEINP_STRING;
 	  val = std::string((char*)(sqlite3_column_text(st,i)));
 	  break;
+	case SQLITE_BLOB:
+	  inpType = SQLITEINP_STRING;
+	  val = std::string((char*)(sqlite3_column_blob(st,i)));
+	  break;
 	case SQLITE_NULL:
 	  continue;
 	default:

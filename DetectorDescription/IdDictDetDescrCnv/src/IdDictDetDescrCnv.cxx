@@ -366,11 +366,41 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
                 "dictionary ");
     };
 
+    // Function for reading ID dictionary as a BLOB from SQLite
+    // and writing it on the disk in the run directory
+    auto getEmbeddedDict = [this](const std::string& dictName
+				  , IRDBAccessSvc* rdbAccessSvc
+				  , std::string &fileName
+				  , std::string &dictTag) -> bool
+    {
+      IRDBRecordset_ptr rec = rdbAccessSvc->getRecordsetPtr(dictName,"","");
+      if(rec->size()>0) {
+	const IRDBRecord *dictRecord = (*rec)[0];
+	std::string dictString = dictRecord->getString("CONTENTS");
+
+	//  write to the temporary file
+	std::string dictFileName = dictName+"-fromSQLite.xml";
+	std::ofstream dictFile;
+	dictFile.open(dictFileName);
+	dictFile << dictString;
+	dictFile.close();
+
+	fileName = dictFileName;
+	dictTag = std::string();  // This may change in the future if we also write dict tags into SQLite
+
+	ATH_MSG_DEBUG(dictName << " read from the SQLite database as a BLOB");
+	return true;
+      }
+      return false;
+    };
+
     bool useGeomDB = (geoDbTagSvc->getSqliteReader() == nullptr);
 
     std::string detTag{""}, detNode{""}, dictName{""};
     DecodeVersionKey detectorKey("ATLAS");
     IRDBRecordset_ptr idDictSet{};
+
+    bool embeddedDict{false};
 
     // Get InDet
     if (m_useGeomDB_InDet) {
@@ -399,55 +429,70 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
                 "dictionary ");
 
     } else {
+      // Attempt to read the embedded disctionary from SQLite
+      embeddedDict = !useGeomDB && getEmbeddedDict("IdDictInnerDetector",rdbAccessSvc,m_inDetIDFileName,m_inDetIdDictTag);
+      if(!embeddedDict) {
+	// Fall back on getting file names from the database
         if (useGeomDB) {
-            detectorKey = DecodeVersionKey(geoDbTagSvc, "InnerDetector");
-            ATH_MSG_DEBUG("From Version Tag: " << detectorKey.tag()
-                                               << " at Node: "
-                                               << detectorKey.node());
-            detTag = detectorKey.tag();
-            detNode = detectorKey.node();
+	  detectorKey = DecodeVersionKey(geoDbTagSvc, "InnerDetector");
+	  ATH_MSG_DEBUG("From Version Tag: " << detectorKey.tag()
+			<< " at Node: "
+			<< detectorKey.node());
+	  detTag = detectorKey.tag();
+	  detNode = detectorKey.node();
         }
-        idDictSet =
-            rdbAccessSvc->getRecordsetPtr("InDetIdentifier", detTag, detNode);
+        idDictSet = rdbAccessSvc->getRecordsetPtr("InDetIdentifier", detTag, detNode);
         assignTagAndName(idDictSet, m_inDetIDFileName, m_inDetIdDictTag);
+      }
     }
 
     // Get LAr
-    if (useGeomDB) {
+    // Attempt to read the embedded disctionary from SQLite
+    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictLArCalorimeter",rdbAccessSvc,m_larIDFileName,m_larIdDictTag);
+    if(!embeddedDict) {
+      // Fall back on getting file names from the database
+      if (useGeomDB) {
         detectorKey = DecodeVersionKey(geoDbTagSvc, "LAr");
         ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
-            << " at Node: " << detectorKey.node() );
+		       << " at Node: " << detectorKey.node() );
         detTag = detectorKey.tag();
         detNode = detectorKey.node();
+      }
+      idDictSet = rdbAccessSvc->getRecordsetPtr("LArIdentifier", detTag, detNode);
+      assignTagAndName(idDictSet, m_larIDFileName, m_larIdDictTag);
     }
-    idDictSet = rdbAccessSvc->getRecordsetPtr("LArIdentifier", detTag, detNode);
-    assignTagAndName(idDictSet, m_larIDFileName, m_larIdDictTag);
 
     // Get Tile
-    if (useGeomDB) {
+    // Attempt to read the embedded disctionary from SQLite
+    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictTileCalorimeter",rdbAccessSvc,m_tileIDFileName,m_tileIdDictTag);
+    if(!embeddedDict) {
+      // Fall back on getting file names from the database
+      if (useGeomDB) {
         detectorKey = DecodeVersionKey(geoDbTagSvc, "TileCal");
         ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
-            << " at Node: " << detectorKey.node() );
+		       << " at Node: " << detectorKey.node() );
         detTag = detectorKey.tag();
         detNode = detectorKey.node();
+      }
+      idDictSet = rdbAccessSvc->getRecordsetPtr("TileIdentifier", detTag, detNode);
+      assignTagAndName(idDictSet, m_tileIDFileName, m_tileIdDictTag);
     }
-    idDictSet =
-        rdbAccessSvc->getRecordsetPtr("TileIdentifier", detTag, detNode);
-    assignTagAndName(idDictSet, m_tileIDFileName, m_tileIdDictTag);
 
     // Get Calo
-    if (useGeomDB) {
+    // Attempt to read the embedded disctionary from SQLite
+    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictCalorimeter",rdbAccessSvc,m_caloIDFileName,m_caloIdDictTag);
+    if(!embeddedDict) {
+      // Fall back on getting file names from the database
+      if (useGeomDB) {
         detectorKey = DecodeVersionKey(geoDbTagSvc, "Calorimeter");
         ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
-            << " at Node: " << detectorKey.node() );
+		       << " at Node: " << detectorKey.node() );
         detTag = detectorKey.tag();
         detNode = detectorKey.node();
+      }
+      idDictSet = rdbAccessSvc->getRecordsetPtr("CaloIdentifier", detTag, detNode);
+      assignTagAndName(idDictSet, m_caloIDFileName, m_caloIdDictTag);
     }
-    idDictSet =
-        rdbAccessSvc->getRecordsetPtr("CaloIdentifier", detTag, detNode);
-
-    assignTagAndName(idDictSet, m_caloIDFileName, m_caloIdDictTag);
-
     // Calo neighbor files:
     IRDBRecordset_ptr caloNeighborTable =
         rdbAccessSvc->getRecordsetPtr("CaloNeighborTable", detTag, detNode);
@@ -484,38 +529,45 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
     }
 
     // Get Muon
-    if (useGeomDB) {
+    // Attempt to read the embedded disctionary from SQLite
+    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictMuonSpectrometer",rdbAccessSvc,m_muonIDFileName,m_muonIdDictTag);
+    if(!embeddedDict) {
+      // Fall back on getting file names from the database
+      if (useGeomDB) {
         detectorKey = DecodeVersionKey(geoDbTagSvc, "MuonSpectrometer");
         ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
-            << " at Node: " << detectorKey.node() );
+		       << " at Node: " << detectorKey.node() );
         detTag = detectorKey.tag();
         detNode = detectorKey.node();
+      }
+      idDictSet = rdbAccessSvc->getRecordsetPtr("MuonIdentifier", detTag, detNode);
+      assignTagAndName(idDictSet, m_muonIDFileName, m_muonIdDictTag);
     }
-    idDictSet =
-        rdbAccessSvc->getRecordsetPtr("MuonIdentifier", detTag, detNode);
-    assignTagAndName(idDictSet, m_muonIDFileName, m_muonIdDictTag);
 
     // Get Forward
-    if (useGeomDB) {
+    // Attempt to read the embedded disctionary from SQLite
+    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictForwardDetectors",rdbAccessSvc,m_forwardIDFileName,m_forwardIdDictTag);
+    if(!embeddedDict) {
+      // Fall back on getting file names from the database
+      if (useGeomDB) {
         detectorKey = DecodeVersionKey(geoDbTagSvc, "ForwardDetectors");
         ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
-            << " at Node: " << detectorKey.node() );
+		       << " at Node: " << detectorKey.node() );
         detTag = detectorKey.tag();
         detNode = detectorKey.node();
-    }
-    idDictSet =
-        rdbAccessSvc->getRecordsetPtr("ForDetIdentifier", detTag, detNode);
+      }
+      idDictSet = rdbAccessSvc->getRecordsetPtr("ForDetIdentifier", detTag, detNode);
 
-    // For older datasets use ForDetIdentifier-00 as fallback
-    if (idDictSet->size() == 0 && useGeomDB) {
+      // For older datasets use ForDetIdentifier-00 as fallback
+      if (idDictSet->size() == 0 && useGeomDB) {
         idDictSet = rdbAccessSvc->getRecordsetPtr("ForDetIdentifier",
                                                   "ForDetIdentifier-00");
-        ATH_MSG_DEBUG(
-            " explicitly requesting ForDetIdentifier-00 tag for pre-forward "
-            "detector data  ");
+        ATH_MSG_DEBUG(" explicitly requesting ForDetIdentifier-00 tag for pre-forward "
+		      "detector data  ");
+      }
+      // Size == 0 if not found
+      assignTagAndName(idDictSet, m_forwardIDFileName, m_forwardIdDictTag);
     }
-    // Size == 0 if not found
-    assignTagAndName(idDictSet, m_forwardIDFileName, m_forwardIdDictTag);
     ATH_MSG_DEBUG("End access to RDB for id dictionary info ");
     return StatusCode::SUCCESS;
 }
