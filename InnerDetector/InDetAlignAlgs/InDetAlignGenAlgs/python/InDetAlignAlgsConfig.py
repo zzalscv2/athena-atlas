@@ -4,18 +4,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def CreateITkMisalignAlgCfg(flags, name="CreateITkMisalignAlg",SetITkPixelAlignable=False,SetITkStripAlignable=False,setAlignmentFolderName="/Indet/AlignITk", **kwargs):
-    kwargs.setdefault("MisalignmentX",0.0)
-    kwargs.setdefault("MisalignmentY",0.0)
-    kwargs.setdefault("MisalignmentZ",0.0)
-    kwargs.setdefault("MisalignmentAlpha",0.0)
-    kwargs.setdefault("MisalignmentBeta",0.0)
-    kwargs.setdefault("MisalignmentGamma",0.0)
-    kwargs.setdefault("ScalePixelIBL",0.0)
-    kwargs.setdefault("IBLBowingTshift",0.0)
-    kwargs.setdefault("ScalePixelBarrel",1.0)
-    kwargs.setdefault("ScalePixelEndcap",1.0)
-    kwargs.setdefault("ScaleSCTBarrel",0.0)
-    kwargs.setdefault("ScaleSCTEndcap",0.0)
 
     result = ComponentAccumulator()
     
@@ -45,9 +33,6 @@ def CreateITkMisalignAlgCfg(flags, name="CreateITkMisalignAlg",SetITkPixelAligna
     result.addService( ntupSvc )
     result.setAppProperty("HistogramPersistency","ROOT")
 
-
-    #from AthenaCommon.Constants import VERBOSE
-    #kwargs.setdefault("OutputLevel",VERBOSE)
     result.addEventAlgo(CompFactory.InDetAlignment.CreateMisalignAlg(name,**kwargs))
     return result
 
