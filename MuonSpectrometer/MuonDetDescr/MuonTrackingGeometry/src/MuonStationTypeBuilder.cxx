@@ -1323,14 +1323,14 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processNSW(const MuonGM::Muon
     double zMin{25000.}, zMax{-25000.}, rMin{13000.}, rMed{0.}, rMax{0.}, hMin{0.}, hMed{0.}, hMax{0.};
 
     for (auto *layer : layers) {
-        zMin = std::min(zMin, (layer->surfaceRepresentation().center().z()) - 0.5 * layer->thickness());
-        zMax = std::max(zMax, (layer->surfaceRepresentation().center().z()) + 0.5 * layer->thickness());
+        zMin = std::fmin(zMin, (layer->surfaceRepresentation().center().z()) - 0.5 * layer->thickness());
+        zMax = std::fmax(zMax, (layer->surfaceRepresentation().center().z()) + 0.5 * layer->thickness());
 
         const Trk::TrapezoidBounds* trdBounds = dynamic_cast<const Trk::TrapezoidBounds*>(&(layer->surfaceRepresentation().bounds()));
 
         if (trdBounds) {
-            rMin = std::min(rMin, (layer->surfaceRepresentation().center().perp()) - trdBounds->halflengthY());
-            rMax = std::max(rMax, (layer->surfaceRepresentation().center().perp()) + trdBounds->halflengthY());
+            rMin = std::fmin(rMin, (layer->surfaceRepresentation().center().perp()) - trdBounds->halflengthY());
+            rMax = std::fmax(rMax, (layer->surfaceRepresentation().center().perp()) + trdBounds->halflengthY());
 
             // hMin taken from MM, ring 0
             Identifier id(layer->layerType());
@@ -1659,7 +1659,7 @@ double Muon::MuonStationTypeBuilder::get_x_size(const GeoVPhysVol* pv) const {
         std::string type = clv->getShape()->type();
         if (type == "Trd") {
             const GeoTrd* trd = dynamic_cast<const GeoTrd*>(clv->getShape());
-            xh = std::max(trd->getXHalfLength1(), trd->getXHalfLength2());
+            xh = std::fmax(trd->getXHalfLength1(), trd->getXHalfLength2());
         }
         if (type == "Box") {
             const GeoBox* box = dynamic_cast<const GeoBox*>(clv->getShape());
@@ -1682,7 +1682,7 @@ double Muon::MuonStationTypeBuilder::get_x_size(const GeoVPhysVol* pv) const {
         std::string type = clv->getShape()->type();
         if (type == "Trd") {
             const GeoTrd* trd = dynamic_cast<const GeoTrd*>(clv->getShape());
-            xh = std::max(trd->getXHalfLength1(), trd->getXHalfLength2());
+            xh = std::fmax(trd->getXHalfLength1(), trd->getXHalfLength2());
         }
         if (type == "Box") {
             const GeoBox* box = dynamic_cast<const GeoBox*>(clv->getShape());
@@ -1694,11 +1694,11 @@ double Muon::MuonStationTypeBuilder::get_x_size(const GeoVPhysVol* pv) const {
         }
         if (type == "Subtraction") { xh = decodeX(clv->getShape()); }
 
-        xlow = std::min(xlow, (transf.translation())[0] - xh);
-        xup = std::max(xup, (transf.translation())[0] + xh);
+        xlow = std::fmin(xlow, (transf.translation())[0] - xh);
+        xup = std::fmax(xup, (transf.translation())[0] + xh);
     }
 
-    return std::max(-xlow, xup);
+    return std::fmax(-xlow, xup);
 }
 
 Trk::MaterialProperties Muon::MuonStationTypeBuilder::getAveragedLayerMaterial(const GeoVPhysVol* pv, double volume,
@@ -1846,7 +1846,7 @@ Trk::LayerArray* Muon::MuonStationTypeBuilder::processCSCTrdComponent(const GeoV
             x_thickness.push_back(thickness);
             x_active.push_back(1);
         } else if (x_array.size() == 1) {
-            double xthick = 2 * std::min(x_array[0] + halfZ, halfZ - x_array[0]);
+            double xthick = 2 * std::fmin(x_array[0] + halfZ, halfZ - x_array[0]);
             double scale = xthick / thickness;
             Trk::MaterialProperties xmatCSC(xthick, scale * matCSC.x0(), scale * matCSC.l0(), matCSC.averageA(), matCSC.averageZ(),
                                             matCSC.averageRho() / scale);
@@ -1858,7 +1858,7 @@ Trk::LayerArray* Muon::MuonStationTypeBuilder::processCSCTrdComponent(const GeoV
             for (unsigned int il = 0; il < x_array.size(); il++) {
                 double xthick;
                 if (il < x_array.size() - 1) {
-                    xthick = 2 * std::min(x_array[il] - currX, 0.5 * (x_array[il + 1] - x_array[il]));
+                    xthick = 2 * std::fmin(x_array[il] - currX, 0.5 * (x_array[il + 1] - x_array[il]));
                 } else {
                     xthick = 2 * std::min(x_array[il] - currX, halfZ - x_array[il]);
                 }
