@@ -765,12 +765,12 @@ const Muon::Span* Muon::MuonTrackingGeometryBuilderImpl::findVolumeSpan(const Tr
 
     Muon::Span scomb;
     scomb.reserve(6);
-    scomb.push_back(std::min((*s1)[0], (*s2)[0]));
-    scomb.push_back(std::max((*s1)[1], (*s2)[1]));
-    scomb.push_back(std::min((*s1)[2], (*s2)[2]));
-    scomb.push_back(std::max((*s1)[3], (*s2)[3]));
-    scomb.push_back(std::min((*s1)[4], (*s2)[4]));
-    scomb.push_back(std::max((*s1)[5], (*s2)[5]));
+    scomb.push_back(fmin((*s1)[0], (*s2)[0]));
+    scomb.push_back(fmax((*s1)[1], (*s2)[1]));
+    scomb.push_back(fmin((*s1)[2], (*s2)[2]));
+    scomb.push_back(fmax((*s1)[3], (*s2)[3]));
+    scomb.push_back(fmin((*s1)[4], (*s2)[4]));
+    scomb.push_back(fmax((*s1)[5], (*s2)[5]));
     return new Muon::Span(scomb);
   }
 
@@ -850,7 +850,13 @@ const Muon::Span* Muon::MuonTrackingGeometryBuilderImpl::findVolumeSpan(const Tr
     edges.emplace_back(0., 0., -cyl->halflengthZ());
   }
   if (spb) {
+#ifdef TRKDETDESCR_USEFLOATPRECISON
+#define double float
+#endif
     const std::vector<std::pair<double, double> > vtcs = spb->xyVertices();
+#ifdef TRKDETDESCR_USEFLOATPRECISON
+#undef double
+#endif
     for (const auto& vtc : vtcs) {
       edges.emplace_back(vtc.first, vtc.second, spb->halflengthZ());
       edges.emplace_back(vtc.first, vtc.second, -spb->halflengthZ());
@@ -860,7 +866,13 @@ const Muon::Span* Muon::MuonTrackingGeometryBuilderImpl::findVolumeSpan(const Tr
     edges.emplace_back(0., 0., -spb->halflengthZ());
   }
   if (prism) {
+#ifdef TRKDETDESCR_USEFLOATPRECISON
+#define double float
+#endif
     const std::vector<std::pair<double, double> > vtcs = prism->xyVertices();
+#ifdef TRKDETDESCR_USEFLOATPRECISON
+#undef double
+#endif
     for (const auto& vtc : vtcs) {
       edges.emplace_back(vtc.first, vtc.second, prism->halflengthZ());
       edges.emplace_back(vtc.first, vtc.second, -prism->halflengthZ());
@@ -912,8 +924,8 @@ const Muon::Span* Muon::MuonTrackingGeometryBuilderImpl::findVolumeSpan(const Tr
       if (dir.perp() > 0.001) {
         // distance to minimal approach
         double dMA = std::abs(dir[0] * gp[0] + dir[1] * gp[1]) / dir.perp() / dir.perp();
-        double dMD = std::sqrt(std::max(0., gp.perp() * gp.perp() - dMA * dMA));
-        if (dMA < 2 * hz && dMD - radius < minR) minR = std::max(0., dMD - radius);
+        double dMD = sqrt(fmax(0., gp.perp() * gp.perp() - dMA * dMA));
+        if (dMA < 2 * hz && dMD - radius < minR) minR = fmax(0., dMD - radius);
       }
       double dph = rad > 0.001 ? atan(radius / rad) : M_PI;
       if (phi - dph < M_PI && phi - dph < minP0) minP0 = phi - dph;
@@ -967,14 +979,14 @@ const Muon::Span* Muon::MuonTrackingGeometryBuilderImpl::findVolumeSpan(const Tr
     span.push_back(maxZ + zTol);
     span.push_back(minPhi - phiTol);
     span.push_back(maxPhi + phiTol);
-    span.push_back(std::max(m_beamPipeRadius + 0.001, minR - zTol));
+    span.push_back(fmax(m_beamPipeRadius + 0.001, minR - zTol));
     span.push_back(maxR + zTol);
   } else if (bcyl || cyl) {
     span.push_back(minZ - cylZcorr - zTol);
     span.push_back(maxZ + cylZcorr + zTol);
     span.push_back(minPhi - phiTol);
     span.push_back(maxPhi + phiTol);
-    span.push_back(std::max(m_beamPipeRadius + 0.001, minR - zTol));
+    span.push_back(fmax(m_beamPipeRadius + 0.001, minR - zTol));
     span.push_back(maxR + zTol);
   } else {
     ATH_MSG_ERROR(name() << " volume shape not recognized: ");
@@ -1371,7 +1383,7 @@ Trk::TrackingVolume* Muon::MuonTrackingGeometryBuilderImpl::processVolume(const 
         for (unsigned int h = 0; h < hSteps.size() - 1; h++) {
           hCode = colorCode > 0 ? 1 - hCode : 0;
           // similar volume may exist already
-          Trk::Volume subVol{};
+          Trk::Volume* subVol = nullptr;
           Amg::Transform3D* transf = new Amg::Transform3D(Amg::AngleAxis3D(posPhi, Amg::Vector3D(0., 0., 1.)) *
                                                           Amg::Translation3D(Amg::Vector3D(0., 0., posZ)));
           //
@@ -1381,15 +1393,15 @@ Trk::TrackingVolume* Muon::MuonTrackingGeometryBuilderImpl::processVolume(const 
           if (hSteps[h].first == 1 && hSteps[h + 1].first == 1) volType = 3;
           // define subvolume
           if (phiP > -1) {
-            subVol = Trk::Volume(*(phiSubs[phiP][h]), (*transf) * phiSubs[phiP][h]->transform().inverse());
+            subVol = new Trk::Volume(*(phiSubs[phiP][h]), (*transf) * phiSubs[phiP][h]->transform().inverse());
           } else if (phiSect < 0.5 * M_PI) {
             Trk::BevelledCylinderVolumeBounds* subBds =
                 new Trk::BevelledCylinderVolumeBounds(hSteps[h].second, hSteps[h + 1].second, phiSect, hZ, volType);
-            subVol = Trk::Volume(transf, subBds);
+            subVol = new Trk::Volume(transf, subBds);
           } else {
             Trk::CylinderVolumeBounds* subBds =
                 new Trk::CylinderVolumeBounds(hSteps[h].second, hSteps[h + 1].second, phiSect, hZ);
-            subVol = Trk::Volume(transf, subBds);
+            subVol = new Trk::Volume(transf, subBds);
           }
 
           // enclosed muon objects ? also adjusts material properties in case of material blend
@@ -1398,10 +1410,10 @@ Trk::TrackingVolume* Muon::MuonTrackingGeometryBuilderImpl::processVolume(const 
           blendVols.clear();
           std::vector<Trk::DetachedTrackingVolume*>* detVols = nullptr;
           if (hasStations) {
-            detVols = getDetachedObjects(&subVol, blendVols, aLVC);
+            detVols = getDetachedObjects(subVol, blendVols, aLVC);
           }
 
-          Trk::TrackingVolume* sVol = new Trk::TrackingVolume(subVol, aLVC.m_muonMaterial, detVols, volName);
+          Trk::TrackingVolume* sVol = new Trk::TrackingVolume(*subVol, aLVC.m_muonMaterial, detVols, volName);
 
           // statistics
           ++aLVC.m_frameNum;
@@ -1444,7 +1456,10 @@ Trk::TrackingVolume* Muon::MuonTrackingGeometryBuilderImpl::processVolume(const 
           // cleanup
           if (phiP > -1) {
             delete transf;
-          } 
+            delete subVol;
+          } else
+            garbVol[aLVC.m_adjustedPhiType[phi]].push_back(subVol);  // don't delete before cloned
+
           // glue subVolume
           if (h == 0) sVolsInn.push_back(sVol);
           if (h == hSteps.size() - 2) sVolsOut.push_back(sVol);
@@ -2744,7 +2759,13 @@ double Muon::MuonTrackingGeometryBuilderImpl::calculateVolume(const Trk::Volume*
                (bcyl->outerRadius() * bcyl->outerRadius() - bcyl->innerRadius() * bcyl->innerRadius());
   }
   if (prism) {
+#ifdef TRKDETDESCR_USEFLOATPRECISON
+#define double float
+#endif
     std::vector<std::pair<double, double> > v = prism->xyVertices();
+#ifdef TRKDETDESCR_USEFLOATPRECISON
+#undef double
+#endif
     double a2 = v[1].first * v[1].first + v[1].second * v[1].second + v[0].first * v[0].first +
                 v[0].second * v[0].second - 2 * (v[0].first * v[1].first + v[0].second * v[1].second);
     double c2 = v[2].first * v[2].first + v[2].second * v[2].second + v[0].first * v[0].first +
@@ -2752,8 +2773,8 @@ double Muon::MuonTrackingGeometryBuilderImpl::calculateVolume(const Trk::Volume*
     double ca = v[1].first * v[2].first + v[1].second * v[2].second + v[0].first * v[0].first +
                 v[0].second * v[0].second - v[0].first * v[1].first - v[0].second * v[1].second -
                 v[0].first * v[2].first - v[0].second * v[2].second;
-    double vv = std::sqrt(c2 - ca * ca / a2);
-    envVol = vv * std::sqrt(a2) * prism->halflengthZ();
+    double vv = sqrt(c2 - ca * ca / a2);
+    envVol = vv * sqrt(a2) * prism->halflengthZ();
   }
   if (spb) {
     envVol = calculateVolume(spb->combinedVolume());  // exceptional use of combined volume (no intersections)
