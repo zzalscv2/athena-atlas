@@ -277,7 +277,7 @@ void initVertex (VertexInfo& vi,
   cv->setPosition (pos);
   Amg::MatrixX looseConstraintCovariance(3, 3);
   looseConstraintCovariance.setIdentity();
-  looseConstraintCovariance = looseConstraintCovariance * 1e+8;
+  looseConstraintCovariance = looseConstraintCovariance * 1e+5;
   cv->setCovariancePosition (looseConstraintCovariance);
   cv->setFitQuality (0, -3);
   vi.fi = std::make_unique<Trk::MvfFitInfo>  (cv.release(),
@@ -340,11 +340,11 @@ StatusCode AdaptiveMultiVertexFitterTestAlg::test1()
 
   xAOD::Vertex exp_v1;
   exp_v1.makePrivateStore();
-  exp_v1.setPosition ({8.7395, 10.3699, -6.33883});
-  exp_v1.setFitQuality (0.0133323, 0.76466);
+  exp_v1.setPosition ({8.60555, 10.276, -6.33474});
+  exp_v1.setFitQuality (0.0155243, 0.811922);
   exp_v1.setCovariance (std::vector<float>
-                        {778.536, 138.738, 975.131,
-			    -8.67629, 48.7424, 69.3179});
+                        {730.916, 138.738, 926.494,
+			    -7.25401, 46.1613, 66.2963});
 
   xAOD::Vertex exp_v2;
   exp_v2.makePrivateStore();
