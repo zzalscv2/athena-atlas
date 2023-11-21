@@ -79,12 +79,18 @@ private:
                                                                  ///< (to be switched off when adding misalignments to a given geometry)
     int                                    m_MisalignmentMode;   //!< Flag which Misalignment mode is to be generated
     long int                               m_nEvents;
-    double                                 m_Misalign_x;         //!< x Misalignment for the "22" chosen modules
-    double                                 m_Misalign_y;         //!< y Misalignment for the "22" chosen modules
-    double                                 m_Misalign_z;         //!< z Misalignment for the "22" chosen modules
-    double                                 m_Misalign_alpha;     //!< alpha Misalignment for the "22" chosen modules
-    double                                 m_Misalign_beta;      //!< beta Misalignment for the "22" chosen modules
-    double                                 m_Misalign_gamma;     //!< gamma Misalignment for the "22" chosen modules
+    Gaudi::Property<double> m_Misalign_x {this,"MisalignmentX",0.0,"Fixed X shift (mode 1 and 2)"};
+    Gaudi::Property<double> m_Misalign_y {this,"MisalignmentY",0.0,"Fixed Y shif (model 1 and 2)"};       
+    Gaudi::Property<double> m_Misalign_z {this,"MisalignmentZ",0.0,"Fixed Z shift (mode 1 and 2)"};
+    Gaudi::Property<double> m_Misalign_alpha {this,"MisalignmentAlpha",0.0,"Fixed Alpha shift (model 1 and 2)"};
+    Gaudi::Property<double> m_Misalign_beta {this,"MisalignmentBeta",0.0,"Fixed Beta shift (mode 1 and 2)"};
+    Gaudi::Property<double> m_Misalign_gamma {this,"MisalignmentGamma",0.0,"Fixed Gamma shift (model 1 and 2)"};     
+    Gaudi::Property<double> m_RndmMisalignWidth_x {this,"RandomMisalignmentWidthX",0.1,"Gaussian width of X random misalignments (mode 2)"};
+    Gaudi::Property<double> m_RndmMisalignWidth_y {this,"RandomMisalignmentWidthY",0.1,"Gaussian width of Y random misalignments (mode 2)"};
+    Gaudi::Property<double> m_RndmMisalignWidth_z {this,"RandomMisalignmentWidthZ",0.1,"Gaussian width of Z random misalignments (mode 2)"};
+    Gaudi::Property<double> m_RndmMisalignWidth_alpha {this,"RandomMisalignmentWidthAplha",0.1,"Gaussian width of Alpha random misalignments (mode 2)"};
+    Gaudi::Property<double> m_RndmMisalignWidth_beta {this,"RandomMisalignmentWidthBeta",0.1,"Gaussian width of Beta random misalignments (mode 2)"};
+    Gaudi::Property<double> m_RndmMisalignWidth_gamma {this,"RandomMisalignmentWidthGamma",0.1,"Gaussian width of Gamma random misalignments (mode 2)"};
     double                                 m_Misalign_maxShift;  //!< Maximum shift for global modes
     double                                 m_Misalign_maxShift_Inner;  //!< Maximum shift of the Pixel B-layer in curl (d0 bias!)
     double                                 m_ScalePixelIBL;

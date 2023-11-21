@@ -35,7 +35,7 @@
 #include "InDetAlignGenTools/IInDetAlignDBTool.h"
 #include "TRT_ConditionsServices/ITRT_AlignDbSvc.h"
 #include "AthenaKernel/IOVRange.h"
-#include "InDetAlignGenAlgs/CreateMisalignAlg.h"
+#include "CreateMisalignAlg.h"
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include <cmath>
@@ -78,12 +78,6 @@ namespace InDetAlignment
 	m_createFreshDB(true),
 	m_MisalignmentMode(0),
 	m_nEvents(0),
-	m_Misalign_x(0),
-	m_Misalign_y(0),
-	m_Misalign_z(0),
-	m_Misalign_alpha(0),
-	m_Misalign_beta(0),
-	m_Misalign_gamma(0),
 	m_Misalign_maxShift(1*CLHEP::mm),
     m_Misalign_maxShift_Inner(50*CLHEP::micrometer),
     m_ScalePixelIBL(1.),
@@ -105,12 +99,6 @@ namespace InDetAlignment
 		declareProperty("ASCIIFilenameBase"             ,     m_asciiFileNameBase);
 		declareProperty("SQLiteTag"                     ,     m_SQLiteTag);
 		declareProperty("MisalignMode"                  ,     m_MisalignmentMode);
-		declareProperty("MisalignmentX"                 ,     m_Misalign_x);
-		declareProperty("MisalignmentY"                 ,     m_Misalign_y);
-		declareProperty("MisalignmentZ"                 ,     m_Misalign_z);
-		declareProperty("MisalignmentAlpha"             ,     m_Misalign_alpha);
-		declareProperty("MisalignmentBeta"              ,     m_Misalign_beta);
-		declareProperty("MisalignmentGamma"             ,     m_Misalign_gamma);
 		declareProperty("MaxShift"                      ,     m_Misalign_maxShift);
         declareProperty("MaxShiftInner"                 ,     m_Misalign_maxShift_Inner);
 		declareProperty("CreateFreshDB"                 ,     m_createFreshDB);
@@ -288,7 +276,7 @@ namespace InDetAlignment
 				m_ModuleList[SCT_ModuleID][1] = module->center()[1];
 				m_ModuleList[SCT_ModuleID][2] = module->center()[2];
 				++nSCT;
-				ATH_MSG_INFO( "SCT module " << nSCT );
+				ATH_MSG_VERBOSE( "SCT module " << nSCT );
 			}
 			
 			if (m_sctIdHelper->side(element->identify()) == 0) { // inner side case
@@ -302,12 +290,12 @@ namespace InDetAlignment
 					m_HumanReadableID = m_sctIdHelper->barrel_ec(SCT_ModuleID)*(m_HumanReadableID + 10000000);
 				}
 				
-				ATH_MSG_INFO( "Human Readable ID: " << m_HumanReadableID );
+				ATH_MSG_VERBOSE( "Human Readable ID: " << m_HumanReadableID );
 				
 				m_VisualizationLookupTree->Fill();
 				
 				// Syntax is (ID, Level) where Level is from 1 to 3 (3 is single module level)
-				if (msgLvl(MSG::INFO)) {
+				if (msgLvl(MSG::VERBOSE)) {
           HepGeom::Transform3D InitialAlignment = Amg::EigenTransformToCLHEP(m_IDAlignDBTool->getTrans(SCT_ModuleID,3));
 					msg() << "Initial Alignment of module " << m_idHelper->show_to_string(SCT_ModuleID,nullptr,'/') << endmsg;
 					msg() << commonAlignmentOutput(InitialAlignment);
@@ -340,7 +328,7 @@ namespace InDetAlignment
 					m_ModuleList[Pixel_ModuleID][2] = module->center()[2];
 					
 					++nPixel;
-					ATH_MSG_INFO( "Pixel module " << nPixel );
+					ATH_MSG_VERBOSE( "Pixel module " << nPixel );
 					
 					// Write out Visualization Lookup Tree
 					m_AthenaHashedID = Pixel_ModuleID.get_identifier32().get_compact();
@@ -352,11 +340,11 @@ namespace InDetAlignment
 						m_HumanReadableID = m_pixelIdHelper->barrel_ec(Pixel_ModuleID)*(m_HumanReadableID + 10000000);
 					}
 					
-					ATH_MSG_INFO( "Human Readable ID: " << m_HumanReadableID );
+					ATH_MSG_VERBOSE( "Human Readable ID: " << m_HumanReadableID );
 					
 					m_VisualizationLookupTree->Fill();
 					
-					if (msgLvl(MSG::INFO)) {
+					if (msgLvl(MSG::VERBOSE)) {
             HepGeom::Transform3D InitialAlignment = Amg::EigenTransformToCLHEP(m_IDAlignDBTool->getTrans(Pixel_ModuleID,3));
 						msg() << "Initial Alignment of module " << m_idHelper->show_to_string(Pixel_ModuleID,nullptr,'/') << endmsg;
 						msg() << commonAlignmentOutput(InitialAlignment);
@@ -403,7 +391,6 @@ namespace InDetAlignment
 				trtModulesWithCOG[TRTID].at(2) += strawcenter.z(); /*sumz*/
 				trtModulesWithCOG[TRTID].at(3) += 1.;              /*nStraws*/
 				
-				//if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "center of straw " << l << ": " << strawcenter.rho()/CLHEP::cm << ";" << strawcenter.phi() << ";" << strawcenter.z()/CLHEP::cm << endmsg;
 			}
 			
 				ATH_MSG_DEBUG( "this strawlayer has " << nStraws << " straws." );
@@ -417,15 +404,14 @@ namespace InDetAlignment
 			const Identifier TRTID = iter2->first;
 			double nStraws = iter2->second.at(3);
 			nTRT++;
-			ATH_MSG_INFO( "TRT module " << nTRT );
+			ATH_MSG_VERBOSE( "TRT module " << nTRT );
 			m_ModuleList[TRTID] = HepGeom::Point3D<double>(iter2->second.at(0)/nStraws, iter2->second.at(1)/nStraws,iter2->second.at(2)/nStraws);
 			
 			HepGeom::Transform3D InitialAlignment ;
-			//         const HepGeom::Transform3D* p = m_trtaligndbservice->getLvl1Align(TRTID) ;
 			
 			const Amg::Transform3D* p = m_trtaligndbservice->getAlignmentTransformPtr(TRTID,2) ;
 			if ( p ) {
-				if (msgLvl(MSG::INFO)) {
+				if (msgLvl(MSG::VERBOSE)) {
   				InitialAlignment = Amg::EigenTransformToCLHEP(*p) ;
 					msg() << "Initial Alignment of module " << m_idHelper->show_to_string(TRTID,nullptr,'/') << endmsg;
 					msg() << commonAlignmentOutput(InitialAlignment);
@@ -433,7 +419,7 @@ namespace InDetAlignment
 				}
 			} else {
 				
-					ATH_MSG_INFO("No initial alignment for TRT module " << m_idHelper->show_to_string(TRTID,nullptr,'/') );
+					ATH_MSG_VERBOSE("No initial alignment for TRT module " << m_idHelper->show_to_string(TRTID,nullptr,'/') );
 			}
 			
 			
@@ -514,7 +500,6 @@ namespace InDetAlignment
 			++i;
 			const Identifier& ModuleID = iter->first;
 			
-      //const Trk::TrkDetElementBase *module = 0;
 			const InDetDD::SiDetectorElement * SiModule = nullptr; //dummy to get moduleTransform() for silicon
 			
 			if (m_idHelper->is_pixel(ModuleID)) {
@@ -638,28 +623,24 @@ namespace InDetAlignment
 			
 			else if (m_MisalignmentMode == 2) {
 				// randomly misalign modules at L3
-				
-				Rndm::Numbers RandMisX(randsvc, Rndm::Gauss(0.,ScaleFactor*m_Misalign_x));
-				Rndm::Numbers RandMisY(randsvc, Rndm::Gauss(0.,ScaleFactor*m_Misalign_y));
-				Rndm::Numbers RandMisZ(randsvc, Rndm::Gauss(0.,ScaleFactor*m_Misalign_z));
-				Rndm::Numbers RandMisalpha(randsvc, Rndm::Gauss(0.,ScaleFactor*m_Misalign_alpha));
-				Rndm::Numbers RandMisbeta(randsvc, Rndm::Gauss(0.,ScaleFactor*m_Misalign_beta));
-				Rndm::Numbers RandMisgamma(randsvc, Rndm::Gauss(0.,ScaleFactor*m_Misalign_gamma));
-				
-				if (msgLvl(MSG::DEBUG)) {
-					msg() << "JRS ScaleFactor: " << ScaleFactor << endmsg;
-					msg() << "JRS X: " <<   RandMisX() << endmsg;
-					msg() << "JRS Y: " <<   RandMisY() << endmsg;
-					msg() << "JRS Z: " <<   RandMisZ() << endmsg;
-					msg() << "JRS a: " <<   RandMisalpha() << endmsg;
-					msg() << "JRS b: " <<   RandMisbeta() << endmsg;
-					msg() << "JRS c: " <<   RandMisgamma() << endmsg;
-				}
-				
-				HepGeom::Vector3D<double> shift(RandMisX(), RandMisY(), RandMisZ());
-				
-				CLHEP::HepRotation rot;
-				rot = CLHEP::HepRotationX(RandMisalpha()) * CLHEP::HepRotationY(RandMisbeta()) * CLHEP::HepRotationZ(RandMisgamma());
+                Rndm::Numbers RandMisX(randsvc, Rndm::Gauss(m_Misalign_x,m_RndmMisalignWidth_x*ScaleFactor));
+                Rndm::Numbers RandMisY(randsvc, Rndm::Gauss(m_Misalign_y,m_RndmMisalignWidth_y*ScaleFactor));
+                Rndm::Numbers RandMisZ(randsvc, Rndm::Gauss(m_Misalign_z,m_RndmMisalignWidth_z*ScaleFactor));
+                Rndm::Numbers RandMisalpha(randsvc, Rndm::Gauss(m_Misalign_alpha,m_RndmMisalignWidth_alpha*ScaleFactor));
+                Rndm::Numbers RandMisbeta(randsvc, Rndm::Gauss(m_Misalign_beta,m_RndmMisalignWidth_beta*ScaleFactor));
+                Rndm::Numbers RandMisgamma(randsvc, Rndm::Gauss(m_Misalign_gamma,m_RndmMisalignWidth_gamma*ScaleFactor));
+                
+                double randMisX = RandMisX(); //assign to variables to allow the values to be queried
+                double randMisY = RandMisY();
+                double randMisZ = RandMisZ();
+                
+                HepGeom::Vector3D<double> shift(randMisX, randMisY, randMisZ);
+                double randMisaplha = RandMisalpha();
+                double randMisbeta = RandMisbeta();
+                double randMisgamma = RandMisgamma();
+                
+                CLHEP::HepRotation rot;
+				rot = CLHEP::HepRotationX(randMisaplha) * CLHEP::HepRotationY(randMisbeta) * CLHEP::HepRotationZ(randMisgamma);
 				
 
 				if (ScaleFactor == 0.0)  {

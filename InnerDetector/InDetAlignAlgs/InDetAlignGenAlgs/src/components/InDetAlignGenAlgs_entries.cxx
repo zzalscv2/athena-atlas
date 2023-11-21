@@ -1,7 +1,7 @@
 #include "InDetAlignGenAlgs/SiDistWriteAlg.h"
 #include "InDetAlignGenAlgs/InDetAlignCog.h"
 #include "InDetAlignGenAlgs/AddTRTMomConstr.h"
-#include "InDetAlignGenAlgs/CreateMisalignAlg.h"
+#include "../CreateMisalignAlg.h"
 #include "InDetAlignGenAlgs/InDetAlignWrt.h"
 
 
