@@ -174,13 +174,6 @@ AODFix_posttauRec()
 #
 pdr.flag_domain('eflow')
 from eflowRec.eflowRecFlags import jobproperties
-if recAlgs.doEFlow() and jobproperties.eflowRecFlags.usePFFlowElementAssoc:
-    try:
-        from eflowRec.PFCfg import PFTauFlowElementLinkingCfg
-        CAtoGlobalWrapper(PFTauFlowElementLinkingCfg,ConfigFlags)        
-    except Exception:
-        treatException("Could not set up tau-FE links")    
-
 #Links to/from global FE containers created during jet finding
 if(jetOK):
     try:
