@@ -131,7 +131,7 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processBoxStationCompone
             halfY1 = trd->getYHalfLength1();
             halfY2 = trd->getYHalfLength2();
             halfZ = trd->getZHalfLength();
-            volBounds = new Trk::CuboidVolumeBounds(std::max(halfX1, halfX2), std::max(halfY1, halfY2), halfZ);
+            volBounds = new Trk::CuboidVolumeBounds(std::fmax(halfX1, halfX2), std::fmax(halfY1, halfY2), halfZ);
         } else if (clv->getShape()->type() == "Box") {
             const GeoBox* box = dynamic_cast<const GeoBox*>(clv->getShape());
             halfX1 = box->getXHalfLength();
@@ -402,7 +402,7 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processTrdStationCompone
             halfY2 = trd->getYHalfLength2();
             halfZ = trd->getZHalfLength();
             if (halfX1 == halfX2 && halfY1 == halfY2)
-                volBounds = new Trk::CuboidVolumeBounds(std::max(halfX1, halfX2), std::max(halfY1, halfY2), halfZ);
+                volBounds = new Trk::CuboidVolumeBounds(std::fmax(halfX1, halfX2), std::fmax(halfY1, halfY2), halfZ);
             if (halfX1 == halfX2 && halfY1 != halfY2) {
                 transf  = transf  * Amg::getRotateY3D(0.5 * M_PI) * Amg::getRotateZ3D(0.5 * M_PI);
                 volBounds = new Trk::TrapezoidVolumeBounds(halfY1, halfY2, halfZ, halfX1);
@@ -1860,7 +1860,7 @@ Trk::LayerArray* Muon::MuonStationTypeBuilder::processCSCTrdComponent(const GeoV
                 if (il < x_array.size() - 1) {
                     xthick = 2 * std::fmin(x_array[il] - currX, 0.5 * (x_array[il + 1] - x_array[il]));
                 } else {
-                    xthick = 2 * std::min(x_array[il] - currX, halfZ - x_array[il]);
+                    xthick = 2 * std::fmin(x_array[il] - currX, halfZ - x_array[il]);
                 }
                 x_thickness.push_back(xthick);
                 const Trk::MaterialProperties& xmatCSC(matCSC);
@@ -1973,17 +1973,17 @@ Trk::LayerArray* Muon::MuonStationTypeBuilder::processCSCDiamondComponent(const 
             x_active.push_back(1);
         } else if (x_array.size() == 1) {
             x_mat.push_back(matCSC);
-            x_thickness.push_back(2 * std::min(x_array[0] + halfZ, halfZ - x_array[0]));
+            x_thickness.push_back(2 * std::fmin(x_array[0] + halfZ, halfZ - x_array[0]));
             x_active.push_back(1);
         } else {
             double currX = -halfZ;
             for (unsigned int il = 0; il < x_array.size(); il++) {
                 double xthick = 0.;
                 if (il < x_array.size() - 1) {
-                    xthick = 2 * std::min(x_array[il] - currX, 0.5 * (x_array[il + 1] - x_array[il]));
+                    xthick = 2 * std::fmin(x_array[il] - currX, 0.5 * (x_array[il + 1] - x_array[il]));
                     x_thickness.push_back(xthick);
                 } else {
-                    xthick = 2 * std::min(x_array[il] - currX, halfZ - x_array[il]);
+                    xthick = 2 * std::fmin(x_array[il] - currX, halfZ - x_array[il]);
                     x_thickness.push_back(xthick);
                 }
                 x_mat.push_back(matCSC);
@@ -2102,15 +2102,15 @@ Trk::LayerArray* Muon::MuonStationTypeBuilder::processTGCComponent(const GeoVPhy
         x_thickness.push_back(thickness);
         activeThick = thickness;
     } else if (x_array.size() == 1) {
-        x_thickness.push_back(2 * std::min(x_array[0] + halfZ, halfZ - x_array[0]));
+        x_thickness.push_back(2 * std::fmin(x_array[0] + halfZ, halfZ - x_array[0]));
         activeThick += x_thickness.back();
     } else {
         double currX = -halfZ;
         for (unsigned int il = 0; il < x_array.size(); il++) {
             if (il < x_array.size() - 1) {
-                x_thickness.push_back(2 * std::min(x_array[il] - currX, 0.5 * (x_array[il + 1] - x_array[il])));
+                x_thickness.push_back(2 * std::fmin(x_array[il] - currX, 0.5 * (x_array[il + 1] - x_array[il])));
             } else {
-                x_thickness.push_back(2 * std::min(x_array[il] - currX, halfZ - x_array[il]));
+                x_thickness.push_back(2 * std::fmin(x_array[il] - currX, halfZ - x_array[il]));
             }
             currX = x_array[il] + 0.5 * x_thickness.back();
             activeThick += x_thickness.back();
@@ -2185,7 +2185,7 @@ double Muon::MuonStationTypeBuilder::decodeX(const GeoShape* sh) const {
         ATH_MSG_DEBUG(" GeoSimplePolygonBrep xHalf " << xHalf);
     }
 
-    if (trd) xHalf = std::max(trd->getXHalfLength1(), trd->getXHalfLength2());
+    if (trd) xHalf = std::fmax(trd->getXHalfLength1(), trd->getXHalfLength2());
     if (box) xHalf = box->getXHalfLength();
     if (tub) xHalf = tub->getRMax();
 
@@ -2198,7 +2198,7 @@ double Muon::MuonStationTypeBuilder::decodeX(const GeoShape* sh) const {
     if (uni) {
         double xA = decodeX(uni->getOpA());
         double xB = decodeX(uni->getOpB());
-        xHalf = std::max(xA, xB);
+        xHalf = std::fmax(xA, xB);
     }
     if (shift) {
         double xA = decodeX(shift->getOp());
