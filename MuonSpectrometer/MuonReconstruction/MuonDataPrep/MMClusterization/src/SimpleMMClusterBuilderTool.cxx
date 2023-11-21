@@ -63,7 +63,7 @@ StatusCode SimpleMMClusterBuilderTool::getClusters(const EventContext& ctx,
         while (mergeJ <  n_input_prds &&               
                gasGapId == m_idHelperSvc->gasGapId(MMprds[mergeJ].identify()) &&
                std::abs(idHelper.channel(MMprds[mergeJ].identify()) - 
-                        idHelper.channel(MMprds[mergeJ -1].identify()) ) <= m_maxHoleSize + 1) {
+                        idHelper.channel(MMprds[mergeJ -1].identify()) ) <= static_cast<int>(m_maxHoleSize) + 1) {
             ++mergeJ;
         }
         unsigned int clustSize = mergeJ - mergeI;
