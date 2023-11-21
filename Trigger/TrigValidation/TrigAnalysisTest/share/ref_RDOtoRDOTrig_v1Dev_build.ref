@@ -7776,6 +7776,11 @@ HLT_g13_loose_g10_loose_PhysicsTLA_L113DR25-25M70-eEM12LeEM9L:
   eventCount: 0
 HLT_g13_loose_g10_loose_PhysicsTLA_L12DR15-0M30-eEM12LeEM9L:
   eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 7
+    1: 1
 HLT_g140_loose_L1eEM26M:
   eventCount: 0
 HLT_g140_loose_L1eEM28M:
