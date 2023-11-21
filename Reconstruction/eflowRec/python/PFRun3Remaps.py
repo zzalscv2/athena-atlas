@@ -7,7 +7,7 @@ def ListRemaps():
         #Remap input containers, that we rebuild from the ESD
         #Remap the calibrated and origin corrected topoclusters
         InputRenameCfg ('xAOD::CaloClusterContainer','CaloCalTopoClusters','CaloCalTopoClusters_renamed'),
-        InputRenameCfg ('xAOD::CaloClusterContainerAux','CaloCalTopoClustersAux.','CaloCalTopoClusters_renamedAux.'),
+        InputRenameCfg ('xAOD::CaloClusterAuxContainer','CaloCalTopoClustersAux.','CaloCalTopoClusters_renamedAux.'),
         InputRenameCfg ('CaloClusterCellLinkContainer', 'CaloCalTopoClusters_links', 'CaloCalTopoClusters_links_renamed'),
         InputRenameCfg ('xAOD::CaloClusterContainer','LCOriginTopoClusters','LCOriginTopoClusters_renamed'),
         InputRenameCfg ('xAOD::ShallowAuxContainer', 'LCOriginTopoClustersAux.', 'LCOriginTopoClusters_renamedAux.'),
