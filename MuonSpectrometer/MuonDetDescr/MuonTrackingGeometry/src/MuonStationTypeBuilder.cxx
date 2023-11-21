@@ -1153,7 +1153,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
             } else {  // x-y plane -> x-z plane
                 bounds = std::make_shared<Trk::RectangleBounds>(xs, zs);
                 thickness = 2 * ys;
-                cTr = Amg::Transform3D(transf[ic] * Amg::getRotateX3D(0.5 * M_PI));
+                cTr = transf[ic] * Amg::getRotateX3D(0.5 * M_PI);
             }
             Trk::MaterialProperties material(thickness, cmat.X0, cmat.L0, cmat.A, cmat.Z, cmat.rho);
             Trk::HomogeneousLayerMaterial spacerMaterial(material, 0.);
@@ -1179,9 +1179,9 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
                                                                 bounds, spacerMaterial, thickness, nullptr, 0);
                     layers.push_back(layx);
                     Trk::SharedObject<const Trk::SurfaceBounds> bounds2(bounds);
-                    Trk::PlaneLayer* layxx = new Trk::PlaneLayer(Amg::Transform3D(transf[ic] * Amg::Translation3D(-shift, 0., 0.) *
+                    Trk::PlaneLayer* layxx = new Trk::PlaneLayer(transf[ic] * Amg::Translation3D(-shift, 0., 0.) *
                                                                                   Amg::getRotateY3D(M_PI_2) *
-                                                                                  Amg::getRotateZ3D(M_PI_2)),
+                                                                                  Amg::getRotateZ3D(M_PI_2),
                                                                  bounds2, spacerMaterial, thickness, nullptr, 0);
                     layers.push_back(layxx);
                 }
@@ -1476,8 +1476,8 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processCscStation(const GeoVP
             else
                 xSizes.push_back(xSize);
             double xpos = transform.translation()[0];
-            xmn = std::min(xpos - xSizes.back(), xmn);
-            xmx = std::max(xpos + xSizes.back(), xmx);
+            if (xpos - xSize < xmn) xmn = xpos - xSizes.back();
+            if (xpos + xSize > xmx) xmx = xpos + xSizes.back();
         }  // end Trd
            // printChildren(cv);
     }
@@ -2254,8 +2254,7 @@ std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBui
                                               matProp.averageRho() / sf);
         }
         Trk::HomogeneousLayerMaterial mat(matProp, 0.);
-        layer = new Trk::PlaneLayer(Amg::Transform3D(trVol->transform() * Amg::getRotateY3D(0.5 * M_PI) *
-                                                     Amg::getRotateZ3D(0.5 * M_PI)),
+        layer = new Trk::PlaneLayer(trVol->transform() * Amg::getRotateY3D(0.5 * M_PI) * Amg::getRotateZ3D(0.5 * M_PI),
                                     bounds, mat, thickness, std::move(od), 1);
         // multilayers
         if (m_multilayerRepresentation && trVol->confinedVolumes()) {
@@ -2264,9 +2263,7 @@ std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBui
                 for (auto *vol : vols) {
                     Trk::MaterialProperties matMulti = collectStationMaterial(vol, sf);
                     ATH_MSG_VERBOSE(" collectStationMaterial cub matMulti " << matMulti);
-                    multi->push_back(new Trk::PlaneLayer(
-                        Amg::Transform3D(vol->transform() * Amg::getRotateY3D(0.5 * M_PI) *
-                                         Amg::getRotateZ3D(0.5 * M_PI)),
+                    multi->push_back(new Trk::PlaneLayer(vol->transform() * Amg::getRotateY3D(0.5 * M_PI) * Amg::getRotateZ3D(0.5 * M_PI),
                         bounds, Trk::HomogeneousLayerMaterial(matMulti, 0.), matMulti.thickness(), std::move(od), 1));
                 }
             }
@@ -2516,8 +2513,7 @@ Trk::Layer* Muon::MuonStationTypeBuilder::createLayer(const MuonGM::MuonDetector
         Trk::HomogeneousLayerMaterial mat(matProp, 0.);
 
         auto bounds = std::make_shared<const Trk::RectangleBounds>(cubBounds->halflengthY(), cubBounds->halflengthZ());
-        layer = new Trk::PlaneLayer(Amg::Transform3D(trVol->transform() * Amg::getRotateY3D(M_PI_2) *
-                                                     Amg::getRotateZ3D(M_PI_2)),
+        layer = new Trk::PlaneLayer(trVol->transform() * Amg::getRotateY3D(M_PI_2) * Amg::getRotateZ3D(M_PI_2),
                                     bounds, mat, thickness, std::move(od), 1);
     } else if (trdBounds) {
         double thickness = 2 * trdBounds->halflengthZ();
