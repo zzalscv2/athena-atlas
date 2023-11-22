@@ -396,7 +396,26 @@ def getDevSignatures():
         ChainProp(name='HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1jLJ140', groups=DevGroup+MultiJetGroup, l1SeedThresholds=['FSNOSEED']),
         
         # Test chain for X to bb tagging
-        ChainProp(name='HLT_j100_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j260_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J75', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j360_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j420_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j460_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+
+        ChainProp(name='HLT_j260_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J75', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j360_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j420_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j460_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+
+        ChainProp(name='HLT_j260_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J75', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j360_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j420_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j460_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+
+        ChainProp(name='HLT_j260_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J75', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j360_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j420_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j460_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
+
 #        ChainProp(name='HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1gLJ140', groups=DevGroup+MultiJetGroup, l1SeedThresholds=['FSNOSEED']),
 
         # ATR-28352: Test chains for multijet DIPZ 

@@ -4730,8 +4730,6 @@ HLT_j100_0eta290_020jvt_boffperf_pf_ftf_preselj80_L1jJ90:
     0: 2
     1: 2
     2: 2
-HLT_j100_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100:
-  eventCount: 0
 HLT_j110_L1J30:
   eventCount: 1
   stepCounts:
@@ -5226,6 +5224,14 @@ HLT_j260_L1J75:
   eventCount: 0
 HLT_j260_L1jJ125:
   eventCount: 0
+HLT_j260_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J75:
+  eventCount: 0
+HLT_j260_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J75:
+  eventCount: 0
+HLT_j260_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J75:
+  eventCount: 0
+HLT_j260_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J75:
+  eventCount: 0
 HLT_j260_a10sd_cssk_pf_jes_ftf_preselj200_L1J75:
   eventCount: 0
 HLT_j260_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ125:
@@ -5466,6 +5472,14 @@ HLT_j360_L1gJ100p0ETA25:
   eventCount: 0
 HLT_j360_L1jJ160:
   eventCount: 0
+HLT_j360_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100:
+  eventCount: 0
+HLT_j360_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J100:
+  eventCount: 0
+HLT_j360_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J100:
+  eventCount: 0
+HLT_j360_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J100:
+  eventCount: 0
 HLT_j360_a10sd_cssk_pf_jes_ftf_preselj225_L1J100:
   eventCount: 0
 HLT_j360_a10sd_cssk_pf_jes_ftf_preselj225_L1SC111-CJ15:
@@ -5567,6 +5581,14 @@ HLT_j420_L1J120:
 HLT_j420_L1jJ160:
   eventCount: 0
 HLT_j420_L1jJ180:
+  eventCount: 0
+HLT_j420_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100:
+  eventCount: 0
+HLT_j420_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J100:
+  eventCount: 0
+HLT_j420_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J100:
+  eventCount: 0
+HLT_j420_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J100:
   eventCount: 0
 HLT_j420_a10sd_cssk_pf_jes_ftf_preselj225_L1J100:
   eventCount: 0
@@ -5787,6 +5809,14 @@ HLT_j460_a10r_L1gLJ140p0ETA25:
 HLT_j460_a10r_L1jJ160:
   eventCount: 0
 HLT_j460_a10r_L1jLJ140:
+  eventCount: 0
+HLT_j460_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100:
+  eventCount: 0
+HLT_j460_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J100:
+  eventCount: 0
+HLT_j460_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J100:
+  eventCount: 0
+HLT_j460_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J100:
   eventCount: 0
 HLT_j460_a10sd_cssk_pf_jes_ftf_preselj225_L1J100:
   eventCount: 0
