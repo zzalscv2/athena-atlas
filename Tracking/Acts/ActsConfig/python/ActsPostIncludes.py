@@ -7,7 +7,7 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
 
     toAOD = []
 
-    if flags.Acts.EDM.PersistifyClusters:
+    if flags.Acts.EDM.PersistifyClusters or flags.Acts.EDM.PersistifySpacePoints:
         pixel_cluster_shortlist = ['-pixelClusterLink']
         strip_cluster_shortlist = ['-sctClusterLink']
         
@@ -20,13 +20,14 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
                   'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
 
     if flags.Acts.EDM.PersistifySpacePoints:
-        pixel_spacepoint_shortlist = ['-pixelSpacePointLink']
+        pixel_spacepoint_shortlist = ['measurements']
         strip_spacepoint_shortlist = ['topHalfStripLength', 
                                       'bottomHalfStripLength', 
                                       'topStripDirection',
                                       'bottomStripDirection',
                                       'stripCenterDistance',
-                                      'topStripCenter']
+                                      'topStripCenter',
+                                      'measurements']
 
         pixel_spacepoint_variables = '.'.join(pixel_spacepoint_shortlist)
         strip_spacepoint_variables = '.'.join(strip_spacepoint_shortlist)

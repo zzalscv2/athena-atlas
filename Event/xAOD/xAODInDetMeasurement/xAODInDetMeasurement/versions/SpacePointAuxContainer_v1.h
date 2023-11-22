@@ -32,7 +32,6 @@ namespace xAOD {
     std::vector < float > radius;
     std::vector < float > varianceR;
     std::vector < float > varianceZ;
-    std::vector < std::vector< ElementLink< xAOD::UncalibratedMeasurementContainer > > > measurements;
 
     /// @}
   };
