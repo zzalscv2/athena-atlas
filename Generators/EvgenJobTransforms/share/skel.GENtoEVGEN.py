@@ -15,6 +15,7 @@ from future import standard_library
 standard_library.install_aliases()
 
 import ast
+import platform
 import os, re, string, subprocess
 import AthenaCommon.AlgSequence as acas
 import AthenaCommon.AppMgr as acam
@@ -288,6 +289,9 @@ if hasattr(runArgs,'inputGeneratorFile') and int(evgenConfig.inputFilesPerJob) =
 for opt in str(evgenConfig).split(os.linesep):
     evgenLog.info(opt)
 evgenLog.info(".transform =                  Gen_tf")
+
+## Print platform
+evgenLog.info(".platform = "+platform.platform())
 
 ## Sort and check generator name / JO name consistency
 ##
