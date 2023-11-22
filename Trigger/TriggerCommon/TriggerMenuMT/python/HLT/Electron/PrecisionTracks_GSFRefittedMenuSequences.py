@@ -2,62 +2,60 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-# menu components   
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
-from AthenaCommon.CFElements import parOR, seqAND
-from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
+# menu components
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Tracking_GSFRefitted'
 
-def precisionTracks_GSFRefittedSequence(flags, ion=False, variant=''):
-    """ fifth step:  GSF refitting of precision track....."""
+def precisionTracks_GSFRefittedSequenceCfg(flags, name, ion=False, variant='', is_probe_leg = False):
+    """ sixth step:  GSF refitting of precision track....."""
 
-    from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-    TrigEgammaKeys = getTrigEgammaKeys(variant, ion=ion)
-    caloClusters = TrigEgammaKeys.precisionElectronCaloClusterContainer
- 
+    inViewRoIs = "precisionTracks_GSFRefitted"+variant
 
-    InViewRoIs = "precisionTracks_GSFRefitted"+variant
-    # EVCreator:
-    precisionTracks_GSFRefittedViewsMaker = EventViewCreatorAlgorithm("IM" + tag(ion) + variant)
-    precisionTracks_GSFRefittedViewsMaker.mergeUsingFeature=True
-    precisionTracks_GSFRefittedViewsMaker.RoITool = ViewCreatorPreviousROITool()
-    precisionTracks_GSFRefittedViewsMaker.InViewRoIs = InViewRoIs
-    precisionTracks_GSFRefittedViewsMaker.Views = tag(ion) + "Views" + variant
-    precisionTracks_GSFRefittedViewsMaker.ViewFallThrough = True
-    precisionTracks_GSFRefittedViewsMaker.RequireParentView = True
-    
-    # calling precision tracking
+    roiTool = CompFactory.ViewCreatorPreviousROITool()
+    reco = InViewRecoCA(tag(ion)+variant, 
+                            RoITool = roiTool,
+                            InViewRoIs = inViewRoIs, 
+                            RequireParentView = True, 
+                            mergeUsingFeature = True,
+                            ViewFallThrough = True,
+                            isProbe=is_probe_leg)
+
+    # calling GSF refitter
     from TriggerMenuMT.HLT.Electron.PrecisionTracks_GSFRefittedSequence import precisionTracks_GSFRefitted
-    precisionTracks_GSFRefittedInViewSequence, trackParticles = precisionTracks_GSFRefitted(flags, InViewRoIs, ion, variant)
+    precisionTracks_GSFRefittedInViewSequence = precisionTracks_GSFRefitted(flags, inViewRoIs, ion, variant)
 
-    precisionTracks_GSFRefittedInViewAlgs = parOR(tag(ion) + "InViewAlgs" + variant, [precisionTracks_GSFRefittedInViewSequence])
-    precisionTracks_GSFRefittedViewsMaker.ViewNodeName = tag(ion) + "InViewAlgs" + variant
+    reco.mergeReco(precisionTracks_GSFRefittedInViewSequence)
 
-    # connect EVC and reco
-    theSequence = seqAND(tag(ion) + "Sequence" + variant, [precisionTracks_GSFRefittedViewsMaker, precisionTracks_GSFRefittedInViewAlgs] )
-    return (theSequence,precisionTracks_GSFRefittedViewsMaker,caloClusters,trackParticles)
+    selAcc = SelectionCA(name + tag(ion) +variant, isProbe=is_probe_leg)
+    selAcc.mergeReco(reco)
 
-def precisionTracks_GSFRefittedMenuSequence(flags, name, is_probe_leg=False, ion=False, variant='_GSF'):
-    """ Creates precisionCalo MENU sequence """
-    (sequence, precisionTracks_GSFRefittedViewsMaker,caloClusters,trackParticles) = RecoFragmentsPool.retrieve(precisionTracks_GSFRefittedSequence, flags, ion=ion, variant=variant)
-
-    #Hypo
-    from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg, TrigStreamerHypoTool
-    thePrecisionTrack_GSFRefittedHypo = TrigStreamerHypoAlg(name + tag(ion) + "Hypo" + variant)
+    thePrecisionTrack_GSFRefittedHypo = CompFactory.TrigStreamerHypoAlg(name + tag(ion) + "Hypo" + variant)
     thePrecisionTrack_GSFRefittedHypo.FeatureIsROI = False
+    selAcc.addHypoAlgo(thePrecisionTrack_GSFRefittedHypo)
     def acceptAllHypoToolGen(chainDict):
-        return TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
+        return CompFactory.TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
+    return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen,isProbe=is_probe_leg)
 
-    return MenuSequence( flags,
-                         Sequence    = sequence,
-                         Maker       = precisionTracks_GSFRefittedViewsMaker, 
-                         Hypo        = thePrecisionTrack_GSFRefittedHypo,
-                         HypoToolGen = acceptAllHypoToolGen, # Note: TrigEgammaPrecisionTrackingHypoAlg does not use HypoTools
-                         IsProbe     = is_probe_leg)
+def precisionTracks_GSFRefittedMenuSequenceCfg_lrt(flags, name, is_probe_leg=False):
+    return precisionTracks_GSFRefittedSequenceCfg(flags, name, is_probe_leg=is_probe_leg, ion=False, variant='_LRTGSF')
 
+def precisionTracks_GSFRefittedMenuSequence(flags, name, ion=False, is_probe_leg=False):
+    """Creates sixth step electron sequence"""
+
+    if isComponentAccumulatorCfg():
+        return precisionTracks_GSFRefittedSequenceCfg(flags, name=name, ion=ion, variant='_GSF', is_probe_leg = is_probe_leg)
+    else:
+        return menuSequenceCAToGlobalWrapper(precisionTracks_GSFRefittedSequenceCfg, flags, name=name, ion=ion, variant='_GSF', is_probe_leg = is_probe_leg)
 
 def precisionTracks_GSFRefittedMenuSequence_LRT(flags, name, is_probe_leg=False):
-    return precisionTracks_GSFRefittedMenuSequence(flags, name, is_probe_leg=is_probe_leg, ion=False, variant='_LRTGSF')
+    """Creates sixth step photon sequence"""
+
+    if isComponentAccumulatorCfg():
+        return precisionTracks_GSFRefittedMenuSequenceCfg_lrt(flags, name=name, is_probe_leg=is_probe_leg)
+    else:
+        return menuSequenceCAToGlobalWrapper(precisionTracks_GSFRefittedMenuSequenceCfg_lrt, flags, name=name, is_probe_leg=is_probe_leg)
+
