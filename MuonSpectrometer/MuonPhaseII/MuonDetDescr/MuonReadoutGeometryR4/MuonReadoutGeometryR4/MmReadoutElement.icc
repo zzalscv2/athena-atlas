@@ -1,0 +1,57 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONREADOUTGEOMETRYR4_MMREADOUTELEMENT_ICC
+#define MUONREADOUTGEOMETRYR4_MMREADOUTELEMENT_ICC
+
+
+namespace MuonGMR4 {
+
+inline double MmReadoutElement::thickness() const { return 2.* m_pars.halfThickness; }
+inline int MmReadoutElement::multilayer() const{ return m_multilayer; }
+
+inline IdentifierHash MmReadoutElement::measurementHash(const Identifier& measId) const {
+    if (m_idHelper.elementID(measId) != m_idHelper.elementID(identify()) ) {
+        ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
+                        << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
+    }
+    return createHash(m_idHelper.channel(measId),
+                      m_idHelper.gasGap(measId));
+}
+
+inline IdentifierHash MmReadoutElement::createHash(const int strip, const int gasGap) {
+    /*gasGap can be 1 to 4. So we make sure it contributes to the lower 4 bits. (Bit shifting begins from left to right).
+      Then we shift the bit position to the left by 4 positions and allocate the strip binary expression.
+      (gasGap-1) --> is the binary representation of the gasGap.
+      (strip-1) --> is the binary representation of the strip.
+    */
+    IdentifierHash hash = (gasGap - 1) | (strip - 1) << 4;
+    return hash;
+}
+
+inline IdentifierHash MmReadoutElement::layerHash(const Identifier& measId) const {
+    if (m_idHelper.elementID(measId) != m_idHelper.elementID(identify()) ) {
+        ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
+                        << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
+    }
+    return createHash(0, m_idHelper.gasGap(measId));
+}
+
+inline Identifier MmReadoutElement::measurementId(const IdentifierHash& measHash) const {
+    return m_idHelper.channelID(identify(),multilayer(), gasGapNumber(measHash), stripNumber(measHash));  
+}
+
+// Extract the gas gap number from the lower 4 bits of the hash
+inline unsigned int MmReadoutElement::gasGapNumber(const IdentifierHash& measHash) {
+    return (measHash & 0xF) + 1;
+}
+
+// Extract the strip number from the remaining bits after removing the gas gap bits
+inline unsigned int MmReadoutElement::stripNumber(const IdentifierHash& measHash) {
+    // Right shift by 4 to get rid of the lower 4 bits (gas gap bits).
+    return (measHash >> 4) + 1;
+}
+
+
+}  // namespace MuonGMR4
+#endif

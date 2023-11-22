@@ -53,6 +53,7 @@ class MdtReadoutElement;
 class TgcReadoutElement;
 class RpcReadoutElement;
 class sTgcReadoutElement;
+class MmReadoutElement;
 
 class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
 
@@ -70,6 +71,7 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     DECLARE_ELEMENT(TgcReadoutElement)    
     DECLARE_ELEMENT(RpcReadoutElement)
     DECLARE_ELEMENT(sTgcReadoutElement)
+    DECLARE_ELEMENT(MmReadoutElement)
 
     /// Returns the number of primary nodes in the GeoModel tree
     /// that are building the full MuonSystem (MuonBarrel, MuonEndCap, NSW etc)
@@ -95,6 +97,7 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     ElementStorage<TgcReadoutElement> m_tgcEles{};    
     ElementStorage<RpcReadoutElement> m_rpcEles{};
     ElementStorage<sTgcReadoutElement> m_sTgcEles{};
+    ElementStorage<MmReadoutElement> m_mmEles{};
 
     std::vector<PVConstLink> m_treeTopVector{};
 };
