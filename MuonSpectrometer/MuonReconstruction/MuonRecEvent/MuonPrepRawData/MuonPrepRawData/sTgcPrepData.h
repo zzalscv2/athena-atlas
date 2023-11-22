@@ -109,9 +109,9 @@ namespace Muon {
     enum class Author: uint8_t{
        unKnown = 0,
        RdoToPrdConverter,
+       TrigProcessor,
        SimpleClusterBuilder,
-       Caruana,
-       TrigProcessor
+       Caruana
     };
 
     enum class Quality: uint8_t{

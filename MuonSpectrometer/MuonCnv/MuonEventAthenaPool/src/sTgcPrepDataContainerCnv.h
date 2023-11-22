@@ -10,10 +10,11 @@
 #include "MuonPrepRawData/sTgcPrepDataContainer.h"
 #include "MuonEventTPCnv/MuonPrepRawData/sTgcPrepDataContainerCnv_p1.h"
 #include "MuonEventTPCnv/MuonPrepRawData/sTgcPrepDataContainerCnv_p2.h"
+#include "MuonEventTPCnv/MuonPrepRawData/sTgcPrepDataContainerCnv_p3.h"
 
 
 // the latest persistent representation type of DataCollection:
-typedef  Muon::sTgcPrepDataContainer_p2  sTgcPrepDataContainer_PERS;
+typedef  Muon::sTgcPrepDataContainer_p3  sTgcPrepDataContainer_PERS;
 typedef  T_AthenaPoolCustomCnv<Muon::sTgcPrepDataContainer, sTgcPrepDataContainer_PERS >  sTgcPrepDataContainerCnvBase;
 
 /**
@@ -38,6 +39,7 @@ public:
 private:
     Muon::sTgcPrepDataContainerCnv_p1    m_converter_p1;
     Muon::sTgcPrepDataContainerCnv_p2    m_converter_p2;
+    Muon::sTgcPrepDataContainerCnv_p3    m_converter_p3;
 };
 
 #endif

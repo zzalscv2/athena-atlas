@@ -56,7 +56,7 @@ foreach( name CscMcDataCnv_p1_test CscSimDataCnv_p1_test
       CscStripPrepDataCnv_p1_test MdtPrepDataCnv_p1_test
       MdtPrepDataCnv_p2_test RpcPrepDataCnv_p1_test RpcPrepDataCnv_p2_test
       RpcPrepDataCnv_p3_test TgcPrepDataCnv_p1_test TgcPrepDataCnv_p2_test
-      TgcPrepDataCnv_p3_test MMPrepDataCnv_p1_test sTgcPrepDataCnv_p1_test
+      TgcPrepDataCnv_p3_test MMPrepDataCnv_p1_test  sTgcPrepDataCnv_p1_test
       CscPrepDataContainerCnv_p1_test CscPrepDataContainerCnv_p2_test
       CscStripPrepDataContainerCnv_p1_test MdtPrepDataContainerCnv_p1_test
       MdtPrepDataContainerCnv_p2_test RpcPrepDataContainerCnv_p1_test
@@ -75,7 +75,10 @@ foreach( name CscMcDataCnv_p1_test CscSimDataCnv_p1_test
       STGC_DigitContainerCnv_p1_test
       STGC_RawDataContainerCnv_p1_test
       STGC_RawDataContainerCnv_p2_test
-      sTgcPrepDataCnv_p2_test sTgcPrepDataContainerCnv_p2_test
+      sTgcPrepDataCnv_p2_test sTgcPrepDataContainerCnv_p2_test 
+      MMPrepDataCnv_p2_test MMPrepDataContainerCnv_p2_test
+      sTgcPrepDataCnv_p3_test sTgcPrepDataContainerCnv_p3_test
+
       )
 
    atlas_add_test( ${name}
