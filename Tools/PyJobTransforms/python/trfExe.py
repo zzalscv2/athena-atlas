@@ -1019,7 +1019,7 @@ class athenaExecutor(scriptExecutor):
         if asetupString is not None:
             legacyOSRelease = asetupReleaseIsOlderThan(asetupString, 24)
             currentOS = os.environ['ALRB_USER_PLATFORM']
-            if legacyOSRelease and currentOS!="centos7":
+            if legacyOSRelease and "centos7" not in currentOS:
                 OSSetupString = "centos7"
                 msg.info('Legacy release required for the substep {}, will setup a container running {}'.format(self._substep, OSSetupString))
 
@@ -1560,7 +1560,7 @@ class athenaExecutor(scriptExecutor):
                     print('echo This wrapper is executed within a container', file=wrapper)
                     print('echo For a local re-run, please do:', file=wrapper)
                     print('echo '+ " ".join(container_cmd) + " " + path.join('.', self._wrapperFile), file=wrapper)
-                    print('echo (or with --pwd=`pwd`)')
+                    print('echo "(or with --pwd=`pwd`)"')
 
                 if asetup:
                     print("# asetup", file=wrapper)
