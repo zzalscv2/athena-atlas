@@ -34,12 +34,14 @@
 sTgcDigitMaker::sTgcDigitMaker(const Muon::IMuonIdHelperSvc* idHelperSvc,
                                const int channelTypes,
                                double meanGasGain,
-                               bool doPadChargeSharing)
+                               bool doPadChargeSharing,
+                               double stripChargeScale)
   : AthMessaging ("sTgcDigitMaker"),
   m_idHelperSvc{idHelperSvc},
   m_channelTypes{channelTypes},
   m_meanGasGain{meanGasGain},
-  m_doPadSharing{doPadChargeSharing} {}
+  m_doPadSharing{doPadChargeSharing},
+  m_stripChargeScale{stripChargeScale} {}
 //----- Destructor
 sTgcDigitMaker::~sTgcDigitMaker() = default;
 //------------------------------------------------------

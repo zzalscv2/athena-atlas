@@ -40,7 +40,8 @@ class sTgcDigitMaker : public AthMessaging {
   sTgcDigitMaker(const Muon::IMuonIdHelperSvc* idHelperSvc,
                  const int channelTypes,
                  double meanGasGain, 
-                 bool doPadChargeSharing);
+                 bool doPadChargeSharing,
+                 double stripChargeScale);
 
   virtual ~sTgcDigitMaker();
 
