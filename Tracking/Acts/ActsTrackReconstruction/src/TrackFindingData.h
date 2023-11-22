@@ -195,17 +195,17 @@ namespace
     }
   };
 
-  template <class T_MeasurementContainer>
-  std::pair<xAOD::DetectorIDHashType, bool> getMaxHashAndCheckOrder(const T_MeasurementContainer &measurements)
+  bool checkHashOrder(const xAOD::UncalibratedMeasurementContainer &measurements)
   {
-    std::pair<xAOD::DetectorIDHashType, bool> max_hash_ordered{0, true};
+    xAOD::DetectorIDHashType max_hash = 0;
     for (const auto &measurement : measurements)
     {
       xAOD::DetectorIDHashType id_hash = measurement->identifierHash();
-      max_hash_ordered.second = (id_hash >= max_hash_ordered.first);
-      max_hash_ordered.first = std::max(max_hash_ordered.first, id_hash);
+      if (id_hash < max_hash)
+        return false;
+      max_hash = id_hash;
     }
-    return max_hash_ordered;
+    return true;
   }
 
   void gatherGeoIds(const ActsTrk::IActsToTrkConverterTool &converter_tool,

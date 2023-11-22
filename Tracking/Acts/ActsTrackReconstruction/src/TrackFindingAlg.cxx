@@ -255,10 +255,11 @@ namespace ActsTrk
 
     // MEASUREMENTS
     std::vector<const xAOD::UncalibratedMeasurementContainer *> uncalibratedMeasurementContainers;
+    std::vector<xAOD::UncalibMeasType> measType;
+    std::array<std::size_t, TrackingSurfaceHelper::s_NMeasTypes> measCount{};
     uncalibratedMeasurementContainers.reserve(m_uncalibratedMeasurementContainerKeys.size());
-    std::vector<xAOD::DetectorIDHashType> max_hash;
-    xAOD::DetectorIDHashType total_hash = 0;
-    max_hash.reserve(m_uncalibratedMeasurementContainerKeys.size());
+    measType.reserve(m_uncalibratedMeasurementContainerKeys.size());
+    std::size_t measTotal = 0;
     for (const auto &uncalibratedMeasurementContainerKey : m_uncalibratedMeasurementContainerKeys)
     {
       ATH_MSG_DEBUG("Reading input collection with key " << uncalibratedMeasurementContainerKey.key());
@@ -267,14 +268,24 @@ namespace ActsTrk
       uncalibratedMeasurementContainers.push_back(uncalibratedMeasurementContainerHandle.cptr());
       ATH_MSG_DEBUG("Retrieved " << uncalibratedMeasurementContainers.back()->size() << " input elements from key " << uncalibratedMeasurementContainerKey.key());
 
-      std::pair<xAOD::DetectorIDHashType, bool> max_hash_ordered = getMaxHashAndCheckOrder(*uncalibratedMeasurementContainers.back());
-      if (!max_hash_ordered.second)
+      if (!checkHashOrder(*uncalibratedMeasurementContainers.back()))
       {
         ATH_MSG_ERROR("Measurements " << uncalibratedMeasurementContainerKey.key() << " not ordered by identifier hash.");
         return StatusCode::FAILURE;
       }
-      max_hash.push_back(max_hash_ordered.first);
-      total_hash += max_hash_ordered.first;
+
+      xAOD::UncalibMeasType typ = !uncalibratedMeasurementContainers.back()->empty()
+                                      ? uncalibratedMeasurementContainers.back()->at(0)->type()
+                                      : xAOD::UncalibMeasType::Other;
+      auto ind = static_cast<std::size_t>(typ);
+      if (!(ind < TrackingSurfaceHelper::s_NMeasTypes))
+      {
+        ATH_MSG_FATAL("Measurements " << uncalibratedMeasurementContainerKey.key() << " type " << ind << " larger than " << TrackingSurfaceHelper::s_NMeasTypes - 1);
+        return StatusCode::FAILURE;
+      }
+      measType.push_back(typ);
+      measCount.at(ind) += uncalibratedMeasurementContainers.back()->size();
+      measTotal += uncalibratedMeasurementContainers.back()->size();
     }
 
     std::vector<const InDetDD::SiDetectorElementCollection *> detEleColl;
@@ -294,19 +305,13 @@ namespace ActsTrk
     }
 
     // @TODO make this condition data
-    std::array<std::vector<const Acts::Surface *>, 4> acts_surfaces;
+    std::array<std::vector<const Acts::Surface *>, TrackingSurfaceHelper::s_NMeasTypes> acts_surfaces;
     std::vector<Acts::GeometryIdentifier> geo_ids;
-    geo_ids.reserve(total_hash);
-    std::vector<xAOD::UncalibMeasType> measType(uncalibratedMeasurementContainers.size(), xAOD::UncalibMeasType::Other);
+    geo_ids.reserve(measTotal);
     for (std::size_t icontainer = 0; icontainer < uncalibratedMeasurementContainers.size(); ++icontainer)
     {
-      if (uncalibratedMeasurementContainers[icontainer]->empty())
-        continue;
-      // @TODO can we get the type from the container base?
-      xAOD::UncalibMeasType typ = uncalibratedMeasurementContainers[icontainer]->at(0)->type();
-      measType[icontainer] = typ;
-      auto ind = static_cast<std::size_t>(typ);
-      acts_surfaces.at(ind).reserve(max_hash[icontainer]);
+      auto ind = static_cast<std::size_t>(measType[icontainer]);
+      acts_surfaces.at(ind).reserve(measCount[ind]);
       gatherGeoIds(*m_ATLASConverterTool, *detEleColl[icontainer], geo_ids, acts_surfaces.at(ind));
     }
     std::sort(geo_ids.begin(), geo_ids.end());
