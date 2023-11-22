@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -94,19 +94,19 @@ StatusCode InDet::TRT_TrackSegmentsFinder::execute(const EventContext &ctx) cons
         // TRT detector elements road builder
         //
         const auto & DE = m_roadtool->detElementsRoad(ctx, fieldCache, *par, Trk::alongMomentum, map);
-	      if(int(DE.size()) < m_minNumberDCs) continue;
-	      vTR.clear();
+	     if(int(DE.size()) < m_minNumberDCs) continue;
+	     vTR.clear();
         vTR.reserve(DE.size());
         for (const InDetDD::TRT_BaseElement*d: DE) {
            vTR.push_back(d->identifyHash());
         }
         event_data_p = m_segmentsMakerTool->newRegion(ctx, vTR);
-	      m_segmentsMakerTool->find(ctx, *event_data_p,map);
-	      // Loop through all segments and reconsrtucted segments collection preparation
+	     m_segmentsMakerTool->find(ctx, *event_data_p,map);
+	     // Loop through all segments and reconsrtucted segments collection preparation
         Trk::Segment* segment = nullptr;
-	      while((segment = m_segmentsMakerTool->next(*event_data_p))) {
+	     while((segment = m_segmentsMakerTool->next(*event_data_p))) {
 	        found_segments->push_back(segment);
-	      }
+	     }
       }//end of loopover *calo
   }
   if (event_data_p) {

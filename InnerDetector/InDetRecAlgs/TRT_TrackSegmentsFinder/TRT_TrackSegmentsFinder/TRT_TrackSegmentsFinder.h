@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_TrackSegmentsFinder_H
@@ -42,10 +42,6 @@ namespace InDet {
 
       MsgStream&    dumptools(MsgStream&    out) const;
       MsgStream&    dumpevent(MsgStream&    out, int nsegments) const;
-
-    /// @name Flags to configure SiSPSeededTrackFinder
-    //@{
-    BooleanProperty m_useZvertexTool{this, "useZvertexTool", true}; 
 
       Gaudi::Property<bool>                         m_useCaloSeeds
        {this, "useCaloSeeds",          false,  "Use calo seeds to find TRT segments"};
