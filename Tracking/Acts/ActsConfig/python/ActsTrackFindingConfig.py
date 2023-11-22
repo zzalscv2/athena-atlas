@@ -21,7 +21,6 @@ def ActsTrackStatePrinterCfg(
     acc = ComponentAccumulator()
 
     kwargs.setdefault("InputSpacePoints", isdet(flags, ["ITkPixelSpacePoints"], ["ITkStripSpacePoints", "ITkStripOverlapSpacePoints"]))
-    kwargs.setdefault("spacePointType", isdet(flags, [0], [1, 1] if flags.Detector.EnableITkPixel else [0, 0]))
 
     from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
     kwargs.setdefault(
@@ -40,11 +39,13 @@ def ActsTrackFindingCfg(flags,
                         **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
+    # Seed labels and collections. These 3 lists must match element for element.
     kwargs.setdefault("SeedLabels", isdet(flags, ["PPP"], ["SSS"]))
-    kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, ["ITkPixelClusters"], ["ITkStripClusters"]))
-    kwargs.setdefault("DetectorElementCollectionKeys", isdet(flags, ["ITkPixelDetectorElementCollection"], ["ITkStripDetectorElementCollection"]))
     kwargs.setdefault("EstimatedTrackParametersKeys", isdet(flags, ["ITkPixelEstimatedTrackParams"], ["ITkStripEstimatedTrackParams"]))
     kwargs.setdefault("SeedContainerKeys", isdet(flags, ["ITkPixelSeeds"], ["ITkStripSeeds"]))
+    # Measurement collections. These 2 lists must match element for element.
+    kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, ["ITkPixelClusters"], ["ITkStripClusters"]))
+    kwargs.setdefault("DetectorElementCollectionKeys", isdet(flags, ["ITkPixelDetectorElementCollection"], ["ITkStripDetectorElementCollection"]))
 
     kwargs.setdefault('ACTSTracksLocation', 'ActsTracks')
 

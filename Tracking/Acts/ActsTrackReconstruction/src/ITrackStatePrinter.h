@@ -23,8 +23,9 @@
 
 // Other
 #include <vector>
-namespace InDetDD {
-   class SiDetectorElementCollection;
+namespace InDetDD
+{
+  class SiDetectorElementCollection;
 }
 namespace ActsTrk
 {
@@ -36,10 +37,9 @@ namespace ActsTrk
 
     virtual void
     printMeasurements(const EventContext &ctx,
-                      const xAOD::UncalibratedMeasurementContainer &clusterContainer,
-                      const InDetDD::SiDetectorElementCollection *detectorElements,
-                      size_t typeIndex,
-                      size_t offset) const = 0;
+                      const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
+                      const std::vector<const InDetDD::SiDetectorElementCollection *> &detectorElementCollections,
+                      const std::vector<size_t> &offsets) const = 0;
 
     virtual void
     printSeed(const Acts::GeometryContext &tgContext,
@@ -52,7 +52,7 @@ namespace ActsTrk
     printTracks(const Acts::GeometryContext &tgContext,
                 const ActsTrk::MutableTrackContainer &tracks,
                 const std::vector<ActsTrk::MutableTrackContainer::TrackProxy> &fitResult,
-                const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t> > &offset) const = 0;
+                const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset) const = 0;
   };
 
 } // namespace

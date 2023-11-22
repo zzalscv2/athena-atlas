@@ -105,13 +105,6 @@ namespace ActsTrk
       return StatusCode::FAILURE;
     }
 
-    // @TODO can we remove this requirement to allow PPP seeds with pixel+strip measurements, or even PPS seeds?
-    if (m_seedContainerKeys.size() != m_uncalibratedMeasurementContainerKeys.size())
-    {
-      ATH_MSG_FATAL("There are " << m_uncalibratedMeasurementContainerKeys.size() << " UncalibratedMeasurementContainerKeys, but " << m_seedContainerKeys.size() << " SeedContainerKeys");
-      return StatusCode::FAILURE;
-    }
-
     if (m_detEleCollKeys.size() != m_uncalibratedMeasurementContainerKeys.size())
     {
       ATH_MSG_FATAL("There are " << m_uncalibratedMeasurementContainerKeys.size() << " UncalibratedMeasurementContainerKeys, but " << m_detEleCollKeys.size() << " DetEleCollKeys");
@@ -304,6 +297,14 @@ namespace ActsTrk
       ATH_MSG_DEBUG("Retrieved " << detEleColl.back()->size() << " input condition elements from key " << detEleCollKey.key());
     }
 
+    DuplicateSeedDetector duplicateSeedDetector(total_seeds, m_skipDuplicateSeeds);
+    for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
+    {
+      if (!seedContainers[icontainer])
+        continue;
+      duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer]);
+    }
+
     // @TODO make this condition data
     std::array<std::vector<const Acts::Surface *>, TrackingSurfaceHelper::s_NMeasTypes> acts_surfaces;
     std::vector<Acts::GeometryIdentifier> geo_ids;
@@ -318,9 +319,7 @@ namespace ActsTrk
 
     TrackingSurfaceHelper tracking_surface_helper(std::move(acts_surfaces));
 
-    TrackFindingMeasurements measurements(geo_ids, !m_trackStatePrinter.empty());
-
-    DuplicateSeedDetector duplicateSeedDetector(total_seeds, m_skipDuplicateSeeds);
+    TrackFindingMeasurements measurements(geo_ids);
 
     for (std::size_t icontainer = 0; icontainer < uncalibratedMeasurementContainers.size(); ++icontainer)
     {
@@ -329,8 +328,12 @@ namespace ActsTrk
         tracking_surface_helper.setSiDetectorElements(measType[icontainer], detEleColl[icontainer]);
       }
       ATH_MSG_DEBUG("Create " << uncalibratedMeasurementContainers[icontainer]->size() << " source links from measurements in " << m_uncalibratedMeasurementContainerKeys[icontainer].key());
-      measurements.addMeasurements(icontainer, *uncalibratedMeasurementContainers[icontainer], *detEleColl[icontainer], seedContainers[icontainer],
-                                   m_ATLASConverterTool, m_trackStatePrinter, duplicateSeedDetector, ctx);
+      measurements.addMeasurements(icontainer, *uncalibratedMeasurementContainers[icontainer], *detEleColl[icontainer], m_ATLASConverterTool);
+    }
+
+    if (!m_trackStatePrinter.empty())
+    {
+      m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, detEleColl, measurements.measurementOffsetVector());
     }
 
     // ================================================== //
@@ -464,7 +467,7 @@ namespace ActsTrk
         m_trackStatePrinter->printSeed(tgContext, *(*seeds)[iseed], initialParameters, measurements.measurementOffset(typeIndex), iseed);
       }
 
-      if (duplicateSeedDetector.isDuplicate(measurements.seedOffset(typeIndex) + iseed))
+      if (duplicateSeedDetector.isDuplicate(typeIndex, iseed))
       {
         ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
         ++event_stat[category_i][kNDuplicateSeeds];
