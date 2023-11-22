@@ -5,7 +5,6 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..CommonSequences.CaloSequences import fastCaloMenuSequence 
 from ..CommonSequences.CaloSequences_FWD import fastCaloMenuSequence_FWD
 from ..Electron.FastElectronMenuSequences import fastElectronMenuSequence, fastElectronMenuSequence_LRT
@@ -14,10 +13,8 @@ from ..Electron.PrecisionCaloMenuSequences import precisionCaloMenuSequence, pre
 from ..Electron.PrecisionElectronMenuSequences import precisionElectronMenuSequence, precisionElectronMenuSequence_LRT
 from ..Electron.PrecisionElectronMenuSequences_GSF import precisionElectronMenuSequence_GSF, precisionElectronMenuSequence_LRTGSF
 from TrigBphysHypo.TrigMultiTrkComboHypoConfig import NoMuonDiElecPrecisionGSFComboHypoCfg, DiElecPrecisionGSFComboHypoCfg, TrigMultiTrkComboHypoToolFromDict
-
-if not isComponentAccumulatorCfg():
-    from ..Electron.PrecisionTrackingMenuSequences     import precisionTrackingMenuSequence, precisionTrackingMenuSequence_LRT
-    from ..Electron.PrecisionTracks_GSFRefittedMenuSequences   import precisionTracks_GSFRefittedMenuSequence, precisionTracks_GSFRefittedMenuSequence_LRT 
+from ..Electron.PrecisionTrackingMenuSequences     import precisionTrackingMenuSequence, precisionTrackingMenuSequence_LRT
+from ..Electron.PrecisionTracks_GSFRefittedMenuSequences   import precisionTracks_GSFRefittedMenuSequence, precisionTracks_GSFRefittedMenuSequence_LRT
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 #----------------------------------------------------------------
