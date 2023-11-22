@@ -46,6 +46,16 @@ namespace ActsTrk {
     fill("ActsSpacePointAnalysisAlg", monitor_nsp);
 
     const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
+    // Check we can have access to clusters
+    for (const xAOD::SpacePoint* sp : *inputSpacePointCollection) {
+      const auto& els = sp->measurements();
+      for (const auto& el : els) {
+	const auto idHash = (*el)->identifierHash();
+	(void)idHash;
+      }
+    }
+
+
     auto monitor_barrelEndcap = Monitored::Collection("barrelEndcap", *inputSpacePointCollection,
 						      [this, &pixelID, &stripID] (const auto* spacePoint) -> int
 						      {
