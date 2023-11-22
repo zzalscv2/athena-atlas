@@ -76,12 +76,12 @@ namespace ActsTrk
     ToolHandle<ActsTrk::ITrackStatePrinter> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
 
     // Handle Keys
-    SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_uncalibratedMeasurementContainerKeys{this, "UncalibratedMeasurementContainerKeys", {}, "input cluster collections"};
-    /// To get detector elements condition data
-    SG::ReadCondHandleKeyArray<InDetDD::SiDetectorElementCollection> m_detEleCollKeys{this, "DetectorElementCollectionKeys", {}, "input SiDetectorElementCollection"};
-
+    // Seed collections. These 2 vectors must match element for element.
     SG::ReadHandleKeyArray<ActsTrk::SeedContainer> m_seedContainerKeys{this, "SeedContainerKeys", {}, "Seed containers"};
     SG::ReadHandleKeyArray<ActsTrk::BoundTrackParametersContainer> m_estimatedTrackParametersKeys{this, "EstimatedTrackParametersKeys", {}, "containers of estimated track parameters from seeding"};
+    // Measurement collections. These 2 vectors must match element for element.
+    SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_uncalibratedMeasurementContainerKeys{this, "UncalibratedMeasurementContainerKeys", {}, "input cluster collections"};
+    SG::ReadCondHandleKeyArray<InDetDD::SiDetectorElementCollection> m_detEleCollKeys{this, "DetectorElementCollectionKeys", {}, "input SiDetectorElementCollection"};
 
     ActsTrk::MutableTrackContainerHandle<ActsTrk::TrackFindingAlg> m_tracksBackendHandle{this, "", "Tracks"};
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer", "Output track collection (ActsTrk variant)"};

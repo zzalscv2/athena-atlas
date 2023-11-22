@@ -355,8 +355,7 @@ namespace ActsTrk
     }
     else if (measurement->type() == xAOD::UncalibMeasType::StripClusterType)
     {
-      const small_vector<const xAOD::SpacePoint *> &
-          spvec = measToSp.at(measurement->index());
+      const small_vector<const xAOD::SpacePoint *> &spvec = measToSp.at(measurement->index());
       if (spvec.empty())
       {
         printMeasurement(tgContext, surface_ptr, detElem,
@@ -467,8 +466,6 @@ namespace ActsTrk
   StatusCode TrackStatePrinter::initialize()
   {
     ATH_MSG_DEBUG("Initializing " << name() << "...");
-    ATH_MSG_DEBUG("Properties Summary:");
-    ATH_MSG_DEBUG("   " << m_spacePointType);
 
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     ATH_CHECK(m_spacePointKey.initialize());
@@ -490,10 +487,9 @@ namespace ActsTrk
     for (const auto *sp : seed.sp())
     {
       size_t nom = 0;
-      const auto &els = sp->measurements();
-      for (std::size_t i(0ul); i < els.size(); ++i)
+      for (const auto &el : sp->measurements())
       {
-        std::size_t index = (*els[i])->index();
+        std::size_t index = (*el)->index();
         if (nom > 0)
           os << '+';
         else if (nos > 0)
@@ -565,48 +561,41 @@ namespace ActsTrk
 
   void
   TrackStatePrinter::printMeasurements(const EventContext &ctx,
-                                       const xAOD::UncalibratedMeasurementContainer &clusterContainer,
-                                       const InDetDD::SiDetectorElementCollection *detectorElements,
-                                       size_t typeIndex,
-                                       size_t offset) const
+                                       const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
+                                       const std::vector<const InDetDD::SiDetectorElementCollection *> &detectorElementCollections,
+                                       const std::vector<size_t> &offsets) const
   {
     auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
     Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
 
-    std::vector<small_vector<const xAOD::SpacePoint *>> measToSp;
-    measToSp.resize(clusterContainer.size());
-    addSpacePoints(ctx, measToSp, typeIndex, offset);
+    auto measToSp = addSpacePoints(ctx, clusterContainers, offsets);
 
-    if (offset == 0)
-    {
-      ATH_MSG_INFO("CKF input measurements:");
-      printHeader(0);
-    }
+    ATH_MSG_INFO("CKF input measurements:");
+    printHeader(0);
 
-    for (const auto *measurement : clusterContainer)
+    for (std::size_t icontainer = 0; icontainer < clusterContainers.size(); ++icontainer)
     {
-      printMeasurementAssociatedSpacePoint(tgContext, measurement, measToSp, detectorElements, *m_ATLASConverterTool, offset);
+      for (const auto *measurement : *clusterContainers[icontainer])
+      {
+        printMeasurementAssociatedSpacePoint(tgContext, measurement, measToSp[icontainer], detectorElementCollections[icontainer], *m_ATLASConverterTool, offsets[icontainer]);
+      }
     }
     std::cout << std::flush;
   }
 
-  void
+  std::vector<std::vector<TrackStatePrinter::small_vector<const xAOD::SpacePoint *>>>
   TrackStatePrinter::addSpacePoints(const EventContext &ctx,
-                                    std::vector<TrackStatePrinter::small_vector<const xAOD::SpacePoint *>> &measToSp,
-                                    size_t typeIndex,
-                                    size_t offset) const
+                                    const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
+                                    const std::vector<size_t> &offsets) const
   {
-    size_t icoll = 0;
+    std::vector<std::vector<TrackStatePrinter::small_vector<const xAOD::SpacePoint *>>> measToSp{clusterContainers.size()};
+    for (std::size_t icontainer = 0; icontainer < clusterContainers.size(); ++icontainer)
+    {
+      measToSp[icontainer].resize(clusterContainers[icontainer]->size());
+    }
+
     for (auto &spacePointKey : m_spacePointKey)
     {
-      if (!(icoll < m_spacePointType.size()))
-      {
-        ATH_MSG_WARNING("Need spacePointType[" << icoll << "] to use SpacePoint collection '" << spacePointKey.key() << "'");
-        continue;
-      }
-      auto spType = m_spacePointType[icoll++];
-      if (spType != typeIndex)
-        continue;
       ATH_MSG_DEBUG("Retrieving from input SpacePoint collection '" << spacePointKey.key() << "' ...");
       SG::ReadHandle<xAOD::SpacePointContainer> handle = SG::makeHandle(spacePointKey, ctx);
       if (!handle.isValid())
@@ -617,28 +606,35 @@ namespace ActsTrk
       ATH_MSG_DEBUG("    \\__ " << handle->size() << " elements!");
       for (const auto *sp : *handle)
       {
-        const auto &els = sp->measurements();
-        for (std::size_t i(0ul); i < els.size(); ++i)
+        for (const auto &el : sp->measurements())
         {
-          if (!els[i].isValid())
+          if (!el.isValid())
             continue;
-          const xAOD::UncalibratedMeasurement *meas = *(els[i]);
-          assert(meas);
-          small_vector<const xAOD::SpacePoint *> &measSp = measToSp.at(meas->index());
-          if (!measSp.empty())
+          const xAOD::UncalibratedMeasurement *meas = *el;
+          if (!meas)
+            continue;
+          for (std::size_t icontainer = 0; icontainer < clusterContainers.size(); ++icontainer)
           {
-            ATH_MSG_INFO("Cluster "
-                         << (meas->index() + offset)
-                         << " used by SpacePoints at ("
-                         << sp->globalPosition()[0] << ',' << sp->globalPosition()[1] << ',' << sp->globalPosition()[2]
-                         << ") and ("
-                         << measSp[0]->globalPosition()[0] << ',' << measSp[0]->globalPosition()[1] << ',' << measSp[0]->globalPosition()[2]
-                         << ')');
+            // This measurement may well be in a different clusterContainer. Skip all but the one we are interested in.
+            if (!(meas && meas->index() < clusterContainers[icontainer]->size() && meas == clusterContainers[icontainer]->at(meas->index())))
+              continue;
+            small_vector<const xAOD::SpacePoint *> &measSp = measToSp[icontainer].at(meas->index());
+            if (!measSp.empty())
+            {
+              ATH_MSG_INFO("Cluster "
+                           << (meas->index() + offsets[icontainer])
+                           << " used by SpacePoints at ("
+                           << sp->globalPosition()[0] << ',' << sp->globalPosition()[1] << ',' << sp->globalPosition()[2]
+                           << ") and ("
+                           << measSp[0]->globalPosition()[0] << ',' << measSp[0]->globalPosition()[1] << ',' << measSp[0]->globalPosition()[2]
+                           << ')');
+            }
+            measSp.push_back(sp);
           }
-          measSp.push_back(sp);
         }
       }
     }
+    return measToSp;
   }
 
 } // namespace ActsTrk

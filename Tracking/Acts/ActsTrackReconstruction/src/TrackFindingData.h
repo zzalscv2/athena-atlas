@@ -260,6 +260,7 @@ namespace
       if (m_disabled)
         return;
       m_seedIndex.reserve(6 * numSeeds); // 6 hits/seed for strips (3 for pixels)
+      m_seedOffset.reserve(2);
     }
 
     DuplicateSeedDetector() = delete;
@@ -268,11 +269,14 @@ namespace
 
     // add seeds from an associated measurements collection.
     // measurementOffset non-zero is only needed if measurements holds more than one collection (eg. kept for TrackStatePrinter).
-    size_t addSeeds(const ActsTrk::SeedContainer &seeds, const xAOD::UncalibratedMeasurementContainer &measurements, [[maybe_unused]] std::size_t typeIndex)
+    void addSeeds(size_t typeIndex, const ActsTrk::SeedContainer &seeds)
     {
-      size_t seedOffset = m_numSeed;
       if (m_disabled)
-        return seedOffset;
+        return;
+      if (!(typeIndex < m_seedOffset.size()))
+        m_seedOffset.resize(typeIndex + 1);
+      m_seedOffset[typeIndex] = m_numSeed;
+
       for (const auto *seed : seeds)
       {
         if (!seed)
@@ -280,17 +284,14 @@ namespace
         for (const auto *sp : seed->sp())
         {
           const auto &els = sp->measurements();
-          for (std::size_t i(0ul); i < els.size(); i++)
+          for (const ElementLink<xAOD::UncalibratedMeasurementContainer> &el : els)
           {
-            size_t imeasurement = (*els[i])->index();
-            assert(imeasurement < measurements.size());
-            m_seedIndex.insert({measurements[imeasurement], m_numSeed});
+            m_seedIndex.insert({*el, m_numSeed});
             ++m_nSeedMeasurements[m_numSeed];
           }
         }
         ++m_numSeed;
       }
-      return seedOffset;
     }
 
     void newTrajectory()
@@ -323,10 +324,12 @@ namespace
     }
 
     // For complete removal of duplicate seeds, assumes isDuplicate(iseed) is called for monotonically increasing iseed.
-    bool isDuplicate(size_t iseed)
+    bool isDuplicate(size_t typeIndex, size_t iseed)
     {
       if (m_disabled)
         return false;
+      if (typeIndex < m_seedOffset.size())
+        iseed += m_seedOffset[typeIndex];
       assert(iseed < m_isDuplicateSeed.size());
       // If iseed not increasing, we will miss some duplicate seeds, but won't exclude needed seeds.
       if (iseed >= m_nextSeed)
@@ -340,6 +343,7 @@ namespace
     std::vector<size_t> m_nUsedMeasurements;
     std::vector<size_t> m_nSeedMeasurements;
     std::vector<bool> m_isDuplicateSeed;
+    std::vector<size_t> m_seedOffset;
     size_t m_numSeed = 0u;  // count of number of seeds so-far added with addSeeds()
     size_t m_nextSeed = 0u; // index of next seed expected with isDuplicate()
     size_t m_found = 0u;    // count of found seeds for this/last trajectory
@@ -351,16 +355,11 @@ namespace
   class TrackFindingMeasurements
   {
   public:
-    TrackFindingMeasurements(const std::vector<Acts::GeometryIdentifier> &ordered_geo_ids,
-                             bool doTrackStatePrinter)
+    TrackFindingMeasurements(const std::vector<Acts::GeometryIdentifier> &ordered_geo_ids)
         : m_orderedGeoIds(&ordered_geo_ids)
     {
       m_measurementRanges.resize(m_orderedGeoIds->size(), MeasurementRange());
-      if (doTrackStatePrinter)
-      {
-        m_measurementOffset.reserve(2); // pixels+strips
-      }
-      m_seedOffset.reserve(2);
+      m_measurementOffset.reserve(2); // pixels+strips
     }
 
     TrackFindingMeasurements() = delete;
@@ -370,27 +369,19 @@ namespace
     void addMeasurements(size_t typeIndex,
                          const xAOD::UncalibratedMeasurementContainer &clusterContainer,
                          const InDetDD::SiDetectorElementCollection &detElems,
-                         const ActsTrk::SeedContainer *seeds,
-                         const ToolHandle<ActsTrk::IActsToTrkConverterTool> &ATLASConverterTool,
-                         const ToolHandle<ActsTrk::ITrackStatePrinter> &trackStatePrinter,
-                         DuplicateSeedDetector &duplicateSeedDetector,
-                         const EventContext &ctx)
+                         const ToolHandle<ActsTrk::IActsToTrkConverterTool> &ATLASConverterTool)
     {
-      size_t measurementOffset = m_measurementsTotal;
-      if (!trackStatePrinter.empty())
-      {
-        if (!(typeIndex < m_measurementOffset.size()))
-          m_measurementOffset.resize(typeIndex + 1);
-        m_measurementOffset[typeIndex] = measurementOffset;
-      }
+      // m_measurementOffset only needed for TrackStatePrinter, but it is trivial overhead to save it for each event
+      if (!(typeIndex < m_measurementOffset.size()))
+        m_measurementOffset.resize(typeIndex + 1);
+      m_measurementOffset[typeIndex] = m_measurementsTotal;
+
       // the following is just in case we call addMeasurements out of order or not for 2 types of measurements
       if (typeIndex >= m_measurementRanges.m_measurementContainer.size())
       {
         m_measurementRanges.m_measurementContainer.resize(typeIndex + 1, nullptr);
       }
       m_measurementRanges.m_measurementContainer[typeIndex] = &clusterContainer;
-      if (!(typeIndex < m_seedOffset.size()))
-        m_seedOffset.resize(typeIndex + 1);
 
       xAOD::UncalibMeasType last_measurement_type = xAOD::UncalibMeasType::Other;
       xAOD::DetectorIDHashType last_id_hash = std::numeric_limits<xAOD::DetectorIDHashType>::max();
@@ -439,15 +430,6 @@ namespace
         m_measurementRanges[range_idx].setRangeEnd(typeIndex, sl_idx + 1);
       }
       m_measurementsTotal = std::max(max_measurement_index + 1, clusterContainer.size());
-      if (seeds)
-      {
-        m_seedOffset[typeIndex] = duplicateSeedDetector.addSeeds(*seeds, clusterContainer, typeIndex);
-      }
-
-      if (!trackStatePrinter.empty())
-      {
-        trackStatePrinter->printMeasurements(ctx, clusterContainer, &detElems, typeIndex, m_measurementOffset.at(typeIndex));
-      }
     }
 
     std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> measurementOffsets() const
@@ -465,14 +447,13 @@ namespace
     }
 
     size_t measurementOffset(size_t typeIndex) const { return typeIndex < m_measurementOffset.size() ? m_measurementOffset[typeIndex] : 0u; }
-    size_t seedOffset(size_t typeIndex) const { return typeIndex < m_seedOffset.size() ? m_seedOffset[typeIndex] : 0u; }
+    std::vector<size_t> measurementOffsetVector() const { return m_measurementOffset; }
 
     const std::vector<Acts::GeometryIdentifier> &orderedGeoIds() const { return *m_orderedGeoIds; }
     const MeasurementRangeList &measurementRanges() const { return m_measurementRanges; }
 
   private:
     std::vector<size_t> m_measurementOffset;
-    std::vector<size_t> m_seedOffset;
     const std::vector<Acts::GeometryIdentifier> *m_orderedGeoIds;
 
     MeasurementRangeList m_measurementRanges;
