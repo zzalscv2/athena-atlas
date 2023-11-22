@@ -78,7 +78,6 @@ namespace InDet {
 
       int    m_minNumDriftCircles ;  //!< Minimum number of drift circles for TRT segment tracks
       double m_minPt              ;  //!< Minimum pt cut for TRT only (used in preselection * 0.9)
-      int    m_matEffects         ;  //!< Particle hypothesis for track fitting
       bool   m_oldLogic           ;  //!< use old transition region hit logic 
 
       ToolHandle< ITRT_SegmentToTrackTool >      m_segToTrackTool

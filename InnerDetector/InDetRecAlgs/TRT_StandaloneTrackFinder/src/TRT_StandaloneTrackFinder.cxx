@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -34,11 +34,9 @@ InDet::TRT_StandaloneTrackFinder::TRT_StandaloneTrackFinder
   
   m_minNumDriftCircles = 15                                   ;       //Minimum number of drift circles for TRT segment tracks
   m_minPt              = 1.0 * GeV                            ;       //pt cut    
-  m_matEffects         = 0                                    ;
 
   declareProperty("MinNumDriftCircles"         ,m_minNumDriftCircles); //Minimum number of drift circles for TRT segment tracks
   declareProperty("MinPt"                      ,m_minPt             ); //Minimum Pt in preselection
-  declareProperty("MaterialEffects"            ,m_matEffects        ); //Particle hypothesis during track fitting
   declareProperty("OldTransitionLogic"         ,m_oldLogic = true   ); //use old transition logic for hits 
 }
 
@@ -119,10 +117,10 @@ StatusCode InDet::TRT_StandaloneTrackFinder::execute(const EventContext& ctx) co
 
       // start with pt preselection, get the segment parameters
       const Amg::VectorX& p = trackTRT->localParameters();
-      if ( fabs(sin(p(3))/p(4)) < m_minPt*0.9 ) {
+      if ( std::abs(sin(p(3))/p(4)) < m_minPt*0.9 ) {
 	// Statistics...
 	counter[kNRejectedSeg]++;
-	ATH_MSG_DEBUG ("Segment pt = " << fabs(sin(p(3))/p(4)) << " , fails pre-cut, drop it !");
+	ATH_MSG_DEBUG ("Segment pt = " << std::abs(sin(p(3))/p(4)) << " , fails pre-cut, drop it !");
 	continue;
       }
 
@@ -138,13 +136,10 @@ StatusCode InDet::TRT_StandaloneTrackFinder::execute(const EventContext& ctx) co
       int  nROTs = trackTRT->numberOfMeasurementBases();
       ATH_MSG_DEBUG ("Number Of ROTs " << nROTs);
 
-      // requited number of drift circles
-      int  minDriftCircles = m_minNumDriftCircles; 
-
       bool is_toLower = false; // to handle special case 
 
       // Cases where the min number of required TRT drift circles drops to 10
-      if(nROTs <= minDriftCircles && m_oldLogic) {
+      if(nROTs <= m_minNumDriftCircles && m_oldLogic) {
 	ATH_MSG_DEBUG ("Few DCs, can we recover ?");
 
 	is_toLower = m_segToTrackTool->toLower(*trackTRT);
@@ -153,7 +148,7 @@ StatusCode InDet::TRT_StandaloneTrackFinder::execute(const EventContext& ctx) co
 	}
       }
 
-      if((nROTs < m_minNumDriftCircles) && !is_toLower) {
+      if(nROTs < m_minNumDriftCircles && !is_toLower) {
 	// statistics...
 	counter[kNRejectedSeg]++;
 	ATH_MSG_DEBUG ("Segment fails number of DC requirements, reject it");
