@@ -159,8 +159,7 @@ def executeTest(cfg, num_events = 1):
     if not cfg.run(num_events).isSuccess(): exit(1)
 if __name__=="__main__":
     args = SetupArgParser().parse_args()
-    flags, cfg = setupGeoR4TestCfg(args)
-    #### 
+    flags, cfg = setupGeoR4TestCfg(args)  
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
     

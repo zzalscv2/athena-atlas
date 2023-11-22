@@ -7,6 +7,7 @@
 #include "MuonReadoutGeometryR4/TgcReadoutElement.h"
 #include "MuonReadoutGeometryR4/RpcReadoutElement.h"
 #include "MuonReadoutGeometryR4/sTgcReadoutElement.h"
+#include "MuonReadoutGeometryR4/MmReadoutElement.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include <limits>
 
@@ -74,6 +75,7 @@ MuonDetectorManager::MuonDetectorManager()
 ADD_DETECTOR(MdtReadoutElement, m_mdtEles);
 ADD_DETECTOR(TgcReadoutElement, m_tgcEles);
 ADD_DETECTOR(RpcReadoutElement, m_rpcEles);
+ADD_DETECTOR(MmReadoutElement, m_mmEles);
 ADD_DETECTOR(sTgcReadoutElement, m_sTgcEles);
 
 unsigned int MuonDetectorManager::getNumTreeTops() const {
@@ -96,6 +98,7 @@ std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const
     if (!m_tgcEles.empty()) types.push_back(ActsTrk::DetectorType::Tgc);
     if (!m_rpcEles.empty()) types.push_back(ActsTrk::DetectorType::Rpc);
     if (!m_sTgcEles.empty()) types.push_back(ActsTrk::DetectorType::sTgc);
+    if (!m_mmEles.empty()) types.push_back(ActsTrk::DetectorType::Mm);
     return types;
 }
 const MuonReadoutElement* MuonDetectorManager::getReadoutElement(const Identifier& id) const {
