@@ -44,9 +44,14 @@ run "Reconstruction-ckf" \
     --maxEvents ${nEvents}
 
 reco_rc=$?
+
+# Rename log
+mv log.RAWtoALL log.RAWtoALL.CKF
+
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
+
 
 run "IDPVM" \
     runIDPVM.py \
@@ -69,6 +74,10 @@ run "Reconstruction-ambi" \
     --maxEvents ${nEvents}
 
 reco_rc=$?
+
+# Rename log
+mv log.RAWtoALL log.RAWtoALL.AMBI
+
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
