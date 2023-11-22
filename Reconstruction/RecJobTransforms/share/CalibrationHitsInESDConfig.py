@@ -1,1 +1,0 @@
-StreamESD.ItemList += ["CaloCalibrationHitContainer#*"]
