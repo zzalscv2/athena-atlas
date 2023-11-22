@@ -1112,6 +1112,225 @@ MatVisAttributes::MatVisAttributes() {
   }
   */
 
+  // Adding ITk colors
+  // PP0 material
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 255, 128, 0);
+    m->shininess.setValue(0.67);
+    // inner pixel system
+    add( "PP0BMaterial",m);
+    add( "PP0CMaterial",m);
+    add( "PP0DMaterial",m);
+    add( "PP0SMaterial",m);
+    add( "PP0QMaterial",m);
+    add( "SvcBrlPP0_30_Hor2_L2_Sec0_Material",m);
+    add( "SvcBrlPP0_40_Hor3_L3_Sec0_Material",m);
+    add( "SvcBrlPP0_50_Hor4_L4_Sec0_Material",m);
+    add( "OutPixIncSec2PP0Material",m);
+    add( "OutPixIncSec3PP0Material",m);
+    add( "OutPixIncSec4PP0Material",m);
+  }
+
+  // Services and Cooling
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 0, 70, 0);
+    m->shininess.setValue(0.67);
+    // inner pixel system
+    add( "Type1ServiceBMaterial",m);
+    add( "Type1ServiceCMaterial",m);
+    add( "Type1ServiceDMaterial",m);
+    add( "Type1ServiceSMaterial",m);
+    add( "Type1ServiceQMaterial",m);
+    add( "Type1CoolingBMaterial",m);
+    add( "Type1CoolingEMaterial",m);
+
+    // PP1
+    add( "matPixType2D",m);
+    add( "matPixType2F",m);
+    add( "matPixType2H",m);
+    add( "matPixType2I",m);
+    add( "matPixType2L",m);
+    add( "matPixReadout1",m);
+    add( "matPixReadout2",m);
+    add( "matPixType2G",m);
+    add( "matPixType2E",m);
+    add( "PP1_T2_Power_lowr",m);
+    add( "PP1_T2_Power",m);
+    add( "PP1_T2_Power_midr",m);
+    add( "PP1_T1_Inner_Cone",m);
+    add( "PP1_T1_Outer_Cone",m);
+    add( "matPP1Type1PixOuter",m);
+    add( "matPP1OuterConnectors",m);
+    add( "PP1_T1_Inner",m);
+    add( "PP1_T1_Outer",m);
+    add( "matPP1Type1PixInner",m);
+    add( "PP1_T1_powerconnector_Al",m);
+    add( "matPP1InnerConnectors",m);
+    add( "PP1_T2_Power_highr",m);
+    add( "PP1_T2_cooling_quadrant",m);
+    add( "pixSvc_PP1_T2_R347_R420_CoolingInner",m);
+    add( "MatB_PP1",m);
+    add( "MatEC_PP1",m);
+
+  }
+
+  // other PP1
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 76, 76, 204);
+    m->shininess.setValue(0.67);
+    // inner pixel system
+    add( "HeatExchanger",m);
+    add( "Pix_PP1OuterServices",m);
+    add( "PP1_T1_Outer_Cyl",m);
+    add( "PP1_T1_Inner_Cyl",m);
+    add( "matPixCoolingSum",m);
+    add( "AlAnticorodal",m);
+    add( "matHeatExchanger",m);
+    add( "PP1_T1_cooling_Steel",m);
+    add( "matPixCoolingInner",m);
+    add( "matPixCoolingOuter",m);
+
+  }
+
+  // ITk Strip detector
+  {
+    // Aluminium
+    SoMaterial *m = new SoMaterial;
+    m->ambientColor.setValue (0.70, 0.72, 0.72);
+    m->diffuseColor.setValue (0.56, 0.57, 0.57);
+    m->specularColor.setValue(0.71, 0.48, 0.46);
+    m->shininess.setValue(0.23);
+    add("AlMetal",m);
+  }
+
+  {
+    // Silicon
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 46, 87, 11);
+    m->shininess.setValue(0.67);
+    add( "SiMetal", m);
+  }
+
+  {
+    // Titanium
+    SoMaterial *m = new SoMaterial;
+    m->diffuseColor.setValue (0.62, 0.62, 0.62);
+    m->specularColor.setValue (0.294, 0.294, 0.294);
+    m->shininess.setValue(.20);
+    add("TiMetal",m);
+    add("Ti6Al4V",m);
+  }
+
+  {
+    // Copper
+    SoMaterial *m = new SoMaterial;
+    m->diffuseColor.setValue (0.36, 0.43, 1.0);
+    m->specularColor.setValue (1.0, 1.0, 1.0);
+    m->shininess.setValue(.40);
+    add("CuMetal",m);
+  }
+
+  // a lot of flanges and mounting structures
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 150, 0, 0);
+    m->shininess.setValue(0.67);
+    m->transparency.setValue(0.5);
+    add( "CFRP",m);
+    add( "matSVatBulkhead",m);
+    add( "Honeycomb2pcf",m);
+    add( "Honeycomb3pcf",m);
+    add( "Honeycomb10pcf",m);
+    add( "CFRP174",m);
+    add( "CFRP179",m);
+    add( "matStiffDiscAve",m);
+    add( "SS304",m);
+    add( "K13C2U",m);
+    add( "k9Allcomp",m);
+    add( "Peek",m);
+    add( "K13D2U",m);
+    add( "CFoam",m);
+  }
+
+  // polymoderator
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 204, 178, 153);
+    m->shininess.setValue(0.67);
+    add( "SWX-201HD1Z",m);
+    add( "BoratedPolyethylene",m);
+  }
+
+  {
+    // Tungsten
+    SoMaterial *m = new SoMaterial;
+    m->diffuseColor.setValue (0.14, 0.14, 0.14);
+    m->specularColor.setValue(0.84, 0.94, 1.00);
+    m->shininess.setValue(0.20);
+    add( "matDCDC_PCB",m);
+    add( "matDCDC_Box",m);
+  }
+
+  {
+    SoMaterial *m = new SoMaterial;
+    m->diffuseColor.setValue (1, 1, 0.78);
+    add( "SE4445",m);
+    add( "GraphiteLoadedEpoxy",m);
+  }
+
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 0, 70, 0);
+    m->shininess.setValue(0.67);
+    add( "matEOS",m);
+    add( "Torlon",m);
+    add( "TorlonForCloseoutFar",m);
+    add( "TorlonForCloseoutNear",m);
+    add( "T300CF",m);
+  }
+
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 186, 122, 29);
+    m->shininess.setValue(0.67);
+    add( "matB_HybridPCB",m);
+    add( "matEC_HybridPCB",m);
+    add( "matEC_HybridR0H0",m);
+    add( "matEC_HybridR0H1",m);
+    add( "matEC_HybridR1H0",m);
+    add( "matEC_HybridR1H1",m);
+    add( "matEC_HybridR2H0",m);
+    add( "matEC_HybridR3H0",m);
+    add( "matEC_HybridR3H1",m);
+    add( "matEC_HybridR3H2",m);
+    add( "matEC_HybridR3H3",m);
+    add( "matEC_HybridR4H0",m);
+    add( "matEC_HybridR4H1",m);
+    add( "matEC_HybridR5H0",m);
+    add( "matEC_HybridR5H1",m);
+    add( "matPetalBusKapton",m);
+  }
+
+  {
+    // C02:
+    SoMaterial *m = new SoMaterial;
+    m->ambientColor.setValue(0.2, 0.2, 0.2);
+    m->diffuseColor.setValue(0.58, 0.47, 0.81);
+    m->specularColor.setValue(0.56, 0.55, 0.56);
+    add("CO2Liquid",m);
+  }
+
+  {
+    // C02:
+    SoMaterial *m = new SoMaterial;
+    m->ambientColor.setValue(0.2, 0.2, 0.2);
+    m->diffuseColor.setValue(0.58, 0.47, 0.81);
+    m->specularColor.setValue(0.56, 0.55, 0.56);
+    add("CO2Liquid",m);
+  }
 
 //////////////
   init();
@@ -1220,7 +1439,279 @@ VolVisAttributes::VolVisAttributes() {
     add( "Rpclayer",m);
   }
 
-  
+  // Adding ITk colors
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 46, 87, 11);
+    m->shininess.setValue(0.67);
+    // innermost pixel barrel layer
+    add( "InnerBarrelSingleMod_Sensor",m);
+    add( "InnerBarrelSingleMod_DeadVolume",m);
+    // next-to-innermost pixel barrel layer
+    add( "InnerBarrelQuadMod_Sensor",m);
+    // innermost pixel endcap layer
+    add( "InnerRingSingleMod_Sensor",m);
+    // next-to-innermost pixel endcap layer
+    add( "InnerEndcapQuadMod_Sensor",m);
+    // outer pixel barrel layers
+    add( "OuterBarrelQuadMod_Sensor",m);
+    add( "InclinedQuadMod_Sensor",m);
+    // outer pixel endcap layers
+    add( "OuterEndcapQuadMod_Sensor",m);
+  }
+
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 140, 143, 143);
+    m->shininess.setValue(0.67);
+    // innermost pixel barrel layer
+    add( "InnerBarrelSingleMod_Chip",m);
+    add( "InnerBarrelSingleMod_Bonding",m);
+    // innermost pixel endcap layer
+    add( "InnerRingSingleMod_Chip",m);
+    add( "InnerRingSingleMod_Bonding",m);
+    // next-to-innermost pixel layers
+    add( "InnerQuadMod_Chip",m);
+    add( "InnerQuadMod_Bonding",m);
+    // outer pixel layers
+    add( "OuterQuadMod_Chip",m);
+    add( "OuterQuadMod_Bonding",m);
+  }
+
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 186, 122, 29);
+    m->shininess.setValue(0.67);
+    // innermost pixel barrel layer
+    add( "InnerBarrelSingleMod_Pigtail",m);
+    // next-to-innermost pixel layers
+    add( "InnerQuadMod_QuadPigtail",m);
+    add( "InnerQuadMod_QuadFlex",m);
+    // outer pixel layers
+    add( "OuterQuadMod_QuadFlex",m);
+  }
+
+  // Services and cooling
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 0, 70, 0);
+    m->shininess.setValue(0.67);
+    // inner pixel system
+    add( "InnerPixelBarrel_T0",m);
+    add( "InnerPixEndcap_L0T0Back_ring",m);
+    add( "InnerPixEndcap_L1T0Front_ring",m);
+    add( "InnerPixEndcap_L1T0Back_ring",m);
+    add( "InnerPixEndcap_L2T0Front_ring",m);
+    add( "InnerPixEndcap_L2T0Back_ring",m);
+    // outer pixel system
+    add( "L2HalfRingEndCapBusTapeRing",m);
+    add( "L3HalfRingEndCapBusTapeRing",m);
+    add( "L4endcapBusTape",m);
+
+    //
+    unsigned int sectors = 9;
+    std::vector<unsigned int> layers = {2, 3, 4};
+    for (auto& layer : layers) {
+      for (unsigned int sector = 0; sector<sectors; sector++) {
+        std::string volumeName = "Pixel__ModuleSvcM" + std::to_string(sectors-sector) + "_L" + std::to_string(layer) + "_S" + std::to_string(sector);
+        std::cout << volumeName << std::endl;
+        add( volumeName,m);
+      }
+    }
+    add( "PixelSvcBrlT1_L2",m);
+    add( "PixelSvcBrlT1_L3",m);
+    add( "PixelSvcBrlT1_L4in",m);
+    add( "PixelSvcBrlT1_L4out",m);
+    for (unsigned int sector = 0; sector<sectors; sector++) {
+      std::string volumeName = "PixelSvcBrlT1_Radial" + std::to_string(sectors-sector);
+      add( volumeName,m);
+    }
+
+    add( "svcEcT1_r199_z103",m);
+    add( "svcEcT1_r199_z116",m);
+    add( "svcEcT1_r199_z127",m);
+    add( "svcEcT1_r199_z141",m);
+    add( "svcEcT1_r199_z1366",m);
+    add( "svcEcT1_r198_z172",m);
+    add( "svcEcT1_r198_z190",m);
+    add( "svcEcT1_r198_z210",m);
+    add( "svcEcT1_r198_z232",m);
+    add( "svcEcT1_r198_z257",m);
+    add( "svcEcT1_r198_z149",m);
+
+    add( "svcEcT1_r259_z151",m);
+    add( "svcEcT1_r259_z176",m);
+    add( "svcEcT1_r259_z203",m);
+    add( "svcEcT1_r259_z234",m);
+    add( "svcEcT1_r259_z270",m);
+    add( "svcEcT1_r259_z311",m);
+    add( "svcEcT1_r259_z359",m);
+    add( "svcEcT1_r259_z149",m);
+
+    add( "svcEcT1_r319_z131",m);
+    add( "svcEcT1_r319_z150",m);
+    add( "svcEcT1_r319_z170",m);
+    add( "svcEcT1_r319_z192",m);
+    add( "svcEcT1_r319_z218",m);
+    add( "svcEcT1_r319_z246",m);
+    add( "svcEcT1_r319_z746",m);
+    add( "svcEcT1_r318_z317",m);
+    add( "svcEcT1_r318_z149",m);
+
+    add( "SvcEcT0TwdBS_r156_199_z.5",m);
+    add( "SvcEcT0TwdBS_r156_198_z.5",m);
+    add( "SvcEcT0TwdBS_r199_199_z.5",m);
+    add( "SvcEcT0TwdBS_r216_259_z.5",m);
+    add( "SvcEcT0TwdBS_r276_319_z.5",m);
+    add( "SvcEcT0TwdBS_r276_318_z.5",m);
+    add( "SvcEcT0TwdBS_r318_319_z.5",m);
+
+    add( "SvcEc_r196.7_197.1_z78.6",m);
+    add( "SvcEc_r196.7_197.1_z97.6",m);
+    add( "SvcEc_r196.7_197.1_z121.2",m);
+    add( "SvcEc_r196.7_197.1_z150.3",m);
+    add( "SvcEc_r196.7_197.1_z186.7",m);
+    add( "SvcEc_r196.7_197.1_z23.3",m);
+    add( "SvcEc_r337.8_338.2_z1939.2",m);
+
+
+    add( "SvcEc_r264.4_264.8_z58.1",m);
+    add( "SvcEc_r264.4_264.8_z66.6",m);
+    add( "SvcEc_r264.4_264.8_z76.4",m);
+    add( "SvcEc_r264.4_264.8_z87.5",m);
+    add( "SvcEc_r264.4_264.8_z100.3",m);
+    add( "SvcEc_r264.4_264.8_z115",m);
+    add( "SvcEc_r264.4_264.8_z131.9",m);
+    add( "SvcEc_r264.4_264.8_z30.9",m);
+    add( "SvcEc_r338.8_339.2_z1937.2",m);
+
+    add( "SvcEc_r327.3_327.7_z52.7",m);
+    add( "SvcEc_r327.3_327.7_z58.8",m);
+    add( "SvcEc_r327.3_327.7_z65.6",m);
+    add( "SvcEc_r327.3_327.7_z73.1",m);
+    add( "SvcEc_r327.3_327.7_z81.7",m);
+    add( "SvcEc_r327.3_327.7_z91.1",m);
+    add( "SvcEc_r327.3_327.7_z101.6",m);
+    add( "SvcEc_r327.3_327.7_z113.4",m);
+    add( "SvcEc_r327.3_327.7_z34.7",m);
+    add( "SvcEc_r339.8_340.2_z1935.2",m);
+
+    add( "SvcEc_r197.1_202.8_z.4",m);
+    add( "SvcEc_r203.2_263.4_z.4",m);
+    add( "SvcEc_r264.8_270.8_z.4",m);
+    add( "SvcEc_r271.2_326.3_z.4",m);
+    add( "SvcEc_r326.7_327.3_z.4",m);
+    add( "SvcEc_r327.7_333.8_z.4",m);
+    add( "SvcEc_r334.2_337.3_z.4",m);
+    add( "SvcEc_r337.7_337.8_z.4",m);
+    add( "SvcEc_r338.2_338.3_z.4",m);
+    add( "SvcEc_r338.7_338.8_z.4",m);
+    add( "SvcEc_r339.2_339.3_z.4",m);
+    add( "SvcEc_r339.7_339.8_z.4",m);
+
+    // ITk Strip
+    add ("SV_Barrel01",m);
+    add ("SV_Barrel12",m);
+    add ("SV_Barrel23",m);
+    add ("SV_Barrel3Out",m);
+    add ("SV_BarrelPastEndcap",m);
+    add ("SV_Endcap01",m);
+    add ("SV_Endcap12",m);
+    add ("SV_Endcap23",m);
+    add ("SV_Endcap34",m);
+    add ("SV_Endcap45",m);
+    add ("SV_Endcap5Out",m);
+
+  }
+
+  // Cooling
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 170, 255, 255);
+    m->shininess.setValue(0.67);
+    // inner pixel system
+    add( "InnerPixelBarrelCoolingL0",m);
+    add( "InnerPixelBarrelCoolingL1",m);
+    // outer pixel system
+    add( "OuterQuadMod_Cell",m);
+    add( "LongeronCoolingTube",m);
+    add( "L2HalfRingCoolingPipe",m);
+    add( "L3HalfRingCoolingPipe",m);
+    add( "L4endcapcoolingpipe",m);
+  }
+
+  // Support structures
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 150, 0, 0);
+    m->shininess.setValue(0.67);
+    m->transparency.setValue(0.5);
+    // inner pixel system
+    add( "IPTvol",m);
+    add( "ISTvol",m);
+    add( "InnerPixBarrelSupport_Stave",m);
+    add( "InnerPixBarrelSupport_Stave1",m);
+    add( "InnerPixBarrelSupport_Global",m);
+    add( "InnerPixEndcap_CoupledRingSupport",m);
+    add( "InnerPixEndcap_IntermediateRingSupport",m);
+    add( "InnerPixEndcap_L1RingSupport",m);
+    add( "QuarterShell",m);
+    // outer pixel system
+    add( "InclL2HalfShell",m);
+    add( "InclL2Support",m);
+    add( "InclL3HalfShell",m);
+    add( "InclL3Support",m);
+    add( "InclL4HalfShell",m);
+    add( "InclL4Support",m);
+    add( "LongeronCornerBase",m);
+    add( "LongeronCornerEnd",m);
+    add( "LongeronTrussWall",m);
+    add( "LongeronCapBase",m);
+    add( "LongeronTopCap",m);
+    add( "L2HalfRingCarbonFoamInner",m);
+    add( "L2HalfRingCarbonFoamOuter",m);
+    add( "L2HalfRingFaceSheet",m);
+    add( "L3HalfRingCarbonFoamInner",m);
+    add( "L3HalfRingCarbonFoamOuter",m);
+    add( "L3HalfRingFaceSheet",m);
+    add( "L4endcapinnerCarbonFoam",m);
+    add( "L4endcapouterCarbonFoam",m);
+    add( "L4endcapFaceSheet",m);
+    add( "L2HalfShell",m);
+    add( "L3HalfShell",m);
+    add( "L4HalfShell",m);
+  }
+
+  // Other support structures
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 204, 178, 153);
+    m->shininess.setValue(0.67);
+
+    add( "L2HalfRingEndCapFixingLug",m);
+    add( "L3HalfRingEndCapFixingLug",m);
+    add( "HalfRingEndCapFixingLug",m);
+
+    add( "FrontSupportFacing",m);
+    add( "FrontSupportCore",m);
+    add( "RearSupport",m);
+
+
+  }
+
+  // volumes that don't need colors as they are made of air
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 204, 178, 153);
+    m->transparency.setValue(1.0);
+
+    add( "StaveCchannelAirEOS",m);
+    add( "StaveCchannelAirLong",m);
+    add( "StaveCchannelAirLongEOS",m);
+    add( "PetalCloseoutShortSpace",m);
+    add( "PetalCloseoutLongSpace",m);
+
+  }
   
   init();
 }
