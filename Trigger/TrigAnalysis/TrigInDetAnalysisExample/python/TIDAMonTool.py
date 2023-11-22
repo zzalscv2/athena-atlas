@@ -111,6 +111,9 @@ def createMonTool( flags, slicetag, chain ) :
 
     
     defineHisto( monTool,  "Chain",    weight="Chain_weight",   path=mypath, type="TH1F", title=chain,  xlabels=binlabels,  xbins=5, xmin=0, xmax=5 )
+
+
+    defineHisto( monTool,  "roi_eta",      path=mypath, type="TH1F", title="Roi eta",  xbins=25, xmin=-2.5, xmax=2.5 )
     
     defineHisto( monTool,  "reftrk_N",     path=mypath, type="TH1F", title="Reference tracks", xbins=vnbins )
     

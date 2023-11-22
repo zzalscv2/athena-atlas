@@ -58,6 +58,8 @@ void AnalysisR3_Tier0::initialise_R3() {
 
   m_hchain = new TIDA::Histogram<float>( monTool(),  "Chain" );
 
+  m_hroieta = new TIDA::Histogram<float>( monTool(),  "roi_eta" );
+
   /// Limit the bins - to only the first 77 bins - so a range up to ~ 1000
   /// leave the previous selection commented for the time being
 
@@ -266,11 +268,13 @@ void AnalysisR3_Tier0::initialise_R3() {
 
 extern TIDARoiDescriptor* agroi;
 
+
 void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
 			       const std::vector<TIDA::Track*>& testTracks,
 			       TrackAssociator* associator, 
 			       const TIDA::Event* tevt, 
-			       double* beamline ) 
+			       double* beamline, 
+			       TIDARoiDescriptor* roi) 
 { 
   
   /// Loop over reference tracks
@@ -281,7 +285,7 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
   /// the number of passed RoIs for this chain 
   m_hchain->Fill( 0.5, 1 );
 
-  
+  if ( roi!=nullptr ) m_hroieta->Fill( roi->eta(), 1 );
 
   //  if ( m_eventid != event()->event_number() ) { 
   if ( m_eventid != tevt->event_number() ) { 

@@ -1067,7 +1067,7 @@ protected:
 	  /// we can do without this functionality, so leave the code in place until we either 
 	  /// fix it properly in the future, or determine that it is not needed 
 	  //	  m_manalysis->setroi( &rois.at(iroi)->roi() );  
-	  m_manalysis->execute( ref_tracks, test_tracks, associator, eventp, beamline );
+	  m_manalysis->execute( ref_tracks, test_tracks, associator, eventp, beamline, &(rois.at(iroi)->roi()) );
 
 	  if ( vtx_name!="" ) { 
 	    /// get vertices for this roi - have to copy to a vector<Vertex*>
