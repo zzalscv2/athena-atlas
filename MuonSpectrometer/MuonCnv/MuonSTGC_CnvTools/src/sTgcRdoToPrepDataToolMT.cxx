@@ -176,8 +176,10 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
                                                                     });
             if (it == sTgcPrds.end()) {
                 sTgcPrds.emplace_back(rdoId, hash, std::move(localPos), std::move(rdoList), std::move(cov), detEl, calibratedCharge, calibStrip.time, bcTag);
+                sTgcPrds.back().setAuthor(sTgcPrepData::Author::RdoToPrdConverter);
             } else if (it->time() > calibStrip.time) {
                 *it = sTgcPrepData(rdoId, hash, std::move(localPos), std::move(rdoList), std::move(cov), detEl, calibratedCharge, calibStrip.time, bcTag);
+                it->setAuthor(sTgcPrepData::Author::RdoToPrdConverter);
             }
         } else {
             // if not merging just add the PRD to the collection

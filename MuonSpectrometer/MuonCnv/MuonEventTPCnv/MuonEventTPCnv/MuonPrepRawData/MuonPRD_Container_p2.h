@@ -14,8 +14,10 @@
 #include "MuonEventTPCnv/MuonPrepRawData/TgcPrepData_p2.h"
 #include "MuonEventTPCnv/MuonPrepRawData/TgcPrepData_p3.h"
 #include "MuonEventTPCnv/MuonPrepRawData/MMPrepData_p1.h"
+#include "MuonEventTPCnv/MuonPrepRawData/MMPrepData_p2.h"
 #include "MuonEventTPCnv/MuonPrepRawData/sTgcPrepData_p1.h"
 #include "MuonEventTPCnv/MuonPrepRawData/sTgcPrepData_p2.h"
+#include "MuonEventTPCnv/MuonPrepRawData/sTgcPrepData_p3.h"
 
 namespace Muon {
 /** Class to contain the Muon Prep Raw Data. */
@@ -37,8 +39,10 @@ typedef MuonPRD_Container_p2<RpcPrepData_p3> RpcPrepDataContainer_p3;
 typedef MuonPRD_Container_p2<TgcPrepData_p2> TgcPrepDataContainer_p2;
 typedef MuonPRD_Container_p2<TgcPrepData_p3> TgcPrepDataContainer_p3;
 typedef MuonPRD_Container_p2<MMPrepData_p1>  MMPrepDataContainer_p1;
+typedef MuonPRD_Container_p2<MMPrepData_p2>  MMPrepDataContainer_p2;
 typedef MuonPRD_Container_p2<sTgcPrepData_p1>  sTgcPrepDataContainer_p1;
 typedef MuonPRD_Container_p2<sTgcPrepData_p2>  sTgcPrepDataContainer_p2;
+typedef MuonPRD_Container_p2<sTgcPrepData_p3>  sTgcPrepDataContainer_p3;
 } 
 
 #endif

@@ -10,11 +10,12 @@
 #include "MuonPrepRawData/MMPrepDataCollection.h"
 #include "MuonPrepRawData/MMPrepDataContainer.h"
 #include "MuonEventTPCnv/MuonPrepRawData/MMPrepDataContainerCnv_p1.h"
+#include "MuonEventTPCnv/MuonPrepRawData/MMPrepDataContainerCnv_p2.h"
 
 
 // the latest persistent representation type of DataCollection:
 // COMPRESS typedef  Muon::MMPrepDataContainer_p2  MMPrepDataContainer_PERS;
-typedef  Muon::MMPrepDataContainer_p1  MMPrepDataContainer_PERS;
+typedef  Muon::MMPrepDataContainer_p2  MMPrepDataContainer_PERS;
 typedef  T_AthenaPoolCustomCnv<Muon::MMPrepDataContainer, MMPrepDataContainer_PERS >  MMPrepDataContainerCnvBase;
 
 /**
@@ -38,6 +39,7 @@ public:
         
 private:
     Muon::MMPrepDataContainerCnv_p1    m_converter_p1;
+    Muon::MMPrepDataContainerCnv_p2    m_converter_p2;
 };
 
 #endif

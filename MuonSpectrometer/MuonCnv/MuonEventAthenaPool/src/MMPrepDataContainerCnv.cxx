@@ -32,7 +32,7 @@ StatusCode MMPrepDataContainerCnv::initialize() {
 MMPrepDataContainer_PERS*    MMPrepDataContainerCnv::createPersistent (Muon::MMPrepDataContainer* transCont) {
     MsgStream log(msgSvc(), "MMPrepDataContainerCnv" );
     if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createPersistent(): main converter"<<endmsg;
-    MMPrepDataContainer_PERS *pers= m_converter_p1.createPersistent( transCont, log );
+    MMPrepDataContainer_PERS *pers= m_converter_p2.createPersistent( transCont, log );
     // COMPRESS MMPrepDataContainer_PERS *pers= m_converter_p1.createPersistent( transCont, log );
     return pers;
 }
@@ -40,13 +40,19 @@ MMPrepDataContainer_PERS*    MMPrepDataContainerCnv::createPersistent (Muon::MMP
 Muon::MMPrepDataContainer* MMPrepDataContainerCnv::createTransient() {
     MsgStream log(msgSvc(), "MMPrepDataContainerCnv" );
     static const pool::Guid   p1_guid("5E5C97E2-8D7C-11E2-9FCB-001517648C14"); 
+    static const pool::Guid   p2_guid("86B42223-304D-4AFA-8E94-A49B23AC8865"); 
     if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): main converter"<<endmsg;
     Muon::MMPrepDataContainer* p_collection(nullptr);
     if( compareClassGuid(p1_guid) ) {
-        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): T/P version 2 detected"<<endmsg;
+        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): T/P version 1 detected"<<endmsg;
         std::unique_ptr< Muon::MMPrepDataContainer_p1 >  p_coll( poolReadObject< Muon::MMPrepDataContainer_p1 >() );
         p_collection = m_converter_p1.createTransient( p_coll.get(), log );
-    } else {
+    } else if(compareClassGuid(p2_guid)) {
+        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): T/P version 2 detected"<<endmsg;
+        std::unique_ptr< Muon::MMPrepDataContainer_p2 >  p_coll( poolReadObject< Muon::MMPrepDataContainer_p2 >() );
+        p_collection = m_converter_p2.createTransient( p_coll.get(), log );
+
+    }else {
         throw std::runtime_error("Unsupported persistent version of MMPrepDataContainer.");
  
     }
