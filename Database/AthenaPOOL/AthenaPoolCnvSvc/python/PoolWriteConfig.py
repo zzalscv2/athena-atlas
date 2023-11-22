@@ -149,7 +149,7 @@ def PoolWriteCfg(flags):
         requestedEvents = flags.Exec.MaxEvents
         availableEvents = flags.Input.FileNentries - flags.Exec.SkipEvents
         totalEntries = availableEvents if requestedEvents == -1 else min( availableEvents, requestedEvents )
-        if ( totalEntries > 0 ) and ( maxAutoFlush > 0 ) and ( maxAutoFlush * flags.Concurrency.NumProcs >= totalEntries ):
+        if ( totalEntries > 0 ) and ( maxAutoFlush > 0 ) and ( maxAutoFlush * flags.Concurrency.NumProcs > totalEntries ):
             logger.info( "Not enough events to process, disabling parallel compression for SharedWriter!" )
             logger.info( f"Processing {totalEntries} events in {flags.Concurrency.NumProcs} workers "
                          f"and a maximum (across all outputs) AutoFlush of {maxAutoFlush}")
