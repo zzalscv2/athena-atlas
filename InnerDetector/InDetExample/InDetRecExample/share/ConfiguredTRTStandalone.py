@@ -113,7 +113,6 @@ class ConfiguredTRTStandalone:
                                                                         MinNumDriftCircles    = NewTrackingCuts.minTRTonly(),
                                                                         MinPt                 = NewTrackingCuts.minTRTonlyPt(),
                                                                         InputSegmentsLocation = BarrelSegments,
-                                                                        MaterialEffects       = 0,
                                                                         PRDtoTrackMap         = prd_to_track_map,
                                                                         OldTransitionLogic    = NewTrackingCuts.useTRTonlyOldLogic(),
                                                                         OutputTracksLocation  = self.__TRTStandaloneTracks,

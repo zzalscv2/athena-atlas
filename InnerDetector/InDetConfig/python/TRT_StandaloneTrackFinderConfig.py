@@ -9,7 +9,6 @@ def TRT_StandaloneTrackFinderCfg(flags, name ='InDetTRT_StandaloneTrackFinder', 
     kwargs.setdefault("MinNumDriftCircles",
                       flags.Tracking.ActiveConfig.minTRTonly)
     kwargs.setdefault("MinPt", flags.Tracking.ActiveConfig.minTRTonlyPt)
-    kwargs.setdefault("MaterialEffects", 0)
     kwargs.setdefault("OldTransitionLogic",
                       flags.Tracking.ActiveConfig.useTRTonlyOldLogic)
     kwargs.setdefault("OutputTracksLocation", "TRTStandaloneTracks")
