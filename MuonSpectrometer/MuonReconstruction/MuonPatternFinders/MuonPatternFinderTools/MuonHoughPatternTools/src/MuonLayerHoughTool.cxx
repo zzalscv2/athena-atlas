@@ -1823,19 +1823,34 @@ namespace Muon {
                                          << MuonStationIndex::regionName(region) << " " << MuonStationIndex::layerName(layer) << " -> hits "
                                          << mms.size());
 
+        std::array<double,8> multiplicity{};
+        for (const MMPrepData* prd : mms) {
+            const Identifier id = prd->identify();
+            int sublayer = sublay(id) % 10;
+            multiplicity[sublayer]++;
+        }
+
+        if( msgLvl(MSG::DEBUG) ){
+            for (int i = 0; i<8 ; i++) if(multiplicity[i]>0) ATH_MSG_DEBUG(" sublayer " << i << " hits " <<  multiplicity[i]);
+        }
+
         for (const MMPrepData* prd : mms) {
             const Identifier id = prd->identify();
             float x = prd->globalPosition().z();
             float y = rCor(*prd);
-            int sublayer = sublay(id);
+            int sublayer = sublay(id) % 10;
             float stripCor = prd->detectorElement()->getDesign(id)->inputPitch;
             float ymin = y - stripCor;
             float ymax = y + stripCor;
+
+            //Downweight noise channels
+            const double weight = 1. / std::max(1., multiplicity[sublayer]);
+
             MuonHough::HitDebugInfo* debug = new MuonHough::HitDebugInfo(technology, sector, region, layer, sublayer);
             debug->r = stripCor;
             std::map<unsigned int, unsigned int>::const_iterator pos = m_techToTruthNameIdx.find(technology);
             if (pos != m_techToTruthNameIdx.end()) { matchTruth(truthHits, *truthCollections[pos->second], id, *debug); }
-            std::unique_ptr<MuonHough::Hit> hit = std::make_unique<MuonHough::Hit>(sublayer, x, ymin, ymax, 1., debug, prd);
+            std::unique_ptr<MuonHough::Hit> hit = std::make_unique<MuonHough::Hit>(sublayer, x, ymin, ymax, weight, debug, prd);
             hits.emplace_back(std::move(hit));
         }
     }
