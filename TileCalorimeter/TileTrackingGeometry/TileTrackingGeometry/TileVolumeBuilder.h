@@ -13,6 +13,10 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
+// GeoModel
+#include "GeoPrimitives/GeoPrimitives.h"
+//
+#include "GeoModelKernel/GeoVPhysVol.h"
 // Trk
 #include "CaloTrackingGeometry/ICaloSurfaceBuilder.h"
 #include "TrkDetDescrInterfaces/ICaloTrackingVolumeBuilder.h"
@@ -26,7 +30,6 @@ class TileDetDescrManager;
 class CaloDetDescrManager;
 class CaloDepthTool;
 class StoreGateSvc;
-class GeoPVConstLink;
 
 namespace Trk {
 class ILayerArrayCreator;

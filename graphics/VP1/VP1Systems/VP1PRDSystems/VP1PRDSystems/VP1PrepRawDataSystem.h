@@ -5,8 +5,12 @@
 #ifndef VP1PREPRAWDATASYSTEM_H
 #define VP1PREPRAWDATASYSTEM_H
 
+// GeoModel
+#include "GeoPrimitives/GeoPrimitives.h"
+//
+#include "GeoModelKernel/GeoVPhysVol.h"
+
 #include "VP1Base/IVP13DSystemSimple.h"
-#include "GeoModelKernel/GeoPVConstLink.h"//It would be good to get rid of this.
 #include "VP1Utils/InDetProjFlags.h"
 #include <vector>
 #include <QList>

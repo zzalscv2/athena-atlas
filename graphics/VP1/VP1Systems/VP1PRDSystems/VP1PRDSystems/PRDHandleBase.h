@@ -9,10 +9,10 @@
 
 #include "VP1PRDSystems/PRDSysCommonData.h"
 
-#include "GeoModelKernel/GeoPVConstLink.h"
-
-//#include "CLHEP/Geometry/Transform3D.h"
+// GeoModel
 #include "GeoPrimitives/GeoPrimitives.h"
+//
+#include "GeoModelKernel/GeoVPhysVol.h"
 
 #include <QFlags>
 #include <QStringList>

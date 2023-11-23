@@ -7,11 +7,12 @@
 
 #ifndef BUILDVP1LIGHT
 
+#include "GeoPrimitives/GeoPrimitives.h"
+#include "GeoModelKernel/GeoVDetectorManager.h"
 #include "GeoModelInterfaces/IGeoModelTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CxxUtils/checker_macros.h"
 
-class GeoVDetectorManager;
 
 class GeoModelTool : public extends<AthAlgTool, IGeoModelTool> {
 

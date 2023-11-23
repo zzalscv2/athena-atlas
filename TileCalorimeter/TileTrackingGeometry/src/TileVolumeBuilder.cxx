@@ -24,7 +24,6 @@
 #include "GeoModelKernel/GeoPcon.h"
 #include "GeoModelKernel/GeoTrd.h"
 #include "GeoModelKernel/GeoMaterial.h"
-#include "GeoModelKernel/GeoPVConstLink.h"
 #include "GeoModelKernel/GeoVPhysVol.h"
 #include "GeoModelKernel/GeoVolumeCursor.h"
 #include "GeoModelKernel/Units.h"

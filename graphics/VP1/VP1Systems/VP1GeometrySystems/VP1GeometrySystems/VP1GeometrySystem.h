@@ -17,8 +17,12 @@
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 
+// GeoModel
+#include "GeoPrimitives/GeoPrimitives.h"
+//
+#include "GeoModelKernel/GeoVPhysVol.h"
+
 #include "VP1Base/IVP13DSystemSimple.h"
-#include "GeoModelKernel/GeoPVConstLink.h"//It would be good to get rid of this.
 #include "VP1GeometrySystems/VP1GeoFlags.h"
 #include "VP1GeometrySystems/VolumeHandle.h"//fixme
 #include <set>

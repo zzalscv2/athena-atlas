@@ -8,7 +8,6 @@
 //This reference counted class keeps data (and related methods) which are common
 //for all volume handle nodes under a given top-level handle.
 
-#include "GeoModelKernel/GeoPVConstLink.h"
 #include "VP1GeometrySystems/VP1GeoFlags.h"
 #include <map>
 class SoNode;

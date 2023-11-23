@@ -20,10 +20,11 @@
 #include "VP1TrackSystems/TrackCommonFlags.h"
 
 #include "TrkEventPrimitives/ParticleHypothesis.h"
-#include "GeoModelKernel/GeoPVConstLink.h"
 
-//#include "CLHEP/Geometry/Point3D.h"
+// GeoModel
 #include "GeoPrimitives/GeoPrimitives.h"
+//
+#include "GeoModelKernel/GeoVPhysVol.h"
 
 #include <QStringList>
 #include <QTreeWidgetItem>

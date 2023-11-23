@@ -19,6 +19,11 @@
 #include <QObject>
 #include <QByteArray>
 
+// GeoModel
+#include "GeoPrimitives/GeoPrimitives.h"
+//
+#include "GeoModelKernel/GeoVPhysVol.h"
+
 #ifdef BUILDVP1LIGHT
   #include "xAODBase/IParticle.h"
 #endif // BUILDVP1LIGHT

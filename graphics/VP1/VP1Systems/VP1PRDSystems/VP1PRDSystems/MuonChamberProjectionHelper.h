@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -18,13 +18,12 @@
 #define MUONCHAMBERPROJECTIONHELPER_H
 
 #include "VP1Base/VP1HelperClassBase.h"
-#include "GeoModelKernel/GeoPVConstLink.h"
 
-//#include "CLHEP/Geometry/Point3D.h"
-//#include "CLHEP/Vector/ThreeVector.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
+//
+#include "GeoModelKernel/GeoVPhysVol.h"
 
 
 class StoreGateSvc;

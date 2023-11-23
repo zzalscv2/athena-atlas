@@ -22,7 +22,6 @@
 #include "GeoModelKernel/GeoPcon.h"
 #include "GeoModelKernel/GeoTrd.h"
 #include "GeoModelKernel/GeoMaterial.h"
-#include "GeoModelKernel/GeoPVConstLink.h"
 #include "GeoModelUtilities/StoredPhysVol.h"
 #include "GeoModelUtilities/GeoVisitVolumes.h"
 // Trk
