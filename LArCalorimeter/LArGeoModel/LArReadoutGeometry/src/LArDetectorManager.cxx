@@ -1,18 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArReadoutGeometry/LArDetectorManager.h"
 #include <algorithm>
-
-LArDetectorManager::LArDetectorManager()
-  : m_embManager (nullptr),
-    m_emecManager (nullptr),
-    m_hecManager (nullptr),
-    m_fcalManager (nullptr),
-    m_isTestBeam(false)
-{
-}
 
 LArDetectorManager::LArDetectorManager (const EMBDetectorManager* emb
 					, const EMECDetectorManager* emec
