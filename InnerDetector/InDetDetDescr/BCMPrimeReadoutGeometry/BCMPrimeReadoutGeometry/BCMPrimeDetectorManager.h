@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BCMPRIMEREADOUTGEOMETRY_BCMPRIMEDETECTORMANAGER_H
@@ -32,17 +32,17 @@ namespace InDetDD {
     public:
 
         /** Constructor */
-        BCMPrimeDetectorManager(StoreGateSvc* detStore, const std::string & name);
+        BCMPrimeDetectorManager(const std::string & name);
 
         /** Destructor */
         ~BCMPrimeDetectorManager();
 
         /** Access to raw geometry: */
-        virtual unsigned int getNumTreeTops()           const;
-        virtual PVConstLink  getTreeTop(unsigned int i) const;
+        virtual unsigned int getNumTreeTops()           const override;
+        virtual PVConstLink  getTreeTop(unsigned int i) const override;
 
         /** Add a Tree top: */
-        virtual void addTreeTop (PVLink treeTop);
+        void addTreeTop (PVLink treeTop);
 
         void addAlignableTransform (int /*id*/, GeoAlignableTransform * /*transform*/, const GeoVPhysVol * /*child*/);
         StatusCode align( IOVSVC_CALLBACK_ARGS ) const;
@@ -55,9 +55,6 @@ namespace InDetDD {
 
         /** Private member data */
         std::vector<PVLink>              m_volume;
-
-        /** Detector store */
-        StoreGateSvc * m_detStore;
     };
 
 } // namespace InDetDD

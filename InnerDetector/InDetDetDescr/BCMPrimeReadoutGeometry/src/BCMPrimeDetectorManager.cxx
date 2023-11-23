@@ -1,15 +1,13 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BCMPrimeReadoutGeometry/BCMPrimeDetectorManager.h"
 
-#include "AthenaBaseComps/AthMsgStreamMacros.h"
 
 namespace InDetDD {
 
-    BCMPrimeDetectorManager::BCMPrimeDetectorManager(StoreGateSvc* detStore, const std::string & name)
-                        : m_detStore(detStore)
+    BCMPrimeDetectorManager::BCMPrimeDetectorManager(const std::string & name)
     {
         setName(name);
     }
