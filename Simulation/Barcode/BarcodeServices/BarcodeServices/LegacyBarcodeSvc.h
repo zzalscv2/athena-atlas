@@ -110,7 +110,7 @@ namespace Barcode {
         < std::thread::id, BarcodeInfo, std::hash<std::thread::id> >;
     LegacyBarcodeSvcThreadMap_t m_bcThreadMap;
 
-    BarcodeInfo& getBarcodeInfo() const;
+    BarcodeInfo& getBarcodeInfo();
 
   };
 

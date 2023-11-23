@@ -71,7 +71,7 @@ StatusCode Barcode::LegacyBarcodeSvc::initializeBarcodes() {
 }
 
 //FIXME this should return an optional type, since returning the value of the end iterator is undefined behaviour (I think it causes a segfault).
-Barcode::LegacyBarcodeSvc::BarcodeInfo& Barcode::LegacyBarcodeSvc::getBarcodeInfo() const {
+Barcode::LegacyBarcodeSvc::BarcodeInfo& Barcode::LegacyBarcodeSvc::getBarcodeInfo() {
     const auto tid = std::this_thread::get_id();
     auto bcPair = m_bcThreadMap.find(tid);
     if ( bcPair == m_bcThreadMap.end() ) {
