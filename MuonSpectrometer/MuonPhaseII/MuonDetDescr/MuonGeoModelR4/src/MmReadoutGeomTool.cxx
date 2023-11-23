@@ -19,11 +19,6 @@
 
 using namespace ActsTrk;
 
-namespace {
-    constexpr double tolerance = 0.001 * Gaudi::Units::mm;
-
-}
-
 using namespace CxxUtils;
 
 namespace MuonGMR4 {
@@ -100,7 +95,7 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
       I doing this in case the gaps aren't sorted in that way within the Full Phys Vol Quadruplet.
       Also, now the stereoAngles and totalActiveStrips vectors will match the sequence of the allGasGaps vector.*/
     std::sort(allGasGaps.begin(), allGasGaps.end(),
-              [&define,&stationEta](const physVolWithTrans&gapI, const physVolWithTrans & gapJ) {
+              [&stationEta](const physVolWithTrans&gapI, const physVolWithTrans & gapJ) {
                 const Amg::Vector3D posGapI = gapI.transform.translation();
                 const Amg::Vector3D posGapJ = gapJ.transform.translation();
                 if (stationEta>0) // stationEta 1 or 2.
