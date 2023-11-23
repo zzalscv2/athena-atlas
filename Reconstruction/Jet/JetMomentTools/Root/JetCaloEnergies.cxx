@@ -28,10 +28,12 @@ bool JetCaloEnergies::isInVector(const std::string& key, const std::vector<std::
   std::vector<std::string> split;
   std::string sub_string;
   std::istringstream tokenStream(key);
+
   while (std::getline(tokenStream, sub_string, '.'))
   {
     split.push_back(sub_string);
   }
+
   // Return true if handle key in list of calculations
   return std::find(calculations.begin(), calculations.end(), split[1]) != calculations.end();
 }
@@ -51,7 +53,9 @@ StatusCode JetCaloEnergies::initialize() {
   m_em3FracKey = m_jetContainerName + "." + m_em3FracKey.key();
   m_tile0FracKey = m_jetContainerName + "." + m_tile0FracKey.key();
   m_effNClustsFracKey = m_jetContainerName + "." + m_effNClustsFracKey.key();
-  
+  m_fracSamplingMaxKey = m_jetContainerName + "." + m_fracSamplingMaxKey.key();
+  m_fracSamplingMaxIndexKey = m_jetContainerName + "." + m_fracSamplingMaxIndexKey.key();
+
   if(m_calcClusterBasedVars){
     m_ePerSamplingClusterKey = m_jetContainerName + "." + m_ePerSamplingClusterKey.key();
     m_emFracClusterKey = m_jetContainerName + "." + m_emFracClusterKey.key();
@@ -60,6 +64,8 @@ StatusCode JetCaloEnergies::initialize() {
     m_em3FracClusterKey = m_jetContainerName + "." + m_em3FracClusterKey.key();
     m_tile0FracClusterKey = m_jetContainerName + "." + m_tile0FracClusterKey.key();
     m_effNClustsFracClusterKey = m_jetContainerName + "." + m_effNClustsFracClusterKey.key();
+    m_fracSamplingMaxClusterKey = m_jetContainerName + "." + m_fracSamplingMaxClusterKey.key();
+    m_fracSamplingMaxIndexClusterKey = m_jetContainerName + "." + m_fracSamplingMaxIndexClusterKey.key();
   }
 
   // Init calo based variables if necessary
@@ -71,6 +77,12 @@ StatusCode JetCaloEnergies::initialize() {
   ATH_CHECK(m_tile0FracClusterKey.initialize( m_calcClusterBasedVars && isInVector(m_tile0FracKey.key(), m_calculationNames) ));
   ATH_CHECK(m_effNClustsFracClusterKey.initialize( m_calcClusterBasedVars && isInVector(m_effNClustsFracKey.key(), m_calculationNames) ));
   
+  if(isInVector(m_fracSamplingMaxKey.key(), m_calculationNames)) m_doFracSamplingMax = true;
+  else m_doFracSamplingMax = false;
+
+  ATH_CHECK(m_fracSamplingMaxClusterKey.initialize(m_calcClusterBasedVars && m_doFracSamplingMax));
+  ATH_CHECK(m_fracSamplingMaxIndexClusterKey.initialize(m_calcClusterBasedVars && m_doFracSamplingMax));
+
   // Init standard variables if necessary
   ATH_CHECK(m_ePerSamplingKey.initialize());
   ATH_CHECK(m_emFracKey.initialize());
@@ -79,6 +91,8 @@ StatusCode JetCaloEnergies::initialize() {
   ATH_CHECK(m_em3FracKey.initialize( isInVector(m_em3FracKey.key(), m_calculationNames) ));
   ATH_CHECK(m_tile0FracKey.initialize( isInVector(m_tile0FracKey.key(), m_calculationNames) ));
   ATH_CHECK(m_effNClustsFracKey.initialize( isInVector(m_effNClustsFracKey.key(), m_calculationNames) ));
+  ATH_CHECK(m_fracSamplingMaxKey.initialize(m_doFracSamplingMax));
+  ATH_CHECK(m_fracSamplingMaxIndexKey.initialize(m_doFracSamplingMax));
   
   return StatusCode::SUCCESS;
 }
@@ -147,6 +161,22 @@ void JetCaloEnergies::fillEperSamplingCluster(const xAOD::Jet& jet, std::vector<
       ePerSampling[s] += constit->eSample( (xAOD::CaloCluster::CaloSample) s );
     }
   }
+
+  double fracSamplingMax = -999999999.;
+  int fracSamplingMaxIndex = -1;
+  double sumE_samplings = 0.0;
+
+  if(m_doFracSamplingMax){
+    for(unsigned int i = 0; i < ePerSampling.size(); ++i){
+      double e = ePerSampling[i];
+      sumE_samplings += e;
+      if (e>fracSamplingMax){
+        fracSamplingMax=e;
+        fracSamplingMaxIndex = i;
+      }
+    }
+  }
+
   SG::WriteDecorHandle<xAOD::JetContainer, float> emFracHandle(m_emFracKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> hecFracHandle(m_hecFracKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> psFracHandle(m_psFracKey);
@@ -154,6 +184,13 @@ void JetCaloEnergies::fillEperSamplingCluster(const xAOD::Jet& jet, std::vector<
   emFracHandle(jet) = jet::JetCaloQualityUtils::emFraction( ePerSampling );
   hecFracHandle(jet) = jet::JetCaloQualityUtils::hecF( &jet );
   psFracHandle(jet) = jet::JetCaloQualityUtils::presamplerFraction( &jet );
+
+  if(m_doFracSamplingMax){
+    SG::WriteDecorHandle<xAOD::JetContainer, float> fracSamplingMaxHandle(m_fracSamplingMaxKey);
+    fracSamplingMaxHandle(jet) = sumE_samplings != 0. ? fracSamplingMax/sumE_samplings : 0.;
+    SG::WriteDecorHandle<xAOD::JetContainer, int> fracSamplingMaxIndexHandle(m_fracSamplingMaxIndexKey);
+    fracSamplingMaxIndexHandle(jet) = fracSamplingMaxIndex;
+  }
 }
 
 #define FillESamplingPFO( LAYERNAME )                                        \
@@ -276,7 +313,7 @@ void JetCaloEnergies::fillEperSamplingFE(const xAOD::Jet& jet, std::vector<float
 
       //Charged FlowElements:
       if(constit->isCharged()){
-	      eTot += constit->chargedObject(0)->e();
+	eTot += constit->chargedObject(0)->e();
         e2Tot += constit->chargedObject(0)->e()*constit->chargedObject(0)->e();
       }
       //Neutral FlowElements
@@ -309,7 +346,7 @@ void JetCaloEnergies::fillEperSamplingFE(const xAOD::Jet& jet, std::vector<float
 
       // UFO is simply a charged FlowElement
       if(constit->signalType() == xAOD::FlowElement::Charged){
-	      eTot += constit->chargedObject(0)->e();
+	eTot += constit->chargedObject(0)->e();
         e2Tot += constit->chargedObject(0)->e()*constit->chargedObject(0)->e();
       }
       //UFO is simply a neutral Flowelement
@@ -393,6 +430,21 @@ void JetCaloEnergies::fillEperSamplingFE(const xAOD::Jet& jet, std::vector<float
     }
   }
 
+  double fracSamplingMax = -999999999.;
+  int fracSamplingMaxIndex = -1;
+  double sumE_samplings = 0.0;
+
+  if(m_doFracSamplingMax){
+    for(unsigned int i = 0; i < ePerSampling.size(); ++i){
+      double e = ePerSampling[i];
+      sumE_samplings += e;
+      if (e>fracSamplingMax){
+        fracSamplingMax=e;
+        fracSamplingMaxIndex = i;
+      }
+    }
+  }
+
   for( const std::string & calcN : m_calculationNames){
     if ( calcN == "EMFrac" ) {
       SG::WriteDecorHandle<xAOD::JetContainer, float> emFracHandle(m_emFracKey);
@@ -412,6 +464,11 @@ void JetCaloEnergies::fillEperSamplingFE(const xAOD::Jet& jet, std::vector<float
     } else if ( calcN == "EffNClusts" ) {
       SG::WriteDecorHandle<xAOD::JetContainer, float> effNClustsFracHandle(m_effNClustsFracKey);
       effNClustsFracHandle(jet)  = eTot != 0. ? std::sqrt(eTot*eTot/e2Tot)  : 0.;
+    } else if ( calcN == "FracSamplingMax" ){
+      SG::WriteDecorHandle<xAOD::JetContainer, float> fracSamplingMaxHandle(m_fracSamplingMaxKey);
+      fracSamplingMaxHandle(jet) = sumE_samplings != 0. ? fracSamplingMax/sumE_samplings : 0.;
+      SG::WriteDecorHandle<xAOD::JetContainer, int> fracSamplingMaxIndexHandle(m_fracSamplingMaxIndexKey);
+      fracSamplingMaxIndexHandle(jet) = fracSamplingMaxIndex;
     }
   }
 }
@@ -485,6 +542,21 @@ void JetCaloEnergies::fillEperSamplingFEClusterBased(const xAOD::Jet& jet, std::
     }
   }
 
+  float fracSamplingMax = -999999999.;
+  int fracSamplingMaxIndex = -1;
+  float sumE_samplings = 0.0;
+
+  if(m_doFracSamplingMax){
+    for(unsigned int i = 0; i < ePerSampling.size(); ++i){
+      float e = ePerSampling[i];
+      sumE_samplings += e;
+      if (e>fracSamplingMax){
+	fracSamplingMax=e;
+	fracSamplingMaxIndex = i;
+      }
+    }
+  }
+
   for( const std::string & calcN : m_calculationNames){
     if ( calcN == "EMFrac" ) {
       SG::WriteDecorHandle<xAOD::JetContainer, float> emFracClusterHandle(m_emFracClusterKey);
@@ -504,6 +576,11 @@ void JetCaloEnergies::fillEperSamplingFEClusterBased(const xAOD::Jet& jet, std::
     } else if ( calcN == "EffNClusts" ) {
       SG::WriteDecorHandle<xAOD::JetContainer, float> effNClustsFracClusterHandle(m_effNClustsFracClusterKey);
       effNClustsFracClusterHandle(jet)  = eTot != 0. ? std::sqrt(eTot*eTot/e2Tot)  : 0.;
+    } else if ( calcN == "FracSamplingMax" ){
+      SG::WriteDecorHandle<xAOD::JetContainer, float> fracSamplingMaxClusterHandle(m_fracSamplingMaxClusterKey);
+      fracSamplingMaxClusterHandle(jet) = sumE_samplings != 0. ? fracSamplingMax/sumE_samplings : 0.;
+      SG::WriteDecorHandle<xAOD::JetContainer, int> fracSamplingMaxIndexClusterHandle(m_fracSamplingMaxIndexClusterKey);
+      fracSamplingMaxIndexClusterHandle(jet) = fracSamplingMaxIndex;
     }
   }
 

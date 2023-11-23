@@ -96,7 +96,7 @@ try:
         # More complex cases here
         CaloEnergies =    JetModifier("JetCaloEnergies", "jetens", 
                                       prereqs=["mod:EMScaleMom"], 
-                                      Calculations=["EMFrac", "HECFrac", "PSFrac"], JetContainer = _jetname,
+                                      Calculations=["EMFrac", "HECFrac", "PSFrac", "FracSamplingMax"], JetContainer = _jetname,
                                       ),
         
         CaloEnergiesLargeR =    JetModifier("JetCaloEnergies", "jetenslargeR", 
@@ -108,12 +108,17 @@ try:
         # CaloEnergiesClus is only relevant for FE-based jet collections
         CaloEnergiesClus = JetModifier("JetCaloEnergies", "jetensclus",
                                        prereqs=["mod:EMScaleMom"], 
-                                       Calculations=["EMFrac", "HECFrac", "PSFrac"], JetContainer = _jetname,
+                                       Calculations=["EMFrac", "HECFrac", "PSFrac", "FracSamplingMax"], JetContainer = _jetname,
                                        calcClusterBasedVars = True),
 
         CaloQuality =     JetModifier("JetCaloQualityTool", "caloqual",
                                       TimingCuts = [5,10],
-                                      Calculations = ["LArQuality", "N90Constituents", "FracSamplingMax",  "NegativeE", "Timing", "HECQuality", "Centroid", "AverageLArQF", "BchCorrCell"],JetContainer = _jetname),
+                                      Calculations = ["LArQuality", "N90Constituents", "NegativeE", "Timing", "HECQuality", "Centroid", "AverageLArQF", "BchCorrCell"],JetContainer = _jetname),
+
+        CaloQualityFE =   JetModifier("JetCaloQualityToolFE", "caloqualFE",
+                                      TimingCuts = [5,10],
+                                      ThresholdCuts = [90],
+                                      Calculations = ["LArQuality", "NegativeE", "Timing", "HECQuality", "Centroid", "AverageLArQF", "BchCorrCell"],JetContainer = _jetname),
 
         N90 =             JetModifier("JetCaloQualityTool", "n90",
                                       Calculations = ["N90Constituents"],JetContainer = _jetname),

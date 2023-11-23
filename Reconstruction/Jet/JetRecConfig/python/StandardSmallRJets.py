@@ -47,6 +47,12 @@ standardmods = (
     "JVF", "JVT", "Charge",
 )
 
+standardmods_ufo = (
+    "Width",
+    "CaloQualityFE", "TrackMoments","TrackSumMoments",
+    "JVF", "JVT", "Charge",
+)
+
 clustermods      = ("ECPSFrac","ClusterMoments",) 
 truthmods        = ("PartonTruthLabel","TruthPartonDR","JetDeltaRLabel:5000")
 pflowmods        = ()
@@ -116,7 +122,7 @@ AntiKt4EMPFlowCSSK = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
 # *********************************************************
 AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+("Filter_calibThreshold:10000","EMScaleMom","JetPtAssociation","CaloEnergiesClus",)+truthmods+standardmods,
+                               modifiers = calibmods+("Filter_calibThreshold:10000","EMScaleMom","JetPtAssociation","CaloEnergiesClus",)+truthmods+standardmods_ufo,
                                lock = True
 )
 
@@ -126,7 +132,7 @@ AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
 AntiKt4UFOCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
                                       infix = "NoPtCut",
                                       ghostdefs = standardghosts+flavourghosts,
-                                      modifiers = calibmods_noCut+("Filter:1","EMScaleMom","JetPtAssociation","CaloEnergiesClus",)+truthmods+standardmods,
+                                      modifiers = calibmods_noCut+("Filter:1","EMScaleMom","JetPtAssociation","CaloEnergiesClus",)+truthmods+standardmods_ufo,
                                       ptmin = 1,
                                       lock = True
 )

@@ -30,6 +30,7 @@ protected:
   void fillEperSamplingFE(const xAOD::Jet &jet, std::vector<float> & ePerSampling ) const ;
   void fillEperSamplingFEClusterBased(const xAOD::Jet &jet, std::vector<float> & ePerSampling ) const ;
   bool isInVector(const std::string& key, const std::vector<std::string>& calculations);
+  bool m_doFracSamplingMax = false;
 
 private:
   Gaudi::Property<std::vector<std::string> > m_calculationNames{this, "Calculations", {}, "Name of calo quantities to compute and add as decorations"};
@@ -43,7 +44,9 @@ private:
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_em3FracKey{this, "EM3FracName", "EM3Frac", "SG key for the EM3Frac attribute"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_tile0FracKey{this, "Tile0FracName", "Tile0Frac", "SG key for the Tile0Frac attribute"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_effNClustsFracKey{this, "EffNClustsName", "EffNClusts", "SG key for the EffNClusts attribute"};
-  
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_fracSamplingMaxKey{this, "FracSamplingMaxName", "FracSamplingMax", "SG key for the FracSamplingMax attribute"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_fracSamplingMaxIndexKey{this, "FracSamplingMaxIndexName", "FracSamplingMaxIndex", "SG key for the FracSamplingMaxIndex attribute"};
+
   // Variables for FE-based jet collection using the underlying cluster rather than energy-subtracted FE for calculations
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_ePerSamplingClusterKey{this, "EPerSamplingClusterName", "EnergyPerSamplingCaloBased", "SG key for the EnergyPerSampling attribute"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_emFracClusterKey{this, "EMFracClusterName", "EMFracCaloBased", "SG key for the EMFrac attribute"};
@@ -52,6 +55,8 @@ private:
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_em3FracClusterKey{this, "EM3FracClusterName", "EM3FracCaloBased", "SG key for the EM3Frac attribute"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_tile0FracClusterKey{this, "Tile0FracClusterName", "Tile0FracCaloBased", "SG key for the Tile0Frac attribute"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_effNClustsFracClusterKey{this, "EffNClustsClusterName", "EffNClustsCaloBased", "SG key for the EffNClusts attribute"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_fracSamplingMaxClusterKey{this, "FracSamplingMaxClusterName", "FracSamplingMaxCaloBased", "SG key for the FracSamplingMax (clus) attribute"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_fracSamplingMaxIndexClusterKey{this, "FracSamplingMaxIndexClusterName", "FracSamplingMaxIndexCaloBased", "SG key for FracSamplingMaxIndex (clus) attribute"};
 
 };
 
