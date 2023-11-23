@@ -17,11 +17,12 @@
 
 #ifndef VP1JOBCONFIGINFO_H
 #define VP1JOBCONFIGINFO_H
-
+// GeoModel
+#include "GeoPrimitives/GeoPrimitives.h"
+//
+#include "GeoModelKernel/GeoVPhysVol.h"
 class IVP1System;
 class StoreGateSvc;
-class GeoPhysVol;
-class GeoPVConstLink;
 
 class VP1JobConfigInfo {
 public:

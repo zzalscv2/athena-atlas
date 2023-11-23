@@ -5,6 +5,11 @@
 #ifndef PRDCOLLECTIONHANDLEBASE_H
 #define PRDCOLLECTIONHANDLEBASE_H
 
+// GeoModel
+#include "GeoPrimitives/GeoPrimitives.h"
+//
+#include "GeoModelKernel/GeoVPhysVol.h"
+
 #include "VP1Base/VP1StdCollection.h"
 #include "VP1PRDSystems/PRDDetTypes.h"
 #include <vector>

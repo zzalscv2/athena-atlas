@@ -13,13 +13,16 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
+// GeoModel
+#include "GeoPrimitives/GeoPrimitives.h"
+//
+#include "GeoModelKernel/GeoVPhysVol.h"
 // Trk
 #include "CaloTrackingGeometry/ICaloSurfaceBuilder.h"
 #include "TrkDetDescrInterfaces/ICaloTrackingVolumeBuilder.h"
 // STL
 #include <vector>
 
-class GeoPVConstLink;
 
 namespace Trk {
 class ITrackingVolumeHelper;

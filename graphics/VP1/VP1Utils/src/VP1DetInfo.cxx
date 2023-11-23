@@ -20,7 +20,6 @@
 #include "VP1Base/IVP1System.h"
 #include "VP1Base/VP1AthenaPtrs.h"
 
-#include "GeoModelKernel/GeoPVConstLink.h"
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"

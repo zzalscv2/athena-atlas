@@ -8,8 +8,6 @@
 #ifndef BUILDVP1LIGHT
 
 #include "GeoModelUtilities/GeoModelTool.h"
-#include "GeoModelKernel/GeoPVConstLink.h"
-
 class ToyDetectorTool final : public GeoModelTool 
 {
  public:

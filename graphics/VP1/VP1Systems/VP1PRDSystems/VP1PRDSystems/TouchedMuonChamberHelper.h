@@ -19,8 +19,12 @@
 #ifndef TOUCHEDMUONCHAMBERHELPER_H
 #define TOUCHEDMUONCHAMBERHELPER_H
 
+// GeoModel
+#include "GeoPrimitives/GeoPrimitives.h"
+//
+#include "GeoModelKernel/GeoVPhysVol.h"
+
 #include <QObject>
-#include "GeoModelKernel/GeoPVConstLink.h"
 #include <set>
 
 class TouchedMuonChamberHelper : public QObject {

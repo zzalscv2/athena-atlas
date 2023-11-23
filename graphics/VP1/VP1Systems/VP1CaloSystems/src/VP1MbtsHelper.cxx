@@ -15,7 +15,6 @@
 
 #include "GeoModelUtilities/StoredPhysVol.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
-#include "GeoModelKernel/GeoPVConstLink.h"
 #include "GeoModelKernel/GeoVolumeCursor.h"
 #include "GeoModelKernel/GeoTrd.h"
 

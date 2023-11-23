@@ -19,7 +19,6 @@
 
 #include "VP1Base/IVP13DSystemSimple.h"
 #include "VP1Utils/InDetProjFlags.h"
-#include "GeoModelKernel/GeoPVConstLink.h"
 #include <QList>
 #include <vector>
 #include <map>
