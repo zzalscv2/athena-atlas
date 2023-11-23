@@ -17,14 +17,15 @@ def JetHitAssociationCfg(flags, name="JetHitAssociation", **kwargs):
     acc = ComponentAccumulator()
     
     isMC = flags.Input.isMC
-    SiHitsRequested = any("SiHitCollection" in collection for collection in flags.Input.TypedCollections)
-           
+
+        
+
     acc.merge(
         InDetPixelPrepDataToxAODCfg(
             flags,
             ClusterSplitProbabilityName=ClusterSplitProbabilityContainerName(flags),
-            WriteSiHits=(isMC and SiHitsRequested),
-            WriteSDOs=(isMC and SiHitsRequested),       
+            WriteSiHits=isMC,
+            WriteSDOs=isMC,       
             # see ATR-27293 for discussion on why this was disabled
             WriteNNinformation=False
         )
@@ -33,8 +34,8 @@ def JetHitAssociationCfg(flags, name="JetHitAssociation", **kwargs):
     acc.merge(
         InDetSCT_PrepDataToxAODCfg(
             flags,
-            WriteSiHits=(isMC and SiHitsRequested),
-            WriteSDOs=(isMC and SiHitsRequested)	     
+            WriteSiHits=isMC,
+            WriteSDOs=isMC	     
         )
     )
 
