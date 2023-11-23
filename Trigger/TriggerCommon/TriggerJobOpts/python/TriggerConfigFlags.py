@@ -483,6 +483,9 @@ def createTriggerRecoFlags():
     flags.addFlag("Trigger.Jet.emtopoCalibKey", "TrigLS2",
                   help='calibration config file for HLT small-R jets')
 
+    flags.addFlag("Trigger.Jet.pflowLJCalibKey", "TrigSoftDrop",
+                  help='calibration config file for HLT large-R PFlow jets')                  
+
     flags.addFlag("Trigger.Jet.PFlowTolerance", 1e-2,
                   help='tolerance in STEP Propagator')
     

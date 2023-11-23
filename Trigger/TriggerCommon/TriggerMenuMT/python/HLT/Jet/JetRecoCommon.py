@@ -246,7 +246,7 @@ def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
         elif jetRecoDict["constitType"] == "pf":
             gscDepth = "auto"
             if 'sd' in jetRecoDict["recoAlg"]:
-                calibContext = "TrigSoftDrop"
+                calibContext = flags.Trigger.Jet.pflowLJCalibKey # large-R pflow
                 calibSeq = "EtaJES_JMS"
             else:
                 calibKey = flags.Trigger.Jet.pflowCalibKey # small-R pflow
@@ -275,7 +275,7 @@ def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
         else:
             calibMods = ["ConstitFourMom_copy",
                          "Calib:"+calibSpec]
-
+    
     return calibMods
 
 # Make generating the list a bit more comprehensible
