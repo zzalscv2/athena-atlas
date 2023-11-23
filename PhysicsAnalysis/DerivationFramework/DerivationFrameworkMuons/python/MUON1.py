@@ -347,6 +347,7 @@ def MUON1Cfg(ConfigFlags):
                                               "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ",
                                               "TauJets.dRmax.etOverPtLeadTrk",
                                               "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
+                                              "CombinedMuonTrackParticles.vx.vy.vz",
                                               "MuonSpectrometerTrackParticles.vx.vy.vz",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
