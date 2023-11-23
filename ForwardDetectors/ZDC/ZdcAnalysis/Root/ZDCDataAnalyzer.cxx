@@ -265,7 +265,7 @@ void ZDCDataAnalyzer::SetCutValues(const ZDCModuleFloatArray& chisqDivAmpCutHG, 
 }
 
 void ZDCDataAnalyzer::SetTimingCorrParams(const std::array<std::array<std::vector<float>, 4>, 2>& HGParamArr,
-    const std::array<std::array<std::vector<float>, 4>, 2>& LGParamArr)
+					  const std::array<std::array<std::vector<float>, 4>, 2>& LGParamArr)
 {
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
@@ -275,11 +275,11 @@ void ZDCDataAnalyzer::SetTimingCorrParams(const std::array<std::array<std::vecto
 
 }
 
-void ZDCDataAnalyzer::SetNonlinCorrParams(const std::array<std::array<std::vector<float>, 4>, 2>& HGNonlinCorrParams)
+void ZDCDataAnalyzer::SetNonlinCorrParams(float refADC, const std::array<std::array<std::vector<float>, 4>, 2>& HGNonlinCorrParams)
 {
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
-      m_moduleAnalyzers[side][module]->SetNonlinCorrParams(HGNonlinCorrParams.at(side).at(module));
+      m_moduleAnalyzers[side][module]->SetNonlinCorrParams(refADC, HGNonlinCorrParams[side][module]);
     }
   }
 }
