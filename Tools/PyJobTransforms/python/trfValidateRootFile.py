@@ -14,6 +14,7 @@ import logging
 from PyUtils import RootUtils
 ROOT = RootUtils.import_root()
 from ROOT import TFile, TTree, TDirectory, TStopwatch
+from ROOT.Experimental import RNTuple, RNTupleReader
 
 msg = logging.getLogger(__name__)
 
@@ -45,7 +46,7 @@ def checkTreeBasketWise(tree):
 
     listOfBranches=tree.GetListOfBranches()
 
-    msg.debug('Checking %s branches ...', listOfBranches.GetEntries())
+    msg.debug('Checking %s branches...', listOfBranches.GetEntries())
 
     for branch in listOfBranches:
         if checkBranch(branch)==1:
@@ -64,6 +65,29 @@ def checkTreeEventWise(tree, printInterval = 150000):
     for i in range(nEntries):
         if tree.GetEntry(i)<0:
             msg.warning('Event %s of tree %s is corrupted.', i, tree.GetName())
+            return 1
+
+        # Show a sign of life for long validation jobs: ATLASJT-433
+        if (i%printInterval)==0 and i>0:
+            msg.info('Validated %s events so far...', i)
+
+    return 0
+
+def checkNTupleEventWise(ntuple, printInterval = 150000):
+
+    try:
+        reader=RNTupleReader.Open(ntuple)
+    except BaseException as err:
+        msg.warning('Could not open ntuple %s: %s', ntuple, err)
+        return 1
+
+    msg.debug('Checking %s entries...', reader.GetNEntries())
+
+    for i in reader:
+        try:
+            reader.LoadEntry(i)
+        except BaseException as err:
+            msg.warning('Event %s of ntuple %s is corrupted: %s', i, reader.GetDescriptor().GetName(), err)
             return 1
 
         # Show a sign of life for long validation jobs: ATLASJT-433
@@ -92,12 +116,12 @@ def checkDirectory(directory, the_type, requireTree):
             return 1
 
         if requireTree and not isinstance(the_object, TTree):
-            msg.warning("Object %s is not of class TTree!", the_object.GetName())
+            msg.warning("Object of key %s is not of class TTree!", key.GetName())
             return 1
 
         if isinstance(the_object,TTree):
 
-            msg.debug('Checking tree %s ...', the_object.GetName())
+            msg.debug('Checking tree %s...', the_object.GetName())
             
             if the_type=='event':
                 if checkTreeEventWise(the_object)==1:
@@ -107,6 +131,18 @@ def checkDirectory(directory, the_type, requireTree):
                     return 1
 
             msg.debug('Tree %s looks ok.', the_object.GetName())    
+
+        if isinstance(the_object,RNTuple):
+
+            msg.debug('Checking ntuple of key %s...', key.GetName())
+
+            if the_type=='event':
+                if checkNTupleEventWise(the_object)==1:
+                    return 1
+            elif the_type=='basket':
+                raise NotImplementedError()
+
+            msg.debug('NTuple of key %s looks ok.', key.GetName())
             
         if isinstance(the_object, TDirectory):
             if checkDirectory(the_object, the_type, requireTree)==1:
@@ -187,7 +223,11 @@ def main(argv):
     if the_type!="event" and the_type!="basket":
         return usage()
 
-    if requireTree!="true" and requireTree!="false":
+    if requireTree=="true":
+        requireTree=True
+    elif requireTree=="false":
+        requireTree=False
+    else:
         return usage()
 
     if verbosity=="on":
