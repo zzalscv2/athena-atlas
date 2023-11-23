@@ -1,6 +1,7 @@
 #include "PFlowUtils/IWeightPFOTool.h"
 #include "JetMomentTools/JetCaloEnergies.h"
 #include "JetMomentTools/JetCaloQualityTool.h"
+#include "JetMomentTools/JetCaloQualityToolFE.h"
 #include "JetMomentTools/JetWidthTool.h"
 #include "JetMomentTools/JetVertexFractionTool.h"
 #include "JetMomentTools/JetVertexTaggerTool.h"
@@ -31,6 +32,7 @@
 
 DECLARE_COMPONENT( JetCaloEnergies )
 DECLARE_COMPONENT( JetCaloQualityTool )
+DECLARE_COMPONENT( JetCaloQualityToolFE )
 DECLARE_COMPONENT( JetWidthTool )
 DECLARE_COMPONENT( JetVertexFractionTool )
 DECLARE_COMPONENT( JetVertexTaggerTool )
