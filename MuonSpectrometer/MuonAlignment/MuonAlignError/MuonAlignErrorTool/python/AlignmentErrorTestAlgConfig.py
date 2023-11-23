@@ -17,12 +17,19 @@ def AlignmentErrorTestAlgCfg(flags, name="AlignmentErrorTestAlg", **kwargs):
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+
+    parser = flags.getArgumentParser()
+    parser.add_argument('--postExec', help='Code to execute after setup')
+    parser.add_argument('--errorClobFileOverride', help='Optional path to an error clob file to use as override')
+
+    # Set flags defaults
     flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/main/q442/v32/myESD.pool.root']
     flags.Exec.MaxEvents = 10
     flags.Common.ShowMsgStats = True
-    flags.addFlag("Muon.Align.ErrorClobFileOverride", '')
 
-    flags.fillFromArgs()
+    args, _ = parser.parse_known_args()
+
+    flags.fillFromArgs(parser=parser)
     flags.lock()
 
     flags.dump()
@@ -35,8 +42,12 @@ if __name__ == "__main__":
 
     cfg.merge(AlignmentErrorTestAlgCfg(flags))
 
-    if flags.Muon.Align.ErrorClobFileOverride:
-        cfg.getCondAlgo("MuonAlignmentErrorDbAlg").clobFileOverride = flags.Muon.Align.ErrorClobFileOverride
+    if args.errorClobFileOverride:
+        cfg.getCondAlgo("MuonAlignmentErrorDbAlg").clobFileOverride = args.errorClobFileOverride
+
+    if args.postExec:
+        print('Executing postExec: %s', args.postExec)
+        exec(args.postExec)
 
     cfg.printConfig()
 

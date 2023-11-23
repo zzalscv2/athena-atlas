@@ -266,8 +266,7 @@ namespace Muon {
                 translationError = std::sqrt(it->getCovariance(0, 0));
                 // vector to store hit id
                 std::vector<Identifier> hitids;
-                std::vector<const Trk::RIO_OnTrack*> vec_riowithdev;
-                it->getListOfHits(vec_riowithdev);
+                const auto& vec_riowithdev = it->getListOfHits();
                 // bool to decide if deviation should be skipped (if it's for more than 1 station)
                 for (const Trk::RIO_OnTrack* riowithdev : vec_riowithdev) {
                     const Identifier id_riowithdev = riowithdev->identify();
@@ -344,8 +343,7 @@ namespace Muon {
                 bool used = std::find(usedRotations.begin(), usedRotations.end(), iRot) != usedRotations.end();
                 if (used) continue;
                 ATH_MSG_ERROR("This following code should not be reached anymore!");
-                std::vector<const Trk::RIO_OnTrack*> vec_riowithdev;
-                itRot->getListOfHits(vec_riowithdev);
+                const auto& vec_riowithdev = itRot->getListOfHits();
 
                 std::vector<Identifier> hitids;
                 // bool to decide if deviation should be skipped (if it's for more than 1 station)
