@@ -66,11 +66,9 @@ def BTAG_TrkVKalVrtFitterCfg(flags, name="BTAG_TrkVKalVrtFitter",**kwargs):
     from MagFieldServices.MagFieldServicesConfig import (
         AtlasFieldCacheCondAlgCfg)
     acc = AtlasFieldCacheCondAlgCfg(flags) # To produce AtlasFieldCacheCondObj
-    myargs = kwargs.copy()
-    myargs.setdefault("FirstMeasuredPoint", False)
-    myargs.setdefault("FrozenVersionForBTagging", True)
-    if "Extrapolator" in myargs:
-       del myargs["Extrapolator"]
-    acc.setPrivateTools(CompFactory.Trk.TrkVKalVrtFitter(name, **myargs))
+    kwargs.setdefault("FirstMeasuredPoint", False)
+    kwargs.setdefault("FrozenVersionForBTagging", True)
+    # No extrapolator explicitly configured, default constructor used
+    acc.setPrivateTools(CompFactory.Trk.TrkVKalVrtFitter(name, **kwargs))
     return acc
 
