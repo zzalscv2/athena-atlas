@@ -126,10 +126,11 @@ def hltCaloCellSeedlessMakerCfg(flags, roisKey='UNSPECIFIED'):
 def L0CaloGlobalRoIBuilderCfg(flags):
     acc = ComponentAccumulator()
     from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import RingerReFexConfig
-    ringer = RingerReFexConfig(flags,'RingerGlobalFex',RingerKey='testRKey',
+    ringer = RingerReFexConfig(flags,'RingerGlobalFex',RingerKey='NOTNEEDED',
           ClustersName='CaloClustersGlobal')
     L0CaloGlobalRoIBuilderAlg = CompFactory.CaloGlobalRoIBuilder("L0CaloGlobalRoIBuilder",
                       Cells ="SeedLessFS", ClustersName='CaloClustersGlobal',
+                      RingerKey='RingerGlobal',
                       RingerTool=ringer )
     acc.addEventAlgo(L0CaloGlobalRoIBuilderAlg)
 
@@ -137,6 +138,27 @@ def L0CaloGlobalRoIBuilderCfg(flags):
     acc.merge(CaloNoiseCondAlgCfg(flags))
 
     return acc
+
+def CaloL0RingerPreCfg(flags):
+    flags.Trigger.ExtraEDMList=[('xAOD::TrigRingerRingsContainer#RingerGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigRingerRingsAuxContainer#RingerGlobalAux.',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterContainer#CaloClustersGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.',  'BS ESD AODFULL', 'Calo')]
+
+def CaloL0RingerCfg(flags):
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from OutputStreamAthenaPool.OutputStreamConfig import addToESD,addToAOD
+    extraContent=['xAOD::TrigRingerRingsContainer#RingerGlobal','xAOD::TrigRingerRingsAuxContainer#RingerGlobalAux.','xAOD::TrigEMClusterContainer#CaloClustersGlobal','xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.']
+    acc = ComponentAccumulator()
+    if (flags.Output.doWriteRDO):
+       acc.merge(hltCaloCellSeedlessMakerCfg(flags))
+       acc.merge(L0CaloGlobalRoIBuilderCfg(flags))
+
+    if (flags.Output.doWriteESD or flags.Output.doWriteAOD):
+       if ( flags.Output.doWriteESD ):
+          acc.merge(addToESD(flags, extraContent))
+       if ( flags.Output.doWriteAOD ):
+          acc.merge(addToAOD(flags, extraContent))
+    return acc
+
+
 
 def hltCaloLocalCalib(flags, name = "TrigLocalCalib"):
     det_version_is_rome = flags.GeoModel.AtlasVersion.startswith("Rome")
@@ -456,18 +478,16 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN3
-    print("FILE : ",flags.Input.Files)
     #flags.Input.isMC=False
     flags.GeoModel.Run=LHCPeriod.Run3
     flags.IOVDb.GlobalTag = "CONDBR2-ES1PA-2022-07"
     flags.Common.isOnline = True
-    #outputContainers = [
     outputContainers = ["CaloCellContainer#SeedLessFS",
               "xAOD::EventInfo#EventInfo",
               "xAOD::TrigEMClusterContainer#CaloClustersGlobal",
               "xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.",
-              "xAOD::TrigRingerRingsContainer#Global_FastCaloRinger",
-              "xAOD::TrigRingerRingsAuxContainer#Global_FastCaloRingerAux."]
+              "xAOD::TrigRingerRingsContainer#RingerGlobal",
+              "xAOD::TrigRingerRingsAuxContainer#RingerGlobalAux."]
     flags.Output.ESDFileName='TrigCaloRecCheck'
     
     flags.fillFromArgs()
