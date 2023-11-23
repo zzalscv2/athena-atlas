@@ -43,9 +43,9 @@ if not os.path.isfile(args.grl):
 
 outfile = ROOT.TFile.Open(args.outfile, 'RECREATE')
 metadata = ROOT.TTree('DataCustomReweighting', 'DataCustomReweighting')
-cname_arr = array.array('c', 'pileup\0')
+cname_arr = array.array('u', 'pileup\0')
 runno_arr = array.array('I', [0])
-histname_arr = array.array('c', 'pileup_data_run_XXXXXX\0')
+histname_arr = array.array('u', 'pileup_data_run_XXXXXX\0')
 metadata.Branch('CustomName', cname_arr, 'CustomName/C')
 metadata.Branch('RunNumber', runno_arr, 'RunNumber/i')
 metadata.Branch('HistName', histname_arr, 'HistName/C')
@@ -57,8 +57,8 @@ for run in grl.GetGoodRuns():
     outhist=None
     runno = run.GetRunNumber()
     runno_arr[0] = runno
-    histname_arr[-7:-1] = array.array('c', `runno`)
-    rdir = bcidfile.Get(`runno`)
+    histname_arr[-7:-1] = array.array('u', repr(runno))
+    rdir = bcidfile.Get(repr(runno))
     if not rdir:
         logger.warning('Unable to retrieve mu distributions for run %s, skipping ...', runno)
         continue
@@ -66,7 +66,7 @@ for run in grl.GetGoodRuns():
     runhist = None
     for lbrange in run:
         #print runno, lbrange.Begin(), lbrange.End()
-        for lb in xrange(lbrange.Begin(), lbrange.End()+1):
+        for lb in range(lbrange.Begin(), lbrange.End()+1):
             inhist = rdir.Get('%srec' % lb)
             if not inhist:
                 logger.warning('Unable to retrieve mu distribution for run %s LB %s', (runno, lb))
