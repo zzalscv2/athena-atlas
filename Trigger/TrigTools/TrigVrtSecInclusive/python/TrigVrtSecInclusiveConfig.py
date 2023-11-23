@@ -95,20 +95,13 @@ def TrigVrtSecInclusiveCfg(flags, name, FirstPassTracksName, SecondPassTracksNam
 
     acc = ComponentAccumulator()
 
-    from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-    InDetTrigExtrapolator = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags,name="InDetTrigExtrapolator"))
+    from TrkConfig.TrkVKalVrtFitterConfig import TrigVKalVrtFitterCfg
+    VertexFitter = acc.popToolsAndMerge(
+        TrigVKalVrtFitterCfg(flags, name = 'VKalVrtFitter_'+name))
 
-    VertexFitter = CompFactory.Trk.TrkVKalVrtFitter(
-        name = 'VKalVrtFitter_'+name,
-        Extrapolator    = InDetTrigExtrapolator,
-        IterationNumber = 30
-    )
-
-    VertexPointEstimator = CompFactory.InDet.VertexPointEstimator(
-        name = 'VertexPointEstimator_'+name,
-        MinDeltaR = [-10000., -10000., -10000.],
-        MaxDeltaR = [ 10000.,  10000.,  10000.],
-        MaxPhi    = [ 10000.,  10000.,  10000.])
+    from InDetConfig.InDetConversionFinderToolsConfig import BPHY_VertexPointEstimatorCfg
+    VertexPointEstimator = acc.popToolsAndMerge(
+        BPHY_VertexPointEstimatorCfg(flags, name = 'VertexPointEstimator_'+name))
 
     alg = CompFactory.TrigVSI.TrigVrtSecInclusive(
         name = name,
