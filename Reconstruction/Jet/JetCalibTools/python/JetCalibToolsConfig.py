@@ -11,6 +11,7 @@
 #                                                                      #
 ########################################################################
 from AthenaConfiguration.Enums import LHCPeriod
+from JetRecConfig.StandardJetConstits import inputsFromContext
 
 from AthenaCommon import Logging
 jetcaliblog = Logging.logging.getLogger('JetCalibToolsConfig')
@@ -185,7 +186,7 @@ def defineJetCalibTool(jetcollection, context, configfile, calibarea, calibseq, 
 # This method extends the basic config getter to specify the requisite jet
 # moments or other inputs
 def getJetCalibToolPrereqs(modspec,jetdef):
-    calibcontext, data_type, calibseq, rhoname, pvname, gscdepth = getCalibSpecsFromString(modspec)
+    calibcontext, data_type, calibseq, rhoname, pvname, gscdepth = getCalibSpecsFromString(jetdef, modspec)
     if calibseq=="":
         cfg, calibarea, calibseq = calibcontexts[jetdef.basename][calibcontext]
 
@@ -196,7 +197,7 @@ def getJetCalibToolPrereqs(modspec,jetdef):
     if "JetArea" in calibseq: # Will not insert a prefix here
         if calibcontext.startswith("Trig"): prereqs.append("input:HLT_EventDensity")
         elif pvname != "PrimaryVertices": prereqs.append("input:EventDensityCustomVtx")
-        else: prereqs.append("input:EventDensity")
+        else: prereqs.append(inputsFromContext("EventDensity")(jetdef))
     if "GSC" in calibseq:
         prereqs += ["mod:CaloEnergies"]
         if calibcontext != "TrigRun2": # No track/MS GSC for trigger w/o FTK
@@ -214,9 +215,10 @@ def getJetCalibToolPrereqs(modspec,jetdef):
     return prereqs
 
 # This method translates the mod specification string into calibration specifications
-def getCalibSpecsFromString(modspec):
+def getCalibSpecsFromString(jetdef, modspec):
     calibseq = ""
-    rhoname = "auto"
+    # for the LCTopo EleRM context used for EleRM taus, we need alternative EventShape container
+    rhoname = "EleRM_Kt4LCTopoOriginEventShape" if jetdef.context == "EleRM" else "auto"
     pvname = "PrimaryVertices"
     gscdepth = "auto"
     calibspecs = modspec.split(':')
@@ -226,9 +228,10 @@ def getCalibSpecsFromString(modspec):
     if len(calibspecs)>3: rhoname = calibspecs[3]
     if len(calibspecs)>4: pvname = calibspecs[4]
     if len(calibspecs)>5: gscdepth = calibspecs[5]
+
     return calibcontext, data_type, calibseq, rhoname, pvname, gscdepth
 
 # This method instantiates the JetCalibTool given the input mod specification
 def getJetCalibToolFromString(jetdef, modspec):
-    calibcontext, data_type, calibseq, rhoname, pvname, gscdepth = getCalibSpecsFromString(modspec)
+    calibcontext, data_type, calibseq, rhoname, pvname, gscdepth = getCalibSpecsFromString(jetdef, modspec)
     return getJetCalibTool(jetdef,calibcontext,data_type,calibseq,rhoname,pvname,gscdepth)

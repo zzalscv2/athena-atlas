@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUREC_TAUAODRUNNERALG_H
@@ -31,10 +31,10 @@
  *  @brief  The implementation of the TauAODRunnerAlg, which is meant to run at AOD level.
  *  This algorithm reads in the AOD TauJets and TauTracks containers, as well as other tau 
  *  related containers, and make deep copies. The tools scheduled for this algorithm were 
- *  divided into two categories, modification tools and official tools after the 
- *  modification. The algorithm does not proceed to the official tools if the tau object was 
+ *  divided into two categories, modification tools and standard tools after the 
+ *  modification. The algorithm does not proceed to the standard tools if the tau object was 
  *  not modified by the modification tools. The example python scheduling scripts can be 
- *  found in the TauRec package.
+ *  found in the DerivationFramework package.
  */
 
 class TauAODRunnerAlg: public AthReentrantAlgorithm {

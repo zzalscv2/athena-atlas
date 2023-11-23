@@ -49,7 +49,10 @@ StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
   for (const xAOD::CaloVertexedTopoCluster& vertexedCluster : vertexedClusterList){
     const xAOD::CaloCluster& cluster = vertexedCluster.clust();
     const CaloClusterCellLink* cellLinks = cluster.getCellLinks();
-    
+    if (cellLinks == nullptr) {
+      ATH_MSG_DEBUG("NO Cell links found for cluster with pT " << cluster.pt());
+      continue;
+    }
     for (const CaloCell* cell : *cellLinks) {
       ++numCells;
      

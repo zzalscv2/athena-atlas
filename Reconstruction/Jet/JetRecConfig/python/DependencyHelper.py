@@ -127,7 +127,10 @@ def solveConstitDependencies(constitseq, parentjetdef, inplace=False):
     # bellow, we'll use 'solveInputExternalDependencies()' to instantiate the prereqs
     # so make sure our inputname is part of prereqs. Here, internally, use 'extinput' rather 'input' to mark
     # the prereq is necessarily a JetInputExternal (and thus avoid issues when the same alias appears in stdInputExtDic and stdConstitDic)
-    constitseq.prereqs += ['extinput:'+constitseq.inputname] 
+    if callable(constitseq.inputname): 
+        constitseq.prereqs += ['ext'+constitseq.inputname(parentjetdef)] 
+    else: 
+        constitseq.prereqs += ['extinput:'+constitseq.inputname] 
 
     if isinstance( constitseq, JetInputConstitSeq):
         # instantiate the JetConstitModifier and add their dependencies to the actual constit sequence
@@ -175,7 +178,8 @@ def solveInputExternalDependencies(jetinputext, parentjetdef,  inplace=False):
 def prereqToDef(prereq, parentjetdef):
     """translate a prereq string in the form 'type:alias' into a known config object.
     """
-    reqtype, reqkey = prereq.split(':',1)
+    str_prereq = prereq(parentjetdef) if callable(prereq) else prereq
+    reqtype, reqkey = str_prereq.split(':',1)
     if reqtype=='mod':
         reqInstance = aliasToModDef(reqkey, parentjetdef)
     else:
@@ -202,17 +206,18 @@ def aliasToModDef(alias, parentjetdef ):
         moddef.prereqs = moddef.prereqs( modspec, parentjetdef )        
     
     for prereq in moddef.prereqs:
-        reqInstance = parentjetdef._prereqDic.get( prereq, None)
+        str_prereq = prereq(parentjetdef) if callable(prereq) else prereq
+        reqInstance = parentjetdef._prereqDic.get( str_prereq, None)
         if reqInstance is None:
-            reqInstance = prereqToDef(prereq, parentjetdef)
-
-        if prereq.startswith('ghost:'):
+            reqInstance = prereqToDef(str_prereq, parentjetdef)
+        
+        if str_prereq.startswith('ghost:'):
             # then it is also an input : register this requirement also as an input
-            prereqN = prereq.split(':')[1]
+            prereqN = str_prereq.split(':')[1]
             parentjetdef._prereqOrder.append('input:'+prereqN)
             parentjetdef._prereqDic['input:'+prereqN] = reqInstance # the input config instance is identical for input and ghost (only the PseudoJet will differ)
             
-        parentjetdef._prereqOrder.append(prereq)
-        parentjetdef._prereqDic[prereq] = reqInstance
+        parentjetdef._prereqOrder.append(str_prereq)
+        parentjetdef._prereqDic[str_prereq] = reqInstance
         
     return moddef

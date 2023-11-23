@@ -36,6 +36,14 @@ StatusCode TauClusterFinder::execute(xAOD::TauJet& tau) const {
       ATH_MSG_WARNING("Find cluster with nullptr, please check the configuration !");
       continue;
     }
+    if (inEleRM()){
+      static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::CaloClusterContainer>> acc_originalObject("ERMOriginalCaloCluster");
+      auto original_cluster_link = acc_originalObject(*cluster);
+        if (!original_cluster_link.isValid()){
+            ATH_MSG_ERROR("Original ERM cluster link is not valid");
+        }
+        cluster = *original_cluster_link;
+    }
     
     // Clusters with negative energy will be thinned, and the elementlinks to these
     // clusters will not be valid. 

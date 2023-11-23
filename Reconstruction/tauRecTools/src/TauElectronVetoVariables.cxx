@@ -158,6 +158,11 @@ StatusCode TauElectronVetoVariables::execute(xAOD::TauJet& pTau) const {
     for (const xAOD::CaloVertexedTopoCluster& vertexedCluster : vertexedClusterList){
       
       const xAOD::CaloCluster& cluster = vertexedCluster.clust();
+      auto cell_links = cluster.getCellLinks();
+      if (cell_links == nullptr) {
+        ATH_MSG_DEBUG("NO Cell links found for cluster with pT " << cluster.pt());
+        continue;
+      }
       CaloClusterCellLink::const_iterator pCellIter  = cluster.getCellLinks()->begin();
       CaloClusterCellLink::const_iterator pCellIterE = cluster.getCellLinks()->end();
       for (; pCellIter != pCellIterE; ++pCellIter) {

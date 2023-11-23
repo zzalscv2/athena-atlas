@@ -51,8 +51,9 @@ private:
   /** @brief Apply preselection of the cells 
    *         Cells within dR < 0.4, in EM1, and pt > 100 MeV are selected
    */
-  std::vector<const CaloCell*> selectCells(const xAOD::TauJet& tau, const CaloCellContainer& cellContainer,
-                                           const CaloDetDescrManager* detMgr) const;
+  StatusCode selectCells(const xAOD::TauJet& tau, const CaloCellContainer& cellContainer,
+                                           const CaloDetDescrManager* detMgr, 
+                                           std::vector<const CaloCell*>& cells) const;
 
   /** @brief Select the seed cells used to construct the shot 
    *         Cells must sastisfy:
@@ -60,8 +61,9 @@ private:
    *         2. have largest pt among the neighbours in the eta direction 
    *         3. no other seed cells as neighbors in the eta direction
    */
-  std::vector<const CaloCell*> selectSeedCells(const xAOD::TauJet& tau, const CaloCellContainer& cellContainer,
-                                               const CaloDetDescrManager* detMgr) const;
+  StatusCode selectSeedCells(const xAOD::TauJet& tau, const CaloCellContainer& cellContainer,
+                                               const CaloDetDescrManager* detMgr,
+                                                std::vector<const CaloCell*>& seedCells) const;
 
   /** @brief Check whether two cells are neighbours in the phi direction */
   bool isPhiNeighbour(IdentifierHash cell1Hash, IdentifierHash cell2Hash) const;
@@ -98,10 +100,12 @@ private:
   Gaudi::Property<int> m_nCellsInEta {this, "NCellsInEta"};
   Gaudi::Property<std::vector<float>> m_minPtCut {this, "MinPtCut"};
   Gaudi::Property<std::vector<float>> m_doubleShotCut {this, "AutoDoubleShotCut"};
+  Gaudi::Property<bool> m_removeElectronCells {this, "RemoveElectronCells", false};
 
   SG::ReadHandleKey<CaloCellContainer> m_caloCellInputContainer{this,"Key_caloCellInputContainer", "AllCalo", "input vertex container key"};
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
   ToolHandle<IHadronicCalibrationTool> m_caloWeightTool {this, "CaloWeightTool", "H1WeightToolCSC12Generic"};
+  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_removedClusterInputContainer {this,"Key_RemovedClusterInputContainer", "", "input removed cluster key"};
   
   /// calo cell navigation
   const CaloCell_ID* m_calo_id = nullptr;

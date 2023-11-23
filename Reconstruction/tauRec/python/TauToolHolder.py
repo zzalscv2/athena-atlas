@@ -58,7 +58,9 @@ def TauVertexFinderCfg(flags):
                                       InDetTrackSelectionToolForTJVA = result.popToolsAndMerge(Tau_InDetTrackSelectionToolForTJVACfg(flags)),
                                       Key_trackPartInputContainer= flags.Tau.ActiveConfig.TrackCollection,
                                       Key_vertexInputContainer = flags.Tau.ActiveConfig.VertexCollection,
-                                      TVATool = result.popToolsAndMerge(TVAToolCfg(flags)) )
+                                      TVATool = result.popToolsAndMerge(TVAToolCfg(flags)),
+                                      inEleRM = flags.Tau.ActiveConfig.inTauEleRM,
+                                      )
 
     result.setPrivateTools(TauVertexFinder)
     return result
@@ -117,10 +119,11 @@ def TauTrackFinderCfg(flags):
                                     Key_jetContainer = (flags.Tau.ActiveConfig.SeedJetCollection if flags.Tau.useGhostTracks else ""),
                                     Key_trackPartInputContainer = flags.Tau.ActiveConfig.TrackCollection,
                                     Key_LargeD0TrackInputContainer = (flags.Tau.ActiveConfig.LargeD0TrackContainer if flags.Tau.associateLRT else ""),
-                                    TrackToVertexIPEstimator = result.popToolsAndMerge(AtlasTrackToVertexIPEstimatorCfg(flags)) )
+                                    TrackToVertexIPEstimator = result.popToolsAndMerge(AtlasTrackToVertexIPEstimatorCfg(flags)),
+                                    inEleRM = flags.Tau.ActiveConfig.inTauEleRM,
                                     #maxDeltaZ0wrtLeadTrk = 2, #in mm
                                     #removeTracksOutsideZ0wrtLeadTrk = True
-    
+    )
     result.setPrivateTools(TauTrackFinder)
     return result
 
@@ -132,7 +135,10 @@ def TauClusterFinderCfg(flags):
 
 
     TauClusterFinder = CompFactory.getComp("TauClusterFinder")
-    TauClusterFinder = TauClusterFinder(name = _name)
+    TauClusterFinder = TauClusterFinder(
+        name = _name, 
+        inEleRM = flags.Tau.ActiveConfig.inTauEleRM,
+    )
 
 
     result.setPrivateTools(TauClusterFinder)
@@ -299,13 +305,16 @@ def TauShotFinderCfg(flags):
 
 
     TauShotFinder = CompFactory.getComp("TauShotFinder")
-    TauShotFinder = TauShotFinder(name = _name,
-                                  CaloWeightTool = result.popToolsAndMerge(CaloWeightTool),
-                                  NCellsInEta           = 5,
-                                  MinPtCut              = shotPtCut_1Photon,
-                                  AutoDoubleShotCut     = shotPtCut_2Photons,
-                                  Key_caloCellInputContainer="AllCalo"
-                                  )
+    TauShotFinder = TauShotFinder(
+        name                                = _name,
+        CaloWeightTool                      = result.popToolsAndMerge(CaloWeightTool),
+        NCellsInEta                         = 5,
+        MinPtCut                            = shotPtCut_1Photon,
+        AutoDoubleShotCut                   = shotPtCut_2Photons,
+        Key_RemovedClusterInputContainer    = flags.Tau.ActiveConfig.RemovedElectronClusters,
+        RemoveElectronCells                 = flags.Tau.ActiveConfig.RemoveElectronCells,
+        inEleRM                             = flags.Tau.ActiveConfig.inTauEleRM,
+    )
 
     result.setPrivateTools(TauShotFinder)
     return result
@@ -319,10 +328,15 @@ def Pi0ClusterFinderCfg(flags):
 
     TauPi0CreateROI = CompFactory.getComp("TauPi0CreateROI")
     
-    TauPi0CreateROI = TauPi0CreateROI(name = _name,
-                                      Key_caloCellInputContainer="AllCalo")
+    myTauPi0CreateROI = TauPi0CreateROI(
+        name                             = _name,
+        Key_caloCellInputContainer       = "AllCalo",
+        Key_RemovedClusterInputContainer = flags.Tau.ActiveConfig.RemovedElectronClusters,
+        inEleRM                          = flags.Tau.ActiveConfig.inTauEleRM,
+        RemoveElectronCells              = flags.Tau.ActiveConfig.RemoveElectronCells,
+    )
 
-    result.setPrivateTools(TauPi0CreateROI)
+    result.setPrivateTools(myTauPi0CreateROI)
     return result
 
 #########################################################################
@@ -698,7 +712,8 @@ def MvaTESVariableDecoratorCfg(flags):
 
     MvaTESVariableDecorator = CompFactory.getComp("MvaTESVariableDecorator")
     MvaTESVariableDecorator = MvaTESVariableDecorator(name = _name,
-                                                      Key_vertexInputContainer= flags.Tau.ActiveConfig.VertexCollection,
+                                                      Key_vertexInputContainer = flags.Tau.ActiveConfig.VertexCollection,
+                                                      EventShapeKey = flags.Tau.ActiveConfig.EventShapeCollection,
                                                       VertexCorrection = True)
     result.setPrivateTools(MvaTESVariableDecorator)
     return result
@@ -967,31 +982,16 @@ def TauAODMuonRemovalCfg(flags):
     result.setPrivateTools(myMuonRemoval)
     return result
 
-########################################################################
-# elec removal tool
-def TauAODElectronRemovalCfg(flags):
-    result = ComponentAccumulator()  
-    _name = flags.Tau.ActiveConfig.prefix + 'ElecRemoval'
-    TauAODLeptonRemovalTool = CompFactory.getComp("TauAODLeptonRemovalTool")
-    myElecRemoval = TauAODLeptonRemovalTool(    name                   = _name,
-                                                Key_ElecInputContainer = 'Electrons',
-                                                doElecTrkRm            = True,
-                                                doElecClsRm            = True,
-                                                elecIDWP               = 'Medium'
-    )
-    result.setPrivateTools(myElecRemoval)
-    return result
-
-# FIXME: placeholder, tool not implemented yet
 # electron excluder tool
-def TauElectronExcluderCfg(flags):
+def TauEleOverlapChecker(flags):
     result = ComponentAccumulator()
-    _name = flags.Tau.ActiveConfig.prefix + 'TauElectronExcluder'
-
-    TauElectronExcluder = CompFactory.getComp("TauElectronExcluder")
-    myTauElectronExcluder = TauElectronExcluder(name                       = _name,
-                                                Key_RemovalDirectionsInput = flags.Tau.ActiveConfig.ElectronDirections,
-                                                CheckingCone               = 0.6)
-
-    result.setPrivateTools(myTauElectronExcluder)
+    _name = flags.Tau.ActiveConfig.prefix + 'TauEleOverlapChecker'
+    TauEleOverlapChecker = CompFactory.getComp("TauEleOverlapChecker")
+    myTauEleOverlapChecker = TauEleOverlapChecker(
+        name                         = _name,
+        Key_RemovedClustersContainer = flags.Tau.ActiveConfig.RemovedElectronClusters,
+        Key_RemovedTracksContainer   = flags.Tau.ActiveConfig.RemovedElectronTracks,
+        CheckingCone                 = flags.Tau.ActiveConfig.EleRM_CheckingConeSize,
+    )
+    result.setPrivateTools(myTauEleOverlapChecker)
     return result
