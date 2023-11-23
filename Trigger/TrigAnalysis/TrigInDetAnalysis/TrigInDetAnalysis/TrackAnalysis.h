@@ -71,14 +71,16 @@ public:
 			TrackAssociator* matcher, 
 			const TIDA::Event* event, 
 			double* ) { 
-    execute( tracks1, tracks2, matcher, event ); 
-  } 
+    execute( tracks1, tracks2, matcher, event );
+  }
 
+  virtual void execute( const std::vector<TIDA::Track*>& ,
+			const std::vector<TIDA::Track*>& ,
+			TrackAssociator* , 
+			const TIDA::Event* , 
+			double* , 
+			TIDARoiDescriptor* ) { }
 
-  //  virtual void execute( const std::vector<TIDA::Track*>& ,
-  //			const std::vector<TIDA::Track*>& ,
-  //			TrackAssociator* , 
-  //			TIDARoiDescriptor* =0 ) { } 
 
   virtual void execute_vtx( const std::vector<TIDA::Vertex*>& ,
 			    const std::vector<TIDA::Vertex*>& , 
