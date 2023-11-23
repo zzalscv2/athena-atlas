@@ -25,7 +25,6 @@ def BPHY24Cfg(flags):
 
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
-    from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
     acc = ComponentAccumulator()
     isSimulation = flags.Input.isMC
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
@@ -225,12 +224,8 @@ def BPHY24Cfg(flags):
     thinPassFlagsList += [ "" ] # TODO: is this really needed?
     finalCandidateList += ["BPHY24RecoKshortCandidates"]
     finalCandidateList += ["BPHY24RecoV0Candidates"]
-    JpsiV0VertexFit = CompFactory.Trk.TrkVKalVrtFitter(
-                                  name                 = "JpsiV0VertexFit",
-                                  Extrapolator         = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags)),
-                                  FirstMeasuredPoint   = False,
-                                  CascadeCnstPrecision = 1e-6,
-                                  MakeExtendedVertex   = True)
+    from TrkConfig.TrkVKalVrtFitterConfig import JpsiV0VertexFitCfg
+    JpsiV0VertexFit = acc.popToolsAndMerge(JpsiV0VertexFitCfg(flags))
     acc.addPublicTool(JpsiV0VertexFit)
 
     BPHY24JpsimmKshort          = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
