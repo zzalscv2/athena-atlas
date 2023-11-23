@@ -762,6 +762,25 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
         }
       }
 
+      //  If we have a non-linear correction, apply it here
+      //
+      //    We apply it as an inverse correction - i.e. we divide by a correction
+      //      term tha is a sum of coefficients times the ADC minus a reference
+      //      to a power. The lowest power is 1, the highest is deteremined by
+      //      the number of provided coefficients 
+      //
+      if (m_haveNonlinCorr) {
+        float ampCorrFact = (m_amplitude - m_nonLinCorrRefADC) / 1000. ;
+	
+	float invNLCorr = 1.0;
+	for (size_t power = 1; power <= m_nonLinCorrParams.size(); power++) {
+	  invNLCorr += m_nonLinCorrParams[power - 1]*pow(ampCorrFact, power);
+	}
+
+        m_amplitude /= invNLCorr;
+        m_ampError /= invNLCorr;
+      }
+      
       //
       // Multiply amplitude by gain factor
       //
@@ -806,12 +825,21 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
 
       //  If we have a non-linear correction, apply it here
       //
+      //    We apply it as an inverse correction - i.e. we divide by a correction
+      //      term tha is a sum of coefficients times the ADC minus a reference
+      //      to a power. The lowest power is 1, the highest is deteremined by
+      //      the number of provided coefficients 
+      //
       if (m_haveNonlinCorr) {
-        float ampCorrFact = m_amplitude / 1000. - 0.5;
-        float corrFactor = 1. / (1. + m_nonLinCorrParams[0] * ampCorrFact + m_nonLinCorrParams[1] * ampCorrFact * ampCorrFact);
+        float ampCorrFact = (m_amplitude - m_nonLinCorrRefADC) / 1000. ;
+	
+	float invNLCorr = 1.0;
+	for (size_t power = 1; power <= m_nonLinCorrParams.size(); power++) {
+	  invNLCorr += m_nonLinCorrParams[power - 1]*pow(ampCorrFact, power);
+	}
 
-        m_amplitude *= corrFactor;
-        m_ampError *= corrFactor;
+        m_amplitude /= invNLCorr;
+        m_ampError /= invNLCorr;
       }
     }
 
