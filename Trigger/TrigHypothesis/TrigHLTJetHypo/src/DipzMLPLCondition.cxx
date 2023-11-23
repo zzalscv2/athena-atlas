@@ -24,6 +24,11 @@ DipzMLPLCondition::DipzMLPLCondition(double wp,
 
 }
 
+float safeRatio(float num, float denom) {
+  float ratio = (denom == 0 ? INFINITY : num / denom);
+  return ratio;
+}
+
 float DipzMLPLCondition::getDipzMLPLDecValue(const pHypoJet &ip,
                                      const std::unique_ptr<ITrigJetHypoInfoCollector> &collector,
                                      const std::string &decName) const
@@ -52,14 +57,14 @@ float DipzMLPLCondition::getDipzMLPLDecValue(const pHypoJet &ip,
 
 float DipzMLPLCondition::calcNum(float acml, const pHypoJet &ip, 
                       const std::unique_ptr<ITrigJetHypoInfoCollector> &collector) const {
-    float zoversigma = getDipzMLPLDecValue(ip, collector, m_decName_z) / std::pow(getDipzMLPLDecValue(ip, collector, m_decName_negLogSigma2),2);
+    float zoversigma = safeRatio(getDipzMLPLDecValue(ip, collector, m_decName_z), std::pow(getDipzMLPLDecValue(ip, collector, m_decName_negLogSigma2),2));
     return acml + zoversigma;
 }
 
 
 float DipzMLPLCondition::calcDenom(float acml, const pHypoJet &ip, 
                       const std::unique_ptr<ITrigJetHypoInfoCollector> &collector) const {
-    float oneoversigma = 1 / std::pow(getDipzMLPLDecValue(ip, collector, m_decName_negLogSigma2),2);
+    float oneoversigma = safeRatio(1, std::pow(getDipzMLPLDecValue(ip, collector, m_decName_negLogSigma2),2));
     return acml + oneoversigma;
 }
 
@@ -68,8 +73,9 @@ float DipzMLPLCondition::calcLogTerm(float acml, const pHypoJet &ip,
 
   float dipz_z = getDipzMLPLDecValue(ip, collector, m_decName_z);
   float dipz_sigma = getDipzMLPLDecValue(ip, collector, m_decName_negLogSigma2);
+  float log_sigma = (dipz_sigma <= 0 ? -INFINITY : std::log( dipz_sigma ));
 
-  float logterm = -0.5 * std::log(2.0 * M_PI) - std::log(dipz_sigma) - std::pow(zhat - dipz_z, 2) / (2.0 * std::pow(dipz_sigma, 2));
+  float logterm = -0.5 * std::log(2.0 * M_PI) - log_sigma - safeRatio(std::pow(zhat - dipz_z, 2), (2.0 * std::pow(dipz_sigma, 2)));
 
   return acml + logterm;
 
@@ -84,12 +90,13 @@ bool DipzMLPLCondition::isSatisfied(const HypoJetVector& ips,
         0.0,
         [&collector,this](float sum, const pHypoJet& jp) {
           return this->calcNum(sum, jp, collector);});
-
-  zhat /= std::accumulate(ips.begin(),
-        ips.end(),
-        0.0,
-        [&collector,this](float sum, const pHypoJet& jp) {
-          return this->calcDenom(sum, jp, collector);});          
+        
+  zhat = safeRatio(zhat, std::accumulate(ips.begin(),
+                          ips.end(),
+                          0.0,
+                          [&collector,this](float sum, const pHypoJet& jp) {
+                          return this->calcDenom(sum, jp, collector);})
+          );
 
   auto logproduct = std::accumulate(ips.begin(), 
         ips.end(), 
@@ -120,7 +127,6 @@ bool DipzMLPLCondition::isSatisfied(const HypoJetVector& ips,
   return pass;
   
 }
-    
 
 std::string DipzMLPLCondition::toString() const {
   std::stringstream ss;
@@ -132,4 +138,3 @@ std::string DipzMLPLCondition::toString() const {
 
   return ss.str();
 }
-
