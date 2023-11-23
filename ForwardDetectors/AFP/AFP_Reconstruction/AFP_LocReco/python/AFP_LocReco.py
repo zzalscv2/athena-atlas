@@ -139,15 +139,6 @@ def AFP_LocReco_TD_HLT(flags):
         from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
         acc = ComponentAccumulator()
         
-        from IOVDbSvc.CondDB import conddb
-        if flags.Input.isMC:
-                if not conddb.folderRequested('/FWD/AFP/ToFParameters/Local'):
-                        conddb.addFolder("FWD_OFL","/FWD/AFP/ToFParameters/Local<tag>AFPMCToFLoc-ideal-01</tag>", className="CondAttrListCollection")
-        else:
-                if not conddb.folderRequested('/FWD/Onl/AFP/ToFParameters/Local'):
-                        conddb.addFolder("FWD_ONL","/FWD/Onl/AFP/ToFParameters/Local<tag>AFPToFLoc-01</tag>", className="CondAttrListCollection")
-
-
         acc.merge(AFP_LocReco_TD_Cfg(flags, {"tracksContainerName": recordable("HLT_AFPToFTrackContainer")}))
 
         return acc

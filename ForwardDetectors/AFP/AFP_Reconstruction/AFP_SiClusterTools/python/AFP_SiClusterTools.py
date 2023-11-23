@@ -58,17 +58,6 @@ def AFP_SiClusterTools_HLT(flags):
         acc = ComponentAccumulator()
         acc.merge(AFP_SiClusterTools_Cfg(flags,{"AFPSiHitsClusterContainerKey": recordable("HLT_AFPSiHitsClusterContainer")}))
         
-        from IOVDbSvc.CondDB import conddb
-        if flags.Input.isMC:
-                if not conddb.folderRequested('/FWD/AFP/Align/Local'):
-                        conddb.addFolder("FWD_OFL","/FWD/AFP/Align/Local<tag>AFPMCAlignLoc-ideal-01</tag>", className="CondAttrListCollection")
-                if not conddb.folderRequested('/FWD/AFP/Align/Global'):
-                        conddb.addFolder("FWD_OFL","/FWD/AFP/Align/Global<tag>AFPMCAlignGlob-ideal-01</tag>",className="CondAttrListCollection")
-        else:
-                if not conddb.folderRequested('/FWD/Onl/AFP/Align/Local'):
-                        conddb.addFolder("FWD_ONL","/FWD/Onl/AFP/Align/Local<tag>AFPAlignLoc-03</tag>", className="CondAttrListCollection")
-                if not conddb.folderRequested('/FWD/Onl/AFP/Align/Global'):
-                        conddb.addFolder("FWD_ONL","/FWD/Onl/AFP/Align/Global<tag>AFPAlignGlob-03</tag>",className="CondAttrListCollection")
         
         AFP_SiCl = acc.getEventAlgo("AFPSiCluster")
         

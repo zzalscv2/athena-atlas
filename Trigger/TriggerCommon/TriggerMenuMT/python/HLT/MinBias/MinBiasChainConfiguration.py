@@ -11,7 +11,7 @@ from TriggerMenuMT.HLT.MinBias.MinBiasMenuSequences import (MinBiasSPSequenceCfg
                                                             MinBiasTrkSequenceCfg,
                                                             MinBiasMbtsSequenceCfg,
                                                             MinBiasZVertexFinderSequenceCfg)
-from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import AFPTrkSequenceCfg, AFPGlobalSequenceCfg
+from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import AFPTrkSequenceCfg, AFPGlobalSequenceCfg, AFPToFDeltaZSequenceCfg
 
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO,
@@ -45,7 +45,10 @@ class MinBiasChainConfig(ChainConfigurationBase):
         else:
             steps.append(self.getMinBiasEmptyMbtsStep(flags))
 
-        if "afptof" in self.chainPart['recoAlg']:
+        if "afpdz" in self.chainPart['recoAlg']:
+            # afpdz covers both the trigger hypo and afptof reconstruction
+            steps.append(self.getAFPToFDeltaZStep(flags))
+        elif "afptof" in self.chainPart['recoAlg']:
             steps.append(self.getAFPGlobalStep(flags))
 
         if self.chainPart['recoAlg'][0] in ['sp', 'sptrk', 'hmt', 'excl']:
@@ -77,13 +80,10 @@ class MinBiasChainConfig(ChainConfigurationBase):
         return self.getStep(flags,4,'TrkCount',[callGenerator],genf=MinBiasTrkSequenceCfg)
 
     def getAFPTrkStep(self, flags):
-        # CA generation fails due to use of legacy JobProperties
-        if isComponentAccumulatorCfg():
-            return self.getEmptyStep(1,'AFPTrk_MissingCA')
         return self.getStep(flags,1,'AFPTrk',[callGenerator],genf=AFPTrkSequenceCfg)
 
     def getAFPGlobalStep(self, flags):
-        # CA generation fails due to use of legacy JobProperties
-        if isComponentAccumulatorCfg():
-            return self.getEmptyStep(1,'AFPGlobal_MissingCA')
-        return self.getStep(flags,1,'AFPGlobal',[callGenerator],genf=AFPGlobalSequenceCfg)
+        return self.getStep(flags,2,'AFPGlobal',[callGenerator],genf=AFPGlobalSequenceCfg)
+    
+    def getAFPToFDeltaZStep(self, flags):
+        return self.getStep(flags,2,'AFPToFDeltaZ',[callGenerator],genf=AFPToFDeltaZSequenceCfg)

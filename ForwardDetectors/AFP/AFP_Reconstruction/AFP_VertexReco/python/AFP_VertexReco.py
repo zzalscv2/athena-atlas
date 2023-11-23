@@ -50,14 +50,6 @@ def AFP_VertexReco_HLT(flags):
 	from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 	acc = ComponentAccumulator()
 	
-	from IOVDbSvc.CondDB import conddb
-	if flags.Input.isMC:
-		if not conddb.folderRequested('/FWD/AFP/ToFParameters/Vertex'):
-			conddb.addFolder("FWD_OFL","/FWD/AFP/ToFParameters/Vertex<tag>AFPMCToFVtx-ideal-01</tag>", className="CondAttrListCollection")
-	else:
-		if not conddb.folderRequested('/FWD/Onl/AFP/ToFParameters/Vertex'):
-			conddb.addFolder("FWD_ONL","/FWD/Onl/AFP/ToFParameters/Vertex<tag>AFPToFVtx-01</tag>", className="CondAttrListCollection")
-	
 	acc.merge(AFP_VertexReco_Cfg(flags, {"AFPToFTrackContainerKey": "HLT_AFPToFTrackContainer", "AFPProtonContainerKey": "HLT_AFPProtonContainer", "verticesContainerName": recordable("HLT_AFPVertexContainer")}))
 	
 	return acc
