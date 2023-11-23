@@ -5,11 +5,41 @@
 from AthenaCommon import Logging
 mgparlog = Logging.logging.getLogger('MadGraphParamHelpers')
 
+def parse_particle_info(process_dir):
+    """ Parses param card in process_dir (except for decays, which have different structure)
+    and returns dict with structure dict['block']['pdgid']='value'.
+    """
+    info={}
+    with open(process_dir+'/Cards/param_card.dat') as f:
+        block=None
+        for line in f:
+            if line.strip().startswith('#'):
+                continue
+            sl=line.lower().strip().split()
+            if len(sl)<2:
+                if len(sl)>0:
+                    mgparlog.warning('Unexpected line in param card:')
+                    mgparlog.warning(line)
+                continue
+            if sl[0]=='block':
+                block=sl[1]
+                if block not in info:
+                    info[block]={}
+                continue
+            if sl[0]=='decay':
+                block=None
+            if block is None:
+                continue
+            info[block][sl[0]]=sl[1]
+    return info
+    
+
 def set_SM_params(process_dir,FourFS=False):
     """ Set default SM parameters
     Recommended parameter page from PMG:
     https://twiki.cern.ch/twiki/bin/view/AtlasProtected/McProductionCommonParametersMC15
     """
+    
     param_card_settings = {
     'mass' : {
 '5':  "0.000000",
@@ -33,6 +63,15 @@ def set_SM_params(process_dir,FourFS=False):
     }
     if FourFS:
         param_card_settings['mass']['5']="4.950000e+00"
+
+    # do not set particle mass or yukawa if parameter does not exist in card
+    existing_particle_info=parse_particle_info(process_dir)
+    for block in param_card_settings:
+        for pdgid in list(param_card_settings[block].keys()):
+            if block in existing_particle_info and pdgid not in existing_particle_info[block]:
+                mgparlog.warning('Not setting {} for {} as parameter does not exist in param card'.format(block,pdgid))
+                param_card_settings[block].pop(pdgid)
+                
     from MadGraphControl.MadGraphUtils import modify_param_card
     modify_param_card(process_dir=process_dir,params=param_card_settings)
 
