@@ -12,6 +12,7 @@ JetStandardAux = \
     , "HadronConeExclExtendedTruthLabelID"
     , "ConeExclBHadronsFinal"
     , "ConeExclCHadronsFinal"
+    , "jetFoldHash"
     ]
 
 BTaggingStandardRun3Aux = \

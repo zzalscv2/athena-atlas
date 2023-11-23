@@ -78,6 +78,7 @@ if (NOT XAOD_STANDALONE)
     src/TrackTruthDecoratorAlg.cxx
     src/SoftElectronDecoratorAlg.cxx
     src/SoftElectronTruthDecoratorAlg.cxx
+    src/FoldDecoratorAlg.cxx
     src/components/FlavorTagDiscriminants_entries.cxx
     LINK_LIBRARIES FlavorTagDiscriminants
     )
