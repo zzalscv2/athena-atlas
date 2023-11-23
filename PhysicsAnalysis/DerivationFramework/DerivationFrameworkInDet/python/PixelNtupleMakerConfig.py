@@ -12,7 +12,9 @@ from PixelConditionsTools.PixelConditionsSummaryConfig import PixelConditionsSum
 
 def PixelNtupleMakerCfg(flags, name="PixelMonitoringTool", **kwargs):
     acc= ComponentAccumulator()
-    InDetTrackSelectionTool = CompFactory.InDet.InDetTrackSelectionTool(name="InDetTrackSelectionTool", CutLevel="Loose")
+    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    InDetTrackSelectionTool = acc.popToolsAndMerge(
+        InDetTrackSelectionTool_Loose_Cfg(flags))
     acc.addPublicTool(InDetTrackSelectionTool, primary=False)
     kwargs["TrackSelectionTool"] = InDetTrackSelectionTool
     the_tool = CompFactory.DerivationFramework.PixelNtupleMaker(name,**kwargs)
