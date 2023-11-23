@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZdcID_H
@@ -17,6 +17,9 @@
 #include <vector>
 
 class IdDictDictionary;
+
+enum ZdcIDType{ SINGLECHANNEL=0, MULTICHANNEL=1, ACTIVE=SINGLECHANNEL, INACTIVE=MULTICHANNEL };
+enum ZdcIDVolChannel{ READOUT=0, PIXEL=1, TUNGSTEN=2, HOUSING=3, AIR=4, TANAIR=5};
 
 class ZdcID : public AtlasDetectorID
 {
