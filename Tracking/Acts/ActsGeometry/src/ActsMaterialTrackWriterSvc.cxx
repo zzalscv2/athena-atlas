@@ -281,7 +281,7 @@ ActsMaterialTrackWriterSvc::doWrite(const Acts::RecordedMaterialTrack& mTrack)
         const ActsGeometryContext& gctx{m_trackingGeometrySvc->getNominalContext()};
         auto sfIntersection = surface
           ->intersect(gctx.context(), mint.position,
-                      mint.direction, true)
+                      mint.direction, Acts::BoundaryCheck(true))
           .closest();
         layerID = surface->geometryId();
         m_sur_id.push_back(layerID.value());
