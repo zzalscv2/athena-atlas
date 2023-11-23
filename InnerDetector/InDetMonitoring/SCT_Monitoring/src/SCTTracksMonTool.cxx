@@ -180,7 +180,7 @@ SCTTracksMonTool::fillHistograms() {
       continue;
     }
     double trackPerigeeTheta{track->perigeeParameters()->parameters()[Trk::theta]};
-    double trackPerigeeEta{-log(tan(0.5 * trackPerigeeTheta))};
+    double trackPerigeeEta{-std::log(std::tan(0.5 * trackPerigeeTheta))};
     m_tracksPerRegion->Fill(etaRegion(trackPerigeeEta));
     m_trk_eta->Fill(trackPerigeeEta);
     if (track->perigeeParameters()->parameters()[Trk::qOverP] != 0.) {
@@ -349,10 +349,10 @@ SCTTracksMonTool::checkHists(bool /*fromFinalize*/) {
 // ====================================================================================================
 float
 SCTTracksMonTool::calculatePull(const float residual, const float trkErr, const float hitErr) const {
-  float ErrorSum{sqrt(trkErr * trkErr + hitErr * hitErr)};
+  float errorSum{std::sqrt(trkErr * trkErr + hitErr * hitErr)};
 
-  if (ErrorSum > 1.0e-20) { // as floats are rarely exactly zero
-    return residual / ErrorSum;
+  if (errorSum > 1.0e-20) { // as floats are rarely exactly zero
+    return residual / errorSum;
   } else {
     ATH_MSG_DEBUG("Error on Track and Cluster are 0. Returning Pull value 0.");
     return 0.;
