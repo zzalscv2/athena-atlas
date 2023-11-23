@@ -6,6 +6,10 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from BTagging.BTagConfig import BTagAlgsCfg, GetTaggerTrainingMap
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 
+from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
+from FlavorTagDiscriminants.FoldDecoratorConfig import FoldDecoratorCfg
+
+PFLOW_JETS = 'AntiKt4EMPFlowJets'
 
 def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
                           trackAugmenterPrefix=None):
@@ -20,7 +24,7 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
         raise ValueError('PV collection length is not the same as Jets')
 
     acc = ComponentAccumulator()
-    from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
+
     acc.merge(JetTagCalibCfg(cfgFlags))
 
     if 'AntiKt4EMTopoJets' in jet_cols:
@@ -28,14 +32,14 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
             RenameInputContainerEmTopoHacksCfg('oldAODVersion')
         )
 
-    if 'AntiKt4EMPFlowJets' in jet_cols and cfgFlags.BTagging.Trackless:
+    if PFLOW_JETS in jet_cols and cfgFlags.BTagging.Trackless:
         acc.merge(
             RenameInputContainerEmPflowHacksCfg('tracklessAODVersion')
         )
-    
+
     #Treating decoration of large-R jets as a special case
     largeRJetCollection = 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
-    
+
     if largeRJetCollection in jet_cols:
         jet_col_name_without_Jets = largeRJetCollection.replace('Jets','')
         nnFiles = GetTaggerTrainingMap(cfgFlags, jet_col_name_without_Jets)
@@ -44,12 +48,17 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
         jet_cols.remove(largeRJetCollection)
 
     for jet_col, pv_col in zip(jet_cols, pv_cols):
+        if jet_col == PFLOW_JETS:
+            acc.merge(FoldDecoratorCfg(cfgFlags, jetCollection=jet_col))
+
         acc.merge(
-            getFtagComponent(cfgFlags, jet_col, pv_col,
-                             trackAugmenterPrefix=trackAugmenterPrefix)
+            getFtagComponent(
+                cfgFlags, jet_col, pv_col,
+                trackAugmenterPrefix=trackAugmenterPrefix
+            )
         )
 
-    return(acc)    
+    return acc
 
 def BTagLargeRDecoration(cfgFlags, nnFiles, jet_name='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'):
 

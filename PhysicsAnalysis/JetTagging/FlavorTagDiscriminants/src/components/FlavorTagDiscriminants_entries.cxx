@@ -23,6 +23,8 @@
 #include "FlavorTagDiscriminants/SoftElectronTruthDecoratorAlg.h"
 #include <FlavorTagDiscriminants/TrackClassifier.h>
 
+#include "src/FoldDecoratorAlg.h"
+
 using namespace FlavorTagDiscriminants;
 
 DECLARE_COMPONENT(VRJetOverlapDecoratorTool)
@@ -45,3 +47,4 @@ DECLARE_COMPONENT(TrackTruthDecoratorAlg)
 DECLARE_COMPONENT(SoftElectronDecoratorAlg)
 DECLARE_COMPONENT(SoftElectronTruthDecoratorAlg)
 DECLARE_COMPONENT(TrackClassifier)
+DECLARE_COMPONENT(FoldDecoratorAlg)
