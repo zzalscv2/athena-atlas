@@ -21,18 +21,18 @@ namespace xAOD {
         /**
          * @brief get chi2 of this track state
          */
-        double chi2() const;
+        float chi2() const;
 
         /**
          * @brief Set the Chi2 value of this track state
          */
-        void setChi2(double);
+        void setChi2(float);
 
         /**
          * @brief pointers API needed by MTJ
          */
-        const double* chi2Ptr() const;
-        double* chi2Ptr();
+        const float* chi2Ptr() const;
+        float* chi2Ptr();
 
         /**
          * @brief get path length of this track state

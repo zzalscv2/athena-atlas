@@ -125,7 +125,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     finderConfig.looseConstrValue = m_looseConstrValue;
     finderConfig.useVertexCovForIPEstimation = m_useVertexCovForIPEstimation;
     finderConfig.useSeedConstraint = m_useSeedConstraint;
-    m_vertexFinder = std::make_shared<VertexFinder>(finderConfig, extractParameters);
+    m_vertexFinder = std::make_shared<VertexFinder>(std::move(finderConfig), extractParameters);
     
     ATH_MSG_INFO("ACTS AMVF tool successfully initialized");
     return StatusCode::SUCCESS;

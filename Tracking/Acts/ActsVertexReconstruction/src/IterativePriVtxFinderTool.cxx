@@ -100,7 +100,10 @@ ActsTrk::IterativePriVtxFinderTool::initialize()
   VertexSeedFinder seedFinder(seedFinderConfig, extractParameters);
     
   // Iterative Vertex Finder setup
-  VertexFinder::Config finderConfig(fitter, std::move(linearizer), std::move(seedFinder), ipEst);
+  VertexFinder::Config finderConfig(std::move(fitter), 
+                                    std::move(linearizer), 
+                                    std::move(seedFinder), 
+                                    ipEst);
   finderConfig.significanceCutSeeding = m_significanceCutSeeding;
   finderConfig.maximumChi2cutForSeeding = m_maximumChi2cutForSeeding;
   finderConfig.maxVertices = m_maxVertices;
@@ -110,7 +113,7 @@ ActsTrk::IterativePriVtxFinderTool::initialize()
   finderConfig.doMaxTracksCut = m_doMaxTracksCut;
   finderConfig.maxTracks = m_maxTracks;
   finderConfig.cutOffTrackWeight = m_cutOffTrackWeight;
-  m_vertexFinder = std::make_shared<VertexFinder>(finderConfig, extractParameters); 
+  m_vertexFinder = std::make_shared<VertexFinder>(std::move(finderConfig), extractParameters); 
 
   ATH_MSG_INFO("ACTS Iterative Vertex Finder tool successfully initialized");
   return StatusCode::SUCCESS;

@@ -18,7 +18,7 @@ namespace xAOD {
  class TrackStateAuxContainer_v1 : public AuxContainerBase {
     public:
         TrackStateAuxContainer_v1();
-        std::vector<double> chi2;
+        std::vector<float> chi2;
         std::vector<double> pathLength;
         std::vector< uint64_t > typeFlags;
         std::vector<TrackStateIndexType> previous;

@@ -39,7 +39,7 @@ struct TestTrackState {
   BoundTrackParameters filtered;
   BoundTrackParameters smoothed;
   Jacobian jacobian;
-  double chi2;
+  float chi2;
   double pathLength;
 
   // Generate a random TestTrackState.
@@ -55,7 +55,7 @@ struct TestTrackState {
         filtered(surface, BoundVector::Zero(), std::nullopt, ParticleHypothesis::pion()),
         smoothed(surface, BoundVector::Zero(), std::nullopt, ParticleHypothesis::pion()),
         jacobian(Jacobian::Identity()),
-        chi2(std::chi_squared_distribution<double>(nMeasurements)(rng)),
+        chi2(std::chi_squared_distribution<float>(nMeasurements)(rng)),
         pathLength(
             std::uniform_real_distribution<ActsScalar>(1_mm, 10_mm)(rng)) {
     // set a random geometry identifier to uniquely identify each surface
@@ -316,7 +316,7 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
   auto ro_ts1 = ro_mtj->getTrackState(i1);
   auto ro_ts2 = ro_mtj->getTrackState(i2);
 
-  BOOST_CHECK_EQUAL((ro_ts0.component<double, "chi2"_hash>()), 0.0);
+  BOOST_CHECK_EQUAL((ro_ts0.component<float, "chi2"_hash>()), 0.0);
 
   BOOST_CHECK_EQUAL((ro_ts0.component<short, "author"_hash>()), 5);
   BOOST_CHECK_EQUAL((ro_ts1.component<short, "author"_hash>()), 6);

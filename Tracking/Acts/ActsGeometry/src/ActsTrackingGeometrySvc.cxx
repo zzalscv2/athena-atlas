@@ -37,6 +37,7 @@
 #include <Acts/Surfaces/PlanarBounds.hpp>
 #include <Acts/Surfaces/AnnulusBounds.hpp>
 #include <Acts/Surfaces/DiscSurface.hpp>
+#include <Acts/Surfaces/LineSurface.hpp>
 #include <Acts/Surfaces/RectangleBounds.hpp>
 
 // PACKAGE
@@ -469,9 +470,15 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
         return;
       }
 
+      const auto* regSurface = dynamic_cast<const Acts::RegularSurface*>(surface);
       const auto& trkSurface = siDetElem->surface();
+      if(regSurface == nullptr) {
+        ATH_MSG_ERROR("Invalid surface found");
+        result = false;
+        return;
+      }
 
-      Acts::Vector3 center{surface->center(gctx)};
+      Acts::Vector3 center{regSurface->center(gctx)};
       Amg::Vector3D trkCenter{trkSurface.center()};
       if (/* auto *b = */ dynamic_cast<const Acts::AnnulusBounds *>(&surface->bounds()))
       {
@@ -496,21 +503,24 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
         result = false;
       }
 
-      Acts::Vector3 norm{surface->normal(gctx)};
-      Amg::Vector3D trkNorm{trkSurface.normal()};
-      if(!isApprox(trkNorm, norm)) {
-        std::string trkName;
-        if (auto idHelper = siDetElem->getIdHelper())
-        {
-          trkName = idHelper->show_to_string(siDetElem->identify());
+      const auto* lineSurface = dynamic_cast<const Acts::LineSurface*>(surface);
+      if(lineSurface == nullptr) {
+        Acts::Vector3 norm{regSurface->normal(gctx, regSurface->center(gctx))};
+        Amg::Vector3D trkNorm{trkSurface.normal()};
+        if(!isApprox(trkNorm, norm)) {
+          std::string trkName;
+          if (auto idHelper = siDetElem->getIdHelper())
+          {
+            trkName = idHelper->show_to_string(siDetElem->identify());
+          }
+          ATH_MSG_WARNING("Acts surface "
+                          << surface->geometryId()
+                          << " normal (" << norm[0] << ',' << norm[1] << ',' << norm[2]
+                          << ") does not match Trk surface " << trkName
+                          << " normal (" << trkNorm[0] << ',' << trkNorm[1] << ',' << trkNorm[2] << ')');
+          nMismatchedNormals++;
+          result = false;
         }
-        ATH_MSG_WARNING("Acts surface "
-                        << surface->geometryId()
-                        << " normal (" << norm[0] << ',' << norm[1] << ',' << norm[2]
-                        << ") does not match Trk surface " << trkName
-                        << " normal (" << trkNorm[0] << ',' << trkNorm[1] << ',' << trkNorm[2] << ')');
-        nMismatchedNormals++;
-        result = false;
       }
 
       auto doPoints = [&](unsigned int type, const Acts::Vector2& loc) -> std::array<bool,3> {

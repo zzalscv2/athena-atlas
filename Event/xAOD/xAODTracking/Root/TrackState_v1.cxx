@@ -8,7 +8,7 @@
 
 namespace xAOD {
 
-    DEFINE_API(TrackState_v1, double, chi2, setChi2)    
+    DEFINE_API(TrackState_v1, float, chi2, setChi2)    
     DEFINE_API(TrackState_v1, double, pathLength, setPathLength)
     DEFINE_API( TrackState_v1, uint64_t, typeFlags, setTypeFlags)
     DEFINE_API(TrackState_v1, TrackStateIndexType, previous, setPrevious)
