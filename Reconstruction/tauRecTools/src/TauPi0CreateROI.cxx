@@ -22,7 +22,9 @@ TauPi0CreateROI::TauPi0CreateROI(const std::string& name) :
 StatusCode TauPi0CreateROI::initialize() {
     
     ATH_CHECK( m_caloCellInputContainer.initialize() );
-    ATH_CHECK(m_caloMgrKey.initialize());
+    ATH_CHECK( m_caloMgrKey.initialize() );
+    ATH_CHECK( m_removedClusterInputContainer.initialize(SG::AllowEmpty) );
+  ATH_MSG_INFO("Find Pi0 in context: " << (inEleRM() ? "`EleRM`" : "`Standard`") << ", with Electron cell removal Flag: " << m_removeElectronCells);
     return StatusCode::SUCCESS;
 }
 
@@ -40,7 +42,23 @@ StatusCode TauPi0CreateROI::executePi0CreateROI(xAOD::TauJet& tau, CaloConstCell
     ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << caloCellInHandle.key());
     return StatusCode::FAILURE;
   }
-  const CaloCellContainer *cellContainer = caloCellInHandle.cptr();;
+  
+  const CaloCellContainer *cellContainer = caloCellInHandle.cptr();
+  std::vector<const CaloCell*> removed_cells;
+  if (inEleRM() && m_removeElectronCells){
+    SG::ReadHandle<xAOD::CaloClusterContainer> removedClustersHandle( m_removedClusterInputContainer );
+    if (!removedClustersHandle.isValid()){
+      ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << removedClustersHandle.key());
+      return StatusCode::FAILURE;
+    }
+    const xAOD::CaloClusterContainer *removed_clusters_cont = removedClustersHandle.cptr();
+    
+    for (auto cluster : *removed_clusters_cont){
+      for(auto cell_it = cluster->cell_cbegin(); cell_it != cluster->cell_cend(); cell_it++){
+        removed_cells.push_back(*cell_it);
+      }
+    }
+  }
   
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
   const CaloDetDescrManager* caloDDMgr = *caloMgrHandle;
@@ -57,7 +75,8 @@ StatusCode TauPi0CreateROI::executePi0CreateROI(xAOD::TauJet& tau, CaloConstCell
     // only keep cells that are in Ecal (PS, EM1, EM2 and EM3, both barrel and endcap).
     int sampling = cell->caloDDE()->getSampling();
     if (sampling > 7) continue;
-
+    // if in EleRM, check the clusters do not include electron activities
+    if (m_removeElectronCells && inEleRM() && std::find(removed_cells.cbegin(), removed_cells.cend(), cell) != removed_cells.cend()) continue;
     // Store cell in output container
     const IdentifierHash cellHash = cell->caloDDE()->calo_hash();
 

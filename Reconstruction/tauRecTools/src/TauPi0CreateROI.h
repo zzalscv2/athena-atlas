@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUPI0CREATEROI_H
@@ -40,9 +40,11 @@ public:
   virtual StatusCode executePi0CreateROI(xAOD::TauJet& pTau, CaloConstCellContainer& Pi0CellContainer, boost::dynamic_bitset<>& map) const override;
 
 private:
-    
-  SG::ReadHandleKey<CaloCellContainer> m_caloCellInputContainer{this,"Key_caloCellInputContainer", "AllCalo", "input vertex container key"};
-  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
+  Gaudi::Property<bool> m_removeElectronCells {this, "RemoveElectronCells", false};
+
+  SG::ReadHandleKey<CaloCellContainer>          m_caloCellInputContainer       {this,"Key_caloCellInputContainer",       "AllCalo",           "input calo cell container key"};
+  SG::ReadCondHandleKey<CaloDetDescrManager>    m_caloMgrKey                   {this,"CaloDetDescrManager",              "CaloDetDescrManager"                               };
+  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_removedClusterInputContainer {this,"Key_RemovedClusterInputContainer", "",                   "input removed cluster key"   };
 };
 
 #endif	// TAURECTOOLS_TAUPI0CREATEROI_H

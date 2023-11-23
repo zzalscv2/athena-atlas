@@ -104,7 +104,7 @@ _stdInputList = [
 
     # *****************************
     JetInputExternal("JetETMissParticleFlowObjects", xAODType.FlowElement, algoBuilder = standardReco("PFlow"),
-                     prereqs = ["input:InDetTrackParticles", "input:CaloCalTopoClusters"],
+                     prereqs = [inputsFromContext("Tracks"), "input:CaloCalTopoClusters"],
                      ),
 
     JetInputExternal("GlobalParticleFlowObjects", xAODType.FlowElement,
@@ -117,9 +117,11 @@ _stdInputList = [
                      algoBuilder = standardReco("Tracks"),
                      filterfn = lambda flags : (flags.Reco.EnableTracking or "InDetTrackParticles" in flags.Input.Collections, "Tracking is disabled and no InDetTrackParticles in input")
                      ),
+    # alternative ID tracks for AntiKt4LCTopo_EleRM jets used for the electron removed tau reconstruction  
+    JetInputExternal("InDetTrackParticles_EleRM",   xAODType.TrackParticle),
 
     JetInputExternal("PrimaryVertices",   xAODType.Vertex,
-                     prereqs = ["input:InDetTrackParticles"],
+                     prereqs = [inputsFromContext("Tracks")],
                      filterfn = lambda flags : (flags.Beam.Type == BeamType.Collisions, f"No vertexing with {flags.Beam.Type}"), # should be changed when a reliable "EnableVertexing" flag exists
                      ),
     # No quality criteria are applied to the tracks, used for ghosts for example
@@ -127,7 +129,16 @@ _stdInputList = [
                      prereqs= [ inputsFromContext("Tracks") ], # in std context, this is InDetTrackParticles (see StandardJetContext)
                      algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef.context, trackSelOpt=False )
                      ),
-
+    # alternative JetSelected tracks for AntiKt4LCTopo_EleRM jets used for the electron removed tau reconstruction  
+    JetInputExternal("JetSelectedTracks_EleRM",     xAODType.TrackParticle,
+                     prereqs= [ inputsFromContext("Tracks") ], # in std context, this is InDetTrackParticles (see StandardJetContext)
+                     algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef.context, trackSelOpt=False )
+                     ),
+    # alternative ID tracks for ftf
+    JetInputExternal("JetSelectedTracks_ftf",     xAODType.TrackParticle,
+                     prereqs= [ inputsFromContext("Tracks") ], # in std context, this is InDetTrackParticles (see StandardJetContext)
+                     algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef.context, trackSelOpt=False )
+                     ),
     
     # Apply quality criteria defined via trackSelOptions in jdef.context (used e.g. for track-jets)
     JetInputExternal("JetSelectedTracks_trackSelOpt",     xAODType.TrackParticle,
@@ -139,16 +150,37 @@ _stdInputList = [
                                 inputsFromContext("Vertices")],
                      algoBuilder = inputcfg.buildJetTrackUsedInFitDeco
                      ),
-    JetInputExternal("JetTrackVtxAssoc",      xAODType.TrackParticle,
-                     algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(jdef.context, WorkingPoint="Nonprompt_All_MaxWeight"),
+    JetInputExternal("JetTrackVtxAssoc", xAODType.TrackParticle,
+        algoBuilder = 
+        lambda jdef, _ : jrtcfg.getJetTrackVtxAlg(
+            jdef.context, 
+            algname="jetTVA" if jdef.context in ["HL_LHC", "default", "notrk", ""] else f"jetTVA_{jdef.context}", 
+            WorkingPoint="Nonprompt_All_MaxWeight"
+        ),
+        # previous default for ttva : WorkingPoint="Custom", d0_cut= 2.0, dzSinTheta_cut= 2.0 
+        prereqs = ["input:JetTrackUsedInFitDeco", inputsFromContext("Vertices")],
+    ),
+    # alternative JetTrackVtxAssoc for AntiKt4LCTopo_EleRM jets used for the electron removed tau reconstruction  
+    JetInputExternal("JetTrackVtxAssoc_EleRM",      xAODType.TrackParticle,
+                     algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(jdef.context, algname="jetTVA_" + jdef.context, WorkingPoint="Nonprompt_All_MaxWeight"),
                      # previous default for ttva : WorkingPoint="Custom", d0_cut= 2.0, dzSinTheta_cut= 2.0 
                      prereqs = ["input:JetTrackUsedInFitDeco", inputsFromContext("Vertices") ]
                      ),
-
+    JetInputExternal("JetTrackVtxAssoc_ftf",      xAODType.TrackParticle,
+                     algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(jdef.context, algname="jetTVA_" + jdef.context, WorkingPoint="Nonprompt_All_MaxWeight"),
+                     # previous default for ttva : WorkingPoint="Custom", d0_cut= 2.0, dzSinTheta_cut= 2.0 
+                     prereqs = ["input:JetTrackUsedInFitDeco", inputsFromContext("Vertices") ]
+                     ),
     # *****************************
     JetInputExternal("EventDensity", "EventShape", algoBuilder = inputcfg.buildEventShapeAlg,
                      containername = lambda jetdef, specs : (specs or "")+"Kt4"+jetdef.inputdef.label+"EventShape",
                      prereqs = lambda jetdef : ["input:"+jetdef.inputdef.name] # this will force the input to be build *before* the EventDensity alg.
+    ),
+    # alternative EventDensity for AntiKt4LCTopo_EleRM jets used for the electron removed tau reconstruction  
+    JetInputExternal("EleRM_EventDensity", "EventShape", algoBuilder = inputcfg.buildEventShapeAlg,
+                    containername = lambda jetdef, specs : (specs or "")+"Kt4"+jetdef.inputdef.label+"EventShape",
+                    prereqs = lambda jetdef : ["input:"+jetdef.inputdef.name],
+                    specs = "EleRM_"
     ),
     JetInputExternal("HLT_EventDensity", "EventShape", algoBuilder = inputcfg.buildEventShapeAlg,
                      containername = lambda jetdef, specs : (specs or "")+"Kt4"+jetdef.inputdef.label+"EventShape",
@@ -158,7 +190,7 @@ _stdInputList = [
 
     # *****************************
     JetInputExternal("MuonSegments", "MuonSegment", algoBuilder=standardReco("Muons"),
-                     prereqs = ["input:InDetTrackParticles"], # most likely wrong : what exactly do we need to build muon segments ?? (and not necessarily full muons ...)
+                     prereqs = [inputsFromContext("Tracks")], # most likely wrong : what exactly do we need to build muon segments ?? (and not necessarily full muons ...)
                      filterfn = lambda flags : (flags.Reco.EnableCombinedMuon or "MuonSegments" in flags.Input.Collections, "Muon reco is disabled"),
                      ),
 
@@ -266,6 +298,10 @@ _stdSeqList = [
     JetInputConstitSeq("LCTopoOrigin",xAODType.CaloCluster, ["LC","Origin"],
                        "CaloCalTopoClusters", "LCOriginTopoClusters", jetinputtype="LCTopo",
                        ),
+    # alternative LCTopoOrigin for AntiKt4LCTopo_EleRM jets used for the electron removed tau reconstruction  
+    JetInputConstitSeq("LCTopoOrigin_EleRM",xAODType.CaloCluster, ["LC","Origin"],
+                       "CaloCalTopoClusters_EleRM", "LCOriginTopoClusters_EleRM", jetinputtype="LCTopo",
+                       ),
     JetInputConstitSeq("LCTopoCSSK",  xAODType.CaloCluster, ["LC","Origin","CS","SK"],
                        "CaloCalTopoClusters", "LCOriginTopoCSSK", jetinputtype="LCTopo",
                        ),
@@ -307,9 +343,9 @@ _stdSeqList = [
 
     # *****************************
     # Track constituents (e.g. ghosts, no quality criteria, no TTVA)
-    JetInputConstit("Track", xAODType.TrackParticle,'JetSelectedTracks'),
+    JetInputConstit("Track", xAODType.TrackParticle, inputsFromContext("JetTracks")),
     # Track constituents (e.g. track-jets, trackSelOptions quality criteria, TTVA)
-    JetInputConstit("PV0Track", xAODType.TrackParticle, 'PV0JetSelectedTracks'),
+    JetInputConstit("PV0Track", xAODType.TrackParticle, inputsFromContext("JetTracks", prefix="PV0")),
 
     # LRT. Only used as ghosts
     JetInputConstit("TrackLRT", xAODType.TrackParticle, "InDetLargeD0TrackParticles", 

@@ -82,7 +82,7 @@ def getConstitFourMomTool(jetdef, modspec=""):
             cfourmom.AltJetScales = ["JetConstitScaleMomentum"]
         else:
             clstate = "CALIBRATED" if "LCTopo" in jetdef.basename else "UNCALIBRATED"
-            cfourmom.AltConstitColls = ["CaloCalTopoClusters"]
+            cfourmom.AltConstitColls = [jetdef.inputdef.inputname]
             cfourmom.AltConstitScales = [CaloClusterStates[clstate]]
             cfourmom.AltJetScales = [""]
     # Drop the LC-calibrated four-mom for EMTopo jets as we only wanted it as a possibility

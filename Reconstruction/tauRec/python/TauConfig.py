@@ -21,10 +21,9 @@ def TauBuildAlgCfg(flags):
     tools = []
     tools.append( result.popToolsAndMerge(tauTools.JetSeedBuilderCfg(flags)) )
 
-    # FIXME: placeholder, tool not implemented yet
     # for electron-removed taus, check that seed jets are close to an electron
-    if flags.Tau.ActiveConfig.doTauEleRM:
-        tools.append( result.popToolsAndMerge(tauTools.TauElectronExcluderCfg(flags)) )
+    if getattr(flags.Tau.ActiveConfig, 'inTauEleRM', False):
+        tools.append( result.popToolsAndMerge(tauTools.TauEleOverlapChecker(flags)) )
 
     # run vertex finder only in case vertexing is available
     if flags.Tau.isStandalone or flags.Tracking.doVertexFinding:
@@ -278,7 +277,6 @@ def TauReconstructionCfg(flags):
     if (flags.Output.doWriteAOD and flags.Tau.ThinTaus):
         result.merge(TauxAODthinngCfg(flags_TauRec))
 
-    # FIXME: placeholder, tool not implemented yet
     # electron-subtracted tau reconstruction
     if flags.Tau.doTauEleRMRec:
 
@@ -287,14 +285,17 @@ def TauReconstructionCfg(flags):
         result.merge(TauElecSubtractAlgCfg(flags_TauEleRM))
 
         # jet reclustering
-        # FIXME: config to be checked
         from JetRecConfig.JetRecConfig import JetRecCfg
         from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
+        AntiKt4LCTopo_EleRM = AntiKt4LCTopo.clone(suffix="_EleRM")
+        AntiKt4LCTopo_EleRM.inputdef.name = flags_TauEleRM.Tau.ActiveConfig.LCTopoOrigin_EleRM
+        AntiKt4LCTopo_EleRM.inputdef.inputname = flags_TauEleRM.Tau.ActiveConfig.CaloCalTopoClusters_EleRM
+        AntiKt4LCTopo_EleRM.inputdef.containername = flags_TauEleRM.Tau.ActiveConfig.LCOriginTopoClusters_EleRM
+        AntiKt4LCTopo_EleRM.modifiers = tuple(a_mod for a_mod in AntiKt4LCTopo_EleRM.modifiers if not a_mod.startswith('Filter_ifnotESD'))
+        AntiKt4LCTopo_EleRM.standardRecoMode = True
+        AntiKt4LCTopo_EleRM.context = "EleRM"
 
-        AntiKt4LCTopo_ElecRM = AntiKt4LCTopo.clone(suffix="_ElecRM")
-        AntiKt4LCTopo_ElecRM.inputdef.inputname = flags_TauEleRM.Tau.ActiveConfig.CaloCalTopoClusters_EleRM
-        # FIXME: could also feed electron-subtracted tracks for ghost matching, although not strictly needed
-        result.merge(JetRecCfg(flags_TauEleRM, AntiKt4LCTopo_ElecRM))
+        result.merge(JetRecCfg(flags_TauEleRM, AntiKt4LCTopo_EleRM))
 
         result.merge(TauBuildAlgCfg(flags_TauEleRM))
 
@@ -319,30 +320,36 @@ def TauReconstructionCfg(flags):
     return result
 
 
-# FIXME: placeholder, algorithm not implemented yet
 def TauElecSubtractAlgCfg(flags):
 
-   result = ComponentAccumulator()
+    result = ComponentAccumulator()
 
-   from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
-   from ElectronPhotonSelectorTools.LikelihoodEnums import LikeEnum
-   from ElectronPhotonSelectorTools.ElectronLikelihoodToolMapping import electronLHmenu
+    from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
+    from ElectronPhotonSelectorTools.LikelihoodEnums import LikeEnum
+    from ElectronPhotonSelectorTools.ElectronLikelihoodToolMapping import electronLHmenu
+    ElectronLHSelectorEleRM = result.popToolsAndMerge(
+        AsgElectronLikelihoodToolCfg(
+            flags,
+            name    = flags.Tau.ActiveConfig.prefix+"ElectronLHSelector",
+            quality = getattr(LikeEnum, flags.Tau.ActiveConfig.EleRM_ElectronWorkingPoint),
+            menu    = electronLHmenu.offlineMC21,
+        )
+    )
 
-   ElectronLHSelectorTight = result.popToolsAndMerge(AsgElectronLikelihoodToolCfg(flags,
-                                                                                  name    = flags.Tau.ActiveConfig.prefix+"ElectronLHSelectorTight",
-                                                                                  quality = LikeEnum.Tight,
-                                                                                  menu    = electronLHmenu.offlineMC21))
-
-   tauElecSubtractAlg = CompFactory.TauElecSubtractAlg(name                        = flags.Tau.ActiveConfig.prefix+"TauElecSubtractAlg",
-                                                       Key_ElectronsInput          = 'Electrons',
-                                                       Key_ClustersInput           = 'CaloCalTopoClusters',
-                                                       Key_ClustersOutput          = flags.Tau.ActiveConfig.CaloCalTopoClusters_EleRM,
-                                                       Key_IDTracksInput           = 'InDetTrackParticles',
-                                                       Key_IDTracksOutput          = flags.Tau.ActiveConfig.TrackCollection,
-                                                       Key_RemovalDirectionsOutput = flags.Tau.ActiveConfig.ElectronDirections,
-                                                       ElectronLHTool              = ElectronLHSelectorTight)
-   result.addEventAlgo(tauElecSubtractAlg)
-   return result
+    tauElecSubtractAlg = CompFactory.TauElecSubtractAlg(
+        name                        = flags.Tau.ActiveConfig.prefix+"TauElecSubtractAlg",
+        Key_ElectronsInput          = 'Electrons',
+        Key_ClustersInput           = 'CaloCalTopoClusters',
+        Key_ClustersOutput          = flags.Tau.ActiveConfig.CaloCalTopoClusters_EleRM,
+        Key_IDTracksInput           = 'InDetTrackParticles',
+        Key_IDTracksOutput          = flags.Tau.ActiveConfig.TrackCollection,
+        Key_RemovedClustersOutput   = flags.Tau.ActiveConfig.RemovedElectronClusters,
+        Key_RemovedTracksOutput     = flags.Tau.ActiveConfig.RemovedElectronTracks,
+        ElectronLHTool              = ElectronLHSelectorEleRM,
+        doNothing                   = False,
+    )
+    result.addEventAlgo(tauElecSubtractAlg)
+    return result
 
 
 # This is an example config for scheduling TauJet_MuonRM in AOD

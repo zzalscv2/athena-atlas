@@ -74,7 +74,7 @@ private:
 			       const xAOD::Vertex* primaryVertex) const;
 
     void getTauTracksFromPV( const xAOD::TauJet& tauJet,
-			     const xAOD::TrackParticleContainer& trackParticleCont,
+			     const std::vector<const xAOD::TrackParticle*>& vecTrackParticles,
 			     const xAOD::Vertex* primaryVertex,
 			     const bool& useGhostTracks,
 			     const xAOD::JetContainer* jetContainer,

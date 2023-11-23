@@ -107,12 +107,11 @@ def buildEventShapeAlg(jetOrConstitdef, inputspec, voronoiRf = 0.9, radius = 0.4
     
     pjContName = getPJContName(jetOrConstitdef,suffix)
     nameprefix = inputspec or ""
-    
     rhotool = configEventDensityTool(
         f"EventDensity_{nameprefix}Kt4{pjContName}",
         jetOrConstitdef,
         InputContainer = pjContName, 
-        OutputContainer = getEventShapeName(jetOrConstitdef, nameprefix=inputspec, suffix=suffix, radius=radius),
+        OutputContainer = getEventShapeName(jetOrConstitdef, nameprefix=nameprefix, suffix=suffix, radius=radius),
         JetRadius = radius,
         VoronoiRfact = voronoiRf,
         )

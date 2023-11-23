@@ -73,7 +73,6 @@ def createTauConfigFlags():
     tau_cfg.addFlagsCategory("Tau.ActiveConfig", createTauRecConfigFlags, prefix=True)
 
     # e-had boosted ditaus, aka electron-subtracted taus
-    # FIXME: keep this switched off until missing algorithm and tool are implemented
     tau_cfg.addFlag("Tau.doTauEleRMRec", False)
     # had-had boosted ditaus
     tau_cfg.addFlag("Tau.doDiTauRec", True)
@@ -84,22 +83,21 @@ def createTauConfigFlags():
 def createTauRecConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     flags = AthConfigFlags()
-
     flags.addFlag("prefix", "")
 
     # Output containers
-    flags.addFlag("TauJets", "TauJets")
-    flags.addFlag("TauTracks", "TauTracks")
-    flags.addFlag("TauShotClusters", "TauShotClusters")
-    flags.addFlag("TauShotClustersLinks", "TauShotClusters_links")
-    flags.addFlag("TauShotPFOs", "TauShotParticleFlowObjects")
-    flags.addFlag("TauPi0Clusters", "TauPi0Clusters")
-    flags.addFlag("TauPi0ClustersLinks", "TauPi0Clusters_links")
-    flags.addFlag("TauHadronicPFOs", "TauHadronicParticleFlowObjects")
-    flags.addFlag("TauNeutralPFOs", "TauNeutralParticleFlowObjects")
-    flags.addFlag("TauChargedPFOs", "TauChargedParticleFlowObjects")
-    flags.addFlag("TauSecondaryVertices", "TauSecondaryVertices")
-    flags.addFlag("TauFinalPi0s", "TauFinalPi0s")
+    flags.addFlag("TauJets",                "TauJets")
+    flags.addFlag("TauTracks",              "TauTracks")
+    flags.addFlag("TauShotClusters",        "TauShotClusters")
+    flags.addFlag("TauShotClustersLinks",   "TauShotClusters_links")
+    flags.addFlag("TauShotPFOs",            "TauShotParticleFlowObjects")
+    flags.addFlag("TauPi0Clusters",         "TauPi0Clusters")
+    flags.addFlag("TauPi0ClustersLinks",    "TauPi0Clusters_links")
+    flags.addFlag("TauHadronicPFOs",        "TauHadronicParticleFlowObjects")
+    flags.addFlag("TauNeutralPFOs",         "TauNeutralParticleFlowObjects")
+    flags.addFlag("TauChargedPFOs",         "TauChargedParticleFlowObjects")
+    flags.addFlag("TauSecondaryVertices",   "TauSecondaryVertices")
+    flags.addFlag("TauFinalPi0s",           "TauFinalPi0s")
 
     # Transient containers
     flags.addFlag("TauJets_tmp", "TauJets_tmp")
@@ -111,42 +109,64 @@ def createTauRecConfigFlags():
     flags.addFlag("TrackCollection", "InDetTrackParticles")
     flags.addFlag("SeedJetCollection", "AntiKt4LCTopoJets")
     flags.addFlag("LargeD0TrackCollection", "InDetLargeD0TrackParticles")
-
-    # Electron-subtracted tau
-    # FIXME: improve naming
-    flags.addFlag("doTauEleRM", False)
-    flags.addFlag("ElectronDirections", "")
-    flags.addFlag("CaloCalTopoClusters_EleRM", "")
-
+    flags.addFlag("EventShapeCollection", "Kt4LCTopoOriginEventShape")
+    # Electron-subtracted tau flags
+    flags.addFlag("inTauEleRM", False)
+    flags.addFlag("RemoveElectronCells",        False)
+    flags.addFlag("RemovedElectronClusters",    "")
     return flags
 
 
 def createTauEleRMConfigFlags():
     flags = createTauRecConfigFlags()
+    flags.prefix                     = "EleRM_"
+    _output_suffix                   = "_EleRM"
 
-    flags.prefix                    = "EleRM_"
-    flags.SeedJetCollection         = "AntiKt4LCTopoJets_ElecRM"
-    flags.TrackCollection           = "InDetTrackParticles_ElecRM"
-    flags.TauJets                   = "TauJets_EleRM"
-    flags.TauTracks                 = "TauTracks_EleRM"
-    flags.TauShotClusters           = "TauShotClusters_EleRM"
-    # FIXME: check the double underscore doesn't cause trouble for cell links
-    flags.TauShotClustersLinks      = "TauShotClusters_EleRM_links"
-    flags.TauShotPFOs               = "TauShotParticleFlowObjects_EleRM"
-    flags.TauJets_tmp               = "TauJets_tmp_EleRM"
-    flags.TauCommonPi0Cells         = "TauCommonPi0Cells_EleRM"
-    flags.TauPi0Clusters_tmp        = "TauPi0Clusters_tmp_EleRM"
-    flags.TauPi0Clusters            = "TauPi0Clusters_EleRM"
-    # FIXME: check the double underscore doesn't cause trouble for cell links
-    flags.TauPi0ClustersLinks       = "TauPi0Clusters_EleRM_links"
-    flags.TauHadronicPFOs           = "TauHadronicParticleFlowObjects_EleRM"
-    flags.TauNeutralPFOs            = "TauNeutralParticleFlowObjects_EleRM"
-    flags.TauChargedPFOs            = "TauChargedParticleFlowObjects_EleRM"
-    flags.TauSecondaryVertices      = "TauSecondaryVertices_EleRM"
-    flags.TauFinalPi0s              = "TauFinalPi0s_EleRM"
-    flags.doTauEleRM                = True
-    flags.ElectronDirections        = "RemovalDirections_ElecRM"
-    flags.CaloCalTopoClusters_EleRM = "CaloCalTopoClusters_EleRM"
+    # More Electron-subtracted tau specific flags
+    flags.addFlag("EleRM_ElectronWorkingPoint", "Medium")
+    flags.addFlag("RemovedElectronTracks",      "")
+    flags.addFlag("CaloCalTopoClusters_EleRM",  "")
+    flags.addFlag("InDetTrackParticles_EleRM",  "")
+    flags.addFlag("LCOriginTopoClusters_EleRM", "")
+    flags.addFlag("LCTopoOrigin_EleRM",         "")
+    flags.addFlag("EleRM_CheckingConeSize",     0.6)
+
+    # Output containers
+    flags.TauJets                    = f"TauJets{_output_suffix}"
+    flags.TauTracks                  = f"TauTracks{_output_suffix}"
+    flags.TauShotClusters            = f"TauShotClusters{_output_suffix}"
+    flags.TauShotClustersLinks       = f"TauShotClusters{_output_suffix}_links" # FIXME: check the double underscore doesn't cause trouble for cell links
+    flags.TauShotPFOs                = f"TauShotParticleFlowObjects{_output_suffix}"
+    flags.TauPi0Clusters             = f"TauPi0Clusters{_output_suffix}"
+    flags.TauPi0ClustersLinks        = f"TauPi0Clusters{_output_suffix}_links"  # FIXME: check the double underscore doesn't cause trouble for cell links
+    flags.TauHadronicPFOs            = f"TauHadronicParticleFlowObjects{_output_suffix}"
+    flags.TauNeutralPFOs             = f"TauNeutralParticleFlowObjects{_output_suffix}"
+    flags.TauChargedPFOs             = f"TauChargedParticleFlowObjects{_output_suffix}"
+    flags.TauSecondaryVertices       = f"TauSecondaryVertices{_output_suffix}"
+    flags.TauFinalPi0s               = f"TauFinalPi0s{_output_suffix}"
+
+    # Transient containers
+    flags.TauJets_tmp                = "TauJets_tmp_EleRM"
+    flags.TauCommonPi0Cells          = "TauCommonPi0Cells_EleRM"
+    flags.TauPi0Clusters_tmp         = "TauPi0Clusters_tmp_EleRM"
+    
+    # Input containers
+    flags.VertexCollection           = "PrimaryVertices"
+    flags.TrackCollection            = "InDetTrackParticles_EleRM"
+    flags.SeedJetCollection          = "AntiKt4LCTopoJets_EleRM"
+    flags.LargeD0TrackCollection     = "InDetLargeD0TrackParticles"
+    flags.EventShapeCollection       = "EleRM_Kt4LCTopoOriginEventShape"
+
+    # EleRM specific
+    flags.inTauEleRM                 = True
+    flags.EleRM_ElectronWorkingPoint = "Medium"
+    flags.RemovedElectronClusters    = "RemovedClusters_EleRM"
+    flags.RemovedElectronTracks      = "RemovedTracks_EleRM"
+    flags.CaloCalTopoClusters_EleRM  = "CaloCalTopoClusters_EleRM"
+    flags.LCOriginTopoClusters_EleRM = "LCOriginTopoClusters_EleRM"
+    flags.LCTopoOrigin_EleRM         = "LCTopoOrigin_EleRM"
+    flags.EleRM_CheckingConeSize     = 0.6
+    flags.RemoveElectronCells        = True
 
     return flags
 

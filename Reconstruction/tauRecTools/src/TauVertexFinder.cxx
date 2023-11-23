@@ -170,10 +170,30 @@ TauVertexFinder::getPV_TJVA(const xAOD::TauJet& pTau,
   // To be included in the TJVA calculation
   // Maybe not as efficient as deleting unwanted tracks from assocTrack but quicker and safer for now.
   float sumTrackAll = 0.0;
-  for ( auto xTrack : assocTracks ){
-    if ( (xTrack->p4().DeltaR(pJetSeed->p4())<dDeltaRMax) && m_TrackSelectionToolForTJVA->accept(*xTrack) ){
-      tracksForTJVA.push_back(xTrack);
+  for ( auto xTrack : assocTracks ) {
+    if ( (xTrack->p4().DeltaR(pJetSeed->p4())<dDeltaRMax) && m_TrackSelectionToolForTJVA->accept(*xTrack) ) {
+      if (!inEleRM()) { tracksForTJVA.push_back(xTrack); }
+      else {
+        static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::TrackParticleContainer>> acc_originalTrack("ERMOriginalTrack");
+        if (!acc_originalTrack.isAvailable(*xTrack)) {
+          ATH_MSG_WARNING("Original ERM track link is not available, skipping track");
+          continue;
+        }
+        auto original_id_track_link = acc_originalTrack(*xTrack);
+        if (!original_id_track_link.isValid()) {
+          ATH_MSG_WARNING("Original ERM track link is not valid, skipping track");
+          continue;
+        }
+        tracksForTJVA.push_back(*original_id_track_link);
+      }
       sumTrackAll += xTrack->pt();
+    }
+  }
+  if (this->msgLevel() <= MSG::DEBUG){
+    ATH_MSG_DEBUG("tracksForTJVA # = " << tracksForTJVA.size() << ", sum pT = " << sumTrackAll);
+
+    for (uint i = 0; i < tracksForTJVA.size(); i++){
+      ATH_MSG_DEBUG("tracksForTJVA[" << i << "].pt = " << tracksForTJVA[i]->pt());
     }
   }
 
@@ -237,8 +257,29 @@ TauVertexFinder::getPV_TJVA(const xAOD::TauJet& pTau,
     for (const xAOD::Vertex* vert : vertices) {
       vertVec.push_back(vert);
     }
+    if (this->msgLevel() <= MSG::DEBUG){
+      ATH_MSG_DEBUG("Vertex # = " << vertVec.size());
+      for (uint i = 0; i < vertVec.size(); i++){
+        ATH_MSG_DEBUG("vertVec[" << i << "].z = " << vertVec[i]->z());
+      }
+    }
+
     // Tool returns map between vertex and tracks associated to that vertex (based on selection criteria set in config)
     trktovxmap = m_trkVertexAssocTool->getMatchMap(tracksForTJVA, vertVec);
+  }
+  if (this->msgLevel() <= MSG::DEBUG){
+    for (const auto& [vtx, trks] : trktovxmap){
+      std::stringstream ss;
+      for (auto ass_trk : trks){
+        for (uint i=0; i < tracksForTJVA.size(); i++){
+          if (ass_trk->p4() == tracksForTJVA[i]->p4()) {
+            ss << i << ", ";
+            break;
+          }
+        }
+      }
+      ATH_MSG_DEBUG("Vtx[" << vtx->index() << "] associated with trks [" << ss.str() << "]");
+    }
   }
 
   // Get the highest JVF vertex and store maxJVF for later use
@@ -271,28 +312,26 @@ TauVertexFinder::getPV_TJVA(const xAOD::TauJet& pTau,
 
   if (m_useTJVA_Tiebreak and !inTrigger() ){
     ATH_MSG_DEBUG("First TJVA");
-    ATH_MSG_DEBUG("TJVA vtx found at z: " << vertices.at(maxIndex)->z() );
-    ATH_MSG_DEBUG("highest pt vtx found at z: " << vertices.at(0)->z());
+    ATH_MSG_DEBUG("TJVA vtx found at z: " << vertices.at(maxIndex)->z() << " i_vtx = " << maxIndex << "jvf = " << maxJVF);
+    ATH_MSG_DEBUG("highest pt vtx found at z (i=0): " << vertices.at(0)->z());
 
     float min_sumDz = 99999999.;
     iVertex = 0;
     for (const xAOD::Vertex* vert : vertices) {
-      ATH_MSG_DEBUG("i=" << iVertex << ", z=" << vert->z() << ", JVF=" << v_jvf[iVertex] << ", sumDz=" << sumDz[iVertex]);
+      ATH_MSG_DEBUG("i_vtx=" << iVertex << ", z=" << vert->z() << ", JVF=" << v_jvf[iVertex] << ", sumDz=" << sumDz[iVertex]);
       if ( v_jvf[iVertex] == maxJVF ){
-	// in case of 0 tracks, first vertex will have sumDz=0, and be selected
-	if (sumDz[iVertex] < min_sumDz){
-	  min_sumDz = sumDz[iVertex];
-	  maxIndex = iVertex;
-	}
+        // in case of 0 tracks, first vertex will have sumDz=0, and be selected
+        if (sumDz[iVertex] < min_sumDz){
+          min_sumDz = sumDz[iVertex];
+          maxIndex = iVertex;
+        }
       }
       ++iVertex;
     }
   }
 
-  ATH_MSG_DEBUG("Final TJVA");
-  ATH_MSG_DEBUG("TJVA vtx found at z: " << vertices.at(maxIndex)->z() );
-  ATH_MSG_DEBUG("highest pt vtx found at z: " << vertices.at(0)->z());
-
+    ATH_MSG_DEBUG("Final TJVA");
+    ATH_MSG_DEBUG("TJVA vtx found at z: " << vertices.at(maxIndex)->z() << " i_vtx = " << maxIndex);
   return ElementLink<xAOD::VertexContainer> (vertices, maxIndex);
 }
 

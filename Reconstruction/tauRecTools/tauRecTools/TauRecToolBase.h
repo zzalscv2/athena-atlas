@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAURECTOOLBASE_H
@@ -76,14 +76,17 @@ class TauRecToolBase : public asg::AsgTool, virtual public ITauToolBase {
  protected:
   Gaudi::Property<bool>        m_in_trigger     {this, "inTrigger",   false,                     "Indicate if the tool is running on trigger"};
   Gaudi::Property<bool>        m_in_AOD         {this, "inAOD",       false,                     "Indicate if the tool is running on AOD"};
+  Gaudi::Property<bool>        m_in_EleRM       {this, "inEleRM",       false,                     "Indicate if the tool is running on EleRM routine"};
   Gaudi::Property<std::string> m_tauRecToolsTag {this, "calibFolder", "tauRecTools/R22_preprod", "CVMFS path to the tau calibration folder"};
 
   bool inTrigger() const;
   bool inAOD() const;
+  bool inEleRM() const;
 
 };
 
 inline bool TauRecToolBase::inTrigger() const { return m_in_trigger; }
 inline bool TauRecToolBase::inAOD() const { return m_in_AOD; }
+inline bool TauRecToolBase::inEleRM() const { return m_in_EleRM; }
 
 #endif // TAURECTOOLS_TAURECTOOLBASE_H

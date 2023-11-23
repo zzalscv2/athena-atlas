@@ -25,6 +25,7 @@ from .JetDefinition import JetModifier
 from .Utilities import ldict
 from AthenaConfiguration.ComponentFactory import CompFactory
 from JetRecConfig.JetConfigFlags import jetInternalFlags
+from .StandardJetConstits import inputsFromContext
 
 stdJetModifiers = ldict()
 
@@ -58,7 +59,7 @@ try:
     stdJetModifiers.update(
         Calib = JetModifier("JetCalibrationTool","jetcalib_jetcoll_calibseq",
                             createfn=JetCalibToolsConfig.getJetCalibToolFromString,
-                            prereqs=lambda mod,jetdef : JetCalibToolsConfig.getJetCalibToolPrereqs(mod,jetdef)+["input:PrimaryVertices"])
+                            prereqs=lambda mod,jetdef : JetCalibToolsConfig.getJetCalibToolPrereqs(mod,jetdef)+[inputsFromContext("Vertices")])
     )
 except ModuleNotFoundError:
     # In some releases (AthGeneration) JetCalibTools is not existing
@@ -131,7 +132,7 @@ try:
 
         JVF =             JetModifier("JetVertexFractionTool", "jvf",
                                       createfn=JetMomentToolsConfig.getJVFTool,
-                                      prereqs = ["input:JetTrackVtxAssoc", "mod:TrackMoments", "input:PrimaryVertices"],
+                                      prereqs = [inputsFromContext("TVA"), "mod:TrackMoments", inputsFromContext("Vertices")],
                                       JetContainer = _jetname),
         JVT =             JetModifier("JetVertexTaggerTool", "jvt",
                                        createfn=JetMomentToolsConfig.getJVTTool,
@@ -145,29 +146,29 @@ try:
                                        prereqs = [ "mod:JVF" ],JetContainer = _jetname, OnlyAssignPV=True),
         TrackMoments =    JetModifier("JetTrackMomentsTool", "trkmoms",
                                       createfn=JetMomentToolsConfig.getTrackMomentsTool,
-                                      prereqs = [ "input:JetTrackVtxAssoc","ghost:Track" ],JetContainer = _jetname),
+                                      prereqs = [ inputsFromContext("TVA"),"ghost:Track" ],JetContainer = _jetname),
 
         TrackSumMoments = JetModifier("JetTrackSumMomentsTool", "trksummoms",
                                       createfn=JetMomentToolsConfig.getTrackSumMomentsTool,
-                                      prereqs = [ "input:JetTrackVtxAssoc","ghost:Track" ],JetContainer = _jetname),
+                                      prereqs = [ inputsFromContext("TVA"),"ghost:Track" ],JetContainer = _jetname),
         Charge =          JetModifier("JetChargeTool", "jetcharge", 
                                       prereqs = [ "ghost:Track" ]),
 
         QGTagging =       JetModifier("JetQGTaggerVariableTool", "qgtagging",
                                       createfn=JetMomentToolsConfig.getQGTaggingTool,
                                       prereqs = lambda _,jetdef :
-                                      ["input:JetTrackVtxAssoc","mod:TrackMoments"] +
+                                      [inputsFromContext("TVA"),"mod:TrackMoments"] +
                                       (["mod:JetPtAssociation"] if not isMC(jetdef._cflags) else []),
                                       JetContainer = _jetname),
 
         fJVT =           JetModifier("JetForwardPFlowJvtTool", "fJVT",
                                      createfn=JetMomentToolsConfig.getPFlowfJVTTool,
-                                     prereqs = ["input:JetTrackVtxAssoc","input:EventDensity","input:PrimaryVertices","mod:NNJVT"],
+                                     prereqs = [inputsFromContext("TVA"),inputsFromContext("EventDensity"),inputsFromContext("Vertices"),"mod:NNJVT"],
                                      JetContainer = _jetname),
 
         bJVT =           JetModifier("JetBalancePFlowJvtTool", "bJVT",
                                      createfn=JetMomentToolsConfig.getPFlowbJVTTool,
-                                     prereqs = ["input:EventDensity","input:PrimaryVertices","mod:NNJVT"],
+                                     prereqs = [inputsFromContext("EventDensity"),inputsFromContext("Vertices"),"mod:NNJVT"],
                                      JetContainer = _jetname),
 
         ConstitFrac =    JetModifier("JetConstituentFrac", "constitFrac",

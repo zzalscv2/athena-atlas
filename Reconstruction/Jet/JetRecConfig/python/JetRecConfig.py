@@ -158,11 +158,10 @@ def getJetDefAlgs(flags, jetdef ,  returnConfiguredDef=False, monTool=None):
     algs += getInputAlgs(jetdef_i, flags , monTool=monTool)
 
     # algs to create fastjet::PseudoJet objects out of the inputs
-    algs+= getPseudoJetAlgs(jetdef_i)
+    algs += getPseudoJetAlgs(jetdef_i)
     
     # Generate a JetRecAlg to run the jet finding and modifiers
-    jetrecalg = getJetRecAlg( jetdef_i, monTool=monTool)
-    algs += [jetrecalg]
+    algs += [getJetRecAlg(jetdef_i, monTool=monTool)]
     
     jetlog.info("Scheduled JetAlgorithm instance \"jetalg_{0}\"".format(jetdef_i.fullname()))
     
@@ -239,7 +238,7 @@ def getPseudoJetAlgs(jetdef):
     (this function is factorized out of PseudoJetCfg so it can be used standalone in the trigger config)
     """
     
-    constitpjalg = getConstitPJGAlg( jetdef.inputdef , suffix=None , flags=jetdef._cflags)
+    constitpjalg = getConstitPJGAlg(jetdef.inputdef , suffix=None , flags=jetdef._cflags, parent_jetdef = jetdef)
 
     finalPJContainer = str(constitpjalg.OutputContainer)
     pjalglist = [constitpjalg]
@@ -251,7 +250,7 @@ def getPseudoJetAlgs(jetdef):
         pjContNames = [finalPJContainer]
         for ghostkey in sorted(ghostlist):
             ghostdef = jetdef._prereqDic[ghostkey]
-            ghostpjalg = getGhostPJGAlg( ghostdef )
+            ghostpjalg = getGhostPJGAlg( ghostdef, jetdef )
             pjalglist.append(ghostpjalg)
             pjContNames.append( str(ghostpjalg.OutputContainer) ) #
 
@@ -346,30 +345,30 @@ def getInputAlgs(jetOrConstitdef, flags=None, context="default", monTool=None):
 ########################################################################
 
 
-def getPJContName( jetOrConstitdef, suffix=None):
+def getPJContName( jetOrConstitdef, suffix=None, parent_jetdef = None):
     """Construct the name of the PseudoJetContainer defined by the given JetDef or JetInputConstit.
     This name has to be constructed from various places, so we factorize the definition here.
     """
-    
     cdef = jetOrConstitdef if isinstance(jetOrConstitdef, JetInputConstit) else jetOrConstitdef.inputdef
+    _str_containername = cdef.containername(parent_jetdef).split(':')[-1] if callable(cdef.containername) else cdef.containername
     end = '' if suffix is None else f'_{suffix}'
-    return f'PseudoJet{cdef.containername}{end}'
+    return f'PseudoJet{_str_containername}{end}'
     
-def getConstitPJGAlg(constitdef, suffix=None, flags=None):
+def getConstitPJGAlg(constitdef, suffix=None, flags=None, parent_jetdef = None):
     """returns a configured PseudoJetAlgorithm which converts the inputs defined by constitdef into fastjet::PseudoJet
 
     IMPORTANT : constitdef must have its dependencies solved (i.e. it must result from a solveDependencies() call)
     
     the flags argument is TEMPORARY and will be removed once further dev on PseudoJetAlgorithm is done (see comment below)
     """
+    _str_containername = constitdef.containername(parent_jetdef).split(':')[-1] if callable(constitdef.containername) else constitdef.containername
     jetlog.debug("Getting PseudoJetAlg for label {0} from {1}".format(constitdef.name,constitdef.inputname))
-
     end = '' if suffix is None else f'_{suffix}'
     full_label = constitdef.label + end
     pjgalg = CompFactory.PseudoJetAlgorithm(
-        "pjgalg_"+constitdef.containername+end,
-        InputContainer = constitdef.containername,
-        OutputContainer =getPJContName(constitdef,suffix),
+        "pjgalg_"+_str_containername+end,
+        InputContainer = _str_containername,
+        OutputContainer =getPJContName(constitdef, suffix = suffix, parent_jetdef = parent_jetdef),
         Label = full_label,
         SkipNegativeEnergy=True,
         DoByVertex=constitdef.byVertex
@@ -392,7 +391,7 @@ def getConstitPJGAlg(constitdef, suffix=None, flags=None):
         
     return pjgalg
 
-def getGhostPJGAlg(ghostdef):
+def getGhostPJGAlg(ghostdef, parentjetdef = None):
     """returns a configured PseudoJetAlgorithm which converts the inputs defined by constitdef into fastjet::PseudoJet
     
     The difference for the above is this is dedicated to ghosts which need variations for the Label and the muon segment cases.  
@@ -400,10 +399,12 @@ def getGhostPJGAlg(ghostdef):
     IMPORTANT : ghostdef must have its dependencies solved (i.e. it must result from a solveDependencies() call)
     """
     label = "Ghost"+ghostdef.label # IMPORTANT !! "Ghost" in the label will be interpreted by the C++ side !
+    _container_name = ghostdef.containername(parentjetdef).split(":")[1] if callable(ghostdef.containername) else ghostdef.containername
+    _output_cont_name_suffix = "" if parentjetdef.context == "default" or _container_name.endswith(parentjetdef.context) else ("_" + parentjetdef.context)
 
     kwargs = dict( 
-        InputContainer = ghostdef.containername,
-        OutputContainer= "PseudoJetGhost"+ghostdef.containername,
+        InputContainer = _container_name,
+        OutputContainer= "PseudoJetGhost"+_container_name + _output_cont_name_suffix,
         Label=              label,
         SkipNegativeEnergy= True,
     )
@@ -415,7 +416,7 @@ def getGhostPJGAlg(ghostdef):
         kwargs.update( Pt =1e-20 ) # ??,)
         kwargs.pop('SkipNegativeEnergy')
 
-    pjgalg = pjaclass( "pjgalg_"+label, **kwargs )
+    pjgalg = pjaclass( "pjgalg_" + label + "_" + parentjetdef.context, **kwargs )
     return pjgalg
 
 
@@ -709,7 +710,7 @@ def removeComponentFailingConditions(jetdef, flags=None, raiseOnFailure=True):
 
     # ---------
     # first check if the input can be obtained. If not return.
-    ok,reason = isComponentPassingConditions( jetdef.inputdef, jetdef._cflags, jetdef._prereqDic)
+    ok,reason = isComponentPassingConditions( jetdef.inputdef, jetdef._cflags, jetdef)
     if not ok:
         if raiseOnFailure:
             raise Exception(f"JetDefinition {jetdef} can NOT be scheduled. Failure  of input {jetdef.inputdef.name}  reason={reason}" )
@@ -751,7 +752,7 @@ def filterJetDefList(jetdef, inList, compType, raiseOnFailure, flags):
     for comp in inList:
         fullkey = basekey+comp
         cInstance = jetdef._prereqDic[fullkey]
-        ok, reason = isComponentPassingConditions(cInstance, flags, jetdef._prereqDic)
+        ok, reason = isComponentPassingConditions(cInstance, flags, jetdef)
         if not ok :
             if raiseOnFailure:
                 raise Exception("JetDefinition {} can NOT be scheduled. Failure  of {} {}  reason={}".format(
@@ -774,15 +775,16 @@ def filterJetDefList(jetdef, inList, compType, raiseOnFailure, flags):
 
 
 
-def isComponentPassingConditions(component, flags, prereqDic):
+def isComponentPassingConditions(component, flags, jetdef):
     """Test if component is compatible with flags.
     This is done by calling component.filterfn AND testing all its prereqs.
     """
     for req in component.prereqs:
-        if req not in prereqDic:
-            return False, "prereq "+req+" not available"
-        reqInstance = prereqDic[req]
-        ok, reason = isComponentPassingConditions(reqInstance, flags, prereqDic)
+        _str_req = req(jetdef) if callable(req) else req
+        if _str_req not in jetdef._prereqDic:
+            return False, "prereq "+_str_req+" not available"
+        reqInstance = jetdef._prereqDic[_str_req]
+        ok, reason = isComponentPassingConditions(reqInstance, flags, jetdef)
         if not ok :
             return False, "prereq "+str(reqInstance)+" failed because : "+reason
 

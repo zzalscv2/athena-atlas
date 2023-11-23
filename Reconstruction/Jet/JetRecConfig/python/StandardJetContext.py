@@ -23,7 +23,7 @@ jetContextDic = ldict(
         TVA =                  "JetTrackVtxAssoc",
         GhostTracks =          "PseudoJetGhostTrack",
         GhostTracksLabel =     "GhostTrack",
-
+        EventDensity =         "EventDensity",
         GhostTrackCutLevel =   'NoCut', # The track selection level for ghost-associated tracks. This is different from the cutlevel we apply when performing actual calculations such as JVT or tack moments.
 
         # options passed to InDet::InDetTrackSelectionTool.
@@ -45,6 +45,15 @@ jetContextDic["notrk"] = jetContextDic["default"] # used in trigger
 jetContextDic["HL_LHC"] = jetContextDic["default"].clone(
     trackSelOptions = jetContextDic["default"]["trackSelOptions"].clone(maxAbsEta=4.0) # set range of track selection up to eta=4
 )
+# Alternative context for AntiKt4LCTopo_EleRM jets used for the electron removed tau reconstruction  
+jetContextDic["EleRM"] = jetContextDic["default"].clone(
+    Tracks = "InDetTrackParticles_EleRM",
+    TVA    = "JetTrackVtxAssoc_EleRM",
+    JetTracks = "JetSelectedTracks_EleRM",
+    GhostTracks = "PseudoJetGhostTrack_EleRM",
+    EventDensity = "EleRM_EventDensity",
+)
+
 
 
 def propFromContext(propName):
@@ -60,11 +69,11 @@ def propFromContext(propName):
         return jetContextDic[context][propName]
     return getProp
 
-def inputsFromContext(inputKey):
+def inputsFromContext(inputKey, prefix="", suffix=""):
     """Some prerequisites might depend on the context for which jets are configured.
     This function returns a helper function which gives a list of input prerequisites according to 'inputKey' in the current jetdef.context.
     
     """
     def getPrereqs(jetdef):
-        return "input:"+jetContextDic[jetdef.context][inputKey] 
+        return "input:" + prefix + jetContextDic[jetdef.context][inputKey] + suffix
     return getPrereqs
