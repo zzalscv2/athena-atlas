@@ -49,16 +49,10 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         seqArray = []   
         from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu             
         for sequenceCfg in sequenceCfgArray:            
-            try:
-                if isCAMenu():                
-                    seqArray.append (sequenceCfg(flags, **stepArgs) )                                                         
-                else:
-                    seqArray.append( RecoFragmentsPool.retrieve( sequenceCfg, flags, **stepArgs ))                                                       
-            except NameError:
-                if isCAMenu():
-                    log.warning(str(NoCAmigration('[getStep] Menu sequence {0} does not exist for CA components'.format(sequenceCfg.__name__)) ))                    
-                else: 
-                    raise
+            if isCAMenu():
+                seqArray.append (sequenceCfg(flags, **stepArgs) )
+            else:
+                seqArray.append( RecoFragmentsPool.retrieve( sequenceCfg, flags, **stepArgs ))
 
         if (len(seqArray)>0):                                
             if inspect.signature(comboHypoCfg).parameters and all(inspect.signature(comboTool).parameters for comboTool in comboTools):                
@@ -75,6 +69,7 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
             raise RuntimeError("[getStep] No sequences generated for step %s!", stepPartName)        
         except NoCAmigration:
             # return an Empty step with newJO if no Sequence was found 
+            log.warning("[getStep] No sequence generated for step %s, replacing with empty step %s", stepPartName, stepPartName+"_MissingCA")
             return self.getEmptyStep(stepID, stepPartName+"_MissingCA")
 
 
