@@ -57,7 +57,9 @@ class DipzMLPLCondition: public ICondition{
                   const std::unique_ptr<ITrigJetHypoInfoCollector> &collector) const ;                       
 
   float calcLogTerm(float acmlt, const pHypoJet &ip, float zhat,
-                  const std::unique_ptr<ITrigJetHypoInfoCollector> &collector) const ;                           
+                  const std::unique_ptr<ITrigJetHypoInfoCollector> &collector) const ;  
+
+  float safeLogRatio(float num, float denom);                         
   
 };
 
