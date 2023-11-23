@@ -307,8 +307,9 @@ def PseudoTrackSelectorCfg(flags, name, **kwargs):
 def InDetTrackSelectionToolWrapperCfg(flags, name, **kwargs):
     """Configure the InDetTrackSelectionToolWrapper"""
     acc = ComponentAccumulator()
-    InDetTrackSelectionTool = CompFactory.InDet.InDetTrackSelectionTool(
-        name=f"{name}Tool", CutLevel="TightPrimary")
+    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_TightPrimary_Cfg
+    InDetTrackSelectionTool = acc.popToolsAndMerge(
+        InDetTrackSelectionTool_TightPrimary_Cfg(flags))
     acc.addPublicTool(InDetTrackSelectionTool, primary=False)
     InDetTrackSelectionToolWrapper = (
         CompFactory.DerivationFramework.InDetTrackSelectionToolWrapper)
