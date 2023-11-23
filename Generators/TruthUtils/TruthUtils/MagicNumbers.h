@@ -109,10 +109,10 @@ inline bool is_same_generator_particle(const T1& p1,const T2& p2) { int b1 = bar
 template <class T1,class T2>
 inline bool is_sim_descendant(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return b1 % SIM_REGENERATION_INCREMENT == b2;}
 
-template <class T> int  unique_id(const T& p1){ return p1->barcode();}
+template <class T> inline int uniqueID(const T& p) { return barcode(p); }
 #if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
-template <>  inline int unique_id(const ConstGenParticlePtr& p1){ return p1->id();}
-template <>  inline int unique_id(const GenParticlePtr& p1){ return p1->id();}
+template <>  inline int uniqueID(const ConstGenParticlePtr& p1){ return p1->id();}
+template <>  inline int uniqueID(const GenParticlePtr& p1){ return p1->id();}
 #endif
 
 
@@ -123,7 +123,7 @@ template <class T> inline void get_particle_history(const T& p, std::deque<int>&
       if (pv) {
         for (auto pa: pv->particles_in()) {
           if (pa->pdg_id() != p->pdg_id()) continue;
-          out.push_front(unique_id(p));
+          out.push_front(uniqueID(p));
           get_particle_history(pa,out,-1);
           break;
         }
@@ -136,7 +136,7 @@ template <class T> inline void get_particle_history(const T& p, std::deque<int>&
       if (pv) {
         for (auto pa: pv->particles_out()) {
           if (pa->pdg_id() != p->pdg_id()) continue;
-          out.push_back(unique_id(p));
+          out.push_back(uniqueID(p));
           get_particle_history(pa,out,1);
           break;
         }
@@ -144,7 +144,7 @@ template <class T> inline void get_particle_history(const T& p, std::deque<int>&
     }
   }
 }
-template <class T>  inline std::deque<int> simulation_history(const T& p, int direction ) { std::deque<int> res; res.push_back(unique_id(p)); get_particle_history(p, res, direction); return res;}
+template <class T>  inline std::deque<int> simulation_history(const T& p, int direction ) { std::deque<int> res; res.push_back(uniqueID(p)); get_particle_history(p, res, direction); return res;}
 
 /// @brief Function that converts the old scheme of labeling the simulation particles (barcodes) into the new scheme (statuses).
 

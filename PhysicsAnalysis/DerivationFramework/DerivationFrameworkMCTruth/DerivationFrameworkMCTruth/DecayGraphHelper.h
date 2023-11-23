@@ -115,12 +115,12 @@ namespace DerivationFramework {
         // descendants: starting from particle (simple listing version)
         void descendants(const xAOD::TruthParticle* pHead,
                          std::vector<int> &particleList,
-                         std::unordered_set<int> &encounteredBarcodes) {
+                         std::unordered_set<int> &encounteredUniqueIDs) {
             
-            // Check that this barcode hasn't been seen before (e.g. we are in a loop)
-            std::unordered_set<int>::const_iterator found = encounteredBarcodes.find(pHead->barcode());
-            if (found!=encounteredBarcodes.end()) return;
-            encounteredBarcodes.insert(pHead->barcode());
+            // Check that this unique ID hasn't been seen before (e.g. we are in a loop)
+            std::unordered_set<int>::const_iterator found = encounteredUniqueIDs.find(HepMC::uniqueID(pHead));
+            if (found!=encounteredUniqueIDs.end()) return;
+            encounteredUniqueIDs.insert(HepMC::uniqueID(pHead));
             
             // Get the decay vertex
             const xAOD::TruthVertex* decayVtx(0);
@@ -134,7 +134,7 @@ namespace DerivationFramework {
             int nChildren = decayVtx->nOutgoingParticles();
             for (int i=0; i<nChildren; ++i) {
                 if (decayVtx->outgoingParticle(i)==nullptr) continue;
-                descendants(decayVtx->outgoingParticle(i),particleList,encounteredBarcodes);
+                descendants(decayVtx->outgoingParticle(i),particleList,encounteredUniqueIDs);
             } 
             return;
         }
@@ -143,16 +143,16 @@ namespace DerivationFramework {
         void descendants(const xAOD::TruthParticle* pHead,
                          std::vector<bool> &particleMask,
                          std::vector<bool> &vertexMask,
-                         std::unordered_set<int> &encounteredBarcodes,
+                         std::unordered_set<int> &encounteredUniqueIDs,
                          bool includeGeant) {
             
             // Check that the particle exists
             if (pHead==nullptr) return;           
  
-            // Check that this barcode hasn't been seen before (e.g. we are in a loop)
-            std::unordered_set<int>::const_iterator found = encounteredBarcodes.find(pHead->barcode());
-            if (found!=encounteredBarcodes.end()) return;
-            encounteredBarcodes.insert(pHead->barcode());
+            // Check that this unique ID hasn't been seen before (e.g. we are in a loop)
+            std::unordered_set<int>::const_iterator found = encounteredUniqueIDs.find(HepMC::uniqueID(pHead));
+            if (found!=encounteredUniqueIDs.end()) return;
+            encounteredUniqueIDs.insert(HepMC::uniqueID(pHead));
             
             // Save the particle position in the mask
             // If user doesn't want Geant, check and reject Geant particles
@@ -170,7 +170,7 @@ namespace DerivationFramework {
             bool saveVertex = false;
             for (int i=0; i<nChildren; ++i) {
               if (decayVtx->outgoingParticle(i)==nullptr) continue;
-              descendants(decayVtx->outgoingParticle(i),particleMask,vertexMask,encounteredBarcodes,includeGeant);
+              descendants(decayVtx->outgoingParticle(i),particleMask,vertexMask,encounteredUniqueIDs,includeGeant);
               saveVertex = saveVertex || includeGeant || !(HepMC::is_simulation_particle(decayVtx->outgoingParticle(i)));
             }
 
@@ -186,15 +186,15 @@ namespace DerivationFramework {
         void ancestors(const xAOD::TruthParticle* pHead,
                        std::vector<bool> &particleMask,
                        std::vector<bool> &vertexMask,
-                       std::unordered_set<int> &encounteredBarcodes ) {
+                       std::unordered_set<int> &encounteredUniqueIDs ) {
             
             // Check that the head particle exists
             if (pHead==nullptr) return;
 
-            // Check that this barcode hasn't been seen before (e.g. we are in a loop)
-            std::unordered_set<int>::const_iterator found = encounteredBarcodes.find(pHead->barcode());
-            if (found!=encounteredBarcodes.end()) return;
-            encounteredBarcodes.insert(pHead->barcode());
+            // Check that this unique ID hasn't been seen before (e.g. we are in a loop)
+            std::unordered_set<int>::const_iterator found = encounteredUniqueIDs.find(HepMC::uniqueID(pHead));
+            if (found!=encounteredUniqueIDs.end()) return;
+            encounteredUniqueIDs.insert(HepMC::uniqueID(pHead));
             
             // Save particle position in the mask
             int headIndex = pHead->index();
@@ -211,7 +211,7 @@ namespace DerivationFramework {
             
             // Get children particles and self-call
             int nParents = prodVtx->nIncomingParticles();
-            for (int i=0; i<nParents; ++i) ancestors(prodVtx->incomingParticle(i),particleMask,vertexMask,encounteredBarcodes);
+            for (int i=0; i<nParents; ++i) ancestors(prodVtx->incomingParticle(i),particleMask,vertexMask,encounteredUniqueIDs);
             return;
         }
         
@@ -220,7 +220,7 @@ namespace DerivationFramework {
                                            const std::vector<int> &pdgId, bool allowFromHadron = false,
                                            bool chargedOnly = false) const {
             //fill the vector selectedlist with only particles with abs(ID) in the list
-            //pdgID that are 'good' for dressing: status==1, barcode < 2e5 (for the
+            //pdgID that are 'good' for dressing: considered stable by the generator, produced during evgen (for the
             //photons), not from hadron decay,
             //skip pdgId check if pdgId is an empty vector,
             //ignore particles coming from hadrons if allowFromHadron=false,

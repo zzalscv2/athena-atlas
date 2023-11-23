@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -13,6 +13,9 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
 //#include "xAODTruth/TruthVertexContainer.h"
+
+#include "TruthUtils/MagicNumbers.h"
+
 #include <vector>
 #include <string>
 
@@ -177,13 +180,13 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
 	      xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
 	      newParticleCollection->push_back( xTruthParticle );
 	      
-	      int motherbarcode = -1;
+	      int motherUniqueID = -1;
 	      int motherPDGid = 0;
 	      float mothermass = 0.;
 	      if (theParticle->hasProdVtx()){
 		int parentid = abs(theParticle->prodVtx()->incomingParticle(0)->pdgId());
 		xTruthParticle->setBarcode(parentid);
-		motherbarcode = theParticle->prodVtx()->incomingParticle(0)->barcode();
+		motherUniqueID = HepMC::uniqueID(theParticle->prodVtx()->incomingParticle(0));
 		const xAOD::TruthParticle * mother_hold = theParticle->prodVtx()->incomingParticle(0);
 		motherPDGid = mother_hold->pdgId();
 		mothermass = mother_hold->p4().M()/1000.;
@@ -195,13 +198,13 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
 		    break; //should not come in here, but just in case we have a closed loop from a bug
 		  }
 		  mother_hold = mother_hold->prodVtx()->incomingParticle(0);
-		  motherbarcode = mother_hold->barcode();
+		  motherUniqueID = HepMC::uniqueID(mother_hold);
 		  motherPDGid = mother_hold->pdgId();
 		  mothermass = mother_hold->p4().M()/1000.;
 		}
 	      }
 
-	      xTruthParticle->setBarcode(motherbarcode);
+	      xTruthParticle->setBarcode(motherUniqueID);
               xTruthParticle->setPdgId(theParticle->pdgId());
               xTruthParticle->setStatus(theParticle->status());
               xTruthParticle->setM(theParticle->m());
@@ -210,7 +213,7 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
               xTruthParticle->setPz(theParticle->pz());
               xTruthParticle->setE(theParticle->e());
               originDecorator(*xTruthParticle) = motherPDGid;
-	      typeDecorator(*xTruthParticle) = motherbarcode;
+	      typeDecorator(*xTruthParticle) = motherUniqueID;
 	      typeDecoratorMass(*xTruthParticle) = mothermass;
 	      
 	      //Check for tau decays

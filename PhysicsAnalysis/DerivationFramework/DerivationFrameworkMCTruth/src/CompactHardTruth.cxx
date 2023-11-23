@@ -407,9 +407,9 @@ StatusCode CompactHardTruth::execute() {
   for (unsigned int iv = 1; iv < hadVertices.size(); ++iv) {
     HepMC::GenVertex* v = hadVertices[iv];
     if (v->particles_in_size() != 0 || v->particles_out_size() != 0) {
-      ATH_MSG_WARNING("Removing vertex " << v->barcode() << " for event " << nEvent << " with in/out particles " << v->particles_in_size() << " " << v->particles_out_size());
+      ATH_MSG_WARNING("Removing vertex " << HepMC::uniqueID(v) << " for event " << nEvent << " with in/out particles " << v->particles_in_size() << " " << v->particles_out_size());
     }
-    if (!thinEvt->remove_vertex(hadVertices[iv])) { ATH_MSG_WARNING("Error removing vertex " << v->barcode() << " for event " << nEvent); }
+    if (!thinEvt->remove_vertex(hadVertices[iv])) { ATH_MSG_WARNING("Error removing vertex " << HepMC::uniqueID(v) << " for event " << nEvent); }
   }
 
   // Delete removed particles/vertices
@@ -418,14 +418,14 @@ StatusCode CompactHardTruth::execute() {
   deleteV.sort();
   deleteV.unique();
   for (dvItr = deleteV.begin(); dvItr != deleteV.end(); ++dvItr) {
-    if (doDebug) ATH_MSG_VERBOSE("Deleting vertex " << (*dvItr)->barcode());
+    if (doDebug) ATH_MSG_VERBOSE("Deleting vertex " << HepMC::uniqueID(*dvItr));
     if (*dvItr) delete (*dvItr);
   }
 
   deleteP.sort();
   deleteP.unique();
   for (dpItr = deleteP.begin(); dpItr != deleteP.end(); ++dpItr) {
-    if (doDebug) ATH_MSG_VERBOSE("Deleting particle " << (*dpItr)->barcode());
+    if (doDebug) ATH_MSG_VERBOSE("Deleting particle " << HepMC::uniqueID(*dpItr));
     if (*dpItr) delete (*dpItr);
   }
 #endif
@@ -654,15 +654,15 @@ StatusCode CompactHardTruth::execute() {
 
       HepMC::GenParticle* fp = *finp;
       if (!isFinalParton(fp)) continue;
-      if (doDebug) ATH_MSG_DEBUG("Starting final parton " << fp->barcode());
+      if (doDebug) ATH_MSG_DEBUG("Starting final parton " << HepMC::uniqueID(fp));
 
       // Production/end vertices
       HepMC::GenVertex* pvtx = fp->production_vertex();
       if (!pvtx) {
-        ATH_MSG_WARNING("Missing production for final parton " << fp->barcode());
+        ATH_MSG_WARNING("Missing production for final parton " << HepMC::uniqueID(fp));
         continue;
       }
-      if (doDebug) ATH_MSG_DEBUG("Final parton " << pvtx->barcode() << " " << fp->barcode());
+      if (doDebug) ATH_MSG_DEBUG("Final parton " << HepMC::uniqueID(pvtx) << " " << HepMC::uniqueID(fp));
 
       ////////////
       // Case 1->1
@@ -675,15 +675,15 @@ StatusCode CompactHardTruth::execute() {
         // Incoming particle to parent vertex
         HepMC::GenVertex::particles_in_const_iterator pitr = pvtx->particles_in_const_begin();
         HepMC::GenParticle* pp = *pitr;
-        if (!pp || pp->barcode() == 0) {
-          ATH_MSG_DEBUG("1->1: missing pp for fp " << fp->barcode());
+        if (!pp || HepMC::uniqueID(pp) == 0) {
+          ATH_MSG_DEBUG("1->1: missing pp for fp " << HepMC::uniqueID(fp));
           ++m_missCount;
           continue;
         }
         // Its parent vertex
         HepMC::GenVertex* ppvtx = pp->production_vertex();
-        if (!ppvtx || ppvtx->barcode() == 0) {
-          ATH_MSG_DEBUG("1->1: missing ppvtx for fp " << fp->barcode());
+        if (!ppvtx || HepMC::uniqueID(ppvtx) == 0) {
+          ATH_MSG_DEBUG("1->1: missing ppvtx for fp " << HepMC::uniqueID(fp));
           ++m_missCount;
           continue;
         }
@@ -696,7 +696,7 @@ StatusCode CompactHardTruth::execute() {
         removeV.push_back(pvtx);
         deleteV.push_back(pvtx);
         addoutPV.emplace_back(ppvtx, fp);
-        if (doDebug) { ATH_MSG_DEBUG("1->1: ppvtx,pp,pvtx,fp,evtx " << ppvtx->barcode() << " " << pp->barcode() << " " << pvtx->barcode() << " " << fp->barcode()); }
+        if (doDebug) { ATH_MSG_DEBUG("1->1: ppvtx,pp,pvtx,fp,evtx " << HepMC::uniqueID(ppvtx) << " " << HepMC::uniqueID(pp) << " " << HepMC::uniqueID(pvtx) << " " << HepMC::uniqueID(fp)); }
       }
 
       ////////////
@@ -722,13 +722,13 @@ StatusCode CompactHardTruth::execute() {
         // Their parent vertices
         HepMC::GenVertex* ppvtx1 = pp1->production_vertex();
         HepMC::GenVertex* ppvtx2 = pp2->production_vertex();
-        if (!ppvtx1 || ppvtx1->barcode() == 0) {
-          ATH_MSG_DEBUG("2->1: missing ppvtx1 for fp " << fp->barcode());
+        if (!ppvtx1 || HepMC::uniqueID(ppvtx1) == 0) {
+          ATH_MSG_DEBUG("2->1: missing ppvtx1 for fp " << HepMC::uniqueID(fp));
           ++m_missCount;
           continue;
         }
-        if (!ppvtx2 || ppvtx2->barcode() == 0) {
-          ATH_MSG_DEBUG("2->1: missing ppvtx2 for fp " << fp->barcode());
+        if (!ppvtx2 || HepMC::uniqueID(ppvtx2) == 0) {
+          ATH_MSG_DEBUG("2->1: missing ppvtx2 for fp " << HepMC::uniqueID(fp));
           ++m_missCount;
           continue;
         }
@@ -744,8 +744,8 @@ StatusCode CompactHardTruth::execute() {
         deleteV.push_back(pvtx);
 
         if (doDebug) {
-          ATH_MSG_DEBUG("2->1: ppvtx1,pp1,ppvtx2,pp2,pvtx,fp " << ppvtx1->barcode() << " " << pp1->barcode() << " " << ppvtx2->barcode() << " " << pp2->barcode() << " " << pvtx->barcode() << " "
-                                                               << fp->barcode());
+          ATH_MSG_DEBUG("2->1: ppvtx1,pp1,ppvtx2,pp2,pvtx,fp " << HepMC::uniqueID(ppvtx1) << " " << HepMC::uniqueID(pp1) << " " << HepMC::uniqueID(ppvtx2) << " " << HepMC::uniqueID(pp2) << " " << HepMC::uniqueID(pvtx) << " "
+                                                               << HepMC::uniqueID(fp));
         }
       }
 
@@ -766,16 +766,16 @@ StatusCode CompactHardTruth::execute() {
         // Require two final partons and avoid duplication
         if (fp == pout1) {
           if (!isFinalParton(pout2)) {
-            if (doDebug) ATH_MSG_DEBUG("1->2: not final " << pout2->barcode());
+            if (doDebug) ATH_MSG_DEBUG("1->2: not final " << HepMC::uniqueID(pout2));
             continue;
           }
         } else if (fp == pout2) {
           if (!isFinalParton(pout1)) {
-            if (doDebug) ATH_MSG_DEBUG("1->2: not final " << pout1->barcode());
+            if (doDebug) ATH_MSG_DEBUG("1->2: not final " << HepMC::uniqueID(pout1));
             continue;
           }
         } else {
-          ATH_MSG_WARNING("1->2: No match found for branching " << fp->barcode() << " " << pvtx->barcode() << " " << pout1->barcode() << " " << pout2->barcode());
+          ATH_MSG_WARNING("1->2: No match found for branching " << HepMC::uniqueID(fp) << " " << HepMC::uniqueID(pvtx) << " " << HepMC::uniqueID(pout1) << " " << HepMC::uniqueID(pout2));
           continue;
         }
         if (fp != pout1) continue;
@@ -792,7 +792,7 @@ StatusCode CompactHardTruth::execute() {
         double m12 = p12.m();
         if (m12 < 0) {
           if (fabs(m12) > 10. + 1.0e-5 * p12.e()) {
-            ATH_MSG_WARNING("Spacelike mass^2 for parton sum " << m12 << " " << pp->barcode() << " " << pvtx->barcode() << " " << pout1->barcode() << " " << pout2->barcode());
+            ATH_MSG_WARNING("Spacelike mass^2 for parton sum " << m12 << " " << HepMC::uniqueID(pp) << " " << HepMC::uniqueID(pvtx) << " " << HepMC::uniqueID(pout1) << " " << HepMC::uniqueID(pout2));
           }
           m12 = 0;
         }
@@ -805,8 +805,8 @@ StatusCode CompactHardTruth::execute() {
 
         // Associated vertices
         HepMC::GenVertex* ppvtx = pp->production_vertex();
-        if (!ppvtx || ppvtx->barcode() == 0) {
-          ATH_MSG_DEBUG("1->2: missing ppvtx for fp " << fp->barcode());
+        if (!ppvtx || HepMC::uniqueID(ppvtx) == 0) {
+          ATH_MSG_DEBUG("1->2: missing ppvtx for fp " << HepMC::uniqueID(fp));
           ++m_missCount;
           continue;
         }
@@ -848,7 +848,7 @@ StatusCode CompactHardTruth::execute() {
       // Case not found
       // Need test for 2->2 in underlying event
       if (iCase == 0) {
-        if (doDebug) ATH_MSG_DEBUG("Case not found " << pvtx->barcode() << " " << fp->barcode() << " " << pvtx->particles_in_size() << " " << pvtx->particles_out_size());
+        if (doDebug) ATH_MSG_DEBUG("Case not found " << HepMC::uniqueID(pvtx) << " " << HepMC::uniqueID(fp) << " " << pvtx->particles_in_size() << " " << pvtx->particles_out_size());
       }
 
     } // end final parton loop
@@ -1057,7 +1057,7 @@ StatusCode CompactHardTruth::execute() {
     int nhard = 0;
     for (; hItr2 != hItr2E; ++hItr2) {
       ++nhard;
-      ATH_MSG_DEBUG("Hard GenParticles " << (*hItr2)->barcode() << " " << (*hItr2)->pdg_id() << " " << (*hItr2)->momentum().perp() / 1000. << " " << (*hItr2)->momentum().pz() / 1000.);
+      ATH_MSG_DEBUG("Hard GenParticles " << HepMC::uniqueID(*hItr2) << " " << (*hItr2)->pdg_id() << " " << (*hItr2)->momentum().perp() / 1000. << " " << (*hItr2)->momentum().pz() / 1000.);
     }
     if (doDebug) ATH_MSG_DEBUG("Hard GenParticles total " << nhard);
   }
@@ -1103,7 +1103,7 @@ StatusCode CompactHardTruth::execute() {
         break;
       }
     }
-    if (doDebug) ATH_MSG_DEBUG("Particle bc/isHard " << p->barcode() << " " << isHard);
+    if (doDebug) ATH_MSG_DEBUG("Particle bc/isHard " << HepMC::uniqueID(p) << " " << isHard);
     if (isHard) continue;
     HepMC::GenVertex* pvtx = p->production_vertex();
     if (pvtx) pvtx->remove_particle(p);
@@ -1236,15 +1236,15 @@ StatusCode CompactHardTruth::execute() {
       // Sherpa does 1-body decay of incoming protons :-(
       if (pin == beams[0] || pin == beams[1]) continue;
       HepMC::GenVertex* pvtx = pin->production_vertex();
-      if (!pvtx || pvtx->barcode() == 0) {
-        ATH_MSG_DEBUG("1->1: missing pvtx for vertex " << (*v)->barcode());
+      if (!pvtx || HepMC::uniqueID(pvtx) == 0) {
+        ATH_MSG_DEBUG("1->1: missing pvtx for vertex " << HepMC::uniqueID(*v));
         ++m_missCount;
         continue;
       }
 
       moreV1 = true;
       vtx11 = (*v);
-      if (doDebug) ATH_MSG_DEBUG("One-body " << pin->barcode() << " " << vtx11->barcode() << " " << pout->barcode());
+      if (doDebug) ATH_MSG_DEBUG("One-body " << HepMC::uniqueID(pin) << " " << HepMC::uniqueID(vtx11) << " " << HepMC::uniqueID(pout));
       break;
     }
     if (moreV1) {
@@ -1256,7 +1256,7 @@ StatusCode CompactHardTruth::execute() {
       thinEvt->remove_vertex(vtx11);
       delete pin;
       delete vtx11;
-      if (doDebug) ATH_MSG_DEBUG("One-body new pvtx " << pvtx->barcode() << " " << pvtx->particles_in_size() << " " << pvtx->particles_out_size());
+      if (doDebug) ATH_MSG_DEBUG("One-body new pvtx " << HepMC::uniqueID(pvtx) << " " << pvtx->particles_in_size() << " " << pvtx->particles_out_size());
     }
   }
 

@@ -164,7 +164,7 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
     return StatusCode::FAILURE;
   }
 
-  // Hard particles are different objects but have matching barcodes.
+  // Hard particles are different objects but have matching unique IDs.
   // Find hard particles with status==1.
   // Save 4vectors of leptons and photons for matching if requested.
   // Do we need a photon pt cut for soft photons from quarks?
@@ -219,15 +219,15 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
   for(; pItr!=pItrE; ++pItr){
 
     // Stable hard particle matches
-    int bc = (*pItr)->barcode();
+    int uid = HepMC::uniqueID(*pItr);
     bool isHard = false;
     for(unsigned int i=0; i<hardPart.size(); ++i){
-      if( bc == (hardPart[i])->barcode() ){
+      if( uid == HepMC::uniqueID(hardPart[i]) ){
         isHard = true;
         if( (*pItr)->pdgId() != (hardPart[i])->pdgId() ){
-          ATH_MSG_WARNING("pdgID mismatch, TruthParticle bc/id "
-                          <<(*pItr)->barcode() <<" " <<(*pItr)->pdgId()
-                          <<"   Hard bc/id "  <<(hardPart[i])->barcode() 
+          ATH_MSG_WARNING("pdgID mismatch, TruthParticle uid/pdgid "
+                          <<HepMC::uniqueID(*pItr) <<" " <<(*pItr)->pdgId()
+                          <<"   Hard uid/pdgid "  <<HepMC::uniqueID(hardPart[i])
                           <<" " <<(hardPart[i])->pdgId());
           ++m_errCount;
           break;
@@ -235,7 +235,7 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
       }
     }
     if( isHard ){
-      if( doPrint ) ATH_MSG_DEBUG("ParticleMask isHard " <<bc);
+      if( doPrint ) ATH_MSG_DEBUG("ParticleMask isHard " <<uid);
       partMask[ (*pItr)->index() ] = true;
     }
 
@@ -249,13 +249,13 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
       }
     }
     if( isKeep ){
-      if( doPrint ) ATH_MSG_DEBUG("ParticleMask isKeep " <<bc);
+      if( doPrint ) ATH_MSG_DEBUG("ParticleMask isKeep " <<uid);
       partMask[(*pItr)->index()] = true;
       const xAOD::TruthParticle* ppItr = (*pItr);
       int nkids =  getDescendants( ppItr, kids );
       for(int i=0; i<nkids; ++i){
         if( doPrint ) ATH_MSG_DEBUG("ParticleMask isKeep kid " 
-                                    <<bc <<" " <<kids[i]->barcode());
+                                    <<uid <<" " <<HepMC::uniqueID(kids[i]));
         partMask[ (kids[i])->index() ] = true;
         const xAOD::TruthVertex* v = (kids[i])->prodVtx();
         if( v ) vertMask[ v->index() ] = true;
@@ -268,7 +268,7 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
       for(unsigned int lep=0; lep<pLepGam.size(); ++lep){
         double r = pp4.DeltaR( pLepGam[lep] );
         if( r < m_isolR ){
-          if( doPrint ) ATH_MSG_DEBUG("ParticleMask isol " <<bc);
+          if( doPrint ) ATH_MSG_DEBUG("ParticleMask isol " <<uid);
           partMask[ (*pItr)->index() ] = true;
         }
       }
@@ -279,7 +279,7 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
 
 
   // Retrieve optional jets
-  // Add particles that are constituents of selected jets using barcodes.
+  // Add particles that are constituents of selected jets using unique IDs.
   // Is index() for JetConstituentVector or TruthParticleContainer or??
 
   if( !m_jetName.empty() ){
@@ -290,7 +290,7 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
       return StatusCode::FAILURE;
     }
 
-    std::vector<int> bcJetConst;
+    std::vector<int> uidJetConst;
 
     for(unsigned int j=0; j<inJets->size(); ++j){
       const xAOD::Jet* ajet = (*inJets)[j];
@@ -307,10 +307,10 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
         dynamic_cast<const xAOD::TruthParticle*>(aipraw);
         if( pp ) {
           if( pp->pt()>m_jetConstPtCut && pp->pdgId()!=22 ){
-            bcJetConst.push_back( pp->barcode() );
+            uidJetConst.push_back( HepMC::uniqueID(pp) );
           }
           if( pp->pt()>m_jetPhotonPtCut && pp->pdgId()==22 ){
-            bcJetConst.push_back( pp->barcode() );
+            uidJetConst.push_back( HepMC::uniqueID(pp) );
           }
         } else {
           ATH_MSG_WARNING("Bad cast for particle in jet " <<j);
@@ -321,16 +321,16 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
     pItr = inTruthParts->begin();
     pItrE = inTruthParts->end();
     for(; pItr!=pItrE; ++pItr){
-      int bc = (*pItr)->barcode();
+      int uid = HepMC::uniqueID(*pItr);
       bool isJet = false;
-      for(unsigned int i=0; i<bcJetConst.size(); ++i){
-        if( bc == bcJetConst[i] ){
+      for(unsigned int i=0; i<uidJetConst.size(); ++i){
+        if( uid == uidJetConst[i] ){
           isJet = true;
           break;
         }
       }
       if( isJet ){
-        if( doPrint ) ATH_MSG_DEBUG("ParticleMask isJet " <<bc);
+        if( doPrint ) ATH_MSG_DEBUG("ParticleMask isJet " <<uid);
         partMask[ (*pItr)->index() ] = true;
       }
     }
@@ -358,16 +358,16 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
     std::cout <<"======================================================================================" <<std::endl;
     std::cout <<"HardTruthThinning complete for event " <<evtNum <<std::endl;
     std::cout <<"Saved " <<outPartNum <<" particles" <<std::endl;
-    std::cout <<"Particle barcodes = ";
+    std::cout <<"Particle unique IDs = ";
     for(unsigned int i=0; i<partMask.size(); ++i){
-      if( partMask[i] ) std::cout << ((*inTruthParts)[i])->barcode() <<" ";
+      if( partMask[i] ) std::cout << HepMC::uniqueID((*inTruthParts)[i]) <<" ";
     }
     std::cout <<std::endl;
 
     std::cout <<"Saved " <<outVertNum <<" vertices" <<std::endl;
-    std::cout <<"Vertex barcodes = ";
+    std::cout <<"Vertex unique IDs = ";
     for(unsigned int i=0; i<vertMask.size(); ++i){
-      if( vertMask[i] ) std::cout << ((*inTruthVerts)[i])->barcode() <<" ";
+      if( vertMask[i] ) std::cout << HepMC::uniqueID((*inTruthVerts)[i]) <<" ";
     }
     std::cout <<std::endl;
     std::cout <<"======================================================================================" <<std::endl;
@@ -435,34 +435,34 @@ int DerivationFramework::HardTruthThinning::getDescendants(
   return nstop;
 }
 
-// Print xAODTruth Event. The printout is particle oriented, unlike the
-// HepMC particle/vertex printout. Geant and pileup particles with
-// barcode>100000 are omitted.
+// Print xAODTruth Event. The printout is particle oriented, unlike
+// the HepMC particle/vertex printout. Geant and pileup particles are
+// omitted.
 
 void DerivationFramework::HardTruthThinning::printxAODTruth(long long evnum,
                           const xAOD::TruthParticleContainer* truths) {
 
   xAOD::TruthParticleContainer::const_iterator tpItr = truths->begin();
   xAOD::TruthParticleContainer::const_iterator tpItrE = truths->end();
-  std::vector<int> bcPars;
-  std::vector<int> bcKids;
+  std::vector<int> uidPars;
+  std::vector<int> uidKids;
 
   std::cout <<"======================================================================================" <<std::endl;
   std::cout <<"xAODTruth Event " <<evnum <<std::endl;
-  std::cout <<"   Barcode      PDG Id  Status   px(GeV)   py(GeV)   pz(GeV)    E(GeV)   Parent: Decay" <<std::endl;
+  std::cout <<"   Unique ID    PDG Id  Status   px(GeV)   py(GeV)   pz(GeV)    E(GeV)   Parent: Decay" <<std::endl;
   std::cout <<"   -----------------------------------------------------------------------------------" <<std::endl;
 
   for(; tpItr != tpItrE; ++tpItr ) {
-    int bc = (*tpItr)->barcode();
-    if( bc > 100000 ) continue;
+    if (HepMC::is_simulation_particle(*tpItr)) continue;
+    int uid = HepMC::uniqueID(*tpItr);
     int id = (*tpItr)->pdgId();
     int stat = (*tpItr)->status();
     float px = (*tpItr)->px()/1000.;
     float py = (*tpItr)->py()/1000.;
     float pz = (*tpItr)->pz()/1000.;
     float e = (*tpItr)->e()/1000.;
-    bcPars.clear();
-    bcKids.clear();
+    uidPars.clear();
+    uidKids.clear();
 
     if( (*tpItr)->hasProdVtx() ){
       const xAOD::TruthVertex* pvtx = (*tpItr)->prodVtx();
@@ -472,7 +472,7 @@ void DerivationFramework::HardTruthThinning::printxAODTruth(long long evnum,
         for(unsigned int k=0; k<pars.size(); ++k){
           if( ! (pars[k]).isValid() ) continue;
           const xAOD::TruthParticle* par = *(pars[k]);
-          bcPars.push_back(par->barcode());
+          uidPars.push_back(HepMC::uniqueID(par));
         }
       }
     }
@@ -484,23 +484,23 @@ void DerivationFramework::HardTruthThinning::printxAODTruth(long long evnum,
         for(unsigned int k=0; k<kids.size(); ++k){
           if( ! (kids[k]).isValid() ) continue;
           const xAOD::TruthParticle* kid = *(kids[k]);
-          bcKids.push_back(kid->barcode());
+          uidKids.push_back(HepMC::uniqueID(kid));
         }
       }
     }
 
-    std::cout <<std::setw(10)<<bc <<std::setw(12)<<id
+    std::cout <<std::setw(10)<<uid <<std::setw(12)<<id
               <<std::setw(8)<<stat
               <<std::setprecision(2)<<std::fixed
               <<std::setw(10)<<px <<std::setw(10)<<py
               <<std::setw(10)<<pz <<std::setw(10)<<e <<"   ";
     std::cout <<"P: ";
-    for(unsigned int k=0; k<bcPars.size(); ++k){
-      std::cout <<bcPars[k] <<" ";
+    for(unsigned int k=0; k<uidPars.size(); ++k){
+      std::cout <<uidPars[k] <<" ";
     }
     std::cout <<"  D: ";
-    for(unsigned int k=0; k<bcKids.size(); ++k){
-      std::cout <<bcKids[k] <<" ";
+    for(unsigned int k=0; k<uidKids.size(); ++k){
+      std::cout <<uidKids[k] <<" ";
     }
     std::cout <<std::endl;
   }

@@ -65,12 +65,12 @@ public:
 
 private:
 
-  std::vector<SiHit> matchSiHitsToCluster( const int barcodeToMatch,
+  std::vector<SiHit> matchSiHitsToCluster( const int uniqueIdToMatch,
     const InDet::PixelCluster* pixClus,
     SG::ReadHandle<AtlasHitsVector<SiHit>> &siHitCollection) const;
 
   static bool IsClusterFromTruth( const InDet::PixelCluster* pixClus,
-    const int barcodeToMatch,
+    const int uniqueIdToMatch,
     const InDetSimDataCollection &sdoCollection) ;
 
   HepGeom::Point3D<double> smearTruthPosition( const HepGeom::Point3D<double>& orig,
