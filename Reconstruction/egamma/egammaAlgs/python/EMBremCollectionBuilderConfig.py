@@ -28,11 +28,8 @@ def EMBremCollectionBuilderCfg(flags,
             GSFBuildInDetParticleCreatorToolCfg(flags))
 
     if "TrackSlimmingTool" not in kwargs:
-        slimmingTool = CompFactory.Trk.TrackSlimmingTool(
-            name="GSFBuildInDetTrackSlimmingTool",
-            KeepParameters=False,
-            KeepOutliers=True)
-        kwargs["TrackSlimmingTool"] = slimmingTool
+        from TrkConfig.TrkTrackSlimmingToolConfig import GSFTrackSlimmingToolCfg
+        kwargs["TrackSlimmingTool"] = acc.popToolsAndMerge(GSFTrackSlimmingToolCfg(flags))
 
     kwargs.setdefault(
         "usePixel",
