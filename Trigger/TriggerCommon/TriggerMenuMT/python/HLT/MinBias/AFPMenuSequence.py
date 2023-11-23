@@ -121,18 +121,33 @@ def AFPGlobalRecoSequenceCfg(flags):
 
 @AccumulatorCache
 def AFPGlobalSequenceCfg(flags):
-    def AFPTOFHypoToolGen(chain_dict):
-        return CompFactory.TrigAFPToFHypoTool(chain_dict['chainName'])
-
+    def trigStreamerAFPToFHypoTool(chainDict):
+        return CompFactory.TrigStreamerHypoTool(chainDict['chainName'])
+    
     recoAcc = AFPGlobalRecoSequenceCfg(flags)
 
-    hypo = CompFactory.TrigAFPToFHypoAlg('TrigAFPToFHypoAlg', AFPVertexContainer='HLT_AFPVertexContainer', VertexContainer='HLT_IDVertex_FS')
+    hypo = CompFactory.TrigStreamerHypoAlg('AFPToFPassThroughHypo')
 
     selAcc = SelectionCA('AFPGlobalSequence')
     selAcc.mergeReco(recoAcc)
     selAcc.addHypoAlgo(hypo)
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=AFPTOFHypoToolGen)
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=trigStreamerAFPToFHypoTool)
+
+@AccumulatorCache
+def AFPToFDeltaZSequenceCfg(flags):
+    def AFPToFDeltaZToolGen(chainDict):
+        return CompFactory.TrigAFPToFHypoTool(chainDict['chainName'])
+
+    recoAcc = AFPGlobalRecoSequenceCfg(flags)
+
+    hypo = CompFactory.TrigAFPToFHypoAlg('TrigAFPToFHypoAlg', AFPVertexContainer='HLT_AFPVertexContainer', VertexContainer='HLT_IDVertex_FS')
+
+    selAcc = SelectionCA('AFPToFDeltaZSequence')
+    selAcc.mergeReco(recoAcc)
+    selAcc.addHypoAlgo(hypo)
+
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=AFPToFDeltaZToolGen)
 
 
 if __name__ == '__main__':
