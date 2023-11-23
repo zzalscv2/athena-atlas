@@ -34,23 +34,27 @@ def Conversion_TrkVKalVrtFitterCfg(
 
     return TrkVKalVrtFitterCfg(flags, name, **kwargs)
 
-def BPHY_TrkVKalVrtFitterCfg(flags, name="BPHY_TrkVKalVrtFitter", **kwargs):
+def InDetTrkVKalVrtFitterCfg(flags, name="InDetTrkVKalVrtFitter", **kwargs):
     acc = ComponentAccumulator()
 
     if "Extrapolator" not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
         kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
             InDetExtrapolatorCfg(flags)))
-
-    kwargs.setdefault("FirstMeasuredPoint", False)
-    kwargs.setdefault("MakeExtendedVertex", True)
-
+    
     acc.setPrivateTools(acc.popToolsAndMerge(
         TrkVKalVrtFitterCfg(flags, name, **kwargs)))
     return acc
 
-def V0VKalVrtFitterCfg(flags, name="V0VKalVrtFitter", **kwargs):
+def TrigVKalVrtFitterCfg(flags, name="TrigVKalVrtFitter", **kwargs):
+    kwargs.setdefault("IterationNumber",    30)
+    return InDetTrkVKalVrtFitterCfg(flags, name, **kwargs)
+
+def BPHY_TrkVKalVrtFitterCfg(flags, name="BPHY_TrkVKalVrtFitter", **kwargs):
     kwargs.setdefault("MakeExtendedVertex", True)
+    return InDetTrkVKalVrtFitterCfg(flags, name, **kwargs)
+
+def V0VKalVrtFitterCfg(flags, name="V0VKalVrtFitter", **kwargs):
     kwargs.setdefault("IterationNumber",    30)
     return BPHY_TrkVKalVrtFitterCfg(flags, name, **kwargs)
 
