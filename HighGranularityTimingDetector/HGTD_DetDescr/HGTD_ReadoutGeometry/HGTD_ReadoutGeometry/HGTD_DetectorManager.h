@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HGTD_READOUTGEOMETRY_HGTD_DETECTORMANAGER_H
@@ -44,17 +44,17 @@ public:
     virtual PVConstLink  getTreeTop(unsigned int i) const override;
 
     /** Add a Tree top: */
-    virtual void addTreeTop (PVLink treeTop);
+    void addTreeTop (PVLink treeTop);
 
     //
     // Access Readout Elements
     //
 
     /** access to individual elements : via Identifier */
-    virtual InDetDD::HGTD_DetectorElement * getDetectorElement(const Identifier &id) const;
+    InDetDD::HGTD_DetectorElement * getDetectorElement(const Identifier &id) const;
 
     /** access to individual elements : via IdentifierHash */
-    virtual InDetDD::HGTD_DetectorElement * getDetectorElement(const IdentifierHash &idHash) const;
+    InDetDD::HGTD_DetectorElement * getDetectorElement(const IdentifierHash &idHash) const;
 
     /** access to individual elements : via element identification */
     InDetDD::HGTD_DetectorElement * getDetectorElement(int endcap,
@@ -63,18 +63,18 @@ public:
                                                        int eta_module) const;
 
     /** access to whole collection via Iterators */
-    virtual const InDetDD::HGTD_DetectorElementCollection * getDetectorElementCollection() const;
-    virtual InDetDD::HGTD_DetectorElementCollection::const_iterator getDetectorElementBegin() const;
-    virtual InDetDD::HGTD_DetectorElementCollection::const_iterator getDetectorElementEnd() const;
+    const InDetDD::HGTD_DetectorElementCollection * getDetectorElementCollection() const;
+    InDetDD::HGTD_DetectorElementCollection::const_iterator getDetectorElementBegin() const;
+    InDetDD::HGTD_DetectorElementCollection::const_iterator getDetectorElementEnd() const;
 
     /** Add elememts */
-    virtual void addDetectorElement(InDetDD::HGTD_DetectorElement * element);
+    void addDetectorElement(InDetDD::HGTD_DetectorElement * element);
 
     /** Invalidate cache for all detector elements */
-    virtual void invalidateAll() const;
+    void invalidateAll() const;
 
     /** Update all caches */
-    virtual void updateAll() const;
+    void updateAll() const;
 
     /** Set SiCommonItems */
     void setCommonItems(std::unique_ptr<const InDetDD::SiCommonItems>&& commonItems);
@@ -85,7 +85,7 @@ private:
     const HGTD_DetectorManager & operator=(const HGTD_DetectorManager &right);
     HGTD_DetectorManager(const HGTD_DetectorManager &right);
 
-    virtual const HGTD_ID  * getIdHelper() const;
+    const HGTD_ID  * getIdHelper() const;
 
     // Private member data
     std::vector<PVLink>              m_volume;
