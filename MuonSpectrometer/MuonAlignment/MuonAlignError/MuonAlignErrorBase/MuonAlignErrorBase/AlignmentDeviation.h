@@ -45,7 +45,7 @@ namespace Trk {
         /**
          * Return the list of hits the transform should be applied to.
          */
-        void getListOfHits(std::vector<const Trk::RIO_OnTrack*>& hits) const;
+        const std::vector<const Trk::RIO_OnTrack*>& getListOfHits() const;
 
         /**
          * Return hash built out of associated hits for fast comparison if deviations have same content
@@ -83,7 +83,7 @@ namespace Trk {
     {
     }
 
-    inline void AlignmentDeviation::getListOfHits(std::vector<const Trk::RIO_OnTrack*>& hits) const { hits = m_hits; }
+    inline const std::vector<const Trk::RIO_OnTrack*>& AlignmentDeviation::getListOfHits() const { return m_hits; }
 
     inline std::size_t AlignmentDeviation::getHashOfHits() const { return m_hitshash; }
 

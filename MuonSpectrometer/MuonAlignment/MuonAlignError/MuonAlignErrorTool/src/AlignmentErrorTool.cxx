@@ -13,6 +13,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "GeoPrimitives/GeoPrimitives.h"
 #include "MuonAlignErrorBase/AlignmentRotationDeviation.h"
 #include "MuonAlignErrorBase/AlignmentTranslationDeviation.h"
 #include "TrkCompetingRIOsOnTrack/CompetingRIOsOnTrack.h"
@@ -119,6 +121,24 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
         ATH_MSG_DEBUG("Hit is in station " << alignStationName << " multilayer " << multilayerName);
         ++nPrecisionHits;
 
+        // Compute deviationSummary_t building blocks
+        const Trk::PrepRawData* prd = rot->prepRawData();
+        const Trk::Surface& sur = prd->detectorElement()->surface(prd->identify());
+
+        double w2 = 1.0 / (rot->localCovariance()(Trk::loc1, Trk::loc1));
+        Amg::Vector3D hitP = tsos->trackParameters()->position();
+        Amg::Vector3D hitU = tsos->trackParameters()->momentum().unit();
+
+        // Wire direction for MDT, strip direction for MM or sTGC
+        int icol = (calibId.is_mdt()||calibId.is_csc()) ? 2 : 1;
+        Amg::Vector3D hitV = sur.transform().rotation().col(icol);
+
+        // Enforce orientation of the V vectors
+        static const Amg::Vector3D zATLAS(0., 0., 1.);
+        if (hitP.cross(zATLAS).dot(hitV)<0.0) {
+            hitV *= -1.0;
+        }
+
         // FOR CROSS-CHECK
         bool is_matched = false;
 
@@ -135,24 +155,10 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
             // ASSOCIATE EACH NUISANCE TO A LIST OF HITS
             iDev.hits.push_back(rot);
 
-            // COMPUTE RELEVANT NUMBERS
-            const Trk::PrepRawData* prd = rot->prepRawData();
-            const Trk::Surface& sur = prd->detectorElement()->surface(prd->identify());
-
-            double w2 = 1.0 / (rot->localCovariance()(Trk::loc1, Trk::loc1));
             iDev.sumW2 += w2;
-            iDev.sumP += w2 * tsos->trackParameters()->position();
-            iDev.sumU += w2 * tsos->trackParameters()->momentum().unit();
-
-            // CHECK 1 //
-            Amg::Vector3D zATLAS(0., 0., 1.);
-            Amg::Vector3D v1 = (tsos->trackParameters()->position()).cross(zATLAS);
-            v1 /= v1.mag();
-            Amg::Vector3D v2 = sur.transform().rotation().col(2) / (sur.transform().rotation().col(2)).mag();
-            double sign = (v1.dot(v2) > 0.) ? 1. : -1.;
-
-            // ARTIFICIALLY ORIENTATE EVERYTHING TOWARDS THE SAME DIRECTION
-            iDev.sumV += sign * w2 * sur.transform().rotation().col(2);
+            iDev.sumP += w2 * hitP;
+            iDev.sumU += w2 * hitU;
+            iDev.sumV += w2 * hitV;
 
             // FOR CROSS-CHECK
             is_matched = true;
