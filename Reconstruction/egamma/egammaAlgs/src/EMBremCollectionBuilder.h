@@ -138,7 +138,7 @@ private:
   /** @brief Option to copy TRT holes estimation*/
   Gaudi::Property<bool> m_doTRT{ this, "useTRT", true, "do TRT" };
 
-  /** @brief Option to do pixel holes estimation*/
+  /** @brief Option to slim the Trk::Tracks*/
   Gaudi::Property<bool> m_doSlimTrkTracks{ this,
                                            "slimTrkTracks",
                                            true,
