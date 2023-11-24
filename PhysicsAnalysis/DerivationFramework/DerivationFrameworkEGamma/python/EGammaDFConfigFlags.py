@@ -14,5 +14,5 @@ def createEGammaDFConfigFlags():
     # ECIDS currently not supported in R22
     # For the moment just turn off, remove from code when
     # final decision is taken on whether to revive it or not
-    egdcf.addFlag("Derivation.Egamma.addECIDS", False)
+    egdcf.addFlag("Derivation.Egamma.addECIDS", True)
     return egdcf

@@ -50,15 +50,18 @@ def EGammaCommonCfg(ConfigFlags):
 
     if isFullSim:
         from EGammaVariableCorrection.EGammaVariableCorrectionConfig import (
-            ElectronVariableCorrectionToolCfg, PhotonVariableCorrectionToolCfg
+            ElectronVariableCorrectionToolCfg,
+            PhotonVariableCorrectionToolCfg,
         )
 
         ElectronVariableCorrectionTool = acc.popToolsAndMerge(
-            ElectronVariableCorrectionToolCfg(ConfigFlags))
+            ElectronVariableCorrectionToolCfg(ConfigFlags)
+        )
         acc.addPublicTool(ElectronVariableCorrectionTool)
 
         PhotonVariableCorrectionTool = acc.popToolsAndMerge(
-            PhotonVariableCorrectionToolCfg(ConfigFlags))
+            PhotonVariableCorrectionToolCfg(ConfigFlags)
+        )
         acc.addPublicTool(PhotonVariableCorrectionTool)
 
     # ====================================================================
@@ -458,7 +461,7 @@ def EGammaCommonCfg(ConfigFlags):
                 ConfigFlags,
                 name="ElectronPassECIDS",
                 EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
-                EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isFullSim else None),
+                EGammaFudgeMCTool=None,
                 CutType="",
                 StoreGateEntryName="DFCommonElectronsECIDS",
                 ContainerName="Electrons",
@@ -633,9 +636,12 @@ def EGammaCommonCfg(ConfigFlags):
 
     if ConfigFlags.Derivation.Egamma.addMissingCellInfo:
         from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-            EgammaCoreCellRecoveryCfg)
+            EgammaCoreCellRecoveryCfg,
+        )
+
         CoreCellRecoveryTool = acc.popToolsAndMerge(
-            EgammaCoreCellRecoveryCfg(ConfigFlags))
+            EgammaCoreCellRecoveryCfg(ConfigFlags)
+        )
         acc.addPublicTool(CoreCellRecoveryTool)
         EGAugmentationTools.append(CoreCellRecoveryTool)
 
