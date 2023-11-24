@@ -178,8 +178,8 @@ PixelCluster::PixelCluster(const Identifier& RDOId,
                            const float omegax,
                            const float omegay,
                            int splitInfoRaw)
-    : SiCluster(RDOId, locpos, rdoList, width, detEl,
-                locErrMat),  // call base class constructor
+    : SiCluster(RDOId, locpos, std::move(rdoList), width, detEl,
+                std::move(locErrMat)),  // call base class constructor
       m_omegax(omegax),
       m_omegay(omegay),
       m_totList(),

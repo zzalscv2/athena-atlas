@@ -64,7 +64,7 @@ public:
   /// Move assignment operator
   SiCluster& operator=(SiCluster&&) = default;
   /// Destructor:
-  virtual ~SiCluster(); //default in dtor
+  virtual ~SiCluster() = default;
 
   /**
    * Constructor with parameters using ref or omitting  Amg::MatrixX.
@@ -72,38 +72,20 @@ public:
    */
   SiCluster(const Identifier& RDOId,
             const Amg::Vector2D& locpos,
-            const std::vector<Identifier>& rdoList,
+            std::vector<Identifier>&& rdoList,
             const InDet::SiWidth& width,
             const InDetDD::SiDetectorElement* detEl,
-            const Amg::MatrixX& locErrMat);
+            Amg::MatrixX&& locErrMat);
 
   SiCluster(const Identifier& RDOId,
             const Amg::Vector2D& locpos,
-            const std::vector<Identifier>& rdoList,
+            std::vector<Identifier>&& rdoList,
             const InDet::SiWidth& width,
             const InDetDD::SiDetectorElement* detEl);
 
   SiCluster(const Identifier& RDOId,
             const Amg::Vector2D& locpos,
             const Amg::Vector3D& globpos,
-            const std::vector<Identifier>& rdoList,
-            const InDet::SiWidth& width,
-            const InDetDD::SiDetectorElement* detEl,
-            const Amg::MatrixX& locErrMat);
-
-  SiCluster(const Identifier& RDOId,
-            const Amg::Vector2D& locpos,
-            const Amg::Vector3D& globpos,
-            const std::vector<Identifier>& rdoList,
-            const InDet::SiWidth& width,
-            const InDetDD::SiDetectorElement* detEl);
-
-  /**
-   * Constructor with parameters using r-value reference of Amg::MatrixX.
-   * All parameters have to be given!
-   */
-  SiCluster(const Identifier& RDOId,
-            const Amg::Vector2D& locpos,
             std::vector<Identifier>&& rdoList,
             const InDet::SiWidth& width,
             const InDetDD::SiDetectorElement* detEl,
@@ -114,8 +96,7 @@ public:
             const Amg::Vector3D& globpos,
             std::vector<Identifier>&& rdoList,
             const InDet::SiWidth& width,
-            const InDetDD::SiDetectorElement* detEl,
-            Amg::MatrixX&& locErrMat);
+            const InDetDD::SiDetectorElement* detEl);
 
   /**
    * @name Virtual methods

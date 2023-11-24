@@ -24,17 +24,6 @@ namespace InDet{
 
 SCT_Cluster::SCT_Cluster(const Identifier& RDOId,
                          const Amg::Vector2D& locpos,
-                         const std::vector<Identifier>& rdoList,
-                         const InDet::SiWidth& width,
-                         const InDetDD::SiDetectorElement* detEl,
-                         const Amg::MatrixX& locErrMat)
-  : SiCluster(RDOId, locpos, rdoList, width, detEl, locErrMat)
-{
-  m_hitsInThirdTimeBin = 0;
-}
-
-SCT_Cluster::SCT_Cluster(const Identifier& RDOId,
-                         const Amg::Vector2D& locpos,
                          std::vector<Identifier>&& rdoList,
                          const InDet::SiWidth& width,
                          const InDetDD::SiDetectorElement* detEl,
@@ -60,7 +49,7 @@ std::ostream& operator << (std::ostream& stream, const SCT_Cluster& prd)
     return prd.dump(stream);
 }
 
-bool 
+bool
 SCT_Cluster::type(Trk::PrepRawDataType type) const{
   return (type == Trk::PrepRawDataType::SCT_Cluster or type == Trk::PrepRawDataType::SiCluster);
 }

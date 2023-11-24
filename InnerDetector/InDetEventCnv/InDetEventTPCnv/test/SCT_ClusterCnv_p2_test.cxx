@@ -94,7 +94,7 @@ void test1 ATLAS_NOT_THREAD_SAFE (const SCT_ID& sct_id)
 
   InDet::SCT_Cluster trans1 (Identifier (1234),
                              locpos,
-                             rdoList,
+                             std::vector<Identifier>(rdoList),
                              width,
                              nullptr,
                              Amg::MatrixX(cov));
