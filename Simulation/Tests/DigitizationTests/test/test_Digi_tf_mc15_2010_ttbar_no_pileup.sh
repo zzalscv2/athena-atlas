@@ -6,6 +6,8 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-output: mc15_2010_ttbar_no_pileup.RDO.pool.root
+# art-output: mc15_2010_ttbar_no_pileup.CA.RDO.pool.root
+# art-output: ConfigDigi*.pkl
 
 DigiOutFileNameCG="mc15_2010_ttbar_no_pileup.RDO.pool.root"
 DigiOutFileNameCA="mc15_2010_ttbar_no_pileup.CA.RDO.pool.root"
@@ -111,7 +113,7 @@ echo "art-result: $rc4 checkFile"
 
 if [ $rc1 -eq 0 ]
 then
-    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed
+    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed --file="$DigiOutFileNameCG"
     rc5=$?
     if [ $status -eq 0 ]
     then
