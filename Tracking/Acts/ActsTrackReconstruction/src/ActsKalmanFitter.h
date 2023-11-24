@@ -49,6 +49,9 @@
 #include <limits>//for numeric_limits
 #include <cmath> //std::abs
 
+
+#include "ActsToolInterfaces/IFitterTool.h"
+
 class EventContext;
 
 namespace Trk{
@@ -80,7 +83,7 @@ struct PRDSourceLinkSurfaceAccessor {
   const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;
 };
 
-class ActsKalmanFitter : public extends<AthAlgTool, Trk::ITrackFitter> { 
+class ActsKalmanFitter : public extends2<AthAlgTool, Trk::ITrackFitter, ActsTrk::IFitterTool> { 
 public:
 
   ActsKalmanFitter(const std::string&,const std::string&,const IInterface*);
@@ -136,6 +139,16 @@ public:
     const Trk::RunOutlierRemoval runOutlier = false,
     const Trk::ParticleHypothesis matEffects = Trk::nonInteracting) const override;
 
+  //! Acts seed fit
+  virtual
+    std::unique_ptr< ActsTrk::MutableTrackContainer >
+    fit(const EventContext& ctx,
+	const ActsTrk::Seed &seed,
+	const Acts::BoundTrackParameters& initialParams,
+	const Acts::GeometryContext& tgContext,
+	const Acts::MagneticFieldContext& mfContext,
+	const Acts::CalibrationContext& calContext,
+	const TrackingSurfaceHelper &tracking_surface_helper) const override;
 
   ///////////////////////////////////////////////////////////////////
   // Private methods:
@@ -177,7 +190,10 @@ private:
 
   /// Type erased track fitter function.
     using Fitter = Acts::KalmanFitter<Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>, ActsTrk::MutableTrackStateBackend>;
-    std::unique_ptr<Fitter> m_fitter;
+    std::unique_ptr<Fitter> m_fitter {nullptr};
+
+    using DirectFitter = Acts::KalmanFitter<Acts::Propagator<Acts::EigenStepper<>, Acts::DirectNavigator>, ActsTrk::MutableTrackStateBackend>;
+    std::unique_ptr<DirectFitter> m_directFitter {nullptr};
 
     Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> m_kfExtensions;
 

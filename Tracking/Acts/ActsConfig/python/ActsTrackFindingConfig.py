@@ -33,7 +33,6 @@ def ActsTrackStatePrinterCfg(
 
 # ACTS only algorithm
 
-
 def ActsTrackFindingCfg(flags,
                         name: str = "ActsTrackFindingAlg",
                         **kwargs) -> ComponentAccumulator:
@@ -106,6 +105,15 @@ def ActsTrackFindingCfg(flags,
     # if all eta bins are >=0. the counter will be categorized by abs(eta) otherwise eta
     kwargs.setdefault("StatisticEtaBins", [eta/10. for eta in range(5, 40, 5)]) # eta 0.0 - 4.0 in steps of 0.5
     kwargs.setdefault("DumpEtaBinsForAll", False)
+
+    if 'FitterTool' not in kwargs:
+        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg 
+        kwargs.setdefault(
+            'FitterTool',
+            acc.popToolsAndMerge(ActsFitterCfg(flags, 
+                                               ReverseFilteringPt=0,
+                                               OutlierChi2Cut=30))
+        )
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrackFindingAlg(name, **kwargs))
     return acc

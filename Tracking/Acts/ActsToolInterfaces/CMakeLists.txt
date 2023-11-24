@@ -9,7 +9,6 @@ find_package( Acts COMPONENTS Core )
 # External dependencies:
 # Component(s) in the package:
 atlas_add_library( ActsToolInterfacesLib
-                   ActsToolInterfaces/*.h
                    INTERFACE
                    PUBLIC_HEADERS ActsToolInterfaces
                    LINK_LIBRARIES
@@ -17,6 +16,7 @@ atlas_add_library( ActsToolInterfacesLib
                    BeamSpotConditionsData
                    ActsCore
                    ActsEventLib
+		   ActsGeometryLib
                    SiSpacePointFormationLib
                    InDetReadoutGeometry
 		   InDetIdentifier

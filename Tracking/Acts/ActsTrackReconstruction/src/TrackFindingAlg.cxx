@@ -116,6 +116,7 @@ namespace ActsTrk
     ATH_CHECK(m_extrapolationTool.retrieve());
     ATH_CHECK(m_ATLASConverterTool.retrieve());
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
+    ATH_CHECK(m_fitterTool.retrieve());
 
     m_logger = makeActsAthenaLogger(this, "Acts");
 
@@ -478,7 +479,40 @@ namespace ActsTrk
       // Result here contains a vector of TrackProxy objects
       ++event_stat[category_i][kNUsedSeeds];
 
-      auto result = trackFinder().ckf.findTracks(initialParameters, options, tracksContainerTemp);
+      // Perform KF before CKF
+      std::unique_ptr< ActsTrk::MutableTrackContainer > fitted_track =  m_fitterTool->fit(ctx, *(*seeds)[iseed], initialParameters,
+											  tgContext, mfContext, calContext,
+											  tracking_surface_helper);
+      if (not fitted_track) {
+	ATH_MSG_ERROR("KF Fitted Track is nullptr");
+	return StatusCode::FAILURE;
+      }
+
+
+      if (fitted_track->size() != 1) {
+	ATH_MSG_ERROR("KF produced " << fitted_track->size() << " tracks but should produce 1!");
+	return StatusCode::FAILURE;
+      }
+
+      // Check pTmin requirement
+      const auto trackProxy = fitted_track->getTrack(0);
+
+      double thetaValue = trackProxy.parameters()[Acts::eBoundTheta];
+      double etaValue = - std::log( std::tan(0.5 * thetaValue) );  
+      const auto& cutSets = trackFinder().trackSelector.config().getCuts(etaValue);
+      if (trackProxy.transverseMomentum() < cutSets.ptMin) {
+	ATH_MSG_VERBOSE( "min pt requirement not satisfied after param refinement: pt min is " << cutSets.ptMin << " but Refined params have pt of " << trackProxy.transverseMomentum() );
+	++event_stat[category_i][kNRejectedRefinedSeeds];
+	continue;
+      }
+
+      // Pass the refined params to the CKF
+      const Acts::BoundTrackParameters fitterParameters(trackProxy.referenceSurface().getSharedPtr(),
+							trackProxy.parameters(),
+							trackProxy.covariance(),
+							trackProxy.particleHypothesis());
+
+      auto result = trackFinder().ckf.findTracks(fitterParameters, options, tracksContainerTemp);
 
       // The result for this seed
       if (not result.ok())
@@ -607,6 +641,7 @@ namespace ActsTrk
                                           std::make_pair(kNUsedSeeds, "Used   seeds"),
                                           std::make_pair(kNoTrack, "Cannot find track"),
                                           std::make_pair(kNDuplicateSeeds, "Duplicate seeds"),
+					  std::make_pair(kNRejectedRefinedSeeds, "Rejected refined parameters"),  
                                           std::make_pair(kNOutputTracks, "CKF tracks"),
                                           std::make_pair(kNSelectedTracks, "selected tracks"),
                                       });
@@ -697,6 +732,7 @@ namespace ActsTrk
                                                                                       }, // failed seeds i.e. seeds which are not duplicates but did not produce a track
                                                                                       std::vector<TableUtils::SummandDefinition>{TableUtils::defineSummand(kNTotalSeeds, 1)}),
                                                       TableUtils::defineSimpleRatio("duplication / seeds", kNDuplicateSeeds, kNTotalSeeds),
+		                                      TableUtils::defineSimpleRatio("Rejected refined params / seeds", kNRejectedRefinedSeeds, kNTotalSeeds),
                                                       TableUtils::defineSimpleRatio("selected / CKF tracks", kNSelectedTracks, kNOutputTracks),
                                                       TableUtils::defineSimpleRatio("selected tracks / used seeds", kNSelectedTracks, kNUsedSeeds)});
 
@@ -792,3 +828,4 @@ namespace ActsTrk
   }
 
 } // namespace
+ 
