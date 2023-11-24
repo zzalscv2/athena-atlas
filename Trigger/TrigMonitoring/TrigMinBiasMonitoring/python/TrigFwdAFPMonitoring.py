@@ -4,8 +4,12 @@ import math
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoring import AthMonitorCfgHelper
-from TrigConfigSvc.TriggerConfigAccess import getHLTMenuAccess
+from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
+from AthenaCommon.Logging import logging
 
+from .utils import getMinBiasChains
+
+log = logging.getLogger('TrigFwdAFPMonitoring')
 
 jet_containers = {
     'Topo': 'AntiKt4EMTopoJets',
@@ -20,11 +24,14 @@ def TrigFwdAFPMonitoringCfg(flags):
 
     monConfig = AthMonitorCfgHelper(flags, 'FwdAFPMonitoringAlgs')
 
-    afp_chains = [c for c in getHLTMenuAccess(flags) if 'afp' in c.lower()]
+    monAccess = getHLTMonitoringAccess(flags)
+    afp_chains = getMinBiasChains(monAccess, '(AFP|afp)')
 
     # Counting alg for all AFP triggers
     algCount = monConfig.addAlgorithm(CompFactory.FwdAFPCountMonitoringAlg, 'FwdAFPCountMonitoringAlg')
-    algCount.chains = afp_chains
+    algCount.chains = [name for name, _ in afp_chains]
+
+    log.info(f'Monitoring {len(afp_chains)} AFP chains')
 
     afpCountGroup = monConfig.addGroup(algCount, 'AFPCount', topPath='HLT/FwdAFP/')
     afpCountGroup.defineHistogram('counts', title='Trigger counts;;Counts', xbins=len(algCount.chains),
@@ -37,19 +44,25 @@ def TrigFwdAFPJetMonitoringCfg(flags):
     """ Configure AFP+jet chains monitoring algs """
 
     monConfig = AthMonitorCfgHelper(flags, 'FwdAFPJetMonitoringAlgs')
+    monAccess = getHLTMonitoringAccess(flags)
 
-    from TrigMinBiasMonitoring.FwdAFPJetChainMapping import GetAFPJetChains
-    chains_jet = GetAFPJetChains([c for c in getHLTMenuAccess(flags) if 'afp' in c.lower() or 'L1RD0' in c])
+    # Select non-noalg AFP chains seeded from L1 jet
+    chains_afp = getMinBiasChains(monAccess, '(afpdijet)')
+    ref_chains = ['HLT_mb_sp_L1RD0_FILLED', 'HLT_mb_sptrk_L1RD0_FILLED', 'HLT_noalg_L1RD0_FILLED',
+                  'HLT_noalg_L1AFP_A_OR_C', 'HLT_noalg_L1AFP_A_OR_C']
+
+    log.info(f'Monitoring {len(chains_afp)} AFP+DiJet chains')
+    log.debug([name for name, _ in chains_afp])
 
     # Jet monitoring algs for different jet containers
     for jet, container in jet_containers.items():
         algEff = monConfig.addAlgorithm(CompFactory.FwdAFPJetMonitoringAlg, 'FwdAFP' + jet + 'JetMonitoringAlg')
 
-        algEff.chains = chains_jet['all']
+        algEff.chains = [name for name, _ in chains_afp]
         algEff.jetContainer = container
 
-        for n, chain in enumerate(algEff.chains):
-            afpJetGroup = monConfig.addGroup(algEff, f'{chain}_{container}', topPath=f'HLT/FwdAFP/Jet/{chain}/{container}/')
+        for chain, level in chains_afp:
+            afpJetGroup = monConfig.addGroup(algEff, f'{chain}_{container}', topPath=f'HLT/FwdAFP/{level}/Jet/{chain}/{container}/')
             afpJetGroup.defineHistogram('jetPt', title=f'{jet} jet pT;Jet pT [GeV];Entries', xbins=100, xmin=0, xmax=200)
             afpJetGroup.defineHistogram('jetEta', title=f'{jet} jet eta;Jet #eta;Entries', xbins=100, xmin=-4.9, xmax=4.9)
             afpJetGroup.defineHistogram('jetPhi', title=f'{jet} jet phi;Jet #varphi;Entries', xbins=100, xmin=-math.pi, xmax=math.pi)
@@ -73,13 +86,14 @@ def TrigFwdAFPJetMonitoringCfg(flags):
 
     # Efficiency alg
     algEff = monConfig.addAlgorithm(CompFactory.FwdAFPJetEffMonitoringAlg, 'FwdAFPJetEffMonitoringAlg')
-    algEff.chains = chains_jet['trig']
-    algEff.references = chains_jet['ref']
+    algEff.chains = [name for name, _l in chains_afp for _r in range(len(ref_chains))]
+    algEff.references = ref_chains * len(chains_afp)
 
-    for chain, ref in zip(algEff.chains, algEff.references):
-        afpJetEffGroup = monConfig.addGroup(algEff, f'{chain}_{ref}', topPath='HLT/FwdAFP/Jet/Eff/')
-        afpJetEffGroup.defineHistogram(f'effPassed,leadingJetPt;{chain}_vs_{ref}', type='TEfficiency',
-                                       title=f'{chain} vs {ref};Leading jet pT [GeV];Efficiency', xbins=100, xmin=0, xmax=200)
+    for chain, level in chains_afp:
+        for ref in ref_chains:
+            afpJetEffGroup = monConfig.addGroup(algEff, f'{chain}_{ref}', topPath=f'HLT/FwdAFP/{level}/Jet/Eff/')
+            afpJetEffGroup.defineHistogram(f'effPassed,leadingJetPt;{chain}_vs_{ref}', type='TEfficiency',
+                                           title=f'{chain} vs {ref};Leading jet pT [GeV];Efficiency', xbins=100, xmin=0, xmax=200)
 
     return monConfig.result()
 

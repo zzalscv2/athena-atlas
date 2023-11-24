@@ -5,8 +5,12 @@
 '''
 @brief configuration for the trigger efficiency monitoring
 '''
-from TrigConfigSvc.TriggerConfigAccess import getHLTMenuAccess
+
+from .utils import getMinBiasChains
+from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
+
+log = logging.getLogger('TrigMinBiasEffMonitoring')
 
 
 def _TrigEff(flags, triggerAndRef, algname='HLTMinBiasEffMonitoringAlg'):
@@ -31,10 +35,11 @@ def _TrigEff(flags, triggerAndRef, algname='HLTMinBiasEffMonitoringAlg'):
     for cdef in triggerAndRef:
         chain = cdef['chain']
         refchain = cdef['refchain']
+        level = cdef['level']
         xmin  = cdef['xmin']
         xmax  = cdef['xmax']
         xbins = xmax-xmin
-        effGroup = monConfig.addGroup(alg, chain+refchain, topPath='HLT/MinBiasMon/EffAll/')
+        effGroup = monConfig.addGroup(alg, chain+refchain, topPath=f'HLT/MinBiasMon/{level}/EffAll/')
 
         whichcounter='nTrkOffline'
         # if the chain cuts on higher pt (there is a few predefined chains) use different counter
@@ -72,86 +77,93 @@ def _TrigEff(flags, triggerAndRef, algname='HLTMinBiasEffMonitoringAlg'):
 
 
 def TrigMinBiasEff(flags):
-    allChains = getHLTMenuAccess(flags)
-    mbChains = [c for c in allChains if '_mb_' in c]
-    if len(mbChains) == 0:
+    from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
+    monAccess = getHLTMonitoringAccess(flags)
+
+    mbNames = [name for name, _ in getMinBiasChains(monAccess)]
+    if len(mbNames) == 0:
         return _TrigEff(flags, [])
 
+    log.info(f'Monitoring {len(mbNames)} MinBias chains')
+    log.debug(mbNames)
+
     # here we generate config with detailed settings
-    def _c(chain, refchain, **kwargs):
-        conf = {"chain": chain, "refchain": refchain, "xmin": 0, "xmax": 20}
+    def _c(chain, refchain, level, **kwargs):
+        conf = {"chain": chain, "refchain": refchain, "level": level, "xmin": 0, "xmax": 20}
         conf.update(kwargs)
         return conf
 
-    def _isMBSPTRK(chain):
-        return "HLT_mb_sptrk_" in chain or "HLT_mb_sp_" in chain or "HLT_mb_mbts_" in chain
-
     def _isFilled(chain):
-        return "_EMPTY" not in chain and "_UNPAIRED_ISO" not in chain
+        name, _ = chain
+        return "_EMPTY" not in name and "_UNPAIRED_ISO" not in name
 
-    mbsptrkChains = [chain for chain in mbChains if _isMBSPTRK(chain)]
-
-    filledChains = [chain for chain in mbsptrkChains if _isFilled(chain)]
-    emptyChains = [chain for chain in mbsptrkChains if "_EMPTY" in chain]
-    unpairedChains = [chain for chain in mbsptrkChains if "_UNPAIRED_ISO" in chain]
+    spTrkChains = getMinBiasChains(monAccess, '(_sptrk_|_sp_|_mbts_)')
+    filledChains = list(filter(_isFilled, spTrkChains))
+    emptyChains = [chain for chain in spTrkChains if "_EMPTY" in chain[0]]
+    unpairedChains = [chain for chain in spTrkChains if "_UNPAIRED_ISO" in chain[0]]
 
     triggerAndRef = []
 
     # check all mb_sptrk chains w.r.t. random noalg
-    triggerAndRef += [_c(chain, "HLT_noalg_L1RD0_FILLED") for chain in filledChains]
-    triggerAndRef += [_c(chain, "HLT_noalg_L1RD0_EMPTY") for chain in emptyChains]
-    triggerAndRef += [_c(chain, "HLT_noalg_L1RD0_UNPAIRED_ISO") for chain in unpairedChains]
+    triggerAndRef += [_c(name, "HLT_noalg_L1RD0_FILLED", level) for name, level in filledChains]
+    triggerAndRef += [_c(name, "HLT_noalg_L1RD0_EMPTY", level) for name, level in emptyChains]
+    triggerAndRef += [_c(name, "HLT_noalg_L1RD0_UNPAIRED_ISO", level) for name, level in unpairedChains]
 
     # for monitoring in MB stream
-    triggerAndRef += [_c(chain, "HLT_noalg_mb_L1RD0_FILLED") for chain in filledChains]
-    triggerAndRef += [_c(chain, "HLT_noalg_mb_L1RD0_EMPTY") for chain in emptyChains]
-    triggerAndRef += [_c(chain, "HLT_noalg_mb_L1RD0_UNPAIRED_ISO") for chain in unpairedChains]
+    triggerAndRef += [_c(name, "HLT_noalg_mb_L1RD0_FILLED", level) for name, level in filledChains]
+    triggerAndRef += [_c(name, "HLT_noalg_mb_L1RD0_EMPTY", level) for name, level in emptyChains]
+    triggerAndRef += [_c(name, "HLT_noalg_mb_L1RD0_UNPAIRED_ISO", level) for name, level in unpairedChains]
 
     # sptrk vs sp
-    triggerAndRef += [_c("HLT_mb_sptrk_L1RD0_FILLED", "HLT_mb_sp_L1RD0_FILLED")]
+    triggerAndRef += [_c("HLT_mb_sptrk_L1RD0_FILLED", "HLT_mb_sp_L1RD0_FILLED", 'Shifter')]
 
-    hmt = [c for c in mbChains if ('_hmt_' in c and '_pusup' not in c)]
-    if len(hmt) != 0:
+    # HMT chains
+    hmtChains = getMinBiasChains(monAccess, '(hmt)')
+    nonPusupChains = [chain for chain in hmtChains if '_pusup' not in chain[0]]
+    if len(nonPusupChains) != 0:
         # sort by trk threshold
         def _trk(chain):
-            part = chain.split("_")
+            name, _ = chain
+            part = name.split("_")
             for el in part:
                 if el.startswith("trk"):
                     return int(el.strip("trk"))
-            raise RuntimeError(f"Chain {chain} is not the hmt chain")
+            raise RuntimeError(f"Chain {name} is not the hmt chain")
 
-        hmt.sort(key=lambda c: int(_trk(c)))
+        nonPusupChains.sort(key=lambda chain: int(_trk(chain)))
 
         # monitor first hmt w.r.t sptrk
-        triggerAndRef += [_c(hmt[0], "HLT_mb_sptrk_L1RD0_FILLED", xmax=_trk(hmt[0])+30)]
+        first = nonPusupChains[0]
+        triggerAndRef += [_c(first[0], "HLT_mb_sptrk_L1RD0_FILLED", first[1], xmax=_trk(first) + 30)]
 
         # group set the ref for each trigger to be one of lower threshold : ordering of chains needs to be reviewed
-        # triggerAndRef += [  _c(chain, ref, xmin=_trk(chain)-20, xmax=_trk(chain)+50) for chain,ref in zip(hmt[1:], hmt) ]
-        triggerAndRef += [_c(chain, "HLT_mb_sptrk_L1RD0_FILLED", xmin=_trk(chain)-20, xmax=_trk(chain)+50) for chain in hmt[1:]]
+        triggerAndRef += [_c(chain[0], "HLT_mb_sptrk_L1RD0_FILLED", chain[1], xmin=_trk(chain) - 20, xmax=_trk(chain) + 50) for chain in nonPusupChains[1:]]
 
         # pu suppressing trigger should be monitored using trigger of the same threshold w/o pu suppression
-        pusup = [c for c in mbChains if '_hmt_' in c and '_pusup' in c]
+        pusupChains = [chain for chain in hmtChains if '_pusup' in chain[0]]
 
-        def _dropsup(chain):
-            s = chain.split("_")
-            return "_".join(s[:3]+s[4:])
-        triggerAndRef += [_c(chain, _dropsup(chain),  xmin=_trk(chain)-20, xmax=_trk(chain)+50) for chain in pusup]
+        def _dropsup(name):
+            s = name.split("_")
+            return "_".join(s[:3] + s[4:])
+
+        triggerAndRef += [_c(name, _dropsup(name), level, xmin=_trk(name) - 20, xmax=_trk(name) + 50) for name, level in pusupChains]
 
     # monitor exclusivity cut
-    excl = [c for c in mbChains if ('_excl_' in c)]
-    triggerAndRef += [_c(chain, 'HLT_mb_sptrk_L1RD0_FILLED') for chain in excl]
-    triggerAndRef += [_c(chain, 'HLT_mb_sp_L1RD0_FILLED') for chain in excl]
+    exclChains = getMinBiasChains(monAccess, '(excl)')
+    for name, level in exclChains:
+        triggerAndRef.append(_c(name, 'HLT_mb_sptrk_L1RD0_FILLED', level))
+        triggerAndRef.append(_c(name, 'HLT_mb_sp_L1RD0_FILLED', level))
 
     # monitor noalg MBTS chains
-    mbtsNoAlg = [c for c in mbChains if 'noalg' in c and 'L1MBTS' in c]
-    triggerAndRef += [_c(chain, 'HLT_mb_sptrk_L1RD0_FILLED') for chain in mbtsNoAlg]
+    noalgMbtsChains = getMinBiasChains(monAccess, '^HLT_noalg_.*(L1MBTS)')
+    triggerAndRef += [_c(name, 'HLT_mb_sptrk_L1RD0_FILLED', level) for name, level in noalgMbtsChains]
 
     # L1 MBTS
-    mbts = ["L1_MBTS_A", "L1_MBTS_C", "L1_MBTS_1", "L1_MBTS_2", "L1_MBTS_1_1"]
-    triggerAndRef += [_c(chain, 'HLT_mb_sptrk_L1RD0_FILLED') for chain in mbts]
+    mbtsL1Chains = ["L1_MBTS_A", "L1_MBTS_C", "L1_MBTS_1", "L1_MBTS_2", "L1_MBTS_1_1"]
+    triggerAndRef += [_c(chain, 'HLT_mb_sptrk_L1RD0_FILLED', 'Expert') for chain in mbtsL1Chains]
 
     # L1 transverse energy
-    triggerAndRef += [_c("L1_TE{}".format(i), 'HLT_mb_sptrk_L1RD0_FILLED', xmin=0, xmax=100) for i in [3, 5, 10, 40]]
+    triggerAndRef += [_c("L1_TE{}".format(i), 'HLT_mb_sptrk_L1RD0_FILLED', 'Expert', xmin=0, xmax=100) for i in [3, 5, 10, 40]]
 
     # Pair HLT chain with its noalg version
     def _find_noalg(chain):
@@ -161,30 +173,30 @@ def TrigMinBiasEff(flags):
     def _chains_with_noalg_ref():
         chains = []
 
-        for c in filledChains:
+        for name, level in filledChains:
             # Already added
-            if 'L1RD0_FILLED' in c:
+            if 'L1RD0_FILLED' in name:
                 continue
 
-            noalg = _find_noalg(c)
-            if noalg not in allChains:
+            noalg = _find_noalg(name)
+            if noalg not in mbNames:
                 continue
 
-            chains.append(_c(c, noalg))
+            chains.append(_c(name, noalg, level))
 
         return chains
 
     triggerAndRef += _chains_with_noalg_ref()
 
     # HI chains
-    hiChains = [c for c in mbChains if '_hi_' in c]
+    hiChains = getMinBiasChains(monAccess, '(_hi_)')
 
     # Pair MB+HI chains with MB only reference if it exists
     def _hi_chain_with_mb_ref():
         chains = []
 
-        for c in hiChains:
-            split = c.split('_hi_')
+        for name, level in hiChains:
+            split = name.split('_hi_')
             if len(split) != 2:
                 continue
             mb, hi_l1 = split
@@ -195,11 +207,10 @@ def TrigMinBiasEff(flags):
             hi, l1 = split
 
             ref = f'{mb}_L1{l1}'
-
-            if ref not in mbChains:
+            if ref not in mbNames:
                 continue
 
-            chains.append(_c(c, ref))
+            chains.append(_c(name, ref, level))
 
         return chains
 
@@ -207,7 +218,7 @@ def TrigMinBiasEff(flags):
 
     # Add here all the special cases:
     # HI Fgap chains
-    triggerAndRef.append(_c('HLT_mb_excl_1trk4_pt1_hi_FgapAC5_L12eEM1_VjTE200', 'HLT_mb_excl_1trk4_pt1_L12eEM1_VjTE200_GAP_AANDC'))
+    triggerAndRef.append(_c('HLT_mb_excl_1trk4_pt1_hi_FgapAC5_L12eEM1_VjTE200', 'HLT_mb_excl_1trk4_pt1_L12eEM1_VjTE200_GAP_AANDC', 'Expert'))
 
     return _TrigEff(flags, triggerAndRef)
 
