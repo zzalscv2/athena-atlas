@@ -1,8 +1,9 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
+
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H
-#define ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H 1
+#define ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H 
 
 // Base Class
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -21,6 +22,7 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsToolInterfaces/IFitterTool.h"
 
 // Athena
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -74,6 +76,7 @@ namespace ActsTrk
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
     ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsToTrkConverterTool"};
     ToolHandle<ActsTrk::ITrackStatePrinter> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
+    ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this,"FitterTool","","Fitter Tool for Seeds"};
 
     // Handle Keys
     // Seed collections. These 2 vectors must match element for element.
@@ -119,6 +122,7 @@ namespace ActsTrk
       kNoTrack,
       kNDuplicateSeeds,
       kNOutputTracks,
+      kNRejectedRefinedSeeds,
       kNSelectedTracks,
       kNStat
     };
