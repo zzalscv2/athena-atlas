@@ -67,16 +67,15 @@ namespace CP
         auto MECorrections = getCorrections(mu.ME);
         auto CBCorrections = getCorrections(mu.CB);
 
-
         // Directly correct all three tracks
         double corrIDpT = mu.ID.calib_pt;
-        applySagittaCorrection(corrIDpT, IDCorrections, mu.ID.charge, mu.ID.isData);
+        applySagittaCorrection(corrIDpT, IDCorrections, mu.ID.calib_charge, mu.ID.isData);
 
         double corrMEpT = mu.ME.calib_pt;
-        applySagittaCorrection(corrMEpT, MECorrections, mu.ME.charge, mu.ME.isData);
+        applySagittaCorrection(corrMEpT, MECorrections, mu.ME.calib_charge, mu.ME.isData);
 
         double corrDirectCBpT = mu.CB.calib_pt;
-        applySagittaCorrection(corrDirectCBpT, CBCorrections, mu.CB.charge, mu.CB.isData);
+        applySagittaCorrection(corrDirectCBpT, CBCorrections, mu.CB.calib_charge, mu.CB.isData);
 
 
         // Perform the statistical combination of ID + ME, before and after correction. Apply that ratio as a correction to create the weighted rho
@@ -121,13 +120,10 @@ namespace CP
 
         ATH_MSG_DEBUG("Saggita correction - corrDirectCBpT: " << corrDirectCBpT << " corrStatCombCBpT: " << corrStatCombCBpT << " rho " << rho<<" corrCBPt: "<<corrCBpT);
 
-
         // Write the pT into the object
         mu.ID.calib_pt = corrIDpT;
         mu.ME.calib_pt = corrMEpT;
         mu.CB.calib_pt = corrCBpT;
-
-
 
         // Return gracefully:
         return CorrectionCode::Ok;
@@ -332,7 +328,7 @@ namespace CP
         if(tlv.P() == 0) parsMS[4] = 1e12;
         else parsMS[4] = 1.0 / (tlv.P() * 1e3);
 
-        CorrectionCode SysCorrCode = applyStatCombination(parsID, covID, parsMS, covMS, mu.CB.charge, parsCBNom, covCBNom, chi2Nom);
+        CorrectionCode SysCorrCode = applyStatCombination(parsID, covID, parsMS, covMS, mu.CB.calib_charge, parsCBNom, covCBNom, chi2Nom);
         if (SysCorrCode != CorrectionCode::Ok) return CBpT;
 
 
@@ -348,7 +344,7 @@ namespace CP
         if(tlv.P() == 0) parsMS[4] = 1e12;
         else parsMS[4] = 1.0 / (tlv.P() * 1e3);
 
-        SysCorrCode = applyStatCombination(parsID, covID, parsMS, covMS, mu.CB.charge, parsCBCorr, covCBCorr, chi2Nom);
+        SysCorrCode = applyStatCombination(parsID, covID, parsMS, covMS, mu.CB.calib_charge, parsCBCorr, covCBCorr, chi2Nom);
         if (SysCorrCode != CorrectionCode::Ok) return CBpT;
 
 
