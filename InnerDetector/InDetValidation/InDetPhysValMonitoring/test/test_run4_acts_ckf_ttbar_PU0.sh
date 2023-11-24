@@ -48,6 +48,9 @@ run "Reconstruction-ckf" \
     --maxEvents ${n_events}
 
 reco_rc=$?
+
+mv log.RAWtoALL log.RAWtoALL.CKF
+
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
@@ -74,6 +77,9 @@ run "Reconstruction-ambi" \
     --maxEvents ${n_events}
 
 reco_rc=$?
+
+mv log.RAWtoALL log.RAWtoALL.AMBI
+
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
