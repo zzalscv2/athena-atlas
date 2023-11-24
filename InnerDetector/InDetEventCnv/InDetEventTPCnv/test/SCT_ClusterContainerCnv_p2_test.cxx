@@ -127,7 +127,7 @@ makeclusts(const SCT_ID& sct_id)
       auto cl = std::make_unique<InDet::SCT_Cluster>
         (Identifier (offs+1234),
          locpos,
-         rdoList,
+         std::vector<Identifier>(rdoList),
          width,
          nullptr,
          Amg::MatrixX(cov));

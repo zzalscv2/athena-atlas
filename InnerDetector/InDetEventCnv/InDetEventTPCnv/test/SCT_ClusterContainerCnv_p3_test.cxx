@@ -127,7 +127,7 @@ makeclusts(const SCT_ID& sct_id)
       auto cl = std::make_unique<InDet::SCT_Cluster>
         (Identifier (offs+1234),
          locpos,
-         rdoList,
+         std::vector<Identifier>(rdoList),
          width,
          nullptr,
          Amg::MatrixX(cov));
@@ -152,7 +152,7 @@ void test1 ATLAS_NOT_THREAD_SAFE (const SCT_ID& sct_id)
     std::unique_ptr<const InDet::SCT_ClusterContainer> cont = makeclusts(sct_id);
     testit (*cont, sct_id);
   }
-  
+
   // And again with leak checking.
   Athena_test::Leakcheck check;
   std::unique_ptr<const InDet::SCT_ClusterContainer> cont = makeclusts(sct_id);

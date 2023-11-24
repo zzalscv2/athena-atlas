@@ -47,19 +47,6 @@ class SCT_Cluster final : public SiCluster {
   /// Destructor:
   virtual ~SCT_Cluster(); //default in dtor
 
-
-  /**
-   * Constructor with parameters using pointer of Amg::MatrixX.
-   * Last parameter might not be always filled and will be nullptr by default.
-   * The others including SiDetectorElement have to be given!
-   */
-  SCT_Cluster(const Identifier& RDOId,
-              const Amg::Vector2D& locpos,
-              const std::vector<Identifier>& rdoList,
-              const InDet::SiWidth& width,
-              const InDetDD::SiDetectorElement* detEl,
-              const Amg::MatrixX& locErrMat);
-
   /**
    * Constructor with parameters using unique_ptr of Amg::MatrixX.
    * All parameters have to be given!
@@ -71,7 +58,7 @@ class SCT_Cluster final : public SiCluster {
               const InDet::SiWidth& width,
               const InDetDD::SiDetectorElement* detEl,
               Amg::MatrixX&& locErrMat);
-              
+
   /** Interface method checking the type*/
   virtual bool type(Trk::PrepRawDataType type) const override final;
 
@@ -105,20 +92,20 @@ private:
 
  inline uint16_t SCT_Cluster::hitsInThirdTimeBin() const
  {
-   return m_hitsInThirdTimeBin;  
+   return m_hitsInThirdTimeBin;
  }
- 
- inline void SCT_Cluster::setHitsInThirdTimeBin(uint16_t hitsInThirdTimeBin) 
+
+ inline void SCT_Cluster::setHitsInThirdTimeBin(uint16_t hitsInThirdTimeBin)
  {
    m_hitsInThirdTimeBin = hitsInThirdTimeBin;
  }
- 
+
 
  inline int SCT_Cluster::stripHasHitInThirdTimeBin(int stripNumberWithinCluster) const {
    return stripNumberWithinCluster <= 16 ? (int)((m_hitsInThirdTimeBin >> stripNumberWithinCluster) & 0x1): 0;
-   
+
  }
- 
+
 
 
  MsgStream&    operator << (MsgStream& stream,    const SCT_Cluster& prd);

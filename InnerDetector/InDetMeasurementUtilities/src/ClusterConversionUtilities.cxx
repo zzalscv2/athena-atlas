@@ -266,10 +266,10 @@ namespace TrackingUtilities {
 
     indetCluster = new InDet::SCT_Cluster(id,
 					  locpos,
-					  rdoList,
+					  std::vector<Identifier>(rdoList),
 					  width,
 					  &element,
-					  errorMatrix);
+					  std::move(errorMatrix));
 
     return StatusCode::SUCCESS;
   }

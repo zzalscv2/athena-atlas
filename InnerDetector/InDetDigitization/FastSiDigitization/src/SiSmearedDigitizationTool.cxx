@@ -698,10 +698,10 @@ StatusCode SiSmearedDigitizationTool::mergeClusters(SCT_detElement_RIO_map * clu
 
             InDet::SCT_Cluster* sctCluster = new InDet::SCT_Cluster(intersectionId,
                                                                     intersection,
-                                                                    rdoList,
+                                                                    std::vector<Identifier>(rdoList),
                                                                     siWidth,
                                                                     hitSiDetElement,
-                                                                    clusterErr);
+                                                                    Amg::MatrixX(clusterErr));
             ((*inner_iter).second) = sctCluster;
 
             cluster_map->erase(iter);
@@ -1088,7 +1088,7 @@ StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx,
 
         sctCluster = new InDet::SCT_Cluster(intersectionId,
                                              intersection,
-                                             rdoList,
+                                             std::vector<Identifier>(rdoList),
                                              siWidth,
                                              hitSiDetElement,
                                              Amg::MatrixX(mat));

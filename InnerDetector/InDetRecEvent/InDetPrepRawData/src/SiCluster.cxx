@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -21,12 +21,12 @@ namespace InDet {
 // Constructor for EF:
 SiCluster::SiCluster(const Identifier& RDOId,
                      const Amg::Vector2D& locpos,
-                     const std::vector<Identifier>& rdoList,
+                     std::vector<Identifier>&& rdoList,
                      const InDet::SiWidth& width,
                      const InDetDD::SiDetectorElement* detEl,
-                     const Amg::MatrixX& locErrMat)
+                     Amg::MatrixX&& locErrMat)
   : // call base class constructor
-  PrepRawData(RDOId, locpos, rdoList, locErrMat)
+  PrepRawData(RDOId, locpos, std::move(rdoList), std::move(locErrMat))
   , m_width(width)
   , m_detEl(detEl)
   , m_gangedPixel(false)
@@ -40,58 +40,11 @@ SiCluster::SiCluster(const Identifier& RDOId,
 // Constructor for EF:
 SiCluster::SiCluster(const Identifier& RDOId,
                      const Amg::Vector2D& locpos,
-                     const std::vector<Identifier>& rdoList,
-                     const InDet::SiWidth& width,
-                     const InDetDD::SiDetectorElement* detEl)
-  : // call base class constructor
-  PrepRawData(RDOId, locpos, rdoList, {})
-  , m_width(width)
-  , m_detEl(detEl)
-  , m_gangedPixel(false)
-{
-  if (m_detEl) {
-    m_globalPosition =
-      m_detEl->surface(identify()).localToGlobal(localPosition());
-  }
-}
-
-SiCluster::SiCluster(const Identifier& RDOId,
-                     const Amg::Vector2D& locpos,
-                     const Amg::Vector3D& globpos,
-                     const std::vector<Identifier>& rdoList,
-                     const InDet::SiWidth& width,
-                     const InDetDD::SiDetectorElement* detEl,
-                     const Amg::MatrixX& locErrMat)
-  : // call base class constructor
-  PrepRawData(RDOId, locpos, rdoList, locErrMat)
-  , m_globalPosition(globpos)
-  , m_width(width)
-  , m_detEl(detEl)
-  , m_gangedPixel(false)
-{}
-
-SiCluster::SiCluster(const Identifier& RDOId,
-                     const Amg::Vector2D& locpos,
-                     const Amg::Vector3D& globpos,
-                     const std::vector<Identifier>& rdoList,
-                     const InDet::SiWidth& width,
-                     const InDetDD::SiDetectorElement* detEl)
-  : // call base class constructor
-  PrepRawData(RDOId, locpos, rdoList,{})
-  , m_globalPosition(globpos)
-  , m_width(width)
-  , m_detEl(detEl)
-  , m_gangedPixel(false)
-{}
-
-SiCluster::SiCluster(const Identifier& RDOId,
-                     const Amg::Vector2D& locpos,
                      std::vector<Identifier>&& rdoList,
                      const InDet::SiWidth& width,
-                     const InDetDD::SiDetectorElement* detEl,
-                     Amg::MatrixX&& locErrMat)
+                     const InDetDD::SiDetectorElement* detEl)
   : // call base class constructor
-  PrepRawData(RDOId, locpos, std::move(rdoList), std::move(locErrMat))
+  PrepRawData(RDOId, locpos, std::move(rdoList), {})
   , m_width(width)
   , m_detEl(detEl)
   , m_gangedPixel(false)
@@ -117,8 +70,19 @@ SiCluster::SiCluster(const Identifier& RDOId,
   , m_gangedPixel(false)
 {}
 
-// Destructor:
-SiCluster::~SiCluster() = default;
+SiCluster::SiCluster(const Identifier& RDOId,
+                     const Amg::Vector2D& locpos,
+                     const Amg::Vector3D& globpos,
+                     std::vector<Identifier>&& rdoList,
+                     const InDet::SiWidth& width,
+                     const InDetDD::SiDetectorElement* detEl)
+  : // call base class constructor
+  PrepRawData(RDOId, locpos, std::move(rdoList),{})
+  , m_globalPosition(globpos)
+  , m_width(width)
+  , m_detEl(detEl)
+  , m_gangedPixel(false)
+{}
 
 MsgStream&
 SiCluster::dump(MsgStream& stream) const
