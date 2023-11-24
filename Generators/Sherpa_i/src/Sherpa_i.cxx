@@ -363,6 +363,7 @@ void Sherpa_i::compilePlugin(std::string pluginCode) {
   command += "g++ -shared -std=c++0x -g ";
   command += "-I`Sherpa-config --incdir` ";
   command += "`Sherpa-config --ldflags` ";
+  command += "-I$FASTJETPATH/include ";
   command += "-fPIC -o libSherpa_iPlugin.so Sherpa_iPlugin.C";
   ATH_MSG_INFO("Now compiling plugin library using: "+command);
   if (system(command.c_str())!=0) {
