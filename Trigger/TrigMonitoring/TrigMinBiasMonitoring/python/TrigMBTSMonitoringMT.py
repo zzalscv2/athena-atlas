@@ -3,9 +3,14 @@
 #
 
 '''
-@brief configuration for the min bias monitoring
+@brief Configuration for the MBTS monitoring
 '''
-from TrigConfigSvc.TriggerConfigAccess import getHLTMenuAccess
+from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
+from AthenaCommon.Logging import logging
+
+from .utils import getMinBiasChains
+
+log = logging.getLogger('TrigMBTSMonitoringMT')
 
 
 def TrigMBTS(configFlags):
@@ -16,7 +21,13 @@ def TrigMBTS(configFlags):
     alg = monConfig.addAlgorithm(
         CompFactory.HLTMBTSMonitoringAlgMT, 'HLTMBTSMonitoringAlgMT')
 
-    alg.triggerList = [c for c in getHLTMenuAccess(configFlags) if '_mbts_' in c]
+    monAccess = getHLTMonitoringAccess(configFlags)
+    mbts_chains = getMinBiasChains(monAccess, '(_mbts_)')
+
+    log.info(f'Monitoring {len(mbts_chains)} MBTS chains')
+    log.debug([name for name, _ in mbts_chains])
+
+    alg.triggerList = [name for name, _ in mbts_chains]
     channelLabels = [f'A{i:0>2d}' for i in range(16)]
     channelLabels += [f'C{i:0>2d}' for i in range(16)]
 
@@ -28,10 +39,9 @@ def TrigMBTS(configFlags):
     mbtsGroup.defineHistogram('TrigCounts', title='Trigger counts;;Event rate',
                               xbins=length, xmin=0, xmax=length, xlabels=list(alg.triggerList))
 
-    for chain in alg.triggerList:
+    for chain, level in mbts_chains:
 
-        mbShiftGroup = monConfig.addGroup(alg, chain+'_shifter',
-                                          topPath='HLT/MBTSMon/'+chain+'/')
+        mbShiftGroup = monConfig.addGroup(alg, chain+'_shifter', topPath=f'HLT/MBTSMon/{level}/{chain}/')
 
         mbShiftGroup.defineHistogram('MBTS_A_hits', type='TH1I', title='MBTS hits side A; Entry rate; MBTS side A',
                                      xbins=MBTS_countsSideA+1, xmin=-0.5, xmax=MBTS_countsSideA+0.5)
