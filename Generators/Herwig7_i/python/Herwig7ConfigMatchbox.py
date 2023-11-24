@@ -243,7 +243,7 @@ class Hw7ConfigMatchbox(hw7Config.Hw7Config):
       athMsgLog.warn(hw7Utils.ansi_format_warning("The GoSam installation can't be found from $GOSAMPATH = {}, so don't be surprised if your run crashes in you are using matrix elements from GoSam in Herwig7 / Matchbox. Please ensure that the location exists, that you have permissions to access it and that it contains the script 'bin/gosam.py'".format(GoSam_path)))
 
     try:
-      OpenLoops_path= os.environ['OPENLOOPS_PATH']
+      OpenLoops_path= os.environ['OPENLOOPSPATH']
     except KeyError:
       OpenLoops_path = '/cvmfs/sft.cern.ch/lcg/releases/LCG_88/MCGenerators/openloops/2.0.0/x86_64-slc6-gcc62-opt'
       os.environ["LD_LIBRARY_PATH"]="/cvmfs/sft.cern.ch/lcg/releases/LCG_88/MCGenerators/openloops/2.0.0/x86_64-slc6-gcc62-opt/lib:"+os.environ["LD_LIBRARY_PATH"]
