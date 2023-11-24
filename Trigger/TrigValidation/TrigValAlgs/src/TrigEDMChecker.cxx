@@ -4272,7 +4272,7 @@ StatusCode TrigEDMChecker::TrigCompositeNavigationToDot(std::string& returnValue
   // Now process them
   for (const std::string& key : keys) {
     if ( not m_doDumpAllTrigComposite ) {
-      if ( CxxUtils::starts_with (key, "HLTNav_") ) { // Nav containers should always start with HLTNav_
+      if ( not CxxUtils::starts_with (key, "HLTNav_") ) { // Nav containers should always start with HLTNav_
         continue;
       }
     }
