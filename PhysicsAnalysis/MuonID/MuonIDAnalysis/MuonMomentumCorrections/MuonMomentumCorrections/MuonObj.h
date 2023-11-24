@@ -29,7 +29,8 @@ namespace MCP {
               eta{(track != nullptr) ? track->eta() : FLT_MAX},
               phi{(track != nullptr) ? track->phi() : FLT_MAX},
               mass{(track != nullptr) ? track->m() : 0},
-              charge{charge},
+              uncalib_charge{charge},
+              calib_charge{uncalib_charge},
               year{year},
               isData{isData},
               pars{(track != nullptr) ? track->definingParameters()
@@ -47,7 +48,8 @@ namespace MCP {
               eta{eta},
               phi{phi},
               mass{(track != nullptr) ? track->m() : 0},
-              charge{charge},
+              uncalib_charge{charge},
+              calib_charge{uncalib_charge},
               year{year},
               isData{isData},
               pars{(track != nullptr) ? track->definingParameters()
@@ -64,7 +66,8 @@ namespace MCP {
           eta{eta},
           phi{phi},
           mass{mass},
-          charge{charge},
+          uncalib_charge{charge},
+          calib_charge{uncalib_charge},
           year{year},
           isData{isData},
           pars {pars},
@@ -79,7 +82,8 @@ namespace MCP {
           eta{eta},
           phi{phi},
           mass{-999},
-          charge{-999},
+          uncalib_charge{-999},
+          calib_charge{-999},
           year{year},
           isData{isData},
           pars (AmgVector(5)::Zero()),
@@ -102,8 +106,10 @@ namespace MCP {
         const double phi{0.};
         /// Value of the track-mass
         const double mass{0.};
-        /// Value of the track-charge
-        const int charge{0};
+        /// Value of the track-charge (before calibration)
+        const int uncalib_charge{0};
+        /// Value of the track-charge (after calibration)
+        int calib_charge{0};
         // Data year
         const DataYear year{};
         // isData

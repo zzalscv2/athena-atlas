@@ -135,13 +135,16 @@ namespace CP
         static const SG::AuxElement::Decorator<float> dec_mePt("MuonSpectrometerPt");
         static const SG::AuxElement::Accessor<float> acc_id_pt("InnerDetectorPt");
         static const SG::AuxElement::Accessor<float> acc_me_pt("MuonSpectrometerPt");
+        static const SG::AuxElement::Decorator<float> dec_idCharge("InnerDetectorCharge");
+        static const SG::AuxElement::Decorator<float> dec_meCharge("MuonSpectrometerCharge");
+        static const SG::AuxElement::Accessor<float> acc_id_charge("InnerDetectorCharge");
+        static const SG::AuxElement::Accessor<float> acc_me_charge("MuonSpectrometerCharge");
         
         ATH_MSG_VERBOSE("input ID pT "<<muonObj.ID.calib_pt);
         ATH_MSG_VERBOSE("input ME pT "<<muonObj.ME.calib_pt);
         ATH_MSG_VERBOSE("input CB pT "<<muonObj.CB.calib_pt);
         ATH_MSG_VERBOSE("input eta "<<muonObj.CB.eta);
         ATH_MSG_VERBOSE("input phi "<<muonObj.CB.phi);
-
 
         if (muonObj.CB.isData) 
         {
@@ -167,6 +170,8 @@ namespace CP
 
             dec_idPt(mu) = muonObj.ID.calib_pt * GeVtoMeV;
             dec_mePt(mu) = muonObj.ME.calib_pt * GeVtoMeV;
+            dec_idCharge(mu) = muonObj.ID.calib_charge;
+            dec_meCharge(mu) = muonObj.ME.calib_charge;
 
             ATH_MSG_DEBUG("Checking Output Muon Info for data - Pt_ID: " << acc_id_pt(mu));
             ATH_MSG_DEBUG("Checking Output Muon Info for data - Pt_MS: " << acc_me_pt(mu));
@@ -192,11 +197,14 @@ namespace CP
         if (std::abs(muonObj.ME.calib_pt) == 0) muonObj.CB.calib_pt = muonObj.ID.calib_pt;
         if (std::abs(muonObj.ID.calib_pt) == 0) muonObj.CB.calib_pt = muonObj.ME.calib_pt;
 
-
         // Setting the output object properties right now, so the resolution category get the corrected info
         mu.setP4(muonObj.CB.calib_pt * GeVtoMeV, muonObj.CB.eta, muonObj.CB.phi);
+        mu.setCharge(muonObj.CB.calib_charge);
         dec_idPt(mu) = muonObj.ID.calib_pt * GeVtoMeV;
         dec_mePt(mu) = muonObj.ME.calib_pt * GeVtoMeV;
+        dec_idCharge(mu) = muonObj.ID.calib_charge;
+        dec_meCharge(mu) = muonObj.ME.calib_charge;
+
         if(!m_validationMode)
         {
             muonObj.raw_mst_category = (CP::IMuonSelectionTool::ResolutionCategory) m_MuonSelectionTool->getResolutionCategory(mu);
@@ -225,8 +233,6 @@ namespace CP
 
         // If saggita was out of validity, return it here
         if (sgCode == CorrectionCode::OutOfValidityRange) return sgCode;
-        // Return gracefully:
-
 
         // Return gracefully:
         return CorrectionCode::Ok;
