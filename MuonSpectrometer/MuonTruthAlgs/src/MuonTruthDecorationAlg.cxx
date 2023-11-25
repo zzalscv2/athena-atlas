@@ -60,7 +60,7 @@ namespace Muon {
 
     // Constructor with parameters:
     MuonTruthDecorationAlg::MuonTruthDecorationAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-        AthReentrantAlgorithm(name, pSvcLocator), m_muonMgr(nullptr) {}
+        AthReentrantAlgorithm(name, pSvcLocator) {}
 
     // Initialize method:
     StatusCode MuonTruthDecorationAlg::initialize() {
@@ -70,11 +70,11 @@ namespace Muon {
         ATH_CHECK(m_trackRecordCollectionNames.initialize());
         ATH_CHECK(m_PRD_TruthNames.initialize());
         ATH_CHECK(m_SDO_TruthNames.initialize());
-        if (!m_CSC_SDO_TruthNames.empty()) ATH_CHECK(m_CSC_SDO_TruthNames.initialize());
+        ATH_CHECK(m_CSC_SDO_TruthNames.initialize(!m_CSC_SDO_TruthNames.empty()));
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_truthClassifier.retrieve());
         ATH_CHECK(m_extrapolator.retrieve());
-        ATH_CHECK(detStore()->retrieve(m_muonMgr));
+        ATH_CHECK(m_detMgrKey.initialize());
         return StatusCode::SUCCESS;
     }
 
@@ -137,11 +137,11 @@ namespace Muon {
             }
 
             /// add track records
-            addTrackRecords(ctx, *truthParticle);
+            ATH_CHECK(addTrackRecords(ctx, *truthParticle));
             ChamberIdMap ids;
 
             // add hit counts
-            addHitCounts(ctx, *truthParticle, ids);
+            ATH_CHECK(addHitCounts(ctx, *truthParticle, ids));
 
             // add hit ID vectors
             addHitIDVectors(*truthParticle, ids);
@@ -151,7 +151,9 @@ namespace Muon {
             ATH_MSG_DEBUG("good muon with type " << iType << " and origin" << iOrigin);
 
             // create segments
-            if (m_createTruthSegment && goodMuon) { createSegments(ctx, truthLink, segmentContainer, ids); }
+            if (m_createTruthSegment && goodMuon) { 
+                ATH_CHECK(createSegments(ctx, truthLink, segmentContainer, ids)); 
+            }
         }
 
         ATH_MSG_DEBUG("Registered " << muonTruthContainer->size() << " truth muons ");
@@ -160,25 +162,30 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
 
-    void MuonTruthDecorationAlg::createSegments(const EventContext& ctx, const ElementLink<xAOD::TruthParticleContainer>& truthLink,
-                                                SG::WriteHandle<xAOD::MuonSegmentContainer>& segmentContainer,
-                                                const MuonTruthDecorationAlg::ChamberIdMap& ids) const {
+    StatusCode MuonTruthDecorationAlg::createSegments(const EventContext& ctx, 
+                                                     const ElementLink<xAOD::TruthParticleContainer>& truthLink,
+                                                     SG::WriteHandle<xAOD::MuonSegmentContainer>& segmentContainer,
+                                                     const ChamberIdMap& ids) const {
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_detMgrKey, ctx};
+        
         std::vector<SG::ReadHandle<MuonSimDataCollection> > sdoCollections(6);
         for (const SG::ReadHandleKey<MuonSimDataCollection>& k : m_SDO_TruthNames) {
             SG::ReadHandle<MuonSimDataCollection> col(k, ctx);
             if (!col.isPresent()) {
-                ATH_MSG_DEBUG("MuonSimDataCollection " << col.name() << " not in StoreGate");
+                ATH_MSG_ERROR("MuonSimDataCollection " << col.name() << " not in StoreGate");
+                return StatusCode::FAILURE;
+            }
+            if (col->empty()) {
                 continue;
             }
-            if (!col->empty()) {
-                Identifier id = col->begin()->first;
-                int index = m_idHelperSvc->technologyIndex(id);
-                if (index >= (int)sdoCollections.size()) {
-                    ATH_MSG_WARNING("SDO collection index out of range " << index << "  " << m_idHelperSvc->toStringChamber(id));
-                } else {
-                    sdoCollections[index] = col;
-                }
+            Identifier id = col->begin()->first;
+            int index = m_idHelperSvc->technologyIndex(id);
+            if (index >= (int)sdoCollections.size()) {
+                ATH_MSG_WARNING("SDO collection index out of range " << index << "  " << m_idHelperSvc->toStringChamber(id));
+            } else {
+                sdoCollections[index] = std::move(col);
             }
+            
         }
 
         bool useSDO = (!sdoCollections.empty() || !m_CSC_SDO_TruthNames.empty());
@@ -263,7 +270,7 @@ namespace Muon {
                     if (pos == cscCollection->end()) {
                         continue;
                     }
-                    const MuonGM::CscReadoutElement* descriptor = m_muonMgr->getCscReadoutElement(id);
+                    const MuonGM::CscReadoutElement* descriptor = detMgr->getCscReadoutElement(id);
                     ATH_MSG_DEBUG("found csc sdo with " << pos->second.getdeposits().size() << " deposits");
                     Amg::Vector3D locpos(0, pos->second.getdeposits()[0].second.ypos(), pos->second.getdeposits()[0].second.zpos());
                     gpos = descriptor->localToGlobalCoords(locpos, m_idHelperSvc->cscIdHelper().elementID(id));
@@ -313,9 +320,10 @@ namespace Muon {
                 }
             }
         }
+        return StatusCode::SUCCESS; 
     }
 
-    void MuonTruthDecorationAlg::addTrackRecords(const EventContext& ctx, xAOD::TruthParticle& truthParticle) const {
+    StatusCode MuonTruthDecorationAlg::addTrackRecords(const EventContext& ctx, xAOD::TruthParticle& truthParticle) const {
         // first loop over track records, store parameters at the different positions
         const xAOD::TruthVertex* vertex = truthParticle.prodVtx();        
         const Trk::TrackingGeometry* trackingGeometry = !m_extrapolator.empty()? m_extrapolator->trackingGeometry() : nullptr;
@@ -326,7 +334,10 @@ namespace Muon {
                                     Amg::Vector3D{truthParticle.px(), truthParticle.py(), truthParticle.pz()});
         }
         for (SG::ReadHandle<TrackRecordCollection>& col : m_trackRecordCollectionNames.makeHandles(ctx)) {
-            if (!col.isPresent()) continue;
+            if (!col.isPresent()) {
+                ATH_MSG_FATAL("Failed to retrieve "<<col.key());
+                return StatusCode::FAILURE;
+            }
             const std::string r_name = col.key();
             
             float& x = truthParticle.auxdata<float>(r_name + "_x");
@@ -383,11 +394,10 @@ namespace Muon {
         /// Second loop, extrapolate between the points
         
         /// extrapolation needs to be setup correctly
-        if (!trackingGeometry) return;
+        if (!trackingGeometry) return StatusCode::SUCCESS;
        
         
-        AmgSymMatrix(5) cov;
-        cov.setIdentity();
+        AmgSymMatrix(5) cov{AmgSymMatrix(5)::Identity()};
         cov(0, 0) = cov(1, 1) = 1e-3;
         cov(2, 2) = cov(3, 3) = 1e-6;
         cov(4, 4) = 1e-3 / truthParticle.p4().P();
@@ -408,7 +418,7 @@ namespace Muon {
             float& epz = truthParticle.auxdata<float>(r_name + "_pz_extr");
             std::vector<float>& covMat = truthParticle.auxdata<std::vector<float> >(r_name + "_cov_extr");
            
-            std::unique_ptr<const Trk::TrackParameters> exPars{
+            std::unique_ptr<Trk::TrackParameters> exPars{
                 m_extrapolator->extrapolateToVolume(ctx, pars, *volume, Trk::alongMomentum, Trk::muon)};
             if (! exPars || !exPars->covariance() || !Amg::saneCovarianceDiagonal(*exPars->covariance())) {
                 ATH_MSG_VERBOSE("Extrapolation to "<<r_name<<" failed. ");
@@ -439,11 +449,13 @@ namespace Muon {
                 << (end_pars.mom.mag() -
                     exPars->momentum().mag()) /
                      errorp);                
-        }                
+        }
+        return StatusCode::SUCCESS;            
     }
 
-    void MuonTruthDecorationAlg::addHitCounts(const EventContext& ctx, xAOD::TruthParticle& truthParticle,
-                                              MuonTruthDecorationAlg::ChamberIdMap& ids) const {
+    StatusCode MuonTruthDecorationAlg::addHitCounts(const EventContext& ctx, 
+                                                    xAOD::TruthParticle& truthParticle,
+                                                    ChamberIdMap& ids) const {
         int barcode = truthParticle.barcode();
 
         std::vector<unsigned int> nprecHitsPerChamberLayer;
@@ -457,20 +469,18 @@ namespace Muon {
         // loop over detector technologies
         for (SG::ReadHandle<PRD_MultiTruthCollection>& col : m_PRD_TruthNames.makeHandles(ctx)) {
             if (!col.isPresent()) {
-                ATH_MSG_DEBUG("PRD_MultiTruthCollection " << col.name() << " not in StoreGate");
-                continue;
-            } else
-                ATH_MSG_DEBUG("PRD_MultiTruthCollection " << col.name() << " in StoreGate");
+                ATH_MSG_FATAL("PRD_MultiTruthCollection " << col.name() << " not in StoreGate");
+                return StatusCode::FAILURE;
+            }
             // loop over trajectories
             for (const auto& trajectory : *col) {
                 // check if gen particle same as input
-                if (std::find(truthParticleHistory.begin(),truthParticleHistory.end(),trajectory.second.barcode()) == truthParticleHistory.end()) continue;
+                if (std::find(truthParticleHistory.begin(),truthParticleHistory.end(), trajectory.second.barcode()) == truthParticleHistory.end()) continue;
 
                 const Identifier& id = trajectory.first;
                 bool measPhi = m_idHelperSvc->measuresPhi(id);
                 bool isTgc = m_idHelperSvc->isTgc(id);
                 Muon::MuonStationIndex::ChIndex chIndex = !isTgc ? m_idHelperSvc->chamberIndex(id) : Muon::MuonStationIndex::ChUnknown;
-
                 // add identifier to map
                 if (isTgc) {  // TGCS should be added to both EIL and EIS
                     Muon::MuonStationIndex::PhiIndex index = m_idHelperSvc->phiIndex(id);
@@ -485,18 +495,15 @@ namespace Muon {
                     ids[chIndex].push_back(id);
                 }
 
-                if (m_idHelperSvc->issTgc(id)) {
-                    int index = m_idHelperSvc->phiIndex(id);
-                    if (index >= 0) {
-                      if (measPhi)
+                if (m_idHelperSvc->issTgc(id)) {                    
+                    if (measPhi) {
+                        int index = m_idHelperSvc->phiIndex(id);
                         ++nphiHitsPerChamberLayer.at(index);
-                      else
-                        ++ntrigEtaHitsPerChamberLayer.at(index);
-                    }
+                    }  else {
+                        ++nprecHitsPerChamberLayer.at(chIndex);
+                    }                    
                 } else if (m_idHelperSvc->isMM(id)) {
-                  if (chIndex >= 0) {
                     ++nprecHitsPerChamberLayer.at(chIndex);
-                  }
                 } else if (m_idHelperSvc->isTrigger(id)) {
                     int index = m_idHelperSvc->phiIndex(id);
                     if (index >= 0) {
@@ -508,13 +515,10 @@ namespace Muon {
                 } else {
                     if (measPhi) {
                         Muon::MuonStationIndex::PhiIndex index = m_idHelperSvc->phiIndex(id);
-                        if (index >= 0) {
-                          ++nphiHitsPerChamberLayer.at(index);
-                        }
+                        ++nphiHitsPerChamberLayer.at(index);
+ 
                     } else {
-                      if (chIndex >= 0) {
                         ++nprecHitsPerChamberLayer.at(chIndex);
-                      }
                     }
                 }
             }
@@ -523,39 +527,57 @@ namespace Muon {
         uint8_t innerSmallHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BIS] +
                                  nprecHitsPerChamberLayer[Muon::MuonStationIndex::EIS] +
                                  nprecHitsPerChamberLayer[Muon::MuonStationIndex::CSS];
+
         uint8_t innerLargeHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BIL] +
                                  nprecHitsPerChamberLayer[Muon::MuonStationIndex::EIL] +
                                  nprecHitsPerChamberLayer[Muon::MuonStationIndex::CSL];
-        uint8_t middleSmallHits =
-            nprecHitsPerChamberLayer[Muon::MuonStationIndex::BMS] + nprecHitsPerChamberLayer[Muon::MuonStationIndex::EMS];
-        uint8_t middleLargeHits =
-            nprecHitsPerChamberLayer[Muon::MuonStationIndex::BML] + nprecHitsPerChamberLayer[Muon::MuonStationIndex::EML];
-        uint8_t outerSmallHits =
-            nprecHitsPerChamberLayer[Muon::MuonStationIndex::BOS] + nprecHitsPerChamberLayer[Muon::MuonStationIndex::EOS];
-        uint8_t outerLargeHits =
-            nprecHitsPerChamberLayer[Muon::MuonStationIndex::BML] + nprecHitsPerChamberLayer[Muon::MuonStationIndex::EOL];
-        uint8_t extendedSmallHits =
-            nprecHitsPerChamberLayer[Muon::MuonStationIndex::EES] + nprecHitsPerChamberLayer[Muon::MuonStationIndex::BEE];
+
+        uint8_t middleSmallHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BMS] + 
+                                  nprecHitsPerChamberLayer[Muon::MuonStationIndex::EMS];
+
+        uint8_t middleLargeHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BML] + 
+                                  nprecHitsPerChamberLayer[Muon::MuonStationIndex::EML];
+
+        uint8_t outerSmallHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BOS] + 
+                                 nprecHitsPerChamberLayer[Muon::MuonStationIndex::EOS];
+
+        uint8_t outerLargeHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BML] + 
+                                 nprecHitsPerChamberLayer[Muon::MuonStationIndex::EOL];
+
+        uint8_t extendedSmallHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::EES] + 
+                                    nprecHitsPerChamberLayer[Muon::MuonStationIndex::BEE];
+
         uint8_t extendedLargeHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::EEL];
 
-        uint8_t phiLayer1Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BM1] + nphiHitsPerChamberLayer[Muon::MuonStationIndex::T4] +
+        uint8_t phiLayer1Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BM1] + 
+                                nphiHitsPerChamberLayer[Muon::MuonStationIndex::T4] +
                                 nphiHitsPerChamberLayer[Muon::MuonStationIndex::CSC] +
                                 nphiHitsPerChamberLayer[Muon::MuonStationIndex::STGC1] +
                                 nphiHitsPerChamberLayer[Muon::MuonStationIndex::STGC2];
-        uint8_t phiLayer2Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BM2] + nphiHitsPerChamberLayer[Muon::MuonStationIndex::T1];
-        uint8_t phiLayer3Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BO1] + nphiHitsPerChamberLayer[Muon::MuonStationIndex::T2];
-        uint8_t phiLayer4Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BO2] + nphiHitsPerChamberLayer[Muon::MuonStationIndex::T3];
 
-        uint8_t etaLayer1Hits =
-            ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BM1] + ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T4] +
-            ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::CSC] + ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::STGC1] +
-            ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::STGC2];
-        uint8_t etaLayer2Hits =
-            ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BM2] + ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T1];
-        uint8_t etaLayer3Hits =
-            ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BO1] + ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T2];
-        uint8_t etaLayer4Hits =
-            ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BO2] + ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T3];
+        uint8_t phiLayer2Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BM2] + 
+                                nphiHitsPerChamberLayer[Muon::MuonStationIndex::T1];
+
+        uint8_t phiLayer3Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BO1] + 
+                                nphiHitsPerChamberLayer[Muon::MuonStationIndex::T2];
+
+        uint8_t phiLayer4Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BO2] + 
+                                nphiHitsPerChamberLayer[Muon::MuonStationIndex::T3];
+
+        uint8_t etaLayer1Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BM1] + 
+                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T4] +
+                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::CSC] + 
+                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::STGC1] +
+                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::STGC2];
+
+        uint8_t etaLayer2Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BM2] + 
+                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T1];
+
+        uint8_t etaLayer3Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BO1] + 
+                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T2];
+
+        uint8_t etaLayer4Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BO2] + 
+                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T3];
 
         uint8_t nprecLayers = 0;
         if (nprecHitsPerChamberLayer[Muon::MuonStationIndex::BIS] + nprecHitsPerChamberLayer[Muon::MuonStationIndex::BIL] > 3)
@@ -657,10 +679,11 @@ namespace Muon {
             }
             msg(MSG::VERBOSE) << endmsg;
         }
+        return StatusCode::SUCCESS;
     }
 
     void MuonTruthDecorationAlg::addHitIDVectors(xAOD::TruthParticle& truthParticle,
-                                                 const MuonTruthDecorationAlg::ChamberIdMap& ids) const {
+                                                 const ChamberIdMap& ids) const {
         
         std::vector<unsigned long long>& mdtTruthHits = truthParticle.auxdata<std::vector<unsigned long long> >("truthMdtHits");
         std::vector<unsigned long long>& tgcTruthHits = truthParticle.auxdata<std::vector<unsigned long long> >("truthTgcHits");
@@ -696,13 +719,13 @@ namespace Muon {
             }
         }
         if (m_idHelperSvc->hasCSC()) {
-            truthParticle.auxdata<std::vector<unsigned long long> >("truthCscHits") = cscTruthHits;
+            truthParticle.auxdata<std::vector<unsigned long long> >("truthCscHits") = std::move(cscTruthHits);
         }
         if (m_idHelperSvc->hasSTGC()) {
-            truthParticle.auxdata<std::vector<unsigned long long> >("truthStgcHits") = stgcTruthHits;
+            truthParticle.auxdata<std::vector<unsigned long long> >("truthStgcHits") = std::move(stgcTruthHits);
         }
         if (m_idHelperSvc->hasMM()) {
-            truthParticle.auxdata<std::vector<unsigned long long> >("truthMMHits") = mmTruthHits;
+            truthParticle.auxdata<std::vector<unsigned long long> >("truthMMHits") = std::move(mmTruthHits);
         }
         ATH_MSG_VERBOSE("Added " << mdtTruthHits.size() << " mdt truth hits, " << cscTruthHits.size() << " csc truth hits, "
                                  << rpcTruthHits.size() << " rpc truth hits, and " << tgcTruthHits.size() << " tgc truth hits");
