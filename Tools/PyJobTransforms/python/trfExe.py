@@ -194,6 +194,8 @@ class transformExecutor(object):
         self._athenaConcurrentEvents = 0
         self._dbMonitor = None
         self._resimevents = None
+        self._alreadyInContainer = None
+        self._containerSetup = None
 
         # Holder for execution information about any merges done by this executor in MP mode
         self._myMerger = []
@@ -729,7 +731,18 @@ class scriptExecutor(transformExecutor):
 
         encargs = {'encoding' : 'utf8'}
         try:
+            # if we are already inside a container, then
+            # must map /srv of the nested container to /srv of the parent container:
+            # https://twiki.atlas-canada.ca/bin/view/AtlasCanada/Containers#Mount_point_summary
+            if self._alreadyInContainer and self._containerSetup is not None:
+                msg.info("chdir /srv to launch a nested container for the substep")
+                os.chdir("/srv")
             p = subprocess.Popen(self._cmd, shell = False, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = 1, **encargs)
+            # go back to the original working directory immediately after to store prmon in it
+            if self._alreadyInContainer and self._containerSetup is not None:
+                msg.info("chdir {} after launching the nested container".format(self._workdir))
+                os.chdir(self._workdir)
+
             if self._memMonitor:
                 try:
                     self._memSummaryFile = 'prmon.summary.' + self._name + '.json'
@@ -1533,11 +1546,15 @@ class athenaExecutor(scriptExecutor):
         dbsetup = None,
         ossetup = None
         ):
-        self._originalCmd = self._cmd
-        self._asetup      = asetup
-        self._dbsetup     = dbsetup
-        self._ossetup     = ossetup
-        self._wrapperFile = 'runwrapper.{name}.sh'.format(name = self._name)
+        self._originalCmd        = self._cmd
+        self._asetup             = asetup
+        self._dbsetup            = dbsetup
+        self._containerSetup     = ossetup
+        self._workdir            = os.getcwd()
+        self._alreadyInContainer = self._workdir.startswith("/srv")
+        self._wrapperFile        = 'runwrapper.{name}.sh'.format(name = self._name)
+        self._setupFile          = 'setup.{name}.sh'.format(name = self._name)
+
         container_cmd = None
         msg.debug(
             'Preparing wrapper file {wrapperFileName} with '
@@ -1550,29 +1567,57 @@ class athenaExecutor(scriptExecutor):
         try:
             with open(self._wrapperFile, 'w') as wrapper:
                 print('#! /bin/sh', file=wrapper)
-                if ossetup is not None:
-                    container_cmd = ["{AtlasLRBDirectory}/container/startContainer.sh".format(AtlasLRBDirectory=os.environ['ATLAS_LOCAL_ROOT_BASE']),
+                if self._containerSetup is not None:
+                    # Prepare for container run: generate a script launching container
+                    # This is required for running on the grid
+                    setupScript = "my_setupATLAS.sh"
+                    if not os.path.isfile(setupScript):
+                        contSetupFile = open(setupScript, 'w')
+                        contText = """#! /bin/bash
+
+if [ -z $ATLAS_LOCAL_ROOT_BASE ]; then
+  export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
+fi
+
+source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
+                        print(contText, file=contSetupFile)
+                        contSetupFile.close()
+                        os.chmod(setupScript, 0o755)
+                    container_cmd = [ path.join('.', setupScript),
                                      "-c",
-                                     ossetup,
+                                     self._containerSetup,
                                      "--pwd",
-                                     os.getcwd(),
+                                     self._workdir,
+                                     "-s",
+                                     self._setupFile,
                                      "-r"]
                     print('echo This wrapper is executed within a container', file=wrapper)
                     print('echo For a local re-run, please do:', file=wrapper)
                     print('echo '+ " ".join(container_cmd) + " " + path.join('.', self._wrapperFile), file=wrapper)
-                    print('echo "(or with --pwd=`pwd`)"')
+                    print('echo "(or with --pwd \\`pwd\\`)"', file=wrapper)
+                    print('echo "N.B.: if launching a nested container, navigate to /srv before running the above command"',
+                          file = wrapper)
+                    print('echo "and use --pwd workdir, where workdir is the transform running directory within /srv"',
+                          file=wrapper)
 
                 if asetup:
-                    print("# asetup", file=wrapper)
+                    wfile = wrapper
+                    asetupFile = None
+                    # if the substep is executed within a container, setup athena with a separate script
+                    # e.g. setupATLAS -c el9 -s setup.RDOtoRDOTrigger.sh -r runwrapper.RDOtoRDOTrigger.sh ...
+                    if self._containerSetup is not None:
+                        asetupFile = open(self._setupFile, 'w')
+                        wfile = asetupFile
+                    print("# asetup", file=wfile)
                     print('echo Sourcing {AtlasSetupDirectory}/scripts/asetup.sh {asetupStatus}'.format(
                         AtlasSetupDirectory = os.environ['AtlasSetup'],
                         asetupStatus        = asetup
-                    ), file=wrapper)
+                    ), file=wfile)
                     print('source {AtlasSetupDirectory}/scripts/asetup.sh {asetupStatus}'.format(
                         AtlasSetupDirectory = os.environ['AtlasSetup'],
                         asetupStatus        = asetup
-                    ), file=wrapper)
-                    print('if [ ${?} != "0" ]; then exit 255; fi', file=wrapper)
+                    ), file=wfile)
+                    print('if [ ${?} != "0" ]; then exit 255; fi', file=wfile)
                 if dbsetup:
                     dbroot = path.dirname(dbsetup)
                     dbversion = path.basename(dbroot)
@@ -1676,7 +1721,8 @@ class athenaExecutor(scriptExecutor):
                 errMsg
             )
         self._cmd = [ path.join('.', self._wrapperFile) ]
-        if container_cmd is not None:
+        if self._containerSetup is not None:
+            asetupFile.close()
             self._cmd = container_cmd + self._cmd
 
 
