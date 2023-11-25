@@ -131,14 +131,15 @@ double TauVertexVariables::trFlightPathSig(const xAOD::TauJet& pTau, const xAOD:
     return -11111.;
   }
 
-  double fpx = secVertex.position().x() - pVertex->position().x();
-  double fpy = secVertex.position().y() - pVertex->position().y();
   double fpt = (secVertex.position() - pVertex->position()).perp();
 
   if (fpt == 0.) {
     ATH_MSG_WARNING("delta pt of (secVtx - priVtx) is 0!");
     return -11111.;
   }
+
+  double fpx = secVertex.position().x() - pVertex->position().x();
+  double fpy = secVertex.position().y() - pVertex->position().y();
 
   double sigma_fpt2 = (fpx * fpx * secVertex.covariancePosition()(Trk::x, Trk::x) +
 		       fpx * fpy * secVertex.covariancePosition()(Trk::x, Trk::y) +
@@ -150,13 +151,9 @@ double TauVertexVariables::trFlightPathSig(const xAOD::TauJet& pTau, const xAOD:
     return -11111.;
   }
 
-  double sigma_fpt = std::sqrt(sigma_fpt2);
-  double sign = 0.;
+  double sign = (fpx * pTau.p4().Px() + fpy * pTau.p4().Py() > 0.) ? 1. : -1.;
 
-  if (fpx * pTau.p4().Px() + fpy * pTau.p4().Py() > 0.) sign = 1.;
-  else sign = -1.;
-
-  return sign * fpt / sigma_fpt;
+  return sign * fpt / std::sqrt(sigma_fpt2);
 }
 
 #endif

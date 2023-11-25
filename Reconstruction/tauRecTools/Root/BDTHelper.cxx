@@ -136,60 +136,52 @@ std::vector<float> BDTHelper::getInputVariables(const xAOD::TauJet& tau) const {
 float BDTHelper::getGradBoostMVA(const std::map<TString, float>& availableVariables) const {
   std::vector<float> values = getInputVariables(availableVariables);
 
-  float score = -999;
   if (values.size() < m_inputVariableNames.size()) {
     ATH_MSG_ERROR("There are missing variables when calculating the BDT score, will return -999");
+    return  -999;
   }
   else {  
-    score = m_BDT->GetGradBoostMVA(values);
+    return  m_BDT->GetGradBoostMVA(values);
   }
-
-  return score;
 }
 
 
 float BDTHelper::getResponse(const std::map<TString, float*>& availableVariables) const {
   std::vector<float> values = getInputVariables(availableVariables);
 
-  float score = -999;
   if (values.size() < m_inputVariableNames.size()) {
     ATH_MSG_ERROR("There are missing variables when calculating the BDT score, will return -999");
+    return -999;
   }
   else {
-    score = m_BDT->GetResponse(values);
+    return  m_BDT->GetResponse(values);
   }
-
-  return score;
 }
 
 
 float BDTHelper::getClassification(const std::map<TString, float*>& availableVariables) const {
   std::vector<float> values = getInputVariables(availableVariables);
 
-  float score = -999;
   if (values.size() < m_inputVariableNames.size()) {
     ATH_MSG_ERROR("There are missing variables when calculating the BDT score, will return -999");
+    return -999;
   }
   else {
-    score = m_BDT->GetClassification(values);
+    return  m_BDT->GetClassification(values);
   }
-
-  return score;
 }
 
 
 float BDTHelper::getGradBoostMVA(const xAOD::TauJet& tau) const {
   std::vector<float> values = getInputVariables(tau);
 
-  float score = -999;
   if (values.size() < m_inputVariableNames.size()) {
     ATH_MSG_ERROR("There are missing variables when calculating the BDT score, will return -999");
+    return -999;
   }
   else {
-    score = m_BDT->GetGradBoostMVA(values);
+    return  m_BDT->GetGradBoostMVA(values);
   }
-
-  return score;
 }
 
 } // end of namespace tauRecTools

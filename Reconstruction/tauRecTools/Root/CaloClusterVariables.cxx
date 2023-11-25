@@ -60,18 +60,14 @@ bool CaloClusterVariables::update(const xAOD::TauJet& pTau) {
   TLorentzVector centroid = calculateTauCentroid(this->m_numConstit, clusterP4Vector);
 
   for (const TLorentzVector& clusterP4 : clusterP4Vector) {
-    double energy = clusterP4.E();
-    sum_of_E2 += energy*energy;
 
-    double px = clusterP4.Px();
-    double py = clusterP4.Py();
-    double pz = clusterP4.Pz();
-    double dr = clusterP4.DeltaR(centroid);
-    sum_radii += dr;
-    sum_e += energy;
-    sum_px += px;
-    sum_py += py;
-    sum_pz += pz;
+    sum_of_E2 += clusterP4.E()*clusterP4.E();
+    sum_radii += clusterP4.DeltaR(centroid);
+    sum_e += clusterP4.E();
+    sum_px += clusterP4.Px();
+    sum_py += clusterP4.Py();
+    sum_pz += clusterP4.Pz();
+
   }
 
   // Sum up the energy for constituents
@@ -115,17 +111,12 @@ bool CaloClusterVariables::update(const xAOD::TauJet& pTau) {
     if (icount <= 0) break;
     --icount;
 
-    double energy = clusterP4.E();
-    double px = clusterP4.Px();
-    double py = clusterP4.Py();
-    double pz = clusterP4.Pz();
-    double dr = clusterP4.DeltaR(centroid);
-    sum_radii += dr;
+    sum_radii += clusterP4.DeltaR(centroid);
+    sum_e += clusterP4.E();
+    sum_px += clusterP4.Px();
+    sum_py += clusterP4.Py();
+    sum_pz += clusterP4.Pz();
 
-    sum_e += energy;
-    sum_px += px;
-    sum_py += py;
-    sum_pz += pz;
   }
 
   // Sum up the energy for effective constituents
@@ -153,19 +144,20 @@ TLorentzVector CaloClusterVariables::calculateTauCentroid(int nConst, const std:
   double px = 0.;
   double py = 0.;
   double pz = 0.;
-  double current_px, current_py, current_pz, modulus;
+  double modulus = 0.;
 
   for (const TLorentzVector& clusterP4: clusterP4Vector) {
     if (nConst <= 0) break;
     --nConst;
-    current_px = clusterP4.Px();
-    current_py = clusterP4.Py();
-    current_pz = clusterP4.Pz();
-    modulus = std::sqrt(current_px * current_px + current_py * current_py + current_pz * current_pz);
-    px += current_px / modulus;
-    py += current_py / modulus;
-    pz += current_pz / modulus;
+
+    modulus = std::sqrt((clusterP4.Px() * clusterP4.Px()) + (clusterP4.Py() * clusterP4.Py()) + (clusterP4.Pz() * clusterP4.Pz()));
+
+    px += clusterP4.Px() / modulus;
+    py += clusterP4.Py() / modulus;
+    pz += clusterP4.Pz() / modulus;
+
   }
+
   TLorentzVector centroid(px, py, pz, 1);
   return centroid;
 }
