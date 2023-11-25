@@ -48,12 +48,20 @@ namespace Muon {
         virtual StatusCode execute(const EventContext& ctx) const override;
 
     private:
-        void addTrackRecords(const EventContext& ctx, xAOD::TruthParticle& truthParticle) const;
-        void addHitCounts(const EventContext& ctx, xAOD::TruthParticle& truthParticle, ChamberIdMap& ids) const;
+        StatusCode addTrackRecords(const EventContext& ctx, 
+                                   xAOD::TruthParticle& truthParticle) const;
+        
+ 
+        StatusCode addHitCounts(const EventContext& ctx, 
+                                xAOD::TruthParticle& truthParticle, 
+                                ChamberIdMap& ids) const;
+
         void addHitIDVectors(xAOD::TruthParticle& truthParticle, const MuonTruthDecorationAlg::ChamberIdMap& ids) const;
-        void createSegments(const EventContext& ctx, const ElementLink<xAOD::TruthParticleContainer>& truthLink,
-                            SG::WriteHandle<xAOD::MuonSegmentContainer>& segmentContainer,
-                            const MuonTruthDecorationAlg::ChamberIdMap& ids) const;
+        
+        StatusCode createSegments(const EventContext& ctx, 
+                                  const ElementLink<xAOD::TruthParticleContainer>& truthLink,
+                                  SG::WriteHandle<xAOD::MuonSegmentContainer>& segmentContainer,
+                                  const ChamberIdMap& ids) const;
 
         SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleContainerName{this, "TruthParticleContainerName", "TruthParticles"};
         SG::WriteHandleKey<xAOD::TruthParticleContainer> m_muonTruthParticleContainerName{this, "MuonTruthParticleContainerName",
@@ -78,7 +86,10 @@ namespace Muon {
 
         Gaudi::Property<bool> m_createTruthSegment{this, "CreateTruthSegments", true};
 
-        const MuonGM::MuonDetectorManager* m_muonMgr;
+            // MuonDetectorManager from the conditions store
+        SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{this, "DetectorManagerKey", "MuonDetectorManager",
+                                                                      "Key of input MuonDetectorManager condition data"};
+
     };
 
 }  // namespace Muon

@@ -40,21 +40,16 @@ MuonTruthAssociationAlg::MuonTruthAssociationAlg(const std::string& name, ISvcLo
 // Initialize method:
 StatusCode MuonTruthAssociationAlg::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(m_muonTruthParticleContainerName.initialize());
+    ATH_CHECK(m_truthMuKey.initialize());
+    ATH_CHECK(m_recoMuKey.initialize());
     
     if (m_recoLink.empty()){
         m_muonTruthRecoLink = "" ;
     } else {
-        m_muonTruthRecoLink = m_muonTruthParticleContainerName.key() + "." + m_recoLink;
+        m_muonTruthRecoLink = m_recoLink;
     }
      
-    ATH_CHECK(m_muonTruthRecoLink.initialize(!m_muonTruthRecoLink.empty()));
-    m_muonTruthParticleLink = m_muonName + ".truthParticleLink";
-    m_muonTruthParticleType = m_muonName + ".truthType";
-    m_muonTruthParticleOrigin = m_muonName + ".truthOrigin";
-    m_muonTruthParticleNPrecMatched = m_muonName + ".nprecMatchedHitsPerChamberLayer";
-    m_muonTruthParticleNPhiMatched = m_muonName + ".nphiMatchedHitsPerChamberLayer";
-    m_muonTruthParticleNTrigEtaMatched = m_muonName + ".ntrigEtaMatchedHitsPerChamberLayer";
+    ATH_CHECK(m_muonTruthRecoLink.initialize(!m_recoLink.empty()));
     ATH_CHECK(m_muonTruthParticleLink.initialize());
     ATH_CHECK(m_muonTruthParticleOrigin.initialize());
     ATH_CHECK(m_muonTruthParticleType.initialize());
@@ -70,7 +65,7 @@ StatusCode MuonTruthAssociationAlg::initialize() {
 
 // Execute method:
 StatusCode MuonTruthAssociationAlg::execute(const EventContext& ctx) const {
-    SG::ReadHandle<xAOD::TruthParticleContainer> muonTruthContainer(m_muonTruthParticleContainerName , ctx);
+    SG::ReadHandle<xAOD::TruthParticleContainer> muonTruthContainer(m_truthMuKey , ctx);
     if (!muonTruthContainer.isValid()) {
         ATH_MSG_WARNING("truth particle container not valid");
         return StatusCode::FAILURE;
@@ -91,8 +86,7 @@ StatusCode MuonTruthAssociationAlg::execute(const EventContext& ctx) const {
     SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned int> > muonTruthParticleNPrecMatched(m_muonTruthParticleNPrecMatched,
                                                                                                         ctx);
     SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned int> > muonTruthParticleNPhiMatched(m_muonTruthParticleNPhiMatched, ctx);
-    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned int> > muonTruthParticleNTrigEtaMatched(
-        m_muonTruthParticleNTrigEtaMatched, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned int> > muonTruthParticleNTrigEtaMatched(m_muonTruthParticleNTrigEtaMatched, ctx);
 
     // add link to reco muons and viceversa
     bool saw_staco = false;

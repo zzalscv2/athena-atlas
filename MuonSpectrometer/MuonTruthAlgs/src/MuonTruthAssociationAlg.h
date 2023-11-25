@@ -23,38 +23,41 @@ public:
     StatusCode execute(const EventContext& ctx) const override;
 
 private:
-   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_muonTruthParticleContainerName{
+   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthMuKey{
         this, "MuonTruthParticleContainerName", "MuonTruthParticles",
         "container name for muon truth particles; the full handle name, including the reco muon link auxdata, is set in initialize()"};
    
+   SG::ReadHandleKey<xAOD::MuonContainer> m_recoMuKey{
+        this, "MuonContainerName", "Muons",
+        "container name for muon truth particles; the full handle name, including the reco muon link auxdata, is set in initialize()"};
+   
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_muonTruthRecoLink{
-        this, "MuonTruthParticleRecoLink", "",
+        this, "MuonTruthParticleRecoLink", m_truthMuKey, "",
         "container name for muon truth particles; the full handle name, including the reco muon link auxdata, is set in initialize()"};
     SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonTruthParticleLink{
-        this, "MuonTruthParticleLink", "Muons.truthParticleLink",
+        this, "MuonTruthParticleLink", m_recoMuKey, "truthParticleLink",
         "muon truth particle link auxdata name; name will be reset in initialize() based on m_muonName"};
     SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonTruthParticleType{
-        this, "MuonTruthParticleType", "Muons.truthType",
+        this, "MuonTruthParticleType", m_recoMuKey, "truthType",
         "muon truth type auxdata name; name will be reset in initialize() based on m_muonName"};
     SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonTruthParticleOrigin{
-        this, "MuonTruthParticleOrigin", "Muons.truthOrigin",
+        this, "MuonTruthParticleOrigin", m_recoMuKey, "truthOrigin",
         "muon truth origin auxdata name; name will be reset in initialize() based on m_muonName"};
     SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonTruthParticleNPrecMatched{
-        this, "MuonTruthParticleNPrecMatched", "Muons.nprecMatchedHitsPerChamberLayer",
+        this, "MuonTruthParticleNPrecMatched", m_recoMuKey, "nprecMatchedHitsPerChamberLayer",
         "muon vector of number of precision matched hits per chamber layer auxdata name; name will be reset in initialize() based on "
         "m_muonName"};
     SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonTruthParticleNPhiMatched{
-        this, "MuonTruthParticleNPhiMatched", "Muons.nphiMatchedHitsPerChamberLayer",
+        this, "MuonTruthParticleNPhiMatched", m_recoMuKey, "nphiMatchedHitsPerChamberLayer",
         "muon vector of number of phi matched hits per chamber layer auxdata name; name will be reset in initialize() based on m_muonName"};
     SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonTruthParticleNTrigEtaMatched{
-        this, "MuonTruthParticleNTrigEtaMatched", "Muons.ntrigEtaMatchedHitsPerChamberLayer",
+        this, "MuonTruthParticleNTrigEtaMatched", m_recoMuKey, "ntrigEtaMatchedHitsPerChamberLayer",
         "muon vector of number of phi matched hits per chamber layer auxdata name; name will be reset in initialize() based on m_muonName"};
     
    
     SG::ReadDecorHandleKeyArray<xAOD::TrackParticleContainer> m_trkTruthKeys{
         this, "TrkTruthLinkKeys", {},
         "Declare the decoration dependencies of this algorithm. Steer via TrackContainers property"};
-    Gaudi::Property<std::string> m_muonName{this, "MuonContainerName", "Muons", "muon container name"};
     Gaudi::Property<std::vector<std::string>> m_assocTrkContainers{this, "TrackContainers", {"CombinedMuonTrackParticles",
                                                                                             "ExtrapolatedMuonTrackParticles",
                                                                                             "InDetTrackParticles",
