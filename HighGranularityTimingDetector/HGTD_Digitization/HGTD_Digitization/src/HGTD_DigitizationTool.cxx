@@ -455,11 +455,14 @@ void HGTD_DigitizationTool::createAndStoreSDO(
         }
       }
 
-      // if the charge has already hit the Diode add it to the deposit
+      // Diode has already a hit, check which one that arrived first.
       if (theDeposit != depositsR_end) {
-        (*theDeposit).second += charge_list_itr->time();
-      } else { // create a new deposit
-        deposits.emplace_back(trkLink, charge_list_itr->charge());
+        if((*theDeposit).second > charge_list_itr->time()){
+          (*theDeposit).first = trkLink;
+          (*theDeposit).second = charge_list_itr->time();
+        }
+      } else { // create a new deposit with the track lick and the ToA
+        deposits.emplace_back(trkLink, charge_list_itr->time());
       }
     } // END LOOP charges within diode
 
