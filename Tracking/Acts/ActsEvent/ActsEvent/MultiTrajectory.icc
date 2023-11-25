@@ -17,11 +17,11 @@ constexpr std::optional<bool> has_impl(
       return trackStates[istate]->previous() < kInvalid;
     case "chi2"_hash:{
       INSPECTCALL(key << " " << istate << " chi2");
-      return trackStates[istate]->chi2() < kInvalid;
+      return true;
     }
     case "pathLength"_hash:{
       INSPECTCALL(key << " " << istate << " pathLength");
-      return trackStates[istate]->pathLength() < kInvalid;
+      return true;
     }
     case "typeFlags"_hash:{
       INSPECTCALL(key << " " << istate << " type flags");
