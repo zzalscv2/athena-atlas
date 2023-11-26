@@ -27,9 +27,9 @@ acc.merge(PoolReadCfg(flags))
 
 flags.lock()
 
-from MuonPhysValMonitoring.MuonPhysValConfig import PhysValMuonCfg
+from MuonPhysValMonitoring.MuonPhysValConfig import PhysValMuonCfg, PhysValLRTMuonCfg
 from PhysValMonitoring.PhysValMonitoringConfig import PhysValMonitoringCfg
-acc.merge(PhysValMonitoringCfg(flags, tools=[acc.popToolsAndMerge(PhysValMuonCfg(flags))]))
+acc.merge(PhysValMonitoringCfg(flags, tools=[acc.popToolsAndMerge(PhysValMuonCfg(flags)), acc.popToolsAndMerge(PhysValLRTMuonCfg(flags)))]))
 
 acc.printConfig(withDetails=True)
 

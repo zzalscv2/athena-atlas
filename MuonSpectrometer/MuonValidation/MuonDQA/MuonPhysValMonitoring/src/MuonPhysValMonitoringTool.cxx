@@ -98,6 +98,9 @@ namespace MuonPhysValMonitoring {
 
         return StatusCode::SUCCESS;
     }
+
+    
+
     StatusCode MuonPhysValMonitoringTool::bookHistograms() {
         ATH_MSG_INFO("Booking hists " << name() << "...");
 
@@ -121,9 +124,11 @@ namespace MuonPhysValMonitoring {
         std::string muonContainerName = m_muonsName;
         for (const auto& category : m_selectMuonCategoriesStr) {
             std::string categoryPath = m_muonsName + "/" + category + "/";
+
             m_muonValidationPlots.emplace_back(std::make_unique<MuonValidationPlots>(
                 nullptr, categoryPath, m_selectMuonWPs, m_selectMuonAuthors, m_isData,
                 (category == theMuonCategories.at(ALL) ? false : m_doBinnedResolutionPlots.value()), separateSAFMuons, m_doMuonTree));
+
             if (!m_slowMuonsName.empty()) m_slowMuonValidationPlots.emplace_back(std::make_unique<SlowMuonValidationPlots>(nullptr, categoryPath, m_isData));
             if (m_doTrigMuonValidation) {
                 if (category == "All") {
@@ -227,7 +232,7 @@ namespace MuonPhysValMonitoring {
         }
 
         return StatusCode::SUCCESS;
-    }
+    }//bookHistograms*/
 
     StatusCode MuonPhysValMonitoringTool::bookValidationPlots(PlotBase& valPlots) {
         valPlots.initialize();
@@ -847,7 +852,7 @@ namespace MuonPhysValMonitoring {
             }                  // m_doTrigMuonEFValidation
         }
         return StatusCode::SUCCESS;
-    }
+    }//fillHistograms()*/
 
     void MuonPhysValMonitoringTool::handleTruthMuonSegment(const xAOD::MuonSegment* truthMuSeg,
                                                            const xAOD::TruthParticleContainer* /*muonTruthContainer*/, float weight) {
@@ -1356,7 +1361,7 @@ namespace MuonPhysValMonitoring {
         }
 
         return StatusCode::SUCCESS;
-    }
+    }//procHistograms*/
 
     const xAOD::MuonSegment* MuonPhysValMonitoringTool::findRecoMuonSegment(const xAOD::MuonSegment* truthMuSeg) {
         if (!truthMuSeg->isAvailable<MuonSegmentLink>("recoSegmentLink")) {
@@ -1438,6 +1443,24 @@ namespace MuonPhysValMonitoring {
 
     void MuonPhysValMonitoringTool::modifyHistogram(TH1* hist) {
         std::string histname = hist->GetName();
+         
+        if(m_muonsName == "Muons"){
+            if (histname.find("parameters_z0") != std::string::npos) { 
+                hist->GetXaxis()->Set(80, -200., 200.);
+            }
+            if (histname.find("parameters_d0") != std::string::npos && histname.find("parameters_d0_small") == std::string::npos) {
+                hist->GetXaxis()->Set(80, -1., 1.);
+                hist->GetYaxis()->SetTitle("Entries / 0.025 mm");                
+            }
+       }
+
+       if(m_muonsName == "MuonsLRT"){
+            if (histname.find("parameters_d0") != std::string::npos && histname.find("parameters_d0_small") == std::string::npos) {
+                hist->Rebin(100);
+                hist->GetYaxis()->SetTitle("Entries / 2.5 mm");                
+            }
+       }
+
 
         if (histname.find("trigger_L1_pt") != std::string::npos) {  // if (histname=="Muons_All_trigger_L1_pt"){
             hist->SetTitle("L1Trigger Muons pt treshold");
