@@ -110,10 +110,12 @@ def createTauRecConfigFlags():
     flags.addFlag("SeedJetCollection", "AntiKt4LCTopoJets")
     flags.addFlag("LargeD0TrackCollection", "InDetLargeD0TrackParticles")
     flags.addFlag("EventShapeCollection", "Kt4LCTopoOriginEventShape")
-    # Electron-subtracted tau flags
+
+    # Electron-subtracted tau flags appearing in standard tau reconstruction
     flags.addFlag("inTauEleRM", False)
     flags.addFlag("RemoveElectronCells",        False)
     flags.addFlag("RemovedElectronClusters",    "")
+
     return flags
 
 
@@ -122,23 +124,14 @@ def createTauEleRMConfigFlags():
     flags.prefix                     = "EleRM_"
     _output_suffix                   = "_EleRM"
 
-    # More Electron-subtracted tau specific flags
-    flags.addFlag("EleRM_ElectronWorkingPoint", "Medium")
-    flags.addFlag("RemovedElectronTracks",      "")
-    flags.addFlag("CaloCalTopoClusters_EleRM",  "")
-    flags.addFlag("InDetTrackParticles_EleRM",  "")
-    flags.addFlag("LCOriginTopoClusters_EleRM", "")
-    flags.addFlag("LCTopoOrigin_EleRM",         "")
-    flags.addFlag("EleRM_CheckingConeSize",     0.6)
-
     # Output containers
     flags.TauJets                    = f"TauJets{_output_suffix}"
     flags.TauTracks                  = f"TauTracks{_output_suffix}"
     flags.TauShotClusters            = f"TauShotClusters{_output_suffix}"
-    flags.TauShotClustersLinks       = f"TauShotClusters{_output_suffix}_links" # FIXME: check the double underscore doesn't cause trouble for cell links
+    flags.TauShotClustersLinks       = f"TauShotClusters{_output_suffix}_links"
     flags.TauShotPFOs                = f"TauShotParticleFlowObjects{_output_suffix}"
     flags.TauPi0Clusters             = f"TauPi0Clusters{_output_suffix}"
-    flags.TauPi0ClustersLinks        = f"TauPi0Clusters{_output_suffix}_links"  # FIXME: check the double underscore doesn't cause trouble for cell links
+    flags.TauPi0ClustersLinks        = f"TauPi0Clusters{_output_suffix}_links"
     flags.TauHadronicPFOs            = f"TauHadronicParticleFlowObjects{_output_suffix}"
     flags.TauNeutralPFOs             = f"TauNeutralParticleFlowObjects{_output_suffix}"
     flags.TauChargedPFOs             = f"TauChargedParticleFlowObjects{_output_suffix}"
@@ -157,16 +150,18 @@ def createTauEleRMConfigFlags():
     flags.LargeD0TrackCollection     = "InDetLargeD0TrackParticles"
     flags.EventShapeCollection       = "EleRM_Kt4LCTopoOriginEventShape"
 
-    # EleRM specific
+    # Electron-subtracted tau flags appearing in standard tau reconstruction
     flags.inTauEleRM                 = True
-    flags.EleRM_ElectronWorkingPoint = "Medium"
-    flags.RemovedElectronClusters    = "RemovedClusters_EleRM"
-    flags.RemovedElectronTracks      = "RemovedTracks_EleRM"
-    flags.CaloCalTopoClusters_EleRM  = "CaloCalTopoClusters_EleRM"
-    flags.LCOriginTopoClusters_EleRM = "LCOriginTopoClusters_EleRM"
-    flags.LCTopoOrigin_EleRM         = "LCTopoOrigin_EleRM"
-    flags.EleRM_CheckingConeSize     = 0.6
     flags.RemoveElectronCells        = True
+    flags.RemovedElectronClusters    = "RemovedClusters_EleRM"
+
+    # Electron-subtracted tau specific flags
+    flags.addFlag("EleRM_ElectronWorkingPoint", "Medium")
+    flags.addFlag("RemovedElectronTracks",      "RemovedTracks_EleRM")
+    flags.addFlag("CaloCalTopoClusters_EleRM",  "CaloCalTopoClusters_EleRM")
+    flags.addFlag("LCOriginTopoClusters_EleRM", "LCOriginTopoClusters_EleRM")
+    flags.addFlag("LCTopoOrigin_EleRM",         "LCTopoOrigin_EleRM")
+    flags.addFlag("EleRM_CheckingConeSize",     0.6)
 
     return flags
 
