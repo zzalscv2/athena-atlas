@@ -1,7 +1,7 @@
 /*
    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
-
+ 
 #include "TopAnalysis/EventSaverFlatNtuple.h"
 
 #include "TopEvent/Event.h"
@@ -26,6 +26,7 @@
 #include "FakeBkgTools/AsymptMatrixTool.h"
 
 #include "xAODTracking/TrackParticlexAODHelpers.h"
+#include "RootCoreUtils/StringUtil.h"
 
 namespace top {
   EventSaverFlatNtuple::EventSaverFlatNtuple() :
@@ -1904,7 +1905,7 @@ namespace top {
 
   void EventSaverFlatNtuple::recordTriggerDecision(const top::Event& event) {
     for (const auto& trigger : m_triggerDecisions)
-      m_triggerDecisions[trigger.first] = event.m_info->auxdataConst<char>("TRIGDEC_" + trigger.first);
+      m_triggerDecisions[trigger.first] = event.m_info->auxdataConst<char>("TRIGDEC_" + RCU::substitute(RCU::substitute(trigger.first, ".", "p"), "-", "_"));
   }
 
   void EventSaverFlatNtuple::saveEvent(const top::Event& event) {

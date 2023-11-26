@@ -8,7 +8,8 @@
 
 #include <sstream>
 #include <iostream>
-
+#include <RootCoreUtils/StringUtil.h>
+ 
 namespace top {
   TrigDecisionTightSelector::TrigDecisionTightSelector(const std::string& selectorName,
                                                        std::shared_ptr<top::TopConfig> config) {
@@ -24,8 +25,9 @@ namespace top {
     bool orOfAllTriggers(false);
     for (const auto& trigger : m_triggers) {
       bool passThisTrigger(false);
-      if (event.m_info->isAvailable<char>("TRIGDEC_" + trigger.first)) {
-        if (event.m_info->auxdataConst<char>("TRIGDEC_" + trigger.first) == 1) {
+      auto trigger_name = RCU::substitute(RCU::substitute(trigger.first, ".", "p"), "-", "_");
+      if (event.m_info->isAvailable<char>("TRIGDEC_" + trigger_name)) {
+        if (event.m_info->auxdataConst<char>("TRIGDEC_" + trigger_name) == 1) {
           passThisTrigger = true;
         }
       }

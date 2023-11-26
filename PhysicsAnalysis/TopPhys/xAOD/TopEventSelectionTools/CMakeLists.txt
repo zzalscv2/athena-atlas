@@ -37,4 +37,5 @@ atlas_add_library( TopEventSelectionTools Root/*.cxx Root/*.h Root/*.icc
                                           xAODEgamma
                                           xAODEventInfo
                                           xAODJet
-                                          xAODMuon )
+                                          xAODMuon
+                                          RootCoreUtils )
