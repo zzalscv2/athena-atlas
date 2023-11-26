@@ -82,7 +82,7 @@ def CaloClusterROIPhiRZContainerMaker(name="CaloClusterROIPhiRZContainerMaker", 
             EMFCut=0.7,
             RetaCut=0.65,
             HadLeakCut=0.15)
-        kwargs["egammaCaloClusterSelector"] = egammaCaloClusterROISelector()
+        kwargs["egammaCaloClusterSelector"] = egammaCaloClusterROISelector
 
     from InDetCaloClusterROISelector.InDetCaloClusterROISelectorConf import InDet__CaloClusterROIPhiRZContainerMaker
     return InDet__CaloClusterROIPhiRZContainerMaker(name, **kwargs)
