@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonPRDTEST_RPCDigitVARIABLES_H
@@ -7,6 +7,7 @@
 
 #include "MuonDigitContainer/RpcDigitContainer.h"
 #include "MuonPRDTest/PrdTesterModule.h"
+#include "MuonTesterTree/TwoVectorBranch.h"
 namespace MuonPRDTest {
     class RpcDigitVariables : public PrdTesterModule {
     public:
@@ -21,11 +22,11 @@ namespace MuonPRDTest {
     private:
         SG::ReadHandleKey<RpcDigitContainer> m_key{};
         ScalarBranch<unsigned int>& m_RPC_nDigits{parent().newScalar<unsigned int>("N_Digits_RPC")};
-        VectorBranch<float>& m_RPC_dig_localPosX{parent().newVector<float>("Digits_RPC_localPosX")};
-        VectorBranch<float>& m_RPC_dig_localPosY{parent().newVector<float>("Digits_RPC_localPosY")};
         VectorBranch<float>& m_RPC_dig_time{parent().newVector<float>("Digits_RPC_time")};
+        VectorBranch<float>& m_RPC_tot{parent().newVector<float>("Digits_RPC_timeOverThresh")};
         VectorBranch<int>& m_RPC_dig_stripNumber{parent().newVector<int>("Digits_RPC_stripNumber")};
         ThreeVectorBranch m_RPC_dig_globalPos{parent(), "Digits_RPC_globalPos"};
+        TwoVectorBranch m_RPC_dig_localPos{parent(), "Digits_RPC_localPos"};
         RpcIdentifierBranch m_RPC_dig_id{parent(), "Digits_RPC"};
     };
 }  // namespace MuonPRDTest

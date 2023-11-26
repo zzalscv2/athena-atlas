@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/RPCDigitVariables.h"
@@ -38,8 +38,8 @@ namespace MuonPRDTest {
                     return false;
                 }
 
-                Amg::Vector3D gpos{0., 0., 0.};
-                Amg::Vector2D lpos(0., 0.);
+                Amg::Vector3D gpos{Amg::Vector3D::Zero()};
+                Amg::Vector2D lpos{Amg::Vector2D::Zero()};
 
                 const bool stripPosition = rdoEl->stripPosition(Id, lpos);
                 int stripNumber = rdoEl->stripNumber(lpos, Id);
@@ -52,9 +52,9 @@ namespace MuonPRDTest {
 
                 rdoEl->surface(Id).localToGlobal(lpos, gpos, gpos);
                 m_RPC_dig_globalPos.push_back(gpos);
-                m_RPC_dig_localPosX.push_back(lpos.x());
-                m_RPC_dig_localPosY.push_back(lpos.y());
+                m_RPC_dig_localPos.push_back(lpos);
                 m_RPC_dig_time.push_back(digit->time());
+                m_RPC_tot.push_back(digit->ToT());
                 m_RPC_dig_id.push_back(Id);
                 m_RPC_dig_stripNumber.push_back(stripNumber);
 
