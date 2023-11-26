@@ -11,7 +11,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def PhysValMuonCfg(flags, container='', **kwargs):
+def PhysValMuonCfg(flags, name="muphysval", **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("IsData", not flags.Input.isMC)
@@ -37,11 +37,11 @@ def PhysValMuonCfg(flags, container='', **kwargs):
     kwargs.setdefault("OutputLevel", WARNING)
     kwargs.setdefault("DetailLevel", 10)
 
-    acc.setPrivateTools(CompFactory.MuonPhysValMonitoring.MuonPhysValMonitoringTool("muphysval", **kwargs))
+    acc.setPrivateTools(CompFactory.MuonPhysValMonitoring.MuonPhysValMonitoringTool(name, **kwargs))
     return acc
 
 
-def PhysValMuonTriggerCfg(flags, container='', **kwargs):
+def PhysValMuonTriggerCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     selectHLTMuonItems = [
@@ -70,5 +70,10 @@ def PhysValMuonTriggerCfg(flags, container='', **kwargs):
     kwargs.setdefault("TrigDecTool", acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags)))
 
     acc.setPrivateTools(acc.popToolsAndMerge(
-        PhysValMuonCfg(flags, container, **kwargs)))
+        PhysValMuonCfg(flags, **kwargs)))
     return acc
+
+
+def PhysValLRTMuonCfg(flags, name="lrtmuphysval", **kwargs):
+    kwargs.setdefault("MuonContainerName", "MuonsLRT")
+    return PhysValMuonCfg(flags, name, **kwargs)
