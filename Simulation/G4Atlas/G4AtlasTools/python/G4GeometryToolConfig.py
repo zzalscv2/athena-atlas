@@ -447,7 +447,7 @@ def ATLASEnvelopeCfg(flags, name="Atlas", **kwargs):
     ## ZSurfaces
     zSurfaces = [-26046., -23001., -23001., -22031., -22031., -12899., -12899., -6741., -6741.,  6741.,  6741.,  12899., 12899., 22031., 22031., 23001., 23001., 26046.] # FIXME units mm??
 
-    if flags.Detector.GeometryForward:
+    if flags.Detector.GeometryFwdRegion or flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryZDC:
         zSurfaces[0]  = -400000.
         zSurfaces[17] =  400000.
 
