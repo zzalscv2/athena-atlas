@@ -43,9 +43,10 @@ if not os.path.isfile(args.grl):
 
 outfile = ROOT.TFile.Open(args.outfile, 'RECREATE')
 metadata = ROOT.TTree('DataCustomReweighting', 'DataCustomReweighting')
-cname_arr = array.array('u', 'pileup\0')
+cname_arr = bytearray('pileup\0',encoding='utf-8')
 runno_arr = array.array('I', [0])
-histname_arr = array.array('u', 'pileup_data_run_XXXXXX\0')
+histname_arr = bytearray('pileup_data_run_XXXXXX\0',encoding='utf-8')
+
 metadata.Branch('CustomName', cname_arr, 'CustomName/C')
 metadata.Branch('RunNumber', runno_arr, 'RunNumber/i')
 metadata.Branch('HistName', histname_arr, 'HistName/C')
@@ -57,7 +58,7 @@ for run in grl.GetGoodRuns():
     outhist=None
     runno = run.GetRunNumber()
     runno_arr[0] = runno
-    histname_arr[-7:-1] = array.array('u', repr(runno))
+    histname_arr[-7:-1] = bytearray(repr(runno),encoding='utf-8')
     rdir = bcidfile.Get(repr(runno))
     if not rdir:
         logger.warning('Unable to retrieve mu distributions for run %s, skipping ...', runno)
