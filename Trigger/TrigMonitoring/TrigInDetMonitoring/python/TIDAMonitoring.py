@@ -460,10 +460,10 @@ def TIDAutt( flags, key, toolkey, tools, monlevel, mcTruth ) :
         #### UTT ####
 
         if mcTruth:
-                tidautt = TrigR3Mon_builder( flags, name = "IDBjetTruth"+toolkey+"Tool", mcTruth=True )
+                tidautt = TrigR3Mon_builder( flags, name = "IDUttTruth"+toolkey+"Tool", mcTruth=True )
                 tidautt.SliceTag = "HLT/TRIDT/UTT/"+key
         else:
-                tidautt = TrigR3Mon_builder( flags, name = "IDBjet"+toolkey+"Tool" )
+                tidautt = TrigR3Mon_builder( flags, name = "IDUtt"+toolkey+"Tool" )
                 tidautt.SliceTag = "HLT/TRIDT/UTT/"+key
 
         tidautt.AnalysisConfig = "Tier0"
