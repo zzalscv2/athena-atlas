@@ -46,4 +46,5 @@ atlas_add_library( TopObjectSelectionTools TopObjectSelectionTools/*.h Root/*.cx
                                           PATInterfaces
                                           FourMomUtils
                                           TopParticleLevel
-                                          TopDataPreparation )
+                                          TopDataPreparation
+                                          RootCoreUtils )

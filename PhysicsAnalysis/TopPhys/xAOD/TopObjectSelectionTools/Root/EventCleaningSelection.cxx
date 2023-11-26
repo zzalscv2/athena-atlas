@@ -19,6 +19,7 @@
 #include <sstream>
 #include <list>
 #include <boost/algorithm/string.hpp>
+#include <RootCoreUtils/StringUtil.h>
 
 namespace top {
   EventCleaningSelection::EventCleaningSelection(const std::string& name) :
@@ -640,14 +641,14 @@ namespace top {
       //decorating event with trigger decision
       bool passThisTrigger = m_trigDecisionTool->isPassed(trigger.first);
       char decoration = passThisTrigger ? 1 : 0;
-      eventInfo->auxdecor<char>("TRIGDEC_" + trigger.first) = decoration;
+      eventInfo->auxdecor<char>("TRIGDEC_" + RCU::substitute(RCU::substitute(trigger.first, ".", "p"), "-", "_")) = decoration;
       orOfAllTriggers |= passThisTrigger;
 
       //decorating event with trigger prescale (on Data)
       if (!m_config->isMC()) {
         auto cg = m_trigDecisionTool->getChainGroup(trigger.first);
         float prescale = cg->getPrescale();
-        eventInfo->auxdecor<float>("TRIGPS_" + trigger.first) = prescale;
+        eventInfo->auxdecor<float>("TRIGPS_" + RCU::substitute(RCU::substitute(trigger.first, ".", "p"), "-", "_")) = prescale;
       }
     }
 
