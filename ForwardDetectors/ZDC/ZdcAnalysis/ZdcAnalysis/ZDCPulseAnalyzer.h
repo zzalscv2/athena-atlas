@@ -142,6 +142,7 @@ private:
   std::vector<float> m_HGT0CorrParams; // Parameters used to correct the fit HG times
 
   bool m_haveNonlinCorr{};
+  float m_nonLinCorrRefADC{};
   std::vector<float> m_nonLinCorrParams;
 
   // Histogram used to perform the fits and function wrappers
@@ -389,14 +390,15 @@ public:
 
   void SetFitTimeMax(float tmax);
 
-  void SetNonlinCorrParams(const std::vector<float>& params)
+  void SetNonlinCorrParams(float refADC, const std::vector<float>& params)
   {
     //  Check for valid length
     //
-    if (params.size() != 2) throw std::runtime_error ("SetNonlinCorrParams");
+    //    if (params.size() != 2) throw std::runtime_error ("SetNonlinCorrParams");
 
     (*m_msgFunc_p)(ZDCMsg::Info, ("Setting non-linear parameters for module: " + m_tag + ", vlues = " + std::to_string(params[0]) + ", " + std::to_string(params[1])));
 
+    m_nonLinCorrRefADC = refADC;
     m_nonLinCorrParams = params;
     m_haveNonlinCorr = true;
   }
