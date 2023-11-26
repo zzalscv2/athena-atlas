@@ -157,7 +157,7 @@ public:
   void SetTimingCorrParams(const std::array<std::array<std::vector<float>, 4>, 2>& HGParamArr,
                            const std::array<std::array<std::vector<float>, 4>, 2>& LGParamArr);
 
-  void SetNonlinCorrParams(const std::array<std::array<std::vector<float>, 4>, 2>& HGNonlinCorrParams);
+  void SetNonlinCorrParams(float refADC, const std::array<std::array<std::vector<float>, 4>, 2>& HGNonlinCorrParams);
 
   void SetModuleAmpFractionLG(const ZDCDataAnalyzer::ZDCModuleFloatArray& moduleAmpFractionLG);
 

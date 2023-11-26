@@ -480,7 +480,11 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
 									m_lowGainOnly));
   zdcDataAnalyzer->set2ndDerivStep(2);
   zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
-  zdcDataAnalyzer->SetGainFactorsHGLG(1, 10); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
+
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1, 1, 1, 1},{1, 1, 1, 1}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{9.63, 9.29, 10.08, 9.34},{9.79, 9.45, 9.94, 10.36}}};
+
+  zdcDataAnalyzer->SetGainFactorsHGLG(gainsHG, gainsLG); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
 
   // These noise sigmas we read off from the ch_x_BaselineStdev monitoring histograms with our 
   //   final readout configuration for the Pb+Pb run by BAC on 25-09-2023
@@ -509,6 +513,24 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
 								   {-8, -8, -8, -8}}};
   
   zdcDataAnalyzer->enableRepass(peak2ndDerivMinRepassHG, peak2ndDerivMinRepassLG);
+
+  // Set up non-linear corrections for the ZDC
+  //
+  // Non-linear corrections
+  //
+  std::array<std::array<std::vector<float>, 4>, 2> nonLinearCorrCoeffic;
+  
+  nonLinearCorrCoeffic[0][0] = {-0.039464, 0.013250, -0.003676};
+  nonLinearCorrCoeffic[0][1] = {-0.050573, 0.019664, -0.004340};
+  nonLinearCorrCoeffic[0][2] = {-0.052816, 0.016221, -0.003364};
+  nonLinearCorrCoeffic[0][3] = {-0.014327, 0.000226, -0.000943};
+  nonLinearCorrCoeffic[1][0] = {-0.059663, 0.019482, -0.004615};
+  nonLinearCorrCoeffic[1][1] = {-0.036908, 0.008920, -0.002805};
+  nonLinearCorrCoeffic[1][2] = {-0.046814, 0.019434, -0.004207};
+  nonLinearCorrCoeffic[1][3] = {-0.060879, 0.026635, -0.004833};
+
+  zdcDataAnalyzer->SetNonlinCorrParams(0, nonLinearCorrCoeffic);
+
   
   // Set the amplitude fit range limits                                                                       
   //                                                                                                          
@@ -1002,7 +1024,7 @@ void ZdcAnalysisTool::initialize40MHz()
     m_zdcDataAnalyzer_40MHz->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
     m_zdcDataAnalyzer_40MHz->SetCutValues(chisqDivAmpCutHG, chisqDivAmpCutLG, DeltaT0CutLowHG, DeltaT0CutHighHG, DeltaT0CutLowLG, DeltaT0CutHighLG);
     m_zdcDataAnalyzer_40MHz->SetTimingCorrParams(slewingParamsHG, slewingParamsLG);
-    m_zdcDataAnalyzer_40MHz->SetNonlinCorrParams(moduleHGNonLinCorr);
+    m_zdcDataAnalyzer_40MHz->SetNonlinCorrParams(500, moduleHGNonLinCorr);
     m_zdcDataAnalyzer_40MHz->SetSaveFitFunc(false);
 
 }
@@ -1110,7 +1132,7 @@ void ZdcAnalysisTool::initialize80MHz()
     m_zdcDataAnalyzer_80MHz->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
     m_zdcDataAnalyzer_80MHz->SetCutValues(chisqDivAmpCutHG, chisqDivAmpCutLG, DeltaT0CutLowHG, DeltaT0CutHighHG, DeltaT0CutLowLG, DeltaT0CutHighLG);
     m_zdcDataAnalyzer_80MHz->SetTimingCorrParams(slewingParamsHG, slewingParamsLG);
-    m_zdcDataAnalyzer_80MHz->SetNonlinCorrParams(moduleHGNonLinCorr);
+    m_zdcDataAnalyzer_80MHz->SetNonlinCorrParams(500, moduleHGNonLinCorr);
     m_zdcDataAnalyzer_80MHz->SetSaveFitFunc(false);
 }
 
