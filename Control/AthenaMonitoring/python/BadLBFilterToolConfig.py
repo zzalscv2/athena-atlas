@@ -66,7 +66,7 @@ def BadLBFilterToolCfg(inputFlags,name, defects, alwaysReturnTrue=False, ignoreR
 
     sgkey = 'DQBadLBFilterAlgResult_%s' % name
     #Schedule required cond-algo
-    result.merge(BadLBFilterAlgCfg(inputFlags,name+'_Alg',sorted(defects),sgkey,ignoreRecoverable, origDbTag))
+    result.merge(BadLBFilterAlgCfg(inputFlags,name+'_Alg',tuple(sorted(defects)),sgkey,ignoreRecoverable, origDbTag))
 
     monFilterTool=CompFactory.DQBadLBFilterTool(name,alwaysReturnTrue=alwaysReturnTrue,
                                                 ReadKey= sgkey)
