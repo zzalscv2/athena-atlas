@@ -116,8 +116,6 @@ StatusCode FPEAuditor::finalize()
 
 void FPEAuditor::InstallHandler()
 {
-  struct sigaction act;
-
   // Save the current FP environment.
   fegetenv (&m_env);
 
@@ -127,6 +125,7 @@ void FPEAuditor::InstallHandler()
   FPEAudit::s_handlerDisabled = true;
   FPEAudit::s_handlerInstalled = true;
 #else
+  struct sigaction act;
   memset(&act, 0, sizeof act);
   act.sa_sigaction = FPEAudit::fpe_sig_action;
   act.sa_flags = SA_SIGINFO;
