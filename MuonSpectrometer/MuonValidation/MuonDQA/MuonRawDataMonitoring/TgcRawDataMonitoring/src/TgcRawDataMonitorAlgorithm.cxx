@@ -943,6 +943,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 		  if (hltmu == nullptr) continue; // skip if hltmu is empty
 		  if (hltmu->pt() < 1000.)continue; // skip if pT is very small
 		  double dr = xAOD::P4Helpers::deltaR(muon2,hltmu,false);
+		  deltaR_muons_hlt.push_back(dr);
 		  if( dr < m_trigMatchWindow ){
 		    probeOK = true;
 		    ATH_MSG_DEBUG("Trigger matched: "<<trigName<<" dR=" << dr );

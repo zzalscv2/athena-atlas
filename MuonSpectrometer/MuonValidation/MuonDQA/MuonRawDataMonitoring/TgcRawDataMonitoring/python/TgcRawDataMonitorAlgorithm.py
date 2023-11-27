@@ -70,7 +70,6 @@ def TgcRawDataMonitoringConfig(inputFlags):
         tgcRawDataMonAlg.UseMuonSelectorTool = False
 
     if inputFlags.Trigger.EDMVersion < 3: # Run2 and before
-        tgcRawDataMonAlg.MuonRoIContainerName = ''
         tgcRawDataMonAlg.MuonRoIContainerBCm2Name = ''
         tgcRawDataMonAlg.MuonRoIContainerBCm1Name = ''
         tgcRawDataMonAlg.MuonRoIContainerBCp1Name = ''
