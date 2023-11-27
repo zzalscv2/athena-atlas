@@ -48,6 +48,7 @@ void MM_ClusterOnTrackCnv_p1::persToTrans(const Muon::MM_ClusterOnTrack_p1 *pers
                                        copy(persObj->m_positionAlongStrip),
                                        copy(persObj->m_stripDriftDists),
                                        std::move(stripDriftDistErrors));
+  transObj->setAuthor(static_cast<Muon::MMClusterOnTrack::Author>(persObj->m_author));
 
    // Attempt to call supertool to fill in detElements
    m_eventCnvTool->recreateRIO_OnTrack(transObj);
@@ -84,6 +85,7 @@ void MM_ClusterOnTrackCnv_p1::transToPers(const Muon::MMClusterOnTrack *transObj
    Trk::ErrorMatrix pMat;
    EigenHelpers::eigenMatrixToVector(pMat.values, transObj->localCovariance(), "CscClusterOnTrackCnv_p2");
    persObj->m_localErrMat = toPersistent( &m_errorMxCnv, &pMat, log );
+   persObj->m_author = static_cast<uint8_t>(transObj->author());
 
 }
 

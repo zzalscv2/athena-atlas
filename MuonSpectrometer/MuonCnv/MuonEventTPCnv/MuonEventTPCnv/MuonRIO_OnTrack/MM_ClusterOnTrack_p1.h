@@ -35,6 +35,8 @@ namespace Muon
       std::vector<float> m_stripDriftDists;
       std::vector<float> m_stripDriftDistErrors_0_0;
       std::vector<float> m_stripDriftDistErrors_1_1;
+      // set default to unknow (=64) in case a file is read were the author was not yet persitified
+      uint8_t m_author{64};
    };
 }
 
