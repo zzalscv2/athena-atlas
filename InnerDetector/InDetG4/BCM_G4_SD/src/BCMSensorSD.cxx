@@ -95,7 +95,6 @@ G4bool BCMSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
         primaren = 3;
       else if(trHelp.IsRegisteredSecondary())
         primaren = 4;
-      //std::cout << "BCMBarcode == " << trHelp.GetBarcode() << " Vertex: " << aStep->GetTrack()->GetLogicalVolumeAtVertex()->GetName() << std::endl;
 
       int produced_in_diamond = 0;
       if(aStep->GetTrack()->GetLogicalVolumeAtVertex()->GetName() == "Pixel::bcmDiamondLog")

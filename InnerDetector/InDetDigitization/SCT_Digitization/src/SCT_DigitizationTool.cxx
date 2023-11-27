@@ -779,7 +779,7 @@ void SCT_DigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Writ
       if (HepMC::ignoreTruthLink(barcode, m_vetoPileUpTruthLinks)) {
         continue;
       }
-      if (not real_particle_hit) {
+      if (!real_particle_hit) {
         // Types of SiCharges expected from SCT
         // Noise:                        barcode==0 and
         // processType()==SiCharge::noise
@@ -789,7 +789,7 @@ void SCT_DigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Writ
         // processType()==SiCharge::cut_track
         // Tracks With Truth:            barcode!=0 and
         // processType()==SiCharge::track
-        if (!HepMC::no_truth_link(barcode) and i_ListOfCharges->processType() == SiCharge::track) {
+        if (!HepMC::no_truth_link(barcode) && i_ListOfCharges->processType() == SiCharge::track) {
           real_particle_hit = true;
         }
       }

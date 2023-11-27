@@ -898,7 +898,7 @@ void StripDigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Wri
         // processType()==SiCharge::cut_track
         // Tracks With Truth:            barcode!=0 and
         // processType()==SiCharge::track
-        if (!HepMC::no_truth_link(barcode) and i_ListOfCharges->processType() == SiCharge::track) {
+        if (!HepMC::no_truth_link(barcode) && i_ListOfCharges->processType() == SiCharge::track) {
           real_particle_hit = true;
         }
       }
