@@ -7,18 +7,13 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 from ..CommonSequences.CaloSequences import fastCaloMenuSequence
 from ..Photon.FastPhotonMenuSequences import fastPhotonMenuSequence
 from ..Photon.PrecisionPhotonCaloIsoMenuSequences import precisionPhotonCaloIsoMenuSequence
 from ..Photon.PrecisionPhotonMenuSequences import precisionPhotonMenuSequence
 from ..Photon.PrecisionCaloMenuSequences import precisionCaloMenuSequence
 from ..Photon.HipTRTMenuSequences import hipTRTMenuSequence
-
-if isComponentAccumulatorCfg():
-    pass
-else:
-    from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaTopoHypoTool
 
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -51,14 +46,14 @@ def _diPhotonComboHypoToolFromDict(flags, chainDict, lowermass=80000,uppermass=-
     monTool.defineHistogram('DphiOfAccepted', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo entries per Phi;Phi", xbins=128, xmin=-3.2, xmax=3.2)
     monTool.defineHistogram('MassOfAccepted', type='TH1F', path='EXPERT', title="Mass in accepted combinations [MeV]", xbins=75, xmin=0, xmax=150000)
 
-    tool= TrigEgammaTopoHypoTool(name,
-                                 AcceptAll = False,
-                                 ApplyMassCut = applymass,
-                                 LowerMassEgammaClusterCut = lowermass,
-                                 UpperMassEgammaClusterCut = uppermass,
-                                 ApplyDPhiCut = applydphi,
-                                 ThresholdDPhiCut = dphi,
-                                 MonTool = monTool)
+    tool= CompFactory.TrigEgammaTopoHypoTool(name,
+                                             AcceptAll = False,
+                                             ApplyMassCut = applymass,
+                                             LowerMassEgammaClusterCut = lowermass,
+                                             UpperMassEgammaClusterCut = uppermass,
+                                             ApplyDPhiCut = applydphi,
+                                             ThresholdDPhiCut = dphi,
+                                             MonTool = monTool)
     return tool
 
 def diphotonDPhiHypoToolFromDict(flags, chainDict):

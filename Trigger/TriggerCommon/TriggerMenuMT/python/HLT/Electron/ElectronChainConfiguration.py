@@ -16,6 +16,8 @@ from TrigBphysHypo.TrigMultiTrkComboHypoConfig import NoMuonDiElecPrecisionGSFCo
 from ..Electron.PrecisionTrackingMenuSequences     import precisionTrackingMenuSequence, precisionTrackingMenuSequence_LRT
 from ..Electron.PrecisionTracks_GSFRefittedMenuSequences   import precisionTracks_GSFRefittedMenuSequence, precisionTracks_GSFRefittedMenuSequence_LRT
 
+from AthenaConfiguration.ComponentFactory import CompFactory
+
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO,
@@ -76,13 +78,6 @@ def precisionGSFElectronSequenceCfg_lrt( flags, is_probe_leg=False):
 def precisionElectronSequenceCfg_lrt( flags, is_probe_leg=False):
     return precisionElectronMenuSequence_LRT(flags, is_probe_leg=is_probe_leg)
 
-
-
-# this must be moved to the HypoTool file:
-
-from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaTopoHypoTool
-
-
 def _diElectronMassComboHypoToolFromDict(flags, chainDict, mass_range):
     name = chainDict['chainName']
     monTool = GenericMonitoringTool(flags, "MonTool_"+name,
@@ -92,12 +87,12 @@ def _diElectronMassComboHypoToolFromDict(flags, chainDict, mass_range):
     monTool.defineHistogram('DphiOfAccepted', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo entries per Phi;Phi", xbins=128, xmin=-3.2, xmax=3.2)
     monTool.defineHistogram('MassOfAccepted', type='TH1F', path='EXPERT', title="Mass in accepted combinations [MeV]", xbins=75, xmin=0, xmax=150000)
 
-    tool = TrigEgammaTopoHypoTool(name,
-                                  AcceptAll = False,
-                                  ApplyMassCut = True,
-                                  LowerMassEgammaClusterCut = mass_range[0],
-                                  UpperMassEgammaClusterCut = mass_range[1],
-                                  MonTool = monTool)
+    tool = CompFactory.TrigEgammaTopoHypoTool(name,
+                                              AcceptAll = False,
+                                              ApplyMassCut = True,
+                                              LowerMassEgammaClusterCut = mass_range[0],
+                                              UpperMassEgammaClusterCut = mass_range[1],
+                                              MonTool = monTool)
     return tool
 
 
