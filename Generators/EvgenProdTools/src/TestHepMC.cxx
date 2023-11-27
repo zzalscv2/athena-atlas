@@ -273,11 +273,11 @@ StatusCode TestHepMC::execute() {
     double totalPz = 0;
     double totalE  = 0;
     double nonG4_energy = 0;
-    std::vector<int> negEnPart;
-    std::vector<int> tachyons;
-    std::vector<int> unstNoEnd;
-    std::vector<int> unDecPi0;
-    std::vector<int> undisplaceds;
+    std::vector<HepMC::ConstGenParticlePtr> negEnPart;
+    std::vector<HepMC::ConstGenParticlePtr> tachyons;
+    std::vector<HepMC::ConstGenParticlePtr> unstNoEnd;
+    std::vector<HepMC::ConstGenParticlePtr> unDecPi0;
+    std::vector<HepMC::ConstGenParticlePtr> undisplaceds;
 
 #ifdef HEPMC3
     const auto xsec = evt->cross_section();
@@ -456,8 +456,6 @@ StatusCode TestHepMC::execute() {
       const HepMC::FourVector pmom = pitr->momentum();
       const int pstatus = pitr->status();
       const int ppdgid = pitr->pdg_id();
-      const int pbarcode = HepMC::barcode(pitr);
-
       // Check for NaNs and infs in momentum components
       if ( std::isnan(pmom.px()) || std::isinf(pmom.px()) ||
            std::isnan(pmom.py()) || std::isinf(pmom.py()) ||
@@ -475,7 +473,7 @@ StatusCode TestHepMC::execute() {
       // Check for undecayed pi0s
       if (pstatus == 1 || pstatus == 2) {
         if (ppdgid == 111 && !pitr->end_vertex() ) {
-          unDecPi0.push_back( pbarcode);
+          unDecPi0.push_back( pitr);
           ++m_undecayedPi0CheckRate;
         }
       } // End of check for undecayed pi0s
@@ -544,7 +542,7 @@ StatusCode TestHepMC::execute() {
 
       // Check for unstables with no end vertex, 
       if (!pitr->end_vertex() && pstatus == 2) {
-        unstNoEnd.push_back(pbarcode);
+        unstNoEnd.push_back(pitr);
         ++m_unstableNoEndVtxCheckRate;
       } // End of check for unstable with no end vertex
 
@@ -556,12 +554,12 @@ StatusCode TestHepMC::execute() {
         totalPz += pmom.pz();
         totalE  += pmom.e();
         if (pmom.e() < 0) {
-          negEnPart.push_back(pbarcode);
+          negEnPart.push_back(pitr);
           ++m_negativeEnergyTachyonicCheckRate;
         }
         const double aener = std::abs(pmom.e());
         if ( aener+m_accur_margin < std::abs(pmom.px()) || aener+m_accur_margin < std::abs(pmom.py()) || aener+m_accur_margin < std::abs(pmom.pz()) ) {
-          tachyons.push_back(pbarcode);
+          tachyons.push_back(pitr);
           ++m_negativeEnergyTachyonicCheckRate;
         }
       } // End of sums for momentum and energy conservation
@@ -587,7 +585,7 @@ StatusCode TestHepMC::execute() {
             ATH_MSG_WARNING("Energy sum (decay products): "
                             << "Energy (original particle) > " << m_energy_diff << " MeV, "
                             << "Event #" << evt->event_number() << ", "
-                            << "Barcode of the original particle = " << pbarcode);
+                            << "The original particle = " << pitr);
             ++m_decayCheckRate;
             if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
           }
@@ -613,14 +611,12 @@ StatusCode TestHepMC::execute() {
             const HepMC::FourVector pos2 = ip->production_vertex()->position();
             const double displacement2 = pos2.x()*pos2.x() + pos2.y()*pos2.y() + pos2.z()*pos2.z();
             if (displacement2 < 1e-6) {
-              const int pbarcode2 = HepMC::barcode(ip);
-              const int vbarcode2 = HepMC::barcode(ip->production_vertex());
-              ATH_MSG_WARNING("Decay child " << pbarcode2 << " from " << pbarcode
-                              << " has undisplaced vertex (" << vbarcode2
+              ATH_MSG_WARNING("Decay child " << ip << " from " << pitr
+                              << " has undisplaced vertex (" << ip->production_vertex()
                               << " @ " << displacement2 << "mm) "
-                              << " but parent vertex is displaced (" << HepMC::barcode(decayvtx)
+                              << " but parent vertex is displaced (" << decayvtx
                               << " @ " << displacement << "mm)");
-              undisplaceds.push_back(pbarcode2);
+              undisplaceds.push_back(ip);
               ++m_undisplacedLLHdaughtersCheckRate;
             } // Check for displacement below 1 um
           } // Loop over all particles coming from the decay vertex
@@ -632,7 +628,7 @@ StatusCode TestHepMC::execute() {
       if (ppdgid == 22 && pstatus == 1) {
         const double mass = pitr->generated_mass();
         if (std::abs(mass) > 1.0) { // in MeV
-          ATH_MSG_WARNING("Photon with non-zero mass found! Mass: " << mass << " MeV, BARCODE=" << pbarcode);
+          ATH_MSG_WARNING("Photon with non-zero mass found! Mass: " << mass << " MeV" << pitr);
           ++m_nonZeroPhotonMassCheckRate;
         }
       } // End check for photons with too-large a mass
@@ -683,9 +679,9 @@ StatusCode TestHepMC::execute() {
     // Negative energy particles
     if (!negEnPart.empty()) {
       std::stringstream ss;
-      ss << "NEGATIVE ENERGY PARTICLES FOUND : BARCODES =";
-      for (std::vector<int>::const_iterator b = negEnPart.begin(); b != negEnPart.end(); ++b){
-        ss << " " << *b;
+      ss << "NEGATIVE ENERGY PARTICLES FOUND :";
+      for (auto b: negEnPart){
+        ss << " " << b;
       }
       ATH_MSG_WARNING(ss.str());
       if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
@@ -698,9 +694,9 @@ StatusCode TestHepMC::execute() {
     // Tachyons
     if (!tachyons.empty()) {
       std::stringstream ss;
-      ss << "PARTICLES WITH |E| < |Pi| (i=x,y,z) FOUND : BARCODES =";
-      for (std::vector<int>::const_iterator b = tachyons.begin(); b != tachyons.end(); ++b){
-        ss << " " << *b;
+      ss << "PARTICLES WITH |E| < |Pi| (i=x,y,z) FOUND :";
+      for (auto b: tachyons){
+        ss << " " << b;
       }
       ATH_MSG_WARNING(ss.str());
       if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
@@ -713,9 +709,9 @@ StatusCode TestHepMC::execute() {
     // Unstable particles with no decay vertex
     if (!unstNoEnd.empty()) {
       std::stringstream ss;
-      ss << "Unstable particle with no decay vertex found: BARCODES =";
-      for (std::vector<int>::const_iterator b = unstNoEnd.begin(); b != unstNoEnd.end(); ++b){
-        ss << " " << *b;
+      ss << "Unstable particle with no decay vertex found: ";
+      for (auto b: unstNoEnd){
+        ss << " " << b;
       }
       ATH_MSG_WARNING(ss.str());
       if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
@@ -728,9 +724,9 @@ StatusCode TestHepMC::execute() {
     // Undecayed pi0
     if (!unDecPi0.empty()) {
       std::stringstream ss;
-      ss << "pi0 with no decay vertex found: BARCODES =";
-      for (std::vector<int>::const_iterator b = unDecPi0.begin(); b != unDecPi0.end(); ++b){
-        ss << " " << *b;
+      ss << "pi0 with no decay vertex found:";
+      for (auto b: unDecPi0){
+        ss << " " << b;
       }
       ATH_MSG_WARNING(ss.str());
       if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
@@ -743,9 +739,9 @@ StatusCode TestHepMC::execute() {
     // Undisplaced decay daughters of displaced vertices
     if (!undisplaceds.empty()) {
       std::stringstream ss;
-      ss << "Undisplaced decay vertices from displaced particle: BARCODES =";
-      for (std::vector<int>::const_iterator b = undisplaceds.begin(); b != undisplaceds.end(); ++b){
-        ss << " " << *b;
+      ss << "Undisplaced decay vertices from displaced particle: ";
+      for (auto b: undisplaceds){
+        ss << " " << b;
       }
       ATH_MSG_WARNING(ss.str());
       if (m_dumpEvent) HepMC::Print::line(std::cout,*evt);
