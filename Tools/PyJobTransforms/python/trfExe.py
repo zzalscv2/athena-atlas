@@ -1583,7 +1583,7 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
                         print(contText, file=contSetupFile)
                         contSetupFile.close()
                         os.chmod(setupScript, 0o755)
-                    container_cmd = [ path.join('.', setupScript),
+                    container_cmd = [ os.path.abspath(setupScript),
                                      "-c",
                                      self._containerSetup,
                                      "--pwd",
@@ -1593,7 +1593,9 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
                                      "-r"]
                     print('echo This wrapper is executed within a container', file=wrapper)
                     print('echo For a local re-run, please do:', file=wrapper)
-                    print('echo '+ " ".join(container_cmd) + " " + path.join('.', self._wrapperFile), file=wrapper)
+                    container_cmd_local = container_cmd.copy()
+                    container_cmd_local[0] = "setupATLAS"
+                    print('echo '+ " ".join(container_cmd_local) + " " + path.join('.', self._wrapperFile), file=wrapper)
                     print('echo "(or with --pwd \\`pwd\\`)"', file=wrapper)
                     print('echo "N.B.: if launching a nested container, navigate to /srv before running the above command"',
                           file = wrapper)
