@@ -201,11 +201,20 @@ atlas_add_citest( DataQuality_Run3Data_AODtoHIST
    DEPENDS_SUCCESS RecoRun3Data )
 
 #################################################################################
-# Domain specific reconstruction workflows
+# e/gamma
 #################################################################################
 
-atlas_add_citest( Egamma
+# Test the egamma ART chain
+atlas_add_citest( EgammaART
    SCRIPT ut_egammaARTJob_test.sh )
+
+# Test running egamma from RAW 
+atlas_add_citest( EgammaRAW
+   SCRIPT ut_egamma_fromRAW.sh)
+
+# Test running egamma from ESD
+atlas_add_citest( EgammaESD
+   SCRIPT ut_egamma_fromESD.sh)
 
 #################################################################################
 # ACTS
