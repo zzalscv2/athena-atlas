@@ -35,5 +35,3 @@ Modules in this directory
     * Calls `BTagTrackAugmenterAlg` and `BTagHighLevelAugmenterAlg` (Jet and track augmenter)
     * Calls `HighLevelBTagAlg` (Run3 taggers)
   * **Output**: ComponentAccumulator containing flavour-tagging algorithms and output BTagging-Collection name
-* [**generateBjet**](generateBjet.py)
-  * **Prototype for NewJO chain configuration**

@@ -15,5 +15,3 @@ Modules in this directory
   * Specifies configuration of the MET reco algorithms
 * [AlgInputConfig](AlgInputConfig.py)
   * Helpers for creating reco sequences to generate the inputs to MET reco
-* [generateMET](generateMET.py)
-  * Prototype for NewJO chain configuration

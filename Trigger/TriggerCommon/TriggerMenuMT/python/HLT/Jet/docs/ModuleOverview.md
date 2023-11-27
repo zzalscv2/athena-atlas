@@ -214,9 +214,3 @@ Helper functions to configure the TLA jet sequence.
 -----
 
 Definitions of specialised jet modifier configurations unique to the trigger context.
-
-[generateJet](../generateJet.py)
------
-
-Prototype code for the new job configuration.
-
