@@ -9,5 +9,3 @@ Modules in this directory
   * Defines the top-level sequences containing the input maker and hypothesis alg
 * [MinBiasRecoSequences](MinBiasRecoSequences.py)
   * Assembles the sequences for each stage of reconstruction
-* [generateMinBias](generateMinBias.py)
-  * Prototype for NewJO chain configuration
