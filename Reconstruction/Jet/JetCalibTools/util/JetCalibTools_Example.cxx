@@ -50,6 +50,7 @@ void usage() {
   std::cout << "	--jetCalibConfig= : Specify the JetCalibTools config" << std::endl;
   std::cout << "	--jetColl= : Specify the jet collection" << std::endl;
   std::cout << "	--calibSeq= : Specify the calibration sequence for JetCalibTools" << std::endl;
+  std::cout << "        --calibArea : Specify the calibration area for JetCalibTools" << std::endl;
   std::cout << "	--isData=TRUE : Specify isData true for JetCalibTools" << std::endl;
   std::cout << "	--isData=FALSE : Specify isData false for JetCalibTools" << std::endl;
   std::cout << "	--sample= : Specify input xAOD" << std::endl;
@@ -73,6 +74,7 @@ int main(int argc, char* argv[]){
   std::string jetColl = "";
   std::string jetCalibConfig = "";
   std::string calibSeq = "";
+  std::string calibArea = "";
   bool isCollision = false;
 
   //---------------------------
@@ -102,6 +104,8 @@ int main(int argc, char* argv[]){
     if ( opt.find("--jetCalibConfig=")   != std::string::npos ) jetCalibConfig = v[1];
     
     if ( opt.find("--calibSeq=")   != std::string::npos ) calibSeq = v[1];
+
+    if ( opt.find("--calibArea=")   != std::string::npos ) calibArea = v[1];
 
     if ( opt.find("--isData=")   != std::string::npos ) isData = v[1];
 
@@ -158,6 +162,10 @@ int main(int argc, char* argv[]){
   ANA_CHECK( jetCalibrationTool.setProperty("ConfigFile",jetCalibConfig.c_str()) );
 
   ANA_CHECK( jetCalibrationTool.setProperty("IsData",isCollision) );
+
+  if(calibArea!=""){
+    ANA_CHECK( jetCalibrationTool.setProperty("CalibArea",calibArea.c_str()) );
+  }
 
   // Initialize the tool
   if(!(jetCalibrationTool.initialize().isSuccess())){

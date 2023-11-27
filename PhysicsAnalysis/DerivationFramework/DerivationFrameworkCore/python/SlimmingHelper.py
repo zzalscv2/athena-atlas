@@ -436,6 +436,9 @@ class SlimmingHelper:
                 elif collectionName=="AntiKt4EMPFlowByVertexJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4EMPFlowByVertexJetsCPContent import AntiKt4EMPFlowByVertexJetsCPContent
                         items.extend(AntiKt4EMPFlowByVertexJetsCPContent)
+                elif collectionName=="AntiKt4UFOCSSKJets":
+                        from DerivationFrameworkJetEtMiss.AntiKt4UFOCSSKJetsCPContent import AntiKt4UFOCSSKJetsCPContent
+                        items.extend(AntiKt4UFOCSSKJetsCPContent)
                 elif collectionName=="AntiKt10TruthJets":
                         from DerivationFrameworkJetEtMiss.AntiKt10TruthJetsCPContent import AntiKt10TruthJetsCPContent
                         items.extend(AntiKt10TruthJetsCPContent)

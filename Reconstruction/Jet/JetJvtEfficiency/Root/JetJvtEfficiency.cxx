@@ -158,7 +158,6 @@ StatusCode JetJvtEfficiency::initialize(){
     selToolCfg.setTypeAndName("CP::FJvtSelectionTool/JvtSelTool");
     ATH_CHECK(selToolCfg.setProperty("JvtMomentName", "DFCommonJets_fJvt"));
     effToolCfg.setTypeAndName("CP::FJvtEfficiencyTool/JvtEffTool");
-
     // set a default SF decoration name if not explicitly specified
     if (m_sf_decoration_name.empty()){
       m_sf_decoration_name = "fJvtSF";
@@ -176,7 +175,9 @@ StatusCode JetJvtEfficiency::initialize(){
     selToolCfg.setTypeAndName("CP::JvtSelectionTool/JvtSelTool");
     ATH_CHECK(selToolCfg.setProperty("IsPFlow", ispflow));
     ATH_CHECK(selToolCfg.setProperty("JvtMomentName", m_jetJvtMomentName));
+    ATH_CHECK(selToolCfg.setProperty("JetContainer", m_jetContainerName));
     effToolCfg.setTypeAndName("CP::JvtEfficiencyTool/JvtEffTool");
+    ATH_CHECK(effToolCfg.setProperty("JetContainer", m_jetContainerName));
     ATH_CHECK(effToolCfg.setProperty("IsPFlow", ispflow));
     // set a default SF decoration name if not explicitly specified
     if (m_sf_decoration_name.empty()){

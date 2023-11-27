@@ -135,6 +135,14 @@ def JETM4ExtraContentCfg(ConfigFlags):
     from DerivationFrameworkJetEtMiss.PFlowCommonConfig import PFlowCommonCfg
     acc.merge(PFlowCommonCfg(ConfigFlags))
 
+    from JetRecConfig.JetRecConfig import JetRecCfg
+    from JetRecConfig.JetConfigFlags import jetInternalFlags
+    from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSK
+    jetList = [AntiKt4UFOCSSK]
+    jetInternalFlags.isRecoJob = True
+    for jd in jetList:
+        acc.merge(JetRecCfg(ConfigFlags,jd))
+
     return acc
 
 
@@ -164,10 +172,8 @@ def JETM4Cfg(ConfigFlags):
     JETM4SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles", "PrimaryVertices",
                                             "Electrons", "Photons", "Muons", "TauJets",
                                             "MET_Baseline_AntiKt4EMTopo","MET_Baseline_AntiKt4EMPFlow",
-                                            "AntiKt4EMPFlowJets","AntiKt4EMTopoJets",
-                                            "AntiKt10LCTopoJets",
+                                            "AntiKt4EMPFlowJets","AntiKt4EMTopoJets","AntiKt4UFOCSSKJets",
                                             "AntiKt10UFOCSSKJets",
-                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                             "AntiKtVR30Rmax4Rmin02PV0TrackJets",
                                             "BTagging_AntiKt4EMPFlow",
@@ -184,7 +190,7 @@ def JETM4Cfg(ConfigFlags):
     JETM4SlimmingHelper.ExtraVariables += [".".join(["CaloCalTopoClusters"] + ClusterVariables)]
     JETM4SlimmingHelper.ExtraVariables += [".".join(["GlobalChargedParticleFlowObjects"] + FlowElementVariables)]
     JETM4SlimmingHelper.ExtraVariables += [".".join(["GlobalNeutralParticleFlowObjects"] + FlowElementVariables)]
-    
+
     # Truth containers
     if ConfigFlags.Input.isMC:
 
@@ -197,7 +203,6 @@ def JETM4Cfg(ConfigFlags):
         JETM4SlimmingHelper.AllVariables += ["TruthParticles", "TruthEvents", "TruthVertices", 
                                              "MuonTruthParticles", "egammaTruthParticles",]
         JETM4SlimmingHelper.SmartCollections += ["AntiKt4TruthJets","AntiKt10TruthJets",
-                                                 "AntiKt10TruthTrimmedPtFrac5SmallR20Jets",
                                                  "AntiKt10TruthSoftDropBeta100Zcut10Jets"]
 
     # Trigger content
