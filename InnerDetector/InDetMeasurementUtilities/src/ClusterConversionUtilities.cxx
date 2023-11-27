@@ -30,10 +30,10 @@ namespace TrackingUtilities {
     auto globalPos = indetCluster.globalPosition();
     Eigen::Matrix<float, 3, 1> globalPosition(globalPos.x(), globalPos.y(), globalPos.z());
 
-    auto RDOs = indetCluster.rdoList();
-    auto ToTs = indetCluster.totList();
-    auto charges = indetCluster.chargeList();
-    auto width = indetCluster.width();
+    const auto& RDOs = indetCluster.rdoList();
+    const auto& ToTs = indetCluster.totList();
+    const auto& charges = indetCluster.chargeList();
+    const auto& width = indetCluster.width();
     auto omegaX = indetCluster.omegax();
     auto omegaY = indetCluster.omegay();
     auto isSplit = indetCluster.isSplit();
@@ -66,8 +66,7 @@ namespace TrackingUtilities {
     IdentifierHash idHash = element.identifyHash();
 
     auto localPos = indetCluster.localPosition();
-    auto localCov = indetCluster.localCovariance();
-
+    
     Eigen::Matrix<float,1,1> localPosition;
     Eigen::Matrix<float,1,1> localCovariance;
     localCovariance.setZero();
@@ -89,8 +88,8 @@ namespace TrackingUtilities {
     auto globalPos = indetCluster.globalPosition();
     Eigen::Matrix<float, 3, 1> globalPosition(globalPos.x(), globalPos.y(), globalPos.z());
 
-    auto RDOs = indetCluster.rdoList();
-    auto width = indetCluster.width();
+    const auto& RDOs = indetCluster.rdoList();
+    const auto& width = indetCluster.width();
 
     xaodCluster.setMeasurement<1>(idHash, localPosition, localCovariance);
     xaodCluster.setRDOlist(RDOs);
