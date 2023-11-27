@@ -89,17 +89,9 @@ StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSee
   int decayMode_PanTau = xAOD::TauJetParameters::Mode_NotSet;
  
   //and calc the number of additional neutrals, not tagged as pi0
-  int nCharged_SubAlg     = inSeed->getNumberOfConstituentsOfType(PanTau::TauConstituent::t_Charged);
   int nPi0Neut_SubAlg     = inSeed->getNumberOfConstituentsOfType(PanTau::TauConstituent::t_Pi0Neut);
   int nNeutrals_SubAlg    = inSeed->getNumberOfConstituentsOfType(PanTau::TauConstituent::t_Neutral);
   int AdditionalNeutrals = nNeutrals_SubAlg - nPi0Neut_SubAlg;
-    
-  double BDTCutValue_R10X = m_BDTCutValue_R10X_CellBased;
-  double BDTCutValue_R110 = m_BDTCutValue_R110_CellBased;
-  double BDTCutValue_R11X = m_BDTCutValue_R11X_CellBased;
-  double BDTCutValue_R1XX = m_BDTCutValue_R1XX_CellBased;
-  double BDTCutValue_R30X = m_BDTCutValue_R30X_CellBased;
-  double BDTCutValue_R3XX = m_BDTCutValue_R3XX_CellBased;
     
   //based on the subAlg decay mode, pass to corresponding PanTau BDT...
   double          bdtResponse = -5;
@@ -125,12 +117,7 @@ StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSee
 	decayMode_PanTau = decayMode_SubAlg;
       }
       else {
-	if(bdtResponse >  BDTCutValue_R10X) {
-	  decayMode_PanTau = xAOD::TauJetParameters::Mode_1p0n;
-	}
-	else {
-	  decayMode_PanTau = xAOD::TauJetParameters::Mode_1p1n;
-	}
+        decayMode_PanTau = (bdtResponse >  m_BDTCutValue_R10X_CellBased) ? xAOD::TauJetParameters::Mode_1p0n : xAOD::TauJetParameters::Mode_1p1n;
       }
     }   
   }//end 1p0n    
@@ -148,12 +135,7 @@ StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSee
 	decayMode_PanTau = decayMode_SubAlg;
       }
       else {
-	if(bdtResponse <= BDTCutValue_R110) {
-	  decayMode_PanTau = xAOD::TauJetParameters::Mode_1p1n;
-	}
-	else {
-	  decayMode_PanTau = xAOD::TauJetParameters::Mode_1p0n;
-	}
+        decayMode_PanTau = (bdtResponse <= m_BDTCutValue_R110_CellBased) ? xAOD::TauJetParameters::Mode_1p1n : xAOD::TauJetParameters::Mode_1p0n;
       }      
       //1prong, 1pi0 and additional neutrals. check 1p1n vs 1pXn
     } 
@@ -168,12 +150,7 @@ StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSee
 	decayMode_PanTau = decayMode_SubAlg;
       }
       else {
-	if(bdtResponse >  BDTCutValue_R11X) {
-	  decayMode_PanTau = xAOD::TauJetParameters::Mode_1p1n;
-	}
-	else {
-	  decayMode_PanTau = xAOD::TauJetParameters::Mode_1pXn;
-	}
+        decayMode_PanTau = (bdtResponse >  m_BDTCutValue_R11X_CellBased) ? xAOD::TauJetParameters::Mode_1p1n: xAOD::TauJetParameters::Mode_1pXn;     
       }
     }      
   }//end 1p1n
@@ -189,12 +166,7 @@ StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSee
       ATH_MSG_WARNING("WARNING problems getting bdt response for 1p1n + X-neutrals. use subAlg mode");
       decayMode_PanTau = decayMode_SubAlg;
     } else {
-      if(bdtResponse >  BDTCutValue_R1XX) {
-	decayMode_PanTau = xAOD::TauJetParameters::Mode_1p1n;
-      }
-      else {
-	decayMode_PanTau = xAOD::TauJetParameters::Mode_1pXn;
-      }
+      decayMode_PanTau = (bdtResponse > m_BDTCutValue_R1XX_CellBased) ? xAOD::TauJetParameters::Mode_1p1n : xAOD::TauJetParameters::Mode_1pXn;
     }        
   }//end 1pXn      
     
@@ -217,12 +189,7 @@ StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSee
 	decayMode_PanTau = decayMode_SubAlg;
       }
       else {
-	if(bdtResponse > BDTCutValue_R30X) {
-	  decayMode_PanTau = xAOD::TauJetParameters::Mode_3p0n;
-	}
-	else {
-	  decayMode_PanTau = xAOD::TauJetParameters::Mode_3pXn;
-	}
+        decayMode_PanTau = (bdtResponse > m_BDTCutValue_R30X_CellBased) ? xAOD::TauJetParameters::Mode_3p0n : xAOD::TauJetParameters::Mode_3pXn;
       }
     }        
   }//end 3p0n
@@ -239,12 +206,7 @@ StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSee
       decayMode_PanTau = decayMode_SubAlg;
     }
     else {
-      if(bdtResponse >  BDTCutValue_R3XX) {
-	decayMode_PanTau = xAOD::TauJetParameters::Mode_3p0n;
-      }
-      else {
-	decayMode_PanTau = xAOD::TauJetParameters::Mode_3pXn;
-      }
+      decayMode_PanTau = (bdtResponse >  m_BDTCutValue_R3XX_CellBased) ? xAOD::TauJetParameters::Mode_3p0n: xAOD::TauJetParameters::Mode_3pXn;
     }
   } //end 3pXn          
     
@@ -265,7 +227,7 @@ StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSee
     
   // this overrides Pantau BDT 1p1n decision in the following case:
   // if cell based counted 1 charged, 1 pi0neut, and number of hits in EM1 for the pi0neut is 3 or larger, set 1pXn;
-  if(nCharged_SubAlg == 1 && nPi0Neut_SubAlg == 1) {
+  if(inSeed->getNumberOfConstituentsOfType(PanTau::TauConstituent::t_Charged) == 1 && nPi0Neut_SubAlg == 1) {
     //check for shots in EM1
     bool isOK = false;
     PanTau::TauConstituent* pi0Neut = inSeed->getConstituentsOfType(PanTau::TauConstituent::t_Pi0Neut, isOK).at(0);

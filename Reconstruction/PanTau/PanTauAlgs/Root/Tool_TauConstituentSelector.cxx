@@ -80,9 +80,8 @@ double PanTau::Tool_TauConstituentSelector::getEtCut(double eta, PanTau::TauCons
  */
 StatusCode PanTau::Tool_TauConstituentSelector::SelectTauConstituents(const std::vector<TauConstituent*>& inputList,
 								      std::vector<TauConstituent*>& outputList) const {    
-  unsigned int nConst = inputList.size();
 
-  for (unsigned int iConst=0; iConst<nConst; iConst++) {
+  for (unsigned int iConst=0; iConst<inputList.size(); iConst++) {
 
     PanTau::TauConstituent* curConstituent = inputList[iConst];
         
@@ -142,13 +141,9 @@ StatusCode PanTau::Tool_TauConstituentSelector::SelectTauConstituents(const std:
 bool PanTau::Tool_TauConstituentSelector::passesSelection_NeutralConstituent(PanTau::TauConstituent* tauConstituent) const {
 
   TLorentzVector tlv_Constituent = tauConstituent->p4();
-    
-  double curEta       = tlv_Constituent.Eta();
-  double cut_MinEt    = getEtCut(std::abs(curEta), PanTau::TauConstituent::t_Neutral);
-  double curEt        = tlv_Constituent.Et();
 
-  if (curEt < cut_MinEt) {
-    ATH_MSG_DEBUG("\tNot using constituent at eta " << curEta << " with et of " << curEt);
+  if (tlv_Constituent.Et() < getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_Neutral)) {
+    ATH_MSG_DEBUG("\tNot using constituent at eta " << tlv_Constituent.Eta() << " with et of " << tlv_Constituent.Et());
     return false;
   }
 
@@ -159,12 +154,8 @@ bool PanTau::Tool_TauConstituentSelector::passesSelection_NeutralConstituent(Pan
 bool PanTau::Tool_TauConstituentSelector::passesSelection_Pi0NeutConstituent(PanTau::TauConstituent* tauConstituent) const {
 
   TLorentzVector tlv_Constituent = tauConstituent->p4();
-    
-  double curEta       = tlv_Constituent.Eta();
-  double cut_MinEt    = getEtCut(std::abs(curEta), PanTau::TauConstituent::t_Pi0Neut);
-  double curEt        = tlv_Constituent.Et();
-  if (curEt < cut_MinEt) {
-    ATH_MSG_DEBUG("\tNot using constituent at eta " << curEta << " with et of " << curEt);
+  if (tlv_Constituent.Et() < getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_Pi0Neut)) {
+    ATH_MSG_DEBUG("\tNot using constituent at eta " << tlv_Constituent.Eta() << " with et of " << tlv_Constituent.Et());
     return false;
   }
     
@@ -180,13 +171,11 @@ bool PanTau::Tool_TauConstituentSelector::passesSelection_ChargedConstituent(Pan
 
 bool PanTau::Tool_TauConstituentSelector::passesSelection_OutNeutConstituent(TauConstituent* TauConstituent) const {
   TLorentzVector tlv_Constituent = TauConstituent->p4();
-    
-  double curEta    = tlv_Constituent.Eta();
-  double cut_MinEt = getEtCut(std::abs(curEta), PanTau::TauConstituent::t_OutNeut);
-  double curEt     = tlv_Constituent.Et();
-    
-  if (curEt < cut_MinEt) return false;
+   
+  if (tlv_Constituent.Et() < getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_OutNeut)) return false;
+  
   return true;
+
 }
 
 
@@ -199,22 +188,16 @@ bool PanTau::Tool_TauConstituentSelector::passesSelection_OutChrgConstituent(Tau
 bool PanTau::Tool_TauConstituentSelector::passesSelection_NeutLowAConstituent(TauConstituent* TauConstituent) const {
   TLorentzVector tlv_Constituent = TauConstituent->p4();
     
-  double curEta    = tlv_Constituent.Eta();
-  double cut_MinEt = getEtCut(std::abs(curEta), PanTau::TauConstituent::t_NeutLowA);
-  double curEt     = tlv_Constituent.Pt();
-    
-  if (curEt < cut_MinEt) return false;
+  if (tlv_Constituent.Pt() < getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_NeutLowA)) return false;
+
   return true;
 }
 
 
 bool PanTau::Tool_TauConstituentSelector::passesSelection_NeutLowBConstituent(TauConstituent* TauConstituent) const {
   TLorentzVector tlv_Constituent = TauConstituent->p4();
-    
-  double curEta    = tlv_Constituent.Eta();
-  double cut_MinEt = getEtCut(std::abs(curEta), PanTau::TauConstituent::t_NeutLowB);
-  double curEt     = tlv_Constituent.Pt();
-    
-  if (curEt < cut_MinEt) return false;
+   
+  if (tlv_Constituent.Pt() < getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_NeutLowB)) return false;
+
   return true;
 }

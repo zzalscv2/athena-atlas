@@ -52,14 +52,11 @@ StatusCode PanTau::Tool_TauConstituentGetter::GetTauConstituents(const xAOD::Tau
   }
     
   //loop over charged PFOs
-  unsigned int nChargedPFO = tauJet->nProtoChargedPFOs();
-
-  for(unsigned int iChrgPFO=0; iChrgPFO<nChargedPFO; iChrgPFO++) {
-    const xAOD::PFO* curChrgPFO = tauJet->protoChargedPFO( iChrgPFO );
+  for(unsigned int iChrgPFO=0; iChrgPFO<tauJet->nProtoChargedPFOs(); iChrgPFO++) {
 
     //convert to tau constituent
     PanTau::TauConstituent* curConst = nullptr;
-    ATH_CHECK(m_Tool_InputConverter->ConvertToTauConstituent(curChrgPFO, curConst, tauJet) );
+    ATH_CHECK(m_Tool_InputConverter->ConvertToTauConstituent(tauJet->protoChargedPFO( iChrgPFO ), curConst, tauJet) );
     if(curConst == nullptr) {
       ATH_MSG_DEBUG("Problems converting charged PFO into tau constituent -> skip PFO");
       continue;
@@ -73,14 +70,11 @@ StatusCode PanTau::Tool_TauConstituentGetter::GetTauConstituents(const xAOD::Tau
   // Pi0 tagged PFOs are not collected!
     
   //loop over neutral PFOs
-  unsigned int nNeutPFO = tauJet->nProtoNeutralPFOs();
-    
-  for(unsigned int iNeutPFO=0; iNeutPFO<nNeutPFO; iNeutPFO++) {
-    const xAOD::PFO* curNeutPFO = tauJet->protoNeutralPFO( iNeutPFO );
+  for(unsigned int iNeutPFO=0; iNeutPFO<tauJet->nProtoNeutralPFOs(); iNeutPFO++) {
         
     //convert to tau constituent
     PanTau::TauConstituent* curConst = nullptr;
-    ATH_CHECK( m_Tool_InputConverter->ConvertToTauConstituent(curNeutPFO, curConst, tauJet) );
+    ATH_CHECK( m_Tool_InputConverter->ConvertToTauConstituent(tauJet->protoNeutralPFO( iNeutPFO ), curConst, tauJet) );
     if(curConst == nullptr) {
       ATH_MSG_DEBUG("Problems converting neutral PFO into tau constituent -> skip PFO");
       continue;

@@ -47,12 +47,10 @@ StatusCode PanTau::Tool_ModeDiscriminator::initialize() {
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("ModeDiscriminator_TMVAMethod", m_MethodName) );
     
   // build the name of the variable that contains the variable list for this discri tool
-  std::string varNameList_Prefix  = "ModeDiscriminator_BDTVariableNames_";
-  std::string varNameList_Full    = varNameList_Prefix + m_Name_InputAlg + "_" + m_Name_ModeCase;
+  std::string varNameList_Full    = "ModeDiscriminator_BDTVariableNames_" + m_Name_InputAlg + "_" + m_Name_ModeCase;
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecString(varNameList_Full, m_List_BDTVariableNames) );
     
-  std::string varDefaultValueList_Prefix  = "ModeDiscriminator_BDTVariableDefaults_";
-  std::string varDefaultValueList_Full    = varDefaultValueList_Prefix + m_Name_InputAlg + "_" + m_Name_ModeCase;
+  std::string varDefaultValueList_Full    = "ModeDiscriminator_BDTVariableDefaults_" + m_Name_InputAlg + "_" + m_Name_ModeCase;
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble(varDefaultValueList_Full, m_List_BDTVariableDefaultValues) );
     
     
@@ -63,25 +61,19 @@ StatusCode PanTau::Tool_ModeDiscriminator::initialize() {
     return StatusCode::FAILURE;
   }
   
-  // Create reader for each pT Bin    
-  unsigned int nPtBins = m_BinEdges_Pt.size() - 1; // nBins =  Edges-1
-  for (unsigned int iPtBin=0; iPtBin<nPtBins; iPtBin++) {
+  // Create reader for each pT Bin; nBins =  Edges-1    
+  for (unsigned int iPtBin=0; iPtBin<(m_BinEdges_Pt.size() - 1); iPtBin++) {
         
-    double bin_lowerVal         = m_BinEdges_Pt[iPtBin];
-    double bin_upperVal         = m_BinEdges_Pt[iPtBin+1];
-        
-    std::string bin_lowerStr    = m_HelperFunctions.convertNumberToString(bin_lowerVal/1000.);
-    std::string bin_upperStr    = m_HelperFunctions.convertNumberToString(bin_upperVal/1000.);
-        
+    std::string bin_lowerStr    = m_HelperFunctions.convertNumberToString(m_BinEdges_Pt[iPtBin]/1000.);
+    std::string bin_upperStr    = m_HelperFunctions.convertNumberToString(m_BinEdges_Pt[iPtBin+1]/1000.);     
     std::string curPtBin        = "ET_" + bin_lowerStr + "_" + bin_upperStr;
-    std::string curModeCase     = m_Name_ModeCase;
     
     // weight files
     std::string curWeightFile = m_calib_path + (m_calib_path.length() ? "/" : "");
     curWeightFile += "TrainModes_";
     curWeightFile += m_Name_InputAlg + "_";
     curWeightFile += curPtBin + "_";
-    curWeightFile += curModeCase + "_";
+    curWeightFile += m_Name_ModeCase + "_";
     curWeightFile += m_MethodName + ".weights.root";
 
     std::string resolvedWeightFileName = PathResolverFindCalibFile(curWeightFile);
@@ -149,23 +141,21 @@ double PanTau::Tool_ModeDiscriminator::getResponse(PanTau::PanTauSeed* inSeed, b
     
   //get the pt bin of input Seed
   //NOTE: could be moved to decay mode determinator tool...
-  double seedPt = inSeed->p4().Pt();
   int ptBin = -1;
   for (unsigned int iPtBin=0; iPtBin<m_BinEdges_Pt.size()-1; iPtBin++) {
-    if (seedPt > m_BinEdges_Pt[iPtBin] && seedPt < m_BinEdges_Pt[iPtBin+1]) {
+    if (inSeed->p4().Pt() > m_BinEdges_Pt[iPtBin] && inSeed->p4().Pt() < m_BinEdges_Pt[iPtBin+1]) {
       ptBin = iPtBin;
       break;
     }
   }
   if (ptBin == -1) {
-    ATH_MSG_WARNING("Could not find ptBin for tau seed with pt " << seedPt);
+    ATH_MSG_WARNING("Could not find ptBin for tau seed with pt " << inSeed->p4().Pt());
     isOK = false;
     return -2.;
   }
     
-  //get mva response
-  double mvaResponse = m_MVABDT_List[ptBin]->GetGradBoostMVA(list_BDTVariableValues);
-    
   isOK = true;
-  return mvaResponse;
+  
+  // return the  mva response
+  return m_MVABDT_List[ptBin]->GetGradBoostMVA(list_BDTVariableValues);
 }
