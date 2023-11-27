@@ -31,6 +31,9 @@ def TCAL1TileCellsMuonDecoratorCfg(flags, **kwargs):
     from TileGeoModel.TileGMConfig import TileGMCfg
     acc.merge(TileGMCfg(flags))
 
+    from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
+    acc.merge(TileCablingSvcCfg(flags))
+
     kwargs.setdefault('name', 'TCAL1TileCellsMuonDecorator')
     kwargs.setdefault('Prefix', 'TCAL1_')
     kwargs.setdefault('SelectMuons', flags.Beam.Type is BeamType.Collisions)
