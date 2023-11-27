@@ -74,7 +74,7 @@ end
 Modules in this directory
 -----
 
-* [TrigPhotonFactories](TrigPhotonFactories.py)
+* [TrigPhotonFactoriesCfg](TrigPhotonFactoriesCfg.py)
   * ToolFactories to configure egammaAlgs to be used at the HLT
 * [PhotonRecoSequences](PhotonRecoSequences.py)
   * Assembles the sequences for each stage of reconstruction

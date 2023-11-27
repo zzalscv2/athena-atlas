@@ -67,5 +67,5 @@ Modules in this directory
   * Common definitions
 * [TrigEgammaKeys](TrigEgammaKeys.py)
   * Configuration of container names for HLT electrons, HLT photons and identification working points for Cut=Based selection, likelihood, Dnn and Ringer
-* [TrigEgammaFactories](TrigEgammaFactories.py)
+* [TrigEgammaFactoriesCfg](TrigEgammaFactoriesCfg.py)
   * ToolFactories to configure common TrigEgamma Tools
