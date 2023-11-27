@@ -21,7 +21,6 @@ from TrigEDMConfig.TriggerEDMRun3 import recordable
 #-----------------------------------------------------#
 ### ************* Step1  ************* ###
 #-----------------------------------------------------#
-@AccumulatorCache
 def muFastAlgSequenceCfg(flags, selCAName="", is_probe_leg=False):
 
     selAccSA = SelectionCA('L2MuFastSel'+selCAName, isProbe=is_probe_leg)
@@ -74,6 +73,7 @@ def muFastAlgSequenceCfg(flags, selCAName="", is_probe_leg=False):
 
     return (selAccSA, sequenceOut)
 
+
 def muFastCalibAlgSequenceCfg(flags, is_probe_leg=False):
 
     selAccSA = SelectionCA('L2MuFastCalibSel', isProbe=is_probe_leg)
@@ -100,6 +100,8 @@ def muFastCalibAlgSequenceCfg(flags, is_probe_leg=False):
 
     return (selAccSA, sequenceOut)
 
+
+@AccumulatorCache
 def muFastSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muFastAlgSequenceCfg(flags, "", is_probe_leg)
@@ -118,6 +120,7 @@ def muFastSequence(flags, is_probe_leg=False):
     return l2saSequence
 
 
+@AccumulatorCache
 def muFastCalibSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muFastCalibAlgSequenceCfg(flags, is_probe_leg)
@@ -136,7 +139,7 @@ def muFastCalibSequence(flags, is_probe_leg=False):
     return l2saSequence
 
 
-
+@AccumulatorCache
 def mul2mtSAOvlpRmSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muFastAlgSequenceCfg(flags, "mt", is_probe_leg)
@@ -159,7 +162,7 @@ def mul2mtSAOvlpRmSequence(flags, is_probe_leg=False):
 #-----------------------------------------------------#
 ### ************* Step2  ************* ###
 #-----------------------------------------------------#
-@AccumulatorCache
+
 def muCombAlgSequenceCfg(flags, selCAName="", is_probe_leg=False):
     ### set the EVCreator ###
     ### get ID tracking and muComb reco sequences ###
@@ -252,8 +255,7 @@ def muCombAlgSequenceCfg(flags, selCAName="", is_probe_leg=False):
     return (selAccCB, sequenceOut)
 
 
-
-
+@AccumulatorCache
 def muCombSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "", is_probe_leg)
@@ -271,6 +273,8 @@ def muCombSequence(flags, is_probe_leg=False):
 
     return l2cbSequence
 
+
+@AccumulatorCache
 def mul2IOOvlpRmSequence(flags, is_probe_leg=False):
 
 
@@ -287,6 +291,7 @@ def mul2IOOvlpRmSequence(flags, is_probe_leg=False):
                                   HypoToolGen = Trigl2IOHypoToolwORFromDict, isProbe=is_probe_leg)
 
     return l2cbSequence
+
 
 def muCombLRTAlgSequenceCfg(flags, is_probe_leg=False):
 
@@ -320,7 +325,7 @@ def muCombLRTAlgSequenceCfg(flags, is_probe_leg=False):
     return (selAcc, sequenceOut)
 
 
-
+@AccumulatorCache
 def muCombLRTSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muCombLRTAlgSequenceCfg(flags, is_probe_leg)
@@ -340,6 +345,7 @@ def muCombLRTSequence(flags, is_probe_leg=False):
     return l2cbSequence
 
 
+@AccumulatorCache
 def muCombOvlpRmSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "", is_probe_leg)
@@ -357,9 +363,7 @@ def muCombOvlpRmSequence(flags, is_probe_leg=False):
     return l2cbSequence
  
 
-
-
-
+@AccumulatorCache
 def mul2mtCBOvlpRmSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "mt", is_probe_leg)
@@ -380,7 +384,7 @@ def mul2mtCBOvlpRmSequence(flags, is_probe_leg=False):
 ######################
 ###  EFSA step ###
 ######################
-@AccumulatorCache
+
 def muEFSAAlgSequenceCfg(flags, is_probe_leg=False):
 
     selAccMS = SelectionCA('EFMuMSSel_RoI', isProbe=is_probe_leg)
@@ -433,7 +437,7 @@ def muEFSASequence(flags, is_probe_leg=False):
 ######################
 ###  EFCB seq ###
 ######################
-@AccumulatorCache
+
 def muEFCBAlgSequenceCfg(flags, selCAName='', is_probe_leg=False):
 
     from .MuonRecoSequences import isCosmic
@@ -509,6 +513,8 @@ def muEFCBSequence(flags, is_probe_leg=False):
 
     return efmuCBSequence
 
+
+@AccumulatorCache
 def muEFCBIDperfSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFCBAlgSequenceCfg(flags, 'idperf', is_probe_leg)
@@ -528,6 +534,7 @@ def muEFCBIDperfSequence(flags, is_probe_leg=False):
     return efmuCBSequence
 
 
+@AccumulatorCache
 def muEFIDtpSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFCBAlgSequenceCfg(flags, 'idtp', is_probe_leg)
@@ -545,7 +552,6 @@ def muEFIDtpSequence(flags, is_probe_leg=False):
     return efmuCBSequence
 
 
-@AccumulatorCache
 def muEFCBLRTAlgSequenceCfg(flags, selCAName='', is_probe_leg=False):
 
     selAccCB = SelectionCA('EFMuCBLRTSel'+selCAName, isProbe=is_probe_leg)
@@ -567,6 +573,8 @@ def muEFCBLRTAlgSequenceCfg(flags, selCAName='', is_probe_leg=False):
 
     return (selAccCB, sequenceOut)
 
+
+@AccumulatorCache
 def muEFCBLRTSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFCBLRTAlgSequenceCfg(flags, '', is_probe_leg)
@@ -586,7 +594,7 @@ def muEFCBLRTSequence(flags, is_probe_leg=False):
     return efmuCBSequence
 
 
-
+@AccumulatorCache
 def muEFCBLRTIDperfSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFCBLRTAlgSequenceCfg(flags, 'idperf', is_probe_leg)
@@ -610,7 +618,7 @@ def muEFCBLRTIDperfSequence(flags, is_probe_leg=False):
 ######################
 ### EF SA full scan ###
 ######################
-@AccumulatorCache
+
 def muEFSAFSAlgSequenceCfg(flags):
 
     selAccMS = SelectionCA('EFMuMSSel_FS')
@@ -636,6 +644,7 @@ def muEFSAFSAlgSequenceCfg(flags):
     return (selAccMS, sequenceOut)
 
 
+@AccumulatorCache
 def muEFSAFSSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFSAFSAlgSequenceCfg(flags)
@@ -659,7 +668,7 @@ def muEFSAFSSequence(flags, is_probe_leg=False):
 ######################
 ### EF CB full scan ###
 ######################
-@AccumulatorCache
+
 def muEFCBFSAlgSequenceCfg(flags, is_probe_leg=False):
 
     selAccCB = SelectionCA('EFMuCBSel_FS', isProbe=is_probe_leg)
@@ -719,6 +728,8 @@ def muEFCBFSAlgSequenceCfg(flags, is_probe_leg=False):
 
     return (selAccCB, sequenceOut)
 
+
+@AccumulatorCache
 def muEFCBFSSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFCBFSAlgSequenceCfg(flags, is_probe_leg)
@@ -756,6 +767,8 @@ def efLateMuRoIAlgSequenceCfg(flags):
     selAcc.mergeReco(recoLateMu)
     return (selAcc, sequenceOut)
 
+
+@AccumulatorCache
 def efLateMuRoISequence(flags):
 
     (selAcc, sequenceOut) = efLateMuRoIAlgSequenceCfg(flags)
@@ -805,6 +818,8 @@ def efLateMuAlgSequenceCfg(flags):
 
     return (selAcc, sequenceOut)
 
+
+@AccumulatorCache
 def efLateMuSequence(flags):
 
     (selAcc, sequenceOut) = efLateMuAlgSequenceCfg(flags)
@@ -861,6 +876,8 @@ def muEFIsoAlgSequenceCfg(flags, doMSiso=False, is_probe_leg=False):
 
     return (selAccIso, sequenceOut)
 
+
+@AccumulatorCache
 def muEFIsoSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFIsoAlgSequenceCfg(flags, False, is_probe_leg)
@@ -878,6 +895,7 @@ def muEFIsoSequence(flags, is_probe_leg=False):
     return efmuisoSequence
 
 
+@AccumulatorCache
 def muEFMSIsoSequence(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFIsoAlgSequenceCfg(flags, True, is_probe_leg)
