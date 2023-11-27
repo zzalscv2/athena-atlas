@@ -285,17 +285,14 @@ InDetPerfPlot_Resolution::initializePlots() {
 
 void
 InDetPerfPlot_Resolution::fill(const xAOD::TrackParticle& trkprt, const xAOD::TruthParticle& truthprt, float weight) {
-  // Check whether the track is primary or secondary
-  int trueBC = -9999;
 
-  trueBC = truthprt.barcode();
   int isPrimTrk = 0;
   int isSecdTrk = 0;
 
   if (HepMC::is_simulation_particle(&truthprt)) {
     isSecdTrk = 1;
   } else {
-   if (trueBC > 0) isPrimTrk = 1;
+    if (truthprt.barcode()>0) isPrimTrk = 1;
   } 
 
   // Move on to the next track incase the wrong track category

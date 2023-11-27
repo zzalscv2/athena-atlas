@@ -347,11 +347,10 @@ StatusCode InDetSecVertexTruthMatchTool::matchVertices( const xAOD::VertexContai
       ATH_MSG_DEBUG("Truth prob: " << prob);
 
       // check the truth particle origin
-      if (truthPartLink.isValid()  and prob > m_trkMatchProb) {
+      if (truthPartLink.isValid()  && prob > m_trkMatchProb) {
         const xAOD::TruthParticle & truthPart = **truthPartLink;
 
-        int barcode = -1;
-        barcode = checkProduction(truthPart);
+        int barcode =  checkProduction(truthPart);
 
         //check if the truth particle is "good"
         if ( barcode != -1 ) {

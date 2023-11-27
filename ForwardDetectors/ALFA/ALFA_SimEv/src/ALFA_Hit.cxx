@@ -47,9 +47,7 @@ ALFA_Hit::ALFA_Hit( ) :
 // destructor
 ALFA_Hit::~ALFA_Hit() {}
 
-// barcode
 int ALFA_Hit::GetTrackID() const 
 {
   return 22;  
-// return m_partLink.barcode();
 }

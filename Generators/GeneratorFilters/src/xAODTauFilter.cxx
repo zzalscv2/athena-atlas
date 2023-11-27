@@ -136,7 +136,7 @@ StatusCode xAODTauFilter::filterEvent() {
    // Look for the first tau with genstat != 3
         if (truthtau->absPdgId() == 15 && truthtau->status() != 3) {
         const xAOD::TruthParticle* tau = truthtau;
-        ATH_MSG_DEBUG("found tau with barcode " << tau->barcode() << " status " << tau->status() << " children " << tau->nChildren() );
+        ATH_MSG_DEBUG("found tau " << tau);
         ATH_MSG_DEBUG("pT\t\teta\tphi\tid");
         ATH_MSG_DEBUG(tau->pt() << "\t" <<
                       tau->abseta() << "\t" <<
