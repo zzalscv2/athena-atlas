@@ -53,13 +53,8 @@ def RpcDigitizationTool(name="RpcDigitizationTool", **kwargs):
     kwargs.setdefault("Efficiency_fromCOOL"            ,True  )
     kwargs.setdefault("EfficiencyPatchForBMShighEta"   ,False )   
     kwargs.setdefault("ClusterSize_fromCOOL"           ,True  )  
-    kwargs.setdefault("DumpFromDbFirst"                ,False )  
-    kwargs.setdefault("PanelId_OFF_fromlist"           ,False )  
-    kwargs.setdefault("PanelId_OK_fromlist"            ,False ) 
     kwargs.setdefault("IgnoreRunDependentConfig"       ,False ) 
  
-    #Printout Eff and CS average parameters
-    kwargs.setdefault("PrintCalibrationVector",False )
     ############# average detector status parameters for 2010 data 
     ##Average efficiency sideA for stationname:2=BML,3=BMS,4=BOL,5=BOS,8=BMF,9=BOF,10=BOG
     #kwargs.setdefault("PhiAndEtaEff_A",[0.8661,0.8540,0.8417,0.8383,0.8461,0.7893,0.8708] )                                                                #parameters for 2010 data 
