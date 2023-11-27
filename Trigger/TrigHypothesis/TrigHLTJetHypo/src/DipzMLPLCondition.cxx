@@ -57,25 +57,27 @@ float DipzMLPLCondition::getDipzMLPLDecValue(const pHypoJet &ip,
 
 float DipzMLPLCondition::calcNum(float acml, const pHypoJet &ip, 
                       const std::unique_ptr<ITrigJetHypoInfoCollector> &collector) const {
-    float zoversigma = safeRatio(getDipzMLPLDecValue(ip, collector, m_decName_z), std::pow(getDipzMLPLDecValue(ip, collector, m_decName_negLogSigma2),2));
-    return acml + zoversigma;
+    float sigma_squared = std::exp(-1 * getDipzMLPLDecValue(ip, collector, m_decName_negLogSigma2));
+    float muoversigmasq = safeRatio( getDipzMLPLDecValue(ip, collector, m_decName_z), sigma_squared );
+    return acml + muoversigmasq;
 }
 
 
 float DipzMLPLCondition::calcDenom(float acml, const pHypoJet &ip, 
                       const std::unique_ptr<ITrigJetHypoInfoCollector> &collector) const {
-    float oneoversigma = safeRatio(1, std::pow(getDipzMLPLDecValue(ip, collector, m_decName_negLogSigma2),2));
-    return acml + oneoversigma;
+    float sigma_squared = std::exp(-1 * getDipzMLPLDecValue(ip, collector, m_decName_negLogSigma2));
+    float oneoversigmasq = safeRatio(1, sigma_squared);
+    return acml + oneoversigmasq;
 }
 
 float DipzMLPLCondition::calcLogTerm(float acml, const pHypoJet &ip,
                       const float zhat, const std::unique_ptr<ITrigJetHypoInfoCollector> &collector) const {
 
-  float dipz_z = getDipzMLPLDecValue(ip, collector, m_decName_z);
-  float dipz_sigma = getDipzMLPLDecValue(ip, collector, m_decName_negLogSigma2);
-  float log_sigma = (dipz_sigma <= 0 ? -INFINITY : std::log( dipz_sigma ));
-
-  float logterm = -0.5 * std::log(2.0 * M_PI) - log_sigma - safeRatio(std::pow(zhat - dipz_z, 2), (2.0 * std::pow(dipz_sigma, 2)));
+  float dipz_mu = getDipzMLPLDecValue(ip, collector, m_decName_z);
+  float dipz_negLogSigmaSq = getDipzMLPLDecValue(ip, collector, m_decName_negLogSigma2);
+  float sigma_squared = std::exp(-1 * dipz_negLogSigmaSq); 
+  
+  float logterm = -0.5 * std::log(2.0 * M_PI) + 0.5 * dipz_negLogSigmaSq - safeRatio(std::pow(zhat - dipz_mu, 2), (2.0 * sigma_squared) );
 
   return acml + logterm;
 
