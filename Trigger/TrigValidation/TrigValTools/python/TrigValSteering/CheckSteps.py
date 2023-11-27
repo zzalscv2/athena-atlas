@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -56,6 +56,8 @@ class RefComparisonStep(Step):
             self.misconfig_abort('input_file not specified')
 
         branch = os.environ.get('AtlasBuildBranch')  # Available after asetup
+        if branch:
+            branch = branch.split('--')[0]  # experimental nightlies, e.g. main--mainGAUDI
         if not branch:
             branch = os.environ.get('gitlabTargetBranch')  # Available in CI
         if not branch:
