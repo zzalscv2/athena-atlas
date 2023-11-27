@@ -24,20 +24,16 @@ namespace PixelChargeCalib{
     IdentifierHash wafer_hash = IdentifierHash(moduleHash);
     const InDetDD::SiDetectorElement *element = m_elements->getDetectorElement(wafer_hash);
     const auto & [numFE, technology] = numChipsAndTechnology(element);
-    bool isLUTEnabled;
-    if (inputSource == 0){
-      isLUTEnabled = false;
-    } else {
-      isLUTEnabled = true;
-    }
+    bool isLUTEnabled = (inputSource == 1);
+    bool isChargeCalibrationFromTxt = (inputSource == 2);
     //
-    ChargeCalibrationBundle b(numFE,isLUTEnabled);
+    ChargeCalibrationBundle b(numFE,isLUTEnabled,isChargeCalibrationFromTxt);
     //
     for (unsigned int j{}; j < numFE; j++) {
       const auto &calibArray = data.at(j);
       if (!calibArray.empty()) {
         // new charge calibration for RUN-3
-        if ((technology == InDetDD::PixelReadoutTechnology::FEI4 && !(element->isDBM())) || (b.useLUT && technology == InDetDD::PixelReadoutTechnology::RD53)) {
+        if ((technology == InDetDD::PixelReadoutTechnology::FEI4 && !(element->isDBM())) || ((b.useLUT || b.useTXT) && technology == InDetDD::PixelReadoutTechnology::RD53)) {
           if (calibArray.size() != FEStringSize) {
             std::cout<<"Parameter size is not consistent(" << FEStringSize << ") " << calibArray.size() << " at (i,j)=(" << moduleHash << "," << j << ")\n";
             b.isValid = false;

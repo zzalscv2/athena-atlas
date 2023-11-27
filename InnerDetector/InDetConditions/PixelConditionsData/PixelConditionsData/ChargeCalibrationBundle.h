@@ -24,6 +24,7 @@ namespace PixelChargeCalib{
   struct ChargeCalibrationBundle{
     bool isValid=true;
     bool useLUT = false;
+    bool useTXT = false;
     
     std::vector<PixelChargeCalib::Thresholds> threshold;
     std::vector<PixelChargeCalib::Thresholds> thresholdLong;
@@ -37,7 +38,7 @@ namespace PixelChargeCalib{
     PixelChargeCalibCondData::CalibrationStrategy  calibrationType{PixelChargeCalibCondData::CalibrationStrategy::RUN1PIX};
     //
     ///constructor with reserve for the vectors, n = number of frontends
-    ChargeCalibrationBundle(size_t n, bool lut = false):useLUT(lut){
+  ChargeCalibrationBundle(size_t n, bool lut = false, bool txt = false):useLUT(lut),useTXT(txt){
       threshold.reserve(n);
       thresholdLong.reserve(n);
       thresholdGanged.reserve(n);

@@ -13,7 +13,10 @@
 #include "LUTChargeCalibParser.h"
 
 #include <nlohmann/json.hpp>
+#include "PathResolver/PathResolver.h"
 
+#include <fstream>
+#include <stdexcept>
 #include <memory>
 #include <sstream>
 
@@ -92,7 +95,17 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
       if (payload.exists("data_array") and not payload["data_array"].isNull()) {
         ATH_MSG_DEBUG("Using LUTChargeCalibParser");
         pParser = std::make_unique<LUTChargeCalibParser>(configData, elements, m_pixelID);
-        const nlohmann::json & jsonData = nlohmann::json::parse(payload["data_array"].data<std::string>());
+	std::string fileName = PathResolver::find_file(m_jsonFileName, "DATAPATH");   
+	if (m_inputSource == 2 && fileName.empty()) {
+	  ATH_MSG_FATAL("Input file" << fileName << " not found! Change the inputSource!");
+	  return StatusCode::FAILURE; 
+	}
+	std::ifstream infile(fileName.c_str());
+	//Read the contents of the text file into a string 
+	std::string fileContent((std::istreambuf_iterator<char>(infile)), std::istreambuf_iterator<char>());
+	const nlohmann::json & jsonData = (m_inputSource == 0 || m_inputSource == 1) ? 
+	  nlohmann::json::parse(payload["data_array"].data<std::string>()) :  
+	  nlohmann::json::parse(fileContent);
         for (const auto &[hash, data] : jsonData.items()) {
           const unsigned int moduleHash = std::stoul(hash);
           IdentifierHash wafer_hash = IdentifierHash(moduleHash);
