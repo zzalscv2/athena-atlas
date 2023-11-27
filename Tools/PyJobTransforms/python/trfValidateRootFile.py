@@ -20,11 +20,11 @@ msg = logging.getLogger(__name__)
 
 def checkBranch(branch):
 
-    msg.debug('Checking branch %s...', branch.GetName())
+    msg.debug('Checking branch %s ...', branch.GetName())
 
     nBaskets=branch.GetWriteBasket()
 
-    msg.debug('Checking %s baskets...', nBaskets)
+    msg.debug('Checking %s baskets ...', nBaskets)
 
     for iBasket in range(nBaskets):
         basket=branch.GetBasket(iBasket)
@@ -33,7 +33,7 @@ def checkBranch(branch):
             return 1
 
     listOfSubBranches=branch.GetListOfBranches()
-    msg.debug('Checking %s subbranches...', listOfSubBranches.GetEntries())
+    msg.debug('Checking %s subbranches ...', listOfSubBranches.GetEntries())
     for subBranch in listOfSubBranches:
         if checkBranch(subBranch)==1:
             return 1
@@ -46,7 +46,7 @@ def checkTreeBasketWise(tree):
 
     listOfBranches=tree.GetListOfBranches()
 
-    msg.debug('Checking %s branches...', listOfBranches.GetEntries())
+    msg.debug('Checking %s branches ...', listOfBranches.GetEntries())
 
     for branch in listOfBranches:
         if checkBranch(branch)==1:
@@ -60,7 +60,7 @@ def checkTreeEventWise(tree, printInterval = 150000):
 
     nEntries=tree.GetEntries()
 
-    msg.debug('Checking %s entries...', nEntries)
+    msg.debug('Checking %s entries ...', nEntries)
 
     for i in range(nEntries):
         if tree.GetEntry(i)<0:
@@ -69,7 +69,7 @@ def checkTreeEventWise(tree, printInterval = 150000):
 
         # Show a sign of life for long validation jobs: ATLASJT-433
         if (i%printInterval)==0 and i>0:
-            msg.info('Validated %s events so far...', i)
+            msg.info('Validated %s events so far ...', i)
 
     return 0
 
@@ -81,7 +81,7 @@ def checkNTupleEventWise(ntuple, printInterval = 150000):
         msg.warning('Could not open ntuple %s: %s', ntuple, err)
         return 1
 
-    msg.debug('Checking %s entries...', reader.GetNEntries())
+    msg.debug('Checking %s entries ...', reader.GetNEntries())
 
     for i in reader:
         try:
@@ -92,22 +92,44 @@ def checkNTupleEventWise(ntuple, printInterval = 150000):
 
         # Show a sign of life for long validation jobs: ATLASJT-433
         if (i%printInterval)==0 and i>0:
-            msg.info('Validated %s events so far...', i)
+            msg.info('Validated %s events so far ...', i)
 
     return 0
 
+def checkNTupleMetaData(ntuple):
+
+    try:
+        reader=RNTupleReader.Open(ntuple)
+    except BaseException as err:
+        msg.warning('Could not open ntuple %s: %s', ntuple, err)
+        return 1
+
+    descriptor=reader.GetDescriptor()
+    msg.debug('Checking %s cluster(s) ...', descriptor.GetNClusters())
+
+    for clr in descriptor.GetClusterIterable():
+        msg.debug(f"Checking cluster {clr.GetId()} ...")
+        for colid in clr.GetColumnIds():
+            msg.debug(f"  Checking column {clr.GetColumnRange(colid).fPhysicalColumnId} ...")
+            if clr.GetColumnRange(colid).fNElements.fValue == sum(pg.fNElements for pg in clr.GetPageRange(colid).fPageInfos):
+                msg.debug(f"    {clr.GetColumnRange(colid).fNElements.fValue} elements")
+            else:
+                msg.warning(f"NTuple {descriptor.GetName()}, cluster {clr.GetId()}, column {clr.GetColumnRange(colid).fPhysicalColumnId}: inconsistent meta-data")
+                return 1
+
+    return 0
 
 def checkDirectory(directory, the_type, requireTree):
 
-    msg.debug('Checking directory %s...', directory.GetName())
+    msg.debug('Checking directory %s ...', directory.GetName())
 
     listOfKeys=directory.GetListOfKeys()
 
-    msg.debug('Checking %s keys... ', listOfKeys.GetEntries())
+    msg.debug('Checking %s keys ... ', listOfKeys.GetEntries())
 
     for key in listOfKeys:
 
-        msg.debug('Looking at key %s...', key.GetName())
+        msg.debug('Looking at key %s ...', key.GetName())
         msg.debug('Key is of class %s.', key.GetClassName())
 
         the_object=directory.Get(key.GetName())
@@ -121,7 +143,7 @@ def checkDirectory(directory, the_type, requireTree):
 
         if isinstance(the_object,TTree):
 
-            msg.debug('Checking tree %s...', the_object.GetName())
+            msg.debug('Checking tree %s ...', the_object.GetName())
             
             if the_type=='event':
                 if checkTreeEventWise(the_object)==1:
@@ -134,13 +156,14 @@ def checkDirectory(directory, the_type, requireTree):
 
         if isinstance(the_object,RNTuple):
 
-            msg.debug('Checking ntuple of key %s...', key.GetName())
+            msg.debug('Checking ntuple of key %s ...', key.GetName())
 
             if the_type=='event':
                 if checkNTupleEventWise(the_object)==1:
                     return 1
             elif the_type=='basket':
-                raise NotImplementedError()
+                if checkNTupleMetaData(the_object)==1:
+                    return 1
 
             msg.debug('NTuple of key %s looks ok.', key.GetName())
             
@@ -154,7 +177,7 @@ def checkDirectory(directory, the_type, requireTree):
 
 def checkFile(fileName, the_type, requireTree):
 
-    msg.info('Checking file %s.', fileName)
+    msg.info('Checking file %s ...', fileName)
 
     isIMTEnabled = ROOT.ROOT.IsImplicitMTEnabled()
     if not isIMTEnabled and 'TRF_MULTITHREADED_VALIDATION' in os.environ and 'ATHENA_CORE_NUMBER' in os.environ:
