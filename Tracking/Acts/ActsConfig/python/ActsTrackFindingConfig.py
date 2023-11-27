@@ -66,6 +66,7 @@ def ActsTrackFindingCfg(flags,
         kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
     kwargs.setdefault("chi2CutOff", [flags.Acts.trackFindingChi2CutOff])
     kwargs.setdefault("numMeasurementsCutOff", [3])
+    kwargs.setdefault("maxHoles", flags.Acts.trackFindingMaxHoles)
 
     if flags.Acts.doTrackFindingTrackSelector:
         def tolist(c):
