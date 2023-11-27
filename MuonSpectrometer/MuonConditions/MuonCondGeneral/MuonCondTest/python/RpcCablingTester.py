@@ -1,12 +1,12 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-def RpcCablingTestAlgCfg(flags, name = "RpcCablingTestAlg"):
+def RpcCablingTestAlgCfg(flags, name = "RpcCablingTestAlg", JSONFile="",):
     from AthenaConfiguration.ComponentFactory import CompFactory
     from MuonCondTest.MdtCablingTester import setupServicesCfg
     result = setupServicesCfg(flags)
     from MuonConfig.MuonCablingConfig import NRPCCablingConfigCfg
     from AthenaCommon.Constants import DEBUG
-    result.merge(NRPCCablingConfigCfg(flags, JSONFile = "CablingFile.json", OutputLevel = DEBUG ))
+    result.merge(NRPCCablingConfigCfg(flags, JSONFile = JSONFile, OutputLevel = DEBUG ))
     event_algo = CompFactory.RpcCablingTestAlg(name, OutputLevel = DEBUG)
     result.addEventAlgo(event_algo, primary = True)
     return result
