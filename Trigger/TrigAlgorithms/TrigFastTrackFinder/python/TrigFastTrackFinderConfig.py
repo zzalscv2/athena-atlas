@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+
 
 def TrigFastTrackFinderMonitoring(flags):
     name =    flags.Tracking.ActiveConfig.name
@@ -333,7 +333,6 @@ def ITkTrigSiTrackMaker_FTF_Cfg(flags, signature) -> ComponentAccumulator:
   return acc
 
 
-@AccumulatorCache
 def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTracksName:str = None) -> ComponentAccumulator:
   acc = ComponentAccumulator()
 
