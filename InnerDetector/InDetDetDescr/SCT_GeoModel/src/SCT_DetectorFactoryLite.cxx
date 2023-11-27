@@ -20,7 +20,6 @@
 #include "GeoModelInterfaces/StoredMaterialManager.h"
 
 #include "GeoModelRead/ReadGeoModel.h"
-#include "GeoModelKernel/GeoPVLink.h"
 #include "GeoModelKernel/GeoVolumeCursor.h"
 #include "GeoModelKernel/GeoAlignableTransform.h"
 #include "GeoModelKernel/GeoDefinitions.h"
