@@ -26,7 +26,7 @@ Reco_tf.py \
 --geometryVersion default:ATLAS-R2-2016-01-00-01 \
 --maxEvents ${events} --skipEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
 --preInclude "default:Campaigns.MC20d" "RDOtoRDOTrigger:Campaigns/MC20d.py" \
---postInclude "default:PyJobTransforms.UseFrontier" \
+--postInclude "default:PyJobTransforms.UseFrontier" "RDOtoRDOTrigger:PyJobTransforms/UseFrontier.py" \
 --runNumber 410470 \
 --steering "doOverlay" "doRDO_TRIG" \
 --triggerConfig "RDOtoRDOTrigger=MCRECO:DBF:TRIGGERDBMC:2282,107,325" --asetup "RDOtoRDOTrigger:Athena,21.0-mc16d,latest" \
