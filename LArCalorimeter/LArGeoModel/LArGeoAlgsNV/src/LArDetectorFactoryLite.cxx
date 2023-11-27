@@ -17,7 +17,6 @@
 #include "LArReadoutGeometry/EMBDetectorManager.h"
 
 #include "GeoModelRead/ReadGeoModel.h"
-#include "GeoModelKernel/GeoPVLink.h"
 #include "GeoModelKernel/GeoVolumeCursor.h"
 #include "GeoModelUtilities/StoredAlignX.h"
 #include "GeoModelUtilities/StoredPhysVol.h"

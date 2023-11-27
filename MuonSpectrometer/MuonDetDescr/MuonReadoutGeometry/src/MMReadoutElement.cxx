@@ -11,7 +11,6 @@
 
 #include <GaudiKernel/IMessageSvc.h>
 #include <GeoModelKernel/GeoLogVol.h>
-#include <GeoModelKernel/GeoPVConstLink.h>
 #include <GeoModelKernel/GeoShape.h>
 #include <GeoModelKernel/GeoVFullPhysVol.h>
 #include <GeoModelKernel/GeoVPhysVol.h>
