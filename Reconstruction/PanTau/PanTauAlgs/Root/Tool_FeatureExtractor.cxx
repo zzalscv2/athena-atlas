@@ -22,16 +22,12 @@
 
 
 bool sortTauConstituentMVA(const PanTau::TauConstituent* u, const PanTau::TauConstituent* v) {
-  double uBDT = u->getBDTValue();
-  double vBDT = v->getBDTValue();
-  return uBDT > vBDT;
+  return u->getBDTValue() > v->getBDTValue();
 }
 
 
 bool sortTauConstituentEt(const PanTau::TauConstituent* u, const PanTau::TauConstituent* v) {
-  double uEt = u->p4().Et();
-  double vEt = v->p4().Et();
-  return uEt > vEt;
+  return u->p4().Et() > v->p4().Et();
 }
 
 
@@ -895,8 +891,7 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
     if(tlv_1st_OK[et_Charged] && tlv_1st_OK[et_Neutral] && tlv_2nd_OK[et_Neutral]) {
       TVector3 axis_Plane_cn1 = (tlv_1stEFO[et_Charged].Vect()).Cross( tlv_1stEFO[et_Neutral].Vect() );
       TVector3 axis_Plane_cn2 = (tlv_1stEFO[et_Charged].Vect()).Cross( tlv_2ndEFO[et_Neutral].Vect() );
-      double anglePlanes = axis_Plane_cn1.Angle(axis_Plane_cn2);
-      tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_AnglePlane1stCharged1st2ndNeutral", anglePlanes);
+      tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_AnglePlane1stCharged1st2ndNeutral", axis_Plane_cn1.Angle(axis_Plane_cn2));
     }
   }    
     
@@ -940,9 +935,8 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
       // Fraction of leading EFO of system A wrt complete system B
       // this is not symmetric wrt system A and B, hence do this for all combinations
       if(tlv_1st_OK[type_Nom]) {
-	double LeadEFO_Et_Nom = tlv_1stEFO[type_Nom].Et();
-	if(LeadEFO_Et_Nom > 0. && sum_Et_Denom > 0.) {
-	  tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_Log1st" + typeName_Nom + "EtOver" + typeName_Denom + "Et", std::log10(LeadEFO_Et_Nom / sum_Et_Denom) );
+	if(tlv_1stEFO[type_Nom].Et() > 0. && sum_Et_Denom > 0.) {
+	  tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_Log1st" + typeName_Nom + "EtOver" + typeName_Denom + "Et", std::log10(tlv_1stEFO[type_Nom].Et() / sum_Et_Denom) );
 	}
       }
             
@@ -956,18 +950,15 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
             
       //Angles between systems
       if(tlv_Sys_OK[type_Nom] && tlv_Sys_OK[type_Denom]) {
-	double angle_system = tlv_System[type_Nom].Angle( tlv_System[type_Denom].Vect() );
-	tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_Angle" + typeName_Nom + "To" + typeName_Denom, angle_system );
+	tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_Angle" + typeName_Nom + "To" + typeName_Denom, tlv_System[type_Nom].Angle( tlv_System[type_Denom].Vect()) );
       }//end check for valid system pointer            
       
       if(tlv_1st_OK[type_Nom] && tlv_1st_OK[type_Denom]) {
 	//Delta R between 1st and 1st EFO
-	double deltaR_1st1st = tlv_1stEFO[type_Nom].DeltaR( tlv_1stEFO[type_Denom] );
-	tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_DeltaR1st" + typeName_Nom + "To1st" + typeName_Denom, deltaR_1st1st );
+	tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_DeltaR1st" + typeName_Nom + "To1st" + typeName_Denom, tlv_1stEFO[type_Nom].DeltaR( tlv_1stEFO[type_Denom] ) );
 	
 	//Angles between 1st and 1st EFO
-	double angle_1st1st = tlv_1stEFO[type_Nom].Angle( tlv_1stEFO[type_Denom].Vect() );
-	tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_Angle1st" + typeName_Nom + "To1st" + typeName_Denom, angle_1st1st );
+	tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_Angle1st" + typeName_Nom + "To1st" + typeName_Denom, tlv_1stEFO[type_Nom].Angle( tlv_1stEFO[type_Denom].Vect() ) );
       } //end check for valid leading efo
             
     }//end loop over system B
@@ -1000,14 +991,12 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
       }
             
       //invariant masses
-      double mass_cTypenType = ( tlv_System[et_c]  +  tlv_System[et_n] ).M();
-      tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_InvMass"  + name_cType + name_nType,   mass_cTypenType );
+      tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_InvMass"  + name_cType + name_nType,   ( tlv_System[et_c]  +  tlv_System[et_n] ).M() );
             
       //angle 1st charged to second neutral
       if(tlv_2nd_OK[et_n]) {
 	//Angles between 1st and 2nd EFO
-	double angle_1st2nd = tlv_1stEFO[et_c].Angle( tlv_2ndEFO[et_n].Vect() );
-	tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_Angle1st2nd" + name_cType + name_nType, angle_1st2nd );
+	tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_Angle1st2nd" + name_cType + name_nType, tlv_1stEFO[et_c].Angle( tlv_2ndEFO[et_n].Vect()) );
       } //end check for valid 2nd EFOs
             
     }//end loop neutral types
@@ -1033,12 +1022,6 @@ StatusCode PanTau::Tool_FeatureExtractor::addImpactParameterFeatures(PanTau::Pan
   std::vector<double> impactParameters(0);
   std::vector<double> impactParameterSignf(0);
     
-  // get jet direction:
-  TLorentzVector tlv_Tau;
-  tlv_Tau.SetPtEtaPhiM(tauJet->ptIntermediateAxis(), tauJet->etaIntermediateAxis(), tauJet->phiIntermediateAxis(), tauJet->mIntermediateAxis());
-  TVector3 vec_Tau = tlv_Tau.Vect();
-  TVector3 tauDirection = TVector3(vec_Tau.X(), vec_Tau.Y(), vec_Tau.Z());
-    
   // get a list of tracks from the inputseed
   // NOTE: if we ever have more than one charged type, may want to generalize this part to automagically get IPs from all tracks
   bool foundIt;
@@ -1053,12 +1036,10 @@ StatusCode PanTau::Tool_FeatureExtractor::addImpactParameterFeatures(PanTau::Pan
   for(unsigned int iTrk=0; iTrk<list_Tracks.size(); iTrk++) {
     const xAOD::TrackParticle* curTrack = list_Tracks[iTrk];
         
-    double recoD0 = curTrack->d0();
     double errD02 = curTrack->definingParametersCovMatrix()(0, 0);
     double signfD0 = -999.;
     if(errD02 > 0) signfD0 = curTrack->d0() / sqrtf( errD02 );
 
-    double recoZ0 = curTrack->z0();
     double errZ02 = curTrack->definingParametersCovMatrix()(1, 1);
     double signfZ0 = -999.;
     if(errZ02 > 0) signfZ0 = curTrack->z0() / sqrtf( errZ02 );
@@ -1066,13 +1047,13 @@ StatusCode PanTau::Tool_FeatureExtractor::addImpactParameterFeatures(PanTau::Pan
     // add to features
     if (iTrk < 4) {
       std::string indexTrk = m_HelperFunctions.convertNumberToString(iTrk+1);
-      tauFeatures->addFeature(inputAlgName + "_" + featureNamePrefix + "_TransIPTrack" + indexTrk + "_SortByEt", recoD0 );
-      tauFeatures->addFeature(inputAlgName + "_" + featureNamePrefix + "_LongIPTrack" + indexTrk + "_SortByEt", recoZ0 );
+      tauFeatures->addFeature(inputAlgName + "_" + featureNamePrefix + "_TransIPTrack" + indexTrk + "_SortByEt", curTrack->d0() );
+      tauFeatures->addFeature(inputAlgName + "_" + featureNamePrefix + "_LongIPTrack" + indexTrk + "_SortByEt", curTrack->z0() );
             
       if (!std::isnan(signfD0)) tauFeatures->addFeature(inputAlgName + "_" + featureNamePrefix + "_TransSignfIPTrack" + indexTrk + "_SortByEt", signfD0);
       if (!std::isnan(signfZ0)) tauFeatures->addFeature(inputAlgName + "_" + featureNamePrefix + "_LongSignfIPTrack" + indexTrk + "_SortByEt", signfZ0);
 
-      impactParameters.push_back(std::abs(recoD0));
+      impactParameters.push_back(std::abs(curTrack->d0()));
       impactParameterSignf.push_back(std::abs(signfD0));
     }
 

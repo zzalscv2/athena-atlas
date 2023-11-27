@@ -76,16 +76,14 @@ void PanTau::TauFeature::add(PanTau::TauFeature* otherFeatures) {
     
   //add the scalar features
   for (const auto& p : otherFeatures->m_featureMap) {
-    bool        isOK = this->addFeature(p.first, p.second);
-    if (!isOK) {
+    if (!(this->addFeature(p.first, p.second))) {
       throw std::runtime_error("PanTau::TauFeature::add( PanTau::TauFeature* ): Error when adding scalar feature " + p.first);
     }
   }
     
   //add the vector features
   for (const auto& p : otherFeatures->m_vecFeatureMap) {
-    bool        isOK = this->addVecFeature(p.first, p.second);
-    if (!isOK) {
+    if (!(this->addVecFeature(p.first, p.second))) {
       throw std::runtime_error("PanTau::TauFeature::add( PanTau::TauFeature* ): Error when adding vector feature " + p.first);
     }
   }    

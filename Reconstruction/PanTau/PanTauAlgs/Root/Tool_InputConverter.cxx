@@ -71,10 +71,8 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
   }
     
   // preselection to veto very low energy PFOs
-  int pfoCharge = (int)(pfo->charge());
-  double constituentEnergy = pfo->e();
-  if (!passesPreselectionEnergy(constituentEnergy)) {
-    ATH_MSG_DEBUG("EFO of charge " << pfoCharge << " and energy " << constituentEnergy << " does not pass presel Energy cut of " << m_Config_TauConstituents_PreselectionMinEnergy);
+  if (!passesPreselectionEnergy(pfo->e())) {
+    ATH_MSG_DEBUG("EFO of charge " << static_cast<int>(pfo->charge()) << " and energy " << pfo->e() << " does not pass presel Energy cut of " << m_Config_TauConstituents_PreselectionMinEnergy);
     return StatusCode::SUCCESS;
   }
         
@@ -89,7 +87,7 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
   }
  
   TLorentzVector momentum; 
-  PanTau::SetP4EEtaPhiM( momentum, constituentEnergy, pfo->eta(), pfo->phi(), constituentMass);
+  PanTau::SetP4EEtaPhiM( momentum, pfo->e(), pfo->eta(), pfo->phi(), constituentMass);
     
   // get type (based on charge and DR to tau)
   std::vector<int> typeFlags = std::vector<int>((unsigned int)PanTau::TauConstituent::t_nTypes, 0);
@@ -134,13 +132,12 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
   }//end if pfo is in core
     
   // create the tau constituent
-  tauConstituent = new PanTau::TauConstituent(momentum, pfoCharge, typeFlags, mvaValue, pfo);
+  tauConstituent = new PanTau::TauConstituent(momentum, static_cast<int>(pfo->charge()), typeFlags, mvaValue, pfo);
   tauConstituent->makePrivateStore();
     
   // Check if the pfo object has shots:
   std::vector<const xAOD::IParticle*> list_TauShots = std::vector<const xAOD::IParticle*>(0);
-  bool shotsOK = pfo->associatedParticles(xAOD::PFODetails::TauShot, list_TauShots);
-  if (!shotsOK) {
+  if (!(pfo->associatedParticles(xAOD::PFODetails::TauShot, list_TauShots))) {
     ATH_MSG_DEBUG("WARNING: Could not get shots from current pfo");
   }
     
@@ -155,8 +152,7 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
     TLorentzVector          shotMomentum;
     PanTau::SetP4EEtaPhiM( shotMomentum, curShot->e(), curShot->eta(), curShot->phi(), curShot->m());
     std::vector<int>        shotTypeFlags   = std::vector<int>((unsigned int)PanTau::TauConstituent::t_nTypes, 0);
-    double                  shotMVAValue    = PanTau::TauConstituent::DefaultBDTValue();
-    PanTau::TauConstituent* shotConstituent = new PanTau::TauConstituent(shotMomentum, 0, typeFlags, shotMVAValue, curShot);
+    PanTau::TauConstituent* shotConstituent = new PanTau::TauConstituent(shotMomentum, 0, typeFlags, PanTau::TauConstituent::DefaultBDTValue(), curShot);
     shotConstituent->makePrivateStore();
     
     int nPhotons = 0;

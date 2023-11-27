@@ -244,11 +244,10 @@ std::vector<int> PanTau::TauConstituent::getTypeFlags() const {
 
 
 bool PanTau::TauConstituent::isOfType(PanTau::TauConstituent::Type theType) const {
-  int typeIndex = (int)theType;
-  if(theType >= (int)TauConstituent::t_nTypes) {
+  if(theType >= static_cast<int>(TauConstituent::t_nTypes)) {
     return false;
   }
-  if(m_TypeFlags.at(typeIndex) == 1) return true;
+  if(m_TypeFlags.at( static_cast<int>(theType)) == 1) return true;
   return false;
 }
 
