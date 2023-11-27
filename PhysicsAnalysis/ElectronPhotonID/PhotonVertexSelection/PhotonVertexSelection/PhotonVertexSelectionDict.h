@@ -11,9 +11,6 @@
 #include "PhotonVertexSelection/IPhotonPointingTool.h"
 #include "PhotonVertexSelection/PhotonPointingTool.h"
 
-#include "PhotonVertexSelection/IElectronRemovalTool.h"
-#include "PhotonVertexSelection/ElectronRemovalTool.h"
-
 #include "PhotonVertexSelection/PhotonVertexHelpers.h"
 
 namespace {
