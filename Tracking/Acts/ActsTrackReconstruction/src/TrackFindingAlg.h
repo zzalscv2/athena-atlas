@@ -96,6 +96,7 @@ namespace ActsTrk
     // Acts::MeasurementSelector selection cuts for associating measurements with predicted track parameters on a surface.
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {}, "MeasurementSelector: maximum local chi2 contribution"};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
+    Gaudi::Property<std::vector<std::size_t>> m_maxHoles{this, "maxHoles", {}, "Maximum number of holes before stopping branch"};
 
     // Acts::TrackSelector cuts
     // Use max double, because mergeConfdb2.py doesn't like std::numeric_limits<double>::infinity() (produces bad Python "inf.0")
@@ -124,6 +125,7 @@ namespace ActsTrk
       kNOutputTracks,
       kNRejectedRefinedSeeds,
       kNSelectedTracks,
+      kNStoppedTracksMaxHoles,
       kNStat
     };
     using EventStats = std::vector<std::array<unsigned int, kNStat>>;
@@ -164,6 +166,7 @@ namespace ActsTrk
     CKF_pimpl &trackFinder();
     const CKF_pimpl &trackFinder() const;
 
+    struct CkfBranchStopper;
     std::unique_ptr<CKF_pimpl> m_trackFinder;
 
     // statistics

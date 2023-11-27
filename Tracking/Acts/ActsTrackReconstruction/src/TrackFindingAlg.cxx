@@ -389,6 +389,54 @@ namespace ActsTrk
 
   // === findTracks ==========================================================
 
+  template <typename cut_value_t>
+  static cut_value_t variableCut(double eta,
+                                 const std::vector<double> &etaBins,
+                                 const std::vector<cut_value_t> &cuts,
+                                 cut_value_t nocut)
+  {
+    if (cuts.empty())
+      return nocut;
+    if (etaBins.size() < 2)
+      return cuts[0];
+    std::size_t nbins = etaBins.size() - 2;
+    const auto abseta = std::abs(eta);
+    size_t bin;
+    for (bin = 0; bin < nbins; bin++)
+    {
+      if (!(etaBins[bin + 1] < abseta))
+        break;
+    }
+    if (!(bin < cuts.size()))
+      bin = cuts.size() - 1;
+    return cuts[bin];
+  }
+
+  struct TrackFindingAlg::CkfBranchStopper
+  {
+    bool stopBranch(const Acts::CombinatorialKalmanFilterTipState &tipState) const
+    {
+      if (!(tipState.nHoles > variableCut<std::size_t>(eta, alg->m_etaBins, alg->m_maxHoles, std::numeric_limits<std::size_t>::max())))
+        return false;
+      ++event_stat[category_i][kNStoppedTracksMaxHoles];
+      ATH_MSG_DEBUG("CkfBranchStopper (seed eta " << eta << ") stopped branch with nSensitiveSurfaces="
+                    << tipState.nSensitiveSurfaces
+                    << " nStates=" << tipState.nStates
+                    << " nMeasurements=" << tipState.nMeasurements
+                    << " nOutliers=" << tipState.nOutliers
+                    << " nHoles=" << tipState.nHoles);
+      return true;
+    };
+    MsgStream &msg(const MSG::Level lvl) const { return alg->msgStream(lvl); }
+    bool msgLvl(const MSG::Level lvl) const { return alg->msgLevel(lvl); }
+
+    const TrackFindingAlg *alg;
+    // keep references to stats variables so we can update them.
+    const double &eta;
+    const std::size_t &category_i;
+    EventStats &event_stat ATLAS_THREAD_SAFE;
+  };
+
   StatusCode
   TrackFindingAlg::findTracks(const EventContext &ctx,
                               const TrackFindingMeasurements &measurements,
@@ -438,13 +486,18 @@ namespace ActsTrk
     UncalibratedMeasurementCalibrator<ActsTrk::MutableTrackStateBackend> calibrator(*m_ATLASConverterTool, tracking_surface_helper);
     options.extensions.calibrator.connect(calibrator);
 
+    double eta = 0.0;
+    std::size_t category_i = 0;
+    CkfBranchStopper ckfBranchStopper{this, eta, category_i, event_stat};
+    options.extensions.branchStopper.connect<&CkfBranchStopper::stopBranch>(&ckfBranchStopper);
+
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << ' ' << seedType << " seeds.");
 
     // Loop over the track finding results for all initial parameters
     for (std::size_t iseed = 0; iseed < estimatedTrackParameters.size(); ++iseed)
     {
-      std::size_t category_i = typeIndex * (m_statEtaBins.size() + 1);
+      category_i = typeIndex * (m_statEtaBins.size() + 1);
       tracksContainerTemp.clear();
 
       if (!estimatedTrackParameters[iseed])
@@ -456,7 +509,8 @@ namespace ActsTrk
 
       const Acts::BoundTrackParameters &initialParameters = *estimatedTrackParameters[iseed];
 
-      category_i = getStatCategory(typeIndex, -std::log(std::tan(initialParameters.theta() / 2)));
+      eta = -std::log(std::tan(initialParameters.theta() / 2));
+      category_i = getStatCategory(typeIndex, eta);
       ++event_stat[category_i][kNTotalSeeds];
 
       if (!m_trackStatePrinter.empty() && seeds)
@@ -538,7 +592,7 @@ namespace ActsTrk
 
       if (ntracks == 0)
       {
-        ATH_MSG_WARNING("Track finding found no track candidates for " << seedType << " seed " << iseed);
+        ATH_MSG_DEBUG("Track finding found no track candidates for " << seedType << " seed " << iseed);
         ++event_stat[category_i][kNoTrack];
       }
 
@@ -644,6 +698,7 @@ namespace ActsTrk
 					  std::make_pair(kNRejectedRefinedSeeds, "Rejected refined parameters"),  
                                           std::make_pair(kNOutputTracks, "CKF tracks"),
                                           std::make_pair(kNSelectedTracks, "selected tracks"),
+                                          std::make_pair(kNStoppedTracksMaxHoles, "Stopped tracks reaching max holes"),
                                       });
       assert(stat_labels.size() == kNStat);
       std::vector<std::string> categories;
