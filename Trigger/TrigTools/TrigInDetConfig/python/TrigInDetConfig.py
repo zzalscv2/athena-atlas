@@ -83,7 +83,7 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
 
 
 @AccumulatorCache
-def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inputs=[]):
+def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inputs=tuple()):
   from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
   viewname = "VDVInDetLRT" if in_view else None
   seq = InDetTrigSequence(flags,
@@ -100,7 +100,7 @@ def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inpu
         ( 'SpacePointContainer' ,           'StoreGateSvc+SCT_TrigSpacePoints' ),
         ( 'InDet::PixelClusterContainer' ,  'StoreGateSvc+PixelTrigClusters' ),
         ( 'InDet::SCT_ClusterContainer' ,   'StoreGateSvc+SCT_TrigClusters' ),
-      ]+extra_view_inputs
+      ] + list(extra_view_inputs)
     ) )
 
     acc.merge(seq.viewDataVerifier(viewname))

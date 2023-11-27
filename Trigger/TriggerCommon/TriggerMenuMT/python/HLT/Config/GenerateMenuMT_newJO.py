@@ -105,7 +105,7 @@ def generateMenuMT(flags):
     # if there are empty steps, remove them
     finalListOfChainConfigs = menu.resolveEmptySteps(finalListOfChainConfigs)
 
-    log.info("finalListOfChainConfig %s", finalListOfChainConfigs)
+    log.debug("finalListOfChainConfig %s", finalListOfChainConfigs)
     log.info("Making the HLT configuration tree")
     menuAcc=makeHLTTree(flags)
 

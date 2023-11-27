@@ -52,10 +52,10 @@ def DVRecoFragment(flags):
         fscfg.trkTracks_FTF(),
         inputMakerAlg.InViewRoIs,
         in_view=True,
-        extra_view_inputs=[
+        extra_view_inputs=(
             ( 'xAOD::TrackParticleContainer' , fscfg.tracks_FTF() ),
             ( 'xAOD::VertexContainer' ,        fscfg.vertex ),
-        ]
+        )
     )
 
     from TrigEDMConfig.TriggerEDMRun3 import recordable
