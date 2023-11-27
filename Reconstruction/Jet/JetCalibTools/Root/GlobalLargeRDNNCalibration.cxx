@@ -36,16 +36,39 @@ namespace {
     SG::AuxElement::ConstAccessor<float> m_acc;
   };
 
+  struct RatioAccessorRetriever : public GlobalLargeRDNNCalibration::VarRetriever {
+    RatioAccessorRetriever(): m_accTau1("Tau1_wta"), 
+                              m_accTau2("Tau2_wta"),
+                              m_accTau3("Tau3_wta"),
+                              m_accECF1("ECF1"),
+                              m_accECF2("ECF2"),
+                              m_accECF3("ECF3") {}
+
+    virtual float value(const xAOD::Jet& jet, JetEventInfo&, double eScale) = 0;
+    
+    SG::AuxElement::ConstAccessor<float> m_accTau1;
+    SG::AuxElement::ConstAccessor<float> m_accTau2;
+    SG::AuxElement::ConstAccessor<float> m_accTau3;
+    SG::AuxElement::ConstAccessor<float> m_accECF1;
+    SG::AuxElement::ConstAccessor<float> m_accECF2;
+    SG::AuxElement::ConstAccessor<float> m_accECF3;
+  };
 
 // Define shortcuts macro to declare specialized VarRetriever class in one line
 #define DEF_RETRIEVER0(cname, expr )  struct Var_##cname : public GlobalLargeRDNNCalibration::VarRetriever { float value(const xAOD::Jet& jet, JetEventInfo& , double eScale ) { return expr ; } }
 #define DEF_RETRIEVER1(cname, expr )  struct Var_##cname : public GlobalLargeRDNNCalibration::VarRetriever { float value(const xAOD::Jet& , JetEventInfo& jetInfo, double eScale ) { return expr ; } }
+#define DEF_RATIO_RETRIEVER(cname, expr )  struct Ratio_##cname : public RatioAccessorRetriever { float value(const xAOD::Jet& jet, JetEventInfo& , double eScale ) { return expr ; } }
 
   DEF_RETRIEVER0( eta, jet.eta()*eScale ) ;
   DEF_RETRIEVER0( log_e, log(jet.e()*eScale) ) ;
   DEF_RETRIEVER0( log_m, log(jet.m()*eScale) ) ;
   DEF_RETRIEVER0( m, jet.m()*eScale ) ;
-  
+                               
+  DEF_RATIO_RETRIEVER( Tau21_wta, m_accTau1(jet) > 1e-8 ? eScale * m_accTau2(jet) / m_accTau1(jet) : -999);
+  DEF_RATIO_RETRIEVER( Tau32_wta, m_accTau2(jet) > 1e-8 ? eScale * m_accTau3(jet) / m_accTau2(jet) : -999);
+  DEF_RATIO_RETRIEVER( C2, m_accECF2(jet) > 1e-8 ? eScale * m_accECF3(jet) * m_accECF1(jet) / pow(m_accECF2(jet), 2.0) : -999);
+  DEF_RATIO_RETRIEVER( D2, m_accECF2(jet) > 1e-8 ? eScale * m_accECF3(jet) * pow(m_accECF1(jet), 3.0) / pow(m_accECF2(jet), 3.0) : -999);
+
   DEF_RETRIEVER1( mu, jetInfo.mu()*eScale );
   DEF_RETRIEVER1( NPV, jetInfo.NPV()*eScale );
 
@@ -57,11 +80,15 @@ namespace {
     // create a map of known specialized VarRetriever.
     // it's just a map "name" <-> function returning a Var_xyz()
     static const std::map<std::string, std::function<GlobalLargeRDNNCalibration::VarRetriever*()> > knownVar{
-      {"eta",      [](){return new Var_eta();} },
-      {"log_e",    [](){return new Var_log_e();} },
-      {"log_m",    [](){return new Var_log_m();} },
-      {"mu",       [](){return new Var_mu();} },
-      {"NPV",      [](){return new Var_NPV();} },    
+      {"eta",       [](){return new Var_eta();} },
+      {"log_e",     [](){return new Var_log_e();} },
+      {"log_m",     [](){return new Var_log_m();} },
+      {"Tau21_wta", [](){return new Ratio_Tau21_wta();} },
+      {"Tau32_wta", [](){return new Ratio_Tau32_wta();} },
+      {"C2",        [](){return new Ratio_C2();} },
+      {"D2",        [](){return new Ratio_D2();} },
+      {"mu",        [](){return new Var_mu();} },
+      {"NPV",       [](){return new Var_NPV();} },    
     };
 
     auto it = knownVar.find(name);
@@ -198,6 +225,9 @@ StatusCode GlobalLargeRDNNCalibration::initialize(){
     return StatusCode::FAILURE;
   }
 
+  // Set jet starting scale
+  m_jetStartScale = "JetConstitScaleMomentum";
+
   return StatusCode::SUCCESS;
 }
 
@@ -205,7 +235,16 @@ StatusCode GlobalLargeRDNNCalibration::initialize(){
 
 StatusCode GlobalLargeRDNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& jetEventInfo) const {
 
-  xAOD::JetFourMom_t jetStartP4 = jet.jetP4() ;
+  // Set jet initial scale
+  xAOD::JetFourMom_t jetStartP4;
+  ATH_CHECK( setStartP4(jet) );
+  jetStartP4 = jet.jetP4();
+
+  // Avoid FPEs for jets with zero mass when taking the logarithm
+  if(jet.m()==0){
+    jet.setAttribute<xAOD::JetFourMom_t>("JetDNNCScaleMomentum",jetStartP4);
+    return StatusCode::SUCCESS;
+  }
 
   // Get input features normalized for jet
   std::vector<float> input_tensor_values = getJetFeatures(jet, jetEventInfo);
@@ -221,7 +260,6 @@ StatusCode GlobalLargeRDNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& j
     jet.setAttribute<xAOD::JetFourMom_t>("JetDNNCScaleMomentum",jetStartP4);
     return StatusCode::SUCCESS;
   }
-  
 
   // Convert input_tensor_values array to onnx-compatiple tensor
   Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeCPU);

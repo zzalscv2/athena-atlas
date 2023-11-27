@@ -74,6 +74,6 @@ void JetConstituentFrac::fillConstituentFrac(const xAOD::Jet& jet) const {
   
   neutralEFracFracHandle(jet)  = neutE/jet.e();
   chargePTFracFracHandle(jet)  = chargPt/jet.pt();
-  chargeMFracFracHandle(jet)   = chargM.M()/jet.m();
+  chargeMFracFracHandle(jet)   = jet.m() != 0. ? chargM.M()/jet.m() : 0.;
 
 }

@@ -94,6 +94,8 @@ def ContainersOnTheFly(flags=None):
         ["AntiKt4EMTopoCSSKJetsAux","xAOD::JetAuxContainer"],
         ["AntiKt4EMPFlowCSSKJets","xAOD::JetContainer"],
         ["AntiKt4EMPFlowCSSKJetsAux","xAOD::JetAuxContainer"],
+        ["AntiKt4UFOCSSKJets","xAOD::JetContainer"],
+        ["AntiKt4UFOCSSKJetsAux","xAOD::JetAuxContainer"],
         ["AntiKt10PV0TrackJets","xAOD::JetContainer"],
         ["AntiKt10PV0TrackJetsAux","xAOD::JetAuxContainer"],
 

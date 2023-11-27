@@ -325,7 +325,6 @@ def JETM1Cfg(ConfigFlags):
                                             "InDetTrackParticles",
                                             "AntiKt4EMTopoJets",
                                             "AntiKt10UFOCSSKJets",
-                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                             "BTagging_AntiKt4EMPFlow"]
 
@@ -334,7 +333,6 @@ def JETM1Cfg(ConfigFlags):
                                            "AntiKt4EMPFlowJets.passOnlyBJVT.DFCommonJets_bJvt.isJvtHS.isJvtPU",
                                            "InDetTrackParticles.truthMatchProbability",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.zg.rg.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack",
-                                           "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets.zg.rg",
                                            "AntiKt10UFOCSSKJets.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack"]
 
     JETM1SlimmingHelper.AllVariables = [ "MuonSegments", "EventInfo",

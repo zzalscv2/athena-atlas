@@ -30,6 +30,9 @@ standardrecomods = (
     "Width",
     "ConstitFourMom"
 )
+
+ufo_dnn_moments = ("CaloEnergiesLargeR","ConstitFrac","groomMRatio")
+
 clustermods      = ("ECPSFrac","ClusterMoments",) 
 truthmods        = ("PartonTruthLabel","TruthPartonDR",)
 pflowmods        = ()
@@ -95,7 +98,7 @@ AntiKt10UFOCSSK = JetDefinition("AntiKt",1.0,cst.UFOCSSK,
                                 )
 
 AntiKt10UFOCSSKSoftDrop = JetSoftDrop(AntiKt10UFOCSSK,
-                                      modifiers = ("Calib:SoftDrop:mc","Filter:100000","JetGhostLabel")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD,
+                                      modifiers = ("Calib:SoftDrop:mc","Filter:100000","JetGhostLabel")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD+ufo_dnn_moments,
                                       Beta = 1., ZCut= 0.1,
                                      )
 
