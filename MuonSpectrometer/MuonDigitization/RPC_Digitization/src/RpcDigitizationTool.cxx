@@ -118,15 +118,9 @@ StatusCode RpcDigitizationTool::initialize() {
     ATH_MSG_DEBUG("testbeam_clustersize   " << m_testbeam_clustersize);
     ATH_MSG_DEBUG("FirstClusterSizeInTail " << m_FirstClusterSizeInTail);
     ATH_MSG_DEBUG("ClusterSize1_2uncorr   " << m_ClusterSize1_2uncorr);
-    ATH_MSG_DEBUG("PrintCalibrationVector " << m_PrintCalibrationVector);
     ATH_MSG_DEBUG("BOG_BOF_DoubletR2_OFF  " << m_BOG_BOF_DoubletR2_OFF);
-    ATH_MSG_DEBUG("DumpFromDbFirst        " << m_DumpFromDbFirst);
     ATH_MSG_DEBUG("CutMaxClusterSize      " << m_CutMaxClusterSize);
     ATH_MSG_DEBUG("CutProjectedTracks     " << m_CutProjectedTracks);
-    ATH_MSG_DEBUG("PanelId_OFF_fromlist   " << m_PanelId_OFF_fromlist);
-    ATH_MSG_DEBUG("FileName_DeadPanels    " << m_FileName_DeadPanels);
-    ATH_MSG_DEBUG("PanelId_OK_fromlist    " << m_PanelId_OK_fromlist);
-    ATH_MSG_DEBUG("FileName_GoodPanels    " << m_FileName_GoodPanels);
     ATH_MSG_DEBUG("ValidationSetup        " << m_validationSetup);
     ATH_MSG_DEBUG("IncludePileUpTruth     " << m_includePileUpTruth);
     ATH_MSG_DEBUG("VetoPileUpTruthLinks   " << m_vetoPileUpTruthLinks);
@@ -209,7 +203,6 @@ StatusCode RpcDigitizationTool::initialize() {
         m_ClusterSize_fromCOOL = false;
         m_RPCInfoFromDb = false;
         m_kill_deadstrips = false;
-        m_applyEffThreshold = false;
         if (run == Run1) {
             // m_BOG_BOF_DoubletR2_OFF = true
             // m_Efficiency_fromCOOL   = true
@@ -220,7 +213,6 @@ StatusCode RpcDigitizationTool::initialize() {
                 m_ClusterSize_fromCOOL = true;
                 m_RPCInfoFromDb = true;
                 m_kill_deadstrips = true;
-                m_applyEffThreshold = false;
                 m_CutProjectedTracks = 50;
             }
         } else {
@@ -233,9 +225,6 @@ StatusCode RpcDigitizationTool::initialize() {
                 m_ClusterSize_fromCOOL = true;
                 m_RPCInfoFromDb = true;
                 m_kill_deadstrips = false;
-                m_applyEffThreshold =
-                    false;  // for MC16 [2015-2016]IoV will use measurements, [2017]IoV will use measurements with threshold at 50% already
-                            // applied in the condition data ////// it was true (with threshold 50%) for MC15c;
                 m_CutProjectedTracks = 100;
             } else {
                 ATH_MSG_INFO("Run3/4: configuration parameter not from COOL");
@@ -243,7 +232,6 @@ StatusCode RpcDigitizationTool::initialize() {
                 m_ClusterSize_fromCOOL = false;
                 m_RPCInfoFromDb = false;
                 m_kill_deadstrips = false;
-                m_applyEffThreshold = false;
             }
         }
         ATH_MSG_INFO("RPC Run1/2/3-dependent configuration is enforced");
@@ -256,7 +244,6 @@ StatusCode RpcDigitizationTool::initialize() {
     ATH_MSG_DEBUG("......RPC BOG_BOF_DoubletR2_OFF  " << m_BOG_BOF_DoubletR2_OFF);
     ATH_MSG_DEBUG("......RPC RPCInfoFromDb          " << m_RPCInfoFromDb);
     ATH_MSG_DEBUG("......RPC KillDeadStrips         " << m_kill_deadstrips);
-    ATH_MSG_DEBUG("......RPC ApplyEffThreshold      " << m_applyEffThreshold);
     ATH_MSG_DEBUG("......RPC CutProjectedTracks     " << m_CutProjectedTracks);
 
     ATH_MSG_DEBUG("Ready to read parameters for cluster simulation from file");
@@ -272,10 +259,6 @@ StatusCode RpcDigitizationTool::initialize() {
     ATH_CHECK(fillTagInfo());
 
     ATH_CHECK(m_readKey.initialize(m_RPCInfoFromDb));
-
-    if (m_PrintCalibrationVector) { ATH_CHECK(PrintCalibrationVector()); }
-
-    m_DeadStripPanel.clear();
 
     ///////////////////// special test
     //  m_turnON_clustersize=false;
@@ -412,13 +395,6 @@ StatusCode RpcDigitizationTool::mergeEvent(const EventContext& ctx) {
     StatusCode status = StatusCode::SUCCESS;
 
     ATH_MSG_DEBUG("RpcDigitizationTool::in mergeEvent()");
-
-    if (m_DumpFromDbFirst && m_RPCInfoFromDb) {
-        status = DumpRPCCalibFromCoolDB(ctx);
-        if (status == StatusCode::FAILURE) return status;
-        m_DumpFromDbFirst = false;
-    }
-
     // create and record the Digit container in StoreGate
     SG::WriteHandle<RpcDigitContainer> digitContainer(m_outputDigitCollectionKey, ctx);
     ATH_CHECK(digitContainer.record(std::make_unique<RpcDigitContainer>(m_idHelper->module_hash_max())));
@@ -455,12 +431,6 @@ StatusCode RpcDigitizationTool::processAllSubEvents(const EventContext& ctx) {
     // merging of the hit collection in getNextEvent method
 
     ATH_MSG_DEBUG("RpcDigitizationTool::in digitize()");
-
-    if (m_DumpFromDbFirst && m_RPCInfoFromDb) {
-        status = DumpRPCCalibFromCoolDB(ctx);
-        if (status == StatusCode::FAILURE) return status;
-        m_DumpFromDbFirst = false;
-    }
 
     // create and record the Digit container in StoreGate
     SG::WriteHandle<RpcDigitContainer> digitContainer(m_outputDigitCollectionKey, ctx);
@@ -539,7 +509,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
         struct SimDataContent {
             Identifier channelId;
             std::vector<MuonSimData::Deposit> deposits;
-            Amg::Vector3D gpos;
+            Amg::Vector3D gpos{Amg::Vector3D::Zero()};
             float simTime = 0.0F;
         };
         std::map<Identifier, SimDataContent> channelSimDataMap;
@@ -687,7 +657,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                 // MuonMCData first  word is the packing of    : proptime, bunchTime, posy, posz
                 // MuonMCData second word is the total hit time: bunchcTime+tof+proptime+correlatedJitter / ns
                 MuonSimData::Deposit deposit(particleLink, MuonMCData((*b), time));  // store tof+strip_propagation+corr.jitter
-                //				     MuonMCData((*b),G4Time+bunchTime+proptime          )); // store tof+strip_propagation
+                //                     MuonMCData((*b),G4Time+bunchTime+proptime          )); // store tof+strip_propagation
 
                 // Do not store pile-up truth information
                 if (m_includePileUpTruth || !HepMC::ignoreTruthLink(phit->particleLink(), m_vetoPileUpTruthLinks)) {
@@ -858,9 +828,9 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                 // Calculate propagation time for a hit at the center of the strip, to be subtructed as well as the nominal TOF
                 double propTimeFromStripCenter = PropagationTimeNew(ctx, theId, posi);
                 double newDigit_time = currTime + uncorrjitter + m_rpc_time_shift - tp - propTimeFromStripCenter;
-		
-		double digi_ToT = -1.;  // Time over threshold, for Narrow-gap RPCs only
-		if (m_idHelper->stationName(theId) < 2) digi_ToT=extract_time_over_threshold_value(rndmEngine);  //mn 
+        
+                double digi_ToT = -1.;  // Time over threshold, for Narrow-gap RPCs only
+                if (m_idHelper->stationName(theId) < 2) digi_ToT = extract_time_over_threshold_value(rndmEngine);  //mn 
 
                 ATH_MSG_VERBOSE("last_time=currTime " << last_time << " jitter " << uncorrjitter << " TOFcorrection " << tp << " shift "
                                                       << m_rpc_time_shift << "  newDigit_time " << newDigit_time);
@@ -1509,39 +1479,6 @@ StatusCode RpcDigitizationTool::readParameters() {
     ATH_MSG_DEBUG("Fit parameters: " << m_rgausPara[0] << " " << m_rgausPara[1] << " " << m_rgausPara[2] << " " << m_fgausPara[0] << " "
                                      << m_fgausPara[1] << " " << m_fgausPara[2] << " " << m_constPara[0]);
 
-    // read dead panel list from file
-
-    std::string Id_s1;
-    std::string file1 = PathResolver::find_file(m_FileName_DeadPanels, "DATAPATH");
-    std::ifstream filein1(file1.c_str());
-    if (!filein1.good()) {
-        ATH_MSG_FATAL("Failed to open file - check file name! " << m_FileName_DeadPanels);
-        return StatusCode::FAILURE;
-    }
-    while (getline(filein1, Id_s1)) {
-        ATH_MSG_DEBUG("Dead Panel Id:" << Id_s1);
-        int Id_rpc = atoi(Id_s1.c_str());
-        Identifier rpc = Identifier(Id_rpc);
-        m_DeadPanel_fromlist.insert(std::make_pair(rpc, 1));
-    }
-
-    ATH_MSG_INFO("Number of RPC Dead Panel from list:" << m_DeadPanel_fromlist.size());
-
-    std::string Id_s2;
-    std::string file2 = PathResolver::find_file(m_FileName_GoodPanels, "DATAPATH");
-    std::ifstream filein2(file2.c_str());
-    if (!filein2.good()) {
-        ATH_MSG_FATAL("Failed to open file - check file name! " << m_FileName_GoodPanels);
-        return StatusCode::FAILURE;
-    }
-    while (getline(filein2, Id_s2)) {
-        ATH_MSG_DEBUG("Good Panel Id:" << Id_s2);
-        int Id_rpc = atoi(Id_s2.c_str());
-        Identifier rpc = Identifier(Id_rpc);
-        m_GoodPanel_fromlist.insert(std::make_pair(rpc, 1));
-    }
-
-    ATH_MSG_INFO("Number of RPC Good Panel from list:" << m_GoodPanel_fromlist.size());
     return StatusCode::SUCCESS;
 }
 
@@ -1716,11 +1653,6 @@ StatusCode RpcDigitizationTool::DetectionEfficiency(const EventContext& ctx, con
                           << FracDeadStripEta << "/" << FracDeadStripPhi << " RPC_ProjectedTracksEta " << RPC_ProjectedTracksEta
                           << " Eta/PhiPanelEfficiency " << EtaPanelEfficiency << "/" << PhiPanelEfficiency << " gapEff " << GapEfficiency);
 
-        if (m_PanelId_OK_fromlist && (m_GoodPanel_fromlist.find(IdEta) != m_GoodPanel_fromlist.end()))
-            stripetagood = m_GoodPanel_fromlist.find(IdEta)->second;
-        if (m_PanelId_OK_fromlist && (m_GoodPanel_fromlist.find(IdPhi) != m_GoodPanel_fromlist.end()))
-            stripphigood = m_GoodPanel_fromlist.find(IdPhi)->second;
-
         // gabriele //..stefania - if there are dead strips renormalize the eff. to the active area
         if (m_kill_deadstrips) {
             if ((FracDeadStripEta > 0.0 && FracDeadStripEta < 1.0) || (FracDeadStripPhi > 0.0 && FracDeadStripPhi < 1.0) || (noEntryInDb)) {
@@ -1816,29 +1748,6 @@ StatusCode RpcDigitizationTool::DetectionEfficiency(const EventContext& ctx, con
         }
 
     }  // End eff from COOL
-
-    if (m_applyEffThreshold) {
-        // gabriele //apply minimum allowed efficiency criteria
-
-        if (OnlyEtaEff + PhiAndEtaEff < m_Minimum_efficiency && OnlyPhiEff + PhiAndEtaEff < m_Minimum_efficiency) {
-            // eta panel eff < Minimum AND phi panel eff < Minimum and
-            PhiAndEtaEff = m_Minimum_efficiency;
-            OnlyEtaEff = 0.;
-            OnlyPhiEff = 0.;
-        } else if (OnlyEtaEff + PhiAndEtaEff < m_Minimum_efficiency && OnlyPhiEff + PhiAndEtaEff > m_Minimum_efficiency) {
-            // eta panel eff < Minimum AND phi panel eff > Minimum and
-            double phiEff = OnlyPhiEff + PhiAndEtaEff;
-            PhiAndEtaEff = m_Minimum_efficiency;
-            OnlyEtaEff = 0.;
-            OnlyPhiEff = phiEff - PhiAndEtaEff;  // Phi Panel Efficiency stays unchanged
-        } else if (OnlyEtaEff + PhiAndEtaEff > m_Minimum_efficiency && OnlyPhiEff + PhiAndEtaEff < m_Minimum_efficiency) {
-            // eta panel eff > Minimum AND phi panel eff < Minimum and
-            double etaEff = OnlyEtaEff + PhiAndEtaEff;
-            PhiAndEtaEff = m_Minimum_efficiency;
-            OnlyPhiEff = 0.;
-            OnlyEtaEff = etaEff - PhiAndEtaEff;  // Eta Panel Efficiency stays unchanged
-        }
-    }
 
     // Efficiency correction factor for fractional-charged particles(added by Quanyin Li: quli@cern.ch)
     // link to truth particles and calculate the charge and betagamma
@@ -2080,811 +1989,6 @@ int RpcDigitizationTool::ClusterSizeEvaluation(const EventContext& ctx, const Id
     // negative CS correspond to left asymmetric cluster with respect to nstrip
     return ClusterSize;
 }
-
-//--------------------------------------------
-StatusCode RpcDigitizationTool::PrintCalibrationVector() {
-    ATH_MSG_INFO("RpcDigitizationTool::in PrintCalibrationVector");
-
-    StatusCode sc = StatusCode::SUCCESS;
-    int vec_size = 0;
-
-    vec_size = m_PhiAndEtaEff_A.size();
-    for (int i = 0; i != vec_size; ++i) { ATH_MSG_INFO("size of RPC calib vector PhiAndEtaEff_A: " << m_PhiAndEtaEff_A.value().at(i)); }
-    vec_size = m_OnlyPhiEff_A.size();
-    for (int i = 0; i != vec_size; ++i) { ATH_MSG_INFO("size of RPC calib vector OnlyPhi_A: " << m_OnlyPhiEff_A.value().at(i)); }
-    vec_size = m_OnlyEtaEff_A.size();
-    for (int i = 0; i != vec_size; ++i) { ATH_MSG_INFO("size of RPC calib vector OnlyEta_A: " << m_OnlyEtaEff_A.value().at(i)); }
-
-    vec_size = m_PhiAndEtaEff_C.size();
-    for (int i = 0; i != vec_size; ++i) { ATH_MSG_INFO("size of RPC calib vector PhiAndEtaEff_C: " << m_PhiAndEtaEff_C.value().at(i)); }
-    vec_size = m_OnlyPhiEff_C.size();
-    for (int i = 0; i != vec_size; ++i) { ATH_MSG_INFO("size of RPC calib vector OnlyPhi_C: " << m_OnlyPhiEff_C.value().at(i)); }
-    vec_size = m_OnlyEtaEff_C.size();
-    for (int i = 0; i != vec_size; ++i) { ATH_MSG_INFO("size of RPC calib vector OnlyEta_C: " << m_OnlyEtaEff_C.value().at(i)); }
-    ATH_MSG_INFO("PhiAndEtaEff_BIS78: " << m_PhiAndEtaEff_BIS78);
-    ATH_MSG_INFO("OnlyPhiEff_BIS78: " << m_OnlyPhiEff_BIS78);
-    ATH_MSG_INFO("OnlyEtaEff_BIS78: " << m_OnlyEtaEff_BIS78);
-
-    vec_size = m_FracClusterSize1_A.size();
-    for (int i = 0; i != vec_size; ++i) {
-        ATH_MSG_INFO("size of RPC calib vector FracClusterSize1_A: " << m_FracClusterSize1_A.value().at(i));
-    }
-    vec_size = m_FracClusterSize2_A.size();
-    for (int i = 0; i != vec_size; ++i) {
-        ATH_MSG_INFO("size of RPC calib vector FracClusterSize2_A: " << m_FracClusterSize2_A.value().at(i));
-    }
-    vec_size = m_FracClusterSizeTail_A.size();
-    for (int i = 0; i != vec_size; ++i) {
-        ATH_MSG_INFO("size of RPC calib vector FracClusterSizeTail_A: " << m_FracClusterSizeTail_A.value().at(i));
-    }
-    vec_size = m_MeanClusterSizeTail_A.size();
-    for (int i = 0; i != vec_size; ++i) {
-        ATH_MSG_INFO("size of RPC calib vector MeanClusterSizeTail_A: " << m_MeanClusterSizeTail_A.value().at(i));
-    }
-    vec_size = m_FracClusterSize1_C.size();
-    for (int i = 0; i != vec_size; ++i) {
-        ATH_MSG_INFO("size of RPC calib vector FracClusterSize1_C: " << m_FracClusterSize1_C.value().at(i));
-    }
-    vec_size = m_FracClusterSize2_C.size();
-    for (int i = 0; i != vec_size; ++i) {
-        ATH_MSG_INFO("size of RPC calib vector FracClusterSize2_C: " << m_FracClusterSize2_C.value().at(i));
-    }
-    vec_size = m_FracClusterSizeTail_C.size();
-    for (int i = 0; i != vec_size; ++i) {
-        ATH_MSG_INFO("size of RPC calib vector FracClusterSizeTail_C: " << m_FracClusterSizeTail_C.value().at(i));
-    }
-    vec_size = m_MeanClusterSizeTail_C.size();
-    for (int i = 0; i != vec_size; i++) {
-        ATH_MSG_INFO("size of RPC calib vector MeanClusterSizeTail_C: " << m_MeanClusterSizeTail_C.value().at(i));
-    }
-    ATH_MSG_INFO("FracClusterSize1_BIS78: " << m_FracClusterSize1_BIS78);
-    ATH_MSG_INFO("FracClusterSize1_BIS78: " << m_FracClusterSize2_BIS78);
-    ATH_MSG_INFO("FracClusterSizeTail_BIS78: " << m_FracClusterSizeTail_BIS78);
-    ATH_MSG_INFO("MeanClusterSizeTail_BIS78: " << m_MeanClusterSizeTail_BIS78);
-
-    return sc;
-}
-
-//--------------------------------------------
-StatusCode RpcDigitizationTool::DumpRPCCalibFromCoolDB(const EventContext& ctx) {
-    ATH_MSG_DEBUG("RpcDigitizationTool::in DumpRPCCalibFromCoolDB");
-
-    const RpcCondDbData* readCdo{nullptr};
-    ATH_CHECK(retrieveCondData(ctx, m_readKey, readCdo));
-
-    const MuonGM::MuonDetectorManager* detMgr{nullptr};
-    ATH_CHECK(retrieveCondData(ctx, m_detMgrKey, detMgr));
-
-    StatusCode sc = StatusCode::SUCCESS;
-
-    int NpanelEff0 = 0;
-    int NpanelEffLess05 = 0;
-    int NpanelEffLess1 = 0;
-    int NpanelEff1 = 0;
-
-    int NpanelFracDead0 = 0;
-    int NpanelFracDeadLess05 = 0;
-    int NpanelFracDeadLess1 = 0;
-    int NpanelFracDead1 = 0;
-
-    int NpanelTrackLess500 = 0;
-    int NpanelTrackLess100 = 0;
-    int NpanelTrackLess50 = 0;
-    int NpanelTrackLess10 = 0;
-    int NpanelTrack0 = 0;
-
-    int NpanelWith8Strip = 0;
-    int NpanelWith16Strip = 0;
-    int NpanelWith24Strip = 0;
-    int NpanelWith32Strip = 0;
-    int NpanelWith40Strip = 0;
-    int NpanelWith48Strip = 0;
-    int NpanelWith56Strip = 0;
-    int NpanelWith64Strip = 0;
-    int NpanelWith80Strip = 0;
-    int NpanelWithXStrip = 0;
-
-    int NpanelCSEq1 = 0;
-    int NpanelCSLess15 = 0;
-    int NpanelCSLess20 = 0;
-    int NpanelCSLess25 = 0;
-    int NpanelCSMore5 = 0;
-
-    std::map<Identifier, double>::const_iterator itr;
-    std::map<Identifier, std::string>::const_iterator itrs;
-    std::map<Identifier, float>::const_iterator itrf;
-    std::map<Identifier, int>::const_iterator itri;
-
-    ATH_MSG_DEBUG("Size Summary RPC_EfficiencyMap: " << readCdo->getEfficiencyMap().size());
-    for (itr = readCdo->getEfficiencyMap().begin(); itr != readCdo->getEfficiencyMap().end(); ++itr) {
-        if (itr->second == 0.) NpanelEff0++;
-        if (itr->second < 0.5) NpanelEffLess05++;
-        if (itr->second < 1.) NpanelEffLess1++;
-        if (itr->second == 1.) NpanelEff1++;
-
-        ATH_MSG_DEBUG("Summary Id/RPC_EfficiencyMap: " << itr->first << " i.e. " << (itr->first).get_identifier32().get_compact() << " "
-                                                       << m_idHelper->show_to_string(itr->first) << " " << itr->second);
-    }
-
-    ATH_MSG_DEBUG("Size Summary RPC_EfficiencyGapMap: " << readCdo->getEfficiencyGapMap().size());
-    for (itr = readCdo->getEfficiencyGapMap().begin(); itr != readCdo->getEfficiencyGapMap().end(); ++itr) {
-        ATH_MSG_DEBUG("Summary Id/RPC_EfficiencyGapMap: " << itr->first << " i.e. " << (itr->first).get_identifier32().get_compact() << " "
-                                                          << m_idHelper->show_to_string(itr->first) << " " << itr->second);
-    }
-
-    ATH_MSG_DEBUG("Size Summary RPC_MeanClusterSizeMap: " << readCdo->getMeanClusterSizeMap().size());
-    for (itr = readCdo->getMeanClusterSizeMap().begin(); itr != readCdo->getMeanClusterSizeMap().end(); ++itr) {
-        if (itr->second == 1.0) NpanelCSEq1++;
-        if (itr->second < 1.5) NpanelCSLess15++;
-        if (itr->second < 2.0) NpanelCSLess20++;
-        if (itr->second < 2.5) NpanelCSLess25++;
-        if (itr->second >= 5.0) NpanelCSMore5++;
-
-        ATH_MSG_DEBUG("Summary Id/RPC_MeanClusterSizeMap: " << itr->first << " i.e. " << (itr->first).get_identifier32().get_compact()
-                                                            << " " << m_idHelper->show_to_string(itr->first) << " " << itr->second);
-    }
-
-    ATH_MSG_DEBUG("Size Summary RPC_FracClusterSize1Map: " << readCdo->getFracClusterSize1Map().size());
-    for (itr = readCdo->getFracClusterSize1Map().begin(); itr != readCdo->getFracClusterSize1Map().end(); ++itr) {
-        ATH_MSG_DEBUG("Summary Id/RPC_FracClusterSize1Map: " << itr->first << " i.e. " << (itr->first).get_identifier32().get_compact()
-                                                             << " " << m_idHelper->show_to_string(itr->first) << " " << itr->second);
-    }
-
-    ATH_MSG_DEBUG("Size Summary RPC_FracClusterSize2Map: " << readCdo->getFracClusterSize2Map().size());
-    for (itr = readCdo->getFracClusterSize2Map().begin(); itr != readCdo->getFracClusterSize2Map().end(); ++itr) {
-        ATH_MSG_DEBUG("Summary Id/RPC_FracClusterSize2Map: " << itr->first << " i.e. " << (itr->first).get_identifier32().get_compact()
-                                                             << " " << m_idHelper->show_to_string(itr->first) << " " << itr->second);
-    }
-
-    ATH_MSG_DEBUG("Size Summary RPC_DeadStripListMap: " << readCdo->getDeadStripMap().size());
-    for (itrs = readCdo->getDeadStripMap().begin(); itrs != readCdo->getDeadStripMap().end(); ++itrs) {
-        if (itrs->second.size() == 8) {
-            NpanelWith8Strip++;
-        } else if (itrs->second.size() == 16) {
-            NpanelWith16Strip++;
-        } else if (itrs->second.size() == 24) {
-            NpanelWith24Strip++;
-        } else if (itrs->second.size() == 32) {
-            NpanelWith32Strip++;
-        } else if (itrs->second.size() == 40) {
-            NpanelWith40Strip++;
-        } else if (itrs->second.size() == 48) {
-            NpanelWith48Strip++;
-        } else if (itrs->second.size() == 56) {
-            NpanelWith56Strip++;
-        } else if (itrs->second.size() == 64) {
-            NpanelWith64Strip++;
-        } else if (itrs->second.size() == 80) {
-            NpanelWith80Strip++;
-        } else {
-            NpanelWithXStrip++;
-            ATH_MSG_DEBUG("Anomalous " << itrs->second.size());
-        }
-        ATH_MSG_DEBUG("Summary Id/RPC_DeadStripListMap: " << itrs->first << " i.e. " << (itrs->first).get_identifier32().get_compact()
-                                                          << " " << m_idHelper->show_to_string(itrs->first) << " " << itrs->second);
-    }
-
-    ATH_MSG_DEBUG("Size Summary RPC_FracDeadStripMap: " << readCdo->getFracDeadStripMap().size());
-    for (itr = readCdo->getFracDeadStripMap().begin(); itr != readCdo->getFracDeadStripMap().end(); ++itr) {
-        if (itr->second == 0.) NpanelFracDead0++;
-        if (itr->second < 0.5) NpanelFracDeadLess05++;
-        if (itr->second < 1.) NpanelFracDeadLess1++;
-        if (itr->second == 1.) NpanelFracDead1++;
-
-        ATH_MSG_DEBUG("Summary Id/RPC_FracDeadStripMap: " << itr->first << " i.e. " << (itr->first).get_identifier32().get_compact() << " "
-                                                          << m_idHelper->show_to_string(itr->first) << " " << itr->second);
-        if (itr->second > 0.50) {
-            if (itr->second <= 0.75)
-                ATH_MSG_DEBUG("Summary Id/RPC_FracDeadStripMap: panel with fraction of dead strips >50% and <=75% "
-                              << itr->first << " i.e. " << (itr->first).get_identifier32().get_compact() << " "
-                              << m_idHelper->show_to_string(itr->first) << " " << itr->second);
-            else if (itr->second > 0.75) {
-                if (itr->second <= 0.90)
-                    ATH_MSG_DEBUG("Summary Id/RPC_FracDeadStripMap: panel with fraction of dead strips >75% and <=90% "
-                                  << itr->first << " i.e. " << (itr->first).get_identifier32().get_compact() << " "
-                                  << m_idHelper->show_to_string(itr->first) << " " << itr->second);
-                else if (itr->second > 0.90)
-                    ATH_MSG_DEBUG("Summary Id/RPC_FracDeadStripMap: panel with fraction of dead strips >90% "
-                                  << itr->first << " i.e. " << (itr->first).get_identifier32().get_compact() << " "
-                                  << m_idHelper->show_to_string(itr->first) << " " << itr->second);
-            }
-        }
-    }
-
-    ATH_MSG_DEBUG("Size Summary RPC_ProjectedTracksMap: " << readCdo->getProjectedTracksMap().size());
-    for (itri = readCdo->getProjectedTracksMap().begin(); itri != readCdo->getProjectedTracksMap().end(); ++itri) {
-        if (itri->second < 500) NpanelTrackLess500++;
-        if (itri->second < 100) NpanelTrackLess100++;
-        if (itri->second < 50) NpanelTrackLess50++;
-        if (itri->second < 10) NpanelTrackLess10++;
-        if (itri->second == 0) NpanelTrack0++;
-
-        ATH_MSG_DEBUG("Summary Id/RPC_ProjectedTracksMap: " << itri->first << " i.e. " << (itri->first).get_identifier32().get_compact()
-                                                            << " " << m_idHelper->show_to_string(itri->first) << " " << itri->second);
-    }
-    ATH_MSG_DEBUG("Size Summary RPC_DeadStripList: " << readCdo->getDeadStripIntMap().size());
-    for (itri = readCdo->getDeadStripIntMap().begin(); itri != readCdo->getDeadStripIntMap().end(); ++itri) {
-        ATH_MSG_DEBUG("Summary Id/RPC_DeadStripList: " << itri->first << " i.e. " << (itri->first).get_identifier32().get_compact() << " "
-                                                       << m_idHelper->show_to_string(itri->first) << " " << itri->second);
-    }
-
-    ATH_MSG_INFO("********************SUMMARY RPC CONDITIONS********************");
-    ATH_MSG_INFO("# Panel with Eff =0,<0.5,<1,=1: " << NpanelEff0 << " " << NpanelEffLess05 << " " << NpanelEffLess1 << " " << NpanelEff1);
-    ATH_MSG_INFO("# Panel with CS =1,<1.5,<2.0,<2.5,=>5: " << NpanelCSEq1 << " " << NpanelCSLess15 << " " << NpanelCSLess20 << " "
-                                                           << NpanelCSLess25 << " " << NpanelCSMore5);
-    ATH_MSG_INFO("# Panel with Fraction of dead strip =0,<0.5,<1,=1: " << NpanelFracDead0 << " " << NpanelFracDeadLess05 << " "
-                                                                       << NpanelFracDeadLess1 << " " << NpanelFracDead1);
-    ATH_MSG_INFO("# Panel with 8,16,24,32,40,48,56,64,80,X strips: "
-                 << " " << NpanelWith8Strip << " " << NpanelWith16Strip << " " << NpanelWith24Strip << " " << NpanelWith32Strip << " "
-                 << NpanelWith40Strip << " " << NpanelWith48Strip << " " << NpanelWith56Strip << " " << NpanelWith64Strip << " "
-                 << NpanelWith80Strip << " " << NpanelWithXStrip);
-    ATH_MSG_INFO("# Panel with Extrapolated Tracks =0,<10,<50,<100,<500: " << NpanelTrack0 << " " << NpanelTrackLess10 << " "
-                                                                           << NpanelTrackLess50 << " " << NpanelTrackLess100 << " "
-                                                                           << NpanelTrackLess500);
-    ATH_MSG_INFO("********************SUMMARY RPC CONDITIONS********************");
-
-    // Evaluate mean values from COOLDB
-
-    std::vector<float> COOLDB_PhiAndEtaEff_A(7, 0.0);
-    std::vector<float> COOLDB_OnlyPhiEff_A(7, 0.0);
-    std::vector<float> COOLDB_OnlyEtaEff_A(7, 0.0);
-    std::vector<int> COOLDB_CountEff_A(7, 0);
-
-    std::vector<float> COOLDB_PhiAndEtaEff_C(7, 0.0);
-    std::vector<float> COOLDB_OnlyPhiEff_C(7, 0.0);
-    std::vector<float> COOLDB_OnlyEtaEff_C(7, 0.0);
-    std::vector<int> COOLDB_CountEff_C(7, 0);
-
-    std::vector<double> COOLDB_FracClusterSize1_A(14, 0.0);
-    std::vector<double> COOLDB_FracClusterSize2_A(14, 0.0);
-    std::vector<double> COOLDB_FracClusterSizeTail_A(14, 0.0);
-    std::vector<double> COOLDB_MeanClusterSizeTail_A(14, 0.0);
-    std::vector<int> COOLDB_CountCS_A(7, 0);
-
-    std::vector<double> COOLDB_FracClusterSize1_C(14, 0.0);
-    std::vector<double> COOLDB_FracClusterSize2_C(14, 0.0);
-    std::vector<double> COOLDB_FracClusterSizeTail_C(14, 0.0);
-    std::vector<double> COOLDB_MeanClusterSizeTail_C(14, 0.0);
-    std::vector<int> COOLDB_CountCS_C(7, 0);
-
-    std::vector<float> COOLDB_GapEff_A(7, 0.0);
-    std::vector<float> COOLDB_PhiEff_A(7, 0.0);
-    std::vector<float> COOLDB_EtaEff_A(7, 0.0);
-
-    std::vector<float> COOLDB_GapEff_C(7, 0.0);
-    std::vector<float> COOLDB_PhiEff_C(7, 0.0);
-    std::vector<float> COOLDB_EtaEff_C(7, 0.0);
-
-    std::vector<double> COOLDB_MeanClusterSize_A(14, 0.0);
-    std::vector<double> COOLDB_MeanClusterSize_C(14, 0.0);
-
-    int indexSName = 0;
-    int countGasGap = 0;
-
-    for (int stationName = 2; stationName != 11; stationName++) {
-        for (int stationEta = -7; stationEta != 8; stationEta++) {
-            for (int stationPhi = 1; stationPhi != 9; stationPhi++) {
-                for (int doubletR = 1; doubletR != 3; doubletR++) {
-                    for (int doubletZ = 1; doubletZ != 4; doubletZ++) {
-                        for (int doubletPhi = 1; doubletPhi != 3; doubletPhi++) {
-                            for (int gasGap = 1; gasGap != 3; gasGap++) {
-                                bool isValid = false;
-                                Identifier rpcId =
-                                    m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, 1, 1, 1,
-                                                                 isValid);  // last 5 arguments are: int doubletPhi, int gasGap, int
-                                                                            // measuresPhi, int strip, bool& isValid
-                                if (!isValid) continue;
-                                const RpcReadoutElement* rpc = detMgr->getRpcReadoutElement(rpcId);
-
-                                if (!rpc) continue;
-                                Identifier idr = rpc->identify();
-                                if (idr == 0) continue;
-                                Identifier atlasIdEta = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, 0, 1, isValid);
-                                if (!isValid) continue;
-                                Identifier atlasIdPhi = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, 1, 1, isValid);
-                                if (!isValid) continue;
-
-                                countGasGap++;
-
-                                indexSName = stationName - 2;
-                                if (indexSName > 3) indexSName = indexSName - 2;
-
-                                float efficiencyEta{0.}, averageCSEta{0.}, FracCS1Eta{0.}, FracCS2Eta{0.}, FracCStailEta{0.};
-                                float efficiencyPhi{0.}, averageCSPhi{0.}, FracCS1Phi{0.}, FracCS2Phi{0.}, FracCStailPhi{0.}, efficiencygapEta{0.};
-                                int ProjectedTracksEta{0};
-                               
-                              
-
-                                if (readCdo->getEfficiencyMap().find(atlasIdEta) != readCdo->getEfficiencyMap().end())
-                                    efficiencyEta = readCdo->getEfficiencyMap().find(atlasIdEta)->second;
-                                if (readCdo->getMeanClusterSizeMap().find(atlasIdEta) != readCdo->getMeanClusterSizeMap().end())
-                                    averageCSEta = readCdo->getMeanClusterSizeMap().find(atlasIdEta)->second;
-                                if (readCdo->getFracClusterSize1Map().find(atlasIdEta) != readCdo->getFracClusterSize1Map().end())
-                                    FracCS1Eta = readCdo->getFracClusterSize1Map().find(atlasIdEta)->second;
-                                if (readCdo->getFracClusterSize2Map().find(atlasIdEta) != readCdo->getFracClusterSize2Map().end())
-                                    FracCS2Eta = readCdo->getFracClusterSize2Map().find(atlasIdEta)->second;
-                                FracCStailEta = 1. - FracCS1Eta - FracCS2Eta;
-                                if (readCdo->getProjectedTracksMap().find(atlasIdEta) != readCdo->getProjectedTracksMap().end())
-                                    ProjectedTracksEta = readCdo->getProjectedTracksMap().find(atlasIdEta)->second;
-                                if (readCdo->getEfficiencyGapMap().find(atlasIdEta) != readCdo->getEfficiencyGapMap().end())
-                                    efficiencygapEta = readCdo->getEfficiencyGapMap().find(atlasIdEta)->second;
-
-                                if (readCdo->getEfficiencyMap().find(atlasIdPhi) != readCdo->getEfficiencyMap().end())
-                                    efficiencyPhi = readCdo->getEfficiencyMap().find(atlasIdPhi)->second;
-                                if (readCdo->getMeanClusterSizeMap().find(atlasIdPhi) != readCdo->getMeanClusterSizeMap().end())
-                                    averageCSPhi = readCdo->getMeanClusterSizeMap().find(atlasIdPhi)->second;
-                                if (readCdo->getFracClusterSize1Map().find(atlasIdPhi) != readCdo->getFracClusterSize1Map().end())
-                                    FracCS1Phi = readCdo->getFracClusterSize1Map().find(atlasIdPhi)->second;
-                                if (readCdo->getFracClusterSize2Map().find(atlasIdPhi) != readCdo->getFracClusterSize2Map().end())
-                                    FracCS2Phi = readCdo->getFracClusterSize2Map().find(atlasIdPhi)->second;
-                                FracCStailPhi = 1. - FracCS1Phi - FracCS2Phi;
-
-                                if ((ProjectedTracksEta >= m_CutProjectedTracks) && (ProjectedTracksEta < 10000000) 
-                                     && (efficiencyEta > 0) && (efficiencyEta <= 1) &&
-                                    (efficiencygapEta > 0) && (efficiencygapEta <= 1) && (efficiencyPhi > 0) && (efficiencyPhi <= 1)) {
-                                    if (stationEta >= 0) {
-                                        COOLDB_PhiAndEtaEff_A[indexSName] =
-                                            COOLDB_PhiAndEtaEff_A[indexSName] + efficiencyEta + efficiencyPhi - efficiencygapEta;
-                                        COOLDB_GapEff_A[indexSName] = COOLDB_GapEff_A[indexSName] + efficiencygapEta;
-                                        COOLDB_PhiEff_A[indexSName] = COOLDB_PhiEff_A[indexSName] + efficiencyPhi;
-                                        COOLDB_EtaEff_A[indexSName] = COOLDB_EtaEff_A[indexSName] + efficiencyEta;
-                                        COOLDB_CountEff_A[indexSName] = COOLDB_CountEff_A[indexSName] + 1;
-
-                                    } else {
-                                        COOLDB_PhiAndEtaEff_C[indexSName] =
-                                            COOLDB_PhiAndEtaEff_C[indexSName] + efficiencyEta + efficiencyPhi - efficiencygapEta;
-                                        COOLDB_GapEff_C[indexSName] = COOLDB_GapEff_C[indexSName] + efficiencygapEta;
-                                        COOLDB_PhiEff_C[indexSName] = COOLDB_PhiEff_C[indexSName] + efficiencyPhi;
-                                        COOLDB_EtaEff_C[indexSName] = COOLDB_EtaEff_C[indexSName] + efficiencyEta;
-                                        COOLDB_CountEff_C[indexSName] = COOLDB_CountEff_C[indexSName] + 1;
-                                    }
-                                }
-
-                                if ((ProjectedTracksEta >= m_CutProjectedTracks) && (ProjectedTracksEta < 10000000) && (averageCSEta > 1) &&
-                                    (averageCSPhi > 1) && (averageCSEta <= m_CutMaxClusterSize) && (averageCSPhi <= m_CutMaxClusterSize)) {
-                                    if ((FracCStailEta >= 0) && (FracCS1Eta >= 0) && (FracCS2Eta >= 0) && (FracCStailEta <= 1) &&
-                                        (FracCS1Eta <= 1) && (FracCS2Eta <= 1) && (FracCStailPhi >= 0) && (FracCS1Phi >= 0) &&
-                                        (FracCS2Phi >= 0) && (FracCStailPhi <= 1) && (FracCS1Phi <= 1) && (FracCS2Phi <= 1)) {
-                                        if (stationEta >= 0) {
-                                            COOLDB_FracClusterSize1_A[indexSName] = COOLDB_FracClusterSize1_A[indexSName] + FracCS1Eta;
-                                            COOLDB_FracClusterSize2_A[indexSName] = COOLDB_FracClusterSize2_A[indexSName] + FracCS2Eta;
-                                            COOLDB_MeanClusterSize_A[indexSName] = COOLDB_MeanClusterSize_A[indexSName] + averageCSEta;
-                                            COOLDB_CountCS_A[indexSName] = COOLDB_CountCS_A[indexSName] + 1;
-
-                                            COOLDB_FracClusterSize1_A[indexSName + 7] =
-                                                COOLDB_FracClusterSize1_A[indexSName + 7] + FracCS1Phi;
-                                            COOLDB_FracClusterSize2_A[indexSName + 7] =
-                                                COOLDB_FracClusterSize2_A[indexSName + 7] + FracCS2Phi;
-                                            COOLDB_MeanClusterSize_A[indexSName + 7] =
-                                                COOLDB_MeanClusterSize_A[indexSName + 7] + averageCSPhi;
-
-                                        } else {
-                                            COOLDB_FracClusterSize1_C[indexSName] = COOLDB_FracClusterSize1_C[indexSName] + FracCS1Eta;
-                                            COOLDB_FracClusterSize2_C[indexSName] = COOLDB_FracClusterSize2_C[indexSName] + FracCS2Eta;
-                                            COOLDB_MeanClusterSize_C[indexSName] = COOLDB_MeanClusterSize_C[indexSName] + averageCSEta;
-                                            COOLDB_CountCS_C[indexSName] = COOLDB_CountCS_C[indexSName] + 1;
-
-                                            COOLDB_FracClusterSize1_C[indexSName + 7] =
-                                                COOLDB_FracClusterSize1_C[indexSName + 7] + FracCS1Phi;
-                                            COOLDB_FracClusterSize2_C[indexSName + 7] =
-                                                COOLDB_FracClusterSize2_C[indexSName + 7] + FracCS2Phi;
-                                            COOLDB_MeanClusterSize_C[indexSName + 7] =
-                                                COOLDB_MeanClusterSize_C[indexSName + 7] + averageCSPhi;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    for (unsigned int index = 0; index != COOLDB_PhiAndEtaEff_A.size() + 1; index++) {
-        int Count = COOLDB_CountEff_A[index];
-
-        if (Count) {
-            COOLDB_PhiAndEtaEff_A[index] = COOLDB_PhiAndEtaEff_A[index] / Count;
-            COOLDB_GapEff_A[index] = COOLDB_GapEff_A[index] / Count;
-            COOLDB_EtaEff_A[index] = COOLDB_EtaEff_A[index] / Count;
-            COOLDB_PhiEff_A[index] = COOLDB_PhiEff_A[index] / Count;
-            COOLDB_OnlyPhiEff_A[index] = COOLDB_PhiEff_A[index] - COOLDB_PhiAndEtaEff_A[index];
-            COOLDB_OnlyEtaEff_A[index] = COOLDB_EtaEff_A[index] - COOLDB_PhiAndEtaEff_A[index];
-        }
-
-        Count = COOLDB_CountEff_C[index];
-        if (Count) {
-            COOLDB_PhiAndEtaEff_C[index] = COOLDB_PhiAndEtaEff_C[index] / Count;
-            COOLDB_GapEff_C[index] = COOLDB_GapEff_C[index] / Count;
-            COOLDB_EtaEff_C[index] = COOLDB_EtaEff_C[index] / Count;
-            COOLDB_PhiEff_C[index] = COOLDB_PhiEff_C[index] / Count;
-            COOLDB_OnlyPhiEff_C[index] = COOLDB_PhiEff_C[index] - COOLDB_PhiAndEtaEff_C[index];
-            COOLDB_OnlyEtaEff_C[index] = COOLDB_EtaEff_C[index] - COOLDB_PhiAndEtaEff_C[index];
-        }
-
-        Count = COOLDB_CountCS_A[index];
-        if (Count) {
-            COOLDB_FracClusterSize1_A[index] = COOLDB_FracClusterSize1_A[index] / Count;
-            COOLDB_FracClusterSize2_A[index] = COOLDB_FracClusterSize2_A[index] / Count;
-            COOLDB_MeanClusterSize_A[index] = COOLDB_MeanClusterSize_A[index] / Count;
-            COOLDB_MeanClusterSizeTail_A[index] =
-                COOLDB_MeanClusterSize_A[index] - COOLDB_FracClusterSize1_A[index] - 2 * COOLDB_FracClusterSize2_A[index];
-            COOLDB_FracClusterSizeTail_A[index] = 1. - COOLDB_FracClusterSize1_A[index] - COOLDB_FracClusterSize2_A[index];
-            COOLDB_FracClusterSize1_A[index + 7] = COOLDB_FracClusterSize1_A[index + 7] / Count;
-            COOLDB_FracClusterSize2_A[index + 7] = COOLDB_FracClusterSize2_A[index + 7] / Count;
-            COOLDB_MeanClusterSize_A[index + 7] = COOLDB_MeanClusterSize_A[index + 7] / Count;
-            COOLDB_MeanClusterSizeTail_A[index + 7] =
-                COOLDB_MeanClusterSize_A[index + 7] - COOLDB_FracClusterSize1_A[index + 7] - 2 * COOLDB_FracClusterSize2_A[index + 7];
-            COOLDB_FracClusterSizeTail_A[index + 7] = 1. - COOLDB_FracClusterSize1_A[index + 7] - COOLDB_FracClusterSize2_A[index + 7];
-        }
-
-        Count = COOLDB_CountCS_C[index];
-        if (Count) {
-            COOLDB_FracClusterSize1_C[index] = COOLDB_FracClusterSize1_C[index] / Count;
-            COOLDB_FracClusterSize2_C[index] = COOLDB_FracClusterSize2_C[index] / Count;
-            COOLDB_MeanClusterSize_C[index] = COOLDB_MeanClusterSize_C[index] / Count;
-            COOLDB_MeanClusterSizeTail_C[index] =
-                COOLDB_MeanClusterSize_C[index] - COOLDB_FracClusterSize1_C[index] - 2 * COOLDB_FracClusterSize2_C[index];
-            COOLDB_FracClusterSizeTail_C[index] = 1. - COOLDB_FracClusterSize1_C[index] - COOLDB_FracClusterSize2_C[index];
-            COOLDB_FracClusterSize1_C[index + 7] = COOLDB_FracClusterSize1_C[index + 7] / Count;
-            COOLDB_FracClusterSize2_C[index + 7] = COOLDB_FracClusterSize2_C[index + 7] / Count;
-            COOLDB_MeanClusterSize_C[index + 7] = COOLDB_MeanClusterSize_C[index + 7] / Count;
-            COOLDB_MeanClusterSizeTail_C[index + 7] =
-                COOLDB_MeanClusterSize_C[index + 7] - COOLDB_FracClusterSize1_C[index + 7] - 2 * COOLDB_FracClusterSize2_C[index + 7];
-            COOLDB_FracClusterSizeTail_C[index + 7] = 1. - COOLDB_FracClusterSize1_C[index + 7] - COOLDB_FracClusterSize2_C[index + 7];
-        }
-    }
-
-    // Dump average COOL for Joboptions Input
-    ATH_MSG_VERBOSE("Total Number of GasGap and Readout Panel " << countGasGap << " " << 2 * countGasGap);
-    ATH_MSG_VERBOSE("RpcDigitizationTool.PhiAndEtaEff_A=[" << COOLDB_PhiAndEtaEff_A[0] << "," << COOLDB_PhiAndEtaEff_A[1] << ","
-                                                           << COOLDB_PhiAndEtaEff_A[2] << "," << COOLDB_PhiAndEtaEff_A[3] << ","
-                                                           << COOLDB_PhiAndEtaEff_A[4] << "," << COOLDB_PhiAndEtaEff_A[5] << ","
-                                                           << COOLDB_PhiAndEtaEff_A[6] << "]");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.OnlyPhiEff_A=[" << COOLDB_OnlyPhiEff_A[0] << "," << COOLDB_OnlyPhiEff_A[1] << ","
-                                                         << COOLDB_OnlyPhiEff_A[2] << "," << COOLDB_OnlyPhiEff_A[3] << ","
-                                                         << COOLDB_OnlyPhiEff_A[4] << "," << COOLDB_OnlyPhiEff_A[5] << ","
-                                                         << COOLDB_OnlyPhiEff_A[6] << "]");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.OnlyEtaEff_A=[" << COOLDB_OnlyEtaEff_A[0] << "," << COOLDB_OnlyEtaEff_A[1] << ","
-                                                         << COOLDB_OnlyEtaEff_A[2] << "," << COOLDB_OnlyEtaEff_A[3] << ","
-                                                         << COOLDB_OnlyEtaEff_A[4] << "," << COOLDB_OnlyEtaEff_A[5] << ","
-                                                         << COOLDB_OnlyEtaEff_A[6] << "]");
-    ATH_MSG_VERBOSE(" ");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.PhiAndEtaEff_C=[" << COOLDB_PhiAndEtaEff_C[0] << "," << COOLDB_PhiAndEtaEff_C[1] << ","
-                                                           << COOLDB_PhiAndEtaEff_C[2] << "," << COOLDB_PhiAndEtaEff_C[3] << ","
-                                                           << COOLDB_PhiAndEtaEff_C[4] << "," << COOLDB_PhiAndEtaEff_C[5] << ","
-                                                           << COOLDB_PhiAndEtaEff_C[6] << "]");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.OnlyPhiEff_C=[" << COOLDB_OnlyPhiEff_C[0] << "," << COOLDB_OnlyPhiEff_C[1] << ","
-                                                         << COOLDB_OnlyPhiEff_C[2] << "," << COOLDB_OnlyPhiEff_C[3] << ","
-                                                         << COOLDB_OnlyPhiEff_C[4] << "," << COOLDB_OnlyPhiEff_C[5] << ","
-                                                         << COOLDB_OnlyPhiEff_C[6] << "]");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.OnlyEtaEff_C=[" << COOLDB_OnlyEtaEff_C[0] << "," << COOLDB_OnlyEtaEff_C[1] << ","
-                                                         << COOLDB_OnlyEtaEff_C[2] << "," << COOLDB_OnlyEtaEff_C[3] << ","
-                                                         << COOLDB_OnlyEtaEff_C[4] << "," << COOLDB_OnlyEtaEff_C[5] << ","
-                                                         << COOLDB_OnlyEtaEff_C[6] << "]");
-    ATH_MSG_VERBOSE(" ");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.FracClusterSize1_A=[" << COOLDB_FracClusterSize1_A[0] << "," << COOLDB_FracClusterSize1_A[1] << ","
-                                                               << COOLDB_FracClusterSize1_A[2] << "," << COOLDB_FracClusterSize1_A[3] << ","
-                                                               << COOLDB_FracClusterSize1_A[4] << "," << COOLDB_FracClusterSize1_A[5] << ","
-                                                               << COOLDB_FracClusterSize1_A[6]);
-    ATH_MSG_VERBOSE("," << COOLDB_FracClusterSize1_A[7] << "," << COOLDB_FracClusterSize1_A[8] << "," << COOLDB_FracClusterSize1_A[9] << ","
-                        << COOLDB_FracClusterSize1_A[10] << "," << COOLDB_FracClusterSize1_A[11] << "," << COOLDB_FracClusterSize1_A[12]
-                        << "," << COOLDB_FracClusterSize1_A[13] << "]");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.FracClusterSize2_A=[" << COOLDB_FracClusterSize2_A[0] << "," << COOLDB_FracClusterSize2_A[1] << ","
-                                                               << COOLDB_FracClusterSize2_A[2] << "," << COOLDB_FracClusterSize2_A[3] << ","
-                                                               << COOLDB_FracClusterSize2_A[4] << "," << COOLDB_FracClusterSize2_A[5] << ","
-                                                               << COOLDB_FracClusterSize2_A[6]);
-    ATH_MSG_VERBOSE("," << COOLDB_FracClusterSize2_A[7] << "," << COOLDB_FracClusterSize2_A[8] << "," << COOLDB_FracClusterSize2_A[9] << ","
-                        << COOLDB_FracClusterSize2_A[10] << "," << COOLDB_FracClusterSize2_A[11] << "," << COOLDB_FracClusterSize2_A[12]
-                        << "," << COOLDB_FracClusterSize2_A[13] << "]");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.FracClusterSizeTail_A=["
-                    << COOLDB_FracClusterSizeTail_A[0] << "," << COOLDB_FracClusterSizeTail_A[1] << "," << COOLDB_FracClusterSizeTail_A[2]
-                    << "," << COOLDB_FracClusterSizeTail_A[3] << "," << COOLDB_FracClusterSizeTail_A[4] << ","
-                    << COOLDB_FracClusterSizeTail_A[5] << "," << COOLDB_FracClusterSizeTail_A[6]);
-    ATH_MSG_VERBOSE("," << COOLDB_FracClusterSizeTail_A[7] << "," << COOLDB_FracClusterSizeTail_A[8] << ","
-                        << COOLDB_FracClusterSizeTail_A[9] << "," << COOLDB_FracClusterSizeTail_A[10] << ","
-                        << COOLDB_FracClusterSizeTail_A[11] << "," << COOLDB_FracClusterSizeTail_A[12] << ","
-                        << COOLDB_FracClusterSizeTail_A[13] << "]");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.MeanClusterSizeTail_A=["
-                    << COOLDB_MeanClusterSizeTail_A[0] << "," << COOLDB_MeanClusterSizeTail_A[1] << "," << COOLDB_MeanClusterSizeTail_A[2]
-                    << "," << COOLDB_MeanClusterSizeTail_A[3] << "," << COOLDB_MeanClusterSizeTail_A[4] << ","
-                    << COOLDB_MeanClusterSizeTail_A[5] << "," << COOLDB_MeanClusterSizeTail_A[6]);
-    ATH_MSG_VERBOSE("," << COOLDB_MeanClusterSizeTail_A[7] << "," << COOLDB_MeanClusterSizeTail_A[8] << ","
-                        << COOLDB_MeanClusterSizeTail_A[9] << "," << COOLDB_MeanClusterSizeTail_A[10] << ","
-                        << COOLDB_MeanClusterSizeTail_A[11] << "," << COOLDB_MeanClusterSizeTail_A[12] << ","
-                        << COOLDB_MeanClusterSizeTail_A[13] << "]");
-    ATH_MSG_VERBOSE(" ");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.FracClusterSize1_C=[" << COOLDB_FracClusterSize1_C[0] << "," << COOLDB_FracClusterSize1_C[1] << ","
-                                                               << COOLDB_FracClusterSize1_C[2] << "," << COOLDB_FracClusterSize1_C[3] << ","
-                                                               << COOLDB_FracClusterSize1_C[4] << "," << COOLDB_FracClusterSize1_C[5] << ","
-                                                               << COOLDB_FracClusterSize1_C[6]);
-    ATH_MSG_VERBOSE("," << COOLDB_FracClusterSize1_C[7] << "," << COOLDB_FracClusterSize1_C[8] << "," << COOLDB_FracClusterSize1_C[9] << ","
-                        << COOLDB_FracClusterSize1_C[10] << "," << COOLDB_FracClusterSize1_C[11] << "," << COOLDB_FracClusterSize1_C[12]
-                        << "," << COOLDB_FracClusterSize1_C[13] << "]");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.FracClusterSize2_C=[" << COOLDB_FracClusterSize2_C[0] << "," << COOLDB_FracClusterSize2_C[1] << ","
-                                                               << COOLDB_FracClusterSize2_C[2] << "," << COOLDB_FracClusterSize2_C[3] << ","
-                                                               << COOLDB_FracClusterSize2_C[4] << "," << COOLDB_FracClusterSize2_C[5] << ","
-                                                               << COOLDB_FracClusterSize2_C[6]);
-    ATH_MSG_VERBOSE("," << COOLDB_FracClusterSize2_C[7] << "," << COOLDB_FracClusterSize2_C[8] << "," << COOLDB_FracClusterSize2_C[9] << ","
-                        << COOLDB_FracClusterSize2_C[10] << "," << COOLDB_FracClusterSize2_C[11] << "," << COOLDB_FracClusterSize2_C[12]
-                        << "," << COOLDB_FracClusterSize2_C[13] << "]");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.FracClusterSizeTail_C=["
-                    << COOLDB_FracClusterSizeTail_C[0] << "," << COOLDB_FracClusterSizeTail_C[1] << "," << COOLDB_FracClusterSizeTail_C[2]
-                    << "," << COOLDB_FracClusterSizeTail_C[3] << "," << COOLDB_FracClusterSizeTail_C[4] << ","
-                    << COOLDB_FracClusterSizeTail_C[5] << "," << COOLDB_FracClusterSizeTail_C[6]);
-    ATH_MSG_VERBOSE("," << COOLDB_FracClusterSizeTail_C[7] << "," << COOLDB_FracClusterSizeTail_C[8] << ","
-                        << COOLDB_FracClusterSizeTail_C[9] << "," << COOLDB_FracClusterSizeTail_C[10] << ","
-                        << COOLDB_FracClusterSizeTail_C[11] << "," << COOLDB_FracClusterSizeTail_C[12] << ","
-                        << COOLDB_FracClusterSizeTail_C[13] << "]");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.MeanClusterSizeTail_C=["
-                    << COOLDB_MeanClusterSizeTail_C[0] << "," << COOLDB_MeanClusterSizeTail_C[1] << "," << COOLDB_MeanClusterSizeTail_C[2]
-                    << "," << COOLDB_MeanClusterSizeTail_C[3] << "," << COOLDB_MeanClusterSizeTail_C[4] << ","
-                    << COOLDB_MeanClusterSizeTail_C[5] << "," << COOLDB_MeanClusterSizeTail_C[6]);
-    ATH_MSG_VERBOSE("," << COOLDB_MeanClusterSizeTail_C[7] << "," << COOLDB_MeanClusterSizeTail_C[8] << ","
-                        << COOLDB_MeanClusterSizeTail_C[9] << "," << COOLDB_MeanClusterSizeTail_C[10] << ","
-                        << COOLDB_MeanClusterSizeTail_C[11] << "," << COOLDB_MeanClusterSizeTail_C[12] << ","
-                        << COOLDB_MeanClusterSizeTail_C[13] << "]");
-    ATH_MSG_VERBOSE(" ");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.GapEff_A=[" << COOLDB_GapEff_A[0] << "," << COOLDB_GapEff_A[1] << "," << COOLDB_GapEff_A[2] << ","
-                                                     << COOLDB_GapEff_A[3] << "," << COOLDB_GapEff_A[4] << "," << COOLDB_GapEff_A[5] << ","
-                                                     << COOLDB_GapEff_A[6] << "]");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.PhiEff_A=[" << COOLDB_PhiEff_A[0] << "," << COOLDB_PhiEff_A[1] << "," << COOLDB_PhiEff_A[2] << ","
-                                                     << COOLDB_PhiEff_A[3] << "," << COOLDB_PhiEff_A[4] << "," << COOLDB_PhiEff_A[5] << ","
-                                                     << COOLDB_PhiEff_A[6] << "]");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.EtaEff_A=[" << COOLDB_EtaEff_A[0] << "," << COOLDB_EtaEff_A[1] << "," << COOLDB_EtaEff_A[2] << ","
-                                                     << COOLDB_EtaEff_A[3] << "," << COOLDB_EtaEff_A[4] << "," << COOLDB_EtaEff_A[5] << ","
-                                                     << COOLDB_EtaEff_A[6] << "]");
-    ATH_MSG_VERBOSE(" ");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.GapEff_C=[" << COOLDB_GapEff_C[0] << "," << COOLDB_GapEff_C[1] << "," << COOLDB_GapEff_C[2] << ","
-                                                     << COOLDB_GapEff_C[3] << "," << COOLDB_GapEff_C[4] << "," << COOLDB_GapEff_C[5] << ","
-                                                     << COOLDB_GapEff_C[6] << "]");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.PhiEff_C=[" << COOLDB_PhiEff_C[0] << "," << COOLDB_PhiEff_C[1] << "," << COOLDB_PhiEff_C[2] << ","
-                                                     << COOLDB_PhiEff_C[3] << "," << COOLDB_PhiEff_C[4] << "," << COOLDB_PhiEff_C[5] << ","
-                                                     << COOLDB_PhiEff_C[6] << "]");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.EtaEff_C=[" << COOLDB_EtaEff_C[0] << "," << COOLDB_EtaEff_C[1] << "," << COOLDB_EtaEff_C[2] << ","
-                                                     << COOLDB_EtaEff_C[3] << "," << COOLDB_EtaEff_C[4] << "," << COOLDB_EtaEff_C[5] << ","
-                                                     << COOLDB_EtaEff_C[6] << "]");
-    ATH_MSG_VERBOSE(" ");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.MeanClusterSize_A=[" << COOLDB_MeanClusterSize_A[0] << "," << COOLDB_MeanClusterSize_A[1] << ","
-                                                              << COOLDB_MeanClusterSize_A[2] << "," << COOLDB_MeanClusterSize_A[3] << ","
-                                                              << COOLDB_MeanClusterSize_A[4] << "," << COOLDB_MeanClusterSize_A[5] << ","
-                                                              << COOLDB_MeanClusterSize_A[6]);
-    ATH_MSG_VERBOSE("," << COOLDB_MeanClusterSize_A[7] << "," << COOLDB_MeanClusterSize_A[8] << "," << COOLDB_MeanClusterSize_A[9] << ","
-                        << COOLDB_MeanClusterSize_A[10] << "," << COOLDB_MeanClusterSize_A[11] << "," << COOLDB_MeanClusterSize_A[12] << ","
-                        << COOLDB_MeanClusterSize_A[13] << "]");
-    ATH_MSG_VERBOSE(" ");
-    ATH_MSG_VERBOSE("RpcDigitizationTool.MeanClusterSize_C=[" << COOLDB_MeanClusterSize_C[0] << "," << COOLDB_MeanClusterSize_C[1] << ","
-                                                              << COOLDB_MeanClusterSize_C[2] << "," << COOLDB_MeanClusterSize_C[3] << ","
-                                                              << COOLDB_MeanClusterSize_C[4] << "," << COOLDB_MeanClusterSize_C[5] << ","
-                                                              << COOLDB_MeanClusterSize_C[6]);
-    ATH_MSG_VERBOSE("," << COOLDB_MeanClusterSize_C[7] << "," << COOLDB_MeanClusterSize_C[8] << "," << COOLDB_MeanClusterSize_C[9] << ","
-                        << COOLDB_MeanClusterSize_C[10] << "," << COOLDB_MeanClusterSize_C[11] << "," << COOLDB_MeanClusterSize_C[12] << ","
-                        << COOLDB_MeanClusterSize_C[13] << "]");
-
-    for (int stationName = 2; stationName != 11; stationName++) {
-        for (int stationEta = -7; stationEta != 8; stationEta++) {
-            for (int stationPhi = 1; stationPhi != 9; stationPhi++) {
-                for (int doubletR = 1; doubletR != 3; doubletR++) {
-                    for (int doubletZ = 1; doubletZ != 4; doubletZ++) {
-                        for (int doubletPhi = 1; doubletPhi != 3; doubletPhi++) {
-                            for (int gasGap = 1; gasGap != 3; gasGap++) {
-                                for (int measphi = 0; measphi != 2; measphi++) {
-                                    bool isValid = false;
-                                    Identifier rpcId =
-                                        m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, 1, 1, 1,
-                                                                    isValid);  // last 5 arguments are: int doubletPhi, int gasGap, int
-                                                                                // measuresPhi, int strip, bool& isValid
-                                    if (!isValid) continue;
-                                    const RpcReadoutElement* rpc = detMgr->getRpcReadoutElement(rpcId);
-                                    if (!rpc) continue;
-                                    Identifier idr = rpc->identify();
-                                    if (idr == 0) continue;
-                                    Identifier atlasId = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, measphi, 1, isValid);
-                                    if (!isValid) continue;
-
-                                    if (readCdo->getEfficiencyMap().find(atlasId)->second == 1) {
-                                        ATH_MSG_VERBOSE("Effi RPC panel = 1: " << readCdo->getDeadStripMap().find(atlasId)->second << " "
-                                                                               << readCdo->getProjectedTracksMap().find(atlasId)->second
-                                                                               << " sName " << stationName << " sEta " << stationEta
-                                                                               << " sPhi " << stationPhi << " dR " << doubletR << " dZ "
-                                                                               << doubletZ << " dPhi " << doubletPhi << " Gap " << gasGap
-                                                                               << " view " << measphi);
-                                    }
-                                    if (readCdo->getEfficiencyMap().find(atlasId)->second == 0) {
-                                        ATH_MSG_VERBOSE("Effi RPC panel = 0: " << readCdo->getDeadStripMap().find(atlasId)->second << " "
-                                                                               << readCdo->getProjectedTracksMap().find(atlasId)->second
-                                                                               << " sName " << stationName << " sEta " << stationEta
-                                                                               << " sPhi " << stationPhi << " dR " << doubletR << " dZ "
-                                                                               << doubletZ << " dPhi " << doubletPhi << " Gap " << gasGap
-                                                                               << " view " << measphi);
-                                    }
-                                    if (readCdo->getEfficiencyGapMap().find(atlasId)->second == 0) {
-                                        ATH_MSG_VERBOSE("EffiGap RPC panel = 0: " << readCdo->getDeadStripMap().find(atlasId)->second << " "
-                                                                                  << readCdo->getProjectedTracksMap().find(atlasId)->second
-                                                                                  << " sName " << stationName << " sEta " << stationEta
-                                                                                  << " sPhi " << stationPhi << " dR " << doubletR << " dZ "
-                                                                                  << doubletZ << " dPhi " << doubletPhi << " Gap " << gasGap
-                                                                                  << " view " << measphi);
-                                    }
-                                    if (readCdo->getMeanClusterSizeMap().find(atlasId)->second > 3) {
-                                        ATH_MSG_VERBOSE("MeanClusterSize RPC panel > 3: "
-                                                        << readCdo->getMeanClusterSizeMap().find(atlasId)->second << " "
-                                                        << readCdo->getProjectedTracksMap().find(atlasId)->second << " sName "
-                                                        << stationName << " sEta " << stationEta << " sPhi " << stationPhi << " dR "
-                                                        << doubletR << " dZ " << doubletZ << " dPhi " << doubletPhi << " Gap " << gasGap
-                                                        << " view " << measphi);
-                                    }
-                                    if (readCdo->getFracDeadStripMap().find(atlasId)->second == 1) {
-                                        ATH_MSG_VERBOSE("Dead RPC panel: " << readCdo->getDeadStripMap().find(atlasId)->second << " "
-                                                                           << readCdo->getProjectedTracksMap().find(atlasId)->second
-                                                                           << " sName " << stationName << " sEta " << stationEta << " sPhi "
-                                                                           << stationPhi << " dR " << doubletR << " dZ " << doubletZ
-                                                                           << " dPhi " << doubletPhi << " Gap " << gasGap << " view "
-                                                                           << measphi);
-                                    }
-
-                                    if (m_DeadPanel_fromlist.find(atlasId)->second == 1) {
-                                        ATH_MSG_VERBOSE(atlasId << " Dead RPC panel from file list: "
-                                                                << " sName " << stationName << " sEta " << stationEta << " sPhi "
-                                                                << stationPhi << " dR " << doubletR << " dZ " << doubletZ << " dPhi "
-                                                                << doubletPhi << " Gap " << gasGap << " view " << measphi);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    for (int stationName = 2; stationName != 11; stationName++) {
-        for (int stationEta = -7; stationEta != 8; stationEta++) {
-            for (int stationPhi = 1; stationPhi != 9; stationPhi++) {
-                for (int doubletR = 1; doubletR != 3; doubletR++) {
-                    for (int doubletZ = 1; doubletZ != 4; doubletZ++) {
-                        for (int doubletPhi = 1; doubletPhi != 3; doubletPhi++) {
-                            for (int gasGap = 1; gasGap != 3; gasGap++) {
-                                for (int measphi = 0; measphi != 2; measphi++) {
-                                    bool isValid = false;
-                                    Identifier rpcId =
-                                        m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, 1, 1, 1,
-                                                              isValid);  // last 5 arguments are: int doubletPhi, int gasGap, int
-                                                                                // measuresPhi, int strip, bool& isValid
-                                    if (!isValid) continue;
-                                    const RpcReadoutElement* rpc = detMgr->getRpcReadoutElement(rpcId);
-                                    if (!rpc) continue;
-                                    Identifier idr = rpc->identify();
-                                    if (idr == 0) continue;
-                                    Identifier atlasId = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, measphi, 1, isValid);
-                                    if (!isValid) continue;
-
-                                    indexSName = stationName - 2;
-                                    if (indexSName > 3) indexSName = indexSName - 2;
-
-                                    float efficiency = 0.;
-                                    float efficiencygap = 0.;
-                                    float averageCS = 0.;
-                                    float FracCS1 = 0.;
-                                    float FracCS2 = 0.;
-                                    float FracCStail = 0.;
-                                    float averageCStail = 0.;
-                                    int ProjectedTracks = 0.;
-                                    float FracDeadStrip = 0.;
-
-                                    if (readCdo->getEfficiencyMap().find(atlasId) != readCdo->getEfficiencyMap().end())
-                                        efficiency = readCdo->getEfficiencyMap().find(atlasId)->second;
-                                    if (readCdo->getEfficiencyGapMap().find(atlasId) != readCdo->getEfficiencyGapMap().end())
-                                        efficiencygap = readCdo->getEfficiencyGapMap().find(atlasId)->second;
-                                    if (readCdo->getMeanClusterSizeMap().find(atlasId) != readCdo->getMeanClusterSizeMap().end())
-                                        averageCS = readCdo->getMeanClusterSizeMap().find(atlasId)->second;
-                                    if (readCdo->getFracClusterSize1Map().find(atlasId) != readCdo->getFracClusterSize1Map().end())
-                                        FracCS1 = readCdo->getFracClusterSize1Map().find(atlasId)->second;
-                                    if (readCdo->getFracClusterSize2Map().find(atlasId) != readCdo->getFracClusterSize2Map().end())
-                                        FracCS2 = readCdo->getFracClusterSize2Map().find(atlasId)->second;
-                                    FracCStail = 1.0 - FracCS1 - FracCS2;
-                                    averageCStail = averageCS - FracCS1 - 2 * FracCS2;
-                                    if (readCdo->getProjectedTracksMap().find(atlasId) != readCdo->getProjectedTracksMap().end())
-                                        ProjectedTracks = readCdo->getProjectedTracksMap().find(atlasId)->second;
-                                    if (readCdo->getFracDeadStripMap().find(atlasId) != readCdo->getFracDeadStripMap().end())
-                                        FracDeadStrip = readCdo->getFracDeadStripMap().find(atlasId)->second;
-
-                                    if (ProjectedTracks < m_CutProjectedTracks || ProjectedTracks > 10000000 || efficiency <= 0 ||
-                                        efficiency > 1 || efficiencygap <= 0 || efficiencygap > 1) {
-                                        if (stationEta >= 0) {
-                                            efficiencygap = COOLDB_GapEff_A[indexSName];
-                                            efficiency = COOLDB_PhiEff_A[indexSName];
-                                            if (measphi == 0) { efficiency = COOLDB_EtaEff_A[indexSName]; }
-                                        } else {
-                                            efficiencygap = COOLDB_GapEff_A[indexSName];
-                                            efficiency = COOLDB_PhiEff_A[indexSName];
-                                            if (measphi == 0) { efficiency = COOLDB_EtaEff_A[indexSName]; }
-                                        }
-                                    }
-                                    if (ProjectedTracks < m_CutProjectedTracks || ProjectedTracks > 10000000 ||
-                                        averageCS > m_CutMaxClusterSize || averageCS <= 1 || FracCStail < 0 || FracCS1 < 0 || FracCS2 < 0 ||
-                                        FracCStail > 1 || FracCS1 > 1 || FracCS2 > 1) {
-                                        if (stationEta >= 0) {
-                                            averageCS = COOLDB_MeanClusterSize_A[indexSName + 7];
-                                            FracCS1 = COOLDB_FracClusterSize1_A[indexSName + 7];
-                                            FracCS2 = COOLDB_FracClusterSize2_A[indexSName + 7];
-                                            averageCStail = COOLDB_MeanClusterSizeTail_A[indexSName + 7];
-                                            if (measphi == 0) {
-                                                averageCS = COOLDB_MeanClusterSize_A[indexSName];
-                                                FracCS1 = COOLDB_FracClusterSize1_A[indexSName];
-                                                FracCS2 = COOLDB_FracClusterSize2_A[indexSName];
-                                                averageCStail = COOLDB_MeanClusterSizeTail_A[indexSName];
-                                            }
-                                        } else {
-                                            averageCS = COOLDB_MeanClusterSize_A[indexSName + 7];
-                                            FracCS1 = COOLDB_FracClusterSize1_A[indexSName + 7];
-                                            FracCS2 = COOLDB_FracClusterSize2_A[indexSName + 7];
-                                            averageCStail = COOLDB_MeanClusterSizeTail_A[indexSName + 7];
-                                            if (measphi == 0) {
-                                                averageCS = COOLDB_MeanClusterSize_A[indexSName];
-                                                FracCS1 = COOLDB_FracClusterSize1_A[indexSName];
-                                                FracCS2 = COOLDB_FracClusterSize2_A[indexSName];
-                                                averageCStail = COOLDB_MeanClusterSizeTail_A[indexSName];
-                                            }
-                                        }
-                                    }
-                                    ATH_MSG_VERBOSE("Identifier " << atlasId << " sName " << stationName << " sEta " << stationEta
-                                                                  << " sPhi " << stationPhi << " dR " << doubletR << " dZ " << doubletZ
-                                                                  << " dPhi " << doubletPhi << " Gap " << gasGap << " view " << measphi);
-                                    ATH_MSG_VERBOSE(" Eff " << efficiency << " EffGap " << efficiencygap << " MeanCS " << averageCS
-                                                            << " FracCS1 " << FracCS1 << " FracCS2 " << FracCS2 << " MeanCSTail "
-                                                            << averageCStail << " FracDead " << FracDeadStrip << " Tracks "
-                                                            << ProjectedTracks);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    ATH_MSG_VERBOSE("Number of dead strip " << readCdo->getDeadStripMap().size());
-    for (int stationName = 2; stationName != 11; stationName++) {
-        for (int stationEta = -7; stationEta != 8; stationEta++) {
-            for (int stationPhi = 1; stationPhi != 9; stationPhi++) {
-                for (int doubletR = 1; doubletR != 3; doubletR++) {
-                    for (int doubletZ = 1; doubletZ != 4; doubletZ++) {
-                        for (int doubletPhi = 1; doubletPhi != 3; doubletPhi++) {
-                            for (int gasGap = 1; gasGap != 3; gasGap++) {
-                                for (int measphi = 0; measphi != 2; measphi++) {
-                                    for (int strip = 1; strip != 81; strip++) {
-                                        bool isValid = false;
-                                        Identifier rpcId = m_idHelper->channelID(
-                                            stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, 1, 1, 1, 
-                                            isValid);  // last 5 arguments are: int doubletPhi, int gasGap, int measuresPhi, int strip,
-                                                        // bool& isValid
-                                        if (!isValid) continue;
-                                        const RpcReadoutElement* rpc = detMgr->getRpcReadoutElement(rpcId);
-                                        if (!rpc) continue;
-                                        Identifier idr = rpc->identify();
-                                        if (idr == 0) continue;
-                                        Identifier atlasId = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, measphi, strip, isValid);
-                                        if (!isValid) continue;
-                                        int stripstatus = readCdo->getDeadStripIntMap().find(atlasId)->second;
-                                        if (stripstatus != 1) continue;
-                                        ATH_MSG_VERBOSE("Identifier " << atlasId << " sName " << stationName << " sEta " << stationEta
-                                                                      << " sPhi " << stationPhi << " dR " << doubletR << " dZ " << doubletZ
-                                                                      << " dPhi " << doubletPhi << " Gap " << gasGap << " view " << measphi
-                                                                      << " strip " << strip << " stripstatus " << stripstatus);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return sc;
-}
-
 double RpcDigitizationTool::FCPEfficiency(HepMC::ConstGenParticlePtr genParticle) {
     double qcharge = 1.;
     double qbetagamma = -1.;

@@ -152,16 +152,12 @@ private:
     Gaudi::Property<double> m_timeWindowLowerOffset{this, "WindowLowerOffset", -100., "digitization window lower limit"};
     Gaudi::Property<double> m_timeWindowUpperOffset{this, "WindowUpperOffset", +150., "digitization window lower limit"};
 
-    /** Average calibration methods and parameters */
-    StatusCode PrintCalibrationVector();
     /** Evaluate detection efficiency */
     StatusCode DetectionEfficiency(const EventContext& ctx, const Identifier& ideta, const Identifier& idphi, bool& undefinedPhiStripStatus,
                                    CLHEP::HepRandomEngine* rndmEngine, const HepMcParticleLink& trkParticle);
     double FCPEfficiency(HepMC::ConstGenParticlePtr genParticle);
     /** */
     int ClusterSizeEvaluation(const EventContext& ctx, const Identifier& id, float xstripnorm, CLHEP::HepRandomEngine* rndmEngine);
-    /** CoolDB */
-    StatusCode DumpRPCCalibFromCoolDB(const EventContext& ctx);
 
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey {this, "DetectorManagerKey",  "MuonDetectorManager", 
                                                             "Key of input MuonDetectorManager condition data"};
@@ -188,8 +184,6 @@ private:
 
     Gaudi::Property<bool> m_turnON_efficiency{this, "turnON_efficiency", true, ""};
     Gaudi::Property<bool> m_kill_deadstrips{this, "KillDeadStrips", false, ""};              // gabriele
-    Gaudi::Property<bool> m_applyEffThreshold{this, "ApplyEfficiencyThreshold", false, ""};  // stefania
-    Gaudi::Property<float> m_Minimum_efficiency{this, "Minimum_efficiency", 0.5, ""};        // gabriele
     Gaudi::Property<bool> m_turnON_clustersize{this, "turnON_clustersize", true, ""};
     Gaudi::Property<int> m_testbeam_clustersize{this, "testbeam_clustersize", 1, ""};
     Gaudi::Property<int> m_FirstClusterSizeInTail{this, "FirstClusterSizeInTail", 3, ""};
@@ -220,7 +214,6 @@ private:
     Gaudi::Property<float> m_FracClusterSizeTail_BIS78{this, "FracClusterSizeTail_BIA78", 0.05, ""};
     Gaudi::Property<float> m_MeanClusterSizeTail_BIS78{this, "MeanClusterSizeTail_BIA78", 3.5, ""};
 
-    std::vector<Identifier> m_DeadStripPanel;
 
     bool m_SetPhiOn{false};
     bool m_SetEtaOn{false};
@@ -245,7 +238,7 @@ protected:
     Gaudi::Property<std::string> m_RPC_TimeSchema{this, "RPC_TimeSchema", "RPC_TimeSchema", "Tag info name of Rpc Time Info"};
     Gaudi::Property<bool> m_sdoAreOnlyDigits{this, "RPCSDOareRPCDigits", true,
                                              "decide is SDO deposits are saved for all G4 hits or only for those accepted as digits"};
-    Gaudi::Property<bool> m_PrintCalibrationVector{this, "PrintCalibrationVector", false, "Printout Eff and CS average parameters"};
+
     Gaudi::Property<bool> m_Efficiency_fromCOOL{this, "Efficiency_fromCOOL", false, "Read efficiency from CoolDB"};
     Gaudi::Property<bool> m_EfficiencyPatchForBMShighEta{this, "EfficiencyPatchForBMShighEta", false,
                                                          "special patch to be true only when m_Efficiency_fromCOOL=true and "
@@ -256,20 +249,13 @@ protected:
     Gaudi::Property<bool> m_BOG_BOF_DoubletR2_OFF{this, "Force_BOG_BOF_DoubletR2_OFF", false, "Turn-off BOG and BOF with DoubletR=2"};
     Gaudi::Property<bool> m_ignoreRunDepConfig{this, "IgnoreRunDependentConfig", false,
                                                "true if we want to force the RUN1/RUN2 dependent options"};
-    Gaudi::Property<bool> m_PanelId_OFF_fromlist{this, "PanelId_OFF_fromlist", false, "Turn-off PanelId from file m_FileName_DeadPanels"};
-    Gaudi::Property<std::string> m_FileName_DeadPanels{this, "FileName_DeadPanels", "PermanentDeadPanels.txt",
-                                                       "File with Dead panel PanelId list"};
-    Gaudi::Property<bool> m_PanelId_OK_fromlist{this, "PanelId_OK_fromlist", false, "Turn-on PanelId from file m_FileName_GoodPanels"};
     Gaudi::Property<bool> m_Efficiency_BIS78_fromCOOL{this, "Efficiency_BIS78_fromCOOL", false, " read BIS78 Efficiency from COOL DB"};
     Gaudi::Property<bool> m_ClusterSize_BIS78_fromCOOL{this, "ClusterSize_BIS78_fromCOOL", false, " read BIS78 Cluster Size from COOL DB"};
-    Gaudi::Property<std::string> m_FileName_GoodPanels{this, "FileName_GoodPanels", "PermanentGoodPanels.txt",
-                                                       " File with Good panel PanelId list"};
 
     std::map<Identifier, int> m_DeadPanel_fromlist;
     std::map<Identifier, int> m_GoodPanel_fromlist;
 
     Gaudi::Property<bool> m_RPCInfoFromDb{this, "RPCInfoFromDb", false, ""};
-    Gaudi::Property<bool> m_DumpFromDbFirst{this, "DumpFromDbFirst", false, ""};
     Gaudi::Property<float> m_CutMaxClusterSize{this, "CutMaxClusterSize", 5.0, ""};
     Gaudi::Property<int> m_CutProjectedTracks{this, "CutProjectedTracks", 100, ""};
 
