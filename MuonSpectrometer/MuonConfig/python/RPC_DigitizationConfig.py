@@ -124,7 +124,7 @@ def RPC_OutputCfg(flags):
     if flags.Output.doWriteRDO:
         ItemList = ["RpcPadContainer#*"]
         if flags.Muon.enableNRPC:
-            ItemList += [ 'xAOD::NRPCRDOContainer#NRPCRDO' , 'xAOD::NRPCRDOAuxContainer#NRPCRDOAux.' ]
+            ItemList += [ 'xAOD::NRPCRDOContainer#*' , 'xAOD::NRPCRDOAuxContainer#*' ]
         if flags.Digitization.EnableTruth:
             ItemList += ["MuonSimDataCollection#*"]
             acc.merge(TruthDigitizationOutputCfg(flags))

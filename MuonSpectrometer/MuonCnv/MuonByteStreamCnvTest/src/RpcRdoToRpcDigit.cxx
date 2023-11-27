@@ -142,6 +142,7 @@ StatusCode RpcRdoToRpcDigit::decodeNRpc(const EventContext& ctx, RpcDigitContain
         
         /// Fill the cabling object
         NrpcCablingData conv_obj{};
+        conv_obj.subDetector = rdo->subdetector();
         conv_obj.tdcSector = rdo->tdcsector();
         conv_obj.tdc = rdo->tdc();
         conv_obj.channelId = rdo->channel();
@@ -155,11 +156,7 @@ StatusCode RpcRdoToRpcDigit::decodeNRpc(const EventContext& ctx, RpcDigitContain
             return StatusCode::FAILURE;
         }
         /// Find the proper Digit collection
-        IdentifierHash modHash{0};
-        if (id_helper.get_module_hash(chanId, modHash)) {
-            ATH_MSG_FATAL("Invalid hash built from "<<m_idHelperSvc->toString(chanId));
-            return StatusCode::FAILURE;
-        }
+        IdentifierHash modHash = m_idHelperSvc->moduleHash(chanId);
         std::unique_ptr<RpcDigitCollection>& coll = digit_map[modHash];
         /// The collection has not been made thus far
         if (!coll) {
