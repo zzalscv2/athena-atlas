@@ -27,7 +27,6 @@ class xAODTruthParticleLinkVector : public DataVector<xAODTruthParticleLink> {
 public:
   ElementLink<xAOD::TruthParticleContainer> find( const HepMcParticleLink& hepMCLink ) const {
     auto result = std::lower_bound(begin(),end(), hepMCLink, [](const xAODTruthParticleLink* l, const HepMcParticleLink& hepLink ) { return l->first < hepLink;});
-    // { return l->first.barcode() < hepLink.barcode(); });
     if( result != end() ) {
          if( (*result)->first == hepMCLink ) return (*result)->second;
     }
