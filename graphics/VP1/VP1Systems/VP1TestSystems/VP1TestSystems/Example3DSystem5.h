@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EXAMPLE3DSYSTEM5_H
@@ -38,7 +38,7 @@ public:
   void userChangedSelection(SoCooperativeSelection*, QSet<SoNode*>, QSet<SoPath*>);
   QWidget * buildController();
 
-private slots:
+private Q_SLOTS:
   void ptCutChanged(double);
   void updateSelectionMode( bool single );
 

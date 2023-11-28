@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKINGSURFACESSYSTEM_H
@@ -28,7 +28,7 @@ public:
   void userChangedSelection(SoCooperativeSelection*, QSet<SoNode*>, QSet<SoPath*>);
   QWidget * buildController();
 
-private slots:
+private Q_SLOTS:
   void updateSelectionMode( bool single );
 
 private:
