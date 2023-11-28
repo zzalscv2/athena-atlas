@@ -33,6 +33,7 @@ class LArTTL1Container : public DataVector<LArTTL1> {
   */
  
    LArTTL1Container();
+   LArTTL1Container(SG::OwnershipPolicy ownPolicy) : DataVector<LArTTL1>(ownPolicy) {};
    
 /**
   * destructor 
