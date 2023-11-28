@@ -1,6 +1,6 @@
 #include <MyAnalysis/ONNXUtils.h>
 
-ONNXWrapper::ONNXWrapper(std::string model_path) {
+ONNXWrapper::ONNXWrapper(const std::string model_path) {
     
     // Use the path resolver to find the location of the network .onnx file
     m_modelPath = PathResolverFindCalibFile(model_path);
@@ -28,7 +28,7 @@ ONNXWrapper::ONNXWrapper(std::string model_path) {
 
     // iterate over all input nodes
     for (std::size_t i = 0; i < m_nr_inputs; i++) {
-      const char* input_name = m_onnxSession->GetInputNameAllocated(i, m_allocator);
+      const char* input_name = m_onnxSession->GetInputNameAllocated(i, m_allocator).release();
 
       m_input_names.push_back(input_name);
 
@@ -37,45 +37,13 @@ ONNXWrapper::ONNXWrapper(std::string model_path) {
 
     // iterate over all output nodes
     for(std::size_t i = 0; i < m_nr_output; i++ ) {
-      const char* output_name = m_onnxSession->GetOutputNameAllocated(i, m_allocator);
+      const char* output_name = m_onnxSession->GetOutputNameAllocated(i, m_allocator).release();
 
       m_output_names.push_back(output_name);
 
       m_output_dims[output_name] = getShape(m_onnxSession->GetOutputTypeInfo(i));
 
     }
-}
-
-std::map<std::string, std::vector<int64_t>> ONNXWrapper::GetModelInputs() {
-  std::map<std::string, std::vector<int64_t>> ModelInputINFO_map;
-
-  for(std::size_t i = 0; i < m_nr_inputs; i++ ) {
-    ModelInputINFO_map[m_input_names.at(i)] = m_input_dims[m_input_names.at(i)];
-  }
-  return ModelInputINFO_map;
-}
-
-std::map<std::string, std::vector<int64_t>> ONNXWrapper::GetModelOutputs() {
-  std::map<std::string, std::vector<int64_t>> ModelOutputINFO_map;
-
-  for(std::size_t i = 0; i < m_nr_output; i++ ) {
-    ModelOutputINFO_map[m_output_names.at(i)] = m_output_dims[m_output_names.at(i)];
-  }
-  return ModelOutputINFO_map;
-}
-
-std::map<std::string, std::string> ONNXWrapper::GetMETAData() {
-  std::map<std::string, std::string> METAData_map;
-  // Ort::Session& session ATLAS_THREAD_SAFE = *m_onnxSession;
-  auto metadata = m_onnxSession->GetModelMetadata();
-  int64_t nkeys = 0;
-  char** keys = metadata.GetCustomMetadataMapKeysAllocated(m_allocator, nkeys);
-
-  for (int64_t i = 0; i < nkeys; i++) {
-    METAData_map[keys[i]]=this->GetMETADataByKey(keys[i]);
-  }
-
-  return METAData_map;
 }
 
 std::map<std::string, std::vector<float>> ONNXWrapper::Run(
@@ -91,11 +59,10 @@ std::map<std::string, std::vector<float>> ONNXWrapper::Run(
       
       throw std::invalid_argument("For input '"+p.first+"' length not compatible with model. Expect a multiple of "+std::to_string(n)+", got "+std::to_string(p.second.size()));
     }
-    else if (  p.second.size()!=(n_batches*n)){
-      throw std::invalid_argument("number of batches not compatible with length of vector");
+    if (  p.second.size()!=(n_batches*n)){
+      throw std::invalid_argument("Number of batches not compatible with length of vector");
     }
-
-    } 
+    }
     // Create a CPU tensor to be used as input
     Ort::MemoryInfo memory_info("Cpu", OrtDeviceAllocator, 0, OrtMemTypeDefault);
 
@@ -117,7 +84,7 @@ std::map<std::string, std::vector<float>> ONNXWrapper::Run(
 
     // init output tensor and fill with zeros
     std::map<std::string, std::vector<float>> outputs;
-    for ( const auto &p : m_output_dims ) {     
+    for ( const auto &p : m_output_dims ) {
       std::vector<int64_t> out_dims = p.second;
       out_dims.at(0) = n_batches;
       // init output
@@ -148,37 +115,68 @@ std::map<std::string, std::vector<float>> ONNXWrapper::Run(
     }
 
 
-std::string ONNXWrapper::GetMETADataByKey(const char * key){
-  auto metadata = m_onnxSession->GetModelMetadata();
-  return metadata.LookupCustomMetadataMapAllocated(key, m_allocator);
+const std::map<std::string, std::vector<int64_t>> ONNXWrapper::GetModelInputs() {
+  std::map<std::string, std::vector<int64_t>> ModelInputINFO_map;
+
+  for(std::size_t i = 0; i < m_nr_inputs; i++ ) {
+    ModelInputINFO_map[m_input_names.at(i)] = m_input_dims[m_input_names.at(i)];
+  }
+  return ModelInputINFO_map;
 }
 
-std::vector<const char*> ONNXWrapper::getInputNames(){
+const std::map<std::string, std::vector<int64_t>> ONNXWrapper::GetModelOutputs() {
+  std::map<std::string, std::vector<int64_t>> ModelOutputINFO_map;
+
+  for(std::size_t i = 0; i < m_nr_output; i++ ) {
+    ModelOutputINFO_map[m_output_names.at(i)] = m_output_dims[m_output_names.at(i)];
+  }
+  return ModelOutputINFO_map;
+}
+
+const std::map<std::string, std::string> ONNXWrapper::GetMETAData() {
+  std::map<std::string, std::string> METAData_map;
+  auto metadata = m_onnxSession->GetModelMetadata();
+  int64_t nkeys = 0;
+  char** keys = metadata.GetCustomMetadataMapKeys(m_allocator, nkeys);
+
+  for (int64_t i = 0; i < nkeys; i++) {
+    METAData_map[keys[i]]=this->GetMETADataByKey(keys[i]);
+  }
+
+  return METAData_map;
+}
+
+const std::string& ONNXWrapper::GetMETADataByKey(const char * key){
+  auto metadata = m_onnxSession->GetModelMetadata();
+  return metadata.LookupCustomMetadataMap(key, m_allocator);
+}
+
+const std::vector<const char*>& ONNXWrapper::getInputNames(){
   //put the model access for input here
   return m_input_names;
 }
 
-std::vector<const char*> ONNXWrapper::getOutputNames(){
+const std::vector<const char*>& ONNXWrapper::getOutputNames(){
   //put the model access for outputs here
   return m_output_names;
 }
 
-std::vector<int64_t> ONNXWrapper::getInputShape(int input_nr=0){
+const std::vector<int64_t>& ONNXWrapper::getInputShape(int input_nr=0){
   //put the model access for input here
   std::vector<const char*> names = getInputNames();
   return m_input_dims[names.at(input_nr)];
 }
 
-std::vector<int64_t> ONNXWrapper::getOutputShape(int output_nr=0){
+const std::vector<int64_t>& ONNXWrapper::getOutputShape(int output_nr=0){
   //put the model access for outputs here
   std::vector<const char*> names = getOutputNames();
   return m_output_dims[names.at(output_nr)];
 }
 
-int ONNXWrapper::getNumInputs(){ return m_input_names.size(); }
-int ONNXWrapper::getNumOutputs(){ return m_output_names.size(); }
+int ONNXWrapper::getNumInputs() const { return m_input_names.size(); }
+int ONNXWrapper::getNumOutputs() const { return m_output_names.size(); }
 
-std::vector<int64_t> ONNXWrapper::getShape(Ort::TypeInfo model_info) {
+const std::vector<int64_t> ONNXWrapper::getShape(Ort::TypeInfo model_info) {
       auto tensor_info = model_info.GetTensorTypeAndShapeInfo();
       std::vector<int64_t> dims = tensor_info.GetShape();
       dims[0]=1;

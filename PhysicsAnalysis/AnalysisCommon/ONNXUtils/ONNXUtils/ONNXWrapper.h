@@ -45,29 +45,29 @@ class ONNXWrapper {
     // name of the outputs
     std::vector<const char*> m_output_names;
     std::vector<const char*> m_input_names;
-    std::vector<int64_t> getShape(Ort::TypeInfo model_info);
+    const std::vector<int64_t> getShape(Ort::TypeInfo model_info);
 
   public:
     // Constructor with parameters
 
-    ONNXWrapper(std::string model_path);
+    ONNXWrapper(const std::string model_path);
     
     std::map<std::string, std::vector<float>> Run(
       std::map<std::string,
       std::vector<float>> inputs,
       int n_batches=1);
 
-    std::map<std::string, std::vector<int64_t>> GetModelInputs();
-    std::map<std::string, std::vector<int64_t>> GetModelOutputs();
+    const std::map<std::string, std::vector<int64_t>> GetModelInputs();
+    const std::map<std::string, std::vector<int64_t>> GetModelOutputs();
     
-    std::map<std::string, std::string> GetMETAData();
-    std::string GetMETADataByKey(const char * key);
-    std::vector<int64_t> getInputShape(int input_nr);
-    std::vector<int64_t> getOutputShape(int output_nr);
-    std::vector<const char*> getInputNames();
-    std::vector<const char*> getOutputNames();
-    int getNumInputs();
-    int getNumOutputs();
+    const std::map<std::string, std::string> GetMETAData();
+    const std::string& GetMETADataByKey(const char * key);
+    const std::vector<int64_t>& getInputShape(int input_nr);
+    const std::vector<int64_t>& getOutputShape(int output_nr);
+    const std::vector<const char*>& getInputNames();
+    const std::vector<const char*>& getOutputNames();
+    int getNumInputs() const;
+    int getNumOutputs() const;
 };
 
 #endif
