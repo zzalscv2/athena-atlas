@@ -113,6 +113,9 @@ def fromRunArgs(runArgs):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     cfg.merge(OutputStreamCfg(flags, 'RDO', takeItemsFromInput = True))
 
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    cfg.merge(SetupMetaDataForStreamCfg(flags, 'RDO'))
+
     # Silence HepMcParticleLink warnings
     from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
     cfg.merge(DigitizationMessageSvcCfg(flags))
