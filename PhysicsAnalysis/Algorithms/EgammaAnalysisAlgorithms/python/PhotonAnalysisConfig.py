@@ -155,6 +155,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         self.addOption ('qualityWP', None, type=str)
         self.addOption ('isolationWP', None, type=str)
         self.addOption ('recomputeIsEM', False, type=bool)
+        self.addOption ('doFSRSelection', False, type=bool)
         self.addOption ('noEffSF', False, type=bool, info='disable all scale factors')
 
     def makeAlgs (self, config) :
@@ -193,6 +194,14 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
         config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
+
+        # Set up the FSR selection
+        if self.doFSRSelection :
+            # save the flag set for the WP
+            wpFlag = alg.selectionDecoration.split(",")[0]
+            alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg' + postfix + '_ph') # added extra postfix to avoid name clash with electrons
+            alg.selectionDecoration = wpFlag
+            alg.ElectronOrPhotonContKey = config.readName (self.containerName)
 
         # Set up the isolation selection algorithm:
         if self.isolationWP != 'NonIso' :

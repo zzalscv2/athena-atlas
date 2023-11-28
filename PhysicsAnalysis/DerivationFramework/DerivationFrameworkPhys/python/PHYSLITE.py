@@ -17,6 +17,11 @@ from AthenaConfiguration.Enums import MetadataCategory
 def CPAlgorithmsCfg(flags):
     """do the CP algorithm configuration for PHYSLITE"""
 
+    from AthenaCommon.Logging import logging
+    logPLCPAlgCfg = logging.getLogger('PLCPAlgCfg')
+    logPLCPAlgCfg.info('****************** STARTING PHYSLITE CPAlgorithmsCfg *****************')
+
+
     from AnalysisAlgorithmsConfig.ConfigFactory import makeConfig
     from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
     configSeq = ConfigSequence ()
@@ -34,41 +39,10 @@ def CPAlgorithmsCfg(flags):
         configSeq.setOptionValue ('.files', flags.Input.Files)
         configSeq.setOptionValue ('.useDefaultConfig', True)
 
-    # set up the electron analysis config (For SiHits electrons, use: LooseLHElectronSiHits.NonIso):
-    subConfig = makeConfig ('Electrons', 'AnalysisElectrons')
-    subConfig.setOptionValue ('.trackSelection', False)
-    subConfig.setOptionValue ('.isolationCorrection', True)
-    subConfig.setOptionValue ('.minPt', 0.)
-    configSeq += subConfig
-    subConfig = makeConfig ('Electrons.Selection', 'AnalysisElectrons.loose')
-    subConfig.setOptionValue ('.likelihoodWP', 'LooseLHElectron')
-    subConfig.setOptionValue ('.isolationWP', 'NonIso')
-    subConfig.setOptionValue ('.noEffSF', True)
-    configSeq += subConfig
-    subConfig = makeConfig ('Output.Thinning', 'AnalysisElectrons.loose')
-    subConfig.setOptionValue ('.selectionName', 'loose')
-    subConfig.setOptionValue ('.deepCopy', True)
-    subConfig.setOptionValue ('.noUniformSelection', True)
-    configSeq += subConfig
+    # set up the muon analysis algorithm config (must come before electrons and photons to allow FSR collection):
 
-    # set up the photon analysis config:                                       
-    subConfig = makeConfig ('Photons', 'AnalysisPhotons')
-    subConfig.setOptionValue ('.recomputeIsEM', False)
-    subConfig.setOptionValue ('.minPt', 0.)
-    configSeq += subConfig
-    subConfig = makeConfig ('Photons.Selection', 'AnalysisPhotons.loose')
-    subConfig.setOptionValue ('.qualityWP', 'Loose')
-    subConfig.setOptionValue ('.isolationWP', 'Undefined')
-    subConfig.setOptionValue ('.recomputeIsEM', False)
-    subConfig.setOptionValue ('.noEffSF', True)
-    configSeq += subConfig
-    subConfig = makeConfig ('Output.Thinning', 'AnalysisPhotons.loose')
-    subConfig.setOptionValue ('.selectionName', 'loose')
-    subConfig.setOptionValue ('.deepCopy', True)
-    subConfig.setOptionValue ('.noUniformSelection', True)
-    configSeq += subConfig
+    logPLCPAlgCfg.info('Do Muons')
 
-    # set up the muon analysis algorithm config:
     subConfig = makeConfig ('Muons', 'AnalysisMuons')
     subConfig.setOptionValue ('.trackSelection', False)
     configSeq += subConfig
@@ -81,6 +55,50 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
     configSeq += subConfig
+
+    # set up the electron analysis config (For SiHits electrons, use: LooseLHElectronSiHits.NonIso):
+
+    logPLCPAlgCfg.info('Do Electrons')
+
+    subConfig = makeConfig ('Electrons', 'AnalysisElectrons')
+    subConfig.setOptionValue ('.trackSelection', False)
+    subConfig.setOptionValue ('.isolationCorrection', True)
+    subConfig.setOptionValue ('.minPt', 0.)
+    configSeq += subConfig
+    subConfig = makeConfig ('Electrons.Selection', 'AnalysisElectrons.loose')
+    subConfig.setOptionValue ('.likelihoodWP', 'LooseLHElectron')
+    subConfig.setOptionValue ('.isolationWP', 'NonIso')
+    subConfig.setOptionValue ('.doFSRSelection', True)
+    subConfig.setOptionValue ('.noEffSF', True)
+    configSeq += subConfig
+    subConfig = makeConfig ('Output.Thinning', 'AnalysisElectrons.loose')
+    subConfig.setOptionValue ('.selectionName', 'loose')
+    subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.noUniformSelection', True)
+    configSeq += subConfig
+
+    # set up the photon analysis config:                                       
+
+    logPLCPAlgCfg.info('Do Photons')
+
+    subConfig = makeConfig ('Photons', 'AnalysisPhotons')
+    subConfig.setOptionValue ('.recomputeIsEM', False)
+    subConfig.setOptionValue ('.minPt', 0.)
+    configSeq += subConfig
+    subConfig = makeConfig ('Photons.Selection', 'AnalysisPhotons.loose')
+    subConfig.setOptionValue ('.qualityWP', 'Loose')
+    subConfig.setOptionValue ('.isolationWP', 'Undefined')
+    subConfig.setOptionValue ('.doFSRSelection', True)
+    subConfig.setOptionValue ('.recomputeIsEM', False)
+    subConfig.setOptionValue ('.noEffSF', True)
+    configSeq += subConfig
+    subConfig = makeConfig ('Output.Thinning', 'AnalysisPhotons.loose')
+    subConfig.setOptionValue ('.selectionName', 'loose')
+    subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.noUniformSelection', True)
+    configSeq += subConfig
+
+    
 
     # set up the tau analysis algorithm config:                                                    
     # Commented for now due to use of public tools
@@ -341,8 +359,8 @@ def PHYSLITECfg(flags):
    
     from DerivationFrameworkMuons.MuonsCommonConfig import MuonVariablesCfg    
     PHYSLITESlimmingHelper.ExtraVariables = [ 
-        'AnalysisElectrons.trackParticleLinks.pt.eta.phi.m.charge.author.DFCommonElectronsLHVeryLoose.DFCommonElectronsLHLoose.DFCommonElectronsLHLooseBL.DFCommonElectronsLHMedium.DFCommonElectronsLHTight.DFCommonElectronsLHVeryLooseIsEMValue.DFCommonElectronsLHLooseIsEMValue.DFCommonElectronsLHLooseBLIsEMValue.DFCommonElectronsLHMediumIsEMValue.DFCommonElectronsLHTightIsEMValue.DFCommonElectronsECIDS.DFCommonElectronsECIDSResult.topoetcone20.topoetcone20ptCorrection.neflowisol20.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.topoetcone20_CloseByCorr.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.caloClusterLinks.ambiguityLink.TruthLink.truthParticleLink.truthOrigin.truthType.truthPdgId.firstEgMotherTruthType.firstEgMotherTruthOrigin.firstEgMotherTruthParticleLink.firstEgMotherPdgId.ambiguityType.OQ',
-        'AnalysisPhotons.pt.eta.phi.m.author.OQ.DFCommonPhotonsIsEMLoose.DFCommonPhotonsIsEMTight.DFCommonPhotonsIsEMTightIsEMValue.DFCommonPhotonsCleaning.DFCommonPhotonsCleaningNoTime.ptcone20.topoetcone20.topoetcone40.topoetcone20ptCorrection.topoetcone40ptCorrection.topoetcone20_CloseByCorr.topoetcone40_CloseByCorr.ptcone20_CloseByCorr.caloClusterLinks.vertexLinks.ambiguityLink.TruthLink.truthParticleLink.truthOrigin.truthType',
+        'AnalysisElectrons.trackParticleLinks.f1.pt.eta.phi.m.charge.author.DFCommonElectronsLHVeryLoose.DFCommonElectronsLHLoose.DFCommonElectronsLHLooseBL.DFCommonElectronsLHMedium.DFCommonElectronsLHTight.DFCommonElectronsLHVeryLooseIsEMValue.DFCommonElectronsLHLooseIsEMValue.DFCommonElectronsLHLooseBLIsEMValue.DFCommonElectronsLHMediumIsEMValue.DFCommonElectronsLHTightIsEMValue.DFCommonElectronsECIDS.DFCommonElectronsECIDSResult.topoetcone20.topoetcone20ptCorrection.neflowisol20.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.topoetcone20_CloseByCorr.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.caloClusterLinks.ambiguityLink.TruthLink.truthParticleLink.truthOrigin.truthType.truthPdgId.firstEgMotherTruthType.firstEgMotherTruthOrigin.firstEgMotherTruthParticleLink.firstEgMotherPdgId.ambiguityType.OQ',
+        'AnalysisPhotons.f1.pt.eta.phi.m.author.OQ.DFCommonPhotonsIsEMLoose.DFCommonPhotonsIsEMTight.DFCommonPhotonsIsEMTightIsEMValue.DFCommonPhotonsCleaning.DFCommonPhotonsCleaningNoTime.ptcone20.topoetcone20.topoetcone40.topoetcone20ptCorrection.topoetcone40ptCorrection.topoetcone20_CloseByCorr.topoetcone40_CloseByCorr.ptcone20_CloseByCorr.caloClusterLinks.vertexLinks.ambiguityLink.TruthLink.truthParticleLink.truthOrigin.truthType',
         'GSFTrackParticles.chiSquared.phi.d0.theta.qOverP.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.z0.vz.charge.vertexLink.numberOfPixelHits.numberOfSCTHits.expectInnermostPixelLayerHit.expectNextToInnermostPixelLayerHit.numberOfInnermostPixelLayerHits.numberOfNextToInnermostPixelLayerHits.originalTrackParticle',
         'GSFConversionVertices.trackParticleLinks.x.y.z.px.py.pz.pt1.pt2.neutralParticleLinks.minRfirstHit',
         'egammaClusters.calE.calEta.calPhi.calM.e_sampl.eta_sampl.ETACALOFRAME.PHICALOFRAME.ETA2CALOFRAME.PHI2CALOFRAME.constituentClusterLinks',

@@ -132,6 +132,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('isolationWP', None, type=str)
         self.addOption ('recomputeLikelihood', False, type=bool)
         self.addOption ('chargeIDSelection', False, type=bool)
+        self.addOption ('doFSRSelection', False, type=bool)
         self.addOption ('noEffSF', False, type=bool, info='disable all scale factors')
 
 
@@ -141,7 +142,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         if selectionPostfix != '' and selectionPostfix[0] != '_' :
             selectionPostfix = '_' + selectionPostfix
 
-        # The setup below is inappropriate for Run 1
+        # The setup below is inappropriate for Run 1 and we don't have a use case for Run 4 (yet)
         if config.geometry() is LHCPeriod.Run1:
             raise ValueError ("Can't set up the ElectronWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
 
@@ -197,6 +198,14 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
         config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
+
+        # Set up the FSR selection
+        if self.doFSRSelection :
+            # save the flag set for the WP
+            wpFlag = alg.selectionDecoration.split(",")[0]
+            alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg' + postfix )
+            alg.selectionDecoration = wpFlag
+            alg.ElectronOrPhotonContKey = config.readName (self.containerName)
 
         # Set up the isolation selection algorithm:
         if self.isolationWP != 'NonIso' :
