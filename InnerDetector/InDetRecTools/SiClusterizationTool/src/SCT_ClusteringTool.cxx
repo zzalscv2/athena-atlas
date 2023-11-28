@@ -308,12 +308,13 @@ namespace InDet {
   SCT_ClusteringTool::clusterize(const InDetRawDataCollection<SCT_RDORawData>& collection,
                                  const SCT_ID& idHelper,
                                  const InDet::SiDetectorElementStatus *sctDetElStatus,
+                                 SCTClusteringCache& cache,
                                  DataPool<SCT_Cluster>* dataItemsPool,
                                  const EventContext& ctx) const
   {
     ATH_MSG_VERBOSE ("SCT_ClusteringTool::clusterize()");
 
-    if (m_doFastClustering) return fastClusterize(collection, idHelper, sctDetElStatus, dataItemsPool, ctx);
+    if (m_doFastClustering) return fastClusterize(collection, idHelper, sctDetElStatus, cache, dataItemsPool, ctx);
 
     SCT_ClusterCollection* nullResult(nullptr);
     if (collection.empty()) {
@@ -326,16 +327,12 @@ namespace InDet {
     if (collection.size() not_eq 1) std::sort(collectionCopy.begin(), collectionCopy.end(), strip_less_than());
 
     // Vector of identifiers in a cluster (most likely is that there is one strip in the cluster)
-    IdVec_t currentVector;
     // Vector of clusters to make the cluster collection (most likely equal to collection size)
-    std::vector<IdVec_t> idGroups;
-    idGroups.reserve(collection.size());
+    cache.currentVector.clear();
+    cache.idGroups.clear();
+    cache.tbinGroups.clear();
     int n01X(0);
     int n11X(0);
-
-    std::vector<uint16_t> tbinGroups;
-    tbinGroups.reserve(collection.size());
-
     unsigned int previousStrip(0); // Should be ok?
     uint16_t hitsInThirdTimeBin(0);
     int stripCount(0);
@@ -347,19 +344,19 @@ namespace InDet {
       const int             layer(idHelper.layer_disk(firstStripId));
 
       // Flushes the vector every time a non-adjacent strip is found
-      if (not adjacent(thisStrip, previousStrip) and not(currentVector.empty())) {
+      if (not adjacent(thisStrip, previousStrip) and not(cache.currentVector.empty())) {
         if (m_majority01X) {
           if (n01X >= n11X) {
-            idGroups.push_back(currentVector);
+            cache.idGroups.push_back(cache.currentVector);
           }
         } else {
           // Add this group to existing groups (and flush)
-          idGroups.push_back(currentVector);
+          cache.idGroups.push_back(cache.currentVector);
         }
-        currentVector.clear();
+        cache.currentVector.clear();
         n01X=0;
         n11X=0;
-        tbinGroups.push_back(hitsInThirdTimeBin);
+        cache.tbinGroups.push_back(hitsInThirdTimeBin);
         hitsInThirdTimeBin =0;
         stripCount = 0;
       }
@@ -393,28 +390,28 @@ namespace InDet {
       //                or (b) pushing a new set of ids onto an empty vector
       if (passTiming or m_majority01X) {
         if (m_useRowInformation) {
-           addStripsToClusterInclRows(firstStripId, nStrips, currentVector, idGroups, idHelper,sctDetElStatus, ctx); // Note this takes the current vector only
+           addStripsToClusterInclRows(firstStripId, nStrips, cache.currentVector, cache.idGroups, idHelper,sctDetElStatus, ctx); // Note this takes the current vector only
         } else if (not m_checkBadChannels) {
-          addStripsToCluster(firstStripId, nStrips, currentVector, idHelper); // Note this takes the current vector only
+          addStripsToCluster(firstStripId, nStrips, cache.currentVector, idHelper); // Note this takes the current vector only
         } else {
-          addStripsToClusterWithChecks(firstStripId, nStrips, currentVector, idGroups, idHelper,sctDetElStatus, ctx); // This one includes the groups of vectors as well
+          addStripsToClusterWithChecks(firstStripId, nStrips, cache.currentVector, cache.idGroups, idHelper,sctDetElStatus, ctx); // This one includes the groups of vectors as well
         }
         for (unsigned int iStrip=0; iStrip<nStrips; iStrip++) {
           if (stripCount < 16) hitsInThirdTimeBin |= (timePattern.test(0) << stripCount);
           stripCount++;
         }
       }
-      if (not currentVector.empty()) {
+      if (not cache.currentVector.empty()) {
         // Gives the last strip number in the cluster
-        previousStrip = idHelper.strip(currentVector.back());
+        previousStrip = idHelper.strip(cache.currentVector.back());
       }
     }
 
     // Still need to add this last vector
-    if (not currentVector.empty()) {
+    if (not cache.currentVector.empty()) {
       if ((not m_majority01X) or (n01X >= n11X)) {
-        idGroups.push_back(currentVector);
-        tbinGroups.push_back(hitsInThirdTimeBin);
+        cache.idGroups.push_back(cache.currentVector);
+        cache.tbinGroups.push_back(hitsInThirdTimeBin);
         hitsInThirdTimeBin=0;
       }
     }
@@ -445,21 +442,21 @@ namespace InDet {
     IdentifierHash idHash(collection.identifyHash());
     SCT_ClusterCollection* clusterCollection = new SCT_ClusterCollection(idHash);
     clusterCollection->setIdentifier(elementID);
-    clusterCollection->reserve(idGroups.size());
+    clusterCollection->reserve(cache.idGroups.size());
     //DataPool will own the elements
     if(dataItemsPool){
       clusterCollection->clear(SG::VIEW_ELEMENTS);
     }
 
     // All strips are assumed to be the same width.
-    std::vector<uint16_t>::iterator tbinIter(tbinGroups.begin());
+    std::vector<uint16_t>::iterator tbinIter(cache.tbinGroups.begin());
 
     /// If clusters have been split due to bad strips, would require a whole lot
     /// of new logic to recalculate hitsInThirdTimeBin word - instead, just find
     /// when this is the case here, and set hitsInThirdTimeBin to zero later on
-    const bool badStripInClusterOnThisModuleSide = (idGroups.size() != tbinGroups.size());
+    const bool badStripInClusterOnThisModuleSide = (cache.idGroups.size() != cache.tbinGroups.size());
 
-    for (IdVec_t& stripGroup: idGroups) {
+    for (IdVec_t& stripGroup: cache.idGroups) {
       const int nStrips(stripGroup.size());
       if (nStrips == 0) continue;
       //
@@ -496,7 +493,7 @@ namespace InDet {
 
       cluster->setHashAndIndex(clusterCollection->identifyHash(),
                                clusterCollection->size());
-      if (tbinIter != tbinGroups.end()) {
+      if (tbinIter != cache.tbinGroups.end()) {
         cluster->setHitsInThirdTimeBin(*tbinIter);
         ++tbinIter;
       }
@@ -511,6 +508,7 @@ namespace InDet {
   SCT_ClusterCollection* SCT_ClusteringTool::fastClusterize(const InDetRawDataCollection<SCT_RDORawData>& collection,
                                                             const SCT_ID& idHelper,
                                                             const InDet::SiDetectorElementStatus *sctDetElStatus,
+                                                            SCTClusteringCache& cache,
                                                             DataPool<SCT_Cluster>* dataItemsPool,
                                                             const EventContext& ctx) const
   {
@@ -520,14 +518,9 @@ namespace InDet {
 
     if (collectionCopy.size() > 1) std::sort(collectionCopy.begin(), collectionCopy.end(), strip_less_than());
 
-    IdVec_t currentVector;
-    currentVector.reserve(100);
-
-    std::vector<IdVec_t> idGroups;
-    idGroups.reserve(collectionCopy.size());
-
-    std::vector<uint16_t> tbinGroups;
-    tbinGroups.reserve(collectionCopy.size());
+    cache.currentVector.clear();
+    cache.idGroups.clear();
+    cache.tbinGroups.clear();
 
     unsigned int previousStrip = 0; // Should be ok?
     uint16_t hitsInThirdTimeBin = 0;
@@ -548,16 +541,16 @@ namespace InDet {
 
       // Flushes the vector every time a non-adjacent strip is found
       //
-      if (not currentVector.empty() and
+      if (not cache.currentVector.empty() and
           ((m_useRowInformation and !adjacent(thisStrip, thisRow, previousStrip, previousRow)) or
            (not m_useRowInformation and !adjacent(thisStrip, previousStrip)))) {
 
         // Add this group to existing groups (and flush)
         //
-        idGroups.push_back(currentVector);
-        currentVector.clear();
+        cache.idGroups.push_back(cache.currentVector);
+        cache.currentVector.clear();
 
-        tbinGroups.push_back(hitsInThirdTimeBin);
+        cache.tbinGroups.push_back(hitsInThirdTimeBin);
         hitsInThirdTimeBin = 0;
         stripCount         = 0;
       }
@@ -592,9 +585,9 @@ namespace InDet {
         for (unsigned int sn=thisStrip; sn < max_strip; ++sn) {
           Identifier stripId = m_useRowInformation ? idHelper.strip_id(waferId,thisRow,sn) : idHelper.strip_id(waferId,sn);
           if (!isBad(sctDetElStatus, idHelper, waferHash, stripId, ctx)) {
-            currentVector.push_back(stripId);
+            cache.currentVector.push_back(stripId);
           } else {
-            currentVector.push_back(badId);
+            cache.currentVector.push_back(badId);
             ++nBadStrips;
           }
           if (stripCount < 16) {
@@ -603,26 +596,26 @@ namespace InDet {
           ++stripCount;
         }
 
-        if (currentVector.size() == nBadStrips) {
-          currentVector.clear();
+        if (cache.currentVector.size() == nBadStrips) {
+          cache.currentVector.clear();
         } else if (nBadStrips) {
-          currentVector=recluster(currentVector, idGroups);
+          cache.currentVector=recluster(cache.currentVector, cache.idGroups);
         }
       }
 
-      if (not currentVector.empty()) {
+      if (not cache.currentVector.empty()) {
         // Gives the last strip number in the cluster
         //
-        previousStrip = idHelper.strip(currentVector.back());
-        if (m_useRowInformation) previousRow = idHelper.row(currentVector.back());
+        previousStrip = idHelper.strip(cache.currentVector.back());
+        if (m_useRowInformation) previousRow = idHelper.row(cache.currentVector.back());
       }
     }
 
     // Still need to add this last vector
     //
-    if (not currentVector.empty()) {
-      idGroups.push_back(currentVector);
-      tbinGroups.push_back(hitsInThirdTimeBin);
+    if (not cache.currentVector.empty()) {
+      cache.idGroups.push_back(cache.currentVector);
+      cache.tbinGroups.push_back(hitsInThirdTimeBin);
       hitsInThirdTimeBin=0;
     }
 
@@ -647,7 +640,7 @@ namespace InDet {
     SCT_ClusterCollection* clusterCollection = new SCT_ClusterCollection(idHash);
     Identifier elementID = collection.identify();
     clusterCollection->setIdentifier(elementID);
-    clusterCollection->reserve(idGroups.size());
+    clusterCollection->reserve(cache.idGroups.size());
     if(dataItemsPool){
       clusterCollection->clear(SG::VIEW_ELEMENTS);
     }
@@ -656,9 +649,9 @@ namespace InDet {
 
     // All strips are assumed to be the same width.
     //
-    std::vector<IdVec_t>::iterator pGroup = idGroups.begin();
-    std::vector<IdVec_t>::iterator lastGroup = idGroups.end();
-    std::vector<uint16_t>::iterator tbinIter = tbinGroups.begin();
+    std::vector<IdVec_t>::iterator pGroup = cache.idGroups.begin();
+    std::vector<IdVec_t>::iterator lastGroup = cache.idGroups.end();
+    std::vector<uint16_t>::iterator tbinIter = cache.tbinGroups.begin();
 
     // If clusters have been split due to bad strips, would require a whole lot
     // of new logic to recalculate hitsInThirdTimeBin word - instead, just find
@@ -667,7 +660,7 @@ namespace InDet {
     double iphipitch  = 1./element->phiPitch();
     double shift = m_lorentzAngleTool->getLorentzShift(idHash);
     double stripPitch = design->stripPitch();
-    bool badStripInClusterOnThisModuleSide = (idGroups.size() != tbinGroups.size());
+    bool badStripInClusterOnThisModuleSide = (cache.idGroups.size() != cache.tbinGroups.size());
     bool rotate = (element->design().shape() == InDetDD::Trapezoid || element->design().shape() == InDetDD::Annulus);
     double stripL = 0.;
     double COV11 = 0.;
@@ -755,7 +748,7 @@ namespace InDet {
 
       cluster->setHashAndIndex(idHash, clusterNumber);
 
-      if (tbinIter != tbinGroups.end()) {
+      if (tbinIter != cache.tbinGroups.end()) {
         cluster->setHitsInThirdTimeBin(*tbinIter);
         ++tbinIter;
       }
