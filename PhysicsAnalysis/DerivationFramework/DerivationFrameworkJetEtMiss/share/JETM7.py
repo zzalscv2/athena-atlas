@@ -237,7 +237,9 @@ addJetOutputs(JETM7SlimmingHelper,["JETM7"], [],
               )
 
 if DerivationFrameworkHasTruth:
-    JETM7SlimmingHelper.AllVariables += ["TruthMuons", "TruthElectrons", "TruthPhotons", "TruthEvents"]
+    # Includes truth pileup information that is not usually available in standard MC samples - intended for pileup analysis only
+    # When running over standard MC these truth pileup containers are ignored automatically
+    JETM7SlimmingHelper.AllVariables += ["TruthMuons", "TruthElectrons", "TruthPhotons", "TruthEvents", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", "TruthParticles", "TruthPileupEvents"]
     for truthc in ["TruthTop", "TruthBoson"]:
         JETM7SlimmingHelper.StaticContent.append("xAOD::TruthParticleContainer#"+truthc)
         JETM7SlimmingHelper.StaticContent.append("xAOD::TruthParticleAuxContainer#"+truthc+"Aux.")
