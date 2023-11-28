@@ -37,16 +37,14 @@ def MuonTruthDecorationAlgCfg(flags, name="MuonTruthDecorationAlg", **kwargs):
     kwargs.setdefault("CSCSDOs", CSCSDOs)
     kwargs.setdefault("PRD_TruthMaps", PRD_TruthMaps)
 
-    if "MCTruthClassifier" not in kwargs:
-        from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
-        kwargs.setdefault("MCTruthClassifier", result.popToolsAndMerge(
-            MCTruthClassifierCfg(flags)))
+    from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
+    kwargs.setdefault("MCTruthClassifier", result.popToolsAndMerge(MCTruthClassifierCfg(flags)))
 
-    if "Extrapolator" not in kwargs:
-        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", result.popToolsAndMerge(
-            AtlasExtrapolatorCfg(flags)))
+    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+    kwargs.setdefault("Extrapolator", result.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
         
+    trackRecords = [item for item in ["CaloEntryLayer", "MuonEntryLayer", "MuonExitLayer"] if item in flags.Input.Collections]
+    kwargs.setdefault("TrackRecordCollectionNames", trackRecords)
     result.addEventAlgo(CompFactory.Muon.MuonTruthDecorationAlg(name, **kwargs))
     return result
 
