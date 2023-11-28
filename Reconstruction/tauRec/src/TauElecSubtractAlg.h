@@ -13,6 +13,8 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
+#include "StoreGate/ReadDecorHandle.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
 #include "tauRecTools/TauRecToolBase.h"
@@ -46,6 +48,10 @@ class TauElecSubtractAlg : public AthReentrantAlgorithm
         SG::WriteHandleKey<xAOD::TrackParticleContainer>  m_tracksOutput            { this, "Key_IDTracksOutput",             "", "Output track container  " };
         SG::WriteHandleKey<xAOD::CaloClusterContainer>    m_removedClustersOutput   { this, "Key_RemovedClustersOutput",      "", "Output removed clusters " };
         SG::WriteHandleKey<xAOD::TrackParticleContainer>  m_removedTracksOutput     { this, "Key_RemovedTracksOutput",        "", "Output removed tracks   " };
+
+        // make sure standard jet TVA is run before this algorithm, hard coded for now
+        SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_stdJetTVADecoKey     { this, "InDetTrackParticles_jetTVA_key","InDetTrackParticles.TTVA_AMVFVertices_forReco", "make sure standard jet TVA is run before this algorithm, hard coded for now"};
+
         ToolHandle<IAsgElectronLikelihoodTool>            m_eleLHSelectTool         { this, "ElectronLHTool",                 "", "Electron likelihood selection tool" };
         Gaudi::Property<bool>                             m_doNothing               { this, "doNothing", false, "If we just deep copy the containers (For Validation Only)"};
 };

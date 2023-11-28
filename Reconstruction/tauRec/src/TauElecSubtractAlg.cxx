@@ -14,6 +14,8 @@ StatusCode TauElecSubtractAlg::initialize()
     ATH_CHECK( m_removedClustersOutput.initialize() );
     ATH_CHECK( m_removedTracksOutput.initialize() );
     ATH_CHECK( m_eleLHSelectTool.retrieve() );
+    ATH_CHECK( m_stdJetTVADecoKey.initialize() );
+
     return StatusCode::SUCCESS;
 }
 
@@ -27,6 +29,13 @@ StatusCode TauElecSubtractAlg::execute (const EventContext& ctx) const
         if (!electronInput.isValid())   ATH_MSG_ERROR( "Collection " << electronInput.key() << " is not valid" );
         if (!clustersInput.isValid())   ATH_MSG_ERROR( "Collection " << clustersInput.key() << " is not valid" );
         if (!tracksInput.isValid())     ATH_MSG_ERROR( "Collection " << tracksInput.key()   << " is not valid" );
+        return StatusCode::FAILURE;
+    }
+
+    SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<ElementLink<xAOD::VertexContainer>>> stdJetTVADecoHandle (m_stdJetTVADecoKey, ctx);
+    if (!stdJetTVADecoHandle.isPresent())
+    {
+        ATH_MSG_ERROR("Standard jet TVA decoration is not valid for InDetTrackParticles");
         return StatusCode::FAILURE;
     }
 

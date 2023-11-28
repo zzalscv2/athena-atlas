@@ -1012,8 +1012,12 @@ StreamAOD
 TauFinalPi0s
 TauFinalPi0sAux.
 TauFinalPi0sAuxDyn.pi0PFOLinks
+TauFinalPi0s_EleRM
+TauFinalPi0s_EleRMAux.
 TauHadronicParticleFlowObjects
 TauHadronicParticleFlowObjectsAux.
+TauHadronicParticleFlowObjects_EleRM
+TauHadronicParticleFlowObjects_EleRMAux.
 TauJets
 TauJetsAux.
 TauJetsAuxDyn.ClusterTotalEnergy
@@ -1052,6 +1056,8 @@ TauJetsAuxDyn.phiCombined
 TauJetsAuxDyn.ptCombined
 TauJetsAuxDyn.ptIntermediateAxisEM
 TauJetsAuxDyn.rho
+TauJets_EleRM
+TauJets_EleRMAux.
 TauNeutralParticleFlowObjects
 TauNeutralParticleFlowObjectsAux.
 TauNeutralParticleFlowObjectsAuxDyn.cellBased_CENTER_LAMBDA
@@ -1078,6 +1084,8 @@ TauNeutralParticleFlowObjectsAuxDyn.cellBased_firstEtaWRTClusterPosition_EM2
 TauNeutralParticleFlowObjectsAuxDyn.cellBased_secondEtaWRTClusterPosition_EM1
 TauNeutralParticleFlowObjectsAuxDyn.cellBased_secondEtaWRTClusterPosition_EM2
 TauNeutralParticleFlowObjectsAuxDyn.nPi0Proto
+TauNeutralParticleFlowObjects_EleRM
+TauNeutralParticleFlowObjects_EleRMAux.
 TauPi0Clusters
 TauPi0ClustersAux.
 TauPi0ClustersAuxDyn.BadChannelList
@@ -1111,9 +1119,14 @@ TauPi0ClustersAuxDyn.eta_sampl
 TauPi0ClustersAuxDyn.etamax_sampl
 TauPi0ClustersAuxDyn.phi_sampl
 TauPi0ClustersAuxDyn.phimax_sampl
+TauPi0Clusters_EleRM
+TauPi0Clusters_EleRMAux.
+TauPi0Clusters_EleRM_links
 TauPi0Clusters_links
 TauSecondaryVertices
 TauSecondaryVerticesAux.
+TauSecondaryVertices_EleRM
+TauSecondaryVertices_EleRMAux.
 TauShotClusters
 TauShotClustersAux.
 TauShotClustersAuxDyn.CellLink
@@ -1122,6 +1135,9 @@ TauShotClustersAuxDyn.eta_sampl
 TauShotClustersAuxDyn.etamax_sampl
 TauShotClustersAuxDyn.phi_sampl
 TauShotClustersAuxDyn.phimax_sampl
+TauShotClusters_EleRM
+TauShotClusters_EleRMAux.
+TauShotClusters_EleRM_links
 TauShotClusters_links
 TauShotParticleFlowObjects
 TauShotParticleFlowObjectsAux.
@@ -1131,6 +1147,8 @@ TauShotParticleFlowObjectsAuxDyn.tauShots_pt1
 TauShotParticleFlowObjectsAuxDyn.tauShots_pt3
 TauShotParticleFlowObjectsAuxDyn.tauShots_pt5
 TauShotParticleFlowObjectsAuxDyn.tauShots_seedHash
+TauShotParticleFlowObjects_EleRM
+TauShotParticleFlowObjects_EleRMAux.
 TauTracks
 TauTracksAux.
 TauTracksAuxDyn.CaloSamplingEtaEM
@@ -1145,6 +1163,8 @@ TauTracksAuxDyn.rnn_fakeScore
 TauTracksAuxDyn.rnn_isolationScore
 TauTracksAuxDyn.z0sinthetaSigTJVA
 TauTracksAuxDyn.z0sinthetaTJVA
+TauTracks_EleRM
+TauTracks_EleRMAux.
 TileMuObj
 Token
 TopoClusterIsoCentralEventShape
