@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -36,7 +36,7 @@ public:
   void systemErased(IVP1System*);
   void systemRefreshed(IVP1System*);
 
-protected slots:
+protected Q_SLOTS:
 void entriesChanged(const QStringList& entry_key,const QStringList& entry_type);
   void cellActivated( int row, int column );
 
