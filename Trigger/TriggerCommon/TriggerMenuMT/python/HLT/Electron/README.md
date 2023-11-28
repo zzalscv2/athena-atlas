@@ -183,8 +183,6 @@ Modules in this directory
 
 * [TrigElectronFactoriesCfg](TrigElectronFactoriesCfg.py)
   * ToolFactories to configure egammaAlgs to be used at the HLT
-* [ElectronRecoSequences](ElectronRecoSequences.py)
-  * Assembles the sequences for fast reconstruction
 * [PrecisionElectronRecoSequences](PrecisionElectronRecoSequences.py)
   * Assembles the sequences for precision reconstruction
 * [PrecisionElectronRecoSequences_GSF](PrecisionElectronRecoSequences_GSF.py)
