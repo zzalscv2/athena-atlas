@@ -54,7 +54,7 @@ class SCT_Clusterization : public AthReentrantAlgorithm {
 public:
   /// Constructor with parameters:
   SCT_Clusterization(const std::string& name, ISvcLocator* pSvcLocator);
-  
+
   /**
    *   @name Usual algorithm methods
    */

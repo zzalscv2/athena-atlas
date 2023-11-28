@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**   @file SCT_Clusterization.cxx
@@ -10,7 +10,7 @@
 
 #include "InDetPrepRawDataFormation/SCT_Clusterization.h"
 
-#include "AtlasDetDescr/AtlasDetectorID.h"    
+#include "AtlasDetDescr/AtlasDetectorID.h"
 #include "Identifier/IdentifierHash.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetPrepRawData/SiClusterContainer.h"
@@ -39,7 +39,7 @@ namespace InDet {
   StatusCode SCT_Clusterization::initialize() {
     ATH_MSG_INFO("SCT_Clusterization::initialize()!");
 
-    // Get the conditions summary service (continue anyway, just check the pointer 
+    // Get the conditions summary service (continue anyway, just check the pointer
     // later and declare everything to be 'good' if it is nullptr)
     ATH_CHECK( m_pSummaryTool.retrieve( DisableTool{!m_checkBadModules.value() || (!m_sctDetElStatus.empty() && !VALIDATE_STATUS_ARRAY_ACTIVATED)} ) );
 
@@ -110,8 +110,8 @@ namespace InDet {
     }
     std::unordered_map<IdentifierHash, IDCInDetBSErrContainer::ErrorCode> flaggedCondMap; // temporary store of flagged condition error
 
-    // First, we have to retrieve and access the container, not because we want to 
-    // use it, but in order to generate the proxies for the collections, if they 
+    // First, we have to retrieve and access the container, not because we want to
+    // use it, but in order to generate the proxies for the collections, if they
     // are being provided by a container converter.
     SG::ReadHandle<SCT_RDO_Container> rdoContainer{m_rdoContainerKey, ctx};
     ATH_CHECK(rdoContainer.isValid());
@@ -151,20 +151,39 @@ namespace InDet {
         dataItemsPool->reserve(20000);  // Some large default size
        } else if (m_useDataPoolWithCache) {
         dataItemsPool = std::make_unique<DataPool<SCT_Cluster>>(ctx);
-        //this is  per view so let it expand on its own in blocks
+        // this is  per view so let it expand on its own in blocks
        }
+       // cache to avoid re-allocation inside the loop.
+       // Trying to re-use the vector capacities.
+       // we clear them inside the methods we call
 
-      if (not m_roiSeeded.value()) { //Full-scan mode
+       SCTClusteringCache cache;
+       cache.currentVector.reserve(32);
+       cache.idGroups.reserve(16);
+       cache.tbinGroups.reserve(16);
+       if (not m_roiSeeded.value()) {  // Full-scan mode
+
         for (; rdoCollections != rdoCollectionsEnd; ++rdoCollections) {
           const InDetRawDataCollection<SCT_RDORawData>* rd{*rdoCollections};
-          ATH_MSG_DEBUG("RDO collection size=" << rd->size() << ", Hash=" << rd->identifyHash());
-          SCT_ClusterContainer::IDC_WriteHandle lock{clusterContainer->getWriteHandle(rdoCollections.hashId())};
+          ATH_MSG_DEBUG("RDO collection size=" << rd->size() << ", Hash="
+                                               << rd->identifyHash());
+          SCT_ClusterContainer::IDC_WriteHandle lock{
+              clusterContainer->getWriteHandle(rdoCollections.hashId())};
           if (lock.OnlineAndPresentInAnotherView()) {
-            ATH_MSG_DEBUG("Item already in cache , Hash=" << rd->identifyHash());
+            ATH_MSG_DEBUG(
+                "Item already in cache , Hash=" << rd->identifyHash());
             continue;
           }
-          bool goodModule{m_checkBadModules.value() ? ( !m_sctDetElStatus.empty() ?  sctDetElStatus->isGood( rd->identifyHash() ) : m_pSummaryTool->isGood(rd->identifyHash(),ctx)) : true};
-          VALIDATE_STATUS_ARRAY(m_checkBadModules.value()  && !m_sctDetElStatus.empty(), sctDetElStatus->isGood( rd->identifyHash() ), m_pSummaryTool->isGood(rd->identifyHash(),ctx));
+          bool goodModule{
+              m_checkBadModules.value()
+                  ? (!m_sctDetElStatus.empty()
+                         ? sctDetElStatus->isGood(rd->identifyHash())
+                         : m_pSummaryTool->isGood(rd->identifyHash(), ctx))
+                  : true};
+          VALIDATE_STATUS_ARRAY(
+              m_checkBadModules.value() && !m_sctDetElStatus.empty(),
+              sctDetElStatus->isGood(rd->identifyHash()),
+              m_pSummaryTool->isGood(rd->identifyHash(), ctx));
 
           if (!goodModule) {
             ATH_MSG_DEBUG(" module status is bad");
@@ -196,12 +215,10 @@ namespace InDet {
                 m_clusteringTool->clusterize(
                     *rd, *m_idHelper,
                     !m_sctDetElStatus.empty() ? sctDetElStatus.cptr() : nullptr,
-                    dataItemsPool.get(),
-                    ctx)};
+                    cache, dataItemsPool.get(), ctx)};
             if (clusterCollection) {
               if (not clusterCollection->empty()) {
                 const IdentifierHash hash{clusterCollection->identifyHash()};
-                // Using get because I'm unsure of move semantec status
                 ATH_CHECK(lock.addOrDelete(std::move(clusterCollection)));
                 ATH_MSG_DEBUG("Clusters with key '"
                               << hash << "' added to Container\n");
@@ -213,7 +230,7 @@ namespace InDet {
             }
           }
         }
-      } else {  // enter RoI-seeded mode
+       } else {  // enter RoI-seeded mode
         SG::ReadHandle<TrigRoiDescriptorCollection> roiCollection{
             m_roiCollectionKey, ctx};
         ATH_CHECK(roiCollection.isValid());
@@ -282,11 +299,11 @@ namespace InDet {
             {
               Monitored::ScopedTimer time_Clusterize(mnt_timer_Clusterize);
               std::unique_ptr<SCT_ClusterCollection> clusterCollection{
-                  m_clusteringTool->clusterize(*RDO_Collection, *m_idHelper,
-                                               !m_sctDetElStatus.empty()
-                                                   ? sctDetElStatus.cptr()
-                                                   : nullptr,
-                                               dataItemsPool.get(), ctx)};
+                  m_clusteringTool->clusterize(
+                      *RDO_Collection, *m_idHelper,
+                      !m_sctDetElStatus.empty() ? sctDetElStatus.cptr()
+                                                : nullptr,
+                      cache, dataItemsPool.get(), ctx)};
               if (clusterCollection and (not clusterCollection->empty())) {
                 ATH_MSG_VERBOSE("REGTEST: SCT : clusterCollection contains " << clusterCollection->size() << " clusters");
                 ATH_CHECK(lock.addOrDelete(std::move(clusterCollection)));
@@ -296,7 +313,7 @@ namespace InDet {
             }
           }
         }
-      }
+       }
     }
     // Set container to const
     ATH_CHECK(clusterContainer.setConst());
@@ -310,7 +327,7 @@ namespace InDet {
   }
 
   // Finalize method:
-  StatusCode SCT_Clusterization::finalize() 
+  StatusCode SCT_Clusterization::finalize()
   {
     return StatusCode::SUCCESS;
   }
