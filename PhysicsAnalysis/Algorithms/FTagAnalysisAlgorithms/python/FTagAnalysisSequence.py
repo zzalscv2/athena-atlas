@@ -11,7 +11,6 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
                               preselection=None,
                               kinematicSelection = False,
                               noEfficiency = False,
-                              legacyRecommendations = False,
                               enableCutflow = False,
                               minPt = None,
                               makeViewContainer = False):
@@ -28,7 +27,6 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
       generator -- Generator for MC/MC scale factors
       kinematicSelection -- Wether to run kinematic selection
       noEfficiency -- Wether to run efficiencies calculation
-      legacyRecommendations -- Use legacy recommendations without shallow copied containers
       enableCutflow -- Whether or not to dump the cutflow
       minPt -- Kinematic selection for jet calibration validity (depending on jet collection)
     """
@@ -70,22 +68,8 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
     elif generator == "amcAtNLOHerwig":
         DSID = "412116"
 
-
-    if legacyRecommendations:
-        # Remove b-tagging calibration from the container name
-        btIndex = jetCollection.find('_BTagging')
-        if btIndex == -1:
-            jetCollection += '_BTagging201903'
-
     # CDI file
-    if legacyRecommendations :
-        # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagCalibrationRecommendationsRelease21
-        bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2020-21-13TeV-MC16-CDI-2021-04-16_v1.root"
-    else:
-        bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2023-22-13TeV-MC20-CDI-2023-09-13_v1.root"
-
-    # This is the new calibration file, but it seems to have issues in some cases
-    #bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2022-22-13TeV-MC20-CDI-2022-07-28_v1.root"
+    bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2023-22-13TeV-MC20-CDI-2023-09-13_v1.root"
 
     # # Create the analysis algorithm sequence object:
     # seq = AnaAlgSequence( "FTagAnalysisSequence" )
