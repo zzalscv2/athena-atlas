@@ -49,7 +49,8 @@ atlas_add_library( TopAnalysis Root/*.cxx Root/*.h Root/*.icc
                                           xAODTau
                                           xAODTracking
                                           xAODTruth
-                                          RootCoreUtils )
+                                          RootCoreUtils
+                                          TruthUtils )
 
 atlas_add_dictionary( TopAnalysisDict
                       TopAnalysis/TopAnalysisDict.h

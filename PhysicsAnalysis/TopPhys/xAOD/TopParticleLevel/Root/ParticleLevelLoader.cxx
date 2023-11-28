@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 // Filename: ParticleLevelLoader.cxx
@@ -697,7 +697,7 @@ namespace top {
             for(const xAOD::TruthParticle* p : truth_particles_vec)
             {
               if(!p) continue;
-              if(p->barcode() == muPtr->barcode())
+              if(HepMC::uniqueID(p) == HepMC::uniqueID(muPtr))
               {
                 assMuon = p;
                 break;
