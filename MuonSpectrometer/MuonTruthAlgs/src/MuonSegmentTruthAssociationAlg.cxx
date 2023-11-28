@@ -64,7 +64,7 @@ namespace Muon {
             ATH_MSG_ERROR("Track collection " << m_trackRecord.key() << " is not present");
             return StatusCode::FAILURE;
         }
-        if (truthTrackCol.cptr()->empty()) {
+        if (truthTrackCol->empty()) {
             ATH_MSG_DEBUG("Track collection " << m_trackRecord.key() << " is empty. Skip the rest of the alg");
             return StatusCode::SUCCESS;
         }
