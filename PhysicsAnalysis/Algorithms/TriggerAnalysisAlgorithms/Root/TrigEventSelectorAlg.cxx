@@ -52,7 +52,9 @@ StatusCode CP::TrigEventSelectionAlg::execute()
   ANA_CHECK(evtStore()->retrieve(evtInfo, "EventInfo"));
 
   for (size_t i = 0; i < m_trigList.size(); i++) {
-    bool trigPassed = m_trigDecisionTool->isPassed(m_trigList[i]);
+    bool trigPassed = m_noL1.value()
+           ? m_trigDecisionTool->isPassed(m_trigList[i], TrigDefs::requireDecision)
+           : m_trigDecisionTool->isPassed(m_trigList[i]);
     if (!m_selectionDecoration.empty()) {
       m_selectionAccessors[i](*evtInfo) = trigPassed;
     }
