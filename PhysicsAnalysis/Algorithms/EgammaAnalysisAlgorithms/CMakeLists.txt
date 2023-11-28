@@ -10,7 +10,7 @@ atlas_add_library( EgammaAnalysisAlgorithmsLib
    EgammaAnalysisAlgorithms/*.h EgammaAnalysisAlgorithms/*.icc Root/*.cxx
    PUBLIC_HEADERS EgammaAnalysisAlgorithms
    LINK_LIBRARIES xAODEgamma SelectionHelpersLib SystematicsHandlesLib
-   IsolationSelectionLib AnaAlgorithmLib IsolationCorrectionsLib
+   IsolationSelectionLib AnaAlgorithmLib IsolationCorrectionsLib FourMomUtils
    EgammaAnalysisInterfacesLib egammaUtils CxxUtils )
 
 atlas_add_dictionary( EgammaAnalysisAlgorithmsDict

@@ -17,5 +17,6 @@
 #include <EgammaAnalysisAlgorithms/PhotonShowerShapeFudgeAlg.h>
 #include <EgammaAnalysisAlgorithms/ElectronLRTMergingAlg.h>
 #include <EgammaAnalysisAlgorithms/PhotonOriginCorrectionAlg.h>
+#include <EgammaAnalysisAlgorithms/EgammaFSRForMuonsCollectorAlg.h>
 
 #endif

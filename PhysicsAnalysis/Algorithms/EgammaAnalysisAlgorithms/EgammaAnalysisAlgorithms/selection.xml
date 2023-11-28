@@ -9,5 +9,6 @@
    <class name="CP::PhotonShowerShapeFudgeAlg" />
    <class name="CP::ElectronLRTMergingAlg" />
    <class name="CP::PhotonOriginCorrectionAlg" />
+   <class name="CP::EgammaFSRForMuonsCollectorAlg" />
    
 </lcgdict>
