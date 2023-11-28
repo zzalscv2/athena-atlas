@@ -94,7 +94,7 @@ namespace Muon
     };
     void setAuthor(Author a);
 
-    Author getAuthor() const;
+    Author author() const;
 
   private:
     /**@brief Sets the DetElement and Trk::PrepRawData pointers after reading from disk.
@@ -119,7 +119,7 @@ namespace Muon
   inline void MMClusterOnTrack::setAuthor(Author a) {
       m_author = a;
   }
-  inline MMClusterOnTrack::Author MMClusterOnTrack::getAuthor() const { return m_author; }
+  inline MMClusterOnTrack::Author MMClusterOnTrack::author() const { return m_author; }
   inline MMClusterOnTrack* MMClusterOnTrack::clone() const
   {
     return new MMClusterOnTrack(*this);
