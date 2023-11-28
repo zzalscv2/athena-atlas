@@ -5,11 +5,11 @@ import re
 import math
 import xml.dom.minidom
 
-from GeneratorModules.EvgenAlg import EvgenAlg
+from GeneratorModules.EvgenAnalysisAlg import EvgenAnalysisAlg
 from AthenaPython.PyAthena import StatusCode
 
 
-class LheConverterUpc(EvgenAlg):
+class LheConverterUpc(EvgenAnalysisAlg):
     '''
     Class for modifying output LHE file from Superchic and Madgraph + ensuring compatibility with Tauola
     Intended for ultraperipheral collision (UPC) processes i.e. y y -> l+ l-
