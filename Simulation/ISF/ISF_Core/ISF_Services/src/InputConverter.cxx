@@ -588,30 +588,29 @@ G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(const HepMC
       double tau2=dist3D.mag2()*(1/beta2-1)/Gaudi::Units::c_light/Gaudi::Units::c_light;
       ATH_MSG_VERBOSE("lifetime tau(beta)="<<std::sqrt(tau2)<<" tau="<<tau);
     }
-    const int bcgenpart = HepMC::barcode(genpart);
     if (m_quasiStableParticlesIncluded) {
       ATH_MSG_VERBOSE( "Detected primary particle with end vertex." );
       ATH_MSG_VERBOSE( "Will add the primary particle set on." );
       ATH_MSG_VERBOSE( "Primary Particle: " << genpart );
-      ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out().size()<<" at position "<<genpart->end_vertex() );
+      ATH_MSG_VERBOSE( "Number of daughters: " << genpart->end_vertex()->particles_out().size()<<" at position "<<genpart->end_vertex() );
     }
     else {
       ATH_MSG_WARNING( "Detected primary particle with end vertex." );
       ATH_MSG_WARNING( "Will add the primary particle set on." );
       ATH_MSG_WARNING( "Primary Particle: " << genpart );
-      ATH_MSG_WARNING( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out().size()<<" at position "<<genpart->end_vertex() );
+      ATH_MSG_WARNING( "Number of daughters : " << genpart->end_vertex()->particles_out().size()<<" at position "<<genpart->end_vertex() );
     }
     // Add all necessary daughter particles
     for ( auto daughter: genpart->end_vertex()->particles_out() ) {
       if (m_quasiStableParticlesIncluded) {
-        ATH_MSG_VERBOSE ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
+        ATH_MSG_VERBOSE ( "Attempting to add daughter particle : " << daughter );
       }
       else {
-        ATH_MSG_WARNING ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
+        ATH_MSG_WARNING ( "Attempting to add daughter particle: " << daughter );
       }
       G4PrimaryParticle *daughterG4Particle = this->getDaughterG4PrimaryParticle( daughter, makeLinkToTruth );
       if (!daughterG4Particle) {
-        ATH_MSG_ERROR("Bailing out of loop over daughters of particle with barcode: "<<bcgenpart <<
+        ATH_MSG_ERROR("Bailing out of loop over daughters of particle: "<<
                       " due to errors - will not return G4Particle.");
         return nullptr;
       }
@@ -676,31 +675,29 @@ G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(const HepMC
       double tau2=dist3D.mag2()*(1/beta2-1)/Gaudi::Units::c_light/Gaudi::Units::c_light;
       ATH_MSG_VERBOSE("lifetime tau(beta)="<<std::sqrt(tau2)<<" tau="<<tau);
     }
-    const int bcgenpart = HepMC::barcode(genpart);
     if (m_quasiStableParticlesIncluded) {
       ATH_MSG_VERBOSE( "Detected primary particle with end vertex." );
       ATH_MSG_VERBOSE( "Will add the primary particle set on." );
       ATH_MSG_VERBOSE( "Primary Particle: " << genpart );
-      ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out().size()<<" at position "<<genpart->end_vertex() );
+      ATH_MSG_VERBOSE( "Number of daughters : " << genpart->end_vertex()->particles_out().size()<<" at position "<<genpart->end_vertex() );
     }
     else {
       ATH_MSG_WARNING( "Detected primary particle with end vertex." );
       ATH_MSG_WARNING( "Will add the primary particle set on." );
       ATH_MSG_WARNING( "Primary Particle: " << genpart );
-      ATH_MSG_WARNING( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out().size()<<" at position "<<genpart->end_vertex() );
+      ATH_MSG_WARNING( "Number of daughters: " << genpart->end_vertex()->particles_out().size()<<" at position "<<genpart->end_vertex() );
     }
     // Add all necessary daughter particles
     for ( auto daughter: genpart->end_vertex()->particles_out() ) {
       if (m_quasiStableParticlesIncluded) {
-        ATH_MSG_VERBOSE ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
+        ATH_MSG_VERBOSE ( "Attempting to add daughter particle: " << daughter );
       }
       else {
-        ATH_MSG_WARNING ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
+        ATH_MSG_WARNING ( "Attempting to add daughter particle: " << daughter );
       }
       G4PrimaryParticle *daughterG4Particle = this->getDaughterG4PrimaryParticle( daughter );
       if (!daughterG4Particle) {
-        ATH_MSG_ERROR("Bailing out of loop over daughters of particle with barcode: "<<bcgenpart <<
-                      " due to errors - will not return G4Particle.");
+        ATH_MSG_ERROR("Bailing out of loop over daughters of particle due to errors - will not return G4Particle.");
         return nullptr;
       }
       g4particle->SetDaughter( daughterG4Particle );
@@ -755,32 +752,30 @@ G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(HepMC::GenP
       double tau2=dist3D.mag2()*(1/beta2-1)/Gaudi::Units::c_light/Gaudi::Units::c_light;
       ATH_MSG_VERBOSE("lifetime tau(beta)="<<std::sqrt(tau2)<<" tau="<<tau);
     }
-    const int bcgenpart = genpart.barcode();
     if (m_quasiStableParticlesIncluded) {
       ATH_MSG_VERBOSE( "Detected primary particle with end vertex." );
       ATH_MSG_VERBOSE( "Will add the primary particle set on." );
       ATH_MSG_VERBOSE( "Primary Particle: " << genpart );
-      ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart.end_vertex()->particles_out_size()<<" at position "<<genpart.end_vertex());
+      ATH_MSG_VERBOSE( "Number of daughters: " << genpart.end_vertex()->particles_out_size()<<" at position "<<genpart.end_vertex());
     }
     else {
       ATH_MSG_WARNING( "Detected primary particle with end vertex." );
       ATH_MSG_WARNING( "Will add the primary particle set on." );
       ATH_MSG_WARNING( "Primary Particle: " << genpart );
-      ATH_MSG_WARNING( "Number of daughters of "<<bcgenpart<<": " << genpart.end_vertex()->particles_out_size()<<" at position "<<genpart.end_vertex() );
+      ATH_MSG_WARNING( "Number of daughters: " << genpart.end_vertex()->particles_out_size()<<" at position "<<genpart.end_vertex() );
     }
     // Add all necessary daughter particles
     for ( auto daughterIter=genpart.end_vertex()->particles_out_const_begin();
           daughterIter!=genpart.end_vertex()->particles_out_const_end(); ++daughterIter ) {
       if (m_quasiStableParticlesIncluded) {
-        ATH_MSG_VERBOSE ( "Attempting to add daughter particle of "<<bcgenpart<<": " << **daughterIter );
+        ATH_MSG_VERBOSE ( "Attempting to add daughter particle: " << **daughterIter );
       }
       else {
-        ATH_MSG_WARNING ( "Attempting to add daughter particle of "<<bcgenpart<<": " << **daughterIter );
+        ATH_MSG_WARNING ( "Attempting to add daughter particle: " << **daughterIter );
       }
       G4PrimaryParticle *daughterG4Particle = this->getDaughterG4PrimaryParticle( **daughterIter, makeLinkToTruth );
       if (!daughterG4Particle) {
-        ATH_MSG_ERROR("Bailing out of loop over daughters of particle with barcode: "<<bcgenpart <<
-                      " due to errors - will not return G4Particle.");
+        ATH_MSG_ERROR("Bailing out of loop over daughters of particle due to errors - will not return G4Particle.");
         return nullptr;
       }
       g4particle->SetDaughter( daughterG4Particle );
@@ -885,13 +880,12 @@ void ISF::InputConverter::processPredefinedDecays(const HepMC::ConstGenParticleP
 
     ATH_MSG_VERBOSE( "gammaVertex="<<dist4Dgamma<<" gammamom="<<fourmomgamma<<" gamma(beta)="<<1/std::sqrt(1-beta2)<<" lifetime tau(beta)="<<std::sqrt(tau2)<<" lifetime tau="<<tau);
   }
-  const int bcgenpart = HepMC::barcode(genpart);
   if (m_quasiStableParticlesIncluded) {
     ATH_MSG_VERBOSE( "Detected primary particle with end vertex." );
     ATH_MSG_VERBOSE( "Will add the primary particle set on." );
     ATH_MSG_VERBOSE( "ISF Particle: " << isp );
     ATH_MSG_VERBOSE( "Primary Particle: " << genpart );
-    ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out().size() << " at position "<< genpart->end_vertex() );
+    ATH_MSG_VERBOSE( "Number of daughters: " << genpart->end_vertex()->particles_out().size() << " at position "<< genpart->end_vertex() );
   }
   else {
     ATH_MSG_WARNING( "Detected primary particle with end vertex. This should only be the case if" );
@@ -900,20 +894,19 @@ void ISF::InputConverter::processPredefinedDecays(const HepMC::ConstGenParticleP
     ATH_MSG_WARNING( "particle set on." );
     ATH_MSG_WARNING( "ISF Particle: " << isp );
     ATH_MSG_WARNING( "Primary Particle: " << genpart );
-    ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out().size() );
+    ATH_MSG_VERBOSE( "Number of daughters: " << genpart->end_vertex()->particles_out().size() );
   }
   // Add all necessary daughter particles
   for ( auto daughter: *(genpart->end_vertex())) {
     if (m_quasiStableParticlesIncluded) {
-      ATH_MSG_VERBOSE ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
+      ATH_MSG_VERBOSE ( "Attempting to add daughter particle" << daughter );
     }
     else {
-      ATH_MSG_WARNING ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
+      ATH_MSG_WARNING ( "Attempting to add daughter particle: " << daughter );
     }
     G4PrimaryParticle *daughterG4Particle = this->getDaughterG4PrimaryParticle( daughter );
     if (!daughterG4Particle) {
-      ATH_MSG_FATAL("Bailing out of loop over daughters of particle with barcode: "<<bcgenpart <<
-                    " due to errors.");
+      ATH_MSG_FATAL("Bailing out of loop over daughters due to errors.");
     }
     g4particle->SetDaughter( daughterG4Particle );
   }
@@ -967,13 +960,12 @@ void ISF::InputConverter::processPredefinedDecays(const HepMC::GenParticlePtr& g
 
     ATH_MSG_VERBOSE( "gammaVertex="<<dist4Dgamma<<" gammamom="<<fourmomgamma<<" gamma(beta)="<<1/std::sqrt(1-beta2)<<" lifetime tau(beta)="<<std::sqrt(tau2)<<" lifetime tau="<<tau);
   }
-  const int bcgenpart = HepMC::barcode(genpart);
   if (m_quasiStableParticlesIncluded) {
     ATH_MSG_VERBOSE( "Detected primary particle with end vertex." );
     ATH_MSG_VERBOSE( "Will add the primary particle set on." );
     ATH_MSG_VERBOSE( "ISF Particle: " << isp );
     ATH_MSG_VERBOSE( "Primary Particle: " << genpart );
-    ATH_MSG_VERBOSE( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out_size() << " at position "<< genpart->end_vertex() );
+    ATH_MSG_VERBOSE( "Number of daughters: " << genpart->end_vertex()->particles_out_size() << " at position "<< genpart->end_vertex() );
   }
   else {
     ATH_MSG_WARNING( "Detected primary particle with end vertex. This should only be the case if" );
@@ -982,15 +974,15 @@ void ISF::InputConverter::processPredefinedDecays(const HepMC::GenParticlePtr& g
     ATH_MSG_WARNING( "particle set on." );
     ATH_MSG_WARNING( "ISF Particle: " << isp );
     ATH_MSG_WARNING( "Primary Particle: " << genpart );
-    ATH_MSG_WARNING( "Number of daughters of "<<bcgenpart<<": " << genpart->end_vertex()->particles_out_size() );
+    ATH_MSG_WARNING( "Number of daughters: " << genpart->end_vertex()->particles_out_size() );
   }
   // Add all necessary daughter particles
   for ( auto daughter: *(genpart->end_vertex())) {
     if (m_quasiStableParticlesIncluded) {
-      ATH_MSG_VERBOSE ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
+      ATH_MSG_VERBOSE ( "Attempting to add daughter particle: " << daughter );
     }
     else {
-      ATH_MSG_WARNING ( "Attempting to add daughter particle of "<<bcgenpart<<": " << daughter );
+      ATH_MSG_WARNING ( "Attempting to add daughter particle: " << daughter );
     }
 #ifdef HEPMC3
     G4PrimaryParticle *daughterG4Particle = this->getDaughterG4PrimaryParticle( daughter, makeLinkToTruth );
@@ -998,8 +990,7 @@ void ISF::InputConverter::processPredefinedDecays(const HepMC::GenParticlePtr& g
     G4PrimaryParticle *daughterG4Particle = this->getDaughterG4PrimaryParticle( *daughter, makeLinkToTruth );
 #endif
     if (!daughterG4Particle) {
-      ATH_MSG_FATAL("Bailing out of loop over daughters of particle with barcode: "<<bcgenpart <<
-                    " due to errors.");
+      ATH_MSG_FATAL("Bailing out of loop over daughters due to errors.");
     }
     g4particle->SetDaughter( daughterG4Particle );
   }
