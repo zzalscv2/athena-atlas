@@ -22,7 +22,6 @@
 #include "AtlasDetDescr/AtlasRegion.h"
 #include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/VTrackInformation.h"
-#include "MCTruth/TrackBarcodeInfo.h"
 
 // Geant4 includes
 #include "G4ParticleDefinition.hh"
@@ -327,10 +326,6 @@ namespace G4UA{
 	  //std::cout <<"interaction:"<< process->GetProcessSubType() <<":"<<nSec<< std::endl;
 	  m_process=process->GetProcessSubType();
 	  m_pdg_mother = track->GetDefinition()->GetPDGEncoding();
-	  //VTrackInformation * trackInfo= static_cast<VTrackInformation*>(track->GetUserInformation());
-	  //m_gen_mother = (trackInfo && (trackInfo->GetHepMCParticle() ||
-	  //                            dynamic_cast<TrackBarcodeInfo*>(trackInfo))) ?
-	  //int(trackInfo->GetParticleBarcode()/1.e08) : -1;
 	  m_gen_mother = m_gen;
 	  G4ThreeVector mom = preStep->GetMomentum();
 	  m_p_mother   = mom.mag();
