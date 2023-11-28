@@ -88,6 +88,7 @@ namespace DerivationFramework{
           ||  m_DSID==504330 || m_DSID==504331 || m_DSID==504332 || m_DSID==504334 || m_DSID==504335 || m_DSID==504336 || m_DSID==504338 || m_DSID==504342 || m_DSID==504343 || m_DSID==504344 || m_DSID==504346//aMC@NLO+P8 refined ttZ
           ||  m_DSID==601491 || m_DSID==601492  //Pow+Py8 ttbar pTHard variations - ATLMCPROD-10168
           || (m_DSID>=601495 && m_DSID<=601498) //Pow+Py8 ttbar pTHard variations - ATLMCPROD-10168
+          || (m_DSID>=601669 && m_DSID<=601672) //Pow+Py8 ttbar FSR variations 
 	  || (m_DSID>=601783 && m_DSID<=601784) // Powheg+P8 ttbb bornzerodamp cut 5 pThard variations - ATLMCPROD-10527
 	    ){
       m_GenUsed=Pythia8;
