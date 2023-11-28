@@ -9,5 +9,3 @@ Modules in this directory
   * Defines the top-level sequences containing the input maker and hypothesis alg
 * [BphysicsRecoSequences](BphysicsRecoSequences.py)
   * Assembles the sequences for each stage of reconstruction
-* [generateBphysics](generateBphysics.py)
-  * Prototype for NewJO chain configuration
