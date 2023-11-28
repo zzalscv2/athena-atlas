@@ -135,13 +135,13 @@ HFORType HFOR_Truth::findOverlap(const xAOD::TruthEventContainer& truthEvent,
         const xAOD::TruthParticle* truthParticle   = truth->truthParticle(i);
         if (truthParticle != nullptr) {
           int pdgId = truthParticle->pdgId() ;
-          if (fabs(pdgId) == 4) {
+          if (std::abs(pdgId) == 4) {
             //quarks_4 ++ ;
             if (is_FinalState(truthParticle) ) {
               fsQuarksMap[4].push_back(truthParticle) ;
             }
           }
-          if (fabs(pdgId) == 5) {
+          if (std::abs(pdgId) == 5) {
             //quarks_5 ++ ;
             if ( is_FinalState(truthParticle) ) {
               fsQuarksMap[5].push_back(truthParticle) ;
@@ -219,12 +219,12 @@ HFORType HFOR_Truth::jetBasedRemoval( const xAOD::JetContainer* jets) {
       return HFORType::noType;
     }
     
-    int nGhostMatchedBQuarks = ghostB.size();
-    int nGhostMatchedCQuarks = ghostC.size();   
-    int nB_ME = 0, nC_ME = 0, nB_GS = 0, nC_GS = 0; 
+    size_t nGhostMatchedBQuarks = ghostB.size();
+    size_t nGhostMatchedCQuarks = ghostC.size();   
+    size_t nB_ME = 0, nC_ME = 0, nB_GS = 0, nC_GS = 0; 
 
     if(nGhostMatchedCQuarks == 0 && nGhostMatchedBQuarks == 0) continue;//do nothing for jets without HF hadrons!
-    if( jet->pt() < m_jetBasedHFOR_pT_min || fabs(jet->eta()) > m_jetBasedHFOR_eta_max ) continue;
+    if( jet->pt() < m_jetBasedHFOR_pT_min || std::fabs(jet->eta()) > m_jetBasedHFOR_eta_max ) continue;
 
     //Look only in region where to use only GS only for 2 quarks in 1 jet and ME for 2 quarks in 2 jets 
       
@@ -268,20 +268,15 @@ HFORType HFOR_Truth::jetBasedRemoval( const xAOD::JetContainer* jets) {
       
       std::cout<<"nB_ME = "<<nB_ME<<" nC_ME = "<<nC_ME<<" nB_GS = "<<nB_GS<<" nC_GS = "<<nC_GS<<std::endl;
       for (const xAOD::TruthParticle * part : ghostB ) {
-        std::cout<<"ghost b status: "<<part->status()<<" pdgId: "<<part->pdgId()<<" m:"<<part->m()<<" barcode "<<part->barcode()
-                 <<" Vtx barcode: "<<part->prodVtx()->barcode()<<" n parent: "<<part->nParents()<<" n children: "<<part->nChildren()<<std::endl;          
+        std::cout<<"ghost b: "<<part<<" Vtx: "<<part->prodVtx()<<" n parent: "<<part->nParents()<<" n children: "<<part->nChildren()<<std::endl;          
         if(part->nParents())
-          std::cout<<" mother status: "<<part->parent()->status()<<" mother barcode: "<<part->parent()->barcode()
-                   <<" mother pdgID: "<<part->parent()->pdgId()<<" mother mothers: "<<part->parent()->nParents()<<std::endl;         
+          std::cout<<" mother: "<<part->parent()<<" mother mothers: "<<part->parent()->nParents()<<std::endl;         
       }
       
       for (const xAOD::TruthParticle * part : ghostC ) {
         if(part){
-          std::cout<<"ghost c status: "<<part->status()<<" pdgId: "<<part->pdgId()<<" m:"<<part->m()<<" barcode "<<part->barcode()
-                   <<" n parent: "<<part->nParents()<<" n children: "<<part->nChildren()<<std::endl;
-          if(part->nParents())
-            std::cout<<"mother status: "<<part->parent()->status()<<" mother barcode: "<<part->parent()->barcode()
-                     <<" Vtx barcode: "<<part->prodVtx()->barcode()<<" mother pdgID: "<<part->parent()->pdgId()<<" mother mothers: "<<part->parent()->nParents()<<std::endl;           
+          std::cout<<"ghost c: "<<part<<" n parent: "<<part->nParents()<<" n children: "<<part->nChildren()<<std::endl;
+          if(part->nParents()) std::cout<<"mother: "<<part->parent()<<" Vtx: "<<part->prodVtx()<<" mother mothers: "<<part->parent()->nParents()<<std::endl;           
         } else {
           std::cout<<"WARNING: MISSING LINK!!!"<<std::endl;
         }
@@ -564,42 +559,42 @@ bool HFOR_Truth::findHFQuarks(const std::map <int,
   if(m_debug){
     std::cout<<"m_qq.size = "<<m_qq.size()<<endl;
     std::cout<<"PDF n = "<<PDF.size()<<std::endl;
-    for(auto & i : PDF)  std::cout<<i->barcode()<<std::endl;
+    for(auto & i : PDF)  std::cout<<i<<std::endl;
     std::cout<<"ME n = "<<ME.size()<<std::endl;
-    for(auto & i : ME)  std::cout<<i->barcode()<<std::endl;
+    for(auto & i : ME)  std::cout<<i<<std::endl;
     std::cout<<"GS n = "<<GS.size()<<std::endl;
     for (const auto& gs_item : GS){
       std::cout<<"GS item i = "<<gs_item.first<<std::endl;
-      for(const auto & i : gs_item.second)  std::cout<<i->barcode()<<std::endl;
+      for(const auto & i : gs_item.second)  std::cout<<i<<std::endl;
     }
       
     std::cout<<"xPDF n = "<<xPDF.size()<<std::endl;
     for (const auto& xPDF_item : xPDF){
       std::cout<<"xPDF item i = "<<xPDF_item.first<<std::endl;
-      for(const auto & i : xPDF_item.second)  std::cout<<i->barcode()<<std::endl;
+      for(const auto & i : xPDF_item.second)  std::cout<<i<<std::endl;
     }
       
     std::cout<<"xME n = "<<xME.size()<<std::endl;
     for (const auto& xME_item : xME){
       std::cout<<"xME item i = "<<xME_item.first<<std::endl;
-      for(const auto & i : xME_item.second)  std::cout<<i->barcode()<<std::endl;
+      for(const auto & i : xME_item.second)  std::cout<<i<<std::endl;
     }
       
     std::cout<<"MPI n = "<<MPI.size()<<std::endl;
     for (const auto& mpi_item : MPI){
       std::cout<<"MPI item i = "<<mpi_item.first<<std::endl;
-      for(const auto & i : mpi_item.second)  std::cout<<i->barcode()<<std::endl;
+      for(const auto & i : mpi_item.second)  std::cout<<i<<std::endl;
     }
     std::cout<<"ME_PDF n = "<<ME_PDF.size()<<std::endl;
     for (const auto& ME_PDF_item : ME_PDF){
       std::cout<<"ME_PDF item i = "<<ME_PDF_item.first<<std::endl;
-      for(const auto & i : ME_PDF_item.second)  std::cout<<i->barcode()<<std::endl;
+      for(const auto & i : ME_PDF_item.second)  std::cout<<i<<std::endl;
     }
       
     std::cout<<"UFO n = "<<UFO.size()<<std::endl;
     for (const auto& UFO_item : UFO){
       std::cout<<"UFO item i = "<<UFO_item.first<<std::endl;
-      for(const auto & i : UFO_item.second)  std::cout<<i->barcode()<<std::endl;
+      for(const auto & i : UFO_item.second)  std::cout<<i<<std::endl;
     }
   }
 
@@ -834,7 +829,7 @@ HFORType HFOR_Truth::angularBasedRemoval( void ) {
                     std::cout << "Match NOT from same Vertex flavor->" << flavor << std::endl ;
                   }
                   std::cout << "///////////////// " << proc << "  " << flavor << " dr " << dR << std::endl ;
-                }								 
+                }
               }
               else {
                 if(m_debug) std::cout << "No Match (dr>0.4)" << std::endl ;
