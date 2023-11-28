@@ -458,7 +458,7 @@ bool HFOR_Truth::findHFQuarks(const std::map <int,
 
           if (level != 0) {
             tipo = checkAncestor(ancestor,bcQuark) ;
-            if ( tipo["bastard"] or tipo["cFromb"] or tipo["bFromb"] ) {
+            if ( tipo["orphan"] or tipo["cFromb"] or tipo["bFromb"] ) {
               hasAncestor = false ;
             }
             else {
@@ -620,7 +620,7 @@ std::map<std::string, bool> HFOR_Truth::checkAncestor(const xAOD::TruthParticle*
   tipo ["W"]       = false ;
   tipo ["cFromb"]  = false ;
   tipo ["bFromb"]  = false ;
-  tipo ["bastard"] = false ;
+  tipo ["orphan"] = false ;
   if (!is_sameFlavor(ancestor, bcQuark) ) {
     tipo ["proton"]  = is_proton(ancestor);
     tipo ["top"]     = ancestor->isTop() ;
@@ -629,7 +629,7 @@ std::map<std::string, bool> HFOR_Truth::checkAncestor(const xAOD::TruthParticle*
     tipo ["bFromb"]  = (is_b(bcQuark) && is_bHadron(ancestor)) ;
   }
   else {
-    tipo["bastard"] = true ;
+    tipo["orphan"] = true ;
   }
 
   return (tipo) ;
