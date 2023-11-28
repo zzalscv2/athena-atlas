@@ -1,20 +1,23 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 
+from egammaRec import egammaKeys
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def MaxCellDecoratorCfg(flags,**kwargs):
+def MaxCellDecoratorCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.Electrons)
     kwargs.setdefault("SGKey_photons", flags.Egamma.Keys.Output.Photons)
     acc.setPrivateTools(CompFactory.DerivationFramework.MaxCellDecorator(**kwargs))
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
+
     acc.merge(LArOnOffIdMappingCfg(flags))
     return acc
 
-def GainDecoratorCfg(flags,**kwargs):
+
+def GainDecoratorCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.Electrons)
     kwargs.setdefault("SGKey_photons", flags.Egamma.Keys.Output.Photons)
@@ -22,20 +25,24 @@ def GainDecoratorCfg(flags,**kwargs):
     acc.setPrivateTools(CompFactory.DerivationFramework.GainDecorator(**kwargs))
     return acc
 
-def EgammaCoreCellRecoveryCfg(flags,**kwargs):
+
+def EgammaCoreCellRecoveryCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     acc.setPrivateTools(
-        CompFactory.DerivationFramework.EGammaClusterCoreCellRecovery(**kwargs))
+        CompFactory.DerivationFramework.EGammaClusterCoreCellRecovery(**kwargs)
+    )
     return acc
 
-def CaloFillRectangularClusterCfg(flags,**kwargs):
+
+def CaloFillRectangularClusterCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("cells_name", flags.Egamma.Keys.Input.CaloCells)
     kwargs.setdefault("fill_cluster", True)
     acc.setPrivateTools(CompFactory.CaloFillRectangularCluster(**kwargs))
     return acc
 
-def ClusterEnergyPerLayerDecoratorCfg(flags,**kwargs):
+
+def ClusterEnergyPerLayerDecoratorCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.Electrons)
     kwargs.setdefault("SGKey_photons", flags.Egamma.Keys.Output.Photons)
@@ -45,9 +52,15 @@ def ClusterEnergyPerLayerDecoratorCfg(flags,**kwargs):
     toolArgs = {}
     toolArgs.update({"eta_size": kwargs["neta"]})
     toolArgs.update({"phi_size": kwargs["nphi"]})
-    kwargs.setdefault("CaloFillRectangularClusterTool", acc.popToolsAndMerge(CaloFillRectangularClusterCfg(flags,**toolArgs) ) )
-    acc.setPrivateTools(CompFactory.DerivationFramework.ClusterEnergyPerLayerDecorator(**kwargs))
+    kwargs.setdefault(
+        "CaloFillRectangularClusterTool",
+        acc.popToolsAndMerge(CaloFillRectangularClusterCfg(flags, **toolArgs)),
+    )
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.ClusterEnergyPerLayerDecorator(**kwargs)
+    )
     return acc
+
 
 def MaxCellDecoratorKernelCfg(flags, name="MaxCellDecoratorKernel", **kwargs):
     acc = ComponentAccumulator()
@@ -58,9 +71,9 @@ def MaxCellDecoratorKernelCfg(flags, name="MaxCellDecoratorKernel", **kwargs):
 
     kwargs.setdefault("AugmentationTools", augmentationTools)
 
-    acc.addEventAlgo(
-        CompFactory.DerivationFramework.DerivationKernel(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name, **kwargs))
     return acc
+
 
 def CaloDecoratorKernelCfg(flags, name="CaloDecoratorKernel", **kwargs):
     acc = MaxCellDecoratorKernelCfg(flags)
@@ -74,83 +87,93 @@ def CaloDecoratorKernelCfg(flags, name="CaloDecoratorKernel", **kwargs):
     for neta, nphi in cluster_sizes:
         cename = "ClusterEnergyPerLayerDecorator_%sx%s" % (neta, nphi)
         ClusterEnergyPerLayerDecorator = acc.popToolsAndMerge(
-            ClusterEnergyPerLayerDecoratorCfg(
-                flags, neta=neta, nphi=nphi, name=cename
-            )
+            ClusterEnergyPerLayerDecoratorCfg(flags, neta=neta, nphi=nphi, name=cename)
         )
-        augmentationTools.append(acc.addPublicTool(
-            ClusterEnergyPerLayerDecorator))
+        augmentationTools.append(acc.addPublicTool(ClusterEnergyPerLayerDecorator))
 
     kwargs.setdefault("AugmentationTools", augmentationTools)
 
-    acc.addEventAlgo(
-        CompFactory.DerivationFramework.DerivationKernel(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name, **kwargs))
     return acc
 
-def CaloClusterThinningCfg(flags,**kwargs):
+
+def CaloClusterThinningCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     CaloClusterThinning = CompFactory.DerivationFramework.CaloClusterThinning
-    acc.addPublicTool(CaloClusterThinning(**kwargs),primary=True)
+    acc.addPublicTool(CaloClusterThinning(**kwargs), primary=True)
     return acc
 
 
-#### 
+####
 # additional utilities to return the list of decorations
 # added by the tools
 
-from egammaRec.Factories import getPropertyValue
-from egammaRec import egammaKeys
 
-def getGainLayerNames( tool ):
+def getGainLayerNames(tool):
     """getGainLayerNames( tool ) -> return a list of names of the decorations added to the
     egamma tool, given the GainDecorator tool"""
-    return [getPropertyValue(tool, "decoration_pattern").format(info=info, layer=layer, gain=gain) \
-        for info in ["E", "nCells"] \
-        for layer in getPropertyValue(tool, "layers") \
-        for gain in getPropertyValue(tool, "gain_names").values() ]
+    return [
+        getattr(tool, "decoration_pattern").format(info=info, layer=layer, gain=gain)
+        for info in ["E", "nCells"]
+        for layer in getattr(tool, "layers")
+        for gain in getattr(tool, "gain_names").values()
+    ]
 
-def getGainDecorations(acc, kernel,
+
+def getGainDecorations(
+    acc,
+    kernel,
     collections=[egammaKeys.outputElectronKey(), egammaKeys.outputPhotonKey()],
-    info = ["E", "nCells"] ):
-    """getGainDecorations( acc, kernel collections=["Electrons", "Photons"] ) -> 
+    info=["E", "nCells"],
+):
+    """getGainDecorations( acc, kernel collections=["Electrons", "Photons"] ) ->
     Return a list with the 'ExtraContent' to be added to the decorations to save the gain
     information per layer"""
 
     GainDecoratorTool = None
-    for toolStr in (acc.getEventAlgo(kernel).AugmentationTools):
-        toolStr  = f'{toolStr}'
-        splitStr = toolStr.split('/')
-        tool =  acc.getPublicTool(splitStr[1])
-        if splitStr[0] == 'DerivationFramework::GainDecorator':
+    for toolStr in acc.getEventAlgo(kernel).AugmentationTools:
+        toolStr = f"{toolStr}"
+        splitStr = toolStr.split("/")
+        tool = acc.getPublicTool(splitStr[1])
+        if splitStr[0] == "DerivationFramework::GainDecorator":
             GainDecoratorTool = tool
 
-    if GainDecoratorTool : 
-        return ["{part}.{info}".format(part=part, info=info) for part in collections \
-                for info in getGainLayerNames(GainDecoratorTool) ]
+    if GainDecoratorTool:
+        return [
+            "{part}.{info}".format(part=part, info=info)
+            for part in collections
+            for info in getGainLayerNames(GainDecoratorTool)
+        ]
     else:
         return ""
 
 
-def getClusterEnergyPerLayerDecorations( acc, kernel ):
+def getClusterEnergyPerLayerDecorations(acc, kernel):
     """getClusterEnergyPerLayerDecorationsLegacy( acc, kernel ) -> return a list of names of the
     decorations added to the egamma object, given the ClusterEnergyPerLayerDecorations
     object (e.g. Photons.E7x11_Lr0, ...)"""
-    properties = 'SGKey_photons', 'SGKey_electrons'
-    ClusterEnergyPerLayerDecorators = []  
+    properties = "SGKey_photons", "SGKey_electrons"
+    ClusterEnergyPerLayerDecorators = []
     for toolStr in acc.getEventAlgo(kernel).AugmentationTools:
-        toolStr  = f'{toolStr}'
-        splitStr = toolStr.split('/')
-        tool =  acc.getPublicTool(splitStr[1])
-        if splitStr[0] == 'DerivationFramework::ClusterEnergyPerLayerDecorator':
-            ClusterEnergyPerLayerDecorators.append( tool )
+        toolStr = f"{toolStr}"
+        splitStr = toolStr.split("/")
+        tool = acc.getPublicTool(splitStr[1])
+        if splitStr[0] == "DerivationFramework::ClusterEnergyPerLayerDecorator":
+            ClusterEnergyPerLayerDecorators.append(tool)
 
     decorations = []
     for tool in ClusterEnergyPerLayerDecorators:
-        collections = filter(bool, (getPropertyValue(tool, x) for x in properties) )
+        collections = filter(bool, (getattr(tool, x) for x in properties))
         for part in collections:
-            for layer in getPropertyValue(tool, "layers"):
-                decorations.extend(['{part}.E{neta}x{nphi}_Lr{layer}'.format(part=part, 
-                    neta=getPropertyValue(tool, 'neta'),
-                    nphi=getPropertyValue(tool, 'nphi'),
-                    layer=layer)])
+            for layer in getattr(tool, "layers"):
+                decorations.extend(
+                    [
+                        "{part}.E{neta}x{nphi}_Lr{layer}".format(
+                            part=part,
+                            neta=getattr(tool, "neta"),
+                            nphi=getattr(tool, "nphi"),
+                            layer=layer,
+                        )
+                    ]
+                )
     return decorations
