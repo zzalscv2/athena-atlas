@@ -220,13 +220,7 @@ StatusCode JetQGTaggerVariableTool::decorate(const xAOD::JetContainer& jetCont) 
 	  const xAOD::TruthParticle *part = static_cast<const xAOD::TruthParticle*>(tjet->rawConstituent(ind));
 	  ATH_MSG_DEBUG("part: " << part );
 	  // dont count invalid truth particles                                                                                                                                                         
-	  if (!part) continue;
-	  // require the particle in the final state                                                                                                                                                    
-	  ATH_MSG_DEBUG("status: " << (part->status()) );
-	  if( ! MC::isStable(part) ) continue;
-	  // require that the particle type (e.g. production type) be valid (e.g. not primaries)                                                                                                        
-	  ATH_MSG_DEBUG("barcode: " << (part->barcode()) );
-	  if (HepMC::is_simulation_particle(part)) continue;
+	  if (!part ||  ! MC::isStable(part) || HepMC::is_simulation_particle(part)) continue;
 	  // pt>500 MeV
 	  ATH_MSG_DEBUG("pt: " << (part->pt()) );
 	  if( ! (part->pt()>500.) )  continue;
