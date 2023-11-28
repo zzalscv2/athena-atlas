@@ -14,5 +14,4 @@ atlas_add_component( tauMonitoring
                      LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaMonitoringKernelLib AthenaMonitoringLib GaudiKernel StoreGateLib TrigDecisionToolLib xAODCore xAODEventInfo xAODTau xAODTracking )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_python_modules( python/*.py )

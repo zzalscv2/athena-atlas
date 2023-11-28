@@ -273,10 +273,7 @@ if DQMonFlags.doMonitoring():
       # Tau monitoring #
       #----------------#
       if DQMonFlags.doTauMon():
-         try:
-            include("tauMonitoring/tauMonitoring_jobOptions.py")
-         except Exception:
-            treatException("DataQualitySteering_jobOptions.py: exception when setting up Tau monitoring")
+         local_logger.warning("The legacy TauCP monitoring is no longer supported")
 
       #--------------------#
       # Jet tag monitoring #
