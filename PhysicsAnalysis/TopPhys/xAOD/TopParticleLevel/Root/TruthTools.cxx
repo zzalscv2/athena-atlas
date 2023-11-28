@@ -212,7 +212,7 @@ namespace top {
         return;
       }
       
-      if(verbose) ATH_MSG_INFO("getTruthMuonHistory:: -> called on truth particle with pdgId="<<truthmu->pdgId()<<" barcode="<<truthmu->barcode()<<" status="<<truthmu->status()<<" pt="<<truthmu->pt());
+      if(verbose) ATH_MSG_INFO("getTruthMuonHistory:: -> called on truth particle"<<truthmu);
       
       if(!truthmu->isAvailable<bool>("hasTruthMuonHistoryInfo")) //add default values
       {
@@ -281,15 +281,15 @@ namespace top {
       if(verbose)
       {
         ATH_MSG_INFO("getTruthMuonHistory::LepParticleOriginFlag="<<static_cast<int>(lepParticleOriginFlag));
-        if(truthmu) ATH_MSG_INFO("getTruthMuonHistory::-->truth muon pdgId="<<truthmu->pdgId()<<" barcode="<<truthmu->barcode()<<" pt="<<truthmu->pt());
+        if(truthmu) ATH_MSG_INFO("getTruthMuonHistory::-->truth muon "<<truthmu);
         else ATH_MSG_INFO("getTruthMuonHistory::-->truth muon not found");
-        if(truthmu_mother) ATH_MSG_INFO("getTruthMuonHistory::-->truth muon mother pdgId="<<truthmu_mother->pdgId()<<" barcode="<<truthmu_mother->barcode()<<" pt="<<truthmu_mother->pt());
+        if(truthmu_mother) ATH_MSG_INFO("getTruthMuonHistory::-->truth muon mother "<<truthmu_mother);
         else ATH_MSG_INFO("getTruthMuonHistory::-->truth muon mother not found");
-        if(truthmu_firstNonLeptonMother) ATH_MSG_INFO("getTruthMuonHistory::-->truthmu_firstNonLeptonMother pdgId="<<truthmu_firstNonLeptonMother->pdgId()<<" barcode="<<truthmu_firstNonLeptonMother->barcode()<<" pt="<<truthmu_firstNonLeptonMother->pt());
+        if(truthmu_firstNonLeptonMother) ATH_MSG_INFO("getTruthMuonHistory::-->truthmu_firstNonLeptonMother "<<truthmu_firstNonLeptonMother);
         else ATH_MSG_INFO("getTruthMuonHistory::-->truthmu_firstNonLeptonMother not found");
-        if(truthmu_Bmother) ATH_MSG_INFO("getTruthMuonHistory::-->truth muon Bmother pdgId="<<truthmu_Bmother->pdgId()<<" barcode="<<truthmu_Bmother->barcode()<<" pt="<<truthmu_Bmother->pt());
+        if(truthmu_Bmother) ATH_MSG_INFO("getTruthMuonHistory::-->truth muon Bmother "<<truthmu_Bmother);
         else ATH_MSG_INFO("getTruthMuonHistory::-->truth muon Bmother not found");
-        if(truthmu_Cmother) ATH_MSG_INFO("getTruthMuonHistory::-->truth muon Cmother pdgId="<<truthmu_Cmother->pdgId()<<" barcode="<<truthmu_Cmother->barcode()<<" pt="<<truthmu_Cmother->pt());
+        if(truthmu_Cmother) ATH_MSG_INFO("getTruthMuonHistory::-->truth muon Cmother "<<truthmu_Cmother);
         else ATH_MSG_INFO("getTruthMuonHistory::-->truth muon Cmother not found");
       }
       
