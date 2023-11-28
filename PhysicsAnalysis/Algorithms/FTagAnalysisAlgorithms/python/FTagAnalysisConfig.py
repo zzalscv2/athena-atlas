@@ -35,7 +35,6 @@ class FTagConfig (ConfigBlock):
         self.addOption ('generator', "autoconfig", type=str)
         self.addOption ('kinematicSelection', True, type=bool)
         self.addOption ('noEffSF', False, type=bool)
-        self.addOption ('legacyRecommendations', False, type=bool)
         self.addOption ('minPt', None, type=float)
         self.addOption ('bTagCalibFile', None, type=str,
                         info='calibration file for CDI')
@@ -171,18 +170,9 @@ class FTagConfig (ConfigBlock):
         elif self.generator == "amcAtNLOHerwig":
             DSID = "412116"
 
-        if self.legacyRecommendations:
-            # The CDI file does not have PV0 in the key
-            if "VR" in jetCollection:
-                jetCollection = jetCollection.replace("PV0","")
-
         # CDI file
         if self.bTagCalibFile is not None :
             bTagCalibFile = self.bTagCalibFile
-        elif self.legacyRecommendations :
-            # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagRecommendationsRelease22#Latest_Rel_22_CDI_July_2022
-            # Supports DL1r on VR track jets
-            bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2021-22-13TeV-MC16-CDI-2021-12-02_v2.root"
         else:
             if config.geometry() == LHCPeriod.Run2:
                 bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2023-22-13TeV-MC20-CDI-2023-09-13_v1.root"
@@ -262,7 +252,6 @@ def makeFTagAnalysisConfig( seq, containerName,
                             generator = None,
                             kinematicSelection = None,
                             noEffSF = None,
-                            legacyRecommendations = None,
                             minPt = None ):
     """Create a ftag analysis algorithm config
 
@@ -272,7 +261,6 @@ def makeFTagAnalysisConfig( seq, containerName,
       generator -- Generator for MC/MC scale factors
       kinematicSelection -- Wether to run kinematic selection
       noEffSF -- Disables efficiency and scale factor calculations
-      legacyRecommendations -- Use legacy recommendations without shallow copied containers
       minPt -- Kinematic selection for jet calibration validity (depending on jet collection)
     """
 
@@ -287,8 +275,6 @@ def makeFTagAnalysisConfig( seq, containerName,
         config.setOptionValue ('kinematicSelection', kinematicSelection)
     if noEffSF is not None :
         config.setOptionValue ('noEffSF', noEffSF)
-    if legacyRecommendations is not None :
-        config.setOptionValue ('legacyRecommendations', legacyRecommendations)
     if minPt is not None :
         config.setOptionValue ('minPt', minPt)
     seq.append (config)

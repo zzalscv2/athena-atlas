@@ -22,7 +22,7 @@ def makeSequence (dataType, jetContainer="AntiKt4EMPFlowJets") :
    
     btagOPs = ['FixedCutBEff_60', 'Continuous']
     for btagOP in btagOPs:
-        makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = True, legacyRecommendations = False,
+        makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = True,
                                   enableCutflow=True, btagger = 'DL1dv01', btagWP = btagOP )
     jetSequence.configure( inputName = jetContainer, outputName = 'AnalysisJets_%SYS%' )
 
