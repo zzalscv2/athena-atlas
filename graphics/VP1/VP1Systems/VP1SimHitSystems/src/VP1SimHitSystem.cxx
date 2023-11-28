@@ -262,12 +262,12 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     //
     // Pixel:
     //
-    const SiHitCollection* p_collection;
+    const SiHitCollection* p_collection = nullptr;
     if(sg->retrieve(p_collection,"PixelHits")==StatusCode::SUCCESS)
     {
-      for(SiHitConstIterator i_hit=p_collection->begin(); i_hit!=p_collection->end(); ++i_hit)
+      for (const SiHit& hit : *p_collection)
       {
-        GeoSiHit ghit(*i_hit);
+        GeoSiHit ghit(hit);
         if(!ghit) continue;
         HepGeom::Point3D<double> u = ghit.getGlobalPosition();
         hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
@@ -281,12 +281,12 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     //
     // SCT:
     //
-    const SiHitCollection* s_collection;
+    const SiHitCollection* s_collection = 0;
     if(sg->retrieve(s_collection,"SCT_Hits")==StatusCode::SUCCESS)
     {
-      for(SiHitConstIterator i_hit=s_collection->begin();i_hit!=s_collection->end();++i_hit)
+      for (const SiHit& hit : *s_collection)
       {
-        GeoSiHit ghit(*i_hit);
+        GeoSiHit ghit(hit);
         if (!ghit) continue;
         HepGeom::Point3D<double> u = ghit.getGlobalPosition();
         hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
@@ -300,12 +300,12 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     //
     // TRT:
     //
-    const TRTUncompressedHitCollection* t_collection;
+    const TRTUncompressedHitCollection* t_collection = nullptr;
     if(sg->retrieve(t_collection,"TRTUncompressedHits")==StatusCode::SUCCESS)
     {
-      for(TRTUncompressedHitConstIter i_hit=t_collection->begin();i_hit!=t_collection->end();++i_hit)
+      for (const TRTUncompressedHit& hit : *t_collection)
       {
-        GeoTRTUncompressedHit ghit(*i_hit);
+        GeoTRTUncompressedHit ghit(hit);
         if(!ghit) continue;
         Amg::Vector3D u = Amg::Hep3VectorToEigen(ghit.getGlobalPosition());
         hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(), u.z() );
@@ -360,12 +360,12 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
       // For more Tile simHits data, see:
       // Simulation/Tools/HitAnalysis/src/CaloHitAnalysis.cxx
       //
-      const TileHitVector* t_collection;
+      const TileHitVector* t_collection = nullptr;
 
       if(sg->retrieve(t_collection,"TileHitVec")==StatusCode::SUCCESS)
       {
-          for (const auto& i_hit : *t_collection) {
-              Identifier pmt_id = (i_hit).identify();
+          for (const TileHit& hit : *t_collection) {
+              Identifier pmt_id = hit.identify();
               Identifier cell_id = m_clockwork->tile_id->cell_id(pmt_id);
               const CaloDetDescrElement* ddElement = (m_clockwork->tile_id->is_tile_aux(cell_id)) ? 0 : m_clockwork->tile_dd_man->get_cell_element(cell_id);
               if (ddElement) 
@@ -382,12 +382,12 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     //
     // MDT:
     //
-    const MDTSimHitCollection* mdt_collection;
+    const MDTSimHitCollection* mdt_collection = nullptr;
     if(sg->retrieve(mdt_collection)==StatusCode::SUCCESS)
     {
-      for(MDTSimHitConstIterator i_hit=mdt_collection->begin();i_hit!=mdt_collection->end();++i_hit)
+      for (const MDTSimHit& hit : *mdt_collection)
       {
-        GeoMDTHit ghit(*i_hit);
+        GeoMDTHit ghit(hit);
         if(!ghit) continue;
         Amg::Vector3D u = ghit.getGlobalPosition();
         hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
@@ -401,11 +401,11 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     //
     // RPC:
     //
-    const RPCSimHitCollection* rpc_collection;
+    const RPCSimHitCollection* rpc_collection = nullptr;
     if(sg->retrieve(rpc_collection)==StatusCode::SUCCESS) {
-      for(RPCSimHitConstIterator i_hit=rpc_collection->begin();i_hit!=rpc_collection->end();++i_hit)
+      for (const RPCSimHit& hit : *rpc_collection)
       {
-        GeoRPCHit ghit(*i_hit);
+        GeoRPCHit ghit(hit);
         if(!ghit) continue;
         Amg::Vector3D u = ghit.getGlobalPosition();
         hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
@@ -419,12 +419,12 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     //
     // TGC:
     //
-    const TGCSimHitCollection* tgc_collection;
+    const TGCSimHitCollection* tgc_collection = nullptr;
     if (sg->retrieve(tgc_collection)==StatusCode::SUCCESS)
     {
-      for(TGCSimHitConstIterator i_hit=tgc_collection->begin();i_hit!=tgc_collection->end();++i_hit)
+      for (const TGCSimHit& hit : *tgc_collection)
       {
-        GeoTGCHit ghit(*i_hit);
+        GeoTGCHit ghit(hit);
         if(!ghit) continue;
         Amg::Vector3D u = ghit.getGlobalPosition();
         hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
@@ -438,12 +438,12 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     //
     // CSC:
     //
-    const CSCSimHitCollection* csc_collection;
+    const CSCSimHitCollection* csc_collection = nullptr;
     if(sg->retrieve(csc_collection)==StatusCode::SUCCESS)
     {
-      for(CSCSimHitConstIterator i_hit=csc_collection->begin();i_hit!=csc_collection->end();++i_hit)
+      for (const CSCSimHit& hit : *csc_collection)
       {
-        GeoCSCHit ghit(*i_hit);
+        GeoCSCHit ghit(hit);
         if (!ghit) continue;
         Amg::Vector3D u = ghit.getGlobalPosition();
         hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
@@ -458,17 +458,17 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
       //
       message("Trying for Generic Muon (as many collections as can be found)");
       for(QString key : VP1SGContentsHelper(this).getKeys<GenericMuonSimHitCollection>()) {
-        const GenericMuonSimHitCollection* generic_collection;
+        const GenericMuonSimHitCollection* generic_collection = nullptr;
         if(sg->retrieve( generic_collection,key.toStdString().c_str() )==StatusCode::SUCCESS)
         {
           messageVerbose("Retrieved"+key+"with size: "+str(generic_collection->size()));
           std::cout<<"Got collection with size: "<<generic_collection->size()<<std::endl;
 
           //unsigned int i=0; // for DEBUG only
-          for(GenericMuonSimHitConstIterator i_hit=generic_collection->begin();i_hit!=generic_collection->end();++i_hit)
+          for (const GenericMuonSimHit& hit : *generic_collection)
           {
             // std::cout << "Got hit number: " << i++ << std::endl; // for DEBUG only
-            const GenericMuonSimHit ghit(*i_hit);
+            const GenericMuonSimHit ghit(hit);
             const Amg::Vector3D& u = ghit.globalPosition();
             hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
           }
@@ -483,17 +483,17 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
       //
       message("Trying for ForwardRegion (as many collections as can be found)");
       for(QString key : VP1SGContentsHelper(this).getKeys<SimulationHitCollection>()) {
-        const SimulationHitCollection* generic_collection;
+        const SimulationHitCollection* generic_collection = nullptr;
         if(sg->retrieve( generic_collection,key.toStdString().c_str() )==StatusCode::SUCCESS)
         {
           messageVerbose("Retrieved"+key+"with size: "+str(generic_collection->size()));
           std::cout<<"Got collection with size: "<<generic_collection->size()<<std::endl;
 
           //unsigned int i=0; // for DEBUG only
-          for(SimulationHitConstIter i_hit=generic_collection->begin();i_hit!=generic_collection->end();++i_hit)
+          for (const SimulationHit& hit : *generic_collection)
           {
             // std::cout << "Got hit number: " << i++ << std::endl; // for DEBUG only
-            const SimulationHit ghit(*i_hit);
+            const SimulationHit ghit(hit);
             const Amg::Vector3D& u = Amg::Hep3VectorToEigen(ghit.pre().position);
             hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
           }
