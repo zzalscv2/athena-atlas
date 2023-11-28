@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY18.py
 #====================================================================
@@ -44,19 +44,6 @@ def BPHY18Cfg(ConfigFlags):
                                             StoreGateEntryName = "DFCommonElectronsLHVeryLoosenod0",
                                             ContainerName = "Electrons",
                                             StoreTResult=False)
-    
-    from ElectronPhotonSelectorTools.AsgElectronChargeIDSelectorToolConfig import AsgElectronChargeIDSelectorToolCfg
-    ElectronChargeIDSelector = acc.popToolsAndMerge(AsgElectronChargeIDSelectorToolCfg(ConfigFlags, name="ElectronChargeIDSelectorLoose"))
-    ElectronChargeIDSelector.primaryVertexContainer = "PrimaryVertices"
-    ElectronChargeIDSelector.TrainingFile = "ElectronPhotonSelectorTools/ChargeID/ECIDS_20180731rel21Summer2018.root"
-    acc.addPublicTool(ElectronChargeIDSelector)
-    ElectronPassECIDS = CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name = "ElectronPassECIDS",
-                                            EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
-                                            EGammaFudgeMCTool="",
-                                            CutType="",
-                                            StoreGateEntryName="DFCommonElectronsECIDS",
-                                            ContainerName="Electrons",
-                                            StoreTResult=True)
     
     BPHY18DiElectronFinder = CompFactory.Analysis.JpsiFinder_ee(
                              name                        = "BPHY18DiElectronFinder",
@@ -264,10 +251,10 @@ def BPHY18Cfg(ConfigFlags):
                      ]
     
 
-    augTools = [ElectronPassLHvloosenod0, ElectronPassECIDS,
-                          BPHY18DiElectronSelectAndWrite, BPHY18_Select_DiElectrons,
-                          BPHY18BeeKstSelectAndWrite, BPHY18_Select_BeeKst, BPHY18_Select_BeeKstbar,
-                          BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK]
+    augTools = [ElectronPassLHvloosenod0,
+                BPHY18DiElectronSelectAndWrite, BPHY18_Select_DiElectrons,
+                BPHY18BeeKstSelectAndWrite, BPHY18_Select_BeeKst, BPHY18_Select_BeeKstbar,
+                BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK]
     skimTools = [BPHY18SkimmingAND]
     
     if isSimulation:
@@ -311,7 +298,7 @@ def BPHY18Cfg(ConfigFlags):
                        "Muons.numberOfTriggerEtaLayers.numberOfPhiLayers",
                        "InDetTrackParticles.numberOfTRTHits.numberOfTRTHighThresholdHits.vx.vy.vz.pixeldEdx",
                        "PrimaryVertices.chiSquared.covariance", 
-                       "Electrons.deltaEta1.DFCommonElectronsLHVeryLoosenod0.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone40_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.ptvarcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.DFCommonElectronsECIDS.DFCommonElectronsECIDSResult",
+                       "Electrons.deltaEta1.DFCommonElectronsLHVeryLoosenod0.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone40_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.ptvarcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000",
                        "egammaClusters.calE.calEta.calPhi.e_sampl.eta_sampl.etaCalo.phiCalo.ETACALOFRAME.PHICALOFRAME",
                        "HLT_xAOD__ElectronContainer_egamma_ElectronsAuxDyn.charge"]
     
