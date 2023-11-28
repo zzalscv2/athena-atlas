@@ -2958,15 +2958,15 @@ double RpcDigitizationTool::FCPEfficiency(HepMC::ConstGenParticlePtr genParticle
 
 double RpcDigitizationTool::extract_time_over_threshold_value(CLHEP::HepRandomEngine* rndmEngine) const {
     //mn Time-over-threshold modeled as a narrow and a wide gaussian
-    //mn for the moment based on slide 10 in https://indico.cern.ch/event/1123140/contributions/4994338/attachments/2519481/4340749/Aielli_RPC2022.pdf
-    constexpr double tot_mean_narrow = 15.;
+    //mn based on the fit documented in https://its.cern.ch/jira/browse/ATLASRECTS-7820
+    constexpr double tot_mean_narrow = 16.;
     constexpr double tot_sigma_narrow = 2.;
-    constexpr double tot_mean_wide = 13.;
-    constexpr double tot_sigma_wide = 6.;
+    constexpr double tot_mean_wide = 15.;
+    constexpr double tot_sigma_wide = 4.5;
 
     double thetot = 0.;
     
-    if (CLHEP::RandFlat::shoot(rndmEngine)<0.5) {
+    if (CLHEP::RandFlat::shoot(rndmEngine)<0.75) {
       thetot = CLHEP::RandGaussZiggurat::shoot(rndmEngine, tot_mean_narrow, tot_sigma_narrow);
     } else {
       thetot = CLHEP::RandGaussZiggurat::shoot(rndmEngine, tot_mean_wide, tot_sigma_wide);
