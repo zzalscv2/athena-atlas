@@ -41,7 +41,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
   std::unique_ptr<xAOD::TauJetContainer> shallowTaus(shallowCopy.first);
   std::unique_ptr<xAOD::ShallowAuxContainer> shallowTausAux(shallowCopy.second);
 
-  // In tauMonTool these values are chosen as Et cuts for different Histograms
   const int lowerEtThreshold = 15;
   const int higherEtThreshold = 75;
   auto tool = getGroup(m_kinGroupName);
