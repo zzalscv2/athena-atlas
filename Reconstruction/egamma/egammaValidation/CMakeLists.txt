@@ -15,9 +15,3 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 # ART shell executable scripts :
 atlas_install_scripts( test/*.sh scripts/*py )
 
-
-# Not needed in main as long as the script 
-# runs as part of the CI
-# atlas_add_test( ut_egammaARTJob_test
-#   	         SCRIPT test/ut_egammaARTJob_test.sh
-# 		 PROPERTIES TIMEOUT 1300)
