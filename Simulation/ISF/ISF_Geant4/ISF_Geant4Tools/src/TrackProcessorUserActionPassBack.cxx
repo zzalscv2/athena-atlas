@@ -25,7 +25,6 @@
 #include "StoreGate/StoreGateSvc.h"
 
 // MCTruth includes
-#include "MCTruth/TrackBarcodeInfo.h"
 #include "MCTruth/TrackHelper.h"
 #include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackInformation.h"
@@ -133,14 +132,8 @@ namespace G4UA {
         //     const G4ThreeVector&      aTrack_pos = aTrack->GetPosition();
         //     const G4ThreeVector&      aTrack_mom = aTrack->GetMomentum();
         //     int pdgID=aTrack->GetDefinition()->GetPDGEncoding();
-        //     int bc=0;
         //     int                         aTrackID = aTrack->GetTrackID();
-        //     TrackInformation* trackInfo=dynamic_cast<TrackInformation*>(aTrack->GetUserInformation());
-        //     if (trackInfo) {
-        //       bc=trackInfo->GetParticleBarcode();
-        //     }
-
-        //     ATH_MSG_WARNING("pre "<<preVol->GetName()<<" x="<<prePos.x()<<" y="<<prePos.y()<<" z="<<prePos.z()<<" p="<<preMom.mag()<<" geoID="<<preStepGeoID<<"; post "<<postVol->GetName()<<" x="<<postPos.x()<<" y="<<postPos.y()<<" z="<<postPos.z()<<" p="<<postMom.mag()<<" geoID="<<nextGeoID<<"; length="<<aStep->GetStepLength()<<"; n2nd="<<secondaryVector->size()<<" track  x="<<aTrack_pos.x()<<" y="<<aTrack_pos.y()<<" z="<<aTrack_pos.z()<<" p="<<aTrack_mom.mag()<<" curgeoID="<<curGeoID<<" pdgid="<<pdgID<<" bc="<<bc<<" trackID="<<aTrackID<<" ISF="<<curISP<<"; ploss="<<(postMom-preMom).mag());
+        //     ATH_MSG_WARNING("pre "<<preVol->GetName()<<" x="<<prePos.x()<<" y="<<prePos.y()<<" z="<<prePos.z()<<" p="<<preMom.mag()<<" geoID="<<preStepGeoID<<"; post "<<postVol->GetName()<<" x="<<postPos.x()<<" y="<<postPos.y()<<" z="<<postPos.z()<<" p="<<postMom.mag()<<" geoID="<<nextGeoID<<"; length="<<aStep->GetStepLength()<<"; n2nd="<<secondaryVector->size()<<" track  x="<<aTrack_pos.x()<<" y="<<aTrack_pos.y()<<" z="<<aTrack_pos.z()<<" p="<<aTrack_mom.mag()<<" curgeoID="<<curGeoID<<" pdgid="<<pdgID<<" trackID="<<aTrackID<<" ISF="<<curISP<<"; ploss="<<(postMom-preMom).mag());
         //   }
         // }
 
