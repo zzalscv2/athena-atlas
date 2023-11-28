@@ -73,7 +73,7 @@ def createTauConfigFlags():
     tau_cfg.addFlagsCategory("Tau.ActiveConfig", createTauRecConfigFlags, prefix=True)
 
     # e-had boosted ditaus, aka electron-subtracted taus
-    tau_cfg.addFlag("Tau.doTauEleRMRec", False)
+    tau_cfg.addFlag("Tau.doTauEleRMRec", True)
     # had-had boosted ditaus
     tau_cfg.addFlag("Tau.doDiTauRec", True)
 

@@ -291,7 +291,6 @@ def TauReconstructionCfg(flags):
         AntiKt4LCTopo_EleRM.inputdef.name = flags_TauEleRM.Tau.ActiveConfig.LCTopoOrigin_EleRM
         AntiKt4LCTopo_EleRM.inputdef.inputname = flags_TauEleRM.Tau.ActiveConfig.CaloCalTopoClusters_EleRM
         AntiKt4LCTopo_EleRM.inputdef.containername = flags_TauEleRM.Tau.ActiveConfig.LCOriginTopoClusters_EleRM
-        AntiKt4LCTopo_EleRM.modifiers = tuple(a_mod for a_mod in AntiKt4LCTopo_EleRM.modifiers if not a_mod.startswith('Filter_ifnotESD'))
         AntiKt4LCTopo_EleRM.standardRecoMode = True
         AntiKt4LCTopo_EleRM.context = "EleRM"
 
