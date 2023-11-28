@@ -499,13 +499,13 @@ TriggerHLTListRun3 = [
     ('xAOD::TrackParticleContainer#HLT_IDTrack_Electron_IDTrig',        'BS ESD AODFULL', 'Egamma', [InViews('precisionTrackingViews'),InViews('precisionHITrackingViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_IDTrigAux.',        'BS ESD AODFULL', 'Egamma'),
 
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_ElecLRT_IDTrig',        'BS ESD AODFULL', 'Egamma', [InViews('precisionTrackingViews_LRT')]),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_ElecLRT_IDTrig',        'BS ESD AODFULL', 'Egamma', [InViews('precisionTracking_LRTViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_ElecLRT_IDTrigAux.', 'BS ESD AODFULL', 'Egamma'),
 
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_Electron_LRTGSF',               'BS ESD AODFULL', 'Egamma', [InViews('precisionTracking_GSFRefittedViews_LRTGSF')]),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_Electron_LRTGSF',               'BS ESD AODFULL', 'Egamma', [InViews('precisionTracking_GSFRefitted_LRTGSFViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_LRTGSFAux.',           'BS ESD AODFULL', 'Egamma'),
 
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_Electron_GSF',               'BS ESD AODFULL', 'Egamma', [InViews('precisionTracking_GSFRefittedViews_GSF')]),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_Electron_GSF',               'BS ESD AODFULL', 'Egamma', [InViews('precisionTracking_GSFRefitted_GSFViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_GSFAux.parameterPX.parameterPY.parameterPZ.parameterPosition',        'BS ESD AODFULL', 'Egamma'),
 
     # these two corresponds to the output of the precisionCalo step
@@ -520,11 +520,11 @@ TriggerHLTListRun3 = [
     ('xAOD::CaloClusterTrigAuxContainer#HLT_HICaloEMClustersAux.',    'BS ESD AODFULL AODSLIM', 'Egamma'),
 
     # these two corresponds to the output of the precisionCalo_LRT step
-    ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_LRT',               'BS ESD AODFULL', 'Egamma', [InViews('precisionCaloElectronViews_LRT')]),
+    ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_LRT',               'BS ESD AODFULL', 'Egamma', [InViews('precisionCaloElectron_LRTViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_LRTAux.',    'BS ESD AODFULL', 'Egamma'),
 
     # these two corresponds to the output of the precisionCalo forward step
-    ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_FWD',               'BS ESD AODCOMM', 'Egamma', [InViews('precisionCaloElectronViews_FWD')]),
+    ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_FWD',               'BS ESD AODCOMM', 'Egamma', [InViews('precisionCaloElectron_FWDViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_FWDAux.',    'BS ESD AODCOMM', 'Egamma'),
 
 
@@ -539,7 +539,7 @@ TriggerHLTListRun3 = [
     ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersRoI',          'BS ESD AODFULL', 'Egamma', [InViews('precisionCaloElectronViews'), InViews('precisionCaloPhotonViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersRoIAux.nCells', 'BS ESD AODFULL', 'Egamma'),
 
-    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersRoI_LRT',          'BS ESD AODFULL', 'Egamma', [InViews('precisionCaloElectronViews_LRT')]),
+    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersRoI_LRT',          'BS ESD AODFULL', 'Egamma', [InViews('precisionCaloElectron_LRTViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersRoI_LRTAux.nCells', 'BS ESD AODFULL', 'Egamma'),
 
     # UE subtracted versions for heavy ion paths
@@ -578,7 +578,7 @@ TriggerHLTListRun3 = [
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigEMClusters_ElectronsAux.',     'BS ESD AODFULL', 'Egamma'),
     ('xAOD::CaloClusterContainer#HLT_TrigEMClusters_Electrons_LRT',        'BS ESD AODFULL', 'Egamma', [InViews('precisionElectron_LRTViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigEMClusters_Electrons_LRTAux.',     'BS ESD AODFULL', 'Egamma'),
-    ('xAOD::CaloClusterContainer#HLT_TrigEMClusters_Electrons_GSF',        'BS ESD AODFULL', 'Egamma', [InViews('precisionElectronViews_GSF')]),
+    ('xAOD::CaloClusterContainer#HLT_TrigEMClusters_Electrons_GSF',        'BS ESD AODFULL', 'Egamma', [InViews('precisionElectron_GSFViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigEMClusters_Electrons_GSFAux.',     'BS ESD AODFULL', 'Egamma'),
     ('xAOD::CaloClusterContainer#HLT_TrigEMClusters_Electrons_LRTGSF',        'BS ESD AODFULL', 'Egamma', [InViews('precisionElectron_LRTGSFViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigEMClusters_Electrons_LRTGSFAux.',     'BS ESD AODFULL', 'Egamma'),
