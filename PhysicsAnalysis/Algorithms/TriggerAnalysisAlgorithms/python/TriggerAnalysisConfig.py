@@ -16,6 +16,7 @@ class TriggerAnalysisBlock (ConfigBlock):
         self.addOption ('triggerChainsForSelection', [], type=None)
         self.addOption ('prescaleLumiCalcFiles', [], type=None)
         self.addOption ('noFilter', False, type=bool)
+        self.addOption ('noL1', False, type=bool)
         self.addOption ('electronID', '', type=str)
         self.addOption ('electronIsol', '', type=str)
         self.addOption ('photonIsol', '', type=str)
@@ -64,6 +65,7 @@ class TriggerAnalysisBlock (ConfigBlock):
         alg.triggers = self.triggerChainsForSelection
         alg.selectionDecoration = 'trigPassed'
         alg.noFilter = self.noFilter
+        alg.noL1 = self.noL1
 
         for t in self.triggerChainsForSelection :
             config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, noSys=True)
@@ -171,6 +173,7 @@ def makeTriggerAnalysisConfig( seq,
                                triggerChainsForSelection = None,
                                prescaleLumiCalcFiles = None,
                                noFilter = None,
+                               noL1 = None,
                                electronWorkingPoint = None,
                                muonWorkingPoint = None,
                                photonWorkingPoint = None,
@@ -186,6 +189,7 @@ def makeTriggerAnalysisConfig( seq,
       triggerChainsForSelection -- a list of trigger chains to be used for trigger selection, only set it if you need a different setup than for SFs!
       prescaleLumiCalcFiles -- a list of lumicalc files to calculate trigger prescales
       noFilter -- do not apply an event filter (i.e. don't skip any events)
+      noL1 -- do not check the L1 decision
       noEffSF -- Disables the calculation of efficiencies and scale factors (just matching)
     """
 
@@ -194,6 +198,7 @@ def makeTriggerAnalysisConfig( seq,
     config.setOptionValue ('triggerChainsForSelection', triggerChainsForSelection, noneAction='ignore')
     config.setOptionValue ('prescaleLumiCalcFiles', prescaleLumiCalcFiles, noneAction='ignore')
     config.setOptionValue ('noFilter', noFilter, noneAction='ignore')
+    config.setOptionValue ('noL1', noL1, noneAction='ignore')
     if electronWorkingPoint is not None:
         splitWP = electronWorkingPoint.split ('.')
         if len (splitWP) != 2 :

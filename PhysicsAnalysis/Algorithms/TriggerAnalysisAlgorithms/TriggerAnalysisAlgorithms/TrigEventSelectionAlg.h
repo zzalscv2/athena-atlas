@@ -13,6 +13,7 @@
 #include <AthContainers/AuxElement.h>
 #include <EventBookkeeperTools/FilterReporterParams.h>
 #include <TrigDecisionInterface/ITrigDecisionTool.h>
+#include <TrigDecisionInterface/Conditions.h>
 
 namespace CP
 {
@@ -38,6 +39,9 @@ namespace CP
 
     /// \brief whether to not apply an event filter
     Gaudi::Property<bool> m_noFilter {this, "noFilter", false, "whether to not apply an event filter"};
+
+    /// \brief whether to not require L1 decision
+    Gaudi::Property<bool> m_noL1 {this, "noL1", false, "whether to not require L1 decision"};
 
     /// \brief the accessors for \ref m_selectionDecoration and \ref m_trigList combination
     std::vector<SG::AuxElement::Decorator<bool>> m_selectionAccessors;
