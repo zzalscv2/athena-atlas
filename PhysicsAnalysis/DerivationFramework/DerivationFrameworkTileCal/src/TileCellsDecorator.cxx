@@ -42,6 +42,7 @@ namespace DerivationFramework {
 
   StatusCode TileCellsDecorator::initialize() {
 
+    ATH_CHECK( m_cablingSvc.retrieve() );
     ATH_CHECK( detStore()->retrieve(m_tileID) );
     ATH_CHECK( detStore()->retrieve(m_tileHWID) );
 
@@ -346,9 +347,14 @@ namespace DerivationFramework {
         IdentifierHash hash2 = cell_dde->onl2();
 
         // Tile cell positioning
-        int ros1 = m_tileHWID->ros(m_tileHWID->adc_id(hash1, tile_cell->gain1()));
-        int drawer1 = m_tileHWID->drawer(m_tileHWID->adc_id(hash1, tile_cell->gain1()));
-        int channel1 = m_tileHWID->channel(m_tileHWID->adc_id(hash1, tile_cell->gain1()));
+        int ros1 = -1;
+        int drawer1 = -1;
+        int channel1 = -1;
+        if (hash1 != TileHWID::NOT_VALID_HASH) {
+          ros1 = m_tileHWID->ros(m_tileHWID->adc_id(hash1, tile_cell->gain1()));
+          drawer1 = m_tileHWID->drawer(m_tileHWID->adc_id(hash1, tile_cell->gain1()));
+          channel1 = m_tileHWID->channel(m_tileHWID->adc_id(hash1, tile_cell->gain1()));
+        }
 
         int ros2 = -1;
         int drawer2 = -1;

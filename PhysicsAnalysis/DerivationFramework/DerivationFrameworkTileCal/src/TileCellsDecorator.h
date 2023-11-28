@@ -10,6 +10,9 @@
 #ifndef DERIVATIONFRAMEWORK_DERIVATIONFRAMEWORKTILECAL_TILECELLSDECORATOR_H
 #define DERIVATIONFRAMEWORK_DERIVATIONFRAMEWORKTILECAL_TILECELLSDECORATOR_H 1
 
+// Tile includes
+#include "TileConditions/TileCablingSvc.h"
+
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "xAODMuon/MuonContainer.h"
@@ -108,6 +111,12 @@ namespace DerivationFramework {
       SG::WriteDecorHandleKey<xAOD::MuonContainer> m_cellsPmt2BadKey{this, "CellsPmt2Bad", "cells_pmt2_bad"};
       SG::WriteDecorHandleKey<xAOD::MuonContainer> m_cellsPmt1GainKey{this, "CellsPmt1Gain", "cells_pmt1_gain"};
       SG::WriteDecorHandleKey<xAOD::MuonContainer> m_cellsPmt2GainKey{this, "CellsPmt2Gain", "cells_pmt2_gain"};
+
+     /**
+      * @brief Name of Tile cabling service
+      */
+    ServiceHandle<TileCablingSvc> m_cablingSvc{ this,
+         "TileCablingSvc", "TileCablingSvc", "The Tile cabling service"};
 
       const TileID* m_tileID{nullptr};
       const TileHWID* m_tileHWID{nullptr};
