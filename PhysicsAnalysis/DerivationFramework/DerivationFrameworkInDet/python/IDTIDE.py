@@ -28,114 +28,38 @@ def parSeq(name, subs=[]):
         _append(seq, s)
     return seq
 
-def IDTIDEKernelCfg(flags, name='IDTIDEKernel', **kwargs):
-    """Configure the derivation framework driving algorithm (kernel) for IDTIDE"""
+def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
     acc = ComponentAccumulator()
-    DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-
-    # Sequence for skimming kernel (if running on data) -> PrepDataToxAOD -> IDTIDE kernel
-    # sequence to be used for algorithm which should run before the IDTIDEPresel
-    # Disabled as currently blocks decoration of Z0 and thus crashes thinning
-    IDTIDEPreselSequenceName='IDTIDEPreselSequence'
-    acc.addSequence(seqAND(IDTIDEPreselSequenceName))
-
-    # sequence for algorithms which should run after the preselection but which can run in parallel
-    # acc.addSequence( parOR('IDTIDESeqAfterPresel'), parentName = 'IDTIDESequence')
-    # Sequence for skimming after pre-selection
-    # acc.addSequence( seqAND('IDTIDESkimmingSequence'), parentName = 'IDTIDESequence')
-    # Post processing sequence
-    # acc.addSequence( parOR('IDTIDEPostProcSequence'), parentName = 'IDTIDESkimmingSequence' )
 
     # ====================================================================
     # AUGMENTATION TOOLS
     # ====================================================================
     augmentationTools = []
-    tsos_augmentationTools = []
-
-    # TrackToVertexIPEstimator
-    from TrkConfig.TrkVertexFitterUtilsConfig import (
-        TrackToVertexIPEstimatorCfg)
-    IDTIDEIPETool = acc.getPrimaryAndMerge(TrackToVertexIPEstimatorCfg(flags))
 
     # Add unbiased track parameters to track particles
     from DerivationFrameworkInDet.InDetToolsConfig import (
         TrackToVertexWrapperCfg)
     IDTIDETrackToVertexWrapper = acc.getPrimaryAndMerge(
         TrackToVertexWrapperCfg(
-            flags,
-            name="IDTIDETrackToVertexWrapper",
-            TrackToVertexIPEstimator=IDTIDEIPETool,
-            DecorationPrefix="IDTIDE",
-            ContainerName="InDetTrackParticles")
+            flags, name="IDTIDETrackToVertexWrapper",
+            DecorationPrefix="IDTIDE")
     )
     augmentationTools.append(IDTIDETrackToVertexWrapper)
-
-    from InDetConfig.InDetUsedInFitTrackDecoratorToolConfig import (
-        InDetUsedInFitTrackDecoratorToolCfg)
-    IDTIDEUsedInFitDecoratorTool = acc.popToolsAndMerge(
-        InDetUsedInFitTrackDecoratorToolCfg(
-            flags,
-            name="IDTIDEUsedInFitDecoratorTool",
-            AMVFVerticesDecoName="TTVA_AMVFVertices",
-            AMVFWeightsDecoName="TTVA_AMVFWeights",
-            TrackContainer="InDetTrackParticles",
-            VertexContainer="PrimaryVertices"))
 
     from DerivationFrameworkInDet.InDetToolsConfig import (
         UsedInVertexFitTrackDecoratorCfg)
     IDTIDEUsedInFitDecorator = acc.getPrimaryAndMerge(
-        UsedInVertexFitTrackDecoratorCfg(
-            flags,
-            name="IDTIDEUsedInFitDecorator",
-            UsedInFitDecoratorTool=IDTIDEUsedInFitDecoratorTool)
-    )
+        UsedInVertexFitTrackDecoratorCfg(flags))
     augmentationTools.append(IDTIDEUsedInFitDecorator)
 
     # @TODO eventually computed for other extra outputs. Possible to come  up with a solution to use a common Z0AtPV if there is more than one client ?
     from DerivationFrameworkInDet.InDetToolsConfig import (
         TrackParametersAtPVCfg)
     DFCommonZ0AtPV = acc.getPrimaryAndMerge(TrackParametersAtPVCfg(
-        flags,
-        name="DFCommonZ0AtPV",
-        TrackParticleContainerName="InDetTrackParticles",
-        VertexContainerName="PrimaryVertices",
+        flags, name="DFCommonZ0AtPV",
         Z0SGEntryName="IDTIDEInDetTrackZ0AtPV")
     )
     augmentationTools.append(DFCommonZ0AtPV)
-
-    from DerivationFrameworkInDet.InDetToolsConfig import (
-        TrackStateOnSurfaceDecoratorCfg)
-    DFTSOS = acc.getPrimaryAndMerge(TrackStateOnSurfaceDecoratorCfg(
-        flags,
-        name="DFTrackStateOnSurfaceDecorator",
-        ContainerName="InDetTrackParticles",
-        StorePixel=flags.Detector.EnablePixel,
-        StoreSCT=flags.Detector.EnableSCT,
-        StoreTRT=flags.Detector.EnableTRT,
-        # never decorate EventInfo with TRTPhase, doubt this is useful for IDTIDE
-        AddExtraEventInfo=False,
-        DecorationPrefix="",
-        PRDtoTrackMap="",  # + InDetKeys.UnslimmedTracks() if  jobproperties.PrimaryDPDFlags.WriteDAOD_IDTRKVALIDStream.get_Value() else "",
-        OutputLevel=INFO)
-    )
-    tsos_augmentationTools.append(DFTSOS)
-
-    # Add decoration with truth parameters if running on simulation
-    # No idea what to do with this
-    # if flags.Input.isMC:
-    #    # add track parameter decorations to truth particles but only if the decorations have not been applied already
-    #    import InDetPhysValMonitoring.InDetPhysValDecoration
-    #    meta_data = InDetPhysValMonitoring.InDetPhysValDecoration.getMetaData()
-    #    from AthenaCommon.Logging import logging
-    #    logger = logging.getLogger( "DerivationFramework" )
-    #    if len(meta_data) == 0 :
-    #        truth_track_param_decor_alg = InDetPhysValMonitoring.InDetPhysValDecoration.getInDetPhysValTruthDecoratorAlg()
-    #        if  InDetPhysValMonitoring.InDetPhysValDecoration.findAlg([truth_track_param_decor_alg.getName()]) == None :
-    #            IDTIDESequencePre += truth_track_param_decor_alg
-    #        else :
-    #            logger.info('Decorator %s already present not adding again.' % (truth_track_param_decor_alg.getName() ))
-    #    else :
-    #        logger.info('IDPVM decorations to track particles already applied to input file not adding again.')
 
     # ====================================================================
     # SKIMMING TOOLS
@@ -238,51 +162,66 @@ def IDTIDEKernelCfg(flags, name='IDTIDEKernel', **kwargs):
         skimmingTools.append(IDTIDE_ORTool)
     # End of: if not flags.Input.isMC
 
-    IDTIDEKernelPresel = DerivationKernel("IDTIDEKernelPresel",
-                                          SkimmingTools=skimmingTools)
-    acc.addEventAlgo(IDTIDEKernelPresel, sequenceName=IDTIDEPreselSequenceName)
+    acc.addEventAlgo(
+        CompFactory.DerivationFramework.DerivationKernel(
+            "IDTIDEKernelPresel", SkimmingTools=skimmingTools))
 
-    IDTIDEPreselAlgSequenceName='IDTIDEPreselAlgSequence'
-    acc.addSequence(parSeq(IDTIDEPreselAlgSequenceName), parentName=IDTIDEPreselSequenceName)
+    # ====================================================================
+    # CREATE THE DERIVATION KERNEL ALGORITHM AND PASS THE ABOVE TOOLS
+    # ====================================================================
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+        name,
+        AugmentationTools=augmentationTools,
+        SkimmingTools=skimmingTools,
+        ThinningTools=[],
+        RunSkimmingFirst=True,
+        OutputLevel=INFO))
 
-    # Setup decorators tools
-    # if flags.Detector.EnableTRT:
-    from InDetConfig.InDetPrepRawDataToxAODConfig import (
-        InDetTRT_PrepDataToxAODCfg)
-    acc.merge(InDetTRT_PrepDataToxAODCfg(
-        flags, name="xAOD_TRT_PrepDataToxAOD",
-        OutputLevel=INFO,
-        WriteSDOs=False,
-        UseTruthInfo=flags.Input.isMC),sequenceName=IDTIDEPreselAlgSequenceName)
-    # if flags.Detector.EnableSCT:
-    from InDetConfig.InDetPrepRawDataToxAODConfig import (
-        InDetSCT_PrepDataToxAODCfg)
-    acc.merge(InDetSCT_PrepDataToxAODCfg(
-        flags, name="xAOD_SCT_PrepDataToxAOD",
-        OutputLevel=INFO,
-        WriteSiHits=False,
-        WriteSDOs=False,
-        UseTruthInfo=flags.Input.isMC),sequenceName=IDTIDEPreselAlgSequenceName)
+    return acc
 
-    # if flags.Detector.EnablePixel:
-    #  #if need_pix_ToTList : # What to do with this flag?
-    #    #from PixelCalibAlgs.PixelCalibAlgsConf import PixelChargeToTConversion
-    #    #PixelChargeToTConversionSetter = PixelChargeToTConversion(name = "PixelChargeToTConversionSetter",
-    #    #                                                          ExtraOutputs = ['PixelClusters_ToTList'])
-    #    ## IDTIDESeqAfterPresel += PixelChargeToTConversionSetter
-    #    #topSequence += PixelChargeToTConversionSetter
-    #    #_info("Add Pixel xAOD ToTConversionSetter: %s Properties: %s", PixelChargeToTConversionSetter, PixelChargeToTConversionSetter.properties())
+def DFInDetTSOSKernelCfg(flags, name='DFInDetTSOSKernel'):
+    acc = ComponentAccumulator()
 
-    from InDetConfig.TrackRecoConfig import (
-        ClusterSplitProbabilityContainerName)
-    from InDetConfig.InDetPrepRawDataToxAODConfig import (
-        InDetPixelPrepDataToxAODCfg)
-    acc.merge(InDetPixelPrepDataToxAODCfg(
-        flags, name="xAOD_Pixel_PrepDataToxAOD",
-        OutputLevel=INFO,
-        ClusterSplitProbabilityName=(
-            ClusterSplitProbabilityContainerName(flags)),
-        UseTruthInfo=flags.Input.isMC),sequenceName=IDTIDEPreselAlgSequenceName)
+    # ====================================================================
+    # AUGMENTATION TOOLS
+    # ====================================================================
+    tsos_augmentationTools = []
+
+    from DerivationFrameworkInDet.InDetToolsConfig import (
+        DFTrackStateOnSurfaceDecoratorCfg)
+    DFTSOS = acc.getPrimaryAndMerge(DFTrackStateOnSurfaceDecoratorCfg(flags))
+    tsos_augmentationTools.append(DFTSOS)
+
+    # shared between IDTIDE and IDTRKVALID
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+        name,
+        AugmentationTools=tsos_augmentationTools,
+        ThinningTools=[],
+        OutputLevel=INFO))
+    return acc
+
+def DFITkTSOSKernelCfg(flags, name='DFITkTSOSKernel'):
+    acc = ComponentAccumulator()
+
+    # ====================================================================
+    # AUGMENTATION TOOLS
+    # ====================================================================
+    tsos_augmentationTools = []
+
+    from DerivationFrameworkInDet.InDetToolsConfig import DFITkTSOSKernelCfg
+    DFTSOS = acc.getPrimaryAndMerge(DFITkTSOSKernelCfg(flags))
+    tsos_augmentationTools.append(DFTSOS)
+
+    # shared between IDTIDE and IDTRKVALID
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+        name,
+        AugmentationTools=tsos_augmentationTools,
+        ThinningTools=[],
+        OutputLevel=INFO))
+    return acc
+
+def IDTIDEThinningKernelCfg(flags, name="IDTIDEThinningKernel", StreamName=""):
+    acc = ComponentAccumulator()
 
     # ====================================================================
     # THINNING TOOLS
@@ -290,101 +229,116 @@ def IDTIDEKernelCfg(flags, name='IDTIDEKernel', **kwargs):
     thinningTools = []
 
     # TrackParticles directly
-    from DerivationFrameworkInDet.InDetToolsConfig import (
-        TrackParticleThinningCfg)
-    kw = {}
-    if not flags.Detector.EnablePixel:
-        kw['InDetTrackStatesPixKey'] = ''
-        kw['InDetTrackMeasurementsPixKey'] = ''
-    if not flags.Detector.EnableSCT:
-        kw['InDetTrackStatesSctKey'] = ''
-        kw['InDetTrackMeasurementsSctKey'] = ''
-    if not flags.Detector.EnableTRT:
-        kw['InDetTrackStatesTrtKey'] = ''
-        kw['InDetTrackMeasurementsTrtKey'] = ''
-    IDTIDEThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
-        flags,
-        name="IDTIDEThinningTool",
-        StreamName=kwargs['StreamName'],
-        SelectionString="abs(IDTIDEInDetTrackZ0AtPV) < 5.0",
-        InDetTrackParticlesKey="InDetTrackParticles",
-        # If true, Complains about missing PixelMSOSs #InDetDxAODFlags.ThinHitsOnTrack(),
-        ThinHitsOnTrack=False,
-        **kw)
-    )
-    thinningTools.append(IDTIDEThinningTool)
+    if flags.Detector.GeometryID:
+        from DerivationFrameworkInDet.InDetToolsConfig import (
+            IDTIDEThinningToolCfg)
+        thinningTools.append(acc.getPrimaryAndMerge(
+            IDTIDEThinningToolCfg(flags, StreamName=StreamName)))
+    if flags.Detector.GeometryITk:
+        from DerivationFrameworkInDet.InDetToolsConfig import (
+            ITkTIDEThinningToolCfg)
+        thinningTools.append(acc.getPrimaryAndMerge(
+            ITkTIDEThinningToolCfg(flags, StreamName=StreamName)))
 
     # MC truth thinning
     if flags.Input.isMC:
-        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import (
-            MenuTruthThinningCfg)
-        IDTIDETruthThinningTool = acc.getPrimaryAndMerge(MenuTruthThinningCfg(
-            flags,
-            name="IDTIDETruthThinningTool",
-            StreamName=kwargs['StreamName'],
-            WritePartons=True,
-            WriteHadrons=True,
-            WriteBHadrons=True,
-            WriteGeant=True,
-            GeantPhotonPtThresh=20000,
-            WriteTauHad=True,
-            PartonPtThresh=-1.0,
-            WriteBSM=True,
-            WriteBosons=True,
-            WriteBosonProducts=True,
-            WriteBSMProducts=True,
-            WriteTopAndDecays=True,
-            WriteEverything=True,
-            WriteAllLeptons=True,
-            WriteLeptonsNotFromHadrons=True,
-            WriteStatus3=True,
-            WriteFirstN=-1,
-            PreserveAncestors=True,
-            PreserveGeneratorDescendants=True))
-        thinningTools.append(IDTIDETruthThinningTool)
+        from DerivationFrameworkInDet.InDetToolsConfig import (
+            IDTIDETruthThinningToolCfg)
+        thinningTools.append(acc.getPrimaryAndMerge(
+            IDTIDETruthThinningToolCfg(flags, StreamName=StreamName)))
 
-    # ====================================================================
-    # CREATE THE DERIVATION KERNEL ALGORITHM AND PASS THE ABOVE TOOLS
-    # ====================================================================
-    acc.addEventAlgo(DerivationKernel(
-        name,
-        AugmentationTools=augmentationTools,
-        SkimmingTools=skimmingTools,
-        ThinningTools=[],
-        RunSkimmingFirst=True,
-        OutputLevel=INFO),sequenceName=IDTIDEPreselSequenceName)
-
-    IDTIDEPostProcSequenceName='IDTIDEPostProcSequence'
-    acc.addSequence(parSeq(IDTIDEPostProcSequenceName),parentName=IDTIDEPreselSequenceName)
-
-    # sequenceName = "IDTIDESkimmingSequence" )
-
-    # shared between IDTIDE and IDTRKVALID
-    acc.addEventAlgo(DerivationKernel(
-        name="DFTSOSKernel",
-        AugmentationTools=tsos_augmentationTools,
-        ThinningTools=[],
-        OutputLevel=INFO),
-        sequenceName=IDTIDEPostProcSequenceName)
-
-    acc.addEventAlgo(DerivationKernel(
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         name="IDTIDEThinningKernel",
         AugmentationTools=[],
         ThinningTools=thinningTools,
-        OutputLevel=INFO),
-        sequenceName=IDTIDEPostProcSequenceName)
+        OutputLevel=INFO))
+    return acc
+
+def IDTIDEKernelCfg(flags, StreamName=""):
+    """Configure the derivation framework driving algorithm (kernel) for IDTIDE"""
+    acc = ComponentAccumulator()
+
+    # Sequence for skimming kernel (if running on data) -> PrepDataToxAOD -> IDTIDE kernel
+    # sequence to be used for algorithm which should run before the IDTIDEPresel
+    # Disabled as currently blocks decoration of Z0 and thus crashes thinning
+    IDTIDEPreselSequenceName='IDTIDEPreselSequence'
+    acc.addSequence(seqAND(IDTIDEPreselSequenceName))
+
+    acc.merge(IDTIDEKernelCommonCfg(flags), sequenceName=IDTIDEPreselSequenceName)
+
+    # Add decoration with truth parameters if running on simulation
+    # No idea what to do with this
+    # if flags.Input.isMC:
+    #    # add track parameter decorations to truth particles but only if the decorations have not been applied already
+    #    import InDetPhysValMonitoring.InDetPhysValDecoration
+    #    meta_data = InDetPhysValMonitoring.InDetPhysValDecoration.getMetaData()
+    #    from AthenaCommon.Logging import logging
+    #    logger = logging.getLogger( "DerivationFramework" )
+    #    if len(meta_data) == 0 :
+    #        truth_track_param_decor_alg = InDetPhysValMonitoring.InDetPhysValDecoration.getInDetPhysValTruthDecoratorAlg()
+    #        if  InDetPhysValMonitoring.InDetPhysValDecoration.findAlg([truth_track_param_decor_alg.getName()]) == None :
+    #            IDTIDESequencePre += truth_track_param_decor_alg
+    #        else :
+    #            logger.info('Decorator %s already present not adding again.' % (truth_track_param_decor_alg.getName() ))
+    #    else :
+    #        logger.info('IDPVM decorations to track particles already applied to input file not adding again.')
+
+    IDTIDEPreselAlgSequenceName='IDTIDEPreselAlgSequence'
+    acc.addSequence(parSeq(IDTIDEPreselAlgSequenceName),
+                    parentName=IDTIDEPreselSequenceName)
+
+    from InDetConfig.InDetPrepRawDataToxAODConfig import InDetPrepDataToxAODCfg
+    acc.merge(InDetPrepDataToxAODCfg(flags),
+              sequenceName=IDTIDEPreselAlgSequenceName)
+
+    IDTIDEPostProcSequenceName='IDTIDEPostProcSequence'
+    acc.addSequence(parSeq(IDTIDEPostProcSequenceName),
+                    parentName=IDTIDEPreselSequenceName)
+
+    acc.merge(DFInDetTSOSKernelCfg(flags),
+              sequenceName=IDTIDEPostProcSequenceName)
+    acc.merge(IDTIDEThinningKernelCfg(flags, StreamName=StreamName),
+              sequenceName=IDTIDEPostProcSequenceName)
+    return acc
+
+def ITkTIDEKernelCfg(flags, StreamName=""):
+    """Configure the derivation framework driving algorithm (kernel) for IDTIDE"""
+    acc = ComponentAccumulator()
+
+    IDTIDEPreselSequenceName='IDTIDEPreselSequence'
+    acc.addSequence(seqAND(IDTIDEPreselSequenceName))
+    
+    acc.merge(IDTIDEKernelCommonCfg(flags), sequenceName=IDTIDEPreselSequenceName)
+
+    IDTIDEPreselAlgSequenceName='IDTIDEPreselAlgSequence'
+    acc.addSequence(parSeq(IDTIDEPreselAlgSequenceName),
+                    parentName=IDTIDEPreselSequenceName)
+
+    from InDetConfig.InDetPrepRawDataToxAODConfig import ITkPrepDataToxAODCfg
+    acc.merge(ITkPrepDataToxAODCfg(flags),
+              sequenceName=IDTIDEPreselAlgSequenceName)
+
+    IDTIDEPostProcSequenceName='IDTIDEPostProcSequence'
+    acc.addSequence(parSeq(IDTIDEPostProcSequenceName),
+                    parentName=IDTIDEPreselSequenceName)
+
+    acc.merge(DFITkTSOSKernelCfg(flags),
+              sequenceName=IDTIDEPostProcSequenceName)
+    acc.merge(IDTIDEThinningKernelCfg(flags, StreamName=StreamName),
+              sequenceName=IDTIDEPostProcSequenceName)
     return acc
 
 # Main config
-
 
 def IDTIDECfg(flags):
     """Main config fragment for IDTIDE"""
     acc = ComponentAccumulator()
 
     # Main algorithm (kernel)
-    acc.merge(IDTIDEKernelCfg(flags, name="IDTIDEKernel",
-                              StreamName='StreamDAOD_IDTIDE'))
+    if flags.Detector.GeometryID:
+        acc.merge(IDTIDEKernelCfg(flags, StreamName='StreamDAOD_IDTIDE'))
+    if flags.Detector.GeometryITk:
+        acc.merge(ITkTIDEKernelCfg(flags, StreamName='StreamDAOD_IDTIDE'))
 
     # =============================
     # Define contents of the format
@@ -419,10 +373,6 @@ def IDTIDECfg(flags):
         "InDetTrackParticlesAux": "xAOD::TrackParticleAuxContainer",
         "InDetLargeD0TrackParticles": "xAOD::TrackParticleContainer",
         "InDetLargeD0TrackParticlesAux": "xAOD::TrackParticleAuxContainer",
-        "PixelClusters": "xAOD::TrackMeasurementValidationContainer",
-        "PixelClustersAux": "xAOD::TrackMeasurementValidationAuxContainer",
-        "SCT_Clusters": "xAOD::TrackMeasurementValidationContainer",
-        "SCT_ClustersAux": "xAOD::TrackMeasurementValidationAuxContainer",
         "Kt4EMTopoOriginEventShape": "xAOD::EventShape",
         "Kt4EMTopoOriginEventShapeAux": "xAOD::EventShapeAuxInfo",
         "Kt4LCTopoOriginEventShape": "xAOD::EventShape",
@@ -436,6 +386,20 @@ def IDTIDECfg(flags):
         "TopoClusterIsoForwardEventShape": "xAOD::EventShape",
         "TopoClusterIsoForwardEventShapeAux": "xAOD::EventShapeAuxInfo"}
     )
+    if flags.Detector.GeometryID:
+        IDTIDESlimmingHelper.AppendToDictionary.update({
+            "PixelClusters": "xAOD::TrackMeasurementValidationContainer",
+            "PixelClustersAux": "xAOD::TrackMeasurementValidationAuxContainer",
+            "SCT_Clusters": "xAOD::TrackMeasurementValidationContainer",
+            "SCT_ClustersAux": "xAOD::TrackMeasurementValidationAuxContainer"
+        })
+    if flags.Detector.GeometryITk:
+        IDTIDESlimmingHelper.AppendToDictionary.update({
+            "ITkPixelClusters": "xAOD::TrackMeasurementValidationContainer",
+            "ITkPixelClustersAux": "xAOD::TrackMeasurementValidationAuxContainer",
+            "ITkStripClusters": "xAOD::TrackMeasurementValidationContainer",
+            "ITkStripClustersAux": "xAOD::TrackMeasurementValidationAuxContainer"
+        })
 
     SmartCollections += ["Muons", "Electrons", "Photons"]
 
@@ -453,10 +417,12 @@ def IDTIDECfg(flags):
                      "TopoClusterIsoCentralEventShape",
                      "TopoClusterIsoForwardEventShape",
                      ]
+    if flags.Detector.GeometryID:
+        AllVariables += ["PixelClusters", "SCT_Clusters"]
+    if flags.Detector.GeometryITk:
+        AllVariables += ["ITkPixelClusters", "ITkStripClusters"]
 
     IDTIDESlimmingHelper.AppendToDictionary.update({
-        "TauJets": "xAOD::TauJetContainer",
-        "TauJetsAux": "xAOD::TauJetAuxContainer",
         "Kt4EMPFlowEventShape": "xAOD::EventShape",
         "Kt4EMPFlowEventShapeAux": "xAOD::EventShapeAuxInfo",
         "PrimaryVertices": "xAOD::VertexContainer",
@@ -497,6 +463,18 @@ def IDTIDECfg(flags):
             {'TRT_MSOSs': 'xAOD::TrackStateValidationContainer',
              'TRT_MSOSsAux': 'xAOD::TrackStateValidationAuxContainer'})
         AllVariables += ["TRT_MSOSs"]
+
+    if flags.Detector.EnableITkPixel:
+        IDTIDESlimmingHelper.AppendToDictionary.update(
+            {'ITkPixelMSOSs': 'xAOD::TrackStateValidationContainer',
+             'ITkPixelMSOSsAux': 'xAOD::TrackStateValidationAuxContainer'})
+        AllVariables += ["ITkPixelMSOSs"]
+
+    if flags.Detector.EnableITkStrip:
+        IDTIDESlimmingHelper.AppendToDictionary.update(
+            {'ITkStripMSOSs': 'xAOD::TrackStateValidationContainer',
+             'ITkStripMSOSsAux': 'xAOD::TrackStateValidationAuxContainer'})
+        AllVariables += ["ITkStripMSOSs"]
 
     if flags.Input.isMC:
 
