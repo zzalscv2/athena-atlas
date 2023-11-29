@@ -206,7 +206,7 @@ class ThresholdDef:
         # For correspondence to Run 2, see https://twiki.cern.ch/twiki/bin/viewauth/Atlas/TriggerNamingRun3#New_naming_for_Calo_items
         jJ_cuts = [20, 30, 40, 50, 55, 60, 80, 90, 125, 140, 160, 180, 500]
         for thrV in jJ_cuts:
-            ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ%i' % thrV, 'jJ'), pt=get_threshold_cut('jJ', thrV), shift_set=0, rangemin=0, rangemax=31 )
+            ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ%i' % thrV, 'jJ'), pt=get_threshold_cut('jJ', thrV), shift_set=0, rangemin=0, rangemax=32 )
 
         # jJET central
         jJ_cuts = [(30,25), (40,25), (55,23), (70,23), (80,25), (85,21)]
@@ -219,7 +219,7 @@ class ThresholdDef:
         # jJET forward jet
         jJ_cuts = [15, 20, 40, 50, 60, 90, 125]
         for thrV in jJ_cuts:
-            ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ%ip31ETA49' % thrV, 'jJ'), pt=get_threshold_cut('jJ', thrV), shift_set=0, rangemin=31, rangemax=49 )
+            ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ%ip30ETA49' % thrV, 'jJ'), pt=get_threshold_cut('jJ', thrV), shift_set=0, rangemin=30, rangemax=49 )
 
         # jJET SPARES
         for thrV in range(1,5):
@@ -227,7 +227,7 @@ class ThresholdDef:
 
         # jLJET (default range)
         for thrV in [60, 80, 100, 120, 140, 160, 180, 200]:
-            ThresholdDef.addJetVaryingThrValues( jLJetThreshold('jLJ%i' % thrV, 'jLJ'), pt=get_threshold_cut('jLJ', thrV), shift_set=0, rangemin=0, rangemax=31 )
+            ThresholdDef.addJetVaryingThrValues( jLJetThreshold('jLJ%i' % thrV, 'jLJ'), pt=get_threshold_cut('jLJ', thrV), shift_set=0, rangemin=0, rangemax=32 )
 
         # jLJET SPARES
         for thrV in range(1,5):

@@ -78,8 +78,8 @@ def defineMenu():
         'L1_jJ500', 'L1_jJ500_LAR',
         'L1_jJ20', 'L1_jJ30',
         'L1_jJ40', 'L1_jJ50', 'L1_jJ55', 'L1_jJ60', 'L1_jJ80', 'L1_jJ90',
-        'L1_jJ15p31ETA49', 'L1_jJ20p31ETA49',
-        'L1_jJ40p31ETA49', 'L1_jJ50p31ETA49', 'L1_jJ60p31ETA49', 'L1_jJ90p31ETA49', 'L1_jJ125p31ETA49',
+        'L1_jJ15p30ETA49', 'L1_jJ20p30ETA49',
+        'L1_jJ40p30ETA49', 'L1_jJ50p30ETA49', 'L1_jJ60p30ETA49', 'L1_jJ90p30ETA49', 'L1_jJ125p30ETA49',
 
         # gJ - ATR-28029
         "L1_gJ20p0ETA25","L1_gJ400p0ETA25","L1_gLJ80p0ETA25","L1_gTE200","L1_gXEJWOJ100",

@@ -129,11 +129,11 @@ def defineMenu():
         'L1_jJ125', 'L1_jJ140', 'L1_jJ160', 'L1_jJ180', 'L1_jJ500',
         'L1_jJ500_LAR',
 
-        'L1_jJ40p31ETA49', 'L1_jJ50p31ETA49', 'L1_jJ60p31ETA49', 'L1_jJ90p31ETA49', 'L1_jJ125p31ETA49',
+        'L1_jJ40p30ETA49', 'L1_jJ50p30ETA49', 'L1_jJ60p30ETA49', 'L1_jJ90p30ETA49', 'L1_jJ125p30ETA49',
 
         'L1_4jJ40', 'L1_3jJ90', 'L1_4jJ50', 'L1_4jJ40p0ETA25', 'L1_5jJ40p0ETA25', 
         'L1_3jJ70p0ETA23', 'L1_jJ140_3jJ60', 
-        'L1_jJ80p0ETA25_2jJ55_jJ50p31ETA49', 'L1_jJ55p0ETA23_2jJ40p31ETA49', 'L1_jJ85p0ETA21_3jJ40p0ETA25', 
+        'L1_jJ80p0ETA25_2jJ55_jJ50p30ETA49', 'L1_jJ55p0ETA23_2jJ40p30ETA49', 'L1_jJ85p0ETA21_3jJ40p0ETA25', 
         'L1_MU3V_jJ30', 'L1_MU3V_jJ40', 'L1_MU5VF_jJ90',  #L1_MU3V_jJ30 added temporarily 
   
         # jLJ
@@ -276,7 +276,7 @@ def defineMenu():
         'L1_BPH-0DR3-eEM9jJ40', 'L1_BPH-0DR3-eEM9jJ40_MU5VF', 'L1_BPH-0DR3-eEM9jJ40_2MU3V',
         'L1_LLP-RO-eEM', 'L1_LLP-NOMATCH-eEM',
         #'L1_DPHI-2eEM5', 
-        'L1_HT150-jJ50s5pETA31_jMJJ-400-CF',
+        'L1_HT150-jJ50s5pETA32_jMJJ-400-CF',
         'L1_HT190-jJ40s5pETA21',
         'L1_SC111-CjJ40',  
         'L1_jJ90_DETA20-jJ90J', 
