@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -27,6 +27,7 @@
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODTruth/TruthEventAuxContainer.h"
 
+#include "TruthUtils/HepMCHelpers.h"
 
 #include <HFORTools/HFOR_Truth.h>
 
@@ -134,14 +135,13 @@ HFORType HFOR_Truth::findOverlap(const xAOD::TruthEventContainer& truthEvent,
       for (unsigned int i = 0; i < nPart; i++) {
         const xAOD::TruthParticle* truthParticle   = truth->truthParticle(i);
         if (truthParticle != nullptr) {
-          int pdgId = truthParticle->pdgId() ;
-          if (std::abs(pdgId) == 4) {
+          if (MC::isCharm(truthParticle)) {
             //quarks_4 ++ ;
             if (is_FinalState(truthParticle) ) {
               fsQuarksMap[4].push_back(truthParticle) ;
             }
           }
-          if (std::abs(pdgId) == 5) {
+          if (MC::isBottom(truthParticle)) {
             //quarks_5 ++ ;
             if ( is_FinalState(truthParticle) ) {
               fsQuarksMap[5].push_back(truthParticle) ;
@@ -313,8 +313,8 @@ bool HFOR_Truth::is_FinalState(const xAOD::TruthParticle* bcQuark) const {
     father = bcQuark->parent(i) ;
     if(m_debug)	std::cout << "  Father PDGID " << father->pdgId() << " (quark is " << bcQuark->pdgId() << ")" << std::endl ;
     isFromHadron = (isFromHadron | father->isHadron() ) ;
-    if ( is_c(bcQuark) ) {
-      iscFromb = (iscFromb | is_b(father) ) ;
+    if ( MC::isCharm(bcQuark) ) {
+      iscFromb = (iscFromb | MC::isBottom(father) ) ;
     }
   }
   if (isFromHadron || iscFromb) {
@@ -324,7 +324,7 @@ bool HFOR_Truth::is_FinalState(const xAOD::TruthParticle* bcQuark) const {
   for (unsigned int i=0; i<nChildren; i++) {
     son = bcQuark->child(i) ;
     if (son != nullptr) {
-      if ( is_c(son) || is_b(son) ) {
+      if ( MC::isCharm(son) || MC::isBottom(son) ) {
         return (false) ;
       }
     } else {
@@ -620,8 +620,8 @@ std::map<std::string, bool> HFOR_Truth::checkAncestor(const xAOD::TruthParticle*
     tipo ["proton"]  = is_proton(ancestor);
     tipo ["top"]     = ancestor->isTop() ;
     tipo ["W"]       = ancestor->isW() ;
-    tipo ["cFromb"]  = (is_c(bcQuark) && (is_b(ancestor) || is_bHadron(ancestor))) ;
-    tipo ["bFromb"]  = (is_b(bcQuark) && is_bHadron(ancestor)) ;
+    tipo ["cFromb"]  = (MC::isCharm(bcQuark) && (MC::isBottom(ancestor) || MC::isBottomHadron(ancestor))) ;
+    tipo ["bFromb"]  = (MC::isBottom(bcQuark) && MC::isBottomHadron(ancestor)) ;
   }
   else {
     tipo["orphan"] = true ;
@@ -631,34 +631,6 @@ std::map<std::string, bool> HFOR_Truth::checkAncestor(const xAOD::TruthParticle*
 
 }
 
-//==============================================================================
-
-//==============================================================================
-// Helper to check if particle is a b
-//==============================================================================
-bool HFOR_Truth::is_b(const xAOD::TruthParticle* particle) {
-  return (particle->absPdgId() == 5) ;
-}
-//==============================================================================
-
-//==============================================================================
-// Helper to check if particle is a c
-//==============================================================================
-bool HFOR_Truth::is_c(const xAOD::TruthParticle* particle) {
-  return (particle->absPdgId() == 4) ;
-}
-//==============================================================================
-
-//==============================================================================
-// Helper to check if particle is a hadron
-//==============================================================================
-bool HFOR_Truth::is_bHadron(const xAOD::TruthParticle* x) {
-  int apdg = x->absPdgId() ;
-  bool isBH = false ;
-
-  isBH = ((apdg%10000)/1000 == 5) | ((apdg%1000)/100 == 5) ;
-  return (isBH);
-}
 //==============================================================================
 
 //==============================================================================

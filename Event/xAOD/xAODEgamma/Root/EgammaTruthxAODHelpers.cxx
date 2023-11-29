@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODEgamma/EgammaTruthxAODHelpers.h"
@@ -14,6 +14,7 @@
 #include "xAODEgamma/PhotonContainer.h"
 
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // ==================================================================
 
@@ -80,7 +81,7 @@ bool xAOD::EgammaHelpers::isTrueConvertedPhoton(const xAOD::Photon* ph, float ma
 
 //Is the true object a converted photon with R < maxRadius
 bool xAOD::EgammaHelpers::isTrueConvertedPhoton(const xAOD::TruthParticle* truthPh, float maxRadius /*= 800.*/){
-  return (truthPh->pdgId() == 22 && truthPh->hasDecayVtx() 
+  return (MC::isPhoton(truthPh) && truthPh->hasDecayVtx()
 	  && truthPh->decayVtx()->perp() < maxRadius); 
 }
 
@@ -111,7 +112,7 @@ std::vector<const xAOD::TruthParticle*>
 xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,const bool hard/*=true*/){
   std::vector<const xAOD::TruthParticle*> vec;
   //Truth must exist and be an electron
-  if (!truthel || truthel->absPdgId()!=11){ 
+  if (!truthel || !MC::isElectron(truthel)){
     return vec;
   }
   vec.push_back(truthel); //push its self back as first entry
@@ -122,7 +123,7 @@ xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,co
   }
   //And has to be a photon or electron
   const xAOD::TruthParticle* parent = truthel->parent();
-  if(parent->absPdgId() !=22 && parent->absPdgId() !=11){
+  if ( !MC::isPhoton(parent) && !MC::isElectron(parent) ) {
     return vec;
   }
   
@@ -133,7 +134,7 @@ xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,co
     //Find the next parent
     const xAOD::TruthParticle* tmp = parent->parent();
     //You want to see an electron or a photon 
-    if((tmp->absPdgId() ==22 || tmp->absPdgId() ==11) ){
+    if ( MC::isPhoton(tmp) || MC::isElectron(tmp) ) {
       parent=tmp;
     }
     else{ // if we do not see any more electron and photons we stop

@@ -108,15 +108,6 @@ class HFOR_Truth
   //Helper to return if a given particle is final state particle
   bool is_FinalState(const xAOD::TruthParticle* bcQuark) const ;
 
-  //Helper to return if a particle is a b quark
-  static bool is_b(const xAOD::TruthParticle* particle) ;
-
-  //Helper to return if a particle is a c quark
-  static bool is_c(const xAOD::TruthParticle* particle) ;
-
-  //Helper to return if a particle is a hadron
-  static bool is_bHadron(const xAOD::TruthParticle* x) ;
-
   //Helper to return if a particle is a proton
   static bool is_proton(const xAOD::TruthParticle* x) ;
 

@@ -6,6 +6,7 @@
 
 #include "StoreGate/ReadDecorHandle.h"
 #include "LArRecEvent/LArEventBitInfo.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "TrigTauMonitorAlgorithm.h"
 
@@ -1330,14 +1331,10 @@ StatusCode TrigTauMonitorAlgorithm::examineTruthTau(const xAOD::TruthParticle& x
         {
           const xAOD::TruthParticle * child = decayvtx->outgoingParticle(iChild);
           if(child){
-             if( ( child->absPdgId() == 12 || 
-                   child->absPdgId() == 14 || 
-                   child->absPdgId() == 16 ) ) continue;
+            if( MC::isSMNeutrino(child) ) continue;
              if(child->status()==3) continue;
              ATH_MSG_DEBUG("child "<< child->pdgId() << ", status "<< child->status() << ", charge "<< child->charge());
-             if( ( child->absPdgId() == 11 || 
-                   child->absPdgId() == 13 || 
-                   child->absPdgId() == 15 ) ) xTruthTau.auxdecor<char>("IsLeptonicTau") = true;
+             if( MC::isSMLepton(child) ) xTruthTau.auxdecor<char>("IsLeptonicTau") = true; // Just selects charged SM Leptons as we have already skipped SM neutrinos
              VisSumTLV += child->p4();
              xTruthTau.auxdecor<int>("childChargeSum") += child->charge();
              xTruthTau.auxdecor<int>("nTracks") += std::abs(child->charge());

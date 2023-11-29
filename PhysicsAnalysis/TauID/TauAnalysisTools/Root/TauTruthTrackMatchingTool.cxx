@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <TauAnalysisTools/TauTruthTrackMatchingTool.h>
@@ -7,6 +7,7 @@
 // EDM include(s)
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 using namespace TauAnalysisTools;
 
@@ -209,7 +210,7 @@ bool TauTruthTrackMatchingTool::checkTruthParent(const xAOD::TruthParticle& xTru
       if (xTruthParticleParent) {
         // store parent pdgID in history
         sHistory.insert(0, std::to_string(xTruthParticleParent->pdgId())+":");//xTruthParticleParent->pdgId());
-        if (xTruthParticleParent->absPdgId() == 15)
+        if (MC::isTau(xTruthParticleParent))
         {
           return true;
         }

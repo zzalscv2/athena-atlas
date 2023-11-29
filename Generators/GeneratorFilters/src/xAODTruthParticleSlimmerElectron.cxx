@@ -68,10 +68,8 @@ StatusCode xAODTruthParticleSlimmerElectron::execute()
         for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
             const xAOD::TruthParticle* theParticle =  (*itr)->truthParticle(iPart);
 
-            int this_absPdgID = theParticle->absPdgId();
-
-            //Save stable Electrons 
-            if (MC::isStable(theParticle) && this_absPdgID == 11)
+            //Save stable Electrons
+            if (MC::isStable(theParticle) && MC::isElectron(theParticle))
             {
                 xAOD::TruthParticle *xTruthParticle = new xAOD::TruthParticle();
                 xTruthParticleContainerElectron->push_back( xTruthParticle );

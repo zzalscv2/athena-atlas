@@ -234,7 +234,7 @@ namespace top {
       const xAOD::TruthParticle* initial_mu = getInitialStateParticle(truthmu);
       if(initial_mu) truthmu_mother= initial_mu->parent(0); 
       
-      if(truthmu_mother && abs(truthmu_mother->pdgId())!=13) //let's then look at the history of this muon
+      if(truthmu_mother && !MC::isMuon(truthmu_mother)) //let's then look at the history of this muon
       {
         
         if(!truthmu_mother->isLepton()) truthmu_firstNonLeptonMother=truthmu_mother; //basically all cases apart from tau->muon
@@ -458,12 +458,12 @@ namespace top {
           {
             const xAOD::TruthParticle* parent=firstHadronMother->parent(ip);
             if(!parent) continue;
-            if(isBHadronMother && abs(parent->pdgId())==5)
+            if(isBHadronMother && MC::isBottom(parent))
             {
               hf_parton_parent=parent;
               break;
             }
-            else if(!isBHadronMother && abs(parent->pdgId())==4)
+            else if(!isBHadronMother && MC::isCharm(parent))
             {
               hf_parton_parent=parent;
               break;
@@ -819,11 +819,11 @@ namespace top {
           {
             firstNonParton = truthPart->parent(ip);
           }
-          if(truthPart->isBottomHadron() && abs(truthPart->parent(ip)->pdgId())==5)
+          if(truthPart->isBottomHadron() && MC::isBottom(truthPart->parent(ip)))
           {
             firstCorrectFlavorQuark = truthPart->parent(ip);
           }
-          if(truthPart->isCharmHadron() && abs(truthPart->parent(ip)->pdgId())==4)
+          if(truthPart->isCharmHadron() && MC::isCharm(truthPart->parent(ip)))
           {
             firstCorrectFlavorQuark = truthPart->parent(ip);
           }
@@ -1018,8 +1018,7 @@ namespace top {
         int nDecay = 0;
         if (prodVtx && prodVtx->nIncomingParticles() > 1) {
           for (const auto& child : prodVtx->outgoingParticleLinks()) {
-            if ((*child)->absPdgId() > 10 &&
-                (*child)->absPdgId() < 17) {
+            if (MC::isSMLepton(*child)) {
               nDecay++;
             }
           }
@@ -1045,12 +1044,7 @@ namespace top {
     bool isLeptonFromTau(const xAOD::TruthParticle* truthParticle) {
       // If the input particle is not a lepton directly terminate the
       // algorithm retunring false
-      if (truthParticle->absPdgId() != 11 &&
-          truthParticle->absPdgId() != 12 &&
-          truthParticle->absPdgId() != 13 &&
-          truthParticle->absPdgId() != 14 &&
-          truthParticle->absPdgId() != 15 &&
-          truthParticle->absPdgId() != 16) {
+      if (!MC::isSMLepton(truthParticle)) {
         return false;
       }
       return isFrom(truthParticle, {15, -15}, true);

@@ -66,10 +66,8 @@ StatusCode xAODTruthParticleSlimmerPhoton::execute()
         for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
             const xAOD::TruthParticle* theParticle =  (*itr)->truthParticle(iPart);
 
-            int this_absPdgID = theParticle->absPdgId();
-
-            //Save stable Photons 
-            if (MC::isStable(theParticle) && this_absPdgID == 22)
+            //Save stable Photons
+            if (MC::isStable(theParticle) && MC::isPhoton(theParticle))
             {
                 xAOD::TruthParticle *xTruthParticle = new xAOD::TruthParticle();
                 xTruthParticleContainerPhoton->push_back( xTruthParticle );

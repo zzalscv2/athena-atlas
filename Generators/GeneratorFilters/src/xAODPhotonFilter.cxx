@@ -36,7 +36,7 @@ StatusCode xAODPhotonFilter::filterEvent() {
   for (unsigned int iPart=0; iPart<nParticles; ++iPart) {
     const xAOD::TruthParticle* part = (*xTruthParticleContainer)[iPart];
 
-    if (MC::isStable(part) && part->absPdgId()==22) //photon
+    if (MC::isStable(part) && MC::isPhoton(part)) //photon
         if(  part->pt()>= m_Ptmin && part->pt()< m_Ptmax && part->abseta() <= m_EtaRange )
         {
           NPhotons++;

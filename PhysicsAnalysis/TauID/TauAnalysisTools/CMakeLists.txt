@@ -17,7 +17,7 @@ if( XAOD_STANDALONE )
       LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODEgamma xAODMuon xAODJet
       xAODTau xAODTracking xAODTruth TruthUtils PATCoreLib PATInterfaces
       tauRecToolsLib MCTruthClassifierLib AsgAnalysisInterfaces
-      PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
+      PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver TruthUtils )
 else()
    atlas_add_library( TauAnalysisToolsLib
       TauAnalysisTools/*.h Root/*.cxx
@@ -27,7 +27,7 @@ else()
       xAODTau xAODTracking xAODTruth TruthUtils PATCoreLib PATInterfaces
       ElectronPhotonSelectorToolsLib tauRecToolsLib MCTruthClassifierLib
       AsgAnalysisInterfaces
-      PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
+      PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver TruthUtils )
 endif()
 
 if( NOT XAOD_STANDALONE )
