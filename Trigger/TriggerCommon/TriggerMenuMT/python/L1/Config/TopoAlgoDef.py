@@ -240,9 +240,9 @@ class TopoAlgoDef:
         #jJ lists
         # No additional parameters
         algoList = [
-            {"otype" : "jJ",  "ocut" : 50, "olist" : "ab", "etamin" : 0,  "etamax" : 31}, # jJab
+            {"otype" : "jJ",  "ocut" : 50, "olist" : "ab", "etamin" : 0,  "etamax" : 32}, # jJab
             {"otype" : "CjJ", "ocut" : 40, "olist" : "ab", "etamin" : 0,  "etamax" : 26}, # CjJab
-            {"otype" : "FjJ", "ocut" : 40, "olist" : "ab", "etamin" : 31, "etamax" : 49}, # FjJab
+            {"otype" : "FjJ", "ocut" : 40, "olist" : "ab", "etamin" : 30, "etamax" : 49}, # FjJab
         ]
         for x in algoList:
             class d:
@@ -261,8 +261,8 @@ class TopoAlgoDef:
             tm.registerTopoAlgo(alg)
 
         algoList = [
-            {"otype" : "FjJ", "ocut" : 0,  "olist" : "s",  "etamin" : 31, "etamax" : 49}, # FjJs
-            {"otype" : "jJ",  "ocut" : 0,  "olist" : "s",  "etamin" : 0,  "etamax" : 31}, # jJs
+            {"otype" : "FjJ", "ocut" : 0,  "olist" : "s",  "etamin" : 30, "etamax" : 49}, # FjJs
+            {"otype" : "jJ",  "ocut" : 0,  "olist" : "s",  "etamin" : 0,  "etamax" : 32}, # jJs
             {"otype" : "CjJ", "ocut" : 0,  "olist" : "s",  "etamin" : 0,  "etamax" : 26}, # CjJs
             {"otype" : "AjJ", "ocut" : 0,  "olist" : "s",  "etamin" : 0,  "etamax" : 49}, # AjJs
         ]
@@ -527,7 +527,7 @@ class TopoAlgoDef:
 
         # (ATR-8194) L1Topo HT Trigger
         algoList = [
-            {"minHT": 150, "otype" : "jJ", "ocut" : 50, "olist" : "s",   "nleading" : 5, "inputwidth": HW.jJetOutputWidthSort, "oeta" : 31}, #HT150-jJ50s5pETA31
+            {"minHT": 150, "otype" : "jJ", "ocut" : 50, "olist" : "s",   "nleading" : 5, "inputwidth": HW.jJetOutputWidthSort, "oeta" : 32}, #HT150-jJ50s5pETA32
             {"minHT": 190, "otype" : "jJ", "ocut" : 40, "olist" : "s",   "nleading" : 5, "inputwidth": HW.jJetOutputWidthSort, "oeta" : 21}, #HT190-jJ40s5pETA21
         ]
         for x in algoList:
@@ -1626,7 +1626,7 @@ class TopoAlgoDef:
         algoList = [
             {  "minInvm": 400, "otype1" : "AjJ", "ocut1": 60, "olist1" : "s", "nleading1" : 6, "inputwidth1": HW.jJetOutputWidthSort,
                "otype2" : "AjJ", "ocut2": 50, "olist2" : "s", "nleading2" : 6, "inputwidth2": HW.jJetOutputWidthSort, "applyEtaCut":1,
-               "minEta1": 0 ,"maxEta1": 31 , "minEta2": 31 ,"maxEta2": 49 , }, #400INVM-AjJ60s6pETA31-AjJ50s6p31ETA49
+               "minEta1": 0 ,"maxEta1": 32 , "minEta2": 30 ,"maxEta2": 49 , }, #400INVM-AjJ60s6pETA32-AjJ50s6p30ETA49
         ]
         for x in algoList:
             class d: 

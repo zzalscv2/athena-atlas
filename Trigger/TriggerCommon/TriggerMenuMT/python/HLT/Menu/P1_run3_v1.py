@@ -63,13 +63,13 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_j25_LArPEBHLT_L1J15', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportLegGroup),
         ChainProp(name='HLT_j25_LArPEBHLT_L1jJ40', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j25f_LArPEBHLT_L1J15p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportLegGroup),
-        ChainProp(name='HLT_j25f_LArPEBHLT_L1jJ40p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j25f_LArPEBHLT_L1jJ40p30ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j40_LArPEBHLT_L1J20', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportLegGroup),
         ChainProp(name='HLT_j40_LArPEBHLT_L1jJ50', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j75f_LArPEBHLT_L1J30p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportLegGroup),
-        ChainProp(name='HLT_j75f_LArPEBHLT_L1jJ60p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j75f_LArPEBHLT_L1jJ60p30ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j140f_LArPEBHLT_L1J75p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportLegGroup),
-        ChainProp(name='HLT_j140f_LArPEBHLT_L1jJ125p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j140f_LArPEBHLT_L1jJ125p30ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j165_LArPEBHLT_L1J100', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportLegGroup),
     ]
 

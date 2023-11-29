@@ -152,8 +152,8 @@ class MonitorDef:
                 "L1_jJ30", "L1_jJ40", "L1_jJ50",
                 "L1_jJ60", "L1_jJ90", "L1_jJ125",
                 "L1_jJ160", "L1_jJ500",
-                "L1_jJ40p31ETA49", "L1_jJ50p31ETA49",
-                "L1_jJ60p31ETA49", "L1_jJ90p31ETA49", "L1_jJ125p31ETA49",
+                "L1_jJ40p30ETA49", "L1_jJ50p30ETA49",
+                "L1_jJ60p30ETA49", "L1_jJ90p30ETA49", "L1_jJ125p30ETA49",
                 "L1_3jJ90", "L1_4jJ40", "L1_4jJ50",
                 "L1_3jJ70p0ETA23", "L1_4jJ40p0ETA25", "L1_5jJ40p0ETA25",
                 "L1_jJ140_3jJ60",
@@ -420,8 +420,8 @@ class MonitorDef:
                 "L1_jJ20", "L1_jJ30", "L1_jJ40", "L1_jJ50",
                 "L1_jJ55", "L1_jJ60", "L1_jJ90",
                 "L1_jJ500", "L1_jJ500_LAR",
-                "L1_jJ40p31ETA49", "L1_jJ50p31ETA49", "L1_jJ60p31ETA49",
-                "L1_jJ90p31ETA49",
+                "L1_jJ40p30ETA49", "L1_jJ50p30ETA49", "L1_jJ60p30ETA49",
+                "L1_jJ90p30ETA49",
                 #
                 "L1_gLJ80p0ETA25", "L1_gXEJWOJ100",
                 #

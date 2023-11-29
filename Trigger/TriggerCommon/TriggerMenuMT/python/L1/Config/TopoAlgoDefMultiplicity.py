@@ -141,8 +141,8 @@ class TopoAlgoDefMultiplicity(object):
             'jJ90', 'jJ125',
             'jJ140', 'jJ160', 'jJ180', 'jJ500',
 
-            'jJ15p31ETA49', 'jJ20p31ETA49',
-            'jJ40p31ETA49', 'jJ50p31ETA49', 'jJ60p31ETA49', 'jJ90p31ETA49', 'jJ125p31ETA49',
+            'jJ15p30ETA49', 'jJ20p30ETA49',
+            'jJ40p30ETA49', 'jJ50p30ETA49', 'jJ60p30ETA49', 'jJ90p30ETA49', 'jJ125p30ETA49',
 
             # spares
             'jJSPARE3', 'jJSPARE4',
