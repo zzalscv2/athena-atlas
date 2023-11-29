@@ -385,7 +385,7 @@ public:
    * @brief Add a new type -> factory mapping.
    * @param ti Type of the vector element.
    * @param ti_alloc The type of the vector allocator
-   * @param factory The factory instance.  The registry will take ownership.
+   * @param factory The factory instance.
    *
    * This records that @c factory can be used to construct vectors with
    * an element type of @c ti.  If a mapping already exists, the new
@@ -395,14 +395,14 @@ public:
   const IAuxTypeVectorFactory*
   addFactory (const std::type_info& ti,
               const std::type_info& ti_alloc,
-              const IAuxTypeVectorFactory* factory);
+              std::unique_ptr<const IAuxTypeVectorFactory> factory);
   
 
   /**
    * @brief Add a new type -> factory mapping.
    * @param ti Type of the vector element.
    * @param ti_alloc_name The name of the vector allocator type.
-   * @param factory The factory instance.  The registry will take ownership.
+   * @param factory The factory instance.
    *
    * This records that @c factory can be used to construct vectors with
    * an element type of @c ti.  If a mapping already exists, the new
@@ -412,7 +412,7 @@ public:
   const IAuxTypeVectorFactory*
   addFactory (const std::type_info& ti,
               const std::string& ti_alloc_name,
-              const IAuxTypeVectorFactory* factory);
+              std::unique_ptr<const IAuxTypeVectorFactory> factory);
 
 
 #ifndef XAOD_STANDALONE
@@ -498,7 +498,7 @@ private:
              const std::type_info& ti,
              const std::type_info* ti_alloc,
              const std::string* alloc_name,
-             IAuxTypeVectorFactory* (AuxTypeRegistry::*makeFactory) () const);
+             std::unique_ptr<IAuxTypeVectorFactory> (AuxTypeRegistry::*makeFactory) () const);
 
 
   /**
@@ -506,7 +506,7 @@ private:
    * @param lock The registry lock.
    * @param ti Type of the vector element.
    * @param ti_alloc The type of the vector allocator
-   * @param factory The factory instance.  The registry will take ownership.
+   * @param factory The factory instance.  Ownership is not taken.
    *
    * This records that @c factory can be used to construct vectors with
    * an element type of @c ti.  If a mapping already exists, the new
@@ -525,7 +525,7 @@ private:
    * @param lock The registry lock.
    * @param ti Type of the vector element.
    * @param ti_alloc_name The name of the vector allocator type.
-   * @param factory The factory instance.  The registry will take ownership.
+   * @param factory The factory instance.
    *
    * This records that @c factory can be used to construct vectors with
    * an element type of @c ti.  If a mapping already exists, the new
@@ -536,7 +536,7 @@ private:
   addFactory (lock_t& /*lock*/,
               const std::type_info& ti,
               const std::string& ti_alloc_name,
-              const IAuxTypeVectorFactory* factory);
+              std::unique_ptr<const IAuxTypeVectorFactory> factory);
 
 
   /**
@@ -549,16 +549,16 @@ private:
    * for the resulting vector.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  IAuxTypeVectorFactory* makeFactory() const;
+  std::unique_ptr<IAuxTypeVectorFactory> makeFactory() const;
 
 
   /**
-   * @brief @c makeFactory implementation that always returns 0.
+   * @brief @c makeFactory implementation that always returns nullptr.
    *
    * This is passed to @c findAuxID when we're looking up an item
    * for which we do not know the type at compile-time.
    */
-  IAuxTypeVectorFactory* makeFactoryNull() const;
+  std::unique_ptr<IAuxTypeVectorFactory> makeFactoryNull() const;
 
 
   /**

@@ -270,14 +270,18 @@ void test_factories()
 
   assert (r.getFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>)) == 0);
 
-  SG::IAuxTypeVectorFactory* fac1 = new FacTest1DynFac;
-  r.addFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>), fac1);
+  auto fac1up = std::make_unique<FacTest1DynFac>();
+  SG::IAuxTypeVectorFactory* fac1 = fac1up.get();
+  r.addFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>), std::move (fac1up));
   assert (r.getFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>)) == fac1);
-  SG::IAuxTypeVectorFactory* fac2 = new SG::AuxTypeVectorFactory<FacTest1>;
-  r.addFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>), fac2);
+
+  auto fac2up = std::make_unique<SG::AuxTypeVectorFactory<FacTest1> >();
+  SG::IAuxTypeVectorFactory* fac2 = fac2up.get();
+  r.addFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>), std::move (fac2up));
   assert (r.getFactory (typeid (FacTest1), typeid(std::allocator<FacTest1>)) == fac2);
-  SG::IAuxTypeVectorFactory* fac3 = new SG::AuxTypeVectorFactory<FacTest1>;
-  r.addFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>), fac3);
+
+  auto fac3up = std::make_unique<SG::AuxTypeVectorFactory<FacTest1> >();
+  r.addFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>), std::move (fac3up));
   assert (r.getFactory (typeid (FacTest1), typeid (std::allocator<FacTest1>)) == fac2);
 }
 
@@ -305,7 +309,7 @@ void test_get_by_ti()
   assert (r.getTypeName (auxid) == "short");
 
   assert (r.getAuxID (typeid(FacTest3), "aTest3") == SG::null_auxid);
-  r.addFactory (typeid(FacTest3), typeid(std::allocator<FacTest3>), new SG::AuxTypeVectorFactory<FacTest3>);
+  r.addFactory (typeid(FacTest3), typeid(std::allocator<FacTest3>), std::make_unique<SG::AuxTypeVectorFactory<FacTest3> >());
   auxid = r.getAuxID (typeid(FacTest3), "aTest3");
   assert (auxid != SG::null_auxid);
   assert (r.getType (auxid) == &typeid(FacTest3));

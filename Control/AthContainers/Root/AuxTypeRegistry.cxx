@@ -477,7 +477,7 @@ AuxTypeRegistry::getFactory (const std::type_info& ti,
  * @brief Add a new type -> factory mapping.
  * @param ti Type of the vector element.
  * @param ti_alloc The type of the vector allocator
- * @param factory The factory instance.  The registry will take ownership.
+ * @param factory The factory instance.
  *
  * This records that @c factory can be used to construct vectors with
  * an element type of @c ti.  If a mapping already exists, the new
@@ -487,12 +487,13 @@ AuxTypeRegistry::getFactory (const std::type_info& ti,
 const IAuxTypeVectorFactory*
 AuxTypeRegistry::addFactory (const std::type_info& ti,
                              const std::type_info& ti_alloc,
-                             const IAuxTypeVectorFactory* factory)
+                             std::unique_ptr<const IAuxTypeVectorFactory> factory)
 {
   lock_t lock (m_mutex);
   std::string name = SG::normalizedTypeinfoName (ti_alloc);
-  factory = addFactory (lock, ti, name, factory);
-  return addFactory (lock, ti, ti_alloc, factory);
+  const IAuxTypeVectorFactory* fac =
+    addFactory (lock, ti, name, std::move(factory));
+  return addFactory (lock, ti, ti_alloc, fac);
 }
 
 
@@ -500,7 +501,7 @@ AuxTypeRegistry::addFactory (const std::type_info& ti,
  * @brief Add a new type -> factory mapping.
  * @param ti Type of the vector element.
  * @param ti_alloc_name The name of the vector allocator type.
- * @param factory The factory instance.  The registry will take ownership.
+ * @param factory The factory instance.
  *
  * This records that @c factory can be used to construct vectors with
  * an element type of @c ti.  If a mapping already exists, the new
@@ -510,10 +511,10 @@ AuxTypeRegistry::addFactory (const std::type_info& ti,
 const IAuxTypeVectorFactory*
 AuxTypeRegistry::addFactory (const std::type_info& ti,
                              const std::string& ti_alloc_name,
-                             const IAuxTypeVectorFactory* factory)
+                             std::unique_ptr<const IAuxTypeVectorFactory> factory)
 {
   lock_t lock (m_mutex);
-  return addFactory (lock, ti, ti_alloc_name, factory);
+  return addFactory (lock, ti, ti_alloc_name, std::move (factory));
 }
 
 
@@ -522,7 +523,7 @@ AuxTypeRegistry::addFactory (const std::type_info& ti,
  * @param lock The registry lock.
  * @param ti Type of the vector element.
  * @param ti_alloc The type of the vector allocator
- * @param factory The factory instance.
+ * @param factory The factory instance.  Ownership is not taken.
  *
  * This records that @c factory can be used to construct vectors with
  * an element type of @c ti.  If a mapping already exists, the new
@@ -565,7 +566,7 @@ AuxTypeRegistry::addFactory (lock_t& /*lock*/,
  * @param lock The registry lock.
  * @param ti Type of the vector element.
  * @param ti_alloc_name The name of the vector allocator type.
- * @param factory The factory instance.  The registry will take ownership.
+ * @param factory The factory instance.
  *
  * This records that @c factory can be used to construct vectors with
  * an element type of @c ti.  If a mapping already exists, the new
@@ -576,10 +577,11 @@ const IAuxTypeVectorFactory*
 AuxTypeRegistry::addFactory (lock_t& /*lock*/,
                              const std::type_info& ti,
                              const std::string& ti_alloc_name,
-                             const IAuxTypeVectorFactory* factory)
+                             std::unique_ptr<const IAuxTypeVectorFactory> factory)
 {
   std::string key = std::string (ti.name()) + ";" + ti_alloc_name;
   ti_map_t::const_iterator it = m_factories.find (key);
+  const IAuxTypeVectorFactory* fac = factory.get();
   if (it != m_factories.end()) {
     if (it->second->isDynamic() && !factory->isDynamic()) {
       // Replacing a dynamic factory with a non-dynamic one.
@@ -587,17 +589,16 @@ AuxTypeRegistry::addFactory (lock_t& /*lock*/,
       // Instead, push it on a vector to remember it so we can delete
       // it later.
       m_oldFactories.push_back (it->second);
-      m_factories.insert_or_assign (key, factory);
+      m_factories.insert_or_assign (key, factory.release());
     }
     else {
-      delete factory;
-      factory = it->second;
+      fac = it->second;
     }
   }
   else
-    m_factories.insert_or_assign (key, factory);
+    m_factories.insert_or_assign (key, factory.release());
 
-  return factory;
+  return fac;
 }
 
 
@@ -614,7 +615,7 @@ AuxTypeRegistry::AuxTypeRegistry()
   m_types.reserve (auxid_set_size_hint);
 
   // Make sure we have factories registered for common C++ types.
-#define ADD_FACTORY(T) addFactory(typeid(T), typeid(AuxAllocator_t<T>), new AuxTypeVectorFactory<T>)
+#define ADD_FACTORY(T) addFactory(typeid(T), typeid(AuxAllocator_t<T>), std::make_unique<AuxTypeVectorFactory<T> >())
   ADD_FACTORY (bool);
   ADD_FACTORY (char);
   ADD_FACTORY (unsigned char);
@@ -688,7 +689,7 @@ AuxTypeRegistry::findAuxID (const std::string& name,
                             const std::type_info& ti,
                             const std::type_info* ti_alloc,
                             const std::string* alloc_name,
-                            IAuxTypeVectorFactory* (AuxTypeRegistry::*makeFactory) () const)
+                            std::unique_ptr<IAuxTypeVectorFactory> (AuxTypeRegistry::*makeFactory) () const)
 {
 
   // The extra test here is to avoid having to copy a string
@@ -737,16 +738,15 @@ AuxTypeRegistry::findAuxID (const std::string& name,
     {
       // Try to upgrade a dynamic factory.
       if ((*m.m_factory).isDynamic()) {
-        IAuxTypeVectorFactory* fac2 = (*this.*makeFactory)();
+        std::unique_ptr<IAuxTypeVectorFactory> fac2 = (*this.*makeFactory)();
         if (fac2) {
           if (!ti_alloc) {
             ti_alloc = fac2->tiAlloc();
           }
+          std::string allocName = fac2->tiAllocName();
+          m.m_factory = addFactory (lock, ti, allocName, std::move (fac2));
           if (ti_alloc) {
-            m.m_factory = addFactory (lock, ti, *ti_alloc, fac2);
-          }
-          else {
-            m.m_factory = addFactory (lock, ti, fac2->tiAllocName(), fac2);
+            m.m_factory = addFactory (lock, ti, *ti_alloc, m.m_factory);
           }
         }
       }
@@ -784,16 +784,15 @@ AuxTypeRegistry::findAuxID (const std::string& name,
   }
 
   if (!fac || fac->isDynamic()) {
-    IAuxTypeVectorFactory* fac2 = (*this.*makeFactory)();
+    std::unique_ptr<IAuxTypeVectorFactory> fac2 = (*this.*makeFactory)();
     if (fac2) {
       if (!ti_alloc) {
         ti_alloc = fac2->tiAlloc();
       }
+      std::string allocName = fac2->tiAllocName();
+      fac = addFactory (lock, ti, allocName, std::move (fac2));
       if (ti_alloc) {
-        fac = addFactory (lock, ti, *ti_alloc, fac2);
-      }
-      else {
-        fac = addFactory (lock, ti, fac2->tiAllocName(), fac2);
+        fac = addFactory (lock, ti, *ti_alloc, fac);
       }
     }
   }
