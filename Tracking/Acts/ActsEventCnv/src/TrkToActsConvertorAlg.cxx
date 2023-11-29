@@ -47,8 +47,8 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
   }
 
   // // Let's dump some information for debugging (will be removed later)
-  ATH_MSG_VERBOSE("TrackStateContainer has  " << tc.trackStateContainer().trackStates().size() << " states");
-  ATH_MSG_VERBOSE("TrackParametersContainer has  " << tc.trackStateContainer().trackParameters().size() << " parameters");
+  ATH_MSG_VERBOSE("TrackStateContainer has  " << tc.trackStateContainer().trackStatesAux()->size() << " states");
+  ATH_MSG_VERBOSE("TrackParametersContainer has  " << tc.trackStateContainer().trackParametersAux()->size() << " parameters");
 
   std::unique_ptr<ActsTrk::TrackContainer> constTrackContainer = m_trackContainerBackends.moveToConst(std::move(tc), ctx);
   auto trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);

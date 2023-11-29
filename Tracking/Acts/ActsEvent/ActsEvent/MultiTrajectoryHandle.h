@@ -7,6 +7,9 @@
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "GaudiKernel/StatusCode.h"
+#include "MultiTrajectory.h"
+#include "xAODTracking/TrackParametersContainer.h"
+#include "xAODTracking/TrackStateContainer.h"
 
 namespace ActsTrk {
 
@@ -130,8 +133,9 @@ MutableMultiTrajectoryHandle<C>::moveToConst(
     ActsTrk::MutableMultiTrajectory&& mmtj, const EventContext& context) const {
 
   auto statesBackendHandle = SG::makeHandle(m_statesKey, context);
+  auto statesInterface = ActsTrk::makeInterfaceContainer<xAOD::TrackStateContainer>(mmtj.trackStatesAux());
   if (statesBackendHandle
-          .record(std::move(mmtj.m_trackStates),
+          .record(std::move(statesInterface),
                   std::move(mmtj.m_trackStatesAux))
           .isFailure()) {
     throw std::runtime_error(
@@ -140,8 +144,9 @@ MutableMultiTrajectoryHandle<C>::moveToConst(
   }
 
   auto parametersBackendHandle = SG::makeHandle(m_parametersKey, context);
+  auto parametersInterface = ActsTrk::makeInterfaceContainer<xAOD::TrackParametersContainer>(mmtj.trackParametersAux());
   if (parametersBackendHandle
-          .record(std::move(mmtj.m_trackParameters),
+          .record(std::move(parametersInterface),
                   std::move(mmtj.m_trackParametersAux))
           .isFailure()) {
     throw std::runtime_error(
@@ -150,8 +155,9 @@ MutableMultiTrajectoryHandle<C>::moveToConst(
   }
 
   auto jacobiansBackendHandle = SG::makeHandle(m_jacobiansKey, context);
+  auto jacobiansInterface = ActsTrk::makeInterfaceContainer<xAOD::TrackJacobianContainer>(mmtj.trackJacobiansAux());
   if (jacobiansBackendHandle
-          .record(std::move(mmtj.m_trackJacobians),
+          .record(std::move(jacobiansInterface),
                   std::move(mmtj.m_trackJacobiansAux))
           .isFailure()) {
     throw std::runtime_error(
@@ -160,8 +166,9 @@ MutableMultiTrajectoryHandle<C>::moveToConst(
   }
 
   auto measurementsBackendHandle = SG::makeHandle(m_measurementsKey, context);
+  auto measurementsInterface = ActsTrk::makeInterfaceContainer<xAOD::TrackMeasurementContainer>(mmtj.trackMeasurementsAux());
   if (measurementsBackendHandle
-          .record(std::move(mmtj.m_trackMeasurements),
+          .record(std::move(measurementsInterface),
                   std::move(mmtj.m_trackMeasurementsAux))
           .isFailure()) {
     throw std::runtime_error(

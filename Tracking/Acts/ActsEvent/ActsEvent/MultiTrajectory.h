@@ -3,6 +3,7 @@
 */
 #ifndef ActsEvent_MultiTrajectory_h
 #define ActsEvent_MultiTrajectory_h
+#include <memory>
 #include <type_traits>
 #include <variant>
 
@@ -174,11 +175,11 @@ class MutableMultiTrajectory final
 
   typename ConstTrackStateProxy::Parameters parameters_impl(
       ActsTrk::IndexType index) const {
-    return trackParameters().at(index)->paramsEigen();
+    return typename ConstTrackStateProxy::Parameters{m_trackParametersAux->params[index].data()};
   }
 
   typename TrackStateProxy::Parameters parameters_impl(ActsTrk::IndexType index) {
-    return trackParameters().at(index)->paramsEigen();
+    return typename TrackStateProxy::Parameters{m_trackParametersAux->params[index].data()};
   }
 
   /**
@@ -189,10 +190,10 @@ class MutableMultiTrajectory final
    */
   typename ConstTrackStateProxy::Covariance covariance_impl(
       ActsTrk::IndexType index) const {
-    return trackParameters().at(index)->covMatrixEigen();
+    return typename ConstTrackStateProxy::Covariance{m_trackParametersAux->covMatrix[index].data()};
   }
   typename TrackStateProxy::Covariance covariance_impl(ActsTrk::IndexType index) {
-    return trackParameters().at(index)->covMatrixEigen();
+    return typename TrackStateProxy::Covariance{m_trackParametersAux->covMatrix[index].data()};    
   }
 
   /**
@@ -203,11 +204,13 @@ class MutableMultiTrajectory final
    */
   typename ConstTrackStateProxy::Covariance trackMeasurementsCov(
       ActsTrk::IndexType index) const {
-    return trackMeasurements().at(index)->covMatrixEigen();
+    return typename ConstTrackStateProxy::Covariance{m_trackMeasurementsAux->covMatrix[index].data()};
+
   }
 
   typename TrackStateProxy::Covariance trackMeasurementsCov(ActsTrk::IndexType index) {
-    return trackMeasurements().at(index)->covMatrixEigen();
+    return typename TrackStateProxy::Covariance{m_trackMeasurementsAux->covMatrix[index].data()};
+
   }
 
   /**
@@ -219,13 +222,13 @@ class MutableMultiTrajectory final
 
   inline typename ConstTrackStateProxy::Covariance jacobian_impl(
       ActsTrk::IndexType istate) const {
-    xAOD::TrackStateIndexType jacIdx = trackStates().at(istate)->jacobian();
-    return trackJacobians().at(jacIdx)->jacEigen();
+    xAOD::TrackStateIndexType jacIdx = m_trackStatesAux->jacobian[istate];
+    return typename ConstTrackStateProxy::Covariance{m_trackJacobiansAux->jac[jacIdx].data()};
   }
 
   typename TrackStateProxy::Covariance jacobian_impl(ActsTrk::IndexType istate) {
-    xAOD::TrackStateIndexType jacIdx = trackStates().at(istate)->jacobian();
-    return trackJacobians().at(jacIdx)->jacEigen();
+    xAOD::TrackStateIndexType jacIdx = m_trackStatesAux->jacobian[istate];
+    return typename TrackStateProxy::Covariance{m_trackJacobiansAux->jac[jacIdx].data()};
   }
 
   /**
@@ -238,15 +241,16 @@ class MutableMultiTrajectory final
   template <std::size_t measdim>
   inline typename ConstTrackStateProxy::template Measurement<measdim>
   measurement_impl(ActsTrk::IndexType index) const {
-    xAOD::TrackStateIndexType measIdx = trackStates().at(index)->calibrated();
-    return trackMeasurements().at(measIdx)->template measEigen<measdim>();
+    xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[index];
+    return typename ConstTrackStateProxy::template Measurement<measdim>{m_trackMeasurementsAux->meas[measIdx].data()};
   }
+
   template <std::size_t measdim, bool Enable = true>
   std::enable_if_t<Enable,
                    typename TrackStateProxy::template Measurement<measdim>>
   measurement_impl(ActsTrk::IndexType index) {
-    xAOD::TrackStateIndexType measIdx = trackStates().at(index)->calibrated();
-    return trackMeasurements().at(measIdx)->template measEigen<measdim>();
+    xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[index];
+    return typename TrackStateProxy::template Measurement<measdim>{m_trackMeasurementsAux->meas[measIdx].data()};
   }
 
   /**
@@ -259,15 +263,15 @@ class MutableMultiTrajectory final
   template <std::size_t measdim>
   inline typename ConstTrackStateProxy::template MeasurementCovariance<measdim>
   measurementCovariance_impl(ActsTrk::IndexType index) const {
-    xAOD::TrackStateIndexType measIdx = trackStates().at(index)->calibrated();
-    return trackMeasurements().at(measIdx)->template covMatrixEigen<measdim>();
+    xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[index];
+    return ConstTrackStateProxy::template MeasurementCovariance<measdim>{m_trackMeasurementsAux->covMatrix[measIdx].data()};
   }
   template <std::size_t measdim, bool Enable = true>
   std::enable_if_t<
       Enable, typename TrackStateProxy::template MeasurementCovariance<measdim>>
   measurementCovariance_impl(ActsTrk::IndexType index) {
-    xAOD::TrackStateIndexType measIdx = (*m_trackStates)[index]->calibrated();
-    return trackMeasurements().at(measIdx)->template covMatrixEigen<measdim>();
+    xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[index];
+    return TrackStateProxy::template MeasurementCovariance<measdim>{m_trackMeasurementsAux->covMatrix[measIdx].data()};
   }
 
   /**
@@ -276,7 +280,10 @@ class MutableMultiTrajectory final
    * @return size_t
    */
 
-  inline size_t size_impl() const { return trackStates().size(); }
+  inline size_t size_impl() const { 
+    //return m_trackStatesAux->size(); 
+    return m_trackStatesSize;
+  }
 
   /**
    * @brief clears backends
@@ -322,49 +329,46 @@ class MutableMultiTrajectory final
 
 
   // access to some backends (for debugging purposes)
-  inline const xAOD::TrackStateContainer& trackStates() const {
-    return *const_cast<const xAOD::TrackStateContainer*>(m_trackStates.get());
-  }
-  inline xAOD::TrackStateContainer& trackStates() { return *m_trackStates; }
+  // the reciever should not assume ownership or similar
+  inline xAOD::TrackStateAuxContainer* trackStatesAux() { return m_trackStatesAux.get(); }
 
-  inline const xAOD::TrackParametersContainer& trackParameters() const {
-    return *m_trackParameters;
+  inline const xAOD::TrackParametersAuxContainer* trackParametersAux() const {
+    return m_trackParametersAux.get();
   }
-  inline xAOD::TrackParametersContainer& trackParameters() {
-    return *m_trackParameters;
+  inline xAOD::TrackParametersAuxContainer* trackParametersAux() {
+    return m_trackParametersAux.get();
   }
 
-  inline const xAOD::TrackJacobianContainer& trackJacobians() const {
-    return *const_cast<const xAOD::TrackJacobianContainer*>(m_trackJacobians.get());
-  }
-  inline xAOD::TrackJacobianContainer& trackJacobians() {
-    return *m_trackJacobians;
+  inline xAOD::TrackJacobianAuxContainer* trackJacobiansAux() {
+    return m_trackJacobiansAux.get();
   }
 
-  inline const xAOD::TrackMeasurementContainer& trackMeasurements() const {
-    return *const_cast<const xAOD::TrackMeasurementContainer*>(m_trackMeasurements.get());
-  }
-  inline xAOD::TrackMeasurementContainer& trackMeasurements() {
-    return *m_trackMeasurements;
+  inline xAOD::TrackMeasurementAuxContainer* trackMeasurementsAux() {
+    return m_trackMeasurementsAux.get();
   }
 
 
   template<typename X>
   friend class MutableMultiTrajectoryHandle;
 
+
  private:
 
-  std::unique_ptr<xAOD::TrackStateContainer> m_trackStates;
+  // std::unique_ptr<xAOD::TrackStateContainer> m_trackStates;
   std::unique_ptr<xAOD::TrackStateAuxContainer> m_trackStatesAux;
+  size_t m_trackStatesSize = 0;
 
-  std::unique_ptr<xAOD::TrackParametersContainer> m_trackParameters;
+  // std::unique_ptr<xAOD::TrackParametersContainer> m_trackParameters;
   std::unique_ptr<xAOD::TrackParametersAuxContainer> m_trackParametersAux;
+  size_t m_trackParametersSize = 0;
 
-  std::unique_ptr<xAOD::TrackJacobianContainer> m_trackJacobians;
+  // std::unique_ptr<xAOD::TrackJacobianContainer> m_trackJacobians;
   std::unique_ptr<xAOD::TrackJacobianAuxContainer> m_trackJacobiansAux;
+  size_t m_trackJacobiansSize = 0;
 
-  std::unique_ptr<xAOD::TrackMeasurementContainer> m_trackMeasurements;
+  // std::unique_ptr<xAOD::TrackMeasurementContainer> m_trackMeasurements;
   std::unique_ptr<xAOD::TrackMeasurementAuxContainer> m_trackMeasurementsAux;
+  size_t m_trackMeasurementsSize = 0;
 
   std::unique_ptr<xAOD::TrackSurfaceContainer> m_surfacesBackend;
   std::unique_ptr<xAOD::TrackSurfaceAuxContainer> m_surfacesBackendAux;
@@ -450,9 +454,13 @@ class MultiTrajectory
  private:
   // TODO these 4 DATA links will be replaced by a reference to storable object that would contain those
   const DataLink<xAOD::TrackStateContainer> m_trackStates;
+  const xAOD::TrackStateAuxContainer* m_trackStatesAux;
   const DataLink<xAOD::TrackParametersContainer> m_trackParameters;
+  const xAOD::TrackParametersAuxContainer* m_trackParametersAux;
   const DataLink<xAOD::TrackJacobianContainer> m_trackJacobians;
+  const xAOD::TrackJacobianContainer* m_trackJacobiansAux;
   const DataLink<xAOD::TrackMeasurementContainer> m_trackMeasurements;
+  const xAOD::TrackMeasurementContainer* m_trackMeasurementsAux;
   using DecorationAccess = ActsTrk::detail::Decoration<xAOD::TrackStateContainer>;
   std::vector<DecorationAccess> m_decorations;
   // TODO remove once tracking code switches to sourceLinks with EL
@@ -461,6 +469,22 @@ class MultiTrajectory
 
   std::vector<StoredSurface> m_surfaces;
 };
+
+
+/**
+* @brief helper to construct interface container for already filled Aux container
+* TODO maybe should be moved to xAOD area
+*/
+template<typename IFACE, typename AUX>
+std::unique_ptr<IFACE> makeInterfaceContainer(const AUX* aux) {
+  auto interface = std::make_unique<IFACE>();
+  for ( size_t i = 0, sz = aux->size(); i < sz; ++i) {
+    interface->emplace_back( new std::remove_pointer_t<typename IFACE::value_type>() );
+  }
+  interface->setStore(aux);
+  return interface;
+}
+
 
 }  // namespace ActsTrk
 

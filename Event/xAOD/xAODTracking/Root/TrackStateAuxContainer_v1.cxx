@@ -7,6 +7,7 @@ namespace xAOD {
   TrackStateAuxContainer_v1::TrackStateAuxContainer_v1()
     : AuxContainerBase() {
     AUX_VARIABLE(previous);
+    AUX_VARIABLE(next);
     AUX_VARIABLE(chi2);
     AUX_VARIABLE(pathLength);
     AUX_VARIABLE(typeFlags);

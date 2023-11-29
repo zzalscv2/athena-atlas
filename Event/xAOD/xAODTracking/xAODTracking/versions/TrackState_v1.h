@@ -89,6 +89,23 @@ namespace xAOD {
         const TrackStateIndexType* previousPtr() const;
         TrackStateIndexType* previousPtr();
       
+  /**
+         * @brief inverse (with respect to the @see previous ) direction  
+         */
+        TrackStateIndexType next() const;
+
+        /**
+         * @brief Set the next index
+         * @see next() for explanation
+         */
+        void setNext(TrackStateIndexType);
+
+        /**
+         * @brief pointers API needed by MTJ
+         */
+        const TrackStateIndexType* nextPtr() const;
+        TrackStateIndexType* nextPtr();
+      
 
         /**
          * @brief index in the TrackParametersContainer corresponding to this TrackStates container
