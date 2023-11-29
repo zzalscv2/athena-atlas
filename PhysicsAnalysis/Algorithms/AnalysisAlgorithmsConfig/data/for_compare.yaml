@@ -16,12 +16,6 @@ Jets:
         btagger: 'DL1dv01'
         btagWP: 'FixedCutBEff_60'
         kinematicSelection: True
-      - selectionName: 'ftag_legacy'
-        noEffSF: True
-        legacyRecommendations: True
-        btagger: 'DL1r'
-        btagWP: 'FixedCutBEff_77'
-        kinematicSelection: True
     JVT: {}
     PtEtaSelection: {}
 
