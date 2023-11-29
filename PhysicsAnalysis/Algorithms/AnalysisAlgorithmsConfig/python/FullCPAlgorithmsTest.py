@@ -172,19 +172,6 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         vars += [
             'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
         ]
-    if not noPhysliteBroken :
-        from FTagAnalysisAlgorithms.FTagAnalysisSequence import makeFTagAnalysisSequence
-        btagger = "DL1r"
-        btagWP = "FixedCutBEff_77"
-        makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False, legacyRecommendations = True,
-                                  enableCutflow=True, btagger = btagger, btagWP = btagWP, kinematicSelection = True, postfix='legacy' )
-        vars += [
-            'OutJets_NOSYS.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_legacy_select',
-        ]
-        if dataType != 'data' and not forCompare:
-            vars += [
-                'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_legacy_eff_%SYS%'
-            ]
 
     jetSequence.configure( inputName = input, outputName = 'AnaJets_%SYS%' )
 
@@ -630,15 +617,6 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.btagger', btagger)
     configSeq.setOptionValue ('.btagWP', btagWP)
     configSeq.setOptionValue ('.kinematicSelection', True )
-    if not noPhysliteBroken :
-        btagger_legacy = "DL1r"
-        btagWP_legacy = "FixedCutBEff_77"
-        configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag_legacy' )
-        configSeq.setOptionValue ('.noEffSF', forCompare)
-        configSeq.setOptionValue ('.legacyRecommendations', True)
-        configSeq.setOptionValue ('.btagger', btagger_legacy)
-        configSeq.setOptionValue ('.btagWP', btagWP_legacy)
-        configSeq.setOptionValue ('.kinematicSelection', True )
 
     configSeq += makeConfig( 'Jets.Jvt', 'AnaJets' )
 
