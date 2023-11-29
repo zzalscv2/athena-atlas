@@ -1,7 +1,7 @@
 # BTagging branches
 BTagging_AntiKt4EMPFlowAuxDyn\.DL1dv01(.*)
-BTagging_AntiKt4EMPFlowAuxDyn\.GN120220509_p.
 BTagging_AntiKt4EMPFlowAuxDyn\.GN2v00_p.
+BTagging_AntiKt4EMPFlowAuxDyn\.SV1_masssvx
 BTagging_AntiKtVR30Rmax4Rmin02TrackAuxDyn\.DL1d(.*)
 BTagging_AntiKtVR30Rmax4Rmin02TrackAuxDyn\.GN2V00_p.
 AntiKt4EMPFlowJetsAuxDyn\.HadronConeExclTruthLabelID
@@ -17,6 +17,7 @@ AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn\.Ghost(.*)
 
 # JetEtMiss branches
 AntiKt4EMPFlowJetsAuxDyn(.*)
+AntiKt4EMPFlowJetsAuxDyn\.jetFoldHash
 Kt4EMPFlowEventShapeAux.Density
 Kt4EMPFlowPUSBEventShapeAux.Density
 Kt4EMPFlowNeutEventShapeAux.Density
