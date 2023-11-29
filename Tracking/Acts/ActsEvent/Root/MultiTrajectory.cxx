@@ -3,6 +3,7 @@
 */
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsEvent/SurfaceEncoding.h"
+#include "xAODTracking/TrackMeasurementAuxContainer.h"
 #include "xAODTracking/TrackState.h"
 #include "xAODTracking/TrackParameters.h"
 #include "xAODTracking/TrackJacobian.h"
@@ -10,55 +11,37 @@
 
 constexpr uint64_t InvalidGeoID = std::numeric_limits<uint64_t>::max();
 
+template<typename T>
+const T* to_const_ptr(const std::unique_ptr<T>& ptr) {
+  return ptr.get();
+}
 
 ActsTrk::MutableMultiTrajectory::MutableMultiTrajectory() {
   INSPECTCALL("c-tor " << this)
 
-  m_trackStates = std::make_unique<xAOD::TrackStateContainer>();
   m_trackStatesAux = std::make_unique<xAOD::TrackStateAuxContainer>();
-  m_trackStates->setStore(m_trackStatesAux.get());
 
-  m_trackParameters = std::make_unique<xAOD::TrackParametersContainer>();
   m_trackParametersAux = std::make_unique<xAOD::TrackParametersAuxContainer>();
-  m_trackParameters->setStore(m_trackParametersAux.get());
 
-  m_trackJacobians = std::make_unique<xAOD::TrackJacobianContainer>();
   m_trackJacobiansAux = std::make_unique<xAOD::TrackJacobianAuxContainer>();
-  m_trackJacobians->setStore(m_trackJacobiansAux.get());
 
-  m_trackMeasurements = std::make_unique<xAOD::TrackMeasurementContainer>();
   m_trackMeasurementsAux = std::make_unique<xAOD::TrackMeasurementAuxContainer>();
-  m_trackMeasurements->setStore(m_trackMeasurementsAux.get());
 
   m_surfacesBackend = std::make_unique<xAOD::TrackSurfaceContainer>();
   m_surfacesBackendAux = std::make_unique<xAOD::TrackSurfaceAuxContainer>();
   m_surfacesBackend->setStore(m_surfacesBackendAux.get());
 
-  addColumn_impl<IndexType>("next");
-
 }
 
-ActsTrk::MutableMultiTrajectory::MutableMultiTrajectory(const ActsTrk::MutableMultiTrajectory& other) : MutableMultiTrajectory() {
+ActsTrk::MutableMultiTrajectory::MutableMultiTrajectory(const ActsTrk::MutableMultiTrajectory& other) 
+  : MutableMultiTrajectory()
+  {
   INSPECTCALL("copy c-tor " << this <<  " src " << &other << " " << other.size())
-  for ( auto t: *other.m_trackStates.get()) {
-    m_trackStates->push_back(new xAOD::TrackState());
-    *m_trackStates->back() = *t;
-  }
 
-  for ( auto t: *other.m_trackParameters.get()){
-    m_trackParameters->push_back(new xAOD::TrackParameters(*t));
-    *m_trackParameters->back() = *t;
-
-  }
-  for ( auto t: *other.m_trackJacobians.get()){
-    m_trackJacobians->push_back(new xAOD::TrackJacobian(*t));
-    *m_trackJacobians->back() = *t;
-
-  }
-  for ( auto t: *other.m_trackMeasurements.get()){
-    m_trackMeasurements->push_back(new xAOD::TrackMeasurement(*t));
-    *m_trackMeasurements->back() = *t;
-  }
+  *m_trackStatesAux.get() = *other.m_trackStatesAux.get();
+  *m_trackParametersAux.get() = *other.m_trackParametersAux.get();
+  *m_trackJacobiansAux.get() = *other.m_trackJacobiansAux.get();
+  *m_trackMeasurementsAux.get() = *other.m_trackMeasurementsAux.get();
   m_decorations = other.m_decorations;
   m_calibratedSourceLinks = other.m_calibratedSourceLinks;
   m_uncalibratedSourceLinks = other.m_uncalibratedSourceLinks;
@@ -70,21 +53,26 @@ ActsTrk::MutableMultiTrajectory::MutableMultiTrajectory(const ActsTrk::MutableMu
 
 
 bool ActsTrk::MutableMultiTrajectory::has_backends() const {
-  return m_trackStates != nullptr and m_trackParameters != nullptr and
-         m_trackJacobians != nullptr and m_trackMeasurements != nullptr
+  return m_trackStatesAux != nullptr and m_trackParametersAux != nullptr and
+         m_trackJacobiansAux != nullptr and m_trackMeasurementsAux != nullptr
          and m_surfacesBackend != nullptr;
 }
 
+namespace{
+  template<typename CONT>
+  void stepResize( CONT* auxPtr, const size_t realSize, const size_t sizeStep = 20) {
+    if( realSize >= auxPtr->size() )  auxPtr->resize(auxPtr->size()+sizeStep);
+  }
+}
 
 ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
     Acts::TrackStatePropMask mask,
     ActsTrk::IndexType previous) {
   using namespace Acts::HashedStringLiteral;
-  INSPECTCALL( this << " " <<  mask << " " << m_trackStates->size() << " " << previous);
+  INSPECTCALL( this << " " <<  mask << " " << m_trackStatesAux->size() << " " << previous);
   assert(m_trackStates && "Missing Track States backend");
-
-  auto state = new xAOD::TrackState_v1();
-  m_trackStates->push_back(state);
+  constexpr size_t NDim = 6; // TODO take this from somewhere
+  stepResize(m_trackStatesAux.get(), m_trackStatesSize);
   m_surfaces.push_back(nullptr);
 
   // set kInvalid
@@ -92,61 +80,66 @@ ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
 
   if (previous >= kInvalid - 1)
     previous = kInvalid;  // fix needed in Acts::MTJ
-  m_trackStates->back()->setPrevious(previous);
+  m_trackStatesAux->previous[m_trackStatesSize] = previous;
   using namespace Acts;
 
   auto addParam = [this]() -> ActsTrk::IndexType {
-    trackParameters().push_back(new xAOD::TrackParameters_v1());
-    trackParameters().back()->resize();
-    return trackParameters().size() - 1;
+    stepResize(m_trackParametersAux.get(), m_trackParametersSize, 60);
+    // TODO ask AK if this resize could be method of aux container
+    m_trackParametersAux->params[m_trackParametersSize].resize(NDim);
+    m_trackParametersAux->covMatrix[m_trackParametersSize].resize(NDim*NDim);
+    m_trackParametersSize++;
+    return m_trackParametersSize-1;
   };
 
   auto addJacobian = [this]() -> ActsTrk::IndexType {
-    trackJacobians().push_back(new xAOD::TrackJacobian_v1());
-    trackJacobians().back()->resize();
-    return trackJacobians().size() - 1;
+    stepResize(m_trackJacobiansAux.get(), m_trackJacobiansSize);
+    m_trackJacobiansAux->jac[m_trackJacobiansSize].resize(NDim*NDim);
+    m_trackJacobiansSize++;
+    return m_trackJacobiansSize-1;
   };
 
   auto addMeasurement = [this]() -> ActsTrk::IndexType {
-    trackMeasurements().push_back(new xAOD::TrackMeasurement_v1());
-
-    return trackMeasurements().size() - 1;
+    stepResize(m_trackMeasurementsAux.get(), m_trackMeasurementsSize );
+    m_trackMeasurementsAux->meas[m_trackMeasurementsSize].resize(NDim);
+    m_trackMeasurementsAux->covMatrix[m_trackMeasurementsSize].resize(NDim*NDim);
+    m_trackMeasurementsSize++;
+    return m_trackMeasurementsSize-1;
   };
 
-  state->setPredicted(kInvalid);
+  m_trackStatesAux->predicted[m_trackStatesSize] = kInvalid;
   if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Predicted)) {
-    state->setPredicted(addParam());
+    m_trackStatesAux->predicted[m_trackStatesSize] = addParam();
   }
 
-  state->setFiltered(kInvalid);
+  m_trackStatesAux->filtered[m_trackStatesSize] = kInvalid;
   if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Filtered)) {
-    state->setFiltered(addParam());
+    m_trackStatesAux->filtered[m_trackStatesSize] = addParam();
   }
 
-  state->setSmoothed(kInvalid);
+  m_trackStatesAux->smoothed[m_trackStatesSize] = kInvalid;
   if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Smoothed)) {
-    state->setSmoothed(addParam());
+    m_trackStatesAux->smoothed[m_trackStatesSize] = addParam();
   }
 
-  state->setJacobian(kInvalid);
+  m_trackStatesAux->jacobian[m_trackStatesSize] = kInvalid;
   if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Jacobian)) {
-    state->setJacobian(addJacobian());
+    m_trackStatesAux->jacobian[m_trackStatesSize] = addJacobian();
   }
 
   m_uncalibratedSourceLinks.emplace_back(std::nullopt);
+  m_trackStatesAux->calibrated[m_trackStatesSize] = kInvalid;
+  m_trackStatesAux->measDim[m_trackStatesSize] = 0;
 
-  state->setCalibrated(kInvalid);
-  state->setMeasDim(0);
-  
   if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
-    state->setCalibrated(addMeasurement());
+    m_trackStatesAux->calibrated[m_trackStatesSize]  = addMeasurement();
     m_calibratedSourceLinks.emplace_back(std::nullopt);
-    state->setMeasDim(trackMeasurements().back()->size()); // default measurement size
+    m_trackStatesAux->measDim[m_trackStatesSize] = m_trackMeasurementsAux->meas[m_trackStatesAux->calibrated[m_trackStatesSize]].size();
   }
 
-  state->setGeometryId(InvalidGeoID); // surface is invalid until set
-
-  return m_trackStates->size() - 1;
+  m_trackStatesAux->geometryId[m_trackStatesSize] = InvalidGeoID; // surface is invalid until set
+  m_trackStatesSize++;
+  return m_trackStatesSize-1;
 }
 
 
@@ -156,8 +149,6 @@ void ActsTrk::MutableMultiTrajectory::shareFrom_impl(
     ActsTrk::IndexType iother,
     Acts::TrackStatePropMask shareSource,
     Acts::TrackStatePropMask shareTarget) {
-  auto self = (*m_trackStates)[iself];
-  auto other = (*m_trackStates)[iother];
 
   assert(ACTS_CHECK_BIT(this->getTrackState(iother).getMask(), shareSource) &&
          "Source has incompatible allocation");
@@ -169,16 +160,16 @@ void ActsTrk::MutableMultiTrajectory::shareFrom_impl(
   ActsTrk::IndexType sourceIndex{kInvalid};
   switch (shareSource) {
     case PM::Predicted:
-      sourceIndex = other->predicted();
+      sourceIndex = m_trackStatesAux->predicted[iother];
       break;
     case PM::Filtered:
-      sourceIndex = other->filtered();
+      sourceIndex = m_trackStatesAux->filtered[iother];
       break;
     case PM::Smoothed:
-      sourceIndex = other->smoothed();
+      sourceIndex = m_trackStatesAux->smoothed[iother];
       break;
     case PM::Jacobian:
-      sourceIndex = other->jacobian();
+      sourceIndex = m_trackStatesAux->jacobian[iother];
       break;
     default:
       throw std::domain_error{"MutableMultiTrajectory Unable to share this component"};
@@ -189,19 +180,19 @@ void ActsTrk::MutableMultiTrajectory::shareFrom_impl(
   switch (shareTarget) {
     case PM::Predicted:
       assert(shareSource != PM::Jacobian);
-      self->setPredicted(sourceIndex);
+      m_trackStatesAux->predicted[iself] = sourceIndex;
       break;
     case PM::Filtered:
       assert(shareSource != PM::Jacobian);
-      self->setFiltered(sourceIndex);
+      m_trackStatesAux->filtered[iself] = sourceIndex;
       break;
     case PM::Smoothed:
       assert(shareSource != PM::Jacobian);
-      self->setSmoothed(sourceIndex);
+      m_trackStatesAux->smoothed[iself] = sourceIndex;
       break;
     case PM::Jacobian:
       assert(shareSource == PM::Jacobian);
-      self->setJacobian(sourceIndex);
+      m_trackStatesAux->jacobian[iself] = sourceIndex;
       break;
     default:
       throw std::domain_error{"MutableMultiTrajectory Unable to share this component"};
@@ -219,19 +210,21 @@ void ActsTrk::MutableMultiTrajectory::unset_impl(
 
   switch (target) {
     case PM::Predicted:
-      (*m_trackStates)[istate]->setPredicted(kInvalid);
+      m_trackStatesAux->predicted[istate] = kInvalid;
       break;
     case PM::Filtered:
-      (*m_trackStates)[istate]->setFiltered(kInvalid);
+      m_trackStatesAux->filtered[istate] = kInvalid;
+
       break;
     case PM::Smoothed:
-      (*m_trackStates)[istate]->setSmoothed(kInvalid);
+      m_trackStatesAux->smoothed[istate] = kInvalid;
       break;
     case PM::Jacobian:
-      (*m_trackStates)[istate]->setJacobian(kInvalid);
+      m_trackStatesAux->jacobian[istate] = kInvalid;
+
       break;
     case PM::Calibrated:
-      (*m_trackStates)[istate]->setCalibrated(kInvalid);
+      m_trackStatesAux->calibrated[istate] = kInvalid;
       // TODO here m_measOffset[istate] and m_measCovOffset[istate] should be
       // set to kInvalid
 
@@ -246,32 +239,37 @@ std::any ActsTrk::MutableMultiTrajectory::component_impl(
   using namespace Acts::HashedStringLiteral;
   assert(istate < m_trackStates->size() &&
          "Attempt to reach beyond the Track States container size");
+  INSPECTCALL(key << " " << istate << " non-const component_impl")
 
   switch (key) {
     case "previous"_hash:
-      return (*m_trackStates)[istate]->previousPtr();
+      return &(m_trackStatesAux->previous[istate]);
+    case "next"_hash:
+      return &(m_trackStatesAux->next[istate]);
     case "chi2"_hash:
-      return (*m_trackStates)[istate]->chi2Ptr();
+      return &(m_trackStatesAux->chi2[istate]);
     case "pathLength"_hash:
-      return (*m_trackStates)[istate]->pathLengthPtr();
+      return &(m_trackStatesAux->pathLength[istate]);
     case "predicted"_hash:
-      return (*m_trackStates)[istate]->predictedPtr();
+      return &(m_trackStatesAux->predicted[istate]);
     case "filtered"_hash:
-      return (*m_trackStates)[istate]->filteredPtr();
+      return &(m_trackStatesAux->filtered[istate]);
     case "smoothed"_hash:
-      return (*m_trackStates)[istate]->smoothedPtr();
-    case "projector"_hash:
-      return trackMeasurements()
-          .at((*m_trackStates)[istate]->calibrated())
-          ->projectorPtr();
+      return &(m_trackStatesAux->smoothed[istate]);
+    case "projector"_hash: {
+      auto idx = m_trackStatesAux->calibrated[istate];
+      return &(m_trackMeasurementsAux->projector[idx]);
+    }    
     case "measdim"_hash:
-      return (*m_trackStates)[istate]->measDimPtr();
+      return &(m_trackStatesAux->measDim[istate]);      
     case "typeFlags"_hash:
-      return (*m_trackStates)[istate]->typeFlagsPtr();
+      return &(m_trackStatesAux->typeFlags[istate]);
+
     default: {
       for (auto& d : m_decorations) {
         if (d.hash == key) {
-          return d.setter(m_trackStates.get(), istate, d.name);
+          // TODO VITAL - make decorations to work with a generic Aux
+          // return d.setter(m_trackStates.get(), istate, d.name);
         }
       }
       throw std::runtime_error("MutableMultiTrajectory::component_impl no such component " + std::to_string(key));
@@ -286,41 +284,42 @@ const std::any ActsTrk::MutableMultiTrajectory::component_impl(
   using namespace Acts::HashedStringLiteral;
   assert(istate < m_trackStates->size() &&
          "Attempt to reach beyond the Track States container size");
-  const auto& trackStates = *m_trackStates;
+  INSPECTCALL(key << " " << istate << " const component_impl")
   switch (key) {
     case "previous"_hash:
-      return trackStates[istate]->previousPtr();
+      return &(to_const_ptr(m_trackStatesAux)->previous[istate]);
     case "chi2"_hash:
-      return trackStates[istate]->chi2Ptr();
+      return &(to_const_ptr(m_trackStatesAux)->chi2[istate]);
     case "pathLength"_hash:
-      return trackStates[istate]->pathLengthPtr();
+      return &(to_const_ptr(m_trackStatesAux)->pathLength[istate]);
     case "predicted"_hash:
-      return trackStates[istate]->predictedPtr();
+      return &(to_const_ptr(m_trackStatesAux)->predicted[istate]);
     case "filtered"_hash:
-      return trackStates[istate]->filteredPtr();
+      return &(to_const_ptr(m_trackStatesAux)->filtered[istate]);
     case "smoothed"_hash:
-      return trackStates[istate]->smoothedPtr();
+      return &(to_const_ptr(m_trackStatesAux)->smoothed[istate]);
     case "jacobian"_hash:
-      return trackStates[istate]->jacobianPtr();
-    case "projector"_hash:
-      return trackMeasurements()
-          .at(trackStates[istate]->calibrated())
-          ->projectorPtr();
+      return &(to_const_ptr(m_trackStatesAux)->jacobian[istate]);
+    case "projector"_hash:{
+      auto idx = to_const_ptr(m_trackStatesAux)->calibrated[istate];
+      return &(to_const_ptr(m_trackMeasurementsAux)->projector[idx]);
+    }
     case "calibrated"_hash: {
-      return trackStates[istate]->calibratedPtr();
+      return &(to_const_ptr(m_trackStatesAux)->calibrated[istate]);
     }
     case "calibratedCov"_hash: {
-      return trackStates[istate]->calibratedPtr();
+      return &(to_const_ptr(m_trackStatesAux)->calibrated[istate]);
     }
     case "measdim"_hash:
-      return trackStates[istate]->measDimPtr();
+      return &(to_const_ptr(m_trackStatesAux)->measDim[istate]);
     case "typeFlags"_hash:
-      return trackStates[istate]->typeFlagsPtr();
+      return &(to_const_ptr(m_trackStatesAux)->typeFlags[istate]);
     default: {
       for (auto& d : m_decorations) {
         if (d.hash == key) {
           INSPECTCALL("getting dymaic variable " << d.name << " " << istate);
-          return d.getter(m_trackStates.get(), istate, d.name);
+          // TODO restore after all implementation is moved to Aux backend
+          // return d.getter(m_trackStates.get(), istate, d.name);
         }
       }
       throw std::runtime_error("MutableMultiTrajectory::component_impl const no such component " + std::to_string(key));
@@ -330,9 +329,8 @@ const std::any ActsTrk::MutableMultiTrajectory::component_impl(
 
 bool ActsTrk::MutableMultiTrajectory::has_impl(
     Acts::HashedString key, ActsTrk::IndexType istate) const {
-  const auto& trackStates = *(m_trackStates.get());
   std::optional<bool> inTrackState =
-      ActsTrk::details::has_impl(trackStates, key, istate);
+      ActsTrk::details::has_impl(m_trackStatesAux.get(), key, istate);
   if (inTrackState.has_value())
     return inTrackState.value();
 
@@ -355,10 +353,18 @@ bool ActsTrk::MutableMultiTrajectory::has_impl(
 
 void ActsTrk::MutableMultiTrajectory::clear_impl() {
   INSPECTCALL(this);
-  m_trackStates->clear();
-  m_trackParameters->clear();
-  m_trackJacobians->clear();
-  m_trackMeasurements->clear();
+  m_trackStatesAux->resize(0);
+  m_trackStatesSize = 0;
+
+  m_trackParametersAux->resize(0);
+  m_trackParametersSize = 0;
+
+  m_trackJacobiansAux->resize(0);
+  m_trackJacobiansSize = 0;
+
+  m_trackMeasurementsAux->resize(0);
+  m_trackMeasurementsSize = 0;
+
   m_surfacesBackend->clear();
   m_surfaces.clear();
   m_calibratedSourceLinks.clear();
@@ -367,19 +373,17 @@ void ActsTrk::MutableMultiTrajectory::clear_impl() {
 
 
 void ActsTrk::MutableMultiTrajectory::allocateCalibrated_impl(ActsTrk::IndexType istate, std::size_t measdim) {
-  // resize the calibrated measurement to the size measdim
-  auto& trackStates = *m_trackStates;
-
-  INSPECTCALL(trackStates[istate]->calibrated() << " " << trackMeasurements().size());
-  trackStates[istate]->setMeasDim(measdim);
-  trackMeasurements().at(trackStates[istate]->calibrated())->resize(measdim);
+  m_trackStatesAux->measDim[istate] = measdim;
+  auto idx = m_trackStatesAux->calibrated[istate];
+  m_trackMeasurementsAux->meas[idx].resize(measdim);
+  m_trackMeasurementsAux->covMatrix[idx].resize(measdim*measdim);
 }
 
 
 ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::calibratedSize_impl(ActsTrk::IndexType istate) const {
   // Retrieve the calibrated measurement size
-  INSPECTCALL(istate << " " << trackMeasurements().size());
-  return trackStates().at(istate)->measDim();
+  // INSPECTCALL(istate << " " << trackMeasurements().size());
+  return m_trackStatesAux->measDim[istate];
 }
 
 
@@ -418,7 +422,7 @@ void ActsTrk::MutableMultiTrajectory::setReferenceSurface_impl(IndexType istate,
   if ( istate >= m_surfaces.size() )
     m_surfaces.resize(istate+1, nullptr);
 
-  trackStates()[istate]->setGeometryId(surface->geometryId().value()); // for free surface this will be 0
+  m_trackStatesAux->geometryId[istate] = surface->geometryId().value();
 
   if (surface->geometryId().value() == 0) { // free surface, needs recording of properties
     m_surfaces[istate] = std::move(surface); // and memory management
@@ -426,7 +430,7 @@ void ActsTrk::MutableMultiTrajectory::setReferenceSurface_impl(IndexType istate,
     m_surfacesBackend->push_back(surfaceBackend);
     encodeSurface(surfaceBackend, surface.get(), m_geoContext); // TODO
     auto el = ElementLink<xAOD::TrackSurfaceContainer>(*m_surfacesBackend, m_surfacesBackend->size()-1);
-    trackStates()[istate]->setSurfaceLink(el);
+    m_trackStatesAux->surfaceLink[istate] =  el;
 
   } else {
     m_surfaces[istate] = surface.get(); // no memory management, bare pointer
@@ -461,6 +465,7 @@ ActsTrk::MultiTrajectory::MultiTrajectory(
       m_trackJacobians(trackJacobians),
       m_trackMeasurements(trackMeasurements) {
       INSPECTCALL("ctor " << this << " " << m_trackStates->size());
+      m_trackStatesAux = dynamic_cast<const xAOD::TrackStateAuxContainer*>(m_trackStates->getConstStore());
 
       for ( auto id : m_trackStates->getConstStore()->getAuxIDs() ) {
 
@@ -498,17 +503,15 @@ ActsTrk::MultiTrajectory::MultiTrajectory(
 
 bool ActsTrk::MultiTrajectory::has_impl(Acts::HashedString key,
                                              ActsTrk::IndexType istate) const {
-  const auto& trackStates = *m_trackStates;
+  // const auto& trackStates = *m_trackStates;
   std::optional<bool> inTrackState =
-      ActsTrk::details::has_impl(trackStates, key, istate);
+      ActsTrk::details::has_impl(m_trackStatesAux, key, istate);
   if (inTrackState.has_value())
     return inTrackState.value();
   // TODO remove once EL based source links are in use only
   using namespace Acts::HashedStringLiteral;
   if (key == "uncalibratedSourceLink"_hash)
       return m_uncalibratedSourceLinks[istate].has_value();
-
-
   return false;
 }
 

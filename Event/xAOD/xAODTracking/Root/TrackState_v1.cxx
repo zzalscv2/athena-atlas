@@ -12,6 +12,7 @@ namespace xAOD {
     DEFINE_API(TrackState_v1, double, pathLength, setPathLength)
     DEFINE_API( TrackState_v1, uint64_t, typeFlags, setTypeFlags)
     DEFINE_API(TrackState_v1, TrackStateIndexType, previous, setPrevious)
+    DEFINE_API(TrackState_v1, TrackStateIndexType, next, setNext)
     DEFINE_API(TrackState_v1, TrackStateIndexType, predicted, setPredicted)
     DEFINE_API(TrackState_v1, TrackStateIndexType, filtered, setFiltered)
     DEFINE_API(TrackState_v1, TrackStateIndexType, smoothed, setSmoothed)

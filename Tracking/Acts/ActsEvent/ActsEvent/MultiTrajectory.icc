@@ -6,7 +6,7 @@
 namespace ActsTrk {
 namespace details {
 constexpr std::optional<bool> has_impl(
-    const xAOD::TrackStateContainer& trackStates, Acts::HashedString key,
+    const xAOD::TrackStateAuxContainer* trackStates, Acts::HashedString key,
     ActsTrk::IndexType istate) {
   using namespace Acts::HashedStringLiteral;
   using Acts::MultiTrajectoryTraits::kInvalid;
@@ -14,7 +14,7 @@ constexpr std::optional<bool> has_impl(
 
   switch (key) {
     case "previous"_hash:
-      return trackStates[istate]->previous() < kInvalid;
+      return trackStates->previous[istate] < kInvalid;
     case "chi2"_hash:{
       INSPECTCALL(key << " " << istate << " chi2");
       return true;
@@ -25,39 +25,39 @@ constexpr std::optional<bool> has_impl(
     }
     case "typeFlags"_hash:{
       INSPECTCALL(key << " " << istate << " type flags");
-      return static_cast<IndexType>(trackStates[istate]->typeFlags()) < kInvalid;
+      return true;
     }
     case "predicted"_hash:{
       INSPECTCALL(key << " " << istate << " predicted");
-      return trackStates[istate]->predicted() < kInvalid;
+      return trackStates->predicted[istate] < kInvalid;
     }
     case "filtered"_hash:{
       INSPECTCALL(key << " " << istate << " filtered");
-      return trackStates[istate]->filtered() < kInvalid;
+      return trackStates->filtered[istate] < kInvalid;
     }
     case "smoothed"_hash:{
       INSPECTCALL(key << " " << istate << " smoothed");
-      return trackStates[istate]->smoothed() < kInvalid;
+      return trackStates->smoothed[istate] < kInvalid;
     }
     case "jacobian"_hash:{
       INSPECTCALL(key << " " << istate << " jacobian");
-      return trackStates[istate]->jacobian() < kInvalid;
+      return trackStates->jacobian[istate] < kInvalid;
     }
     case "projector"_hash:{
       INSPECTCALL(key << " " << istate << " projector");
-      return trackStates[istate]->calibrated() < kInvalid;
+      return trackStates->calibrated[istate] < kInvalid;
     }
     case "calibrated"_hash:{
       INSPECTCALL(key << " " << istate << " calibrated");
-      return trackStates[istate]->calibrated() < kInvalid;
+      return trackStates->calibrated[istate] < kInvalid;
     }
     case "calibratedCov"_hash: {
       INSPECTCALL(key << " " << istate << " calibratedCov");
-      return trackStates[istate]->calibrated() < kInvalid;
+      return trackStates->calibrated[istate] < kInvalid;
     }
     case "measdim"_hash: {
       INSPECTCALL(key << " " << istate << " measdim");
-      return trackStates[istate]->measDim() < kInvalid;
+      return trackStates->measDim[istate] < kInvalid;
     }
     case "referenceSurface"_hash: {
       INSPECTCALL(key << " " << istate << " referenceSurfaceEnco");

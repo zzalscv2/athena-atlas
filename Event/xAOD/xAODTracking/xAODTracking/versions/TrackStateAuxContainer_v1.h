@@ -22,6 +22,7 @@ namespace xAOD {
         std::vector<double> pathLength;
         std::vector< uint64_t > typeFlags;
         std::vector<TrackStateIndexType> previous;
+        std::vector<TrackStateIndexType> next;
         std::vector<TrackStateIndexType> predicted;
         std::vector<TrackStateIndexType> filtered;
         std::vector<TrackStateIndexType> smoothed;
