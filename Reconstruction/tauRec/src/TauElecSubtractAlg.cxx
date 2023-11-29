@@ -3,6 +3,7 @@
 */
 
 #include "TauElecSubtractAlg.h"
+#include <algorithm>
 
 StatusCode TauElecSubtractAlg::initialize()
 {
@@ -41,21 +42,38 @@ StatusCode TauElecSubtractAlg::execute (const EventContext& ctx) const
 
     SG::WriteHandle<xAOD::CaloClusterContainer> clustersOutputHandle (m_clustersOutput, ctx);
     ATH_CHECK( clustersOutputHandle.record(std::make_unique<xAOD::CaloClusterContainer>(), std::make_unique<xAOD::CaloClusterAuxContainer>()) );
-    xAOD::CaloClusterContainer* clustersOutputContainer = clustersOutputHandle.ptr();
-    clustersOutputContainer->reserve(clustersInput->size());
 
     SG::WriteHandle<xAOD::TrackParticleContainer> tracksOutputHandle (m_tracksOutput, ctx);
     ATH_CHECK( tracksOutputHandle.record(std::make_unique<xAOD::TrackParticleContainer>(), std::make_unique<xAOD::TrackParticleAuxContainer>()) );
+
+    SG::WriteHandle<xAOD::CaloClusterContainer> removedClustersOutputHandle (m_removedClustersOutput, ctx);
+    ATH_CHECK( removedClustersOutputHandle.record(std::make_unique<xAOD::CaloClusterContainer>(), std::make_unique<xAOD::CaloClusterAuxContainer>()) );
+
+    SG::WriteHandle<xAOD::TrackParticleContainer> removedTracksOutputHandle (m_removedTracksOutput, ctx);
+    ATH_CHECK( removedTracksOutputHandle.record(std::make_unique<xAOD::TrackParticleContainer>(), std::make_unique<xAOD::TrackParticleAuxContainer>()) );
+
+    std::vector<bool> selectElectron(electronInput->size(), false);
+
+    for (const xAOD::Electron* elec : *electronInput.cptr()) {
+      selectElectron.at(elec->index()) = static_cast<bool>(m_eleLHSelectTool->accept(elec));
+    }
+
+    // early stopping: if no electron is selected, the EleRM reconstruction should not run
+    // the simplest strategy is to write out empty cluster and track containers
+    if (std::find(selectElectron.begin(),selectElectron.end(),true) == selectElectron.end()) return StatusCode::SUCCESS;
+
+    xAOD::CaloClusterContainer* clustersOutputContainer = clustersOutputHandle.ptr();
+    clustersOutputContainer->reserve(clustersInput->size());
+
     xAOD::TrackParticleContainer* tracksOutputContainer = tracksOutputHandle.ptr();
     tracksOutputContainer->reserve(tracksInput->size());
-
 
     std::vector<const xAOD::TrackParticle *> tracks_to_remove;
     std::vector<const xAOD::CaloCluster *>   clusters_to_remove;
     if(!m_doNothing){
         for (const xAOD::Electron* elec : *electronInput.cptr())
         {
-            if (static_cast<bool>(m_eleLHSelectTool->accept(elec)))
+	  if (selectElectron.at(elec->index()))
             {
                 tracks_to_remove = xAOD::EgammaHelpers::getTrackParticlesVec(elec, true, true);
                 std::vector<ElementLink< xAOD::CaloClusterContainer>> elec_cluster_links = elec->caloClusterLinks();
@@ -102,8 +120,6 @@ StatusCode TauElecSubtractAlg::execute (const EventContext& ctx) const
     }
     ATH_MSG_DEBUG("Old cluster size = " << clustersInput->size() << ", new cluster size = " << clustersOutputContainer->size() << ", expected diff = " << clusters_to_remove.size());
 
-    SG::WriteHandle<xAOD::CaloClusterContainer> removedClustersOutputHandle (m_removedClustersOutput, ctx);
-    ATH_CHECK( removedClustersOutputHandle.record(std::make_unique<xAOD::CaloClusterContainer>(), std::make_unique<xAOD::CaloClusterAuxContainer>()) );
     xAOD::CaloClusterContainer* removedClustersOutputCont = removedClustersOutputHandle.ptr();
     removedClustersOutputCont->reserve(clusters_to_remove.size());
     for (const xAOD::CaloCluster* cls : clusters_to_remove){
@@ -112,8 +128,6 @@ StatusCode TauElecSubtractAlg::execute (const EventContext& ctx) const
         removedClustersOutputCont->push_back(new_removed_cluster);
     }
 
-    SG::WriteHandle<xAOD::TrackParticleContainer> removedTracksOutputHandle (m_removedTracksOutput, ctx);
-    ATH_CHECK( removedTracksOutputHandle.record(std::make_unique<xAOD::TrackParticleContainer>(), std::make_unique<xAOD::TrackParticleAuxContainer>()) );
     xAOD::TrackParticleContainer* removedTracksOutputCont = removedTracksOutputHandle.ptr();
     removedTracksOutputCont->reserve(tracks_to_remove.size());
     for (const xAOD::TrackParticle* trk : tracks_to_remove){
