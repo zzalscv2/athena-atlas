@@ -18,6 +18,8 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "StoreGate/ReadHandle.h"
 
+#include "TruthUtils/MagicNumbers.h"
+
 // Constructor
 DerivationFramework::TruthLinkRepointTool::TruthLinkRepointTool(const std::string& t,
         const std::string& n,
@@ -78,14 +80,14 @@ StatusCode DerivationFramework::TruthLinkRepointTool::addBranches() const {
   return StatusCode::SUCCESS;
 }
 
-// Find a match by barcode in a different container
+// Find a match by unique ID in a different container
 int DerivationFramework::TruthLinkRepointTool::find_match(const xAOD::TruthParticle* p, const xAOD::TruthParticleContainer* c)
 {
   // See if it's already gone
   if (!p) return -1;
   // Look through the mini-collection
   for (int i=0;i<int(c->size());++i){
-    if (c->at(i) && p->barcode()==c->at(i)->barcode()) return i;
+    if (c->at(i) && HepMC::uniqueID(p) == HepMC::uniqueID(c->at(i))) return i;
   }
   // Note: just fine if it wasn't in the mini-collection
   return -1;

@@ -15,6 +15,9 @@
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
 #include "xAODTruth/TruthVertexAuxContainer.h"
+
+#include "TruthUtils/MagicNumbers.h"
+
 // STL includes
 #include <vector>
 #include <string>
@@ -102,9 +105,9 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::addBranches() const
                                             std::make_unique<xAOD::TruthVertexAuxContainer>()));
     ATH_MSG_DEBUG( "Recorded new TruthVertexContainer with key: " << (m_outputVerticesKey.key()));
 
-    // List of barcodes for particles in our collection already.  Because of the way we recurse,
+    // List of unique IDs for particles in our collection already.  Because of the way we recurse,
     // adding more particles as we go, there should be no need to add (or help from adding) the
-    // barcodes of particles that we are *not* going to keep
+    // unique IDs of particles that we are *not* going to keep
     std::vector<int> seen_particles;
     // Go through that list of particles!
     for (const auto * part : *truthParticles){
@@ -123,14 +126,15 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const Even
                                                                       std::vector<int>& seen_particles,
                                                                       const int generations) const {
     // See if we've seen it - note, could also do this with a unary function on the container itself
-    if (std::find(seen_particles.begin(),seen_particles.end(),old_part.barcode())!=seen_particles.end()){
+    if (std::find(seen_particles.begin(),seen_particles.end(),HepMC::uniqueID(&old_part))!=seen_particles.end()){
       for (size_t p=0;p<part_cont->size();++p){
         // Was it a hit?
-        if ((*part_cont)[p]->barcode()==old_part.barcode()) return p;
+        const xAOD::TruthParticle *theParticle = (*part_cont)[p];
+        if (HepMC::uniqueID(theParticle) == HepMC::uniqueID(&old_part)) return p;
       } // Look through the old container
     } // Found it in the old container
     // Now we have seen it
-    seen_particles.push_back(old_part.barcode());
+    seen_particles.push_back(HepMC::uniqueID(&old_part));
     // Set up decorators
     SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > originDecorator(m_originDecoratorKey, ctx);  
     SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeDecorator(m_typeDecoratorKey, ctx);
@@ -153,7 +157,7 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const Even
     }
     // Fill with numerical content
     xTruthParticle->setPdgId(old_part.pdgId());
-    xTruthParticle->setBarcode(old_part.barcode());
+    xTruthParticle->setBarcode(HepMC::uniqueID(&old_part));
     xTruthParticle->setStatus(old_part.status());
     xTruthParticle->setM(old_part.m());
     xTruthParticle->setPx(old_part.px());
@@ -196,7 +200,7 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthVertex( const EventC
     ElementLink<xAOD::TruthVertexContainer> eltv(*vert_cont, my_index);
     // Set properties
     xTruthVertex->setId(old_vert.id());
-    xTruthVertex->setBarcode(old_vert.barcode());
+    xTruthVertex->setBarcode(HepMC::uniqueID(&old_vert));
     xTruthVertex->setX(old_vert.x());
     xTruthVertex->setY(old_vert.y());
     xTruthVertex->setZ(old_vert.z());

@@ -101,7 +101,7 @@ StatusCode DerivationFramework::MuonTruthIsolationTool::addBranches() const {
             const std::vector<const xAOD::TruthParticle*>& calo_container = truth_map_calo[sector];
             /// Update the topo et cones
             for (const xAOD::TruthParticle* calo_part : calo_container) {
-                if (calo_part == truthLink || (truthLink && truthLink->barcode() == calo_part->barcode())) continue;
+                if (calo_part == truthLink || (truthLink && HepMC::uniqueID(truthLink) == HepMC::uniqueID(calo_part))) continue;
                 const float dR = xAOD::P4Helpers::deltaR(calo_part, part);
                 if (dR < 0.05 || dR > 0.2) continue;
                 new_topoetcone20 += calo_part->pt();
@@ -109,7 +109,7 @@ StatusCode DerivationFramework::MuonTruthIsolationTool::addBranches() const {
 
             const std::vector<const xAOD::TruthParticle*>& truth_container = truth_map_track[sector];
             for (const xAOD::TruthParticle* trk_part : truth_container) {
-                if (trk_part == truthLink || (truthLink && truthLink->barcode() == trk_part->barcode())) continue;
+                if (trk_part == truthLink || (truthLink && HepMC::uniqueID(truthLink) == HepMC::uniqueID(trk_part))) continue;
                 const float dR = xAOD::P4Helpers::deltaR(trk_part, part);
                 const float pt = trk_part->pt();
                 if (dR > 0.3) continue;

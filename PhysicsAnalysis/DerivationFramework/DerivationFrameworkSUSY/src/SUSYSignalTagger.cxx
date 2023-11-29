@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkSUSY/SUSYSignalTagger.h"
 
 #include "xAODEventInfo/EventInfo.h"
+
+#include "TruthUtils/MagicNumbers.h"
 
 namespace DerivationFramework {
 
@@ -114,17 +116,17 @@ namespace DerivationFramework {
             } else if (!secondsp) {
               secondsp = tp;
             } else {
-              if (firstsp->nChildren() != 0 && tp->barcode() == firstsp->child(0)->barcode()) {
+              if (firstsp->nChildren() != 0 && HepMC::uniqueID(tp) == HepMC::uniqueID(firstsp->child(0))) {
                 firstsp = tp;
               }
-              else if (secondsp->nChildren() != 0 && tp->barcode() == secondsp->child(0)->barcode()) {
+              else if (secondsp->nChildren() != 0 && HepMC::uniqueID(tp) == HepMC::uniqueID(secondsp->child(0))) {
                 secondsp = tp;
               }
-              else if (firstsp->nChildren() != 0 && firstsp->child(0)->barcode() == secondsp->barcode()) {
+              else if (firstsp->nChildren() != 0 && HepMC::uniqueID(firstsp->child(0)) == HepMC::uniqueID(secondsp)) {
                 firstsp = secondsp;
                 secondsp = tp;
               }
-              else if (secondsp->nChildren() != 0 && secondsp->child(0)->barcode() == firstsp->barcode()) {
+              else if (secondsp->nChildren() != 0 && HepMC::uniqueID(secondsp->child(0)) == HepMC::uniqueID(firstsp)) {
                 secondsp = firstsp;
                 firstsp = tp;
               }
@@ -139,7 +141,7 @@ namespace DerivationFramework {
 
     if (firstsp && firstsp->nChildren() == 1) {
       for (const auto tp : *truthP) {
-        if (tp->barcode() == firstsp->child(0)->barcode() && tp->pdgId() != firstsp->pdgId()) {
+        if (HepMC::uniqueID(tp) == HepMC::uniqueID(firstsp->child(0)) && tp->pdgId() != firstsp->pdgId()) {
           firstsp = tp;
           break;
         }
@@ -148,7 +150,7 @@ namespace DerivationFramework {
 
     if (secondsp && secondsp->nChildren() == 1) {
       for (const auto tp : *truthP) {
-        if (tp->barcode() == secondsp->child(0)->barcode() && tp->pdgId() != secondsp->pdgId()) {
+        if (HepMC::uniqueID(tp) == HepMC::uniqueID(secondsp->child(0)) && tp->pdgId() != secondsp->pdgId()) {
           secondsp = tp;
           break;
         }

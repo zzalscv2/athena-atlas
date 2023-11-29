@@ -14,6 +14,8 @@
 #include "xAODTruth/TruthVertexContainer.h"
 #include "xAODTruth/TruthVertexAuxContainer.h"
 
+#include "TruthUtils/MagicNumbers.h"
+
 // STL includes
 #include <vector>
 // For a find in the vector
@@ -30,7 +32,7 @@ int DerivationFramework::CollectionMakerHelpers::addTruthVertex( const xAOD::Tru
     ElementLink<xAOD::TruthVertexContainer> eltv(*vertCont, myIndex);
     // Set properties
     xTruthVertex->setId(oldVert.id());
-    xTruthVertex->setBarcode(oldVert.barcode());
+    xTruthVertex->setBarcode(HepMC::uniqueID(&oldVert));
     xTruthVertex->setX(oldVert.x());
     xTruthVertex->setY(oldVert.y());
     xTruthVertex->setZ(oldVert.z());
@@ -53,14 +55,15 @@ int DerivationFramework::CollectionMakerHelpers::addTruthParticle( const xAOD::T
                                                                    xAOD::TruthVertexContainer* vertCont, std::vector<int>& seenParticles,
                                                                    const int generations, bool includeVertex) {
     // See if we've seen it - note, could also do this with a unary function on the container itself
-    if (std::find(seenParticles.begin(),seenParticles.end(),oldPart.barcode())!=seenParticles.end()){
+    if (std::find(seenParticles.begin(),seenParticles.end(),HepMC::uniqueID(&oldPart))!=seenParticles.end()){
       for (size_t p=0;p<partCont->size();++p){
         // Was it a hit?
-        if ((*partCont)[p]->barcode()==oldPart.barcode()) return p;
+        const xAOD::TruthParticle *theParticle = (*partCont)[p];
+        if (HepMC::uniqueID(theParticle) == HepMC::uniqueID(&oldPart)) return p;
       } // Look through the old container
     } // Found it in the old container
     // Now we have seen it
-    seenParticles.push_back(oldPart.barcode());
+    seenParticles.push_back(HepMC::uniqueID(&oldPart));
     // Make a nw truth particle
     xAOD::TruthParticle* xTruthParticle = setupTruthParticle(oldPart,partCont);
     // Make a link to this particle
@@ -89,7 +92,7 @@ xAOD::TruthParticle* DerivationFramework::CollectionMakerHelpers::setupTruthPart
     partCont->push_back( xTruthParticle );
     // Fill with numerical content
     xTruthParticle->setPdgId(oldPart.pdgId());
-    xTruthParticle->setBarcode(oldPart.barcode());
+    xTruthParticle->setBarcode(HepMC::uniqueID(&oldPart));
     xTruthParticle->setStatus(oldPart.status());
     xTruthParticle->setM(oldPart.m());
     xTruthParticle->setPx(oldPart.px());

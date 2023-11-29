@@ -242,11 +242,11 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
           fj_particles.emplace_back(part->px(), part->py(), part->pz(), part->e());
         }
 
-        fj_particles.back().set_user_index(part->barcode());
+        fj_particles.back().set_user_index(HepMC::uniqueID(part));
       }
       for (const auto& part : photonsFSRList) {
         fj_particles.emplace_back(part->px(), part->py(), part->pz(), part->e());
-        fj_particles.back().set_user_index(part->barcode());
+        fj_particles.back().set_user_index(HepMC::uniqueID(part));
       }
 
       //run the clustering
@@ -255,8 +255,8 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
       fastjet::ClusterSequence cseq(fj_particles, jet_def);
       sorted_jets = sorted_by_pt(cseq.inclusive_jets(0));
       //associate clustered jets back to bare particles
-      std::vector<int> photon_barcodes(50);
-      photon_barcodes.clear();
+      std::vector<int> photon_uniqueIDs(50);
+      photon_uniqueIDs.clear();
       for (const auto& part : listOfParticlesToDress) {
         //loop over fastjet pseudojets and associate one with this particle by barcode
         bool found=false;
@@ -264,7 +264,7 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
         while(!found && pjItr!=sorted_jets.end()) {
           std::vector<fastjet::PseudoJet> constituents = pjItr->constituents();
           for(const auto& constit : constituents) {
-            if (part->barcode()==constit.user_index()) {
+            if (HepMC::uniqueID(part)==constit.user_index()) {
 
               // shall we count the number of photons among the pseudojet constituents 
               // to decorate leptons with the number of dressing photons found by the anti-kt algorithm?
@@ -283,11 +283,11 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
               }
               found=true;
               break;
-            } // Found the matching barcode
+            } // Found the matching unique ID
           } // Loop over the jet constituents
           if (found){
             for(const auto& constit : constituents) {
-              photon_barcodes.push_back(constit.user_index());
+              photon_uniqueIDs.push_back(constit.user_index());
             } // Loop over the constituents
           } // Found one of the key leptons in this jet
           ++pjItr;
@@ -312,7 +312,7 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
       if (!m_decorationName.empty()){
         //loop over photons, uniquely associate each to nearest bare particle
         for (const auto& phot : photonsFSRList ) {
-          bool found=std::find(photon_barcodes.begin(),photon_barcodes.end(),phot->barcode())!=photon_barcodes.end();
+          bool found=std::find(photon_uniqueIDs.begin(),photon_uniqueIDs.end(),phot->barcode())!=photon_uniqueIDs.end();
           if (found){
             dressDec(*phot) = 1;
           }

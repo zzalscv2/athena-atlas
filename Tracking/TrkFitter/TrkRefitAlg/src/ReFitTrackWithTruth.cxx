@@ -26,6 +26,7 @@
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkToolInterfaces/ITrackSummaryTool.h"
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "TRandom3.h"
 
 #include <vector>
@@ -167,8 +168,8 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
       ATH_MSG_DEBUG ("Original parameters " << od0  << " " << oz0  << " " << ophi0 << " " << otheta << " " << oqOverP);
     }
 
-    // get the barcode of truth particle matched to the track
-    float minProb(0); 
+    // get the unique ID of truth particle matched to the track
+    float minProb(0);
 
     // copy from DenseEnvironmentsAmbiguityProcessorTool.cxx
     ElementLink<TrackCollection> tracklink;
@@ -180,8 +181,8 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
     if ( found == truthMap->end() )                { continue; }
     if ( !found->second.particleLink().isValid() ) { continue; }
     if ( found->second.probability() < minProb )   { continue; }
-    int barcodeToMatch = found->second.particleLink().barcode();
-    ATH_MSG_DEBUG ("Barcode to match " << barcodeToMatch);
+    int uniqueIdToMatch = HepMC::uniqueID(&(found->second.particleLink()));
+    ATH_MSG_DEBUG ("Unique ID to match " << uniqueIdToMatch);
 
     // now that have the track, loop through and build a new set of measurements for a track fit
     std::vector<const Trk::MeasurementBase*> measurementSet;
@@ -219,9 +220,9 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
       int bec              = m_pixelID->barrel_ec(clusterId);
       int layer_disk       = m_pixelID->layer_disk(clusterId);
 
-      // Do any SDOs in reconstructed cluster match barcodeToMatch
+      // Do any SDOs in reconstructed cluster match uniqueIdToMatch
       // Should always return true for pseudotracks. For reco tracks could differ
-      bool hasSDOMatch = IsClusterFromTruth( pix, barcodeToMatch, *sdoCollection );
+      bool hasSDOMatch = IsClusterFromTruth( pix, uniqueIdToMatch, *sdoCollection );
 
       // --- hit flags' logic
       // m_saveWrongHits - only has impact on reco track, where hit might be from wrong particle
@@ -254,7 +255,7 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
         } 
       } else { // hasSDOMatch
         // Get All SiHits truth matched to the reconstruction cluster for the particle associated with the track
-        const std::vector<SiHit> matchedSiHits = matchSiHitsToCluster( barcodeToMatch, pix, siHits );  
+        const std::vector<SiHit> matchedSiHits = matchSiHitsToCluster( uniqueIdToMatch, pix, siHits );
         if( matchedSiHits.empty() ) {
           ATH_MSG_WARNING ("No SiHit matching cluster");
           continue;  // should NOT HAPPEN for pseudotracks
@@ -400,11 +401,11 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
   return StatusCode::SUCCESS;
 }
 
-std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int barcodeToMatch,
+std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int uniqueIdToMatch,
     const InDet::PixelCluster* pixClus,
     SG::ReadHandle<AtlasHitsVector<SiHit>> &siHitCollection) const {
 
-  // passing a negative barcode value will not apply barcode - can get multiple SiHits upone return from different particles
+  // passing a negative unique ID value skip this requirement - can get multiple SiHits upon return from different particles
 
   ATH_MSG_VERBOSE( " Have " << (*siHitCollection).size() << " SiHits to look through" );
   std::vector<SiHit>  matchingHits; 
@@ -421,11 +422,11 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int bar
 
   std::vector<const SiHit* >  multiMatchingHits;
 
-  // match SiHits to barcode and make sure in same module as reco hit
+  // match SiHits to unique ID and make sure in same module as reco hit
   for ( const auto&  siHit : *siHitCollection) {
 
-    if ( barcodeToMatch > 0 ) { // negative barcodeToMatch will keep all 
-      if ( siHit.particleLink().barcode() != barcodeToMatch ) { continue; }
+    if ( uniqueIdToMatch > 0 ) { // negative uniqueIdToMatch will keep all
+      if ( HepMC::uniqueID(&(siHit.particleLink())) != uniqueIdToMatch ) { continue; }
     }
 
     // Check if it is a Pixel hit
@@ -465,8 +466,8 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int bar
     while ( siHitIter2 != multiMatchingHits.end() ) {
       // Need to come from the same truth particle
 
-      // wasn't the barcode match already done!?
-      if ( (*siHitIter)->particleLink().barcode() != (*siHitIter2)->particleLink().barcode() ) {
+      // wasn't the unique ID match already done!?
+      if ( HepMC::uniqueID(&((*siHitIter)->particleLink())) != HepMC::uniqueID(&((*siHitIter2)->particleLink()))) {
         ++siHitIter2;
         continue;
       }
@@ -517,16 +518,16 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int bar
     time /= (float)ajoiningHits.size();
 
     matchingHits.emplace_back(lowestXPos->localStartPosition(),
-          highestXPos->localEndPosition(),
-          energyDep,
-          time,
-          (*siHitIter)->particleLink().barcode(),
-          0, // 0 for pixel 1 for Pixel 
-          (*siHitIter)->getBarrelEndcap(),
-          (*siHitIter)->getLayerDisk(),
-          (*siHitIter)->getEtaModule(),
-          (*siHitIter)->getPhiModule(),
-          (*siHitIter)->getSide() );
+                              highestXPos->localEndPosition(),
+                              energyDep,
+                              time,
+                              HepMC::uniqueID(&((*siHitIter)->particleLink())),
+                              0, // 0 for pixel 1 for Pixel
+                              (*siHitIter)->getBarrelEndcap(),
+                              (*siHitIter)->getLayerDisk(),
+                              (*siHitIter)->getEtaModule(),
+                              (*siHitIter)->getPhiModule(),
+                              (*siHitIter)->getSide() );
     ATH_MSG_DEBUG("Finished Merging " << ajoiningHits.size() << " SiHits together." );
   } // loop over all matching SiHits
 
@@ -534,7 +535,7 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int bar
 }
 
 bool Trk::ReFitTrackWithTruth::IsClusterFromTruth( const InDet::PixelCluster* pixClus,
-    const int barcodeToMatch,
+    const int uniqueIdToMatch,
     const InDetSimDataCollection &sdoCollection) {
 
   // Should be true for all pseudotracks
@@ -549,10 +550,10 @@ bool Trk::ReFitTrackWithTruth::IsClusterFromTruth( const InDet::PixelCluster* pi
     auto pos = sdoCollection.find(hitIdentifier);
     if( pos == sdoCollection.end() ) { continue; }
 
-    // get the barcode from each deposit
+    // get the unique ID from each deposit
     for( const auto& deposit : pos->second.getdeposits() ){
       if( !deposit.first ){ continue; } // if truthparticle(?) link doesn't exists? Energy deposit is still known
-      if( (deposit.first).barcode() != barcodeToMatch ) { continue; }
+      if( HepMC::uniqueID(&(deposit.first)) != uniqueIdToMatch ) { continue; }
       match = true;
       break;
     }
