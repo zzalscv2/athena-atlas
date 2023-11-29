@@ -12,6 +12,9 @@
   <class name="LArNoisyROSummary_p4" id="8F9E9A44-699E-4056-96CC-555ADA1179D4"/>
   <class name="std::pair<unsigned int, std::vector<int> >" />
   <class name="std::vector<std::pair<unsigned int, std::vector<int> > >" />
+  <class name="LArTTL1_p1" />
+  <class name="std::vector<LArTTL1_p1>" />
+  <class name="LArTTL1Container_p1" id="b859a463-2ea4-4902-b46a-89e5fbc20132" />
 
 
 </lcgdict>
