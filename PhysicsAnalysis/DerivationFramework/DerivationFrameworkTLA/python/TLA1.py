@@ -47,9 +47,8 @@ def TLA1KernelCfg(ConfigFlags, name='TLA1Kernel', **kwargs):
     DFCommonTrackSelection = acc.getPrimaryAndMerge(InDetTrackSelectionToolWrapperCfg(
         ConfigFlags,
         name           = "DFCommonTrackSelectionLoose",
-        ContainerName  = "InDetTrackParticles",
+        CutLevel       = "Loose",
         DecorationName = "DFTLA1Loose"))
-    DFCommonTrackSelection.TrackSelectionTool.CutLevel = "Loose" 
 
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("TLA1CommonKernel", AugmentationTools = [DFCommonTrackSelection]))
 

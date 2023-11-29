@@ -304,18 +304,22 @@ def PseudoTrackSelectorCfg(flags, name, **kwargs):
 # Tool for decorating tracks with the outcome of the track selector tool
 
 
-def InDetTrackSelectionToolWrapperCfg(flags, name, **kwargs):
+def InDetTrackSelectionToolWrapperCfg(
+        flags, name, CutLevel="TightPrimary", **kwargs):
     """Configure the InDetTrackSelectionToolWrapper"""
     acc = ComponentAccumulator()
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_TightPrimary_Cfg
-    InDetTrackSelectionTool = acc.popToolsAndMerge(
-        InDetTrackSelectionTool_TightPrimary_Cfg(flags))
-    acc.addPublicTool(InDetTrackSelectionTool, primary=False)
-    InDetTrackSelectionToolWrapper = (
-        CompFactory.DerivationFramework.InDetTrackSelectionToolWrapper)
-    kwargs["TrackSelectionTool"] = InDetTrackSelectionTool
-    acc.addPublicTool(InDetTrackSelectionToolWrapper(
-        name, **kwargs), primary=True)
+
+    if "TrackSelectionTool" not in kwargs:
+        from InDetConfig.InDetTrackSelectionToolConfig import (
+            InDetTrackSelectionToolCfg)
+        kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
+            InDetTrackSelectionToolCfg(
+                flags, name="InDetTrackSelectionTool_"+CutLevel,
+                CutLevel=CutLevel)))
+
+    acc.addPublicTool(
+        CompFactory.DerivationFramework.InDetTrackSelectionToolWrapper(
+            name, **kwargs), primary=True)
     return acc
 
 # Tool for thinning TrackParticle containers via string selection

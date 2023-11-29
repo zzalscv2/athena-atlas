@@ -4,7 +4,15 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 
-def InDetTrackSelectionTool_TrackTools_Cfg(flags, name="InDetTrackSelectionTool", **kwargs):
+def InDetTrackSelectionToolCfg(flags, name="InDetTrackSelectionTool", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("maxAbsEta",
+                      2.5 if flags.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
+    acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name, **kwargs))
+    return acc
+
+def InDetTrackSelectionTool_TrackTools_Cfg(
+        flags, name="InDetTrackSelectionTool", **kwargs):
     acc = ComponentAccumulator()
 
     if "Extrapolator" not in kwargs:
@@ -17,56 +25,52 @@ def InDetTrackSelectionTool_TrackTools_Cfg(flags, name="InDetTrackSelectionTool"
 
     kwargs.setdefault("UseTrkTrackTools", True)
 
-    acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name, **kwargs))
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        InDetTrackSelectionToolCfg(flags, name, **kwargs)))
     return acc
 
 #############################################
 #####  Configs based on CutLevel Loose  #####
 #############################################
 
-def InDetTrackSelectionTool_Loose_Cfg(flags, name="InDetTrackSelectionTool_Loose", **kwargs):
-    acc = ComponentAccumulator()
+def InDetTrackSelectionTool_Loose_Cfg(
+        flags, name="InDetTrackSelectionTool_Loose", **kwargs):
     kwargs.setdefault("CutLevel", "Loose")
-    kwargs.setdefault("maxAbsEta", 2.5 if flags.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
-    acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name, **kwargs))
-    return acc
+    return InDetTrackSelectionToolCfg(flags, name, **kwargs)
 
 def isoTrackSelectionToolCfg(flags, name="isoTrackSelectionTool", **kwargs):
-    kwargs.setdefault('minPt', 1000)
+    kwargs.setdefault("minPt", 1000)
     return InDetTrackSelectionTool_Loose_Cfg(flags, name, **kwargs)
 
 ####################################################
 #####  Configs based on CutLevel LoosePrimary  #####
 ####################################################
 
-def InDetTrackSelectionTool_LoosePrimary_Cfg(flags, name="InDetTrackSelectionTool_LoosePrimary", **kwargs):
-    acc = ComponentAccumulator()
+def InDetTrackSelectionTool_LoosePrimary_Cfg(
+        flags, name="InDetTrackSelectionTool_LoosePrimary", **kwargs):
     kwargs.setdefault("CutLevel", "LoosePrimary")
-    kwargs.setdefault("maxAbsEta", 2.5 if flags.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
-    acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name, **kwargs))
-    return acc
+    return InDetTrackSelectionToolCfg(flags, name, **kwargs)
 
 ####################################################
 #####  Configs based on CutLevel TightPrimary  #####
 ####################################################
 
-def InDetTrackSelectionTool_TightPrimary_Cfg(flags, name="InDetTrackSelectionTool_TightPrimary", **kwargs):
-    acc = ComponentAccumulator()
+def InDetTrackSelectionTool_TightPrimary_Cfg(
+        flags, name="InDetTrackSelectionTool_TightPrimary", **kwargs):
     kwargs.setdefault("CutLevel", "TightPrimary")
-    kwargs.setdefault("maxAbsEta", 2.5 if flags.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
-    acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name, **kwargs))
-    return acc
+    return InDetTrackSelectionToolCfg(flags, name, **kwargs)
 
-def InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg(flags, name="InDetTrackSelectionTool_TightPrimary", **kwargs):
+def InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg(
+        flags, name="InDetTrackSelectionTool_TightPrimary", **kwargs):
     kwargs.setdefault("CutLevel", "TightPrimary")
-    kwargs.setdefault("maxAbsEta", 2.5 if flags.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
     return InDetTrackSelectionTool_TrackTools_Cfg(flags, name, **kwargs)
 
 def PFTrackSelectionToolCfg(flags, name="PFTrackSelectionTool", **kwargs):
-    kwargs.setdefault('minPt', 500.0)
+    kwargs.setdefault("minPt", 500.0)
     return InDetTrackSelectionTool_TightPrimary_Cfg(flags, name, **kwargs)
 
-def IDAlignMonTrackSelectionToolCfg(flags, name="IDAlignMonTrackSelectionTool", **kwargs):
+def IDAlignMonTrackSelectionToolCfg(
+        flags, name="IDAlignMonTrackSelectionTool", **kwargs):
     kwargs.setdefault("TrackSummaryTool", None)
     kwargs.setdefault("maxNPixelHoles"             , 1)
     kwargs.setdefault("minNBothInnermostLayersHits", 0)
@@ -80,7 +84,8 @@ def IDAlignMonTrackSelectionToolCfg(flags, name="IDAlignMonTrackSelectionTool", 
 #####  Configs not based on any CutLevel  #####
 ###############################################
 
-def VtxInDetTrackSelectionCfg(flags, name="VertexInDetTrackSelectionTool", **kwargs):
+def VtxInDetTrackSelectionCfg(
+        flags, name="VertexInDetTrackSelectionTool", **kwargs):
     for key in (
         "maxAbsEta",
         "maxD0",
