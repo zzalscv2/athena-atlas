@@ -40,9 +40,8 @@ def InDetCommonCfg(flags, **kwargs):
             InDetTrackSelectionToolWrapperCfg(
                 flags,
                 name           = "DFCommonTrackSelection",
-                ContainerName  = "InDetTrackParticles",
+                CutLevel  = "TightPrimary",
                 DecorationName = "DFCommonTightPrimary"))
-        DFCommonTrackSelection.TrackSelectionTool.CutLevel = "TightPrimary"
 
         if kwargs['AddPseudoTracks']:
             from DerivationFrameworkInDet.InDetToolsConfig import (

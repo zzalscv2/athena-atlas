@@ -156,9 +156,8 @@ def JETM1KernelCfg(ConfigFlags, name='JETM1Kernel', **kwargs):
     DFCommonTrackSelection = acc.getPrimaryAndMerge(InDetTrackSelectionToolWrapperCfg(
         ConfigFlags,
         name           = "DFJETM1CommonTrackSelectionLoose",
-        ContainerName  = "InDetTrackParticles",
+        CutLevel       = "Loose",
         DecorationName = "DFJETM1Loose"))
-    DFCommonTrackSelection.TrackSelectionTool.CutLevel = "Loose" 
 
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("JETM1CommonKernel", AugmentationTools = [DFCommonTrackSelection]))
 

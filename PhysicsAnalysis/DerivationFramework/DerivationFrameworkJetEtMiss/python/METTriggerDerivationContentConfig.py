@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -107,9 +107,8 @@ def AugmentationToolsCfg(ConfigFlags, **kwargs):
       DFCommonTrackSelection = acc.getPrimaryAndMerge(InDetTrackSelectionToolWrapperCfg(
          ConfigFlags,
          name           = "DFCommonTrackSelection"+kwargs['trackSel'],
-         ContainerName  = "InDetTrackParticles",
+         CutLevel       = kwargs['trackSel'],
          DecorationName = "DFMETTrig"+kwargs['trackSel']))
-      DFCommonTrackSelection.TrackSelectionTool.CutLevel = kwargs['trackSel']
 
       augTools.append(DFCommonTrackSelection)
 
