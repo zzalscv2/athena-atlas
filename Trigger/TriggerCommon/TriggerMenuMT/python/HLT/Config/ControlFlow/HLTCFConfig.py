@@ -589,7 +589,7 @@ def createControlFlow(flags, HLTNode, CFseqList):
             
                     stepCFReco += seqAndWithFilter
 
-                
+
         # add the monitor summary
         stepDecisions = []
         for CFseq in CFseqList[nstep]:

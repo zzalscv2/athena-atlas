@@ -117,6 +117,8 @@ def makeHLTTree(flags):
     Generate appropriate Control Flow Graph wiht all HLT algorithms
     """
     from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig import decisionTreeFromChains, sequenceScanner
+    from TriggerJobOpts.TriggerConfig import collectViewMakers
+    from AthenaCommon.CFElements import compName   
 
     log.info("newJO version of makeHLTTree")
     acc = ComponentAccumulator()
@@ -134,7 +136,18 @@ def makeHLTTree(flags):
     flatDecisions=[]
     for step in finalDecisions:
         flatDecisions.extend (step)
-    
+ 
+    viewMakers = collectViewMakers(steps)
+    viewMakerMap = {compName(vm):vm for vm in viewMakers}
+    for vmname, vm in viewMakerMap.items():
+        log.debug(f"[makeHLTTree] {vmname} InputMakerOutputDecisions: {vm.InputMakerOutputDecisions}")
+        if vmname.endswith("_probe"):
+            try:
+                log.debug(f"Setting InputCachedViews on {vmname} to read decisions from tag leg {vmname[:-6]}: {vm.InputMakerOutputDecisions}")
+                vm.InputCachedViews = viewMakerMap[vmname[:-6]].InputMakerOutputDecisions
+            except KeyError: # We may be using a probe leg that has different reco from the tag
+                log.debug(f"Tag leg does not match probe: '{vmname[:-6]}', will not use cached views")
+
     
     # generate JSON representation of the config
     from TriggerMenuMT.HLT.Config.JSON.HLTMenuJSON import generateJSON_newJO
