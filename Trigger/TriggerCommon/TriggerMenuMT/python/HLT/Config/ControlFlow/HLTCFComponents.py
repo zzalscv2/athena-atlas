@@ -5,6 +5,7 @@ from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import isComboHypoAlg
 from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu
+from TriggerMenuMT.HLT.Config.MenuComponents import EmptyMenuSequence
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appendCAtoAthena
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.CFElements import compName, findAlgorithmByPredicate, parOR, seqAND
@@ -213,10 +214,17 @@ class CFSequenceCA(CFSequence):
             log.debug("created parOR %s inside seqAND %s  ", self.stepReco.getName(), seqAndWithFilter.getName())
             self.mergeStepSequences(chainStep)
             
+            
         CFSequence.__init__(self, chainStep, filterAlg)
+        if not self.empty: 
+        # merge the Hypoalg (before the Combo)
+            for menuseq in chainStep.sequences:
+                if not isinstance(menuseq, EmptyMenuSequence):
+                    self.ca.merge(menuseq.hypoAcc, sequenceName=seqAndWithFilter.getName())   
+
         if self.combo is not None:    
             self.ca.merge(self.step.combo.acc, sequenceName=seqAndWithFilter.getName())          
-            
+
     def mergeStepSequences(self, chainStep):
         for menuseq in chainStep.sequences:
             try:
