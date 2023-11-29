@@ -56,7 +56,7 @@ TClass* getClassIfDictionaryExists (const std::string& cname)
  *           is true, then this is the type of the stored object.
  * @param name Auxiliary variable name.
  * @param elementTypeName Name of the type for one aux data element.
- *                        Should be the samr as @c branchTypeName
+ *                        Should be the same as @c branchTypeName
  *                        if @c standalone is true.
  * @param branchTypeName Name of the type for this branch.
  * @param standalone True if this is a standalone object.
@@ -95,7 +95,8 @@ SG::auxid_t getDynamicAuxID (const std::type_info& ti,
         void* fac_vp = fac_class->New();
         if (fac_vp) {
           SG::IAuxTypeVectorFactory* fac = reinterpret_cast<SG::IAuxTypeVectorFactory*> (reinterpret_cast<unsigned long>(fac_vp) + offs);
-          r.addFactory (ti, *fac->tiAlloc(), fac);
+          const std::type_info* tiAlloc = fac->tiAlloc();
+          r.addFactory (ti, *tiAlloc, std::unique_ptr<SG::IAuxTypeVectorFactory> (fac));
           auxid = r.getAuxID(*fac->tiAlloc(), ti, name);
         }
       }
@@ -113,9 +114,10 @@ SG::auxid_t getDynamicAuxID (const std::type_info& ti,
     TClass* vec_class = TClass::GetClass (vec_name.c_str());
 
     if (vec_class) {
-      SG::IAuxTypeVectorFactory* fac = new SG::RootAuxVectorFactory (vec_class);
-      r.addFactory (ti, fac->tiAllocName(), fac);
-      auxid = r.getAuxID(fac->tiAllocName(), ti, name);
+      auto facp = std::make_unique<SG::RootAuxVectorFactory> (vec_class);
+      std::string tiAllocName = facp->tiAllocName();
+      (void)r.addFactory (ti, tiAllocName, std::move (facp));
+      auxid = r.getAuxID(tiAllocName, ti, name);
     }
   }
 

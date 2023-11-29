@@ -75,9 +75,9 @@ AuxTypeRegistry::Flags AuxTypeRegistry::getFlags (SG::auxid_t auxid) const
  */
 template <class T, class ALLOC>
 inline
-IAuxTypeVectorFactory* AuxTypeRegistry::makeFactory() const
+std::unique_ptr<IAuxTypeVectorFactory> AuxTypeRegistry::makeFactory() const
 {
-  return new SG::AuxTypeVectorFactory<T, ALLOC>;
+  return std::make_unique<SG::AuxTypeVectorFactory<T, ALLOC> >();
 }
 
 
@@ -88,9 +88,9 @@ IAuxTypeVectorFactory* AuxTypeRegistry::makeFactory() const
  * for which we do not know the type at compile-time.
  */
 inline
-IAuxTypeVectorFactory* AuxTypeRegistry::makeFactoryNull() const
+std::unique_ptr<IAuxTypeVectorFactory> AuxTypeRegistry::makeFactoryNull() const
 {
-  return 0;
+  return nullptr;
 }
 
 
