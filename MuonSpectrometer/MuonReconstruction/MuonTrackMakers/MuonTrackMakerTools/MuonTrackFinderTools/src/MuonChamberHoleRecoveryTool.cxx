@@ -222,7 +222,7 @@ namespace Muon {
         if (chHoles.empty()) return;
 
         const std::vector<const MdtPrepData*> prdCandidates{loadPrepDataHits<MdtPrepData>(ctx, m_key_mdt, chHoles)};
-        
+        bool addedState{false};
         for (const MdtPrepData* mdtPrd : prdCandidates) {
             const Trk::StraightLineSurface& surf{mdtPrd->detectorElement()->surface(mdtPrd->identify())};
             std::unique_ptr<Trk::TrackParameters> exPars = m_extrapolator->extrapolateDirectly(ctx, pars, surf, Trk::anyDirection, false, Trk::muon);
@@ -278,8 +278,33 @@ namespace Muon {
                                                                                         (hitFlag != 0 || !m_addMeasurements) ? 
                                                                                                 Trk::TrackStateOnSurface::Outlier : 
                                                                                                 Trk::TrackStateOnSurface::Measurement);
-            newStates.emplace_back(std::move(tsos));
+
+            if (!addedState) {
+                newStates.emplace_back(std::move(tsos));
+                addedState = true;
+            } else {
+                const MdtDriftCircleOnTrack* prevDC = static_cast<const MdtDriftCircleOnTrack*>(newStates.back()->measurementOnTrack());
+                if (prevDC->identify() != mdtPrd->identify()) {
+                    newStates.emplace_back(std::move(tsos));
+                } else {
+                    ATH_MSG_DEBUG("Two hits recorded for the same tube "<<std::endl<<
+                                 " *** current: "<<m_printer->print(*tsos->measurementOnTrack())<<std::endl<<
+                                 " *** previous: "<<m_printer->print(*prevDC));
+                    std::unique_ptr<const Trk::ResidualPull> prevPullObj{m_pullCalculator->residualPull(prevDC, 
+                                                                                                        tsos->trackParameters(), 
+                                                                                                        Trk::ResidualPull::Unbiased)};
+                    const double prevPull = prevPullObj->pull().front();
+                    /// Overwrite the previous drift circle if the pull of this one is better or it's an outlier
+                    if (std::abs(pull) < std::abs(prevPull) || 
+                        (tsos->type(Trk::TrackStateOnSurface::Measurement) && 
+                        newStates.back()->type(Trk::TrackStateOnSurface::Outlier))) {
+                        newStates.back() = std::move(tsos);
+                    }
+            
+                }
+            }
             chHoles.erase(mdtPrd->identify());
+            knownLayers.insert(mdtPrd->identify());
         }
 
         for (const Identifier& hole : chHoles) {
@@ -415,6 +440,13 @@ namespace Muon {
                     collectedHits.push_back(prd);
                 }
             }
+        }
+        /// Sort the Mdt prepdatas per Identifier as there's the possibily 2 DC can exist for the 
+        /// same channel
+        if constexpr(std::is_same<Prd, MdtPrepData>::value) {
+            std::sort(collectedHits.begin(), collectedHits.end(), [](const Prd* a, const Prd* b){
+                return a->identify() < b->identify();
+            });
         }
         return collectedHits;
     }
