@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -65,7 +65,7 @@ namespace CP
             // Loop over each electron or photon. If already passing WP selection, decorate passWPorFSR as true
             for ( auto eg : *egammaCont ) {
                 // If passes std WP, accept
-                if (((*m_wpDec)(*eg) == selectionAccept())) {
+                if ((*m_wpDec)(*eg) == selectionAccept()) {
                     ATH_MSG_DEBUG("Eg passed WP - pt, eta: " << eg->type() << ", " << eg->pt()/1000. << ", " << eg->eta() << ", " << (*m_wpDec)(*eg)  );
                     continue; // ok, skip to next el/ph
                 }
