@@ -30,17 +30,13 @@ def PixelVALIDKernelCfg(flags, name='PixelVALIDKernel', **kwargs):
     augmentationTools = []
     tsos_augmentationTools = []
 
-    # TrackToVertexIPEstimator
-    from TrkConfig.TrkVertexFitterUtilsConfig import (TrackToVertexIPEstimatorCfg)
-    PixelVALIDIPETool = acc.popToolsAndMerge(TrackToVertexIPEstimatorCfg(flags))
-
     # Add unbiased track parameters to track particles
-    from DerivationFrameworkInDet.InDetToolsConfig import (TrackToVertexWrapperCfg)
-    PixelVALIDTrackToVertexWrapper = acc.getPrimaryAndMerge(TrackToVertexWrapperCfg(flags,
-                                                                                    name="PixelVALIDTrackToVertexWrapper",
-                                                                                    TrackToVertexIPEstimator=PixelVALIDIPETool,
-                                                                                    DecorationPrefix="PixelVALID",
-                                                                                    ContainerName="InDetTrackParticles"))
+    from DerivationFrameworkInDet.InDetToolsConfig import (
+        TrackToVertexWrapperCfg)
+    PixelVALIDTrackToVertexWrapper = acc.getPrimaryAndMerge(
+        TrackToVertexWrapperCfg(flags,
+                                name="PixelVALIDTrackToVertexWrapper",
+                                DecorationPrefix="PixelVALID"))
     augmentationTools.append(PixelVALIDTrackToVertexWrapper)
 
     from DerivationFrameworkInDet.InDetToolsConfig import (UsedInVertexFitTrackDecoratorCfg)

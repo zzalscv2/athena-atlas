@@ -8,6 +8,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
+from AthenaCommon.Constants import INFO
 
 # Track collection merger
 
@@ -38,9 +39,17 @@ def InDetLRTMergeCfg(flags, name="InDetLRTMerge", **kwargs):
 # Used in vertex fit track decorator
 
 
-def UsedInVertexFitTrackDecoratorCfg(flags, name, **kwargs):
+def UsedInVertexFitTrackDecoratorCfg(
+        flags, name="UsedInVertexFitTrackDecorator", **kwargs):
     """Configure the UsedInVertexFitTrackDecorator"""
     acc = ComponentAccumulator()
+
+    if "UsedInFitDecoratorTool" not in kwargs:
+        from InDetConfig.InDetUsedInFitTrackDecoratorToolConfig import (
+            InDetUsedInFitTrackDecoratorToolCfg)
+        kwargs.setdefault("UsedInFitDecoratorTool", acc.popToolsAndMerge(
+            InDetUsedInFitTrackDecoratorToolCfg(flags)))
+
     acc.addPublicTool(
         CompFactory.DerivationFramework.UsedInVertexFitTrackDecorator(
             name, **kwargs), primary=True)
@@ -127,6 +136,18 @@ def TSOS_CommonKernelCfg(flags, name="TSOS_CommonKernel",
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
         name, AugmentationTools=listOfAugmTools))
     return acc
+
+def DFTrackStateOnSurfaceDecoratorCfg(
+        flags, name="DFTrackStateOnSurfaceDecorator", **kwargs):
+    kwargs.setdefault("StorePixel", flags.Detector.EnablePixel)
+    kwargs.setdefault("StoreSCT", flags.Detector.EnableSCT)
+    kwargs.setdefault("StoreTRT", flags.Detector.EnableTRT)
+    # never decorate EventInfo with TRTPhase, doubt this is useful for IDTIDE
+    kwargs.setdefault("AddExtraEventInfo", False)
+    kwargs.setdefault("DecorationPrefix", "")
+    kwargs.setdefault("PRDtoTrackMap", "")
+    kwargs.setdefault("OutputLevel", INFO)
+    return TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
 
 def ObserverTrackStateOnSurfaceDecoratorCfg(
         flags, name="ObserverTrackStateOnSurfaceDecorator", **kwargs):
@@ -256,6 +277,15 @@ def ITkTSOS_CommonKernelCfg(flags, name="ITkTSOS_CommonKernel"):
         name, AugmentationTools=[ITkTrackStateOnSurfaceDecorator]))
     return acc
 
+def DFITkTSOSKernelCfg(
+        flags, name="DFITkTrackStateOnSurfaceDecorator", **kwargs):
+    kwargs.setdefault("StorePixel", flags.Detector.EnableITkPixel)
+    kwargs.setdefault("StoreSCT", flags.Detector.EnableITkStrip)
+    kwargs.setdefault("DecorationPrefix", "")
+    kwargs.setdefault("PRDtoTrackMap", "")
+    kwargs.setdefault("OutputLevel", INFO)
+    return ITkTrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
+
 def ITkSiSPTrackStateOnSurfaceDecoratorCfg(
         flags, name="SiSPTrackStateOnSurfaceDecorator", **kwargs):
     kwargs.setdefault("ContainerName", "SiSPSeededTracksTrackParticles")
@@ -327,10 +357,70 @@ def InDetTrackSelectionToolWrapperCfg(
 
 def TrackParticleThinningCfg(flags, name, **kwargs):
     """Configure the TrackParticleThining tool"""
-    acc = ComponentAccumulator()
+    if flags.Detector.GeometryITk:
+        return ITkTrackParticleThinningCfg(flags, name, **kwargs)
+
+    # To produce SCT_DetectorElementCollection
+    from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
+    acc = SCT_ReadoutGeometryCfg(flags)
+
     acc.addPublicTool(CompFactory.DerivationFramework.TrackParticleThinning(
         name, **kwargs), primary=True)
     return acc
+
+def IDTIDEThinningToolCfg(flags, name="IDTIDEThinningTool", **kwargs):
+    if not flags.Detector.EnablePixel:
+        kwargs.setdefault("InDetTrackStatesPixKey", "")
+        kwargs.setdefault("InDetTrackMeasurementsPixKey", "")
+    if not flags.Detector.EnableSCT:
+        kwargs.setdefault("InDetTrackStatesSctKey", "")
+        kwargs.setdefault("InDetTrackMeasurementsSctKey", "")
+    if not flags.Detector.EnableTRT:
+        kwargs.setdefault("InDetTrackStatesTrtKey", "")
+        kwargs.setdefault("InDetTrackMeasurementsTrtKey", "")
+
+    kwargs.setdefault("SelectionString", "abs(IDTIDEInDetTrackZ0AtPV) < 5.0")
+    # If true, Complains about missing PixelMSOSs
+    kwargs.setdefault("ThinHitsOnTrack", False)
+
+    from DerivationFrameworkInDet.InDetToolsConfig import (
+        TrackParticleThinningCfg)
+    return TrackParticleThinningCfg(flags, name, **kwargs)
+
+def ITkTrackParticleThinningCfg(flags, name, **kwargs):
+    """Configure the TrackParticleThining tool"""
+    # To produce ITkStripDetectorElementCollection
+    from StripGeoModelXml.ITkStripGeoModelConfig import (
+        ITkStripReadoutGeometryCfg)
+    acc = ITkStripReadoutGeometryCfg(flags)
+
+    kwargs.setdefault("InDetTrackStatesPixKey", "ITkPixelMSOSs")
+    kwargs.setdefault("InDetTrackMeasurementsPixKey", "ITkPixelClusters")
+    kwargs.setdefault("InDetTrackStatesSctKey", "ITkStripMSOSs")
+    kwargs.setdefault("InDetTrackMeasurementsSctKey", "ITkStripClusters")
+    kwargs.setdefault("InDetTrackStatesTrtKey", "")
+    kwargs.setdefault("InDetTrackMeasurementsTrtKey", "")
+    kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
+
+    acc.addPublicTool(CompFactory.DerivationFramework.TrackParticleThinning(
+        name, **kwargs), primary=True)
+    return acc
+
+def ITkTIDEThinningToolCfg(flags, name="ITkTIDEThinningTool", **kwargs):
+    if not flags.Detector.EnableITkPixel:
+        kwargs.setdefault("InDetTrackStatesPixKey", "")
+        kwargs.setdefault("InDetTrackMeasurementsPixKey", "")
+    if not flags.Detector.EnableITkStrip:
+        kwargs.setdefault("InDetTrackStatesSctKey", "")
+        kwargs.setdefault("InDetTrackMeasurementsSctKey", "")
+
+    kwargs.setdefault("SelectionString", "abs(IDTIDEInDetTrackZ0AtPV) < 5.0")
+    # If true, Complains about missing PixelMSOSs
+    kwargs.setdefault("ThinHitsOnTrack", False)
+
+    from DerivationFrameworkInDet.InDetToolsConfig import (
+        ITkTrackParticleThinningCfg)
+    return ITkTrackParticleThinningCfg(flags, name, **kwargs)
 
 # Tool for thinning TrackParticles that aren't associated with muons
 
@@ -400,6 +490,41 @@ def EgammaTrackParticleThinningCfg(flags, name, **kwargs):
 def TrackToVertexWrapperCfg(flags, name, **kwargs):
     """Configure the TrackToVertexWrapper tool"""
     acc = ComponentAccumulator()
+
+    if "TrackToVertexIPEstimator" not in kwargs:
+        from TrkConfig.TrkVertexFitterUtilsConfig import (
+            TrackToVertexIPEstimatorCfg)
+        kwargs.setdefault("TrackToVertexIPEstimator", acc.popToolsAndMerge(
+            TrackToVertexIPEstimatorCfg(flags)))
+
+    kwargs.setdefault("ContainerName", "InDetTrackParticles")
+
     acc.addPublicTool(CompFactory.DerivationFramework.TrackToVertexWrapper(
         name, **kwargs), primary=True)
     return acc
+
+
+def IDTIDETruthThinningToolCfg(flags, name="IDTIDETruthThinningTool", **kwargs):
+    kwargs.setdefault("WritePartons", True)
+    kwargs.setdefault("WriteHadrons", True)
+    kwargs.setdefault("WriteBHadrons", True)
+    kwargs.setdefault("WriteGeant", True)
+    kwargs.setdefault("GeantPhotonPtThresh", 20000)
+    kwargs.setdefault("WriteTauHad", True)
+    kwargs.setdefault("PartonPtThresh", -1.0)
+    kwargs.setdefault("WriteBSM", True)
+    kwargs.setdefault("WriteBosons", True)
+    kwargs.setdefault("WriteBosonProducts", True)
+    kwargs.setdefault("WriteBSMProducts", True)
+    kwargs.setdefault("WriteTopAndDecays", True)
+    kwargs.setdefault("WriteEverything", True)
+    kwargs.setdefault("WriteAllLeptons", True)
+    kwargs.setdefault("WriteLeptonsNotFromHadrons", True)
+    kwargs.setdefault("WriteStatus3", True)
+    kwargs.setdefault("WriteFirstN", -1)
+    kwargs.setdefault("PreserveAncestors", True)
+    kwargs.setdefault("PreserveGeneratorDescendants", True)
+
+    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import (
+        MenuTruthThinningCfg)
+    return MenuTruthThinningCfg(flags, name, **kwargs)

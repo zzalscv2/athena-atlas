@@ -124,3 +124,36 @@ def InDetTRT_PrepDataToxAODCfg(flags, name='InDetTRTPrepDataToxAOD', **kwargs):
 def InDetTRT_PrepDataToxAOD_ExtraTruthCfg(flags, name='InDetTRTPrepDataToxAOD_ExtraTruth', **kwargs):
     kwargs.setdefault("WriteSDOs", True)
     return InDetTRT_PrepDataToxAODCfg(flags, name, **kwargs)
+
+def InDetPrepDataToxAODCfg(flags):
+    acc = ComponentAccumulator()
+
+    if flags.Detector.EnablePixel:
+        from InDetConfig.TrackRecoConfig import (
+            ClusterSplitProbabilityContainerName)
+        acc.merge(InDetPixelPrepDataToxAODCfg(
+            flags, ClusterSplitProbabilityName=(
+                ClusterSplitProbabilityContainerName(flags))))
+
+    if flags.Detector.EnableSCT:
+        acc.merge(InDetSCT_PrepDataToxAODCfg(flags))
+
+    if flags.Detector.EnableTRT:
+        acc.merge(InDetTRT_PrepDataToxAODCfg(flags))
+
+    return acc
+
+def ITkPrepDataToxAODCfg(flags):
+    acc = ComponentAccumulator()
+
+    if flags.Detector.EnableITkPixel:
+        from InDetConfig.ITkTrackRecoConfig import (
+            ITkClusterSplitProbabilityContainerName)
+        acc.merge(ITkPixelPrepDataToxAODCfg(
+            flags, ClusterSplitProbabilityName=(
+                ITkClusterSplitProbabilityContainerName(flags))))
+
+    if flags.Detector.EnableITkStrip:
+        acc.merge(ITkStripPrepDataToxAODCfg(flags))
+
+    return acc
