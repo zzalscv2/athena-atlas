@@ -2,14 +2,15 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-# menu components
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
-from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Tracking_GSFRefitted'
 
+@AccumulatorCache
 def precisionTracks_GSFRefittedSequenceCfg(flags, name, ion=False, variant='', is_probe_leg = False):
     """ sixth step:  GSF refitting of precision track....."""
 

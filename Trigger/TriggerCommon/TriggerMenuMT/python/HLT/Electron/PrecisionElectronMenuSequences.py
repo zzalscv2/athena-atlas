@@ -6,13 +6,13 @@ from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 
 # menu components   
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
-from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Electron'
 
-
+@AccumulatorCache
 def precisionElectronSequenceCfg(flags, ion=False, variant='',is_probe_leg = False):
     """ seventh step:  precision electron....."""
     
