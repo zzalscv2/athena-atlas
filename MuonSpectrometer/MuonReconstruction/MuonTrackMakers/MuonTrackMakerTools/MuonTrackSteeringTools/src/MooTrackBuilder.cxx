@@ -91,6 +91,9 @@ namespace Muon {
 
     void MooTrackBuilder::refine(const EventContext& ctx, MuPatTrack& track) const {
 
+        ATH_MSG_VERBOSE("refine: before recovery " << std::endl
+                                                  << m_printer->print(track.track()) << std::endl
+                                                  << m_printer->print(track.track().measurementsOnTrack()->stdcont()));
         
         std::unique_ptr<Trk::Track> finalTrack(m_muonChamberHoleRecoverTool->recover(track.track(), ctx));
         if (!finalTrack) { ATH_MSG_WARNING(" final track lost, this should not happen "); }
