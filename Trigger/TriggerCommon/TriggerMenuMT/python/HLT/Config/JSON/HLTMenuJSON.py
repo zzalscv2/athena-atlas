@@ -1,9 +1,8 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import re
 import json
-from collections import OrderedDict as odict
-from functools import lru_cache
+from functools import cache
 from TrigConfigSvc.TrigConfigSvcCfg import getHLTMenuFileName
 from AthenaCommon.CFElements import getSequenceChildren, isSequence
 from AthenaCommon.Logging import logging
@@ -43,18 +42,13 @@ def __getStepsDataFromAlgSequence(HLTAllSteps):
         __log.warn( "No HLTAllSteps sequencer, will not export per-Step data for chains.")
     return stepsData
 
-# Accessing Configurable properties is sadly rather slow,
-# so we cache the result here:
-@lru_cache(maxsize=2048)
+@cache  # called frequently
 def __getFilterChains(filterAlg):
-    return filterAlg.Chains if hasattr(filterAlg, "Chains") else []
-
-def __isChainInFilter(chainName, filterAlg):
-    for fChain in __getFilterChains(filterAlg):
-        # on purpose not using 'startswith' as this is called many times:
-        if (fChain[0:3] == 'leg' and chainName == fChain[7:]) or chainName == fChain:
-            return True
-    return False
+    if hasattr(filterAlg, "Chains"):
+        # Format: leg000_CHAIN or CHAIN
+        return set(ch[7:] if ch.startswith('leg') else ch for ch in filterAlg.Chains)
+    else:
+        return set()
 
 def __getChainSequencers(stepsData, chainName):
     """ Finds the Filter which is responsible for this Chain in each Step.
@@ -68,7 +62,7 @@ def __getChainSequencers(stepsData, chainName):
             if not seqq: # empty steps
                 continue     
             sequencerFilter = seqq[0] # Always the first child in the step
-            if __isChainInFilter(chainName, sequencerFilter):
+            if chainName in __getFilterChains(sequencerFilter):
                 if mySequencer is not None:
                     __log.error( "Multiple Filters found (corresponding Sequencers %s, %s) for %s in Step %i!",
                         mySequencer.getName(), sequencer.getName(), chainName, counter)
@@ -84,7 +78,7 @@ def __getSequencerAlgs(stepsData):
     """ For each Sequencer in each Step, return a flat list of the full name of all Algorithms under the Sequencer
     """
     from AthenaCommon.CFElements import findAllAlgorithms
-    sequencerAlgs = odict()
+    sequencerAlgs = {}
     for step in stepsData:
         for sequencer in step:
             sequencerAlgs[ sequencer.getName() ] = list(map(lambda x: x.getFullJobOptName(), findAllAlgorithms(sequencer)))
@@ -94,7 +88,11 @@ def __generateJSON( chainDicts, chainConfigs, HLTAllSteps, menuName, fileName ):
     """ Generates JSON given the ChainProps and sequences
     """
     # Menu dictionary that is used to create the JSON content
-    menuDict = odict([ ("filetype", "hltmenu"), ("name", __getMenuBaseName(menuName)), ("chains", odict()), ("streams", odict()), ("sequencers", odict()) ])
+    menuDict = {"filetype": "hltmenu",
+                "name": __getMenuBaseName(menuName),
+                "chains": {},
+                "streams": {},
+                "sequencers": {}}
 
     # List of steps data for sequencers
     stepsData = __getStepsDataFromAlgSequence(HLTAllSteps)
@@ -113,12 +111,12 @@ def __generateJSON( chainDicts, chainConfigs, HLTAllSteps, menuName, fileName ):
             chainStreamTags.append(streamName)
             # If not already listed, add stream details to stream dictionary
             if streamName not in menuDict["streams"]:
-                menuDict["streams"][streamName] = odict([
-                    ("name", streamName),
-                    ("type", streamTag.type()),
-                    ("obeyLB", streamTag.obeysLumiBlock()),
-                    ("forceFullEventBuilding", streamTag.forceFullEventBuilding())
-                ])
+                menuDict["streams"][streamName] = {
+                    "name": streamName,
+                    "type": streamTag.type(),
+                    "obeyLB": streamTag.obeysLumiBlock(),
+                    "forceFullEventBuilding": streamTag.forceFullEventBuilding()
+                }
 
         # Find L1 Threshold information for current chain
         l1Thresholds  = []
@@ -127,16 +125,16 @@ def __generateJSON( chainDicts, chainConfigs, HLTAllSteps, menuName, fileName ):
 
         # Now have all information to write the chain to the menu dictionary
         chainName = chain["chainName"]
-        menuDict["chains"][chainName] = odict([
-            ("counter", chain["chainCounter"]),
-            ("nameHash", chain["chainNameHash"]),
-            ("legMultiplicities", chain["chainMultiplicities"]),
-            ("l1item", chain["L1item"]),
-            ("l1thresholds", l1Thresholds),
-            ("groups", chain["groups"]),
-            ("streams", chainStreamTags),
-            ("sequencers", __getChainSequencers(stepsData, chainName) )
-        ])
+        menuDict["chains"][chainName] = {
+            "counter": chain["chainCounter"],
+            "nameHash": chain["chainNameHash"],
+            "legMultiplicities": chain["chainMultiplicities"],
+            "l1item": chain["L1item"],
+            "l1thresholds": l1Thresholds,
+            "groups": chain["groups"],
+            "streams": chainStreamTags,
+            "sequencers": __getChainSequencers(stepsData, chainName)
+        }
 
     # All algorithms executed by a given Sequencer
     menuDict["sequencers"].update( __getSequencerAlgs(stepsData) )
