@@ -60,9 +60,11 @@ protected:
 
   /// parameters for truth labeling
   SG::ReadHandleKey<xAOD::JetContainer> m_truthJetCollectionName{this, "TruthJetContainer", "", "Do not configure manually!"};
+  SG::ReadHandleKey<xAOD::JetContainer> m_truthGroomedJetCollectionName{this, "TruthGroomedJetContainer", "", "Do not configure manually!"};
   bool m_useDRMatch; /// Use dR to match partons to truth jet
   bool m_useWZMassHigh; /// Use upper mass cut for W/Z labels
   bool m_matchUngroomedParent; /// Use the ungroomed reco jet parent to match to truth jet
+  bool m_getTruthGroomedJetValues; /// When truth jet matching to ungroomed truth, allow saving properties of groomed truth jets
   double m_dRTruthJet; /// dR to match truth jet to reco jet
   double m_dRTruthPart; /// dR to match truth particles to truth jet
   double m_mLowTop; /// Lower mass cut for top label
@@ -94,6 +96,8 @@ protected:
     FloatHandleOp_t split12Handle;
     FloatHandleOp_t truthMassHandle;
     FloatHandleOp_t truthPtHandle;
+    FloatHandleOp_t truthGroomedMassHandle;
+    FloatHandleOp_t truthGroomedPtHandle;
   };
   friend struct DecorHandles;
 
@@ -170,6 +174,8 @@ protected:
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthSplit23_recoKey{this, "TruthSplit23_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthJetMass_recoKey{this, "TruthJetMass_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthJetPt_recoKey{this, "TruthJetPt_RecoKey", "", "Do not configure manually!"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthGroomedJetMass_recoKey{this, "TruthGroomedJetMass_RecoKey", "", "Do not configure manually!"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthGroomedJetPt_recoKey{this, "TruthGroomedJetPt_RecoKey", "", "Do not configure manually!"};
 };
 
 #endif
