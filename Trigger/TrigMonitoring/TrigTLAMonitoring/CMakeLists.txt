@@ -9,4 +9,4 @@ atlas_add_component( TrigTLAMonitoring
                      LINK_LIBRARIES AthenaMonitoringKernelLib AthenaMonitoringLib xAODJet xAODEgamma xAODMuon xAODTrigger )
 
 # Install files from the package:
-atlas_install_python_modules( python/TrigTLAMonitorAlgorithm.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
