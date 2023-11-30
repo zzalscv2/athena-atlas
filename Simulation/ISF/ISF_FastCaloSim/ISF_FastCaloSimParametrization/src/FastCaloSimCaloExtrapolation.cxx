@@ -42,19 +42,6 @@ do {                                 \
 FastCaloSimCaloExtrapolation::FastCaloSimCaloExtrapolation(const std::string& t, const std::string& n, const IInterface* p)
   : base_class(t,n,p)
 {
-
-  m_surfacelist.resize(0);
-  m_surfacelist.push_back(CaloCell_ID_FCS::PreSamplerB);
-  m_surfacelist.push_back(CaloCell_ID_FCS::TileGap3);
-  m_surfacelist.push_back(CaloCell_ID_FCS::PreSamplerE);
-  m_surfacelist.push_back(CaloCell_ID_FCS::EME1);
-  m_surfacelist.push_back(CaloCell_ID_FCS::EME2);
-  m_surfacelist.push_back(CaloCell_ID_FCS::FCAL0);
-  m_surfacelist.push_back(CaloCell_ID_FCS::EME3);
-  m_surfacelist.push_back(CaloCell_ID_FCS::HEC0);
-  m_surfacelist.push_back(CaloCell_ID_FCS::TileGap2);
-
-  declareProperty("Surfacelist",        m_surfacelist);
 }
 
 StatusCode FastCaloSimCaloExtrapolation::initialize()
@@ -95,88 +82,6 @@ StatusCode FastCaloSimCaloExtrapolation::initialize()
 StatusCode FastCaloSimCaloExtrapolation::finalize(){
   ATH_MSG_INFO( "Finalizing FastCaloSimCaloExtrapolation" );
   return StatusCode::SUCCESS;
-}
-
-bool FastCaloSimCaloExtrapolation::getCaloSurface(TFCSExtrapolationState& result, std::vector<Trk::HitInfo>* hitVector) const{
-  ATH_MSG_DEBUG("Start getCaloSurface()");
-
-  //used to identify ID-Calo boundary in tracking tools
-  int IDCaloBoundary = 3000;
-  
-  result.set_CaloSurface_sample(CaloCell_ID_FCS::noSample);
-  result.set_CaloSurface_eta(-999);
-  result.set_CaloSurface_phi(-999);
-  result.set_CaloSurface_r(0);
-  result.set_CaloSurface_z(0);
-  double min_calo_surf_dist=1000;
-
-  for(unsigned int i=0;i<m_surfacelist.size();++i){
-
-    int sample=m_surfacelist[i];
-    std::vector<Trk::HitInfo>::iterator it = hitVector->begin();
-
-    while (it != hitVector->end() && it->detID != (IDCaloBoundary+sample)) ++it;
-
-    if(it==hitVector->end()) continue;
-
-    Amg::Vector3D hitPos = (*it).trackParms->position();
-
-    //double offset = 0.;
-    double etaCalo = hitPos.eta();
-
-    if(std::abs(etaCalo)<900){
-        
-        double phiCalo = hitPos.phi();
-        double distsamp =deta(sample,etaCalo);
-
-        if(distsamp<min_calo_surf_dist && min_calo_surf_dist>=0){
-            
-            //hitVector is ordered in r, so if first surface was hit, keep it
-            result.set_CaloSurface_sample(sample);
-            result.set_CaloSurface_eta(etaCalo);
-            result.set_CaloSurface_phi(phiCalo);
-            double rcalo = rent(sample,etaCalo);
-            double zcalo = zent(sample,etaCalo);
-            result.set_CaloSurface_r(rcalo);
-            result.set_CaloSurface_z(zcalo);
-            min_calo_surf_dist = distsamp;
-            msg(MSG::DEBUG)<<" r="<<rcalo<<" z="<<zcalo;
-
-            if(distsamp<0){
-              msg(MSG::DEBUG)<<endmsg;
-              break;
-            }
-          }
-        msg(MSG::DEBUG)<<endmsg;
-      }
-    else
-      msg(MSG::DEBUG)<<": eta > 900, not using this"<<endmsg;
-    }
-
-  if(result.CaloSurface_sample() == CaloCell_ID_FCS::noSample){
-      // first intersection with sensitive calo layer
-      std::vector<Trk::HitInfo>::iterator it = hitVector->begin();
-
-      while(it < hitVector->end() && (*it).detID != 3) ++it;   // to be updated
-
-      if (it == hitVector->end()) return false;  // no calo intersection, abort
-
-      Amg::Vector3D surface_hitPos = (*it).trackParms->position();
-
-      result.set_CaloSurface_eta(surface_hitPos.eta());
-      result.set_CaloSurface_phi(surface_hitPos.phi());
-      result.set_CaloSurface_r(surface_hitPos.perp());
-      result.set_CaloSurface_z(surface_hitPos[Amg::z]);
-
-      double pT=(*it).trackParms->momentum().perp();
-
-      ATH_MSG_COND("only entrance to calo entrance layer found, no surface : eta="<<result.CaloSurface_eta()<<" phi="<<result.CaloSurface_phi()<<" r="<<result.CaloSurface_r()<<" z="<<result.CaloSurface_z()<<" pT="<<pT, std::abs(result.CaloSurface_eta())>4.9 || pT<1000 || (std::abs(result.CaloSurface_eta())>4 && pT<1500));
-    
-    } //sample
-  else ATH_MSG_DEBUG("entrance to calo surface : sample="<<result.CaloSurface_sample()<<" eta="<<result.CaloSurface_eta()<<" phi="<<result.CaloSurface_phi()<<" r="<<result.CaloSurface_r()<<" z="<<result.CaloSurface_z()<<" deta="<<min_calo_surf_dist);
-    
-  ATH_MSG_DEBUG("End getCaloSurface()");
-  return true;
 }
 
 
@@ -434,9 +339,6 @@ void FastCaloSimCaloExtrapolation::extrapolate(TFCSExtrapolationState& result, c
   
   ATH_MSG_DEBUG("Done FastCaloSimCaloExtrapolation::extrapolate: caloHits");
 
-  ATH_MSG_DEBUG("FastCaloSimCaloExtrapolation::extrapolate:*** Get calo surface ***");
-  getCaloSurface(result, hitVector.get());
-
   ATH_MSG_DEBUG("FastCaloSimCaloExtrapolation::extrapolate:*** Do extrapolation to ID-calo boundary ***");
   extrapolateToID(result, hitVector.get(), truth);
  
@@ -509,13 +411,7 @@ void FastCaloSimCaloExtrapolation::extrapolateToLayers(TFCSExtrapolationState& r
               result.set_r  (sample, subpos, extPos.perp());
             }
             else{
-              //in case that something goes wrong, use CaloSurface as extrapolation result
-              //not expected to happen
-              result.set_OK (sample, subpos, false);
-              result.set_phi(sample, subpos, result.CaloSurface_phi());
-              result.set_eta(sample, subpos, result.CaloSurface_eta());
-              result.set_z  (sample, subpos, zpos(sample, result.CaloSurface_eta(), subpos));
-              result.set_r  (sample, subpos, rpos(sample, result.CaloSurface_eta(), subpos));
+              ATH_MSG_COND(" [extrapolateToLayers] Extrapolation to cylinder failed. Sample="<<sample<<" subpos="<<subpos<<" eta="<<result.IDCaloBoundary_eta()<<" phi="<<result.IDCaloBoundary_phi()<<" r="<<result.IDCaloBoundary_r()<<" z="<<result.IDCaloBoundary_z(), truth->Pt() < transverseMomWarningLimit);
             }   
           } //for pos
         } //for sample

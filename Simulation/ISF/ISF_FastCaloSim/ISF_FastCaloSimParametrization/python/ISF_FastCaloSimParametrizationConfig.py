@@ -59,7 +59,6 @@ def FastCaloSimCaloExtrapolationCfg(flags, name="FastCaloSimCaloExtrapolation", 
 
     kwargs.setdefault("CaloBoundaryR", [1148.0, 120.0, 41.0])
     kwargs.setdefault("CaloBoundaryZ", [3550.0, 4587.0, 4587.0])
-    kwargs.setdefault("CaloMargin", 100)
     from FastCaloSim.FastCaloSimFactoryNew import NITimedExtrapolatorCfg
     kwargs.setdefault("Extrapolator", acc.addPublicTool(acc.popToolsAndMerge(NITimedExtrapolatorCfg(flags))))
     kwargs.setdefault("CaloGeometryHelper", acc.addPublicTool(acc.popToolsAndMerge(FastCaloSimGeometryHelperCfg(flags))))

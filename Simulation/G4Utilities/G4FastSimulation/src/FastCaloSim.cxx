@@ -214,7 +214,7 @@ void FastCaloSim::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
   m_FastCaloSimCaloExtrapolation->extrapolate(extrapolState, &truthState);
 
   // Do not simulate further if extrapolation to ID - Calo boundary fails
-  if(extrapolState.CaloSurface_eta() == -999){
+  if(extrapolState.IDCaloBoundary_eta() == -999){
     #ifdef FCS_DEBUG
       G4cout<<"[FastCaloSim::DoIt] Killing particle as extrapolation failed"<<G4endl;
     #endif

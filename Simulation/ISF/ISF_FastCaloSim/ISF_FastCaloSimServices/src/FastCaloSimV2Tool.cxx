@@ -194,7 +194,7 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(ISF::ISFParticle& isfp, ISFParticleC
   ATH_MSG_DEBUG(" particle: " << isfp.pdgCode() << " Ekin: " << isfp.ekin() << " position eta: " << particle_position.eta() << " direction eta: " << particle_direction.eta() << " position phi: " << particle_position.phi() << " direction phi: " << particle_direction.phi());
 
   //only simulate if extrapolation to calo surface succeeded
-  if(extrapol.CaloSurface_eta() != -999){
+  if(extrapol.IDCaloBoundary_eta() != -999){
 
     TFCSSimulationState simulstate(*rngWrapper);
 

@@ -71,7 +71,6 @@ protected:
   
   /*Main extrapolation methods*/
 
-  bool getCaloSurface(TFCSExtrapolationState& result, std::vector<Trk::HitInfo>* hitVector) const;
   ///Finds best extrapolation extPos from the hitVector for a cylinder defined by radius cylR and half-length cylZ as well as corresponding momentum direction 
   bool extrapolateToCylinder(std::vector<Trk::HitInfo>* hitVector, float cylR, float cylZ, Amg::Vector3D& extPos, Amg::Vector3D& momDir) const;
   ///Extrapolates to ID using three uniquely defined cylinder surfaces
@@ -133,9 +132,6 @@ protected:
   //uniquely defined ID-Calo surfaces
   FloatArrayProperty m_CaloBoundaryR{this, "CaloBoundaryR", {1148.0,120.0,41.0}};
   FloatArrayProperty m_CaloBoundaryZ{this, "CaloBoundaryZ", {3550.0,4587.0,4587.0}};
-  DoubleProperty m_calomargin{this, "CaloMargin", 100};
-
-  std::vector<int> m_surfacelist;
 
   PublicToolHandle<Trk::ITimedExtrapolator>    m_extrapolator{this, "Extrapolator", "TimedExtrapolator"};
   CxxUtils::CachedPointer<const Trk::TrackingVolume> m_caloEntrance;
