@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VTrackInformation_H
@@ -26,7 +26,9 @@ public:
   virtual const ISF::ISFParticle *GetBaseISFParticle() const {return nullptr;}
   virtual ISF::ISFParticle *GetBaseISFParticle() {return nullptr;}
   virtual bool GetReturnedToISF() const;
-  virtual int  GetParticleBarcode() const =0;
+  virtual int  GetParticleBarcode() const =0;  // TODO Drop this once UniqueID and Status are used instead
+  virtual int GetParticleUniqueID() const =0;
+  virtual int GetParticleStatus() const = 0;
   virtual void SetParticle(HepMC::GenParticlePtr);
   virtual void SetBaseISFParticle(ISF::ISFParticle*);
   virtual void SetReturnedToISF(bool) ;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrackHelper_H
@@ -16,7 +16,9 @@ public:
   bool IsRegeneratedPrimary() const;
   bool IsRegisteredSecondary() const ;
   bool IsSecondary() const ;
-  int GetBarcode() const ;
+  int GetBarcode() const ; // TODO Drop this once UniqueID and Status are used instead
+  int GetUniqueID() const;
+  int GetStatus() const ;
   TrackInformation * GetTrackInformation() {return m_trackInfo;}
   HepMcParticleLink GetParticleLink();
 private:

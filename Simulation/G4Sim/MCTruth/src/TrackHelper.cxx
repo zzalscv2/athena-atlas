@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MCTruth/TrackHelper.h"
@@ -29,10 +29,20 @@ bool TrackHelper::IsSecondary() const
   if (m_trackInfo==0) return true;
   return m_trackInfo->GetClassification()==Secondary;
 }
-int TrackHelper::GetBarcode() const
+int TrackHelper::GetBarcode() const  // TODO Drop this once UniqueID and Status are used instead
 {
   if (m_trackInfo==0 || std::as_const(m_trackInfo)->GetHepMCParticle()==0) return 0;
   return m_trackInfo->GetParticleBarcode();
+}
+int TrackHelper::GetUniqueID() const
+{
+  if (m_trackInfo==0 || std::as_const(m_trackInfo)->GetHepMCParticle()==0) return 0;
+  return m_trackInfo->GetParticleUniqueID();
+}
+int TrackHelper::GetStatus() const
+{
+  if (m_trackInfo==0 || std::as_const(m_trackInfo)->GetHepMCParticle()==0) return 0;
+  return m_trackInfo->GetParticleStatus();
 }
 
 HepMcParticleLink TrackHelper::GetParticleLink()
