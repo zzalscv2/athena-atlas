@@ -45,7 +45,7 @@ private:
   std::shared_ptr<TrigAccel::OffloadBuffer> m_input, m_output;
   tbb::concurrent_vector<WorkTimeStamp>* m_timeLine;
 
-  float m_CovMS, m_ptCoeff, m_minPt2, m_ptCoeff2, m_maxD0; 
+  float m_CovMS{}, m_ptCoeff{}, m_minPt2{}, m_ptCoeff2{}, m_maxD0{}; 
 };
 
 class SeedMakingWorkCudaManagedITk : public TrigAccel::Work{
