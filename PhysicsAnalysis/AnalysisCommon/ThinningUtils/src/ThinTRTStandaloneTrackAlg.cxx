@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
 */
 
 #include "ThinTRTStandaloneTrackAlg.h"
@@ -17,6 +17,7 @@ ThinTRTStandaloneTrackAlg::initialize()
   ATH_CHECK(m_InputElectronContainerKey.initialize(m_doElectron));
   ATH_CHECK(m_InputPhotonContainerKey.initialize(m_doPhoton));
   ATH_CHECK(m_InputTauJetContainerKey.initialize(m_doTau));
+  ATH_CHECK(m_InputTauJet_EleRMContainerKey.initialize(m_doTauEleRM));
   ATH_CHECK(m_inputMuonContainerKey.initialize(m_doMuon));
   return StatusCode::SUCCESS;
 }
@@ -137,6 +138,32 @@ ThinTRTStandaloneTrackAlg::execute(const EventContext& ctx) const
       }
     }
   }
+
+  if (m_doTauEleRM) {
+    // Retrieve ele rm taus
+    SG::ReadHandle<xAOD::TauJetContainer> taus_elerm(m_InputTauJet_EleRMContainerKey, ctx);
+    if (!taus_elerm.isValid()) {
+      ATH_MSG_FATAL("Failed to retrieve " << m_InputTauJet_EleRMContainerKey.key());
+      return StatusCode::FAILURE;
+    }
+    static const SG::AuxElement::ConstAccessor<char> acc_passThinning(
+      "passThinning");
+
+    // Loop over taus
+    for (const xAOD::TauJet* elerm_tau : *taus_elerm) {
+      if (!acc_passThinning(*elerm_tau)) {
+        continue;
+      }
+      for (const xAOD::TauTrack* erm_track : elerm_tau->allTracks()) {
+        // LRTs are not in the InDetTrackParticles container, so skip them
+        if (!erm_track->flag(
+              xAOD::TauJetParameters::TauTrackFlag::LargeRadiusTrack)) {
+          keptInDetTrackParticles[erm_track->track()->index()] = true;
+        }
+      }
+    }
+  }
+
   if (m_doMuon) {
     SG::ReadHandle<xAOD::MuonContainer> muons(m_inputMuonContainerKey, ctx);
     if (!muons.isValid()) {

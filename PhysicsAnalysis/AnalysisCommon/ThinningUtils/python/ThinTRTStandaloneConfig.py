@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """
           Instantiate the TRT Standalone Thinning
@@ -22,6 +22,7 @@ def ThinTRTStandaloneCfg(flags, name="ThinTRTStandaloneAlg", **kwargs):
         "doPhoton", flags.Reco.EnableEgamma and flags.Egamma.doTracking
     )
     kwargs.setdefault("doTau", flags.Reco.EnableTau)
+    kwargs.setdefault("doTauEleRM", flags.Reco.EnableTau and flags.Tau.doTauEleRMRec)
     kwargs.setdefault("doMuon", flags.Reco.EnableCombinedMuon)
     acc.addEventAlgo(CompFactory.ThinTRTStandaloneTrackAlg(name, **kwargs))
     mlog.info("TRT Alone Thinning configured")
