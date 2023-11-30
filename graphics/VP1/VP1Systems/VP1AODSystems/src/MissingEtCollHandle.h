@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ public:
   void setState(const QByteArray&); // restore state
 
 
-public slots:
+public Q_SLOTS:
   void setCutAllowedPhi(const QList<VP1Interval>&);
 
 protected:	
@@ -76,7 +76,7 @@ protected:
   bool getPhiAllowall() {return m_cut_phi_allowall; };
 
 
-private slots:
+private Q_SLOTS:
 
 	void resetCachedValuesCuts();
 //  void showParametersChanged(bool);

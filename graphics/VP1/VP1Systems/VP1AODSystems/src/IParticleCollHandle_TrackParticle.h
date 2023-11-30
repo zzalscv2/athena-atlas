@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@ protected:
   virtual bool cut(AODHandleBase*);
   virtual QColor defaultColor() const { return QColor::fromRgbF(1.0f, 1.0f, 0.5f); }
 
-private slots:
+private Q_SLOTS:
   void showParametersChanged(bool);
   void propagationOptionsChanged();
   void resetCachedValuesCuts();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -57,7 +57,7 @@ public:
   void userChangedSelection(SoCooperativeSelection*, QSet<SoNode*>, QSet<SoPath*>);//TOGGLE/SHIFT
   void userClickedOnBgd();  
 
-public slots:
+public Q_SLOTS:
 // FIXME - might be best to make a helper tool to do this, so we don't need to expose the xAOD objects in the interface here.
 // (Of course, that means we would then need to think of an alternate design to fill the collections in the system...)
 #ifndef BUILDVP1LIGHT
@@ -68,7 +68,7 @@ public slots:
 
   void dumpToJSON();
 
-private slots:
+private Q_SLOTS:
   void visibleObjectsChanged();
   void updateSelectionMode();
   void updateShownTotMomentum();
