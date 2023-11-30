@@ -4,20 +4,14 @@
 #
 # ------------------------------------------------------------
 
-#We are building ROIs corresponding (ideally) to high pt Bs
+# We are building ROIs corresponding (ideally) to high pt Bs
 
 #
 # --- load the tool to check the energy deposits and select clusters
 #
-from egammaRec.Factories import ToolFactory
 from egammaCaloTools import egammaCaloToolsConf
 from InDetRecExample.InDetJobProperties import InDetFlags
 
-egammaCaloClusterHadROISelector = ToolFactory( egammaCaloToolsConf.egammaCaloClusterSelector,
-                                               name = 'caloClusterHadROISelector',
-                                               egammaCheckEnergyDepositTool = "",
-                                               ClusterEtCut = 150e3
-                                              )
 
 def HadCaloClusterROIPhiRZContainerMaker(name="HadCaloClusterROIPhiRZContainerMaker", **kwargs):
 
@@ -27,30 +21,37 @@ def HadCaloClusterROIPhiRZContainerMaker(name="HadCaloClusterROIPhiRZContainerMa
 
     kwargs.setdefault("InputClusterContainerName",  "CaloCalTopoClusters")
 
-    OutputROIContainerName=[]
-    minPt=[]
-    phiWidth=[]
+    OutputROIContainerName = []
+    minPt = []
+    phiWidth = []
 
-    if InDetFlags.doHadCaloSeededSSS() :
+    if InDetFlags.doHadCaloSeededSSS():
         OutputROIContainerName.append("InDetHadCaloClusterROIPhiRZ")
         minPt.append(0)
-        phiWidth.append(0.3) # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidthBrem())
+        # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidthBrem())
+        phiWidth.append(0.3)
 
-    if InDetFlags.doCaloSeededAmbi() :
+    if InDetFlags.doCaloSeededAmbi():
         OutputROIContainerName.append("InDetHadCaloClusterROIPhiRZBjet")
         minPt.append(0)
-        phiWidth.append(0.05) # must be equal or larger than phiWidth of its clients: InDetAmbiTrackSelectionTool
+        # must be equal or larger than phiWidth of its clients: InDetAmbiTrackSelectionTool
+        phiWidth.append(0.05)
 
     kwargs.setdefault("OutputROIContainerName", OutputROIContainerName)
     kwargs.setdefault("minPt", minPt)
     kwargs.setdefault("phiWidth", phiWidth)
 
     if "egammaCaloClusterSelector" not in kwargs:
-        kwargs["egammaCaloClusterSelector"] = egammaCaloClusterHadROISelector()
+        egammaCaloClusterHadROISelector = egammaCaloToolsConf.egammaCaloClusterSelector,
+                                          name = 'caloClusterHadROISelector',
+                                          egammaCheckEnergyDepositTool = "",
+                                          ClusterEtCut = 150e3
+                                          )
+        kwargs["egammaCaloClusterSelector"]=egammaCaloClusterHadROISelector
+
     from InDetCaloClusterROISelector.InDetCaloClusterROISelectorConf import InDet__CaloClusterROIPhiRZContainerMaker
     return InDet__CaloClusterROIPhiRZContainerMaker(name, **kwargs)
 
 
-if InDetFlags.doCaloSeededAmbi() :
+if InDetFlags.doCaloSeededAmbi():
     topSequence += HadCaloClusterROIPhiRZContainerMaker()
-
