@@ -17,7 +17,7 @@ def combinedSignatures():
     return ['MinBias','Electron','Photon','Muon','Tau','Jet', 'Bjet','MET','UnconventionalTracking','HeavyIon']
 
 def jointSignatures():
-    return ['Bjet', 'Egamma']
+    return ['Bjet', 'Egamma', 'Combined']
 
 def defaultSignatures():
     return ['Streaming']
