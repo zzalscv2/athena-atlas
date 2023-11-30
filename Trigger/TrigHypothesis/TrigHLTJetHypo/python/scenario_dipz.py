@@ -66,8 +66,8 @@ def get_dipz_mlpl_from_matchdict(groupdict, njets):
     condargs = []
 
     vals = defaults('dipz_mlpl', lo = groupdict['WP'])
-    vals['decName_z']='dipz20230223_z' 
-    vals['decName_sigma']='dipz20230223_negLogSigma2'
+    vals['decName_z']='dipz20231122_z'
+    vals['decName_sigma']='dipz20231122_negLogSigma2'
     vals['capacity']=njets
     
     condargs.append(('dipz_mlpl', vals))

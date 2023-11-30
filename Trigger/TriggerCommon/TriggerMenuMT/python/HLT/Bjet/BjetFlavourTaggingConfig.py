@@ -165,7 +165,7 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                 }
             ],
             [
-                'BTagging/20230223trig/dipz/antikt4emtopo/network.json',
+                'BTagging/20231122trig/dipz/antikt4emtopo/network.json',
                 {
                     'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
                     'btagIp_': trackIpPrefix,
