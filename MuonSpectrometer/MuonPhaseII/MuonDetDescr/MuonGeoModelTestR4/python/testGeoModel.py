@@ -174,4 +174,7 @@ if __name__=="__main__":
     if flags.Detector.GeometryTGC: 
         cfg.merge(GeoModelTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "T"]))
     
+    if flags.Detector.GeometrysTGC: 
+        cfg.merge(GeoModelsTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "S"]))
+    
     executeTest(cfg, num_events = args.nEvents)

@@ -97,32 +97,49 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
     int stEta      = readoutEle->getStationEta();
     int stPhi      = readoutEle->getStationPhi();
     int stML      = id_helper.multilayer(readoutEle->identify());
+    std::string chamberDesign = readoutEle->getStationType();
 
     m_stIndex = stIndex;
     m_stEta = stEta;
     m_stPhi = stPhi;
     m_stML = stML;
+    m_chamberDesign = chamberDesign;
 
     const Identifier genStripID =id_helper.channelID(stIndex, stEta, stPhi, 
                     stML, 1, sTgcIdHelper::sTgcChannelTypes::Strip, 1);
+    const Identifier genPadID =id_helper.channelID(stIndex, stEta, stPhi, 
+                    stML, 1, sTgcIdHelper::sTgcChannelTypes::Pad, 1);
+
+    
 
 //// Chamber Details from sTGCDetectorDescription 
     int numLayers = readoutEle->numberOfLayers(true); 
     double yCutout = readoutEle->getDesign(genStripID)->yCutout();
-    double activeHeight = readoutEle->getDesign(genStripID)->xSize();
     double gasTck = readoutEle->getDesign(genStripID)->thickness;
 
     m_numLayers = numLayers;
     m_yCutout = yCutout;
-    m_activeHeight = activeHeight; 
     m_gasTck = gasTck;
+//// Gas Gap lengths for debug
+    double sGapLength = readoutEle->getDesign(genStripID)->minYSize();
+    double lGapLength = readoutEle->getDesign(genStripID)->maxYSize();
+    double gapHeight = readoutEle->getDesign(genStripID)->xSize();
+
+    m_sGapLength = sGapLength;
+    m_lGapLength = lGapLength;
+    m_gapHeight = gapHeight;
+//// Chamber lengths for debug
+    double sChamberLength = readoutEle->getPadDesign(genPadID)->sWidth;
+    double lChamberLength = readoutEle->getPadDesign(genPadID)->lWidth;
+    double chamberHeight = readoutEle->getPadDesign(genPadID)->Length;
+
+    m_sChamberLength = sChamberLength;
+    m_lChamberLength = lChamberLength;
+    m_chamberHeight = chamberHeight;
 
 /// Transformation of the readout element (Translation, ColX, ColY, ColZ) 
     const Amg::Transform3D& trans{readoutEle->transform()};
-    m_readoutTransform.push_back(Amg::Vector3D(trans.translation()));
-    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitX()));
-    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitY()));
-    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitZ()));
+    m_readoutTransform = trans;
 
 //// All the Vectors
     for (int lay = 1; lay <= numLayers; ++lay) {
@@ -132,7 +149,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
                         stML, lay, sTgcIdHelper::sTgcChannelTypes::Strip, 1);
         const Identifier layPadID =id_helper.channelID(stIndex, stEta, stPhi, 
                         stML, lay, sTgcIdHelper::sTgcChannelTypes::Pad, 1);
-
+/*
 //// Wire Dimensions
         int numWires = readoutEle->numberOfWires(layWireID); 
         int firstWireGroupWidth = readoutEle->getDesign(layWireID)->firstPitch;
@@ -165,7 +182,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
             m_wireGroupNum.push_back(wireGroupIndex);
             m_wireGroupGasGap.push_back(lay);
         }
-
+*/
 ////Strip Dimensions
         int numStrips = readoutEle->getDesign(layStripID)->nch;
         double stripPitch = readoutEle->channelPitch(layStripID);
@@ -193,8 +210,13 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
             m_stripNum.push_back(stripIndex);
             m_stripGasGap.push_back(lay);
             m_stripLengths.push_back(stripLength);
-        }
 
+            if (stripIndex != 1) continue;
+            const Amg::Transform3D locToGlob = readoutEle->transform(stripID);
+            m_stripRot.push_back(locToGlob);                    
+            m_stripRotGasGap.push_back(lay);
+        }
+/*
 ////Pad Dimensions
         int numPads = readoutEle->numberOfPads(layPadID);
         int numPadEta = readoutEle->getPadDesign(layPadID)->nPadH;
@@ -231,7 +253,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
             }
 
         }
-
+*/
     }
 
     return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;

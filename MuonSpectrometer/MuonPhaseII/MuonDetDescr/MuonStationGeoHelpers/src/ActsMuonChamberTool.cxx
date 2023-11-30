@@ -6,6 +6,8 @@
 #include "ActsMuonChamberTool.h"
 ///
 #include <GaudiKernel/SystemOfUnits.h>
+#include <algorithm>
+#include <cmath>
 
 
 namespace {
@@ -126,12 +128,23 @@ namespace MuonGMR4{
               yMax  = std::max(center.y(), yMax);
               zMin  = std::min(center.z(), zMin);
               zMax  = std::max(center.z() + tgcReadoutEle->moduleThickness(), zMax);
+          } else if(ele->detectorType() == ActsTrk::DetectorType::sTgc) {
+            const sTgcReadoutElement* stgcReadoutEle = static_cast<const sTgcReadoutElement*>(ele);
+            const sTgcReadoutElement::parameterBook& parameters{stgcReadoutEle->getParameters()};
+            xMinS = std::min(center.x() - parameters.sHalfChamberLength, xMinS);
+            xMaxS = std::max(center.x() + parameters.sHalfChamberLength, xMaxS);
+            xMinL = std::min(center.x() - parameters.lHalfChamberLength, xMinL);
+            xMaxL = std::max(center.x() + parameters.lHalfChamberLength, xMaxL);
+            yMin = std::min(center.y() - parameters.halfChamberHeight, yMin);
+            yMax = std::max(center.y() + parameters.halfChamberHeight, yMax);
+            zMin = std::min(center.z(), zMin);
+            zMax = std::max(center.z() + 2.*parameters.halfChamberTck, zMax);
           } else {
-              ATH_MSG_FATAL("Only Mdt, Rpc & Tgc chambers can be used right now.");
+              ATH_MSG_FATAL("Only Mdt, Rpc, sTgc & Tgc chambers can be used right now.");
               throw std::logic_error("Detector type not supported");
           }
           ATH_MSG_VERBOSE("Chamber dimensions: yMin: "<<yMin<<" yMax: "<<yMax
-                      <<" xMinS: "<<xMinS<<" xMaxS: "<<xMaxS<<" xMinL: "<<xMinL<<" xMaxL: "<<xMaxL<<" zMin: "<<zMin<<" zMax: "<<zMax);
+                      <<" xMinS: "<<xMinS<<" xMaxS: "<<xMaxS<<" xMinL: "<<xMinL<<" xMaxL: "<<xMaxL<< " zMin: "<<zMin<<" zMax: "<<zMax);       
         }
         
         constexpr double tolerance = 0.1 * Gaudi::Units::mm;
@@ -139,6 +152,7 @@ namespace MuonGMR4{
         define.halfXLong = (xMaxL - xMinL) / 2.;
         define.halfY = (yMax - yMin) / 2.;
         define.halfZ = (zMax - zMin) / 2.;
+ 
         if (define.halfY <=0. || define.halfXShort<=0. ||define.halfXLong <=0. ||  define.halfZ<=0.) {
           ATH_MSG_WARNING("Invalid trapezoid boundaries "<<m_idHelperSvc->toStringDetEl(primRE->identify())<<
                   	      " "<<define);

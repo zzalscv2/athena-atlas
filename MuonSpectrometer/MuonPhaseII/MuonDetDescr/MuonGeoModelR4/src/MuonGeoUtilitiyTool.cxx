@@ -6,6 +6,7 @@
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #include <GeoModelKernel/GeoBox.h>
 #include <GeoModelKernel/GeoTrd.h>
+#include <GeoModelKernel/GeoSimplePolygonBrep.h>
 #include <GeoModelKernel/GeoShapeShift.h>
 #include <GeoModelKernel/GeoTube.h>
 #include <GeoModelKernel/GeoShapeUnion.h>
@@ -243,6 +244,16 @@ std::vector<geoShapeWithShift> MuonGeoUtilityTool::getComponents(const GeoShapeU
    fill_shape(unionShape->getOpB());
  
    return shapes;
+}
+
+std::vector<Amg::Vector2D> MuonGeoUtilityTool::polygonEdges(const GeoSimplePolygonBrep& polygon) const {
+  std::vector<Amg::Vector2D> polygonEdges{};
+  polygonEdges.reserve(polygon.getNVertices());
+  for (unsigned int i = 0; i < polygon.getNVertices(); ++i) {
+      polygonEdges.emplace_back(polygon.getXVertex(i), polygon.getYVertex(i));
+      ATH_MSG_VERBOSE("Polygon vertext point  " << i << ": "<< Amg::toString(polygonEdges.back(),2));
+    }
+  return polygonEdges;
 }
 
 }
