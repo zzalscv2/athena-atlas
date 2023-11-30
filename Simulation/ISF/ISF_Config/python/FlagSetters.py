@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from ISF_Config.ISF_jobProperties import ISF_Flags
 
@@ -101,36 +101,6 @@ def configureFlagsCosmicsG4():
     configureFlagsFullG4()
     return
 
-## methods for simulators which use G4 + FastCaloSim
-
-def configureFlagsATLFASTII():
-    from G4AtlasApps.SimFlags import simFlags
-    simFlags.CalibrationRun.set_Off() # Switch off DeadMaterial Hits
-    simFlags.SimulationFlavour = "AtlfastII" # TODO: can we rename this to "ATLFASTII" ?
-    from ISF_Config.ISF_jobProperties import ISF_Flags
-    ISF_Flags.UsingGeant4 = True
-    mergeDict = {'ID':False, 'CALO':True, 'MUON':False}
-    ISF_Flags.HITSMergingRequired.get_Value().update(mergeDict)
-    ISF_Flags.ParticleBroker = "ISF_AFIIParticleBrokerSvc"
-    return
-
-def configureFlagsATLFASTII_QS():
-    configureFlagsATLFASTII()
-    from G4AtlasApps.SimFlags import simFlags
-    simFlags.SimulationFlavour = "ATLFASTII_QS"
-    return
-
-def configureFlagsATLFASTIIMT():
-    configureFlagsATLFASTII()
-    ISF_Flags.ParticleBroker = ""
-    return
-
-def configureFlagsATLFASTII_PileUp():
-    configureFlagsATLFASTII()
-    from G4AtlasApps.SimFlags import simFlags
-    simFlags.SimulationFlavour = "ATLFASTII_PileUp"
-    return
-
 ## methods for simulators which use G4 + FastCaloSim V2
 
 def configureFlagsATLFAST3():
@@ -189,14 +159,14 @@ def configureFlagsG4FastCaloTest():
     return
 
 def configureFlagsG4FastCaloDNN():
-    configureFlagsATLFASTII()
+    configureFlagsATLFAST3()
     from G4AtlasApps.SimFlags import simFlags
     simFlags.SimulationFlavour = "G4FastCaloDNN"
     return
 
-## methods for simulators which use Fatras + FastCaloSim
+## methods for simulators which use Fatras + FastCaloSim V2
 
-def configureFlagsATLFASTIIF():
+def configureFlagsATLFAST3F():
     from AthenaCommon.DetFlags import DetFlags
     # BCM simulation not supported in FATRAS. Currently it is the
     # geometry task which is used to determine whether a detector has
@@ -206,7 +176,7 @@ def configureFlagsATLFASTIIF():
     DetFlags.BCM_setOff() # For Fast Chain
     from G4AtlasApps.SimFlags import simFlags
     simFlags.CalibrationRun.set_Off() # Switch off DeadMaterial Hits
-    simFlags.SimulationFlavour = "ATLFASTIIF"
+    simFlags.SimulationFlavour = "ATLFAST3F"
     from TrkDetDescrSvc.TrkDetDescrJobProperties import TrkDetFlags
     TrkDetFlags.MaterialVersion=21
     TrkDetFlags.TRT_EndcapLayerMaterialBinsR = 25
@@ -217,71 +187,10 @@ def configureFlagsATLFASTIIF():
     ISF_Flags.HITSMergingRequired.get_Value().update(mergeDict)
     return
 
-def configureFlagsATLFASTIIFMT():
-    configureFlagsATLFASTIIF()
-    ISF_Flags.ParticleBroker = ""
-    return
-
-def configureFlagsFatras_newExtrapolation():
-    configureFlagsATLFASTIIF()
-    from G4AtlasApps.SimFlags import simFlags
-    simFlags.SimulationFlavour = "Fatras_newExtrapolation"
-    return
-
-def configureFlagsFatras_newExtrapolation_IDOnly():
-    configureFlagsATLFASTIIF()
-    from G4AtlasApps.SimFlags import simFlags
-    simFlags.SimulationFlavour = "Fatras_newExtrapolation_IDOnly"
-    return
-
-def configureFlagsATLFASTIIF_PileUp():
-    configureFlagsATLFASTIIF()
-    from G4AtlasApps.SimFlags import simFlags
-    simFlags.SimulationFlavour = "ATLFASTIIF_PileUp"
-    return
-  
-def configureFlagsG4HS_FastPileup():
-    from G4AtlasApps.SimFlags import simFlags
-    simFlags.SimulationFlavour = "G4HS_FastPileup"
-    from ISF_Config.ISF_jobProperties import ISF_Flags
-    ISF_Flags.UsingGeant4 = True
-    from TrkDetDescrSvc.TrkDetDescrJobProperties import TrkDetFlags
-    TrkDetFlags.MaterialVersion=21
-    TrkDetFlags.TRT_BuildStrawLayers=True
-    from ISF_Config.ISF_jobProperties import ISF_Flags
-    mergeDict = {'ID':True, 'CALO':True, 'MUON':True}
-    ISF_Flags.HITSMergingRequired.get_Value().update(mergeDict)
-    return
-
-def configureFlagsATLFASTIIF_IDOnly():
-    configureFlagsATLFASTIIF()
-    from G4AtlasApps.SimFlags import simFlags
-    simFlags.SimulationFlavour = "ATLFASTIIF_IDOnly"
-    return
-
-def configureFlagsATLFASTIIF_IDCalo():
-    configureFlagsATLFASTIIF()
-    from G4AtlasApps.SimFlags import simFlags
-    simFlags.SimulationFlavour = "ATLFASTIIF_IDCalo"
-    return
-
-def configureFlagsFastOnly():
-    configureFlagsATLFASTIIF()
-    return
-
 ## methods for simulators which combine Geant4,  Fatras and FastCaloSim
 
-def configureFlagsATLFASTIIF_G4MS():
-    configureFlagsATLFASTIIF()
-    from G4AtlasApps.SimFlags import simFlags
-    simFlags.SimulationFlavour = "ATLFASTIIF_G4MS"
-    from ISF_Config.ISF_jobProperties import ISF_Flags
-    ISF_Flags.UsingGeant4 = True
-    ISF_Flags.ParticleBroker = "ISF_AFIIParticleBrokerSvc"
-    return
-
 def configureFlagsATLFAST3F_G4MS():
-    configureFlagsATLFASTIIF()
+    configureFlagsATLFAST3F()
     from G4AtlasApps.SimFlags import simFlags
     simFlags.SimulationFlavour = "ATLFAST3F_G4MS"
     from ISF_Config.ISF_jobProperties import ISF_Flags
@@ -290,7 +199,7 @@ def configureFlagsATLFAST3F_G4MS():
     return
 
 def configureFlagsATLFAST3F_ACTSMT():
-    configureFlagsATLFASTIIF()
+    configureFlagsATLFAST3F()
     from G4AtlasApps.SimFlags import simFlags
     simFlags.SimulationFlavour = "ATLFAST3F_G4MS"
     from ISF_Config.ISF_jobProperties import ISF_Flags
@@ -304,43 +213,3 @@ def configureFlagsMultiSimTest():
     mergeDict = {'ID':True, 'CALO':True, 'MUON':True}
     ISF_Flags.HITSMergingRequired.get_Value().update(mergeDict)
     return
-
-def configureFlagsG4GammaCones():
-    return
-
-def configureFlagsG4GammaCones_FastCalo():
-    return
-
-def configureFlagsFatrasGammaCones_FastCalo():
-    return
-
-def configureFlagsG4BHadronsOnly_FastCalo():
-    return
-
-def configureFlagsG4BHadrons_FatrasID_FastCalo():
-    return
-
-def configureFlagsG4TauProductsOnly():
-    return
-
-def configureFlagsG4HiggsLeptonsConeOnly():
-    return
-
-def configureFlagsG4HiggsLeptons():
-    return
-
-def configureFlagsG4WLeptonsCone_FatrasID_FastCalo ():
-    return
-
-def configureFlagsG4JPsiLeptonsCone_FatrasID_FastCalo ():
-    return
-
-def configureFlagsG4ZLeptonsCone_FatrasID_FastCalo ():
-    return
-
-def configureFlagsG4ZLeptonsConeSticky_FatrasID_FastCalo ():
-    return
-
-def configureFlagsG4ZDecayProducts_FatrasID_FastCalo ():
-    return
-
