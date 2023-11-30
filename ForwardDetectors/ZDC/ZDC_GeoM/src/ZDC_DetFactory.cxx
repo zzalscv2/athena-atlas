@@ -5,7 +5,10 @@
 #include "ZDC_DetFactory.h"
 #include "ZDC_ZDCModule.h"
 #include "ZDC_RPDModule.h"
+#include "ZdcIdentifier/ZdcID.h"
 
+
+#include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelKernel/GeoElement.h"
 #include "GeoModelKernel/GeoBox.h"
