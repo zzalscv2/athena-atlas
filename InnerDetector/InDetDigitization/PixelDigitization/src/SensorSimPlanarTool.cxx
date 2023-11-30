@@ -19,6 +19,8 @@
 #include "CLHEP/Units/PhysicalConstants.h"
 #include "PathResolver/PathResolver.h"
 
+#include "GaudiKernel/SystemOfUnits.h"
+
 #include "TFile.h"
 
 #include <cmath>
@@ -568,7 +570,6 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
 
   }
   else if (m_radiationDamageSimulationType == RadiationDamageSimulationType::TEMPLATE_CORRECTION && !(Module.isDBM()) && Module.isBarrel()){ // will run radiation damage but with the template method
-
     const PixelHistoConverter& distanceCorrectionHist = m_distanceCorrection[layer];
     const PixelHistoConverter& lorentzCorrectionHist  = m_lorentzCorrection[layer];
     const PixelHistoConverter& chargeCorrectionHist   = m_chargeCorrection[layer];
@@ -583,9 +584,9 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
         depth_i += 1.0 * iHitRecord.first / iTotalLength * dDepth;
       }
 
-      const double depthZ = (depth_i + 0.5*sensorThickness)*1e3; // to get it in micro meters
+      const double depthZ = (depth_i + 0.5*sensorThickness)/Gaudi::Units::micrometer; // to get it in micro meters
       
-      const double dist_electrode = distanceCorrectionHist.getContent(depthZ);
+      const double dist_electrode = distanceCorrectionHist.getContent(depthZ)*Gaudi::Units::micrometer; // to get it in mm
 
       // get corrected LA
       tanLorentz = lorentzCorrectionHist.getContent(depthZ);
