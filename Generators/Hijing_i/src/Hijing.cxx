@@ -15,7 +15,7 @@
 //     2007-Sep Aaron Angerami: keepSpectators option.
 //     2007-Nov Brian Cole, Mikhail Leltchouk: each vertex is added to the event before particles are added to the vertex
 //          - this fixed bug #30991 for release 13.1.0 and for HepMC 2.3.0 where the 'set's comparison operates
-//            on the barcode rather than on the pointer.
+//            on the bcode rather than on the pointer.
 //     2008-Jul Borut Kersevan:  randomizing the left<->right direction by mirroring momenta settable in jobOpts for beamgas
 //     2023-Aug Aaron Angerami: adding keepAllDecayVertices option to keep decay vertices for strong decays (default=true) 
 
