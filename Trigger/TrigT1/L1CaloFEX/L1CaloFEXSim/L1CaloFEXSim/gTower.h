@@ -102,6 +102,9 @@ namespace LVL1 {
 
     inline int getPosNeg() const {return m_posneg;}
 
+    /** Calculates and returns the firmware ID, as well as iPhi and iEta in FT/global scheme **/
+    int getFWID(int & iPhiFW, int & iEtaFW) const;
+
     /** Calculates and returns the firmware ID **/
     int getFWID() const;
 

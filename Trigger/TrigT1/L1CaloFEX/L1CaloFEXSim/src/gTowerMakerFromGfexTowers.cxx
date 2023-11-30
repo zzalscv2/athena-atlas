@@ -37,6 +37,7 @@ gTowerMakerFromGfexTowers::gTowerMakerFromGfexTowers(const std::string& name, IS
 StatusCode gTowerMakerFromGfexTowers::initialize()
 {
     ATH_CHECK( m_gDataTowerKey.initialize(!m_isMC) );
+    // ATH_CHECK( m_gDataTower50Key.initialize(!m_isMC) );
     ATH_CHECK( m_gEmulTowerKey.initialize(m_UseEmulated) );
     ATH_CHECK( m_gSuperCellTowerMapperTool.retrieve() );
     ATH_CHECK( m_gTowerBuilderTool.retrieve() );
@@ -49,7 +50,7 @@ StatusCode gTowerMakerFromGfexTowers::initialize()
 
 StatusCode gTowerMakerFromGfexTowers::execute() 
 {
-    ATH_MSG_DEBUG("Executing " << name() << ", processing event number " );
+    ATH_MSG_DEBUG("Executing " << name() << ", input: " << m_gDataTowerKey.key() << ", output: " << m_gTowerContainerSGKey.key());
     
     const EventContext& ctx = Gaudi::Hive::currentContext();
 

@@ -277,6 +277,13 @@ if __name__ == '__main__':
         gFEXInputs.IsMC = flags.Input.isMC
         gFEXInputs.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper')
         gFEXInputs.gSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
+
+        gFEXInputs50 = CompFactory.LVL1.gTowerMakerFromGfexTowers('gTowerMakerFromGfexTowers50')
+        gFEXInputs50.InputDataTowers = "L1_gFexDataTowers50"
+        gFEXInputs50.MyGTowers = "gTower50Container"
+        gFEXInputs50.IsMC = flags.Input.isMC
+        gFEXInputs50.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper50')
+        gFEXInputs50.gSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
        
         gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')
         gFEX.gFEXSysSimTool = CompFactory.LVL1.gFEXSysSim('gFEXSysSimTool')
@@ -307,6 +314,7 @@ if __name__ == '__main__':
         outputEDM += addEDM('xAOD::gFexTowerContainer',     'L1_gFexTriggerTowers'        )                
         
         acc.addEventAlgo(gFEXInputs, sequenceName='AthAlgSeq')
+        acc.addEventAlgo(gFEXInputs50, sequenceName='AthAlgSeq')
         acc.addEventAlgo(gFEX, sequenceName='AthAlgSeq')
         
         
@@ -387,6 +395,9 @@ if __name__ == '__main__':
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     acc.merge(SetupMetaDataForStreamCfg(flags, 'AOD'))
     
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    acc.merge(SetupMetaDataForStreamCfg(flags, 'AOD'))    
+
     acc.getEventAlgo("EventInfoTagBuilder").PropagateInput = (flags.Input.Format != Format.BS)
 
     if acc.run().isFailure():
