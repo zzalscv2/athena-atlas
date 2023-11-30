@@ -115,8 +115,8 @@ MCGeneratorWeights Nominal
 
 ### Global lepton trigger scale factor example
 UseGlobalLeptonTriggerSF False
-GlobalTriggers 2022@e26_lhtight_ivarloose_L1EM22VHI_OR_e60_lhmedium_L1EM22VHI_OR_e140_lhloose_L1EM22VHI,mu26_ivarmedium_L1MU14FCH_OR_mu50_L1MU14FCH
-GlobalTriggersLoose 2022@e26_lhtight_ivarloose_L1EM22VHI_OR_e60_lhmedium_L1EM22VHI_OR_e140_lhloose_L1EM22VHI,mu26_ivarmedium_L1MU14FCH_OR_mu50_L1MU14FCH
+GlobalTriggers 2022@e26_lhtight_ivarloose_L1EM22VHI_OR_e60_lhmedium_L1EM22VHI_OR_e140_lhloose_L1EM22VHI,mu24_ivarmedium_L1MU14FCH_OR_mu50_L1MU14FCH
+GlobalTriggersLoose 2022@e26_lhtight_ivarloose_L1EM22VHI_OR_e60_lhmedium_L1EM22VHI_OR_e140_lhloose_L1EM22VHI,mu24_ivarmedium_L1MU14FCH_OR_mu50_L1MU14FCH
 
 ########################
 ### basic selection with mandatory cuts for reco level
