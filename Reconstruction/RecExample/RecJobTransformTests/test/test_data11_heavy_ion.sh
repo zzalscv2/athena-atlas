@@ -16,6 +16,7 @@ Reco_tf.py --CA \
 --outputAODFile myAOD.pool.root \
 --preInclude "all:HIRecConfig.HIModeFlags.HImode" \
 --preExec "all:flags.Reco.EnableZDC=False;flags.Reco.EnableTrigger=False" \
+--postExec 'all:from IOVDbSvc.IOVDbSvcConfig import addOverride;cfg.merge(addOverride(flags,"/TRT/Calib/PID_NN", "TRTCalibPID_NN_v1"));cfg.merge(addOverride(flags,"/TRT/Onl/Calib/PID_NN", "TRTCalibPID_NN_v1"));' \
 
 RES=$?
 echo "art-result: $RES Reco"
