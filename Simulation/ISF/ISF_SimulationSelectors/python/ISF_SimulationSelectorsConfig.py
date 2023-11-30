@@ -22,16 +22,6 @@ def DefaultParticleKillerSelectorCfg(flags, name="ISF_DefaultParticleKillerSelec
     return acc
 
 
-def PileupParticleKillerSelectorCfg(flags, name="ISF_PileupParticleKillerSelector", **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("PileupBCID", [1])
-    if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(ParticleKillerSvcCfg(flags)).name)
-    kwargs.setdefault("SimulationFlavor", SimulationFlavor.ParticleKiller)
-    acc.setPrivateTools(CompFactory.ISF.KinematicPileupSimSelector(name, **kwargs))
-    return acc
-
-
 def DefaultGeant4SelectorCfg(flags, name="ISF_DefaultGeant4Selector", **kwargs):
     acc = ComponentAccumulator()
     if "Simulator" not in kwargs:
@@ -171,79 +161,6 @@ def DefaultParametricSimulationSelectorCfg(flags, name="ISF_DefaultParametricSim
         kwargs.setdefault("Simulator", "ISF_ParametricSimSvc") # TODO
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.Parametric)
     acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
-    return acc
-
-
-# PileUpSimSelector Configurations
-def PileupSimSelectorCfg(flags, name="DONOTUSEDIRECTLY", **kwargs):
-    acc = ComponentAccumulator()
-    acc.setPrivateTools(CompFactory.ISF.KinematicPileupSimSelector(name, **kwargs))
-    return acc
-
-
-def FatrasPileupSelectorCfg(flags, name="ISF_FatrasPileupSelector", **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("PileupBCID", [1])
-    if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        from ISF_FatrasServices.ISF_FatrasConfig import fatrasPileupSimServiceIDCfg
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(fatrasPileupSimServiceIDCfg(flags)).name)
-    kwargs.setdefault("SimulationFlavor", SimulationFlavor.FatrasPileup)
-    tool = acc.popToolsAndMerge(PileupSimSelectorCfg(flags, name, **kwargs))
-    acc.setPrivateTools(tool)
-    return acc
-
-
-# FatrasPileupSelector_noHits not migrated
-# due to missing getter for Simulator "ISF_FatrasPileupSimSvc_noHits"
-
-
-def FastCaloSimPileupOTSelectorCfg(flags, name="ISF_FastCaloSimPileupOTSelector", **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("PileupBCID", flags.Sim.FastChain.BCID)
-    if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastCaloSimPileupOTSvcCfg
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(FastCaloSimPileupOTSvcCfg(flags)).name)
-    kwargs.setdefault("SimulationFlavor", SimulationFlavor.FastCaloSimPileup)
-    tool = acc.popToolsAndMerge(PileupSimSelectorCfg(flags, name, **kwargs))
-    acc.setPrivateTools(tool)
-    return acc
-
-
-def MuonFatrasPileupSelectorCfg(flags, name="ISF_MuonFatrasPileupSelector", **kwargs):
-    acc = ComponentAccumulator()
-    if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        from ISF_FatrasServices.ISF_FatrasConfig import fatrasPileupSimServiceIDCfg
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(fatrasPileupSimServiceIDCfg(flags)).name)
-    kwargs.setdefault("PileupBCID", [1])
-    kwargs.setdefault("ParticlePDG", 13)
-    kwargs.setdefault("SimulationFlavor", SimulationFlavor.Fatras)
-    tool = acc.popToolsAndMerge(PileupSimSelectorCfg(flags, name, **kwargs))
-    acc.setPrivateTools(tool)
-    return acc
-
-
-def EtaGreater5PileupParticleKillerSimSelectorCfg(flags, name="ISF_EtaGreater5PileupParticleKillerSimSelector", **kwargs):
-    acc = ComponentAccumulator()
-    if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(ParticleKillerSvcCfg(flags)).name)
-    kwargs.setdefault("MinPosEta", -5.0)
-    kwargs.setdefault("MaxPosEta",  5.0)
-    kwargs.setdefault("InvertCuts", True)
-    kwargs.setdefault("SimulationFlavor", SimulationFlavor.ParticleKiller)
-    tool = acc.popToolsAndMerge(PileupSimSelectorCfg(flags, name, **kwargs))
-    acc.setPrivateTools(tool)
-    return acc
-
-
-def FastCaloSimPileupSelectorCfg(flags, name="ISF_FastCaloSimPileupSelector", **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("PileupBCID"  , flags.Sim.FastChain.BCID)
-    if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastCaloSimPileupSvcCfg
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(FastCaloSimPileupSvcCfg(flags)).name)
-    kwargs.setdefault("SimulationFlavor", SimulationFlavor.FastCaloSimPileup)
-    tool = acc.popToolsAndMerge(PileupSimSelectorCfg(flags, name, **kwargs))
-    acc.setPrivateTools(tool)
     return acc
 
 
