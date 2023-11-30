@@ -14,7 +14,6 @@ namespace G4UA
   {
     declareProperty("TargetEvent",m_config.targetEvent);
     declareProperty("TargetTrack",m_config.targetTrack);
-    //declareProperty("TargetBarcode",m_config.targetBarcode);
     declareProperty("VerboseLevel",m_config.verboseLevel);
     declareProperty("Continue",m_config.verb);
     // properties for area check at step time

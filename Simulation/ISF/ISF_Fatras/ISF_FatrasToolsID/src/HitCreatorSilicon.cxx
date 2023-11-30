@@ -452,10 +452,6 @@ void iFatras::HitCreatorSilicon::createSimHit(const ISF::ISFParticle& isp, const
                   : energyDeposit_exact(isp,isPix,isSCT);
 
    energyDeposit = dEdX * (localExit - localEntry).mag();
- 
-   //!< barcode & time from current stack particle
-   //  double   energyDeposit = m_siPathToCharge*localDirection.mag()*CLHEP::RandLandau::shoot(m_randomEngine);
-   int    barcode       = isp.barcode();
    
    // create the silicon hit
    const HepGeom::Point3D<double> localEntryHep( localEntry.x(), localEntry.y(), localEntry.z() );
@@ -465,7 +461,7 @@ void iFatras::HitCreatorSilicon::createSimHit(const ISF::ISFParticle& isp, const
 	       localExitHep,
 	       energyDeposit,
 	       time,
-	       barcode,
+	       isp.barcode(),
 	       m_pixIdHelper ? 0 : 1,
 	       m_pixIdHelper ? m_pixIdHelper->barrel_ec(hitId)  : m_sctIdHelper->barrel_ec(hitId),
 	       m_pixIdHelper ? m_pixIdHelper->layer_disk(hitId) : m_sctIdHelper->layer_disk(hitId),
