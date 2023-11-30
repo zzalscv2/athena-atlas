@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTruthTools/PRD_MultiTruthBuilder.h"
@@ -10,6 +10,7 @@
 #include "InDetIdentifier/PixelID.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "ReadoutGeometryBase/SiReadoutCellId.h"
+#include "TruthUtils/MagicNumbers.h"
 //#include <stdexcept>
 //#include <ext/functional>
 
@@ -77,16 +78,16 @@ void PRD_MultiTruthBuilder::addPrepRawDatum(PRD_MultiTruthCollection *prdTruth,
       for( ; nextdeposit!=lastdeposit; ++nextdeposit) {
         const HepMcParticleLink& particleLink = nextdeposit->first;
 
-        ATH_MSG_VERBOSE("addPrepRawDatum(): Barcode " << particleLink.barcode() << " with charge " << nextdeposit->second );
+        ATH_MSG_VERBOSE("addPrepRawDatum(): Unique ID " << HepMC::uniqueID(&particleLink) << " with charge " << nextdeposit->second );
 
         //  Confirm that the energy deposited in the RDO is significant
         if( isPixel  &&  nextdeposit->second < m_pixelThreshold ){  
-          ATH_MSG_VERBOSE("addPrepRawDatum() ignored PIXEL: Barcode " << particleLink.barcode() << " with charge " << nextdeposit->second );
+          ATH_MSG_VERBOSE("addPrepRawDatum() ignored PIXEL: Unique ID " << HepMC::uniqueID(particleLink) << " with charge " << nextdeposit->second );
           continue;
         }
 
         if( isSCT  &&  nextdeposit->second < m_sctThreshold ){  
-          ATH_MSG_VERBOSE("addPrepRawDatum() ignored SCT: Barcode " << particleLink.barcode() << " with charge " << nextdeposit->second );
+          ATH_MSG_VERBOSE("addPrepRawDatum() ignored SCT: Unique ID " << HepMC::uniqueID(particleLink) << " with charge " << nextdeposit->second );
           continue;
         }
 
