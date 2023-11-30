@@ -1074,20 +1074,31 @@ class ComponentAccumulator(AccumulatorCachable):
                     vstr = "" if v is None else str(v)
                     bshPropsToSet.append((name, k, vstr))
 
+       
+        try:
+            from AthenaPython import PyAthenaComps
+            PyAlg = PyAthenaComps.Alg
+            PySvc = PyAthenaComps.Svc
+        except ImportError:
+            PyAlg = type(None)
+            PySvc = type(None)
+
+        # Services:
         for svc in self._services:
             if (
                 svc.getName() != "MessageSvc"
             ):  # MessageSvc will exist already! Needs special treatment
+                if isinstance(svc, PySvc):
+                    svc._properties = svc.getValuedProperties()
+
                 getCompsToBeAdded(svc)
+                if isinstance(svc, PySvc):
+                    svc.setup2()
+                    
             else:
                 mspPropsToSet.update((k,str(v)) for k,v in svc._properties.items())
-        try:
-            from AthenaPython import PyAthenaComps
 
-            PyAlg = PyAthenaComps.Alg
-        except ImportError:
-            PyAlg = type(None)
-
+        #Algorithms
         for seqName, algoList in flatSequencers(self._sequence, algsCollection=self._algorithms).items():
             seq = self.getSequence(seqName)
             for k, v in seq._properties.items():
@@ -1107,7 +1118,7 @@ class ComponentAccumulator(AccumulatorCachable):
 
                 if isinstance(alg, PyAlg):
                     alg.setup2()
-
+        #Cond-Algs
         condalgseq = []
         for alg in self._conditionsAlgs:
             getCompsToBeAdded(alg)
@@ -1116,10 +1127,12 @@ class ComponentAccumulator(AccumulatorCachable):
                 alg.setup2()
         bshPropsToSet.append(("AthCondSeq", "Members", str(condalgseq)))
 
+        #Public Tools:
         for pt in self._publicTools:
             pt.name = "ToolSvc." + pt.name
             getCompsToBeAdded(pt)
 
+        #Auditors:
         for aud in self._auditors:
             getCompsToBeAdded(aud)
 

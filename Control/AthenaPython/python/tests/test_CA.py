@@ -2,13 +2,14 @@
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-from AthenaPython.tests.PyTestsLib import MyAlg
+from AthenaPython.tests.PyTestsLib import MyAlg, MySvc
 
 flags = initConfigFlags()
 flags.lock()
 
 cfg = MainServicesCfg(flags)
 cfg.addEventAlgo( MyAlg() )
+cfg.addService( MySvc(), create=True )
 
 cfg.store(open('test_CA.pkl','wb'))
 
