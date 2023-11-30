@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -61,6 +61,8 @@ namespace Trk {
     operator() (const Trk::TrackStateOnSurface* one, const Trk::TrackStateOnSurface* two) const {
       Amg::Vector3D gp1;
       Amg::Vector3D gp2;
+      gp1.setZero();
+      gp2.setZero();
       const Trk::Surface*  surf1 = 0;
       const Trk::Surface*  surf2 = 0;
       if ( ! ( one->trackParameters() || one->measurementOnTrack() ) ){
