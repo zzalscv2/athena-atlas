@@ -176,6 +176,19 @@ class CfgPyService( ConfigurableService ):
         ## svcMgr.MessageSvc if none already set by user
         setattr(self, 'OutputLevel', _get_prop_value (self, 'OutputLevel') )
         return super(CfgPyService, self).setup()
+   
+
+    def setup2(self): #For CA-based configurations:
+        name=self.getJobOptName()
+        from AthenaPython import PyAthena
+        o = PyComponents.instances.get(name, None)
+        if not (o is None) and not (o is self):
+            err = "A python component [%r] has already been "\
+                  "registered with the PyComponents registry !" % o
+            raise RuntimeError(err)
+        PyComponents.instances[name] = self
+        setattr(PyAthena.services, name, self)
+        return 
     pass # class CfgPyService
 
 ### Configurable base class for PyAlgTools ------------------------------------

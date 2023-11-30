@@ -188,6 +188,9 @@ class Svc( CfgPyService ):
         if name is None: name = kw.get('name', self.__class__.__name__)
         ## init base class
         super(Svc, self).__init__(name, **kw)
+        self.__dict__['msg']  = logging.getLogger( self.getJobOptName() )
+        self.__component_type__ = "Service"
+        self.__cpp_type__=self.__class__.__name__
         return
 
     def sysInitialize(self):
