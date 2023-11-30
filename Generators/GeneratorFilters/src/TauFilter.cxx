@@ -148,7 +148,7 @@ StatusCode TauFilter::filterEvent() {
       // Look for the first tau with genstat != 3
       if (std::abs((pitr)->pdg_id()) == 15 && (pitr)->status() != 3) {
         tau = pitr;
-        ATH_MSG_DEBUG("found tau with barcode " << tau << " status " << pitr->status());
+        ATH_MSG_DEBUG("found tau " << tau );
         ATH_MSG_DEBUG("pT\t\teta\tphi\tid");
         ATH_MSG_DEBUG(tau->momentum().perp() << "\t" <<
                       tau->momentum().eta() << "\t" <<
