@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
 */
 
 #ifndef THINNINGUTILS_THINTRTSTANDALONETRACKALG_H
@@ -44,6 +44,9 @@ class ThinTRTStandaloneTrackAlg final: public AthReentrantAlgorithm
 
   /** @brief Thin tau tracks */
   Gaudi::Property<bool> m_doTau { this, "doTau", true };
+  
+  /** @brief Thin electron removal tau tracks */
+  Gaudi::Property<bool> m_doTauEleRM { this, "doTauEleRM", true };
 
   Gaudi::Property<bool> m_doMuon{this, "doMuon", true};
   /** @brief Track Particle container to thin */
@@ -62,9 +65,15 @@ class ThinTRTStandaloneTrackAlg final: public AthReentrantAlgorithm
   SG::ReadHandleKey<xAOD::PhotonContainer> m_InputPhotonContainerKey
     { this, "InputPhotonContainerName", "Photons", "Name of the input photon container" };
 
-  /** @brief photon collection input name*/
+  /** @brief TauJets collection input name*/
   SG::ReadHandleKey<xAOD::TauJetContainer> m_InputTauJetContainerKey
     { this, "InputTauJetContainerName", "TauJets", "Name of the input tau container" };
+
+  /** @brief TauJets_EleRM collection input name*/
+  SG::ReadHandleKey<xAOD::TauJetContainer> m_InputTauJet_EleRMContainerKey
+    { this, "InputTauJet_EleRMContainerName", "TauJets_EleRM", "Name of the input electron removal tau container" };
+
+  /** @brief Muon collection input name*/
   SG::ReadHandleKey<xAOD::MuonContainer> m_inputMuonContainerKey{
      this, "InputMuonContainerName", "Muons", "Name of the input muon container"
   };
