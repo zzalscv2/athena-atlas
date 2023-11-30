@@ -822,8 +822,8 @@ double TRTFastDigitizationTool::getProbHT( int particleEncoding, float kineticEn
 
 double TRTFastDigitizationTool::HTProbabilityElectron_high_pt( double eta )
 {
-  static const std::vector< double > bins = { 0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 1.05, 1.4, 1.5, 1.6, 1.82 };
-  static const std::vector< double > probability = { 0.210,             // [ 0.,   0.05 ]
+  constexpr std::array< double, 14 > bins = { 0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 1.05, 1.4, 1.5, 1.6, 1.82 };
+  constexpr std::array< double, 15 > probability = { 0.210,             // [ 0.,   0.05 ]
                                                      0.218,             // [ 0.05, 0.15 ]
                                                      0.226,             // [ 0.15, 0.25 ]
                                                      0.234,             // [ 0.25, 0.35 ]
@@ -846,8 +846,8 @@ double TRTFastDigitizationTool::HTProbabilityElectron_high_pt( double eta )
 
 double TRTFastDigitizationTool::HTProbabilityElectron_low_pt( double eta )
 {
-  static const std::vector< double > bins = { 0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 1.05, 1.4, 1.5, 1.6, 1.82 };
-  static const std::vector< double > probability = { 0.210,             // [ 0.,   0.05 ]
+  constexpr std::array< double, 14 > bins = { 0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 1.05, 1.4, 1.5, 1.6, 1.82 };
+  constexpr std::array< double, 15 > probability = { 0.210,             // [ 0.,   0.05 ]
                                                      0.218,             // [ 0.05, 0.15 ]
                                                      0.226,             // [ 0.15, 0.25 ]
                                                      0.234,             // [ 0.25, 0.35 ]
@@ -870,12 +870,12 @@ double TRTFastDigitizationTool::HTProbabilityElectron_low_pt( double eta )
 
 double TRTFastDigitizationTool::HTProbabilityMuon_5_20( double eta )
 {
-  static const std::vector< double > bins = { -2.05, -1.95, -1.85, -1.75, -1.65, -1.55, -1.45, -1.35, -1.25, -1.15, -1.05, -0.95, -0.85,
+  constexpr std::array< double, 41 > bins = { -2.05, -1.95, -1.85, -1.75, -1.65, -1.55, -1.45, -1.35, -1.25, -1.15, -1.05, -0.95, -0.85,
                                               -0.75, -0.65, -0.55, -0.45, -0.35, -0.25, -0.15, -0.05, 0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65,
                                               0.75, 0.85, 0.95, 1.05, 1.15, 1.25, 1.35, 1.45, 1.55, 1.65, 1.75, 1.85, 1.95
                                             };
 
-  static const std::vector< double > probability = { 0.04466501,        // < -2.05
+  constexpr std::array< double, 42 > probability = { 0.04466501,        // < -2.05
                                                      0.05624099,        // [ -2.05, -1.95 ]
                                                      0.05715916,        // [ -1.95, -1.85 ]
                                                      0.05758092,        // [ -1.85, -1.75 ]
@@ -925,12 +925,12 @@ double TRTFastDigitizationTool::HTProbabilityMuon_5_20( double eta )
 
 double TRTFastDigitizationTool::HTProbabilityMuon_60( double eta )
 {
-  static const std::vector< double > bins = { -2.05, -1.95, -1.85, -1.75, -1.65, -1.55, -1.45, -1.35, -1.25, -1.15, -1.05, -0.95, -0.85,
+  constexpr std::array< double, 41 > bins = { -2.05, -1.95, -1.85, -1.75, -1.65, -1.55, -1.45, -1.35, -1.25, -1.15, -1.05, -0.95, -0.85,
                                               -0.75, -0.65, -0.55, -0.45, -0.35, -0.25, -0.15, -0.05, 0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65,
                                               0.75, 0.85, 0.95, 1.05, 1.15, 1.25, 1.35, 1.45, 1.55, 1.65, 1.75, 1.85, 1.95
                                             };
 
-  static const std::vector< double > probability = { 0.058,             // < -2.05
+  constexpr std::array< double, 42 > probability = { 0.058,             // < -2.05
                                                      0.06316120,        // [ -2.05, -1.95 ]
                                                      0.06552401,        // [ -1.95, -1.85 ]
                                                      0.06462226,        // [ -1.85, -1.75 ]

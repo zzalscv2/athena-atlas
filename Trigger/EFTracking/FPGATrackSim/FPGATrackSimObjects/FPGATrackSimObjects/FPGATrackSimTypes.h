@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include <cmath>
-#include <vector>
+#include <array>
 #include <cstdint>
 
 #define MODULE_BADMODULE -1
@@ -54,8 +54,8 @@ inline double eucangle(double x, double y, double z, double u, double v, double 
   return acos((x * u + y * v + z * w) / (eucnorm(x, y, z) * eucnorm(u, v, w)));
 }
 
-const std::vector< double > TARGET_R_1STAGE = { 290.516, 396.066, 558.552, 564.953, 758.321, 764.665, 996.384, 1002.72 };
-const std::vector< double > TARGET_R_2STAGE = { 33.3024, 99.1959, 159.543, 227.638, 290.516, 396.066, 402.463, 558.552, 564.953, 758.321, 764.665, 996.384, 1002.72 };
+constexpr std::array< double, 8 >  TARGET_R_1STAGE = { 290.516, 396.066, 558.552, 564.953, 758.321, 764.665, 996.384, 1002.72 };
+constexpr std::array< double, 13 > TARGET_R_2STAGE = { 33.3024, 99.1959, 159.543, 227.638, 290.516, 396.066, 402.463, 558.552, 564.953, 758.321, 764.665, 996.384, 1002.72 };
 
 
 #endif
