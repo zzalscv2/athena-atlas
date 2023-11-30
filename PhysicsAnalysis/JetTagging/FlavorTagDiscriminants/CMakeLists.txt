@@ -16,8 +16,8 @@ find_package( ROOT COMPONENTS Core MathCore )
 find_package( onnxruntime )
 find_package( nlohmann_json )
 
-# Build a shared library:
-atlas_add_library( FlavorTagDiscriminants
+# source files, depend on the build
+set(FTDSource
   Root/BTagJetAugmenter.cxx
   Root/BTagTrackIpAccessor.cxx
   Root/BTagAugmenterTool.cxx
@@ -30,6 +30,7 @@ atlas_add_library( FlavorTagDiscriminants
   Root/OnnxUtil.cxx
   Root/GNN.cxx
   Root/GNNTool.cxx
+  Root/GNNToolifiers.cxx
   Root/customGetter.cxx
   Root/FlipTagEnums.cxx
   Root/AssociationEnums.cxx
@@ -42,6 +43,18 @@ atlas_add_library( FlavorTagDiscriminants
   Root/VRJetOverlapDecorator.cxx
   Root/FTagDataDependencyNames.cxx
   Root/TrackClassifier.cxx
+)
+if (NOT XAOD_STANDALONE)
+  list(
+    APPEND FTDSource
+    Root/MultifoldGNN.cxx
+    Root/MultifoldGNNTool.cxx
+    )
+endif()
+
+# Build a shared library:
+atlas_add_library( FlavorTagDiscriminants
+  ${FTDSource}
   PUBLIC_HEADERS FlavorTagDiscriminants
   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}

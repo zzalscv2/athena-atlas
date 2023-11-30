@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
++  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GNN_TOOL_H
-#define GNN_TOOL_H
+#ifndef MULTIFOLD_GNN_TOOL_H
+#define MULTIFOLD_GNN_TOOL_H
 
 // Tool includes
 #include "AsgTools/AsgTool.h"
@@ -22,27 +22,26 @@
 
 namespace FlavorTagDiscriminants {
 
-  class GNN;
+  class MultifoldGNN;
 
   //
   // Tool to to flavor tag jet/btagging object
   // using GNN based taggers
-  class GNNTool : public asg::AsgTool,
+  class MultifoldGNNTool : public asg::AsgTool,
                   virtual public IBTagDecorator,
                   virtual public IJetTagConditionalDecorator
   {
 
-    ASG_TOOL_CLASS2(GNNTool, IBTagDecorator, IJetTagConditionalDecorator)
+    ASG_TOOL_CLASS2(MultifoldGNNTool, IBTagDecorator, IJetTagConditionalDecorator)
     public:
-      GNNTool(const std::string& name);
-      ~GNNTool();
+      MultifoldGNNTool(const std::string& name);
+      ~MultifoldGNNTool();
 
       StatusCode initialize() override;
 
       virtual void decorate(const xAOD::BTagging& btag) const override;
       virtual void decorate(const xAOD::Jet& jet) const override;
       virtual void decorateWithDefaults(const xAOD::Jet& jet) const override;
-      void decorate(const xAOD::Jet& jet, const SG::AuxElement& decorated) const;
 
       virtual std::set<std::string> getDecoratorKeys() const override;
       virtual std::set<std::string> getAuxInputKeys() const override;
@@ -50,9 +49,10 @@ namespace FlavorTagDiscriminants {
 
     private:
 
-    std::string m_nn_file;
+    std::vector<std::string> m_nn_files;
+    std::string m_fold_hash_name;
       GNNToolProperties m_props;
-      std::unique_ptr<const GNN> m_gnn;
+      std::unique_ptr<const MultifoldGNN> m_gnn;
   };
 }
 #endif
