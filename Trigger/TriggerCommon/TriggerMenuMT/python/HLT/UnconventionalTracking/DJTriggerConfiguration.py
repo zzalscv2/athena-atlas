@@ -8,7 +8,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.Logging import logging
 
 from TrigEDMConfig.TriggerEDMRun3 import recordable
-from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnIParticleROITool
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetLRTCfg
@@ -48,7 +47,7 @@ def DJPromptStep(flags):
 def DJDispFragment(flags):
 
     lrtcfg = getInDetTrigConfig( 'DJetLRT' )
-    roiTool = ViewCreatorCentredOnIParticleROITool('ViewCreatorDJRoI', RoisWriteHandleKey = recordable(lrtcfg.roi), RoIEtaWidth = lrtcfg.etaHalfWidth, RoIPhiWidth = lrtcfg.phiHalfWidth, RoIZedWidth=lrtcfg.zedHalfWidth, UseZedPosition=False)
+    roiTool = CompFactory.ViewCreatorCentredOnIParticleROITool('ViewCreatorDJRoI', RoisWriteHandleKey = recordable(lrtcfg.roi), RoIEtaWidth = lrtcfg.etaHalfWidth, RoIPhiWidth = lrtcfg.phiHalfWidth, RoIZedWidth=lrtcfg.zedHalfWidth, UseZedPosition=False)
 
     InViewRoIs = "InViewRoIs"
     reco = InViewRecoCA("IMDJRoIFTF", RoITool = roiTool, mergeUsingFeature = True, 
