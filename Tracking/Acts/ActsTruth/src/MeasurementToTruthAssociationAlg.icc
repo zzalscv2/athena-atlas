@@ -1,0 +1,224 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "MeasurementToTruthAssociationAlg.h"
+
+#include "ActsGeometry/ATLASSourceLink.h"
+
+#include <iomanip>
+#include <cmath>
+#include <type_traits>
+#include <typeinfo>
+
+namespace ActsTrk
+{
+
+  template <class T_MeasurementCollection, class T_SimDataCollection, class T_TruthEventCollection, bool IsDebug >
+  MeasurementToTruthAssociationAlg<T_MeasurementCollection,
+                                   T_SimDataCollection,
+                                   T_TruthEventCollection,
+                                   IsDebug>::MeasurementToTruthAssociationAlg(const std::string &name,
+                                                                                             ISvcLocator *pSvcLocator)
+      : AthReentrantAlgorithm(name, pSvcLocator)
+  {
+  }
+
+  template <class T_MeasurementCollection, class T_SimDataCollection, class T_TruthEventCollection, bool IsDebug>
+  StatusCode MeasurementToTruthAssociationAlg<T_MeasurementCollection,
+                                              T_SimDataCollection,
+                                              T_TruthEventCollection,
+                                              IsDebug>::initialize()
+  {
+     ATH_CHECK( m_measurementKey.initialize() );
+     ATH_CHECK( m_simDataKey.initialize() );
+     for (unsigned int i=0; i<m_statRDO.size(); ++i) {
+        m_statRDO[i]=0;
+     }
+     ATH_CHECK( m_associationOutKey.initialize() );
+     if constexpr(std::is_same<T_TruthEventCollection, void>::value) {
+        ATH_CHECK( m_truthEventCollectionKey.initialize(false) );
+     }
+     else {
+        ATH_MSG_INFO( " Truth event " << typeid(m_truthEventCollectionKey).name()
+                      << " " << m_truthEventCollectionKey.key());
+        ATH_CHECK( m_truthEventCollectionKey.initialize() );
+     }
+     return StatusCode::SUCCESS;
+  }
+
+  template <class T_MeasurementCollection, class T_SimDataCollection, class T_TruthEventCollection, bool IsDebug>
+  StatusCode MeasurementToTruthAssociationAlg<T_MeasurementCollection,
+                                              T_SimDataCollection,
+                                              T_TruthEventCollection,
+                                              IsDebug>::finalize()
+  {
+     std::array<std::string, kNCategories> names {
+        "Measurements without SimData",              // kNoTruth
+        "Measurements with SimData",                 // kHasSimHit
+        "Deposits without xAOD TruthParticle",       // kInvalidTruthLink
+        "SimData without deposits above threshold",  // kHasSimHitNoParticle
+        "Associated truth exceeds small vector size" // kBeyondSmallVectorSize
+     };
+     auto  max_name_iter = std::max_element(names.begin(),names.end(),[](std::string &a,std::string &b) { return a.size() < b.size(); } );
+     for (unsigned int i=0; i<names.size(); ++i) {
+        ATH_MSG_INFO( "RDO truth stat " << std::left << std::setw(max_name_iter->size()) << names[i] << std::right << " " << m_statRDO[i]);
+     }
+     if constexpr(IsDebug) {
+        ATH_MSG_INFO("Truth particles per RDO " << m_stat.m_particlesPerMeasurement << std::endl
+                     << m_stat.m_particlesPerMeasurement.histogramToString() );
+        ATH_MSG_INFO("Measurements per particle " << m_stat.m_measurementsPerParticle << std::endl
+                     << m_stat.m_measurementsPerParticle.histogramToString() );
+        ATH_MSG_INFO("Log10 of deposited energy per RDO " << m_stat.m_depositedEnergy << std::endl
+                     << m_stat.m_depositedEnergy.histogramToString() );
+     }
+     ATH_MSG_INFO("Deposits HS: " << m_depositCounts[1]
+                  << " PU: " << m_depositCounts[0]
+                  << " ; without truth particle HS: "
+                  << " " << m_depositCounts[1+2]
+                  << " PU: "  << m_depositCounts[0+2]  );
+
+     return StatusCode::SUCCESS;
+  }
+
+  template <class T_MeasurementCollection, class T_SimDataCollection, class T_TruthEventCollection, bool IsDebug>
+  StatusCode MeasurementToTruthAssociationAlg<T_MeasurementCollection,
+                                              T_SimDataCollection,
+                                              T_TruthEventCollection,
+                                              IsDebug>::execute(const EventContext &ctx) const
+  {
+    std::unique_ptr<MeasurementToTruthParticleAssociation>
+       association( std::make_unique<MeasurementToTruthParticleAssociation>() );
+
+    SG::ReadHandle<T_SimDataCollection> simDataHandle = SG::makeHandle(m_simDataKey, ctx);
+    if (!simDataHandle.isValid()) {
+       ATH_MSG_ERROR("No sim data for key " << m_simDataKey.key() );
+       return StatusCode::FAILURE;
+    }
+    SG::ReadHandle<T_MeasurementCollection> measurementHandle = SG::makeHandle(m_measurementKey, ctx);
+    if (!measurementHandle.isValid()) {
+       ATH_MSG_ERROR("No measurements for key " << m_measurementKey.key() );
+       return StatusCode::FAILURE;
+    }
+    association->resize( measurementHandle->size() );
+
+    const T_TruthEventCollection *truth_event_collection=nullptr;
+    if constexpr(!std::is_same<T_TruthEventCollection, void>::value) {
+       SG::ReadHandle<T_TruthEventCollection>
+          truthEventCollectionHandle = SG::makeHandle(m_truthEventCollectionKey, ctx);
+       if (!truthEventCollectionHandle.isValid()) {
+          ATH_MSG_ERROR("No truth event collection for key " << m_truthEventCollectionKey.key() );
+          return StatusCode::FAILURE;
+       }
+       truth_event_collection = truthEventCollectionHandle.cptr();
+    }
+
+    auto deposit_to_truth_map = makeDepositToTruthParticleMap(truth_event_collection);
+
+    typename std::conditional<IsDebug,Dbg::HistTemp,Dbg::Empty>::type stat(m_stat);
+    typename std::conditional<IsDebug,
+                              std::unordered_map<const xAOD::TruthParticle *,unsigned int>,
+                              Dbg::Empty>::type
+       hits_per_truthparticle;
+    std::array<std::size_t,4> depositCounts {0u, 0u, 0u, 0u};
+    std::array<unsigned int, kNCategories> truth_stat{};
+
+    const T_SimDataCollection *simData = simDataHandle.cptr();
+
+    std::vector<float> summed_contribution;
+    const T_MeasurementCollection *measurements = measurementHandle.cptr();
+    for ( const auto *measurement : *measurements ) {
+       summed_contribution.clear();
+       for (const auto& a_rdo : getRDOList(*measurement) ) {
+          typename T_SimDataCollection::const_iterator sim_data_iter(simData->find(a_rdo));
+
+          if(sim_data_iter != simData->end() )  {
+             auto  deposits_for_measurement = getSimDataDeposits(*simData, sim_data_iter);
+             unsigned int n_particles=0;
+             for (const auto &deposit : deposits_for_measurement ) {
+                auto *truth_particle = deposit_to_truth_map.getTruthParticle(deposit);
+                ++(depositCounts.at(deposit_to_truth_map.isHardScatter(deposit)+(truth_particle ? 0u : 2u)));
+                if (!truth_particle) {
+                   ++truth_stat[kInvalidTruthLink];
+                   continue;
+                }
+                if constexpr(IsDebug) { stat.m_depositedEnergy.add( std::log10(getDepositedEnergy(deposit)) ); }
+
+                if (getDepositedEnergy(deposit) >= m_depositedEnergyMin.value()) {
+                   if (measurement->index() >= association->size()) {
+                      throw std::range_error("Measurement index out of range");
+                   }
+                   ParticleVector::iterator
+                      particle_iter = std::find( (*association)[ measurement->index() ].begin(),
+                                                 (*association)[ measurement->index() ].end(),
+                                                 truth_particle );
+                   if (   particle_iter == (*association)[ measurement->index() ].end()
+                       || *particle_iter != truth_particle) {
+                      particle_iter  = (*association)[ measurement->index() ].insert( particle_iter, truth_particle);
+                      ++n_particles;
+                   }
+                   unsigned int idx = (/*dest_iter*/ particle_iter - (*association)[ measurement->index() ].begin());
+                   if (idx >= summed_contribution.size() ) {
+                      summed_contribution.resize(idx+1, 0.);
+                   }
+                   summed_contribution[idx] += getDepositedEnergy(deposit);
+                   if constexpr(IsDebug) {
+                      std::unordered_map<const xAOD::TruthParticle *,unsigned int>::iterator
+                         part_hits_iter = hits_per_truthparticle.find(truth_particle);
+                      if (part_hits_iter == hits_per_truthparticle.end()) {
+                         hits_per_truthparticle.insert(std::make_pair(truth_particle,1));
+                      }
+                      else {
+                         ++(part_hits_iter->second);
+                      }
+                   }
+                }
+             }
+             if constexpr(IsDebug) { stat.m_particlesPerMeasurement.add(n_particles); }
+             ++truth_stat[ n_particles == 0  ? kHasSimHitNoParticle : kHasSimHit];
+             if (n_particles>ActsTrk::NTruthParticlesPerMeasurement) {
+                ++truth_stat[kBeyondSmallVectorSize];
+             }
+          }
+          else {
+             ++truth_stat[kNoTruth];
+          }
+       }
+       if ( (*association)[ measurement->index() ].size()>1) {
+          // move truth particle with largest contribution to the measurement to the beginning of the list
+          std::vector<float>::const_iterator iter_max=std::max_element(summed_contribution.begin(),summed_contribution.end());
+          unsigned int idx = iter_max - summed_contribution.begin();
+          if (idx>0) {
+             std::swap((*association)[ measurement->index() ][0],
+                       (*association)[ measurement->index() ][idx]);
+          }
+       }
+    }
+    if constexpr(IsDebug) {
+       std::lock_guard<std::mutex> lock(m_stat.m_mutex);
+       m_stat.m_depositedEnergy += stat.m_depositedEnergy;
+       m_stat.m_particlesPerMeasurement += stat.m_particlesPerMeasurement;
+       for (const auto &particle_hit_counts : hits_per_truthparticle) {
+          m_stat.m_measurementsPerParticle.add( particle_hit_counts.second);
+       }
+    }
+    for (unsigned int i=0; i<m_depositCounts.size(); ++i) {
+       m_depositCounts[i] += depositCounts[i];
+    }
+    for (unsigned int i=0; i<m_statRDO.size(); ++i) {
+       m_statRDO[i]+=truth_stat[i];
+    }
+
+    SG::WriteHandle<MeasurementToTruthParticleAssociation> associationOutHandle(m_associationOutKey, ctx);
+    if (associationOutHandle.record( std::move(association)).isFailure()) {
+       ATH_MSG_ERROR("Failed to record measurement to truth assocition with key " << m_associationOutKey.key() );
+       return StatusCode::FAILURE;
+    }
+
+    return StatusCode::SUCCESS;
+  }
+
+
+
+
+} // namespace
