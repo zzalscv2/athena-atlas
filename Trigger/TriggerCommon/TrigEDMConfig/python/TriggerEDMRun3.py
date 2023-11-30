@@ -115,8 +115,8 @@ JetFastFTagVarsToKeep = JetCopyVarsToKeep
 JetFastFTagVarsToKeep += [f'fastDips_p{x}' for x in 'cub']
 JetFastFTagVarsToKeep += [f'fastGN120230327_p{x}' for x in 'cub']
 JetFastFTagVarsToKeep += [f'fastGN120230331_p{x}' for x in 'cub']
-JetFastFTagVarsToKeep += ['dipz20230223_z']
-JetFastFTagVarsToKeep += ['dipz20230223_negLogSigma2']
+JetFastFTagVarsToKeep += ['dipz20231122_z']
+JetFastFTagVarsToKeep += ['dipz20231122_negLogSigma2']
 JetFastFTagVars = '.'.join(JetFastFTagVarsToKeep)
 
 LargeRJetVarsToKeep = [f'GN2Xv01_p{x}' for x in ['hbb', 'top', 'qcd']]
