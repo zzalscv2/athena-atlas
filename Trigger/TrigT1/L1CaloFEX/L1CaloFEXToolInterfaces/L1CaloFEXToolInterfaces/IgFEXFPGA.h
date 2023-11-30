@@ -22,6 +22,7 @@ Interface definition for gFEXFPGA
 
   static const InterfaceID IID_IgFEXFPGA("LVL1::IgFEXFPGA", 1, 0);
 
+  typedef  std::array<std::array<int, 12>, 32> gTowersType;
   typedef  std::array<std::array<int, 12>, 32> gTowersCentral;
   typedef  std::array<std::array<int, 8>, 32> gTowersForward;
 
@@ -36,14 +37,14 @@ Interface definition for gFEXFPGA
     virtual int getID() const = 0;
 
 
-    virtual void SetTowersAndCells_SG(gTowersCentral) = 0;
-    virtual void SetTowersAndCells_SG(gTowersForward) = 0;
+    // virtual void SetTowersAndCells_SG(gTowersCentral) = 0;
+    // virtual void SetTowersAndCells_SG(gTowersForward) = 0;
 
-    virtual void GetEnergyMatrix(gTowersCentral &) const = 0;
-    virtual void GetEnergyMatrix(gTowersForward &) const = 0;
+    // virtual void GetEnergyMatrix(gTowersCentral &) const = 0;
+    // virtual void GetEnergyMatrix(gTowersForward &) const = 0;
 
-    virtual void FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> &) = 0;
-    virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &) = 0;
+    virtual void FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersCentral &, gTowersType &, gTowersType &) = 0;
+    virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersForward &, gTowersForward &, gTowersType &, gTowersType &) = 0;
 
 
   private:

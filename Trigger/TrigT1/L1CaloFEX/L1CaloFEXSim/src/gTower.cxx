@@ -171,6 +171,12 @@ namespace LVL1 {
 
   }
 
+  int gTower::getFWID() const {
+    int iPhiFW, iEtaFW;
+    return getFWID(iPhiFW, iEtaFW);
+  }
+
+
   /** Return the firmware ID from the software ID */
   //This is about assigning a unique ID to the gTowers, that reflects as much as possible 
   //the tower identification in firmware.
@@ -183,13 +189,16 @@ namespace LVL1 {
   //one gTower object in the simulation. We assign here a unique ID to each gTower. 
   //The hardcoded numbers come from the definition of local FPGA IDs from global eta, phi indices.  
 
-  int gTower::getFWID() const {
+  int gTower::getFWID(int & iPhiFW, int & iEtaFW) const {
 
     int gFEXtowerID; // the firmware ID to be calculated
 
     int iEta = this->iEta();
     int iPhi = this->iPhi();
     float Eta = this->eta();
+
+    iPhiFW = iPhi;
+    iEtaFW = iEta;
 
     bool is_central = true;
     if (iEta <= 7 || iEta >= 32) is_central = false;
@@ -216,23 +225,23 @@ namespace LVL1 {
 
         if ( iEta == 0 ){
           gFEXtowerID = gFEXtowerID + (iPhi*24);
-          iPhi = iPhi*2;
-          iEta = 2;
+          iPhiFW = iPhi*2;
+          iEtaFW = 2;
         }
         else if ( iEta == 1 ){
           gFEXtowerID = gFEXtowerID + ((iPhi*24) + 12);
-          iPhi = (iPhi*2)+1;
-          iEta = 2;
+          iPhiFW = (iPhi*2)+1;
+          iEtaFW = 2;
         }   
         else if ( iEta == 2 ){
           gFEXtowerID = gFEXtowerID + ((iPhi*24) + 1);
-          iPhi = iPhi*2;
-          iEta = 3;
+          iPhiFW = iPhi*2;
+          iEtaFW = 3;
         } 
         else if ( iEta == 3 ){
           gFEXtowerID = gFEXtowerID + ((iPhi*24) + 13);
-          iPhi = (iPhi*2)+1;
-          iEta = 3;
+          iPhiFW = (iPhi*2)+1;
+          iEtaFW = 3;
         }
         else if ( iEta >= 4 and iEta <= 7 ){
           gFEXtowerID = gFEXtowerID + ((iPhi*12) + (iEta -2));
@@ -247,27 +256,28 @@ namespace LVL1 {
         }
         else if ( iEta == 36 ){
           gFEXtowerID = gFEXtowerID + ((iPhi*24) + 22);
-          iPhi = (iPhi*2)+1;
-          iEta = 36;
+          iPhiFW = iPhi*2;
+          iEtaFW = 36;
         }   
         else if ( iEta == 37 ){
           gFEXtowerID = gFEXtowerID + ((iPhi*24) + 10);
-          iPhi = iPhi*2;
-          iEta = 36;
+          iPhiFW = (iPhi*2)+1;
+          iEtaFW = 36;
         } 
         else if ( iEta == 38 ){
           gFEXtowerID = gFEXtowerID + ((iPhi*24) + 23);
-          iPhi = (iPhi*2)+1;
-          iEta = 37;
+          iPhiFW = iPhi*2;
+          iEtaFW = 37;
         }
         else if ( iEta == 39 ){
           gFEXtowerID = gFEXtowerID + ((iPhi*24) + 11);
-          iPhi = iPhi*2;
-          iEta = 37;
+          iPhiFW = (iPhi*2)+1;
+          iEtaFW = 37;
         }  
       }
 
     }
+
     return gFEXtowerID;
 
   }

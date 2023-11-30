@@ -35,14 +35,14 @@ namespace LVL1 {
     virtual void reset() override ;
     virtual int getID() const override {return m_fpgaId;}
 
-    virtual void SetTowersAndCells_SG(gTowersCentral) override ;
-    virtual void SetTowersAndCells_SG(gTowersForward) override ;
+    // virtual void SetTowersAndCells_SG(gTowersCentral) override ;
+    // virtual void SetTowersAndCells_SG(gTowersForward) override ;
 
-    virtual void GetEnergyMatrix(gTowersCentral &) const override ;
-    virtual void GetEnergyMatrix(gTowersForward &) const override ;
+    // virtual void GetEnergyMatrix(gTowersCentral &) const override ;
+    // virtual void GetEnergyMatrix(gTowersForward &) const override ;
 
-    virtual void FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> &) override ;
-    virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &) override ;
+    virtual void FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersCentral &, gTowersType &, gTowersType &) override ;
+    virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersForward &, gTowersForward &, gTowersType &, gTowersType &) override ;
 
 
     /** Internal data */
@@ -50,11 +50,12 @@ namespace LVL1 {
 
     int m_fpgaId = -1;
 
-    gTowersCentral m_gTowersIDs_central;
-    gTowersForward m_gTowersIDs_forward;
+    // gTowersCentral m_gTowersIDs_central;
+    // gTowersForward m_gTowersIDs_forward;
 
 
     SG::ReadHandleKey<LVL1::gTowerContainer> m_gFEXFPGA_gTowerContainerKey {this, "MyGTowers", "gTowerContainer", "Input container for gTowers"};
+    SG::ReadHandleKey<LVL1::gTowerContainer> m_gFEXFPGA_gTower50ContainerKey {this, "MyGTowers50", "gTower50Container", "Input container for gTowers"};
 
   };
 

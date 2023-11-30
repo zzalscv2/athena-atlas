@@ -68,11 +68,15 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
 
    std::copy(&tmp_gTowersIDs_subset[0][0], &tmp_gTowersIDs_subset[0][0]+(rows*cols),&m_gTowersIDs[0][0]);
 
-   gTowersCentral Atwr = {{{0}}};
-   gTowersCentral Btwr = {{{0}}};
+   gTowersType Atwr = {{{0}}};
+   gTowersType Btwr = {{{0}}};
+   gTowersType Ctwr = {{{0}}};
    gTowersForward CPtwr = {{{0}}};
    gTowersForward CNtwr = {{{0}}};
 
+   gTowersType Atwr50 = {{{0}}};
+   gTowersType Btwr50 = {{{0}}};
+   gTowersType Ctwr50 = {{{0}}};
 
 
    //FPGA A----------------------------------------------------------------------------------------------------------------------------------------------
@@ -84,10 +88,9 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
       }
    }
    ATH_CHECK(m_gFEXFPGA_Tool->init(0));
-   m_gFEXFPGA_Tool->SetTowersAndCells_SG(tmp_gTowersIDs_subset_centralFPGA);
-   m_gFEXFPGA_Tool->GetEnergyMatrix(Atwr);
-   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer);
+   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer, tmp_gTowersIDs_subset_centralFPGA, Atwr, Atwr50);
    m_gFEXFPGA_Tool->reset();
+
    //FPGA A----------------------------------------------------------------------------------------------------------------------------------------------
 
    //FPGA B----------------------------------------------------------------------------------------------------------------------------------------------
@@ -99,38 +102,15 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
       }
    }
    ATH_CHECK(m_gFEXFPGA_Tool->init(1));
-   m_gFEXFPGA_Tool->SetTowersAndCells_SG(tmp_gTowersIDs_subset_centralFPGA_B);
-   m_gFEXFPGA_Tool->GetEnergyMatrix(Btwr);
-   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer);
+   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer, tmp_gTowersIDs_subset_centralFPGA_B, Btwr, Btwr50);
    m_gFEXFPGA_Tool->reset();
+
    //FPGA B----------------------------------------------------------------------------------------------------------------------------------------------
 
 
-   //FPGA C-P ----------------------------------------------------------------------------------------------------------------------------------------------
-   //Use a matrix with 32 rows, even if FPGA-C (positive) also deals with regions of 16 bins in phi (those connected to FCAL).
-   //We have 4 columns with 32 rows and 4 columns with 16 rows for each FPGA-C.
-   //So we use a matrix 32x8 but we fill only half of it in the region 3.3<|eta|<4.8.
-   gTowersForward tmp_gTowersIDs_subset_forwardFPGA;
-   memset(&tmp_gTowersIDs_subset_forwardFPGA, 0, sizeof tmp_gTowersIDs_subset_forwardFPGA);
-   for (int myrow = 0; myrow<FEXAlgoSpaceDefs::centralNphi; myrow++){
-      for (int mycol = 0; mycol<4; mycol++){
-         tmp_gTowersIDs_subset_forwardFPGA[myrow][mycol] = tmp_gTowersIDs_subset[myrow][mycol+32];
-      }
-   }
-   for (int myrow = 0; myrow<FEXAlgoSpaceDefs::forwardNphi; myrow++){
-      for (int mycol = 4; mycol<8; mycol++){
-         tmp_gTowersIDs_subset_forwardFPGA[myrow][mycol] = tmp_gTowersIDs_subset[myrow][mycol+32];
-      }
-   }
-   ATH_CHECK(m_gFEXFPGA_Tool->init(2));
-   m_gFEXFPGA_Tool->SetTowersAndCells_SG(tmp_gTowersIDs_subset_forwardFPGA);
-   m_gFEXFPGA_Tool->GetEnergyMatrix(CPtwr);
-   m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer);
-   m_gFEXFPGA_Tool->reset();
-   //FPGA C-P----------------------------------------------------------------------------------------------------------------------------------------------
+   //FPGA C ----------------------------------------------------------------------------------------------------------------------------------------------
 
-
-   //FPGA C-N----------------------------------------------------------------------------------------------------------------------------------------------
+   // C-N
    //Use a matrix with 32 rows, even if FPGA-N (negative) also deals with regions of 16 bins in phi (those connected to FCAL).
    //We have 4 columns with 32 rows and 4 columns with 16 rows for each FPGA-C.
    //So we use a matrix 32x8 but we fill only half of it in the region 3.3<|eta|<4.8.
@@ -146,13 +126,29 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
          tmp_gTowersIDs_subset_forwardFPGA_N[myrow][mycol] = tmp_gTowersIDs_subset[myrow][mycol];
       }
    }
-   ATH_CHECK(m_gFEXFPGA_Tool->init(2));
-   m_gFEXFPGA_Tool->SetTowersAndCells_SG(tmp_gTowersIDs_subset_forwardFPGA_N);
-   m_gFEXFPGA_Tool->GetEnergyMatrix(CNtwr);
-   m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer);
-   m_gFEXFPGA_Tool->reset();
-   //FPGA C-N----------------------------------------------------------------------------------------------------------------------------------------------
 
+   // C-P
+   //Use a matrix with 32 rows, even if FPGA-C (positive) also deals with regions of 16 bins in phi (those connected to FCAL).
+   //We have 4 columns with 32 rows and 4 columns with 16 rows for each FPGA-C.
+   //So we use a matrix 32x8 but we fill only half of it in the region 3.3<|eta|<4.8.
+   gTowersForward tmp_gTowersIDs_subset_forwardFPGA_P;
+   memset(&tmp_gTowersIDs_subset_forwardFPGA_P, 0, sizeof tmp_gTowersIDs_subset_forwardFPGA_P);
+   for (int myrow = 0; myrow<FEXAlgoSpaceDefs::centralNphi; myrow++){
+      for (int mycol = 0; mycol<4; mycol++){
+         tmp_gTowersIDs_subset_forwardFPGA_P[myrow][mycol] = tmp_gTowersIDs_subset[myrow][mycol+32];
+      }
+   }
+   for (int myrow = 0; myrow<FEXAlgoSpaceDefs::forwardNphi; myrow++){
+      for (int mycol = 4; mycol<8; mycol++){
+         tmp_gTowersIDs_subset_forwardFPGA_P[myrow][mycol] = tmp_gTowersIDs_subset[myrow][mycol+32];
+      }
+   }
+
+   ATH_CHECK(m_gFEXFPGA_Tool->init(2));
+   m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer, tmp_gTowersIDs_subset_forwardFPGA_N, tmp_gTowersIDs_subset_forwardFPGA_P, Ctwr, Ctwr50);
+   m_gFEXFPGA_Tool->reset();
+
+   //FPGA C----------------------------------------------------------------------------------------------------------------------------------------------
 
    // Retrieve the L1 menu configuration
    SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey/*, ctx*/);
@@ -162,22 +158,30 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    auto & thr_gLJ = l1Menu->thrExtraInfo().gLJ();
    int gLJ_seedThrA = 0;
    int gLJ_seedThrB = 0;
-   gLJ_seedThrA = thr_gLJ.seedThr('A'); //defined in GeV by default
-   gLJ_seedThrA = gLJ_seedThrA/0.2; //rescaling with 0.2 GeV scale to get counts (corresponding to hw units) 
-   gLJ_seedThrB = thr_gLJ.seedThr('B'); //defined in GeV by default
-   gLJ_seedThrB = gLJ_seedThrB/0.2; //rescaling with 0.2 GeV scale to get counts (corresponding to hw units) 
+   int gLJ_seedThrC = 0;
+   gLJ_seedThrA = thr_gLJ.seedThrCounts('A'); //defined in GeV by default
+   // gLJ_seedThrA = gLJ_seedThrA/0.2; //rescaling with 0.2 GeV scale to get counts (corresponding to hw units) 
+   gLJ_seedThrB = thr_gLJ.seedThrCounts('B'); //defined in GeV by default
+   // gLJ_seedThrB = gLJ_seedThrB/0.2; //rescaling with 0.2 GeV scale to get counts (corresponding to hw units) 
+   gLJ_seedThrC = thr_gLJ.seedThrCounts('C'); //defined in GeV by default
+
    int gLJ_ptMinToTopoCounts1 = 0;
    int gLJ_ptMinToTopoCounts2 = 0;
    gLJ_ptMinToTopoCounts1 = thr_gLJ.ptMinToTopoCounts(1); 
    gLJ_ptMinToTopoCounts2 = thr_gLJ.ptMinToTopoCounts(2); 
    float gLJ_rhoMaxA = 0;
    float gLJ_rhoMaxB = 0;
+   float gLJ_rhoMaxC = 0;
    float gLJ_rhoMinA = 0;
    float gLJ_rhoMinB = 0;
+   float gLJ_rhoMinC = 0;
+
    gLJ_rhoMaxA = (thr_gLJ.rhoTowerMax('A'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
    gLJ_rhoMaxB = (thr_gLJ.rhoTowerMax('B'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
+   gLJ_rhoMaxC = (thr_gLJ.rhoTowerMax('C'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
    gLJ_rhoMinA = (thr_gLJ.rhoTowerMin('A'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
    gLJ_rhoMinB = (thr_gLJ.rhoTowerMin('B'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
+   gLJ_rhoMinC = (thr_gLJ.rhoTowerMin('C'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
    
 
    //Parameters related to gJ (small-R jet objects - gBlock)
@@ -190,11 +194,16 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
 
    int pucA = 0;
    int pucB = 0;
+   int pucC = 0;
    //note that jetThreshold is not a configurable parameter in firmware, it is used to check that jet values are positive
-   int jetThreshold = 0;
+   int jetThreshold = FEXAlgoSpaceDefs::jetThr; //this threshold is set by the online software 
 
-   m_gFEXJetAlgoTool->pileUpCalculation(Atwr, gLJ_rhoMaxA, gLJ_rhoMinA,  4,  pucA);
-   m_gFEXJetAlgoTool->pileUpCalculation(Btwr, gLJ_rhoMaxB, gLJ_rhoMinB,  4,  pucB);
+   if (FEXAlgoSpaceDefs::ENABLE_PUC == true){
+      m_gFEXJetAlgoTool->pileUpCalculation(Atwr50, gLJ_rhoMaxA, gLJ_rhoMinA,  1,  pucA);
+      m_gFEXJetAlgoTool->pileUpCalculation(Btwr50, gLJ_rhoMaxB, gLJ_rhoMinB,  1,  pucB);
+      m_gFEXJetAlgoTool->pileUpCalculation(Ctwr50, gLJ_rhoMaxC, gLJ_rhoMinC,  1,  pucC);
+   }
+   
    
 
    // The output TOBs, to be filled by the gFEXJetAlgoTool
@@ -202,22 +211,26 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    std::array<uint32_t, 7> ATOB2_dat = {0};
    std::array<uint32_t, 7> BTOB1_dat = {0};
    std::array<uint32_t, 7> BTOB2_dat = {0};
+   std::array<uint32_t, 7> CTOB1_dat = {0};
+   std::array<uint32_t, 7> CTOB2_dat = {0};
 
    // Use the gFEXJetAlgoTool
 
    // Pass the energy matrices to the algo tool, and run the algorithms
-   auto tobs_v = m_gFEXJetAlgoTool->largeRfinder(Atwr, Btwr, CNtwr, CPtwr, pucA, pucB, 
-                                                gLJ_seedThrA, gLJ_seedThrB, gJ_ptMinToTopoCounts1, gJ_ptMinToTopoCounts2, 
-                                                jetThreshold, gLJ_ptMinToTopoCounts1, gLJ_ptMinToTopoCounts2,
-                                                ATOB1_dat, ATOB2_dat,
-                                                BTOB1_dat, BTOB2_dat);
+   auto tobs_v = m_gFEXJetAlgoTool->largeRfinder(Atwr, Btwr, Ctwr, pucA, pucB, pucC,
+                                                 gLJ_seedThrA, gLJ_seedThrB, gLJ_seedThrC, gJ_ptMinToTopoCounts1, gJ_ptMinToTopoCounts2, 
+                                                 jetThreshold, gLJ_ptMinToTopoCounts1, gLJ_ptMinToTopoCounts2,
+                                                 ATOB1_dat, ATOB2_dat,
+                                                 BTOB1_dat, BTOB2_dat,
+                                                 CTOB1_dat, CTOB2_dat);
 
-   m_gRhoTobWords.resize(2);
-   m_gBlockTobWords.resize(8);
-   m_gJetTobWords.resize(4);
+   m_gRhoTobWords.resize(3);
+   m_gBlockTobWords.resize(12);
+   m_gJetTobWords.resize(6);
 
    m_gRhoTobWords[0] = ATOB2_dat[0];//Pile up correction A
    m_gRhoTobWords[1] = BTOB2_dat[0];//Pile up correction B
+   m_gRhoTobWords[2] = CTOB2_dat[0];//Pile up correction C
 
    //Placing the gBlock TOBs into a dedicated array
    m_gBlockTobWords[0] = ATOB1_dat[1];//leading gBlock in FPGA A, eta bins (0--5)
@@ -230,11 +243,18 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    m_gBlockTobWords[6] = BTOB1_dat[2];//subleading gBlock in FPGA B, eta bins (0--5)
    m_gBlockTobWords[7] = BTOB2_dat[2];//subleading gBlock in FPGA B, eta bins (6--11)
 
+   m_gBlockTobWords[8] = CTOB1_dat[1];//leading gBlock in FPGA C, eta positive
+   m_gBlockTobWords[9] = CTOB2_dat[1];//leading gBlock in FPGA C, eta negative
+   m_gBlockTobWords[10] = CTOB1_dat[2];//sub-leading gBlock in FPGA C, eta positive
+   m_gBlockTobWords[11] = CTOB2_dat[2];//sub-leading gBlock in FPGA C, eta negative
+
    //Placing the gJet TOBs into a dedicated array
    m_gJetTobWords[0] = ATOB1_dat[3];//leading gJet in FPGA A, eta bins (0--5)
    m_gJetTobWords[1] = ATOB2_dat[3];//leading gJet in FPGA A, eta bins (6--11)
    m_gJetTobWords[2] = BTOB1_dat[3];//leading gJet in FPGA B, eta bins (0--5)
    m_gJetTobWords[3] = BTOB2_dat[3];//leading gJet in FPGA B, eta bins (6--11)
+   m_gJetTobWords[4] = CTOB1_dat[3];//leading gJet in FPGA C positive
+   m_gJetTobWords[5] = CTOB2_dat[3];//leading gJet in FPGA C positive
 
 
    // Use the gFEXJetAlgoTool
@@ -246,12 +266,9 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    int gXE_seedThrA = 0;
    int gXE_seedThrB = 0;
    int gXE_seedThrC = 0;
-   gXE_seedThrA = thr_gXE.seedThr('A'); //defined in GeV by default
-   gXE_seedThrA = gXE_seedThrA/0.2; //rescaling with 0.2 GeV scale to get counts (corresponding to hw units) 
-   gXE_seedThrB = thr_gXE.seedThr('B'); //defined in GeV by default
-   gXE_seedThrB = gXE_seedThrB/0.2; //rescaling with 0.2 GeV scale to get counts (corresponding to hw units) 
-   gXE_seedThrC = thr_gXE.seedThr('C'); //defined in GeV by default
-   gXE_seedThrC = gXE_seedThrC/0.2; //rescaling with 0.2 GeV scale to get counts (corresponding to hw units) 
+   gXE_seedThrA = thr_gXE.seedThrCounts('A'); //defined in GeV by default
+   gXE_seedThrB = thr_gXE.seedThrCounts('B'); //defined in GeV by default
+   gXE_seedThrC = thr_gXE.seedThrCounts('C'); //defined in GeV by default
 
 
    float aFPGA_A = 0;

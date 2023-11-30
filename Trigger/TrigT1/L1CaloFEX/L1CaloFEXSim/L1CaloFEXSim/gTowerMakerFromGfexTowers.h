@@ -33,7 +33,8 @@ class gTowerMakerFromGfexTowers : public AthAlgorithm
     private:
         
         // Decoded input data
-        SG::ReadHandleKey<xAOD::gFexTowerContainer> m_gDataTowerKey {this, "InputDataTowers", "L1_gFexDataTowers", "gfexTowers (use L1_gFexEmulatedTowers for built from SC, or L1_gFexDataTowers for efex readout"};
+        SG::ReadHandleKey<xAOD::gFexTowerContainer> m_gDataTowerKey {this, "InputDataTowers", "L1_gFexDataTowers", "gfexTowers with 200 MeV resolution (default) (use L1_gFexEmulatedTowers for built from SC, or L1_gFexDataTowers for efex readout"};
+        // SG::ReadHandleKey<xAOD::gFexTowerContainer> m_gDataTower50Key {this, "InputDataTowers", "L1_gFexDataTowers50", "gfexTowers with 50 MeV resolution (use L1_gFexEmulatedTowers for built from SC, or L1_gFexDataTowers for efex readout"};
         
         //Emulated input data
         // the use-case for this second input tower collection is in monitoring when running in prescaled readout mode

@@ -316,26 +316,12 @@ namespace LVL1 {
       }
       //iterate over all gBlock Tobs and fill EDM with them
       for(auto &tob : m_allgBlockTobs){
-         //Check the status of the TOB (bit 7)
-         //Only fill the EDM if status = 1 (means it passed the threshold, see JetFinder algorithm) 
-         int statusBit = 7;
-         int statusMask = 0x1;
-         int tob_status = (tob >> statusBit) & statusMask;
-         if (tob_status == 1){
-            ATH_CHECK(fillgBlockEDM(tob, gJ_scale));
-         }
+         ATH_CHECK(fillgBlockEDM(tob, gJ_scale));
       }
 
       //iterate over all gJet Tobs and fill EDM with them
       for(auto &tob : m_allgJetTobs){
-         //Check the status of the TOB (bit 7)
-         //Only fill the EDM if status = 1 (means it passed the threshold, see JetFinder algorithm) 
-         int statusBit = 7;
-         int statusMask = 0x1;
-         int tob_status = (tob >> statusBit) & statusMask;
-         if (tob_status == 1){
-            ATH_CHECK(fillgJetEDM(tob, gLJ_scale));   
-         }
+         ATH_CHECK(fillgJetEDM(tob, gLJ_scale));   
       }
 
       //iterate over all JwoJ scalar energy Tobs and fill EDM with them (should be only one)

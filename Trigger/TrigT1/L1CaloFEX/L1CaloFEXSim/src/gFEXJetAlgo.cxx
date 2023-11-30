@@ -36,22 +36,24 @@ StatusCode gFEXJetAlgo::initialize(){
 
 
 std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
-                               const gTowersCentral& Atwr, const gTowersCentral& Btwr,
-                               const gTowersForward& CNtwr, const gTowersForward& CPtwr,
-                               int pucA, int pucB, int gLJ_seedThrA, int gLJ_seedThrB, 
+                               const gTowersType& Atwr, 
+                               const gTowersType& Btwr,
+                               const gTowersType& Ctwr,
+                               int pucA, int pucB, int pucC, int gLJ_seedThrA, int gLJ_seedThrB, int gLJ_seedThrC, 
                                int gJ_ptMinToTopoCounts1, int gJ_ptMinToTopoCounts2,
                                int jetThreshold, int gLJ_ptMinToTopoCounts1, int gLJ_ptMinToTopoCounts2,
                                std::array<uint32_t, 7> & ATOB1_dat, std::array<uint32_t, 7> & ATOB2_dat,
-                               std::array<uint32_t, 7> & BTOB1_dat, std::array<uint32_t, 7> & BTOB2_dat) const {
+                               std::array<uint32_t, 7> & BTOB1_dat, std::array<uint32_t, 7> & BTOB2_dat,
+                               std::array<uint32_t, 7> & CTOB1_dat, std::array<uint32_t, 7> & CTOB2_dat) const {
 
   // Arrays for gJets
   // s = status (1 if above threshold)
   // v = value 200 MeV LSB
   // eta and phi are bin numbers
-  std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> gJetTOBs   = {{0,0,0,0}};
-  std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> gJetTOBv   = {{0,0,0,0}};
-  std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> gJetTOBeta = {{0,0,0,0}};
-  std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> gJetTOBphi = {{0,0,0,0}};
+  std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> gJetTOBs   = {{0,0,0,0,0,0}};
+  std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> gJetTOBv   = {{0,0,0,0,0,0}};
+  std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> gJetTOBeta = {{0,0,0,0,0,0}};
+  std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> gJetTOBphi = {{0,0,0,0,0,0}};
 
   // Arrays for gBlocks  (so far only 2 gBlocks per fiber)
   // first index is for the fiber number (A 0 and 1, B 0 and 1, C P and C N )
@@ -61,36 +63,108 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   std::array<std::array<int, 3>, FEXAlgoSpaceDefs::BTOBFIB> gBlockTOBphi = {{ {{0,0,0}}, {{0,0,0}}, {{0,0,0}}, {{0,0,0}}, {{0,0,0}}, {{0,0,0}} }};
 
 
-  // calculate A & B  remote partial sums first
-  gTowersPartialSums RAlps_out, RArps_out;
-  RemotePartialAB(Atwr, RAlps_out, RArps_out);
-
-  gTowersPartialSums RBlps_out, RBrps_out;
-  RemotePartialAB(Btwr, RBlps_out, RBrps_out);
-
-  gTowersPartialSums RCNrps_out;
-  RemotePartialCN(CNtwr,  RCNrps_out);
-  gTowersPartialSums RCPlps_out;
-  RemotePartialCP(CPtwr,  RCPlps_out);
-
-
-  // find all possible jets within the FPGA (32 x 12 for FPGAs A and B )
-
-  gTowersCentral AjetsRestricted;
-  singleAB(Atwr, AjetsRestricted);
+  //Alternate format for FPGC C (split in two)
   
-  gTowersCentral BjetsRestricted;
-  singleAB(Btwr, BjetsRestricted);
+  gTowersJetEngine CNtwr;
+  gTowersJetEngine CPtwr;
 
+  for(int irow=0; irow<FEXAlgoSpaceDefs::ABCrows; irow++){ 
+    for(int jcolumn=0;jcolumn<FEXAlgoSpaceDefs::ABCcolumnsEng;jcolumn++){
+      CNtwr[irow][jcolumn] =  Ctwr[irow][jcolumn]  ;     
+      CPtwr[irow][jcolumn] =  Ctwr[irow][jcolumn+FEXAlgoSpaceDefs::ABCcolumnsEng] ;
+    }
+  }
+
+
+
+  gTowersType AjetsAlt;
+  singleHalf(Atwr,AjetsAlt);
+
+  gTowersPartialSums AlpsAltOut;
+  gTowersPartialSums ArpsAltOut;
+
+  InternalPartialAB(Atwr, AlpsAltOut, ArpsAltOut);
+
+  gTowersType BjetsAlt;
+  singleHalf(Btwr,BjetsAlt);
+
+  gTowersPartialSums BlpsAltOut;
+  gTowersPartialSums BrpsAltOut;
+
+  InternalPartialAB(Btwr, BlpsAltOut, BrpsAltOut);
+
+  gTowersType CjetsAlt;
+  singleHalf(Ctwr,CjetsAlt);
+
+  // Add the left local partial sum (zero if right column)
+  addInternalLin(AjetsAlt, AlpsAltOut);
+  addInternalLin(BjetsAlt, BlpsAltOut);
+
+  pileUpCorrectionAB(AjetsAlt,pucA);
+  pileUpCorrectionAB(BjetsAlt,pucB);
+  pileUpCorrectionAB(CjetsAlt,pucC);
+
+  // If the local sum is less than zero set it to zero
+  ZeroNegative(AjetsAlt);
+  ZeroNegative(BjetsAlt);
+  ZeroNegative(CjetsAlt);
+
+  // Add the right local partial sum (zero if right column)
+  addInternalRin(AjetsAlt, ArpsAltOut);
+  addInternalRin(BjetsAlt, BrpsAltOut);
+
+  // SaturateJets( AjetsAlt, Asat );
+  // SaturateJets( BjetsAlt, Bsat );
+  // SaturateJets( CjetsAlt, CCsat );
+
+
+  gTowersType AjetsRestricted;
+  gTowersType BjetsRestricted;
+  gTowersType CjetsRestricted;
+
+
+  for(int irow=0; irow<FEXAlgoSpaceDefs::ABCrows; irow++){
+    for(int icolumn=0; icolumn<FEXAlgoSpaceDefs::ABcolumns; icolumn++){
+      AjetsRestricted[irow][icolumn]  = AjetsAlt[irow][icolumn]; 
+      BjetsRestricted[irow][icolumn]  = BjetsAlt[irow][icolumn];
+      CjetsRestricted[irow][icolumn]  = CjetsAlt[irow][icolumn]; 
+    }
+  }
 
   // find gBlocks
-  gTowersCentral gBLKA;
-  gBlockAB(Atwr, gBLKA);
+  gTowersType gBLKA;
+  gTowersType hasSeedA;
+  gBlockAB(Atwr, gBLKA, hasSeedA, gLJ_seedThrA);
 
-  gTowersCentral gBLKB;
-  gBlockAB(Btwr, gBLKB);
+  gTowersType gBLKB;
+  gTowersType hasSeedB;
+  gBlockAB(Btwr, gBLKB, hasSeedB, gLJ_seedThrB);  
+
+  gTowersType gBLKC;
+  gTowersType hasSeedC;
+  gBlockAB(Ctwr, gBLKC, hasSeedC, gLJ_seedThrC);  
+
+  // sorting by jet engine -- not done in FPGA
+  std::array<int, 32> AgBlockOutL;
+  std::array<int, 32> AgBlockEtaIndL;
+  std::array<int, 32> AgBlockOutR;
+  std::array<int, 32> AgBlockEtaIndR;
+  blkOutAB(gBLKA, AgBlockOutL, AgBlockEtaIndL, AgBlockOutR, AgBlockEtaIndR);
+
+  std::array<int, 32> BgBlockOutL;
+  std::array<int, 32> BgBlockEtaIndL;
+  std::array<int, 32> BgBlockOutR;
+  std::array<int, 32> BgBlockEtaIndR;
+  blkOutAB(gBLKB, BgBlockOutL, BgBlockEtaIndL, BgBlockOutR, BgBlockEtaIndR);
+  
+  std::array<int, 32> CgBlockOutL;
+  std::array<int, 32> CgBlockEtaIndL;
+  std::array<int, 32> CgBlockOutR;
+  std::array<int, 32> CgBlockEtaIndR;
+  blkOutAB(gBLKC, CgBlockOutL, CgBlockEtaIndL, CgBlockOutR, CgBlockEtaIndR) ;
 
   // sorting by 192 blocks 0 = left, 1 = right
+  // second index is column number, the eta value is 2 + 6*column number + local eta
 
   // find the leading and subleading gBlock  in the left column of FPGA A
   gBlockMax2(gBLKA, 1, 0, gBlockTOBv[0], gBlockTOBeta[0], gBlockTOBphi[0]);
@@ -102,28 +176,55 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   // find the leading and subleading gBlock  in the right column of FPGA B
   gBlockMax2(gBLKB, 4, 1, gBlockTOBv[3], gBlockTOBeta[3], gBlockTOBphi[3]);
 
+  // find the leading and subleading gBlock  in the  CN column of FPGA C 
+  gBlockMax2( gBLKC, 0, 0, gBlockTOBv[4], gBlockTOBeta[4], gBlockTOBphi[4]);
+  // find the leading and subleading gBlock  in the CP column of FPGA C 
+  gBlockMax2( gBLKC, 5, 1, gBlockTOBv[5], gBlockTOBeta[5], gBlockTOBphi[5]);
+
+
+  // in hardware vetos happen before remote sums come in. 
+  gBlockVetoAB(AjetsRestricted, hasSeedA);  
+  gBlockVetoAB(BjetsRestricted, hasSeedB);  
+  gBlockVetoAB(CjetsRestricted, hasSeedC);  
+
+  // calculate A & B  remote partial sums first
+  gTowersPartialSums RAlps_out, RArps_out;
+  RemotePartialAB(Atwr, RAlps_out, RArps_out);
+
+  gTowersPartialSums RBlps_out, RBrps_out;
+  RemotePartialAB(Btwr, RBlps_out, RBrps_out);
+
+  gTowersPartialSums RCNrps_out, RCPlps_out;
+  RemotePartialCN(CNtwr,  RCNrps_out);
+  RemotePartialCP(CPtwr,  RCPlps_out);
+
 
   if( FEXAlgoSpaceDefs::ENABLE_INTER_AB ) {
+    
     // input partial sums from FPGA B to A (lps_out -> rps_in)
-    addRemoteRin(AjetsRestricted, RBlps_out);
+    addRemoteRin(AjetsRestricted, RBlps_out, FEXAlgoSpaceDefs::PS_UPPER_AB, FEXAlgoSpaceDefs::PS_LOWER_AB, FEXAlgoSpaceDefs::PS_SHIFT_AB);
 
     // input partial sums from FPGA B to A (lps_out -> rps_in)
-    addRemoteLin(BjetsRestricted, RArps_out);
+    addRemoteLin(BjetsRestricted, RArps_out, FEXAlgoSpaceDefs::PS_UPPER_AB, FEXAlgoSpaceDefs::PS_LOWER_AB, FEXAlgoSpaceDefs::PS_SHIFT_AB);
 
   }
 
   if( FEXAlgoSpaceDefs::ENABLE_INTER_C ) {
-    addRemoteLin(AjetsRestricted, RCNrps_out);
 
-    addRemoteRin(BjetsRestricted, RCPlps_out);
+    addRemoteLin(AjetsRestricted, RCNrps_out, FEXAlgoSpaceDefs::PS_UPPER_C, FEXAlgoSpaceDefs::PS_LOWER_C, FEXAlgoSpaceDefs::PS_SHIFT_C);
+
+    addRemoteRin(BjetsRestricted, RCPlps_out, FEXAlgoSpaceDefs::PS_UPPER_C, FEXAlgoSpaceDefs::PS_LOWER_C, FEXAlgoSpaceDefs::PS_SHIFT_C);
 
   }
 
-  // Apply pileup threshold
-  // Apply pileup correction (if enabled)
-  if (FEXAlgoSpaceDefs::ENABLE_PUC){
-    pileUpCorrectionAB(AjetsRestricted,pucA);
-    pileUpCorrectionAB(BjetsRestricted,pucB);
+//  this are added into the jets you have to truncate to the number of bits on the interFPGA communication
+  
+  if( FEXAlgoSpaceDefs::ENABLE_INTER_ABC ) {
+
+    addRemoteCNin(CjetsRestricted, RAlps_out, FEXAlgoSpaceDefs::PS_UPPER_C, FEXAlgoSpaceDefs::PS_LOWER_C, FEXAlgoSpaceDefs::PS_SHIFT_C );
+    
+    addRemoteCPin(CjetsRestricted, RBrps_out, FEXAlgoSpaceDefs::PS_UPPER_C, FEXAlgoSpaceDefs::PS_LOWER_C, FEXAlgoSpaceDefs::PS_SHIFT_C );
+
   }
 
 
@@ -132,12 +233,8 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
  
   gJetVetoAB(AjetsRestricted,  jetThreshold);
   gJetVetoAB(BjetsRestricted,  jetThreshold);
-  // gJetVetoAB(CCjetsRestricted, jetThreshold);
+  gJetVetoAB(CjetsRestricted, jetThreshold);
 
-  // Apply gBlock trheshold to jet array
-
-  gBlockVetoAB(AjetsRestricted, gBLKA, gLJ_seedThrA);
-  gBlockVetoAB(BjetsRestricted, gBLKB, gLJ_seedThrB);
 
   std::array<int, 32> AjetOutL;
   std::array<int, 32> AetaIndL;
@@ -145,20 +242,32 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   std::array<int, 32> AetaIndR;
 
 
-  jetOutAB(AjetsRestricted, gBLKA, gLJ_seedThrA, AjetOutL, AetaIndL, AjetOutR, AetaIndR);
+  jetOutAB(AjetsRestricted, AjetOutL, AetaIndL, AjetOutR, AetaIndR);
 
   std::array<int, 32> BjetOutL;
   std::array<int, 32> BetaIndL;
   std::array<int, 32> BjetOutR;
   std::array<int, 32> BetaIndR;
 
-  jetOutAB(BjetsRestricted, gBLKB, gLJ_seedThrB,  BjetOutL, BetaIndL, BjetOutR, BetaIndR);
+  jetOutAB(BjetsRestricted, BjetOutL, BetaIndL, BjetOutR, BetaIndR);
+
+  std::array<int, 32> CNjetOut;
+  std::array<int, 32> CNetaInd;
+  std::array<int, 32> CPjetOut;
+  std::array<int, 32> CPetaInd;
+
+  jetOutAB(CjetsRestricted, CNjetOut, CNetaInd, CPjetOut, CPetaInd);
+
+
 
   gJetTOBgen(AjetOutL, AetaIndL, 0, jetThreshold, gJetTOBs, gJetTOBv, gJetTOBeta, gJetTOBphi);
   gJetTOBgen(AjetOutR, AetaIndR, 1, jetThreshold, gJetTOBs, gJetTOBv, gJetTOBeta, gJetTOBphi);
 
-  gJetTOBgen(BjetOutL, BetaIndL, 2, jetThreshold,  gJetTOBs, gJetTOBv, gJetTOBeta, gJetTOBphi);
-  gJetTOBgen(BjetOutR, BetaIndR, 3, jetThreshold,  gJetTOBs, gJetTOBv, gJetTOBeta, gJetTOBphi);
+  gJetTOBgen(BjetOutL, BetaIndL, 2, jetThreshold, gJetTOBs, gJetTOBv, gJetTOBeta, gJetTOBphi);
+  gJetTOBgen(BjetOutR, BetaIndR, 3, jetThreshold, gJetTOBs, gJetTOBv, gJetTOBeta, gJetTOBphi);
+
+  gJetTOBgen(CNjetOut, CNetaInd, 4, jetThreshold, gJetTOBs, gJetTOBv, gJetTOBeta, gJetTOBphi);
+  gJetTOBgen(CPjetOut, CPetaInd, 5, jetThreshold, gJetTOBs, gJetTOBv, gJetTOBeta, gJetTOBphi);
 
   ///Define a vector to be filled with all the TOBs of one event
   std::vector<std::unique_ptr<gFEXJetTOB>> tobs_v;
@@ -167,9 +276,11 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   // fill in TOBs
   ATOB1_dat[0]  = 0;
   BTOB1_dat[0]  = 0;
-  //
+  CTOB1_dat[0]  = 0;
+  
   ATOB2_dat[0]  =  (( pucA & 0x00000FFF ) << 8);
   BTOB2_dat[0]  =  (( pucB & 0x00000FFF ) << 8);
+  CTOB2_dat[0]  =  (( pucC & 0x00000FFF ) << 8);
 
   // //First available TOBs are the gRho for each central FPGA
   tobs_v[0] = std::make_unique<gFEXJetTOB>();
@@ -253,6 +364,20 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   else tobs_v[5]->setStatus(0);
 
 
+  CTOB1_dat[1] =  0x00000001;
+  if(  gBlockTOBv[4][0] > gJ_ptMinToTopoCounts1 ) CTOB1_dat[1] = CTOB1_dat[1] | 0x00000080;
+  CTOB1_dat[1] =  CTOB1_dat[1] | ( ( gBlockTOBv[4][0]   & 0x00000FFF ) << 8);
+  CTOB1_dat[1] =  CTOB1_dat[1] | ( ( gBlockTOBeta[4][0] & 0x0000003F ) <<20);
+  CTOB1_dat[1] =  CTOB1_dat[1] | ( ( gBlockTOBphi[4][0] & 0x0000001F) <<26);
+
+
+  CTOB2_dat[1] =  0x00000002;
+  if(  gBlockTOBv[5][0] > gJ_ptMinToTopoCounts2) CTOB2_dat[1] = CTOB2_dat[1] | 0x00000080;
+  CTOB2_dat[1] =  CTOB2_dat[1] | ( ( gBlockTOBv[5][0]   & 0x00000FFF ) << 8);
+  CTOB2_dat[1] =  CTOB2_dat[1] | ( ( gBlockTOBeta[5][0] & 0x0000003F ) <<20);
+  CTOB2_dat[1] =  CTOB2_dat[1] | ( ( gBlockTOBphi[5][0] & 0x0000001F ) <<26);
+
+
   // subleading gBlocks
   // TOBs 6-9 are subleading gBlocks
   ATOB1_dat[2] =  0x00000003;
@@ -317,6 +442,20 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   tobs_v[9]->setTobID(4);
   if(  gBlockTOBv[3][1] > gJ_ptMinToTopoCounts2 ) tobs_v[9]->setStatus(1);
   else tobs_v[9]->setStatus(0);
+
+
+  CTOB1_dat[2] =  0x00000003;
+  if(  gBlockTOBv[4][1] > gJ_ptMinToTopoCounts1 ) CTOB1_dat[2] = CTOB1_dat[2] | 0x00000080;
+  CTOB1_dat[2] =  CTOB1_dat[2] | ( ( gBlockTOBv[4][1]   & 0x00000FFF ) << 8);
+  CTOB1_dat[2] =  CTOB1_dat[2] | ( ( gBlockTOBeta[4][1] & 0x0000003F ) <<20);
+  CTOB1_dat[2] =  CTOB1_dat[2] | ( ( gBlockTOBphi[4][1] & 0x0000001F ) <<26);
+
+  CTOB2_dat[2] =  0x00000004;
+  if(  gBlockTOBv[5][1] > gJ_ptMinToTopoCounts2 ) CTOB2_dat[2] = CTOB2_dat[2] | 0x00000080;
+  CTOB2_dat[2] =  CTOB2_dat[2] | ( ( gBlockTOBv[5][1]   & 0x00000FFF ) << 8);
+  CTOB2_dat[2] =  CTOB2_dat[2] | ( ( gBlockTOBeta[5][1] & 0x0000003F ) <<20);
+  CTOB2_dat[2] =  CTOB2_dat[2] | ( ( gBlockTOBphi[5][1] & 0x0000001F ) <<26);
+
 
   // finally the main event -- lead gJET
   // according the specification https://docs.google.com/spreadsheets/d/15YVVtGofhXMtV7jXRFzWO0FVUtUAjS-X-aQjh3FKE_w/edit#gid=523371660
@@ -391,12 +530,58 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   if(  gJetTOBv[3] > gLJ_ptMinToTopoCounts2 ) tobs_v[13]->setStatus(1);
   else tobs_v[13]->setStatus(0);
 
-   return tobs_v;
+  // // CECILIA - TO BE CHECKED
+  CTOB1_dat[3] =  0x00000005;
+  if(  gJetTOBv[4] > gLJ_ptMinToTopoCounts1 ) CTOB1_dat[3] = CTOB1_dat[3] | 0x00000080;
+  CTOB1_dat[3] =  CTOB1_dat[3] | ( ( gJetTOBv[4]   & tobvMask) << tobvShift);
+  CTOB1_dat[3] =  CTOB1_dat[3] | ( ( gJetTOBeta[4] & 0x0000003F ) <<20);
+  CTOB1_dat[3] =  CTOB1_dat[3] | ( ( gJetTOBphi[4] & 0x0000001F ) <<26);
+
+  CTOB2_dat[3] =  0x00000006;
+  if(  gJetTOBv[5] > gLJ_ptMinToTopoCounts2 ) CTOB2_dat[3] = CTOB2_dat[3] | 0x00000080;
+  CTOB2_dat[3] =  CTOB2_dat[3] | ( ( gJetTOBv[5]   & tobvMask   ) << tobvShift);
+  CTOB2_dat[3] =  CTOB2_dat[3] | ( ( gJetTOBeta[5] & 0x0000003F ) <<20);
+  CTOB2_dat[3] =  CTOB2_dat[3] | ( ( gJetTOBphi[5] & 0x0000001F ) <<26);
+
+
+  // zero tob 4 word
+
+  ATOB1_dat[4] =  0 ;
+  ATOB2_dat[4] =  0 ;
+  BTOB1_dat[4] =  0 ;
+  BTOB2_dat[4] =  0 ;
+  CTOB1_dat[4] =  0 ;
+  CTOB2_dat[4] =  0 ;
+  
+
+  // add seven bits as in the hardware of BCID in 6th TOB word ( index 5) 
+  int BCID = 0;
+
+  ATOB1_dat[5] =  ( (BCID&0x0000007F)<<8 ) ;
+  ATOB2_dat[5] =  ( (BCID&0x0000007F)<<8 ) ;
+  BTOB1_dat[5] =  ( (BCID&0x0000007F)<<8 ) ;
+  BTOB2_dat[5] =  ( (BCID&0x0000007F)<<8 ) ;
+  CTOB1_dat[5] =  ( (BCID&0x0000007F)<<8 ) ;
+  CTOB2_dat[5] =  ( (BCID&0x0000007F)<<8 ) ;
+  
+  // 3 is gFEX FEX number, set CRC to zero for now 
+  int CRC = 0;
+
+  
+  ATOB1_dat[6] = 0x000000BC | ( (BCID&0x0000000F)<<8 ) | (3<<12) | (CRC<<23);
+  ATOB2_dat[6] = 0x000000BC | ( (BCID&0x0000000F)<<8 ) | (3<<12) | (CRC<<23);
+  BTOB1_dat[6] = 0x000000BC | ( (BCID&0x0000000F)<<8 ) | (3<<12) | (CRC<<23);
+  BTOB2_dat[6] = 0x000000BC | ( (BCID&0x0000000F)<<8 ) | (3<<12) | (CRC<<23);
+  CTOB1_dat[6] = 0x000000BC | ( (BCID&0x0000000F)<<8 ) | (3<<12) | (CRC<<23);
+  CTOB2_dat[6] = 0x000000BC | ( (BCID&0x0000000F)<<8 ) | (3<<12) | (CRC<<23);
+
+
+  return tobs_v;
 
 }
 
 
-void gFEXJetAlgo::RemotePartialAB(const gTowersCentral& twrs, gTowersPartialSums & lps, gTowersPartialSums & rps) const {
+void gFEXJetAlgo::RemotePartialAB(const gTowersType& twrs, gTowersPartialSums & lps, gTowersPartialSums & rps) const {
 
   // Computes partial sums for FPGA A or B
   // twrs are the 32 x 12 = 284 gTowers in FPGA A or B
@@ -456,42 +641,35 @@ void gFEXJetAlgo::RemotePartialAB(const gTowersCentral& twrs, gTowersPartialSums
 }
 
 
-void gFEXJetAlgo::RemotePartialCN(const gTowersForward& twrs, gTowersPartialSums & rps ) const {
+void gFEXJetAlgo::RemotePartialCN(const gTowersJetEngine& twrs, gTowersPartialSums & rps ) const {
 
-  // Copied from AB
   typedef  std::array<std::array<int, 4>, 4> gTowersNeighbours;
   gTowersNeighbours NUpDwnR = {{ {{2,3,4,4}}, {{0,2,3,4}}, {{0,0,2,3}}, {{0,0,0,2}} }};
 
   // same as AB for right partial sum
+  // starts from the righ most partial sum -- largest partial sum
   for( int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
     for(int rcolumn = 0; rcolumn<FEXAlgoSpaceDefs::n_partial; rcolumn++){
-      // start calculating right partial sums for remote column rcolumn
       rps[irow][rcolumn] = 0;
-      //lcolumn needs to be offset by 4 below, because the interFPGA comm only takes the 4 col most close to the central FPGA 
-      //note that this is different from C-sim (where offset is 2) because the twr input has different number of columns (6 in C-sim, 8 here with the first or last two empty)
       for(int lcolumn = 0; lcolumn<FEXAlgoSpaceDefs::n_partial; lcolumn++){
-        // add in any energy from towers in this row
-        // no need of modular arithmetic
         if ( NUpDwnR[rcolumn][lcolumn] > 0 ) {
-          rps[irow][rcolumn] = rps[irow][rcolumn] + twrs[irow][lcolumn+4];
+          rps[irow][rcolumn] = rps[irow][rcolumn] + twrs[irow][lcolumn+2];
         }
-        // now add rup1, rup2, rup3, rup4, ldn1, ldn2, ln3, ln4 -- use a loop instead of enumeratin in firmware
         for( int rowOff = 1 ; rowOff < NUpDwnR[rcolumn][lcolumn]+1; rowOff++){
           int rowModUp =  (irow + rowOff)%32;
           int rowModDn =  (irow - rowOff + 32 )%32;
-          rps[irow][rcolumn] =  rps[irow][rcolumn] + twrs[rowModUp][lcolumn+4] + twrs[rowModDn][lcolumn];
+          rps[irow][rcolumn] =  rps[irow][rcolumn] + twrs[rowModUp][lcolumn+2] + twrs[rowModDn][lcolumn+2];
         }
       }
     }
   }
-
 }
 
 
-void gFEXJetAlgo::RemotePartialCP(const gTowersForward& twrs, gTowersPartialSums & lps ) const {
+void gFEXJetAlgo::RemotePartialCP(const gTowersJetEngine& twrs, gTowersPartialSums & lps ) const {
 
   typedef  std::array<std::array<int, 4>, 4> gTowersNeighbours;
-  gTowersNeighbours NUpDwnL = {{ {{2,0,0,0}}, {{2,3,0,0}}, {{4,3,2,0}}, {{4,4,3,2}} }};
+  gTowersNeighbours NUpDwnL = {{ {{2,0,0,0}}, {{3,2,0,0}}, {{4,3,2,0}}, {{4,4,3,2}} }};
   // do  partial sum for output to left FPGA second
   for( int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
     for(int rcolumn = 0; rcolumn<FEXAlgoSpaceDefs::n_partial; rcolumn++){
@@ -503,7 +681,6 @@ void gFEXJetAlgo::RemotePartialCP(const gTowersForward& twrs, gTowersPartialSums
         if ( NUpDwnL[rcolumn][lcolumn] > 0 ) {
           lps[irow][rcolumn] = lps[irow][rcolumn] + twrs[irow][lcolumn];
         }
-        // now add rup1, rup2, rup3, rup4, ldn1, ldn2, ln3, ln4 -- use a loop instead of enumeratin in firmware
         for( int rowOff = 1 ; rowOff < NUpDwnL[rcolumn][lcolumn]+1; rowOff++){
           int rowModUp =  (irow + rowOff)%32;
           int rowModDn =  (irow - rowOff + 32 )%32;
@@ -512,12 +689,12 @@ void gFEXJetAlgo::RemotePartialCP(const gTowersForward& twrs, gTowersPartialSums
       }
     }
   }
-
 }
 
 
-void gFEXJetAlgo::singleAB(const gTowersCentral& twrs, gTowersCentral & FPGAsum) const {
+void gFEXJetAlgo::singleHalf(const gTowersType& twrs, gTowersType & FPGAsum) const {
   // Finds jets in a single FPGA
+  // This version only gives sum in the right or left half of the FPGA
 
   // Number of up and down FPGAs to add
   std::array<int, 9> NUpDwn =  {{2,3,4,4,4,4,4,3,2}};
@@ -532,30 +709,159 @@ void gFEXJetAlgo::singleAB(const gTowersCentral& twrs, gTowersCentral & FPGAsum)
       for(int localColumn = 0; localColumn<9; localColumn++){
         int sumColumn = jcolumn + localColumn - 4;
 
-        // check if tower to be summed is actually in FPGA
-        if( (sumColumn < FEXAlgoSpaceDefs::ABcolumns) && (sumColumn > -1) ) {
+        // calculate min and max columns for FPGA half 
+        int lmin = 0;
+        int lmax = 5;
 
-          // sum tower in the same row as jet center
-          FPGAsum[irow][jcolumn] = FPGAsum[irow][jcolumn] + twrs[irow][sumColumn];
+        if( jcolumn > 5 ) {
+          lmin = 6;
+          lmax = 11;
+        }
 
-          // add rows above and below according to NUpDwn
-          // localRow goes from 1 to 2, 1 to 3 or 1 to 4
+        // check if tower to be summed is actually in FPGA 
+        if( (sumColumn >= lmin)   && (sumColumn <= lmax) ) {
+
+          // sum tower in the same row as jet center 
+          FPGAsum[irow][jcolumn] = FPGAsum[irow][jcolumn] + twrs[irow][sumColumn]; 
+
+          // add rows above and below according NUpDwn
+          // localRow goes from 1 to 2, 1 to 3 or 1 to 4 
           for(int localRow = 1; localRow<=NUpDwn[localColumn]; localRow++){
             int krowUp = (irow + localRow);
-            if( krowUp > 31 ) krowUp = krowUp - 32;
+            if( krowUp > 31 ) krowUp = krowUp - 32; 
             int krowDn = (irow - localRow);
-            if( krowDn < 0 ) krowDn = krowDn + 32;
+            if( krowDn < 0 ) krowDn = krowDn + 32; 
             FPGAsum[irow][jcolumn] =  FPGAsum[irow][jcolumn] +
-                                      twrs[krowUp][sumColumn] + twrs[krowDn][sumColumn];
+                                      twrs[krowUp][sumColumn] + 
+                                      twrs[krowDn][sumColumn];
           }
-        }
-      }
+        }   
+      } 
     }
   }
 }
 
 
-void gFEXJetAlgo::gBlockAB(const gTowersCentral& twrs, gTowersCentral & gBlkSum) const {
+void gFEXJetAlgo::InternalPartialAB(const gTowersType & twrs, gTowersPartialSums & lps, gTowersPartialSums & rps ) const{
+  
+  // Computes partial sums for FPGA A or B
+  // twrs are the 32 x 12 = 284 gTowers in FPGA A or B
+  //
+  // lps:    partial sum for left hand side of FPGA
+  // rps:    partial sum for  right half of the FPGA
+
+  // NOTE rps is available first 
+  
+  // number of rows above/below for right partial sum
+  // when sending to the right send values for largest partial sum first, i.e. for column 6
+  unsigned int NUpDwnR[4][4] = { {2,3,4,4}, {0,2,3,4}, {0,0,2,3}, {0,0,0,2} };
+  
+  // number of rows above or below for left partial sum
+  // when sending to the left send values for smallest partial sumn first (i.e. for column 2 ) 
+  unsigned int NUpDwnL[4][4] = { {2,0,0,0}, {3,2,0,0}, {4,3,2,0}, {4,4,3,2} }; 
+ 
+  
+  // Do partial sum for output to right side FPGA first
+  // for the right partial sum this starts from the right-most value first 
+  for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+    for(unsigned int rcolumn = 0; rcolumn<FEXAlgoSpaceDefs::n_partial; rcolumn++){
+      // start calculating right partial sums for remote column rcolumn 
+      rps[irow][rcolumn] = 0;
+      for(unsigned int lcolumn = 0; lcolumn<FEXAlgoSpaceDefs::n_partial; lcolumn++){
+        // add in any energy from towers in this row
+        // no need of modular arithmetic
+        if ( NUpDwnR[rcolumn][lcolumn] > 0 ) {
+          // this is partial sum for the right half of the FPGA -- columns 2,3,4,5
+          rps[irow][rcolumn] = rps[irow][rcolumn] + twrs[irow][lcolumn+2];
+        }
+        // now add rup1, rup2, rup3, rup4, ldn1, ldn2, ln3, ln4 -- use a loop instead of enumeratin in firmware  
+        for(unsigned int rowOff = 1 ; rowOff < NUpDwnR[rcolumn][lcolumn]+1; rowOff++){
+          int rowModUp =  (irow + rowOff)%32;
+          int rowModDn =  (irow - rowOff + 32 )%32;
+          // this is partial sum for the right half of the FPGA -- columns 2,3,4,5
+          rps[irow][rcolumn] =  rps[irow][rcolumn] + twrs[rowModUp][lcolumn+2] + twrs[rowModDn][lcolumn+2];
+        }
+      }
+    }
+  }
+  // do  partial sum for output to left half of the FPGA second
+  // for the left partial sum this starts also with the right most column -- which is the smallest sum 
+  for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+    for(unsigned int rcolumn = 0; rcolumn<FEXAlgoSpaceDefs::n_partial; rcolumn++){
+      // start calculating right partial sums for remote column rcolumn 
+      lps[irow][rcolumn] = 0;
+      for(unsigned int lcolumn = 0; lcolumn<FEXAlgoSpaceDefs::n_partial; lcolumn++){
+        // add in any energy from towers in this row
+        // no need of modular arithmetic
+        if ( NUpDwnL[rcolumn][lcolumn] > 0 ) {
+          lps[irow][rcolumn] = lps[irow][rcolumn] + twrs[irow][lcolumn+6];
+        }
+        // now add rup1, rup2, rup3, rup4, ldn1, ldn2, ln3, ln4 -- use a loop instead of enumeratin in firmware  
+        for(unsigned int rowOff = 1 ; rowOff < NUpDwnL[rcolumn][lcolumn]+1; rowOff++){
+          int rowModUp =  (irow + rowOff)%32;
+          int rowModDn =  (irow - rowOff + 32 )%32;
+          // this is partial sum for the left half of the FPGA -- columns 6,7,8,9 
+          lps[irow][rcolumn] =  lps[irow][rcolumn] + twrs[rowModUp][lcolumn+6] + twrs[rowModDn][lcolumn+6];
+        }
+      }
+    } 
+  }
+}
+
+
+void gFEXJetAlgo::addInternalLin(gTowersType & jets, gTowersPartialSums & partial) const{
+  // add parial sums for left side of FPGA
+  for(unsigned int irow=0;irow<FEXAlgoSpaceDefs::ABCrows;irow++){
+    for(unsigned int ipartial= 0; ipartial <FEXAlgoSpaceDefs::n_partial; ipartial++){
+      jets[irow][2+ipartial] =  jets[irow][2+ipartial] + partial[irow][ipartial];
+    }
+  }
+}
+
+
+void gFEXJetAlgo::addInternalRin(gTowersType & jets, gTowersPartialSums & partial) const{
+  // add parial sums for right side of FPGA 
+  for(unsigned int irow=0;irow<FEXAlgoSpaceDefs::ABCrows;irow++){
+    for(unsigned int ipartial= 0; ipartial <FEXAlgoSpaceDefs::n_partial; ipartial++){
+      jets[irow][6+ipartial] =  jets[irow][6+ipartial] + partial[irow][ipartial];
+    }
+  }
+}
+
+
+void gFEXJetAlgo::pileUpCorrectionAB(gTowersType &jets, int puc) const {
+  int rows = jets.size();
+  int cols = jets[0].size();
+  for(int irow=0;irow<rows;irow++){
+    for(int icolumn=0;icolumn<cols;icolumn++){
+      jets[irow][icolumn] =   jets[irow][icolumn] - puc;
+    }
+  }
+}
+
+
+void gFEXJetAlgo::ZeroNegative(gTowersType & jets) const{
+  for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+    for(unsigned int icolumn =0; icolumn<FEXAlgoSpaceDefs::ABcolumns; icolumn++){
+      if(jets[irow][icolumn] < 0) jets[irow][icolumn] = 0; 
+    }
+  }
+}
+
+
+// https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/devel/common/jet_finder/HDL/jet_eng.vhd#L538
+void gFEXJetAlgo::SaturateJets( gTowersType & jets, gTowersType & sat ) const {
+   for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+    for(unsigned int icolumn =0; icolumn<FEXAlgoSpaceDefs::ABcolumns; icolumn++){
+      // set 18 bits on
+      if(sat[irow][icolumn] ) jets[irow][icolumn] = 0x0003ffff; 
+    }
+  }
+}
+
+
+
+void gFEXJetAlgo::gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const {
 
   int rows = twrs.size();
   int cols = twrs[0].size();
@@ -568,51 +874,83 @@ void gFEXJetAlgo::gBlockAB(const gTowersCentral& twrs, gTowersCentral & gBlkSum)
       if( (jcolumn == 0) || (jcolumn == 6) ) {
         //left edge case
         gBlkSum[irow][jcolumn] =
-          twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn]   +
-          twrs[irow][jcolumn+1] + twrs[krowUp][jcolumn+1] + twrs[krowDn][jcolumn+1];
-            } else if( (jcolumn == 5) || (jcolumn == 11)) {
+        twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn] +
+        twrs[irow][jcolumn+1] + twrs[krowUp][jcolumn+1] + twrs[krowDn][jcolumn+1];
+      } else if( (jcolumn == 5) || (jcolumn == 11)) {
         //  right edge case
         gBlkSum[irow][jcolumn] =
-          twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn]   +
-          twrs[irow][jcolumn-1] + twrs[krowUp][jcolumn-1] + twrs[krowDn][jcolumn-1];
-            } else{
+        twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn] +
+        twrs[irow][jcolumn-1] + twrs[krowUp][jcolumn-1] + twrs[krowDn][jcolumn-1];
+      } else{
         // normal case
         gBlkSum[irow][jcolumn] =
-          twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn]   +
-          twrs[irow][jcolumn-1] + twrs[krowUp][jcolumn-1] + twrs[krowDn][jcolumn-1] +
-          twrs[irow][jcolumn+1] + twrs[krowUp][jcolumn+1] + twrs[krowDn][jcolumn+1];
-        }
-        // switch to 800 MeV LSB 
-        if (FEXAlgoSpaceDefs::APPLY_TRUNC){
-          gBlkSum[irow][jcolumn] =  gBlkSum[irow][jcolumn]/4;
-        }
-        // limit result to an unsigned integer of 12 bits ( 2376 GeV) 
-        if ( gBlkSum[irow][jcolumn] < 0 ){
-          gBlkSum[irow][jcolumn] = 0;
-        }
-        if ( gBlkSum[irow][jcolumn] > 4091 ){
-          gBlkSum[irow][jcolumn] = 4091;
-        }  
+        twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn]   +
+        twrs[irow][jcolumn-1] + twrs[krowUp][jcolumn-1] + twrs[krowDn][jcolumn-1] +
+        twrs[irow][jcolumn+1] + twrs[krowUp][jcolumn+1] + twrs[krowDn][jcolumn+1];
+      }
 
+      if( gBlkSum[irow][jcolumn]  > seedThreshold) {
+        hasSeed[irow][jcolumn] = 1;
+      } else {
+        hasSeed[irow][jcolumn] = 0;
+      }
+    
+      if ( gBlkSum[irow][jcolumn] < 0 )       
+        gBlkSum[irow][jcolumn] = 0;
+
+      // was bits 11+3 downto 3, now is 11 downto 0 
+      if ( gBlkSum[irow][jcolumn] > FEXAlgoSpaceDefs::gBlockMax )   {
+        gBlkSum[irow][jcolumn] =  FEXAlgoSpaceDefs::gBlockMax;
+      }
     }
   }
-
 }
 
 
-void gFEXJetAlgo::gBlockMax2(const gTowersCentral& gBlkSum, int BjetColumn, int localColumn, std::array<int, 3> & gBlockV, std::array<int, 3> & gBlockEta, std::array<int, 3> & gBlockPhi) const {
 
+void gFEXJetAlgo::blkOutAB(gTowersType & blocks, std::array<int, 32> jetOutL, std::array<int, 32> etaIndL, std::array<int, 32> jetOutR, std::array<int, 32> etaIndR) const{
+  
+  // find maximum in each jet engine for gBlocks  (not done in hardware) 
+
+  //loop over left engines 
+  for(unsigned int ieng=0; ieng<FEXAlgoSpaceDefs::ABCrows; ieng++){
+    jetOutL[ieng] = 0;
+    etaIndL[ieng] = 0;
+    for(unsigned int localEta = 0; localEta<6; localEta++){
+      if( blocks[ieng][localEta] > jetOutL[ieng]  ){
+        jetOutL[ieng] = blocks[ieng][localEta];
+        etaIndL[ieng] = localEta;
+      }
+    }
+  }
+  // loop over right engines 
+  for(unsigned int ieng=0; ieng<FEXAlgoSpaceDefs::ABCrows; ieng++){
+    jetOutR[ieng] = 0;
+    etaIndR[ieng] = 0;
+    for(unsigned int localEta = 0; localEta<6; localEta++){
+      if(  blocks[ieng][localEta+6] > jetOutR[ieng] ) {
+        jetOutR[ieng] = blocks[ieng][localEta+6];
+        etaIndR[ieng] = localEta;
+      }
+    }
+  }
+}
+
+
+void gFEXJetAlgo::gBlockMax2(const gTowersType & gBlkSum, int BjetColumn, int localColumn, std::array<int, 3> & gBlockV, std::array<int, 3> & gBlockEta, std::array<int, 3> & gBlockPhi) const {
   //  gBlkSum are the 9 or 6 gTower sums  
   //  BjetColumn is the Block Column -- 0 for CN, 1, 2 for A 3, 4 for B and 5 for CP 
+  //  gBlockV is the array of values currently 2 
+  //  gBlockEta is the eta in global 
 
   gTowersJetEngine gBlkSumC;
  
+  // copy the correct column
   for( int irow = 0; irow<FEXAlgoSpaceDefs::ABCrows; irow++){
-    for( int icolumn =0; icolumn<FEXAlgoSpaceDefs::ABcolumnsEng; icolumn++){
-      gBlkSumC[irow][icolumn] = gBlkSum[irow][icolumn + localColumn*FEXAlgoSpaceDefs::ABcolumnsEng];
+    for( int icolumn =0; icolumn<FEXAlgoSpaceDefs::ABCcolumnsEng; icolumn++){
+      gBlkSumC[irow][icolumn] = gBlkSum[irow][icolumn + localColumn*FEXAlgoSpaceDefs::ABCcolumnsEng];
     }
   }
-
 
   gBlockMax192(gBlkSumC, gBlockV, gBlockEta, gBlockPhi, 0);
 
@@ -624,7 +962,6 @@ void gFEXJetAlgo::gBlockMax2(const gTowersCentral& gBlkSum, int BjetColumn, int 
     // don't do anything outside of the six columsn
     for( int j = -1; j<2; j++){
       int jGlobal = j + gBlockEta[0];
-      //printf("zero %d %d \n", iGlobal, jGlobal);
       if( (jGlobal > -1)  && (jGlobal < 6) ) {
         gBlkSumC[iGlobal][jGlobal] = 0;
       }
@@ -639,11 +976,15 @@ void gFEXJetAlgo::gBlockMax2(const gTowersCentral& gBlkSum, int BjetColumn, int 
 }
 
 
-void gFEXJetAlgo::gBlockMax192(  const gTowersJetEngine& gBlkSum,
-                                 std::array<int, 3> & gBlockVp,
-                                 std::array<int, 3> & gBlockEtap,
-                                 std::array<int, 3> & gBlockPhip,
-                                 int index) const {
+void gFEXJetAlgo::gBlockMax192(const gTowersJetEngine& gBlkSum,
+                               std::array<int, 3> & gBlockVp,
+                               std::array<int, 3> & gBlockEtap,
+                               std::array<int, 3> & gBlockPhip,
+                               int index) const {
+  // gBLKSum are the sums
+  // gBlockVp is the returned value for the max block
+  // gBlockEtap is the eta in the local  corrdinate system
+  // gBlockPhip is the phi (global and local are the same) 
 
   int inpv[192]{};
   int maxv1[96]{};
@@ -664,16 +1005,15 @@ void gFEXJetAlgo::gBlockMax192(  const gTowersJetEngine& gBlkSum,
   int maxvall;
   int maxiall;
 
-  // FEXAlgoSpaceDefs::ENABLE_INTER_AB is 6 in hardware
+
+  // ABCcolumnsEng is 6 in hardware
   int maxv = 0;
 
-  int rows = gBlkSum.size();
-  int cols = gBlkSum[0].size();
+  for(unsigned int icolumn = 0;  icolumn<FEXAlgoSpaceDefs::ABCcolumnsEng; icolumn++){
+    for(unsigned int irow = 0; irow<FEXAlgoSpaceDefs::ABCrows; irow++){
+      inpv[irow + icolumn*FEXAlgoSpaceDefs::ABCrows] = gBlkSum[irow][icolumn];
+      inpi[irow + icolumn*FEXAlgoSpaceDefs::ABCrows] = irow  + icolumn*FEXAlgoSpaceDefs::ABCrows;
 
-  for(int icolumn = 0;  icolumn<cols; icolumn++){
-    for( int irow = 0; irow<rows; irow++){
-      inpv[irow + icolumn*rows] = gBlkSum[irow][icolumn];
-      inpi[irow + icolumn*rows] = irow + icolumn*rows;
       if( gBlkSum[irow][icolumn] > maxv){
         maxv = gBlkSum[irow][icolumn];
       }
@@ -761,89 +1101,131 @@ void gFEXJetAlgo::gBlockMax192(  const gTowersJetEngine& gBlkSum,
 }
 
 
-void gFEXJetAlgo::addRemoteRin(gTowersCentral &jets, const gTowersPartialSums &partial) const {
+void gFEXJetAlgo::gBlockVetoAB(gTowersType &jets, gTowersType& hasSeed) const {
+  int rows = jets.size();
+  int cols = jets[0].size();
+  for( int irow = 0; irow < rows; irow++ ){
+    for(int jcolumn = 0; jcolumn < cols; jcolumn++){
+      if( hasSeed[irow][jcolumn] == 0 ) {
+        // set to negative value as in hardware
+        // https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/devel/common/jet_finder/HDL/jet_eng.vhd#L561
+        jets[irow][jcolumn] = 0XFFFFF000; 
+      }
+    }
+  }
+}
 
+
+void gFEXJetAlgo::addRemoteRin(gTowersType &jets, const gTowersPartialSums &partial,
+                               int ps_upper, int ps_lower, int ps_shift) const {
+
+  // See https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/kw-dev/jwj_verif/common/jet_finder/HDL/ab_encode.vhd
+  
   int rows = partial.size();
   int cols = partial[0].size();
   // add partial sums
   for(int irow=0;irow<rows;irow++){
     for(int ipartial= 0; ipartial <cols; ipartial++){
       // current behavior
-      int truncPart = partial[irow][ipartial];
-      if(truncPart < 0 ) truncPart = 0;
-      // change LSB from 200 MeV to 800 MeV and then back to 200 MeV.
-      truncPart = (truncPart >> 2);
-      if( truncPart > 511 ) truncPart = 511;
-      truncPart = (truncPart << 2);
+      int truncPart = -1;
+      if( partial[irow][ipartial] > ps_upper ) {
+        truncPart = ps_upper;
+      } else if ( partial[irow][ipartial] < ps_lower ) {
+        truncPart = ps_lower; 
+      } else {
+        truncPart = partial[irow][ipartial];
+      }
+      // change LSB from 200 MeV to 1600  MeV and then back to 200 MeV.   
+      truncPart = (truncPart >> ps_shift );
+      truncPart = (truncPart << ps_shift );
+
       jets[irow][8+ipartial] =  jets[irow][8+ipartial]  + truncPart;
     }
   }
 }
 
-void gFEXJetAlgo::addRemoteLin(gTowersCentral &jets, const gTowersPartialSums &partial) const {
+void gFEXJetAlgo::addRemoteLin(gTowersType &jets, const gTowersPartialSums &partial,
+                              int ps_upper, int ps_lower, int ps_shift) const {
+
   int rows = partial.size();
   int cols = partial[0].size();
   // add partial sums
   for(int irow=0;irow<rows;irow++){
     for(int ipartial= 0; ipartial <cols; ipartial++){
       // current behavior
-      int truncPart = partial[irow][ipartial];
-      if(truncPart < 0 ) truncPart = 0;
-      // change LSB from 200 MeV to 800 MeV and then back to 200 MeV.
-      truncPart = (truncPart >> 2);
-      if( truncPart > 511 ) truncPart = 511;
-      truncPart = (truncPart << 2);
+      int truncPart = -1;
+      if( partial[irow][ipartial] > ps_upper ) {
+        truncPart = ps_upper;
+      } else if ( partial[irow][ipartial] < ps_lower ) {
+          truncPart = ps_lower; 
+      } else {
+          truncPart = partial[irow][ipartial];
+      }
+      // change LSB from 200 MeV to 1600  MeV and then back to 200 MeV. 
+      truncPart = (truncPart >> ps_shift );
+      truncPart = (truncPart << ps_shift );
+
       jets[irow][ipartial] =  jets[irow][ipartial]  + truncPart;
     }
   }
 }
 
 
-void gFEXJetAlgo::pileUpCalculation(gTowersCentral &twrs, int rhoThreshold_Max, int rhoThreshold_Min, int inputScale,  int &PUCp) const {
-  // input are 50 MeV "fine" scale towers (i.e. inputScale = 1)
-  // to use 200 MeV towers use inputScale = 4  
-  //PUCp output is the pileup correction for 69 towers at 200 MeV energy scale 
+void gFEXJetAlgo::addRemoteCNin(gTowersType & jets, const gTowersPartialSums & partial,
+                                int ps_upper, int ps_lower, int ps_shift ) const {
 
-  int rows = twrs.size();
-  int cols = twrs[0].size();
-  int pucSum = 0;
-  int nSum   = 0; 
-  for(int irow=0; irow<rows; irow++){
-    for( int icolumn=0; icolumn<cols; icolumn++){
-      int fineGT = twrs[irow][icolumn]*inputScale; 
-      if( (fineGT > rhoThreshold_Min) && (fineGT < rhoThreshold_Max) ) {
-      pucSum = pucSum + fineGT;
-      nSum = nSum + 1;
+  int rows = partial.size();
+  int cols = partial[0].size();
+  // add partial sums 
+  for(int irow=0; irow < rows; irow++){
+    for(int ipartial= 0; ipartial <cols; ipartial++){
+      // current behavior
+      int truncPart = -1;
+      if( partial[irow][ipartial] > ps_upper ) {
+        truncPart = ps_upper;
+      } else if ( partial[irow][ipartial] < ps_lower ) {
+          truncPart = ps_lower; 
+      } else {
+          truncPart = partial[irow][ipartial];
       }
+
+      truncPart = (truncPart >> ps_shift );
+      truncPart = (truncPart << ps_shift );
+
+      jets[irow][ipartial+2] =  jets[irow][ipartial+2]  + truncPart;
+      
     }
   }
-  // in firmware this is done with a lookup table see https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/devel/common/jet_finder/HDL/inv_lut19.vhd
-  // See also https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/devel/common/jet_finder/HDL/gt_build_all_AB.vhd#L1471
-  int oneOverN = 69*4096;
-  if( nSum > 0 ) {
-    oneOverN = oneOverN/nSum;
-  } else {
-    oneOverN = 0.0;
-  }
-
-  PUCp = pucSum * oneOverN;
-  // divide by 4096 and convert to 200 MeV LSB 
-  PUCp = PUCp/(4*4096); 
 }
 
+void gFEXJetAlgo::addRemoteCPin(gTowersType & jets, const gTowersPartialSums & partial,
+                                int ps_upper, int ps_lower, int ps_shift ) const {
 
-
-void gFEXJetAlgo::pileUpCorrectionAB(gTowersCentral &jets, int puc) const {
-  int rows = jets.size();
-  int cols = jets[0].size();
+  int rows = partial.size();
+  int cols = partial[0].size();
+  // add partial sums 
   for(int irow=0;irow<rows;irow++){
-    for(int icolumn=0;icolumn<cols;icolumn++){
-      jets[irow][icolumn] =   jets[irow][icolumn] - puc;
+    for(int ipartial= 0; ipartial <cols; ipartial++){
+      int truncPart = -1;
+      if( partial[irow][ipartial] > ps_upper ) {
+        truncPart = ps_upper;
+      } else if ( partial[irow][ipartial] < ps_lower ) {
+          truncPart = ps_lower; 
+      } else {
+          truncPart = partial[irow][ipartial];
+      }
+
+      truncPart = (truncPart >> ps_shift );
+      truncPart = (truncPart << ps_shift );
+      
+      jets[irow][ipartial+6] =  jets[irow][ipartial+6]  + truncPart;
+      
     }
   }
 }
 
-void gFEXJetAlgo::gJetVetoAB( gTowersCentral &twrs ,int jet_threshold ) const {
+
+void gFEXJetAlgo::gJetVetoAB( gTowersType &twrs ,int jet_threshold ) const {
   int rows = twrs.size();
   int cols = twrs[0].size();
   for( int irow = 0; irow < rows; irow++ ){
@@ -855,22 +1237,8 @@ void gFEXJetAlgo::gJetVetoAB( gTowersCentral &twrs ,int jet_threshold ) const {
   }
 }
 
-void gFEXJetAlgo::gBlockVetoAB( gTowersCentral &twrs,
-                                const gTowersCentral& blocks,
-                                int seed_threshold  ) const {
-  int rows = twrs.size();
-  int cols = twrs[0].size();
-  for( int irow = 0; irow < rows; irow++ ){
-    for(int jcolumn = 0; jcolumn<cols; jcolumn++){
-      if( blocks[irow][jcolumn] < seed_threshold+1 ) {
-        twrs[irow][jcolumn] = 0;
-      }
-    }
-  }
-}
 
-
-void gFEXJetAlgo::jetOutAB(const gTowersCentral& jets, const gTowersCentral& blocks, int seedThreshold,
+void gFEXJetAlgo::jetOutAB(const gTowersType & jets,
                            std::array<int, 32> & jetOutL, std::array<int, 32> & etaIndL,
                            std::array<int, 32> & jetOutR, std::array<int, 32> & etaIndR ) const {
   // find maximum in each jet engine or either gJets and requires corresponding gBlock be above threhsold
@@ -879,37 +1247,82 @@ void gFEXJetAlgo::jetOutAB(const gTowersCentral& jets, const gTowersCentral& blo
     jetOutL[ieng] = 0;
     etaIndL[ieng] = 0;
     for(int localEta = 0; localEta<6; localEta++){
-      if( (jets[ieng][localEta] >  jetOutL[ieng] ) && (blocks[ieng][localEta] > seedThreshold) ){
+      if( jets[ieng][localEta] > jetOutL[ieng] ){
         jetOutL[ieng] = jets[ieng][localEta];
         etaIndL[ieng] = localEta;
       }
     }
-    // Turncate to 15 bits as in firmware
-    if( jetOutL[ieng] >  (1<<16) - 1 )  jetOutL[ieng] = 0x00007FFF;
-    if (FEXAlgoSpaceDefs::APPLY_TRUNC){
-      // reduce by 3 bits prior to sorting done here
-      jetOutL[ieng] = jetOutL[ieng]/8;
-    } 
+    // truncation and mapping from 12 to 15 bits 
+    // https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/kw-dev/jet_finder_abc/common/jet_finder/HDL/jet_eng.vhd#L561
+    // https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/kw-dev/jet_finder_abc/common/jet_finder/HDL/jet_eng.vhd#L561
+    // Turncate to 15 bits as in VHDL  (Corresponds to 13 TeV)
+    
+    if( jetOutL[ieng] >  FEXAlgoSpaceDefs::gJetMax )  jetOutL[ieng] = FEXAlgoSpaceDefs::gJetMax;
+    if( jetOutL[ieng] <  0  )       jetOutL[ieng] = 0;
   }
   // loop over right engines
   for(int ieng=0; ieng<FEXAlgoSpaceDefs::ABCrows; ieng++){
     jetOutR[ieng] = 0;
     etaIndR[ieng] = 0;
-    for(int localEta = 0; localEta<6; localEta++){
-      if( (jets[ieng][localEta+6] > jetOutR[ieng]) && (blocks[ieng][localEta+6] > seedThreshold) ) {
+    for(int localEta = 0; localEta < 6; localEta++){
+      if( jets[ieng][localEta+6] > jetOutR[ieng] ){
        jetOutR[ieng] = jets[ieng][localEta+6];
        etaIndR[ieng] = localEta;
       }
     }
-    // Turncate to 15 bits as in firmware 
-    if( jetOutR[ieng] >  (1<<16) - 1 )  jetOutR[ieng] = 0x00007FFF;
-    // reduce by 3 bits prior to sorting done here
-    if (FEXAlgoSpaceDefs::APPLY_TRUNC){  
-      // reduce by 3 bits prior to sorting done here
-      jetOutR[ieng] = jetOutR[ieng]/8; 
-    } 
+    // Turncate to 15 bits as in VHDL (orresponds to 13 TeV) 
+    if( jetOutR[ieng] >  FEXAlgoSpaceDefs::gJetMax )      jetOutR[ieng] = FEXAlgoSpaceDefs::gJetMax;
+    if( jetOutR[ieng] <    0     )      jetOutR[ieng] = 0;
+    // https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/kw-dev/jet_finder_abc/common/jet_finder/HDL/jet_finder_abc.vhd#L1103
+    // https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/kw-dev/jet_finder_abc/common/jet_finder/HDL/jet_finder_abc.vhd#L1119
 
   }
+
+}
+
+
+void gFEXJetAlgo::pileUpCalculation(gTowersType &twrs, int rhoThreshold_Max, int rhoThreshold_Min, int inputScale,  int &PUCp /*, int &PUChres*/) const {
+  // input are 50 MeV "fine" scale towers (i.e. inputScale = 1)
+  // to use 200 MeV towers use inputScale = 4  
+  // PUCp output is the pileup correction for 69 towers at 200 MeV energy scale 
+
+  int rows = twrs.size();
+  int cols = twrs[0].size();
+  int pucSum = 0;
+  int nSum   = 0; 
+  for(int irow=0; irow<rows; irow++){
+    for( int icolumn=0; icolumn<cols; icolumn++){
+      int fineGT = twrs[irow][icolumn]*inputScale;
+      //  set floor and ceiling here (currently 255 and -256 ) 
+      if (fineGT > FEXAlgoSpaceDefs::fineCeiling ) fineGT = FEXAlgoSpaceDefs::fineCeiling;
+      if (fineGT < FEXAlgoSpaceDefs::fineFloor ) fineGT = FEXAlgoSpaceDefs::fineFloor;
+
+      if( (fineGT > rhoThreshold_Min) && (fineGT < rhoThreshold_Max) ) {
+      pucSum = pucSum + fineGT;
+      nSum = nSum + 1;
+      }
+    }
+  }
+  // in firmware this is done with a lookup table see https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/devel/common/jet_finder/HDL/inv_lut19.vhd
+  // See also https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/devel/common/jet_finder/HDL/gt_build_all_AB.vhd#L1471
+
+  // oneOverN is stored as a 32 bit number in inv_lut19
+  unsigned int oneOverNTab = 69<<25;
+  if( nSum > 0 && nSum < 385  ) {
+    oneOverNTab = FEXAlgoSpaceDefs::inv19[nSum]; 
+  } else {
+    oneOverNTab = 0;
+  }
+
+  int oneOverN = oneOverNTab ;
+
+  // largest value should be 255*2^14 ~ 2^22  -- should easily fit in int -- try expliciting putting in int here.  
+  pucSum  = pucSum * oneOverN;
+  // PUChres = pucSum;
+
+  // current system 19 bits in table (69*4096 is max value) sign exten
+  pucSum = ( pucSum >> 14); 
+  PUCp   = pucSum;
 
 }
 
@@ -926,12 +1339,14 @@ void gFEXJetAlgo::gJetTOBgen(const std::array<int, FEXAlgoSpaceDefs::ABCrows>& j
   for( int irow =0; irow<FEXAlgoSpaceDefs::ABCrows; irow++){
     if(  jetOut[irow] > jetThreshold ) {
       jetOutZS[irow] = jetOut[irow];
-    };
+    } else {
+        jetOutZS[irow] = 0 ;
+    }   
   }
 
 
   // offset of TOBs according to official format
-  int etaOff[4] = {8,14,20,26};
+  int etaOff[FEXAlgoSpaceDefs::gJetTOBfib] = {8,14,20,26,2,32};
 
   // see tob_gen.vhd
   int l1mv[16]{};
@@ -950,7 +1365,6 @@ void gFEXJetAlgo::gJetTOBgen(const std::array<int, FEXAlgoSpaceDefs::ABCrows>& j
   int l4met[2]{};
   int l4mphi[2]{};
   
-
   for(int i=0; i<16; i++){
     if( jetOut[2*i + 1] > jetOutZS[2*i] ){
       l1mv[i]   = jetOutZS[2*i + 1];
