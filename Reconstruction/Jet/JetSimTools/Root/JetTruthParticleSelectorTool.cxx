@@ -283,9 +283,7 @@ bool JetTruthParticleSelectorTool::selector(const xAOD::TruthParticle* truthPart
     }
   }
 
-  ATH_MSG_VERBOSE("Truth selection result: pdg=" << truthPart->pdgId()
-                  << ", bar=" << truthPart->barcode()
-                  << ", result=" << result);
+  ATH_MSG_VERBOSE("Truth selection result: " << truthPart<<", result=" << result);
 
   return result;
 }
