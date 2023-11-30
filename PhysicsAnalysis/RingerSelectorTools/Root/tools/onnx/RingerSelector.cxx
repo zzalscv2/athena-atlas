@@ -5,8 +5,7 @@
 // Local includes:
 #include "RingerSelectorTools/tools/onnx/RingerSelector.h"
 #include "PathResolver/PathResolver.h"
-#include <boost/algorithm/string.hpp>
-
+#include <filesystem>
 #include <algorithm>
 #include "TEnv.h"
 
@@ -46,7 +45,7 @@ namespace Ringer{
       {
         // Retrieve the size
         unsigned size = env.GetValue( "Model__size" , 0 );
-        auto barcode = GetValues<int>( "Model__barcode", env); // select the input preprocessing mode
+        auto PreprocessingMode = GetValues<int>( "Model__barcode", env); // select the input preprocessing mode
           
         // Retrieve Et bins
         auto etmin = GetValues<float>( "Model__etmin", env );
@@ -64,7 +63,7 @@ namespace Ringer{
         {
           std::string modelPath = PathResolverFindCalibFile( basepath+"/"+model_paths[idx] );
           ATH_MSG_DEBUG( "Reading Onnx model from: " << modelPath );
-          auto model = Ringer::onnx::Model( modelPath, svc, etmin[idx], etmax[idx], etamin[idx], etamax[idx], barcode[idx]) ;
+          auto model = Ringer::onnx::Model( modelPath, svc, etmin[idx], etmax[idx], etamin[idx], etamax[idx], PreprocessingMode[idx]) ;
           // Compile the model
           model.compile();
           m_models.push_back(model);
@@ -147,16 +146,16 @@ namespace Ringer{
 
 
     //==============================================================================
-    // barcode = 0: use only rings normalized by total energy as input
-    // barcode = 1: use only a half of total rings and then normalize to use as input
-    std::vector<std::vector<float>> RingerSelector::prepare_inputs(  unsigned barcode,
+    // PreprocessingMode = 0: use only rings normalized by total energy as input
+    // PreprocessingMode = 1: use only a half of total rings and then normalize to use as input
+    std::vector<std::vector<float>> RingerSelector::prepare_inputs(  unsigned PreprocessingMode,
                                                                      const xAOD::TrigRingerRings *ringsCluster, 
                                                                      const xAOD::TrigElectron */*el*/ ) const
     {
       std::vector< std::vector< float > > inputs;
 
       // Barcode 0 for all rings normalized by the total energy
-      if ( barcode == 0 ){ 
+      if ( PreprocessingMode == 0 ){ 
         const std::vector<float> rings = ringsCluster->rings();
         std::vector<float> refRings(rings.size());
         refRings.assign(rings.begin(), rings.end());
@@ -170,7 +169,7 @@ namespace Ringer{
         inputs.push_back( refRings );
 
       // Barcode 1 for half rings normalized by the total energy
-      }else if ( barcode == 1){
+      }else if ( PreprocessingMode == 1){
 
         const std::vector<float> rings = ringsCluster->rings();
         std::vector<float> refRings(rings.size());
@@ -178,13 +177,13 @@ namespace Ringer{
 
         std::vector<float> halfRings; 
         
-        int PS   = 8;
-        int EM1  = 64;
-        int EM2  = 8;
-        int EM3  = 8;
-        int HAD1 = 4;
-        int HAD2 = 4;
-        int HAD3 = 4;
+        constexpr int PS   = 8;
+        constexpr int EM1  = 64;
+        constexpr int EM2  = 8;
+        constexpr int EM3  = 8;
+        constexpr int HAD1 = 4;
+        constexpr int HAD2 = 4;
+        constexpr int HAD3 = 4;
 
         halfRings.insert(halfRings.end(), refRings.begin(), refRings.begin() + PS/2);
         halfRings.insert(halfRings.end(), refRings.begin() + PS, refRings.begin() + PS + (EM1/2));
@@ -284,15 +283,11 @@ namespace Ringer{
       return CutVector;
     }
 
-    std::string RingerSelector::GetBasePath(const std::string &path){
-      
-      std::vector<std::string> strs;
-      boost::split(strs,path,boost::is_any_of("/"));
-      std::string basepath;
-      for (unsigned at=0; at<strs.size()-1;++at)
-        basepath += "/"+strs.at(at);
-      basepath.erase(0,1);
-      return basepath;
+    std::string RingerSelector::GetBasePath(const std::string &path) const {
+      // Get the normalized parent path
+      std::string ret = std::filesystem::path(path).parent_path().lexically_normal().string();
+      if (!ret.empty() && ret.front()=='/') ret.erase(0, 1);
+      return ret;
     }
 
 
