@@ -45,12 +45,6 @@ public:
     m_distetaCaloBorder[layer][subpos] = val;
   };
 
-  void set_CaloSurface_sample(int val) { m_CaloSurface_sample = val; };
-  void set_CaloSurface_eta(double val) { m_CaloSurface_eta = val; };
-  void set_CaloSurface_phi(double val) { m_CaloSurface_phi = val; };
-  void set_CaloSurface_r(double val) { m_CaloSurface_r = val; };
-  void set_CaloSurface_z(double val) { m_CaloSurface_z = val; };
-
   void set_IDCaloBoundary_eta(double val) { m_IDCaloBoundary_eta = val; };
   void set_IDCaloBoundary_phi(double val) { m_IDCaloBoundary_phi = val; };
   void set_IDCaloBoundary_r(double val) { m_IDCaloBoundary_r = val; };
@@ -65,12 +59,6 @@ public:
   double detaBorder(int layer, int subpos) const {
     return m_distetaCaloBorder[layer][subpos];
   };
-
-  int CaloSurface_sample() const { return m_CaloSurface_sample; };
-  double CaloSurface_eta() const { return m_CaloSurface_eta; };
-  double CaloSurface_phi() const { return m_CaloSurface_phi; };
-  double CaloSurface_r() const { return m_CaloSurface_r; };
-  double CaloSurface_z() const { return m_CaloSurface_z; };
 
   double IDCaloBoundary_eta() const { return m_IDCaloBoundary_eta; };
   double IDCaloBoundary_phi() const { return m_IDCaloBoundary_phi; };
@@ -97,12 +85,6 @@ private:
   double m_zCalo[CaloCell_ID_FCS::MaxSample][3];
   double m_dCalo[CaloCell_ID_FCS::MaxSample][3];
   double m_distetaCaloBorder[CaloCell_ID_FCS::MaxSample][3];
-
-  int m_CaloSurface_sample;
-  double m_CaloSurface_eta;
-  double m_CaloSurface_phi;
-  double m_CaloSurface_r;
-  double m_CaloSurface_z;
 
   double m_IDCaloBoundary_eta;
   double m_IDCaloBoundary_phi;

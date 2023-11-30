@@ -215,7 +215,7 @@ TFCSGANEtaSlice::GetNetworkOutputs(const TFCSTruthState *truth,
                  // regions and added only to the GANs that use it, for now all
                  // GANs have 3 conditioning inputs so filling zeros
       inputs["node_1"].insert(std::pair<std::string, double>(
-          "variable_1", fabs(extrapol->CaloSurface_eta())));
+          "variable_1", fabs(extrapol->IDCaloBoundary_eta())));
     } else {
       inputs["node_1"].insert(std::pair<std::string, double>("variable_1", 0));
     }

@@ -391,7 +391,6 @@ void TFCSPredictExtrapWeights::unit_test(
   }
   if (!extrapol) {
     TFCSExtrapolationState *e = new TFCSExtrapolationState();
-    e->set_CaloSurface_eta(truth->Eta());
     e->set_IDCaloBoundary_eta(truth->Eta());
     for (int i = 0; i < 24; ++i) {
       e->set_eta(i, TFCSExtrapolationState::SUBPOS_ENT, truth->Eta());
