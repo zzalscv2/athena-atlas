@@ -10,7 +10,7 @@ from TrigInDetConfig.utils import getFlagsForActiveConfig
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-@AccumulatorCache
+
 def _caloSeq(flags, is_probe_leg=False):
     selAcc = SelectionCA('CaloTau', isProbe=is_probe_leg)
 
@@ -50,13 +50,13 @@ def _caloSeq(flags, is_probe_leg=False):
     return (selAcc , menuCA)
 
 
+@AccumulatorCache
 def tauCaloMVAMenuSeq(flags, name, is_probe_leg=False):
     (selAcc , menuCA) = _caloSeq(flags, is_probe_leg)
     return menuCA 
 
 
-@AccumulatorCache
-def _ftfCoreSeq(flags,name,is_probe_leg=False):                                                                                                                                                                 
+def _ftfCoreSeq(flags,name,is_probe_leg=False):
     selAcc=SelectionCA('tau'+name+'FTF', isProbe=is_probe_leg)
 
     newRoITool   = CompFactory.ViewCreatorFetchFromViewROITool( 
@@ -124,6 +124,8 @@ def _ftfCoreSeq(flags,name,is_probe_leg=False):
     menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict, isProbe=is_probe_leg)
     return (selAcc , menuCA)
 
+
+@AccumulatorCache
 def tauFTFTauCoreSeq(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauCore',log)
 
@@ -131,13 +133,15 @@ def tauFTFTauCoreSeq(flags, is_probe_leg=False):
     (selAcc , menuCA) = _ftfCoreSeq(newflags,name,is_probe_leg)
     return menuCA 
 
+
+@AccumulatorCache
 def tauFTFTauLRTSeq(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauLRT',log)
     name='LRT'
     (selAcc , menuCA) = _ftfCoreSeq(newflags,name,is_probe_leg)
     return menuCA 
 
-@AccumulatorCache
+
 def _ftfTauIsoSeq(flags,name,is_probe_leg=False):
     selAcc=SelectionCA('tau'+name+'FTF', isProbe=is_probe_leg)
 
@@ -170,13 +174,15 @@ def _ftfTauIsoSeq(flags,name,is_probe_leg=False):
     menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict, isProbe=is_probe_leg)
     return (selAcc , menuCA)
 
+
+@AccumulatorCache
 def tauFTFTauIsoSeq(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauIso',log)
     name = 'Iso'
     (selAcc , menuCA) = _ftfTauIsoSeq(newflags,name,is_probe_leg)
     return menuCA
 
-@AccumulatorCache
+
 def _precTrackSeq(flags,name,is_probe_leg=False):
     selAcc=SelectionCA('tau'+name+'Track', isProbe=is_probe_leg)
 
@@ -217,17 +223,22 @@ def _precTrackSeq(flags,name,is_probe_leg=False):
     menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTrkPrecHypoToolFromDict, isProbe=is_probe_leg)
     return (selAcc , menuCA)
 
+
+@AccumulatorCache
 def tauPrecTrackIsoSeq(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauIso',log)
     name = 'Iso'
     (selAcc , menuCA) = _precTrackSeq(newflags,name,is_probe_leg)
     return menuCA
 
+
+@AccumulatorCache
 def tauPrecTrackLRTSeq(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauLRT',log)
     name = 'LRT'
     (selAcc , menuCA) = _precTrackSeq(newflags,name,is_probe_leg)
     return menuCA
+
 
 def _tauPrecSeq(flags,name,is_probe_leg=False):
     selAcc=SelectionCA('tauPrec'+name, isProbe=is_probe_leg)
@@ -264,18 +275,24 @@ def _tauPrecSeq(flags,name,is_probe_leg=False):
     menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEFTauMVHypoToolFromDict, isProbe=is_probe_leg)
     return (selAcc , menuCA)
 
+
+@AccumulatorCache
 def tauTrackTwoMVASeq(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauIso',log)
     name = 'MVA'
     (selAcc , menuCA) = _tauPrecSeq(newflags,name,is_probe_leg)
     return menuCA
 
+
+@AccumulatorCache
 def tauTrackTwoLLPSeq(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauIso',log)
     name = 'LLP'
     (selAcc , menuCA) = _tauPrecSeq(newflags,name,is_probe_leg)
     return menuCA
 
+
+@AccumulatorCache
 def tauTrackLRTSeq(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauLRT',log)
     name = 'LRT'
