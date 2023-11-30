@@ -62,6 +62,8 @@ private:
   /** The write key for adding tau element links to the Charged Flow Elements */
   SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_chargedFETauWriteDecorKey{this,"ChargedFETauDecorKey","JetETMissChargedParticleFlowObjects.FE_TauLinks","WriteDecorHandleKey for adding tau links to charged FEs"};
 
+  SG::ReadHandleKey<xAOD::JetContainer> m_jetReadHandleKey{this,"JetContainer","AntiKt4EMPFlowJets","ReadHandleKey for Jet Container"};
+
 };
 
 #endif // PFTAUFLOWELEMENTASSOC_H
