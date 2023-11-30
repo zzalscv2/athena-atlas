@@ -9,7 +9,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ..Menu.SignatureDicts import METChainParts_Default, METChainParts
 from ..Config.MenuComponents import (
-    RecoFragmentsPool,
     ChainStep,
     InEventRecoCA,
     SelectionCA,
@@ -298,23 +297,10 @@ class AlgConfig(ABC):
             yield subcls
 
     @classmethod
-    def _makeCls(cls, flags, **kwargs) -> AlgConfig:
-        """This is a rather horrible work-around.
-
-        The RecoFragmentsPool approach wants a function that takes a set of
-        flags. However our class constructors don't do this (and passing
-        in a class doesn't *quite* fit what the RecoFragmentsPool is expecting.
-        So instead we pass this function...
-        """
-        return cls(**kwargs)
-
-    @classmethod
-    def fromRecoDict(cls, flags, EFrecoAlg, **recoDict) -> AlgConfig:
+    def fromRecoDict(cls, EFrecoAlg, **recoDict) -> AlgConfig:
         for subcls in cls._get_subclasses():
             if subcls.algType() == EFrecoAlg:
-                return RecoFragmentsPool.retrieve(
-                    subcls._makeCls, flags, EFrecoAlg=EFrecoAlg, **recoDict
-                )
+                return subcls(EFrecoAlg=EFrecoAlg, **recoDict)
 
         raise ValueError("Unknown EFrecoAlg '{}' requested".format(EFrecoAlg))
 

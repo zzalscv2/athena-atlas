@@ -52,7 +52,7 @@ def getMETRecoSequences(flags, purposes: List[str]):
         merged_ca.addSequence(parOR(seqname), primary=True)
         max_step_idx = 0
         for alg in ef_reco_algs:
-            cfg = AlgConfig.fromRecoDict(flags, **stringToMETRecoDict(alg))
+            cfg = AlgConfig.fromRecoDict(**stringToMETRecoDict(alg))
             step_output = cfg.make_reco_algs(flags, **cfg.interpret_reco_dict())
             max_step_idx = max(max_step_idx, step_output.max_step_idx)
             for ca in step_output.steps:

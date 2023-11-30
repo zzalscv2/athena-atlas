@@ -324,7 +324,7 @@ class NNHLTConfig(AlgConfig):
         inputs = StepOutput()
         met_names: list[str] = []
         for alg in self.input_mets:
-            cfg = AlgConfig.fromRecoDict(flags, **stringToMETRecoDict(alg, onlyRecoKeys = True))
+            cfg = AlgConfig.fromRecoDict(**stringToMETRecoDict(alg, onlyRecoKeys = True))
             met_names.append(cfg.outputKey)
             output = cfg.make_reco_algs(flags, **cfg.interpret_reco_dict())
             output.add_output_prefix(f"{alg}.")

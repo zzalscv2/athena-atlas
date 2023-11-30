@@ -41,7 +41,7 @@ class METChainConfiguration(ChainConfigurationBase):
     # ----------------------
     def assembleChainImpl(self, flags):
         log.debug("Assembling chain for %s", self.chainName)
-        conf = AlgConfig.fromRecoDict(flags, **self.recoDict)
+        conf = AlgConfig.fromRecoDict(**self.recoDict)
         if isComponentAccumulatorCfg():
             steps = conf.make_accumulator_steps(flags, self.dict)
         else:
