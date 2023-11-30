@@ -1,4 +1,4 @@
-#include <MyAnalysis/ONNXUtils.h>
+#include <ONNXUtils/ONNXWrapper.h>
 
 ONNXWrapper::ONNXWrapper(const std::string model_path) {
     
@@ -136,11 +136,11 @@ const std::map<std::string, std::vector<int64_t>> ONNXWrapper::GetModelOutputs()
 const std::map<std::string, std::string> ONNXWrapper::GetMETAData() {
   std::map<std::string, std::string> METAData_map;
   auto metadata = m_onnxSession->GetModelMetadata();
-  int64_t nkeys = 0;
-  char** keys = metadata.GetCustomMetadataMapKeys(m_allocator, nkeys);
 
-  for (int64_t i = 0; i < nkeys; i++) {
-    METAData_map[keys[i]]=this->GetMETADataByKey(keys[i]);
+  auto keys = metadata.GetCustomMetadataMapKeysAllocated(m_allocator);
+  // auto status = OrtApi::ModelMetadataGetCustomMetadataMapKeys(metadata, m_allocator, keys, nkeys)
+  for (int64_t i = 0; i < keys.size(); i++) {
+    METAData_map[keys[i].get()]=this->GetMETADataByKey(keys[i].get());
   }
 
   return METAData_map;
@@ -148,7 +148,7 @@ const std::map<std::string, std::string> ONNXWrapper::GetMETAData() {
 
 const std::string& ONNXWrapper::GetMETADataByKey(const char * key){
   auto metadata = m_onnxSession->GetModelMetadata();
-  return metadata.LookupCustomMetadataMap(key, m_allocator);
+  return metadata.LookupCustomMetadataMapAllocated(key, m_allocator).get();
 }
 
 const std::vector<const char*>& ONNXWrapper::getInputNames(){

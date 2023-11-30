@@ -14,10 +14,10 @@ int main(int narg, char* argv[]) {
   // no key provided, print out all
   if (narg == 2) {  // should be extend to more that 2 inputs and outputs
     // print input/output shape and names
-    for ( const auto &p : model->GetModelInputs(); )
+    for ( const auto &p : model->GetModelInputs() )
     {
       std::string separator;
-      std::cout << "Input: " << p.first ", shape: (";
+      std::cout << "Input: " << p.first << ", shape: (";
       for (auto x : p.second) {
         std::cout << separator << x;
         separator = ",";
@@ -27,7 +27,7 @@ int main(int narg, char* argv[]) {
     for ( const auto &p : model->GetModelOutputs() )
     {
       std::string separator;
-      std::cout << "Outputs: " << p.first ", shape: (";
+      std::cout << "Outputs: " << p.first << ", shape: (";
       for (auto x : p.second) {
         std::cout << separator << x;
         separator = ",";

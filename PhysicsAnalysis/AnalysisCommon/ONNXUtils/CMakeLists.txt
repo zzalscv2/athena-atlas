@@ -13,23 +13,25 @@ atlas_subdir( ONNXUtils )
 find_package( onnxruntime )
 
 # Build a shared library:
-atlas_add_library( ONNXUtils
+atlas_add_library( ONNXUtils Root/*cxx ONNXUtils/*h
   PUBLIC_HEADERS ONNXUtils
-  INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS} PathResolver CxxUtils
-  LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} 
+  INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
+  PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils
+  LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} PathResolver
   )
 
 
-if (NOT XAOD_STANDALONE)
-  atlas_add_component( ONNXUtilsLib
-    LINK_LIBRARIES ONNXUtils
-    )
-endif()
+#if (NOT XAOD_STANDALONE)
+#  atlas_add_component(
+#    LINK_LIBRARIES ONNXUtils
+#    )
+#endif()
 
 atlas_add_dictionary( ONNXUtilsDict
    ONNXUtils/ONNXUtilsDict.h
    ONNXUtils/selection.xml
-   LINK_LIBRARIES ONNXUtils )
+   LINK_LIBRARIES ONNXUtils 
+)
 
 #atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
@@ -37,4 +39,4 @@ atlas_add_dictionary( ONNXUtilsDict
 atlas_add_executable( get-onnx-metadata
                       utils/get-onnx-metadata.cxx
                       INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} )
+                      LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} PathResolver ONNXUtils)
