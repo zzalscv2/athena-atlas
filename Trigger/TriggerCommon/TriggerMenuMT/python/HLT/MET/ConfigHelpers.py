@@ -72,9 +72,13 @@ def metRecoDictToString(recoDict: dict[str, str], skipDefaults: bool = True) -> 
     )
 
 
-def stringToMETRecoDict(string: str) -> dict[str, Any]:
-    """Convert a string to a MET reco dict"""
+def stringToMETRecoDict(string: str, onlyRecoKeys: bool = False) -> dict[str, Any]:
+    """Convert a string to a MET reco dict. Optionally only keep entries contained in recoKeys. 
+    Necessary for correctly configuring algorithms as inputs to NN.
+    """
     defaults = copy(METChainParts_Default)
+    if onlyRecoKeys:
+        defaults = {key: defaults[key] for key in recoKeys}
     # Now go through the parts of the string and fill in the dict
     for part in string.split("_"):
         for key, values in METChainParts.items():
