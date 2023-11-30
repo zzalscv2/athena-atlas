@@ -39,16 +39,31 @@ namespace top {
       return StatusCode::SUCCESS;
     }
 
-    static const std::string cdi_file_default =
-      "xAODBTaggingEfficiency/13TeV/2022-22-13TeV-MC20-CDI-2022-07-28_v1.root";
+    // see https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/BTagRecommendationsRelease22#Calibration_pre_recommendations
+    static const std::string cdi_file_default_MC20 =
+      "xAODBTaggingEfficiency/13TeV/2023-22-13TeV-MC20-CDI-2023-09-13_v1.root ";
+    static const std::string cdi_file_default_MC21 =
+      "xAODBTaggingEfficiency/13p6TeV/2023-22-13TeV-MC21-CDI-2023-09-13_v1.root";
 
     if (m_config->bTaggingCDIPath() != "Default") {
-      if (m_config->bTaggingCDIPath() != cdi_file_default) {
-        m_config->setPrintCDIpathWarning(true);
+      if (m_config->isRun3()) {
+	if (m_config->bTaggingCDIPath() != cdi_file_default_MC21) {
+	  m_config->setPrintCDIpathWarning(true);
+	}
+      }
+      else {
+	if (m_config->bTaggingCDIPath() != cdi_file_default_MC20) {
+	  m_config->setPrintCDIpathWarning(true);
+	}
       }
       m_cdi_file = m_config->bTaggingCDIPath();
     } else {
-      m_cdi_file = cdi_file_default;
+      if (m_config->isRun3()) {
+	m_cdi_file = cdi_file_default_MC21;
+      }
+      else {
+	m_cdi_file = cdi_file_default_MC20;
+      }
     }
     // This ordering needs to match the indexing in TDP (for missing cases, we use default which gives a MC/MC of 1 as
     // its the same as the eff used in the calibration
