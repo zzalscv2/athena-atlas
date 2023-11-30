@@ -377,7 +377,9 @@ namespace top {
           top::check(jet->isAvailable<float>(
                        "JET_SF_jvt"),
                      " Can't find jet decoration \"JET_SF_jvt\" - we need it to calculate the jet scale-factors!");
-          event.m_jvtSF *= jet->auxdataConst<float>("JET_SF_jvt");
+	  if (jet->auxdataConst<float>("JET_SF_jvt") > 0) {
+	    event.m_jvtSF *= jet->auxdataConst<float>("JET_SF_jvt");
+	  }
 	  
 	  // fJVT scale factors not added to jets unless fJVT is requested
 	  if (m_config->getfJVTWP() != "None") {
