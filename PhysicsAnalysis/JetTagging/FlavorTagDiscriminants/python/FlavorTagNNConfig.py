@@ -2,7 +2,8 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
+from os.path import commonpath
+from pathlib import PurePath
 
 def DL2ToolCfg(ConfigFlags, NNFile, **options):
     acc = ComponentAccumulator()
@@ -152,8 +153,7 @@ def FlavorTagNNCfg(
 
     # Ensure different names for standard and flip taggers
     if FlipConfig != "STANDARD":
-        FlipConfig_name = FlipConfig
-        name = name + FlipConfig_name
+        name = name + FlipConfig
 
     veto_list = getStaticTrackVars(TrackCollection)
     veto_list += getUndeclaredBtagVars(BTaggingCollection)
@@ -169,4 +169,41 @@ def FlavorTagNNCfg(
     # -- create the association algorithm
     acc.addEventAlgo(decorAlg)
 
+    return acc
+
+
+def MultifoldGNNCfg(
+        flags,
+        BTaggingCollection,
+        TrackCollection,
+        FlipConfig="STANDARD",
+):
+    # dummy paths for now
+    rawpath = 'BTagging/20230306/gn2v00/antikt4empflow/network.onnx'
+    nnFilePaths = [rawpath]*4
+    common = commonpath(nnFilePaths)
+    nn_name = '_'.join(PurePath(common).with_suffix('').parts)
+    algname = f'{nn_name}_{FlipConfig}'
+    veto_list = getStaticTrackVars(TrackCollection)
+    veto_list += getUndeclaredBtagVars(BTaggingCollection)
+    flavors = list('cub') + [] # todo: add tau when we have it
+    acc = ComponentAccumulator()
+    acc.addEventAlgo(
+        CompFactory.FlavorTagDiscriminants.BTagDecoratorAlg(
+            name=algname,
+            container=BTaggingCollection,
+            constituentContainer=TrackCollection,
+            decorator=CompFactory.FlavorTagDiscriminants.MultifoldGNNTool(
+                name=f'{algname}_tool',
+                foldHashName='jetFoldHash',
+                nnFiles=nnFilePaths,
+                flipTagConfig=FlipConfig,
+                # todo: don't remap anything with final NN
+                variableRemapping={
+                    f'GN2v00_p{x}':f'GN2v00Fold_p{x}' for x in flavors
+                }
+            ),
+            undeclaredReadDecorKeys=veto_list,
+        )
+    )
     return acc

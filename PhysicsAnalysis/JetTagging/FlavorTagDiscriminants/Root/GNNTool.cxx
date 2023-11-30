@@ -4,6 +4,7 @@
 
 #include "FlavorTagDiscriminants/GNNTool.h"
 #include "FlavorTagDiscriminants/GNN.h"
+#include "FlavorTagDiscriminants/GNNOptions.h"
 
 namespace FlavorTagDiscriminants {
 
@@ -11,40 +12,18 @@ namespace FlavorTagDiscriminants {
           asg::AsgTool(name),
           m_props()
   {
-    declareProperty("nnFile", m_props.nnFile,
+    declareProperty("nnFile", m_nn_file,
       "the path to the netowrk file used to run inference");
-    declareProperty("flipTagConfig", m_props.flipTagConfig,
-      "flip configuration used for calibration");
-    declareProperty("variableRemapping", m_props.variableRemapping,
-      "user-defined mapping to rename the vars stored in the NN");
-    declareProperty("trackLinkType", m_props.trackLinkType,
-      "access tracks as IParticleContainer or as TrackParticleContainer");
-    declareProperty("defaultOutputValue", m_props.default_output_value);
-    declareProperty("decorateTracks", m_props.decorate_tracks);
+    propify(*this, &m_props);
   }
 
   GNNTool::~GNNTool() {}
 
   StatusCode GNNTool::initialize() {
 
-    ATH_MSG_INFO("Initialize bTagging Tool (GNN) from: " + m_props.nnFile);
+    ATH_MSG_INFO("Initialize bTagging Tool (GNN) from: " + m_nn_file);
 
-    FlipTagConfig flip_config = FlipTagConfig::STANDARD;
-    if (m_props.flipTagConfig.size() > 0) {
-      flip_config = flipTagConfigFromString(m_props.flipTagConfig);
-    }
-    TrackLinkType trackLinkType = TrackLinkType::TRACK_PARTICLE;
-    if (m_props.trackLinkType.size() > 0) {
-      trackLinkType = trackLinkTypeFromString(m_props.trackLinkType);
-    }
-    m_gnn.reset(
-      new GNN(
-        m_props.nnFile,
-        flip_config,
-        m_props.variableRemapping,
-        trackLinkType,
-        m_props.default_output_value,
-        m_props.decorate_tracks));
+    m_gnn.reset(new GNN(m_nn_file, getOptions(m_props)));
 
     return StatusCode::SUCCESS;
   }

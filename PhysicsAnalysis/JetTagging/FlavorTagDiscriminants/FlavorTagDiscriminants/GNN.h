@@ -9,6 +9,7 @@
 #include "FlavorTagDiscriminants/FlipTagEnums.h"
 #include "FlavorTagDiscriminants/AssociationEnums.h"
 #include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
+#include "FlavorTagDiscriminants/GNNOptions.h"
 
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
 
@@ -22,6 +23,7 @@
 
 namespace FlavorTagDiscriminants {
 
+  class GNNOptions;
   class OnnxUtil;
   //
   // Tool to to flavor tag jet/btagging object
@@ -29,6 +31,7 @@ namespace FlavorTagDiscriminants {
   class GNN
   {
   public:
+    GNN(const std::string nnFile, const GNNOptions& opts);
     GNN(const std::string& nnFile,
         const FlipTagConfig& flip_config = FlipTagConfig::STANDARD,
         const std::map<std::string, std::string>& variableRemapping = {},

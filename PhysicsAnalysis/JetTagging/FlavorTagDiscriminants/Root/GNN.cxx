@@ -5,6 +5,7 @@
 #include "FlavorTagDiscriminants/GNN.h"
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
 #include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagDiscriminants/GNNOptions.h"
 
 #include "xAODBTagging/BTagging.h"
 #include "xAODJet/JetContainer.h"
@@ -22,16 +23,11 @@ namespace {
 
 namespace FlavorTagDiscriminants {
 
-  GNN::GNN(const std::string& nnFile,
-           const FlipTagConfig& flip_config,
-           const std::map<std::string, std::string>& variableRemapping,
-           const TrackLinkType trackLinkType,
-           float defaultOutputValue,
-           bool decorate_tracks):
+  GNN::GNN(const std::string nn_file, const GNNOptions& o):
     m_onnxUtil(nullptr),
     m_jetLink(jetLinkName),
-    m_defaultValue(defaultOutputValue),
-    m_decorate_tracks(decorate_tracks)
+    m_defaultValue(o.default_output_value),
+    m_decorate_tracks(o.decorate_tracks)
   {
     // track decoration is allowed only for non-production builds
     if (m_decorate_tracks) {
@@ -46,7 +42,7 @@ namespace FlavorTagDiscriminants {
       }
     }
 
-    std::string fullPathToOnnxFile = PathResolverFindCalibFile(nnFile);
+    std::string fullPathToOnnxFile = PathResolverFindCalibFile(nn_file);
     m_onnxUtil = std::make_shared<OnnxUtil>(fullPathToOnnxFile);
 
     std::string gnn_config_str = m_onnxUtil->getMetaData("gnn_config");
@@ -67,7 +63,7 @@ namespace FlavorTagDiscriminants {
     auto config = lwt::parse_json_graph(gnn_config_stream);
 
     auto [inputs, track_sequences, options] = dataprep::createGetterConfig(
-        config, flip_config, variableRemapping, trackLinkType);
+        config, o.flip_config, o.variable_remapping, o.track_link_type);
 
     auto [vb, vj, ds] = dataprep::createBvarGetters(inputs);
     m_varsFromBTag = vb;
@@ -89,6 +85,15 @@ namespace FlavorTagDiscriminants {
 
     rd.merge(rt);
     dataprep::checkForUnusedRemaps(options.remap_scalar, rd);
+  }
+  GNN::GNN(const std::string& file,
+           const FlipTagConfig& flip,
+           const std::map<std::string, std::string>& remap,
+           const TrackLinkType link_type,
+           float def_out_val,
+           bool dt):
+    GNN( file, GNNOptions { flip, remap, link_type, def_out_val, dt} )
+  {
   }
 
   GNN::GNN(GNN&&) = default;
