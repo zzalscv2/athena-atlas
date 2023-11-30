@@ -204,6 +204,7 @@ def cvfClusterInputCfg(flags, **recoDict) -> StepOutput:
     return StepOutput.create(acc, inputs, CVF="CVF", PUCategory="PUClassification")
 
 
+@AccumulatorCache
 def jetInputCfg(flags, force_tracks: bool = False, **recoDict) -> StepOutput:
     """Create the input jets
 

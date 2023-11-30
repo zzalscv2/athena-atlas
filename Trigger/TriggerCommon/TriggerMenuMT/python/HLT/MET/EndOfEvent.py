@@ -10,6 +10,7 @@ from .ConfigHelpers import AlgConfig, stringToMETRecoDict
 from ..CommonSequences.FullScanDefs import caloFSRoI, trkFSRoI
 from ..Config.MenuComponents import extractAlgorithmsAndAppendCA
 
+
 _algs_by_purpose = {
     "metcalo": ["cell", "tcpufit", "tcpufit_sig30"],
     "mettrk": [
