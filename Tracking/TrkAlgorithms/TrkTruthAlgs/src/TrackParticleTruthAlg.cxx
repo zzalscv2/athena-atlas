@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackParticleTruthAlg.h"
@@ -10,6 +10,8 @@
 #include "GeneratorObjects/McEventCollection.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "StoreGate/WriteDecorHandle.h"
+#include "TruthUtils/MagicNumbers.h"
+
 
 TrackParticleTruthAlg::TrackParticleTruthAlg(const std::string &name,ISvcLocator *pSvcLocator) :
   AthAlgorithm(name,pSvcLocator),
@@ -109,7 +111,7 @@ StatusCode TrackParticleTruthAlg::execute() {
     
     // if we found a match use it
     if( result != truthTrackColl.end() ){
-      ATH_MSG_VERBOSE("Found track Truth: barcode  " << result->second.particleLink().barcode() << " evt " << result->second.particleLink().eventIndex());
+      ATH_MSG_VERBOSE("Found track Truth: uniqueID  " << HepMC::uniqueID(&(result->second.particleLink())) << " evt " << result->second.particleLink().eventIndex());
       link = truthParticleLinks.find(result->second.particleLink());
       
       // if configured also get truth classification
@@ -123,7 +125,7 @@ StatusCode TrackParticleTruthAlg::execute() {
     }
 
     if( link.isValid() ){
-      ATH_MSG_DEBUG("Found matching xAOD Truth: barcode " << (*link)->barcode() << " pt " << (*link)->pt() << " eta " << (*link)->eta() << " phi " << (*link)->phi());
+      ATH_MSG_DEBUG("Found matching xAOD Truth: uniqueID " << HepMC::uniqueID(*link) << " pt " << (*link)->pt() << " eta " << (*link)->eta() << " phi " << (*link)->phi());
       // set element link 
       link.toPersistent();
       particlesLink(*particle)=link;

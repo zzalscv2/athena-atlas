@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkTruthAlgs )
@@ -7,4 +7,4 @@ atlas_subdir( TrkTruthAlgs )
 atlas_add_component( TrkTruthAlgs
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps GaudiKernel StoreGateLib TrkTruthData xAODCore xAODTracking GeneratorObjects MCTruthClassifierLib TrkToolInterfaces )
+                     LINK_LIBRARIES AthenaBaseComps GaudiKernel StoreGateLib TrkTruthData xAODCore xAODTracking GeneratorObjects MCTruthClassifierLib TrkToolInterfaces TruthUtils )
