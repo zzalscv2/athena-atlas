@@ -90,3 +90,9 @@ atlas_add_test( LArRawSCContainerCnv_p1_test
                 SOURCES
                 test/LArRawSCContainerCnv_p1_test.cxx
                 LINK_LIBRARIES AthenaPoolCnvSvcLib LArRawEvent LArRecEvent TestTools CaloIdentifier AthenaKernel Identifier LArTPCnv )
+
+atlas_add_test( LArTTL1ContainerCnv_p1_test
+                SOURCES
+                test/LArTTL1ContainerCnv_p1_test.cxx
+                LINK_LIBRARIES AthenaPoolCnvSvcLib LArRawEvent LArRecEvent TestTools CaloIdentifier AthenaKernel Identifier LArTPCnv
+                POST_EXEC_SCRIPT nopost.sh )
