@@ -11,6 +11,7 @@
 #include <GeoModelKernel/GeoFullPhysVol.h>
 #include <GeoModelKernel/GeoPhysVol.h>
 #include <GeoModelKernel/GeoShape.h>
+#include <GeoModelKernel/GeoSimplePolygonBrep.h>
 #include <GeoModelKernel/GeoAlignableTransform.h>
 #include <GaudiKernel/IAlgTool.h>
 
@@ -68,6 +69,9 @@ class IMuonGeoUtilityTool : virtual public IAlgTool {
         virtual std::string dumpShape(const GeoShape* inShape) const = 0;
         ///
         virtual std::string dumpVolume(const PVConstLink& physVol) const = 0;
+        /// Transforms the vertices of the Polygon shape into a std::vector consisting of Amg::Vector2D objects
+        virtual std::vector<Amg::Vector2D> polygonEdges(const GeoSimplePolygonBrep& polygon) const = 0;
+
  
 };
 

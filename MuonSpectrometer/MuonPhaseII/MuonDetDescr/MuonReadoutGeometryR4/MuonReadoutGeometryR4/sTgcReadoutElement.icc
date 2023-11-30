@@ -1,0 +1,75 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONREADOUTGEOMETRYR4_STGCREADOUTELEMENT_ICC
+#define MUONREADOUTGEOMETRYR4_STGCREADOUTELEMENT_ICC
+
+
+namespace MuonGMR4 {
+    constexpr unsigned int minusOne = -1;
+inline double sTgcReadoutElement::chamberHeight() const { return 2.* m_pars.halfChamberHeight; }
+inline double sTgcReadoutElement::sChamberLength() const { return 2.* m_pars.sHalfChamberLength; }
+inline double sTgcReadoutElement::lChamberLength() const { return 2.* m_pars.lHalfChamberLength; }
+inline double sTgcReadoutElement::sGapLength() const { return (m_pars.stripDesign ? 2.*m_pars.stripDesign->shortHalfHeight(): 0.); }
+inline double sTgcReadoutElement::lGapLength() const { return (m_pars.stripDesign ? 2.*m_pars.stripDesign->longHalfHeight(): 0.); }
+inline double sTgcReadoutElement::gapHeight() const { return (m_pars.stripDesign ? 2.*m_pars.stripDesign->halfWidth(): 0.); }
+inline double sTgcReadoutElement::thickness() const { return 2.* m_pars.halfChamberTck; }
+inline double sTgcReadoutElement::sFrameWidth() const { return m_pars.sFrameWidth; }
+inline double sTgcReadoutElement::lFrameWidth() const { return m_pars.lFrameWidth; }
+inline int sTgcReadoutElement::multilayer() const { return m_pars.stMultilayer; }
+inline int sTgcReadoutElement::numLayers() const { return m_pars.numLayers; }
+inline unsigned int sTgcReadoutElement::nChTypes() const { return m_pars.nChTypes; }
+inline double sTgcReadoutElement::gasGapThickness() const { return m_pars.gasTck; }
+inline double sTgcReadoutElement::yCutout() const { return m_pars.yCutout; }
+inline unsigned int sTgcReadoutElement::numStrips() const { return (m_pars.stripDesign ? m_pars.stripDesign->numStrips(): 0u); }
+inline double sTgcReadoutElement::stripPitch() const { return (m_pars.stripDesign ? m_pars.stripDesign->stripPitch(): 0.); }
+inline double sTgcReadoutElement::stripWidth() const { return (m_pars.stripDesign ? m_pars.stripDesign->stripWidth(): 0.); }
+inline double sTgcReadoutElement::stripLength(const int& stripNumb) const { return (m_pars.stripDesign ? m_pars.stripDesign->stripLength(stripNumb): 0.); }
+inline IdentifierHash sTgcReadoutElement::measurementHash(const Identifier& measId) const {
+    if (idHelperSvc()->detElId(measId) != identify()) {
+        ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
+                        << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
+    }
+    return createHash(m_idHelper.gasGap(measId),
+                      m_idHelper.channelType(measId),
+                      m_idHelper.channel(measId));
+}
+inline IdentifierHash sTgcReadoutElement::createHash(const int gasGap, const int channelType, const int channel) const {
+    /// Construct the Hash such that  (channel) | (channelType) | (gasGap -1) 
+    
+    const IdentifierHash hash{ channel << m_hashShiftChannel | channelType << m_hashShiftChType | 1u*(gasGap -1) };
+    return hash;
+}
+inline IdentifierHash sTgcReadoutElement::layerHash(const Identifier& measId) const {
+    if (m_idHelper.elementID(measId) != m_idHelper.elementID(identify()) ) {
+        ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
+                        << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
+    }
+    return createHash(m_idHelper.gasGap(measId), m_idHelper.channelType(measId), 0);
+}
+inline IdentifierHash sTgcReadoutElement::layerHash(const IdentifierHash& measHash) const {
+    unsigned int mask = minusOne <<m_hashShiftChannel;
+    return IdentifierHash{static_cast<unsigned int>(measHash) & (~mask)};
+}
+inline unsigned int sTgcReadoutElement::stripNumber(const IdentifierHash& measHash) const {
+    return static_cast<unsigned int>(measHash) >> m_hashShiftChannel;
+}
+inline unsigned int sTgcReadoutElement::chType(const IdentifierHash& measHash) const {
+    const unsigned int mask = minusOne << m_hashShiftChannel;
+    const unsigned int stripedHash = (~mask) & static_cast<unsigned int>(measHash);
+    return (stripedHash >> m_hashShiftChType);
+}
+inline unsigned int sTgcReadoutElement::gasGapNumber(const IdentifierHash& measHash) const {
+    const unsigned int mask = minusOne << m_hashShiftChType;
+    const unsigned int stripedHash = (~mask) & static_cast<unsigned int>(measHash);
+    return (stripedHash);
+}
+inline Identifier sTgcReadoutElement::measurementId(const IdentifierHash& measHash) const {
+    return m_idHelper.channelID(identify(), multilayer(), gasGapNumber(measHash) + 1, chType(measHash), stripNumber(measHash));  
+ }
+ inline Amg::Vector3D sTgcReadoutElement::stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const {
+        return stripPosition(ctx, measurementHash(measId));
+ }  
+
+}  // namespace MuonGMR4
+#endif

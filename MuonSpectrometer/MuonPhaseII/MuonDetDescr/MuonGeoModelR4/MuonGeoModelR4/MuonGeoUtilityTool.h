@@ -11,6 +11,7 @@
 #include <MuonGeoModelR4/IMuonGeoUtilityTool.h>
 #include <AthenaBaseComps/AthAlgTool.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
+#include <GeoModelKernel/GeoSimplePolygonBrep.h>
 
 
 namespace MuonGMR4 {
@@ -49,6 +50,8 @@ class MuonGeoUtilityTool final : virtual public IMuonGeoUtilityTool, public AthA
 
     std::string dumpVolume(const PVConstLink& physVol) const override final;
 
+    /// Transforms the vertices of the Polygon shape into a std::vector consisting of Amg::Vector2D objects
+    std::vector<Amg::Vector2D> polygonEdges(const GeoSimplePolygonBrep& polygon) const;
 
    private:
     std::string dumpVolume(const PVConstLink& physVol, const std::string& childDelim) const;

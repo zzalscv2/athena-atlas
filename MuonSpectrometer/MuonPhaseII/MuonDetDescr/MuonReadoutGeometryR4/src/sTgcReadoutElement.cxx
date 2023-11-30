@@ -5,31 +5,75 @@
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 #include <AthenaBaseComps/AthCheckMacros.h>
+#include <GaudiKernel/SystemOfUnits.h>
 
 using namespace ActsTrk;
 
 namespace MuonGMR4 {
-std::ostream& operator<<(std::ostream& ostr, const MuonGMR4::sTgcReadoutElement::parameterBook& /*pars*/) {
-    return ostr;
-
+using parameterBook = sTgcReadoutElement::parameterBook;
+std::ostream& operator<<(std::ostream& ostr, const parameterBook& pars) {
+  if (pars.stripDesign) ostr<<"Strips: "<<(*pars.stripDesign)<<std::endl;
+  if (pars.wireGroupDesign) ostr<<"Wire Groups: "<<(*pars.wireGroupDesign)<<std::endl;   
+  return ostr;
 }
+
 sTgcReadoutElement::sTgcReadoutElement(defineArgs&& args)
     : MuonReadoutElement(std::move(args)),
       m_pars{std::move(args)} {
 }
-const sTgcReadoutElement::parameterBook& sTgcReadoutElement::getParameters() const {return m_pars;}
-Identifier sTgcReadoutElement::measurementId(
-    const IdentifierHash& /*measHash*/) const {
-    return Identifier{};
-}
+
+const parameterBook& sTgcReadoutElement::getParameters() const {return m_pars;}
+
 StatusCode sTgcReadoutElement::initElement() {
-  if (m_init) return StatusCode::SUCCESS;
-  m_init = true;
-  return StatusCode::SUCCESS;
+   ATH_MSG_DEBUG("Parameter book "<<parameterBook());
+   if (m_pars.stripLayers.empty()) {
+      ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" doesn't have any layers defined");
+      return StatusCode::FAILURE;
+   }
+   for (unsigned int layer = 0; layer < m_pars.stripLayers.size(); ++layer) {
+      IdentifierHash layHash{layer};
+      if (gasGapNumber(m_pars.stripLayers[layer].hash()) != layHash) {
+         ATH_MSG_FATAL("Layer "<<m_pars.stripLayers[layer]<<" has a very strange hash. Expect "<<layer);
+       return StatusCode::FAILURE;
+      }
+      ATH_CHECK(insertTransform(m_pars.stripLayers[layer].hash(), 
+                                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
+                                    return toStation(store) * fromGapToChamOrigin(hash); 
+                                 }));
+   }
+   return StatusCode::SUCCESS;
 }
 
-IdentifierHash sTgcReadoutElement::measurementHash(const Identifier& /*measId*/) const { return IdentifierHash{};}
-IdentifierHash sTgcReadoutElement::layerHash(const Identifier& /*measId*/) const { return  IdentifierHash{};}
+Amg::Transform3D sTgcReadoutElement::fromGapToChamOrigin(const IdentifierHash& hash) const{
+   unsigned int layIdx = static_cast<unsigned int>(hash);
+   unsigned int gasGap = gasGapNumber(hash);
+   if (gasGap < m_pars.stripLayers.size()) return m_pars.stripLayers[gasGap].toOrigin();
+   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.stripLayers.size());
+   return Amg::Transform3D::Identity();
+}
 
-        
+Amg::Vector3D sTgcReadoutElement::stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+   const IdentifierHash lHash = layerHash(measHash);
+   unsigned int layIdx = static_cast<unsigned int>(lHash);
+   unsigned int gasGap = gasGapNumber(measHash);
+   if (gasGap < m_pars.stripLayers.size()) {
+      return localToGlobalTrans(ctx, lHash) * m_pars.stripLayers[gasGap].localStripPos(stripNumber(measHash));
+   }
+   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.stripLayers.size());
+   return Amg::Vector3D::Zero();
+}
+
+Amg::Vector3D sTgcReadoutElement::chamberStripPos(const IdentifierHash& measHash) const {
+   const IdentifierHash lHash = layerHash(measHash);
+   unsigned int layIdx = static_cast<unsigned int>(lHash);
+   if (layIdx < m_pars.stripLayers.size()) {
+      return  m_pars.stripLayers[layIdx].stripPosition(stripNumber(measHash));
+   }
+   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.stripLayers.size());
+   return Amg::Vector3D::Zero();
+}
+
 }  // namespace MuonGMR4
