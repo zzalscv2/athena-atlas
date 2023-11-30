@@ -24,9 +24,6 @@
 
 using namespace CxxUtils;
 using namespace ActsTrk;
-namespace {
-    constexpr double tolerance = 0.001 * Gaudi::Units::mm;
-}
 
 namespace MuonGMR4 {
 
