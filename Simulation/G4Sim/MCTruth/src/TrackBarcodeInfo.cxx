@@ -4,11 +4,11 @@
 
 #include "MCTruth/TrackBarcodeInfo.h"
 
-TrackBarcodeInfo::TrackBarcodeInfo(int bc, ISF::ISFParticle* baseIsp)
+TrackBarcodeInfo::TrackBarcodeInfo(int uid, int bc, ISF::ISFParticle* baseIsp)
   : VTrackInformation(BarcodeOnly)
   , m_theBaseISFParticle(baseIsp)
   , m_barcode(bc)
-  , m_uniqueID(bc) // TODO Assign this separately
+  , m_uniqueID(uid)
   , m_returnedToISF(false)
 {
 }

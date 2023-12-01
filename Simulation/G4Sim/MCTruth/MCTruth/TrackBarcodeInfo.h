@@ -13,7 +13,7 @@ namespace ISF {
 
 class TrackBarcodeInfo: public VTrackInformation {
 public:
-  TrackBarcodeInfo(int bc, ISF::ISFParticle* baseIsp=0);
+  TrackBarcodeInfo(int uid, int bc, ISF::ISFParticle* baseIsp=0);
   virtual int GetParticleBarcode() const override {return m_barcode;}  // TODO Drop this once UniqueID and Status are used instead
   virtual int GetParticleUniqueID() const override {return m_uniqueID;}
   virtual int GetParticleStatus() const override {return m_status;}

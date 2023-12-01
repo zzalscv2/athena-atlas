@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PrimaryParticleInformation_H
@@ -22,7 +22,7 @@ public:
   HepMC::ConstGenParticlePtr GetHepMCParticle() const { return m_theParticle; }
   HepMC::GenParticlePtr GetHepMCParticle() { return m_theParticle; }
   int GetParticleBarcode() const;
-  void SuggestBarcode(int bc);
+  int GetParticleUniqueID() const;
   void SetParticle(HepMC::GenParticlePtr);
   void Print() const {}
   int GetRegenerationNr() {return  m_regenerationNr;}
@@ -38,6 +38,7 @@ private:
 
   int m_regenerationNr{0};
   mutable int m_barcode ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE;
+  mutable int m_uniqueID ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE;
 };
 
 #endif
