@@ -23,7 +23,7 @@
 
 namespace FlavorTagDiscriminants {
 
-  class GNNOptions;
+  struct GNNOptions;
   class OnnxUtil;
   //
   // Tool to to flavor tag jet/btagging object
