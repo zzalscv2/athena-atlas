@@ -30,6 +30,8 @@ StatusCode PFTauFlowElementAssoc::initialize() {
   ATH_CHECK(m_neutralFEReadHandleKey.initialize());
   ATH_CHECK(m_chargedFEReadHandleKey.initialize());
 
+  if (!m_jetReadHandleKey.empty()) ATH_CHECK(m_jetReadHandleKey.initialize());
+
   ATH_MSG_DEBUG("Initialization completed successfully");
 
   return StatusCode::SUCCESS;
