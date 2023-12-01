@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CSCHitsTestTool.h"
@@ -87,20 +87,20 @@ StatusCode CSCHitsTestTool::processEvent() {
 
   if (m_DoCSCTest) {
     // -- loop over CSC hit collection --
-    const CSCSimHitCollection* p_collection;
+    const CSCSimHitCollection* p_collection = nullptr;
     if (evtStore()->retrieve(p_collection,"CSC_Hits") == StatusCode::SUCCESS) {
-      for (CSCSimHitCollection::const_iterator i_hit = p_collection->begin(); i_hit != p_collection->end(); ++i_hit) {
+      for (const CSCSimHit& hit : *p_collection) {
 
         // Check the Hits identifiers, access the functions that give:
         // Station name, station eta, station phi, chamber layer, wire layer.
-        HitID cschit= (*i_hit).CSCid();
+        HitID cschit= hit.CSCid();
         Identifier offid= getIdentifier(cschit);
         CHECK(checkIdentifier(offid));
 
         // Check Hits. For every hit within the event, get the global position
         // Amg::Vector3D u and then retrieve all releveant info either from the
         // Amg::Vector3D or from the MC vector (direction)
-        GeoCSCHit ghit(*i_hit);
+        GeoCSCHit ghit(hit);
         if (!ghit) continue;
         Amg::Vector3D u = ghit.getGlobalPosition();
         CHECK(executeFillHistos(u));

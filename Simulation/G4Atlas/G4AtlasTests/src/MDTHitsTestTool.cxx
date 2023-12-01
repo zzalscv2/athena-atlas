@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MDTHitsTestTool.h"
@@ -100,12 +100,12 @@ StatusCode MDTHitsTestTool::processEvent() {
 
 
   if (m_DoMDTTest) {
-    const MDTSimHitCollection* p_collection;
+    const MDTSimHitCollection* p_collection = nullptr;
     if (evtStore()->retrieve(p_collection,"MDT_Hits") == StatusCode::SUCCESS) {
-      for (MDTSimHitCollection::const_iterator i_hit = p_collection->begin(); i_hit != p_collection->end(); ++i_hit) {
+      for (const MDTSimHit& hit : *p_collection) {
         // Check the Hits identifiers, access the functions that give:
         // Station name, station eta, station phi, multilayer ID, layer ID, tube ID.
-        HitID mdthit= (*i_hit).MDTid();
+        HitID mdthit= (hit).MDTid();
         Identifier offid= getIdentifier(mdthit);
         CHECK(checkIdentifier(offid));
 
@@ -114,7 +114,7 @@ StatusCode MDTHitsTestTool::processEvent() {
         // Check Hits
         // For every hit within the event, get the global position Amg::Vector3D u and then retrieve all releveant info
         // either from the Amg::Vector3D or from the MC vector (direction)
-        GeoMDTHit ghit(*i_hit);
+        GeoMDTHit ghit(hit);
         if (!ghit) continue;
         Amg::Vector3D u = ghit.getGlobalPosition();
         CHECK(executeFillHistos(u));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTGCHitsTestTool.h"
@@ -40,15 +40,15 @@ StatusCode sTGCHitsTestTool::processEvent() {
   CHECK(executeCheckEventInfo());
 
    if (m_DosTGCTest) {
-    const sTGCSimHitCollection* p_collection;
+    const sTGCSimHitCollection* p_collection = nullptr;
     CHECK(evtStore()->retrieve(p_collection,"sTGC_Hits"));
-    for (sTGCSimHitCollection::const_iterator i_hit = p_collection->begin(); i_hit != p_collection->end(); ++i_hit) { 
-      Amg::Vector3D u = (*i_hit).globalPosition();
+    for (const sTGCSimHit& hit : *p_collection) {
+      Amg::Vector3D u = hit.globalPosition();
       CHECK(executeFillHistos(u));
       
       
       const sTgcHitIdHelper* hitHelper = sTgcHitIdHelper::GetHelper();
-      int simId = (*i_hit).sTGCId();
+      int simId = hit.sTGCId();
       std::string sim_stationName = hitHelper->GetStationName(simId);
 
       static const std::string QS1C("QS1C");
@@ -92,7 +92,7 @@ StatusCode sTGCHitsTestTool::processEvent() {
       }
 
 
-      // GeoMMHit ghit(*i_hit);
+      // GeoMMHit ghit(hit);
       //       if (!ghit) continue;
       //       Amg::Vector3D u = ghit.getGlobalPosition();
       //       CHECK(executeFillHistos(u));
