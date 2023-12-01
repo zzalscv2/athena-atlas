@@ -10,6 +10,12 @@ __author__  = "Sebastien Binet <binet@cern.ch>"
 def _setup():
     from AthenaCommon.Logging import logging
     msg = logging.getLogger("McParticleEvent")
+    try:
+        from pyHepMC3 import HepMC3 as hm
+        msg.info('importing HepMC3...')
+    except ImportError:
+        from AthenaPython.PyAthena import HepMC as hm
+        msg.info('importing HepMC2...')
 
     import AthenaPython.PyAthena as PyAthena
     from PyDumper.Dumpers import toiter
@@ -22,7 +28,7 @@ def _setup():
         for p in toiter(self.particles_begin(),
                         self.particles_end()):
             yield p
-    PyAthena.HepMC.GenEvent.particles = particles
+    hm.GenEvent.particles = particles
     del particles
 
     # now, for vertices...
@@ -33,7 +39,7 @@ def _setup():
         for v in toiter(self.vertices_begin(),
                         self.vertices_end()):
             yield v
-    PyAthena.HepMC.GenEvent.vertices = vertices
+    hm.GenEvent.vertices = vertices
     del vertices
 
     # a nicer print method
@@ -43,7 +49,7 @@ def _setup():
         s = PyAthena.std.stringstream()
         getattr(self, 'print')(s)
         return s.str()
-    PyAthena.HepMC.GenEvent.__str__ = __py_str__
+    hm.GenEvent.__str__ = __py_str__
     del __py_str__
     #######################
 
@@ -55,7 +61,7 @@ def _setup():
         for p in toiter(self.particles_in_const_begin(),
                         self.particles_in_const_end()):
             yield p
-    PyAthena.HepMC.GenVertex.particles_in = particles_in
+    hm.GenVertex.particles_in = particles_in
     del particles_in
     
     msg.info("fixing up HepMC.GenVertex.particles_out iterator...")
@@ -65,7 +71,7 @@ def _setup():
         for p in toiter(self.particles_out_const_begin(),
                         self.particles_out_const_end()):
             yield p
-    PyAthena.HepMC.GenVertex.particles_out = particles_out
+    hm.GenVertex.particles_out = particles_out
     del particles_out
 
     # a nicer print method
@@ -75,7 +81,7 @@ def _setup():
         s = PyAthena.std.stringstream()
         getattr(self, 'print')(s)
         return s.str()
-    PyAthena.HepMC.GenVertex.__str__ = __py_str__
+    hm.GenVertex.__str__ = __py_str__
     del __py_str__
     #######################
     
@@ -86,7 +92,7 @@ def _setup():
         s = PyAthena.std.stringstream()
         getattr(self, 'print')(s)
         return s.str()
-    PyAthena.HepMC.GenParticle.__str__ = __py_str__
+    hm.GenParticle.__str__ = __py_str__
     del __py_str__
 
     return
