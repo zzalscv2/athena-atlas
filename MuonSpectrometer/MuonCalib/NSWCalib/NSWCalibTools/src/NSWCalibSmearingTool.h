@@ -54,7 +54,7 @@ namespace Muon {
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-    Gaudi::Property<std::vector<double>> m_timeSmear {this, "TimeSmear" ,{0.,0.,0.,0.,0.,0.,0.,0.}};
+    Gaudi::Property<std::vector<double>> m_timeSmear {this, "TimeSmear" ,{8.,8.,8.,8.,8.,8.,8.,8.}};
     Gaudi::Property<std::vector<double>> m_chargeSmear {this, "ChargeSmear" ,{0.,0.,0.,0.,0.,0.,0.,0.}};
 
     Gaudi::Property<std::vector<double>> m_channelEfficiency {this, "ChannelEfficiency", {1.,1.,1.,1.,1.,1.,1.,1.}};

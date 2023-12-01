@@ -144,8 +144,8 @@ private:
     Gaudi::Property<bool> m_needsMcEventCollHelper{this, "UseMcEventCollectionHelper", false};
     Gaudi::Property<bool> m_checkMMSimHits{this, "CheckSimHits", true, "Control on the hit validity"};
     Gaudi::Property<bool> m_useTimeWindow{this, "UseTimeWindow", true};
-    Gaudi::Property<bool> m_vmmNeighborLogic{this, "VMMNeighborLogic", true};
-    Gaudi::Property<bool> m_doSmearing{this, "doSmearing", false,
+    Gaudi::Property<bool> m_vmmNeighborLogic{this, "VMMNeighborLogic", false};
+    Gaudi::Property<bool> m_doSmearing{this, "doSmearing", true,
                                        "set the usage or not of the smearing tool for realistic detector performance"};
     // Constants vars for the MM_StripsResponseSimulation class
     // qThreshold=2e, we accept a good strip if the charge is >=2e
