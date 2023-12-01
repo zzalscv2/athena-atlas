@@ -59,34 +59,6 @@ def cellRecoSequence(flags, name="HLTCaloCellMakerFS", RoIs=caloFSRoI, outputNam
     alg = algorithmCAToGlobalWrapper(hltCaloCellMakerCfg, flags=flags, name=name, roisKey=RoIs, CellsName=outputName, monitorCells=monitorCells)
     return alg,outputName
 
-def caloClusterRecoSequence(
-        flags, name="HLTCaloClusterMakerFS", RoIs=caloFSRoI,
-        outputName="HLT_TopoCaloClustersFS"):
-        from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg
-    
-        alg=algorithmCAToGlobalWrapper(jetmetTopoClusteringCfg,
-                                       flags	   =flags,
-                                       RoIs        =RoIs
-                                       )        
-        return alg, outputName
-
-def LCCaloClusterRecoSequence(
-        flags, name="HLTCaloClusterCalibratorLCFS", RoIs=caloFSRoI,
-        outputName="HLT_TopoCaloClustersLCFS"):
-    """ Create the LC calibrated fullscan clusters
-
-    The clusters will be created as a shallow copy of the EM level clusters
-    """
-    em_sequence, em_clusters = RecoFragmentsPool.retrieve(caloClusterRecoSequence, flags=flags, RoIs=RoIs)
-    from TrigCaloRec.TrigCaloRecConfig import hltCaloTopoClusterCalibratorCfg
-    alg = algorithmCAToGlobalWrapper(hltCaloTopoClusterCalibratorCfg,
-                                     flags, name,
-                                     clustersin = em_clusters,
-                                     clustersout = outputName,
-                                     OutputCellLinks = outputName+"_cellLinks")[0]
-
-    return parOR(name+"RecoSequence", [em_sequence, alg]), str(alg.OutputClusters)
-
 def caloTowerHIRecoSequence(
         flags, name="HLTHICaloTowerMakerFS", RoIs=caloFSRoI,
         outputName="HLT_HICaloTowerFS"):
