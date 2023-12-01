@@ -412,23 +412,13 @@ StatusCode PixelPrepDataToxAOD::execute()
 
 	  std::vector<int> barcodes2 = acc_sihit_barcode(*pixelCluster2);
 	  
-	  bool broken = false;
-	  for ( auto bc : barcodes )
-	  {
-	      for ( auto bc2 : barcodes2 )
-	      {
-		  if ( bc2 == bc )
-		  {
-		      broken = true;
-                      static const SG::AuxElement::Accessor<char> acc_broken ("broken");
-		      acc_broken(*pixelCluster)  = true;
-		      acc_broken(*pixelCluster2) = true;
-		      break;
-		  }
-	      }
-	      if ( broken ) 
-		  break;
-	  }
+	  for ( auto bc : barcodes ) {
+              if (std::find(barcodes2.begin(), barcodes2.end(), bc ) == barcodes2.end()) continue;
+              static const SG::AuxElement::Accessor<char> acc_broken ("broken");
+              acc_broken(*pixelCluster)  = true;
+              acc_broken(*pixelCluster2) = true;
+              break;
+          }
       }
   }
 
@@ -586,20 +576,12 @@ std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const 
     }
     else
     {
-	bool foundHit = false;
 	for ( const auto& barcodeSDOColl : trkBCs )
 	{
-	    for ( const auto barcode : barcodeSDOColl )
-	    {
-		if ( siHit->particleLink().barcode() == barcode )
-		{
-		    multiMatchingHits.push_back(siHit);
-		    foundHit = true;
-		    break;   
-		}
-	    }
-	    if ( foundHit )
-		break;
+           auto bc = siHit->particleLink().barcode();
+           if (std::find(barcodeSDOColl.begin(),barcodeSDOColl.end(),bc) == barcodeSDOColl.end() ) continue;
+           multiMatchingHits.push_back(siHit);
+           break;   
 	}
     }
   }

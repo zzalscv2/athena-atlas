@@ -90,8 +90,7 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
       id = record.GetPDGCode();
       pd = m_particleDataTable->particle(std::abs(id));
       if (!pd) {
-        ATH_MSG_WARNING ("found barcode but could not digest pdg_id. " <<
-                         barcodepart << " , " << id);
+        ATH_MSG_WARNING ("Found particle with problematic PDG ID " << part << " , " << id);
         continue;
       }
 
@@ -103,8 +102,7 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
                             record.GetMomentum().z());
       globalMom = hv2;
 
-      ATH_MSG_DEBUG("found barcode " << barcodepart << " with pdg ID " <<
-                    id << ", momentum " << hv2 << " production " << globalPos);
+      ATH_MSG_DEBUG("Found particle " << part << ", momentum " << hv2 << " production " << globalPos);
 
 
   }   // loop over G4 records
@@ -160,8 +158,7 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
       id = record.GetPDGCode();
       pd = m_particleDataTable->particle(std::abs(id));
       if (!pd) {
-        ATH_MSG_WARNING ("found barcode but could not digest pdg_id. " <<
-                         part->barcode() << " , " << id);
+        ATH_MSG_WARNING ("found particle with problematic PDG ID" << part << " , " << id);
         continue;
       }
 
@@ -169,15 +166,13 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
       prodVertexVector = Amg::Vector3D(tv.x(),tv.y(),tv.z());
       globalPos = prodVertexVector;
 
-      Amg::Vector3D hv2(record.GetMomentum().x(), record.GetMomentum().y(),
-                            record.GetMomentum().z());
+      Amg::Vector3D hv2(record.GetMomentum().x(), record.GetMomentum().y(), record.GetMomentum().z());
       globalMom = hv2;
 
-      ATH_MSG_DEBUG("found barcode " << part->barcode() << " with pdg ID " <<
-                    id << ", momentum " << hv2 << " production " << globalPos);
+      ATH_MSG_DEBUG("found particle " << part << ", momentum " << hv2 << " production " << globalPos);
 
 
-    } // if barcodes match
+    }
   }   // loop over G4 records
 
   if (pd) {
