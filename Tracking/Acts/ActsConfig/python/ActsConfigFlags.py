@@ -57,4 +57,6 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.fitFromPRD', False) # Acts.writeTrackCollection needs to be True for either cases. If Acts.fitFromPRD is False, fit from ROT; else, fit from PRD
     actscf.addFlag('Acts.trackFitterType', TrackFitterType.KalmanFitter, enum=TrackFitterType) # Define Tracking algorithm for refitting
 
+    actscf.addFlag("Acts.useActsGsfInEgamma", False)
+
     return actscf

@@ -55,7 +55,11 @@ StatusCode ActsGaussianSumFitter::initialize() {
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_ATLASConverterTool.retrieve());
-  ATH_CHECK(m_trkSummaryTool.retrieve());
+  if (!m_refitOnly) {
+    ATH_CHECK(m_trkSummaryTool.retrieve());
+  }else{
+    ATH_MSG_INFO("Running GSF without track summary");
+  }
 
   m_logger = makeActsAthenaLogger(this, "Acts Gaussian Sum Refit");
 
@@ -401,7 +405,6 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
              acts_track.particleHypothesis());
       parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
       auto boundaryCheck = m_boundaryCheckTool->boundaryCheck(*parm);
-      
       // Check if this is a hole, a dead sensors or a state outside the sensor boundary
       ATH_MSG_VERBOSE("Check if this is a hole, a dead sensors or a state outside the sensor boundary");
       if(boundaryCheck == Trk::BoundaryCheckResult::DeadElement){
@@ -474,7 +477,7 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
   Trk::TrackInfo newInfo(Trk::TrackInfo::TrackFitter::GaussianSumFilter, Trk::noHypothesis);
   newInfo.setTrackFitter(Trk::TrackInfo::TrackFitter::GaussianSumFilter); //Mark the fitter as GaussianSumFilter
   newtrack = std::make_unique<Trk::Track>(newInfo, std::move(finalTrajectory), nullptr);
-  if (newtrack) {
+  if (newtrack && !m_refitOnly) {
     // Create the track summary and update the holes information
     if (!newtrack->trackSummary()) {
       newtrack->setTrackSummary(std::make_unique<Trk::TrackSummary>());
