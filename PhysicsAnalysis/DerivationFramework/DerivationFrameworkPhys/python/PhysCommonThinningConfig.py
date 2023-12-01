@@ -62,6 +62,18 @@ def PhysCommonThinningCfg(ConfigFlags, StreamName = "StreamDAOD_PHYS", **kwargs)
             TauSecondaryVertices = "TauSecondaryVertices_MuonRM",
             SelectionString      = tau_murm_thinning_expression))
 
+    if "TauJets_EleRMThinningToolName" in kwargs:
+        tau_erm_thinning_expression = tau_thinning_expression.replace('TauJets', 'TauJets_EleRM')
+        acc.merge(TauThinningCfg(ConfigFlags,
+            name                 = kwargs['TauJets_EleRMThinningToolName'],
+            StreamName           = StreamName,
+            Taus                 = "TauJets_EleRM",
+            TauTracks            = "TauTracks_EleRM",
+            TrackParticles       = "InDetTrackParticles",
+            TauNeutralPFOs       = "TauNeutralParticleFlowObjects_EleRM",
+            TauSecondaryVertices = "TauSecondaryVertices_EleRM",
+            SelectionString      = tau_erm_thinning_expression))
+
     # ID tracks associated with high-pt di-tau
     if "DiTauTPThinningToolName" in kwargs:
         acc.merge(DiTauTrackParticleThinningCfg(

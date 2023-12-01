@@ -11,6 +11,8 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
+from AthenaCommon.Logging import logging
+logPHYS = logging.getLogger('PHYS')
 
 # Main algorithm config
 def PHYSKernelCfg(ConfigFlags, name='PHYSKernel', **kwargs):
@@ -19,7 +21,11 @@ def PHYSKernelCfg(ConfigFlags, name='PHYSKernel', **kwargs):
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(PhysCommonAugmentationsCfg(
+        ConfigFlags, 
+        TriggerListsHelper     = kwargs['TriggerListsHelper'], 
+        TauJets_EleRM_in_input = kwargs['TauJets_EleRM_in_input']
+    ))
 
     # Thinning tools
     # These are set up in PhysCommonThinningConfig. Only thing needed here the list of tools to schedule 
@@ -32,6 +38,9 @@ def PHYSKernelCfg(ConfigFlags, name='PHYSKernel', **kwargs):
         'DiTauLowPtThinningToolName'          : "PHYSDiTauLowPtThinningTool",
         'DiTauLowPtTPThinningToolName'        : "PHYSDiTauLowPtTPThinningTool",
     } 
+    # for AOD produced before 24.0.17, the electron removal tau is not available
+    if kwargs.get('TauJets_EleRM_in_input', False):
+        thinningToolsArgs['TauJets_EleRMThinningToolName'] = "PHYSTauJets_EleRMThinningTool"
     # Configure the thinning tools
     from DerivationFrameworkPhys.PhysCommonThinningConfig import PhysCommonThinningCfg
     acc.merge(PhysCommonThinningCfg(ConfigFlags, StreamName = kwargs['StreamName'], **thinningToolsArgs))
@@ -47,9 +56,7 @@ def PHYSKernelCfg(ConfigFlags, name='PHYSKernel', **kwargs):
 
 
 def PHYSCfg(ConfigFlags):
-
-    from AthenaCommon.Logging import logging
-    logPHYS = logging.getLogger('PHYS')
+    
     logPHYS.info('****************** STARTING PHYS *****************')
 
     stream_name = 'StreamDAOD_PHYS'
@@ -62,8 +69,21 @@ def PHYSCfg(ConfigFlags):
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     PHYSTriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
+    # for AOD produced before 24.0.17, the electron removal tau is not available
+    TauJets_EleRM_in_input = (ConfigFlags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
+    if TauJets_EleRM_in_input:
+        logPHYS.info("TauJets_EleRM is in the input AOD. Relevant containers will be scheduled")
+    else:
+        logPHYS.info("TauJets_EleRM is Not in the input AOD. No relevant containers will be written")
+
     # Common augmentations
-    acc.merge(PHYSKernelCfg(ConfigFlags, name="PHYSKernel", StreamName = stream_name, TriggerListsHelper = PHYSTriggerListsHelper))
+    acc.merge(PHYSKernelCfg(
+        ConfigFlags, 
+        name="PHYSKernel", 
+        StreamName = stream_name, 
+        TriggerListsHelper = PHYSTriggerListsHelper, 
+        TauJets_EleRM_in_input=TauJets_EleRM_in_input
+    ))
     
     ## Higgs augmentations - create 4l vertex
     from DerivationFrameworkHiggs.HiggsPhysContent import  HiggsAugmentationAlgsCfg
@@ -102,6 +122,8 @@ def PHYSCfg(ConfigFlags):
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                            "AntiKtVR30Rmax4Rmin02PV0TrackJets",
                                           ]
+    if TauJets_EleRM_in_input:
+        PHYSSlimmingHelper.SmartCollections.append("TauJets_EleRM")
     
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
     StaticContent = []
@@ -124,6 +146,8 @@ def PHYSCfg(ConfigFlags):
                                               "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
+    if TauJets_EleRM_in_input:
+        PHYSSlimmingHelper.ExtraVariables += ["TauJets_EleRM.dRmax.etOverPtLeadTrk"]
 
     # FTAG Xbb extra content
     extraList = []
@@ -187,9 +211,7 @@ def PHYSCfg(ConfigFlags):
         ## It should be removed once doEDMVersionConversion goes into production use.
         if ConfigFlags.Trigger.doEDMVersionConversion:   
             from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput
-            from AthenaCommon.Logging import logging
-            msg = logging.getLogger('PHYSCfg')
-            msg.warn('doEDMVersionConversion is still in validation, WRITING FULL TRIGGER EDM TO THE DAOD!')
+            logPHYS.warn('doEDMVersionConversion is still in validation, WRITING FULL TRIGGER EDM TO THE DAOD!')
             addTrigEDMSetToOutput(ConfigFlags, PHYSSlimmingHelper, "AODFULL")
             PHYSSlimmingHelper.AppendToDictionary.update({'HLTNav_R2ToR3Summary':'xAOD::TrigCompositeContainer','HLTNav_R2ToR3SummaryAux':'xAOD::TrigCompositeAuxContainer'})
             PHYSSlimmingHelper.AllVariables += ['HLTNav_R2ToR3Summary']
