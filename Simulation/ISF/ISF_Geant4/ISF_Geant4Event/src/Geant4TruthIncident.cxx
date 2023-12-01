@@ -10,7 +10,6 @@
 
 // Atlas G4 Helpers
 #include "MCTruth/AtlasG4EventUserInfo.h"
-#include "MCTruth/TrackBarcodeInfo.h"
 #include "MCTruth/TrackHelper.h"
 #include "MCTruth/TrackInformation.h"
 #include "MCTruth/PrimaryParticleInformation.h"

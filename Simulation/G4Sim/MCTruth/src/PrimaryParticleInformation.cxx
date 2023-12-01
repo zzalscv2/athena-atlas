@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MCTruth/PrimaryParticleInformation.h"
@@ -12,14 +12,6 @@ PrimaryParticleInformation::PrimaryParticleInformation(HepMC::GenParticlePtr p, 
 {
 }
 
-void PrimaryParticleInformation::SuggestBarcode(int bc)
-{
-  m_barcode=bc;
-  if (m_theParticle) {
-    std::cout<<"ERROR: PrimaryParticleInformation::SuggestBarcode() should be only called if no HepMC::Particle is available"<<std::endl;
-  }
-}
-
 int PrimaryParticleInformation::GetParticleBarcode() const
 {
   if (m_barcode !=  HepMC::INVALID_PARTICLE_BARCODE) return m_barcode;
@@ -30,10 +22,21 @@ int PrimaryParticleInformation::GetParticleBarcode() const
   return 0;
 }
 
+int PrimaryParticleInformation::GetParticleUniqueID() const
+{
+  if (m_uniqueID !=  HepMC::INVALID_PARTICLE_BARCODE) return m_uniqueID;
+  if (m_theParticle) {
+      m_uniqueID = HepMC::uniqueID(m_theParticle);
+      return m_uniqueID;
+  }
+  return 0;
+}
+
 void PrimaryParticleInformation::SetParticle(HepMC::GenParticlePtr p)
 {
   m_theParticle=p;
   m_barcode = HepMC::INVALID_PARTICLE_BARCODE;
+  m_uniqueID = HepMC::INVALID_PARTICLE_BARCODE;
 }
 
 void PrimaryParticleInformation::SetISFParticle(ISF::ISFParticle* p)

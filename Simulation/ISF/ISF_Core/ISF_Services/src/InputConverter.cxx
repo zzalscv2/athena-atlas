@@ -624,7 +624,7 @@ G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(const HepMC
     ppi->SetParticle(genpart);
     ppi->SetRegenerationNr(0);
     g4particle->SetUserInformation(ppi);
-    ATH_MSG_VERBOSE("Making primary down the line with barcode " << ppi->GetParticleBarcode());
+    ATH_MSG_VERBOSE("Making primary down the line with barcode " << ppi->GetParticleUniqueID());
   }
 
   return g4particle.release();
@@ -788,7 +788,7 @@ G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(HepMC::GenP
     ppi->SetParticle(&genpart);
     ppi->SetRegenerationNr(0);
     g4particle->SetUserInformation(ppi);
-    ATH_MSG_VERBOSE("Making primary down the line with barcode " << ppi->GetParticleBarcode());
+    ATH_MSG_VERBOSE("Making primary down the line with barcode " << ppi->GetParticleUniqueID());
   }
 
   return g4particle.release();
@@ -1131,7 +1131,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
   } // Truth was detected
 
   ATH_MSG_VERBOSE("PrimaryParticleInformation:");
-  ATH_MSG_VERBOSE("     GetParticleBarcode = " << ppi->GetParticleBarcode());
+  ATH_MSG_VERBOSE("     GetParticleUniqueID = " << ppi->GetParticleUniqueID());
   ATH_MSG_VERBOSE("     GetRegenerationNr = " << ppi->GetRegenerationNr());
   ATH_MSG_VERBOSE("     GetHepMCParticle = " << ppi->GetHepMCParticle());
   ATH_MSG_VERBOSE("     GetISFParticle = " << ppi->GetISFParticle());

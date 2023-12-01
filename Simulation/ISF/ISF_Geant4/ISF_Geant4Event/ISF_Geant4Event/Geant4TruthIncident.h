@@ -85,7 +85,7 @@ namespace iGeant4 {
       /** Return the PDG Code of the i-th child particle */
       int                       childPdgCode(unsigned short index) const override final;
       /** Return the barcode of the i-th child particle (if defined as part of the TruthIncident) otherwise return 0 */
-      Barcode::ParticleBarcode  childBarcode(unsigned short index) const override final;
+      Barcode::ParticleBarcode  childBarcode(unsigned short index) const override final; // TODO Remove - only used in one place in TruthSvc
       /** Set the the barcode of all child particles to the given bc */
       void                      setAllChildrenBarcodes(Barcode::ParticleBarcode bc) override final;
 
