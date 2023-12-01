@@ -103,23 +103,17 @@ StatusCode TileTBHitToNtuple::execute()
 {
 
   // step1: read Hit for ancillary
-  const TileHitVector* HitCnt; 
+  const TileHitVector* HitCnt = nullptr; 
   CHECK( evtStore()->retrieve(HitCnt, m_hitContainer) );
-
-  // step2: to fill items in ntuple
-  TileHitVecConstIterator it=HitCnt->begin();  
-  TileHitVecConstIterator end=HitCnt->end();  
-
 
   m_nchan=0;
   m_tolE=0.0;
-  for(; it != end; ++it) {
-    const TileHit * cinp = &(*it);
-    m_tolE+=cinp->energy();
-    m_energy[m_nchan]=cinp->energy();
-    m_time[m_nchan]=cinp->time();
+  for (const TileHit& cinp : *HitCnt) {
+    m_tolE+=cinp.energy();
+    m_energy[m_nchan]=cinp.energy();
+    m_time[m_nchan]=cinp.time();
 
-    Identifier id=cinp->identify();
+    Identifier id=cinp.identify();
     m_type[m_nchan]=m_tileTBID->type(id);
     m_channel[m_nchan]=m_tileTBID->channel(id);
     m_module[m_nchan]=m_tileTBID->module(id);
