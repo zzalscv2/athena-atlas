@@ -394,6 +394,9 @@ class SlimmingHelper:
                                 self.AppendToDictionary["TauNeutralParticleFlowObjects_MuonRM"]    = 'xAOD::PFOContainer'
                                 self.AppendToDictionary["TauNeutralParticleFlowObjects_MuonRMAux"] = 'xAOD::PFOAuxContainer'
                         items.extend(TauJets_MuonRMCPContent)
+                elif collectionName=="TauJets_EleRM":
+                        from DerivationFrameworkTau.TauJets_EleRMCPContent import TauJets_EleRMCPContent
+                        items.extend(TauJets_EleRMCPContent)
                 elif collectionName=="MET_Baseline_AntiKt4EMTopo":
                         from DerivationFrameworkJetEtMiss.MET_Baseline_AntiKt4EMTopoCPContent import MET_Baseline_AntiKt4EMTopoCPContent
                         items.extend(MET_Baseline_AntiKt4EMTopoCPContent)

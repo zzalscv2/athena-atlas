@@ -8,6 +8,8 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
+from AthenaCommon.Logging import logging
+msg = logging.getLogger('PHYSCommonConfig')
 
 def PhysCommonAugmentationsCfg(flags,**kwargs):
     """Configure the common augmentation"""
@@ -81,7 +83,9 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     # eVeto WP and DeepSet ID for taus and muon-subtracted taus
     acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets"))
     acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets_MuonRM"))
-
+    # for AOD produced before 24.0.17, the electron removal tau is not available
+    if kwargs.get('TauJets_EleRM_in_input', False): 
+        acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets_EleRM"))
     FTagJetColl = ['AntiKt4EMPFlowJets','AntiKtVR30Rmax4Rmin02TrackJets', 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets']
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         FTagJetColl.append('AntiKt4EMTopoJets')
