@@ -42,7 +42,7 @@ def fastCaloMenuSequenceCfg(flags, name, doRinger=True, is_probe_leg=False):
     # The tool is what will use that or not
     from TrigEgammaHypo.TrigEgammaFastCaloHypoTool import createTrigEgammaFastCaloHypoAlg
 
-    theFastCaloHypo = createTrigEgammaFastCaloHypoAlg(flags, name, sequenceOut=output)
+    theFastCaloHypo = createTrigEgammaFastCaloHypoAlg(flags, name+"FastCaloHypo", sequenceOut=output)
     selAcc.addHypoAlgo(theFastCaloHypo)
 
     from TrigEgammaHypo.TrigEgammaFastCaloHypoTool import TrigEgammaFastCaloHypoToolFromDict
