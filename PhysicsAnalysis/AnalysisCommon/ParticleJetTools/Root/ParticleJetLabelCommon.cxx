@@ -203,28 +203,56 @@ namespace ParticleJetTools {
     }
 
     // extended flavour label
+    int double_label = 0;
     if (particles.b.size()) {
       if (particles.b.size() >= 2)
-        decs.doubleint(jet) = 55;
+        double_label = 55;
 
       else if (particles.c.size())
-        decs.doubleint(jet) = 54;
+        double_label = 54;
 
       else
-        decs.doubleint(jet) = 5;
+        double_label = 5;
 
     } else if (particles.c.size()) {
       if (particles.c.size() >= 2)
-        decs.doubleint(jet) = 44;
+        double_label = 44;
 
       else
-        decs.doubleint(jet) = 4;
+        double_label = 4;
 
-    } else if (particles.tau.size())
-      decs.doubleint(jet) = 15;
+    } else if (particles.tau.size()){
 
-    else
-      decs.doubleint(jet) = 0;
+      bool hasElectrondecay = false;
+      bool hasMuondecay = false;
+      bool hasHadronicdecay = false;
+      for (auto itau: particles.tau){
+        for (size_t i = 0; i< itau->nChildren(); i++){ // tau children loop
+          if (itau->child(i)->absPdgId() == 12 || itau->child(i)->absPdgId() == 14 || itau->child(i)->absPdgId() == 16) continue; 
+          if (itau->child(i)->absPdgId() == 13) hasMuondecay = true;
+          else if (itau->child(i)->absPdgId() == 11) hasElectrondecay = true;
+          else hasHadronicdecay = true;
+        }
+      }
+
+      if (particles.tau.size() >= 2){
+        // check if we have at least one hadronic tau
+        if (hasHadronicdecay){
+          // check if we have also tau->mu decay 
+          if (hasMuondecay) double_label = 151513;
+          // check if we have also tau->el decay 
+          else if (hasElectrondecay) double_label = 151511;
+          // otherwise fully hadronic di-tau decay 
+          else double_label = 1515;
+	}
+      } else { 
+        // only consider hadronic tau decay
+        if (hasHadronicdecay) double_label = 15;
+      }
+      
+    }
+
+    decs.doubleint(jet) = double_label;
 
   }
 

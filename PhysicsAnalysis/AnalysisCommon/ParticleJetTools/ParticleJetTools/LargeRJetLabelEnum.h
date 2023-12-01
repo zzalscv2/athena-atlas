@@ -26,6 +26,9 @@ namespace LargeRJetTruthLabel
     Hbb,          // fully-contained H->bb
     Hcc,          // fully-contained H->cc
     other_From_H, // matched to H
+    HtautauEl,    // fully-contained H->tautau,  el
+    HtautauMu,    // fully-contained H->tautau,  mu
+    HtautauHad,   // fully-contained H->tautau, had
   };
 
   inline int enumToInt(const TypeEnum type)
@@ -44,6 +47,9 @@ namespace LargeRJetTruthLabel
       case Hbb:          return 11;
       case Hcc:          return 12;
       case other_From_H: return 13;
+      case HtautauEl:    return 14;
+      case HtautauMu:    return 15;
+      case HtautauHad:   return 16;
       default:           return 0;
       }
   }
@@ -64,6 +70,9 @@ namespace LargeRJetTruthLabel
       case 11: return Hbb;
       case 12: return Hcc;
       case 13: return other_From_H;
+      case 14: return HtautauEl;
+      case 15: return HtautauMu;
+      case 16: return HtautauHad;
       default: return UNKNOWN;
     }
 
@@ -85,6 +94,9 @@ namespace LargeRJetTruthLabel
     TRY(Hbb);
     TRY(Hcc);
     TRY(other_From_H);
+    TRY(HtautauEl);
+    TRY(HtautauMu);
+    TRY(HtautauHad);
 #undef TRY
     return UNKNOWN;
   }

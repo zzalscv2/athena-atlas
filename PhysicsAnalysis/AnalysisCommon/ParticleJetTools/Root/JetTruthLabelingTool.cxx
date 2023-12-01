@@ -766,6 +766,9 @@ int JetTruthLabelingTool::getLabel( DecorHandles& dh,
   /// Booleans for containment selections
   bool is_bb = false;
   bool is_cc = false;
+  bool is_tautauEl = false;
+  bool is_tautauMu = false;
+  bool is_tautauHad = false;
   bool isTop = false;
   bool isW = false;
   bool isZ = false;
@@ -809,6 +812,9 @@ int JetTruthLabelingTool::getLabel( DecorHandles& dh,
     SG::ReadDecorHandle<xAOD::JetContainer, float> split12Handle(m_split12_truthKey, ctx);
     is_bb = ( extended_GA_label == 55 );
     is_cc = ( extended_GA_label == 44 );
+    is_tautauEl = ( extended_GA_label == 151511 );
+    is_tautauMu = ( extended_GA_label == 151513 );
+    is_tautauHad = ( extended_GA_label == 1515 );
     isTop = ( matchTop && matchW && nMatchB > 0 && jet.m() / 1000. > m_mLowTop && split23Handle(jet) / 1000. > getTopSplit23Cut( jet.pt() / 1000. ) );
     isW = matchW && nMatchB == 0 && jet.m() / 1000. > m_mLowW && split12Handle(jet) / 1000. > getWZSplit12Cut( jet.pt() / 1000. );
     isZ = matchZ &&  jet.m() / 1000. > m_mLowZ && split12Handle(jet) / 1000. > getWZSplit12Cut( jet.pt() / 1000. );
@@ -818,7 +824,7 @@ int JetTruthLabelingTool::getLabel( DecorHandles& dh,
   /// This method can be expanded to include custom label priorities
 
   /* The default priority of labels is:
-   * 1) Hbb/cc
+   * 1) Hbb/cc/tautau
    * 2) Contained top
    * 3) Contained W
    * 4) Contained Zbb/cc/qq
@@ -837,6 +843,10 @@ int JetTruthLabelingTool::getLabel( DecorHandles& dh,
     if ( is_bb ) return LargeRJetTruthLabel::Hbb;
     /// Contained H->cc
     if ( is_cc ) return LargeRJetTruthLabel::Hcc;
+    /// Contained H->tautau
+    if ( is_tautauEl ) return LargeRJetTruthLabel::HtautauEl;
+    if ( is_tautauMu ) return LargeRJetTruthLabel::HtautauMu;
+    if ( is_tautauHad ) return LargeRJetTruthLabel::HtautauHad;
     /// Other from H
     return LargeRJetTruthLabel::other_From_H;
   }
