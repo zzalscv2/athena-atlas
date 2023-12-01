@@ -10,6 +10,12 @@
 #include "MCTruthClassifier/MCTruthClassifier.h"
 #include "AsgDataHandles/ReadHandle.h"
 #include "TruthUtils/MagicNumbers.h"
+#ifndef XAOD_ANALYSIS
+#include "AtlasHepMC/GenEvent.h"
+#include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/GenParticle.h"
+#endif
+#include "TruthUtils/DecayProducts.h"
 using namespace MCTruthPartClassifier;
 using std::abs;
 
@@ -931,50 +937,19 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
     info->motherPDG = motherPDG;
     info->motherBarcode = mother->barcode();
   }
-
-  long DaugType(0);
-  int NumOfPhot(0);
-  int NumOfEl(0);
-  int NumOfPos(0);
-  int NumOfElNeut(0);
-  int NumOfMuNeut(0);
-  int NumOfLQ(0);
-  int NumOfquark(0);
-  int NumOfgluon(0);
-  int NumOfMuPl(0);
-  int NumOfMuMin(0);
-  int NumOfTau(0);
-
-  int NumOfTauNeut(0);
-  for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ipOut++) {
-    const xAOD::TruthParticle* theDaug = partOriVert->outgoingParticle(ipOut);
-    if (!theDaug) continue;
-    DaugType = theDaug->pdgId();
-    if (DaugType == 11)
-      NumOfEl++;
-    else if (DaugType == -11)
-      NumOfPos++;
-    else if (DaugType == 13)
-      NumOfMuMin++;
-    else if (DaugType == -13)
-      NumOfMuPl++;
-    else if (abs(DaugType) == 12)
-      NumOfElNeut++;
-    else if (abs(DaugType) == 14)
-      NumOfMuNeut++;
-    else if (abs(DaugType) == 15)
-      NumOfTau++;
-    else if (abs(DaugType) == 16)
-      NumOfTauNeut++;
-    else if (abs(DaugType) == 42)
-      NumOfLQ++;
-    else if (abs(DaugType) < 7)
-      NumOfquark++;
-    else if (abs(DaugType) == 21)
-      NumOfgluon++;
-    else if (DaugType == 22)
-      NumOfPhot++;
-  } // cycle itrDaug
+  auto DP = DecayProducts(partOriVert);  
+  int NumOfPhot = DP.pd(22);
+  int NumOfEl = DP.pd(11);
+  int NumOfPos = DP.pd(-11);
+  int NumOfElNeut = DP.apd(12);
+  int NumOfMuNeut = DP.apd(14);
+  int NumOfLQ = DP.apd(42);
+  int NumOfquark = DP.apd({1,2,3,4,5,6});
+  int NumOfgluon = DP.apd(21);
+  int NumOfMuPl = DP.pd(-13);
+  int NumOfMuMin = DP.pd(13);
+  int NumOfTau = DP.apd(15);
+  int NumOfTauNeut = DP.apd(16);
 
   if (std::abs(motherPDG) == 211 && numOfDaug == 2 && NumOfMuNeut == 1) return PionDecay;
   if (std::abs(motherPDG) == 321 && numOfDaug == 2 && NumOfMuNeut == 1) return KaonDecay;

@@ -19,6 +19,7 @@ CREATED:  Sep 2007
 // EDM includes
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
+#include "xAODTruth/TruthParticle.h"
 // For making PID selections easier
 #include "TruthUtils/HepMCHelpers.h"
 #include "TruthUtils/MagicNumbers.h"
@@ -31,8 +32,6 @@ CREATED:  Sep 2007
 
 #ifndef GENERATIONBASE
 //EDM includes
-#include "xAODTruth/TruthVertex.h"
-#include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
