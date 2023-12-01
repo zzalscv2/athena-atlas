@@ -56,6 +56,8 @@ namespace MuonGMR4 {
             int stationPhi() const;
             /// Returns the detector type of the primary detector element
             ActsTrk::DetectorType detectorType() const;
+            /// Returns the sector of the detector element
+            int sector() const;
             /// Returns the list of all associated readout elements 
             const ReadoutSet& readOutElements() const;
             /// Returns the transformation of the MuonChamber

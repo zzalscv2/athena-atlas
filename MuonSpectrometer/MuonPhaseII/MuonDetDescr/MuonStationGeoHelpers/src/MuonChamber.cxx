@@ -5,9 +5,14 @@
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
 
 
+namespace {
+    inline bool isNsw(const MuonGMR4::MuonChamber& chamber) {
+        return chamber.detectorType() == ActsTrk::DetectorType::Mm ||
+               chamber.detectorType() == ActsTrk::DetectorType::sTgc;
+    }
+}
 
-
-namespace MuonGMR4{
+namespace MuonGMR4 {
 
 using ReadoutSet = MuonChamber::ReadoutSet;
 using SubDetAlignments = ActsGeometryContext::SubDetAlignments;
@@ -66,6 +71,7 @@ double MuonChamber::halfXLong() const { return m_args.halfXLong; }
 double MuonChamber::halfXShort() const { return m_args.halfXShort; }
 double MuonChamber::halfY() const { return m_args.halfY; }
 double MuonChamber::halfZ() const { return m_args.halfZ; }
+int MuonChamber::sector() const {return idHelperSvc()->sector(m_args.readoutEles[0]->identify()); }
 
 std::shared_ptr<Acts::Volume> MuonChamber::boundingVolume(const ActsGeometryContext& gctx) const {
     return std::make_shared<Acts::Volume>(localToGlobalTrans(gctx), bounds());
@@ -75,7 +81,12 @@ std::shared_ptr<Acts::TrapezoidVolumeBounds> MuonChamber::bounds() const {
 }
 
 bool operator<(const MuonChamber& a, const MuonChamber& b) { 
-    if (a.stationName() != b.stationName()) {
+    if (isNsw(a) || isNsw(b)) {
+        if (isNsw(a) != isNsw(b)) return isNsw(a);
+        const int secA = a.sector();
+        const int secB = b.sector();
+        if (secA != secB) return secA < secB;
+    } else if (a.stationName() != b.stationName()) {
         return a.stationName() < b.stationName();
     }
     if (a.stationEta() != b.stationEta()) {
@@ -84,15 +95,31 @@ bool operator<(const MuonChamber& a, const MuonChamber& b) {
     return a.stationPhi() < b.stationPhi();
 }
 bool operator<(const Identifier& a, const MuonChamber& b) {
-    const int stName = b.idHelperSvc()->stationName(a);
-    if (stName != b.stationName()) { return stName < b.stationName(); }
+    const bool isNswA = b.idHelperSvc()->isMM(a) || b.idHelperSvc()->issTgc(a);
+    if (isNsw(b) || isNswA) {
+        if (isNsw(b) != isNswA) return isNswA;
+        const int secB = b.sector();
+        const int secA = b.idHelperSvc()->sector(a);
+        if (secA != secB) return secA < secB;
+    } else{
+        const int stName = b.idHelperSvc()->stationName(a);
+        if (stName != b.stationName()) { return stName < b.stationName(); }
+    }
     const int stEta = b.idHelperSvc()->stationEta(a);
-    if (stEta != b.stationEta()) { return stEta < b.stationEta(); }
-    return b.idHelperSvc()->stationPhi(a) < b.stationPhi();
+    if (stEta != b.stationEta()) { return  stEta < b.stationEta(); }
+    return  b.idHelperSvc()->stationPhi(a) < b.stationPhi();
 }
 bool operator<(const MuonChamber& a, const Identifier& b) {
-    const int stName = a.idHelperSvc()->stationName(b);
-    if (stName != a.stationName()) { return a.stationName() < stName; }
+    const bool isNswB = a.idHelperSvc()->isMM(b) || a.idHelperSvc()->issTgc(b);
+    if (isNsw(a) || isNswB) {
+        if (isNsw(a) != isNswB) return isNsw(a);
+        const int secA = a.sector();
+        const int secB = a.idHelperSvc()->sector(b);
+        if (secA != secB) return secA < secB;
+    } else{
+        const int stName = a.idHelperSvc()->stationName(b);
+        if (stName != a.stationName()) { return a.stationName() < stName; }
+    }
     const int stEta = a.idHelperSvc()->stationEta(b);
     if (stEta != a.stationEta()) { return a.stationEta() < stEta; }
     return a.stationPhi() < a.idHelperSvc()->stationPhi(b);

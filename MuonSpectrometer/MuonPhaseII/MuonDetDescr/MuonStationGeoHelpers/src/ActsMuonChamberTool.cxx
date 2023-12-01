@@ -9,6 +9,11 @@
 #include <algorithm>
 #include <cmath>
 
+#include <MuonReadoutGeometryR4/MmReadoutElement.h>
+#include <MuonReadoutGeometryR4/MdtReadoutElement.h>
+#include <MuonReadoutGeometryR4/RpcReadoutElement.h>
+#include <MuonReadoutGeometryR4/TgcReadoutElement.h>
+#include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 
 namespace {
     constexpr double tolerance = 10 * Gaudi::Units::micrometer;
@@ -38,10 +43,24 @@ namespace MuonGMR4{
      std::vector<const MuonReadoutElement*> allElements = m_detMgr->getAllReadoutElements();
      /// Next loop over all volumes and group them by their mother
      std::map<PVConstLink, ReadoutSet> chamberConstituents{};
+     /// Except for the Nsw because that's not having a common mother volume. 
+     /// So let's plunge all readout element of a sector into a single chamber    
+     std::map<int, std::vector<const MuonReadoutElement*>> nswREs{};
      for (const MuonReadoutElement* readOut: allElements) {
-        chamberConstituents[readOut->getMaterialGeom()->getParent()].push_back(readOut);
+        if (readOut->detectorType() == ActsTrk::DetectorType::Mm ||
+            readOut->detectorType() == ActsTrk::DetectorType::sTgc) {
+            const int sector = m_idHelperSvc->sector(readOut->identify()) * 
+                              (m_idHelperSvc->stationEta(readOut->identify()) > 0 ? 1 : -1);
+            nswREs[sector].push_back(readOut);
+        } else {
+          chamberConstituents[readOut->getMaterialGeom()->getParent()].push_back(readOut);
+        }
      }
-     for (auto& [motherVol, readoutEles] : chamberConstituents){
+     for (auto& [sector, readEles]:  nswREs) {
+       ATH_MSG_VERBOSE("Summarize all Nsw readout elements of sector "<<sector<<" into single object");
+       chamberConstituents[readEles[0]->getMaterialGeom()->getParent()] = std::move(readEles);
+     }
+     for (auto& [motherVol, readoutEles] : chamberConstituents) {
         /// Sort the chambers within the mother such that mdts are sorted first by distance to IP
         /// then the rpcs are sorted by distance to IP
 
@@ -139,15 +158,24 @@ namespace MuonGMR4{
             yMax = std::max(center.y() + parameters.halfChamberHeight, yMax);
             zMin = std::min(center.z(), zMin);
             zMax = std::max(center.z() + 2.*parameters.halfChamberTck, zMax);
+          } else if (ele->detectorType() == ActsTrk::DetectorType::Mm) {
+            const MmReadoutElement* mmReadoutEle = static_cast<const MmReadoutElement*>(ele);
+            xMinS = std::min(center.x() - 0.5*mmReadoutEle->moduleWidthS(), xMinS);
+            xMaxS = std::max(center.x() + 0.5*mmReadoutEle->moduleWidthS(), xMaxS);
+            xMinL = std::min(center.x() - 0.5*mmReadoutEle->moduleWidthL(), xMinS);
+            xMaxL = std::max(center.x() + 0.5*mmReadoutEle->moduleWidthL(), xMaxL);
+            yMin = std::min(center.y(), yMin);
+            yMax = std::max(center.y() + mmReadoutEle->moduleHeight(), yMax);
+            zMin = std::min(center.z(), zMin);
+            zMax = std::max(center.z() + mmReadoutEle->moduleThickness(), zMax);
           } else {
-              ATH_MSG_FATAL("Only Mdt, Rpc, sTgc & Tgc chambers can be used right now.");
+              ATH_MSG_FATAL("Did the Csc made it back? Or do we have a new detector technology.");
               throw std::logic_error("Detector type not supported");
           }
           ATH_MSG_VERBOSE("Chamber dimensions: yMin: "<<yMin<<" yMax: "<<yMax
                       <<" xMinS: "<<xMinS<<" xMaxS: "<<xMaxS<<" xMinL: "<<xMinL<<" xMaxL: "<<xMaxL<< " zMin: "<<zMin<<" zMax: "<<zMax);       
         }
         
-        constexpr double tolerance = 0.1 * Gaudi::Units::mm;
         define.halfXShort = (xMaxS - xMinS) / 2.;
         define.halfXLong = (xMaxL - xMinL) / 2.;
         define.halfY = (yMax - yMin) / 2.;

@@ -62,12 +62,8 @@ class MmReadoutGeomTool : public AthAlgTool,
     StatusCode readParameterBook(FactoryCache& cache);
 
     /// Loads the chamber dimensions from GeoModel
-    StatusCode loadDimensions(MmReadoutElement::defineArgs& args, FactoryCache& factory, int stationEta);
-
-    IdentifierHash layerHash(const int gasGap) const;
-
-
-
+    StatusCode loadDimensions(MmReadoutElement::defineArgs& args, 
+                              FactoryCache& factory);
 };
 
 }  // namespace MuonGMR4

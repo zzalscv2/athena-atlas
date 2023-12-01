@@ -18,12 +18,12 @@ namespace MuonGMR4 {
 using parameterBook = MmReadoutElement::parameterBook;
 std::ostream& operator<<(std::ostream& ostr, const parameterBook& pars) {
    ostr<<"chamber shortWidth/longWidth/length [mm]: "<<(2.*pars.halfShortWidth)<<"/";
-   ostr<<(2.*pars.halfLongWidth)<<"/"<<(2.*pars.halfLength)<<std::endl;
+   ostr<<(2.*pars.halfLongWidth)<<"/"<<(2.*pars.halfHeight)<<std::endl;
    return ostr;
 }
 
-MmReadoutElement::MmReadoutElement(defineArgs&& args)
-    : MuonReadoutElement(std::move(args)),
+MmReadoutElement::MmReadoutElement(defineArgs&& args): 
+    MuonReadoutElement(std::move(args)),
       m_pars{std::move(args)} {
 }
 
@@ -37,8 +37,8 @@ StatusCode MmReadoutElement::initElement() {
     }
 #ifndef SIMULATIONBASE
     ATH_CHECK(planeSurfaceFactory(geoTransformHash(), m_pars.layerBounds->make_bounds(m_pars.halfShortWidth, 
-                                                                            m_pars.halfLongWidth, 
-                                                                            m_pars.halfLength)));
+                                                                                      m_pars.halfLongWidth, 
+                                                                                      m_pars.halfHeight)));
 #endif
     for (unsigned int layer = 0; layer < m_pars.layers.size(); ++layer) {
       IdentifierHash layHash{layer};
@@ -57,8 +57,6 @@ StatusCode MmReadoutElement::initElement() {
                                                                                    design.halfWidth())));
 #endif
     }
-    // m_gasThickness = (chamberStripPos(createHash(1, 2, 1, false)) - 
-    //                   chamberStripPos(createHash(1, 1, 1, false))).mag();
 #ifndef SIMULATIONBASE
     m_pars.layerBounds.reset();
 #endif
