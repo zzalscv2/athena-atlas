@@ -140,6 +140,8 @@ private:
   Gaudi::Property< int > m_option_maxPropagationStep {this, "MaxPropagationStep", 5000, 
       "Maximum number of steps for one propagate call"};
 
+  Gaudi::Property<bool> m_refitOnly{this, "RefitOnly", false, "Do refit only. Track summary will not be added"};
+
   /// Type erased track fitter function.
   using Fitter = Acts::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator>,
                                                         Acts::AtlasBetheHeitlerApprox<6, 5>,
