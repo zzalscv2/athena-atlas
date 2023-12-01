@@ -13,6 +13,12 @@
 #include "xAODTracking/TrackStorageContainer.h"
 #include "xAODTracking/TrackStorageAuxContainer.h"
 
+#include "xAODTracking/TrackStorage.h"
+#include "xAODTracking/TrackSurface.h"
+#include "xAODTracking/TrackSurfaceContainer.h"
+#include "xAODTracking/TrackSurfaceAuxContainer.h"
+
+
 BOOST_AUTO_TEST_SUITE(EventDataTrackStorage)
 
 BOOST_AUTO_TEST_CASE(ConstCompilesWithInterface) {
@@ -35,11 +41,11 @@ struct EmptyBackend {
 };
 
 BOOST_FIXTURE_TEST_CASE(AllStaticxAODVaraiblesAreKnown, EmptyBackend) {
-  for (auto id : m->backend()->getConstStore()->getAuxIDs()) {
+  for (auto id : m->trackBackend()->getConstStore()->getAuxIDs()) {
     const std::string name = SG::AuxTypeRegistry::instance().getName(id);
     BOOST_CHECK( ActsTrk::TrackStorageContainer::staticVariables.count(name) == 1);
   }
-  BOOST_CHECK( m->backend()->getConstStore()->getAuxIDs().size() == ActsTrk::TrackStorageContainer::staticVariables.size());
+  BOOST_CHECK( m->trackBackend()->getConstStore()->getAuxIDs().size() == ActsTrk::TrackStorageContainer::staticVariables.size());
 }
 
 
@@ -85,7 +91,7 @@ BOOST_FIXTURE_TEST_CASE(BareContainerFill, FilledBackend) {
 BOOST_FIXTURE_TEST_CASE(ImmutableAccess, FilledBackend) {
   using namespace Acts::HashedStringLiteral;
 
-  auto c = std::make_unique<ActsTrk::TrackStorageContainer>(m->backend());
+  auto c = std::make_unique<ActsTrk::TrackStorageContainer>(m->trackBackend());
   c->restoreDecorations();
   BOOST_CHECK_EQUAL(c->size_impl(), 2);
   BOOST_CHECK(c->hasColumn_impl("author"_hash));
@@ -102,5 +108,98 @@ BOOST_FIXTURE_TEST_CASE(ImmutableAccess, FilledBackend) {
 
 
 }
+
+
+/////////////////////////////////////////////////////////////////////
+// Test of TrackSurfaceContainer in mutable TrackStorageContainer  
+
+BOOST_FIXTURE_TEST_CASE(MutableSurfaceBackend_test, FilledBackend){
+
+//TODO: Here the empty surface is created. Tests of surfase filling are needed
+
+  auto i = m->addSurface_impl();
+  BOOST_CHECK_EQUAL(i, 0);
+
+  i = m->addSurface_impl();
+  BOOST_CHECK_EQUAL(i, 1); 
+
+  m->removeSurface_impl(i);
+  i = m->addSurface_impl();
+  BOOST_CHECK_EQUAL(i, 1);
+};
+
+
+template<typename surfType>
+void testSurface(surfType surf, std::shared_ptr<const Acts::Surface> outSurf, const ActsGeometryContext& gctx) {
+    BOOST_CHECK_EQUAL(int(surf->type()), int(outSurf->type()));
+    BOOST_CHECK_EQUAL(surf->center(gctx.context()), outSurf->center(gctx.context()));
+    BOOST_CHECK_EQUAL(surf->transform(gctx.context()).rotation().eulerAngles(2, 1, 0), 
+                  outSurf->transform(gctx.context()).rotation().eulerAngles(2, 1, 0));  
+    BOOST_CHECK_EQUAL(size(surf->bounds().values()), size(outSurf->bounds().values()));
+    for (unsigned int i=0; i<size(surf->bounds().values()); i++)  {  
+      BOOST_TEST(surf->bounds().values()[i] == outSurf->bounds().values()[i], boost::test_tools::tolerance(0.001));
+    }      
+} 
+
+
+// Test of const TrackStorageContainer with TrackSurfaceContainer
+BOOST_AUTO_TEST_CASE(ConstSurfaceBackend_test){
+
+    // Create filled xAOD::TrackStorageContainer
+    constexpr static size_t sz = 6;
+
+    xAOD::TrackStorageContainer backend;
+    xAOD::TrackStorageAuxContainer aux;
+    backend.setStore(&aux);
+
+    std::vector<double> semirandoms = {0.12, 0.92};
+    for (const double sr : semirandoms) {    
+        auto par = new xAOD::TrackStorage();    
+        backend.push_back(par);
+        par->resize();
+        for ( size_t i = 0; i < sz; ++i) {
+            par->paramsEigen()(i) = i * sr;
+            for ( size_t j = 0; j < sz; ++j) {
+                par->covParamsEigen()(i, j) = (i+j) * sr;
+            }
+        }
+    }
+
+  
+  // Create filled xAOD::TrackSurfaceContainer
+  const ActsGeometryContext& gctx{};
+
+  float layerZ = 30.;
+  Acts::Transform3 transform(Acts::Translation3(0., 0., -layerZ));
+  float rotation[3] = {2.1, 1.2, 0.4};
+  transform *= Acts::AngleAxis3(rotation[0], Acts::Vector3(0., 0., 1.));  //rotZ
+  transform *= Acts::AngleAxis3(rotation[1], Acts::Vector3(0., 1., 0.));  //rotY
+  transform *= Acts::AngleAxis3(rotation[2], Acts::Vector3(1., 0., 0.));  //rotX
+
+  xAOD::TrackSurfaceContainer surfBackend;
+  xAOD::TrackSurfaceAuxContainer aux0;
+  surfBackend.setStore(&aux0);
+  
+  auto surfCurr = new xAOD::TrackSurface();
+  surfBackend.push_back(surfCurr);
+
+  // create the ConeSurface
+  double alpha(M_PI/4.), minZ(5.), maxZ(25), halfPhi(M_PI);
+  auto surf = Acts::Surface::makeShared<Acts::ConeSurface>(
+              transform, alpha, minZ, maxZ, halfPhi);                   
+  ActsTrk::encodeSurface(surfCurr, surf.get(), gctx);
+
+  // Create constant ActsTrk::TrackStorageContainer
+  std::unique_ptr<ActsTrk::TrackStorageContainer> ms = std::make_unique<ActsTrk::TrackStorageContainer>(&backend, &surfBackend);
+
+  // Read the ActsTrk::TrackStorageContainer and check track storage and track surfaces
+  auto cc = std::make_unique<ActsTrk::TrackStorageContainer>(ms->trackBackend());
+  BOOST_CHECK_EQUAL(cc->size_impl(), 2);
+  
+  auto outSurf = ActsTrk::decodeSurface(ms->surfBackend()->at(0), gctx);
+  testSurface(surf, outSurf, gctx);
+  
+};
+
 
 BOOST_AUTO_TEST_SUITE_END()

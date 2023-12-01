@@ -11,7 +11,9 @@
 #include "ActsEvent/Decoration.h"
 #include "xAODTracking/TrackStorageContainer.h"
 #include "xAODTracking/TrackStorageAuxContainer.h"
-
+#include "xAODTracking/TrackSurfaceAuxContainer.h"
+#include "xAODTracking/TrackSurfaceContainer.h"
+#include "ActsEvent/SurfaceEncoding.h"
 
 
 namespace ActsTrk {
@@ -37,6 +39,8 @@ struct IsReadOnlyTrackContainer<ActsTrk::TrackStorageContainer>
 template <>
 struct IsReadOnlyTrackContainer<ActsTrk::MutableTrackStorageContainer>
     : std::false_type {};
+
+    
 }  // namespace Acts
 
 namespace ActsTrk {
@@ -46,14 +50,14 @@ using ConstCovariance = Acts::TrackStateTraits<3>::Covariance;
 using Parameters = Acts::TrackStateTraits<3, false>::Parameters;
 using Covariance = Acts::TrackStateTraits<3, false>::Covariance;
 
-
 class MutableTrackStorageContainer;
 
 class TrackStorageContainer {
  public:
   using IndexType = uint32_t; // TODO find common place for it
   static constexpr auto kInvalid = Acts::MultiTrajectoryTraits::kInvalid;
-  TrackStorageContainer(const DataLink<xAOD::TrackStorageContainer>& lin = nullptr);
+  TrackStorageContainer(const DataLink<xAOD::TrackStorageContainer>& lin = nullptr,
+                        const DataLink<xAOD::TrackSurfaceContainer>& surfLink = nullptr);
   static const std::set<std::string> staticVariables;
   /**
   * return true if the container has specific decoration
@@ -85,6 +89,11 @@ class TrackStorageContainer {
   * covariance of the track fit
   */
   ActsTrk::ConstCovariance covariance(ActsTrk::IndexType itrack) const;
+  
+  /**
+  * surface
+  */
+  std::shared_ptr<const Acts::Surface> surface(ActsTrk::IndexType itrack) const;
 
   void fillFrom(ActsTrk::MutableTrackStorageContainer& mtb);
 
@@ -94,15 +103,20 @@ class TrackStorageContainer {
 
   void restoreDecorations();
 
-  const xAOD::TrackStorageContainer* backend() const{
-    return m_backend.cptr();
+  const xAOD::TrackStorageContainer* trackBackend() const{
+    return m_trackBackend.cptr();
+  }
+
+  const xAOD::TrackSurfaceContainer* surfBackend() const{
+    return m_surfBackend.cptr();
   }
 
  protected:
   using DecorationAccess = ActsTrk::detail::Decoration<xAOD::TrackStorageContainer>;
 
   std::vector<DecorationAccess> m_decorations;
-  DataLink<xAOD::TrackStorageContainer> m_backend = nullptr;
+  DataLink<xAOD::TrackStorageContainer> m_trackBackend = nullptr;
+  DataLink<xAOD::TrackSurfaceContainer> m_surfBackend = nullptr;
 
 
   std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces;
@@ -115,6 +129,20 @@ class MutableTrackStorageContainer : public TrackStorageContainer {
   MutableTrackStorageContainer(const MutableTrackStorageContainer&) = delete;
   MutableTrackStorageContainer operator=(const MutableTrackStorageContainer&) = delete;
   MutableTrackStorageContainer(MutableTrackStorageContainer&&) noexcept;
+
+// Add and remove surface
+  /**
+  * adds new surface to the tail of the container
+  */
+  ActsTrk::IndexType addSurface_impl();
+
+  /**
+  * clears surface data under index
+  */
+  void removeSurface_impl(ActsTrk::IndexType isurf);
+
+  //TODO: function(s) needed to fill the surface in the way analog to tracks
+
 
   /**
   * adds new track to the tail of the container
@@ -192,19 +220,21 @@ class MutableTrackStorageContainer : public TrackStorageContainer {
   template<typename T>
   friend class MutableTrackContainerHandle;
 
-  // obtain access to backend, only needed for testing
-  const xAOD::TrackStorageContainer* backend() const{
-    return m_mutableBackend.get();
+
+  xAOD::TrackStorageContainer* trackBackend(){
+    return m_mutableTrackBackend.get();
   }
 
-  xAOD::TrackStorageContainer* backend(){
-    return m_mutableBackend.get();
+  xAOD::TrackSurfaceContainer* surfBackend(){
+    return m_mutableSurfBackend.get();
   }
-
 
  private:
-  std::unique_ptr<xAOD::TrackStorageContainer> m_mutableBackend;
-  std::unique_ptr<xAOD::TrackStorageAuxContainer> m_mutableBackendAux;
+  std::unique_ptr<xAOD::TrackStorageContainer> m_mutableTrackBackend;
+  std::unique_ptr<xAOD::TrackStorageAuxContainer> m_mutableTrackBackendAux;
+
+  std::unique_ptr<xAOD::TrackSurfaceContainer> m_mutableSurfBackend;
+  std::unique_ptr<xAOD::TrackSurfaceAuxContainer> m_mutableSurfBackendAux;
 };
 
 
