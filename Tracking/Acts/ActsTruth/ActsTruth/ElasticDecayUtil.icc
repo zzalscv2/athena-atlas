@@ -1,0 +1,139 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+#include "xAODTruth/TruthVertex.h"
+#include <sstream>
+
+template <bool IsDebug>
+const xAOD::TruthParticle *ElasticDecayUtil<IsDebug>::getMother(const xAOD::TruthParticle &truth_particle, float max_energy_loss) const {
+   // from ElasticTruthTrajectoryBuilder.cxx
+   // Restrict to quasi-elastic processes (e.g. brems, delta-rays, pi->pi+Delta).
+   //
+   // Require not more than 2 outgoing particles. Note that
+   // delta-rays for primary==electron is a special case, because we have two
+   // outgoing particles with the same PDG id.  The "correct" one
+   // is that with the higher energy (NOT pt).
+   //
+   // allow 1 outgoing to cover possible vertexes from interaction in detector material
+   // disallow hadronic pi->N*pi etc.
+
+   const xAOD::TruthParticle *last_parent = &truth_particle;
+
+   typename std::conditional<IsDebug, unsigned int,Empty>::type stat_n_parents {};
+
+   // follow decay chain upwards until PdgId changes, a particle has more than one
+   // parent, or a particle has more than one sibling.
+   for (;; ) {
+      const xAOD::TruthVertex* prod_vtx = last_parent->production_vertex();
+      if (!prod_vtx) break;
+      if (prod_vtx->nIncomingParticles() != 1) break;
+      if (prod_vtx->nOutgoingParticles() > 2) break;
+      const xAOD::TruthParticle *grand_parent = prod_vtx->incomingParticle(0u);
+      if (!grand_parent) break;
+      if (grand_parent->pdgId() != last_parent->pdgId()) break;
+      if constexpr(IsDebug) {
+         unsigned int particle_type_i = kNoSibling;
+         std::lock_guard<std::mutex> lock(m_mutex);
+         if (prod_vtx->nOutgoingParticles()>1) {
+            int sibling_particle_type =0;
+            for (unsigned int part_out_i=0u; part_out_i<prod_vtx->nOutgoingParticles(); ++part_out_i) {
+               const xAOD::TruthParticle *a_sibling = prod_vtx->outgoingParticle(part_out_i);
+
+               if (a_sibling != last_parent && a_sibling) {
+                  if (particle_type_i == kNoSibling) {
+                     sibling_particle_type = a_sibling->absPdgId();
+                     if (sibling_particle_type==11) {
+                        particle_type_i = kElectron;
+                     }
+                     else if (sibling_particle_type==22) {
+                        particle_type_i = kPhoton;
+                     }
+                     else {
+                        particle_type_i = kOther;
+                     }
+                  }
+                  else  if (sibling_particle_type != a_sibling->absPdgId() ) {
+                     particle_type_i = kOther;
+                  }
+                  m_outgoingPdgIds.insert( a_sibling->pdgId() );
+               }
+            }
+         }
+
+         m_energyLossStat.at(particle_type_i).add( grand_parent->e() - last_parent->e() );
+      }
+
+      if (prod_vtx->nOutgoingParticles()>1) {
+         unsigned int part_out_i=0u;
+         for (; part_out_i<prod_vtx->nOutgoingParticles(); ++part_out_i) {
+            const xAOD::TruthParticle *a_sibling = prod_vtx->outgoingParticle(part_out_i);
+            if (a_sibling != last_parent) {
+               if (last_parent->pdgId() == a_sibling->pdgId() && (last_parent->pdgId() != 11 || last_parent->e() < a_sibling->e())) {
+                  break;
+               }
+            }
+         }
+         if (part_out_i < prod_vtx->nOutgoingParticles()) break;
+      }
+      if (last_parent->e() - grand_parent->e() > max_energy_loss) break;
+
+      if constexpr(IsDebug) {
+         m_outgoingMotherPdgIds.insert( grand_parent->pdgId() );
+         ++stat_n_parents;
+      }
+
+      last_parent = grand_parent;
+   }
+   if constexpr(IsDebug) {
+      std::lock_guard<std::mutex> lock(m_mutex);
+      m_nParentsStat.add(stat_n_parents);
+   }
+   return last_parent;
+}
+
+template <bool IsDebug>
+inline void ElasticDecayUtil<IsDebug>::setEnergyLossBinning(const std::conditional<IsDebug,
+                                                            std::vector<float>,
+                                                            EmptyProperty>::type &binning) {
+   if constexpr(IsDebug) {
+      if (binning.size()>=3) {
+         for (ActsUtils::StatHist &stat : m_energyLossStat ) {
+            stat.setBinning( static_cast<unsigned int>(binning[0]), binning[1],binning[2]);
+         }
+      }
+   }
+}
+
+template <bool IsDebug>
+template <class T_OutStream>
+inline void ElasticDecayUtil<IsDebug>::dumpStatistics(T_OutStream &out) const {
+   if constexpr(IsDebug) {
+        std::stringstream tmp_out;
+        tmp_out << m_nParentsStat  << " number of parents" << std::endl
+                << m_nParentsStat.histogramToString() << std::endl;
+        std::array<std::string,kNParticleTypes> energyLossLabel{"no-sibling",
+                                                 "electron as sibling",
+                                                 "photon as sibling",
+                                                 "other sibling"};
+
+        unsigned int type_i=0;
+        for (const auto &stat : m_energyLossStat) {
+           if (stat.n()>0) {
+              tmp_out << stat << " energy loss, decay with " << energyLossLabel.at(type_i) << std::endl
+                      << stat.histogramToString() << std::endl;
+           }
+           ++type_i;
+        }
+        tmp_out << "Sibling PDG IDs : ";
+        for(const auto &elm : m_outgoingPdgIds) {
+           tmp_out << " " << elm;
+        }
+        tmp_out << std::endl;
+        tmp_out << "PDG IDs of followed particles : ";
+        for(const auto &elm : m_outgoingMotherPdgIds) {
+           tmp_out << " " << elm;
+        }
+        tmp_out;
+        out << tmp_out.str();
+   }
+}

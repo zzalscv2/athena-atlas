@@ -4,6 +4,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from ActsInterop import UnitConstants
 
 def extractChildKwargs(kwargs: dict, prefix: str) :
     args={}
@@ -43,6 +44,17 @@ def StripClusterToTruthAssociationCfg(flags, name: str = 'StripClusterToTruthAss
     kwargs.setdefault('Measurements','ITkStripClusters')
     kwargs.setdefault('AssociationMapOut','ITkStripClustersToTruthParticles')
     acc.addEventAlgo( CompFactory.ActsTrk.StripClusterToTruthAssociationAlg(name=name, **kwargs) )
+    return acc
+
+def TrackToTruthAssociationCfg(flags, name: str = 'ActsTracksToTruthAssociationAlg', **kwargs) :
+    acc = ComponentAccumulator()
+    acc.merge( MapToInDetSimDataWrapCfg(flags, 'ITkStripSDO_Map') )
+    kwargs.setdefault('ACTSTracksLocation','SiSPSeededActsTrackContainer')
+    kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
+    kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
+    kwargs.setdefault('AssociationMapOut','ActsTracksToTruthParticles')
+    kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV)
+    acc.addEventAlgo( CompFactory.ActsTrk.TrackToTruthAssociationAlg(name=name, **kwargs) )
     return acc
 
 def ITkTruthAssociationCfg(flags, **kwargs) :

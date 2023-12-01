@@ -27,6 +27,7 @@ def ITkTrackingSiPatternCfg(flags,
             TracksName=list(InputCollections)))
 
     runTruth = True
+    runActsTrackTruth = False
 
     # Can use FastTrackFinder instead of SiSPSeededTrackFinder
     if flags.Tracking.useITkFTF:
@@ -84,6 +85,8 @@ def ITkTrackingSiPatternCfg(flags,
         if flags.Tracking.ActiveConfig.doActsTrack:
             from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg
             acc.merge(ActsTrackFindingCfg(flags))
+            runActsTrackTruth = flags.Tracking.doTruth
+
 
         # Convert Tracks Acts -> Athena (before ambi)
         if flags.Tracking.ActiveConfig.doActsToAthenaTrack:
@@ -160,5 +163,13 @@ def ITkTrackingSiPatternCfg(flags,
             Tracks=ResolvedTrackCollectionKey,
             DetailedTruth=ResolvedTrackCollectionKey+"DetailedTruth",
             TracksTruth=ResolvedTrackCollectionKey+"TruthCollection"))
+
+    if runActsTrackTruth :
+        from ActsConfig.ActsTruthConfig import TrackToTruthAssociationCfg
+        acts_tracks='ActsTracks' if not flags.Acts.doAmbiguityResolution else 'ResolvedActsTracks'
+        acc.merge(TrackToTruthAssociationCfg(flags,
+                                             ACTSTracksLocation=acts_tracks,
+                                             AssociationMapOut=acts_tracks+"ToTruthParticleAssociation"))
+
 
     return acc
