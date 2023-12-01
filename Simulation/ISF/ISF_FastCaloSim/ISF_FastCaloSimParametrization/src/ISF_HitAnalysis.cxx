@@ -1017,7 +1017,7 @@ StatusCode ISF_HitAnalysis::execute()
   //std::cout <<"ZH G4Hit size: "<<m_g4hit_e->size()<<std::endl;
  }// End detector type loop
 
- const TileHitVector * hitVec;
+ const TileHitVector * hitVec = nullptr;
  if (evtStore()->retrieve(hitVec,"TileHitVec")==StatusCode::SUCCESS &&  m_tileMgr &&  m_tileID )
  {
   int hitnumber = 0;
