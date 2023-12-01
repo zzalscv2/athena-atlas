@@ -143,12 +143,12 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
 
 //// All the Vectors
     for (int lay = 1; lay <= numLayers; ++lay) {
-        const Identifier layWireID =id_helper.channelID(stIndex, stEta, stPhi, 
-                        stML, lay, sTgcIdHelper::sTgcChannelTypes::Wire, 1);
+//        const Identifier layWireID =id_helper.channelID(stIndex, stEta, stPhi, 
+//                        stML, lay, sTgcIdHelper::sTgcChannelTypes::Wire, 1);
         const Identifier layStripID =id_helper.channelID(stIndex, stEta, stPhi, 
                         stML, lay, sTgcIdHelper::sTgcChannelTypes::Strip, 1);
-        const Identifier layPadID =id_helper.channelID(stIndex, stEta, stPhi, 
-                        stML, lay, sTgcIdHelper::sTgcChannelTypes::Pad, 1);
+//        const Identifier layPadID =id_helper.channelID(stIndex, stEta, stPhi, 
+//                        stML, lay, sTgcIdHelper::sTgcChannelTypes::Pad, 1);
 /*
 //// Wire Dimensions
         int numWires = readoutEle->numberOfWires(layWireID); 
