@@ -231,8 +231,10 @@ RIO_Author SimpleMMClusterBuilderTool::getCalibratedClusterPosition(const EventC
     errorCalibIn.locTheta = dirEstimate.theta();
     errorCalibIn.localPos = clusterLocalPosition;
     errorCalibIn.stripId = calibratedStrips[errorCalibIn.clusterSize/2].identifier;
+
+    const double localUncertainty = errorCalibDB->clusterUncertainty(errorCalibIn);
     
-    covMatrix(0, 0) = errorCalibDB->clusterUncertainty(errorCalibIn);
+    covMatrix(0, 0) = localUncertainty * localUncertainty;
 
     
     return RIO_Author::SimpleClusterBuilder;
