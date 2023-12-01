@@ -630,14 +630,14 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
 
   if (abs(motherPDG) == 6) return top;
 
-  if (abs(motherPDG) == 24 && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
+  if (MC::isW(motherPDG) && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
 
     const xAOD::TruthVertex* prodVert = mothOriVert;
     const xAOD::TruthParticle* ptrPart;
     do {
       ptrPart = prodVert->incomingParticle(0);
       prodVert = ptrPart->hasProdVtx() ? ptrPart->prodVtx() : nullptr;
-    } while (abs(ptrPart->pdgId()) == 24 && prodVert != nullptr);
+    } while (MC::isW(ptrPart) && prodVert != nullptr);
 
     if (prodVert && prodVert->nIncomingParticles() == 1) { 
       if (abs(ptrPart->pdgId()) == 9900012) return NuREle;
@@ -646,8 +646,8 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
     }
     return WBoson;
   } 
-  if (abs(motherPDG) == 24) return WBoson;
-  if (abs(motherPDG) == 23) return ZBoson;
+  if (MC::isW(motherPDG)) return WBoson;
+  if (MC::isZ(motherPDG)) return ZBoson;
 
   //-- Exotics
 //AV: please note that "barcode=-5" is generator-dependent.
@@ -861,7 +861,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
     info->motherBarcode = mother->barcode();
   }
 
-  if ((abs(motherPDG) == 15 || abs(motherPDG) == 24) && mothOriVert != nullptr) {
+  if ((abs(motherPDG) == 15 || MC::isW(motherPDG)) && mothOriVert != nullptr) {
     long pPDG(0);
     const xAOD::TruthParticle* MotherParent(nullptr);
     do {
@@ -989,21 +989,21 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
   // Quark weak decay
   if (abs(motherPDG) < 7 && numOfParents == 1 && numOfDaug == 3 && NumOfquark == 1 && NumOfMuNeut == 1) return QuarkWeakDec;
 
-  if (std::abs(motherPDG) == 24 && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
+  if (MC::isW(motherPDG) && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
     const xAOD::TruthVertex* prodVert = mothOriVert;
     const xAOD::TruthParticle* itrP;
     do {
       itrP = prodVert->incomingParticle(0);
       prodVert = itrP->hasProdVtx() ? itrP->prodVtx() : nullptr;
-    } while (abs(itrP->pdgId()) == 24 && prodVert != nullptr);
+    } while (MC::isW(itrP) && prodVert != nullptr);
 
     if (prodVert && prodVert->nIncomingParticles() == 1 && abs(itrP->pdgId()) == 9900012) return NuREle;
     if (prodVert && prodVert->nIncomingParticles() == 1 && abs(itrP->pdgId()) == 9900014) return NuRMu;
     if (prodVert && prodVert->nIncomingParticles() == 1 && abs(itrP->pdgId()) == 9900016) return NuRTau;
     return WBoson;
   }
-  if (abs(motherPDG) == 24) return WBoson;
-  if (abs(motherPDG) == 23) return ZBoson;
+  if (MC::isW(motherPDG)) return WBoson;
+  if (MC::isZ(motherPDG)) return ZBoson;
 
   if (motherPDG == 22 && numOfDaug == 2 && NumOfMuMin == 1 && NumOfMuPl == 1) {
     return PhotonConv;
@@ -1208,7 +1208,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
 
   const xAOD::TruthParticle* MotherParent(nullptr);
 
-  if (abs(motherPDG) == 24 && mothOriVert != nullptr) {
+  if (MC::isW(motherPDG) && mothOriVert != nullptr) {
     MotherParent = getMother(mother);
     long pPDG(0);
     if (MotherParent) {//MotherParent checked here...
@@ -1270,22 +1270,21 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
   }
 
   if (abs(motherPDG) == 6) return top;
-  if (abs(motherPDG) == 24 && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
+  if (MC::isW(motherPDG) && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
     const xAOD::TruthVertex* prodVert = mothOriVert;
     const xAOD::TruthParticle* itrP;
     do {
       itrP = prodVert->incomingParticle(0);
       prodVert = itrP->hasProdVtx() ? itrP->prodVtx() : nullptr;
-    } while (abs(itrP->pdgId()) == 24 && prodVert != nullptr);
+    } while (MC::isW(itrP) && prodVert != nullptr);
 
     if (prodVert && prodVert->nIncomingParticles() == 1 && abs(itrP->pdgId()) == 9900012) return NuREle;
     if (prodVert && prodVert->nIncomingParticles() == 1 && abs(itrP->pdgId()) == 9900014) return NuRMu;
     if (prodVert && prodVert->nIncomingParticles() == 1 && abs(itrP->pdgId()) == 9900016) return NuRTau;
     return WBoson;
   } 
-  if (abs(motherPDG) == 24) { return WBoson;}
-
-  if (abs(motherPDG) == 23) { return ZBoson;}
+  if (MC::isW(motherPDG)) { return WBoson;}
+  if (MC::isZ(motherPDG)) { return ZBoson;}
   if (numOfParents == 1 && numOfDaug > 4 && (abs(motherPDG) < 7 || motherPDG == 21)) {
     bool isZboson = false;
     bool isWboson = false;
@@ -1666,7 +1665,7 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
     return FSRPhot;
 
   // FSR  from Photos
-  if (abs(motherPDG) == 23 &&
+  if (MC::isZ(motherPDG) &&
       ((NumOfEl + NumOfPos == 2 || NumOfEl + NumOfPos == 4) || (NumOfMu == 2 || NumOfMu == 4) ||
        (NumOfTau == 2 || NumOfTau == 4)) &&
       NumOfPht > 0)
@@ -1678,8 +1677,8 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
 
   //--- other process
 
-  if (abs(motherPDG) == 23) return ZBoson;
-  if (abs(motherPDG) == 24) {
+  if (MC::isZ(motherPDG)) return ZBoson;
+  if (MC::isW(motherPDG)) {
 
     if (NumOfLep == 1 && NumOfNeut == 1 && numOfDaug == NumOfLep + NumOfNeut + NumOfPht)
       return FSRPhot;
@@ -1690,7 +1689,7 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
       do {
         itrP = prodVert->incomingParticle(0);
         prodVert = itrP->hasProdVtx() ? itrP->prodVtx() : nullptr;
-      } while (abs(itrP->pdgId()) == 24 && prodVert != nullptr);
+      } while (MC::isW(itrP) && prodVert != nullptr);
 
       if (prodVert && prodVert->nIncomingParticles() == 1 ) {
         if ( abs(itrP->pdgId()) == 15) return TauLep;
@@ -1841,7 +1840,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   if (mothOriVert && mothOriVert->barcode() == partOriVert->barcode())
     samePart = true;
   //
-  if ((abs(motherPDG) == nuFlav || abs(motherPDG) == 15 || abs(motherPDG) == 24) && mothOriVert != nullptr &&
+  if ((abs(motherPDG) == nuFlav || abs(motherPDG) == 15 || MC::isW(motherPDG)) && mothOriVert != nullptr &&
       !samePart) {
     long pPDG(0);
     const xAOD::TruthParticle* MotherParent(nullptr);
@@ -1873,7 +1872,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       if (mother == MotherParent) {
         break;
       }
-      if (abs(pPDG) == nuFlav || abs(pPDG) == 15 || abs(pPDG) == 24) {
+      if (abs(pPDG) == nuFlav || abs(pPDG) == 15 || abs(pPDG) == 24 ) {
         mother = MotherParent;
   if (info) {
         info->mother = mother;
@@ -1957,22 +1956,23 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   if (std::abs(motherPDG) < 7 && numOfParents == 1 && numOfDaug == 3 && NumOfquark == 1 && (NumOfEl == 1 || NumOfMu == 1 || NumOfTau == 1)) return QuarkWeakDec;
   if (std::abs(motherPDG) == 6) return top;
 
-  if (std::abs(motherPDG) == 24 && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
+  if (MC::isW(motherPDG) && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
     const xAOD::TruthVertex* prodVert = mothOriVert;
     const xAOD::TruthParticle* ptrPart;
     do {
       ptrPart = prodVert->incomingParticle(0);
       prodVert = ptrPart->hasProdVtx() ? ptrPart->prodVtx() : nullptr;
-    } while (abs(ptrPart->pdgId()) == 24 && prodVert != nullptr);
+    } while (MC::isW(ptrPart) && prodVert != nullptr);
 
-    if (prodVert && prodVert->nIncomingParticles() == 1 && abs(ptrPart->pdgId()) == 9900012) return NuREle;
-    if (prodVert && prodVert->nIncomingParticles() == 1 && abs(ptrPart->pdgId()) == 9900014) return NuRMu;
-    if (prodVert && prodVert->nIncomingParticles() == 1 && abs(ptrPart->pdgId()) == 9900016) return NuRTau;
+    if (prodVert && prodVert->nIncomingParticles() == 1) { 
+      if (abs(ptrPart->pdgId()) == 9900012) return NuREle;
+      if (abs(ptrPart->pdgId()) == 9900014) return NuRMu;
+      if (abs(ptrPart->pdgId()) == 9900016) return NuRTau;
+    }
     return WBoson;
   }
-  if (abs(motherPDG) == 24) return WBoson;
-
-  if (abs(motherPDG) == 23) return ZBoson;
+  if (MC::isW(motherPDG)) return WBoson;
+  if (MC::isZ(motherPDG)) return ZBoson;
 
   //-- Exotics
 //AV: please note that "barcode=-5" is generator-dependent.
