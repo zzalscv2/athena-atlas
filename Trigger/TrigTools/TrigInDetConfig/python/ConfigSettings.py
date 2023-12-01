@@ -511,7 +511,6 @@ ConfigSettingsInstances = {
 
     "fullScan"    : ConfigSettings_fullScan(),
     "FS"          : ConfigSettings_fullScan(),
-
     "jetSuper"    : ConfigSettings_jetSuper(),
 
     "beamSpot"    : ConfigSettings_beamSpot(),

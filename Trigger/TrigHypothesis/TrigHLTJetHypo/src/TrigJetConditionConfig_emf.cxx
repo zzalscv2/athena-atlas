@@ -5,13 +5,13 @@
 /*
   Instantiator for PT Condition
  */
-#include "TrigJetConditionConfig_pt.h"
+#include "TrigJetConditionConfig_emf.h"
 #include "GaudiKernel/StatusCode.h"
-#include "./PtCondition.h"
+#include "./EMFCondition.h"
 #include "./ArgStrToDouble.h"
 
 
-TrigJetConditionConfig_pt::TrigJetConditionConfig_pt(const std::string& type,
+TrigJetConditionConfig_emf::TrigJetConditionConfig_emf(const std::string& type,
 						     const std::string& name,
 						     const IInterface* parent) :
   base_class(type, name, parent){
@@ -19,17 +19,17 @@ TrigJetConditionConfig_pt::TrigJetConditionConfig_pt(const std::string& type,
 }
 
 
-StatusCode TrigJetConditionConfig_pt::initialize() {
+StatusCode TrigJetConditionConfig_emf::initialize() {
   return StatusCode::SUCCESS;
 }
 
 
-Condition TrigJetConditionConfig_pt::getCondition() const {
+Condition TrigJetConditionConfig_emf::getCondition() const {
   auto a2d = ArgStrToDouble();
-  return std::make_unique<PtCondition>(a2d(m_min));
+  return std::make_unique<EMFCondition>(a2d(m_min));
 }
 				     
 
-StatusCode TrigJetConditionConfig_pt::checkVals() const {
+StatusCode TrigJetConditionConfig_emf::checkVals() const {
   return StatusCode::SUCCESS;
 }

@@ -97,8 +97,8 @@ def getMCSignatures():
 
         ## ATR-25456 - calratio jet chains
         
-        ChainProp(name='HLT_j30_CLEANllp_calratio_L1TAU60', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportGroup),
-        ChainProp(name='HLT_j30_CLEANllp_calratiormbib_L1TAU60', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportGroup),
+#        ChainProp(name='HLT_j30_CLEANllp_calratio_L1TAU60', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportGroup),
+#        ChainProp(name='HLT_j30_CLEANllp_calratiormbib_L1TAU60', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportGroup),
       
         # supporting chains for background studies
       

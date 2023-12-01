@@ -155,7 +155,7 @@ def getDevSignatures():
         # Ranges + Asymmetric
         ChainProp(name='HLT_g13_loose_g10_loose_PhysicsTLA_L12DR15-0M30-eEM12LeEM9L',l1SeedThresholds=['eEM12L', 'eEM9'],stream=['TLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
         ChainProp(name='HLT_g13_loose_g10_loose_PhysicsTLA_L113DR25-25M70-eEM12LeEM9L',l1SeedThresholds=['eEM12L','eEM9'],stream=['TLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
-    
+
     ]
 
     chains['MET'] = [
@@ -199,12 +199,16 @@ def getDevSignatures():
 
 
     chains['Jet'] = [
-       
+
+        # new calratio chain 
+        ChainProp(name='HLT_j20_calratio_roiftf_preselj20e24_L1J100', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_calratio_roiftf_preselj20e24_L1TAU40_EMPTY', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_calratio_roiftf_preselj20e24_L1TAU40_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+
         # ATR-28412 test lower than VBF inclusive
         ChainProp(name='HLT_j70_j50a_j0_DJMASS900j50dphi200x400deta_L1MJJ-500-NFF', l1SeedThresholds=['FSNOSEED']*3,stream=['VBFDelayed'],groups=PrimaryLegGroup+MultiJetGroup+LegacyTopoGroup), # previously HLT_j70_j50_0eta490_invm1000j70_dphi20_deta40_L1MJJ-500-NFF
         ChainProp(name='HLT_j70_j50a_j0_DJMASS1000j50dphi250x260deta_L1MJJ-500-NFF', l1SeedThresholds=['FSNOSEED']*3,stream=['VBFDelayed'],groups=PrimaryLegGroup+MultiJetGroup+LegacyTopoGroup), # previously HLT_j70_j50_0eta490_invm1000j70_dphi20_deta40_L1MJJ-500-NFF
         ChainProp(name='HLT_j70_j50a_j0_DJMASS900j50dphi250x260deta_L1MJJ-500-NFF', l1SeedThresholds=['FSNOSEED']*3,stream=['VBFDelayed'],groups=PrimaryLegGroup+MultiJetGroup+LegacyTopoGroup), # previously HLT_j70_j50_0eta490_invm1000j70_dphi20_deta40_L1MJJ-500-NFF
-
 
         # pflow jet chains without pile-up residual correction for calibration derivations and calibration cross-checks ATR-26827
         ChainProp(name='HLT_j0_perf_pf_subjesgscIS_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportGroup+['RATE:CPS_RD0_FILLED']),
@@ -389,7 +393,6 @@ def getDevSignatures():
         # Duplicated with old naming conventions only for validation
         ChainProp(name='HLT_j45_320eta490_L1J15p31ETA49', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_j220_320eta490_L1J75p31ETA49', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-
         ChainProp(name='HLT_j420_a10t_lcw_jes_35smcINF_L1SC111-CJ15', groups=DevGroup+SingleJetGroup+LegacyTopoGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_2j330_a10t_lcw_jes_35smcINF_L1J100', groups=DevGroup+MultiJetGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1SC111-CJ15', groups=DevGroup+MultiJetGroup+LegacyTopoGroup, l1SeedThresholds=['FSNOSEED']),
@@ -428,13 +431,11 @@ def getDevSignatures():
         ChainProp(name='HLT_10j35_pf_ftf_presel7c30Z110_L14J15', groups=MultiJetGroup+DevGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_10j35_pf_ftf_presel7c30Z110MAXMULT20_L14J15', groups=MultiJetGroup+DevGroup, l1SeedThresholds=['FSNOSEED']),
         
-
         ]
 
 
     chains['Bjet'] = [
         
-
         # single bjet pflow options, # changes according to ATR-23883
         ChainProp(name="HLT_j225_0eta290_bdl1d60_pf_ftf_L1J100", l1SeedThresholds=['FSNOSEED'], groups=SingleBjetGroup + DevGroup),
         ChainProp(name="HLT_j225_0eta290_bdl1d85_pf_ftf_L1J100", l1SeedThresholds=['FSNOSEED'], groups=SingleBjetGroup + DevGroup),
@@ -462,6 +463,7 @@ def getDevSignatures():
         ChainProp(name="HLT_j40c_020jvt_j28c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2J15_J20", l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup + DevGroup),
         ChainProp(name="HLT_j75c_020jvt_j50c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2J15_J20", l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup + DevGroup),
         ChainProp(name="HLT_j75c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2J15_J20", l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup + DevGroup),
+
         # TEST CHAINS WITH ROIFTF PRESEL
         #HH4b chains with b-jet preselections
         ChainProp(name='HLT_j80c_020jvt_j55c_020jvt_j28c_020jvt_j20c_020jvt_SHARED_3j20c_020jvt_bdl1d85_pf_ftf_presel2c20XX2c20b90_L1J45p0ETA21_3J15p0ETA25', l1SeedThresholds=['FSNOSEED']*5, stream=[PhysicsStream], groups=DevGroup+MultiBjetGroup),
@@ -871,6 +873,7 @@ def getDevSignatures():
 
         # Tau+MET: ATR-27252
         ChainProp(name='HLT_tau60_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_xe50_cell_03dRAB_L1eTAU60_2cTAU20M_jXE80', stream=[PhysicsStream], l1SeedThresholds=['eTAU60','cTAU20M','FSNOSEED'], groups=PrimaryPhIGroup+TauMETGroup),  
+
     ]
 
     chains['Beamspot'] = [
@@ -882,6 +885,7 @@ def getDevSignatures():
     ]
 
     chains['Calib'] = [
+
         # Calib Chains
         # ChainProp(name='HLT_larpsallem_L1EM3', groups=SingleElectronGroup+SupportLegGroup),
     ]

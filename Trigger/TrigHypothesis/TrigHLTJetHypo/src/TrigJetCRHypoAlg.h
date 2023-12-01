@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 */
 
@@ -37,9 +37,6 @@ class TrigJetCRHypoAlg : public ::HypoBase {
       "HypoTools", 
 	{}, 
       "Tools to perfrom selection"};
-  
-  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleKey {this, 
-      "Tracks","Key for precision tracks"};
 
   SG::ReadHandleKey<CaloConstCellContainer> m_cellKey {this,
       "Cells","Key for input CaloCellContainer"};

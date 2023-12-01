@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
 log.info("Importing %s",__name__)
@@ -146,6 +146,7 @@ JetChainParts = {
     'trkpresel'    : # Tracking preselection
       ['nopresel',
        # Single jet
+       'preselj20e24',
        'preselj20',
        'preselj50',
        'preselj80',

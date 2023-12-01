@@ -1381,18 +1381,18 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_j45_020jvt_pf_ftf_preselj20_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportGroup+['RATE:CPS_RD0_FILLED']),
 
         # ATR-22696 calratio primaries
-        ChainProp(name='HLT_j30_CLEANllp_calratio_L1TAU100', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryLegGroup),
-        ChainProp(name='HLT_j30_CLEANllp_calratiormbib_L1TAU100', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryLegGroup),
-        ChainProp(name='HLT_j30_CLEANllp_calratio_L1LLP-NOMATCH', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryLegGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_j30_CLEANllp_calratiormbib_L1LLP-NOMATCH', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryLegGroup+LegacyTopoGroup),
+        #ChainProp(name='HLT_j30_CLEANllp_calratio_L1TAU100', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryLegGroup),
+        #ChainProp(name='HLT_j30_CLEANllp_calratiormbib_L1TAU100', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryLegGroup),
+        #ChainProp(name='HLT_j30_CLEANllp_calratio_L1LLP-NOMATCH', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryLegGroup+LegacyTopoGroup),
+        #ChainProp(name='HLT_j30_CLEANllp_calratiormbib_L1LLP-NOMATCH', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryLegGroup+LegacyTopoGroup),
         # Phase I duplicates for primary calratio TAU
-        ChainProp(name='HLT_j30_CLEANllp_calratio_L1eTAU140', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_j30_CLEANllp_calratiormbib_L1eTAU140', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup),
+        #ChainProp(name='HLT_j30_CLEANllp_calratio_L1eTAU140', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup),
+        #ChainProp(name='HLT_j30_CLEANllp_calratiormbib_L1eTAU140', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup),
         # calratio support  
-        ChainProp(name='HLT_j30_CLEANllp_calratio_L1TAU40_EMPTY', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportLegGroup),
-        ChainProp(name='HLT_j30_CLEANllp_calratiormbib_L1TAU40_EMPTY', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportLegGroup),
-        ChainProp(name='HLT_j30_CLEANllp_calratio_L1TAU40_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportLegGroup),
-        ChainProp(name='HLT_j30_CLEANllp_calratiormbib_L1TAU40_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportLegGroup),
+        #ChainProp(name='HLT_j30_CLEANllp_calratio_L1TAU40_EMPTY', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportLegGroup),
+        #ChainProp(name='HLT_j30_CLEANllp_calratiormbib_L1TAU40_EMPTY', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportLegGroup),
+        #ChainProp(name='HLT_j30_CLEANllp_calratio_L1TAU40_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportLegGroup),
+        #ChainProp(name='HLT_j30_CLEANllp_calratiormbib_L1TAU40_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportLegGroup),
 
     ]
 

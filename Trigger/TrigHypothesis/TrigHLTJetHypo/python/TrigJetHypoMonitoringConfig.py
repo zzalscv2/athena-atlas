@@ -17,3 +17,22 @@ def TrigJetHypoToolMonitoring(flags, histPath, histFlags):
         montool.defineHistogram('HT', title='Event H_{T};H_{T} (GeV)', xbins=100, xmin=0, xmax=3000, path='EXPERT', type='TH1F' )
         montool.defineHistogram('NJet', title='Jet multiplicity;N(jets)', xbins=20, xmin=-0.5, xmax=19.5, path='EXPERT', type='TH1F' )   
     return montool
+
+
+def TrigJetCRHypoToolMonitoring(histPath):
+    montool = GenericMonitoringTool(None,"MonTool", HistPath = histPath)
+    default_bin_count = 100
+    montool.defineHistogram('jet_pt', title="Jet Transverse Momentum;p_{T} (GeV)", xbins = default_bin_count, xmin=0, xmax=1000, path='EXPERT', type='TH1F')
+    montool.defineHistogram('jet_eta', title="Jet #eta;#eta", xbins = default_bin_count, xmin=-5, xmax=5, path='EXPERT', type='TH1F')
+    montool.defineHistogram('jet_phi', title="Jet #phi;#phi", xbins = default_bin_count, xmin=-3.5, xmax=3.5, path='EXPERT', type='TH1F')
+    montool.defineHistogram('jet_emf', title="Jet emf;emf", xbins = default_bin_count, xmin=0, xmax=1, path='EXPERT', type='TH1F')
+    montool.defineHistogram('jet_emf_pl', title="Jet emf pl;emf pl", xbins = default_bin_count, xmin=0, xmax=1, path='EXPERT', type='TH1F')
+    montool.defineHistogram('jet_emf,jet_emf_pl', path='EXPERT', type='TH2F', title="Jet emf vs jet emf rpl",
+                         xbins = default_bin_count, xmin=-0, xmax=1, ybins = default_bin_count, ymin=0, ymax=1)
+
+    montool.defineHistogram('jet_logR_pl', title="Jet logR plp;logR plp", xbins = default_bin_count, xmin=-2, xmax=2, path='EXPERT', type='TH1F')
+    montool.defineHistogram('jet_logR', title="Jet logR;logR", xbins = default_bin_count, xmin=-2, xmax=2, path='EXPERT', type='TH1F')
+    montool.defineHistogram('jet_tr_pt', title="Jet track pt;tr_pt",  xbins = default_bin_count, xmin=0, xmax=1000, path='EXPERT', type='TH1F')
+    montool.defineHistogram('jet_tr_DR', title="Jet track dr;track dr", xbins = default_bin_count, xmin=0, xmax=1, path='EXPERT', type='TH1F')
+
+    return montool

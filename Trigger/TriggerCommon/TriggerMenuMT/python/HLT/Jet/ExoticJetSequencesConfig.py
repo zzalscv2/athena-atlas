@@ -45,25 +45,22 @@ def jetCRMenuSequence(flags, jetsIn):
     from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetCRHypoToolFromDict
 
     # Get track sequence name
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    from ..CommonSequences.FullScanDefs import fs_cells, trkFSRoI
-    IDTrigConfig = getInDetTrigConfig( 'fullScan' )
-    sequenceOut  = IDTrigConfig.tracks_FTF()
+    from ..CommonSequences.FullScanDefs import fs_cells
     cellsin=fs_cells
-
-    from .JetMenuSequencesConfig import getTrackingInputMaker
-    from .JetTrackingConfig import JetFSTrackingCfg
-    trk_acc = JetFSTrackingCfg(flags, trkopt='ftf', RoIs=trkFSRoI)
-
-    reco = InEventRecoCA(f"CalRatio_{jetsIn}Reco", inputMaker=getTrackingInputMaker('ftf'))
-    reco.mergeReco(trk_acc)
+    reco = InEventRecoCA( 
+        f"CalRatio_{jetsIn}_RecoSequence",
+        inputMaker=CompFactory.InputMakerForRoI(
+            "IM_CalRatio_HypoOnlyStep",
+            RoITool = CompFactory.ViewCreatorInitialROITool(),
+            mergeUsingFeature = True
+        )
+    )
 
     selAcc = SelectionCA(f"CalRatio_{jetsIn}")
     selAcc.mergeReco(reco)
     selAcc.addHypoAlgo(
         CompFactory.TrigJetCRHypoAlg(
-            "L2CalRatio",
-            Tracks = sequenceOut,
+            "L2CalRatio", 
             Cells  = cellsin
         )
     )

@@ -6,7 +6,6 @@ from AthenaCommon.SystemOfUnits import GeV
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoHypoToolCreated
 from TrigHLTJetHypo.hypoConfigBuilder import hypotool_from_chaindict
 from TrigHLTJetHypo.TrigJetHypoMonitoringConfig import TrigJetHypoToolMonitoring
-
 from AthenaCommon.Logging import logging
 logger = logging.getLogger(__name__)
 
@@ -126,15 +125,12 @@ def  trigJetCRHypoToolFromDict(chain_dict):
         raise Exception("misconfiguration of Exotic jet chain")
 
     hypo = CompFactory.TrigJetCRHypoTool(chain_name)
-
+    hypo.MpufixLogRatio     = 0.5
     hypo.MinjetlogR      = 1.2
     hypo.MintrackPt      = 2*GeV
     hypo.MindeltaR       = 0.2
-
     hypo.countBIBcells   = 4
-
     hypo.doBIBremoval = doBIBrm
-
 
     return  hypo
 

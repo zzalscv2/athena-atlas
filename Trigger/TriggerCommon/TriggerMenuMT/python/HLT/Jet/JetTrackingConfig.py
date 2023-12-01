@@ -171,8 +171,8 @@ def JetRoITrackingCfg(flags, jetsIn, trkopt, RoIs):
     outmap = { k:jetContext[k] for k in trkKeys }
     if flags.Trigger.Jet.doJetSuperPrecisionTracking:
         outmap["Tracks"] = vertexInputTracks
-    return acc, outmap
 
+    return acc, outmap
 
 def addJetTTVA( flags, jetseq, trkopt, config, verticesname=None, adaptiveVertex=None, selector=None ):
 
