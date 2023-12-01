@@ -456,11 +456,8 @@ class MultiTrajectory
   const DataLink<xAOD::TrackStateContainer> m_trackStates;
   const xAOD::TrackStateAuxContainer* m_trackStatesAux;
   const DataLink<xAOD::TrackParametersContainer> m_trackParameters;
-  const xAOD::TrackParametersAuxContainer* m_trackParametersAux;
   const DataLink<xAOD::TrackJacobianContainer> m_trackJacobians;
-  const xAOD::TrackJacobianContainer* m_trackJacobiansAux;
   const DataLink<xAOD::TrackMeasurementContainer> m_trackMeasurements;
-  const xAOD::TrackMeasurementContainer* m_trackMeasurementsAux;
   using DecorationAccess = ActsTrk::detail::Decoration<xAOD::TrackStateContainer>;
   std::vector<DecorationAccess> m_decorations;
   // TODO remove once tracking code switches to sourceLinks with EL
