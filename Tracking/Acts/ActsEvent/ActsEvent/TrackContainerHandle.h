@@ -96,8 +96,8 @@ MutableTrackContainerHandle<C>::moveToConst(
 
   auto xAODTrackStorageHandle = SG::makeHandle(m_xAODTrackStorageKey, context);
   if (xAODTrackStorageHandle
-          .record(std::move(tc.container().m_mutableBackend),
-                  std::move(tc.container().m_mutableBackendAux))
+          .record(std::move(tc.container().m_mutableTrackBackend),
+                  std::move(tc.container().m_mutableTrackBackendAux))
           .isFailure()) {
     throw std::runtime_error(
         "MutableTrackContainerHandle::moveToConst, can't record "

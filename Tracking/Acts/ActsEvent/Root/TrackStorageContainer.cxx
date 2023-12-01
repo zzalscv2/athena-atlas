@@ -10,9 +10,11 @@ const std::set<std::string> ActsTrk::TrackStorageContainer::staticVariables = {
     "params", "covParams", "nMeasurements", "nHoles",   "chi2f",
     "ndf",    "nOutliers", "nSharedHits",   "tipIndex", "stemIndex"};
 
+
 ActsTrk::TrackStorageContainer::TrackStorageContainer(
-    const DataLink<xAOD::TrackStorageContainer>& link)
-    : m_backend(link) {}
+    const DataLink<xAOD::TrackStorageContainer>& link,
+    const DataLink<xAOD::TrackSurfaceContainer>& surfLink)
+    : m_trackBackend(link), m_surfBackend(surfLink) {}
 
 const Acts::Surface* ActsTrk::TrackStorageContainer::referenceSurface_impl(
     ActsTrk::IndexType itrack) const {
@@ -24,7 +26,7 @@ const Acts::Surface* ActsTrk::TrackStorageContainer::referenceSurface_impl(
 }
 
 std::size_t ActsTrk::TrackStorageContainer::size_impl() const {
-  return m_backend->size();
+  return m_trackBackend->size();
 }
 
 namespace {
@@ -58,7 +60,7 @@ std::any component_impl(C& container, Acts::HashedString key,
 
 std::any ActsTrk::TrackStorageContainer::component_impl(
     Acts::HashedString key, ActsTrk::IndexType itrack) const {
-  std::any result = ::component_impl(*m_backend, key, itrack);
+  std::any result = ::component_impl(*m_trackBackend, key, itrack);
   if (result.has_value()) {
     return result;
   }
@@ -68,7 +70,7 @@ std::any ActsTrk::TrackStorageContainer::component_impl(
   }
   for (auto& d : m_decorations) {
     if (d.hash == key) {
-      return d.getter(m_backend.cptr(), itrack, d.name);
+      return d.getter(m_trackBackend.cptr(), itrack, d.name);
     }
   }
   throw std::runtime_error("TrackStorageContainer no such component " +
@@ -77,12 +79,18 @@ std::any ActsTrk::TrackStorageContainer::component_impl(
 
 ActsTrk::ConstParameters ActsTrk::TrackStorageContainer::parameters(
     ActsTrk::IndexType itrack) const {
-  return m_backend->at(itrack)->paramsEigen();
+  return m_trackBackend->at(itrack)->paramsEigen();
 }
 
 ActsTrk::ConstCovariance ActsTrk::TrackStorageContainer::covariance(
     ActsTrk::IndexType itrack) const {
-  return m_backend->at(itrack)->covParamsEigen();
+  return m_trackBackend->at(itrack)->covParamsEigen();
+}
+
+std::shared_ptr<const Acts::Surface>  ActsTrk::TrackStorageContainer::surface(
+    ActsTrk::IndexType itrack) const {
+  const ActsGeometryContext& geoContext{};
+  return   decodeSurface( m_surfBackend->at(itrack), geoContext );
 }
 
 void ActsTrk::TrackStorageContainer::fillFrom(
@@ -91,9 +99,11 @@ void ActsTrk::TrackStorageContainer::fillFrom(
   m_particleHypothesis = std::move(mtb.m_particleHypothesis);
 }
 
+
+
 void ActsTrk::TrackStorageContainer::restoreDecorations() {
 
-  for (auto id : m_backend->getConstStore()->getAuxIDs()) {
+  for (auto id : m_trackBackend->getConstStore()->getAuxIDs()) {
     const std::string name = SG::AuxTypeRegistry::instance().getName(id);
     const std::type_info* typeInfo =
         SG::AuxTypeRegistry::instance().getType(id);
@@ -141,44 +151,72 @@ void ActsTrk::TrackStorageContainer::restoreDecorations() {
   }
 }
 
+
 ////////////////////////////////////////////////////////////////////
 // write api
 ////////////////////////////////////////////////////////////////////
 ActsTrk::MutableTrackStorageContainer::MutableTrackStorageContainer() {
 
-  m_mutableBackend = std::make_unique<xAOD::TrackStorageContainer>();
-  m_mutableBackendAux = std::make_unique<xAOD::TrackStorageAuxContainer>();
-  m_mutableBackend->setStore(m_mutableBackendAux.get());
+  m_mutableTrackBackend = std::make_unique<xAOD::TrackStorageContainer>();
+  m_mutableTrackBackendAux = std::make_unique<xAOD::TrackStorageAuxContainer>();
+  m_mutableTrackBackend->setStore(m_mutableTrackBackendAux.get());
 
-  TrackStorageContainer::m_backend = m_mutableBackend.get();
+  TrackStorageContainer::m_trackBackend = m_mutableTrackBackend.get();
+  m_mutableSurfBackend = std::make_unique<xAOD::TrackSurfaceContainer>();
+  m_mutableSurfBackendAux = std::make_unique<xAOD::TrackSurfaceAuxContainer>();
+  m_mutableSurfBackend->setStore(m_mutableSurfBackendAux.get());
+
+  TrackStorageContainer::m_surfBackend = m_mutableSurfBackend.get();  
 }
 
 ActsTrk::MutableTrackStorageContainer::MutableTrackStorageContainer(
     MutableTrackStorageContainer&& other) noexcept {
-  m_mutableBackend = std::move(other.m_mutableBackend);
-  m_mutableBackendAux = std::move(other.m_mutableBackendAux);
-  m_mutableBackend->setStore(m_mutableBackendAux.get());
-  TrackStorageContainer::m_backend = m_mutableBackend.get();
+  m_mutableTrackBackend = std::move(other.m_mutableTrackBackend);
+  m_mutableTrackBackendAux = std::move(other.m_mutableTrackBackendAux);
+  m_mutableTrackBackend->setStore(m_mutableTrackBackendAux.get());
+  TrackStorageContainer::m_trackBackend = m_mutableTrackBackend.get();
+
+  m_mutableSurfBackend = std::move(other.m_mutableSurfBackend);
+  m_mutableSurfBackendAux = std::move(other.m_mutableSurfBackendAux);
+  m_mutableSurfBackend->setStore(m_mutableSurfBackendAux.get());
+  TrackStorageContainer::m_surfBackend = m_mutableSurfBackend.get();
+
   m_surfaces = std::move(other.m_surfaces);
   m_particleHypothesis = std::move(other.m_particleHypothesis);
   m_decorations = std::move(other.m_decorations);
 }
 
 ActsTrk::IndexType ActsTrk::MutableTrackStorageContainer::addTrack_impl() {
-  m_mutableBackend->push_back(std::make_unique<xAOD::TrackStorage>());
-  m_mutableBackend->back()->resize();
-  m_particleHypothesis.resize(m_mutableBackend->size(),
+  m_mutableTrackBackend->push_back(std::make_unique<xAOD::TrackStorage>());
+  m_mutableTrackBackend->back()->resize();
+  m_particleHypothesis.resize(m_mutableTrackBackend->size(),
                               Acts::ParticleHypothesis::pion());
-  return m_mutableBackend->size() - 1;
+  return m_mutableTrackBackend->size() - 1;
 }
 
 void ActsTrk::MutableTrackStorageContainer::removeTrack_impl(
     ActsTrk::IndexType itrack) {
-  if (itrack >= m_mutableBackend->size()) {
+  if (itrack >= m_mutableTrackBackend->size()) {
     throw std::out_of_range("removeTrack_impl");
   }
-  m_mutableBackend->erase(m_mutableBackend->begin() + itrack);
+  m_mutableTrackBackend->erase(m_mutableTrackBackend->begin() + itrack);
 }
+
+// Add and remove surface
+ActsTrk::IndexType ActsTrk::MutableTrackStorageContainer::addSurface_impl() {
+  m_mutableSurfBackend->push_back(std::make_unique<xAOD::TrackSurface>());
+  return m_mutableSurfBackend->size() - 1;
+}
+
+void ActsTrk::MutableTrackStorageContainer::removeSurface_impl(
+    ActsTrk::IndexType isurf) {
+  if (isurf >= m_mutableSurfBackend->size()) {
+    throw std::out_of_range("removeSurface_impl");
+  }
+  m_mutableSurfBackend->erase(m_mutableSurfBackend->begin() + isurf);
+}
+
+
 
 // this in fact may be a copy from other MutableTrackStorageContainer
 void ActsTrk::MutableTrackStorageContainer::copyDynamicFrom_impl(
@@ -188,14 +226,14 @@ void ActsTrk::MutableTrackStorageContainer::copyDynamicFrom_impl(
   for ( const auto& other_decor: other.m_decorations) {
     if ( staticVariables.count(other_decor.name) == 1)  { continue; }
 
-    other_decor.copier(backend(), itrack, other_decor.name, other.backend(),
+    other_decor.copier(trackBackend(), itrack, other_decor.name, other.trackBackend(),
                       other_itrack);
     }
 }
 
 std::any ActsTrk::MutableTrackStorageContainer::component_impl(
     Acts::HashedString key, ActsTrk::IndexType itrack) {
-  std::any result = ::component_impl(*m_mutableBackend, key, itrack);
+  std::any result = ::component_impl(*m_mutableTrackBackend, key, itrack);
   if (result.has_value()) {
     return result;
   }
@@ -205,7 +243,7 @@ std::any ActsTrk::MutableTrackStorageContainer::component_impl(
   }
   for (auto& d : m_decorations) {
     if (d.hash == key) {
-      return d.setter(m_mutableBackend.get(), itrack, d.name);
+      return d.setter(m_mutableTrackBackend.get(), itrack, d.name);
     }
   }
   throw std::runtime_error("TrackStorageContainer no such component " +
@@ -214,12 +252,12 @@ std::any ActsTrk::MutableTrackStorageContainer::component_impl(
 
 ActsTrk::Parameters ActsTrk::MutableTrackStorageContainer::parameters(
     ActsTrk::IndexType itrack) {
-  return m_mutableBackend->at(itrack)->paramsEigen();
+  return m_mutableTrackBackend->at(itrack)->paramsEigen();
 }
 
 ActsTrk::Covariance ActsTrk::MutableTrackStorageContainer::covariance(
     ActsTrk::IndexType itrack) {
-  return m_mutableBackend->at(itrack)->covParamsEigen();
+  return m_mutableTrackBackend->at(itrack)->covParamsEigen();
 }
 
 void ActsTrk::MutableTrackStorageContainer::ensureDynamicColumns_impl(
@@ -237,11 +275,11 @@ void ActsTrk::MutableTrackStorageContainer::ensureDynamicColumns_impl(
 }
 
 void ActsTrk::MutableTrackStorageContainer::reserve(ActsTrk::IndexType size) {
-  m_mutableBackend->reserve(size);
+  m_mutableTrackBackend->reserve(size);
 }
 
 void ActsTrk::MutableTrackStorageContainer::clear() {
-  m_mutableBackend->clear();
+  m_mutableTrackBackend->clear();
   m_surfaces.clear();
 }
 
