@@ -86,7 +86,7 @@ public:
 
 
   enum PositionFlag {
-    IS_INDEX = 0,
+    IS_EVENTNUM = 0,
     IS_POSITION = 1,
   };
 
@@ -111,7 +111,7 @@ public:
      * @brief Constructor.
      * @param barcode Barcode of target particle.
      * @param eventIndex Identifies the target GenEvent in a McEventCollection,
-     *        as either the number if @c isIndexEventPosition is IS_INDEX,
+     *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
      *        or the position in the container
      *        if isIndexEventPosition is IS_POSITION.
      *        0 always means the first event in the collection.
@@ -121,14 +121,14 @@ public:
     ExtendedBarCode (barcode_type barcode,
                      index_type eventIndex,
                      EBC_EVCOLL evtColl=EBC_MAINEVCOLL,
-                     PositionFlag isIndexEventPosition = IS_INDEX);
+                     PositionFlag isIndexEventPosition = IS_EVENTNUM);
 
                     
     /** 
      * @brief Constructor.
      * @param barcode Barcode of target particle.
      * @param eventIndex Identifies the target GenEvent in a McEventCollection,
-     *        as either the number if @c isIndexEventPosition is IS_INDEX,
+     *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
      *        or the position in the container
      *        if isIndexEventPosition is IS_POSITION.
      *        0 always means the first event in the collection.
@@ -139,7 +139,7 @@ public:
     ExtendedBarCode (barcode_type barcode,
                      index_type eventIndex,
                      char evtColl,
-                     PositionFlag isIndexEventPosition = IS_INDEX);
+                     PositionFlag isIndexEventPosition = IS_EVENTNUM);
 
 
     /**
@@ -328,7 +328,7 @@ public:
    * @brief Constructor.
    * @param barCode Barcode of the target particle.  0 means a null link.
    * @param eventIndex Identifies the target GenEvent in a McEventCollection,
-   *        as either the number if @c isIndexEventPosition is IS_INDEX,
+   *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
    *        or the position in the container
    *        if isIndexEventPosition is IS_POSITION.
    *        0 always means the first event in the collection.
@@ -339,7 +339,7 @@ public:
   HepMcParticleLink (barcode_type barCode,
                      uint32_t eventIndex = 0,
                      EBC_EVCOLL evColl = EBC_MAINEVCOLL,
-                     PositionFlag positionFlag = IS_INDEX,
+                     PositionFlag positionFlag = IS_EVENTNUM,
                      IProxyDict* sg = SG::CurrentEventStore::store());
 
 
@@ -347,7 +347,7 @@ public:
    * @brief Constructor.
    * @param barCode Barcode of the target particle.  0 means a null link.
    * @param eventIndex Identifies the target GenEvent in a McEventCollection,
-   *        as either the number if @c isIndexEventPosition is IS_INDEX,
+   *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
    *        or the position in the container
    *        if isIndexEventPosition is IS_POSITION.
    *        0 always means the first event in the collection.
@@ -366,7 +366,7 @@ public:
    * @brief Constructor.
    * @param barCode Barcode of the target particle.  0 means a null link.
    * @param eventIndex Identifies the target GenEvent in a McEventCollection,
-   *        as either the number if @c isIndexEventPosition is IS_INDEX,
+   *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
    *        or the position in the container
    *        if isIndexEventPosition is IS_POSITION.
    *        0 always means the first event in the collection.
@@ -377,7 +377,7 @@ public:
   HepMcParticleLink (barcode_type barCode,
                      uint32_t eventIndex,
                      const std::string& evCollName,
-                     PositionFlag positionFlag = IS_INDEX,
+                     PositionFlag positionFlag = IS_EVENTNUM,
                      IProxyDict* sg = SG::CurrentEventStore::store());
 
 
@@ -385,7 +385,7 @@ public:
    * @brief Constructor.
    * @param p Particle to reference.
    * @param eventIndex Identifies the target GenEvent in a McEventCollection,
-   *        as either the number if @c isIndexEventPosition is IS_INDEX,
+   *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
    *        or the position in the container
    *        if isIndexEventPosition is IS_POSITION.
    *        0 always means the first event in the collection.
@@ -396,7 +396,7 @@ public:
   HepMcParticleLink (const HepMC::ConstGenParticlePtr& p,
                      uint32_t eventIndex = 0,
                      EBC_EVCOLL evColl=EBC_MAINEVCOLL,
-                     PositionFlag positionFlag = IS_INDEX,
+                     PositionFlag positionFlag = IS_EVENTNUM,
                      IProxyDict* sg = SG::CurrentEventStore::store());
 
 
@@ -404,7 +404,7 @@ public:
    * @brief Constructor.
    * @param p Particle to reference.
    * @param eventIndex Identifies the target GenEvent in a McEventCollection,
-   *        as either the number if @c isIndexEventPosition is IS_INDEX,
+   *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
    *        or the position in the container
    *        if isIndexEventPosition is IS_POSITION.
    *        0 always means the first event in the collection.
@@ -415,7 +415,7 @@ public:
   HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                      uint32_t eventIndex,
                      const std::string& evCollName,
-                     PositionFlag positionFlag = IS_INDEX,
+                     PositionFlag positionFlag = IS_EVENTNUM,
                      IProxyDict* sg = SG::CurrentEventStore::store());
 
 
@@ -423,7 +423,7 @@ public:
    * @brief Constructor.
    * @param p Particle to reference.
    * @param eventIndex Identifies the target GenEvent in a McEventCollection,
-   *        as either the number if @c isIndexEventPosition is IS_INDEX,
+   *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
    *        or the position in the container
    *        if isIndexEventPosition is IS_POSITION.
    *        0 always means the first event in the collection.

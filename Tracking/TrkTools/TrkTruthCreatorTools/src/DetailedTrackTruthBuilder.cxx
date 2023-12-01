@@ -220,7 +220,7 @@ public:
    }
 
    HepMcParticleLink makeLink(HepMcParticleLink::barcode_type other_particle_barcode, IProxyDict *proxy) {
-      return {other_particle_barcode, m_eventIndex,m_eventCollection, (m_isPosition ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_INDEX ), proxy};
+      return {other_particle_barcode, m_eventIndex,m_eventCollection, (m_isPosition ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM ), proxy};
    }
 
 private:

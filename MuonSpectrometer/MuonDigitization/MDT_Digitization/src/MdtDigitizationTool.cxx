@@ -781,7 +781,7 @@ bool MdtDigitizationTool::createDigits(const EventContext& ctx, Collections_t& c
             // Create the Deposit for MuonSimData
             const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
             const HepMcParticleLink::PositionFlag idxFlag =
-                (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_INDEX;
+                (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
             MuonSimData::Deposit deposit(HepMcParticleLink(phit->trackNumber(), phit.eventId(), evColl, idxFlag),
                                          MuonMCData(driftRadius, hit.localPosition().z()));
 
