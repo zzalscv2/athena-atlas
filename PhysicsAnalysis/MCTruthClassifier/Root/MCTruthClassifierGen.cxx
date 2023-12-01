@@ -731,9 +731,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
       (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4)) {
     int pdg1 = partOriVert->incomingParticle(0)->pdgId();
     int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((abs(pdg1) == 21 && abs(pdg2) == 21) || (abs(pdg1) < 7 && abs(pdg2) < 7) || (pdg1 == 21 && abs(pdg2) < 7) ||
-        (pdg2 == 21 && abs(pdg1) < 7))
-      return DiBoson;
+    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
   }
 
   //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
@@ -741,9 +739,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
       (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6)) {
     int pdg1 = partOriVert->incomingParticle(0)->pdgId();
     int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((abs(pdg1) == 21 && abs(pdg2) == 21) || (abs(pdg1) < 7 && abs(pdg2) < 7) || (pdg1 == 21 && abs(pdg2) < 7) ||
-        (pdg2 == 21 && abs(pdg1) < 7))
-      return MultiBoson;
+    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
   }
 
   // New Sherpa Z->ee
@@ -1052,8 +1048,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
       (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4)) {
     int pdg1 = partOriVert->incomingParticle(0)->pdgId();
     int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((abs(pdg1) == 21 && abs(pdg2) == 21) || (abs(pdg1) < 7 && abs(pdg2) < 7) || (pdg1 == 21 && abs(pdg2) < 7) || (pdg2 == 21 && abs(pdg1) < 7))
-      return DiBoson;
+    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
   }
 
   //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
@@ -1061,9 +1056,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
       (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6)) {
     int pdg1 = partOriVert->incomingParticle(0)->pdgId();
     int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((abs(pdg1) == 21 && abs(pdg2) == 21) || (abs(pdg1) < 7 && abs(pdg2) < 7) || (pdg1 == 21 && abs(pdg2) < 7) ||
-        (pdg2 == 21 && abs(pdg1) < 7))
-      return MultiBoson;
+    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
   }
 
   //--New Sherpa Z->mumu
@@ -1303,9 +1296,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
   if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfTau == 2) {
     int pdg1 = partOriVert->incomingParticle(0)->pdgId();
     int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((abs(pdg1) == 21 && abs(pdg2) == 21) || (abs(pdg1) < 7 && abs(pdg2) < 7) || (pdg1 == 21 && abs(pdg2) < 7) ||
-        (pdg2 == 21 && abs(pdg1) < 7))
-      return ZBoson;
+    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return ZBoson;
   }
 
   //--Sherpa W->taunu  new
@@ -1317,9 +1308,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
       (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4)) {
     int pdg1 = partOriVert->incomingParticle(0)->pdgId();
     int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((abs(pdg1) == 21 && abs(pdg2) == 21) || (abs(pdg1) < 7 && abs(pdg2) < 7) || (pdg1 == 21 && abs(pdg2) < 7) ||
-        (pdg2 == 21 && abs(pdg1) < 7))
-      return DiBoson;
+    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
   }
 
   //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
@@ -1327,9 +1316,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
       (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6)) {
     int pdg1 = partOriVert->incomingParticle(0)->pdgId();
     int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((abs(pdg1) == 21 && abs(pdg2) == 21) || (abs(pdg1) < 7 && abs(pdg2) < 7) || (pdg1 == 21 && abs(pdg2) < 7) ||
-        (pdg2 == 21 && abs(pdg1) < 7))
-      return MultiBoson;
+    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
   }
 
   // New Sherpa Z->tautau
@@ -2032,9 +2019,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       (NumOfEl + NumOfMu + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4)) {
     int pdg1 = partOriVert->incomingParticle(0)->pdgId();
     int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((abs(pdg1) == 21 && abs(pdg2) == 21) || (abs(pdg1) < 7 && abs(pdg2) < 7) || (pdg1 == 21 && abs(pdg2) < 7) ||
-        (pdg2 == 21 && abs(pdg1) < 7))
-      return DiBoson;
+    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
   }
 
   //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
@@ -2042,9 +2027,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       (NumOfEl + NumOfMu + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6)) {
     int pdg1 = partOriVert->incomingParticle(0)->pdgId();
     int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((abs(pdg1) == 21 && abs(pdg2) == 21) || (abs(pdg1) < 7 && abs(pdg2) < 7) || (pdg1 == 21 && abs(pdg2) < 7) ||
-        (pdg2 == 21 && abs(pdg1) < 7))
-      return MultiBoson;
+    if ( (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2)) ) return MultiBoson;
   }
 
   // New Sherpa Z->nunu
