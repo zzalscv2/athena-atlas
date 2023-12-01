@@ -35,7 +35,7 @@ TrackSelectionAlg::TrackSelectionAlg(const std::string& name, ISvcLocator* pSvcL
 
 //---------------------------------------------------------------------------------------
 
-TrackSelectionAlg::~TrackSelectionAlg() { }
+TrackSelectionAlg::~TrackSelectionAlg() = default;
 
 
 //---------------------------------------------------------------------------------------

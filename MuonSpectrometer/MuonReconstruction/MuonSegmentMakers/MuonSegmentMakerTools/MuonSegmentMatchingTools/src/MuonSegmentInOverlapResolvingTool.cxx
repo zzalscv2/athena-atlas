@@ -518,19 +518,19 @@ MuonSegmentInOverlapResolvingTool::checkPhiHitConsistency(const EventContext& ct
         std::unique_ptr<const Trk::TrackParameters> exPars {
             m_propagator->propagate(
               ctx,
-              segPars, 
-              measSurf, 
-              Trk::anyDirection, 
-              false, 
+              segPars,
+              measSurf,
+              Trk::anyDirection,
+              false,
               m_magFieldProperties)};
         if (!exPars) {
             ATH_MSG_WARNING("  Failed to propagate parameter to segment surface" << std::endl
                                                                                  << " pars "
                                                                                  << m_printer->print(segPars));
             continue;
-        } 
-        
-        std::unique_ptr<const Trk::ResidualPull> resPull { m_pullCalculator->residualPull(meas, exPars.get(), Trk::ResidualPull::Unbiased)};
+        }
+
+        std::optional<Trk::ResidualPull> resPull { m_pullCalculator->residualPull(meas, exPars.get(), Trk::ResidualPull::Unbiased)};
         if (!resPull) {
             ATH_MSG_DEBUG(" calculation of residual/pull failed !!!!! ");
             continue;
@@ -544,7 +544,7 @@ MuonSegmentInOverlapResolvingTool::checkPhiHitConsistency(const EventContext& ct
         const double pull = resPull->pull().front();
         averagePull += pull;
         ++nphiMeas;
-        
+
     }
     if (nphiMeas != 0) averagePull /= nphiMeas;
     return averagePull;

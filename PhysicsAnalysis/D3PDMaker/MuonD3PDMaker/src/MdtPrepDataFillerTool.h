@@ -41,13 +41,13 @@ public:
 
 
 private:
- float* m_x;
- float* m_y;
- float* m_z;
- int* m_tdc;
- int* m_adc;
- float* m_locX;
- int* m_status;
+ float* m_x = nullptr;
+ float* m_y = nullptr;
+ float* m_z = nullptr;
+ int* m_tdc = nullptr;
+ int* m_adc = nullptr;
+ float* m_locX = nullptr;
+ int* m_status = nullptr;
 };
 
 } // namespace D3PD

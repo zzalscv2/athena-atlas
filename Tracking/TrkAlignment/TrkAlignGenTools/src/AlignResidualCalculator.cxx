@@ -249,7 +249,7 @@ namespace Trk {
           const MeasurementBase* mesb = tsos->measurementOnTrack();
 
           const TrackParameters * trackPars = tsos->trackParameters();
-          std::unique_ptr<ResidualPull> resPull = nullptr;
+          std::optional<ResidualPull> resPull = std::nullopt;
 
           if ( trackPars ) {
 

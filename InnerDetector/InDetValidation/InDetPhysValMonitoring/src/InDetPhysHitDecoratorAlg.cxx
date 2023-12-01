@@ -261,7 +261,7 @@ InDetPhysHitDecoratorAlg::decorateTrack(const xAOD::TrackParticle &particle,
         float angle(0), etaloc(0);
         int phiWidth(-1);
         int etaWidth(-1);
-        std::unique_ptr<const Trk::ResidualPull> residualPull(nullptr);
+        std::optional<Trk::ResidualPull> residualPull(std::nullopt);
         const Trk::TrackParameters* biasedTrackParameters = thisTrackState->trackParameters();
         if (biasedTrackParameters) {
           ATH_MSG_VERBOSE("biased track parameters ok");

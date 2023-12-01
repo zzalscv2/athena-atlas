@@ -94,7 +94,7 @@ namespace Muon {
         ATH_MSG_VERBOSE("refine: before recovery " << std::endl
                                                   << m_printer->print(track.track()) << std::endl
                                                   << m_printer->print(track.track().measurementsOnTrack()->stdcont()));
-        
+
         std::unique_ptr<Trk::Track> finalTrack(m_muonChamberHoleRecoverTool->recover(track.track(), ctx));
         if (!finalTrack) { ATH_MSG_WARNING(" final track lost, this should not happen "); }
         ATH_MSG_VERBOSE("refine: after recovery " << std::endl
@@ -131,7 +131,7 @@ namespace Muon {
         if (entryRecordTrack) {
             finalTrack.swap(entryRecordTrack);
             ATH_MSG_VERBOSE(" track at muon entry record " << std::endl << m_printer->print(*finalTrack));
-        }         
+        }
         m_candidateHandler->updateTrack(track, finalTrack);
     }
 
@@ -150,7 +150,7 @@ namespace Muon {
 
     std::unique_ptr<Trk::Track> MooTrackBuilder::combine(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2,
                                                          const PrepVec& externalPhiHits) const {
-     
+
         // convert segments
         std::unique_ptr<MuPatSegment> segInfo1{m_candidateHandler->createSegInfo(ctx, seg1)};
         if (!segInfo1) {return nullptr; }
@@ -237,7 +237,7 @@ namespace Muon {
             const std::vector<MuPatSegment*>& excl = candidate->excludedSegments();
             if (std::find(excl.begin(),excl.end(), segment) != excl.end()){
                 ATH_MSG_DEBUG(" Rejected segment based on exclusion list");
-                return nullptr;                
+                return nullptr;
             }
         }
 
@@ -251,10 +251,10 @@ namespace Muon {
             }
             if (candidate && segment) {
                 segments.insert(segment);
-                segments.insert(candidate->segments().begin(), candidate->segments().end());                
+                segments.insert(candidate->segments().begin(), candidate->segments().end());
             }
             // now loop over the segments and check if any of them is associated with a track that contains all of the segments
-           
+
             for (const MuPatSegment* used : segments) {
                 // loop over the tracks associated with the current segment
                 for (const MuPatTrack* assoc_track : used->tracks()) {
@@ -262,7 +262,7 @@ namespace Muon {
                     std::set<const MuPatSegment*> foundSegments;
                     for (const MuPatSegment* segOnTrack : assoc_track->segments()) {
                         if (segments.count(segOnTrack)) foundSegments.insert(segOnTrack);
-                    }                   
+                    }
                     // if all segments are already part of an existing track, don't perform the fit
                     if (foundSegments.size() == segments.size()) {
                         ATH_MSG_DEBUG("Combination already part of an existing track");
@@ -323,16 +323,16 @@ namespace Muon {
         if (!candidate) return nullptr;
         std::unique_ptr<MuPatSegment> segInfo(m_candidateHandler->createSegInfo(ctx, seg));
         if (!segInfo) { return nullptr; }
-       
+
         // call fit()
         return  combine(ctx, *candidate, *segInfo, externalPhiHits);
     }
 
     std::vector<std::unique_ptr<Trk::Track> > MooTrackBuilder::combineWithSegmentFinding(const EventContext& ctx, const Trk::Track& track, const MuonSegment& seg,
                                                                                          const PrepVec& externalPhiHits) const {
-       
+
         // convert segments
-        std::unique_ptr<Trk::Track> inTrack = std::make_unique<Trk::Track>(track);       
+        std::unique_ptr<Trk::Track> inTrack = std::make_unique<Trk::Track>(track);
         std::unique_ptr<MuPatTrack> candidate = m_candidateHandler->createCandidate(inTrack);
         if (!candidate) return {};
         std::unique_ptr<MuPatSegment> segInfo(m_candidateHandler->createSegInfo(ctx, seg));
@@ -595,9 +595,9 @@ namespace Muon {
                     }
                 }
                 std::unique_ptr<MuPatSegment> segInfo{m_candidateHandler->createSegInfo(ctx, *mseg)};
-                
+
                 if (!m_candidateMatchingTool->match(ctx, candidate, *segInfo, true)) { continue; }
-               
+
                 std::unique_ptr<Trk::Track> segTrack = m_fitter->fit(ctx, candidate, *segInfo, externalPhiHits);
 
                 if (!segTrack) continue;
@@ -637,7 +637,7 @@ namespace Muon {
 
         // loop over TSOSs
         Trk::TrackStates::const_iterator state_itr = states->begin();
-        Trk::TrackStates::const_iterator end_itr = states->end();        
+        Trk::TrackStates::const_iterator end_itr = states->end();
         for (; state_itr != end_itr; ++state_itr) {
             const Trk::TrackStateOnSurface* tsit = (*state_itr);
             if (!tsit) continue;  // sanity check
@@ -833,8 +833,8 @@ namespace Muon {
                 } else {
                     // ownership relinquished, should be treated in createMeasTSOS
                     etaPars =
-                        m_propagator->propagate(ctx,*pars, 
-                          etaCompRot->associatedSurface(), 
+                        m_propagator->propagate(ctx,*pars,
+                          etaCompRot->associatedSurface(),
                           Trk::anyDirection, false, m_magFieldProperties);
                 }
                 if (!etaPars) {
@@ -859,7 +859,7 @@ namespace Muon {
                 } else {
                     // ownership relinquished, handled in createMeasTSOS
                     phiPars =
-                        m_propagator->propagate(ctx, *pars, phiCompRot->associatedSurface(), 
+                        m_propagator->propagate(ctx, *pars, phiCompRot->associatedSurface(),
                         Trk::anyDirection, false, m_magFieldProperties);
                 }
                 if (!phiPars) {
@@ -886,7 +886,7 @@ namespace Muon {
         std::stable_sort(newStates.begin(), newStates.end(), SortTSOSByDistanceToPars(pars));
 
         // insert the states into
-        states.insert(states.end(), std::make_move_iterator(newStates.begin()), 
+        states.insert(states.end(), std::make_move_iterator(newStates.begin()),
                                     std::make_move_iterator(newStates.end()));
 
         // iterator should point to the last TGC in this chamber
@@ -914,7 +914,7 @@ namespace Muon {
         return m_fitter->splitTrack(ctx, track);
     }
 
-    std::vector<std::unique_ptr<MuPatTrack> > MooTrackBuilder::find(const EventContext& ctx, MuPatCandidateBase& candidate, 
+    std::vector<std::unique_ptr<MuPatTrack> > MooTrackBuilder::find(const EventContext& ctx, MuPatCandidateBase& candidate,
                                                                     const std::vector<MuPatSegment*>& segVec) const {
         std::vector<std::unique_ptr<MuPatTrack> > candidates;
         // check whether we have segments
@@ -973,7 +973,7 @@ namespace Muon {
                 // check whether the track cleaner didn't remove one of the already added chamber layers
                 // loop over hits
                 std::set<MuonStationIndex::StIndex> stationLayersOnTrack;
-                for ( const Trk::MeasurementBase* meas : *track->measurementsOnTrack()) {                 
+                for ( const Trk::MeasurementBase* meas : *track->measurementsOnTrack()) {
                     Identifier id = m_edmHelperSvc->getIdentifier(*meas);
                     if (!id.is_valid() || m_idHelperSvc->isTrigger(id)) { continue; }
                     stationLayersOnTrack.insert(m_idHelperSvc->stationIndex(id));
@@ -1005,7 +1005,7 @@ namespace Muon {
                 for (MuPatSegment* seg_1 : segVec) {
                     // select segments is different chamber
                     if (seg->chIndex == seg_1->chIndex) continue;
-       
+
                     if (!newCandidate) {
                         std::unique_ptr<Trk::Track> trkTrkCan = std::make_unique<Trk::Track>(*track);
                         if (trkCan) {
@@ -1023,7 +1023,7 @@ namespace Muon {
                                         << m_printer->print(*seg->segment));
                         continue;
                     }
-       
+
                     ATH_MSG_VERBOSE("adding SL overlap " << m_printer->print(*seg_1->segment));
                     std::unique_ptr<Trk::Track> slOverlapTrack = combine(ctx, *track, *seg_1->segment, emptyPhiHits);
                     if (!slOverlapTrack) continue;
@@ -1065,7 +1065,7 @@ namespace Muon {
                 std::unique_ptr<MuPatTrack> newCandidate;
                 if (trkCan) {
                     // copy candidate and add segment
-                    newCandidate = std::make_unique<MuPatTrack>(*trkCan);                    
+                    newCandidate = std::make_unique<MuPatTrack>(*trkCan);
                     m_candidateHandler->extendWithSegment(*newCandidate, *ext_itr.first, ext_itr.second);
                 } else if (segCan) {
                     newCandidate = m_candidateHandler->createCandidate(*segCan, *ext_itr.first, ext_itr.second);
@@ -1230,13 +1230,13 @@ namespace Muon {
                     if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << m_idHelperSvc->toString(id);
                     // unique ptr ownership retained. Original code deleted impactPars
                     auto impactPars =
-                        m_propagator->propagate(ctx, *closestPars, meas->associatedSurface(), 
+                        m_propagator->propagate(ctx, *closestPars, meas->associatedSurface(),
                                                 Trk::anyDirection, false, m_magFieldProperties);
                     if (impactPars) {
                         double residual = 1e10;
                         double pull = 1e10;
                         // pointer to resPull
-                        std::unique_ptr<Trk::ResidualPull> resPull =
+                        std::optional<Trk::ResidualPull> resPull =
                             m_pullCalculator->residualPull(meas, impactPars.get(), Trk::ResidualPull::Unbiased);
                         if (resPull && resPull->pull().size() == 1) {
                             if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "  residual " << m_printer->print(*resPull);

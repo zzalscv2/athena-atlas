@@ -44,12 +44,12 @@ public:
 
 private:
   // t0 from either t0segment or chamber-t0
-  float *m_t0;
-  float *m_t0err;
+  float *m_t0 = nullptr;
+  float *m_t0err = nullptr;
 
   // muonboy specific CSC timing code
   bool m_doMuonBoyCSCTiming;
-  void MuonboyT0CSCSegment(const Muon::MuonSegment* pMuonSegment, float& t0, float& t0Error);
+  static void MuonboyT0CSCSegment(const Muon::MuonSegment* pMuonSegment, float& t0, float& t0Error);
   
   std::string m_muonSegmentT0ContainerKey;
   ServiceHandle<Muon::IMuonEDMHelperSvc> m_edmHelperSvc {this, "edmHelper", 

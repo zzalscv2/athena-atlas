@@ -45,7 +45,7 @@ IDAlignMonTruthComparison::IDAlignMonTruthComparison(const std::string& type, co
   declareProperty("trackSelection", m_trackSelection = ToolHandle<InDetAlignMon::TrackSelectionTool>("InDetAlignMon::TrackSelectionTool"));
 }
 
-IDAlignMonTruthComparison::~IDAlignMonTruthComparison() { }
+IDAlignMonTruthComparison::~IDAlignMonTruthComparison() = default;
 
 
 StatusCode IDAlignMonTruthComparison::initialize() {

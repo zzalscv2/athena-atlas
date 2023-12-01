@@ -32,7 +32,7 @@ namespace Muon {
     StatusCode MuPatHitTool::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_mdtRotCreator.retrieve());
-        ATH_CHECK(m_cscRotCreator.retrieve(DisableTool{m_cscRotCreator.empty()})); 
+        ATH_CHECK(m_cscRotCreator.retrieve(DisableTool{m_cscRotCreator.empty()}));
         ATH_CHECK(m_edmHelperSvc.retrieve());
         ATH_CHECK(m_printer.retrieve());
         ATH_CHECK(m_pullCalculator.retrieve());
@@ -79,7 +79,7 @@ namespace Muon {
             if (pars.associatedSurface() == broadMeas->associatedSurface()) {
                 exPars = pars.uniqueClone();
                 ATH_MSG_VERBOSE(" start parameters and measurement expressed at same surface, cloning parameters ");
-            } else {                
+            } else {
                 exPars = m_propagator->propagate(ctx, pars, broadMeas->associatedSurface(), Trk::anyDirection, false, m_magFieldProperties);
                 if (!exPars) { continue; }  // !exPars
             }
@@ -87,11 +87,11 @@ namespace Muon {
             // create hit and insert it into list
             ATH_MSG_VERBOSE(" inserting hit " << m_idHelperSvc->toString(id) << " " << m_printer->print(*exPars));
             std::unique_ptr<MuPatHit> hit = std::make_unique<MuPatHit>(std::move(exPars), meas->uniqueClone(), std::move(broadMeas), std::move(hitInfo));
-            hitList.push_back(std::move(hit));           
+            hitList.push_back(std::move(hit));
         }
 
         const SortByDirectionMuPatHits isLargerCal{pars};
-        std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);      
+        std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);
         return true;
     }
 
@@ -135,12 +135,12 @@ namespace Muon {
             double residual{0.}, pull{0.};
             calculateResiduals(tsit, Trk::ResidualPull::Unbiased, residual, pull);
             hit->setResidual(residual,pull);
-            hitList.push_back(std::move(hit));         
+            hitList.push_back(std::move(hit));
         }
 
         const Trk::TrackParameters* pars = track.perigeeParameters();
         const SortByDirectionMuPatHits isLargerCal{*pars};
-        std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);      
+        std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);
 
         return true;
     }
@@ -152,8 +152,8 @@ namespace Muon {
 
         if (!hitList1.empty()) {
             const Trk::TrackParameters& pars{hitList1.front()->parameters()};
-            const SortByDirectionMuPatHits isLargerCal{pars};            
-            std::merge(hitList1.begin(), hitList1.end(), hitList2.begin(), hitList2.end(), 
+            const SortByDirectionMuPatHits isLargerCal{pars};
+            std::merge(hitList1.begin(), hitList1.end(), hitList2.begin(), hitList2.end(),
                             std::back_inserter(tmpList), isLargerCal);
         } else {
             return hitList2;
@@ -164,7 +164,7 @@ namespace Muon {
         /// Loop another time to ensure that duplicate hits are removed
         std::copy_if(std::make_move_iterator(tmpList.begin()), std::make_move_iterator(tmpList.end()), std::back_inserter(outList),
                      [&used_hits](const MuPatHitPtr& pathit) { return used_hits.insert(pathit->info().id).second; });
-        
+
         return outList;
     }
 
@@ -202,7 +202,7 @@ namespace Muon {
         MuPatHitIt lit = hitList.begin(), lit_end = hitList.end();
         for (; lit != lit_end; ++lit) {
             const MuPatHit& hit = **lit;
-            if (m_edmHelperSvc->getIdentifier(hit.preciseMeasurement()) == meas_id || 
+            if (m_edmHelperSvc->getIdentifier(hit.preciseMeasurement()) == meas_id ||
                 m_edmHelperSvc->getIdentifier(hit.broadMeasurement()) == meas_id) {
                 hitList.erase(lit);
                 return true;
@@ -396,7 +396,7 @@ namespace Muon {
     }
     inline void MuPatHitTool::calculateResiduals(const Trk::TrackStateOnSurface* tsos, Trk::ResidualPull::ResidualType type, double& residual,
                                             double& residualPull) const {
-        std::unique_ptr<const Trk::ResidualPull> resPull(
+        std::optional<Trk::ResidualPull> resPull(
             m_pullCalculator->residualPull(tsos->measurementOnTrack(), tsos->trackParameters(), type));
         if (resPull) {
             residual = resPull->residual().front();

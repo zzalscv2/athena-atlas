@@ -13,7 +13,7 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkEventPrimitives/ResidualPull.h"
 
-namespace Muon 
+namespace Muon
 {
 
   /** @brief TGC-specific tool to calculate hit residual and pull from a
@@ -26,17 +26,17 @@ namespace Muon
       the strip errors.
 
       @author  Wolfgang Liebig <http://consult.cern.ch/xwho/people/54608>
-  */  
+  */
 
-  class TGC_ResidualPullCalculator : virtual public Trk::IResidualPullCalculator, public AthAlgTool
+  class TGC_ResidualPullCalculator final: virtual public Trk::IResidualPullCalculator, public AthAlgTool
     {
     public:
       TGC_ResidualPullCalculator(const std::string&,const std::string&,const IInterface*);
 
       virtual ~TGC_ResidualPullCalculator()=default;
-      
+
       virtual StatusCode initialize() override;
-      
+
       using IResidualPullCalculator::residualPull;
       /** @brief This function returns (creates!) a Trk::ResidualPull
           object, which contains the values of residual and pull for
@@ -48,7 +48,7 @@ namespace Muon
           The enum ResidualType must be set according to this, otherwise the pulls will be wrong.
           Residuals differ in all three cases; please be aware of this!!!
      */
-    virtual std::unique_ptr<Trk::ResidualPull> residualPull(
+    virtual std::optional<Trk::ResidualPull> residualPull(
         const Trk::MeasurementBase* measurement,
         const Trk::TrackParameters* trkPar,
         const Trk::ResidualPull::ResidualType,
@@ -64,7 +64,7 @@ namespace Muon
         const Trk::TrackState::MeasurementType) const override;
 
     private:
-      
+
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
       //! internal structuring: common code for calculating hit pulls
@@ -73,7 +73,7 @@ namespace Muon
                       const double locTrkCov,
                       const Trk::ResidualPull::ResidualType&) const;
 
-    }; 
+    };
 } // end of namespace
 
-#endif 
+#endif

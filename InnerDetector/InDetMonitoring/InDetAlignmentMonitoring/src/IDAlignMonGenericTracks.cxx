@@ -39,7 +39,6 @@
 
 #include "InDetAlignGenTools/IInDetAlignHitQualSelTool.h"
 #include "TrackSelectionTool.h"
-#include <cmath>
 
 // *********************************************************************
 // Public Methods
@@ -88,7 +87,7 @@ IDAlignMonGenericTracks::IDAlignMonGenericTracks(const std::string& type, const 
   InitializeHistograms();
 }
 
-IDAlignMonGenericTracks::~IDAlignMonGenericTracks() { }
+IDAlignMonGenericTracks::~IDAlignMonGenericTracks() = default;
 
 
 void IDAlignMonGenericTracks::InitializeHistograms() {

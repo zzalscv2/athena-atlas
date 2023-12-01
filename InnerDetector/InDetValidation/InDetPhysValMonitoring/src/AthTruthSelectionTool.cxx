@@ -17,7 +17,6 @@
 #include <cmath>
 
 #include "TrkParameters/TrackParameters.h"
-#include "TruthUtils/MagicNumbers.h"
 
 namespace {
   constexpr int electronId(11);

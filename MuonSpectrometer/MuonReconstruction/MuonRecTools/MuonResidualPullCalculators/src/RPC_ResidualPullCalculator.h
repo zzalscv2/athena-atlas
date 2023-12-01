@@ -13,16 +13,16 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkEventPrimitives/ResidualPull.h"
 
-namespace Muon 
+namespace Muon
 {
 
   /** @brief RPC-specific tool to calculate hit residual and pull from a RIO_OnTrack/TrackParameter pair
 
       Uses Muon-specific info to code the strip type (measuring phi/eta)
       in the 2nd coordinate of the residual.
-      
+
       @author  Wolfgang Liebig <http://consult.cern.ch/xwho/people/54608>
-  */  
+  */
 
   class RPC_ResidualPullCalculator : virtual public Trk::IResidualPullCalculator, public AthAlgTool
     {
@@ -30,7 +30,7 @@ namespace Muon
       RPC_ResidualPullCalculator(const std::string&,const std::string&,const IInterface*);
 
       virtual ~RPC_ResidualPullCalculator()=default;
-      
+
       virtual StatusCode initialize() override;
 
       using IResidualPullCalculator::residualPull;
@@ -43,14 +43,14 @@ namespace Muon
      The enum ResidualType must be set according to this, otherwise the pulls will be wrong.
      Residuals differ in all three cases; please be aware of this!
      */
-    virtual std::unique_ptr<Trk::ResidualPull> residualPull(
+    virtual std::optional<Trk::ResidualPull> residualPull(
         const Trk::MeasurementBase* measurement,
         const Trk::TrackParameters* trkPar,
         const Trk::ResidualPull::ResidualType,
         const Trk::TrackState::MeasurementType) const override;
 
     /** This function is a light-weight version of the function above, designed for track fitters
-     * where speed is critical. 
+     * where speed is critical.
      */
     virtual std::array<double,5> residuals(
         const Trk::MeasurementBase* measurement,
@@ -59,16 +59,16 @@ namespace Muon
         const Trk::TrackState::MeasurementType) const override;
 
     private:
-      
+
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
       //! internal structuring: common method to calculate the hit pull.
-      double calcPull(const double residual,
+      static double calcPull(const double residual,
                       const double locMesCov,
                       const double locTrkCov,
-                      const Trk::ResidualPull::ResidualType& ) const;
+                      const Trk::ResidualPull::ResidualType& ) ;
 
-    }; 
+    };
 } // end of namespace
 
-#endif 
+#endif

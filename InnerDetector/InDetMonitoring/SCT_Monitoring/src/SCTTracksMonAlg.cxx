@@ -196,8 +196,11 @@ ATH_MSG_DEBUG("SCTTracksMonAlg::fillHistograms()");
               ATH_MSG_DEBUG("Cluster Position Phi= " << clus->localParameters()[Trk::locX]);
 #endif
               if (not m_residualPullCalculator.empty()) {
-                std::unique_ptr<const Trk::ResidualPull> residualPull{m_residualPullCalculator->residualPull(rio, trkParam,
-                                                                      m_doUnbiasedCalc ? Trk::ResidualPull::Unbiased : Trk::ResidualPull::Biased)};
+                std::optional<Trk::ResidualPull> residualPull{
+                    m_residualPullCalculator->residualPull(
+                        rio, trkParam,
+                        m_doUnbiasedCalc ? Trk::ResidualPull::Unbiased
+                                         : Trk::ResidualPull::Biased)};
                 if (not residualPull) {
                   ATH_MSG_WARNING("Residual Pull Calculator did not succeed!");
                   return StatusCode::SUCCESS;

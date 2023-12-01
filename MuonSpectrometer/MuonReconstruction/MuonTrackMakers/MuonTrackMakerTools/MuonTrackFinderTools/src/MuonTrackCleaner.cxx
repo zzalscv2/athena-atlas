@@ -98,7 +98,7 @@ namespace Muon {
         }
 
         // if performed curved fit and we did not have a vertex constraint or ID hits, reject the track if inner was removed
-        if (!state.slFit && !(state.hasVertexConstraint || state.nIdHits > 0)) {
+        if (!state.slFit && !state.hasVertexConstraint && state.nIdHits <= 0) {
             if (!checkInnerConstraint(state)) return nullptr;
         }
 
@@ -138,7 +138,7 @@ namespace Muon {
         }
 
         // if performed curved fit and we did not have a vertex constraint or ID hits, reject the track if inner was removed
-        if (!state.slFit && !(state.hasVertexConstraint || state.nIdHits > 0)) {
+        if (!state.slFit && !state.hasVertexConstraint && state.nIdHits <= 0) {
             if (!checkInnerConstraint(state)) return nullptr;
         }
 
@@ -646,7 +646,7 @@ namespace Muon {
         printStates(cleanedTrack.get());
 
         if (!cleanedTrack->perigeeParameters()) { ATH_MSG_DEBUG("   track without perigee "); }
-        
+
         std::unique_ptr<Trk::Track> newTrack = fitTrack(ctx, *cleanedTrack, track->info().particleHypothesis(), state.slFit);
 
         if (newTrack && !newTrack->perigeeParameters()) {
@@ -714,7 +714,7 @@ namespace Muon {
                         // check whether we can savely add hits in this chamber to the track
                         bool recover = !isOutsideOnTrackCut(hit.id, hit.residual, hit.pull, m_associationScaleFactor);
                         if (recover && m_onlyUseHitErrorInRecovery && hit.pars) {
-                            std::unique_ptr<const Trk::ResidualPull> resPull{
+                            std::optional<const Trk::ResidualPull> resPull{
                                 m_pullCalculator->residualPull(hit.meas, hit.pars, Trk::ResidualPull::HitOnly)};
                             if (!resPull) {
                                 ATH_MSG_DEBUG(" calculation of residual/pull failed !!!!! ");
@@ -722,7 +722,7 @@ namespace Muon {
                             } else {
                                 recover = !isOutsideOnTrackCut(hit.id, resPull->residual().front(), std::abs(resPull->pull().front()),
 
-                                                               m_associationScaleFactor);                               
+                                                               m_associationScaleFactor);
                             }
                         }
                         if (recover) {
@@ -941,7 +941,7 @@ namespace Muon {
             MuonStationIndex::ChIndex chIndex = !pseudo ? m_idHelperSvc->chamberIndex(id) : MuonStationIndex::ChUnknown;
 
             // pointer to resPull: workaround because a const pointer is returned
-            std::unique_ptr<const Trk::ResidualPull> resPull{m_pullCalculator->residualPull(
+            std::optional<Trk::ResidualPull> resPull{m_pullCalculator->residualPull(
                 meas, pars, tsit->type(Trk::TrackStateOnSurface::Outlier) ? Trk::ResidualPull::Unbiased : Trk::ResidualPull::Biased)};
             if (!resPull) {
                 ATH_MSG_DEBUG(" calculation of residual/pull failed !!!!! ");
@@ -1139,8 +1139,8 @@ namespace Muon {
                 ATH_MSG_DEBUG("updated competing ROT");
                 info.cleanedCompROT = std::move(updatedCompRot);
                 if (info.cleanedCompROT->associatedSurface() != meas->associatedSurface()) {
-                     std::unique_ptr<Trk::TrackParameters> exPars = m_extrapolator->extrapolate(ctx, 
-                                                                        *pars, info.cleanedCompROT->associatedSurface(), 
+                     std::unique_ptr<Trk::TrackParameters> exPars = m_extrapolator->extrapolate(ctx,
+                                                                        *pars, info.cleanedCompROT->associatedSurface(),
                                                                         Trk::anyDirection, false, Trk::muon);
                     if (!exPars) {
                         ATH_MSG_WARNING("Update of comp rot parameters failed, keeping old ones");
@@ -1332,7 +1332,7 @@ namespace Muon {
                 double fakePull = 1000. * nhits.neta;
                 if (!chambersToBeRemoved.count(chit->first)) {
                     // just add it
-                    state.chambersToBeRemoved.push_back(std::make_pair(fakePull, chit->first));
+                    state.chambersToBeRemoved.emplace_back(fakePull, chit->first);
                     chambersToBeRemoved.insert(chit->first);
                 } else {
                     // replace existing entry if new one has larger Pull
@@ -1361,7 +1361,7 @@ namespace Muon {
                 double fakePull = 1000. * nhits.nphi;
                 if (!chambersToBeRemovedPhi.count(chit->first)) {
                     // just add it
-                    state.chambersToBeRemovedPhi.push_back(std::make_pair(fakePull, chit->first));
+                    state.chambersToBeRemovedPhi.emplace_back(fakePull, chit->first);
                     chambersToBeRemovedPhi.insert(chit->first);
                 } else {
                     // replace existing entry if new one has larger pull
@@ -1439,7 +1439,7 @@ namespace Muon {
                 } else {
                     if (msgLvl(MSG::DEBUG)) msg() << MSG::DEBUG << "  large pull sum => removing";
                     if (!chambersToBeRemovedSet.count(cit->first)) {
-                        chambersToBeRemoved.push_back(std::make_pair(avePull, cit->first));
+                        chambersToBeRemoved.emplace_back(avePull, cit->first);
                         chambersToBeRemovedSet.insert(cit->first);
                     }
                 }
@@ -1457,7 +1457,7 @@ namespace Muon {
             for (; cit != cit_end; ++cit) {
                 double avePull = cit->second.pullSum / cit->second.nhits;
                 if (!chambersToBeRemovedSet.count(cit->first)) {
-                    chambersToBeRemoved.push_back(std::make_pair(avePull, cit->first));
+                    chambersToBeRemoved.emplace_back(avePull, cit->first);
                     chambersToBeRemovedSet.insert(cit->first);
                 }
             }
@@ -1470,7 +1470,7 @@ namespace Muon {
             for (; cit != cit_end; ++cit) {
                 double avePull = cit->second.pullSum / cit->second.nhits;
                 if (!chambersToBeRemovedSet.count(cit->first)) {
-                    chambersToBeRemoved.push_back(std::make_pair(avePull, cit->first));
+                    chambersToBeRemoved.emplace_back(avePull, cit->first);
                     chambersToBeRemovedSet.insert(cit->first);
                 }
             }
@@ -1552,7 +1552,7 @@ namespace Muon {
         const Trk::TrackStates* states = track->trackStateOnSurfaces();
         int nStates = 0;
         if (states) nStates = states->size();
-        ATH_MSG_DEBUG("Calling fit with hits: " << nStates<<std::endl<<m_printer->printMeasurements(*track));       
+        ATH_MSG_DEBUG("Calling fit with hits: " << nStates<<std::endl<<m_printer->printMeasurements(*track));
     }
 
     std::unique_ptr<Trk::Track> MuonTrackCleaner::fitTrack(const EventContext& ctx, Trk::Track& track, Trk::ParticleHypothesis pHyp,

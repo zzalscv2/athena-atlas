@@ -55,7 +55,7 @@ IDAlignMonResidualsAlg::IDAlignMonResidualsAlg( const std::string & name, ISvcLo
   m_residualPullCalculator = ToolHandle<Trk::IResidualPullCalculator>(
     "Trk::ResidualPullCalculator/ResidualPullCalculator");
   m_hitQualityTool = ToolHandle<IInDetAlignHitQualSelTool>("");
- 
+
   declareProperty("CheckRate"                 , m_checkrate=1000);
   declareProperty("ITRT_CalDbTool"            , m_trtcaldbTool);
   declareProperty("iUpdator"                  , m_iUpdator);
@@ -70,7 +70,7 @@ IDAlignMonResidualsAlg::IDAlignMonResidualsAlg( const std::string & name, ISvcLo
 //---------------------------------------------------------------------------------------
 
 IDAlignMonResidualsAlg::~IDAlignMonResidualsAlg() {}
-  
+
 StatusCode IDAlignMonResidualsAlg::initialize()
 {
   //initialize tools and services
@@ -82,13 +82,13 @@ StatusCode IDAlignMonResidualsAlg::initialize()
   }
   else
     ATH_MSG_DEBUG("Successfully initialized tools/services");
-  
+
   /** Get TRTCalDbTool */
   ATH_CHECK( m_trtcaldbTool.retrieve() );
-  
+
   ATH_CHECK( m_tracksName.initialize() );
   ATH_CHECK( m_tracksKey.initialize() );
-  
+
   m_pixResidualX = Monitored::buildToolMap<int>(m_tools, "PixResidualX", m_nSiBlayers);
   m_pixResidualY = Monitored::buildToolMap<int>(m_tools, "PixResidualY", m_nSiBlayers);
   m_pixPullX = Monitored::buildToolMap<int>(m_tools, "PixPullX", m_nSiBlayers);
@@ -125,7 +125,7 @@ StatusCode IDAlignMonResidualsAlg::initialize()
   m_trtECResVsEta= Monitored::buildToolMap<int>(m_tools, "TRTResVsEtaEC", m_nTRTEClayers);
   m_trtECResVsPhiSec= Monitored::buildToolMap<int>(m_tools, "TRTResVsPhiEC", m_nTRTEClayers);
   m_trtECLRVsPhiSec= Monitored::buildToolMap<int>(m_tools, "TRTLRVsPhiEC", m_nTRTEClayers);
-   
+
   return AthMonitorAlgorithm::initialize();
 }
 
@@ -138,7 +138,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 
   // For histogram naming
   auto residualGroup = getGroup("Residuals");
-  
+
   //counters
   bool hasBeenCalledThisEvent=false;
   float mu = 0.;
@@ -153,7 +153,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
   }
   else
     mu = -999;
-  
+
   if (m_extendedPlots){
     fill("residualGroup", mu_m);
   }
@@ -199,7 +199,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 
     int nHits =  0;//counts number of tsos from which we can define residual/pull
     int nTSOS = -1;//counts all TSOS on the track
-    
+
     //looping over the hits
     for (const Trk::TrackStateOnSurface* tsos : *trksItr->trackStateOnSurfaces()) {
 
@@ -223,7 +223,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	ATH_MSG_DEBUG("Skipping TSOS " << nTSOS << " because it is an outlier (or the first TSOS on the track)");
 	continue;
       }
-      
+
       const Trk::MeasurementBase* mesh =tsos->measurementOnTrack();
        ATH_MSG_DEBUG(
         " --> Defined hit measurementOnTrack() for hit: " << nTSOS << "/" << trksItr->trackStateOnSurfaces()->size() << " of track " <<
@@ -271,13 +271,13 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       int sctSide = 99;
       int   modEta = 9999;
       int   modPhi = 9999;
-       
+
       const Identifier & hitId = hit->identify();
       ATH_MSG_DEBUG("Defining hit Identifier ");
       if (m_idHelper->is_trt(hitId)) detType = 2;
       else if (m_idHelper->is_sct(hitId)) detType = 1;
       else  detType = 0;
-  
+
 
       //TRT hits: detType = 2
       if (detType == 2) {
@@ -313,9 +313,10 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
         float predictR = trackParameterUnbiased->parameters()[Trk::locR];
 
         const Trk::MeasurementBase* mesh = tsos->measurementOnTrack();
-        std::unique_ptr<Trk::ResidualPull> residualPull = m_residualPullCalculator->residualPull(mesh,
-                                                                                       trackParameterUnbiased.get(),
-                                                                                       Trk::ResidualPull::Unbiased);
+        std::optional<Trk::ResidualPull> residualPull =
+            m_residualPullCalculator->residualPull(mesh,
+                                                   trackParameterUnbiased.get(),
+                                                   Trk::ResidualPull::Unbiased);
 
         if (residualPull) {
           pullR = residualPull->pull()[Trk::locR];
@@ -352,7 +353,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       }
       else {//have identified pixel or SCT hit
 	ATH_MSG_DEBUG("** fillHistograms() ** Hit is pixel or SCT, type: " << detType);
-	
+
 	if(m_doHitQuality) {
 	  ATH_MSG_DEBUG("applying hit quality cuts to Silicon hit...");
 
@@ -415,7 +416,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  }
 	  else
 	    ATH_MSG_DEBUG("biased residuals found ok");
-	  
+
 	  biasedResidualX = (float)biasedResXY[0];
 	  biasedResidualY = (float)biasedResXY[1];
 
@@ -423,7 +424,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  ATH_MSG_DEBUG("No TrackParameters associated with Si TrkSurface "<< nTSOS << " - Hit is probably an outlier");
       }
 
-  
+
       //--------------------------------------------
       //
       // Filling Residual Histograms for Pixel and SCT
@@ -453,7 +454,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       auto lb_m    = Monitored::Scalar<int>( "m_lb", lb );
       auto layerDisk_m = Monitored::Scalar<float>("m_layerDisk", layerDisk);
       auto layerDisk_si_m = Monitored::Scalar<float>("m_layerDisk_si", 0);
-  
+
       if (detType==0) {//filling pixel histograms
 	ATH_MSG_DEBUG(" This is a PIXEL hit " << hitId  << " - filling histograms");
 
@@ -463,7 +464,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	if(barrelEC==0){//filling pixel barrel histograms
 	  int ModEtaShift[4] = {0, 30, 53, 76};
           int ModPhiShift[4] = {0, 24, 56, 104};
- 
+
 	  //common Si plots
 	  si_b_residualx_m = residualX;
 	  fill(residualGroup, si_b_residualx_m);
@@ -501,7 +502,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  fill(m_tools[m_pixResidualYvsEta[layerDisk]], modEta_m, residualY_m );
 	  fill(m_tools[m_pixResidualXvsPhi[layerDisk]], modPhi_m, residualX_m );
 	  fill(m_tools[m_pixResidualYvsPhi[layerDisk]], modPhi_m, residualY_m );
-	  
+
 	  auto residualX_barrel_m = Monitored::Scalar<float>( "m_residualX_barrel", residualX);
 	  auto residualY_barrel_m = Monitored::Scalar<float>( "m_residualY_barrel", residualY);
 	  auto modPhiShift_barrel_m = Monitored::Scalar<int>( "m_modPhiShift_barrel", modPhi + ModPhiShift[layerDisk] );
@@ -525,7 +526,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  fill(residualGroup, layerDisk_si_m, si_eca_pullX_m);
 	  si_eca_pullY_m = pullY;
 	  fill(residualGroup, layerDisk_si_m, si_eca_pullY_m);
-	  	  
+
 	  //Pixel Residual plots
 	  auto pix_eca_residualx_m = Monitored::Scalar<float>( "m_pix_eca_residualx", residualX);
 	  fill(residualGroup, pix_eca_residualx_m);
@@ -544,7 +545,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  fill(m_tools[m_pixECAResidualY[layerDisk]], modPhi_m, pix_eca_residualy_m);
 	  fill(residualGroup, modPhiShift_eca_m, residualX_eca_m);
 	  fill(residualGroup, modPhiShift_eca_m, residualY_eca_m);
-	  
+
 	}
 	else if(barrelEC==-2){
 	  int ModPhiShift[3] = {0, 55, 110};
@@ -559,7 +560,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  fill(residualGroup, layerDisk_si_m, si_ecc_pullX_m);
 	  si_ecc_pullY_m = pullY;
 	  fill(residualGroup, layerDisk_si_m, si_ecc_pullY_m);
-	  
+
 	  //Pixel Residual plots
 	  auto pix_ecc_residualx_m = Monitored::Scalar<float>( "m_pix_ecc_residualx", residualX);
 	  fill(residualGroup, pix_ecc_residualx_m);
@@ -578,29 +579,29 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  fill(m_tools[m_pixECCResidualY[layerDisk]], modPhi_m, pix_ecc_residualy_m);
 	  fill(residualGroup, modPhiShift_ecc_m, residualX_ecc_m);
 	  fill(residualGroup, modPhiShift_ecc_m, residualY_ecc_m);
-	  
+
 	}
       }
       else if (detType==1) {//filling SCT histograms
 	si_residualx_m = residualX;
 	fill(residualGroup, si_residualx_m);
-	
+
 	ATH_MSG_DEBUG(" This is an SCT hit " << hitId << " - filling histograms");
-	
+
 	if(barrelEC==0){//filling SCT barrel histograms
 	  int ModPhiShift[4] = {0, 42, 92, 150};
 	  int ModEtaShift[4] = {0, 23, 46, 69};
-	  
+
 	  //common Si plots
 	  si_b_residualx_m = residualX;
 	  fill(residualGroup, si_b_residualx_m);
-	  
+
 	  layerDisk_si_m = 4 + 2 * layerDisk + sctSide;
 	  si_barrel_resX_m = residualX;
 	  fill(residualGroup, layerDisk_si_m, si_barrel_resX_m);
 	  si_barrel_pullX_m = pullX;
 	  fill(residualGroup, layerDisk_si_m, si_barrel_pullX_m);
-	  
+
 	  //SCT Residual plots
 	  auto sct_b_residualx_m = Monitored::Scalar<float>( "m_sct_b_residualx", residualX);
 	  fill(residualGroup, sct_b_residualx_m);
@@ -609,70 +610,70 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  fill(m_tools[m_sctResidualX[layerDisk]], sct_b_residualsx_m);
 	  auto sct_b_pullsx_m = Monitored::Scalar<float>("m_sct_pullsx", pullX);
 	  fill(m_tools[m_sctPullX[layerDisk]], sct_b_pullsx_m);
-	  
+
 	  //Residuals vs Eta and Phi
 	  fill(m_tools[m_sctResidualXvsEta[layerDisk]], modEta_m, residualX_m);
 	  fill(m_tools[m_sctResidualXvsPhi[layerDisk]], modPhi_m, residualX_m);
-	  
+
 	  auto residualX_sct_barrel_m = Monitored::Scalar<float>( "m_residualX_sct_barrel", residualX);
 	  auto modPhiShift_sct_barrel_m = Monitored::Scalar<int>( "m_modPhiShift_sct_barrel", modPhi + ModPhiShift[layerDisk] );
 	  auto modEtaShift_sct_barrel_m = Monitored::Scalar<int>( "m_modEtaShift_sct_barrel", modEta + ModEtaShift[layerDisk] );
 	  fill(residualGroup, modPhiShift_sct_barrel_m, residualX_sct_barrel_m);
 	  fill(residualGroup, modEtaShift_sct_barrel_m, residualX_sct_barrel_m);
-	  
-	  
+
+
 	} else if(barrelEC==2){//nine SCT endcap disks from 0-8
 	  int Nmods = 52;
 	  int gap_sct = 10;
-	  
+
 	  //Common Si plots
 	  layerDisk_si_m = 3 + 2 * layerDisk + sctSide;
 	  si_eca_resX_m = residualX;
 	  fill(residualGroup, layerDisk_si_m, si_eca_resX_m);
 	  si_eca_pullX_m = pullX;
 	  fill(residualGroup, layerDisk_si_m, si_eca_pullX_m);
-	  
+
 	  //SCT Residual plots
 	  auto sct_eca_residualx_m = Monitored::Scalar<float>( "m_sct_eca_residualx", residualX);
 	  fill(residualGroup, sct_eca_residualx_m);
 	  auto sct_eca_pullx_m = Monitored::Scalar<float>( "m_sct_eca_pullx", pullX);
 	  fill(residualGroup, sct_eca_pullx_m);
-	  
+
 	  //Residuals vs Eta and Phi
 	  auto residualX_sct_eca_m = Monitored::Scalar<float>( "m_residualX_sct_eca", residualX);
 	  auto modPhiShift_sct_eca_m = Monitored::Scalar<int>( "m_modPhiShift_sct_eca", modPhi + layerDisk * (gap_sct + Nmods) );
 	  fill(residualGroup,  modPhiShift_sct_eca_m, residualX_sct_eca_m);
-	  
+
 	} else if(barrelEC==-2){
 	  int Nmods = 52;
 	  int gap_sct = 10;
-	  
+
 	  //Common Si plots
 	  layerDisk_si_m = 3 + 2 * layerDisk + sctSide;
 	  si_ecc_resX_m = residualX;
 	  fill(residualGroup, layerDisk_si_m, si_ecc_resX_m);
 	  si_ecc_pullX_m = pullX;
 	  fill(residualGroup, layerDisk_si_m, si_ecc_pullX_m);
-	  
+
 	  //SCT Residual plots
 	  auto sct_ecc_residualx_m = Monitored::Scalar<float>( "m_sct_ecc_residualx", residualX);
 	  fill(residualGroup, sct_ecc_residualx_m);
 	  auto sct_ecc_pullx_m = Monitored::Scalar<float>( "m_sct_ecc_pullx", pullX);
 	  fill(residualGroup, sct_ecc_pullx_m);
-	  
+
 	  //Residuals vs Eta and Phi
 	  auto residualX_sct_ecc_m = Monitored::Scalar<float>( "m_residualX_sct_ecc", residualX);
 	  auto modPhiShift_sct_ecc_m = Monitored::Scalar<int>( "m_modPhiShift_sct_ecc", modPhi + layerDisk * (gap_sct + Nmods) );
 	  fill(residualGroup,  modPhiShift_sct_ecc_m, residualX_sct_ecc_m);
 
-	} 
+	}
       }// end of SCT
       ++nHits;
       //++nHitsEvent;
     }//end of loop on track surfaces
   } // end of loop on tracks
 
-  
+
   ATH_MSG_DEBUG("Number of tracks : "<< nTracks);
 
   return StatusCode::SUCCESS;
@@ -715,7 +716,7 @@ StatusCode  IDAlignMonResidualsAlg::getSiResiduals(const Trk::Track* track, cons
 
       ATH_MSG_DEBUG(" got hit and track parameters ");
 
-      std::unique_ptr<Trk::ResidualPull> residualPull = nullptr;
+      std::optional<Trk::ResidualPull> residualPull = std::nullopt;
       if(unBias) residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals.get(), Trk::ResidualPull::Unbiased);
       else residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals.get(), Trk::ResidualPull::Biased);
 
@@ -773,7 +774,7 @@ StatusCode  IDAlignMonResidualsAlg::getSiResiduals(const Trk::Track* track, cons
 
 void IDAlignMonResidualsAlg::fillTRTHistograms(int barrel_ec, int layer_or_wheel, int phi_module, float predictR, float hitR, float residualR, float pullR, bool isTubeHit, float trketa) const {
   bool LRcorrect = (predictR * hitR > 0);
-  
+
   //Need to correct the TRT residual on the C-side.
   if (barrel_ec == -1) {
     residualR *= -1;
@@ -808,7 +809,7 @@ void IDAlignMonResidualsAlg::fillTRTHistograms(int barrel_ec, int layer_or_wheel
 
 //Filling barrel histograms
 void IDAlignMonResidualsAlg::fillTRTBarrelHistograms(int barrel_ec, int layer_or_wheel, int phi_module, float predictR, float hitR, float residualR, float pullR, bool LRcorrect, bool isTubeHit, float trketa) const {
-  
+
   //Loop over the barrel sides
   for (unsigned int side = 0; side < 3; ++side) {
     bool doFill = false;
@@ -826,7 +827,7 @@ void IDAlignMonResidualsAlg::fillTRTBarrelHistograms(int barrel_ec, int layer_or
     fill(m_tools[m_trtBResidualR[side]], trt_b_residualR_m);
     auto trt_b_pullR_m = Monitored::Scalar<float>( "m_trt_b_pullR", pullR);
     fill(m_tools[m_trtBPullR[side]], trt_b_pullR_m);
-    
+
     if (!isTubeHit) {
       auto trt_b_residualR_notube_m = Monitored::Scalar<float>( "m_trt_b_residualR_notube", residualR);
       fill(m_tools[m_trtBResidualRNoTube[side]], trt_b_residualR_notube_m);
@@ -848,7 +849,7 @@ void IDAlignMonResidualsAlg::fillTRTBarrelHistograms(int barrel_ec, int layer_or
     fill(m_tools[m_trtBResVsPhiSec[side][layer_or_wheel]], trt_b_PhiSec_m, trt_b_residualR_m);
     trt_b_lrVsPhiSec_m = LRcorrect;
     fill(m_tools[m_trtBLRVsPhiSec[side][layer_or_wheel]], trt_b_PhiSec_m, trt_b_lrVsPhiSec_m);
- 
+
   }//Over sides
 
   return;
@@ -861,7 +862,7 @@ void IDAlignMonResidualsAlg::fillTRTEndcapHistograms(int barrel_ec, int phi_modu
     else if (endcap && barrel_ec == -2) doFill = true;
 
     if (!doFill) continue;
-    
+
     auto trt_ec_PredictedR_m = Monitored::Scalar<float>( "m_trt_ec_PredictedR", predictR);
     fill(m_tools[m_trtECPredictedR[endcap]], trt_ec_PredictedR_m);
     auto trt_ec_MeasuredR_m = Monitored::Scalar<float>( "m_trt_ec_MeasuredR", hitR);
@@ -870,24 +871,24 @@ void IDAlignMonResidualsAlg::fillTRTEndcapHistograms(int barrel_ec, int phi_modu
     fill(m_tools[m_trtECResidualR[endcap]], trt_ec_residualR_m);
     auto trt_ec_pullR_m = Monitored::Scalar<float>( "m_trt_ec_pullR", pullR);
     fill(m_tools[m_trtECPullR[endcap]], trt_ec_pullR_m);
-    
+
     if (!isTubeHit) {
       auto trt_ec_pullR_notube_m = Monitored::Scalar<float>( "m_trt_ec_pullR_notube", pullR);
       fill(m_tools[m_trtECPullRNoTube[endcap]], trt_ec_pullR_notube_m);
       auto trt_ec_residualR_notube_m = Monitored::Scalar<float>( "m_trt_ec_residualR_notube", residualR);
       fill(m_tools[m_trtECResidualRNoTube[endcap]], trt_ec_residualR_notube_m);
     }
-    
+
     auto trt_ec_lr_m = Monitored::Scalar<float>( "m_trt_ec_lr", 0.0);
     if (LRcorrect && !isTubeHit)       trt_ec_lr_m = 0.5;
     else if (LRcorrect && isTubeHit)   trt_ec_lr_m = 1.5;
     else if (!LRcorrect && !isTubeHit) trt_ec_lr_m = 2.5;
     else if (!LRcorrect && isTubeHit)  trt_ec_lr_m = 3.5;
     fill(m_tools[m_trtECLR[endcap]], trt_ec_lr_m);
-    
+
     auto trt_ec_aveResVsTrackEta_m = Monitored::Scalar<float>( "m_trt_ec_aveResVsTrackEta", trketa);
     fill(m_tools[m_trtECResVsEta[endcap]], trt_ec_aveResVsTrackEta_m, trt_ec_residualR_m);
-    
+
     auto trt_ec_phi_m = Monitored::Scalar<float>( "m_trt_ec_phi", phi_module);
     fill(m_tools[m_trtECResVsPhiSec[endcap]], trt_ec_phi_m, trt_ec_residualR_m);
     auto trt_ec_lrVsPhiSec_m = Monitored::Scalar<float>( "m_trt_ec_lrVsPhiSec", LRcorrect);
@@ -953,7 +954,7 @@ std::unique_ptr <Trk::TrackParameters> IDAlignMonResidualsAlg::getUnbiasedTrackP
 	OtherSideUnbiasedTrackParams = m_iUpdator->removeFromState(*(OtherModuleSideHit->trackParameters()),
 	 							   OtherModuleSideHit->measurementOnTrack()->localParameters(),
 	 							   OtherModuleSideHit->measurementOnTrack()->localCovariance());
-	
+
 	if (OtherSideUnbiasedTrackParams) {
 	  ATH_MSG_VERBOSE("Unbiased OtherSideTrackParameters: " << *OtherSideUnbiasedTrackParams);
 
@@ -1021,7 +1022,7 @@ std::unique_ptr <Trk::TrackParameters> IDAlignMonResidualsAlg::getUnbiasedTrackP
      ->removeFromState(*PropagatedTrackParams,
                        tsos->measurementOnTrack()->localParameters(),
                        tsos->measurementOnTrack()->localCovariance());
-  
+
   if (UnbiasedTrackParams) {
     if(surfaceID.is_valid() ) ATH_MSG_VERBOSE("Unbiased residual. Removing original Hit " << m_idHelper->show_to_string(surfaceID,nullptr,'/') );
     ATH_MSG_VERBOSE("Unbiased Trackparameters: " << *UnbiasedTrackParams);
@@ -1050,14 +1051,14 @@ StatusCode IDAlignMonResidualsAlg::setupTools()
   //Get the PIX manager from the detector store
   ATH_CHECK(detStore()->retrieve(m_PIX_Mgr,m_Pixel_Manager));
   ATH_MSG_DEBUG("Initialized PixelManager");
-  
+
   //Get the SCT manager from the detector store
   ATH_CHECK(detStore()->retrieve(m_SCT_Mgr, m_SCT_Manager));
   ATH_MSG_DEBUG("Initialized SCTManager");
-  
+
   ATH_CHECK(detStore()->retrieve(m_pixelID, "PixelID"));
   ATH_MSG_DEBUG("Initialized PixelIDHelper");
-  
+
   ATH_CHECK(detStore()->retrieve(m_sctID, "SCT_ID"));
   ATH_MSG_DEBUG("Initialized SCTIDHelper");
 
@@ -1069,7 +1070,7 @@ StatusCode IDAlignMonResidualsAlg::setupTools()
 
   ATH_CHECK(m_iUpdator.retrieve());
   ATH_MSG_DEBUG("Retrieved iUpdator tool " << m_iUpdator);
-  
+
   if (m_propagator.retrieve().isFailure()) {
     ATH_MSG_WARNING("Can not retrieve Propagator tool of type " << m_propagator.typeAndName());
     return StatusCode::FAILURE;

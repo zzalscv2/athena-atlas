@@ -2,6 +2,8 @@
   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <cmath>
+
 #include "MuonSegmentT0FillerTool.h"
 #include "TrkSegment/Segment.h"
 #include "MuonSegment/MuonSegment.h"
@@ -102,11 +104,11 @@ void MuonSegmentT0FillerTool::MuonboyT0CSCSegment(const Muon::MuonSegment* pMuon
        if (Alternative_t0Error < 0.){
          Alternative_t0Error = 0. ;
        }else{
-         Alternative_t0Error = sqrt(Alternative_t0Error) ;
+         Alternative_t0Error = std::sqrt(Alternative_t0Error) ;
        }
      }else if (Alternative_ThereIsaCscTimeEarly == 1 && Alternative_ThereIsaCscTimeLate == 0){
        Alternative_t0      = Alternative_LatestEarlyTime       ;
-       Alternative_t0Error = fabs(Alternative_LatestEarlyTime) ;
+       Alternative_t0Error = std::fabs(Alternative_LatestEarlyTime) ;
      }else if (Alternative_ThereIsaCscTimeEarly == 0 && Alternative_ThereIsaCscTimeLate == 1){
        Alternative_t0      = Alternative_EarliestLateTime ;
        Alternative_t0Error = Alternative_EarliestLateTime ;

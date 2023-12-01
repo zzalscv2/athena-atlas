@@ -41,8 +41,8 @@ namespace {
 }  // namespace
 namespace Muon {
     using NewTrackStates = MuonChamberHoleRecoveryTool::NewTrackStates;
-    
-    
+
+
     MuonChamberHoleRecoveryTool::RecoveryState::RecoveryState(const Trk::Track& trk): m_trk{trk} {}
     Trk::TrackStates::const_iterator MuonChamberHoleRecoveryTool::RecoveryState::begin() const{
         return m_trk.trackStateOnSurfaces()->begin();
@@ -50,8 +50,8 @@ namespace Muon {
     Trk::TrackStates::const_iterator MuonChamberHoleRecoveryTool::RecoveryState::end() const {
         return m_trk.trackStateOnSurfaces()->end();
     }
-    const Trk::TrackStateOnSurface* MuonChamberHoleRecoveryTool::RecoveryState::tsos() const { 
-        return m_curr_itr != end() ? (*m_curr_itr) : nullptr; 
+    const Trk::TrackStateOnSurface* MuonChamberHoleRecoveryTool::RecoveryState::tsos() const {
+        return m_curr_itr != end() ? (*m_curr_itr) : nullptr;
     }
     bool MuonChamberHoleRecoveryTool::RecoveryState::nextState() {
         if (!m_nextCalled) {
@@ -84,7 +84,7 @@ namespace Muon {
         }
         return outVec;
     }
-    
+
     MuonChamberHoleRecoveryTool::MuonChamberHoleRecoveryTool(const std::string& ty, const std::string& na, const IInterface* pa) :
         AthAlgTool(ty, na, pa) {
         declareInterface<IMuonHoleRecoveryTool>(this);
@@ -107,7 +107,7 @@ namespace Muon {
         ATH_CHECK(m_key_tgc.initialize(!m_key_tgc.empty()));
         ATH_CHECK(m_key_rpc.initialize(!m_key_rpc.empty()));
 
-        ATH_CHECK(m_cscRotCreator.retrieve(DisableTool{m_key_csc.empty()}));       
+        ATH_CHECK(m_cscRotCreator.retrieve(DisableTool{m_key_csc.empty()}));
 
         ATH_CHECK(m_clusRotCreator.retrieve());
         ATH_CHECK(m_pullCalculator.retrieve());
@@ -116,8 +116,8 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
     bool MuonChamberHoleRecoveryTool::getNextMuonMeasurement(RecoveryState& trkRecov, RecoveryState::CopyTarget target) const {
-        while(trkRecov.nextState()) {           
-            const Trk::TrackParameters* pars = trkRecov.tsos()->trackParameters();            
+        while(trkRecov.nextState()) {
+            const Trk::TrackParameters* pars = trkRecov.tsos()->trackParameters();
             ATH_MSG_VERBOSE("Track parameters "<<(*pars));
             /// Copy all track states inside the MS
             const Trk::Volume& msVol{m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::MuonSpectrometerEntryLayer)};
@@ -126,7 +126,7 @@ namespace Muon {
                 trkRecov.copyState(target);
                 continue;
             }
-            
+
             if (trkRecov.tsos()->type(Trk::TrackStateOnSurface::Hole)) {
                 ATH_MSG_VERBOSE("Skip hole in MS");
                 continue;
@@ -149,14 +149,14 @@ namespace Muon {
         }
         return false;
     }
-    
+
     std::set<Identifier> MuonChamberHoleRecoveryTool::layersOnTrkIds(const Trk::Track& track) const {
         std::set<Identifier> layerIds{};
         for (const Trk::TrackStateOnSurface* tsos: *track.trackStateOnSurfaces()){
             const Trk::MeasurementBase* meas = tsos->measurementOnTrack();
             if (!meas) continue;
             const Identifier measId = m_edmHelperSvc->getIdentifier(*meas);
-            
+
             if (!m_idHelperSvc->isMuon(measId)) continue;
             layerIds.insert(measId);
             layerIds.insert(m_idHelperSvc->layerId(measId));
@@ -175,7 +175,7 @@ namespace Muon {
         ATH_MSG_DEBUG(" performing hole search track " << std::endl
                                                        << m_printer->print(track) << std::endl
                                                        << m_printer->printMeasurements(track));
-        
+
         RecoveryState recovState{track};
         recovState.layersOnTrk = layersOnTrkIds(track);
 
@@ -188,7 +188,7 @@ namespace Muon {
         return newTrack;
     }
     void MuonChamberHoleRecoveryTool::recoverHitsInChamber(const EventContext& ctx, RecoveryState& trkRecov) const {
-        const Muon::MuonStationIndex::ChIndex currStation = m_idHelperSvc->chamberIndex(trkRecov.tsosId);        
+        const Muon::MuonStationIndex::ChIndex currStation = m_idHelperSvc->chamberIndex(trkRecov.tsosId);
         /// Collect all hits in a chamber
         std::set<Identifier> chambInStation{};
         do {
@@ -201,22 +201,22 @@ namespace Muon {
             /// New chamber added
             if (chambInStation.insert(m_idHelperSvc->chamberId(trkRecov.tsosId)).second) {
                 if (m_idHelperSvc->isMdt(trkRecov.tsosId)) {
-                    recoverMdtHits(ctx, trkRecov.tsosId, *trkRecov.tsos()->trackParameters(), 
+                    recoverMdtHits(ctx, trkRecov.tsosId, *trkRecov.tsos()->trackParameters(),
                                    trkRecov.chamberStates, trkRecov.layersOnTrk);
                 } else {
-                    recoverClusterHits(ctx, trkRecov.tsosId, *trkRecov.tsos()->trackParameters(), 
+                    recoverClusterHits(ctx, trkRecov.tsosId, *trkRecov.tsos()->trackParameters(),
                                        trkRecov.chamberStates, trkRecov.layersOnTrk);
                 }
             }
         } while (getNextMuonMeasurement(trkRecov, RecoveryState::CopyTarget::ChamberTrkStates));
         trkRecov.finalizeChamber();
     }
-    void MuonChamberHoleRecoveryTool::recoverMdtHits(const EventContext& ctx, 
+    void MuonChamberHoleRecoveryTool::recoverMdtHits(const EventContext& ctx,
                                                      const Identifier& chId,
                                                      const Trk::TrackParameters& pars,
                                                      NewTrackStates& newStates, std::set<Identifier>& knownLayers) const {
-        
-                
+
+
         std::set<Identifier> chHoles = holesInMdtChamber(ctx, pars.position(), pars.momentum().unit(), chId, knownLayers);
         ATH_MSG_VERBOSE(" chamber " << m_idHelperSvc->toStringChamber(chId) << " has holes " << chHoles.size());
         if (chHoles.empty()) return;
@@ -244,8 +244,8 @@ namespace Muon {
 
             // calibrate Mdt PRD
             const Amg::Vector3D momentum = exPars->momentum();
-            std::unique_ptr<MdtDriftCircleOnTrack> mdtROT{m_mdtRotCreator->createRIO_OnTrack(*mdtPrd, 
-                                                                                             exPars->position(), 
+            std::unique_ptr<MdtDriftCircleOnTrack> mdtROT{m_mdtRotCreator->createRIO_OnTrack(*mdtPrd,
+                                                                                             exPars->position(),
                                                                                              &momentum)};
             if (!mdtROT) continue;
 
@@ -255,13 +255,13 @@ namespace Muon {
             m_mdtRotCreator->updateSign(*mdtROT, side);
 
             /// pointer to resPull
-            std::unique_ptr<const Trk::ResidualPull> resPull{m_pullCalculator->residualPull(mdtROT.get(), 
-                                                                                            exPars.get(), 
-                                                                                            Trk::ResidualPull::Unbiased)};
+            std::optional<const Trk::ResidualPull> resPull{m_pullCalculator->residualPull(mdtROT.get(),
+                                                                                          exPars.get(),
+                                                                                          Trk::ResidualPull::Unbiased)};
             if (!resPull) { continue; }
 
             const double pull = resPull->pull().front();
-            const double radialResidual = std::abs(mdtROT->localParameters()[Trk::locR]) - 
+            const double radialResidual = std::abs(mdtROT->localParameters()[Trk::locR]) -
                                           std::abs(exPars->parameters()[Trk::locR]);
 
             unsigned int hitFlag = 1;
@@ -273,10 +273,10 @@ namespace Muon {
                 hitFlag = 2;  // out of time
 
             ATH_MSG_VERBOSE(__func__<<"() - Recover "<<m_printer->print(*mdtROT)<<" pull: "<<pull<<" hitFlag: "<<hitFlag);
-            std::unique_ptr<Trk::TrackStateOnSurface> tsos = MuonTSOSHelper::createMeasTSOS(std::move(mdtROT), 
+            std::unique_ptr<Trk::TrackStateOnSurface> tsos = MuonTSOSHelper::createMeasTSOS(std::move(mdtROT),
                                                                                             std::move(exPars),
-                                                                                        (hitFlag != 0 || !m_addMeasurements) ? 
-                                                                                                Trk::TrackStateOnSurface::Outlier : 
+                                                                                        (hitFlag != 0 || !m_addMeasurements) ?
+                                                                                                Trk::TrackStateOnSurface::Outlier :
                                                                                                 Trk::TrackStateOnSurface::Measurement);
 
             if (!addedState) {
@@ -290,17 +290,17 @@ namespace Muon {
                     ATH_MSG_DEBUG("Two hits recorded for the same tube "<<std::endl<<
                                  " *** current: "<<m_printer->print(*tsos->measurementOnTrack())<<std::endl<<
                                  " *** previous: "<<m_printer->print(*prevDC));
-                    std::unique_ptr<const Trk::ResidualPull> prevPullObj{m_pullCalculator->residualPull(prevDC, 
-                                                                                                        tsos->trackParameters(), 
-                                                                                                        Trk::ResidualPull::Unbiased)};
+                    std::optional<Trk::ResidualPull> prevPullObj{m_pullCalculator->residualPull(prevDC,
+                                                                                                tsos->trackParameters(),
+                                                                                                Trk::ResidualPull::Unbiased)};
                     const double prevPull = prevPullObj->pull().front();
                     /// Overwrite the previous drift circle if the pull of this one is better or it's an outlier
-                    if (std::abs(pull) < std::abs(prevPull) || 
-                        (tsos->type(Trk::TrackStateOnSurface::Measurement) && 
+                    if (std::abs(pull) < std::abs(prevPull) ||
+                        (tsos->type(Trk::TrackStateOnSurface::Measurement) &&
                         newStates.back()->type(Trk::TrackStateOnSurface::Outlier))) {
                         newStates.back() = std::move(tsos);
                     }
-            
+
                 }
             }
             chHoles.erase(mdtPrd->identify());
@@ -316,16 +316,16 @@ namespace Muon {
             }
             ATH_MSG_VERBOSE(__func__<<"() - Add hole "<<m_idHelperSvc->toString(hole));
             newStates.emplace_back(MuonTSOSHelper::createHoleTSOS(std::move(exPars)));
-        }    
+        }
     }
-    void MuonChamberHoleRecoveryTool::recoverClusterHits(const EventContext& ctx, 
+    void MuonChamberHoleRecoveryTool::recoverClusterHits(const EventContext& ctx,
                                                          const Identifier& chambId,
                                                          const Trk::TrackParameters& pars,
                                                          NewTrackStates& states, std::set<Identifier>& knownLayers) const {
 
         NewTrackStates recovered{};
         if (m_idHelperSvc->isRpc(chambId)) {
-            recovered = recoverChamberClusters(ctx, m_key_rpc, chambId, pars, knownLayers);        
+            recovered = recoverChamberClusters(ctx, m_key_rpc, chambId, pars, knownLayers);
         } else if (m_idHelperSvc->isTgc(chambId)) {
             recovered = recoverChamberClusters(ctx, m_key_tgc, chambId, pars, knownLayers);
         } else if (m_idHelperSvc->isCsc(chambId)) {
@@ -335,12 +335,12 @@ namespace Muon {
         } else if (m_idHelperSvc->issTgc(chambId)) {
             recovered = recoverChamberClusters(ctx, m_key_stgc, chambId, pars, knownLayers);
         }
-        states.insert(states.end(), std::make_move_iterator(recovered.begin()), 
+        states.insert(states.end(), std::make_move_iterator(recovered.begin()),
                                     std::make_move_iterator(recovered.end()));
     }
-    void MuonChamberHoleRecoveryTool::createHoleTSOSsForClusterChamber(const Identifier& detElId, 
-                                                                      const EventContext& ctx, 
-                                                                      const Trk::TrackParameters& pars, 
+    void MuonChamberHoleRecoveryTool::createHoleTSOSsForClusterChamber(const Identifier& detElId,
+                                                                      const EventContext& ctx,
+                                                                      const Trk::TrackParameters& pars,
                                                                       std::set<Identifier>& layIds,
                                                                       NewTrackStates& states) const {
         ATH_MSG_VERBOSE(" performing holes search in chamber " << m_idHelperSvc->toString(detElId));
@@ -374,10 +374,10 @@ namespace Muon {
 
     std::set<Identifier> MuonChamberHoleRecoveryTool::holesInMdtChamber(const EventContext& ctx, const Amg::Vector3D& position, const Amg::Vector3D& direction,
                                                                         const Identifier& chId, const std::set<Identifier>& tubeIds) const {
-        
+
         SG::ReadCondHandle<Muon::MuonIntersectGeoData> interSectSvc{m_chamberGeoKey,ctx};
         if (!interSectSvc.isValid())   {
-            ATH_MSG_ERROR("Failed to retrieve chamber intersection service");            
+            ATH_MSG_ERROR("Failed to retrieve chamber intersection service");
             throw std::runtime_error("No chamber intersection service");
         }
         const MuonGM::MdtReadoutElement* readoutEle = interSectSvc->detMgr()->getMdtReadoutElement(chId);
@@ -396,16 +396,16 @@ namespace Muon {
             if (std::abs(tint.rIntersect) > readoutEle->innerTubeRadius() || tint.xIntersect > -10.) {
                 ATH_MSG_VERBOSE(" not counted");
                 continue;
-            } 
+            }
             // check whether there is a hit in this tube
             ATH_MSG_VERBOSE(" hole tube");
             holes.insert(tint.tubeId);
-            
+
         }
         return holes;
     }
-    template <class Prd> std::vector<const Prd*> MuonChamberHoleRecoveryTool::loadPrepDataHits(const EventContext& ctx, 
-                                                                                               const SG::ReadHandleKey<MuonPrepDataContainerT<Prd>>& key, 
+    template <class Prd> std::vector<const Prd*> MuonChamberHoleRecoveryTool::loadPrepDataHits(const EventContext& ctx,
+                                                                                               const SG::ReadHandleKey<MuonPrepDataContainerT<Prd>>& key,
                                                                                                const std::set<Identifier>& gasGapIds) const {
         std::vector<const Prd*> collectedHits{};
         if (key.empty()) {
@@ -419,8 +419,8 @@ namespace Muon {
         }
         /// Create a subset of Identifiers
         std::set<IdentifierHash> chamberIds{};
-        std::transform(gasGapIds.begin(), gasGapIds.end(), 
-                            std::inserter(chamberIds, chamberIds.end()), 
+        std::transform(gasGapIds.begin(), gasGapIds.end(),
+                            std::inserter(chamberIds, chamberIds.end()),
                                 [this](const Identifier& id){
                                     return m_idHelperSvc->moduleHash(id);
                                 });
@@ -441,7 +441,7 @@ namespace Muon {
                 }
             }
         }
-        /// Sort the Mdt prepdatas per Identifier as there's the possibily 2 DC can exist for the 
+        /// Sort the Mdt prepdatas per Identifier as there's the possibily 2 DC can exist for the
         /// same channel
         if constexpr(std::is_same<Prd, MdtPrepData>::value) {
             std::sort(collectedHits.begin(), collectedHits.end(), [](const Prd* a, const Prd* b){
@@ -450,15 +450,15 @@ namespace Muon {
         }
         return collectedHits;
     }
-    std::set<Identifier> MuonChamberHoleRecoveryTool::getHoleLayerIds(const Identifier& detElId, 
+    std::set<Identifier> MuonChamberHoleRecoveryTool::getHoleLayerIds(const Identifier& detElId,
                                                                       const std::set<Identifier>& knownLayers) const {
          std::set<Identifier> holeGaps{};
          if (m_idHelperSvc->isMdt(detElId)) {
-            const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};            
+            const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
             for (int ml = 1; ml <= idHelper.numberOfMultilayers(detElId); ++ml) {
-                for (int layer = idHelper.tubeLayerMin(detElId); 
+                for (int layer = idHelper.tubeLayerMin(detElId);
                          layer <= idHelper.tubeLayerMax(detElId); ++layer) {
-                    const Identifier layerId = idHelper.channelID(detElId, ml, layer, 1); 
+                    const Identifier layerId = idHelper.channelID(detElId, ml, layer, 1);
                     if (!knownLayers.count(layerId)) holeGaps.insert(layerId);
                 }
             }
@@ -468,26 +468,26 @@ namespace Muon {
                 for (int gap = idHelper.gasGapMin(); gap <= idHelper.gasGapMax(); ++gap) {
                     const Identifier layerId = idHelper.channelID(detElId, ml, gap, 1);
                     if (!knownLayers.count(layerId)) holeGaps.insert(layerId);
-                }            
+                }
             }
          } else if (m_idHelperSvc->issTgc(detElId)) {
             const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
             using channelType = sTgcIdHelper::sTgcChannelTypes;
             for (int ml : {1, 2}) {
-                for (const channelType chType : {channelType::Strip, 
-                                                 channelType::Pad, 
+                for (const channelType chType : {channelType::Strip,
+                                                 channelType::Pad,
                                                  channelType::Wire}){
-                    for (int gap = idHelper.gasGapMin(); 
+                    for (int gap = idHelper.gasGapMin();
                              gap <= idHelper.gasGapMax(); ++gap) {
-                        const Identifier layerId = idHelper.channelID(detElId, ml, gap, chType, 1); 
+                        const Identifier layerId = idHelper.channelID(detElId, ml, gap, chType, 1);
                         if (!knownLayers.count(layerId)) holeGaps.insert(layerId);
                     }
                 }
             }
          } else if (m_idHelperSvc->isTgc(detElId)) {
-            const TgcIdHelper& idHelper = m_idHelperSvc->tgcIdHelper();        
+            const TgcIdHelper& idHelper = m_idHelperSvc->tgcIdHelper();
             const int gapMax{idHelper.gasGapMax(detElId)};
-            for (int gasgap = idHelper.gasGapMin(detElId); 
+            for (int gasgap = idHelper.gasGapMin(detElId);
                      gasgap < gapMax; ++gasgap){
                 for (int measPhi: {0,1}) {
                     /// the second gas gap of the three layer stations does not have a phi measurement
@@ -500,9 +500,9 @@ namespace Muon {
             const RpcIdHelper& idHelper = m_idHelperSvc->rpcIdHelper();
             const int doubZ{idHelper.doubletZ(detElId)};
             const int gapMax{idHelper.gasGapMax(detElId)};
-            for (int phiGap = idHelper.doubletPhi(detElId); 
+            for (int phiGap = idHelper.doubletPhi(detElId);
                      phiGap <= idHelper.doubletPhiMax(); ++phiGap) {
-                for (int gap = idHelper.gasGapMin(detElId); 
+                for (int gap = idHelper.gasGapMin(detElId);
                          gap <= gapMax; ++gap) {
                     for (int measPhi: {0, 1}) {
                         const Identifier layerId = idHelper.channelID(detElId, doubZ, phiGap, gap, measPhi, 1);
@@ -530,12 +530,12 @@ namespace Muon {
         const std::set<Identifier> missingLayers = getHoleLayerIds(detElId, knownLayers);
         std::vector<const Prd*> prdCandidates = loadPrepDataHits(ctx, prdKey, missingLayers);
         //// Next extrapolate once the TrackParameters onto the surfaces
-        using LayerParsMap = std::map<Identifier, std::unique_ptr<Trk::TrackParameters>>; 
+        using LayerParsMap = std::map<Identifier, std::unique_ptr<Trk::TrackParameters>>;
         LayerParsMap parsAtSurfMap{};
         for (const Identifier& holeId : missingLayers) {
             const Trk::TrkDetElementBase* detEl = getDetectorElement(ctx, holeId);
             const Trk::Surface& surf{detEl->surface(holeId)};
-            std::unique_ptr<Trk::TrackParameters> pars = m_extrapolator->extrapolateDirectly(ctx, parsInChamb, surf, 
+            std::unique_ptr<Trk::TrackParameters> pars = m_extrapolator->extrapolateDirectly(ctx, parsInChamb, surf,
                                                                                              Trk::anyDirection, false, Trk::muon);
             if (!pars) {
                 ATH_MSG_VERBOSE("Surface layer "<<m_idHelperSvc->toStringGasGap(holeId)<<" cannot be reached");
@@ -550,7 +550,7 @@ namespace Muon {
             bool inbounds{false};
             if constexpr(std::is_same<Prd, MMPrepData>::value) {
                 inbounds = static_cast<const MuonGM::MMReadoutElement*>(detEl)->insideActiveBounds(holeId, locExPos, 10.,10.);
-            } else { 
+            } else {
                 inbounds = surf.insideBounds(locExPos, 10., 10.);
             }
             /// The hit is out of bounds --> continue
@@ -558,7 +558,7 @@ namespace Muon {
                 ATH_MSG_VERBOSE("Extrapolation to layer "<<m_idHelperSvc->toStringGasGap(holeId)
                               <<" is outside of the chamber "<<Amg::toString(locExPos, 2));
                 continue;
-            }                                                                                
+            }
             parsAtSurfMap[holeId] = std::move(pars);
         }
         ClusterLayerMap bestClusterInLay;
@@ -571,14 +571,14 @@ namespace Muon {
                 continue;
             }
             const std::unique_ptr<Trk::TrackParameters>& parsInLay{pars_itr->second};
-            std::unique_ptr<MuonClusterOnTrack> calibClus{};                
+            std::unique_ptr<MuonClusterOnTrack> calibClus{};
             if constexpr(std::is_same<Prd, CscPrepData>::value) {
-                calibClus.reset(m_cscRotCreator->createRIO_OnTrack(*hit, 
-                                                                   parsInLay->position(), 
+                calibClus.reset(m_cscRotCreator->createRIO_OnTrack(*hit,
+                                                                   parsInLay->position(),
                                                                    parsInLay->momentum().unit()));
             } else {
-                calibClus.reset(m_clusRotCreator->createRIO_OnTrack(*hit, 
-                                                                    parsInLay->position(), 
+                calibClus.reset(m_clusRotCreator->createRIO_OnTrack(*hit,
+                                                                    parsInLay->position(),
                                                                     parsInLay->momentum().unit()));
             }
             if (!calibClus) continue;
@@ -589,28 +589,28 @@ namespace Muon {
                     /// Compare the pad & local positions
                     const Amg::Vector2D locExPos{parsInLay->parameters()[Trk::locX],
                                                  parsInLay->parameters()[Trk::locY]};
-            
+
                     const MuonGM::MuonPadDesign* pad = hit->detectorElement()->getPadDesign(hit->identify());
                     const Amg::Vector2D padDist = pad->distanceToPad(locExPos, idHelper.channel(hit->identify()));
-                    
+
                     /// Calculate the pull by hand
                     const double xCov = std::hypot(Amg::error(*parsInLay->covariance(), Trk::locX),
                                                    Amg::error(hit->localCovariance(), Trk::locX));
                     /// For one reason or another, the pads have 1D covariances
                     const double yCov =Amg::error(*parsInLay->covariance(), Trk::locY);
-                    
+
                     const double xPull = padDist.x() / xCov;
                     const double yPull = padDist.y() / yCov;
-                    
+
                     ATH_MSG_VERBOSE(__func__<<"() - check "<<m_printer->print(*calibClus)
                                  <<" diff "<<Amg::toString(padDist, 2)
                                  <<" covariance: ("<<xCov<<", "<<yCov<<")"
                                  <<" pull: ("<<xPull<<","<<yPull<<").");
-                    
+
                     /// Check whether the pull is reasonable
                     if (xPull > m_associationPullCutEta || yPull > m_associationPullCutPhi) continue;
                     const double pull = std::hypot(xPull, yPull);
-                    
+
                     /// Assign the best pad onto the track
                     PullCluster& bestClus = bestClusterInLay[layId];
                     if (bestClus.pull < pull) continue;
@@ -618,31 +618,33 @@ namespace Muon {
                     bestClus.clus = std::move(calibClus);
                     bestClus.pars = parsInLay->uniqueClone();
                     continue;
-                } 
+                }
             }
 
             /// Calculate the track pull
-            std::unique_ptr<const Trk::ResidualPull> resPull{m_pullCalculator->residualPull(calibClus.get(),
-                                                                                            parsInLay.get(), 
-                                                                                            Trk::ResidualPull::Unbiased)};
-            if (!resPull || resPull->pull().empty()) { continue; }
+            std::optional<const Trk::ResidualPull> resPull{
+                m_pullCalculator->residualPull(calibClus.get(), parsInLay.get(),
+                                               Trk::ResidualPull::Unbiased)};
+            if (!resPull || resPull->pull().empty()) {
+                continue;
+            }
 
             const double pull = std::abs(resPull->pull().front());
-            const double pullCut = m_idHelperSvc->measuresPhi(layId) ? m_associationPullCutPhi 
+            const double pullCut = m_idHelperSvc->measuresPhi(layId) ? m_associationPullCutPhi
                                                                      : m_associationPullCutEta;
             if (pull > pullCut) continue;
-            
+
             PullCluster& bestClus = bestClusterInLay[layId];
             if (bestClus.pull < pull) continue;
             bestClus.pull = pull;
             bestClus.clus = std::move(calibClus);
             bestClus.pars = parsInLay->uniqueClone();
-                        
+
         }
         /// the best clusters are found. Put them onto the track
         for (auto& [layerId, foundClus]: bestClusterInLay) {
             ATH_MSG_VERBOSE(__func__<<"() recovered hit " << m_printer->print(*foundClus.clus)<<" pull: "<<foundClus.pull);
-            std::unique_ptr<Trk::TrackStateOnSurface> tsos = MuonTSOSHelper::createMeasTSOS(std::move(foundClus.clus), 
+            std::unique_ptr<Trk::TrackStateOnSurface> tsos = MuonTSOSHelper::createMeasTSOS(std::move(foundClus.clus),
                                                                                             std::move(foundClus.pars),
                                                                                             Trk::TrackStateOnSurface::Measurement);
             recoveredStates.emplace_back(std::move(tsos));

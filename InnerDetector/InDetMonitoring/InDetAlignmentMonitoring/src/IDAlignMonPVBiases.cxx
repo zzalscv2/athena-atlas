@@ -59,7 +59,7 @@ IDAlignMonPVBiases::IDAlignMonPVBiases(const std::string& type, const std::strin
   InitializeHistograms();
 }
 
-IDAlignMonPVBiases::~IDAlignMonPVBiases() { }
+IDAlignMonPVBiases::~IDAlignMonPVBiases() = default;
 
 void IDAlignMonPVBiases::InitializeHistograms() {
   /////////////////////////////////////////////////

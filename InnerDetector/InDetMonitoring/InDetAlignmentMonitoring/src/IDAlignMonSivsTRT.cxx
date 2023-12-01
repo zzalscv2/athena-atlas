@@ -45,7 +45,7 @@ IDAlignMonSivsTRT::IDAlignMonSivsTRT(const std::string& type, const std::string&
 //---------------------------------------------------------------------------------------
 
 
-IDAlignMonSivsTRT::~IDAlignMonSivsTRT() { }
+IDAlignMonSivsTRT::~IDAlignMonSivsTRT() = default;
 
 
 StatusCode IDAlignMonSivsTRT::initialize() {

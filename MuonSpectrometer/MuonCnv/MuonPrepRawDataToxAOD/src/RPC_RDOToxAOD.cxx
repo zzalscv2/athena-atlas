@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-typedef unsigned short int ubit16;
+using ubit16 = unsigned short;
 
 // Constructor with parameters:
 RPC_RDOToxAOD::RPC_RDOToxAOD(const std::string &name, ISvcLocator *pSvcLocator) :

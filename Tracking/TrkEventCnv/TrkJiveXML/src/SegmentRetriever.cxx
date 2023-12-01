@@ -66,11 +66,11 @@ namespace JiveXML {
       for (SegmentItr=(*CollectionItr).begin(); SegmentItr!=(*CollectionItr).end(); ++SegmentItr) {
         
         //Retrive primite variabels
-        x.push_back(DataType((*SegmentItr)->globalPosition().x()/10.));
-        y.push_back(DataType((*SegmentItr)->globalPosition().y()/10.));
-        z.push_back(DataType((*SegmentItr)->globalPosition().z()/10.));
-        phi.push_back(DataType((*SegmentItr)->localParameters()[Trk::phi]));
-        theta.push_back(DataType((*SegmentItr)->localParameters()[Trk::theta]));
+        x.emplace_back((*SegmentItr)->globalPosition().x()/10.);
+        y.emplace_back((*SegmentItr)->globalPosition().y()/10.);
+        z.emplace_back((*SegmentItr)->globalPosition().z()/10.);
+        phi.emplace_back((*SegmentItr)->localParameters()[Trk::phi]);
+        theta.emplace_back((*SegmentItr)->localParameters()[Trk::theta]);
 
         //Count number of valid (non-null) RIO_OnTracks
         int NRoTs = 0;
@@ -92,13 +92,13 @@ namespace JiveXML {
           if (!RoT) continue ;
 
           //Add the hit
-          hits.push_back(DataType(RoT->identify().get_compact() ));
+          hits.emplace_back(RoT->identify().get_compact() );
           //count as valid
           NRoTs++;
         }
 
         //Store number of hits for this segement
-        numHits.push_back(DataType(NRoTs));
+        numHits.emplace_back(NRoTs);
       }
 
       //Add data to our map

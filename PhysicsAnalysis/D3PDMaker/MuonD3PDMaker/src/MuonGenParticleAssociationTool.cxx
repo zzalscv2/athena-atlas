@@ -40,7 +40,7 @@ MuonGenParticleAssociationTool::MuonGenParticleAssociationTool
   declareProperty ("DRVar", m_drvar,
                    "If not empty, the variable name to use for DR.");
 
-  m_dr = 0;
+  m_dr = nullptr;
 }
 
 
@@ -76,7 +76,7 @@ const xAOD::TruthParticle*
 MuonGenParticleAssociationTool::get (const xAOD::Muon& p)
 {
   IMCTruthClassifier::Info info;
-  const xAOD::TruthParticle* out = 0;
+  const xAOD::TruthParticle* out = nullptr;
   if (m_classifier->particleTruthClassifier (&p, &info).first !=
       MCTruthPartClassifier::Unknown)
   {

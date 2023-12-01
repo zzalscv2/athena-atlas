@@ -742,7 +742,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillMeasurementData(
       float pullLocX     = s_errorEntry;
       float pullLocY     = s_errorEntry;
       if (trkParameters) {
-        std::unique_ptr<Trk::ResidualPull> residualPull
+        std::optional<Trk::ResidualPull> residualPull
           = m_residualPullCalculator->residualPull(measurement, trkParameters,
                                                    (m_isUnbiased==1) ? Trk::ResidualPull::Unbiased :
                                                     Trk::ResidualPull::Biased);

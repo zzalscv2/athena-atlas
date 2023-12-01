@@ -56,7 +56,7 @@ namespace Muon {
             const Trk::TrackStateOnSurface* originalState{nullptr};
             const Trk::MeasurementBase* meas{nullptr};
             const Trk::TrackParameters* pars{nullptr};
-            std::unique_ptr<const Trk::ResidualPull> resPull{nullptr};
+            std::optional<Trk::ResidualPull> resPull{std::nullopt};
             std::unique_ptr<MdtDriftCircleOnTrack> flippedMdt{nullptr};
             std::unique_ptr<const CompetingMuonClustersOnTrack> cleanedCompROT{nullptr};
             const Trk::FitQuality* fitQ{nullptr};
@@ -76,18 +76,18 @@ namespace Muon {
 
             MCTBCleaningInfo(const Identifier& i, const Identifier& chi, MuonStationIndex::ChIndex chIn, bool inB, double r, double p,
                              const Trk::TrackStateOnSurface* orState, const Trk::MeasurementBase* me, const Trk::TrackParameters* par,
-                             std::unique_ptr<const Trk::ResidualPull> resP, const Trk::FitQuality* fq) :
+                             std::optional<Trk::ResidualPull>&& resP, const Trk::FitQuality* fq) :
                 id(i),
                 chId(chi),
                 chIndex(chIn),
-                inBounds(inB),              
+                inBounds(inB),
                 copyState{false},
                 residual(r),
                 pull(p),
                 originalState(orState),
                 meas(me),
                 pars(par),
-                resPull(std::move(resP)),               
+                resPull(std::move(resP)),
                 fitQ(fq) {}
         };
         typedef std::vector<MCTBCleaningInfo> InfoVec;

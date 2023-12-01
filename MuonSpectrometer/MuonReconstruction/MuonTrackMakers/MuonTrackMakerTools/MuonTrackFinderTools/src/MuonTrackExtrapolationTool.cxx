@@ -200,7 +200,7 @@ namespace Muon {
         double minDistance = 1e9;
 
         // loop over surfaces and find the closest to the parameters
-        for (size_t ib =0 ; boundarySurfs.size();++ib) {
+        for (size_t ib =0 ; !boundarySurfs.empty();++ib) {
             const Trk::Surface &surf = boundarySurfs[ib]->surfaceRepresentation();
             Trk::DistanceSolution solution = surf.straightLineDistanceEstimate(pars.position(), pars.momentum());
             double distance = solution.currentDistance();

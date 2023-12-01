@@ -26,7 +26,7 @@ StatusCode Muon::TGC_ResidualPullCalculator::initialize()
 }
 
 //================ calculate residuals for TGC ==================================
-std::array<double,5> 
+std::array<double,5>
 Muon::TGC_ResidualPullCalculator::residuals(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
@@ -46,11 +46,11 @@ Muon::TGC_ResidualPullCalculator::residuals(
     return residuals;
   }
   Identifier ID = rot->identify();
-  
+
   if( m_idHelperSvc->isTgc(ID) ) {
 
     double sinAlpha = 0.0;
-    
+
     bool isStrip = m_idHelperSvc->tgcIdHelper().isStrip(ID);
 
     // calculate residual
@@ -75,7 +75,7 @@ Muon::TGC_ResidualPullCalculator::residuals(
       residuals[Trk::loc1] =
 	(measurement->localParameters()[Trk::locX] - trkPar->parameters()[Trk::locX]) * cosAlpha
 	+ (measurement->localParameters()[Trk::locY] - trkPar->parameters()[Trk::locY]) * sinAlpha;
-      
+
     } else {
       if (measurement->localParameters().parameterKey() != 1) {
         ATH_MSG_WARNING ("TGC ClusterOnTrack does not carry the expected "
@@ -95,7 +95,7 @@ Muon::TGC_ResidualPullCalculator::residuals(
 }
 
 //================ calculate residuals and pulls for TGC ==================================
-std::unique_ptr<Trk::ResidualPull> Muon::TGC_ResidualPullCalculator::residualPull(
+std::optional<Trk::ResidualPull> Muon::TGC_ResidualPullCalculator::residualPull(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
     const Trk::ResidualPull::ResidualType resType,
@@ -111,10 +111,10 @@ std::unique_ptr<Trk::ResidualPull> Muon::TGC_ResidualPullCalculator::residualPul
   if (!trkPar || !rot) {
     if( !trkPar ) ATH_MSG_WARNING ("No TrackParameters, cannot calculate residual/pull ");
     if( !rot )    ATH_MSG_WARNING ("No ROT, cannot calculate residual/pull ");
-    return nullptr;
+    return std::nullopt;
   }
   Identifier ID = rot->identify();
-  
+
   if( m_idHelperSvc->isTgc(ID) ) {
 
     // try to cast the track parameters to measured ones
@@ -122,7 +122,7 @@ std::unique_ptr<Trk::ResidualPull> Muon::TGC_ResidualPullCalculator::residualPul
     bool pullIsValid = (trkCov);
 
     double sinAlpha = 0.0;
-    
+
     bool isStrip = m_idHelperSvc->tgcIdHelper().isStrip(ID);
 
     // calculate residual
@@ -133,7 +133,7 @@ std::unique_ptr<Trk::ResidualPull> Muon::TGC_ResidualPullCalculator::residualPul
       if (measurement->localParameters().parameterKey() !=3) {
         ATH_MSG_WARNING ( "TGC ClusterOnTrack does not carry the expected "
                           << "LocalParameters structure!");
-        return nullptr;
+        return std::nullopt;
       }
       // get orientation angle of strip to rotate back from local frame to strip
       const Amg::MatrixX &covmat=measurement->localCovariance();
@@ -143,11 +143,11 @@ std::unique_ptr<Trk::ResidualPull> Muon::TGC_ResidualPullCalculator::residualPul
 						    4*(covmat(0,0)*covmat(1,1)-covmat(0,1)*covmat(0,1))));
       sinAlpha=std::sin(0.5*std::asin(2*covmat(0,1)/(v0-v1)));
 
-      const MuonGM::TgcReadoutElement *ele = 
+      const MuonGM::TgcReadoutElement *ele =
         dynamic_cast<const MuonGM::TgcReadoutElement*>(rot->detectorElement());
       if (!ele) {
         ATH_MSG_WARNING ("Could not obtain TGC detEl from TGC ROT, this is a bug!" );
-        return nullptr;
+        return std::nullopt;
       }
 
       double cosAlpha = std::sqrt(1 - sinAlpha*sinAlpha);
@@ -156,7 +156,7 @@ std::unique_ptr<Trk::ResidualPull> Muon::TGC_ResidualPullCalculator::residualPul
       residual[Trk::loc1] =
 	(measurement->localParameters()[Trk::locX] - trkPar->parameters()[Trk::locX]) * cosAlpha
 	+ (measurement->localParameters()[Trk::locY] - trkPar->parameters()[Trk::locY]) * sinAlpha;
-      
+
       // Fill transformation matrix to transform covariance matrices
       Amg::MatrixX RotMat(2,2);
       RotMat(0,0) = cosAlpha;
@@ -170,8 +170,8 @@ std::unique_ptr<Trk::ResidualPull> Muon::TGC_ResidualPullCalculator::residualPul
         // Get local error matrix for track to calc pull
         // Just use first local coordinates
         // and rotate by the stereo angle
-	Amg::MatrixX subm = trkCov->block<2,2>(0,0);
-	Amg::MatrixX transformedTrkCov = subm.similarity(RotMat);
+        Amg::MatrixX subm = trkCov->block<2,2>(0,0);
+        Amg::MatrixX transformedTrkCov = subm.similarity(RotMat);
         // calc pull now
         pull[Trk::loc1] = calcPull(residual[Trk::loc1],
                                    transformedROTCov(0,0),
@@ -188,7 +188,7 @@ std::unique_ptr<Trk::ResidualPull> Muon::TGC_ResidualPullCalculator::residualPul
       if (measurement->localParameters().parameterKey() != 1) {
         ATH_MSG_WARNING ("TGC ClusterOnTrack does not carry the expected "
                          << "LocalParameters structure!" );
-        return nullptr;
+        return std::nullopt;
       } else {
         // convention to be interpreted by TrkValTools: 2nd coordinate codes orientation of TGC
         residual[Trk::loc1] = measurement->localParameters()[Trk::loc1]
@@ -199,7 +199,7 @@ std::unique_ptr<Trk::ResidualPull> Muon::TGC_ResidualPullCalculator::residualPul
                                      measurement->localCovariance()(Trk::loc1,Trk::loc1),
                                      (*trkCov)(Trk::loc1,Trk::loc1),
                                      resType);
-        else 
+        else
           pull[Trk::loc1] = calcPull(residual[Trk::loc1],
                                      measurement->localCovariance()(Trk::loc1,Trk::loc1),
                                      0,
@@ -209,11 +209,11 @@ std::unique_ptr<Trk::ResidualPull> Muon::TGC_ResidualPullCalculator::residualPul
     // create the Trk::ResidualPull.
     ATH_MSG_VERBOSE ( "Calculating Pull for channel " << m_idHelperSvc->toString(ID) << " residual " << residual[Trk::loc1] << " pull " << pull[Trk::loc1] );
 
-    return std::make_unique<Trk::ResidualPull>(std::move(residual), std::move(pull), pullIsValid, resType, 1, sinAlpha);
+    return std::make_optional<Trk::ResidualPull>(std::move(residual), std::move(pull), pullIsValid, resType, 1, sinAlpha);
 
   } else {
     ATH_MSG_DEBUG ( "Input problem measurement is not TGC." );
-    return nullptr;
+    return std::nullopt;
   }
 }
 
@@ -235,7 +235,7 @@ double Muon::TGC_ResidualPullCalculator::calcPull(
       else{
 	ATH_MSG_DEBUG("Bad error measurement " << locMesCov << "  from track " << locTrkCov << ", using measured error ");
         ErrorSum = std::sqrt(locMesCov);
-      } 
+      }
     } else if (resType == Trk::ResidualPull::Biased) {
         if ((locMesCov - locTrkCov) < 0.) {
             return 0;

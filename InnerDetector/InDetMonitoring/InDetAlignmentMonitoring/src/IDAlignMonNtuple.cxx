@@ -69,7 +69,7 @@ IDAlignMonNtuple::IDAlignMonNtuple(const std::string& type, const std::string& n
 
 //---------------------------------------------------------------------------------------
 
-IDAlignMonNtuple::~IDAlignMonNtuple() { }
+IDAlignMonNtuple::~IDAlignMonNtuple() = default;
 
 //---------------------------------------------------------------------------------------
 
@@ -234,7 +234,7 @@ StatusCode IDAlignMonNtuple::fillHistograms() {
   m_nt_vtxntrks = ntrkMax;
   //these quantities are only 0,0,0 if something has gone wrong with vtx finding
   //so we don't want these in the m_ntuple
-  if (!(xv == 0.0 && yv == 0.0 && zv == 0.0)) {
+  if (xv != 0.0 || yv != 0.0 || zv != 0.0) {
     m_nt_vtxX = xv;
     m_nt_vtxY = yv;
     m_nt_vtxZ = zv;
@@ -548,7 +548,7 @@ StatusCode IDAlignMonNtuple::fillHistograms() {
     m_nt_trkcharge[nTracks] = startPerigee->charge();
 
     //finding d0 wrt the primary vertex if one is well-defined
-    if (!(xv == 0.0 && yv == 0.0 && zv == 0.0)) {
+    if (xv != 0.0 || yv != 0.0 || zv != 0.0) {
       //if we found a decent vertex
       float d0wrtVtx = d0 - (yv * cos(phi0) - xv * sin(phi0));
       m_nt_trkvtxd0[nTracks] = d0wrtVtx;
@@ -704,9 +704,7 @@ StatusCode IDAlignMonNtuple::getSiResiduals(const Trk::Track* track, const Trk::
     if (hit && trackParameterForResiduals) {
       if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " got hit and track parameters " << endmsg;
 
-      //const Trk::ResidualPull* residualPull = m_residualPullCalculator->residualPull(hit, trackParameterForResiduals,
-      // unBias);
-      std::unique_ptr<Trk::ResidualPull> residualPull = nullptr;
+      std::optional<Trk::ResidualPull> residualPull = std::nullopt;
       if (unBias) residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals, Trk::ResidualPull::Unbiased);
       else residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals, Trk::ResidualPull::Biased);
 
@@ -758,7 +756,7 @@ StatusCode IDAlignMonNtuple::getSiResiduals(const Trk::Track* track, const Trk::
 }
 
 //__________________________________________________________________________
-const Trk::TrackParameters* 
+const Trk::TrackParameters*
 IDAlignMonNtuple::getUnbiasedTrackParameters(const Trk::Track* trkPnt, const Trk::TrackStateOnSurface* tsos) {
   const Trk::TrackParameters* TrackParams{};
   //const Trk::TrackParameters* UnbiasedTrackParams(nullptr);
@@ -810,7 +808,7 @@ IDAlignMonNtuple::getUnbiasedTrackParameters(const Trk::Track* trkPnt, const Trk
       const AmgSymMatrix(5) * covariance = OMSHmeasuredTrackParameter->covariance();
       if (covariance) {
         ATH_MSG_VERBOSE( "OtherSideTrackParameters: " << *(otherModuleSideHit->trackParameters()) );
-        otherSideUnbiasedTrackParams = 
+        otherSideUnbiasedTrackParams =
           m_iUpdator->removeFromState(
           *(otherModuleSideHit->trackParameters()),
           otherModuleSideHit->measurementOnTrack()->localParameters(),
@@ -850,7 +848,7 @@ IDAlignMonNtuple::getUnbiasedTrackParameters(const Trk::Track* trkPnt, const Trk
             Trk::nonInteracting);
 
           ATH_MSG_VERBOSE( "After other side unbiased propagation" );
-          
+
           if (propagatedTrackParams) {
             ATH_MSG_VERBOSE( "Propagated Track Parameters: " << *propagatedTrackParams );
           } else {

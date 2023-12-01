@@ -80,7 +80,7 @@ StatusCode MuonTrkHitFillerTool::book()
   m_vars.reserve (std::distance (std::begin (vars), std::end (vars)));
   for (const Var& v : vars) {
     if (v.which & mask) {
-      m_vars.push_back (std::make_pair (v.type, nullptr));
+      m_vars.emplace_back (v.type, nullptr);
       CHECK( addVariable (v.name, m_vars.back().second) );
     }
   }

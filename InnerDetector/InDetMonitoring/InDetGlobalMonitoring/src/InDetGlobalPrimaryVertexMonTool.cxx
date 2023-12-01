@@ -73,7 +73,7 @@ InDetGlobalPrimaryVertexMonTool::InDetGlobalPrimaryVertexMonTool( const std::str
   declareProperty("doEnhancedMonitoring" , m_doEnhancedMonitoring, "turn on the enhanced vertex monitoring, it is triggered by the same InDetFlag that also triggers the creation of no beam constraint and split vertices");
 }
 
-InDetGlobalPrimaryVertexMonTool::~InDetGlobalPrimaryVertexMonTool() {}
+InDetGlobalPrimaryVertexMonTool::~InDetGlobalPrimaryVertexMonTool() = default;
 
 StatusCode InDetGlobalPrimaryVertexMonTool::initialize() {
   StatusCode sc;
@@ -467,8 +467,7 @@ void InDetGlobalPrimaryVertexMonTool::makeAndRegisterDummyTGraph(MonGroup& mon, 
       if (mon.regGraph(h).isFailure()) {
         ATH_MSG_WARNING ("Unable to book TGraph with name = " + std::string(hName));
       }
-      return;
-}
+      }
 
 
 double InDetGlobalPrimaryVertexMonTool::GetSplitMatchDistance(const xAOD::Vertex* splitVx, const xAOD::Vertex* originalVx)

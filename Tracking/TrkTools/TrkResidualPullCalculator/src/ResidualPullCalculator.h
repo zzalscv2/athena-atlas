@@ -20,6 +20,8 @@
 
 #include "TrkToolInterfaces/IResidualPullCalculator.h"
 
+#include <optional>
+
 
 class AtlasDetectorID;
 
@@ -36,7 +38,7 @@ namespace Trk {
     detector type. For sub-detectors like the SCT which need more attention
     a special tool in the detector-realm is called (to avoid dependencies on
     sub-detector code; only runtime-dependencies are created).
- 
+
     The residuals and pulls are calculated according to the formulas given in
     the description of Trk::ResidualPull.
  */
@@ -60,11 +62,11 @@ public:
      *
      * This function determines the sub-detector type itself by using the ID helper
      */
-    virtual std::unique_ptr<Trk::ResidualPull> residualPull(
-                        const Trk::MeasurementBase* measurement,
-                        const Trk::TrackParameters* trkPar,
-                        const Trk::ResidualPull::ResidualType resType,
-                        const Trk::TrackState::MeasurementType) const override final;
+    virtual std::optional<Trk::ResidualPull> residualPull(
+        const Trk::MeasurementBase* measurement,
+        const Trk::TrackParameters* trkPar,
+        const Trk::ResidualPull::ResidualType resType,
+        const Trk::TrackState::MeasurementType) const override final;
 
     /**This function returns (creates!) a Trk::ResidualPull object, which contains the values
     * of residual and pull for the given measurement and track state, and the Alignment effects.
@@ -75,12 +77,13 @@ public:
     * Residuals differ in all three cases; please be aware of this.
     *
     * This function determines the sub-detector type itself by using the ID helper*/
-    virtual std::unique_ptr<Trk::ResidualPull> residualPull(
-                          const Trk::MeasurementBase* measurement,
-                          const Trk::TrackParameters* trkPar,
-                          const Trk::ResidualPull::ResidualType resType,
-                          const Trk::TrackState::MeasurementType, 
-                          const std::vector<const Trk::AlignmentEffectsOnTrack*>& ) const override final;
+    virtual std::optional<Trk::ResidualPull> residualPull(
+        const Trk::MeasurementBase* measurement,
+        const Trk::TrackParameters* trkPar,
+        const Trk::ResidualPull::ResidualType resType,
+        const Trk::TrackState::MeasurementType,
+        const std::vector<const Trk::AlignmentEffectsOnTrack*>&)
+        const override final;
 
     /** This function is a light-weight version of the function above, designed for track fitters
      * where speed is critical. The user has to provide a std::array of size 5, which gets

@@ -35,7 +35,7 @@ StatusCode InDet::SCT_ResidualPullCalculator::initialize() {
 /////////////////////////////////
 /// calc residual and pull for SCT measurements
 /////////////////////////////////
-std::unique_ptr<Trk::ResidualPull> InDet::SCT_ResidualPullCalculator::residualPull(
+std::optional<Trk::ResidualPull> InDet::SCT_ResidualPullCalculator::residualPull(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
     const Trk::ResidualPull::ResidualType resType,
@@ -43,8 +43,8 @@ std::unique_ptr<Trk::ResidualPull> InDet::SCT_ResidualPullCalculator::residualPu
 
     // check the input:
     const InDet::SCT_ClusterOnTrack *sctROT = dynamic_cast<const InDet::SCT_ClusterOnTrack*>(measurement);
-    if (!sctROT) return nullptr;
-    if (!trkPar) return nullptr;
+    if (!sctROT) return std::nullopt;
+    if (!trkPar) return std::nullopt;
 
     // if no covariance for the track parameters is given the pull calculation is not valid
     bool pullIsValid = trkPar->covariance()!=nullptr;
@@ -128,7 +128,7 @@ std::unique_ptr<Trk::ResidualPull> InDet::SCT_ResidualPullCalculator::residualPu
 
     // create the Trk::ResidualPull:
     // ParameterKey is always 1, because otherwise we rotated it back
-    return std::make_unique<Trk::ResidualPull>(std::move(residual),
+    return std::make_optional<Trk::ResidualPull>(std::move(residual),
                                                std::move(pull), pullIsValid,
                                                resType, 1, sinAlpha);
 }
@@ -136,7 +136,7 @@ std::unique_ptr<Trk::ResidualPull> InDet::SCT_ResidualPullCalculator::residualPu
 /////////////////////////////////
 /// calc residuals for SCT measurements
 /////////////////////////////////
-std::array<double,5> 
+std::array<double,5>
 InDet::SCT_ResidualPullCalculator::residuals(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
@@ -148,7 +148,7 @@ InDet::SCT_ResidualPullCalculator::residuals(
     if (!sctROT) return residuals;
     if (!trkPar) return residuals;
     double sinAlpha = 0.0;
-    
+
     // check if we have a 2-dim SCT cluster
     if (sctROT->localParameters().parameterKey() == 1) {
         // the (easy) 1-dim case:

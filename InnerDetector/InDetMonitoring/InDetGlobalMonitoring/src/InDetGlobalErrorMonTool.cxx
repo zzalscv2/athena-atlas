@@ -238,8 +238,7 @@ void InDetGlobalErrorMonTool::FillModule( moduleGeo_t module, TH2F * histo ) con
 		) /  ( widthEta * widthPhi ); 
 	histo->Fill( centerEta[i], centerPhi[j], area );
       }
-  return;
-}
+  }
 
 bool InDetGlobalErrorMonTool::SyncErrorSCT()
 {

@@ -21,7 +21,7 @@
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "EventPrimitives/EventPrimitives.h"
 #include "TrkTrack/AlignmentEffectsOnTrack.h"
-#include <Eigen/Geometry> 
+#include <Eigen/Geometry>
 #include <algorithm>
 #include <cmath>
 
@@ -45,9 +45,6 @@ m_idHelper(nullptr) {
 /// initialize
 ///////////////////////////////
 StatusCode Trk::ResidualPullCalculator::initialize() {
-    //StatusCode sc = AthAlgTool::initialize();
-    //if (sc.isFailure()) return sc;
-    //StatusCode sc=StatusCode::SUCCESS;
 
     // ---------------------------------------
     //Set up ATLAS ID helper to be able to identify the RIO's det-subsystem.
@@ -75,7 +72,7 @@ StatusCode Trk::ResidualPullCalculator::initialize() {
     } else {
         ATH_MSG_DEBUG ("No residual calculator for TGC given, will ignore TGC measurements!");
     }
-  
+
     return StatusCode::SUCCESS;
 }
 
@@ -87,7 +84,7 @@ StatusCode Trk::ResidualPullCalculator::finalize() {
 ////////////////////////////////////////////////////////////////////////////////
 //  calc residuals with determination of detector/MBase type
 ////////////////////////////////////////////////////////////////////////////////
-std::array<double,5> 
+std::array<double,5>
 Trk::ResidualPullCalculator::residuals(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
@@ -122,7 +119,7 @@ Trk::ResidualPullCalculator::residuals(
             // calc residual and pull for the first coordinate
             if( measurement->localParameters().contains(Trk::loc1) )
                 residuals[Trk::loc1] = measurement->localParameters()[Trk::loc1] - trkPar->parameters()[Trk::loc1];
-            else 
+            else
                 residuals[Trk::loc2] = measurement->localParameters()[Trk::loc2] - trkPar->parameters()[Trk::loc2];
             break;
         case Trk::TrackState::SCT:
@@ -146,7 +143,7 @@ Trk::ResidualPullCalculator::residuals(
         case Trk::TrackState::TGC:
             // special case, has to be handed down to the TGC tool
             if ( ! m_TGCresidualTool.empty() ) {
-                ATH_MSG_VERBOSE ("Calling TGC tool ");  
+                ATH_MSG_VERBOSE ("Calling TGC tool ");
                 return m_TGCresidualTool->residuals(measurement, trkPar, resType, Trk::TrackState::TGC);
             } else {
                 ATH_MSG_WARNING ("No TGC ResidualPullCalculator given, cannot calculate residual and pull for TGC measurement!");
@@ -159,7 +156,7 @@ Trk::ResidualPullCalculator::residuals(
         default:
             ATH_MSG_VERBOSE ("Bit-key calculation ");
             ParamDefsAccessor PDA;
- 
+
             // PMs, Segments etc: use LocalParameters bit-key scheme
             for (unsigned int i=0; i<5; ++i) {
                 Trk::ParamDefs iPar = PDA.pardef[i];
@@ -177,13 +174,13 @@ Trk::ResidualPullCalculator::residuals(
 ////////////////////////////////////////////////////////////////////////////////
 //  calc residual and pull with determination of detector/MBase type
 ////////////////////////////////////////////////////////////////////////////////
-std::unique_ptr<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
+std::optional<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
     const Trk::ResidualPull::ResidualType resType,
     const Trk::TrackState::MeasurementType detType) const {
 
-    if (!measurement || !trkPar) return nullptr;
+    if (!measurement || !trkPar) return std::nullopt;
 
     // if no covariance for the track parameters is given the pull calculation is not valid
     bool pullIsValid = trkPar->covariance();
@@ -250,7 +247,7 @@ std::unique_ptr<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
             return m_SCTresidualTool->residualPull(measurement, trkPar, resType, Trk::TrackState::SCT);
         } else {
             ATH_MSG_WARNING ("No SCT ResidualPullCalculator given, cannot calculate residual and pull for SCT measurement!");
-            return nullptr;
+            return std::nullopt;
         }
         break;
         case Trk::TrackState::RPC:
@@ -260,7 +257,7 @@ std::unique_ptr<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
             return m_RPCresidualTool->residualPull(measurement, trkPar, resType, Trk::TrackState::RPC);
         } else {
             ATH_MSG_WARNING ("No RPC ResidualPullCalculator given, cannot calculate residual and pull for RPC measurement!");
-            return nullptr;
+            return std::nullopt;
         }
         break;
         case Trk::TrackState::TGC:
@@ -270,7 +267,7 @@ std::unique_ptr<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
             return m_TGCresidualTool->residualPull(measurement, trkPar, resType, Trk::TrackState::TGC);
         } else {
             ATH_MSG_WARNING ("No TGC ResidualPullCalculator given, cannot calculate residual and pull for TGC measurement!");
-            return nullptr;
+            return std::nullopt;
         }
         break;
         case Trk::TrackState::Segment:
@@ -304,9 +301,9 @@ std::unique_ptr<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
         for (int i = 0; i < HEPresidual.rows(); i++) {
             residual[i] = HEPresidual[i];
         }
-    
+
     }
-    return std::make_unique<Trk::ResidualPull>(
+    return std::make_optional<Trk::ResidualPull>(
         std::move(residual), std::move(pull), pullIsValid, resType,
         measurement->localParameters().parameterKey());
 }
@@ -314,7 +311,7 @@ std::unique_ptr<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
 ////////////////////////////////////////////////////////////////////////////////
 //  calc residual and pull with determination of detector/MBase type
 ////////////////////////////////////////////////////////////////////////////////
-std::unique_ptr<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
+std::optional<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* originalTrkPar,
     const Trk::ResidualPull::ResidualType resType,
@@ -335,35 +332,53 @@ std::unique_ptr<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
     Amg::Vector2D localPosSimple;
     Amg::Vector3D globalPos;
     AmgVector(5) parameters;
-    
-    Trk::TrackParameters*  trkPar = originalTrkPar->clone();
+
+    std::unique_ptr<Trk::TrackParameters>  trkPar = originalTrkPar->uniqueClone();
     parameters =  trkPar->parameters();
-   
-    ATH_MSG_VERBOSE( " ResidualPullCalculator aeots size  " <<  aeots.size() << " parameters[0] " <<  parameters[0] ); 
+
+    ATH_MSG_VERBOSE( " ResidualPullCalculator aeots size  " <<  aeots.size() << " parameters[0] " <<  parameters[0] );
     double residual = measurement->localParameters()[Trk::loc1] - trkPar->parameters()[Trk::loc1];
-    ATH_MSG_VERBOSE( " parameters[0] " << parameters[0] << " trkPar->parameters()[Trk::loc1] " << trkPar->parameters()[Trk::loc1] << " measurement->localParameters()[Trk::loc1] " << measurement->localParameters()[Trk::loc1] << " resi " << residual );
+    ATH_MSG_VERBOSE(" parameters[0] "
+                    << parameters[0] << " trkPar->parameters()[Trk::loc1] "
+                    << trkPar->parameters()[Trk::loc1]
+                    << " measurement->localParameters()[Trk::loc1] "
+                    << measurement->localParameters()[Trk::loc1] << " resi "
+                    << residual);
 
     localPos[0] = parameters[0];
     localPosSimple[0] = parameters[0];
     for ( const auto & aeot : aeots ){
-        ATH_MSG_VERBOSE( " ResidualPullCalculator aeots deltaTranslation  " <<  aeot->deltaTranslation() << " angle " << aeot->deltaAngle()); 
+        ATH_MSG_VERBOSE( " ResidualPullCalculator aeots deltaTranslation  " <<  aeot->deltaTranslation() << " angle " << aeot->deltaAngle());
 
         Trk::DistanceSolution solution = aeot->associatedSurface().straightLineDistanceEstimate(originalTrkPar->position(),originalTrkPar->momentum().unit());
-        double distance = solution.currentDistance(true); 
+        double distance = solution.currentDistance(true);
 //      calculate sign of distance
-        Amg::Vector3D* displacementVector  = new Amg::Vector3D(originalTrkPar->position().x()-aeot->associatedSurface().center().x(),originalTrkPar->position().y()-aeot->associatedSurface().center().y(),originalTrkPar->position().z()-aeot->associatedSurface().center().z()); 
-        if(displacementVector->dot(originalTrkPar->momentum().unit())<0) distance = - distance;
+        Amg::Vector3D displacementVector =
+            Amg::Vector3D(originalTrkPar->position().x() -
+                                  aeot->associatedSurface().center().x(),
+                              originalTrkPar->position().y() -
+                                  aeot->associatedSurface().center().y(),
+                              originalTrkPar->position().z() -
+                                  aeot->associatedSurface().center().z());
+        if (displacementVector.dot(originalTrkPar->momentum().unit()) < 0)
+        distance = -distance;
 
         if(measType == Trk::TrackState::MDT) {
-// MDT 
+// MDT
           double distanceX = distance*originalTrkPar->momentum().unit().x();
           double distanceY = distance*originalTrkPar->momentum().unit().y();
           const double originalPhi=originalTrkPar->momentum().phi();
           double distanceR = std::cos(originalPhi)*distanceX + std::sin(originalPhi)*distanceY; //< Is this quicker than hypotenuse?
-          ATH_MSG_VERBOSE( " originalTrkPar->position() x " << originalTrkPar->position().x() << " y " << originalTrkPar->position().y() << " z " << originalTrkPar->position().z() );
-          ATH_MSG_VERBOSE( " aeot->associatedSurface().center() x " << aeot->associatedSurface().center().x() << " y " << aeot->associatedSurface().center().y() << " z " << aeot->associatedSurface().center().z() );
-          
-//        use drift (circle) derivatives as in TrkiPatFitterUtils 
+          ATH_MSG_VERBOSE(" originalTrkPar->position() x "
+                          << originalTrkPar->position().x() << " y "
+                          << originalTrkPar->position().y() << " z "
+                          << originalTrkPar->position().z());
+          ATH_MSG_VERBOSE(" aeot->associatedSurface().center() x "
+                          << aeot->associatedSurface().center().x() << " y "
+                          << aeot->associatedSurface().center().y() << " z "
+                          << aeot->associatedSurface().center().z());
+
+          //        use drift (circle) derivatives as in TrkiPatFitterUtils
 
           Amg::Vector3D sensorDirection  = Amg::Vector3D(measurement->associatedSurface().transform().rotation().col(2));
           Amg::Vector3D driftDirection = Amg::Vector3D(sensorDirection.cross(originalTrkPar->momentum().unit()));
@@ -371,22 +386,22 @@ std::unique_ptr<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
           ATH_MSG_VERBOSE( " cos(theta) " << std::cos(originalTrkPar->momentum().theta()) << " phi " << originalPhi );
           ATH_MSG_VERBOSE( " sensorDirection x " << sensorDirection.x() << " y " << sensorDirection.y() << " z " << sensorDirection.z() );
           ATH_MSG_VERBOSE( " driftDirection x " << driftDirection.x() << " y " << driftDirection.y() << " z " << driftDirection.z() );
-          
 
-// Barrel 
+
+// Barrel
           double projection = driftDirection.z();
 // dz because of a dhteta change: factor = dz/dtheta
           const double originalTheta=originalTrkPar->momentum().theta();
           const double sinOriginalTheta=std::sin(originalTheta);
-          double factor = (distanceR/sinOriginalTheta)/sinOriginalTheta;    //preserve calc. order     
+          double factor = (distanceR/sinOriginalTheta)/sinOriginalTheta;    //preserve calc. order
           const Surface&  surface = aeot->associatedSurface();
           ATH_MSG_VERBOSE( " fabs(surface.normal().z()) " << std::fabs(surface.normal().z()) );
           if(std::fabs(surface.normal().z()) > 0.5) {
-// endcap 
+// endcap
              projection = (driftDirection.x()*surface.center().x() + driftDirection.y()*surface.center().y()) /
                                  surface.center().perp();
 // dr because of a dhteta change : factor = dR/dtheta
-             factor = -(distanceR/std::sin(originalTheta))/(std::cos(originalTheta)); //preserve calc. order        
+             factor = -(distanceR/std::sin(originalTheta))/(std::cos(originalTheta)); //preserve calc. order
              ATH_MSG_VERBOSE( " distance " << distance << " Endcap projection " << projection << " factor " << factor );
           } else {
              ATH_MSG_VERBOSE( " distance " << distance << " Barrel projection " << projection  << " factor " << factor );
@@ -394,24 +409,21 @@ std::unique_ptr<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
 
 
           localPos[0] += projection*aeot->deltaTranslation() - projection*factor*aeot->deltaAngle(); // Shift in precision direction.
-          
-          ATH_MSG_VERBOSE( " MDT old localPos " << parameters[0] << " new localPos " << localPos[0] ); 
+
+          ATH_MSG_VERBOSE( " MDT old localPos " << parameters[0] << " new localPos " << localPos[0] );
 
         } else {
 
 // CSC or MM clusters
 
-//        use cluster derivatives as in TrkiPatFitterUtils 
-//            double distance     = fm->surface()->normal().dot(measurement.intersection(FittedTrajectory).position() - fm->intersection(FittedTrajectory).position());
-//            double projection   = fm->surface()->normal().dot(measurement.intersection(FittedTrajectory).direction());
-
-
-          double projection = aeot->associatedSurface().normal().dot(originalTrkPar->momentum().unit()); 
+          double projection = aeot->associatedSurface().normal().dot(originalTrkPar->momentum().unit());
           localPos[0] += aeot->deltaTranslation()*projection + distance*aeot->deltaAngle();
 
-          ATH_MSG_VERBOSE( " CSC old localPos " << parameters[0] << " distance " << distance << " proj " << projection << " new localPos " << localPos[0] << " simple " << localPosSimple[0] ); 
-          
-        } 
+          ATH_MSG_VERBOSE(" CSC old localPos "
+                          << parameters[0] << " distance " << distance
+                          << " proj " << projection << " new localPos "
+                          << localPos[0] << " simple " << localPosSimple[0]);
+        }
     }
 
     parameters[0] = localPos[0];
@@ -423,13 +435,11 @@ std::unique_ptr<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
     if(originalCov) {
        trkPar->updateParameters(parameters, AmgSymMatrix(5)( *originalCov ) );
     } else {
-       trkPar->updateParameters(parameters); 
+       trkPar->updateParameters(parameters);
     }
-  
+
     // Now call original method.
-    std::unique_ptr<Trk::ResidualPull> resPull = residualPull(measurement, trkPar, resType, detType );
-    delete trkPar;
-    return resPull;
+    return residualPull(measurement, trkPar.get(), resType, detType );
 }
 
 

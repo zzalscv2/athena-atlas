@@ -32,7 +32,7 @@ namespace D3PD {
 								      const std::string& name,
 								      const IInterface* parent)
     : BlockFillerTool<Trk::Segment> (type, name, parent) ,
-      m_idHelper(0),
+      m_idHelper(nullptr),
       m_truthTool("Trk::DetailedMuonPatternTruthBuilder/DetailedMuonPatternTruthBuilder") {
 
     declareProperty("DetailedMuonPatternTruthTool", m_truthTool);
@@ -99,16 +99,16 @@ namespace D3PD {
     //----------------------------------------------------------------
     // Retrieve prep raw data truth
     std::vector<std::string> PRD_TruthNames;
-    PRD_TruthNames.push_back("CSC_TruthMap");
-    PRD_TruthNames.push_back("RPC_TruthMap");
-    PRD_TruthNames.push_back("TGC_TruthMap");
-    PRD_TruthNames.push_back("MDT_TruthMap");
-    PRD_TruthNames.push_back("MM_TruthMap");
-    PRD_TruthNames.push_back("STGC_TruthMap");
+    PRD_TruthNames.emplace_back("CSC_TruthMap");
+    PRD_TruthNames.emplace_back("RPC_TruthMap");
+    PRD_TruthNames.emplace_back("TGC_TruthMap");
+    PRD_TruthNames.emplace_back("MDT_TruthMap");
+    PRD_TruthNames.emplace_back("MM_TruthMap");
+    PRD_TruthNames.emplace_back("STGC_TruthMap");
 
     std::vector<const PRD_MultiTruthCollection*> prdCollectionVector;
     for(std::vector<std::string>::const_iterator ikey=PRD_TruthNames.begin(); ikey!=PRD_TruthNames.end(); ++ikey) {
-      prdCollectionVector.push_back(0);
+      prdCollectionVector.push_back(nullptr);
 
       StatusCode sc = evtStore()->retrieve(*prdCollectionVector.rbegin(), *ikey);
       if (!sc.isSuccess()){
