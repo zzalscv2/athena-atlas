@@ -170,6 +170,7 @@ class JetChainConfiguration(ChainConfigurationBase):
             chainSteps.append( jetPreselStep )
             # Standard tracking step, configure the tracking instance differently
             # Later we should convert this to a preselection-style hypo
+
             jetRoITrackJetTagHypoStep = self.getJetRoITrackJetTagHypoChainStep(flags, preselJetDef.fullname())
             chainSteps.append( jetRoITrackJetTagHypoStep )
         elif self.recoDict["trkopt"]=="ftf":
@@ -197,8 +198,8 @@ class JetChainConfiguration(ChainConfigurationBase):
             EJsStep = self.getJetEJsChainStep(flags, jetCollectionName, self.exotHypo)
             chainSteps+= [EJsStep]
         elif self.exotHypo != '' and ("calratio" in self.exotHypo):
-            CRStep = self.getJetCRChainStep(flags, jetCollectionName, self.exotHypo)
-            chainSteps+= [self.getEmptyStep(2, 'RoIFTFEmptyStep'), CRStep]
+             CRStep = self.getJetCRChainStep(flags, self.jetName, self.exotHypo)
+             chainSteps+= [ CRStep]
 
         myChain = self.buildChain(chainSteps)
 

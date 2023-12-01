@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -38,7 +38,6 @@ TrigJetCRHypoAlg::TrigJetCRHypoAlg( const std::string& name,
 StatusCode TrigJetCRHypoAlg::initialize() {
 
   ATH_CHECK(m_hypoTools.retrieve() );
-  ATH_CHECK(m_trackParticleKey.initialize());
   ATH_CHECK(m_cellKey.initialize());
 
   return StatusCode::SUCCESS;
@@ -63,14 +62,6 @@ StatusCode TrigJetCRHypoAlg::execute( const EventContext& context ) const {
 
   // prepare imput for tools
   std::vector<TrigJetCRHypoTool::JetInfo> hypoToolInput;
- 
-  // get tracks from the key :
-  ATH_MSG_DEBUG( "Getting Track Handle "<<m_trackParticleKey);
-  auto trackHandle = SG::makeHandle(m_trackParticleKey, context );
-
-  ATH_CHECK( trackHandle.isValid() );
-  const xAOD::TrackParticleContainer* allTracks = trackHandle.get();
-  ATH_MSG_DEBUG ( allTracks->size() << " tracks found" );
 
   // get cells from the key :
   ATH_MSG_DEBUG( "Getting Cells Handle "<<m_cellKey);
@@ -96,10 +87,9 @@ StatusCode TrigJetCRHypoAlg::execute( const EventContext& context ) const {
     decisionIDs(previousDecision, previousDecisionIDs);
 
     // Collect all the required information for the tool together in a handy struct 
-    hypoToolInput.emplace_back( TrigJetCRHypoTool::JetInfo{previousDecisionIDs, *(jetLinkInfo.link), allTracks, cells, d} );
- 
-}
 
+    hypoToolInput.emplace_back( TrigJetCRHypoTool::JetInfo{previousDecisionIDs, *(jetLinkInfo.link),cells, d} );
+  } 
 
   //Loop over all hypoToolinputs and get their decisions
   for ( auto & tool: m_hypoTools ) {

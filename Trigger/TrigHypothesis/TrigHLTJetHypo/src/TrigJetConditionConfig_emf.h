@@ -2,19 +2,19 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGJETCONDITIONCONFIG_ET_H
-#define TRIGJETCONDITIONCONFIG_ET_H
+#ifndef TRIGJETCONDITIONCONFIG_EMF_H
+#define TRIGJETCONDITIONCONFIG_EMF_H
 
 #include "ITrigJetConditionConfig.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "./ConditionsDefs.h"
 
-class TrigJetConditionConfig_et:
+class TrigJetConditionConfig_emf:
 public extends<AthAlgTool, ITrigJetConditionConfig> {
 
  public:
   
-  TrigJetConditionConfig_et(const std::string& type,
+  TrigJetConditionConfig_emf(const std::string& type,
                           const std::string& name,
                           const IInterface* parent);
 
@@ -24,10 +24,10 @@ public extends<AthAlgTool, ITrigJetConditionConfig> {
  private:
   
   Gaudi::Property<std::string>
-    m_min{this, "min", {}, "single jet min Et"};
+    m_min{this, "min", {}, "single jet min EMF"};
   
   Gaudi::Property<std::string>
-    m_max{this, "max", {}, "single jet max Et"};
+    m_max{this, "max", {}, "single jet max EMF"};
   
   StatusCode checkVals()  const;
  

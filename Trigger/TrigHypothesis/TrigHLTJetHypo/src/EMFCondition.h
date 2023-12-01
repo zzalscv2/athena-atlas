@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGHLTJETHYPO_PTCONDITION_H
-#define TRIGHLTJETHYPO_PTCONDITION_H
+#ifndef TRIGHLTJETHYPO_EMFCONDITION_H
+#define TRIGHLTJETHYPO_EMFCONDITION_H
 
 /********************************************************************
  *
@@ -22,9 +22,9 @@ namespace HypoJet{
 
 class ITrigJetHypoInfoCollector;
 
-class PtCondition: public ICondition{
+class EMFCondition: public ICondition{
  public:
-  PtCondition(double threshold);
+  EMFCondition(double threshold);
   
   bool isSatisfied(const HypoJetVector&,
                    const std::unique_ptr<ITrigJetHypoInfoCollector>&) const override;

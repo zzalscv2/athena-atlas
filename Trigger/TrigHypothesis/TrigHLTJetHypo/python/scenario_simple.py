@@ -9,7 +9,7 @@ from TrigHLTJetHypo.make_treevec import make_treevec
 # make a list of all possible cut items for the simple scenario
 all_elemental_keys = ('etaRange', 'jvt', 'smc',
                       'threshold', 'momCuts', 'bsel',
-                      'timing', 'timeSig')
+                      'clrsel', 'timing', 'timeSig')
 
 # Extract moment cuts
 def _cuts_from_momCuts(momCuts):
@@ -72,6 +72,13 @@ def get_condition_args_from_chainpart(cp):
 
         if k == 'timeSig':
             key    = 'timeSig'
+            values = v.split(key)
+            lo   = values[0]
+            vals = defaults(key, lo=lo)
+            condargs.append((key, vals))
+
+        if k =='clrsel':
+            key    = 'clrsel'
             values = v.split(key)
             lo   = values[0]
             vals = defaults(key, lo=lo)

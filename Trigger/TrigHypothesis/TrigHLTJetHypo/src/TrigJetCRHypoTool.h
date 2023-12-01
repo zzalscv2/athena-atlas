@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
    */
 
 #ifndef TRIGJETCRHYPOTOOL_H
@@ -21,7 +21,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
-
 #include "TrigHLTJetHypo/ITrigJetHypoToolHelper.h"
 
 #include "xAODEventInfo/EventInfo.h"
@@ -49,7 +48,6 @@ class TrigJetCRHypoTool: public AthAlgTool{
   struct JetInfo {
     const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
     const xAOD::Jet* jet;
-    const xAOD::TrackParticleContainer* allTracks;
     const CaloConstCellContainer* cells;
     TrigCompositeUtils::Decision* decision;
   };
@@ -87,6 +85,7 @@ class TrigJetCRHypoTool: public AthAlgTool{
   // minjetlogR may be read from trigger chain name -- to be updated
   Gaudi::Property< float > m_jetlogRCut{ this, "MinjetlogR",  { float(1.2 ) }, "Jet logR requirement" };
 
+  Gaudi::Property< float > m_pufixLogRatio{ this, "MpufixLogRatio",  { float(1.2 ) }, "Jet pufix logR requirement" };
   Gaudi::Property< float > m_trackPtCut{ this, "MintrackPt",  { float( 2.0*Gaudi::Units::GeV ) }, "Track pT requirement" };
   Gaudi::Property< float > m_deltaR{ this, "MindeltaR",  { float( 0.2 ) }, "deltaR(jet, track) requirement" };
 

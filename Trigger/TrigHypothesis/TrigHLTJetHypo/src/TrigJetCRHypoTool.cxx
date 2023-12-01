@@ -23,6 +23,11 @@
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
 
+#include "CaloEvent/CaloCellContainer.h"
+#include "CaloEvent/CaloCell.h"
+#include "xAODCaloEvent/CaloCluster.h"
+#include "CaloEvent/CaloClusterContainer.h"
+
 #include "CxxUtils/fpcompare.h"
 #include "CxxUtils/phihelper.h"
 #include "FourMomUtils/xAODP4Helpers.h"
@@ -71,13 +76,13 @@ StatusCode TrigJetCRHypoTool::finalize(){
 bool TrigJetCRHypoTool::decide_on_single_jet( JetInfo& input ) const {
 
   auto jet = input.jet;
-  auto trackContainer = input.allTracks;
   auto cellContainer = input.cells;
-
+  auto allTracks= jet->getAttribute<std::vector<ElementLink<xAOD::IParticleContainer> >>("TracksForMinimalJetTag");
   //Checking jet logRatio requirements
   double jetEMF = jet->getAttribute<float>("EMFrac");
   ATH_MSG_DEBUG( " Jet EMF = " << jetEMF << " jet pT = " << jet->pt() << "jet eta = " << jet->eta() << " phi = " << jet->phi() );
-  double jetRatio;
+
+  double jetRatio=-999;
 
   if (CxxUtils::fpcompare::greater(jetEMF,0.)){
     if(CxxUtils::fpcompare::greater_equal(jetEMF,1.)){
@@ -85,27 +90,97 @@ bool TrigJetCRHypoTool::decide_on_single_jet( JetInfo& input ) const {
       return false;
     }
     else jetRatio = log10(double(1./jetEMF - 1.));
-
-    if(  jetRatio < m_jetlogRCut  ) {
-      ATH_MSG_DEBUG( "Fails logR cut" << jetRatio << " > " << m_jetlogRCut );
-      return false;
-    }
   }
+  if ( jetRatio < m_pufixLogRatio) {
+       ATH_MSG_DEBUG( "Jet "<< " below the " << m_pufixLogRatio << " threshold for the log-ratio cut; logRatio = " << jetRatio << "; skipping this jet.");
+       return false;
+  }
+
 
   // Loop over all tracks above m_trackPtCut and reject the jet if the closest track is at dR(jet, track)< m_deltaR
   auto jetPhi= jet->phi();
   auto jetEta= jet->eta();
+  double pufixLR = -1; 
+  
+  if(  jetRatio < m_jetlogRCut  ) {
+  
+      ATH_MSG_DEBUG( "Fails logR cut" << jetRatio << " > " << m_jetlogRCut );
+      size_t nClusters = jet->numConstituents();
+      double clusterPU_sumEEM = 0; double clusterPU_sumE = 0;
+      for (size_t clust = 0; clust < nClusters; clust++) {
+         const xAOD::CaloCluster * aCluster = dynamic_cast<const xAOD::CaloCluster*> (jet->rawConstituent(clust));
+         double clusEEM = 0;
+         clusEEM+=(aCluster)->eSample(CaloSampling::EMB1);
+         clusEEM+=(aCluster)->eSample(CaloSampling::EMB2);
+         clusEEM+=(aCluster)->eSample(CaloSampling::EMB3);
+         clusEEM+=(aCluster)->eSample(CaloSampling::EME1);
+         clusEEM+=(aCluster)->eSample(CaloSampling::EME2);
+         clusEEM+=(aCluster)->eSample(CaloSampling::EME3);
+         clusEEM+=(aCluster)->eSample(CaloSampling::FCAL1);
+         double lambda = aCluster->getMomentValue(xAOD::CaloCluster::CENTER_LAMBDA);
 
-  for ( const xAOD::TrackParticle_v1* track : *trackContainer) {
+         if (lambda > 500) continue;
 
-    if(track->pt() < m_trackPtCut ) continue;
+         double d_eta = aCluster->rawEta() - jetEta;
+         double d_phi = xAOD::P4Helpers::deltaPhi(aCluster->rawPhi(),jetPhi);
+      
+         double d_R2 = d_eta*d_eta + d_phi*d_phi;
 
-    double phi  = track->phi0();
-    double eta  = track->eta();
+         if (d_R2 < 0.15*0.15) continue;
+         clusterPU_sumEEM+=clusEEM/1000.;
+         clusterPU_sumE+=aCluster->rawE()/1000.;
+    }
+  
+    double jetEEM_EMscale = 0; double jetE_EMscale = 0;  //Working on EM scale because calE() doesn't always return correct EEM and cluster moment EMF not accessable during testing
 
-    double dR = xAOD::P4Helpers::deltaR( eta, phi, jetEta, jetPhi );
-    ATH_MSG_DEBUG(" track with " << "pt=" << track->pt() << ", eta=" << eta << ", phi=" << phi << " dR = " << dR);
-    if (dR<m_deltaR)   return false;
+    std::vector<double> samplingEnergy = jet->getAttribute<std::vector<double> >("EnergyPerSampling");  
+
+    for(size_t s=0; s<samplingEnergy.size(); s++) {
+
+      double samplingE = 0.001*(samplingEnergy.at(s));
+      if ( s < 8 || (s > 20 && s < 28) ) jetEEM_EMscale+=samplingE; // EM layers 0-7 and 21-27
+      jetE_EMscale+=samplingE; 
+    }
+
+    double pufixEMF = (jetEEM_EMscale - clusterPU_sumEEM)/(jetE_EMscale - clusterPU_sumE);
+
+    if (CxxUtils::fpcompare::greater(pufixEMF,0.)){
+      if(CxxUtils::fpcompare::greater_equal(pufixEMF,1.0)) pufixLR = -999.;
+        else pufixLR = log10(double(1./pufixEMF - 1.));
+    } else {
+      pufixLR = 999;
+    }
+
+    if ( pufixLR < m_jetlogRCut) {
+      ATH_MSG_DEBUG( "Jet "<< " is still below the " << m_jetlogRCut << " threshold for the log-ratio cut; recalculated logRatio = " << pufixLR << "; skipping this jet.");
+      return false;
+    }
+    
+    jetRatio = pufixLR;
+    
+  }else {
+
+    if ( jetRatio < m_jetlogRCut) {
+        return false;
+    } 
+    ATH_MSG_DEBUG( "Jet "<< " above the " << m_jetlogRCut<< " threshold for the log-ratio cut; logRatio = " << jetRatio << "; skipping this jet.");
+  }
+ 
+
+
+
+  // Loop over all tracks above m_trackPtCut and reject the jet if the closest track is at dR(jet, track)< m_deltaR
+  for ( unsigned int index(0); index < allTracks.size(); index++  ) {         
+     const xAOD::IParticle* track = *( allTracks.at(index));
+
+     if(track->pt() < m_trackPtCut ) continue;
+
+     double phi  = track->p4().Phi();
+     double eta  = track->p4().Eta() ;
+
+     double dR = xAOD::P4Helpers::deltaR( eta, phi, jetEta, jetPhi );
+     ATH_MSG_DEBUG(" track with " << "pt=" << track->pt() << ", eta=" << eta << ", phi=" << phi << " dR = " << dR);
+     if (dR<m_deltaR)   return false;
   }
 
   ATH_MSG_DEBUG(" jet passed tracking" );
@@ -143,10 +218,12 @@ bool TrigJetCRHypoTool::decide_on_single_jet( JetInfo& input ) const {
 	}
       }
     }
+  
 
-    // get max number of selected cells in a layer
-    for(int i=0; i<4; i++) 
-      if(countCaloCell<countCell_layer[i]) countCaloCell=countCell_layer[i];
+  // get max number of selected cells in a layer
+  for(int i=0; i<4; i++){ 
+    if(countCaloCell<countCell_layer[i]) countCaloCell=countCell_layer[i];
+  }
 
     ATH_MSG_DEBUG("Jet Pt " << jet->pt() << "; eta "<< jetEta << "; phi " << jetPhi <<"; logRatio " << jetRatio << "; LoF Cells " << countCaloCell );
 
@@ -163,6 +240,7 @@ bool TrigJetCRHypoTool::decide_on_single_jet( JetInfo& input ) const {
   }
 
   ATH_MSG_DEBUG( "Passed selection" );
+
   return  true;
 
 }
@@ -171,7 +249,7 @@ StatusCode TrigJetCRHypoTool::decide( std::vector<JetInfo>& input )  const{
   for ( JetInfo& j: input ) {
     if ( passed ( m_decisionId.numeric(), j.previousDecisionIDs ) ) {
       if ( decide_on_single_jet( j ) ) {
-	addDecisionID( m_decisionId, j.decision );
+	        addDecisionID( m_decisionId, j.decision );      
       }
     }
   }
