@@ -66,6 +66,7 @@ protected:
   int m_numberOfBcid{1}; //assumed same for all positions
   double m_timeOffset{5.0};
   double m_timeJitter{0.0};
+  double m_thermalNoise{160.0}; //default noise level
   ToolHandle<IInDetConditionsTool> m_pixelConditionsTool{
     this, "PixelConditionsSummaryTool", "PixelConditionsSummaryTool", "Tool to retrieve Pixel Conditions summary"
   };
