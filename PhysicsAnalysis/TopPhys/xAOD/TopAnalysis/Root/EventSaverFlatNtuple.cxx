@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
  
 #include "TopAnalysis/EventSaverFlatNtuple.h"
@@ -27,6 +27,8 @@
 
 #include "xAODTracking/TrackParticlexAODHelpers.h"
 #include "RootCoreUtils/StringUtil.h"
+
+#include "TruthUtils/MagicNumbers.h"
 
 namespace top {
   EventSaverFlatNtuple::EventSaverFlatNtuple() :
@@ -4162,7 +4164,7 @@ namespace top {
           m_mc_pdgId[i] = mcPtr->pdgId();
           m_mc_charge[i] = mcPtr->charge();
           m_mc_status[i] = mcPtr->status();
-          m_mc_barcode[i] = mcPtr->barcode();
+          m_mc_barcode[i] = HepMC::uniqueID(mcPtr);
 
           ++i;
         }

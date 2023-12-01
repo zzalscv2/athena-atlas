@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 // $Id: CalcTopPartonHistory.cxx 800464 2017-03-13 18:06:24Z tpelzer $
@@ -9,6 +9,7 @@
 #include "TopPartons/CalcTtbarPartonHistory.h"
 #include "TopPartons/PartonHistoryUtils.h"
 #include "xAODTruth/TruthVertex.h"
+#include "TruthUtils/MagicNumbers.h"
 
 namespace top {
   CalcTopPartonHistory::CalcTopPartonHistory(const std::string& name) :
@@ -53,7 +54,7 @@ namespace top {
       const xAOD::TruthParticle* link =0;
       for(const xAOD::TruthParticle *p2 : *cont2)
       {
-        if(p->pdgId()==p2->pdgId() && p->barcode()==p2->barcode())
+        if(p->pdgId()==p2->pdgId() && HepMC::uniqueID(p) == HepMC::uniqueID(p2))
         {
           link=p2;
           break;

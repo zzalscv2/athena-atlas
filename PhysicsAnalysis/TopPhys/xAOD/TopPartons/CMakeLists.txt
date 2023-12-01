@@ -20,6 +20,7 @@ atlas_add_library( TopPartons Root/*.cxx Root/*.h Root/*.icc
                    LINK_LIBRARIES ${ROOT_LIBRARIES}
                                   AsgTools
                                   AthContainers
+                                  TruthUtils
                                   xAODCore
                                   xAODTruth
                    PRIVATE_LINK_LIBRARIES TopConfiguration )
