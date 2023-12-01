@@ -88,7 +88,7 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
 
   if (m_doNoise) {
     // Add thermal noise
-    thermalNoise(moduleData->getThermalNoise(barrel_ec, layerIndex), chargedDiodes, rndmEngine);
+    thermalNoise(m_thermalNoise, chargedDiodes, rndmEngine);
 
     // Add random noise
     randomNoise(chargedDiodes, moduleData, calibData, rndmEngine);
