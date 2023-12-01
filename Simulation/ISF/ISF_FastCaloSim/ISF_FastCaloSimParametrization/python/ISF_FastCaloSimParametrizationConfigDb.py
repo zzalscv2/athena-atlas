@@ -7,6 +7,7 @@ Configuration database for ISF_FastCaloSimParametrization
 from AthenaCommon.CfgGetter import addTool
 
 # Common tools, services and algorithms used by jobs
-addTool("ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfigLegacy.getFastCaloSimCaloExtrapolation" , "FastCaloSimCaloExtrapolation"   )
-addTool("ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfigLegacy.getFastCaloSimGeometryHelper" , "FastCaloSimGeometryHelper"   )
-addTool("ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfigLegacy.getCaloCellContainerSD",           "CaloCellContainerSD")
+addTool("ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfigLegacy.getFastCaloSimCaloExtrapolation", "FastCaloSimCaloExtrapolation")
+addTool("ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfigLegacy.getFastCaloSimGeometryHelper", "FastCaloSimGeometryHelper")
+addTool("ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfigLegacy.getCaloCellContainerSD", "CaloCellContainerSD")
+addTool("ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfigLegacy.getFastCaloSimCaloTransportation", "FastCaloSimCaloTransportation")

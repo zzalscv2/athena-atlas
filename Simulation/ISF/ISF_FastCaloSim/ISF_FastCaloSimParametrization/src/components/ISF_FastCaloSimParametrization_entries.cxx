@@ -2,10 +2,12 @@
 #include "ISF_FastCaloSimParametrization/ISF_HitAnalysis.h"
 
 #include "../FastCaloSimGeometryHelper.h"
+#include "../FastCaloSimCaloTransportation.h"
 #include "../FastCaloSimCaloExtrapolation.h"
 #include "../CaloCellContainerSDTool.h"
 
 DECLARE_COMPONENT( FastCaloSimGeometryHelper )
+DECLARE_COMPONENT( FastCaloSimCaloTransportation )
 DECLARE_COMPONENT( FastCaloSimCaloExtrapolation )
 
 DECLARE_COMPONENT( FastCaloSimParamAlg )
