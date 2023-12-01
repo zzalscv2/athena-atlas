@@ -7,18 +7,18 @@ Tools configurations for ISF_FastCaloSimParametrization
 from AthenaCommon import CfgMgr
 
 def getFastCaloSimCaloExtrapolation(name="FastCaloSimCaloExtrapolation", **kwargs):
-    kwargs.setdefault("CaloBoundaryR"             , [1148.0, 120.0, 41.0] )
-    kwargs.setdefault("CaloBoundaryZ"             , [3550.0, 4587.0, 4587.0] )
-    kwargs.setdefault("Extrapolator"              , "TimedExtrapolator" )
-    kwargs.setdefault("CaloGeometryHelper"        , "FastCaloSimGeometryHelper" )
-    kwargs.setdefault("CaloEntrance"              , "InDet::Containers::InnerDetector"     )
-
+    kwargs.setdefault("CaloBoundaryR", [1148.0, 120.0, 41.0])
+    kwargs.setdefault("CaloBoundaryZ", [3550.0, 4587.0, 4587.0])
+    kwargs.setdefault("CaloGeometryHelper", "FastCaloSimGeometryHelper")
+    kwargs.setdefault("CaloTransportation", "FastCaloSimCaloTransportation")
     return CfgMgr.FastCaloSimCaloExtrapolation(name, **kwargs)
 
 
 def getFastCaloSimGeometryHelper(name="FastCaloSimGeometryHelper", **kwargs):
     return CfgMgr.FastCaloSimGeometryHelper(name, **kwargs)
-    
+
+def getFastCaloSimCaloTransportation(name="FastCaloSimCaloTransportation", **kwargs):
+    return CfgMgr.FastCaloSimCaloTransportation(name, **kwargs)
 
 def getCaloCellContainerSD(name='CaloCellContainerSD', **kwargs):
     

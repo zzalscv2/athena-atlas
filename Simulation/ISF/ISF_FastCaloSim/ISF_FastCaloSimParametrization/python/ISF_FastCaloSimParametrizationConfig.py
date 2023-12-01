@@ -53,26 +53,27 @@ def ISF_HitAnalysisCfg(flags, name="ISF_HitAnalysis",
     result.addEventAlgo(CompFactory.ISF_HitAnalysis(name,**kwargs))
     return result
 
+def FastCaloSimCaloTransportationCfg(flags, name="FastCaloSimCaloTransportation", **kwargs):
+    acc = ComponentAccumulator()
+    from FastCaloSim.FastCaloSimFactoryNew import NITimedExtrapolatorCfg
+    kwargs.setdefault("Extrapolator", acc.addPublicTool(acc.popToolsAndMerge(NITimedExtrapolatorCfg(flags))))
+    kwargs.setdefault("CaloEntrance", 'InDet::Containers::InnerDetector')
+    acc.setPrivateTools(CompFactory.FastCaloSimCaloTransportation(name, **kwargs))
+    return acc
 
 def FastCaloSimCaloExtrapolationCfg(flags, name="FastCaloSimCaloExtrapolation", **kwargs):
     acc = ComponentAccumulator()
-
     kwargs.setdefault("CaloBoundaryR", [1148.0, 120.0, 41.0])
     kwargs.setdefault("CaloBoundaryZ", [3550.0, 4587.0, 4587.0])
-    from FastCaloSim.FastCaloSimFactoryNew import NITimedExtrapolatorCfg
-    kwargs.setdefault("Extrapolator", acc.addPublicTool(acc.popToolsAndMerge(NITimedExtrapolatorCfg(flags))))
     kwargs.setdefault("CaloGeometryHelper", acc.addPublicTool(acc.popToolsAndMerge(FastCaloSimGeometryHelperCfg(flags))))
-    kwargs.setdefault("CaloEntrance", 'InDet::Containers::InnerDetector')
-
+    kwargs.setdefault("CaloTransportation", acc.addPublicTool(acc.popToolsAndMerge(FastCaloSimCaloTransportationCfg(flags))))
     acc.setPrivateTools(CompFactory.FastCaloSimCaloExtrapolation(name, **kwargs))
     return acc
-
 
 def FastCaloSimGeometryHelperCfg(flags, name="FastCaloSimGeometryHelper", **kwargs):
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.FastCaloSimGeometryHelper(name, **kwargs))
     return acc
-
 
 def ISF_FastCaloSimParametrization_SimPreInclude(flags):
     flags.Sim.RecordStepInfo=True
