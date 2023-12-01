@@ -10,13 +10,12 @@ def MuonJetDrToolCfg(ConfigFlags, name):
     return acc
 
 ### Configuration for the MuonTPExtrapolation tool
-def MuonTPExtrapolationToolCfg(ConfigFlags, name = "MuonTPExtrapolationTool", **kwargs):
+def MuonTPExtrapolationAlgCfg(ConfigFlags, name = "MuonTPExtrapolationAlg", **kwargs):
     acc= ComponentAccumulator()
     from TrkConfig.AtlasExtrapolatorConfig import MuonExtrapolatorCfg
     kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(MuonExtrapolatorCfg(ConfigFlags)))
-    the_tool = CompFactory.MuonTPExtrapolationTool(name = name,
-                                                    **kwargs)
-    acc.setPrivateTools(the_tool)
+    the_alg = CompFactory.DerivationFramework.MuonTPExtrapolationAlg(name = name,**kwargs)
+    acc.addEventAlgo(the_alg, primary = True)
     return acc
 ### Algorithm that decorates the calorimeter deposits in form of 3 vectors to the
 ### muon. The deposits are used to identify the track as CT muon
@@ -38,11 +37,28 @@ def AnalysisMuonThinningAlgCfg(ConfigFlags, name="AnalysisMuonThinningAlg", **kw
     acc.addEventAlgo(the_alg, primary = True)
     return acc
 
+def TriggerMatchingToolCfg(flags, name="TriggerMatchingTool", **kwargs):
+    result = ComponentAccumulator()
+    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+    trig_dec_tool = result.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
+    kwargs.setdefault("TrigDecisionTool", trig_dec_tool)
+
+    from AthenaConfiguration.Enums import LHCPeriod
+    if flags.GeoModel.Run == LHCPeriod.Run3:
+        matching_tool = CompFactory.Trig.R3MatchingTool(name, **kwargs)
+    else:
+        matching_tool = CompFactory.Trig.MatchingTool(name, **kwargs)
+
+    result.setPrivateTools(matching_tool)
+    return result
+
+
 ### Di-muon tagging tool, for T&P studies
 def DiMuonTaggingAlgCfg(ConfigFlags, name="DiMuonTaggingTool", **kwargs):
     acc = ComponentAccumulator()
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    kwargs.setdefault("TrigDecisionTool",  acc.getPrimaryAndMerge(TrigDecisionToolCfg(ConfigFlags)))
+    kwargs.setdefault("TrigMatchingTool",  acc.getPrimaryAndMerge(TriggerMatchingToolCfg(ConfigFlags)))
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(MuonSelectionToolCfg(ConfigFlags)))
     kwargs.setdefault("isMC", ConfigFlags.Input.isMC)
     the_alg = CompFactory.DerivationFramework.DiMuonTaggingAlg(name, **kwargs)
     acc.addEventAlgo(the_alg, primary = True)

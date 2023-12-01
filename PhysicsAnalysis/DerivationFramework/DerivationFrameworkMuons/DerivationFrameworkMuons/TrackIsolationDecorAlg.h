@@ -38,11 +38,14 @@ private:
 
     Gaudi::Property<std::string> m_customName{this, "customName", "", "Custom appendix of the isolation variables"};
 
-    Gaudi::Property<float> m_pt_min{this, "PtMin", 3. * Gaudi::Units::GeV, "Minimal track pt required to decorate the ID track"};
+    Gaudi::Property<float> m_pt_min{this, "PtMin", 2.5 * Gaudi::Units::GeV, "Minimal track pt required to decorate the ID track"};
 
     /// Optional list of decorators to select only the good tracks for the isolation decoration. Only one decorator needs
     /// to pass to launch the isolation calculation
-    SG::ReadDecorHandleKeyArray<xAOD::TrackParticleContainer> m_trkSelKeys{this, "TrackSelections", {}};
+    Gaudi::Property<std::vector<std::string>> m_trkSel_Decors{this, "TrackSelections", {},
+                                                "List of decorator names of which one needs to be true to run the isolation" };
+    SG::ReadDecorHandleKeyArray<xAOD::TrackParticleContainer> m_trkSel_keys{this, "SelectionKeys", {},
+                                                                            "Will be overwritten in initialize"};
     
     /// Now let's come to the WriteDecorHandleKeys
     SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_ptcone20_key{this, "IsoPtCone20", m_toDeorTrkKey, ""};
@@ -53,7 +56,7 @@ private:
     SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_ptvarcone30_key{this, "IsoPtVarCone30", m_toDeorTrkKey, ""};
     SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_ptvarcone40_key{this, "IsoPtVarCone40", m_toDeorTrkKey, ""};
 
-    ToolHandle<xAOD::ITrackIsolationTool> m_track_iso_tool{this, "TrackIsolationTool", ""};
+    ToolHandle<xAOD::ITrackIsolationTool> m_isoTool{this, "IsolationTool", ""};
 
     std::vector<xAOD::Iso::IsolationType> m_trk_iso_types{xAOD::Iso::ptcone40, xAOD::Iso::ptcone30, xAOD::Iso::ptcone20};
     xAOD::TrackCorrection m_trk_corr{};

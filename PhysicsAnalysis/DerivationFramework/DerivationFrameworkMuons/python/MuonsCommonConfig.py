@@ -16,9 +16,6 @@ def MuonsCommonCfg(flags, suff=""):
     Container = "Muons"+suff
 
     acc = ComponentAccumulator()
-    from DerivationFrameworkMuons import DFCommonMuonsConfig   
-    DFCommonMuonsTrtCutOff = DFCommonMuonsConfig.TrtCutOff
-   
     #====================================================================
     # MCP GROUP TOOLS 
     #====================================================================
@@ -29,19 +26,13 @@ def MuonsCommonCfg(flags, suff=""):
     ### IDHits
     # turn of the momentum correction which is not needed for IDHits cut and Preselection
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-    from AthenaConfiguration.Enums import LHCPeriod
-    isRun3 = False
-    if flags.GeoModel.Run == LHCPeriod.Run3: isRun3 = True
-    if not hasattr(acc, "DFCommonMuonsSelector"):
-        DFCommonMuonsSelector = acc.popToolsAndMerge(MuonSelectionToolCfg(
-            flags,
-            name            = "DFCommonMuonsSelector",
-            MaxEta          = 3.,
-            MuQuality       = 3,
-            IsRun3Geo       = isRun3,
-            TurnOffMomCorr  = True)) 
-        acc.addPublicTool(DFCommonMuonsSelector)
-    if DFCommonMuonsTrtCutOff is not None: DFCommonMuonsSelector.TrtCutOff = DFCommonMuonsTrtCutOff
+    
+    DFCommonMuonsSelector = acc.popToolsAndMerge(MuonSelectionToolCfg(flags,
+                                                                        name            = "DFCommonMuonsSelector",
+                                                                        MaxEta          = 3.,
+                                                                        MuQuality       = 3,            
+                                                                        TurnOffMomCorr  = True)) 
+    acc.addPublicTool(DFCommonMuonsSelector)
     DFCommonMuonToolWrapperIDCuts = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(
         flags,
         name               = "DFCommonMuonToolWrapperIDCuts"+suff,

@@ -17,6 +17,7 @@ def MuonSelectionToolCfg(flags, name="MuonSelectionTool", **kwargs):
    """Configure the muon selection tool"""
    acc = ComponentAccumulator()
    kwargs.setdefault("IsRun3Geo", flags.GeoModel.Run >= LHCPeriod.Run3 )
+   kwargs.setdefault("ForceGeometry", flags.GeoModel.Run > LHCPeriod.Run3 )   
    kwargs.setdefault("DisablePtCuts", True)
    kwargs.setdefault("TurnOffMomCorr", True)
    the_tool = CompFactory.CP.MuonSelectionTool(name, **kwargs)   
