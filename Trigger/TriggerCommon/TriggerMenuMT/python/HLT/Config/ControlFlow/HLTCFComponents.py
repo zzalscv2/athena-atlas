@@ -238,3 +238,40 @@ class CFSequenceCA(CFSequence):
     @lru_cache(None)
     def findComboHypoAlg(self):
         return findAlgorithmByPredicate(self.seq, lambda alg: compName(alg) == self.step.Alg.getName() and isComboHypoAlg(alg))
+<<<<<<< Updated upstream
+=======
+
+
+    def createHypoTools(self, flags, chain, newstep):
+        """ set and create HypoTools accumulated on the self.step from an input step configuration
+        Overloading the base class function
+        """
+        with ConfigurableCABehavior(): 
+            acc = ComponentAccumulator()
+        if self.step.combo is None:
+            return
+
+        assert len(newstep.sequences) == len(self.step.sequences), f'Trying to add HypoTools from new step {newstep.name}, which differ in number of sequences'
+        assert len(self.step.sequences) == len(newstep.stepDicts), f'The number of sequences of step {self.step.name} ({len(self.step.sequences)}) differ from the number of dictionaries in the chain {len(newstep.stepDicts)}'
+ 
+        log.debug("createHypoTools for Step %s", newstep.name)
+        log.debug('from chain %s with step mult= %d', chain, sum(newstep.multiplicity))
+        log.debug("N(seq)=%d, N(chainDicts)=%d", len(newstep.sequences), len(newstep.stepDicts))
+        
+        for seq, myseq, onePartChainDict in zip(newstep.sequences, self.step.sequences, newstep.stepDicts):
+            log.debug('    seq: %s, onePartChainDict:', seq.name)
+            log.debug('    %s', onePartChainDict)
+            hypoToolConf=seq.getHypoToolConf()
+            if hypoToolConf is not None: # avoid empty sequences
+                hypoToolConf.setConf( onePartChainDict )
+                hypo = HypoAlgNode(Alg = self.ca.getEventAlgo(myseq.hypo.Alg.getName()))
+                hypoToolAcc = hypo.addHypoTool(flags, hypoToolConf) #this creates the HypoTools
+                if isinstance(hypoToolAcc, ComponentAccumulator):
+                    acc.merge(hypoToolAcc)
+                   
+
+        chainDict = HLTMenuConfig.getChainDictFromChainName(chain)
+        self.combo.createComboHypoTools(flags, chainDict, newstep.comboToolConfs)
+        return acc
+    
+>>>>>>> Stashed changes
