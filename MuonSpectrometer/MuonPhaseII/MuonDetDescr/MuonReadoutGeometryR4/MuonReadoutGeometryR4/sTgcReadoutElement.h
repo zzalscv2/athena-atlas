@@ -150,7 +150,6 @@ class sTgcReadoutElement : public MuonReadoutElement {
         Amg::Transform3D fromGapToChamOrigin(const IdentifierHash& layerHash) const;
         Amg::Vector3D chamberStripPos(const IdentifierHash& measHash) const;
 
-        bool m_init{false};
         parameterBook m_pars{};
         const sTgcIdHelper& m_idHelper{idHelperSvc()->stgcIdHelper()};
 
