@@ -9,6 +9,10 @@ namespace MuonGMR4 {
 
 inline double MmReadoutElement::thickness() const { return 2.* m_pars.halfThickness; }
 inline int MmReadoutElement::multilayer() const{ return m_multilayer; }
+inline double MmReadoutElement::moduleHeight() const { return 2.*m_pars.halfHeight; }
+inline double MmReadoutElement::moduleWidthS() const { return 2.*m_pars.halfShortWidth; }
+inline double MmReadoutElement::moduleWidthL() const { return 2.*m_pars.halfLongWidth; }
+inline double MmReadoutElement::moduleThickness() const { return 2.*m_pars.halfThickness; }
 
 inline IdentifierHash MmReadoutElement::measurementHash(const Identifier& measId) const {
     if (m_idHelper.elementID(measId) != m_idHelper.elementID(identify()) ) {

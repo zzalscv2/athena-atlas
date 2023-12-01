@@ -39,15 +39,12 @@ StatusCode MmReadoutGeomTool::initialize() {
     ATH_CHECK(m_geoUtilTool.retrieve());
     return StatusCode::SUCCESS;
 }
-
-
-
 StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& define,
-                                              FactoryCache& factoryCache, int stationEta) {    
+                                              FactoryCache& factoryCache) {    
     
     ATH_MSG_VERBOSE("Load dimensions of "<<m_idHelperSvc->toString(define.detElId)
-                     <<std::endl<<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
-     const GeoShape* shape = m_geoUtilTool->extractShape(define.physVol);
+                     <<std::endl<<std::endl<<m_geoUtilTool->dumpVolume(define.physVol->getParent()));
+    const GeoShape* shape = m_geoUtilTool->extractShape(define.physVol);
     if (!shape) {
         ATH_MSG_FATAL("Failed to deduce a valid shape for "<<m_idHelperSvc->toString(define.detElId));
         return StatusCode::FAILURE;
@@ -63,14 +60,13 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
     define.halfThickness = trapezoid->getXHalfLength1() * Gaudi::Units::mm;
     define.halfShortWidth = trapezoid->getYHalfLength1() * Gaudi::Units::mm;
     define.halfLongWidth = trapezoid->getYHalfLength2() * Gaudi::Units::mm;
-    define.halfLength = trapezoid->getZHalfLength() * Gaudi::Units::mm;
+    define.halfHeight = trapezoid->getZHalfLength() * Gaudi::Units::mm;
    
-        ATH_MSG_DEBUG("Extracted parameters "
-                       <<", halfThickness: "<<define.halfThickness<<"/"
-                       <<", halfShortWidth : "<<define.halfShortWidth<<"/"
-                       <<", halfLongWidth : "<<define.halfLongWidth<<"/"
-                       <<", halfLength : "<<define.halfLength<<"/"
-                    );
+    ATH_MSG_DEBUG("Extracted parameters "
+                    <<", halfThickness: "<<define.halfThickness<<"/"
+                    <<", halfShortWidth : "<<define.halfShortWidth<<"/"
+                    <<", halfLongWidth : "<<define.halfLongWidth<<"/"
+                    <<", halfHeight : "<<define.halfHeight);
 
 
     std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "MicroMegasGas");
@@ -94,6 +90,7 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
       I'm sorting the gas gap with the first one being closest to the experiment's origin.
       I doing this in case the gaps aren't sorted in that way within the Full Phys Vol Quadruplet.
       Also, now the stereoAngles and totalActiveStrips vectors will match the sequence of the allGasGaps vector.*/
+    const int stationEta = m_idHelperSvc->stationEta(define.detElId);
     std::sort(allGasGaps.begin(), allGasGaps.end(),
               [&stationEta](const physVolWithTrans&gapI, const physVolWithTrans & gapJ) {
                 const Amg::Vector3D posGapI = gapI.transform.translation();
@@ -104,9 +101,8 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
                     return posGapI.x() > posGapJ.x();             
               });
 
-    for (std::size_t gap = 0; gap < allGasGaps.size(); ++gap) {
-
-        const auto& gapVol = allGasGaps[gap];
+    for (unsigned int gap = 0; gap < allGasGaps.size(); ++gap) {
+        const physVolWithTrans& gapVol = allGasGaps[gap];
         const GeoShape* gapShape = m_geoUtilTool->extractShape(gapVol.physVol);
         if (gapShape->typeID() != GeoTrd::getClassTypeID()) {
             ATH_MSG_FATAL("Failed to extract a geo shape");
@@ -118,7 +114,6 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
         /*The origin of the chamber/gasGap axes system is located at the center of the chamber.
         We subtract the HalfLength across the Z axis to transform from the center to the origin of the trapezoid
         The we add the strip pitch to reach the position of the first strip.*/
-
         StripDesignPtr stripDesign = std::make_unique<StripDesign>();
 
         stripDesign->defineStripLayout(Amg::Vector2D{-gapTrd->getZHalfLength() + paramBook.stripPitch, 0.},
@@ -126,28 +121,14 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
                                         paramBook.stripWidth,
                                         paramBook.totalActiveStrips.at(gap));       
 
-        stripDesign->defineTrapezoid(define.halfShortWidth, define.halfLongWidth, define.halfLength, paramBook.stereoAngle.at(gap));
+        stripDesign->defineTrapezoid(define.halfShortWidth, define.halfLongWidth, define.halfHeight, paramBook.stereoAngle.at(gap));
         stripDesign = (*factoryCache.stripDesigns.emplace(stripDesign).first);
         StripLayer stripLayer(gapVol.transform, stripDesign, 
-                            layerHash(gap+1));
+                              IdentifierHash{gap});
         define.layers.push_back(std::move(stripLayer));
-
-
     } //end of gas gap loop
-
-
     return StatusCode::SUCCESS;
 }
-
-
-IdentifierHash MmReadoutGeomTool::layerHash(const int gasGap) const {
-
-    
-    IdentifierHash idHash = (gasGap-1);
-    ATH_MSG_DEBUG("gasGap: "<<gasGap<<" --> "<<static_cast<unsigned int>(idHash));
-    return idHash;
-}
-
 
 StatusCode MmReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     GeoModelIO::ReadGeoModel* sqliteReader = m_geoDbTagSvc->getSqliteReader();
@@ -156,15 +137,11 @@ StatusCode MmReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         return StatusCode::FAILURE;
     }
 
-
     FactoryCache facCache{};
     ATH_CHECK(readParameterBook(facCache));
 
 
     const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
-    for (auto itr = idHelper.detectorElement_begin(); itr != idHelper.detectorElement_end(); ++itr){
-        ATH_MSG_DEBUG("Expect detector Identifier "<<m_idHelperSvc->toString(*itr));
-    }
     // Get the list of full phys volumes from SQLite, and create detector
     // elements
     using alignNodeMap = IMuonGeoUtilityTool::alignNodeMap;    
@@ -176,7 +153,7 @@ StatusCode MmReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     alignedPhysNodes alignedNodes = m_geoUtilTool->selectAlignableVolumes(mapFPV, mapAlign);
 #ifndef SIMULATIONBASE
     SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds= std::make_shared<SurfaceBoundSet<Acts::TrapezoidBounds>>();
-#endif    
+#endif 
 
     for (auto& [key, pv] : mapFPV) {
         /// For MicroMegas the Keys are formatted in the following way.
@@ -184,9 +161,9 @@ StatusCode MmReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         // e.g. MM_SM1Q2_1_6_1 . It's the "type" Attribute in the new GeoModel XML files.
         std::vector<std::string> key_tokens = tokenize(key, "_");
 
-        if (key_tokens[0].find("MM") == std::string::npos )
-            continue;   
-
+        if (key_tokens[0].find("MM") == std::string::npos){
+            continue;
+        }
         ATH_MSG_DEBUG("Retrieving MicroMegas Quadruplet : " << key );
 
         MmReadoutElement::defineArgs define{};
@@ -208,7 +185,7 @@ StatusCode MmReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         define.physVol = pv;
         define.chambDesign = key_tokens[0]+"_"+key_tokens[1]; // Recover the string denoted in WMM tables. e.g. chambDesign = "MM_SM1Q2"
         define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol, alignedNodes);  
-        ATH_CHECK(loadDimensions(define, facCache,atoi(key_tokens[2].c_str())));
+        ATH_CHECK(loadDimensions(define, facCache));
 #ifndef SIMULATIONBASE
         define.layerBounds = layerBounds;
 #endif

@@ -23,12 +23,17 @@ class MmReadoutElement : public MuonReadoutElement {
     struct parameterBook {
 
 
-        //Trapezoid dimensions of MicroMegas
-
+      ///Trapezoid dimensions of MicroMegas
+      
+      /// half-thickness along z-axis
       double halfThickness{0.};
+      /// width of the lower edge 
       double halfShortWidth{0.};
+      /// width of the upper edge
       double halfLongWidth{0.};
-      double halfLength{0.};
+      /// length in the radial direction
+      double halfHeight{0.};
+      /// number of gasGaps
       unsigned int nGasGaps{0};
 
       std::vector<StripLayer> layers{};
@@ -50,9 +55,20 @@ class MmReadoutElement : public MuonReadoutElement {
         return ActsTrk::DetectorType::Mm;
     }
 
+    
     /// Overload from the Acts::DetectorElement (2 * halfheight)
     double thickness() const override final;
+    
+    /// Returns the multi layer of the element [1-2]
     int multilayer() const;
+    /// Returns the height along the z-axis
+    double moduleHeight() const;
+    /// Returns the width at the short edge
+    double moduleWidthS() const;
+    /// Returns the width at the top edge
+    double moduleWidthL() const;
+    /// Returns the module thickness
+    double moduleThickness() const;
 
     StatusCode initElement() override final;
 

@@ -79,6 +79,10 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
         
         if (!station) {
             const MuonGMR4::MuonChamber* chamber = m_surfaceProvTool->getChamber(reId);
+            if (!chamber) {
+                ATH_MSG_FATAL("No chamber is available for "<<m_idHelperSvc->toStringDetEl(reId));
+                return StatusCode::FAILURE;
+            }
             std::unique_ptr<MuonGM::MuonStation> newStation = std::make_unique<MuonGM::MuonStation>(stName,
                                                                                                     chamber->halfXShort(),   /// S-size
                                                                                                     chamber->halfY(),        /// R-size

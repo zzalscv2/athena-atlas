@@ -69,6 +69,7 @@ MuonDetectorManager::MuonDetectorManager()
     insert(getAllMdtReadoutElements(), allEles);
     insert(getAllTgcReadoutElements(), allEles);
     insert(getAllRpcReadoutElements(), allEles);
+    insert(getAllMmReadoutElements(), allEles);
     insert(getAllsTgcReadoutElements(), allEles);
     return allEles;
 }
@@ -81,7 +82,6 @@ ADD_DETECTOR(sTgcReadoutElement, m_sTgcEles);
 unsigned int MuonDetectorManager::getNumTreeTops() const {
     return m_treeTopVector.size();
 }
-
 PVConstLink MuonDetectorManager::getTreeTop(unsigned int i) const {
     return m_treeTopVector[i];
 }
@@ -106,6 +106,7 @@ const MuonReadoutElement* MuonDetectorManager::getReadoutElement(const Identifie
     else if (m_idHelperSvc->isRpc(id)) return getRpcReadoutElement(id);
     else if (m_idHelperSvc->isTgc(id)) return getTgcReadoutElement(id);
     else if (m_idHelperSvc->issTgc(id)) return getsTgcReadoutElement(id);
+    else if (m_idHelperSvc->isMM(id)) return getMmReadoutElement(id);
     ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Not a muon detector element "<<m_idHelperSvc->toString(id));
     return nullptr;
 }

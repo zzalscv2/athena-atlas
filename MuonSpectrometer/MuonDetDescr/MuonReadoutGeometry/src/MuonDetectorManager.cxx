@@ -25,7 +25,7 @@ namespace MuonGM {
         setName("Muon");
         if (m_idHelperSvc.retrieve().isFailure()) {
             throw std::runtime_error("MuonDetectorManager() - No IdHelper svc is available");
-        } 
+        }
         loadStationIndices();
     }
 
@@ -750,12 +750,14 @@ namespace MuonGM {
     }
     void MuonDetectorManager::loadStationIndices() {
         
-        const MdtIdHelper& mdtHelper{m_idHelperSvc->mdtIdHelper()};
-        m_mdt_EIS_stName = mdtHelper.stationNameIndex("EIS");
-        m_mdt_BIM_stName = mdtHelper.stationNameIndex("BIM");
-        m_mdt_BME_stName = mdtHelper.stationNameIndex("BME");
-        m_mdt_BMG_stName = mdtHelper.stationNameIndex("BMG");
-  
+        if (m_idHelperSvc->hasMDT()) {
+            const MdtIdHelper& mdtHelper{m_idHelperSvc->mdtIdHelper()};
+            m_mdt_EIS_stName = mdtHelper.stationNameIndex("EIS");
+            m_mdt_BIM_stName = mdtHelper.stationNameIndex("BIM");
+            m_mdt_BME_stName = mdtHelper.stationNameIndex("BME");
+            m_mdt_BMG_stName = mdtHelper.stationNameIndex("BMG");
+        }
+        if (!m_idHelperSvc->hasRPC()) return;
         const RpcIdHelper& rpcHelper{m_idHelperSvc->rpcIdHelper()};
         m_rpcStatToIdx.insert(std::make_pair(rpcHelper.stationNameIndex("BML"), RpcStatType::BML));
         m_rpcStatToIdx.insert(std::make_pair(rpcHelper.stationNameIndex("BMS"), RpcStatType::BMS));
