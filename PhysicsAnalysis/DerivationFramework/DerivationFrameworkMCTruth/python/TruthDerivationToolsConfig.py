@@ -196,11 +196,10 @@ def TruthIsolationToolCfg(flags, name, **kwargs):
                       primary = True)
     return acc 
 
-def MuonTruthIsolationToolCfg(flags, name, **kwargs):
+def MuonTruthIsolationDecorAlgCfg(flags, name, **kwargs):
     """Configure the MuonTruthIsolationTool"""
     acc = ComponentAccumulator()
-    MuonTruthIsolationTool = CompFactory.DerivationFramework.MuonTruthIsolationTool
-    acc.addPublicTool(MuonTruthIsolationTool(name = name, **kwargs),
+    acc.addEventAlgo(CompFactory.DerivationFramework.MuonTruthIsolationDecorAlg(name = name, **kwargs),
                       primary = True)
     return acc
 

@@ -3,11 +3,11 @@
 */
 
 /////////////////////////////////////////////////////////////////
-// MuonTruthIsolationTool.cxx, (c) ATLAS Detector software
+// MuonTruthIsolationDecorAlg.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 // Runs on muons without a truth particle link.
 // Finds the nearest stable truth particle and adds its info to the muon.
-#include "DerivationFrameworkMuons/MuonTruthIsolationTool.h"
+#include "DerivationFrameworkMuons/MuonTruthIsolationDecorAlg.h"
 
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
@@ -16,9 +16,11 @@ namespace {
     static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> acc_tpl("truthParticleLink");
 
     static const SG::AuxElement::Decorator<float> decorator_topoetcone20("topoetcone20_truth");
+
     static const SG::AuxElement::Decorator<float> decorator_ptcone20("ptcone20_truth");
     static const SG::AuxElement::Decorator<float> decorator_ptvarcone20("ptvarcone20_truth");
     static const SG::AuxElement::Decorator<float> decorator_ptvarcone30("ptvarcone30_truth");
+
     static const SG::AuxElement::Decorator<float> decorator_ptcone20_pt500("ptcone20_pt500_truth");
     static const SG::AuxElement::Decorator<float> decorator_ptvarcone20_pt500("ptvarcone20_pt500_truth");
     static const SG::AuxElement::Decorator<float> decorator_ptvarcone30_pt500("ptvarcone30_pt500_truth");
@@ -27,25 +29,26 @@ namespace {
 
 }  // namespace
 // Constructor
-
-DerivationFramework::MuonTruthIsolationTool::MuonTruthIsolationTool(const std::string& t, const std::string& n, const IInterface* p) :
-    AthAlgTool(t, n, p) {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
-}
+namespace DerivationFramework{
+MuonTruthIsolationDecorAlg::MuonTruthIsolationDecorAlg(const std::string& name, ISvcLocator* pSvcLocator) :
+    AthReentrantAlgorithm(name, pSvcLocator) {}
 
 // Athena initialize and finalize
-StatusCode DerivationFramework::MuonTruthIsolationTool::initialize() {
+StatusCode MuonTruthIsolationDecorAlg::initialize() {
     ATH_MSG_VERBOSE("initialize() ...");
     ATH_CHECK(m_partSGKey.initialize());
     ATH_CHECK(m_truthSGKey.initialize());
+    
+    SG::AuxTypeRegistry& registry{SG::AuxTypeRegistry::instance()};
+    m_topoetcone20_Key = registry.getName(decorator_topoetcone20.auxid());
+    
+    m_ptcone20_pt500_Key = registry.getName(decorator_ptcone20_pt500.auxid());
+    m_ptvarcone20_pt500_Key = registry.getName(decorator_ptvarcone20_pt500.auxid());
+    m_ptvarcone30_pt500_Key = registry.getName(decorator_ptvarcone30_pt500.auxid());
 
-    m_topoetcone20_Key = m_partSGKey.key() + ".topoetcone20_truth";
-    m_ptcone20_pt500_Key = m_partSGKey.key() + ".ptcone20_pt500_truth";
-    m_ptcone20_Key = m_partSGKey.key() + ".ptcone20_truth";
-    m_ptvarcone20_pt500_Key = m_partSGKey.key() + ".ptvarcone20_pt500_truth";
-    m_ptvarcone20_Key = m_partSGKey.key() + ".ptvarcone20_truth";
-    m_ptvarcone30_pt500_Key = m_partSGKey.key() + ".ptvarcone30_pt500_truth";
-    m_ptvarcone30_Key = m_partSGKey.key() + ".ptvarcone30_truth";
+    m_ptcone20_Key = registry.getName(decorator_ptcone20.auxid());
+    m_ptvarcone20_Key = registry.getName(decorator_ptvarcone20.auxid());
+    m_ptvarcone30_Key = registry.getName(decorator_ptvarcone30.auxid());
 
     ATH_CHECK(m_topoetcone20_Key.initialize());
     ATH_CHECK(m_ptcone20_pt500_Key.initialize());
@@ -58,9 +61,8 @@ StatusCode DerivationFramework::MuonTruthIsolationTool::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode DerivationFramework::MuonTruthIsolationTool::addBranches() const {
+StatusCode MuonTruthIsolationDecorAlg::execute(const EventContext& ctx) const {
     // Retrieve main particle collection
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::ReadHandle<xAOD::IParticleContainer> parts{m_partSGKey, ctx};
     if (!parts.isValid()) {
         ATH_MSG_ERROR("No Muon collection with name " << m_partSGKey.fullKey() << " found in StoreGate!");
@@ -78,10 +80,10 @@ StatusCode DerivationFramework::MuonTruthIsolationTool::addBranches() const {
     for (const xAOD::TruthEvent* event : *tec) {
         for (size_t parti = 0; parti < event->nTruthParticles(); ++parti) {
             const xAOD::TruthParticle* tpart = event->truthParticle(parti);
-            if (!tpart || !MC::isStable(tpart) || HepMC::is_simulation_particle(tpart) || tpart->isNeutrino()) continue;
+            if (!tpart || tpart->pt() < 1  || !MC::isStable(tpart) || HepMC::is_simulation_particle(tpart) || tpart->isNeutrino()) continue;
             const int sector = sector_mapping.getSector(tpart->phi());
             truth_map_calo[sector].push_back(tpart);
-            if (!tpart->isCharged() || tpart->abseta() > 2.5 || tpart->pt() < 500) continue;
+            if (tpart->pt() < 500 || !tpart->isCharged() || tpart->abseta() > 2.5) continue;
             truth_map_track[sector].push_back(tpart);
         }
     }
@@ -94,15 +96,15 @@ StatusCode DerivationFramework::MuonTruthIsolationTool::addBranches() const {
         std::vector<int> sectors;
         sector_mapping.getSectors(part->phi(), sectors);
 
-        float new_topoetcone20{0}, new_ptcone20{0}, new_ptvarcone20{0}, new_ptvarcone30{0}, new_ptcone20_pt500{0}, new_ptvarcone20_pt500{0},
-            new_ptvarcone30_pt500{0};
+        float new_topoetcone20{0}, new_ptcone20{0}, new_ptvarcone20{0}, new_ptvarcone30{0}, 
+              new_ptcone20_pt500{0}, new_ptvarcone20_pt500{0}, new_ptvarcone30_pt500{0};
         /// Loop over the sectors
         for (const int sector : sectors) {
             const std::vector<const xAOD::TruthParticle*>& calo_container = truth_map_calo[sector];
             /// Update the topo et cones
             for (const xAOD::TruthParticle* calo_part : calo_container) {
                 if (calo_part == truthLink || (truthLink && HepMC::uniqueID(truthLink) == HepMC::uniqueID(calo_part))) continue;
-                const float dR = xAOD::P4Helpers::deltaR(calo_part, part);
+                const float dR = xAOD::P4Helpers::deltaR(calo_part, part, false);
                 if (dR < 0.05 || dR > 0.2) continue;
                 new_topoetcone20 += calo_part->pt();
             }
@@ -110,7 +112,7 @@ StatusCode DerivationFramework::MuonTruthIsolationTool::addBranches() const {
             const std::vector<const xAOD::TruthParticle*>& truth_container = truth_map_track[sector];
             for (const xAOD::TruthParticle* trk_part : truth_container) {
                 if (trk_part == truthLink || (truthLink && HepMC::uniqueID(truthLink) == HepMC::uniqueID(trk_part))) continue;
-                const float dR = xAOD::P4Helpers::deltaR(trk_part, part);
+                const float dR = xAOD::P4Helpers::deltaR(trk_part, part, false);
                 const float pt = trk_part->pt();
                 if (dR > 0.3) continue;
                 new_ptcone20_pt500 += (dR < 0.2) * pt;
@@ -132,4 +134,5 @@ StatusCode DerivationFramework::MuonTruthIsolationTool::addBranches() const {
         decorator_ptvarcone30_pt500(*part) = new_ptvarcone30_pt500;
     }
     return StatusCode::SUCCESS;
+}
 }

@@ -12,10 +12,8 @@ def AddRecoMumuToolCfg(flags, name = "MuonTPRecoMumuTool", **kwargs):
     result.setPrivateTools(the_tool)
     return result
 
-def AddJPsiVertexingFitterCfg(flags, prefix=''):
+def AddJPsiVertexingFitterCfg(flags, prefix='', IdTrkContainer = "InDetTrackParticles", MuonContainer = "Muons"):
   result = ComponentAccumulator()
-  MuonContainer = "Muons"
-  IdTrkContainer = "InDetTrackParticles"
   from JpsiUpsilonTools.JpsiUpsilonToolsConfig import JpsiFinderCfg
   jpsi_finder_tool = result.popToolsAndMerge(JpsiFinderCfg(flags,  
                                            muAndMu = False,
@@ -82,9 +80,9 @@ def AddJPsiVertexingSelectionCfg(flags, prefix = ''):
   result.addEventAlgo(the_alg, primary = True)
   return result
 
-def AddMCPJPsiVertexFitCfg(flags, prefix = ''):
+def AddMCPJPsiVertexFitCfg(flags, prefix = '', IdTrkContainer = "InDetTrackParticles", MuonContainer = "Muons"):
   result = ComponentAccumulator()
-  result.merge(AddJPsiVertexingFitterCfg(flags, prefix = prefix))
+  result.merge(AddJPsiVertexingFitterCfg(flags, prefix = prefix, IdTrkContainer = IdTrkContainer, MuonContainer = MuonContainer))
   result.merge(AddJPsiVertexingSelectionCfg(flags, prefix = prefix))  
   return result
 

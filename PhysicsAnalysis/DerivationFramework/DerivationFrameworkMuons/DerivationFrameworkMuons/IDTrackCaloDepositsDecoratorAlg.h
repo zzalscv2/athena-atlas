@@ -8,6 +8,7 @@
 #include "ICaloTrkMuIdTools/ITrackDepositInCaloTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 #include "xAODMuon/MuonContainer.h"
 ///     Algorithm to store decorate the IParticle with all energy deposits in the calorimeter needed for post fine tuning of the cut-based
 ///     calorimeter tagging working points. The tool adds the following three decorations
@@ -29,24 +30,27 @@ public:
     StatusCode execute(const EventContext& ctx) const override;
 
 private:
-    StatusCode recompute_and_decorate(const xAOD::IParticle* track_part) const;
 
     ToolHandle<ITrackDepositInCaloTool> m_trkDepositInCalo{this, "TrackDepositInCaloTool", "TrackDepositInCaloTool/TrackDepositInCaloTool"};
 
-    /// Store gate key of the muon container
-    SG::ReadHandleKey<xAOD::MuonContainer> m_muon_key{this, "MuonContainer", "Muons"};
-    /// Key of the associated ID tracks.
-    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_id_trk_key{this, "InDetTrks", "InDetTrackParticles"};
+    /// Particle container to decorate the Pivot plane coordinates to
+    SG::ReadHandleKey<xAOD::IParticleContainer> m_partKey{this, "ContainerKey", "RandomParticle"};
 
-    Gaudi::Property<bool> m_decor_muons{this, "DecorateMuons", true, "Switch to attach the decorations to the muon particles."};
-    ///
-    Gaudi::Property<bool> m_use_SAF{this, "IncludeSAF_Muons", false, "If the muons are not decorated directly"};
+    Gaudi::Property<float> m_ptMin{this, "PtMin", 2.5 * Gaudi::Units::GeV, 
+                                    "Minimal track pt required to decorate the ID track"};
 
-    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_deposit_key{
-        this, "Calo_Deposit", "", "Name of the decorator to store all the energy deposits in the calorimeter"};
-    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_eloss_key{this, "Calo_EnergyLoss", "",
+    /// Optional list of decorators to select only the good tracks for the isolation decoration. Only one decorator needs
+    /// to pass to launch the isolation calculation    
+    Gaudi::Property<std::vector<std::string>> m_trkSelDecors{this, "TrackSelections", {},
+                                                  "List of decorator names of which one needs to be true to run the isolation" };
+    SG::ReadDecorHandleKeyArray<xAOD::IParticleContainer> m_trkSelKeys{this, "SelectionKeys", {},
+                                                                       "Will be overwritten in initialize"};
+
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_depositKey{this, "Calo_Deposit", m_partKey, "CaloDeposits", 
+                                                "Name of the decorator to store all the energy deposits in the calorimeter"};
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_elossKey{this, "Calo_EnergyLoss", m_partKey, "CaloElosses",
                                                                   "Name of the decorator to store the energy loss from EMB1."};
-    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_type_key{this, "Calo_Type", "",
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_typeKey{this, "Calo_Type", m_partKey, "CaloDepType",
                                                                  "Name of the decorator to store the energy deposit from EMB2."};
 };
 

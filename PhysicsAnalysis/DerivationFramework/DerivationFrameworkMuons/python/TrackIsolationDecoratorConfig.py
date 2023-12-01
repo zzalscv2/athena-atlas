@@ -35,23 +35,34 @@ def MuonTrackIsolationDecorAlgCfg(ConfigFlags, name="MuonTrackIsolationDecorator
     kwargs.setdefault("customName", wpName)
     ## Minimal pt cut on the ID tracks
     kwargs.setdefault("PtMin", 2500.)
-    kwargs.setdefault("TrackIsolationTool", result.popToolsAndMerge(TrackIsolationToolCfg(ConfigFlags, 
-                                                                                          TTVATool=ttvaTool, 
-                                                                                          TrackSelectionTool=trackSelTool)))
+    kwargs.setdefault("IsolationTool", result.popToolsAndMerge(TrackIsolationToolCfg(ConfigFlags, 
+                                                                                     TTVATool=ttvaTool, 
+                                                                                     TrackSelectionTool=trackSelTool)))
     theAlg = CompFactory.DerivationFramework.TrackIsolationDecorAlg(name = name, **kwargs)
     result.addEventAlgo(theAlg, primary = True)
     return result
 
 
-def MuonCaloIsolationDecorAlgCfg(ConfigFlags, name = "MuonCaloIsolationDecorator", **kwargs):
+def TrackCaloIsolationDecorAlgCfg(ConfigFlags, name = "MuonCaloIsolationDecorator", **kwargs):
     from IsolationAlgs.IsoToolsConfig import MuonCaloIsolationToolCfg
     result = ComponentAccumulator()
     kwargs.setdefault("PtMin", 2500.)
-    kwargs.setdefault("CaloIsolationTool", result.getPrimaryAndMerge(MuonCaloIsolationToolCfg(ConfigFlags, 
+    kwargs.setdefault("IsolationTool", result.getPrimaryAndMerge(MuonCaloIsolationToolCfg(ConfigFlags, 
                                                                         saveOnlyRequestedCorrections=True)))
     the_alg = CompFactory.DerivationFramework.CaloIsolationDecorAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary=True)
     return result
+
+def TrackPflowIsolationDecorAlgCfg(ConfigFlags, name = "MuonPflowIsolationDecorator", **kwargs):
+    from IsolationAlgs.IsoToolsConfig import MuonCaloIsolationToolCfg
+    result = ComponentAccumulator()
+    kwargs.setdefault("PtMin", 2500.)
+    kwargs.setdefault("IsolationTool", result.getPrimaryAndMerge(MuonCaloIsolationToolCfg(ConfigFlags, 
+                                                                    saveOnlyRequestedCorrections=True)))
+    the_alg = CompFactory.DerivationFramework.PflowIsolationDecorAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary=True)
+    return result
+
 
 def TrackIsolationCfg(ConfigFlags, TrackCollection="InDetTrackParticles", TrackSelections = []):
     result = ComponentAccumulator()
@@ -64,7 +75,13 @@ def TrackIsolationCfg(ConfigFlags, TrackCollection="InDetTrackParticles", TrackS
                                                        trackPt = trackPt,
                                                        TrackCollection = TrackCollection,
                                                        TrackSelections = TrackSelections))
-    result.merge(MuonCaloIsolationDecorAlgCfg(ConfigFlags,
-                                              name = "CaloIsoDecorAlg{container}".format(container = TrackCollection),
-                                              TrackCollection = TrackCollection))
+    result.merge(TrackCaloIsolationDecorAlgCfg(ConfigFlags,
+                                               name = "CaloIsoDecorAlg{container}".format(container = TrackCollection),
+                                               TrackCollection = TrackCollection,
+                                               TrackSelections = TrackSelections))
+    
+    result.merge(TrackPflowIsolationDecorAlgCfg(ConfigFlags,
+                                               name = "PflowIsoDecorAlg{container}".format(container = TrackCollection),
+                                               TrackCollection = TrackCollection,
+                                               TrackSelections = TrackSelections))
     return result
