@@ -17,11 +17,13 @@ def mongroupsCfg(moniAccess, data_type):
         
         # need request new mongroup in the future for bootstrap photon (like "shifter_bsphoton")
         monitoring_photon = list(filter(lambda x: ('HLT_g' in x), shifter_eg))
+        # monitoring_bootstrap = {
+        #         'HLT_g22_tight_L1eEM18M'  : 'HLT_g20_tight_L1eEM18M',
+        #         'HLT_g25_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
+        #         'HLT_g35_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
+        #         'HLT_g50_loose_L1eEM24L'  : 'HLT_g25_loose_L1eEM24L'
+        # }
         monitoring_bootstrap = {
-                'HLT_g25_medium_L1EM20VH' : 'HLT_g25_loose_L1EM20VH',
-                'HLT_g35_medium_L1EM20VH' : 'HLT_g25_loose_L1EM20VH',
-                'HLT_g22_tight_L1EM15VHI' : 'HLT_g20_tight_L1EM15VHI',
-                'HLT_g50_loose_L1EM20VH'  : 'HLT_g25_loose_L1EM20VH',
                 'HLT_g22_tight_L1eEM18M'  : 'HLT_g20_tight_L1eEM18M',
                 'HLT_g25_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
                 'HLT_g35_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
@@ -41,7 +43,7 @@ def mongroupsCfg(moniAccess, data_type):
         monitoring_topo = []
         mongroups = { 
                 'monitoring_electron'           : monitoring_electron,
-                'monitoring_photon'             : monitoring_photon,
+                'monitoring_photon'             : ['HLT_g22_tight_L1eEM18M','HLT_g25_medium_L1eEM24L','HLT_g35_medium_L1eEM24L','HLT_g50_loose_L1eEM24L','HLT_g140_loose_L1eEM26M','HLT_g140_loose_L1eEM28M','HLT_g300_etcut_L1eEM26M','HLT_g300_etcut_L1eEM28M'],
                 'monitoring_bootstrap'          : monitoring_bootstrap,
                 'monitoringTP_electron'         : monitoringTP_electron,
                 'monitoring_tags'               : monitoring_tags,

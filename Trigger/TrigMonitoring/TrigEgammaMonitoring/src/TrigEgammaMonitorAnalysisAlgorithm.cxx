@@ -67,12 +67,12 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const std::vector< st
 	  }else if(pairObj.first->type()==xAOD::Type::Photon){
 		  float et = getCluster_et(pairObj.first)/Gaudi::Units::GeV;
 		  if(et < info.etthr-5.0) continue; 
-
 		  // Applying FixedCutLoose isolation on the offline photon as recommended  in the twiki:
 		  // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/IsolationSelectionTool#Photons
 		  bool pass_CaloIso = getIsolation_topoetcone20(pairObj.first)/getCluster_et(pairObj.first) < 0.065;
 		  bool pass_trkIso = getIsolation_ptcone20(pairObj.first)/getCluster_et(pairObj.first) < 0.05; 
 
+        //   ATH_MSG_INFO("Edmar caloIso: " << pass_CaloIso << " trkIso: " << pass_trkIso);
 		  if (!pass_CaloIso || !pass_trkIso){
 			  continue; // pass FixedCutLoose offline isolation
 		  }
@@ -511,6 +511,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const std::vector< s
               const auto *feat = *(featLinkInfo.link);
               if(!feat) continue;
               ph_vec.push_back(feat);
+            //   ATH_MSG_INFO( "Edmar Chain :" <<  trigger);
           }
           fillShowerShapes( trigger, ph_vec, true );
       }

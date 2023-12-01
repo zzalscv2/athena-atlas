@@ -176,8 +176,6 @@ bool TrigEgammaMonitorBaseAlgorithm::isPrescaled(const std::string& trigger) con
 
 asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUtils::Decision *dec, const TrigInfo& info) const {
     
-    ATH_MSG_DEBUG("setAccept");
-
     unsigned int condition=TrigDefs::includeFailedDecisions;
 
     asg::AcceptData acceptData (&m_accept);
@@ -190,7 +188,6 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
     bool passedEF=false;
     
     if (dec) {
-
         auto trigger = info.trigger; 
         // Step 1
         passedL1Calo = match()->ancestorPassed<TrigRoiDescriptorCollection>( dec , trigger , "initialRois", condition);
@@ -200,7 +197,6 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
             passedL2Calo = match()->ancestorPassed<xAOD::TrigEMClusterContainer>(dec, trigger, match()->key("FastCalo"), condition);  
           
             if(passedL2Calo){
-
                 // Step 3
                 if(info.signature == "Electron"){
                     std::string key = match()->key("FastElectrons");
@@ -211,7 +207,6 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                 }
 
                 if(passedL2){
-
                     // Step 4
                     std::string key = match()->key("PrecisionCalo_Electron");
                     if(info.signature == "Photon") key = match()->key("PrecisionCalo_Photon");
@@ -221,8 +216,7 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                     passedEFCalo = match()->ancestorPassed<xAOD::CaloClusterContainer>(dec, trigger, key, condition);
 
                     if(passedEFCalo){
-
-                        // Step 5
+                         // Step 5
                         passedEFTrk=true;// Assume true for photons
 
                         // Step 6
@@ -246,9 +240,14 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                     } // EFCalo
                 }// L2
             }// L2Calo
-        }// L2Calo
-
+        }// L1Calo
+        if(info.signature == "Photon"){
+            passedEF = match()->ancestorPassed<xAOD::PhotonContainer>(dec, info.trigger, match()->key("Photons"), condition);
+        }
     }
+
+
+    
 
     acceptData.setCutResult("L1Calo",passedL1Calo);
     acceptData.setCutResult("L2Calo",passedL2Calo);
@@ -256,12 +255,12 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
     acceptData.setCutResult("EFCalo",passedEFCalo);
     acceptData.setCutResult("EFTrack",passedEFTrk);
     acceptData.setCutResult("HLT",passedEF);
-    ATH_MSG_DEBUG("Accept results:");
-    ATH_MSG_DEBUG("L1: "<< passedL1Calo);
-    ATH_MSG_DEBUG("L2Calo: " << passedL2Calo);
-    ATH_MSG_DEBUG("L2: "<< passedL2);
-    ATH_MSG_DEBUG("EFCalo: "<< passedEFCalo);
-    ATH_MSG_DEBUG("HLT: "<<passedEF);
+    // ATH_MSG_INFO("Edmar Accept results:");
+    // ATH_MSG_INFO("Edmar L1: "<< passedL1Calo);
+    // ATH_MSG_INFO("Edmar L2Calo: " << passedL2Calo);
+    // ATH_MSG_INFO("Edmar L2: "<< passedL2);
+    // ATH_MSG_INFO("Edmar EFCalo: "<< passedEFCalo);
+    // ATH_MSG_INFO("Edmar HLT: "<<passedEF);
 
     return acceptData;
 }
