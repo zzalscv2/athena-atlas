@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from TriggerMenuMT.HLT.Config.MenuComponents import AlgNode
+from TriggerMenuMT.HLT.Config.MenuComponents import AlgNode, HypoAlgNode
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import isComboHypoAlg
@@ -14,7 +14,6 @@ from functools import lru_cache
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
-
 
 RoRSeqFilter = CompFactory.RoRSeqFilter
 PassFilter   = CompFactory.PassFilter
@@ -238,3 +237,35 @@ class CFSequenceCA(CFSequence):
     @lru_cache(None)
     def findComboHypoAlg(self):
         return findAlgorithmByPredicate(self.seq, lambda alg: compName(alg) == self.step.Alg.getName() and isComboHypoAlg(alg))
+
+
+    def createHypoTools(self, flags, chain, newstep):
+        """ set and create HypoTools accumulated on the self.step from an input step configuration
+        """
+        with ConfigurableCABehavior(): 
+            acc = ComponentAccumulator()
+        if self.step.combo is None:
+            return
+
+        assert len(newstep.sequences) == len(self.step.sequences), f'Trying to add HypoTools from new step {newstep.name}, which differ in number of sequences'
+        assert len(self.step.sequences) == len(newstep.stepDicts), f'The number of sequences of step {self.step.name} ({len(self.step.sequences)}) differ from the number of dictionaries in the chain {len(newstep.stepDicts)}'
+ 
+        log.debug("createHypoTools for Step %s", newstep.name)
+        log.debug('from chain %s with step mult= %d', chain, sum(newstep.multiplicity))
+        log.debug("N(seq)=%d, N(chainDicts)=%d", len(newstep.sequences), len(newstep.stepDicts))
+        
+        for seq, myseq, onePartChainDict in zip(newstep.sequences, self.step.sequences, newstep.stepDicts):
+            log.debug('    seq: %s, onePartChainDict:', seq.name)
+            log.debug('    %s', onePartChainDict)
+            hypoToolConf=seq.getHypoToolConf()
+            if hypoToolConf is not None: # avoid empty sequences
+                hypoToolConf.setConf( onePartChainDict )
+                hypo = HypoAlgNode(Alg = self.ca.getEventAlgo(myseq.hypo.Alg.getName()))
+                hypoToolAcc = hypo.addHypoTool(flags, hypoToolConf) #this creates the HypoTools
+                if isinstance(hypoToolAcc, ComponentAccumulator):
+                    acc.merge(hypoToolAcc)
+                   
+
+        chainDict = HLTMenuConfig.getChainDictFromChainName(chain)
+        self.combo.createComboHypoTools(flags, chainDict, newstep.comboToolConfs)
+        return acc
