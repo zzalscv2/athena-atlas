@@ -27,6 +27,9 @@ def LVL1InterfacesMonitoringCfg(flags):
     if isData and flags.DQ.Environment not in ('tier0Raw', 'AOD'):
         from TrigT1Monitoring.L1CaloL1TopoMonitorAlgorithm import L1CaloL1TopoMonitoringConfig
         result.merge(L1CaloL1TopoMonitoringConfig(flags))
+
+        from TrigT1Monitoring.L1CaloCTPMonitorAlgorithm import L1CaloCTPMonitoringConfig
+        result.merge(L1CaloCTPMonitoringConfig(flags))
     
         # For online running on bytestream data
         if flags.Input.Format is Format.BS and flags.Trigger.Online.isPartition:
