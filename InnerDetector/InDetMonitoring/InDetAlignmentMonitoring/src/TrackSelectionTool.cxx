@@ -35,7 +35,7 @@ InDetAlignMon::TrackSelectionTool::TrackSelectionTool(const std::string& type, c
 
 //---------------------------------------------------------------------------------------
 
-InDetAlignMon::TrackSelectionTool::~TrackSelectionTool() { }
+InDetAlignMon::TrackSelectionTool::~TrackSelectionTool() = default;
 
 
 //---------------------------------------------------------------------------------------

@@ -28,12 +28,12 @@ MuonTruthHitsFillerTool::MuonTruthHitsFillerTool (const std::string& type,
   : Base (type, name, parent)
 {
   declareProperty("PRD_TruthNames",          m_PRD_TruthNames);
-  m_PRD_TruthNames.push_back("CSC_TruthMap");
-  m_PRD_TruthNames.push_back("RPC_TruthMap");
-  m_PRD_TruthNames.push_back("TGC_TruthMap");
-  m_PRD_TruthNames.push_back("MDT_TruthMap");
-  m_PRD_TruthNames.push_back("MM_TruthMap");
-  m_PRD_TruthNames.push_back("STGC_TruthMap");
+  m_PRD_TruthNames.emplace_back("CSC_TruthMap");
+  m_PRD_TruthNames.emplace_back("RPC_TruthMap");
+  m_PRD_TruthNames.emplace_back("TGC_TruthMap");
+  m_PRD_TruthNames.emplace_back("MDT_TruthMap");
+  m_PRD_TruthNames.emplace_back("MM_TruthMap");
+  m_PRD_TruthNames.emplace_back("STGC_TruthMap");
 
  
 }
@@ -113,7 +113,7 @@ StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode)
 
   bool found = false;
   for (const std::string& key : m_PRD_TruthNames) {
-    const PRD_MultiTruthCollection* collection = 0;
+    const PRD_MultiTruthCollection* collection = nullptr;
     if (!evtStore()->retrieve(collection, key).isSuccess()) {
       ATH_MSG_WARNING(  "PRD_MultiTruthCollection " << key << " NOT found");
       continue;

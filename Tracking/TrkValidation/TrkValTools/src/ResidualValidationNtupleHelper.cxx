@@ -181,7 +181,7 @@ StatusCode Trk::ResidualValidationNtupleHelper::addNtupleItems (
       tree->Branch("TGCPull",     &m_TGCPull);
       tree->Branch("TGCRes",      &m_TGCRes);
     }
-    
+
     if (detectorType==Trk::TrackState::CSC) {
       ATH_MSG_INFO ( "adding CSC residual/pull variables to ntuple ");
       ATH_MSG_INFO ( "Reminder: these variables do not distinguish CSC phi from eta hits.");
@@ -227,7 +227,7 @@ StatusCode Trk::ResidualValidationNtupleHelper::fillMeasurementData (
         fillValues(detectorType);
         return StatusCode::SUCCESS;
     } */
-    std::unique_ptr<Trk::ResidualPull> residualPull=nullptr;
+    std::optional<Trk::ResidualPull> residualPull=std::nullopt;
     if (detectorType!=TrackState::unidentified) {
         residualPull = m_residualPullCalculator->residualPull(measurement, trkParameters,
           (*m_isUnbiased==1) ? Trk::ResidualPull::Unbiased : Trk::ResidualPull::Biased);

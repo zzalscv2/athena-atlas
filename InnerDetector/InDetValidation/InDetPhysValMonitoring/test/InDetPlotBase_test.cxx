@@ -31,7 +31,7 @@
 static const std::string testJobOptionsFile("IDPVM_Test.txt");
 
 struct GaudiKernelFixture:public IDPVM_GaudiFixtureBase{
-  GaudiKernelFixture(const std::string & joFilename):IDPVM_GaudiFixtureBase(joFilename){
+  explicit GaudiKernelFixture(const std::string & joFilename):IDPVM_GaudiFixtureBase(joFilename){
     //nop, everything in base.
   }
 };

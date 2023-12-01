@@ -35,16 +35,16 @@ namespace D3PD {
 
    private:
 
-      int*   m_barcode;
-      int*   m_pdgid;
-      float* m_energy;
-      float* m_pt;
-      float* m_eta;
-      float* m_phi;
-      float* m_posx;
-      float* m_posy;
-      float* m_posz;
-      float* m_time;
+      int*   m_barcode = nullptr;
+      int*   m_pdgid = nullptr;
+      float* m_energy = nullptr;
+      float* m_pt = nullptr;
+      float* m_eta = nullptr;
+      float* m_phi = nullptr;
+      float* m_posx = nullptr;
+      float* m_posy = nullptr;
+      float* m_posz = nullptr;
+      float* m_time = nullptr;
 
       // Property: fill info for only muons or all particles entering Muon Spectrometer?
       bool m_OnlyMuon;

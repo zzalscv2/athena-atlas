@@ -35,7 +35,7 @@ namespace Rec {
 
     MuidMuonRecovery::MuidMuonRecovery(const std::string& type, const std::string& name, const IInterface* parent) :
         AthAlgTool(type, name, parent){
-        declareInterface<IMuidMuonRecovery>(this);       
+        declareInterface<IMuidMuonRecovery>(this);
     }
 
     //<<<<<< PUBLIC MEMBER FUNCTION DEFINITIONS                             >>>>>>
@@ -138,7 +138,7 @@ namespace Rec {
                 ATH_MSG_DEBUG("Using existing pars");
                 exPars = std::move(lastPars);
             } else {
-                exPars = m_extrapolator->extrapolate(ctx, *lastPars, meas->associatedSurface(), Trk::alongMomentum, false, Trk::muon);               
+                exPars = m_extrapolator->extrapolate(ctx, *lastPars, meas->associatedSurface(), Trk::alongMomentum, false, Trk::muon);
             }
 
             if (!exPars) {
@@ -146,7 +146,7 @@ namespace Rec {
                 continue;
             }
 
-            std::unique_ptr<const Trk::ResidualPull> res {m_residualCalculator->residualPull(meas, exPars.get(), Trk::ResidualPull::Unbiased)};
+            std::optional<Trk::ResidualPull> res {m_residualCalculator->residualPull(meas, exPars.get(), Trk::ResidualPull::Unbiased)};
 
             ATH_MSG_DEBUG(" " << m_idHelperSvc->toStringChamber(id) << "  residual " << m_printer->print(*res));
 
@@ -157,7 +157,7 @@ namespace Rec {
                     badEtaIndices.insert(index);
                 }
             }
-          
+
 
             if (msgLvl(MSG::DEBUG)) {
                 if (!m_idHelperSvc->measuresPhi(id)) {
@@ -180,25 +180,25 @@ namespace Rec {
                             Trk::LocalDirection msDir{};
                             detSurf->globalToLocalDirection(pars->momentum(), msDir);
                             ATH_MSG_DEBUG(" local Angles: id (" << idDir.angleXZ() << "," << idDir.angleYZ() << ")  ms ("
-                                                                << msDir.angleXZ() << "," << msDir.angleYZ() << ")");                           
+                                                                << msDir.angleXZ() << "," << msDir.angleYZ() << ")");
                         }
                     }
                 }
             }  // end DEBUG toggle
 
             if (!innerParsSet && !innerParameters && exPars && lastPars) {
-               innerParameters = std::move(exPars); 
+               innerParameters = std::move(exPars);
             } else if (exPars && innerParameters && !middleParameters ) {
-                middleParameters = std::move(exPars);                
+                middleParameters = std::move(exPars);
             }
             lastPars = std::move(exPars);
             innerParsSet = true;
         }
 
         if (middleParameters) {
-            outerParameters = std::move(lastPars); 
+            outerParameters = std::move(lastPars);
         } else {
-            middleParameters = std::move(innerParameters);            
+            middleParameters = std::move(innerParameters);
             if (!middleParameters) {
                 ATH_MSG_DEBUG("parameter extrapolation failed");
                 return nullptr;

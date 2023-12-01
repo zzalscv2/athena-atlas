@@ -75,7 +75,7 @@ void TGC_PrepDataToxAOD::addSDO_TechnologyInformation( xAOD::TrackMeasurementVal
           .createUniqueTrackParameters(gposCor, gposCor.unit(), 1., std::nullopt)
           .release();
       if (pars) {
-        std::unique_ptr<Trk::ResidualPull> resPull = m_pullCalculator->residualPull( clus, pars, Trk::ResidualPull::HitOnly );
+        std::optional<Trk::ResidualPull> resPull = m_pullCalculator->residualPull( clus, pars, Trk::ResidualPull::HitOnly );
         if( resPull && !resPull->residual().empty() ) {
           residual = resPull->residual().front();
           pull     = resPull->pull().front();

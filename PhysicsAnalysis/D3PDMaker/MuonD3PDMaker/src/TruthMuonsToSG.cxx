@@ -44,7 +44,7 @@ StatusCode TruthMuonsToSG::finalize() {
 
 
 StatusCode TruthMuonsToSG::execute() {
-  const xAOD::TruthParticleContainer *truthCollection = 0;
+  const xAOD::TruthParticleContainer *truthCollection = nullptr;
   StatusCode sc=evtStore()->retrieve( truthCollection, m_resolver.key());
   if( sc.isFailure()  ||  !truthCollection) {
     ATH_MSG_ERROR("Failed to retrieve xAOD::TruthParticleContainer " << m_resolver.key());

@@ -62,15 +62,15 @@ namespace JiveXML {
 			if (! perigee) return nullptr ;
 
 			//write out p_T
-			if ((perigee->parameters())[Trk::qOverP]==0) pt.push_back(DataType(9999.));
+			if ((perigee->parameters())[Trk::qOverP]==0) pt.emplace_back(9999.);
 			else pt.push_back( (perigee->charge() > 0) ? DataType(perigee->pT()/Gaudi::Units::GeV) : DataType((-perigee->pT())/Gaudi::Units::GeV));
 
-			d0.push_back(DataType((perigee->parameters())[Trk::d0]/Gaudi::Units::cm));
-			z0.push_back(DataType(perigee->parameters()[Trk::z0]/Gaudi::Units::cm));
-			phi0.push_back(DataType(perigee->parameters()[Trk::phi0]));
+			d0.emplace_back((perigee->parameters())[Trk::d0]/Gaudi::Units::cm);
+			z0.emplace_back(perigee->parameters()[Trk::z0]/Gaudi::Units::cm);
+			phi0.emplace_back(perigee->parameters()[Trk::phi0]);
 
-			if (perigee->parameters()[Trk::theta] == 0.) cotTheta.push_back(DataType(9999.));
-			else cotTheta.push_back(DataType(1./tan(perigee->parameters()[Trk::theta])));
+			if (perigee->parameters()[Trk::theta] == 0.) cotTheta.emplace_back(9999.);
+			else cotTheta.emplace_back(1./tan(perigee->parameters()[Trk::theta]));
 
 			// CLHEP->Eigen migration. jpt Dec'13
 			// https://twiki.cern.ch/twiki/bin/viewauth/Atlas/MigrationCLHEPtoEigen
@@ -97,15 +97,15 @@ namespace JiveXML {
 			const long scale = 10000;
 			const double thisScale(scale/100.);
 			// Migration: Now only has diagonal elements from covariance matrix ?
-			covMatrix.push_back(DataType(covVert(0)*thisScale)); // 5 elements
-			covMatrix.push_back(DataType(covVert(1)*thisScale));
-			covMatrix.push_back(DataType(covVert(2)*thisScale));
-			covMatrix.push_back(DataType(covVert(3)*thisScale));
-			covMatrix.push_back(DataType(covVert(4)*thisScale));
+			covMatrix.emplace_back(covVert(0)*thisScale); // 5 elements
+			covMatrix.emplace_back(covVert(1)*thisScale);
+			covMatrix.emplace_back(covVert(2)*thisScale);
+			covMatrix.emplace_back(covVert(3)*thisScale);
+			covMatrix.emplace_back(covVert(4)*thisScale);
 
 			// Used to be 15 elements before migration, so need to put 10 placeholders
 			for ( int i=0; i<10; i++){
-				covMatrix.push_back(DataType( 0. ));
+				covMatrix.emplace_back( 0. );
 			}
 
 		//All for perigee, return object for use by other functions
@@ -166,14 +166,14 @@ namespace JiveXML {
 					// get global track position
 					if (!(*tsosIter)->trackParameters()) continue ;
 					const Amg::Vector3D& pos = (*tsosIter)->trackParameters()->position();
-					polylineX.push_back(DataType(pos.x()*onetenth));
-					polylineY.push_back(DataType(pos.y()*onetenth));
-					polylineZ.push_back(DataType(pos.z()*onetenth));
+					polylineX.emplace_back(pos.x()*onetenth);
+					polylineY.emplace_back(pos.y()*onetenth);
+					polylineZ.emplace_back(pos.z()*onetenth);
 					++numPoly;
 				}
 			}
 			//Store counter as well
-			numPolyline.push_back(DataType(numPoly));
+			numPolyline.emplace_back(numPoly);
 		}
 
 
@@ -206,7 +206,7 @@ namespace JiveXML {
 
 			// Now start writing out values:
 			// Check if this is an outlier hit
-			isOutlier.push_back(DataType(tsos->type(Trk::TrackStateOnSurface::Outlier)));
+			isOutlier.emplace_back(tsos->type(Trk::TrackStateOnSurface::Outlier));
 
 			//Now try to get the identifier, create an empty invalid one if no rot
 			Identifier hitId (rot->identify());
@@ -219,27 +219,27 @@ namespace JiveXML {
 				// get local parameters
 				theDriftSign = measurement->localParameters()[Trk::driftRadius] > 0. ? 1 : -1;
 			}
-			driftSign.push_back(DataType(theDriftSign));
+			driftSign.emplace_back(theDriftSign);
 
 			//Now get the detector type of the hit
 			if ( !hitId.is_valid() ){
-				tsosDetType.push_back(DataType("unident"));
+				tsosDetType.emplace_back("unident");
 			} else if (idHelper->is_pixel(hitId) ) {
-				tsosDetType.push_back(DataType("PIX")); // is PIX in Atlantis
+				tsosDetType.emplace_back("PIX"); // is PIX in Atlantis
 			} else if (idHelper->is_sct(hitId)) {
-				tsosDetType.push_back(DataType("SIL")); // is SIL in Atlantis
+				tsosDetType.emplace_back("SIL"); // is SIL in Atlantis
 			} else if (idHelper->is_trt(hitId)) {
-				tsosDetType.push_back(DataType("TRT"));
+				tsosDetType.emplace_back("TRT");
 			} else if (idHelper->is_mdt(hitId)) {
-				tsosDetType.push_back(DataType("MDT"));
+				tsosDetType.emplace_back("MDT");
 			} else if (idHelper->is_csc(hitId)) {
-				tsosDetType.push_back(DataType("CSC"));
+				tsosDetType.emplace_back("CSC");
 			} else if (idHelper->is_rpc(hitId)) {
-				tsosDetType.push_back(DataType("RPC"));
+				tsosDetType.emplace_back("RPC");
 			} else if (idHelper->is_tgc(hitId)) {
-				tsosDetType.push_back(DataType("TGC"));
+				tsosDetType.emplace_back("TGC");
 			} else {
-				tsosDetType.push_back(DataType("unident"));
+				tsosDetType.emplace_back("unident");
 			}
 
 			//Return the reco input object
@@ -272,7 +272,7 @@ namespace JiveXML {
 				*/
 
 				//Get the residualPull object
-        std::unique_ptr<Trk::ResidualPull> residualPull = residualPullCalculator->residualPull(rot, tsosParameters,Trk::ResidualPull::Biased);
+        std::optional<Trk::ResidualPull> residualPull = residualPullCalculator->residualPull(rot, tsosParameters,Trk::ResidualPull::Biased);
 
 				if (residualPull) {
 					//Get the first residual
@@ -290,10 +290,10 @@ namespace JiveXML {
 			} // end if tsosParameters
 
 			//Finally store the values
-			tsosResLoc1.push_back( ResLoc1 );
-			tsosResLoc2.push_back( ResLoc2 );
-			tsosPullLoc1.push_back( PullLoc1 );
-			tsosPullLoc2.push_back( PullLoc2 );
+			tsosResLoc1.emplace_back(ResLoc1 );
+			tsosResLoc2.emplace_back(ResLoc2 );
+			tsosPullLoc1.emplace_back(PullLoc1 );
+			tsosPullLoc2.emplace_back(PullLoc2 );
 		}
 
 		/**
@@ -304,7 +304,7 @@ namespace JiveXML {
 
 			if (!truthCollection) {
 				//Fill with zero if none found
-				barcode.push_back(DataType(0));
+				barcode.emplace_back(0);
 				return ;
 			}
 
@@ -319,12 +319,12 @@ namespace JiveXML {
 			//Fill with zero if none found
 			if (tempTrackTruthItr == truthCollection->end()){
 				//Fill with zero if none found
-				barcode.push_back(DataType(0));
+				barcode.emplace_back(0);
 				return ;
 		  }
 
 			//if found, Store the barcode
-			barcode.push_back(DataType((*tempTrackTruthItr).second.particleLink().barcode()));
+			barcode.emplace_back((*tempTrackTruthItr).second.particleLink().barcode());
 		}
 
 		} //namespace TrackRetrieverHelpers
@@ -546,10 +546,10 @@ namespace JiveXML {
 				/**
 				* General track fit info
 				*/
-				id.push_back(DataType(id.size())); //<! simple counter starting from 0
-				chi2.push_back(DataType((*track)->fitQuality()->chiSquared()));
-				numDoF.push_back(DataType((*track)->fitQuality()->numberDoF()));
-				trackAuthor.push_back(DataType((*track)->info().trackFitter()));
+				id.emplace_back(id.size()); //<! simple counter starting from 0
+				chi2.emplace_back((*track)->fitQuality()->chiSquared());
+				numDoF.emplace_back((*track)->fitQuality()->numberDoF());
+				trackAuthor.emplace_back((*track)->info().trackFitter());
 
 				/**
 				* Get truth Information
@@ -569,15 +569,15 @@ namespace JiveXML {
 
 				if(not summary){
 					ATH_MSG_DEBUG( "Track summary is NULL " );
-					nBLayerHits.push_back(DataType(0));
-					nPixHits.push_back(DataType(0));
-					nSCTHits.push_back(DataType(0));
-					nTRTHits.push_back(DataType(0));
+					nBLayerHits.emplace_back(0);
+					nPixHits.emplace_back(0);
+					nSCTHits.emplace_back(0);
+					nTRTHits.emplace_back(0);
 				}else{
-					nBLayerHits.push_back(DataType(summary->get(Trk::numberOfInnermostPixelLayerHits)));
-					nPixHits.push_back(DataType(summary->get(Trk::numberOfPixelHits)));
-					nSCTHits.push_back(DataType(summary->get(Trk::numberOfSCTHits)));
-					nTRTHits.push_back(DataType(summary->get(Trk::numberOfTRTHits)));
+					nBLayerHits.emplace_back(summary->get(Trk::numberOfInnermostPixelLayerHits));
+					nPixHits.emplace_back(summary->get(Trk::numberOfPixelHits));
+					nSCTHits.emplace_back(summary->get(Trk::numberOfSCTHits));
+					nTRTHits.emplace_back(summary->get(Trk::numberOfTRTHits));
 				}
 
 				/**
@@ -636,7 +636,7 @@ namespace JiveXML {
 				} // end hits details
 
 				//Store number of retrieved hits for which we have retrieved information
-				numHits.push_back(nHits);
+				numHits.emplace_back(nHits);
 
 			} // end loop over tracks in collection
 

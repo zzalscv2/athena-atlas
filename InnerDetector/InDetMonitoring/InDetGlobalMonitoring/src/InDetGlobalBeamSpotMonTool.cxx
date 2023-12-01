@@ -64,8 +64,7 @@ InDetGlobalBeamSpotMonTool::InDetGlobalBeamSpotMonTool( const std::string & type
 }
 
 
-InDetGlobalBeamSpotMonTool::~InDetGlobalBeamSpotMonTool() {
-}
+InDetGlobalBeamSpotMonTool::~InDetGlobalBeamSpotMonTool() = default;
 
 
 StatusCode InDetGlobalBeamSpotMonTool::initialize() {

@@ -34,7 +34,7 @@ Muon::RPC_ResidualPullCalculator::residuals(
   std::array<double, 5> residuals{};
   if (!trkPar || !measurement) return residuals;
   Identifier ID = Trk::IdentifierExtractor::extract(measurement);
-  
+
   if( ID.is_valid() && m_idHelperSvc->isRpc(ID) ) {
 
     if (measurement->localParameters().parameterKey() == 1) {
@@ -46,7 +46,7 @@ Muon::RPC_ResidualPullCalculator::residuals(
                         << "LocalParameters structure!" );
       return residuals;
     }
-    
+
   } else {
     ATH_MSG_DEBUG ( "Input problem measurement is not RPC." );
     return residuals;
@@ -55,13 +55,13 @@ Muon::RPC_ResidualPullCalculator::residuals(
 }
 
 //================ calculate residuals and pulls for RPC ==================================
-std::unique_ptr<Trk::ResidualPull> Muon::RPC_ResidualPullCalculator::residualPull(
+std::optional<Trk::ResidualPull> Muon::RPC_ResidualPullCalculator::residualPull(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
     const Trk::ResidualPull::ResidualType resType,
     const Trk::TrackState::MeasurementType) const {
 
-  if (!trkPar || !measurement) return nullptr;
+  if (!trkPar || !measurement) return std::nullopt;
 
   Identifier ID = Trk::IdentifierExtractor::extract(measurement);
   if( ID.is_valid() && m_idHelperSvc->isRpc(ID) ) {
@@ -80,16 +80,16 @@ std::unique_ptr<Trk::ResidualPull> Muon::RPC_ResidualPullCalculator::residualPul
     } else {
       ATH_MSG_WARNING ( "RPC ClusterOnTrack does not carry the expected "
                         << "LocalParameters structure!" );
-      return nullptr;
+      return std::nullopt;
     }
-    
+
     // calculate pull
     if (pullIsValid)
       pull[Trk::loc1] = calcPull(residual[Trk::loc1],
                                  measurement->localCovariance()(Trk::loc1,Trk::loc1),
                                  (*trkCov)(Trk::loc1,Trk::loc1),
                                  resType);
-    else 
+    else
       pull[Trk::loc1] = calcPull(residual[Trk::loc1],
                                  measurement->localCovariance()(Trk::loc1,Trk::loc1),
                                  0,
@@ -97,12 +97,12 @@ std::unique_ptr<Trk::ResidualPull> Muon::RPC_ResidualPullCalculator::residualPul
 
     // create the Trk::ResidualPull.
     ATH_MSG_DEBUG ( "Calculating Pull for channel " << m_idHelperSvc->toString(ID) << " residual " << residual[Trk::loc1] << " pull " << pull[Trk::loc1] );
-    return std::make_unique<Trk::ResidualPull>(
+    return std::make_optional<Trk::ResidualPull>(
         std::move(residual), std::move(pull), pullIsValid, resType, 1);
 
   } else {
     ATH_MSG_DEBUG ( "Input problem measurement is not RPC." );
-    return nullptr;
+    return std::nullopt;
   }
 }
 
@@ -114,7 +114,7 @@ double Muon::RPC_ResidualPullCalculator::calcPull(
     const double residual,
     const double locMesCov,
     const double locTrkCov,
-    const Trk::ResidualPull::ResidualType& resType ) const {
+    const Trk::ResidualPull::ResidualType& resType ) {
 
     double ErrorSum(0.0);
     if (resType == Trk::ResidualPull::Unbiased) {

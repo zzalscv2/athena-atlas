@@ -32,7 +32,7 @@ namespace InDet {
  * Normaly it should not be called directly, but through the Trk::ResidualPullCalculator.
  */
 
-class SCT_ResidualPullCalculator : virtual public Trk::IResidualPullCalculator, public AthAlgTool {
+class SCT_ResidualPullCalculator final : virtual public Trk::IResidualPullCalculator, public AthAlgTool {
 public:
     using Trk::IResidualPullCalculator::residualPull;
 
@@ -49,14 +49,14 @@ public:
      * The enum ResidualType must be set according to this, otherwise the pulls will be wrong.
      * Residuals differ in all three cases; please be aware of this!
      */
-    virtual std::unique_ptr<Trk::ResidualPull> residualPull(
+    virtual std::optional<Trk::ResidualPull> residualPull(
         const Trk::MeasurementBase* measurement,
         const Trk::TrackParameters* trkPar,
         const Trk::ResidualPull::ResidualType resType,
         const Trk::TrackState::MeasurementType) const override;
 
     /** This function is a light-weight version of the function above, designed for track fitters
-     * where speed is critical. 
+     * where speed is critical.
      */
     virtual std::array<double,5> residuals(
         const Trk::MeasurementBase* measurement,

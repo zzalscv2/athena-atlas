@@ -47,43 +47,43 @@ public:
 
 private:
   // global position
-  float *m_x;
-  float *m_y;
-  float *m_z;
+  float *m_x = nullptr;
+  float *m_y = nullptr;
+  float *m_z = nullptr;
 
   // global direction
-  float *m_phi;
-  float *m_theta;
+  float *m_phi = nullptr;
+  float *m_theta = nullptr;
 
   // local position
-  float *m_locX;
-  float *m_locY;
+  float *m_locX = nullptr;
+  float *m_locY = nullptr;
 
   // local direction - conventions for Moore and Muonboy are different!
-  float *m_thetaXZ; // local x-z angle
-  float *m_thetaYZ; // local y-z angle
-  float *m_thetaXZ_IP; // local x-z angle pointing to the IP
-  float *m_thetaYZ_IP; // local y-z angle pointing to the IP
+  float *m_thetaXZ = nullptr; // local x-z angle
+  float *m_thetaYZ = nullptr; // local y-z angle
+  float *m_thetaXZ_IP = nullptr; // local x-z angle pointing to the IP
+  float *m_thetaYZ_IP = nullptr; // local y-z angle pointing to the IP
 
   // chamber summary
-  int *m_sector;  // phi sector - 1 to 16
-  int *m_stationEta; // station eta
-  bool *m_isEndcap; // 1 for endcap, 0 for barrel
-  int *m_stationName; // Station name in MuonFixedId scheme
+  int *m_sector = nullptr;  // phi sector - 1 to 16
+  int *m_stationEta = nullptr; // station eta
+  bool *m_isEndcap = nullptr; // 1 for endcap, 0 for barrel
+  int *m_stationName = nullptr; // Station name in MuonFixedId scheme
 
   // hit counts
-  int* m_nphiHits;
-  int* m_netaHits;
-  int* m_netaTrigHits;
-  int* m_npadHits;
-  int* m_npseudoHits;
+  int* m_nphiHits = nullptr;
+  int* m_netaHits = nullptr;
+  int* m_netaTrigHits = nullptr;
+  int* m_npadHits = nullptr;
+  int* m_npseudoHits = nullptr;
 
-  std::vector<int>*   m_id; // fixed id
-  std::vector<int>*   m_type;  // 1000*channelType (0:pad,1:eta,2:phi) + 0:MDT,1:RPC,2:TGC,3:CSC,4:STGC,5::MM,6::Pseudo)
-  std::vector<float>* m_error; // error
-  std::vector<float>* m_residual; // residual
-  std::vector<float>* m_biasedPull; // biased pull
-  std::vector<float>* m_unbiasedPull; // unbiased pull
+  std::vector<int>*   m_id = nullptr; // fixed id
+  std::vector<int>*   m_type = nullptr;  // 1000*channelType (0:pad,1:eta,2:phi) + 0:MDT,1:RPC,2:TGC,3:CSC,4:STGC,5::MM,6::Pseudo)
+  std::vector<float>* m_error = nullptr; // error
+  std::vector<float>* m_residual = nullptr; // residual
+  std::vector<float>* m_biasedPull = nullptr; // biased pull
+  std::vector<float>* m_unbiasedPull = nullptr; // unbiased pull
 
   // tools
   ServiceHandle<Muon::IMuonEDMHelperSvc> m_edmHelperSvc {this, "edmHelper", 
@@ -93,7 +93,7 @@ private:
   ToolHandle<MuonCalib::IIdToFixedIdTool> m_idToFixedIdTool;
   ToolHandle<Trk::IPropagator>  m_slPropagator;
   ToolHandle<Trk::IResidualPullCalculator>  m_pullCalculator;
-  Trk::MagneticFieldProperties* m_magFieldProperties;
+  Trk::MagneticFieldProperties* m_magFieldProperties = nullptr;
 };
 
 } // namespace D3PD

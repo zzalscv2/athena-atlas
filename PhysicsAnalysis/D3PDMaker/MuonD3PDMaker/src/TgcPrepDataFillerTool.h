@@ -39,10 +39,10 @@ public:
 
 
 private:
- float* m_x;
- float* m_y;
- float* m_z;
- float* m_locX;
+ float* m_x = nullptr;
+ float* m_y = nullptr;
+ float* m_z = nullptr;
+ float* m_locX = nullptr;
  //int* m_bcBitMap;
 };
 

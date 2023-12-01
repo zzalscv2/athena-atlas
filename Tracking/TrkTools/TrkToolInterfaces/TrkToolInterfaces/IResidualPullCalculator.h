@@ -18,8 +18,8 @@
 #include "TrkParameters/TrackParameters.h" // typedef
 #include "TrkEventPrimitives/TrackStateDefs.h"
 #include "TrkEventPrimitives/ResidualPull.h"
-#include <memory>
 #include <array>
+#include <optional>
 
 namespace Trk {
 static const InterfaceID IID_IResidualPullCalculator("IResidualPullCalculator",1,0);
@@ -36,7 +36,7 @@ class IResidualPullCalculator : virtual public IAlgTool {
 public:
     /**Interface ID, declared here, and defined below*/
     static const InterfaceID& interfaceID();
-    
+
     /** This function returns a Trk::ResidualPull object, which contains the values
      * of residual and pull for the given measurement and track state.
      * The pull calculation needs to have matching TrackParameters and ResidualType setting:
@@ -45,33 +45,35 @@ public:
      *
      * The function can determine the sub-detector type itself by using the ID helper,
      * or interpret the DetectorType enum from the method interface.
-     */    
-    virtual std::unique_ptr<Trk::ResidualPull> residualPull
-      (const Trk::MeasurementBase*,
-       const Trk::TrackParameters*,
-       const Trk::ResidualPull::ResidualType residualType,
-       const TrackState::MeasurementType = TrackState::unidentified) const = 0;
-     
-   /**This function returns (creates!) a Trk::ResidualPull object, which contains the values
-   * of residual and pull for the given measurement and track state, and the Alignment effects.
-   * The track state can be an unbiased one (which can be retrieved by the Trk::IUpdator),
-   * a biased one (which contains the measurement),
-   * or a truth state.
-   * The enum residualTyp must be set according to this, otherwise the pulls will be wrong.
-   * Residuals differ in all three cases; please be aware of this.
-   *
-   * This function determines the sub-detector type itself by using the ID helper*/
-    virtual std::unique_ptr<Trk::ResidualPull> residualPull(
-             const Trk::MeasurementBase* ,
-             const Trk::TrackParameters* ,
-             const Trk::ResidualPull::ResidualType ,
-             const Trk::TrackState::MeasurementType, 
-             const std::vector<const Trk::AlignmentEffectsOnTrack*>& ) const { return nullptr; }
+     */
+    virtual std::optional<Trk::ResidualPull> residualPull(
+        const Trk::MeasurementBase*, const Trk::TrackParameters*,
+        const Trk::ResidualPull::ResidualType residualType,
+        const TrackState::MeasurementType = TrackState::unidentified) const = 0;
+
+    /**This function returns (creates!) a Trk::ResidualPull object, which
+     * contains the values of residual and pull for the given measurement and
+     * track state, and the Alignment effects. The track state can be an
+     * unbiased one (which can be retrieved by the Trk::IUpdator), a biased one
+     * (which contains the measurement), or a truth state. The enum residualTyp
+     * must be set according to this, otherwise the pulls will be wrong.
+     * Residuals differ in all three cases; please be aware of this.
+     *
+     * This function determines the sub-detector type itself by using the ID
+     * helper*/
+    virtual std::optional<Trk::ResidualPull> residualPull(
+        const Trk::MeasurementBase*,
+        const Trk::TrackParameters*,
+        const Trk::ResidualPull::ResidualType,
+        const Trk::TrackState::MeasurementType,
+        const std::vector<const Trk::AlignmentEffectsOnTrack*>&) const {
+      return std::nullopt;
+    }
 
      /** This function is a light-weight version of the function above, designed for track fitters
-      * where speed is critical. The user has to provide a std::array of size 5, which gets 
+      * where speed is critical. The user has to provide a std::array of size 5, which gets
       * filled with the residuals.
-      */ 
+      */
     virtual  std::array<double,5> residuals(
        const Trk::MeasurementBase*,
        const Trk::TrackParameters*,

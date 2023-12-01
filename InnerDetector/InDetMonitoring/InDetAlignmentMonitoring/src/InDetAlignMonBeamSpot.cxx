@@ -60,8 +60,7 @@ InDetAlignMonBeamSpot::InDetAlignMonBeamSpot(const std::string& type, const std:
   declareProperty("histFolder", m_histFolder = "IDAlignMon/BeamSpot/" + m_triggerChainName);
 }
 
-InDetAlignMonBeamSpot::~InDetAlignMonBeamSpot() {
-}
+InDetAlignMonBeamSpot::~InDetAlignMonBeamSpot() = default;
 
 StatusCode InDetAlignMonBeamSpot::initialize() {
   StatusCode sc;

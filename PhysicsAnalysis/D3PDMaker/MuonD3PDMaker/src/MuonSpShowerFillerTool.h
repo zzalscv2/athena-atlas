@@ -45,17 +45,17 @@ private:
   ServiceHandle<StoreGateSvc> m_storeGate;
 
   /// Variable: Position
-  float* m_eta;
-  float* m_phi;
+  float* m_eta = nullptr;
+  float* m_phi = nullptr;
   /// Variable: Hits
-  unsigned short* m_trigHits;
-  unsigned short* m_innerHits;
-  unsigned short* m_middleHits;
-  unsigned short* m_outerHits;
+  unsigned short* m_trigHits = nullptr;
+  unsigned short* m_innerHits = nullptr;
+  unsigned short* m_middleHits = nullptr;
+  unsigned short* m_outerHits = nullptr;
   /// Variable: Segments
-  unsigned short* m_innerSegments;
-  unsigned short* m_middleSegments;
-  unsigned short* m_outerSegments;
+  unsigned short* m_innerSegments = nullptr;
+  unsigned short* m_middleSegments = nullptr;
+  unsigned short* m_outerSegments = nullptr;
 
   /// Property: Fill Position?
   bool m_doPosition;

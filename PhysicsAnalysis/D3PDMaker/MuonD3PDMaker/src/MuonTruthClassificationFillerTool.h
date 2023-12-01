@@ -37,8 +37,8 @@ namespace D3PD {
 
   private:
   // Variables from each stored
-  int* m_type;
-  int* m_origin;
+  int* m_type = nullptr;
+  int* m_origin = nullptr;
   
   // other private
   ToolHandle<IMCTruthClassifier> m_classifier;

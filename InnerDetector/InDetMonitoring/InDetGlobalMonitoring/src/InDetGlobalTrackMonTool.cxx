@@ -625,7 +625,7 @@ StatusCode InDetGlobalTrackMonTool::fillHistograms()
 
     uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
 
-    for (const auto trackPart: *trackParticles)
+    for (const auto *const trackPart: *trackParticles)
     {
 	const Trk::Track * track = trackPart->track();
 	if ( !track || track->perigeeParameters() == nullptr )
@@ -730,7 +730,7 @@ StatusCode InDetGlobalTrackMonTool::fillHistograms()
 		return StatusCode::SUCCESS;
 	    }
 
-	    for (const auto trackPart: *forwardTrackParticles) {
+	    for (const auto *const trackPart: *forwardTrackParticles) {
 		FillForwardTracks( trackPart );
 	    }
 	}
@@ -875,8 +875,7 @@ void InDetGlobalTrackMonTool::FillEtaPhi( const xAOD::TrackParticle *trackPart)
 	m_Trk_eta_phi_Tight_ratio->Fill( eta, phi, 0 );
     }
 
-    return;
-}
+    }
 
 void InDetGlobalTrackMonTool::FillForwardTracks( const xAOD::TrackParticle *trackPart )
 {
@@ -910,8 +909,6 @@ void InDetGlobalTrackMonTool::FillForwardTracks( const xAOD::TrackParticle *trac
 
     if ( track->fitQuality() && track->fitQuality()->numberDoF() > 0 )
 	m_Trk_FORW_chi2->Fill(track->fitQuality()->chiSquared()/track->fitQuality()->numberDoF());
-
-    return;
 }
 
 void InDetGlobalTrackMonTool::FillTIDE()
@@ -919,7 +916,7 @@ void InDetGlobalTrackMonTool::FillTIDE()
     SG::ReadHandle<xAOD::VertexContainer> vertices { m_vertexKey };
     SG::ReadHandle<xAOD::JetContainer> jets(m_JetsName);
     if ( jets.isValid() ) {
-        for ( const auto jetItr : *jets )
+        for ( const auto *const jetItr : *jets )
 	{
 	    if ( jetItr->pt() < 20000. )
 		continue;
@@ -928,7 +925,7 @@ void InDetGlobalTrackMonTool::FillTIDE()
 	    if ( !jetItr->getAssociatedObjects<xAOD::IParticle>(xAOD::JetAttribute::GhostTrack, trackVector) )
 		continue;
 
-	    for ( const auto trkItr : trackVector )
+	    for ( const auto *const trkItr : trackVector )
 	    {
 		const xAOD::TrackParticle* trackPart = dynamic_cast<const xAOD::TrackParticle*>(trkItr);
 
@@ -999,7 +996,7 @@ void InDetGlobalTrackMonTool::FillTIDE()
 			const Trk::TrackStates* trackStates = track->trackStateOnSurfaces();
 			if ( trackStates == nullptr ) return;
 
-			for (const auto tsos : *trackStates) {
+			for (const auto *const tsos : *trackStates) {
 
 			    if (tsos == nullptr) continue;
 
@@ -1023,7 +1020,7 @@ void InDetGlobalTrackMonTool::FillTIDE()
 					if(msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "RemoveFromState did not work, using original TrackParameters" << endmsg;
 
 
-            std::unique_ptr<Trk::ResidualPull> residualPull = m_residualPullCalculator->residualPull(
+            std::optional<Trk::ResidualPull> residualPull = m_residualPullCalculator->residualPull(
               tsos->measurementOnTrack(), ( UnbiasedTrackParams ) ? UnbiasedTrackParams:tsos->trackParameters(), Trk::ResidualPull::Unbiased);
 				    if (residualPull) {
 					{
@@ -1079,8 +1076,7 @@ void InDetGlobalTrackMonTool::FillTIDE()
 	m_doTide = false;
     }
 
-    return;
-}
+    }
 
 void InDetGlobalTrackMonTool::FillHitMaps( const xAOD::TrackParticle *trackPart )
 {
@@ -1090,7 +1086,7 @@ void InDetGlobalTrackMonTool::FillHitMaps( const xAOD::TrackParticle *trackPart 
     const Trk::TrackStates* trackStates = track->trackStateOnSurfaces();
     if ( trackStates == nullptr ) return;
 
-    for (const auto trackState : *trackStates) {
+    for (const auto *const trackState : *trackStates) {
 
 	if (trackState == nullptr) continue;
 
@@ -1148,8 +1144,7 @@ void InDetGlobalTrackMonTool::FillHitMaps( const xAOD::TrackParticle *trackPart 
 	    }
 	}
     }
-    return;
-}
+    }
 
 
 void InDetGlobalTrackMonTool::FillHoles( const xAOD::TrackParticle *trackPart )
@@ -1229,8 +1224,6 @@ void InDetGlobalTrackMonTool::FillHoles( const xAOD::TrackParticle *trackPart )
     }
 
     if (m_DoHoles_Search) FillHoleMaps(trackPart);
-
-    return;
 }
 
 void InDetGlobalTrackMonTool::FillHoleMaps( const xAOD::TrackParticle *trackPart )
@@ -1244,7 +1237,7 @@ void InDetGlobalTrackMonTool::FillHoleMaps( const xAOD::TrackParticle *trackPart
     if (!holesOnTrack) {
 	msg(MSG::WARNING) << "Got no holes on track" << endmsg;
     } else {
-        for( const auto it : *holesOnTrack ) {
+        for( const auto *const it : *holesOnTrack ) {
 	    if (!it) {
 		msg(MSG::WARNING) << "TrackStateOnSurface from hole search tool == Null" << endmsg;
 		continue;
@@ -1260,5 +1253,4 @@ void InDetGlobalTrackMonTool::FillHoleMaps( const xAOD::TrackParticle *trackPart
 	}
     }
 
-    return;
-}
+    }

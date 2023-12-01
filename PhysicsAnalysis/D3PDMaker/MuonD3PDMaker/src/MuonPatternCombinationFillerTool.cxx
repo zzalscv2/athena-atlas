@@ -28,7 +28,7 @@ namespace D3PD {
 								      const std::string& name,
 								      const IInterface* parent)
     : BlockFillerTool<Muon::MuonPatternCombination> (type, name, parent) ,
-      m_idHelper(0),
+      m_idHelper(nullptr),
       m_truthTool("Trk::DetailedMuonPatternTruthBuilder/DetailedMuonPatternTruthBuilder") {
 
     declareProperty("DetailedMuonPatternTruthTool", m_truthTool);
@@ -85,7 +85,7 @@ namespace D3PD {
    }
 
   StatusCode MuonPatternCombinationFillerTool::fill(const Muon::MuonPatternCombination& pattern) {
-    if(pattern.chamberData().size() == 0) return StatusCode::SUCCESS;
+    if(pattern.chamberData().empty()) return StatusCode::SUCCESS;
     Amg::Vector3D gpos = pattern.chamberData().front().intersectPosition();
     *m_pattern_gpos_eta = static_cast<float>(gpos.eta());
     *m_pattern_gpos_phi = static_cast<float>(gpos.phi());
@@ -101,7 +101,7 @@ namespace D3PD {
     int nPatternMDT(0),nPatternRPC(0),nPatternTGC(0),nPatternCSC(0);
     std::vector< Muon::MuonPatternChamberIntersect >::const_iterator chit = pattern.chamberData().begin();
     for(; chit!=pattern.chamberData().end(); ++chit) {
-      if((*chit).prepRawDataVec().size() == 0) continue;
+      if((*chit).prepRawDataVec().empty()) continue;
       SubDetHitStatistics::SubDetType subdet = findSubDetType( (*chit).prepRawDataVec().at(0)->identify() );
       if(subdet == SubDetHitStatistics::MDT) nPatternMDT += (*chit).prepRawDataVec().size();
       else if(subdet == SubDetHitStatistics::RPC) nPatternRPC += (*chit).prepRawDataVec().size();
@@ -116,14 +116,14 @@ namespace D3PD {
     //----------------------------------------------------------------
     // Retrieve prep raw data truth
     std::vector<std::string> PRD_TruthNames;
-    PRD_TruthNames.push_back("CSC_TruthMap");
-    PRD_TruthNames.push_back("RPC_TruthMap");
-    PRD_TruthNames.push_back("TGC_TruthMap");
-    PRD_TruthNames.push_back("MDT_TruthMap");
+    PRD_TruthNames.emplace_back("CSC_TruthMap");
+    PRD_TruthNames.emplace_back("RPC_TruthMap");
+    PRD_TruthNames.emplace_back("TGC_TruthMap");
+    PRD_TruthNames.emplace_back("MDT_TruthMap");
     
     std::vector<const PRD_MultiTruthCollection*> prdCollectionVector;
     for(std::vector<std::string>::const_iterator ikey=PRD_TruthNames.begin(); ikey!=PRD_TruthNames.end(); ++ikey) {
-      prdCollectionVector.push_back(0);
+      prdCollectionVector.push_back(nullptr);
       StatusCode sc = evtStore()->retrieve(*prdCollectionVector.rbegin(), *ikey);
       if (!sc.isSuccess()){
 	ATH_MSG_WARNING( "PRD_MultiTruthCollection " << *ikey << " NOT found");

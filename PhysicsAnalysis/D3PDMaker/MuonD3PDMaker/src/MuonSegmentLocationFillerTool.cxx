@@ -84,7 +84,7 @@ StatusCode MuonSegmentLocationFillerTool::fill (const Trk::Segment& ts) {
   //local position
   Amg::Vector2D localPos;
   Amg::Vector3D momdum (0, 0, 0);
-  
+
   if( mSeg.associatedSurface().globalToLocal(globalPos, momdum, localPos) )
   {
     *m_locX = (float) localPos.x();
@@ -125,14 +125,14 @@ StatusCode MuonSegmentLocationFillerTool::fill (const Trk::Segment& ts) {
   //we own these pars, but the createTrackParameters returns a plain pointer
   const Trk::AtaPlane* pars = m_edmHelperSvc->createTrackParameters( mSeg );
   if( !pars ) return StatusCode::SUCCESS;
-  
+
   int nphiHits = 0;
   int netaHits = 0;
   int netaTrigHits = 0;
   int npadHits = 0;
   int npseudoHits = 0;
 
-  const std::vector<const Trk::MeasurementBase*>& measurements = mSeg.containedMeasurements(); 
+  const std::vector<const Trk::MeasurementBase*>& measurements = mSeg.containedMeasurements();
   for( std::vector<const Trk::MeasurementBase*>::const_iterator it = measurements.begin();it!=measurements.end();++it ){
     const Trk::MeasurementBase& meas = **it;
     Identifier id = m_edmHelperSvc->getIdentifier(meas);
@@ -145,7 +145,7 @@ StatusCode MuonSegmentLocationFillerTool::fill (const Trk::Segment& ts) {
       else if( m_idHelperSvc->isCsc(id) )  type = 3;
       else if( m_idHelperSvc->isMM(id)   ) type = 4;
       else if( m_idHelperSvc->issTgc(id) ) type = 5;
-      
+
       if( m_idHelperSvc->issTgc(id) ){
 	int chtype = m_idHelperSvc->stgcIdHelper().channelType(id);
 	type += 1000*chtype;
@@ -179,15 +179,18 @@ StatusCode MuonSegmentLocationFillerTool::fill (const Trk::Segment& ts) {
     float pullb  = -99999;
     if( exPars ){
       //residualPull just needs some numbers from the params, it never owns them
-      std::unique_ptr<Trk::ResidualPull> resPull = m_pullCalculator->residualPull( &meas, exPars.get(), Trk::ResidualPull::Biased );
-      if( resPull ) {
-	res = resPull->residual().front();
-	pullub = resPull->pull().front();
-      }else ATH_MSG_WARNING("Failed to calculate biased residual for " << m_idHelperSvc->toString(id) );
+      std::optional<Trk::ResidualPull> resPull = m_pullCalculator->residualPull(
+          &meas, exPars.get(), Trk::ResidualPull::Biased);
+      if (resPull) {
+        res = resPull->residual().front();
+        pullub = resPull->pull().front();
+      } else
+        ATH_MSG_WARNING("Failed to calculate biased residual for "
+                        << m_idHelperSvc->toString(id));
 
       resPull = m_pullCalculator->residualPull( &meas, exPars.get(), Trk::ResidualPull::Unbiased );
       if( resPull ) {
-	pullb = resPull->pull().front();
+        pullb = resPull->pull().front();
       } else {
         ATH_MSG_WARNING("Failed to calculate biased residual for " << m_idHelperSvc->toString(id) );
       }

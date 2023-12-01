@@ -117,7 +117,7 @@ bool MuTagMatchingTool::match(const Trk::TrackParameters& atSurface, const Muon:
     // performs a rough match to an abstract MS surface (disc or cylinder)
     // by matching on station name (I M O, S L, B E) and a crude phi-position
     // match, followed by either a match in theta-position or r-position
-    ///////////////////////////////////////////////////////////////////////////    
+    ///////////////////////////////////////////////////////////////////////////
     if (!surfaceMatch(segment, surfaceName)) return false;
 
     if (!phiMatch(atSurface, segment)) return false;
@@ -133,7 +133,7 @@ bool MuTagMatchingTool::match(const Trk::TrackParameters& atSurface, const Muon:
 
 
 
-bool MuTagMatchingTool::surfaceMatch(const Muon::MuonSegment& segment, int surfaceName) const {    
+bool MuTagMatchingTool::surfaceMatch(const Muon::MuonSegment& segment, int surfaceName) const {
     const Identifier id = m_edmHelperSvc->chamberId(segment);
     return surfaceName == MuonCombined::MuonSegmentTagSurfaces::stIdxToSurfDef(m_idHelperSvc->stationIndex(id), m_idHelperSvc->stationEta(id)>0);
 }
@@ -141,7 +141,7 @@ bool MuTagMatchingTool::surfaceMatch(const Muon::MuonSegment& segment, int surfa
 /** Get extrapolation at MS entrance: this will be the starting point to following extrapolations*/
 std::unique_ptr<Trk::TrackParameters> MuTagMatchingTool::ExtrapolateTrktoMSEntrance(const EventContext& ctx, const Trk::Track& pTrack,
                                                                                           Trk::PropDirection direction) const {
-  
+
 
     const Trk::TrackingVolume* MSEntranceVolume = getVolume(ctx, "MuonSpectrometerEntrance");
     if (!MSEntranceVolume) { return nullptr; }
@@ -192,9 +192,9 @@ std::shared_ptr<Trk::AtaPlane> MuTagMatchingTool::ExtrapolateTrktoSegmentSurface
                                                                                  const Muon::MuonSegment& segment,
                                                                                  const Trk::TrackParameters& pTrack,
                                                                                  Trk::PropDirection direction) const {
-    
+
     unsigned int hits{cscHits(segment)};
-    bool isCsc{hits>0};   
+    bool isCsc{hits>0};
     if (isCsc) {
         ATH_MSG_DEBUG("CSC segment has " << hits << " hits");
         if (hits < 5) {
@@ -220,7 +220,7 @@ std::shared_ptr<Trk::AtaPlane> MuTagMatchingTool::ExtrapolateTrktoSegmentSurface
     } else {
         ATH_MSG_DEBUG(" Succesfull extrapolation segment surface matap Radius " << matap->position().perp() << " Z"
                                                                                 << matap->position().z());
-    }   
+    }
     return matap;
 }
 
@@ -236,19 +236,19 @@ bool MuTagMatchingTool::phiMatch(const Trk::TrackParameters& atSurface, const Mu
     double sigma_phi = 0.;
     if (atSurface.associatedSurface().type() == Trk::SurfaceType::Cylinder) {
         const AmgSymMatrix(5)& covAtCyl = *atSurface.covariance();
-        double r = atSurface.associatedSurface().bounds().r();            
+        double r = atSurface.associatedSurface().bounds().r();
         if ( r > 0 && covAtCyl(Trk::locRPhi, Trk::locRPhi) >= 0.) sigma_phi = Amg::error(covAtCyl, Trk::locRPhi) / r;
     } else if (atSurface.associatedSurface().type() == Trk::SurfaceType::Plane) {
             const AmgSymMatrix(5)& covAtPlane = *atSurface.covariance();
             sigma_phi = Amg::error(covAtPlane, Trk::phi0);
     } else if (atSurface.associatedSurface().type() == Trk::SurfaceType::Disc) {  // error in endcap
         const AmgSymMatrix(5)& covAtDisc = *atSurface.covariance();
-        if (covAtDisc(Trk::locPhi, Trk::locPhi) >= 0.) sigma_phi = Amg::error(covAtDisc, Trk::locPhi);    
+        if (covAtDisc(Trk::locPhi, Trk::locPhi) >= 0.) sigma_phi = Amg::error(covAtDisc, Trk::locPhi);
     }
     double errPhi = std::hypot(PHI_CUT, sigma_phi);
     // if the difference between exTrk and Segment phi position falls within the errPhi, accept as rough match
     if (std::abs(deltaPhi) < errPhi)
-        return true;  // BRes: TEMPORARY - segment direction not sure, so I'm making this match symmetric wrt Pi/2    
+        return true;  // BRes: TEMPORARY - segment direction not sure, so I'm making this match symmetric wrt Pi/2
     ATH_MSG_DEBUG(std::setw(30) << "roughPhi failed:  d_phi = " << std::setw(10) << std::abs(deltaPhi)  // BRes: TEMPORARY - same
                                     << " while the cut is set on " << std::setw(10) << errPhi);
     return false;
@@ -266,7 +266,7 @@ bool MuTagMatchingTool::thetaMatch(const Trk::TrackParameters& atSurface, const 
     const double dTheta = std::abs(exTrkPos.theta() - segPos.theta());
     if (dTheta < THETA_CUT)
         return true;
-    
+
     ATH_MSG_DEBUG(std::setw(30) << "roughTheta failed: d_theta = " << std::setw(10) << dTheta << " while the cut is set on "
                                     << std::setw(10) << THETA_CUT);
     return false;
@@ -281,7 +281,7 @@ bool MuTagMatchingTool::rMatch(const Trk::TrackParameters& atSurface, const Muon
     const double dPerp = std::abs(exTrkPos.perp() - segPos.perp());
     if (dPerp < R_CUT)
         return true;
-    
+
     ATH_MSG_DEBUG(std::setw(30) << "rough  R   failed:   d_R    = " << std::setw(10) << dPerp << " while the cut is set on "
                                     << std::setw(10) << R_CUT);
     return false;
@@ -295,14 +295,14 @@ double MuTagMatchingTool::errorProtection(double exTrk_Err, bool isAngle) const 
     return newError;
 }
 
-bool MuTagMatchingTool::matchSegmentPosition(const MuonCombined::MuonSegmentInfo& info, bool idHasEtaHits) const {    
+bool MuTagMatchingTool::matchSegmentPosition(const MuonCombined::MuonSegmentInfo& info, bool idHasEtaHits) const {
     if (!info.segment || !info.trackAtSegment) {
         ATH_MSG_DEBUG(" No segment and or trackAtSegment pointer matchSegmentPosition ");
         return false;
     }
 
     bool pass(false);
-    
+
     if (idHasEtaHits) {
         if (std::abs(info.pullY) < m_MATCH_THETA || std::abs(info.pullCY) <  m_combinedPullCut) pass = true;
     } else {
@@ -311,26 +311,26 @@ bool MuTagMatchingTool::matchSegmentPosition(const MuonCombined::MuonSegmentInfo
 
     return pass;
 }
-bool MuTagMatchingTool::matchSegmentDirection(const MuonCombined::MuonSegmentInfo& info, bool idHasEtaHits) const {   
+bool MuTagMatchingTool::matchSegmentDirection(const MuonCombined::MuonSegmentInfo& info, bool idHasEtaHits) const {
     if (!info.segment || !info.trackAtSegment) {
         ATH_MSG_DEBUG(" No segment and or trackAtSegment pointer matchSegmentDirection ");
         return false;
-    } 
+    }
     if (idHasEtaHits) {
         return std::abs(info.pullYZ) < m_MATCH_THETAANGLE || std::abs(info.pullCY) <  m_combinedPullCut;
     }
-     return true;  
+     return true;
 }
 
 bool MuTagMatchingTool::matchCombinedPull(const MuonCombined::MuonSegmentInfo& info) const {
-    bool pass(true);    
+    bool pass(true);
     if (!info.segment || !info.trackAtSegment) {
         ATH_MSG_DEBUG(" No segment and or trackAtSegment pointer matchCombinedPull ");
         return false;
     }
     if (info.pullChamber > m_chamberPullCut) pass = false;
     if (std::abs(info.pullCY) > m_combinedPullCut) pass = false;
-    
+
     ATH_MSG_DEBUG(" matchCombinedPull MuTagSegmentInfo hasPhi "
                   << info.hasPhi << " minimumPullPhi " << info.minimumPullPhi << " pullChamber " << info.pullChamber << " cut "
                   << m_chamberPullCut << " pullCY " << info.pullCY << " cut m_combinedPullCut " << m_combinedPullCut << " pass " << pass);
@@ -339,7 +339,7 @@ bool MuTagMatchingTool::matchCombinedPull(const MuonCombined::MuonSegmentInfo& i
 }
 
 bool MuTagMatchingTool::matchPtDependentPull(const MuonCombined::MuonSegmentInfo& info, const Trk::Track& trk) const {
-    bool pass(true);  
+    bool pass(true);
     if (!info.segment || !info.trackAtSegment) {
         ATH_MSG_DEBUG(" No segment and or trackAtSegment pointermatchPtDependentPull ");
         return false;
@@ -365,7 +365,7 @@ void MuTagMatchingTool::testExtrapolation(const Trk::Surface& pSurface, const Tr
         ATH_MSG_DEBUG("Couldn't get the measured Perigee from TP");
         return;
     }
-    const EventContext& ctx = Gaudi::Hive::currentContext(); 
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     const AmgVector(5)& oripars = oriPerigee->parameters();
     const Trk::PerigeeSurface periSurf;
     std::unique_ptr<Trk::Perigee> pPerigee = std::make_unique<Trk::Perigee>(oripars[0], oripars[1], oripars[2], oripars[3], 0., periSurf, std::nullopt);
@@ -444,7 +444,7 @@ void MuTagMatchingTool::testExtrapolation(const Trk::Surface& pSurface, const Tr
         ATH_MSG_DEBUG("======= NOT EXTRAPOLATED");
 
     ATH_MSG_DEBUG("==============================================================================");
-   
+
 }
 
 //==========Counts ROTs and CompetingROTs on segment.
@@ -466,12 +466,12 @@ void MuTagMatchingTool::nrTriggerHits(const Muon::MuonSegment& seg, int& nRPC, i
 MuonCombined::MuonSegmentInfo MuTagMatchingTool::muTagSegmentInfo(const EventContext& ctx, const Trk::Track* track, const Muon::MuonSegment& segment,
                                                                   std::shared_ptr<const Trk::AtaPlane> exTrack) const {
     MuonCombined::MuonSegmentInfo info;
-  
+
     //  segment and track pointers
 
     info.track = track;
     info.segment = &segment;
-    info.trackAtSegment = exTrack;   
+    info.trackAtSegment = exTrack;
 
     Muon::IMuonSegmentHitSummaryTool::HitCounts hitCounts = m_hitSummaryTool->getHitCounts(segment);
 
@@ -496,7 +496,7 @@ MuonCombined::MuonSegmentInfo MuTagMatchingTool::muTagSegmentInfo(const EventCon
 
     // Local errors and covariance Matrix
 
-    info.exCovYTheta = 0.;   
+    info.exCovYTheta = 0.;
     if (exTrack->covariance()) {
         ATH_MSG_DEBUG("Measured Parameters: error x " << (*exTrack->covariance())(Trk::locX, Trk::locX) << " y "
                                                       << (*exTrack->covariance())(Trk::locY, Trk::locY) << " pull x "
@@ -610,7 +610,7 @@ MuonCombined::MuonSegmentInfo MuTagMatchingTool::muTagSegmentInfo(const EventCon
                 ATH_MSG_WARNING("Failed to extrapolate to " << m_idHelperSvc->toString(id));
                 continue;
             }
-            std::unique_ptr<const Trk::ResidualPull> resPull{
+            std::optional<Trk::ResidualPull> resPull{
                 m_pullCalculator->residualPull(seg_it, exP.get(), Trk::ResidualPull::Unbiased)};
             if (!resPull) {
                 ATH_MSG_WARNING(" calculation of residual/pull failed !!!!! ");
@@ -619,12 +619,12 @@ MuonCombined::MuonSegmentInfo MuTagMatchingTool::muTagSegmentInfo(const EventCon
             }
             const double residual = resPull->residual().front();
             const double pull = resPull->pull().front();
-            
+
             maxResPhi = std::max(residual, maxResPhi);
             minResPhi = std::min(residual, minResPhi);
             maxPullPhi = std::max(pull, maxPullPhi);
             minPullPhi = std::min(pull, minPullPhi);
-            
+
             ATH_MSG_DEBUG(m_idHelperSvc->toString(id) << " residual " << residual << " pull " << pull);
         }
     }
@@ -693,7 +693,7 @@ MuonCombined::MuonSegmentInfo MuTagMatchingTool::muTagSegmentInfo(const EventCon
     if (info.chi2Y < 0) ATH_MSG_DEBUG(" NEGATIVE chi2Y " << chi2Y << " dydyz " << dydyz << " determinant " << det);
 
     bool hasPhi = hitCounts.nexpectedTrigHitLayers > 1;
-    
+
     //
     // Store hasphi
     //
@@ -804,7 +804,7 @@ void MuTagMatchingTool::calculateLocalAngleErrors(const Trk::AtaPlane& exTrack, 
                                 << " and angleYZ error = " << std::setw(10) << angleYZerror);
 }
 bool MuTagMatchingTool::matchDistance(const MuonCombined::MuonSegmentInfo& info) const {
-    bool pass(true);    
+    bool pass(true);
     if (!info.segment || !info.trackAtSegment) {
         ATH_MSG_DEBUG(" No segment and or trackAtSegment pointer matchDistance ");
         return false;

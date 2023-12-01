@@ -40,14 +40,14 @@ namespace D3PD {
       virtual StatusCode fill( const MDTSimHit& obj );
 
    private:
-      float* m_globalTime;
-      float* m_driftRadius;
-      float* m_stepLength;
-      float* m_energyDeposit;
-      int*   m_particleEncoding;
-      float* m_kineticEnergy;
-      int*   m_MDTid;
-      int*   m_trackNumber; ///< Number of track which released this energy
+      float* m_globalTime = nullptr;
+      float* m_driftRadius = nullptr;
+      float* m_stepLength = nullptr;
+      float* m_energyDeposit = nullptr;
+      int*   m_particleEncoding = nullptr;
+      float* m_kineticEnergy = nullptr;
+      int*   m_MDTid = nullptr;
+      int*   m_trackNumber = nullptr; ///< Number of track which released this energy
 
    }; // class MDTSimHitFillerTool
 

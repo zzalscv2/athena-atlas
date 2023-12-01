@@ -1388,11 +1388,11 @@ StatusCode IDAlignMonResiduals::fillHistograms() {
                                                                        // safe to keep it without redefinition
         //Not clear to me here. isPullUnbiased is set to true. Why inside the Function I am checking if it is true or
         // not? Useless I would say.
-        std::unique_ptr<Trk::ResidualPull> residualPull = m_residualPullCalculator->residualPull(mesh,
-                                                                                       trackParameterUnbiased,
-                                                                                       (isPullUnbiased) ?
-                                                                                       Trk::ResidualPull::Unbiased :
-                                                                                       Trk::ResidualPull::Biased);
+        std::optional<Trk::ResidualPull> residualPull =
+            m_residualPullCalculator->residualPull(
+                mesh, trackParameterUnbiased,
+                (isPullUnbiased) ? Trk::ResidualPull::Unbiased
+                                 : Trk::ResidualPull::Biased);
 
         if (residualPull) {
           pullR = residualPull->pull()[Trk::locR];
@@ -2501,7 +2501,7 @@ StatusCode IDAlignMonResiduals::getSiResiduals(const Trk::Track* track, const Tr
 
       //const Trk::ResidualPull* residualPull = m_residualPullCalculator->residualPull(hit, trackParameterForResiduals,
       // unBias);
-      std::unique_ptr<Trk::ResidualPull> residualPull = nullptr;
+      std::optional<Trk::ResidualPull> residualPull = std::nullopt;
       if (unBias) residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals, Trk::ResidualPull::Unbiased);
       else residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals, Trk::ResidualPull::Biased);
 
@@ -2889,7 +2889,7 @@ const Trk::TrackParameters* IDAlignMonResiduals::getUnbiasedTrackParameters(cons
                   *TempField,
                   Trk::nonInteracting);
               } else {
-               ATH_MSG_VERBOSE( "TempSurface->associatedLayer()->enclosingTrackingVolume does not exist" );              
+               ATH_MSG_VERBOSE( "TempSurface->associatedLayer()->enclosingTrackingVolume does not exist" );
               }
             } else {
               ATH_MSG_VERBOSE( "TempSurface->associatedLayer() does not exist" );
@@ -3127,8 +3127,7 @@ void IDAlignMonResiduals::meanRMSProjections(TH2F* h2d, TH1F* h, int meanrms) {
     delete hproj;
   }
 
-  return;
-}
+  }
 
 //--------------------------------------------------------------------------------------------
 
@@ -3191,8 +3190,7 @@ void IDAlignMonResiduals::meanRMSProjection2D(TH3F* h3d, TH2F* h2d, int meanrms,
     }
   }
 
-  return;
-}
+  }
 
 //--------------------------------------------------------------------------------------------
 
@@ -3222,8 +3220,7 @@ void IDAlignMonResiduals::fillRMSFromProfile(TProfile* hprof, TProfile* h) {
       h->Fill(centre, rms);      //Need to understand!
     }
   }
-  return;
-}
+  }
 
 //--------------------------------------------------------------------------------------------
 
@@ -3272,8 +3269,7 @@ void IDAlignMonResiduals::fillGaussianMeanOrWidth(TH2F* h2d, TH1F* h, float fitM
     delete fit;
   }
 
-  return;
-}
+  }
 
 //================================================================
 // Establishes a minimim window for the TProfile
@@ -4649,7 +4645,6 @@ void IDAlignMonResiduals::MakeTRTHistograms(MonGroup& al_mon) {
   MakeTRTBarrelHistograms(al_mon);
   /** Make the endcap hists */
   MakeTRTEndcapHistograms(al_mon);
-  return;
 }
 
 void IDAlignMonResiduals::MakeTRTBarrelHistograms(MonGroup& al_mon) {
@@ -4866,8 +4861,7 @@ void IDAlignMonResiduals::MakeTRTBarrelHistograms(MonGroup& al_mon) {
     RegisterHisto(al_mon, m_trt_b_hist->lrOverPhiVsStrawLayer[side]);
   }//Over sides
 
-  return;
-}
+  }
 
 void IDAlignMonResiduals::MakeTRTEndcapHistograms(MonGroup& al_mon) {
   std::string endcapName[2] = {
@@ -5104,8 +5098,7 @@ void IDAlignMonResiduals::MakeTRTEndcapHistograms(MonGroup& al_mon) {
     RegisterHisto(al_mon, m_trt_ec_hist->lrVsRing[endcap]);
   }
 
-  return;
-}
+  }
 
 void IDAlignMonResiduals::fillTRTHistograms(int barrel_ec, int layer_or_wheel, int phi_module, int straw_layer, float perdictR, float hitR, float hitZ, float hitGlobalR, float residualR, float pullR, float LE, float EP, float t0, bool isTubeHit, float trketa, float trkpt, double hweight) {
   bool LRcorrect = true;
@@ -5153,8 +5146,6 @@ void IDAlignMonResiduals::fillTRTHistograms(int barrel_ec, int layer_or_wheel, i
                             , isTubeHit
                             , trketa
                             , trkpt, hweight);
-
-  return;
 }
 
 //Filling barrel histograms
@@ -5248,8 +5239,7 @@ void IDAlignMonResiduals::fillTRTBarrelHistograms(int barrel_ec, int layer_or_wh
     }
   }//Over sides
 
-  return;
-}//fillTRTBarrelHistograms
+  }//fillTRTBarrelHistograms
 
 void IDAlignMonResiduals::fillTRTEndcapHistograms(int barrel_ec, int layer_or_wheel, int phi_module, int straw_layer, float perdictR, float hitR, float hitGlobalR, float residualR, float pullR, bool LRcorrect, float LE, float EP, float t0, bool isTubeHit, float trketa, float trkpt, double hweight) {
   for (unsigned int endcap = 0; endcap < 2; ++endcap) {
@@ -5334,8 +5324,7 @@ void IDAlignMonResiduals::fillTRTEndcapHistograms(int barrel_ec, int layer_or_wh
     }
   }
 
-  return;
-}
+  }
 
 unsigned int IDAlignMonResiduals::getRing(unsigned int wheel, unsigned int strawlayer) {
   if (wheel < 6) return (16 * wheel + strawlayer) / 4;
@@ -5360,7 +5349,6 @@ void IDAlignMonResiduals::MakeStaveShapeFit(float& mag, float& mag_er, float& ba
   base_er = fit.GetParError(1);
 
   delete g;
-  return;
 }
 
 TGraphErrors* IDAlignMonResiduals::ConvertHistoInGraph(TH1* histo) {

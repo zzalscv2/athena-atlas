@@ -87,16 +87,16 @@ const void* TgcPrepDataCollectionGetterTool::nextUntyped()
 {
   if(m_collItr == m_collEnd){
     if(m_contItr==m_contEnd){
-      return 0;
+      return nullptr;
     }
     ++m_contItr;
     if(m_contItr==m_contEnd){
-      return 0;
+      return nullptr;
     }
     m_collItr = (*m_contItr)->begin();
     m_collEnd = (*m_contItr)->end();
     if(m_collItr == m_collEnd){
-      return 0;
+      return nullptr;
     }
   }
 
@@ -121,7 +121,7 @@ template<>
 const void*
 CollectionGetterTool<Muon::TgcPrepDataContainer>::nextUntyped()
 {
-  return 0;
+  return nullptr;
 }
 
 

@@ -249,24 +249,24 @@ namespace JiveXML {
 //            << " ," << (*vertexItr)->recVertex().position().x()/10. << " ," << (*vertexItr)->recVertex().position().x()*CLHEP::cm 
             << ", R: " << R << endmsg; }
 
-        chi2.push_back(DataType( this_chi2 ));
-        x.push_back(DataType( this_x ));
-        y.push_back(DataType( this_y ));
-        z.push_back(DataType( this_z ));
+        chi2.emplace_back( this_chi2 );
+        x.emplace_back( this_x );
+        y.emplace_back( this_y );
+        z.emplace_back( this_z );
 
         // from: Tracking/TrkEvent/TrkEventPrimitives/VertexType.h
 	const Trk::VertexType vtx_type = (*vertexItr)->vertexType();
-        vertexType.push_back(DataType( vtx_type )); 
+        vertexType.emplace_back( vtx_type ); 
 	if (msgLvl(MSG::DEBUG)){ msg(MSG::DEBUG) << " collection " << vtxCollectionItr.key() << ": VertexType: " << vtx_type << endmsg; }
 
         //Store primary vertex candidate flag
     if ( &(*vtxCollectionItr) == primaryVtxCollection ){
-	  if ( Trk::PriVtx == vtx_type ){ primVxCand.push_back(DataType( 1 )); // type 1 'real' primary vertex
-          }else{ primVxCand.push_back(DataType( 0 )); } // hack ! 'type 3 pileup' Should properly use 'vertexType'
+	  if ( Trk::PriVtx == vtx_type ){ primVxCand.emplace_back( 1 ); // type 1 'real' primary vertex
+          }else{ primVxCand.emplace_back( 0 ); } // hack ! 'type 3 pileup' Should properly use 'vertexType'
 	}else if ( &(*vtxCollectionItr) == secondaryVtxCollection ){
-	   primVxCand.push_back(DataType( 2 )); // normally those are 'type 9 Kshort'
+	   primVxCand.emplace_back( 2 ); // normally those are 'type 9 Kshort'
         }else{
-           primVxCand.push_back(DataType( 0 ));
+           primVxCand.emplace_back( 0 );
         }    
 
 // !!! This doesn't work after Migration. 'errorposition' not known anymore ? jpt Dec'13 !!!
@@ -281,7 +281,7 @@ namespace JiveXML {
         //// Purely experimentally found !
         //// these values of covMatrix make Atlantis
         //// not to reject the 'vertex'  
-	covMatrix.push_back(DataType("2 -.1 .5 -.01 0.002 .01")); 
+	covMatrix.emplace_back("2 -.1 .5 -.01 0.002 .01"); 
 
         /**
          * Step 2:
@@ -295,10 +295,10 @@ namespace JiveXML {
 
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Tracks at vertex: " << trklist->size() << endmsg;
 
-    numTracks.push_back(DataType( trklist->size() ) );
-    sgkey.push_back(DataType( m_trackCollection )); // sgkey in current scheme is _not_ a multiple !
+    numTracks.emplace_back( trklist->size() );
+    sgkey.emplace_back( m_trackCollection ); // sgkey in current scheme is _not_ a multiple !
 
-    tracks.push_back(DataType( -1 ));
+    tracks.emplace_back( -1 );
       }
     } // loop over vertex containers
 

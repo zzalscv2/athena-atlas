@@ -36,8 +36,8 @@ public:
 
 
 private:
-  float *m_chi2;
-  int *m_ndof;
+  float *m_chi2 = nullptr;
+  int *m_ndof = nullptr;
 };
 
 } // namespace D3PD

@@ -213,12 +213,12 @@ MuonEDMPrinterTool::printMeasurements(const Trk::Track& track) const
                     ++itMap;
                     if (itMap != measAndTheirAlignmentEffects.end() && itMap->first == m)
                         aeotos.push_back(itMap->second);
-                    std::unique_ptr<const Trk::ResidualPull> resPull{m_pullCalculator->residualPull(
+                    std::optional<Trk::ResidualPull> resPull{m_pullCalculator->residualPull(
                         m, trackParameters, Trk::ResidualPull::Unbiased, Trk::TrackState::unidentified, aeotos)};
                     if (resPull) dataStr += print(*resPull);
                     if (resPull) dataStr += " (AEOT)";
                 } else {
-                    std::unique_ptr<const Trk::ResidualPull> resPull{
+                    std::optional<Trk::ResidualPull> resPull{
                         m_pullCalculator->residualPull(m, trackParameters, Trk::ResidualPull::Unbiased)};
                     if (resPull) dataStr += print(*resPull);
                 }
@@ -299,7 +299,7 @@ MuonEDMPrinterTool::print(const Trk::Track& track) const
         if (tsos->measurementOnTrack())      sout<<" **** "<<std::setw(3)<<n<<" Measurement: "<<print(*tsos->measurementOnTrack())<<std::endl;
         if (tsos->materialEffectsOnTrack())  sout<<" **** "<<std::setw(3)<<n<<" Material:    "<<print(*tsos->materialEffectsOnTrack())<<std::endl;
         if (tsos->alignmentEffectsOnTrack()) sout<<" **** "<<std::setw(3)<<n<<" AEOT:        "<<print(*tsos->alignmentEffectsOnTrack())<<std::endl;
-        if (tsos->trackParameters())         sout<<" **** "<<std::setw(3)<<n<<" Parameters:  "<<print(*tsos->trackParameters())<<std::endl;        
+        if (tsos->trackParameters())         sout<<" **** "<<std::setw(3)<<n<<" Parameters:  "<<print(*tsos->trackParameters())<<std::endl;
         ++n;
     }
     sout<<"-----------------------------"<<std::endl;
@@ -373,7 +373,7 @@ MuonEDMPrinterTool::print(const MuonSegment& segment) const
     const MuonSegmentQuality* q = dynamic_cast<const MuonSegmentQuality*>(fq);
     if (q) sout << std::setw(2) << " nholes " << q->numberOfHoles();
 
-   
+
     sout << " theta " << std::fixed << std::setprecision(5) << std::setw(7) << segment.globalDirection().theta()
          << " phi " << std::fixed << std::setprecision(3) << std::setw(6) << segment.globalDirection().phi();
 
@@ -426,7 +426,7 @@ MuonEDMPrinterTool::print(const Trk::PrepRawData& prd) const
         double h_phi   = pos->phi();
         double h_theta = pos->theta();
         double error = std::sqrt(prd.localCovariance()(0, 0));
-         
+
         // add time for RPC
         double             rpcTime = 0.0;
         const RpcPrepData* rpc     = dynamic_cast<const RpcPrepData*>(&prd);
@@ -881,7 +881,7 @@ MuonEDMPrinterTool::print(const Trk::TrackParameters& pars) const
          << std::setprecision(3) << std::setw(6) << pars.momentum().phi() << " q*p(GeV) " << std::scientific
          << std::setprecision(3) << std::setw(10) << pars.momentum().mag() * pars.charge() * 1e-3 << " pT(GeV) "
          << std::scientific << std::setprecision(3) << std::setw(9) << pars.momentum().perp() * 1e-3;
-    
+
     return sout.str();
 }
 
@@ -920,16 +920,16 @@ MuonEDMPrinterTool::printData(const Trk::MeasurementBase& measurement) const
          << h_phi << " theta " << std::fixed << std::setprecision(3) << std::setw(4) << h_theta
          << " lPos " << std::fixed << std::setprecision(2) << std::setw(5) << local_pos
          << " error " << std::fixed << std::setprecision(2) << std::setw(5) << error;
-   
+
 
     // print measurement data
     const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(&measurement);
     if (rot) {
         // add drift time for MDT
         const MdtDriftCircleOnTrack* mdt = dynamic_cast<const MdtDriftCircleOnTrack*>(rot);
-        if (mdt) {            
+        if (mdt) {
             sout << "  r_drift " << std::fixed << std::setprecision(2) << std::setw(5) << mdt->driftRadius();
-                 
+
         } else {
             // add time for RPC
             const RpcClusterOnTrack* rpc = dynamic_cast<const RpcClusterOnTrack*>(rot);
@@ -998,7 +998,7 @@ std::string MuonEDMPrinterTool::print(const Trk::MaterialEffectsBase& mat) const
     std::stringstream mat_string{};
     const Trk::MaterialEffectsOnTrack* matOnTrk = dynamic_cast<const Trk::MaterialEffectsOnTrack*>(&mat);
     if (matOnTrk) {
-        const Trk::ScatteringAngles* scatAng = matOnTrk->scatteringAngles();            
+        const Trk::ScatteringAngles* scatAng = matOnTrk->scatteringAngles();
         if (scatAng) {
             mat_string<<" dPhi: "<<scatAng->deltaPhi()<<" +- "<<scatAng->sigmaDeltaPhi()<< " / ";
             mat_string<<" dTheta: "<<scatAng->deltaTheta()<<" +- "<<scatAng->sigmaDeltaTheta()<<"   ";
@@ -1016,7 +1016,7 @@ std::string MuonEDMPrinterTool::print(const Trk::MaterialEffectsBase& mat) const
             mat_string<<" Length "<<eloss->length();
         }
         mat_string<<" ";
-        
+
     }
     return mat_string.str();
 }
@@ -1026,13 +1026,13 @@ std::string MuonEDMPrinterTool::print(const Trk::AlignmentEffectsOnTrack& aeot) 
     aeot_string<<" dAngle: "<<aeot.deltaAngle()<<" +- "<<aeot.sigmaDeltaAngle();
     return aeot_string.str();
 }
-    
+
 std::string MuonEDMPrinterTool::print(const Trk::TrackStateOnSurface& tsos) const {
    std::stringstream tsos_str{};
    if (tsos.measurementOnTrack()) tsos_str<<"Measurement: "<<print(*tsos.measurementOnTrack())<<"\t";
    if (tsos.materialEffectsOnTrack()) tsos_str<<"Material "<<print(*tsos.materialEffectsOnTrack())<<"\t";
    if (tsos.trackParameters()) tsos_str<<"Parameters: "<<print(*tsos.trackParameters())<<"\t";
-   
-   return tsos_str.str(); 
+
+   return tsos_str.str();
 }
 }  // namespace Muon

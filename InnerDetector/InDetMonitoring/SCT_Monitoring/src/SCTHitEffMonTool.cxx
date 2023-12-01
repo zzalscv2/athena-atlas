@@ -914,7 +914,7 @@ SCTHitEffMonTool::previousChip(double xl, int side, bool swap) const {
 }
 
 StatusCode
-SCTHitEffMonTool::findAnglesToWaferSurface(const Amg::Vector3D& mom, const Identifier id, 
+SCTHitEffMonTool::findAnglesToWaferSurface(const Amg::Vector3D& mom, const Identifier id,
                                            const InDetDD::SiDetectorElementCollection* elements,
                                            double& theta, double& phi) const {
   phi = 90.;
@@ -993,8 +993,8 @@ SCTHitEffMonTool::getResidual(const Identifier& surfaceID, const Trk::TrackParam
         const Trk::PrepRawData* rioo{dynamic_cast<const Trk::PrepRawData *>(cluster)};
         std::unique_ptr<const Trk::RIO_OnTrack> rio{m_rotcreator->correct(*rioo, *trkParam)};
         if (not m_residualPullCalculator.empty()) {
-          std::unique_ptr<const Trk::ResidualPull> residualPull{m_residualPullCalculator->residualPull(rio.get(), trkParam,
-                                                                                                       Trk::ResidualPull::Unbiased)};
+          std::optional<Trk::ResidualPull> residualPull{m_residualPullCalculator->residualPull(rio.get(), trkParam,
+                                                                                               Trk::ResidualPull::Unbiased)};
           if (not residualPull) continue;
           if (std::abs(residualPull->residual()[Trk::loc1]) < std::abs(trackHitResidual)) {
             trackHitResidual = residualPull->residual()[Trk::loc1];

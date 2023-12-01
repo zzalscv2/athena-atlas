@@ -60,7 +60,7 @@ public:
 
 private:
   /// Variable: Number of muon segments.
-  bool* m_numberOfSegments;
+  bool* m_numberOfSegments = nullptr;
 };
 
 

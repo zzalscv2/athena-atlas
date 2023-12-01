@@ -37,7 +37,7 @@ static const std::string entityInclusionOptions("XmlEntityInclusionOptions.txt")
 */
 
 struct GaudiKernelFixture:public IDPVM_GaudiFixtureBase{
-  GaudiKernelFixture(const std::string & joFilename):IDPVM_GaudiFixtureBase(joFilename){
+  explicit GaudiKernelFixture(const std::string & joFilename):IDPVM_GaudiFixtureBase(joFilename){
     //nop, everything in base.
   }
 };

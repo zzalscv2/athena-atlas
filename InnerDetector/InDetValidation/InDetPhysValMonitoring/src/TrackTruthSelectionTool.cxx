@@ -6,7 +6,6 @@
 #include "TrackTruthSelectionTool.h"
 #include "TruthUtils/MagicNumbers.h"
 #include "xAODTruth/TruthVertex.h"
-#include "TruthUtils/MagicNumbers.h"
 #include <cmath> // std::fabs
 
 

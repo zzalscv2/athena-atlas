@@ -27,7 +27,7 @@
 #include "TrkSurfaces/Surface.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkParameters/TrackParameters.h"
-#include "TrkTrack/Track.h" 
+#include "TrkTrack/Track.h"
 #include "TrkTrackSummary/TrackSummary.h"
 
 // SCT
@@ -82,13 +82,13 @@ StatusCode SCTHitEffMonAlg::initialize() {
   ATH_CHECK(detStore()->retrieve(m_sctId, "SCT_ID"));
   ATH_CHECK(detStore()->retrieve(m_pixelId, "PixelID"));
   ATH_CHECK(detStore()->retrieve(m_trtId, "TRT_ID"));
-  
+
   ATH_CHECK(m_residualPullCalculator.retrieve());
   ATH_MSG_INFO("Retrieved pull calculator tool " << m_residualPullCalculator);
-  
+
   ATH_CHECK(m_holeSearchTool.retrieve());
   ATH_MSG_INFO("Retrieved hole search tool " << m_holeSearchTool);
-  
+
   ATH_CHECK(m_rotcreator.retrieve());
 
   ATH_MSG_INFO("Retrieved tool " << m_rotcreator);
@@ -116,7 +116,7 @@ StatusCode SCTHitEffMonAlg::initialize() {
 
   ATH_CHECK(m_SCTDetEleCollKey.initialize());
   ATH_CHECK(m_fieldCondObjInputKey.initialize());
-  
+
   return AthMonitorAlgorithm::initialize();
 }
 
@@ -138,7 +138,7 @@ int SCTHitEffMonAlg::getWaferIndex(const int barrel_ec, const int layer_disk, co
   int waferIndex = -1;
   if (barrel_ec == BARREL) {
     // corresponds to the waferIndex of B3 side0
-    waferIndex = 0; 
+    waferIndex = 0;
   } else if (barrel_ec == ENDCAP_A) {
     // corresponds to the waferIndex of EA0 side0
     waferIndex = N_BARRELS*N_SIDES;
@@ -173,8 +173,8 @@ double SCTHitEffMonAlg::getResidual(const Identifier& surfaceID,
         const Trk::PrepRawData* rioo{dynamic_cast<const Trk::PrepRawData *>(cluster)};
         std::unique_ptr<const Trk::RIO_OnTrack> rio{m_rotcreator->correct(*rioo, *trkParam)};
         if (not m_residualPullCalculator.empty()) {
-          std::unique_ptr<const Trk::ResidualPull> residualPull{m_residualPullCalculator->residualPull(rio.get(), trkParam,
-                                                                                                       Trk::ResidualPull::Unbiased)};
+          std::optional<Trk::ResidualPull> residualPull{m_residualPullCalculator->residualPull(rio.get(), trkParam,
+                                                                                               Trk::ResidualPull::Unbiased)};
           if (not residualPull) continue;
           if (std::abs(residualPull->residual()[Trk::loc1]) < std::abs(trackHitResidual)) {
             trackHitResidual = residualPull->residual()[Trk::loc1];
@@ -423,7 +423,7 @@ StatusCode SCTHitEffMonAlg::fillHistograms(const EventContext& ctx) const {
       if (not surfaceID.is_valid()) {
         continue;
       }
-      
+
       // Check waferIndex; if the default value of -1 is kept, the corresponding TSOS is not associated with SCT.
       int waferIndex = -1;
       // Calculate waferIndex
@@ -432,7 +432,7 @@ StatusCode SCTHitEffMonAlg::fillHistograms(const EventContext& ctx) const {
                                    m_sctId->layer_disk(surfaceID),
                                    m_sctId->side(surfaceID));
       }
-      
+
       if (tsos->type(Trk::TrackStateOnSurface::Measurement) or tsos->type(Trk::TrackStateOnSurface::Outlier)) {
         if (m_pixelId->is_pixel(surfaceID)) {
           pixelNHits++;
@@ -542,7 +542,7 @@ StatusCode SCTHitEffMonAlg::fillHistograms(const EventContext& ctx) const {
       float dedicated_layerPlusHalfSide{static_cast<float>(layer) + static_cast<float>((side + 1) % 2) * 0.5f};
       const Trk::TrackParameters* trkParamOnSurface{tsos->trackParameters()};
       double trackHitResidual{getResidual(surfaceID, trkParamOnSurface, &*p_sctclcontainer)};
-      
+
       float distCut{m_effdistcut};
 
       if (tsos->type(Trk::TrackStateOnSurface::Measurement) or tsos->type(Trk::TrackStateOnSurface::Outlier)) {
@@ -733,7 +733,7 @@ StatusCode SCTHitEffMonAlg::fillHistograms(const EventContext& ctx) const {
     } // End of loop over hits/holes
   }
   ATH_MSG_VERBOSE("finished loop over tracks = " << tracks->size());
-  
+
   return StatusCode::SUCCESS;
 }
 

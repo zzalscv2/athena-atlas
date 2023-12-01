@@ -36,7 +36,7 @@ public:
 
 
 private:
-  int *m_author;
+  int *m_author = nullptr;
 };
 
 } // namespace D3PD

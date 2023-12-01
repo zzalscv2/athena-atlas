@@ -860,7 +860,6 @@ void IDAlignMonEfficiencies::RegisterHisto(MonGroup& mon, TProfile2D* histo) {
   if (pch != nullptr) histo->GetXaxis()->SetTitle("SCT ECA Disk");
   pch = strstr(HistName, "sct_ecc");
   if (pch != nullptr) histo->GetXaxis()->SetTitle("SCT ECC Disk");
-  return;
 }
 
 ///////////////////////////////////////////////////
@@ -1629,7 +1628,6 @@ void IDAlignMonEfficiencies::makeEffHisto(TH1F_LW* h_num, TH1F_LW* h_denom, TPro
   SetMinWindow(h_eff, m_minSiliconEffWindow, m_maxSiliconEffWindow);
 
   ATH_MSG_DEBUG("leaving makeEffHisto with Nbins " << Nbins);
-  return;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1711,8 +1709,7 @@ void IDAlignMonEfficiencies::makeEffHisto(TH2F* h_num, TH2F* h_denom, TH2F* h_ef
                                            << "  Eff= " << h_eff->GetBinContent(bin, binY));
     }
   }
-  return;
-}
+  }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 void IDAlignMonEfficiencies::makeEffHistoWithCut(TH2F* h_num, TH2F* h_denom, TProfile2D* h_eff) {
@@ -1746,8 +1743,7 @@ void IDAlignMonEfficiencies::makeEffHistoWithCut(TH2F* h_num, TH2F* h_denom, TPr
                                            << "  Eff= " << h_eff->GetBinContent(bin, binY));
     }
   }
-  return;
-}
+  }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 StatusCode IDAlignMonEfficiencies::procHistograms() {
@@ -2810,8 +2806,6 @@ void IDAlignMonEfficiencies::makeTRTBarrelHistograms(MonGroup& al_mon, MonGroup&
   m_trt_b_hist->totHits_vs_StrawLay->GetXaxis()->SetTitle("Straw Layer");
   m_trt_b_hist->totHits_vs_StrawLay->GetYaxis()->SetTitle("Total Measurements");
   RegisterHisto(al_mon, m_trt_b_hist->totHits_vs_StrawLay);
-
-  return;
 }
 
 void IDAlignMonEfficiencies::makeTRTEndcapHistograms(MonGroup& al_mon, MonGroup& al_mon_ls) {
@@ -2871,8 +2865,7 @@ void IDAlignMonEfficiencies::makeTRTEndcapHistograms(MonGroup& al_mon, MonGroup&
     RegisterHisto(al_mon, m_trt_ec_hist->tubeHits_eff_vs_phiSector[endcap], "Fraction of Tube");
   }
 
-  return;
-}
+  }
 
 void IDAlignMonEfficiencies::fillTRTTotalMeasurements(int barrel_ec, int layer_or_wheel, int phi_module, int straw_layer) {
   //Barrel
@@ -2885,8 +2878,7 @@ void IDAlignMonEfficiencies::fillTRTTotalMeasurements(int barrel_ec, int layer_o
     fillTRTEndcapTotalMeasurements(barrel_ec, layer_or_wheel, phi_module, straw_layer);
   }
 
-  return;
-}
+  }
 
 void IDAlignMonEfficiencies::fillTRTHits(int barrel_ec, int layer_or_wheel, int phi_module, int straw_layer, bool isTubeHit) {
   //Barrel
@@ -2899,8 +2891,7 @@ void IDAlignMonEfficiencies::fillTRTHits(int barrel_ec, int layer_or_wheel, int 
     fillTRTEndcapHits(barrel_ec, layer_or_wheel, phi_module, straw_layer, isTubeHit);
   }
 
-  return;
-}
+  }
 
 void IDAlignMonEfficiencies::fillTRTOutliers(int barrel_ec, int layer_or_wheel, int phi_module, int straw_layer) {
   //Barrel
@@ -2913,8 +2904,7 @@ void IDAlignMonEfficiencies::fillTRTOutliers(int barrel_ec, int layer_or_wheel, 
     fillTRTEndcapOutliers(barrel_ec, layer_or_wheel, straw_layer);
   }
 
-  return;
-}
+  }
 
 void IDAlignMonEfficiencies::fillTRTBarrelTotalMeasurements(int layer_or_wheel, int phi_module, int straw_layer) {
   //There are different number of straw layers in the differnt types of module layers
@@ -2926,8 +2916,6 @@ void IDAlignMonEfficiencies::fillTRTBarrelTotalMeasurements(int layer_or_wheel, 
   for (int i = 0; i < 3; i++)
     if (layer_or_wheel == i) //Filling phi sectors of layer i
       m_trt_b_hist->totHits_vs_phiSector[i]->Fill(phi_module);
-
-  return;
 }
 
 void IDAlignMonEfficiencies::fillTRTBarrelHits(int layer_or_wheel, int phi_module, int straw_layer, bool isTubeHit) {
@@ -2952,8 +2940,7 @@ void IDAlignMonEfficiencies::fillTRTBarrelHits(int layer_or_wheel, int phi_modul
     }
   }
 
-  return;
-}
+  }
 
 void IDAlignMonEfficiencies::fillTRTBarrelOutliers(int layer_or_wheel, int phi_module, int straw_layer) {
   //There are different number of straw layers in the differnt types of module layers
@@ -2967,8 +2954,7 @@ void IDAlignMonEfficiencies::fillTRTBarrelOutliers(int layer_or_wheel, int phi_m
       m_trt_b_hist->outliers_vs_phiSector[i]->Fill(phi_module);
   }
 
-  return;
-}
+  }
 
 void IDAlignMonEfficiencies::fillTRTEndcapTotalMeasurements(int barrel_ec, int layer_or_wheel, int phi_module, int straw_layer) {
   for (unsigned int endcap = 0; endcap < 2; ++endcap) {
@@ -3003,8 +2989,7 @@ void IDAlignMonEfficiencies::fillTRTEndcapHits(int barrel_ec, int layer_or_wheel
     }
   }
 
-  return;
-}
+  }
 
 void IDAlignMonEfficiencies::fillTRTEndcapOutliers(int barrel_ec, int layer_or_wheel, int straw_layer) {
   for (unsigned int endcap = 0; endcap < 2; ++endcap) {
@@ -3018,8 +3003,7 @@ void IDAlignMonEfficiencies::fillTRTEndcapOutliers(int barrel_ec, int layer_or_w
     m_trt_ec_hist->outliers_vs_ring[endcap]->Fill(ring);
     m_trt_ec_hist->outliers_vs_phiSector[endcap]->Fill(ring);
   }
-  return;
-}
+  }
 
 unsigned int IDAlignMonEfficiencies::getRing(unsigned int wheel, unsigned int strawlayer) {
   if (wheel < 6) return (16 * wheel + strawlayer) / 4;
