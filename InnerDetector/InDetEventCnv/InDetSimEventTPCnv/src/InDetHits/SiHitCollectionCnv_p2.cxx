@@ -333,7 +333,7 @@ void SiHitCollectionCnv_p2::persToTrans(const SiHitCollection_p2* persCont, SiHi
 
         HepGeom::Point3D<double> endThis( endLast + r );
 
-        HepMcParticleLink partLink( persCont->m_barcode[idxBC], event_number, EBC_MAINEVCOLL, HepMcParticleLink::IS_INDEX, sg);
+        HepMcParticleLink partLink( persCont->m_barcode[idxBC], event_number, EBC_MAINEVCOLL, HepMcParticleLink::IS_EVENTNUM, sg);
         transCont->Emplace( endLast, endThis, eneLoss, meanTime, partLink, persCont->m_id[idxId]);
 
         endLast = endThis;

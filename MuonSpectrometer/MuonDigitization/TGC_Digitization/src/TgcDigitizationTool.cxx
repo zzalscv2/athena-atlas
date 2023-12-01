@@ -455,7 +455,7 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
                     const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
                     const HepMcParticleLink::PositionFlag idxFlag =
                         (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION
-                                              : HepMcParticleLink::IS_INDEX;
+                                              : HepMcParticleLink::IS_EVENTNUM;
                     std::vector<MuonSimData::Deposit> deposits;
                     deposits.emplace_back(
                         HepMcParticleLink(phit->trackNumber(), phit.eventId(),

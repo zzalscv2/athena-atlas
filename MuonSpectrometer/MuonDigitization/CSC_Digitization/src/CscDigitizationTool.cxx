@@ -209,7 +209,7 @@ StatusCode CscDigitizationTool::CoreDigitization(Collections_t& collections,CscS
         hashVec.clear();
         continue;
       }
-      const HepMcParticleLink::PositionFlag idxFlag = (phit.eventId()==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_INDEX;
+      const HepMcParticleLink::PositionFlag idxFlag = (phit.eventId()==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
       const HepMcParticleLink trackLink(phit->trackNumber(), phit.eventId(), evColl, idxFlag);
       const auto cscd = CscMcData(energy, ypos, zpos);
       for (; vecBeg != vecEnd; ++vecBeg) {

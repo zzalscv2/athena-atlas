@@ -130,7 +130,7 @@ void HepMcParticleLink::ExtendedBarCode::print (MsgStream& os) const
  * @brief Constructor.
  * @param p Particle to reference.
  * @param eventIndex Identifies the target GenEvent in a McEventCollection,
- *        as either the number if @c isIndexEventPosition is IS_INDEX,
+ *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
  *        or the position in the container
  *        if isIndexEventPosition is IS_POSITION.
  *        0 always means the first event in the collection.
@@ -141,7 +141,7 @@ void HepMcParticleLink::ExtendedBarCode::print (MsgStream& os) const
 HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                                       uint32_t eventIndex,
                                       EBC_EVCOLL evColl,
-                                      PositionFlag positionFlag /*= IS_INDEX*/,
+                                      PositionFlag positionFlag /*= IS_EVENTNUM*/,
                                       IProxyDict* sg /*= SG::CurrentEventStore::store()*/)
   : m_store (sg),
     m_ptr (part),
@@ -253,24 +253,24 @@ HepMcParticleLink::index_type HepMcParticleLink::eventIndex() const
     return ExtendedBarCode::UNDEFINED;
   }
 
-  index_type index, position;
-  m_extBarcode.eventIndex (index, position);
-  if (index == ExtendedBarCode::UNDEFINED) {
+  index_type event_number, event_position;
+  m_extBarcode.eventIndex (event_number, event_position);
+  if (event_number == ExtendedBarCode::UNDEFINED) {
     const HepMC::GenEvent* pEvt{};
     if (const McEventCollection* coll = retrieveMcEventCollection (getEventCollection(),m_store)) {
-      if (position < coll->size()) {
-        pEvt = coll->at (position);
+      if (event_position < coll->size()) {
+        pEvt = coll->at (event_position);
       }
       if (pEvt) {
-        const int event_number = pEvt->event_number();
+        const int genEventNumber = pEvt->event_number();
         // Be sure to update m_extBarcode before m_ptr.
         // Otherwise, if two threads run this method simultaneously,
-        // one thread could see index == UNDEFINED, but where m_ptr
+        // one thread could see event_number == UNDEFINED, but where m_ptr
         // is already updated so we get nullptr back for sg.
-        if(event_number>-1) {
-          index = static_cast<index_type>(event_number);
-          m_extBarcode.makeIndex (index, position);
-          return index;
+        if (genEventNumber > -1) {
+          event_number = static_cast<index_type>(genEventNumber);
+          m_extBarcode.makeIndex (event_number, event_position);
+          return event_number;
         }
         if (barcode() != 0) {
           HepMC::ConstGenParticlePtr pp = HepMC::barcode_to_particle(pEvt, barcode());
@@ -283,15 +283,15 @@ HepMcParticleLink::index_type HepMcParticleLink::eventIndex() const
   }
   // Don't trip the assertion for a null link.
   if (barcode() == 0 ) {  // || barcode() == 0x7fffffff)
-    if (index != ExtendedBarCode::UNDEFINED) {
-      return index;
+    if (event_number != ExtendedBarCode::UNDEFINED) {
+      return event_number;
     }
     return 0;
   }
   cptr();
-  m_extBarcode.eventIndex (index, position);
-  assert (index != ExtendedBarCode::UNDEFINED);
-  return index;
+  m_extBarcode.eventIndex (event_number, event_position);
+  assert (event_number != ExtendedBarCode::UNDEFINED);
+  return event_number;
 }
 
 

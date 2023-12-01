@@ -477,7 +477,7 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
       ATH_MSG_DEBUG("sTgcDigitizationTool::doDigitization hits mapped");
 
       const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
-      const HepMcParticleLink::PositionFlag idxFlag = (eventId==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_INDEX;
+      const HepMcParticleLink::PositionFlag idxFlag = (eventId==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
       const int barcode = hit.particleLink().barcode();
       const HepMcParticleLink particleLink(barcode, eventId, evColl, idxFlag);
       const sTGCSimHit temp_hit(hit.sTGCId(), hit.globalTime(),

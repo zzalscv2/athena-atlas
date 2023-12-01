@@ -63,7 +63,7 @@ ConstVectorMap<3> MuonSimHit_v1::localDirection() const { return ConstVectorMap<
 const HepMcParticleLink& MuonSimHit_v1::genParticleLink() const {
    if (!m_hepMCLink) {
       const unsigned short eventIndex = acc_mcEventIndex(*this);
-      const HepMcParticleLink::PositionFlag flag =  eventIndex > 0 ? HepMcParticleLink::IS_INDEX :
+      const HepMcParticleLink::PositionFlag flag =  eventIndex > 0 ? HepMcParticleLink::IS_EVENTNUM :
                                                                      HepMcParticleLink::IS_POSITION;
       std::unique_ptr<HepMcParticleLink> link = std::make_unique<HepMcParticleLink>();
       

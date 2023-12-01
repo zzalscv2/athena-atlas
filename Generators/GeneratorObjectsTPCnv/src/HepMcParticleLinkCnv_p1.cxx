@@ -32,7 +32,7 @@ void HepMcParticleLinkCnv_p1::persToTrans( const HepMcParticleLink_p1* persObj,
                                            MsgStream &/*msg*/ ) const
 {
   EBC_EVCOLL evColl = EBC_MAINEVCOLL;
-  HepMcParticleLink::PositionFlag flag = HepMcParticleLink::IS_INDEX;
+  HepMcParticleLink::PositionFlag flag = HepMcParticleLink::IS_EVENTNUM;
 
   if (persObj->m_mcEvtIndex == 0) {
     flag = HepMcParticleLink::IS_POSITION;

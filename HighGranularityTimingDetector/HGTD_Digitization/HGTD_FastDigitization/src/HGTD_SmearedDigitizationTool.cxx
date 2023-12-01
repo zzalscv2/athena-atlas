@@ -359,7 +359,7 @@ StatusCode HGTD_SmearedDigitizationTool::fillMultiTruthCollection(PRD_MultiTruth
   EBC_EVCOLL ev_coll = EBC_MAINEVCOLL; // enum from HepMcParticleLink.h, usually
                                        // contains the HS GenEvent
 
-  HepMcParticleLink::PositionFlag is_event_index_is_position = (hit.eventId() == 0)? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_INDEX;
+  HepMcParticleLink::PositionFlag is_event_index_is_position = (hit.eventId() == 0)? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
   HepMcParticleLink trk_link(hit->trackNumber(), hit.eventId(), ev_coll,
                              is_event_index_is_position, ctx);
 

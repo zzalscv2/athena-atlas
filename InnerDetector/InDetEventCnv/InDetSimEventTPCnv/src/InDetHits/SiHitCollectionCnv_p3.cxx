@@ -349,7 +349,7 @@ void SiHitCollectionCnv_p3::persToTrans(const SiHitCollection_p3* persCont, SiHi
 
         HepGeom::Point3D<double> endThis( endLast + r );
 
-        HepMcParticleLink::PositionFlag flag = HepMcParticleLink::IS_INDEX;
+        HepMcParticleLink::PositionFlag flag = HepMcParticleLink::IS_EVENTNUM;
         if (persCont->m_mcEvtIndex[idxBC] == 0) {
           flag = HepMcParticleLink::IS_POSITION;
         }

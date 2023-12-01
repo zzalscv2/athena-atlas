@@ -497,7 +497,7 @@ void TRT_HitCollectionCnv_p4::persToTrans(const TRT_HitCollection_p4* persCont, 
         // - For charged particles kinEne is *zero*!
         //
 
-        HepMcParticleLink::PositionFlag flag = HepMcParticleLink::IS_INDEX;
+        HepMcParticleLink::PositionFlag flag = HepMcParticleLink::IS_EVENTNUM;
         if (persCont->m_mcEvtIndex[idxBC] == 0) {
           flag = HepMcParticleLink::IS_POSITION;
         }
