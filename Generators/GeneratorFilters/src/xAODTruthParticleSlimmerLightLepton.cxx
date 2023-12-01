@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
 #include "AthLinks/ElementLink.h"
 
 #include "GeneratorObjects/xAODTruthParticleLink.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/DataSvc.h"
@@ -19,7 +20,6 @@
 #include "xAODTruth/TruthEventContainer.h"
 
 #include "GeneratorFilters/xAODTruthParticleSlimmerLightLepton.h"
-#include "TruthUtils/HepMCHelpers.h"
 
 xAODTruthParticleSlimmerLightLepton::xAODTruthParticleSlimmerLightLepton(const std::string &name, ISvcLocator *svcLoc)
     : AthReentrantAlgorithm(name, svcLoc)
@@ -59,11 +59,9 @@ StatusCode xAODTruthParticleSlimmerLightLepton::execute(const EventContext& cont
         unsigned int nPart = (*itr)->nTruthParticles();
         for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
             const xAOD::TruthParticle* particle =  (*itr)->truthParticle(iPart);
-            
-            int this_absPdgID = particle->absPdgId();
 
             //Save stable Electrons & Muons
-            if (MC::isStable(particle) && (this_absPdgID == 11 || this_absPdgID == 13) )
+            if (MC::isStable(particle) && (MC::isElectron(particle) || MC::isMuon(particle)) )
             {
                 xAOD::TruthParticle *xTruthParticle = new xAOD::TruthParticle();
                 xTruthParticleContainerLightLepton->push_back( xTruthParticle );

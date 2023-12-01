@@ -66,10 +66,8 @@ StatusCode xAODTruthParticleSlimmerMuon::execute()
         for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
             const xAOD::TruthParticle* theParticle =  (*itr)->truthParticle(iPart);
 
-            int this_absPdgID = theParticle->absPdgId();
-
-            //Save stable Muons 
-            if (MC::isStable(theParticle) && this_absPdgID == 13)
+            //Save stable Muons
+            if (MC::isStable(theParticle) && MC::isMuon(theParticle))
             {
                 xAOD::TruthParticle *xTruthParticle = new xAOD::TruthParticle();
                 xTruthParticleContainerMuon->push_back( xTruthParticle );
@@ -83,7 +81,7 @@ StatusCode xAODTruthParticleSlimmerMuon::execute()
                 xTruthParticle->setPy(theParticle->py());
                 xTruthParticle->setPz(theParticle->pz());
                 xTruthParticle->setE(theParticle->e());
-            }   
+            }
         }
     }
 

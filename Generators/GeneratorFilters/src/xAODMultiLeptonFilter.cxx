@@ -37,7 +37,7 @@ StatusCode xAODMultiLeptonFilter::filterEvent() {
   for (unsigned int iPart=0; iPart<nParticlesElectrons; ++iPart) {
     const xAOD::TruthParticle* part = (*xTruthParticleContainerElectron)[iPart];
 
-    if (MC::isStable(part) && part->absPdgId()==11) //electron 
+    if (MC::isStable(part) && MC::isElectron(part)) //electron
         if(  part->pt()>= m_Ptmin && part->abseta() <= m_EtaRange )
         {
           numLeptons += 1;
@@ -53,7 +53,7 @@ StatusCode xAODMultiLeptonFilter::filterEvent() {
   for (unsigned int iPart=0; iPart<nParticlesMuons; ++iPart) {
     const xAOD::TruthParticle* part = (*xTruthParticleContainerMuon)[iPart];
 
-    if (MC::isStable(part) && part->absPdgId()==13) //Muon 
+    if (MC::isStable(part) && MC::isMuon(part)) //Muon
         if(  part->pt()>= m_Ptmin && part->abseta() <= m_EtaRange )
         {
           numLeptons += 1;

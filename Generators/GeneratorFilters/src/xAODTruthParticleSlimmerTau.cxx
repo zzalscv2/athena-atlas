@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -7,6 +7,7 @@
 
 #include "GeneratorObjects/McEventCollection.h"
 #include "GeneratorObjects/xAODTruthParticleLink.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/DataSvc.h"
@@ -108,7 +109,6 @@ StatusCode xAODTruthParticleSlimmerTau::execute()
     ElementLink<xAOD::TruthParticleContainer> eltp(*xTruthParticleContainer, iPart);
     const xAOD::TruthParticle *theParticle = (*xTruthParticleContainer)[iPart];
 
-    int this_absPdgID = theParticle->absPdgId();
     float this_abseta = theParticle->abseta();
     float this_pt = theParticle->pt();
     int this_status = theParticle->status();
@@ -116,7 +116,7 @@ StatusCode xAODTruthParticleSlimmerTau::execute()
     //Save Taus above 0.001 GeV, & with any eta (may be changed on JOs level eg. to dectector acceptance of eta 4.5)
     // see GeneratorFilters/share/common/xAODTauFilter_Common.py
     // we want to avoid status 3 taus
-    if (this_status != 3 && this_absPdgID == 15 && this_pt >= m_tau_pt_selection && this_abseta < m_abseta_selection)
+    if (this_status != 3 && MC::isTau(theParticle) && this_pt >= m_tau_pt_selection && this_abseta < m_abseta_selection)
     {
       xAOD::TruthParticle *xTruthParticle = new xAOD::TruthParticle();
 
@@ -143,7 +143,7 @@ StatusCode xAODTruthParticleSlimmerTau::execute()
           tauType = 1; //Tau decays into an electron
         else if (tau->child(n)->absPdgId() == 14)
           tauType = 2; //Tau decays into a muon
-        else if (tau->child(n)->absPdgId() == 15)
+        else if (MC::isTau(tau->child(n)))
           tauType = 11; //Tau radiates a particle and decays into another tau
       }
       tauTypeDecorator(*xTruthParticle) = tauType;

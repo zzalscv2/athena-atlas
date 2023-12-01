@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( HFORTools )
@@ -13,7 +13,7 @@ atlas_add_library( HFORToolsLib
    PUBLIC_HEADERS HFORTools
    LINK_LIBRARIES AsgTools PMGAnalysisInterfacesLib xAODTruth xAODJet
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} PathResolver xAODBase xAODEventInfo
+   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} PathResolver TruthUtils xAODBase xAODEventInfo
    xAODRootAccess )
 
 if( NOT XAOD_STANDALONE )

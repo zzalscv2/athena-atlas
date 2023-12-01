@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration 
 */
 #include "GeneratorFilters/xAODTauFilter.h"
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "TMath.h"
 #include <vector>
@@ -134,7 +135,7 @@ StatusCode xAODTauFilter::filterEvent() {
   
   for (const auto * truthtau : *vtruth) {
    // Look for the first tau with genstat != 3
-        if (truthtau->absPdgId() == 15 && truthtau->status() != 3) {
+    if (MC::isTau(truthtau) && truthtau->status() != 3) {
         const xAOD::TruthParticle* tau = truthtau;
         ATH_MSG_DEBUG("found tau " << tau);
         ATH_MSG_DEBUG("pT\t\teta\tphi\tid");

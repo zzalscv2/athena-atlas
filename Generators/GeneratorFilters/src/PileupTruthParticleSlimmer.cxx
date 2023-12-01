@@ -86,12 +86,11 @@ StatusCode PileupTruthParticleSlimmer::execute() {
           continue; //Skip this particle
       }
 
-      int this_absPdgID = theParticle->absPdgId();
       float this_abseta = theParticle->abseta();
       float this_pt =  theParticle->pt();
 
       //Save photons above 8 GeV or electrons/muons above 1 GeV, & within detector acceptance (4.5)
-      if( ( (this_absPdgID == 22 && this_pt >= m_photon_pt_selection) || ((this_absPdgID == 11 || this_absPdgID == 13) && this_pt >= m_lepton_pt_selection) )
+      if( ( (MC::isPhoton(theParticle) && this_pt >= m_photon_pt_selection) || ((MC::isElectron(theParticle) || MC::isMuon(theParticle)) && this_pt >= m_lepton_pt_selection) )
           && (this_abseta < m_abseta_selection) ){
 
         xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();

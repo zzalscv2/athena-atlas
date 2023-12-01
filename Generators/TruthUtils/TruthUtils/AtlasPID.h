@@ -152,6 +152,9 @@ template<> inline bool isTau(const int& p){ return std::abs(p) == TAU;}
 template<class T> inline bool isNeutrino(const T& p){return isNeutrino(p->pdg_id());}
 template<> inline bool isNeutrino(const int& p){ auto sp = std::abs(p); return sp == 12 || sp == 14 || sp == 16|| sp == 18;  }
 
+template<class T> inline bool isSMNeutrino(const T& p){return isSMNeutrino(p->pdg_id());}
+template<> inline bool isSMNeutrino(const int& p){ auto sp = std::abs(p); return sp == 12 || sp == 14 || sp == 16;  }
+
 template<class T> inline bool isGluon(const T& p){return isGluon(p->pdg_id());}
 template<> inline bool isGluon(const int& p){ return p == GLUON; }
 

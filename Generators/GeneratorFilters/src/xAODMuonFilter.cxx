@@ -28,7 +28,7 @@ StatusCode xAODMuonFilter::filterEvent() {
   for (unsigned int iPart=0; iPart<nParticles; ++iPart) {
     const xAOD::TruthParticle* part = (*xTruthParticleContainer)[iPart];
 
-    if (MC::isStable(part) && part->absPdgId()==13) //muon
+    if (MC::isStable(part) && MC::isMuon(part)) //muon
         if(  part->pt()>= m_Ptmin && part->abseta() <= m_EtaRange )
             return StatusCode::SUCCESS;
   }

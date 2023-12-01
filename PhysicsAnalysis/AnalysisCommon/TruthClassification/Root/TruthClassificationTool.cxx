@@ -44,11 +44,11 @@ StatusCode TruthClassificationTool::classify(const xAOD::IParticle &particle,
                                              Truth::Type &classification) const
 {
   const xAOD::TruthParticle *truthParticle = dynamic_cast<const xAOD::TruthParticle *> (&particle);
-  if (dynamic_cast<const xAOD::Electron *> (&particle) || (truthParticle != nullptr && truthParticle->absPdgId() == 11))
+  if (dynamic_cast<const xAOD::Electron *> (&particle) || (truthParticle != nullptr && MC::isElectron(truthParticle)))
   {
     ANA_CHECK(classifyElectron(particle, classification));
   }
-  else if (dynamic_cast<const xAOD::Muon *> (&particle) || (truthParticle != nullptr && truthParticle->absPdgId() == 13))
+  else if (dynamic_cast<const xAOD::Muon *> (&particle) || (truthParticle != nullptr && MC::isMuon(truthParticle)))
   {
     ANA_CHECK(classifyMuon(particle, classification));
   }
