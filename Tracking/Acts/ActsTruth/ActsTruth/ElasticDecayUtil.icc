@@ -133,7 +133,7 @@ inline void ElasticDecayUtil<IsDebug>::dumpStatistics(T_OutStream &out) const {
         for(const auto &elm : m_outgoingMotherPdgIds) {
            tmp_out << " " << elm;
         }
-        tmp_out;
+        tmp_out << std::endl;
         out << tmp_out.str();
    }
 }
