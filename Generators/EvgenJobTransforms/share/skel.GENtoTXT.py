@@ -396,6 +396,8 @@ svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"evgenTune": evgenConfig.tune})
 if hasattr( evgenConfig, "hardPDF" ) : svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"hardPDF": evgenConfig.hardPDF})
 if hasattr( evgenConfig, "softPDF" ) : svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"softPDF": evgenConfig.softPDF})
 if hasattr( runArgs, "randomSeed") :  svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"randomSeed": str(runArgs.randomSeed)})
+svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"keywords": ", ".join(evgenConfig.keywords).lower()})
+
 # Set AMITag in in-file metadata
 from PyUtils import AMITagHelper
 AMITagHelper.SetAMITag(runArgs=runArgs)

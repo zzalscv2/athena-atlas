@@ -422,6 +422,9 @@ else:
 import EventInfoMgt.EventInfoMgtInit
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"beam_energy": str(int(runArgs.ecmEnergy*Units.GeV/2.0))})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"beam_type": 'collisions'})
+if len(evgenConfig.keywords)>0:
+    # Assume that this is the correct list of keywords we should keep
+    svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"keywords": ", ".join(evgenConfig.keywords).lower()})
 
 # Set AMITag in in-file metadata
 from PyUtils import AMITagHelper
