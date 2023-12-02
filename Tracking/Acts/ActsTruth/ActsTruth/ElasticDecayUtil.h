@@ -42,7 +42,7 @@ struct ElasticDecayUtil {
    void dumpStatistics(T_OutStream &out) const;
 
    // @param binning number of bins, lower edge, upper edge in MeV
-   void setEnergyLossBinning(const std::conditional<IsDebug, std::vector<float>, EmptyProperty>::type &binning);
+   void setEnergyLossBinning(const typename std::conditional<IsDebug, std::vector<float>, EmptyProperty>::type &binning);
 
    struct Empty {
       template <typename... T_Args>

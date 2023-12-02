@@ -92,9 +92,9 @@ const xAOD::TruthParticle *ElasticDecayUtil<IsDebug>::getMother(const xAOD::Trut
 }
 
 template <bool IsDebug>
-inline void ElasticDecayUtil<IsDebug>::setEnergyLossBinning(const std::conditional<IsDebug,
-                                                            std::vector<float>,
-                                                            EmptyProperty>::type &binning) {
+inline void ElasticDecayUtil<IsDebug>::setEnergyLossBinning(const typename std::conditional<IsDebug,
+											    std::vector<float>,
+                                                                                            EmptyProperty>::type &binning) {
    if constexpr(IsDebug) {
       if (binning.size()>=3) {
          for (ActsUtils::StatHist &stat : m_energyLossStat ) {
