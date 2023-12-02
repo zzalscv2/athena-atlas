@@ -702,35 +702,35 @@ StatusCode IDAlignMonNtuple::getSiResiduals(const Trk::Track* track, const Trk::
 
   if (!m_residualPullCalculator.empty() && !m_residualPullCalculator.retrieve().isFailure()) {
     if (hit && trackParameterForResiduals) {
-      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " got hit and track parameters " << endmsg;
+      ATH_MSG_DEBUG(" got hit and track parameters ");
 
       std::optional<Trk::ResidualPull> residualPull = std::nullopt;
-      if (unBias) residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals, Trk::ResidualPull::Unbiased);
-      else residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals, Trk::ResidualPull::Biased);
+      if (unBias) {
+        residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals, Trk::ResidualPull::Unbiased);
+      }
+      else {
+        residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals, Trk::ResidualPull::Biased);
+      }
 
-      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " got hit and track parameters...done " << endmsg;
+      ATH_MSG_DEBUG( " got hit and track parameters...done ");
       if (residualPull) {
-        if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " got residual pull " << endmsg;
         residualX = residualPull->residual()[Trk::loc1];
-        if (residualPull->isPullValid()) pullX = residualPull->pull()[Trk::loc1];
-        else {
-          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "ResidualPullCalculator finds invalid X Pull!!!" << endmsg;
-          sc = StatusCode::FAILURE;
-        }
-
-        if (residualPull->dimension() >= 2) {
-          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " residualPull dim >= 2" << endmsg;
+        if (residualPull->residual().size()>1) {
           residualY = residualPull->residual()[Trk::loc2];
-
-          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " residual Y = " << residualY << endmsg;
-          if (residualPull->isPullValid()) pullY = residualPull->pull()[Trk::loc2];
-          else {
-            if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "ResidualPullCalculator finds invalid Y Pull!!!" << endmsg;
-            sc = StatusCode::FAILURE;
+        }
+        ATH_MSG_DEBUG(" got residual pull ");
+        if (residualPull->isPullValid()&& !residualPull->pull().empty()) {
+          pullX = residualPull->pull()[Trk::loc1];
+          if (residualPull->pull().size()>1) {
+            pullY = residualPull->pull()[Trk::loc2];
           }
         }
+        else {
+          ATH_MSG_DEBUG("ResidualPullCalculator finds invalid Pull!!!");
+          sc = StatusCode::FAILURE;
+        }
       } else {
-        if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "ResidualPullCalculator failed!" << endmsg;
+        ATH_MSG_DEBUG("ResidualPullCalculator failed!");
         sc = StatusCode::FAILURE;
       }
     }

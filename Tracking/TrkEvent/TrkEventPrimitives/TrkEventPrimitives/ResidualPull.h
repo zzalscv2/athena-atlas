@@ -101,8 +101,8 @@ protected:
   ///////////////////////////////////////////////////////////////////
   // Protected Data
   ///////////////////////////////////////////////////////////////////
-  std::vector<double> m_residual;
-  std::vector<double> m_pull;
+  std::vector<double> m_residual{};
+  std::vector<double> m_pull{};
   bool m_pullValid = false;
   ResidualType m_residualType = Trk::ResidualPull::Biased;
   int m_parameterKey = 0;
