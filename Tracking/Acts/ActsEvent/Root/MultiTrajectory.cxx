@@ -70,7 +70,7 @@ ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
     ActsTrk::IndexType previous) {
   using namespace Acts::HashedStringLiteral;
   INSPECTCALL( this << " " <<  mask << " " << m_trackStatesAux->size() << " " << previous);
-  assert(m_trackStates && "Missing Track States backend");
+  assert(m_trackStatesAux && "Missing Track States backend");
   constexpr size_t NDim = 6; // TODO take this from somewhere
   stepResize(m_trackStatesAux.get(), m_trackStatesSize);
   m_surfaces.push_back(nullptr);
@@ -237,7 +237,7 @@ void ActsTrk::MutableMultiTrajectory::unset_impl(
 std::any ActsTrk::MutableMultiTrajectory::component_impl(
     Acts::HashedString key, ActsTrk::IndexType istate) {
   using namespace Acts::HashedStringLiteral;
-  assert(istate < m_trackStates->size() &&
+  assert(istate < m_trackStatesAux->size() &&
          "Attempt to reach beyond the Track States container size");
   INSPECTCALL(key << " " << istate << " non-const component_impl")
 
@@ -282,7 +282,7 @@ const std::any ActsTrk::MutableMultiTrajectory::component_impl(
     Acts::HashedString key,
     ActsTrk::IndexType istate) const {
   using namespace Acts::HashedStringLiteral;
-  assert(istate < m_trackStates->size() &&
+  assert(istate < m_trackStatesAux->size() &&
          "Attempt to reach beyond the Track States container size");
   INSPECTCALL(key << " " << istate << " const component_impl")
   switch (key) {
