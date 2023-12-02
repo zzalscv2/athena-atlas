@@ -89,7 +89,7 @@ CaloCluster_OnTrackBuilder::finalize()
   return StatusCode::SUCCESS;
 }
 
-Trk::CaloCluster_OnTrack*
+std::unique_ptr<Trk::CaloCluster_OnTrack>
 CaloCluster_OnTrackBuilder::buildClusterOnTrack(
   const EventContext& ctx,
   const xAOD::CaloCluster* cluster,
@@ -118,16 +118,10 @@ CaloCluster_OnTrackBuilder::buildClusterOnTrack(
   Trk::LocalParameters lp =
     getClusterLocalParameters(cluster, surface.get(), charge);
 
-  const Amg::MatrixX em = getClusterErrorMatrix(cluster, *surface, charge);
+  Amg::MatrixX em = getClusterErrorMatrix(cluster, *surface, charge);
 
-  Trk::CaloCluster_OnTrack* ccot =
-    new Trk::CaloCluster_OnTrack(lp, em, *surface);
+  return std::make_unique<Trk::CaloCluster_OnTrack>(std::move(lp), std::move(em), *surface);
 
-  if (ccot) {
-    ATH_MSG_DEBUG("Successful build of Trk::CaloCluster_OnTrack");
-  }
-
-  return ccot;
 }
 
 std::unique_ptr<Trk::Surface>

@@ -26,10 +26,10 @@ public:
 
   ~ICaloCluster_OnTrackBuilder(){};
 
-  virtual Trk::CaloCluster_OnTrack* buildClusterOnTrack(
-    const EventContext& ctx,
-    const xAOD::CaloCluster* cl,
-    int charge = 0) const = 0;
+  virtual std::unique_ptr<Trk::CaloCluster_OnTrack> buildClusterOnTrack(
+      const EventContext& ctx,
+      const xAOD::CaloCluster* cl,
+      int charge = 0) const = 0;
 };
 
 #endif // ICALOCLUSTER_ONTRACKBUILER_H

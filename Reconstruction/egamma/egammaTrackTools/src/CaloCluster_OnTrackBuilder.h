@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCLUSTER_ONTRACKBUILER_H
@@ -45,7 +45,7 @@ public:
   virtual StatusCode initialize() override final;
   virtual StatusCode finalize() override final;
 
-  virtual Trk::CaloCluster_OnTrack* buildClusterOnTrack(
+  virtual std::unique_ptr<Trk::CaloCluster_OnTrack> buildClusterOnTrack(
     const EventContext& ctx,
     const xAOD::CaloCluster* cl,
     int charge = 0) const override final;
@@ -60,9 +60,10 @@ private:
     const Trk::Surface* surf,
     int charge) const;
 
-  Amg::MatrixX getClusterErrorMatrix(const xAOD::CaloCluster* cluster,
-                                     const Trk::Surface& surf,
-                                     int charge) const;
+  Amg::MatrixX getClusterErrorMatrix(
+    const xAOD::CaloCluster* cluster,
+    const Trk::Surface& surf,
+    int charge) const;
 
   /** @brief Tool to build calorimeter layer surfaces */
   ToolHandle<ICaloSurfaceBuilder> m_calosurf{

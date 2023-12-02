@@ -17,13 +17,13 @@ const Amg::Vector3D INVALID_VECTOR3D(NaN, NaN, NaN);
 }
 
 Trk::CaloCluster_OnTrack::CaloCluster_OnTrack(
-  const Trk::LocalParameters& locpars,
-  const Amg::MatrixX& locerr,
+  Trk::LocalParameters&& locpars,
+  Amg::MatrixX&& locerr,
   const Trk::Surface& surface,
   const Trk::EnergyLoss* eloss)
-  : MeasurementBase(locpars, locerr)
+  : MeasurementBase(std::move(locpars), std::move(locerr))
   , SurfacePtrHolder(surface)
-  , m_globalpos(surface.localToGlobal(locpars))
+  , m_globalpos(surface.localToGlobal(m_localParams))
   , m_eloss(eloss)
 {}
 

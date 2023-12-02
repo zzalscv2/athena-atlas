@@ -42,11 +42,9 @@ public:
   /** Move Assignment  operator */
   CaloCluster_OnTrack& operator=(CaloCluster_OnTrack&& cot) noexcept = default;
 
-  /** Constructor with parameters  LocalParameters*,  LocalErrorMatrix*,
-  Surface& This class owns the LocalParameters, ErrorMatrix & EnergyLoss.  A
-  copy of the surface will be made if it is not owned by a detector element. */
-  CaloCluster_OnTrack(const LocalParameters& locpars,
-                      const Amg::MatrixX& locerr,
+  /** Constructor with parameters*/
+  CaloCluster_OnTrack(LocalParameters&& locpars,
+                      Amg::MatrixX&& locerr,
                       const Surface& surf,
                       const EnergyLoss* eloss = nullptr);
 
