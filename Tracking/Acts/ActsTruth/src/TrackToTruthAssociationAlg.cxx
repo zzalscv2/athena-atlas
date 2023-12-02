@@ -149,7 +149,6 @@ namespace ActsTrk
        tracksContainer->trackStateContainer().visitBackwards(
           lastMeasurementIndex,
           [this,
-           &tgContext,
            &n_measurements,
            &measurement_to_truth_association_maps,
            &truth_particle_counts](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void

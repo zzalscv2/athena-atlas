@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <map>
 #include <utility>
@@ -14,7 +14,6 @@
 
 L1CaloCTPMonitorAlgorithm::L1CaloCTPMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
   : AthMonitorAlgorithm(name,pSvcLocator),
-    m_debug(true),
     m_errorTool("LVL1::TrigT1CaloMonErrorTool/TrigT1CaloMonErrorTool")
 {
 }
@@ -317,7 +316,6 @@ void L1CaloCTPMonitorAlgorithm::compare(const CTP_BC& bunch, int hits, int total
        std::map<std::string, int> threshMap;
 
       const std::vector<std::shared_ptr<TrigConf::L1Threshold>>& thresholds = getL1Menu(ctx)->thresholds();
-      std::vector<std::shared_ptr<TrigConf::L1Threshold>>::const_iterator it;
       ATH_MSG_DEBUG("Size of thresholds vector: " << thresholds.size());
       
       for (const auto& it : thresholds) {

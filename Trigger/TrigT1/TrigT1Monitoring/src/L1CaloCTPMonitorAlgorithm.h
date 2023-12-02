@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CALOMONITORING_L1CALOCTPMONITORALGORITHM_H
 #define TRIGT1CALOMONITORING_L1CALOCTPMONITORALGORITHM_H
@@ -70,18 +70,6 @@ private:
   SG::ReadHandleKey<xAOD::CMXCPHitsContainer> m_cmxCpHitsLocation {this, "CMXCPHitsLocation", LVL1::TrigT1CaloDefs::CMXCPHitsLocation, "CMXCPHits container"};
 
   SG::ReadHandleKey<TrigConf::L1Menu> m_L1MenuKey  { this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu", "L1 Menu" };
-
-  /// TIP map
-  
-  /// Number of TIP bits (CTP input)
-  const int m_nTIP = 512;
-
-  //---------------------- get TIP mappings from COOL ----------------------
-  
-  //mutable std::vector<std::pair<std::string, int>> m_tipMap;
-
-  /// Debug printout flag
-  bool m_debug;
 
   // Event veto error tool 
   ToolHandle<LVL1::ITrigT1CaloMonErrorTool>    m_errorTool;  
