@@ -5,7 +5,10 @@
 #include "ActsMuonAlignCondAlg.h"
 
 #include <StoreGate/ReadCondHandle.h>
+#include <GeoModelKernel/GeoPerfUtils.h>
+#include <GeoModelKernel/GeoClearAbsPosAction.h>
 #include <AthenaKernel/IOVInfiniteRange.h>
+
 
 using namespace MuonGMR4;
 
@@ -234,6 +237,7 @@ StatusCode ActsMuonAlignCondAlg::declareDependencies(const EventContext& ctx,
 StatusCode ActsMuonAlignCondAlg::execute(const EventContext& ctx) const {
     deltaMap alignDeltas{};
     alignTechMap techTransforms{};
+    unsigned int memBeforeAlign = GeoPerfUtils::getMem();
     ATH_CHECK(loadDeltas(ctx, alignDeltas, techTransforms));
     
     std::vector<const MuonReadoutElement*> readoutEles = m_detMgr->getAllReadoutElements();
@@ -276,8 +280,19 @@ StatusCode ActsMuonAlignCondAlg::execute(const EventContext& ctx) const {
     }
     /// Check that all readout elements were properly aligned
     if (numAligned != readoutEles.size()){
-        ATH_MSG_WARNING("Only "<<numAligned<<" out of "<<readoutEles.size()<<" were picked up by the alignment cutalg");
+        ATH_MSG_FATAL("Only "<<numAligned<<" out of "<<readoutEles.size()<<" were picked up by the alignment cutalg");
+        return StatusCode::FAILURE;
     }
+    alignDeltas.clear();
+    techTransforms.clear();
+    /// Whipe the GeoModelCache
+    GeoClearAbsPosAction whipeTreeTop{};
+    for (unsigned int treeTop = 0 ; treeTop < m_detMgr->getNumTreeTops(); ++treeTop) {
+        m_detMgr->getTreeTop(treeTop)->exec(&whipeTreeTop);
+    }
+
+    unsigned int memAfterAlign  = GeoPerfUtils::getMem();
+    ATH_MSG_INFO("Caching of the alignment parameters required "<<(memAfterAlign - memBeforeAlign) / 1024<<" MB of memory");
     return StatusCode::SUCCESS;
 }
 

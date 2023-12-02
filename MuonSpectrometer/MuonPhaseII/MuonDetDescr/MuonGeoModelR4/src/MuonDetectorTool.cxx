@@ -4,11 +4,13 @@
 #include "MuonGeoModelR4/MuonDetectorTool.h"
 
 #include <GeoModelInterfaces/IGeoModelSvc.h>
+#include <GeoModelKernel/GeoPerfUtils.h>
 #include <GeoModelKernel/GeoPhysVol.h>
 #include <GeoModelKernel/GeoVolumeCursor.h>
 #include <GeoModelRead/ReadGeoModel.h>
 #include <GeoModelUtilities/GeoModelExperiment.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
+
 
 namespace MuonGMR4 {
 MuonDetectorTool::MuonDetectorTool(const std::string &type,
@@ -38,9 +40,12 @@ StatusCode MuonDetectorTool::create() {
     ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
     GeoPhysVol *world = theExpt->getPhysVol();
 
-    for (auto &readOutTool : m_detTechTools)
+    for (auto &readOutTool : m_detTechTools) {
+        const unsigned memBefore = GeoPerfUtils::getMem();
         ATH_CHECK(readOutTool->buildReadOutElements(*m_manager));
-
+        const unsigned memAfter = GeoPerfUtils::getMem();
+        ATH_MSG_INFO("Building of "<<readOutTool->name()<<" consumed "<<(memAfter - memBefore) / 1024<<" MB memory");
+    }
     GeoVolumeCursor cursor(world);
     while (!cursor.atEnd()) {
         std::string volName = cursor.getName();
