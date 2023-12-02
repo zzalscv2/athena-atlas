@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import BeamType, LHCPeriod
+from AthenaConfiguration.Enums import BeamType, LHCPeriod, HIMode
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg
 from BTagging.JetBTaggingAlgConfig import JetBTaggingAlgCfg
 from BTagging.JetSecVertexingAlgConfig import JetSecVertexingAlgCfg
@@ -149,7 +149,7 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
  
     if inputFlags.Reco.EnableHI:   
         JetCollection=['AntiKt4HI']     
-        if not inputFlags.HeavyIon.Egamma.doSubtractedClusters:
+        if inputFlags.Reco.HIMode is not HIMode.HI:
             JetCollection.extend(['AntiKt4EMTopo','AntiKt4EMPFlow'])
 
     # Can only configure b-tagging for collisions; not cosmics, etc.
