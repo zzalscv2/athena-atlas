@@ -454,7 +454,7 @@ class MultiTrajectory
  private:
   // TODO these 4 DATA links will be replaced by a reference to storable object that would contain those
   const DataLink<xAOD::TrackStateContainer> m_trackStates;
-  const xAOD::TrackStateAuxContainer* m_trackStatesAux;
+  const xAOD::TrackStateAuxContainer* m_trackStatesAux{};
   const DataLink<xAOD::TrackParametersContainer> m_trackParameters;
   const DataLink<xAOD::TrackJacobianContainer> m_trackJacobians;
   const DataLink<xAOD::TrackMeasurementContainer> m_trackMeasurements;
