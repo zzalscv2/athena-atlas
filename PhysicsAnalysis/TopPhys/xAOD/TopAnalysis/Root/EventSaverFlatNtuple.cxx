@@ -119,7 +119,7 @@ namespace top {
     m_weight_leptonSF_MU_SF_Isol_PROBEQ_DOWN(0.),
     m_weight_leptonSF_MU_SF_Isol_SHERPA_POWHEG_UP(0.),
     m_weight_leptonSF_MU_SF_Isol_SHERPA_POWHEG_DOWN(0.),
-    //Muon TTVA SF systematics 
+    //Muon TTVA SF systematics
     m_weight_leptonSF_MU_SF_TTVA_STAT_UP(0.),
     m_weight_leptonSF_MU_SF_TTVA_STAT_DOWN(0.),
     m_weight_leptonSF_MU_SF_TTVA_SYST_UP(0.),
@@ -233,6 +233,14 @@ namespace top {
     for (std::unordered_map<std::string, float*>::iterator i = m_extraTruthVars_float.begin();
          i != m_extraTruthVars_float.end(); ++i)
       delete (*i).second;
+
+    for (auto& i:  m_extraTruthVars_vecint){
+      delete i.second;
+    }
+
+    for (auto& i: m_extraTruthVars_vecfloat){
+      delete i.second;
+    }
   }
 
   std::shared_ptr<top::TopConfig> EventSaverFlatNtuple::topConfig() {
@@ -274,7 +282,7 @@ namespace top {
     // set the branch filters
     branchFilters().push_back(std::bind(&EventSaverFlatNtuple::filterBranches, this, std::placeholders::_1,
                                         std::placeholders::_2));
-					
+
 
     // variable-R re-clustering (VarRC)
     if (m_config->useVarRCJets()) {
@@ -741,9 +749,9 @@ namespace top {
                                              "weight_leptonSF_MU_SF_Isol_SYST_UP");
           systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_SYST_DOWN,
                                              "weight_leptonSF_MU_SF_Isol_SYST_DOWN");
-          } 
+          }
 
-         // TTVA 
+         // TTVA
           systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_TTVA_STAT_UP,
                                              "weight_leptonSF_MU_SF_TTVA_STAT_UP");
           systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_TTVA_STAT_DOWN,
@@ -1263,7 +1271,7 @@ namespace top {
 
 	for (const std::pair<std::string,std::string>& it : m_config->largeRJetSubstructureVariables()) {
 	  systematicTree->makeOutputVariable(m_ljet_substructure[it.first],"ljet_"+it.first);
-	} 
+	}
 
         for (const std::string& taggerName : m_boostedJetTaggersNames) {
           systematicTree->makeOutputVariable(m_ljet_isTagged[taggerName], "ljet_isTagged_" + taggerName);
@@ -1275,18 +1283,15 @@ namespace top {
           for (const std::string& taggerName : m_boostedJetTaggersNamesCalibrated) {
             systematicTree->makeOutputVariable(m_ljet_tagSF[taggerName], "ljet_tagSF_" + taggerName);
           }
-	  
+
 	  if (systematicTree->name() == nominalTTreeName || systematicTree->name() == nominalLooseTTreeName) {
-	    
+
 	    for (const std::string& taggerName : m_boostedJetTaggersNamesCalibrated) {
 	      systematicTree->makeOutputVariable(m_ljet_tagSFSysVars[taggerName],"ljet_tagSF_" + taggerName + "_variations");
 	    }
-	    
+
 	  }
-	  
-	  
-	  
-	  
+
         }
 
         if(m_config->useXbbTagger()){
@@ -1363,7 +1368,7 @@ namespace top {
 	    systematicTree->makeOutputVariable(m_rcjetJSSVariables[name], "rcjet_" + name);
 	  }
 	}
-	  
+
       }
       // vRC branches
       if (m_config->useVarRCJets()) {
@@ -1386,13 +1391,13 @@ namespace top {
             if (m_config->bTagAlgo_MV2c10_used()) {
               systematicTree->makeOutputVariable(m_VarRCjetsubBranches[VarRC + "_" + name + "_sub_mv2c10"], VarRC + "sub_" + name + "_mv2c10");
             }
-	    
+
 	    if(m_config->useVarRCJetSubstructure()) {
 	      for (const std::string& varname : config->VarRCJetSubstructureVariables()) {
 		systematicTree->makeOutputVariable(m_VarRCjetJSSVariables[VarRC + "_" + name][varname], VarRC + "_" + name + "_" + varname);
 	      }
 	    }
-            
+
           } // end loop over mass parameters
         } // end loop over multipliers for mass scale
       } // end if VarRC jets
@@ -1697,7 +1702,7 @@ namespace top {
       m_particleLevelTreeManager->makeOutputVariable(m_el_phi, "el_phi");
       m_particleLevelTreeManager->makeOutputVariable(m_el_e, "el_e");
       m_particleLevelTreeManager->makeOutputVariable(m_el_charge, "el_charge");
-      
+
       m_particleLevelTreeManager->makeOutputVariable(m_el_true_type, "el_true_type");
       m_particleLevelTreeManager->makeOutputVariable(m_el_true_origin, "el_true_origin");
 
@@ -1714,7 +1719,7 @@ namespace top {
       m_particleLevelTreeManager->makeOutputVariable(m_mu_phi, "mu_phi");
       m_particleLevelTreeManager->makeOutputVariable(m_mu_e, "mu_e");
       m_particleLevelTreeManager->makeOutputVariable(m_mu_charge, "mu_charge");
-      
+
       m_particleLevelTreeManager->makeOutputVariable(m_mu_true_type, "mu_true_type");
       m_particleLevelTreeManager->makeOutputVariable(m_mu_true_origin, "mu_true_origin");
 
@@ -1722,7 +1727,7 @@ namespace top {
       m_particleLevelTreeManager->makeOutputVariable(m_mu_eta_bare, "mu_eta_bare");
       m_particleLevelTreeManager->makeOutputVariable(m_mu_phi_bare, "mu_phi_bare");
       m_particleLevelTreeManager->makeOutputVariable(m_mu_e_bare, "mu_e_bare");
-      
+
       if(m_config->useSoftMuons())
       {
         m_particleLevelTreeManager->makeOutputVariable(m_softmu_pt, "softmu_pt");
@@ -1730,10 +1735,10 @@ namespace top {
         m_particleLevelTreeManager->makeOutputVariable(m_softmu_phi, "softmu_phi");
         m_particleLevelTreeManager->makeOutputVariable(m_softmu_e, "softmu_e");
         m_particleLevelTreeManager->makeOutputVariable(m_softmu_charge, "softmu_charge");
-        
+
         m_particleLevelTreeManager->makeOutputVariable(m_softmu_true_type, "softmu_true_type");
         m_particleLevelTreeManager->makeOutputVariable(m_softmu_true_origin, "softmu_true_origin");
-        
+
         if(m_config->softmuonAdditionalTruthInfo())
         {
           if(m_config->softmuonAdditionalTruthInfoCheckPartonOrigin()) m_particleLevelTreeManager->makeOutputVariable(m_softmu_parton_origin_flag, "softmu_parton_origin_flag");
@@ -1808,7 +1813,7 @@ namespace top {
 	  m_particleLevelTreeManager->makeOutputVariable(m_rcjetJSSVariables[name], "rcjet_" + name);
 	}
       }
-      
+
     }
 
     if (m_config->useVarRCJets()) {
@@ -1828,13 +1833,13 @@ namespace top {
           m_particleLevelTreeManager->makeOutputVariable(m_VarRCjetsubBranchesParticle[VarRC + "_" + name + "_sub_eta"], VarRC + "sub_" + name + "_eta");  // of vectors
           m_particleLevelTreeManager->makeOutputVariable(m_VarRCjetsubBranchesParticle[VarRC + "_" + name + "_sub_phi"], VarRC + "sub_" + name + "_phi");   // subjet
           m_particleLevelTreeManager->makeOutputVariable(m_VarRCjetsubBranchesParticle[VarRC + "_" + name + "_sub_e"], VarRC + "sub_" + name + "_e");      // info
-	  
+
 	  if(m_config->useVarRCJetSubstructure()) {
 	    for (const std::string& varname : m_config->VarRCJetSubstructureVariables()) {
 	      m_particleLevelTreeManager->makeOutputVariable(m_VarRCjetJSSVariables[VarRC + "_" + name][varname], VarRC + "_" + name + "_" + varname);
 	    }
 	  }
-	  
+
         } // end loop over mass parameters
       } // end loop over multipliers for mass scale
     } // end if VarRC jets
@@ -2181,7 +2186,7 @@ namespace top {
         } else {
           m_weight_leptonSF_MU_SF_Isol_SYST_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_SYST_UP);
           m_weight_leptonSF_MU_SF_Isol_SYST_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_SYST_DOWN);
-        }   
+        }
         //Muon TTVA SF systematics
         m_weight_leptonSF_MU_SF_TTVA_STAT_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_TTVA_STAT_UP);
         m_weight_leptonSF_MU_SF_TTVA_STAT_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_TTVA_STAT_DOWN);
@@ -2576,7 +2581,7 @@ namespace top {
           m_el_true_isPrompt[i] = isPrompt_isChargeFl.first;
           m_el_true_isChargeFl[i] = isPrompt_isChargeFl.second;
 
-          //Write IFF classification to output 
+          //Write IFF classification to output
           if(IFFClass.isAvailable(*elPtr)){
             m_el_true_IFFclass[i] = IFFClass(*elPtr);
             ATH_MSG_DEBUG("Electron (pt = "<< elPtr->pt() << ") IFF classification = " << m_el_true_IFFclass[i]);
@@ -2607,7 +2612,7 @@ namespace top {
       m_mu_ptvarcone30.resize(n_muons);
       m_mu_isTight.resize(n_muons);
       m_mu_passOR.resize(n_muons);
-      
+
       for (const auto& trigger : m_mu_trigMatched)
         m_mu_trigMatched[trigger.first].resize(n_muons);
       m_mu_d0sig.resize(n_muons);
@@ -2658,12 +2663,12 @@ namespace top {
             m_mu_isTight[i] = muPtr->auxdataConst<char>("passPreORSelection");
           }
         }
-        
+
         if(m_config->noORForMuons())
         {
           m_mu_passOR[i]=muPtr->auxdataConst<char>("passOverlapRemoval");
         }
-        
+
         for (const auto& trigger : m_mu_trigMatched) {
           std::string trig = "TRIGMATCH_" + trigger.first;
           m_mu_trigMatched[trigger.first][i] = muPtr->auxdataConst<char>(trig);
@@ -2733,7 +2738,7 @@ namespace top {
         m_softmu_SF_ID_STAT_LOWPT_DOWN.resize(n_muons);
         m_softmu_SF_ID_SYST_LOWPT_UP.resize(n_muons);
         m_softmu_SF_ID_SYST_LOWPT_DOWN.resize(n_muons);
-        
+
         if(m_config->softmuonAdditionalTruthInfo())
         {
           m_softmu_parton_origin_flag.resize(n_muons);
@@ -2789,11 +2794,11 @@ namespace top {
             m_softmu_true_IFFclass[i] = IFFClass(*muPtr);
             ATH_MSG_DEBUG("Muon (pt = "<< muPtr->pt() << ") IFF classification = " << m_softmu_true_IFFclass[i]);
           }
-          
+
           if(m_config->softmuonAdditionalTruthInfo())
           {
             //these truth info are written in SoftMuonObjectCollectionMaker.cxx
-            
+
             m_softmu_parton_origin_flag[i]=0;
             if(m_config->softmuonAdditionalTruthInfoCheckPartonOrigin())
             {
@@ -2806,22 +2811,22 @@ namespace top {
             m_softmu_c_hadron_parent_pdgid[i]=0;
             static const SG::AuxElement::Accessor<top::LepParticleOriginFlag> lepparticleoriginflag("LepParticleOriginFlag");
             if(lepparticleoriginflag.isAvailable(*muPtr)) m_softmu_particle_origin_flag[i]=static_cast<int>(lepparticleoriginflag(*muPtr));
-            
+
             static const SG::AuxElement::Accessor<const xAOD::TruthParticle*> Mother("truthMotherLink");
             const xAOD::TruthParticle* mother = 0;
             if(Mother.isAvailable(*muPtr)) mother=Mother(*muPtr);
             if(mother) m_softmu_parent_pdgid[i]=mother->pdgId();
-            
+
             static const SG::AuxElement::Accessor<const xAOD::TruthParticle*> BMother("truthBMotherLink");
             const xAOD::TruthParticle* Bmother = 0;
             if(BMother.isAvailable(*muPtr)) Bmother=BMother(*muPtr);
             if(Bmother) m_softmu_b_hadron_parent_pdgid[i]=Bmother->pdgId();
-            
+
             static const SG::AuxElement::Accessor<const xAOD::TruthParticle*> CMother("truthCMotherLink");
             const xAOD::TruthParticle* Cmother = 0;
             if(CMother.isAvailable(*muPtr)) Cmother=CMother(*muPtr);
             if(Cmother) m_softmu_c_hadron_parent_pdgid[i]=Cmother->pdgId();
-            
+
             if(m_config->softmuonAdditionalTruthInfoDoVerbose()) asg::msgUserCode::ATH_MSG_INFO("writing soft muon with pt="<<m_softmu_pt[i] <<" parton_origin_flag="<<m_softmu_parton_origin_flag[i]<<" particle_origin_flag="<<m_softmu_particle_origin_flag[i]<<" parent_pdg_id="<<m_softmu_parent_pdgid[i]<<" b_hadron_parent_pdg_id="<<m_softmu_b_hadron_parent_pdgid[i]<<" c_hadron_parent_pdg_id="<<m_softmu_c_hadron_parent_pdgid[i]);
           }
         }//end of if (m_config->isMC())
@@ -2875,7 +2880,7 @@ namespace top {
       }
     }
 
-    // tracks                   
+    // tracks
     if (m_config->useTracks()) {
       const xAOD::EventInfo* eventInfo(nullptr);
 
@@ -2993,7 +2998,7 @@ namespace top {
           }
         }
       }
-      
+
       unsigned int j(0);// jet-electron index
       for (const auto* const jetPtr : event.m_jets) {// loop on jets
         if (m_config->useJetElectrons() && jetPtr->auxdataConst<int>("jet_electron")) {
@@ -3047,7 +3052,7 @@ namespace top {
           if(jetPtr->getAssociatedObjects<xAOD::TrackParticle>(m_config->decoKeyJetGhostTrack(event.m_hashValue),ghostTracks)) {
 
 	    const unsigned int nghostTracks = ghostTracks.size();
-            
+
             m_jet_ghostTrack_pt[i].clear();
 	    m_jet_ghostTrack_eta[i].clear();
 	    m_jet_ghostTrack_phi[i].clear();
@@ -3055,7 +3060,7 @@ namespace top {
 	    m_jet_ghostTrack_d0[i].clear();
 	    m_jet_ghostTrack_z0[i].clear();
 	    m_jet_ghostTrack_qOverP[i].clear();
-              
+
 	    m_jet_ghostTrack_pt[i].reserve(nghostTracks);
 	    m_jet_ghostTrack_eta[i].reserve(nghostTracks);
 	    m_jet_ghostTrack_phi[i].reserve(nghostTracks);
@@ -3063,12 +3068,12 @@ namespace top {
 	    m_jet_ghostTrack_d0[i].reserve(nghostTracks);
 	    m_jet_ghostTrack_z0[i].reserve(nghostTracks);
 	    m_jet_ghostTrack_qOverP[i].reserve(nghostTracks);
-            
-  
-	    for (unsigned int iGhost = 0; iGhost < nghostTracks; ++iGhost) {  
-              
-              top::check(ghostTracks.at(iGhost), "Error in EventSaverFlatNtuple: Found jet with null pointer in ghost track vector.");  
-                
+
+
+	    for (unsigned int iGhost = 0; iGhost < nghostTracks; ++iGhost) {
+
+              top::check(ghostTracks.at(iGhost), "Error in EventSaverFlatNtuple: Found jet with null pointer in ghost track vector.");
+
 	      if(ghostTracks.at(iGhost)->auxdataConst< char >("passPreORSelection") != 1)
 		{ continue;}
 
@@ -3081,7 +3086,7 @@ namespace top {
 	      m_jet_ghostTrack_qOverP[i].emplace_back(accQOverP(*ghostTracks.at(iGhost)));
 
 	    }
-	
+
 	  }
 	}
 
@@ -3189,7 +3194,7 @@ namespace top {
       m_failJvt_jet_jvt.resize(event.m_failJvt_jets.size());
       m_failJvt_jet_fjvt.resize(event.m_failJvt_jets.size());
       m_failJvt_jet_passfjvt.resize(event.m_failJvt_jets.size());
-      
+
       // ghost tracks
       // fail-JVT jet could still have some ghost tracks, so these variables are kept
       if (m_config->useJetGhostTrack()) {
@@ -3243,7 +3248,7 @@ namespace top {
           if(jetPtr->getAssociatedObjects<xAOD::TrackParticle>(m_config->decoKeyJetGhostTrack(event.m_hashValue),ghostTracks)) {
 
 	    const unsigned int nghostTracks = ghostTracks.size();
-  
+
 	    m_failJvt_jet_ghostTrack_pt[i].clear();
 	    m_failJvt_jet_ghostTrack_eta[i].clear();
 	    m_failJvt_jet_ghostTrack_phi[i].clear();
@@ -3251,7 +3256,7 @@ namespace top {
 	    m_failJvt_jet_ghostTrack_d0[i].clear();
 	    m_failJvt_jet_ghostTrack_z0[i].clear();
 	    m_failJvt_jet_ghostTrack_qOverP[i].clear();
-            
+
             m_failJvt_jet_ghostTrack_pt[i].reserve(nghostTracks);
 	    m_failJvt_jet_ghostTrack_eta[i].reserve(nghostTracks);
 	    m_failJvt_jet_ghostTrack_phi[i].reserve(nghostTracks);
@@ -3259,14 +3264,14 @@ namespace top {
 	    m_failJvt_jet_ghostTrack_d0[i].reserve(nghostTracks);
 	    m_failJvt_jet_ghostTrack_z0[i].reserve(nghostTracks);
 	    m_failJvt_jet_ghostTrack_qOverP[i].reserve(nghostTracks);
-  
+
 	    for (unsigned int iGhost = 0; iGhost < nghostTracks; ++iGhost) {
-	      
+
              top::check(ghostTracks.at(iGhost), "Error in EventSaverFlatNtuple: Found jet with null pointer in ghost track vector.");
-              
+
              if(ghostTracks.at(iGhost)->auxdataConst< char >("passPreORSelection") != 1)
 		{continue;}
-                
+
 	      m_failJvt_jet_ghostTrack_pt[i].emplace_back(ghostTracks.at(iGhost)->pt());
 	      m_failJvt_jet_ghostTrack_eta[i].emplace_back(ghostTracks.at(iGhost)->eta());
 	      m_failJvt_jet_ghostTrack_phi[i].emplace_back(ghostTracks.at(iGhost)->phi());
@@ -3275,7 +3280,7 @@ namespace top {
 	      m_failJvt_jet_ghostTrack_z0[i].emplace_back(accZ0(*ghostTracks.at(iGhost)));
 	      m_failJvt_jet_ghostTrack_qOverP[i].emplace_back(accQOverP(*ghostTracks.at(iGhost)));
 	    }
-            
+
 	  }
 	}
 
@@ -3296,7 +3301,7 @@ namespace top {
         ++i;
       }
     }//ifSaveJVT
-      	
+
     // fail-FJVT jets
     // btagging info removed as this is only looking at forward jets
     if (m_config->getfJVTWP() != "None" && m_config->saveFailForwardJVTJets()) {
@@ -3362,7 +3367,7 @@ namespace top {
           if(jetPtr->getAssociatedObjects<xAOD::TrackParticle>(m_config->decoKeyJetGhostTrack(event.m_hashValue),ghostTracks)) {
 
 	    const unsigned int nghostTracks = ghostTracks.size();
-            
+
             m_failFJvt_jet_ghostTrack_pt[i].clear();
 	    m_failFJvt_jet_ghostTrack_eta[i].clear();
 	    m_failFJvt_jet_ghostTrack_phi[i].clear();
@@ -3370,7 +3375,7 @@ namespace top {
 	    m_failFJvt_jet_ghostTrack_d0[i].clear();
 	    m_failFJvt_jet_ghostTrack_z0[i].clear();
 	    m_failFJvt_jet_ghostTrack_qOverP[i].clear();
-  
+
 	    m_failFJvt_jet_ghostTrack_pt[i].reserve(nghostTracks);
 	    m_failFJvt_jet_ghostTrack_eta[i].reserve(nghostTracks);
 	    m_failFJvt_jet_ghostTrack_phi[i].reserve(nghostTracks);
@@ -3379,14 +3384,14 @@ namespace top {
 	    m_failFJvt_jet_ghostTrack_z0[i].reserve(nghostTracks);
 	    m_failFJvt_jet_ghostTrack_qOverP[i].reserve(nghostTracks);
 
-            
+
 	    for (unsigned int iGhost = 0; iGhost < nghostTracks; ++iGhost) {
 	      top::check(ghostTracks.at(iGhost), "Error in EventSaverFlatNtuple: Found jet with null pointer in ghost track vector.");
-              
+
               if(ghostTracks.at(iGhost)->auxdataConst< char >("passPreORSelection") != 1)
 		{ continue;}
-		
-  
+
+
 	      m_failFJvt_jet_ghostTrack_pt[i].emplace_back(ghostTracks.at(iGhost)->pt());
 	      m_failFJvt_jet_ghostTrack_eta[i].emplace_back(ghostTracks.at(iGhost)->eta());
 	      m_failFJvt_jet_ghostTrack_phi[i].emplace_back(ghostTracks.at(iGhost)->phi());
@@ -3395,8 +3400,8 @@ namespace top {
 	      m_failFJvt_jet_ghostTrack_z0[i].emplace_back(accZ0(*ghostTracks.at(iGhost)));
 	      m_failFJvt_jet_ghostTrack_qOverP[i].emplace_back(accQOverP(*ghostTracks.at(iGhost)));
 	    }
-	    
-            
+
+
 	  }
 	}
 
@@ -3409,7 +3414,7 @@ namespace top {
           m_failFJvt_jet_passjvt[i] = jetPtr->getAttribute<char>("passJVT");
         }
         m_failFJvt_jet_fjvt[i] = -1;
-        if (jetPtr->isAvailable<float>("fJvt")) { 
+        if (jetPtr->isAvailable<float>("fJvt")) {
 	  m_failFJvt_jet_fjvt[i] = jetPtr->auxdataConst<float>("fJvt");
         }
 
@@ -3474,11 +3479,11 @@ namespace top {
           for (const std::pair<std::string, std::string>& tagSF : m_config->boostedTaggerSFnames()) {
             const std::string& taggerName = tagSF.first;
 	    const std::string& sfNameNominal = tagSF.second;
-	    
-	    
-	    
+
+
+
 	    m_ljet_tagSF[taggerName][i] = jetPtr->isAvailable<float>(sfNameNominal) ? jetPtr->auxdata<float>(sfNameNominal) : -999;
-	    
+
 	    if (event.m_hashValue == m_config->nominalHashValue()) {
 	      const std::vector<std::string>& sysNames = m_config->boostedTaggersSFSysNames().at(taggerName);
 	      std::vector<float>& vec = m_ljet_tagSFSysVars[taggerName][i];
@@ -3501,7 +3506,7 @@ namespace top {
          m_ljet_Xbb2020v3Top[i] = accHbbm_Xbb2020v3Top(*jetPtr);
          m_ljet_Xbb2020v3QCD[i] = accHbbm_Xbb2020v3QCD(*jetPtr);
          m_ljet_Xbb2020v3Higgs[i] = accHbbm_Xbb2020v3Higgs(*jetPtr);
-         float ftop = 0.25; 
+         float ftop = 0.25;
          m_ljet_Xbb2020v3[i] = log(m_ljet_Xbb2020v3Higgs[i]/(ftop*m_ljet_Xbb2020v3Top[i]+(1-ftop)*m_ljet_Xbb2020v3QCD[i]));
         }
         ++i;
@@ -3627,7 +3632,7 @@ namespace top {
       // re-clustered jet substructure
       static const SG::AuxElement::ConstAccessor<float> RCSplit12("Split12");
       static const SG::AuxElement::ConstAccessor<float> RCSplit23("Split23");
-     
+
       // Initialize the vectors to be saved as branches
       unsigned int sizeOfRCjets(event.m_RCJets.size());
 
@@ -3685,7 +3690,7 @@ namespace top {
 
         m_rcjet_d12[i] = (RCSplit12.isAvailable(*rc_jet)) ? RCSplit12(*rc_jet) : -999.;
         m_rcjet_d23[i] = (RCSplit23.isAvailable(*rc_jet)) ? RCSplit23(*rc_jet) : -999.;
-	
+
 	for (auto& var : m_rcjetJSSVariables) {
 	  var.second[i] = rc_jet->isAvailable<float>(var.first) ? rc_jet->auxdata<float>(var.first) : -999.;
 	}
@@ -3772,7 +3777,7 @@ namespace top {
           if (m_config->bTagAlgo_MV2c10_used()) {
             m_VarRCjetsubBranches[VarRC + "_" + name + "_sub_mv2c10"].resize(sizeOfRCjets, std::vector<float>());
           }
-	  
+
 	  for (auto& var : m_VarRCjetJSSVariables[VarRC + "_" + name]) {
 	    var.second.clear();
 	    var.second.resize(sizeOfRCjets, -999.);
@@ -3790,7 +3795,7 @@ namespace top {
 
             m_VarRCjetBranches[VarRC + "_" + name + "_d12"][i] = (VarRCSplit12.isAvailable(*rc_jet)) ? VarRCSplit12(*rc_jet) : -999.;
             m_VarRCjetBranches[VarRC + "_" + name + "_d23"][i] = (VarRCSplit23.isAvailable(*rc_jet)) ? VarRCSplit23(*rc_jet) : -999.;
-	    
+
 	    for (auto& var : m_VarRCjetJSSVariables[VarRC + "_" + name]) {
 	      var.second[i] = rc_jet->isAvailable<float>(var.first) ? rc_jet->auxdata<float>(var.first) : -999.;
 	    }
@@ -3860,13 +3865,13 @@ namespace top {
         }
       }
     }
-    
+
     if(m_config->writeMETBuiltWithLooseObjects())
     {
       const xAOD::MissingETContainer* mets(nullptr);
       if(event.m_isLoose) top::check(evtStore()->retrieve(mets, m_config->sgKeyMissingEtLoose(event.m_hashValue)+"WithLooseObjects"), "Failed to retrieve MET");
       else top::check(evtStore()->retrieve(mets, m_config->sgKeyMissingEt(event.m_hashValue)+"WithLooseObjects"), "Failed to retrieve MET");
-      
+
       m_met_met_withLooseObjects=(*mets)["FinalTrk"]->met();
       m_met_phi_withLooseObjects=(*mets)["FinalTrk"]->phi();
     }
@@ -4229,7 +4234,7 @@ namespace top {
   }
 
   void EventSaverFlatNtuple::calculateTruthEvent() {
-    
+
     const xAOD::EventInfo* eventInfo(nullptr);
 
     top::check(evtStore()->retrieve(eventInfo, m_config->sgKeyEventInfo()), "Failed to retrieve EventInfo");
@@ -4378,7 +4383,7 @@ namespace top {
       m_el_eta_bare.resize(plEvent.m_electrons->size());
       m_el_phi_bare.resize(plEvent.m_electrons->size());
       m_el_e_bare.resize(plEvent.m_electrons->size());
-      
+
       m_el_true_type.resize(plEvent.m_electrons->size());
       m_el_true_origin.resize(plEvent.m_electrons->size());
 
@@ -4393,11 +4398,11 @@ namespace top {
         m_el_eta_bare[i] = elPtr->auxdata<float>("eta_bare");
         m_el_phi_bare[i] = elPtr->auxdata<float>("phi_bare");
         m_el_e_bare[i] = elPtr->auxdata<float>("e_bare");
-        
+
         if(elPtr->isAvailable<unsigned int>("particleType")) m_el_true_type[i] = elPtr->auxdata<unsigned int>("particleType");
         else if(elPtr->isAvailable<unsigned int>("classifierParticleType")) m_el_true_type[i] = elPtr->auxdata<unsigned int>("classifierParticleType");
         else m_el_true_type[i] = 0;
-        
+
         if(elPtr->isAvailable<unsigned int>("particleOrigin")) m_el_true_origin[i] = elPtr->auxdata<unsigned int>("particleOrigin");
         else if(elPtr->isAvailable<unsigned int>("classifierParticleOrigin")) m_el_true_origin[i] = elPtr->auxdata<unsigned int>("classifierParticleOrigin");
         else m_el_true_origin[i] = 0;
@@ -4420,7 +4425,7 @@ namespace top {
       m_mu_eta_bare.resize(plEvent.m_muons->size());
       m_mu_phi_bare.resize(plEvent.m_muons->size());
       m_mu_e_bare.resize(plEvent.m_muons->size());
-      
+
       m_mu_true_type.resize(plEvent.m_muons->size());
       m_mu_true_origin.resize(plEvent.m_muons->size());
 
@@ -4435,30 +4440,30 @@ namespace top {
         m_mu_eta_bare[i] = muPtr->auxdata<float>("eta_bare");
         m_mu_phi_bare[i] = muPtr->auxdata<float>("phi_bare");
         m_mu_e_bare[i] = muPtr->auxdata<float>("e_bare");
-        
+
         if(muPtr->isAvailable<unsigned int>("particleType")) m_mu_true_type[i] = muPtr->auxdata<unsigned int>("particleType");
         else if(muPtr->isAvailable<unsigned int>("classifierParticleType")) m_mu_true_type[i] = muPtr->auxdata<unsigned int>("classifierParticleType");
         else m_mu_true_type[i] = 0;
-        
+
         if(muPtr->isAvailable<unsigned int>("particleOrigin")) m_mu_true_origin[i] = muPtr->auxdata<unsigned int>("particleOrigin");
         else if(muPtr->isAvailable<unsigned int>("classifierParticleOrigin")) m_mu_true_origin[i] = muPtr->auxdata<unsigned int>("classifierParticleOrigin");
         else m_mu_true_origin[i] = 0;
 
         ++i;
       }
-      
+
       i=0;
       if(m_config->useSoftMuons()) {
-        
+
         m_softmu_pt.resize(plEvent.m_softmuons->size());
         m_softmu_eta.resize(plEvent.m_softmuons->size());
         m_softmu_phi.resize(plEvent.m_softmuons->size());
         m_softmu_e.resize(plEvent.m_softmuons->size());
         m_softmu_charge.resize(plEvent.m_softmuons->size());
-        
+
         m_softmu_true_type.resize(plEvent.m_softmuons->size());
         m_softmu_true_origin.resize(plEvent.m_softmuons->size());
-        
+
         if(m_config->softmuonAdditionalTruthInfo())
         {
           m_softmu_parton_origin_flag.resize(plEvent.m_softmuons->size());
@@ -4467,25 +4472,25 @@ namespace top {
           m_softmu_b_hadron_parent_pdgid.resize(plEvent.m_softmuons->size());
           m_softmu_c_hadron_parent_pdgid.resize(plEvent.m_softmuons->size());
         }
-        
+
         for (const auto& muPtr : *plEvent.m_softmuons) {
           m_softmu_pt[i] = muPtr->pt();
           m_softmu_eta[i] = muPtr->eta();
           m_softmu_phi[i] = muPtr->phi();
           m_softmu_e[i] = muPtr->e();
           m_softmu_charge[i] = muPtr->charge();
-          
+
           if(muPtr->isAvailable<unsigned int>("particleType")) m_softmu_true_type[i] = muPtr->auxdata<unsigned int>("particleType");
           else if(muPtr->isAvailable<unsigned int>("classifierParticleType")) m_softmu_true_type[i] = muPtr->auxdata<unsigned int>("classifierParticleType");
           else m_softmu_true_type[i] = 0;
-          
+
           if(muPtr->isAvailable<unsigned int>("particleOrigin")) m_softmu_true_origin[i] = muPtr->auxdata<unsigned int>("particleOrigin");
           else if(muPtr->isAvailable<unsigned int>("classifierParticleOrigin")) m_softmu_true_origin[i] = muPtr->auxdata<unsigned int>("classifierParticleOrigin");
           else m_softmu_true_origin[i] = 0;
-          
+
           if(m_config->softmuonAdditionalTruthInfo())
           {
-            
+
             m_softmu_parton_origin_flag[i]=0;
             if(m_config->softmuonAdditionalTruthInfoCheckPartonOrigin())
             {
@@ -4498,27 +4503,27 @@ namespace top {
             m_softmu_c_hadron_parent_pdgid[i]=0;
             static const SG::AuxElement::Accessor<top::LepParticleOriginFlag> lepparticleoriginflag("LepParticleOriginFlag");
             if(lepparticleoriginflag.isAvailable(*muPtr)) m_softmu_particle_origin_flag[i]=static_cast<int>(lepparticleoriginflag(*muPtr));
-            
+
             static const SG::AuxElement::Accessor<const xAOD::TruthParticle*> Mother("truthMotherLink");
             const xAOD::TruthParticle* mother = 0;
             if(Mother.isAvailable(*muPtr)) mother=Mother(*muPtr);
             if(mother) m_softmu_parent_pdgid[i]=mother->pdgId();
-            
+
             static const SG::AuxElement::Accessor<const xAOD::TruthParticle*> BMother("truthBMotherLink");
             const xAOD::TruthParticle* Bmother = 0;
             if(BMother.isAvailable(*muPtr)) Bmother=BMother(*muPtr);
             if(Bmother) m_softmu_b_hadron_parent_pdgid[i]=Bmother->pdgId();
-            
+
             static const SG::AuxElement::Accessor<const xAOD::TruthParticle*> CMother("truthCMotherLink");
             const xAOD::TruthParticle* Cmother = 0;
             if(CMother.isAvailable(*muPtr)) Cmother=CMother(*muPtr);
             if(Cmother) m_softmu_c_hadron_parent_pdgid[i]=Cmother->pdgId();
-            
+
             if(m_config->softmuonAdditionalTruthInfoDoVerbose()) asg::msgUserCode::ATH_MSG_INFO("writing truth soft muon with pt="<<m_softmu_pt[i] <<" parton_origin_flag="<<m_softmu_parton_origin_flag[i]<<" particle_origin_flag="<<m_softmu_particle_origin_flag[i]<<" parent_pdg_id="<<m_softmu_parent_pdgid[i]<<" b_hadron_parent_pdg_id="<<m_softmu_b_hadron_parent_pdgid[i]<<" c_hadron_parent_pdg_id="<<m_softmu_c_hadron_parent_pdgid[i]);
           }
-          
+
           ++i;
-        } 
+        }
       }//end of soft muons part
     }//end of muons part
 
@@ -4565,7 +4570,7 @@ namespace top {
 	  ATH_MSG_DEBUG("Found a jet with no GhostBHadronFinalCount auxdata");
 	  m_jet_Ghosts_BHadron_Final_Count[i] = 0;
 	}
-	
+
 	if(ghostCHadronsFinalCount.isAvailable(*jetPtr)) {
 	  m_jet_Ghosts_CHadron_Final_Count[i] = ghostCHadronsFinalCount(*jetPtr);
 	}
@@ -4593,7 +4598,7 @@ namespace top {
         m_ljet_eta[i] = jetPtr->eta();
         m_ljet_phi[i] = jetPtr->phi();
         m_ljet_e[i] = jetPtr->e();
-	
+
 	if(ghostBHadronsFinalCount.isAvailable(*jetPtr)) {
 	  m_ljet_Ghosts_BHadron_Final_Count[i] = ghostBHadronsFinalCount(*jetPtr);
 	}
@@ -4601,7 +4606,7 @@ namespace top {
 	  ATH_MSG_DEBUG("Found a jet with no GhostBHadronFinalCount auxdata");
 	  m_ljet_Ghosts_BHadron_Final_Count[i] = 0;
 	}
-	
+
 	if(ghostCHadronsFinalCount.isAvailable(*jetPtr)) {
 	  m_ljet_Ghosts_CHadron_Final_Count[i] = ghostCHadronsFinalCount(*jetPtr);
 	}
@@ -4644,7 +4649,7 @@ namespace top {
       static const SG::AuxElement::ConstAccessor<float> RCSplit12("Split12");
       static const SG::AuxElement::ConstAccessor<float> RCSplit23("Split23");
 
-      
+
       // store also the jet that is rebuilt to calculate the JSS
       static const SG::AuxElement::ConstAccessor<float> RRCJet_pt("RRCJet_pt");
       static const SG::AuxElement::ConstAccessor<float> RRCJet_eta("RRCJet_eta");
@@ -4686,7 +4691,7 @@ namespace top {
       m_rcjetsub_e.resize(sizeOfRCjets, std::vector<float>());
       m_rcjetsub_Ghosts_BHadron_Final_Count.resize(sizeOfRCjets, std::vector<int>());
       m_rcjetsub_Ghosts_CHadron_Final_Count.resize(sizeOfRCjets, std::vector<int>());
-      
+
       unsigned int i = 0;
       for (auto rc_jet : plEvent.m_RCJets) {
         m_rcjet_pt[i] = rc_jet->pt();
@@ -4700,7 +4705,7 @@ namespace top {
 	for (auto& var : m_rcjetJSSVariables) {
 	  var.second[i] = rc_jet->isAvailable<float>(var.first) ? rc_jet->auxdata<float>(var.first) : -999.;
 	}
-	
+
         // loop over subjets
         m_rcjetsub_pt[i].clear();     // clear the vector size (otherwise it grows out of control!)
         m_rcjetsub_eta[i].clear();
@@ -4714,7 +4719,7 @@ namespace top {
           m_rcjetsub_eta[i].push_back(subjet->eta());
           m_rcjetsub_phi[i].push_back(subjet->phi());
           m_rcjetsub_e[i].push_back(subjet->e());
-	  
+
 	  if(ghostBHadronsFinalCount.isAvailable(*subjet)) {
 	    m_rcjetsub_Ghosts_BHadron_Final_Count[i].push_back(ghostBHadronsFinalCount(*subjet));
 	  }
@@ -4722,7 +4727,7 @@ namespace top {
 	    ATH_MSG_DEBUG("Found a jet with no GhostBHadronFinalCount auxdata");
 	    m_rcjetsub_Ghosts_BHadron_Final_Count[i].push_back(0);
 	  }
-	  
+
 	  if(ghostCHadronsFinalCount.isAvailable(*subjet)) {
 	    m_rcjetsub_Ghosts_CHadron_Final_Count[i].push_back(ghostCHadronsFinalCount(*subjet));
 	  }
@@ -4730,7 +4735,7 @@ namespace top {
 	    ATH_MSG_DEBUG("Found a jet with no GhostCHadronFinalCount auxdata");
 	    m_rcjetsub_Ghosts_CHadron_Final_Count[i].push_back(0);
 	  }
-	  
+
         } // end for-loop over subjets
         ++i;
       } // end for-loop over re-clustered jets
@@ -4762,7 +4767,7 @@ namespace top {
           m_VarRCjetsubBranchesParticle[VarRC + "_" + name + "_sub_eta"].resize(sizeOfRCjets, std::vector<float>());
           m_VarRCjetsubBranchesParticle[VarRC + "_" + name + "_sub_phi"].resize(sizeOfRCjets, std::vector<float>());
           m_VarRCjetsubBranchesParticle[VarRC + "_" + name + "_sub_e"].resize(sizeOfRCjets, std::vector<float>());
-          
+
 	  for (auto& var : m_VarRCjetJSSVariables[VarRC + "_" + name]) {
 	    var.second.clear();
 	    var.second.resize(sizeOfRCjets, -999.);
@@ -4780,7 +4785,7 @@ namespace top {
 
             m_VarRCjetBranchesParticle[VarRC + "_" + name + "_d12"][i] = (VarRCSplit12.isAvailable(*rc_jet)) ? VarRCSplit12(*rc_jet) : -999.;
             m_VarRCjetBranchesParticle[VarRC + "_" + name + "_d23"][i] = (VarRCSplit23.isAvailable(*rc_jet)) ? VarRCSplit23(*rc_jet) : -999.;
-	    
+
 	    for (auto& var : m_VarRCjetJSSVariables[VarRC + "_" + name]) {
 	      var.second[i] = rc_jet->isAvailable<float>(var.first) ? rc_jet->auxdata<float>(var.first) : -999.;
 	    }
@@ -5080,7 +5085,7 @@ namespace top {
 
       if (jetPtr->auxdata<int>("pileUp") == 0) {
         m_jet_isPileup[i] = 0;
-        
+
 	if(ghostBHadronsFinalCount.isAvailable(*jetPtr)) {
 	  m_jet_Ghosts_BHadron_Final_Count[i] = ghostBHadronsFinalCount(*jetPtr);
 	}
@@ -5088,7 +5093,7 @@ namespace top {
 	  ATH_MSG_DEBUG("Found a jet with no GhostBHadronFinalCount auxdata");
 	  m_jet_Ghosts_BHadron_Final_Count[i] = 0;
 	}
-	
+
 	if(ghostCHadronsFinalCount.isAvailable(*jetPtr)) {
 	  m_jet_Ghosts_CHadron_Final_Count[i] = ghostCHadronsFinalCount(*jetPtr);
 	}
@@ -5096,7 +5101,7 @@ namespace top {
 	  ATH_MSG_DEBUG("Found a jet with no GhostCHadronFinalCount auxdata");
 	  m_jet_Ghosts_CHadron_Final_Count[i] = 0;
 	}
-	
+
       } else {
         m_jet_isPileup[i] = 1;
         m_jet_Ghosts_BHadron_Final_Count[i] = 0;
@@ -5129,7 +5134,7 @@ namespace top {
 	  ATH_MSG_DEBUG("Found a jet with no GhostBHadronFinalCount auxdata");
 	  m_ljet_Ghosts_BHadron_Final_Count[i] = 0;
 	}
-	
+
 	if(ghostCHadronsFinalCount.isAvailable(*jetPtr)) {
 	  m_ljet_Ghosts_CHadron_Final_Count[i] = ghostCHadronsFinalCount(*jetPtr);
 	}
@@ -5314,6 +5319,10 @@ namespace top {
         m_extraTruthVars_int.insert(std::make_pair(name, new int));
       } else if (*ti == typeid(float)) {
         m_extraTruthVars_float.insert(std::make_pair(name, new float));
+      } else if (*ti == typeid(std::vector<int>)) {
+        m_extraTruthVars_vecint.insert(std::make_pair(name, new std::vector<int>));
+      } else if (*ti == typeid(std::vector<float>)) {
+        m_extraTruthVars_vecfloat.insert(std::make_pair(name, new std::vector<float>));
       } else {
         ATH_MSG_INFO("insertObjectIntoTruthTree - you need another variable map for more types!");
       }
@@ -5325,6 +5334,12 @@ namespace top {
     }
     for (std::unordered_map<std::string, float*>::const_iterator i = m_extraTruthVars_float.begin(); i != m_extraTruthVars_float.end(); ++i) {
       m_truthTreeManager->makeOutputVariable(*(*i).second, (*i).first);
+    }
+    for (auto& i : m_extraTruthVars_vecint) {
+      m_truthTreeManager->makeOutputVariable(*(i.second), i.first);
+    }
+    for (auto& i : m_extraTruthVars_vecfloat) {
+      m_truthTreeManager->makeOutputVariable(*(i.second), i.first);
     }
   }
 
@@ -5357,6 +5372,16 @@ namespace top {
         std::unordered_map<std::string, float*>::iterator itr = m_extraTruthVars_float.find(name);
         if (itr != m_extraTruthVars_float.end()) {
           *((*itr).second) = obj.auxdataConst<float> (name);
+        }
+      } else if (*ti == typeid(std::vector<int>)) {
+        std::unordered_map<std::string, std::vector<int>*>::iterator itr = m_extraTruthVars_vecint.find(name);
+        if (itr != m_extraTruthVars_vecint.end()) {
+          *((*itr).second) = obj.auxdataConst<std::vector<int>> (name);
+        }
+      } else if (*ti == typeid(std::vector<float>)) {
+        std::unordered_map<std::string, std::vector<float>*>::iterator itr = m_extraTruthVars_vecfloat.find(name);
+        if (itr != m_extraTruthVars_vecfloat.end()) {
+          *((*itr).second) = obj.auxdataConst<std::vector<float>> (name);
         }
       } else {
         ATH_MSG_INFO("saveObjectIntoTruthTree - you need another variable map for more types!");

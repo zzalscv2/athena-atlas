@@ -203,7 +203,7 @@ namespace top {
                       "EXPERT OPTION! Tells the MuonEfficiencyScaleFactors tools to use a custom Period. If set to \" \" will use the default",
                       " ");
     registerParameter("forceTrigger",
-                      "EXPERT OPTION! Tells the MuonEfficiencyScaleFactors tools to use a custom Trigger. If set to \" \" will use the default", 
+                      "EXPERT OPTION! Tells the MuonEfficiencyScaleFactors tools to use a custom Trigger. If set to \" \" will use the default",
                       " ");
     registerParameter("MuonBreakDownSystematics",
                       "Tells the MuonEfficiencyScaleFactors tools to use a more complex systematic model, if set to True. Default is False",
@@ -527,7 +527,7 @@ namespace top {
     registerParameter("ElectronInJetSubtractionBias",
                       "pT ratio bias used in the ElectronInJetSubtraction method. Default 20.0", "20.0");
     registerParameter("TopPartonHistory", "Topology to be assumed when reconstructing parton-level history.", "False",
-                      {"ttbar", "ttbarlight", "tb", "Wtb", "tchannel", "ttz", "ttgamma", "tHq", "tZq", "tttt", "tWH","False"});
+                      {"ttbar", "ttbarlight", "ttbarjets", "tb", "Wtb", "tchannel", "ttz", "ttgamma", "tHq", "tZq", "tttt", "tWH","False"});
     registerParameter("TopPartonLevel", "Perform parton level analysis (stored in truth tree)? True or False", "True");
 
     registerParameter("TopParticleLevel",
@@ -716,7 +716,7 @@ namespace top {
                                                  " noPhotonMuOR, noPhotonMuOrJetOR",
                       "recommended"
                       );
-    
+
     registerParameter("NoOverlapRemovalForMuons", "For tests: do not remove muons due to OR, instead store a flag with the OR result for them in the output. True or False (default: False).", "False");
 
     registerParameter("OverlapRemovalSlidingInnerDRel",

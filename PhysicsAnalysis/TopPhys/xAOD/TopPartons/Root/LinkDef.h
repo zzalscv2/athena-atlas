@@ -3,6 +3,7 @@
  */
 
 #include "TopPartons/PartonHistory.h"
+#include <vector>
 
 #ifdef __CINT__
 #pragma extra_include "TopPartons/PartonHistory.h";
@@ -15,6 +16,5 @@
 #pragma link C++ class xAOD::PartonHistory+;
 #pragma link C++ class xAOD::PartonHistoryContainer+;
 #pragma link C++ class xAOD::PartonHistoryAuxContainer+;
-
 
 #endif

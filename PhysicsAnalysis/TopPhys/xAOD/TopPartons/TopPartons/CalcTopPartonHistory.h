@@ -58,10 +58,23 @@ namespace top {
     bool topWb(const xAOD::TruthParticleContainer* truthParticles, int start, TLorentzVector& t_beforeFSR_p4,
                TLorentzVector& t_afterFSR_p4, TLorentzVector& W_p4, TLorentzVector& b_p4, TLorentzVector& Wdecay1_p4,
                int& Wdecay1_pdgId, TLorentzVector& Wdecay2_p4, int& Wdecay2_pdgId, TLorentzVector& tau_decay_from_W_p4,
-	       int& tau_decay_from_W_isHadronic, TLorentzVector& tauvis_decay_from_W_p4); //overloaded
+	       int& tau_decay_from_W_isHadronic, TLorentzVector& tauvis_decay_from_W_p4,
+           int& b_barcode, int& Wdecay2_barcode, int& Wdecay1_barcode); //overloaded
+
+    // Store tau info, no barcodes
+    bool topWb(const xAOD::TruthParticleContainer* truthParticles, int start, TLorentzVector& t_beforeFSR_p4,
+               TLorentzVector& t_afterFSR_p4, TLorentzVector& W_p4, TLorentzVector& b_p4, TLorentzVector& Wdecay1_p4,
+               int& Wdecay1_pdgId, TLorentzVector& Wdecay2_p4, int& Wdecay2_pdgId, TLorentzVector& tau_decay_from_W_p4,
+	       int& tau_decay_from_W_isHadronic, TLorentzVector& tauvis_decay_from_W_p4);
+    // Store no barcodes and no tau info
     bool topWb(const xAOD::TruthParticleContainer* truthParticles, int start, TLorentzVector& t_beforeFSR_p4,
                TLorentzVector& t_afterFSR_p4, TLorentzVector& W_p4, TLorentzVector& b_p4, TLorentzVector& Wdecay1_p4,
                int& Wdecay1_pdgId, TLorentzVector& Wdecay2_p4, int& Wdecay2_pdgId);
+    // Store barcodes and no tau info
+    bool topWb(const xAOD::TruthParticleContainer* truthParticles, int start, TLorentzVector& t_beforeFSR_p4,
+               TLorentzVector& t_afterFSR_p4, TLorentzVector& W_p4, TLorentzVector& b_p4, int& b_barcode, TLorentzVector& Wdecay1_p4,
+               int& Wdecay1_pdgId, int& Wdecay1_barcode, TLorentzVector& Wdecay2_p4, int& Wdecay2_pdgId, int& Wdecay2_barcode);
+
     bool topWq(const xAOD::TruthParticleContainer* truthParticles, int start, TLorentzVector& t_beforeFSR_p4,
                TLorentzVector& t_afterFSR_p4, TLorentzVector& W_p4, TLorentzVector& q_p4, int& q_pdgId,
                TLorentzVector& Wdecay1_p4, int& Wdecay1_pdgId, TLorentzVector& Wdecay2_p4, int& Wdecay2_pdgId);
@@ -86,42 +99,46 @@ namespace top {
                  TLorentzVector& t_afterFSR_p4, TLorentzVector& Ph_p4, TLorentzVector& W_p4, TLorentzVector& b_p4,
                  TLorentzVector& Wdecay1_p4, int& Wdecay1_pdgId, TLorentzVector& Wdecay2_p4, int& Wdecay2_pdgId,
                  bool& has_ph, int& BranchType, int& IniPartonType, bool& missingTop);
-    
+
     //// Store the parton histoiry for 4-top events
-    bool tttt(const xAOD::TruthParticleContainer* truthParticles, std::array<int,4> &top_pdgId, 
-	      std::array<TLorentzVector,4> &top_beforeFSR_p4, std::array<TLorentzVector,4> &top_afterFSR_p4, 
-	      std::array<TLorentzVector,4> &b_p4, std::array<TLorentzVector,4> &W_p4, 
-	      std::array<int,4> &Wdecay1_pdgId, std::array<int,4> &Wdecay2_pdgId, 
+    bool tttt(const xAOD::TruthParticleContainer* truthParticles, std::array<int,4> &top_pdgId,
+	      std::array<TLorentzVector,4> &top_beforeFSR_p4, std::array<TLorentzVector,4> &top_afterFSR_p4,
+	      std::array<TLorentzVector,4> &b_p4, std::array<TLorentzVector,4> &W_p4,
+	      std::array<int,4> &Wdecay1_pdgId, std::array<int,4> &Wdecay2_pdgId,
 	      std::array<TLorentzVector,4> &Wdecay1_p4, std::array<TLorentzVector,4> &Wdecay2_p4);
+
+    // Enumerate for branch fill method
+    enum class FillBranchMethod {Regular, PushBack};
 
     virtual StatusCode execute();
   protected:
     std::shared_ptr<top::TopConfig> m_config;
 
-    void fillEtaBranch(xAOD::PartonHistory* partonHistory, std:: string branchName, TLorentzVector& tlv);
-    
+
+    void fillEtaBranch(xAOD::PartonHistory* partonHistory, std:: string branchName, TLorentzVector& tlv, FillBranchMethod FillMethod = FillBranchMethod::Regular);
+
     /** used to build container from multiple collections
     *   in DAOD_PHYS we don't have the TruthParticles collection, so we have to build a TruthParticleContainer (named out_contName) by merging several collections; this is stored in the evtStore
     *   this method has to use some tricks, like the helper m_tempParticles ConstDataVector, due to the desing of DataVector, see https://twiki.cern.ch/twiki/bin/view/AtlasComputing/DataVector
     */
     StatusCode buildContainerFromMultipleCollections(const std::vector<std::string> &collections, const std::string& out_contName);
-    
+
     /** currently in DAOD_PHYS TruthTop have links to Ws from the TruthBoson collection, which have no link to their decay products;
     *   we have therefore to associate the W from the TruthBoson collections to those in the TruthBosonsWithDecayParticles collection.
-    *   This method will use the helper method decorateCollectionWithLinksToAnotherCollection to decorate bosons in the TruthBoson collection with 
+    *   This method will use the helper method decorateCollectionWithLinksToAnotherCollection to decorate bosons in the TruthBoson collection with
     *   "AT_linkToTruthBosonsWithDecayParticles", which is a link to the same bosons in the TruthBosonsWithDecayParticles collection
     */
     StatusCode linkBosonCollections();
-    
+
     ///helper method to handle retriveing the truth particle linked in the decoration of another particle
     const xAOD::TruthParticle* getTruthParticleLinkedFromDecoration(const xAOD::TruthParticle* part, const std::string &decorationName);
-    
+
   private:
     /**helper method currently used in DAOD_PHYS to link particles from a given collection to the same particles included in another collection;
     *  needed because particles may be duplicated in different collections, but their navigation links may only be there in some of them...
     */
     StatusCode decorateCollectionWithLinksToAnotherCollection(const std::string &collectionToDecorate, const std::string &collectionToLink, const std::string &nameOfDecoration);
-    
+
   };
 }
 
