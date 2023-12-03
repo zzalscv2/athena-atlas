@@ -325,7 +325,7 @@ def muEFSARecoSequenceCfg( flags, RoIs, name ):
   if flags.Muon.runCommissioningChain:
     acc.merge(MuonSegmentFinderAlgCfg(flags, name="TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW"))
     acc.merge(MuonSegmentFilterAlgCfg(flags, name="TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
-                                                FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations={}))
+                                                FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations=()))
   else:
     acc.merge(MuonSegmentFinderAlgCfg(flags, "TrigMuonSegmentMaker_"+name))
 
@@ -509,7 +509,7 @@ def muEFInsideOutRecoSequenceCfg(flags, RoIs, name):
     if flags.Muon.runCommissioningChain:
       acc.merge(MuonSegmentFinderAlgCfg(flags, name="TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW"))
       acc.merge(MuonSegmentFilterAlgCfg(flags, name="TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
-                                                  FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations={})) 
+                                                  FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations=())) 
     else:
       acc.merge(MuonSegmentFinderAlgCfg(flags, "TrigMuonSegmentMaker_"+name))
 
