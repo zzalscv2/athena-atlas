@@ -297,8 +297,8 @@ std::ostream& InDet::SegmentDriftCircleAssValidation::dump( std::ostream& out ) 
 void InDet::SegmentDriftCircleAssValidation::newCirclesEvent( const PRD_MultiTruthCollection* prdCollection )
 {
   m_ncircles = 0;
-  m_kinecircle.erase(m_kinecircle.begin(),m_kinecircle.end());
-  m_allBarcodes.erase(m_allBarcodes.begin(),m_allBarcodes.end());
+  m_kinecircle.clear();
+  m_allBarcodes.clear();
 
   // Get Drift Circles container
   //
@@ -345,14 +345,10 @@ void InDet::SegmentDriftCircleAssValidation::newCirclesEvent( const PRD_MultiTru
 
 int InDet::SegmentDriftCircleAssValidation::QualityTracksSelection()
 {
-  m_particles.erase(m_particles.begin(),m_particles.end());
-  m_allParticles.erase(m_allParticles.begin(),m_allParticles.end());
+  m_particles.clear();
+  m_allParticles.clear();
 
-  std::multimap<int,const Trk::PrepRawData*>::iterator c = m_kinecircle   .begin();
-
-  if( c == m_kinecircle   .end()) {
-    return 0;
-  }
+  if (m_kinecircle.empty()) return 0;
 
   std::list<int>::iterator ii,iie=m_allBarcodes.end();
   for(ii=m_allBarcodes.begin();ii!=iie;++ii) {
@@ -386,7 +382,7 @@ void InDet::SegmentDriftCircleAssValidation::tracksComparison( const Trk::Segmen
 {
   if(!m_nqsegments) return;
 
-  m_tracks.erase(m_tracks.begin(),m_tracks.end());
+  m_tracks.clear();
 
   int KINE[200],NKINE[200];
   for(int i=0;i<200;++i){
@@ -455,13 +451,11 @@ void InDet::SegmentDriftCircleAssValidation::tracksComparison( const Trk::Segmen
 
 void InDet::SegmentDriftCircleAssValidation::efficiencyReconstruction()
 {
-  std::list<int>::iterator p = m_particles.begin(), pe =m_particles.end();
-  if(p==pe) return;
+  if(m_particles.empty()) return;
   std::multimap<int,int>::iterator t, te = m_tracks.end(); 
 
-  while (p!=pe) {
-    
-    int k = (*p); 
+  for (auto k: m_particles) {
+
     std::multimap<int,int>::iterator im = m_allParticles.find(k);
     int n = (*im).second;
       
@@ -478,7 +472,6 @@ void InDet::SegmentDriftCircleAssValidation::efficiencyReconstruction()
     else if(rd > 0.25) d=3; 
     else if(rd <= 0.25) d=4; 
     ++m_efficiency[d]; ++m_events;
-    ++p;
   }
 
 }
@@ -509,16 +502,12 @@ std::list<int> InDet::SegmentDriftCircleAssValidation::kine
   
     // pT cut
     //
-    CLHEP::HepLorentzVector m(pa->momentum().px(),
-		       pa->momentum().py(),
-		       pa->momentum().pz(),
-		       pa->momentum().e());
-    double           pt = sqrt(m.px()*m.px()+m.py()*m.py());
+    double pt = pa->momentum().pt();
     if( pt < m_pTmin ) continue;
     
     // Rapidity cut
     //
-    double           t  = std::abs(m.pz())/pt;
+    double           t  = std::abs(pa->momentum().pz())/pt;
     if( t  > m_tcut ) continue;
 
     // Radius cut
@@ -534,7 +523,7 @@ std::list<int> InDet::SegmentDriftCircleAssValidation::kine
 
   return lk;
 }
-	
+
 ///////////////////////////////////////////////////////////////////
 // Pointer to particle production for drift circle
 ///////////////////////////////////////////////////////////////////
@@ -564,18 +553,13 @@ std::list<PRD_MultiTruthCollection::const_iterator> InDet::SegmentDriftCircleAss
   
     // pT cut
     //
-    CLHEP::HepLorentzVector m(pa->momentum().px(),
-		       pa->momentum().py(),
-		       pa->momentum().pz(),
-		       pa->momentum().e());
-
-    double           pt = sqrt(m.px()*m.px()+m.py()*m.py());
+    double pt = pa->momentum().pt();
     if( pt < m_pTmin ) continue;
 
 
     // Rapidity cut
     //
-    double           t  = std::abs(m.pz())/pt;
+    double           t  = std::abs(pa->momentum().pz())/pt;
     if( t  > m_tcut ) continue;
 
     // Radius cut
@@ -615,19 +599,14 @@ std::list<PRD_MultiTruthCollection::const_iterator>
 InDet::SegmentDriftCircleAssValidation::findTruth (const InDet::TRT_DriftCircle* d,bool& Q, const PRD_MultiTruthCollection* prdCollection )
 {
   Q = true;
-  
   std::list<PRD_MultiTruthCollection::const_iterator> mc;
-
-  if(d){
-    using TruthIter = PRD_MultiTruthCollection::const_iterator;
-
-    std::pair<TruthIter, TruthIter> r = prdCollection->equal_range(d->identify());
-    for(TruthIter i=r.first; i!=r.second;++i){
-      if(i==prdCollection->end()) continue;
+  if (d) {
+    auto r = prdCollection->equal_range(d->identify());
+    for( auto  i = r.first; i != r.second && i != prdCollection->end(); ++i){
       mc.push_back(i);
     }
   }
-  if(int(mc.size())==0)  Q = false;
+  if (mc.empty())  Q = false;
 
   return mc;
 }
