@@ -1207,35 +1207,20 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
   }
 
   numOfParents = partOriVert->nIncomingParticles();
-  int numOfDaug = partOriVert->nOutgoingParticles();
-  int NumOfPhot(0);
-  int NumOfEl(0);
-  int NumOfPos(0);
-  int NumOfquark(0);
-  int NumOfgluon(0);
-  int NumOfElNeut(0);
-  int NumOfMuPl(0);
-  int NumOfMuMin(0);
-  int NumOfMuNeut(0);
-  int NumOfTau(0);
-  int NumOfTauNeut(0);
-  long DaugType(0);
-
-  for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ipOut++) {
-    if (!partOriVert->outgoingParticle(ipOut)) continue;
-    DaugType = partOriVert->outgoingParticle(ipOut)->pdgId();
-    if (abs(DaugType) < 7) NumOfquark++;
-    if (abs(DaugType) == 21) NumOfgluon++;
-    if (abs(DaugType) == 12) NumOfElNeut++;
-    if (abs(DaugType) == 14) NumOfMuNeut++;
-    if (DaugType == 22) NumOfPhot++;
-    if (DaugType == 11) NumOfEl++;
-    if (DaugType == -11) NumOfPos++;
-    if (DaugType == 13) NumOfMuMin++;
-    if (DaugType == -13) NumOfMuPl++;
-    if (abs(DaugType) == 15) NumOfTau++;
-    if (abs(DaugType) == 16) NumOfTauNeut++;
-  }
+  auto DP = DecayProducts(partOriVert);
+  int numOfDaug = DP.size();
+  int NumOfPhot = DP.pd(22);
+  int NumOfEl = DP.pd(11);
+  int NumOfPos = DP.pd(-11);
+  int NumOfElNeut = DP.apd(12);
+  int NumOfMuNeut = DP.apd(14);
+  /* int NumOfLQ = DP.apd(42); */
+  int NumOfquark = DP.apd({1,2,3,4,5,6});
+  int NumOfgluon = DP.apd(21);
+  int NumOfMuPl = DP.pd(-13);
+  int NumOfMuMin = DP.pd(13);
+  int NumOfTau = DP.apd(15);
+  int NumOfTauNeut = DP.pd(16);
 
   if (abs(motherPDG) == 6) return top;
   if (MC::isW(motherPDG) && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
@@ -2366,37 +2351,17 @@ ParticleOutCome MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* th
   ParticleOutCome PartOutCome = UnknownOutCome;
   const xAOD::TruthVertex* EndVert = findEndVert(thePart);
   if (EndVert == nullptr) return NonInteract;
-  int NumOfTauDaug(0);
-  int NumOfNucFr(0);
-  int NumOfElec(0);
-  int NumOfElecNeut(0);
-  int NumOfMuon(0);
-  int NumOfMuonNeut(0);
-  int NumOfPhot(0);
-  int NumOfPi(0);
-  int NumOfKaon(0);
-
-  NumOfTauDaug = EndVert->nOutgoingParticles();
+  int NumOfTauDaug = EndVert->nOutgoingParticles();
   std::vector<const xAOD::TruthParticle*> tauFinalStatePart = findFinalStatePart(EndVert);
-
-  for (auto& i : tauFinalStatePart) {
-    int pdg = i->pdgId();
-    if (MC::isElectron(pdg)) NumOfElec++;
-    else if (MC::isMuon(pdg))
-      NumOfMuon++;
-    else if (abs(pdg) == 12)
-      NumOfElecNeut++;
-    else if (abs(pdg) == 14)
-      NumOfMuonNeut++;
-    else if (MC::isPhoton(pdg))
-      NumOfPhot++;
-    else if (abs(pdg) == 211)
-      NumOfPi++;
-    else if (abs(pdg) == 321)
-      NumOfKaon++;
-    else if (pdg > 1000000000 || pdg == 0)
-      NumOfNucFr++;
-  }
+  auto PD = DecayProducts(tauFinalStatePart);
+  int NumOfElec = PD.apd(11);
+  int NumOfMuon = PD.apd(13);
+  int NumOfElecNeut = PD.apd(12);
+  int NumOfMuonNeut = PD.apd(14);
+  int NumOfPhot = PD.apd(22);
+  int NumOfPi = PD.apd(211);
+  int NumOfKaon = PD.apd(321);
+  int NumOfNucFr = PD.apd(0) + PD.apd(1000000000, std::numeric_limits<int>::max());
 
   if (info) info->tauFinalStatePart = std::move(tauFinalStatePart);
 
