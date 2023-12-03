@@ -41,8 +41,10 @@ class PixelSpacePoint final : public Trk::SpacePoint {
   PixelSpacePoint(IdentifierHash elementId, const Trk::PrepRawData* clus);
 
   /** add Covariance Matrix and global position directly */
-  PixelSpacePoint(IdentifierHash elementId, const Trk::PrepRawData* clus,
-                  const Amg::Vector3D& globpos, const Amg::MatrixX& globcov);
+  PixelSpacePoint(IdentifierHash elementId,
+                  const Trk::PrepRawData* clus,
+                  const Amg::Vector3D& globpos,
+                  const AmgSymMatrix(3)& globcov);
 
   PixelSpacePoint(const PixelSpacePoint& PSP) = default;
   PixelSpacePoint(PixelSpacePoint&& PSP) noexcept = default;

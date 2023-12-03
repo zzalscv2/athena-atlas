@@ -42,7 +42,7 @@ PixelSpacePoint::PixelSpacePoint(IdentifierHash elementId,
 PixelSpacePoint::PixelSpacePoint(IdentifierHash elementId,
                                  const Trk::PrepRawData* clus,
                                  const Amg::Vector3D& globpos,
-                                 const Amg::MatrixX& globcov)
+                                 const AmgSymMatrix(3)& globcov)
     : SpacePoint() {
   assert(clus != nullptr);
   m_position = globpos;
