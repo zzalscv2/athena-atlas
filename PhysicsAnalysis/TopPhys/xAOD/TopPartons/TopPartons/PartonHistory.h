@@ -52,6 +52,7 @@ namespace xAOD {
     /// Default desturctor
     virtual ~PartonHistory() {}
 
+    void IniVarTtbarJets();
     void IniVarTtbar();
     void IniVarTzq();
     void IniVarTtbarLight();

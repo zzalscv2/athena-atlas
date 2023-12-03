@@ -16,26 +16,26 @@ namespace top {
     m_config(nullptr) {
     declareProperty("config", m_config);
   }
-  
+
   StatusCode CalcTopPartonHistory::buildContainerFromMultipleCollections(const std::vector<std::string> &collections, const std::string& out_contName)
   {
     ConstDataVector<DataVector<xAOD::TruthParticle_v1> > *out_cont = new ConstDataVector<DataVector<xAOD::TruthParticle_v1> > (SG::VIEW_ELEMENTS);
-    
+
     for(const std::string& collection : collections)
     {
       const xAOD::TruthParticleContainer* cont=nullptr;
       ATH_CHECK(evtStore()->retrieve(cont,collection));
       for(const xAOD::TruthParticle* p : *cont) out_cont->push_back(p);
     }
-    
+
     //we give control of the container to the store, because in this way we are able to retrieve it as a const data vector, see https://twiki.cern.ch/twiki/bin/view/AtlasComputing/DataVector#ConstDataVector
     xAOD::TReturnCode save = evtStore()->tds()->record(out_cont,out_contName);
     if (!save) return StatusCode::FAILURE;
 
     return StatusCode::SUCCESS;
   }
-  
-  StatusCode CalcTopPartonHistory::linkBosonCollections() 
+
+  StatusCode CalcTopPartonHistory::linkBosonCollections()
   {
     return decorateCollectionWithLinksToAnotherCollection("TruthBoson","TruthBosonsWithDecayParticles","AT_linkToTruthBosonsWithDecayParticles");
   }
@@ -48,7 +48,7 @@ namespace top {
 
     for(const xAOD::TruthParticle *p : *cont1)
     {
-      
+
       const xAOD::TruthParticle* link =0;
       for(const xAOD::TruthParticle *p2 : *cont2)
       {
@@ -57,20 +57,20 @@ namespace top {
           link=p2;
           break;
         }
-      } 
+      }
       p->auxdecor<const xAOD::TruthParticle*>(nameOfDecoration)=link;
-      
+
     }
     return StatusCode::SUCCESS;
   }
-  
+
   const xAOD::TruthParticle* CalcTopPartonHistory::getTruthParticleLinkedFromDecoration(const xAOD::TruthParticle* part, const std::string &decorationName)
   {
     if(!part->isAvailable<const xAOD::TruthParticle*>(decorationName)) return part;
-  
+
     const xAOD::TruthParticle* link=part->auxdecor<const xAOD::TruthParticle*>(decorationName);
     if(link) return link;
-    
+
     return part;
   }
 
@@ -183,13 +183,14 @@ namespace top {
                                    TLorentzVector& W_p4,
                                    TLorentzVector& b_p4, TLorentzVector& Wdecay1_p4,
                                    int& Wdecay1_pdgId, TLorentzVector& Wdecay2_p4, int& Wdecay2_pdgId,
-                                   TLorentzVector& tau_decay_from_W_p4, int& tau_decay_from_W_isHadronic,  TLorentzVector& tauvis_decay_from_W_p4) {
+                                   TLorentzVector& tau_decay_from_W_p4, int& tau_decay_from_W_isHadronic,  TLorentzVector& tauvis_decay_from_W_p4,
+                                   int& b_barcode, int& Wdecay2_barcode, int& Wdecay1_barcode) {
     bool hasT = false;
     bool hasW = false;
     bool hasB = false;
     bool hasWdecayProd1 = false;
     bool hasWdecayProd2 = false;
-    
+
     bool store_tau_info = true;
     if (tau_decay_from_W_isHadronic == -9999){store_tau_info = false;}
 
@@ -204,23 +205,25 @@ namespace top {
       // demanding the last tops after FSR
       particle = PartonHistoryUtils::findAfterFSR(particle);
       t_afterFSR_p4 = particle->p4(); // top after FSR
-      
+
       for (size_t k = 0; k < particle->nChildren(); k++) {
         const xAOD::TruthParticle* topChildren = particle->child(k);
 
         if (std::abs(topChildren->pdgId()) == 24) {
           W_p4 = topChildren->p4();  // W boson after FSR
           hasW = true;
-          
+
           // demanding the last W after FSR
-          topChildren = PartonHistoryUtils::findAfterFSR(topChildren);          
+          topChildren = PartonHistoryUtils::findAfterFSR(topChildren);
           for (size_t q = 0; q < topChildren->nChildren(); ++q) {
 	    const xAOD::TruthParticle* WChildren = topChildren->child(q);
             if (std::abs(WChildren->pdgId()) < 17 && store_tau_info == true){
 	      // When W decays leptonically, Wdecay1 stores the lepton and Wdecay2 the neutrino
 	      if (std::abs(WChildren->pdgId()) == 11 || std::abs(WChildren->pdgId()) == 13 || std::abs(WChildren->pdgId()) == 15){
-		Wdecay1_p4 = WChildren->p4();                                  
+		Wdecay1_p4 = WChildren->p4();
                 Wdecay1_pdgId = WChildren->pdgId();
+
+                Wdecay1_barcode = WChildren->barcode();
 		const xAOD::TruthParticle* WChildrenAfterFSR = PartonHistoryUtils::findAfterFSR(WChildren);
 		tau_decay_from_W_isHadronic = PartonHistoryUtils::TauIsHadronic(WChildren, tauvis_decay_from_W_p4);
 		if (std::abs(Wdecay1_pdgId) == 15){
@@ -231,18 +234,21 @@ namespace top {
 	      if (std::abs(WChildren->pdgId()) == 12 || std::abs(WChildren->pdgId()) == 14 || std::abs(WChildren->pdgId()) == 16){
 		Wdecay2_p4 = WChildren->p4();
                 Wdecay2_pdgId = WChildren->pdgId();
+                Wdecay2_barcode = WChildren->barcode();
                 hasWdecayProd2 = true;
 	      }
 	      if (std::abs(WChildren->pdgId()) < 11){ // W does not decay leptonically
 		if (WChildren->pdgId() > 0) {
 		  Wdecay1_p4 = WChildren->p4();
 		  Wdecay1_pdgId = WChildren->pdgId();
+          Wdecay1_barcode = WChildren->barcode();
 		  tau_decay_from_W_isHadronic = -99;
 		  tau_decay_from_W_p4 = WChildren->p4();
 		  hasWdecayProd1 = true;
 		}else{
 		  Wdecay2_p4 = WChildren->p4();
 		  Wdecay2_pdgId = WChildren->pdgId();
+          Wdecay2_barcode = WChildren->barcode();
 		  hasWdecayProd2 = true;
 		}//else
 	      }// if not leptonic decay
@@ -251,28 +257,46 @@ namespace top {
 	      if (WChildren->pdgId() > 0) {
                 Wdecay1_p4 = WChildren->p4();
                 Wdecay1_pdgId = WChildren->pdgId();
+                Wdecay1_barcode = WChildren->barcode();
                 hasWdecayProd1 = true;
               } else {
                 Wdecay2_p4 = WChildren->p4();
                 Wdecay2_pdgId = WChildren->pdgId();
+                Wdecay2_barcode = WChildren->barcode();
+
                 hasWdecayProd2 = true;
               }
 	    } // end of if store_tau_info == false
           }//end of for
         } else if (abs(topChildren->pdgId()) == 5) {
           b_p4 = topChildren->p4();
+          b_barcode = topChildren->barcode();
           hasB = true;
         } //else if
       } //for (size_t k=0; k < particle->nChildren(); k++)
 
       if (hasT && hasW && hasB && hasWdecayProd1 && hasWdecayProd2) return true;
-      
+
     } //for (const xAOD::TruthParticle* particle : *truthParticles)
-    
+
     return false;
   }
 
+  bool CalcTopPartonHistory::topWb(const xAOD::TruthParticleContainer* truthParticles,
+                                   int start, TLorentzVector& t_beforeFSR_p4, TLorentzVector& t_afterFSR_p4,
+                                   TLorentzVector& W_p4,
+                                   TLorentzVector& b_p4, TLorentzVector& Wdecay1_p4,
+                                   int& Wdecay1_pdgId, TLorentzVector& Wdecay2_p4, int& Wdecay2_pdgId,
+                                   TLorentzVector& tau_decay_from_W_p4, int& tau_decay_from_W_isHadronic,  TLorentzVector& tauvis_decay_from_W_p4) {
 
+    int b_barcode = -9999;
+    int Wdecay1_barcode = -9999;
+    int Wdecay2_barcode = -9999;
+
+    return topWb(truthParticles, start, t_beforeFSR_p4, t_afterFSR_p4, W_p4, b_p4, Wdecay1_p4,Wdecay1_pdgId, Wdecay2_p4, Wdecay2_pdgId, tau_decay_from_W_p4, tau_decay_from_W_isHadronic, tauvis_decay_from_W_p4, b_barcode, Wdecay1_barcode, Wdecay2_barcode);
+
+    return false;
+    }
 
   bool CalcTopPartonHistory::topWb(const xAOD::TruthParticleContainer* truthParticles,
                                    int start, TLorentzVector& t_beforeFSR_p4, TLorentzVector& t_afterFSR_p4,
@@ -282,12 +306,29 @@ namespace top {
     TLorentzVector tau_decay_from_W_p4;
     int tau_decay_from_W_isHadronic = -9999;
     TLorentzVector tauvis_decay_from_W_p4;
-    return topWb(truthParticles, start, t_beforeFSR_p4, t_afterFSR_p4, W_p4, b_p4, Wdecay1_p4,Wdecay1_pdgId, Wdecay2_p4, Wdecay2_pdgId, tau_decay_from_W_p4, tau_decay_from_W_isHadronic, tauvis_decay_from_W_p4);
+    int b_barcode = -9999;
+    int Wdecay1_barcode = -9999;
+    int Wdecay2_barcode = -9999;
+
+    return topWb(truthParticles, start, t_beforeFSR_p4, t_afterFSR_p4, W_p4, b_p4, Wdecay1_p4,Wdecay1_pdgId, Wdecay2_p4, Wdecay2_pdgId, tau_decay_from_W_p4, tau_decay_from_W_isHadronic, tauvis_decay_from_W_p4, b_barcode, Wdecay1_barcode, Wdecay2_barcode);
 
     return false;
   }
 
- 
+ bool CalcTopPartonHistory::topWb(const xAOD::TruthParticleContainer* truthParticles,
+                                   int start, TLorentzVector& t_beforeFSR_p4, TLorentzVector& t_afterFSR_p4,
+                                   TLorentzVector& W_p4, TLorentzVector& b_p4, int& b_barcode,
+                                   TLorentzVector& Wdecay1_p4, int& Wdecay1_pdgId, int& Wdecay1_barcode,
+                                   TLorentzVector& Wdecay2_p4, int& Wdecay2_pdgId, int& Wdecay2_barcode) {
+    TLorentzVector tau_decay_from_W_p4;
+    int tau_decay_from_W_isHadronic = -9999;
+    TLorentzVector tauvis_decay_from_W_p4;
+    return topWb(truthParticles, start, t_beforeFSR_p4, t_afterFSR_p4, W_p4, b_p4, Wdecay1_p4,Wdecay1_pdgId, Wdecay2_p4, Wdecay2_pdgId, tau_decay_from_W_p4, tau_decay_from_W_isHadronic, tauvis_decay_from_W_p4, b_barcode, Wdecay1_barcode, Wdecay2_barcode);
+
+    return false;
+  }
+
+
   bool CalcTopPartonHistory::topWq(const xAOD::TruthParticleContainer* truthParticles,
                                    int start, TLorentzVector& t_beforeFSR_p4, TLorentzVector& t_afterFSR_p4,
                                    TLorentzVector& W_p4,
@@ -693,10 +734,10 @@ namespace top {
   }
 
   // for tttt events
-  bool CalcTopPartonHistory::tttt(const xAOD::TruthParticleContainer* truthParticles, std::array<int,4> &top_pdgId, 
-				  std::array<TLorentzVector,4> &top_beforeFSR_p4, std::array<TLorentzVector,4> &top_afterFSR_p4, 
-				  std::array<TLorentzVector,4> &b_p4, std::array<TLorentzVector,4> &W_p4, 
-				  std::array<int,4> &Wdecay1_pdgId, std::array<int,4> &Wdecay2_pdgId, 
+  bool CalcTopPartonHistory::tttt(const xAOD::TruthParticleContainer* truthParticles, std::array<int,4> &top_pdgId,
+				  std::array<TLorentzVector,4> &top_beforeFSR_p4, std::array<TLorentzVector,4> &top_afterFSR_p4,
+				  std::array<TLorentzVector,4> &b_p4, std::array<TLorentzVector,4> &W_p4,
+				  std::array<int,4> &Wdecay1_pdgId, std::array<int,4> &Wdecay2_pdgId,
 				  std::array<TLorentzVector,4> &Wdecay1_p4, std::array<TLorentzVector,4> &Wdecay2_p4) {
 
     int n_top = 0;
@@ -705,7 +746,7 @@ namespace top {
     for (const auto* const particle : *truthParticles){
       if( std::abs(particle->pdgId()) != 6 ) continue;
 
-      // For Sherpa 2.2.10 samples : 
+      // For Sherpa 2.2.10 samples :
       // So if you want to select parton-level event kinematics, you should always use status 20 if available in the event and otherwise status 3.
       if( std::abs(particle->status()) == 20 && n_top >=4 ) n_top=0; // Re-fill the top-quarks kinematic
 
@@ -750,7 +791,7 @@ namespace top {
 	}
 	else if (abs(topChildren->pdgId()) == 5) { // b-quark
 	  b_p4[n_top] = topChildren->p4();
-	}	
+	}
       } // top quark children loop
 
       n_top++;
@@ -794,10 +835,20 @@ namespace top {
   }
 
   void CalcTopPartonHistory::fillEtaBranch(xAOD::PartonHistory* partonHistory, std::string branchName,
-                                           TLorentzVector& tlv) {
-    if (tlv.CosTheta() == 1.) partonHistory->auxdecor< float >(branchName) = 1000.;
-    else if (tlv.CosTheta() == -1.) partonHistory->auxdecor< float >(branchName) = 1000.;
-    else partonHistory->auxdecor< float >(branchName) = tlv.Eta();
+                                           TLorentzVector& tlv, FillBranchMethod FillMethod) {
+
+    if (FillMethod == FillBranchMethod::Regular) {
+        if (std::abs(tlv.CosTheta()) == 1.) partonHistory->auxdecor< float >(branchName) = 1000.;
+        else partonHistory->auxdecor< float >(branchName) = tlv.Eta();
+    }
+
+    else{ // FillMethod == FillBranchMethod::PushBack
+        if (std::abs(tlv.CosTheta()) == 1.) partonHistory->auxdecor< std::vector< float> >(branchName).push_back(1000.);
+        else partonHistory->auxdecor< std::vector< float> >(branchName).push_back(tlv.Eta());
+    }
+
     return;
   }
+
+
 }

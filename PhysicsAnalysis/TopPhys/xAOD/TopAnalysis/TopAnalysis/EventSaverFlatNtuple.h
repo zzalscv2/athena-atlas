@@ -29,7 +29,7 @@ namespace top {
  * themselves.
  */
 
-  
+
   class EventSaverFlatNtuple: public top::EventSaverBase, public asg::AsgTool  {
   public:
     /**
@@ -178,7 +178,7 @@ namespace top {
      * @returns A shared pointer to the m_branchFilters object
      */
     std::vector<top::TreeManager::BranchFilter>& branchFilters();
-    
+
     /*!
      * @brief Internal function which configures the particle level tree
      * manager. It does branch setup etc.
@@ -1082,6 +1082,8 @@ namespace top {
     // This is just a first pass at doing this sort of thing
     std::unordered_map<std::string, int*> m_extraTruthVars_int;
     std::unordered_map<std::string, float*> m_extraTruthVars_float;
+    std::unordered_map<std::string, std::vector<int>*> m_extraTruthVars_vecint;
+    std::unordered_map<std::string, std::vector<float>*> m_extraTruthVars_vecfloat;
   protected:
     /////////////////////////////////////
     /// const getters for the event variables
@@ -1497,7 +1499,7 @@ namespace top {
     const std::vector<std::vector<float> >& rcjetsub_phi() const {return m_rcjetsub_phi;}
     const std::vector<std::vector<float> >& rcjetsub_e() const {return m_rcjetsub_e;}
     const std::vector<std::vector<float> >& rcjetsub_mv2c10() const {return m_rcjetsub_mv2c10;}
-    
+
     const std::map<std::string,std::vector<float>>& rcjetJSSVariables() const {return m_rcjetJSSVariables;}
     const std::map<std::string,std::map<std::string,std::vector<float>>>& VarRCjetJSSVariables() const {return m_VarRCjetJSSVariables;}
 
