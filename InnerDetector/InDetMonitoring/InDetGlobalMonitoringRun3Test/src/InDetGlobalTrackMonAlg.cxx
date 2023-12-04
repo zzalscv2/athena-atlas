@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -266,6 +266,7 @@ StatusCode InDetGlobalTrackMonAlg::fillHistograms( const EventContext& ctx ) con
     {
       // retrieving vertices
       auto handle_vxContainer = SG::makeHandle(m_vxContainerName, ctx);
+      const xAOD::VertexContainer* vertexContainer = nullptr;
 
       if (!handle_vxContainer.isPresent()) {
 	ATH_MSG_DEBUG ("InDetGlobalTrackMonAlg: StoreGate doesn't contain primary vertex container with key "+m_vxContainerName.key()+",may not be able to produce TIDE histograms");
@@ -273,8 +274,9 @@ StatusCode InDetGlobalTrackMonAlg::fillHistograms( const EventContext& ctx ) con
       if (!handle_vxContainer.isValid()) {
 	ATH_MSG_DEBUG ("InDetGlobalTrackMonAlg: Could not retrieve primary vertex container with key "+m_vxContainerName.key()+",may not be able to produce TIDE histograms");
       }
-
-      auto vertexContainer = handle_vxContainer.cptr();
+      else {
+        vertexContainer = handle_vxContainer.cptr();
+      }
 
       // retrieving jets
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -199,12 +199,12 @@ StatusCode InDetGlobalBeamSpotMonAlg::fillHistograms( const EventContext& ctx ) 
     
     // Basic primary vertex monitoring
     auto handle_vxContainer = SG::makeHandle(m_vxContainerName, ctx);  
-    auto vertexContainer = handle_vxContainer.cptr();
 
     if (!handle_vxContainer.isValid()) {
       ATH_MSG_DEBUG ("InDetGlobalBeamSpotMonAlg: Could not retrieve primary vertex container with key "+ m_vxContainerName.key());
       return StatusCode::SUCCESS;
     }
+    auto vertexContainer = handle_vxContainer.cptr();
     
     auto pvN_m = Monitored::Scalar<float>("m_pvN", vertexContainer->size()-1);  // exclude dummy vertex
     fill(bsGroup, pvN_m);
