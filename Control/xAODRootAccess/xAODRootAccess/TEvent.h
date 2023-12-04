@@ -102,9 +102,10 @@ namespace xAOD {
       /// Default constructor
       TEvent( EAuxMode mode = kUndefinedAccess );
       /// Constructor connecting the object to an input TFile
-      TEvent( ::TFile* file, EAuxMode mode = kUndefinedAccess );
+      TEvent( ::TFile* file, EAuxMode mode = kUndefinedAccess);
       /// Constructor connecting the objects to an input TTree/TChain
-      TEvent( ::TTree* tree, EAuxMode mode = kUndefinedAccess );
+      /// With this constructor possibility to read augmented files by providing the main tree and having set friend trees before providing the tree to TEvent
+      TEvent( ::TTree* tree, EAuxMode mode = kUndefinedAccess);
       /// Destructor
       virtual ~TEvent();
 
@@ -424,7 +425,7 @@ namespace xAOD {
       /// The auxiliary access mode
       EAuxMode m_auxMode;
 
-      /// The tree that we are reading from
+      /// The main tree that we are reading from
       ::TTree* m_inTree;
       /// Internal status flag showing that an input file is open, but it
       /// doesn't contain an event tree

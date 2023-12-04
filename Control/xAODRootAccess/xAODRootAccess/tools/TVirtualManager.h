@@ -28,7 +28,7 @@ namespace xAOD {
       virtual ~TVirtualManager() {}
 
       /// Function for updating the object in memory if needed
-      virtual ::Int_t getEntry( ::Long64_t entry, ::Int_t getall = 0 ) = 0;
+      virtual ::Int_t getEntry( ::Int_t getall = 0 ) = 0;
 
       /// Function getting a const pointer to the object being handled
       virtual const void* object() const = 0;
