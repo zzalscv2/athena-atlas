@@ -14,7 +14,7 @@ atlas_add_component( LArSCellTest
                      LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel StoreGateLib CxxUtils
                      CaloDetDescrLib CaloEvent CaloIdentifier AthenaBaseComps xAODEgamma xAODEventInfo
                      xAODTracking xAODTrigger xAODTrigCalo xAODTrigL1Calo 
-                     xAODTruth LArCablingLib LArRawEvent RecoToolInterfaces )
+                     xAODTruth LArCablingLib LArRawEvent RecoToolInterfaces TruthUtils)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

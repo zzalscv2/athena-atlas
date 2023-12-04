@@ -15,6 +15,7 @@
 #include "NoiseStudy.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "CaloIdentifier/CaloIdManager.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "TFile.h"
 #include "TH1F.h"
 #include "TH2F.h"
@@ -155,8 +156,8 @@ StatusCode NoiseStudy::execute(const EventContext& context) const{
 	for( auto tt : *truth ){
 		if ( tt->parent() == nullptr ) continue;
                 if ( tt->parent()->pdgId() != 23 ) continue;
-                if ( std::abs(tt->absPdgId()) != 11 ) continue;
-                if ( tt->barcode() >= 10000 ) continue;
+                if ( !MC::isElectron(tt)) continue;
+                if ( HepMC::is_simulation_particle(tt)) continue;
                 if ( tt->pt() < 1e3 ) continue;
 		el_etas.push_back ( tt->eta() );
 		el_phis.push_back ( tt->phi() );

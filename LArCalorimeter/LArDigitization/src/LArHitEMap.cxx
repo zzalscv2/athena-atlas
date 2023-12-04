@@ -15,7 +15,7 @@
 #include "GeneratorObjects/McEventCollection.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 LArHitEMap::~LArHitEMap() = default;
 
@@ -88,9 +88,9 @@ bool LArHitEMap::BuildWindows(const McEventCollection* mcCollptr,
       {
          //works only for photons(22) and electrons(11) primary particle (+pi0 in case not decayed by generator)
          // with pt>5 GeV
-         // check status==1 and barcode<200000  to pickup "stable" particle from generator excluding G4 secondaries
-         if(   (part->pdg_id()==22 || std::abs(part->pdg_id())==11 || part->pdg_id()==111) && part->momentum().perp()> ptmin
-             && part->status()==1 && !HepMC::is_simulation_particle(part) ) 
+         // pickup "stable" particle from generator excluding G4 secondaries
+         if(   ( MC::isPhoton(part) || MC::isElectron(part) || part->pdg_id()==111) && part->momentum().perp()> ptmin
+             && MC::isStable(part) && !HepMC::is_simulation_particle(part) ) 
          {
           etaPart.push_back(part->momentum().pseudoRapidity());
           phiPart.push_back(part->momentum().phi());
