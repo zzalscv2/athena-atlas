@@ -10,6 +10,8 @@
 #include "MultiTrajectory.h"
 #include "xAODTracking/TrackParametersContainer.h"
 #include "xAODTracking/TrackStateContainer.h"
+#include "xAODTracking/TrackJacobianContainer.h"
+#include "xAODTracking/TrackMeasurementContainer.h"
 
 namespace ActsTrk {
 
@@ -132,6 +134,7 @@ std::unique_ptr<ActsTrk::MultiTrajectory>
 MutableMultiTrajectoryHandle<C>::moveToConst(
     ActsTrk::MutableMultiTrajectory&& mmtj, const EventContext& context) const {
 
+  mmtj.trim();
   auto statesBackendHandle = SG::makeHandle(m_statesKey, context);
   auto statesInterface = ActsTrk::makeInterfaceContainer<xAOD::TrackStateContainer>(mmtj.trackStatesAux());
   if (statesBackendHandle
@@ -188,10 +191,10 @@ MutableMultiTrajectoryHandle<C>::moveToConst(
   }
 
   auto cmtj = std::make_unique<ActsTrk::MultiTrajectory>(
-      DataLink<xAOD::TrackStateContainer>(m_statesKey.key(), context),
-      DataLink<xAOD::TrackParametersContainer>(m_parametersKey.key(), context),
-      DataLink<xAOD::TrackJacobianContainer>(m_jacobiansKey.key(), context),
-      DataLink<xAOD::TrackMeasurementContainer>(m_measurementsKey.key(),
+      DataLink<xAOD::TrackStateAuxContainer>(m_statesKey.key()+"Aux.", context),
+      DataLink<xAOD::TrackParametersAuxContainer>(m_parametersKey.key()+"Aux.", context),
+      DataLink<xAOD::TrackJacobianAuxContainer>(m_jacobiansKey.key()+"Aux.", context),
+      DataLink<xAOD::TrackMeasurementAuxContainer>(m_measurementsKey.key()+"Aux.",
                                                 context));
   cmtj->moveSurfaces(&mmtj);  
   cmtj->moveLinks(&mmtj);

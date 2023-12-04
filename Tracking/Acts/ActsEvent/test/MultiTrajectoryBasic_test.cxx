@@ -155,26 +155,15 @@ struct EmptyMTJ {  // setup empty MTJ
   EmptyMTJ() {
     mtj = std::make_unique<ActsTrk::MutableMultiTrajectory>();
   }
-  std::unique_ptr<xAOD::TrackStateContainer> trackStateBackend;
-  std::unique_ptr<xAOD::TrackParametersContainer> parametersBackend;
-  std::unique_ptr<xAOD::TrackJacobianContainer> jacobianBackend;
-  std::unique_ptr<xAOD::TrackMeasurementContainer> measurementsBackend;
-  std::unique_ptr<xAOD::TrackSurfaceContainer> surfacesBackend;
 
   std::unique_ptr<ActsTrk::MutableMultiTrajectory> mtj;
   ActsTrk::MultiTrajectory* ro_mtj() {
     if ( !m_ro_mtj ) {
-      trackStateBackend = ActsTrk::makeInterfaceContainer<xAOD::TrackStateContainer>(mtj->trackStatesAux());
-      parametersBackend = ActsTrk::makeInterfaceContainer<xAOD::TrackParametersContainer>(mtj->trackParametersAux());
-      jacobianBackend = ActsTrk::makeInterfaceContainer<xAOD::TrackJacobianContainer>(mtj->trackJacobiansAux());
-      measurementsBackend = ActsTrk::makeInterfaceContainer<xAOD::TrackMeasurementContainer>(mtj->trackMeasurementsAux());
-
-
       m_ro_mtj = std::make_unique<ActsTrk::MultiTrajectory>(
-        trackStateBackend.get(), 
-        parametersBackend.get(),
-        jacobianBackend.get(),
-        measurementsBackend.get()
+        mtj->trackStatesAux(), 
+        mtj->trackParametersAux(),
+        mtj->trackJacobiansAux(),
+        mtj->trackMeasurementsAux()
       );
 
     }
