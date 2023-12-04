@@ -93,6 +93,9 @@ LVL1CTP::CTPSimulation::initialize() {
    // L1ZDC
    ATH_CHECK(  m_iKeyZDC.initialize( ! m_iKeyZDC.empty() && m_doZDC ) );
 
+   // L1TRT
+   ATH_CHECK(  m_iKeyTRT.initialize( ! m_iKeyTRT.empty() && m_doTRT ) );
+
    // services
    ATH_CHECK( m_histSvc.retrieve() );
 
@@ -623,7 +626,7 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
    thrMultiMap.clear();
 
    std::vector<std::string> connNames = l1menu->connectorNames();
-   for (const std::string connName : {"LegacyTopo0", "LegacyTopo1", "Topo1El", "Topo2El", "Topo3El", "Topo1Opt0", "Topo1Opt1", "Topo1Opt2", "Topo1Opt3", "CTPCAL"})
+   for (const std::string connName : {"LegacyTopo0", "LegacyTopo1", "Topo1El", "Topo2El", "Topo3El", "Topo1Opt0", "Topo1Opt1", "Topo1Opt2", "Topo1Opt3", "CTPCAL", "NIM2"})
    {
       if( find(connNames.begin(), connNames.end(), connName) == connNames.end() ) {
          continue;
@@ -663,6 +666,27 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
          thrMultiMap[tl.name()] = pass;
          ATH_MSG_DEBUG(tl.name() << " MULT calculated mult for topo " << pass);
 
+         }
+         continue;
+      }
+      else if (CxxUtils::starts_with (connName, "NIM2") && m_doTRT) // TRT simulation
+      {
+         auto trtInput = SG::makeHandle(m_iKeyTRT, context);
+         if (not trtInput.isValid())
+         {
+            continue;
+         }
+         cable = static_cast<uint64_t>(trtInput->cableWord0());
+         auto &conn = l1menu->connector(connName);
+         for (auto &tl : conn.triggerLines()){
+            if (tl.name().find("TRT") == std::string::npos)
+            {
+               continue;
+            }
+            uint flatIndex = tl.flatindex();
+            uint pass = (cable & (uint64_t(0x1) << flatIndex)) == 0 ? 0 : 1;
+            thrMultiMap[tl.name()] = pass;
+            ATH_MSG_DEBUG(tl.name() << " MULT calculated mult for topo " << pass);
          }
          continue;
       }
@@ -720,6 +744,9 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
       if( thr->type() == "ZDC" && m_doZDC ){
          continue;
       }
+      if( thr->name() == "NIMTRT" && m_doTRT ){
+         continue;
+      }
       // get the multiplicity for each threshold
       unsigned int multiplicity = calculateMultiplicity(*thr, l1menu, context);
       // and record in threshold--> multiplicity map (to be used for item decision)
@@ -754,7 +781,7 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
          ATH_MSG_ERROR("Did not find L1BunchGroupSet in DetectorStore");
       }
    }
-
+   
    // all RNDM triggers run with 40MHz, so they are always in
    thrMultiMap["RNDM0"] = 1;
    thrMultiMap["RNDM1"] = 1;
