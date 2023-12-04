@@ -356,7 +356,8 @@ recurse_pyinspect(PyObject *pyobj,
 
     if (persistentOnly && !mbr->IsPersistent())
       continue;
-    if (mbr->IsaPointer())
+    if (mbr->IsaPointer() || CxxUtils::starts_with(mbr->GetTypeName(), "unique_ptr")
+        || CxxUtils::starts_with(mbr->GetTypeName(), "shared_ptr") )
       continue;
     if (mbr->IsBasic()) {
       TDataType * mbr_type = mbr->GetDataType();
