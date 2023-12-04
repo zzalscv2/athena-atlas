@@ -34,13 +34,13 @@ namespace Muon
   // Constructor with parameters
   CscClusterOnTrack::CscClusterOnTrack(
                        const CscPrepData* RIO,
-                       const Trk::LocalParameters& locpos,
-                       const Amg::MatrixX& locerr,
+                       Trk::LocalParameters&& locpos,
+                       Amg::MatrixX&& locerr,
                        double positionAlongStrip,
                        CscClusterStatus status,
                        CscTimeStatus timeStatus,
                        float time ) :
-    MuonClusterOnTrack(locpos, locerr, RIO->identify(), positionAlongStrip), //call base class constructor
+    MuonClusterOnTrack(std::move(locpos), std::move(locerr), RIO->identify(), positionAlongStrip), //call base class constructor
     m_detEl( RIO->detectorElement() ),
     m_status( status ),
     m_timeStatus( timeStatus ),
@@ -53,15 +53,15 @@ namespace Muon
 
   CscClusterOnTrack::CscClusterOnTrack(
                        const ElementLinkToIDC_CSC_Container& RIO,
-                       const Trk::LocalParameters& locpos,
-                       const Amg::MatrixX& locerr,
+                       Trk::LocalParameters&& locpos,
+                       Amg::MatrixX&& locerr,
                        const Identifier& id,
                        const MuonGM::CscReadoutElement*  detEl,
                        double positionAlongStrip,
                        CscClusterStatus status,
                        CscTimeStatus timeStatus,
                        float time ) :
-    MuonClusterOnTrack(locpos, locerr, id, positionAlongStrip), //call base class constructor
+    MuonClusterOnTrack(std::move(locpos), std::move(locerr), id, positionAlongStrip), //call base class constructor
     m_rio( RIO ),
     m_detEl( detEl ),
     m_status( status ),
@@ -88,7 +88,7 @@ namespace Muon
       }
     return *this;
   }
-  
+
   MsgStream& CscClusterOnTrack::dump( MsgStream&    stream) const
   {
     stream << MSG::INFO<<"CscClusterOnTrack {"<<std::endl;
@@ -96,7 +96,7 @@ namespace Muon
     stream <<"Status: "<<m_status<<std::endl;
     stream <<"TimeStatus: "<<m_timeStatus<<std::endl;
 
-    MuonClusterOnTrack::dump(stream); 
+    MuonClusterOnTrack::dump(stream);
 
     stream << "Cluster Status: "<<toString(m_status)<<std::endl;
     stream << "Cluster Time Status: "<<toString(m_timeStatus)<<std::endl;
@@ -112,7 +112,7 @@ namespace Muon
     stream <<"Status: "<<m_status<<std::endl;
     stream <<"TimeStatus: "<<m_timeStatus<<std::endl;
 
-    MuonClusterOnTrack::dump(stream); 
+    MuonClusterOnTrack::dump(stream);
 
     stream << "Cluster Status: "<<toString(m_status)<<std::endl;
     stream << "Cluster Time Status: "<<toString(m_timeStatus)<<std::endl;

@@ -400,7 +400,8 @@ PixelClusterOnTrackTool::correctNN
     Trk::LocalParameters locpar = Trk::LocalParameters(locpos);
     Amg::MatrixX cov = pixelPrepCluster->localCovariance();
 
-    return new InDet::PixelClusterOnTrack(pixelPrepCluster, locpar, cov, iH, glob,
+    return new InDet::PixelClusterOnTrack(pixelPrepCluster, std::move(locpar),
+                                          std::move(cov), iH, glob,
                                           pixelPrepCluster->gangedPixel(), false);
   }
 

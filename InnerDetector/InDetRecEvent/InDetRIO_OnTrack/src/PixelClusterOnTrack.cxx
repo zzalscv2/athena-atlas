@@ -13,26 +13,6 @@
 #include <ostream>
 
 
-// Constructor with parameters - no global position specified
-InDet::PixelClusterOnTrack::PixelClusterOnTrack(
-  const InDet::PixelCluster* RIO,
-  const Trk::LocalParameters& locpars,
-  const Amg::MatrixX& locerr,
-  const IdentifierHash& idDE,
-  bool,
-  bool isbroad)
-  : // call base class constructor
-  InDet::SiClusterOnTrack(locpars, locerr, idDE, RIO->identify(), isbroad)
-  , m_hasClusterAmbiguity(RIO->isAmbiguous())
-  , m_isFake(RIO->isFake())
-  , m_energyLoss(RIO->energyLoss())
-  , m_detEl(RIO->detectorElement())
-{
-  m_rio.setElement(RIO);
-  // Set global position
-  m_globalPosition = associatedSurface().localToGlobal(localParameters());
-}
-
 InDet::PixelClusterOnTrack::PixelClusterOnTrack(
   const InDet::PixelCluster* RIO,
   Trk::LocalParameters&& locpars,
@@ -52,31 +32,6 @@ InDet::PixelClusterOnTrack::PixelClusterOnTrack(
   m_rio.setElement(RIO);
   // Set global position
   m_globalPosition = associatedSurface().localToGlobal(localParameters());
-}
-
-
-// Constructor with parameters
-InDet::PixelClusterOnTrack::PixelClusterOnTrack(
-  const InDet::PixelCluster* RIO,
-  const Trk::LocalParameters& locpars,
-  const Amg::MatrixX& locerr,
-  const IdentifierHash& idDE,
-  const Amg::Vector3D& globalPosition,
-  bool,
-  bool isbroad)
-  : // call base class constructor
-  InDet::SiClusterOnTrack(locpars,
-                          locerr,
-                          idDE,
-                          RIO->identify(),
-                          globalPosition,
-                          isbroad)
-  , m_hasClusterAmbiguity(RIO->isAmbiguous())
-  , m_isFake(RIO->isFake())
-  , m_energyLoss(RIO->energyLoss())
-  , m_detEl(RIO->detectorElement())
-{
-  m_rio.setElement(RIO);
 }
 
 // Constructor with parameters
@@ -116,7 +71,7 @@ InDet::PixelClusterOnTrack::PixelClusterOnTrack
     bool isFake,
     bool hasClusterAmbiguity,
     bool isbroad)
- : InDet::SiClusterOnTrack(locpars, locerr, idDE, id, isbroad),
+ : InDet::SiClusterOnTrack(Trk::LocalParameters(locpars), Amg::MatrixX(locerr), idDE, id, isbroad),
   m_rio (RIO),
   m_hasClusterAmbiguity (hasClusterAmbiguity),
   m_isFake (isFake),

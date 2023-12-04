@@ -14,7 +14,7 @@
 
 typedef ElementLink<Muon::MMPrepDataContainer> ElementLinkToIDC_MM_Container;
 
-namespace Trk 
+namespace Trk
 {
   class ITrkEventCnvTool;
 }
@@ -41,7 +41,7 @@ namespace Muon
         @param[in] RIO <b>Required</b> (i.e. must not be NULL). Ownership is not taken.
         @param[in] locpos <b>Required</b> (i.e. must not be NULL). Ownership is taken.
         @param[in] locerr <b>Required</b> (i.e. must not be NULL). Ownership is taken.
-        @param[in] positionAlongStrip  <b>Required</b> Used to calculate global position.  
+        @param[in] positionAlongStrip  <b>Required</b> Used to calculate global position.
      */
     MMClusterOnTrack(const MMPrepData* RIO,
                      Trk::LocalParameters&& locpos,
@@ -73,7 +73,7 @@ namespace Muon
     /** @brief Returns the detector element, assoicated with the PRD of this class*/
     virtual const MuonGM::MMReadoutElement* detectorElement() const;
 
-    /** @brief Returns the surface on which this measurement was taken. 
+    /** @brief Returns the surface on which this measurement was taken.
     (i.e. a surface of a detector element) */
     virtual const Trk::Surface& associatedSurface() const;
 
@@ -85,7 +85,7 @@ namespace Muon
 
     /** @brief Dumps information about the PRD*/
     virtual std::ostream& dump( std::ostream& stream) const;
-    
+
     enum Author{
       unKnownAuthor = 64,
       SimpleClusterBuilder,
@@ -127,7 +127,7 @@ namespace Muon
 
   inline const MMPrepData* MMClusterOnTrack::prepRawData() const
   {
-    if (m_rio.isValid()) return m_rio.cachedElement(); 
+    if (m_rio.isValid()) return m_rio.cachedElement();
     else return nullptr;
   }
 

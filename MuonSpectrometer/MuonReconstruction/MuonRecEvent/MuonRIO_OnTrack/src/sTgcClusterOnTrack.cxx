@@ -21,10 +21,10 @@ namespace Muon
   // Constructor with parameters
   sTgcClusterOnTrack::sTgcClusterOnTrack(
 					 const sTgcPrepData* RIO,
-					 const Trk::LocalParameters& locpos,
-					 const Amg::MatrixX& locerr,
+					 Trk::LocalParameters&& locpos,
+					 Amg::MatrixX&& locerr,
 					 double positionAlongStrip) :
-    MuonClusterOnTrack(locpos, locerr, RIO->identify(), positionAlongStrip), //call base class constructor
+    MuonClusterOnTrack(std::move(locpos), std::move(locerr), RIO->identify(), positionAlongStrip), //call base class constructor
     m_detEl( RIO->detectorElement() )
   {
     //Set EL
@@ -35,12 +35,12 @@ namespace Muon
   // Alternate constructor that doesn't dereference the RIO link.
   sTgcClusterOnTrack::sTgcClusterOnTrack(
                                          const ElementLinkToIDC_STGC_Container& RIO,
-                                         const Trk::LocalParameters& locpos,
-                                         const Amg::MatrixX& locerr,
+                                         Trk::LocalParameters&& locpos,
+                                         Amg::MatrixX&& locerr,
                                          const Identifier& id,
                                          const MuonGM::sTgcReadoutElement* detEl,
                                          double positionAlongStrip)
-    : MuonClusterOnTrack(locpos, locerr, id, positionAlongStrip),
+    : MuonClusterOnTrack(std::move(locpos), std::move(locerr), id, positionAlongStrip),
       m_rio (RIO),
       m_detEl( detEl )
   {
@@ -68,7 +68,7 @@ namespace Muon
   {
     stream << MSG::INFO<<"sTgcClusterOnTrack {"<<std::endl;
 
-    MuonClusterOnTrack::dump(stream); 
+    MuonClusterOnTrack::dump(stream);
 
     stream<<"}"<<endmsg;
     return stream;
@@ -78,7 +78,7 @@ namespace Muon
   {
     stream << "sTgcClusterOnTrack {"<<std::endl;
 
-    MuonClusterOnTrack::dump(stream); 
+    MuonClusterOnTrack::dump(stream);
 
     stream<<"}"<<std::endl;
     return stream;

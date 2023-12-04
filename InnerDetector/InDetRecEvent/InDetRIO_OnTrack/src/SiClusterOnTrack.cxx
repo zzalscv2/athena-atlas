@@ -19,18 +19,6 @@
 
 
 // Constructor with parameters - global position not specified here
-InDet::SiClusterOnTrack::SiClusterOnTrack( const Trk::LocalParameters& locpars,
-                                           const Amg::MatrixX& locerr,
-                                           const IdentifierHash& idDE,
-                                           const Identifier& id,
-                                           bool isbroad) :
-  RIO_OnTrack(locpars, locerr, id), //call base class constructor
-  m_idDE(idDE),
-  m_globalPosition(), // should be set in constructor of derived class
-  m_isbroad(isbroad)
-{}
-
-// Constructor with parameters - global position not specified here
 InDet::SiClusterOnTrack::SiClusterOnTrack( Trk::LocalParameters&& locpars,
                                            Amg::MatrixX&& locerr,
                                            const IdentifierHash& idDE,
@@ -40,20 +28,6 @@ InDet::SiClusterOnTrack::SiClusterOnTrack( Trk::LocalParameters&& locpars,
   m_idDE(idDE),
   m_globalPosition(), // should be set in constructor of derived class
   m_isbroad(isbroad)
-{}
-
-// Constructor with parameters - global position specified
-InDet::SiClusterOnTrack::SiClusterOnTrack( const Trk::LocalParameters& locpars,
-                                           const Amg::MatrixX& locerr,
-                                           const IdentifierHash& idDE,
-                                           const Identifier& id,
-                                           const Amg::Vector3D& globalPosition,
-                                           bool isbroad)
-    :
-    RIO_OnTrack(locpars, locerr, id), //call base class constructor
-    m_idDE(idDE),
-    m_globalPosition(globalPosition),
-    m_isbroad(isbroad)
 {}
 
 // Constructor with parameters - global position specified

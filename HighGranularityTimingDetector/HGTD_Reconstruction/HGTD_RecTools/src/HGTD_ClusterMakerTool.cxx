@@ -51,7 +51,7 @@ HGTD_Cluster HGTD_ClusterMakerTool::createCluster(
           rdo_list,
           width,
           det_el,
-          std::move(loc_err_matx),
+          loc_err_matx,
           time_of_arrival,
           time_of_arrival_err,
           time_over_threshold};

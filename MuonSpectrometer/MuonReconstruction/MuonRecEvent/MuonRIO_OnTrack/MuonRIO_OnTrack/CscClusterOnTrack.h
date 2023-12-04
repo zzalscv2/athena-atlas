@@ -34,7 +34,7 @@ namespace MuonGM
 class CscReadoutElement;
 }
 
-namespace Trk 
+namespace Trk
 {
     class ITrkEventCnvTool;
 }
@@ -60,14 +60,14 @@ public:
     @param[in] RIO <b>Required</b> (i.e. must not be NULL). Ownership is not taken.
     @param[in] locpos <b>Required</b> (i.e. must not be NULL). Ownership is taken.
     @param[in] locerr <b>Required</b> (i.e. must not be NULL). Ownership is taken.
-    @param[in] positionAlongStrip  <b>Required</b> Used to calculate global position.  
-    @param[in] status  <b>Required</b> Measure of 'quality' of cluster - see CscClusterStatus for more info.  
-    @param[in] time  <b>Required</b>   
+    @param[in] positionAlongStrip  <b>Required</b> Used to calculate global position.
+    @param[in] status  <b>Required</b> Measure of 'quality' of cluster - see CscClusterStatus for more info.
+    @param[in] time  <b>Required</b>
     */
     CscClusterOnTrack(
         const CscPrepData* RIO,
-        const Trk::LocalParameters& locpos,
-        const Amg::MatrixX& locerr,
+        Trk::LocalParameters&& locpos,
+        Amg::MatrixX&& locerr,
         double positionAlongStrip,
         CscClusterStatus status,
         CscTimeStatus timeStatus=Muon::CscTimeStatusUndefined,
@@ -77,8 +77,8 @@ public:
     // Alternate constructor that doesn't dereference the RIO link.
     CscClusterOnTrack(
         const ElementLinkToIDC_CSC_Container& RIO,
-        const Trk::LocalParameters& locpos,
-        const Amg::MatrixX& locerr,
+        Trk::LocalParameters&& locpos,
+        Amg::MatrixX&& locerr,
         const Identifier& id,
         const MuonGM::CscReadoutElement*  detEL,
         double positionAlongStrip,
@@ -100,7 +100,7 @@ public:
     /** @brief Returns the detector element, associated with the PRD of this class*/
     virtual const MuonGM::CscReadoutElement* detectorElement() const override final;
 
-    /** @brief Returns the surface on which this measurement was taken. 
+    /** @brief Returns the surface on which this measurement was taken.
     (i.e. a surface of a detector element) */
     virtual const Trk::Surface& associatedSurface() const override final;
 
@@ -109,10 +109,10 @@ public:
 
     /** @brief Returns Csc time measurement status flag */
     CscTimeStatus timeStatus() const;
-  
+
     /** Return the time(ns)*/
     float time() const;
-    
+
     /** @brief Dumps information about the PRD*/
     virtual MsgStream&    dump( MsgStream&    stream) const override final;
 
@@ -120,7 +120,7 @@ public:
     virtual std::ostream& dump( std::ostream& stream) const override final;
 
 private:
-    /** this method is only used by the custom convertors. 
+    /** this method is only used by the custom convertors.
     @warning At the moment it only actually sets the CscPrepData, since that's all that's stored
     @todo Throw exception if TrkDetElementBase isn't correct concrete type*/
   virtual void setValues(const Trk::TrkDetElementBase*,
@@ -153,7 +153,7 @@ inline CscClusterOnTrack* CscClusterOnTrack::clone() const
 
 inline const CscPrepData* CscClusterOnTrack::prepRawData() const
 {
-    if (m_rio.isValid()) return m_rio.cachedElement(); 
+    if (m_rio.isValid()) return m_rio.cachedElement();
     //std::cout<<"CscClusterOnTrack::WARNING invalid PRD"<<std::endl;
     return 0;
 }

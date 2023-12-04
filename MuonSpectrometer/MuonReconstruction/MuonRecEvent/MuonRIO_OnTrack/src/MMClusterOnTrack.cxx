@@ -16,7 +16,7 @@ namespace Muon
                                      double positionAlongStrip,
                                      std::vector<float>&& stripDriftDists,
                                      std::vector<Amg::MatrixX>&& stripDriftDistErrors) :
-    MuonClusterOnTrack(locpos, locerr, RIO->identify(), positionAlongStrip),
+    MuonClusterOnTrack(std::move(locpos), std::move(locerr), RIO->identify(), positionAlongStrip),
     m_detEl( RIO->detectorElement() ),
     m_stripDriftDists(std::move(stripDriftDists)),
     m_stripDriftDistErrors(std::move(stripDriftDistErrors)) {
@@ -32,7 +32,7 @@ namespace Muon
                                      double positionAlongStrip,
                                      std::vector<float>&& stripDriftDists,
                                      std::vector<Amg::MatrixX>&& stripDriftDistErrors) :
-    MuonClusterOnTrack(locpos, locerr, id, positionAlongStrip),  // call base class constructor
+    MuonClusterOnTrack(std::move(locpos), std::move(locerr), id, positionAlongStrip),  // call base class constructor
     m_rio( RIO ),
     m_detEl( detEl ),
     m_stripDriftDists(stripDriftDists),
@@ -40,13 +40,13 @@ namespace Muon
   {
   }
 
-  
+
 
   MsgStream& MMClusterOnTrack::dump( MsgStream&    stream) const
   {
     stream << MSG::INFO<<"MMClusterOnTrack {"<<std::endl;
 
-    MuonClusterOnTrack::dump(stream); 
+    MuonClusterOnTrack::dump(stream);
 
     stream<<"}"<<endmsg;
     return stream;
@@ -56,7 +56,7 @@ namespace Muon
   {
     stream << "MMClusterOnTrack {"<<std::endl;
 
-    MuonClusterOnTrack::dump(stream); 
+    MuonClusterOnTrack::dump(stream);
 
     stream<<"}"<<std::endl;
     return stream;

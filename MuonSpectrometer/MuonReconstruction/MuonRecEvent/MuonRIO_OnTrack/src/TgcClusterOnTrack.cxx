@@ -31,10 +31,10 @@ TgcClusterOnTrack::TgcClusterOnTrack( const TgcClusterOnTrack& rot) = default;
 // Constructor with parameters
 TgcClusterOnTrack::TgcClusterOnTrack(
                      const TgcPrepData* RIO,
-                     const Trk::LocalParameters& locpos,
-                     const Amg::MatrixX& locerr,
+                     Trk::LocalParameters&& locpos,
+                     Amg::MatrixX&& locerr,
                      double positionAlongStrip) :
-  MuonClusterOnTrack(locpos, locerr, RIO->identify(), positionAlongStrip), //call base class constructor
+  MuonClusterOnTrack(std::move(locpos), std::move(locerr), RIO->identify(), positionAlongStrip), //call base class constructor
   m_detEl( RIO->detectorElement() )
 {
     //Set EL
@@ -44,12 +44,12 @@ TgcClusterOnTrack::TgcClusterOnTrack(
 
 TgcClusterOnTrack::TgcClusterOnTrack(
                      const ElementLinkToIDC_TGC_Container& RIO,
-                     const Trk::LocalParameters& locpos,
-                     const Amg::MatrixX& locerr,
+                     Trk::LocalParameters&& locpos,
+                     Amg::MatrixX&& locerr,
                      const Identifier& id,
                      const MuonGM::TgcReadoutElement* detEl,
                      double positionAlongStrip) :
-  MuonClusterOnTrack(locpos, locerr, id, positionAlongStrip), //call base class constructor
+  MuonClusterOnTrack(std::move(locpos), std::move(locerr), id, positionAlongStrip), //call base class constructor
   m_rio(RIO),
   m_detEl( detEl )
 {
@@ -77,7 +77,7 @@ MsgStream& TgcClusterOnTrack::dump( MsgStream&    stream) const
 {
     stream << MSG::INFO<<"TgcClusterOnTrack {"<<std::endl;
 
-    MuonClusterOnTrack::dump(stream); 
+    MuonClusterOnTrack::dump(stream);
 
     stream<<"}"<<endmsg;
     return stream;
@@ -87,7 +87,7 @@ std::ostream& TgcClusterOnTrack::dump( std::ostream&    stream) const
 {
     stream << "TgcClusterOnTrack {"<<std::endl;
 
-    MuonClusterOnTrack::dump(stream); 
+    MuonClusterOnTrack::dump(stream);
 
     stream<<"}"<<std::endl;
     return stream;

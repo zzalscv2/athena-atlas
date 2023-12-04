@@ -72,7 +72,7 @@ void compare (const Trk::RIO_OnTrack& p1,
   compare (static_cast<const Trk::MeasurementBase&>(p1),
            static_cast<const Trk::MeasurementBase&>(p2));
   assert (p1.identify() == p2.identify());
-  
+
 }
 
 
@@ -134,7 +134,7 @@ void test1 ATLAS_NOT_THREAD_SAFE (const MuonGM::MuonDetectorManager& muo_dd)
 
   Muon::RpcClusterOnTrack trans1 (rio,
                                   locpos,
-                                  cov,
+                                  std::move(cov),
                                   clusId,
                                   muo_dd.getRpcReadoutElement (clusId),
                                   2.5,

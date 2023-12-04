@@ -58,34 +58,14 @@ namespace InDet{
       /** Destructor */
       virtual ~SCT_ClusterOnTrack() = default;
 
-    /** Constructors with parameters :
-      RIO/PrepRawData pointer, LocalPosition, LocalErrorMatrix, idDE&
-      The base class owns local position, error matrix, this class owns global pos.
-      Everything else is owned elsewhere. */
-      SCT_ClusterOnTrack( const InDet::SCT_Cluster* RIO,
-                          const Trk::LocalParameters& locpars,
-                          const Amg::MatrixX& locerr,
-                          const IdentifierHash& idDE,
-                          bool isbroad=false);
-
+      /** Constructor with parameters*/
       SCT_ClusterOnTrack( const InDet::SCT_Cluster* RIO,
                           Trk::LocalParameters&& locpars,
                           Amg::MatrixX&& locerr,
                           const IdentifierHash& idDE,
                           bool isbroad=false);
 
-      /** Constructors with parameters :
-      RIO/PrepRawData pointer, LocalPosition, LocalErrorMatrix, idDE&,
-      Global Position
-      The base class owns local position, error matrix, this class owns global pos.
-      Everything else is owned elsewhere. */
-      SCT_ClusterOnTrack( const InDet::SCT_Cluster* RIO,
-                          const Trk::LocalParameters& locpars,
-                          const Amg::MatrixX& locerr,
-                          const IdentifierHash& idDE,
-                          const Amg::Vector3D& globalPosition,
-                          bool isbroad=false);
-
+      /** Constructor with parameters */
       SCT_ClusterOnTrack( const InDet::SCT_Cluster* RIO,
                           Trk::LocalParameters&& locpars,
                           Amg::MatrixX&& locerr,

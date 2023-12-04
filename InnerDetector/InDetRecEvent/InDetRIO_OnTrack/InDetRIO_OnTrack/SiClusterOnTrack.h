@@ -54,14 +54,9 @@ namespace InDet {
       virtual ~SiClusterOnTrack() = default;
 
       /** Constructors with parameters :
-      LocalParameters&/&&,
-      ErrorMatrix&/&&,
-      idDE& */
-      SiClusterOnTrack(const Trk::LocalParameters& locpos,
-                       const Amg::MatrixX& locerr,
-                       const IdentifierHash& idDE,
-                       const Identifier& id,
-                       bool isbroad=false);
+      LocalParameters,
+      ErrorMatrix,
+      idDE */
       SiClusterOnTrack(Trk::LocalParameters&& locpos,
                        Amg::MatrixX&& locerr,
                        const IdentifierHash& idDE,
@@ -69,17 +64,11 @@ namespace InDet {
                        bool isbroad=false);
 
       /** Constructors with parameters :
-      LocalParameters& / &&,
-      ErrorMatrix& /&&,
-      idDE&,
-      GlobalPosition&,
+      LocalParameters,
+      ErrorMatrix,
+      idDE,
+      GlobalPosition,
       */
-      SiClusterOnTrack( const Trk::LocalParameters& locpos,
-                        const Amg::MatrixX& locerr,
-                        const IdentifierHash& idDE,
-                        const Identifier& id,
-                        const Amg::Vector3D& globalPosition,
-                        bool isbroad=false);
       SiClusterOnTrack( Trk::LocalParameters&& locpos,
                         Amg::MatrixX&& locerr,
                         const IdentifierHash& idDE,

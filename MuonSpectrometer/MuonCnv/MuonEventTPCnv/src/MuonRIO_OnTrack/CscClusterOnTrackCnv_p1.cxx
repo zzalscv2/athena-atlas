@@ -18,13 +18,13 @@ persToTrans( const Muon::CscClusterOnTrack_p1 *persObj,
 	     Muon::CscClusterOnTrack *transObj, MsgStream &log )
 {
   ElementLinkToIDC_CSC_Container rio;
-  m_elCnv.persToTrans(&persObj->m_prdLink,&rio,log);  
+  m_elCnv.persToTrans(&persObj->m_prdLink,&rio,log);
 
   Amg::MatrixX locerr;
   locerr.setZero();
   *transObj = Muon::CscClusterOnTrack (rio,
                                        Trk::LocalParameters(), // locpos,
-                                       locerr,
+                                       std::move(locerr),
                                        Identifier(),
                                        nullptr, // detEL
                                        persObj->m_positionAlongStrip,
@@ -35,9 +35,9 @@ persToTrans( const Muon::CscClusterOnTrack_p1 *persObj,
 
 void CscClusterOnTrackCnv_p1::
 transToPers( const Muon::CscClusterOnTrack * /**transObj*/,
-	     Muon::CscClusterOnTrack_p1 * /**persObj*/, MsgStream & /**log*/ ) 
+	     Muon::CscClusterOnTrack_p1 * /**persObj*/, MsgStream & /**log*/ )
 {
-  throw std::runtime_error("CscClusterOnTrackCnv_p1::transToPers is deprecated!");    
+  throw std::runtime_error("CscClusterOnTrackCnv_p1::transToPers is deprecated!");
 }
 
 

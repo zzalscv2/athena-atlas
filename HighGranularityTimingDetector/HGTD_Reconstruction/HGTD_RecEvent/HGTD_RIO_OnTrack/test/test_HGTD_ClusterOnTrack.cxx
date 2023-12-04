@@ -63,7 +63,7 @@ HGTD_Cluster createCluster() {
       cov(i, j) = 100 * (i + 1) * (j + 1);
 
   HGTD_Cluster cluster(Identifier(1234), locpos, rdoList, width, nullptr,
-                       std::move(cov), dummy_toa, dummy_toa_res,
+                       cov, dummy_toa, dummy_toa_res,
                        dummy_tot);
 
   std::cout << "createCluster done\n";
@@ -80,7 +80,7 @@ createClusterOnTrackWithCluster(const HGTD_Cluster& cluster) {
     for (int j = 0; j < 2; j++)
       cov(i, j) = 100 * (i + 1) * (j + 1);
 
-  HGTD_ClusterOnTrack cot(&cluster, locpars, cov, dummy_toa,
+  HGTD_ClusterOnTrack cot(&cluster,locpars, std::move(cov), dummy_toa,
                           dummy_toa_res, IdentifierHash(1234));
 
   return cot;

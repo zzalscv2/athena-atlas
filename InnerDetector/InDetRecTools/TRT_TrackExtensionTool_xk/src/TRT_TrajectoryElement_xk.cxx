@@ -576,7 +576,7 @@ const Trk::RIO_OnTrack* InDet::TRT_TrajectoryElement_xk::rioOnTrack()
 ///////////////////////////////////////////////////////////////////
 
 std::unique_ptr<Trk::RIO_OnTrack>
-InDet::TRT_TrajectoryElement_xk::rioOnTrackSimple() const 
+InDet::TRT_TrajectoryElement_xk::rioOnTrackSimple() const
 {
   if(m_bestlink < 0 || m_status<=0) return nullptr;
 
@@ -586,9 +586,11 @@ InDet::TRT_TrajectoryElement_xk::rioOnTrackSimple() const
   Amg::MatrixX cov(1,1);
   cov(0,0) = 1.;
   if(m_status==2) {
-    return std::make_unique<InDet::TRT_DriftCircleOnTrack>(m_link[l].cluster(),Trk::LocalParameters(radius),cov,0,0.,dir,Trk::DECIDED);
+    return std::make_unique<InDet::TRT_DriftCircleOnTrack>(m_link[l].cluster(),Trk::LocalParameters(radius),
+                                                           std::move(cov),0,0.,dir,Trk::DECIDED);
   }
-  return  std::make_unique<InDet::TRT_DriftCircleOnTrack>(m_link[l].cluster(),Trk::LocalParameters(radius),cov,0,0.,dir,Trk::NODRIFTTIME);
+  return  std::make_unique<InDet::TRT_DriftCircleOnTrack>(m_link[l].cluster(),Trk::LocalParameters(radius),
+                                                          std::move(cov),0,0.,dir,Trk::NODRIFTTIME);
 }
 
 ///////////////////////////////////////////////////////////////////

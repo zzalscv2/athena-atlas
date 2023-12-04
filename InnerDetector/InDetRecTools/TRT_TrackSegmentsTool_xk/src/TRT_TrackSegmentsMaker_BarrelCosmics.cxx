@@ -3,7 +3,7 @@
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-//    TRT_TrackSegmentsMaker_BarrelCosmics.h, (c) ATLAS Detector software 
+//    TRT_TrackSegmentsMaker_BarrelCosmics.h, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 #include "TRT_TrackSegmentsTool_xk/TRT_TrackSegmentsMaker_BarrelCosmics.h"
@@ -22,7 +22,7 @@
 
 InDet::TRT_TrackSegmentsMaker_BarrelCosmics::TRT_TrackSegmentsMaker_BarrelCosmics
 (const std::string& t,const std::string& n,const IInterface* p)
-  : AthAlgTool(t,n,p), 
+  : AthAlgTool(t,n,p),
     m_TRTManagerName("TRT"),
     m_trtid(nullptr),
     m_maxTotalHits(21000), // corresponds to 20% occupancy
@@ -62,7 +62,7 @@ StatusCode InDet::TRT_TrackSegmentsMaker_BarrelCosmics::initialize() {
                 << " search bins: " << m_nBinsInX << ", " << m_nBinsInPhi);
 
   StatusCode sc = StatusCode::SUCCESS;
-  
+
   // Initialize ReadHandle
   ATH_CHECK(m_driftCirclesName.initialize());
   // TRT
@@ -203,7 +203,7 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::endEvent (InDet::ITRT_TrackSeg
 
   // elements of m_segments created by new have not been passed on
   if ( event_data.m_segmentDriftCirclesCount < event_data.m_segments.size() ) {
-    msg(MSG::WARNING) << "endEvent() you called the function t create the segments but not retrived them later??" << endmsg; 
+    msg(MSG::WARNING) << "endEvent() you called the function t create the segments but not retrived them later??" << endmsg;
     msg(MSG::WARNING) << "endEvent() deleting remaining elements of m_segments" << endmsg;
     for (unsigned int i=event_data.m_segmentDriftCirclesCount; i<event_data.m_segments.size(); i++) delete event_data.m_segments[i];
   }
@@ -211,7 +211,7 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::endEvent (InDet::ITRT_TrackSeg
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//   segment finding algorithm function: find, calls findSeed 
+//   segment finding algorithm function: find, calls findSeed
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::find(const EventContext &/*ctx*/,
@@ -239,8 +239,8 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::find(const EventContext &/*ctx
   int nIterations(15), countCalls(0);
   while (countCalls<150) {
 
-    double xRange(1000.), phiRange(M_PI_4); 
-    double par[] = {0., M_PI_2, 0., 0., 0., 0., 0., 0.}; 
+    double xRange(1000.), phiRange(M_PI_4);
+    double par[] = {0., M_PI_2, 0., 0., 0., 0., 0., 0.};
     int foundSeed(0);
 
     for (int i=0; i<nIterations; i++) {
@@ -249,35 +249,35 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::find(const EventContext &/*ctx
       foundSeed = findSeed( par[0]-xRange, par[0]+xRange, par[1]-phiRange, par[1]+phiRange, par, event_data);
       if ( !foundSeed ) break;
 
-      xRange /= 3.; 
-      phiRange /= 2.; 
-      if ( xRange < 0.01 || phiRange < 0.00001) break; 
+      xRange /= 3.;
+      phiRange /= 2.;
+      if ( xRange < 0.01 || phiRange < 0.00001) break;
     }
     if (!foundSeed) break;
-	
+
     if (m_magneticField) findSeedInverseR(par, event_data);
 
 // remove the hits associated with this region, save this region, search again
-    int countAssociatedHits[] = {0, 0}; 
+    int countAssociatedHits[] = {0, 0};
     double cosphi = std::cos( par[1] );
     double sinphi = std::sqrt( 1. - cosphi*cosphi );
 	double range = (m_magneticField) ? 10. : 2.; // BE CAREFULL ABOUT THIS RANGE, IT USED TO BE 2 BUT PERHAPS IT SHOULD BE INCREASED TO 10 in the case of magnetic field!
-	
-	
+
+
 	double measx[200], measy[200];
 	int countMeas(0);
-	
+
 	for (std::vector< Amg::Vector3D>::iterator it = event_data.m_listHitCenter.begin(); it!=event_data.m_listHitCenter.end(); ) {
 
-      double a = (par[3]-it->x())*sinphi+(it->y()-par[4])*cosphi; 
+      double a = (par[3]-it->x())*sinphi+(it->y()-par[4])*cosphi;
 	  double b = (m_magneticField) ? 0.5 * (std::pow(it->x()-par[3], 2.) + std::pow(it->y()-par[4], 2.) - std::pow(a, 2)) : 0.;
-	  if ( std::abs(a+par[2]*b) > range ) { ++it; continue; } 
-	  
+	  if ( std::abs(a+par[2]*b) > range ) { ++it; continue; }
+
 	  if (m_magneticField && countMeas<200) { measx[countMeas] = it->x(); measy[countMeas] = it->y(); countMeas++; }
-	  
+
       countAssociatedHits[(it->y()>0)?0:1]++;
       it = event_data.m_listHitCenter.erase( it );
-    } 
+    }
 
     if ( countAssociatedHits[0]+countAssociatedHits[1] < m_minHitsAboveTOT ) continue;
 
@@ -480,27 +480,27 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::findSeedInverseR(double *par,
 // 1/R = 0.002/mm corresponds to R = 0.5 m
 // circle search window: 200 mm (for R=1m, circle-to-line distance 0.5 m away from a common point is 130mm)
 
-// -> pivot at: x_pivot = meanTransformY * cosphi + parTransformX * sinphi; y_pivot = meanTransformY * sinphi - parTransformX * cosphi;		
-  double mean[] = { meanTransformY * cosphi + parTransformX * sinphi, meanTransformY * sinphi - parTransformX * cosphi };  
+// -> pivot at: x_pivot = meanTransformY * cosphi + parTransformX * sinphi; y_pivot = meanTransformY * sinphi - parTransformX * cosphi;
+  double mean[] = { meanTransformY * cosphi + parTransformX * sinphi, meanTransformY * sinphi - parTransformX * cosphi };
   int scanInverseR[101]; for (int & i : scanInverseR)  i = 0;
 
   double window = 10.; // parabola search window BE CAREFULL OF THIS RANGE!
 
   for (auto & it : event_data.m_listHitCenter) {
-  
-    double transformX = it.x() * sinphi - it.y() * cosphi; 
+
+    double transformX = it.x() * sinphi - it.y() * cosphi;
 	if ( std::abs(transformX-parTransformX) > 200. ) continue;  // search circles in a broad band
 
 	double a = (mean[0]-it.x())*sinphi+(it.y()-mean[1])*cosphi;  // TEST THAT THIS CONDITION ( if ( fabs(a) > 200. ) continue; ) IS THE SAME AS ABOVE!
 	double b = 0.5 * (std::pow(it.x()-mean[0], 2.) + std::pow(it.y()-mean[1], 2.) - std::pow(a, 2));
 
-    // estimated allowed range in radius: x_1,2 = ( +- window - a ) / b -> get integer as  ((int) (ceil(x/bin-0.5))) + 50 
+    // estimated allowed range in radius: x_1,2 = ( +- window - a ) / b -> get integer as  ((int) (ceil(x/bin-0.5))) + 50
 	b *= 0.00004; // multiply by the bin width
 
     int i1(0), i2(0);
     if (std::abs(b)>0.0000001) {
       double i1_tmp = ( window - a ) / b + 0.5;
-      double i2_tmp = ( -window - a ) / b + 0.5; 
+      double i2_tmp = ( -window - a ) / b + 0.5;
       if (std::abs(i1_tmp)<1000.) { i1 = (int) (std::ceil( i1_tmp )); i1 += 50; }
       if (std::abs(i2_tmp)<1000.) { i2 = (int) (std::ceil( i2_tmp )); i2 += 50; }
     }
@@ -508,33 +508,33 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::findSeedInverseR(double *par,
     if (i2>100) { i2 = 100; } else { if (i2<0) i2 = 0; }
     if (i1+i2==0 || i1+i2==200) continue; // out of search range
 	if (i1<=i2) { for (int i=i1; i<=i2; i++) scanInverseR[i]++; }
-	else { for (int i=i2; i<=i1; i++) scanInverseR[i]++; }	
+	else { for (int i=i2; i<=i1; i++) scanInverseR[i]++; }
   }
 
   int iMax(-1), hitsMax(0);
   for (int i=0; i<101; i++) if (scanInverseR[i]>hitsMax) { iMax = i; hitsMax = scanInverseR[i]; } // find max bin
-	  
+
   par[2] = 0.00004 * (iMax-50); // save estimated inverse radius
   for (int i=0; i<2; i++) par[3+i] = mean[i]; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //   convert list of TRT hits to "TrackSegment": convert()
-// 
+//
 //   the only TrackSegment constructor one can use for the purpose:
-// 
+//
 //   TrackSegment( const LocalParameters* locpars,  // LocalParameters(radius, z0, phi0, theta, QoverP) at Surface point "sf"
 //                 const ErrorMatrix* locerr,       // error matrix for above params
-//                 const Surface* sf,               // 
+//                 const Surface* sf,               //
 //                 DataVector<const MeasurementBase>* crots, // TRT_DriftCircleOnTrack : RIO_OnTrack : MeasurementBase
 //                 FitQuality* fqual,               // FitQuality(float chi2, short ndf)
 //                 Segment::Author author = Segment::AuthorUnknown
-//               ); 
+//               );
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::linearRegressionParabolaFit(double *mean, double *a) { // input: elsewhere calculated mean, output: result a
 
-  double A[6], discriminant; 
-  
+  double A[6], discriminant;
+
   A[0] = mean[8]*mean[8]-mean[4]*mean[9];                    // parabola fit
   A[1] = mean[1]*mean[9]-mean[4]*mean[8];
   A[2] = mean[4]*mean[4]-mean[1]*mean[8];
@@ -569,15 +569,15 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::convert(std::vector<const InDe
 
   if (hits.size()<5) { msg(MSG::ERROR) << "convert(): empty list of hits! size: " << hits.size() << endmsg; return; }
 
-  // sort the vector of hits 
+  // sort the vector of hits
   std::sort( hits.begin(), hits.end(), InDet::TRT_TrackSegmentsMaker_BarrelCosmics::sortHits );
 
   // remove hits from the opposite side
-  int countOppositeSide(0); 
-  for (std::vector<const InDet::TRT_DriftCircle *>::iterator it = hits.begin(); it != hits.end(); ) { 
+  int countOppositeSide(0);
+  for (std::vector<const InDet::TRT_DriftCircle *>::iterator it = hits.begin(); it != hits.end(); ) {
     int side = m_trtid->barrel_ec( (*it)->identify() );
     int previous = ( it == hits.begin() ) ? m_trtid->barrel_ec( (*(it+2))->identify() ) : m_trtid->barrel_ec( (*(it-1))->identify() );
-    int next = ( it == hits.end()-1 ) ? m_trtid->barrel_ec( (*(it-2))->identify() ) : m_trtid->barrel_ec( (*(it+1))->identify() ); 
+    int next = ( it == hits.end()-1 ) ? m_trtid->barrel_ec( (*(it-2))->identify() ) : m_trtid->barrel_ec( (*(it+1))->identify() );
     if ( previous==next && side*next==-1 ) { it = hits.erase( it ); countOppositeSide++; }
     else { ++it; }
   }
@@ -590,28 +590,28 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::convert(std::vector<const InDe
     return;
   }
 
-  // make the linear regression fit  
-  double mean[10]; for (double & i : mean) i = 0.; 
-  for (auto & hit : hits) {  
+  // make the linear regression fit
+  double mean[10]; for (double & i : mean) i = 0.;
+  for (auto & hit : hits) {
 
     mean[0] += (hit->detectorElement())->surface(hit->identify()).center().x();
-    mean[1] += (hit->detectorElement())->surface(hit->identify()).center().y();	
+    mean[1] += (hit->detectorElement())->surface(hit->identify()).center().y();
   }
   for (int i=0; i<2; i++) mean[i] /= (double) hits.size();
   int iPivot(-1); double yPivot(10000000.); // choose pivot closest to the mean
-  for (unsigned int i=0; i<hits.size(); i++) {  
+  for (unsigned int i=0; i<hits.size(); i++) {
     double x = (hits[i]->detectorElement())->surface(hits[i]->identify()).center().x() - mean[0];
 	double y = (hits[i]->detectorElement())->surface(hits[i]->identify()).center().y() - mean[1];
 	double x2 = x * x;
     double y2 = y * y;
     mean[2] += x * y;
-    mean[3] += x2;	
-    mean[4] += y2;	
+    mean[3] += x2;
+    mean[4] += y2;
     mean[5] += x2 * y;
     mean[6] += y2 * x;
     mean[7] += x2 * x;
-    mean[8] += y2 * y;	
-	mean[9] += y2 * y2; 	
+    mean[8] += y2 * y;
+	mean[9] += y2 * y2;
 	if (x2+y2<yPivot) { yPivot = x2+y2; iPivot = i; }
   }
 
@@ -629,8 +629,8 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::convert(std::vector<const InDe
 
   if (m_magneticField) { // fit parabola instead of line, add circle if neccessary
 
-    double A[6], discriminant, a[3]; 
-  
+    double A[6], discriminant, a[3];
+
     A[0] = mean[8]*mean[8]-mean[4]*mean[9];                    // parabola fit
     A[1] = mean[1]*mean[9]-mean[4]*mean[8];
     A[2] = mean[4]*mean[4]-mean[1]*mean[8];
@@ -644,7 +644,7 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::convert(std::vector<const InDe
     a[2] = A[2] * mean[0] + A[4] * mean[2] + A[5] * mean[6];
     discriminant *= -1.;
     for (double & i : a) { i /= discriminant; }
-	
+
     double Xparabola = a[0];
     double cotanParabola = a[1];
     double inverseSin3phi = 1. + a[1]*a[1]; inverseSin3phi *= std::sqrt(inverseSin3phi); // 1/sin^3phi
@@ -655,35 +655,35 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::convert(std::vector<const InDe
        msg(MSG::DEBUG) << "                                      parabola fit, cotan: " << cotanParabola << " compare to " << cotanPhi << endmsg;
        msg(MSG::DEBUG) << "                                      parabola fit, 1/R: " << inverseR << "/ mm " << endmsg;
     }
- 
-    qOverp = inverseR / 0.6;  // [1/MeV]; 1 / (eBRC) = 1 / (e 2T 3 100 M m/s mm) / R[mm] = (1/R[mm]) / 0.6 
+
+    qOverp = inverseR / 0.6;  // [1/MeV]; 1 / (eBRC) = 1 / (e 2T 3 100 M m/s mm) / R[mm] = (1/R[mm]) / 0.6
   }
 
-// errors from the fit: 
-// - for d: sigma_r / sqrt(N hits) -> sigma_d^2 =  
-// - for cotanPhi: sigma_r / (sqrt(N hits * <y^2>) * sinPhi) 
+// errors from the fit:
+// - for d: sigma_r / sqrt(N hits) -> sigma_d^2 =
+// - for cotanPhi: sigma_r / (sqrt(N hits * <y^2>) * sinPhi)
 // - for phi: 1 / (1 + cotanPhi^2) * DcotanPhi // note that this mthod gives a biased estimate for phi!
-    
+
   Amg::MatrixX cov(5,5);
 
-  double f33 = 4. / ( 3. * (1.+cotanPhi*cotanPhi) * mean[4] ); // see above, mean[4] = N hits * <y^2> 
-  cov<<    
+  double f33 = 4. / ( 3. * (1.+cotanPhi*cotanPhi) * mean[4] ); // see above, mean[4] = N hits * <y^2>
+  cov<<
     4.  ,    0.,   0.,     0.,  0.,
     0.  ,45633.,   0.,     0.,  0.,
     0.  ,    0.,  f33,     0.,  0.,
     0.  ,    0.,   0.,    0.2,  0.,
     0.  ,    0.,   0.,     0.,   1.;
 
-  Amg::Vector3D hepVec( mean[0], mean[1], 
+  Amg::Vector3D hepVec( mean[0], mean[1],
 			 (hits[iPivot]->detectorElement())->surface(hits[iPivot]->identify()).center().z() );
-  
+
 
   Amg::Transform3D htrans = Amg::Transform3D(Amg::Translation3D(hepVec)*Amg::RotationMatrix3D::Identity());
-  
-  
+
+
 
   Trk::StraightLineSurface *sur = new Trk::StraightLineSurface(htrans);
- 
+
   if (phi>0.) phi -= M_PI;
   if (phi<-M_PI || phi>0.) msg(MSG::ERROR) << "phi value problem: " << phi << endmsg;
 
@@ -693,13 +693,13 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::convert(std::vector<const InDe
 
   // calculate TrackParameters so that one can calculate input for TRT_DriftCircleOnTrack
   // Global direction of the track parameters
-  Amg::Vector3D dir(std::cos(phi), std::sin(phi), 0.); 
-  
+  Amg::Vector3D dir(std::cos(phi), std::sin(phi), 0.);
+
   auto rio = DataVector<const Trk::MeasurementBase>{};
 
   for (const auto *DC : hits) { // rewrite: InDet::TRT_DriftCircle -> InDet::TRT_DriftCircleOnTrack
-  // based on http://atlas-sw.cern.ch/cgi-bin/viewcvs-atlas.cgi/offline/InnerDetector/InDetRecTools/TRT_DriftCircleOnTrackTool/src/TRT_DriftCircleOnTrackNoDriftTimeTool.cxx?revision=1.11&view=markup  
-  
+  // based on http://atlas-sw.cern.ch/cgi-bin/viewcvs-atlas.cgi/offline/InnerDetector/InDetRecTools/TRT_DriftCircleOnTrackTool/src/TRT_DriftCircleOnTrackNoDriftTimeTool.cxx?revision=1.11&view=markup
+
     // Straw identification
     const InDetDD::TRT_BaseElement* pE = DC->detectorElement();
     if (!pE) {
@@ -708,14 +708,15 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::convert(std::vector<const InDe
     }
     Identifier iD = DC->identify();
     IdentifierHash iH = m_trtid->straw_layer_hash(m_trtid->layer_id(iD));
- 
+
     // TRT_DriftCircleOnTrack production
     Trk::DefinedParameter  radius(0.,Trk::locX);
-    Trk::LocalParameters lp(radius);  
-    Amg::MatrixX cov(1,1); cov<<1.33333; 
-    const InDet::TRT_DriftCircleOnTrack *element = new InDet::TRT_DriftCircleOnTrack(DC, lp, cov, iH, 1., dir, Trk::NODRIFTTIME);
+    Trk::LocalParameters lp(radius);
+    Amg::MatrixX cov(1,1); cov<<1.33333;
+    const InDet::TRT_DriftCircleOnTrack *element = new InDet::TRT_DriftCircleOnTrack(DC, std::move(lp), std::move(cov),
+                                                                                     iH, 1., dir, Trk::NODRIFTTIME);
 
-    rio.push_back( dynamic_cast<const Trk::MeasurementBase *>(element) ); 
+    rio.push_back( dynamic_cast<const Trk::MeasurementBase *>(element) );
   } // end fill rio
 
   // add pseudo measurement - follow up https://savannah.cern.ch/bugs/?41079
@@ -730,19 +731,19 @@ if (1) { // limit the scope of all these variables
     1.  ,   0.,
     0.  , .001;
 
-  const Trk::Surface &surf =  (hits[hits.size()-1]->detectorElement())->surface(hits[hits.size()-1]->identify()); 
+  const Trk::Surface &surf =  (hits[hits.size()-1]->detectorElement())->surface(hits[hits.size()-1]->identify());
 
   Amg::RotationMatrix3D linerot=surf.transform().rotation();
   Amg::Vector3D         firstcenter=surf.center();
   Amg::Vector3D         faketransl(firstcenter.x(),firstcenter.y()-5.,firstcenter.z());
   Amg::Transform3D     faketransf = Amg::Transform3D(linerot* Amg::Translation3D(faketransl));
-  Trk::StraightLineSurface *pseudoSurface = new Trk::StraightLineSurface( faketransf, 99999., 99999. );  
+  Trk::StraightLineSurface *pseudoSurface = new Trk::StraightLineSurface( faketransf, 99999., 99999. );
 
   Trk::PseudoMeasurementOnTrack *pseudo = new Trk::PseudoMeasurementOnTrack( pseudoPar, pseudocov, *pseudoSurface );
   rio.push_back( pseudo );
   delete pseudoSurface;
 }
- 
+
   double chi2 = mean[3] - 2.*cotanPhi*mean[2] + mean[4]*cotanPhi*cotanPhi;
   chi2 /= ( 1. + cotanPhi*cotanPhi );
   int ndf = (int) hits.size() - 2;
@@ -755,12 +756,12 @@ if (1) { // limit the scope of all these variables
   //add segment to list of segments
   ATH_MSG_DEBUG( "Add " << event_data.m_segments.size() << "th segment to list" );
   event_data.m_segments.push_back(segment);
-} 
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// 
+//
 //   DEBUG FUNCTIONS
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::segFit(double *measx, double *measy, int nhits, double *residuals, double *result ) {
@@ -784,12 +785,12 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::segFit(double *measx, double *
     mean[5] += x2 * measy[i];
     mean[6] += y2 * measx[i];
     mean[7] += x2 * measx[i];
-    mean[8] += y2 * measy[i];	
-	mean[9] += y2 * y2; 
-  }  
-  for (double & i : mean)  i /= (double) nhits; 
+    mean[8] += y2 * measy[i];
+	mean[9] += y2 * y2;
+  }
+  for (double & i : mean)  i /= (double) nhits;
 
-  double A[6], discriminant, a[3]; 
+  double A[6], discriminant, a[3];
 
   A[0] = mean[8]*mean[8]-mean[4]*mean[9];                    // parabola fit, no need for mean[3], [5], [7], se mi zdi
   A[1] = mean[1]*mean[9]-mean[4]*mean[8];
@@ -803,12 +804,12 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::segFit(double *measx, double *
   a[1] = A[1] * mean[0] + A[3] * mean[2] + A[4] * mean[6];
   a[2] = A[2] * mean[0] + A[4] * mean[2] + A[5] * mean[6];
   discriminant *= -1.;
-  for (double & i : a) i /= discriminant; 
+  for (double & i : a) i /= discriminant;
   double Xparabola = a[0];
   double cotanParabola = a[1];
   double inverseSin3phi = 1. + a[1]*a[1]; inverseSin3phi *= std::sqrt(inverseSin3phi); // 1/sin^3phi
   double inverseR = 2. * a[2] / inverseSin3phi;
-  double sinphi = std::sqrt(1./(1+a[1]*a[1])); 
+  double sinphi = std::sqrt(1./(1+a[1]*a[1]));
   double cosphi = std::sqrt(1.-sinphi*sinphi); if (cotanParabola<0.) cosphi *= -1.;
 
   if (result) {
@@ -817,24 +818,24 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::segFit(double *measx, double *
     result[3] = cotanParabola;
 	result[4] = inverseR;
   }
-  
+
   if (residuals) {
-    for (int i=0; i<nhits; i++) {    
+    for (int i=0; i<nhits; i++) {
 	  double tmp = (Xparabola-measx[i])*sinphi+measy[i]*cosphi;
-      double res = (tmp+0.5*inverseR*(std::pow(measx[i]-Xparabola, 2.) + std::pow(measy[i], 2.) - std::pow(tmp, 2))); 
+      double res = (tmp+0.5*inverseR*(std::pow(measx[i]-Xparabola, 2.) + std::pow(measy[i], 2.) - std::pow(tmp, 2)));
       residuals[i] = res;
     }
   }
 
   for (int i=0; i<nhits; i++) { measx[i] += shift[0]; measy[i] += shift[1]; }
-  
+
   }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// 
+//
 //   DEBUG cpu consumption: old find method
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -857,7 +858,7 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::findOld(TRT_TrackSegmentsMaker
   while (countCalls<150) {
 
     double xRange(1000.), phiRange(M_PI_4);
-    double par[] = {0., M_PI_2}; 
+    double par[] = {0., M_PI_2};
     int foundSeed(0);
 
     for (int i=0; i<nIterations; i++) {
@@ -866,24 +867,24 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::findOld(TRT_TrackSegmentsMaker
       foundSeed = findSeed( par[0]-xRange, par[0]+xRange, par[1]-phiRange, par[1]+phiRange, par, event_data);
       if ( !foundSeed ) break;
 
-      xRange /= 3.; 
-      phiRange /= 2.; 
+      xRange /= 3.;
+      phiRange /= 2.;
       if ( xRange < 0.01 || phiRange < 0.00001) break;
 
     }
     if (!foundSeed) break;
 
 // remove the hits associated with this region, save this region, search again
-    int countAssociatedHits[] = {0, 0}; 
+    int countAssociatedHits[] = {0, 0};
     double cosphi = std::cos(par[1]);
 	double sinphi = std::sqrt(1.-cosphi*cosphi);
-	
+
 	for (std::vector< Amg::Vector3D >::iterator it = event_data.m_listHitCenter.begin(); it!=event_data.m_listHitCenter.end(); ) {
 
       if ( std::abs( (par[0]-it->x())*sinphi + it->y()*cosphi ) > 2. ) { ++it; continue; }
       countAssociatedHits[(it->y()>0)?0:1]++;
       it = event_data.m_listHitCenter.erase( it );
-    } 
+    }
 
     if ( countAssociatedHits[0]+countAssociatedHits[1] < m_minHitsAboveTOT ) continue;
 

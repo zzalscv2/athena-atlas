@@ -74,7 +74,7 @@ void compare (const Trk::RIO_OnTrack& p1,
   compare (static_cast<const Trk::MeasurementBase&>(p1),
            static_cast<const Trk::MeasurementBase&>(p2));
   assert (p1.identify() == p2.identify());
-  
+
 }
 
 
@@ -143,8 +143,8 @@ void test1 ATLAS_NOT_THREAD_SAFE (const MuonGM::MuonDetectorManager& muo_dd)
   Identifier clusId = muo_dd.mdtIdHelper()->channelID (0, 1, 2, 1, 1, 1);
 
   Muon::MdtDriftCircleOnTrack trans1 (rio,
-                                      locpos,
-                                      cov,
+                                      std::move(locpos),
+                                      std::move(cov),
                                       clusId,
                                       muo_dd.getMdtReadoutElement (clusId),
                                       2.5,

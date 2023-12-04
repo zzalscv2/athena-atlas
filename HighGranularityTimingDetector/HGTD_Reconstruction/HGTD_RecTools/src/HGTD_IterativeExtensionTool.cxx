@@ -228,7 +228,7 @@ HGTD_IterativeExtensionTool::getCompatibleSurfaces(
   std::vector<const Trk::Surface*> surfaces;
 
   // point of extrapolation as global position
-  Amg::Vector3D position = param.position();
+  const Amg::Vector3D& position = param.position();
   // get the surface at the point of extrapolation
   const auto* surface_arr = layer->surfaceArray(); // these are the modules
   if (!surface_arr) {
@@ -393,14 +393,14 @@ HGTD_IterativeExtensionTool::updateState(const Trk::Track* track, const Trk::Tra
   std::unique_ptr<HGTD_ClusterOnTrack> cot =
       std::make_unique<HGTD_ClusterOnTrack>(
           cluster, Trk::LocalParameters(cluster->localPosition()),
-          cluster->localCovariance(), corr_time_and_res.first,
+          Amg::MatrixX(cluster->localCovariance()), corr_time_and_res.first,
           corr_time_and_res.second, det_el->identifyHash());
 
   Trk::FitQualityOnSurface* quality = nullptr;
 
   std::unique_ptr<Trk::TrackParameters> pars = m_updator->addToState(
       *param, cot->localParameters(), cot->localCovariance(), quality);
-  //Here one could  fix the addToState intefaces to 
+  //Here one could  fix the addToState intefaces to
   //avoid them allocating memory for  Fit Quality On Surface
   auto uniqueQuality= std::unique_ptr<Trk::FitQualityOnSurface>(quality);
   auto QoS = uniqueQuality? *uniqueQuality : Trk::FitQualityOnSurface{};
@@ -430,7 +430,7 @@ HGTD_IterativeExtensionTool::getTruthMatchedCluster(
                   ids.push_back(surf->associatedDetectorElementIdentifier());
                 });
 
-  for (const auto collection : *container) {
+  for (const auto *const collection : *container) {
     // if the ID corresponding to this collection is not in the list, skip
 
     if (std::find(ids.begin(), ids.end(), collection->identify()) ==

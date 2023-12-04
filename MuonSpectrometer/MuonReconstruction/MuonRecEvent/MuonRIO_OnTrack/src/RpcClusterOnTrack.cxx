@@ -34,12 +34,12 @@ RpcClusterOnTrack::RpcClusterOnTrack( const RpcClusterOnTrack& rot) = default;
 // Constructor with parameters
 RpcClusterOnTrack::RpcClusterOnTrack(
                      const RpcPrepData* RIO,
-                     const Trk::LocalParameters& locpos,
-                     const Amg::MatrixX& locerr,
+                     Trk::LocalParameters&& locpos,
+                     Amg::MatrixX&& locerr,
                      double positionAlongStrip,
-                     float time) 
+                     float time)
     :
-    MuonClusterOnTrack(locpos, locerr, RIO->identify(), positionAlongStrip ), //call base class constructor
+    MuonClusterOnTrack(std::move(locpos), std::move(locerr), RIO->identify(), positionAlongStrip ), //call base class constructor
     m_detEl( RIO->detectorElement() ),
     m_time(time)
 {
@@ -51,14 +51,14 @@ RpcClusterOnTrack::RpcClusterOnTrack(
 
 RpcClusterOnTrack::RpcClusterOnTrack(
                      const ElementLinkToIDC_RPC_Container& RIO,
-                     const Trk::LocalParameters& locpos,
-                     const Amg::MatrixX& locerr,
+                     Trk::LocalParameters&& locpos,
+                     Amg::MatrixX&& locerr,
                      const Identifier& id,
                      const MuonGM::RpcReadoutElement* detEl,
                      double positionAlongStrip,
-                     float time) 
+                     float time)
     :
-    MuonClusterOnTrack(locpos, locerr, id, positionAlongStrip ), //call base class constructor
+    MuonClusterOnTrack(std::move(locpos), std::move(locerr), id, positionAlongStrip ), //call base class constructor
     m_rio (RIO),
     m_detEl( detEl ),
     m_time(time)
@@ -88,7 +88,7 @@ MsgStream& RpcClusterOnTrack::dump( MsgStream&    stream) const
 {
   stream << MSG::INFO<<"RpcClusterOnTrack {"<<std::endl;
   stream <<"Time: "<<m_time<<std::endl;
-  MuonClusterOnTrack::dump(stream); 
+  MuonClusterOnTrack::dump(stream);
 
   stream<<"}"<<endmsg;
   return stream;
@@ -99,7 +99,7 @@ std::ostream& RpcClusterOnTrack::dump( std::ostream&    stream) const
   stream << "RpcClusterOnTrack {"<<std::endl;
   stream <<"Time: "<<m_time<<std::endl;
 
-  MuonClusterOnTrack::dump(stream); 
+  MuonClusterOnTrack::dump(stream);
 
   stream<<"}"<<std::endl;
   return stream;

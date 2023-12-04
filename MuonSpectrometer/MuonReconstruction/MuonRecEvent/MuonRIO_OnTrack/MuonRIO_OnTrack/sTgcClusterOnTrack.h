@@ -17,7 +17,7 @@ using ElementLinkToIDC_STGC_Container = ElementLink<Muon::sTgcPrepDataContainer>
 class STGC_ClusterOnTrackCnv_p1;
 
 
-namespace Trk 
+namespace Trk
 {
   class ITrkEventCnvTool;
 }
@@ -43,20 +43,20 @@ namespace Muon
 	@param[in] RIO <b>Required</b> (i.e. must not be NULL). Ownership is not taken.
 	@param[in] locpos <b>Required</b> (i.e. must not be NULL). Ownership is taken.
 	@param[in] locerr <b>Required</b> (i.e. must not be NULL). Ownership is taken.
-	@param[in] positionAlongStrip  <b>Required</b> Used to calculate global position.  
+	@param[in] positionAlongStrip  <b>Required</b> Used to calculate global position.
     */
     sTgcClusterOnTrack(
 		       const sTgcPrepData* RIO,
-		       const Trk::LocalParameters& locpos,
-		       const Amg::MatrixX& locerr, 
+		       Trk::LocalParameters&& locpos,
+		       Amg::MatrixX&& locerr,
 		       double positionAlongStrip
 		       );
 
     // Alternate constructor that doesn't dereference the RIO link.
     sTgcClusterOnTrack(
                      const ElementLinkToIDC_STGC_Container& RIO,
-                     const Trk::LocalParameters& locpos,
-                     const Amg::MatrixX& locerr,
+                     Trk::LocalParameters&& locpos,
+                     Amg::MatrixX&& locerr,
                      const Identifier& id,
                      const MuonGM::sTgcReadoutElement* detEl,
                      double positionAlongStrip);
@@ -74,7 +74,7 @@ namespace Muon
     /** @brief Returns the detector element, assoicated with the PRD of this class*/
     virtual const MuonGM::sTgcReadoutElement* detectorElement() const override final;
 
-    /** @brief Returns the surface on which this measurement was taken. 
+    /** @brief Returns the surface on which this measurement was taken.
 	(i.e. a surface of a detector element) */
     virtual const Trk::Surface& associatedSurface() const override final;
 
@@ -83,7 +83,7 @@ namespace Muon
 
     /** @brief Dumps information about the PRD*/
     virtual std::ostream& dump( std::ostream& stream) const override final;
-    
+
   private:
     /**@brief Sets the DetElement and Trk::PrepRawData pointers after reading from disk.
        @warning Only intended for use by persistency convertors.
@@ -111,7 +111,7 @@ namespace Muon
 
   inline const sTgcPrepData* sTgcClusterOnTrack::prepRawData() const
   {
-    if (m_rio.isValid()) return m_rio.cachedElement(); 
+    if (m_rio.isValid()) return m_rio.cachedElement();
     else return 0;
   }
 

@@ -256,7 +256,7 @@ namespace ActsTrk
         ATH_MSG_DEBUG("create InDet::PixelClusterOnTrack without correction");
         return std::make_unique<InDet::PixelClusterOnTrack>(pix,
                                                             Trk::LocalParameters(pix->localPosition()),
-                                                            pix->localCovariance(),
+                                                            Amg::MatrixX(pix->localCovariance()),
                                                             element->identifyHash(),
                                                             pix->globalPosition(),
                                                             pix->gangedPixel(),
@@ -286,7 +286,7 @@ namespace ActsTrk
         ATH_MSG_DEBUG("create InDet::SCT_ClusterOnTrack without correction");
         return std::make_unique<InDet::SCT_ClusterOnTrack>(sct,
                                                            Trk::LocalParameters(sct->localPosition()),
-                                                           sct->localCovariance(),
+                                                           Amg::MatrixX(sct->localCovariance()),
                                                            element->identifyHash(),
                                                            sct->globalPosition(),
                                                            false);

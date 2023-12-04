@@ -50,7 +50,7 @@ SinglePadClusterTool::clusterize(const HGTD_RDO_Collection& rdo_coll,
   InDetDD::HGTD_DetectorElement* element =
       m_hgtd_det_mgr->getDetectorElement(identifier);
 
-  for (const auto rdo : rdo_coll) {
+  for (const auto *const rdo : rdo_coll) {
 
     Identifier rdo_id = rdo->identify();
     ATH_MSG_DEBUG("Using RDO: " << rdo_id);

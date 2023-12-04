@@ -17,10 +17,10 @@
 
 void MdtDriftCircleOnTrackCnv_p2::
 persToTrans( const Muon::MdtDriftCircleOnTrack_p2 *persObj,
-	     Muon::MdtDriftCircleOnTrack *transObj, MsgStream &log ) 
+	     Muon::MdtDriftCircleOnTrack *transObj, MsgStream &log )
 {
   ElementLinkToIDC_MDT_Container rio;
-  m_elCnv.persToTrans(&persObj->m_prdLink,&rio,log);  
+  m_elCnv.persToTrans(&persObj->m_prdLink,&rio,log);
 
   Trk::LocalParameters localParams;
   fillTransFromPStore( &m_localParCnv, persObj->m_localParams, &localParams, log );
@@ -33,8 +33,8 @@ persToTrans( const Muon::MdtDriftCircleOnTrack_p2 *persObj,
 
 
   *transObj = Muon::MdtDriftCircleOnTrack (rio,
-                                           localParams,
-                                           localCovariance,
+                                           std::move(localParams),
+                                           std::move(localCovariance),
                                            Identifier(persObj->m_id),
                                            nullptr, // detEl,
                                            persObj->m_driftTime,
@@ -49,21 +49,21 @@ persToTrans( const Muon::MdtDriftCircleOnTrack_p2 *persObj,
 
 void MdtDriftCircleOnTrackCnv_p2::
 transToPers( const Muon::MdtDriftCircleOnTrack    *transObj,
-	     Muon::MdtDriftCircleOnTrack_p2 *persObj, MsgStream &log) 
+	     Muon::MdtDriftCircleOnTrack_p2 *persObj, MsgStream &log)
 {
   // Prepare ELs
   Trk::IEventCnvSuperTool::ELKey_t key;
   Trk::IEventCnvSuperTool::ELIndex_t index;
   m_eventCnvTool->prepareRIO_OnTrackLink(transObj, key, index);
   ElementLinkToIDC_MDT_Container eltmp (key, index);
-  m_elCnv.transToPers(&eltmp, &persObj->m_prdLink,log);  
-  
+  m_elCnv.transToPers(&eltmp, &persObj->m_prdLink,log);
+
   persObj->m_id = transObj->identify().get_identifier32().get_compact();
   persObj->m_localParams = toPersistent( &m_localParCnv, &transObj->localParameters(), log );
   Trk::ErrorMatrix pMat;
   EigenHelpers::eigenMatrixToVector(pMat.values, transObj->localCovariance(), "MdtDriftCircleOnTrackCnv_p2");
   persObj->m_localErrMat = toPersistent( &m_errorMxCnv, &pMat, log );
-  
+
 
   persObj->m_status    = static_cast<unsigned int>( transObj->status() );
   persObj->m_localAngle            = transObj->localAngle() ;

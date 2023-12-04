@@ -115,7 +115,7 @@ make_csccluster (const MuonGM::MuonDetectorManager& muo_dd)
 
   return new Muon::CscClusterOnTrack (rio,
                                       locpos,
-                                      cov,
+                                      std::move(cov),
                                       clusId,
                                       muo_dd.getCscReadoutElement (clusId),
                                       2.5,
@@ -142,7 +142,7 @@ make_rpccluster (const MuonGM::MuonDetectorManager& muo_dd)
 
   return new Muon::RpcClusterOnTrack (rio,
                                       locpos,
-                                      cov,
+                                      std::move(cov),
                                       clusId,
                                       muo_dd.getRpcReadoutElement (clusId),
                                       2.5,

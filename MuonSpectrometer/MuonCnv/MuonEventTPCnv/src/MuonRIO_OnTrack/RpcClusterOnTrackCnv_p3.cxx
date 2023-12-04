@@ -26,11 +26,11 @@ persToTrans( const Muon::RpcClusterOnTrack_p3 *persObj,
   EigenHelpers::vectorToEigenMatrix(dummy.values, localCovariance, "RpcClusterOnTrackCnv_p3");
 
   ElementLinkToIDC_RPC_Container rio;
-  m_elCnv.persToTrans(&persObj->m_prdLink,&rio,log);  
+  m_elCnv.persToTrans(&persObj->m_prdLink,&rio,log);
 
   *transObj = Muon::RpcClusterOnTrack (rio,
-                                       localParams,
-                                       localCovariance,
+                                       std::move(localParams),
+                                       std::move(localCovariance),
                                        Identifier(persObj->m_id),
                                        nullptr, // detEL
                                        persObj->m_positionAlongStrip,
@@ -39,23 +39,23 @@ persToTrans( const Muon::RpcClusterOnTrack_p3 *persObj,
 
    // Attempt to call supertool to fill in detElements
    m_eventCnvTool->recreateRIO_OnTrack(transObj);
-   if (transObj->detectorElement()==nullptr) 
+   if (transObj->detectorElement()==nullptr)
         log << MSG::WARNING<<"Unable to reset DetEl for this RIO_OnTrack, "
             << "probably because of a problem with the Identifier/IdentifierHash : ("
-            << transObj->identify()<<"/"<<transObj->idDE()<<endmsg;   
+            << transObj->identify()<<"/"<<transObj->idDE()<<endmsg;
 }
 
 
 void RpcClusterOnTrackCnv_p3::
 transToPers( const Muon::RpcClusterOnTrack *transObj,
-	     Muon::RpcClusterOnTrack_p3 *persObj, MsgStream &log ) 
+	     Muon::RpcClusterOnTrack_p3 *persObj, MsgStream &log )
 {
   // Prepare ELs
    Trk::IEventCnvSuperTool::ELKey_t key;
    Trk::IEventCnvSuperTool::ELIndex_t index;
    m_eventCnvTool->prepareRIO_OnTrackLink(transObj, key, index);
    ElementLinkToIDC_RPC_Container eltmp (key, index);
-  
+
    m_elCnv.transToPers(&eltmp,&persObj->m_prdLink,log);
    persObj->m_positionAlongStrip = transObj->positionAlongStrip();
    persObj->m_time = transObj->time();

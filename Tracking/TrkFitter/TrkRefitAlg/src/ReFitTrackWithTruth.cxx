@@ -34,7 +34,7 @@
 // Constructor with parameters:
 Trk::ReFitTrackWithTruth::ReFitTrackWithTruth(const std::string &name, ISvcLocator *pSvcLocator) :
   AthAlgorithm(name,pSvcLocator)
-{  
+{
 
 }
 
@@ -47,7 +47,7 @@ StatusCode Trk::ReFitTrackWithTruth::initialize()
   ATH_CHECK (m_SDOContainerName.initialize());
   ATH_CHECK (m_truthMapName.initialize());
 
-  // get tracks 
+  // get tracks
   ATH_CHECK( m_inputTrackColName.initialize() );
 
   if (m_ITrackFitter.retrieve().isFailure()) {
@@ -69,8 +69,8 @@ StatusCode Trk::ReFitTrackWithTruth::initialize()
     ATH_MSG_FATAL ("Failed to retrieve tool " << m_assoTool);
     return StatusCode::FAILURE;
   } else ATH_MSG_INFO("Retrieved tool " << m_assoTool);
-  
-  
+
+
   // Configuration of the material effects
   m_ParticleHypothesis = Trk::ParticleSwitcher::particle[m_matEffects];
 
@@ -94,11 +94,11 @@ StatusCode Trk::ReFitTrackWithTruth::initialize()
   if( m_errorZ.size() < 4 ) { m_errorZ={1.,1.,1.,1.}; }
 
   ATH_MSG_INFO (" Resolutions " << m_resolutionRPhi.size() << " " << m_resolutionZ.size());
-  for( unsigned int i=0; i<m_resolutionRPhi.size(); i++) { 
+  for( unsigned int i=0; i<m_resolutionRPhi.size(); i++) {
     ATH_MSG_INFO (" " << i << " " << m_resolutionRPhi[i] << "\t" << m_resolutionZ[i]);
   }
   ATH_MSG_INFO (" Error SR " << m_errorRPhi.size() << " " << m_errorZ.size());
-  for( unsigned int i=0; i<m_errorRPhi.size(); i++) { 
+  for( unsigned int i=0; i<m_errorRPhi.size(); i++) {
     ATH_MSG_INFO (" " << i << " " << m_errorRPhi[i] << "\t" << m_errorZ[i]);
   }
 
@@ -109,7 +109,7 @@ StatusCode Trk::ReFitTrackWithTruth::initialize()
 }
 
 // Execute method:
-StatusCode Trk::ReFitTrackWithTruth::execute() 
+StatusCode Trk::ReFitTrackWithTruth::execute()
 {
   ATH_MSG_DEBUG ("ReFitTrackWithTruth::execute()");
   std::unique_ptr<Trk::PRDtoTrackMap> prd_to_track_map(m_assoTool->createPRDtoTrackMap());
@@ -118,9 +118,9 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
   SG::ReadHandle<TrackCollection> tracks(m_inputTrackColName, ctx);
   if (!tracks.isValid()) {
     ATH_MSG_ERROR(m_inputTrackColName.key() << " not found");
-    return StatusCode::FAILURE; 
+    return StatusCode::FAILURE;
   }
-  
+
   //retrieve truth information needed (SiHitCollection)
   SG::ReadHandle<SiHitCollection> siHits(m_siHitCollectionName, ctx);
   if (!siHits.isValid()) {
@@ -135,7 +135,7 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
     return StatusCode::FAILURE;
   }
 
-  //retrieve truth map 
+  //retrieve truth map
   SG::ReadHandle<TrackTruthCollection> truthMap(m_truthMapName, ctx);
   if (!truthMap.isValid()) {
     ATH_MSG_WARNING( "Error retrieving truth map " << m_truthMapName );
@@ -157,9 +157,9 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
     double otheta(0);
     double oqOverP(0);
     if (!origPerigee){
-      ATH_MSG_WARNING("Cannot get original parameters"); 
+      ATH_MSG_WARNING("Cannot get original parameters");
     }
-    else if (msgLvl(MSG::DEBUG)) { 
+    else if (msgLvl(MSG::DEBUG)) {
       od0 = origPerigee->parameters()[Trk::d0];
       oz0 = origPerigee->parameters()[Trk::z0];
       ophi0 = origPerigee->parameters()[Trk::phi0];
@@ -194,26 +194,26 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
 
       // Get measurement as RIO_OnTrack
       const Trk::RIO_OnTrack* rio = dynamic_cast <const Trk::RIO_OnTrack*>( measurement );
-      if (rio == nullptr) { 
+      if (rio == nullptr) {
         ATH_MSG_WARNING("Cannot get RIO_OnTrack from measurement. Hit will NOT be included in track fit.");
-        continue; 
+        continue;
       }
 
       // if not a pixel cluster, keep the measurement as is and press on
       const Identifier& surfaceID = (rio->identify()) ;
       if( !m_idHelper->is_pixel(surfaceID) ) {
-        measurementSet.push_back( measurement ); 
+        measurementSet.push_back( measurement );
         continue;
       }
 
       // only PIXEL CLUSTERS from here on
       const InDet::PixelCluster* pix = dynamic_cast<const InDet::PixelCluster*>(rio->prepRawData());
-      if (pix == nullptr) { 
+      if (pix == nullptr) {
         ATH_MSG_WARNING("Cannot get PixelCluster from RIO_OnTrack");
-        continue; 
+        continue;
       }
 
-      const InDetDD::SiDetectorElement* element = pix->detectorElement(); 
+      const InDetDD::SiDetectorElement* element = pix->detectorElement();
       const InDetDD::SiDetectorDesign* design = static_cast<const InDetDD::SiDetectorDesign*>(&element->design());
       // To locate cluster module
       Identifier clusterId = pix->identify();
@@ -235,9 +235,9 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
 
       if ( !hasSDOMatch ) {
         ATH_MSG_DEBUG ("No SDO matching cluster");
-        // save wrong hits 
+        // save wrong hits
         if (not m_saveWrongHits) continue;
-        const std::vector<SiHit> matchedSiHits = matchSiHitsToCluster( -999 , pix, siHits );  
+        const std::vector<SiHit> matchedSiHits = matchSiHitsToCluster( -999 , pix, siHits );
         if( matchedSiHits.empty() ) {  // then noise, and go to next hit
           if( !m_rejNoiseHits ) { measurementSet.push_back( measurement ); }
           continue;
@@ -250,19 +250,19 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
             }
           }
         } else { // save the wrong hit as is and go to next cluster
-          measurementSet.push_back( measurement ); 
+          measurementSet.push_back( measurement );
           continue;
-        } 
+        }
       } else { // hasSDOMatch
         // Get All SiHits truth matched to the reconstruction cluster for the particle associated with the track
         const std::vector<SiHit> matchedSiHits = matchSiHitsToCluster( uniqueIdToMatch, pix, siHits );
         if( matchedSiHits.empty() ) {
           ATH_MSG_WARNING ("No SiHit matching cluster");
           continue;  // should NOT HAPPEN for pseudotracks
-        } 
+        }
         ATH_MSG_DEBUG ("N SiHit matching cluster: " << matchedSiHits.size());
 
-        // If multiple SiHits / cluster FOR THE SAME TRUTH PARTICLE, 
+        // If multiple SiHits / cluster FOR THE SAME TRUTH PARTICLE,
         // Take position of SiHit giving the most energy
         for( const auto& siHit : matchedSiHits ) {
           if (siHit.energyLoss() > maxEnergyDeposit) {
@@ -285,7 +285,7 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
       HepGeom::Point3D<double> smearedPosition = smearTruthPosition( averagePosition, bec, layer_disk, design );
       ATH_MSG_DEBUG (" Smeared position : " << smearedPosition );
 
-      auto locparOrig = rio->localParameters(); 
+      auto locparOrig = rio->localParameters();
       ATH_MSG_DEBUG(" Original locpar " << locparOrig);
 
       Trk::LocalParameters locpar = element->hitLocalToLocal(smearedPosition.z(), smearedPosition.y()); // eta, phi
@@ -300,15 +300,15 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
       // only need to check width to test against 0...
       // disk one is layer 0
       if(bec!=0) layer_disk++;
-      if(pixWidth.phiR()>0) { 
+      if(pixWidth.phiR()>0) {
         float error(1.0);
-        error = getPhiPosResolution(layer_disk)*getPhiPosErrorFactor(layer_disk); 
+        error = getPhiPosResolution(layer_disk)*getPhiPosErrorFactor(layer_disk);
         cov(0,0) = error*error;
       } else {
         ATH_MSG_WARNING("pixWidth.phiR not > 0");
       }
 
-      if(pixWidth.z()>0) { 
+      if(pixWidth.z()>0) {
         float error(1.0);
         error = getEtaPosResolution(layer_disk)*getEtaPosErrorFactor(layer_disk);
         cov(1,1) = error*error;
@@ -316,13 +316,13 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
         ATH_MSG_WARNING("pixWidth.z not > 0");
       }
 
-      auto iH = element->identifyHash();  
+      auto iH = element->identifyHash();
 
-      InDet::PixelClusterOnTrack* pcot = new InDet::PixelClusterOnTrack(pix,locpar,cov,iH,globPos,
+      InDet::PixelClusterOnTrack* pcot = new InDet::PixelClusterOnTrack(pix,std::move(locpar),std::move(cov),iH,globPos,
           pix->gangedPixel(),
           false);
 
-      if(pcot) { 
+      if(pcot) {
         measurementSet.push_back( pcot);
         trash.push_back(pcot);
       } else {
@@ -337,9 +337,9 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
     std::unique_ptr<Trk::Track> newtrack;
     try {
       newtrack = m_ITrackFitter->fit(ctx,
-          measurementSet, 
-          *origPerigee, 
-          m_runOutlier, 
+          measurementSet,
+          *origPerigee,
+          m_runOutlier,
           m_ParticleHypothesis);
     }
     catch(const std::exception& e) {
@@ -363,11 +363,11 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
           double phi0 = aMeasPer->parameters()[Trk::phi0];
           double theta = aMeasPer->parameters()[Trk::theta];
           double qOverP = aMeasPer->parameters()[Trk::qOverP];
-          ATH_MSG_DEBUG ("Refitted parameters differences " 
-              << (od0-d0)/od0  << " " 
-              << (oz0-z0)/oz0  << " " 
-              << (ophi0-phi0)/ophi0 << " " 
-              << (otheta-theta)/otheta << " " 
+          ATH_MSG_DEBUG ("Refitted parameters differences "
+              << (od0-d0)/od0  << " "
+              << (oz0-z0)/oz0  << " "
+              << (ophi0-phi0)/ophi0 << " "
+              << (otheta-theta)/otheta << " "
               << (oqOverP-qOverP)/oqOverP );
         } // aMeasPer exists
       } // newtrack exists
@@ -408,13 +408,13 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int uni
   // passing a negative unique ID value skip this requirement - can get multiple SiHits upon return from different particles
 
   ATH_MSG_VERBOSE( " Have " << (*siHitCollection).size() << " SiHits to look through" );
-  std::vector<SiHit>  matchingHits; 
+  std::vector<SiHit>  matchingHits;
 
   // Check if we have detector element  --  needed to find the local position of the SiHits
   const InDetDD::SiDetectorElement* de = pixClus->detectorElement();
-  if(!de) { 
+  if(!de) {
     ATH_MSG_WARNING("Do not have detector element to find the local position of SiHits!");
-    return matchingHits; 
+    return matchingHits;
   }
 
   // To locate cluster module
@@ -440,7 +440,7 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int uni
 
     // Have SiHits in the same module as the cluster at this point
     ATH_MSG_DEBUG("Hit is on the same module");
-    multiMatchingHits.push_back(&siHit);   
+    multiMatchingHits.push_back(&siHit);
 
   } // loop over SiHitCollection
 
@@ -451,7 +451,7 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int uni
   ATH_MSG_DEBUG( "Found " << multiMatchingHits.size() << " SiHit " );
 
   // double loop - for each matching SiHit, consider all the SiHits _next_ in the collection
-  // to see if they overlap. 
+  // to see if they overlap.
   // if overlapping, combine and only consider new merged hits
   for ( ; siHitIter != multiMatchingHits.end(); ++siHitIter) {
     const SiHit* lowestXPos  = *siHitIter;
@@ -462,7 +462,7 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int uni
     std::vector<const SiHit* > ajoiningHits;
     ajoiningHits.push_back( *siHitIter );
 
-    siHitIter2 = siHitIter+1;   
+    siHitIter2 = siHitIter+1;
     while ( siHitIter2 != multiMatchingHits.end() ) {
       // Need to come from the same truth particle
 
@@ -494,7 +494,7 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int uni
       } else {
         ++siHitIter2;
       }
-    } // loop over matching SiHits to see if any overlap 
+    } // loop over matching SiHits to see if any overlap
 
     if( ajoiningHits.empty()){
       ATH_MSG_WARNING("This should really never happen");
@@ -505,7 +505,7 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int uni
       matchingHits.push_back( *ajoiningHits[0] );
       continue;
     }
-    //  Build new SiHit and merge information together. 
+    //  Build new SiHit and merge information together.
     ATH_MSG_DEBUG("Merging " << ajoiningHits.size() << " SiHits together." );
 
 
@@ -513,7 +513,7 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int uni
     float time(0);
     for( auto& siHit :  ajoiningHits){
       energyDep += siHit->energyLoss();
-      time += siHit->meanTime();   
+      time += siHit->meanTime();
     }
     time /= (float)ajoiningHits.size();
 
@@ -566,7 +566,7 @@ bool Trk::ReFitTrackWithTruth::IsClusterFromTruth( const InDet::PixelCluster* pi
 HepGeom::Point3D<double> Trk::ReFitTrackWithTruth::smearTruthPosition( const HepGeom::Point3D<double>& orig,
     const int bec,
     const int layer_disk,
-    const InDetDD::SiDetectorDesign* design) const { 
+    const InDetDD::SiDetectorDesign* design) const {
 
   HepGeom::Point3D<double> smeared(0,0,0);
 
