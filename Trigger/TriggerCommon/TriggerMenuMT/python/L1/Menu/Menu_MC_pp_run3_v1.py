@@ -46,6 +46,10 @@ def defineMenu():
         'L1_jJ85p0ETA21_3jJ40p0ETA25_cTAU20M_2cTAU12M',
         #ATR-27252
         'L1_eTAU60_2cTAU20M_jXE80',
+
+        # ART-28443  test eEMX{} + {{3,4jJY{}}} L1 seeds
+        'L1_eEM22M_3jJ40p0ETA25',
+        'L1_eEM22M_4jJ30p0ETA25',
     ]
 
     # To replace thresholds in the physics menu

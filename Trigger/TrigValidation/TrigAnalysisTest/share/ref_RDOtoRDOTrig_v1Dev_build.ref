@@ -3454,6 +3454,8 @@ HLT_e20_idperf_loose_lrtloose_L1eEM18L:
     2: 3
     3: 3
     4: 3
+HLT_e20_lhmedium_g20_medium_j35_j20_pf_ftf_L12eEM18M:
+  eventCount: 0
 HLT_e20_lhtight_ivarloose_L12eEM9:
   eventCount: 1
   stepCounts:
@@ -7913,6 +7915,54 @@ HLT_g20_medium_ringer_L1eEM18M:
     1: 3
     2: 3
     3: 3
+HLT_g20_tight_2j40_3j20_pf_ftf_L1eEM22M_jMJJ-300:
+  eventCount: 1
+  stepCounts:
+    0: 2
+    1: 1
+    2: 1
+    3: 1
+    4: 1
+    5: 1
+  stepFeatures:
+    0: 2
+    1: 1
+    2: 1
+    3: 1
+    4: 2
+    5: 15
+HLT_g20_tight_3j40_pf_ftf_L1eEM22M_3jJ40p0ETA25:
+  eventCount: 3
+  stepCounts:
+    0: 4
+    1: 3
+    2: 3
+    3: 3
+    4: 3
+    5: 3
+  stepFeatures:
+    0: 4
+    1: 3
+    2: 3
+    3: 3
+    4: 3
+    5: 12
+HLT_g20_tight_4j30_pf_ftf_L1eEM22M_4jJ30p0ETA25:
+  eventCount: 3
+  stepCounts:
+    0: 4
+    1: 3
+    2: 3
+    3: 3
+    4: 3
+    5: 3
+  stepFeatures:
+    0: 4
+    1: 3
+    2: 3
+    3: 3
+    4: 3
+    5: 17
 HLT_g20_tight_L1eEM18M:
   eventCount: 3
   stepCounts:
@@ -8003,6 +8053,24 @@ HLT_g20_tight_icaloloose_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS500j35_pf_ftf_
     3: 1
     4: 1
     5: 3
+HLT_g20_tight_icaloloose_j40_j40_3j20_03dRAB30_pf_ftf_L14jJ40:
+  eventCount: 3
+  stepCounts:
+    0: 4
+    1: 3
+    2: 3
+    3: 3
+    4: 3
+    5: 3
+    6: 3
+  stepFeatures:
+    0: 4
+    1: 3
+    2: 3
+    3: 3
+    4: 3
+    5: 9
+    6: 47
 HLT_g20_tight_j35_0eta290_020jvt_bdl1d77_3j35a_j0_DJMASS500j35_pf_ftf_L1EM18VHI_MJJ-300:
   eventCount: 0
   stepCounts:
@@ -8031,6 +8099,54 @@ HLT_g20_tight_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS500j35_pf_ftf_L1EM18VHI_M
     2: 1
     3: 1
     4: 3
+HLT_g20_tight_j40_j20_j20_pf_ftf_L1eEM22M_3jJ40p0ETA25:
+  eventCount: 3
+  stepCounts:
+    0: 4
+    1: 3
+    2: 3
+    3: 3
+    4: 3
+    5: 3
+  stepFeatures:
+    0: 4
+    1: 3
+    2: 3
+    3: 3
+    4: 9
+    5: 58
+HLT_g20_tight_j40_j25_pf_ftf_L1EM18VHI_MJJ-300:
+  eventCount: 1
+  stepCounts:
+    0: 2
+    1: 1
+    2: 1
+    3: 1
+    4: 1
+    5: 1
+  stepFeatures:
+    0: 2
+    1: 1
+    2: 1
+    3: 1
+    4: 2
+    5: 12
+HLT_g20_tight_j40_j25_pf_ftf_L1eEM22M_jMJJ-300:
+  eventCount: 1
+  stepCounts:
+    0: 2
+    1: 1
+    2: 1
+    3: 1
+    4: 1
+    5: 1
+  stepFeatures:
+    0: 2
+    1: 1
+    2: 1
+    3: 1
+    4: 2
+    5: 12
 HLT_g20_tight_ringer_L1eEM18M:
   eventCount: 2
   stepCounts:
