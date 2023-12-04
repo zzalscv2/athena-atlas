@@ -49,7 +49,6 @@ StatusCode DumpAll::initialize(){
 	m_file->mkdir("DumpAll");
 	m_file->cd("DumpAll");
 	m_evt = (TTree*)new TNtuple("Evt","Evt","count:event_number:nVtx");
-	//m_truth = (TTree*)new TNtuple("Truth","Truth","count:truth_pt:truth_eta:truth_phi:truth_pdg:truth_barcode");
 	m_truth = (TTree*)new TTree("Truth","Truth");
 	m_truth->Branch("truth_pt",    &m_truth_pt);
 	m_truth->Branch("truth_eta",    &m_truth_eta);
@@ -278,9 +277,9 @@ StatusCode DumpAll::execute(){
 	((TNtuple*)m_evt)->Fill(m_counter,event_number,nvtxs);
 
 	for( auto tt : *truth ){
-		if ( !MC::isStable(tt) ) continue;
-                if ( std::abs(tt->absPdgId()) != 11 ) continue;                 
-                if ( HepMC::is_simulation_particle(tt) )continue; // discard sim particles
+        if ( !MC::isStable(tt) ) continue;
+        if ( !MC::isElectron(tt) ) continue;                 
+        if ( HepMC::is_simulation_particle(tt) )continue; // discard sim particles
 		m_truth_pt.push_back( tt->pt() );
 		m_truth_eta.push_back( tt->eta() );
 		m_truth_phi.push_back( tt->phi() );
