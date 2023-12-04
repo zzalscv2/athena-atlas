@@ -34,6 +34,7 @@
 #include "TrigT1Result/CTP_RDO.h"
 #include "TrigT1Interfaces/CTPSLink.h"
 #include "TrigT1Interfaces/ZdcCTP.h"
+#include "TrigT1Interfaces/TrtCTP.h"
 
 // new configuration data
 #include "TrigConfData/L1Menu.h"
@@ -143,6 +144,8 @@ namespace LVL1CTP {
       SG::ReadHandleKey< xAOD::EmTauRoIContainer >       m_iKeyEFexTau    {  this, "eFexTauInput", "SClusterTau", "Input list of eFEX tau" };
       // ZDC
       SG::ReadHandleKey<LVL1::ZdcCTP> m_iKeyZDC{this, "ZdcInput", LVL1::TrigT1CaloDefs::ZdcCTPLocation, "Input from Zdc"};
+      // TRT
+      SG::ReadHandleKey<LVL1::TrtCTP> m_iKeyTRT{this, "TrtInput", LVL1::DEFAULT_TrtCTPLocation, "Input from Trt"};
 
       // outputs
       SG::WriteHandleKey<CTP_RDO>  m_oKeyRDO  {this, "RDOOutput", LVL1CTP::DEFAULT_RDOOutputLocation, "Output of CTP RDO object (sim)"};
@@ -153,6 +156,7 @@ namespace LVL1CTP {
       Gaudi::Property<bool> m_isData { this, "IsData", false, "emulate CTP as part of MC or rerun on data" };
       Gaudi::Property<std::string>  m_histPath { this, "HistPath",  "/EXPERT/L1", "Booking path for the histogram" };
       Gaudi::Property<bool> m_doZDC{this, "DoZDC", false, "emulate CTP with ZDC included"};
+      Gaudi::Property<bool> m_doTRT{this, "DoTRT", false, "emulate CTP with TRT included"};
       Gaudi::Property<bool> m_forceBunchGroupPattern { this, "ForceBunchGroupPattern", true, "When true, ignore the bunchgroups and use the provided BunchGroupPattern" };
       Gaudi::Property<unsigned int> m_bunchGroupPattern { this, "BunchGroupPattern", 0x0003, "Bunchgroup pattern applied at every event, useful for simulation. Bit x corresponds to bunchgroup x" };
 

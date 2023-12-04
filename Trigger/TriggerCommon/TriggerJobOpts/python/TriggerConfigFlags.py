@@ -108,6 +108,12 @@ def createTriggerFlags(doTriggerRecoFlags):
     # Path to Run3 ZDC LUT
     flags.addFlag('Trigger.ZdcLUT', 'TrigT1ZDC/zdcRun3T1LUT_v2_08_08_2023.json')
 
+    # Enable TRT fast-OR trigger
+    flags.addFlag('Trigger.doTRT', False)
+
+    # Set TTC multiplicity required for the TRT fast-OR trigger
+    flags.addFlag('Trigger.TRT.TTCMultiplicity', 5)
+
     # Checks the validity of each Decision Object produced by a HypoAlg, including all of its
     # parents all the way back to the HLTSeeding. Potentially CPU expensive.
     # also enables per step decison printouts

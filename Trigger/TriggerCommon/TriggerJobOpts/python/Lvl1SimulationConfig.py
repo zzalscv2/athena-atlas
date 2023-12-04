@@ -48,6 +48,11 @@ def Lvl1SimulationCfg(flags, seqName = None):
         from TrigT1ZDC.TrigT1ZDCConfig import L1ZDCSimCfg
         acc.merge(L1ZDCSimCfg(flags), sequenceName = 'L1ZDCSimSeq')
 
+    if flags.Trigger.doTRT:
+        acc.addSequence(seqAND('L1TRTSimSeq'),parentName='L1SimSeq')
+        from TrigT1TRT.TrigT1TRTConfig import L1TRTSimCfg
+        acc.merge(L1TRTSimCfg(flags), sequenceName = 'L1TRTSimSeq')
+
 
     acc.addSequence(seqAND('L1CTPSimSeq'), parentName='L1SimSeq')
     from TrigT1CTP.CTPSimulationConfig import CTPSimulationCfg
