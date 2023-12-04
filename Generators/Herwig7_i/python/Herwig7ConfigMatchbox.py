@@ -394,7 +394,7 @@ saverun {} /Herwig/Generators/EventGenerator
   ##
   def sampler_commands(self, bin_sampler="CellGridSampler",
                        initial_points=10000, n_iterations=1, remapper_points=50000,
-                       exploration_steps=4, exploration_points=500):
+                       exploration_steps=4, exploration_points=500, alpha=0.8, grid_divisions=48):
 
     bin_samplers = ["CellGridSampler", "MonacoSampler", "FlatBinSampler"]
 
@@ -409,7 +409,9 @@ set /Herwig/Samplers/Sampler:BinSampler /Herwig/Samplers/{}
 set /Herwig/Samplers/Sampler:BinSampler:InitialPoints {}
 set /Herwig/Samplers/Sampler:BinSampler:NIterations {}
 set /Herwig/Samplers/Sampler:BinSampler:RemapperPoints {}
-""".format(bin_sampler, initial_points, n_iterations, remapper_points)
+set /Herwig/Samplers/Sampler:BinSampler:Alpha {}
+set /Herwig/Samplers/Sampler:BinSampler:GridDivisions {}
+""".format(bin_sampler, initial_points, n_iterations, remapper_points, alpha, grid_divisions)
 
     if bin_sampler == "CellGridSampler":
       self.commands += """
