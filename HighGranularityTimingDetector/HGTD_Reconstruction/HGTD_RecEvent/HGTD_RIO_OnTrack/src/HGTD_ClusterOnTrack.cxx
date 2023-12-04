@@ -24,12 +24,12 @@ HGTD_ClusterOnTrack::HGTD_ClusterOnTrack()
 
 // Constructor with parameters - no global position specified
 HGTD_ClusterOnTrack::HGTD_ClusterOnTrack(const HGTD_Cluster* rio,
-                                         const Trk::LocalParameters& locpars,
-                                         const Amg::MatrixX& locerr,
+                                         Trk::LocalParameters&& locpars,
+                                         Amg::MatrixX&& locerr,
                                          const float calib_time,
                                          const float calib_time_res,
                                          const IdentifierHash& id_hash)
-    : RIO_OnTrack(locpars, locerr, rio->identify()),
+    : RIO_OnTrack(std::move(locpars), std::move(locerr), rio->identify()),
       m_det_el(rio->detectorElement()),
       m_id_hash(id_hash),
       m_calibrated_time(calib_time),
@@ -39,13 +39,13 @@ HGTD_ClusterOnTrack::HGTD_ClusterOnTrack(const HGTD_Cluster* rio,
 
 // Constructor with parameters
 HGTD_ClusterOnTrack::HGTD_ClusterOnTrack(const HGTD_Cluster* rio,
-                                         const Trk::LocalParameters& locpars,
-                                         const Amg::MatrixX& locerr,
+                                         Trk::LocalParameters&& locpars,
+                                         Amg::MatrixX&& locerr,
                                          const float calib_time,
                                          const float calib_time_res,
                                          const IdentifierHash& id_hash,
                                          const Amg::Vector3D& global_position)
-    : RIO_OnTrack(locpars, locerr, rio->identify()),
+    : RIO_OnTrack(std::move(locpars), std::move(locerr), rio->identify()),
       m_det_el(rio->detectorElement()),
       m_id_hash(id_hash),
       m_global_position(global_position),

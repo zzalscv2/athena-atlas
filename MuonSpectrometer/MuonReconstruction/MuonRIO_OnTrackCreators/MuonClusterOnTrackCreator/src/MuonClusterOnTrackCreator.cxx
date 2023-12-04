@@ -96,7 +96,7 @@ namespace Muon {
             ATH_MSG_VERBOSE("Making 1-dim local parameters: " << m_idHelperSvc->toString(RIO.identify()));
         }
 
-        Amg::Vector2D lp{Amg::Vector2D::Zero()}; 
+        Amg::Vector2D lp{Amg::Vector2D::Zero()};
         double positionAlongStrip{0};
         double positionAlongZ{0};
 
@@ -108,7 +108,7 @@ namespace Muon {
             lp[Trk::locY] = lpos.y();
             positionAlongZ = lpos.z();
         }
-        
+
         positionAlongStrip = lp[Trk::locY];
 
         Amg::MatrixX loce = RIO.localCovariance();
@@ -119,8 +119,8 @@ namespace Muon {
             //***************************
             // RPC: cast to RpcPrepData
             //***************************
-            
-            const RpcPrepData* MClus = static_cast<const RpcPrepData*>(&RIO); 
+
+            const RpcPrepData* MClus = static_cast<const RpcPrepData*>(&RIO);
             bool measphi = m_idHelperSvc->measuresPhi(RIO.identify());
 
             double fixedError = 1.;
@@ -166,7 +166,7 @@ namespace Muon {
             // let's evaluate the total time correction
             double correct_time_tot = real_TOF_onRPCgap - nominal_TOF_onRPCgap + correct_time_along_strip - av_correct_time_along_strip;
 
-            MClT = new RpcClusterOnTrack(MClus, locpar, loce, positionAlongStrip, MClus->time() - correct_time_tot);
+            MClT = new RpcClusterOnTrack(MClus, std::move(locpar), std::move(loce), positionAlongStrip, MClus->time() - correct_time_tot);
 
             ATH_MSG_DEBUG(" correct_time_along_strip " << correct_time_along_strip << " av_correct_time_along_strip "
                                                        << av_correct_time_along_strip << " real_TOF_onRPCgap " << real_TOF_onRPCgap
@@ -178,9 +178,9 @@ namespace Muon {
             //***************************
             // TGC: cast to TgcPrepData
             //***************************
-            
+
             const TgcPrepData* MClus = static_cast<const TgcPrepData*>(&RIO);
-            
+
             // calculation of 2D error matrix for TGC phi strips
             if (m_idHelperSvc->measuresPhi(RIO.identify())) {
                 int stationeta = m_idHelperSvc->stationEta(RIO.identify());
@@ -220,14 +220,14 @@ namespace Muon {
                 }
             }
 
-            MClT = new TgcClusterOnTrack(MClus, locpar, loce, positionAlongStrip);
+            MClT = new TgcClusterOnTrack(MClus, std::move(locpar), std::move(loce), positionAlongStrip);
 
         } else if (m_idHelperSvc->isCsc(RIO.identify())) {
 
             //***************************
             // CSC: cast to CscPrepData
             //***************************
-            
+
             const CscPrepData* MClus = static_cast<const CscPrepData*>(&RIO);
 
             bool measphi = m_idHelperSvc->measuresPhi(RIO.identify());
@@ -247,7 +247,7 @@ namespace Muon {
                 loce = mat;
             }
             // current not changing CscClusterStatus but passing status of RIO
-            MClT = new CscClusterOnTrack(MClus, locpar, loce, positionAlongStrip, MClus->status(), MClus->timeStatus());
+            MClT = new CscClusterOnTrack(MClus, std::move(locpar), std::move(loce), positionAlongStrip, MClus->status(), MClus->timeStatus());
 
         } else if (m_idHelperSvc->issTgc(RIO.identify())) {
 
@@ -266,18 +266,18 @@ namespace Muon {
             if (!rio_surface.insideBounds(localPos) && m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) != sTgcIdHelper::Wire)
               return nullptr;
 
-            MClT = new sTgcClusterOnTrack(MClus, locpar, loce, positionAlongStrip);
+            MClT = new sTgcClusterOnTrack(MClus, std::move(locpar), std::move(loce), positionAlongStrip);
 
         } else if (m_idHelperSvc->isMM(RIO.identify())) {
-        
+
             //***************************
             // MM: cast to MMPrepData
             //***************************
-            
+
             const MMPrepData* mmPRD = static_cast<const MMPrepData*>(&RIO);
             return new MMClusterOnTrack(mmPRD, std::move(locpar), std::move(loce), positionAlongStrip, {}, {});
         }
-        
+
         return MClT;
     }
 
@@ -294,7 +294,7 @@ namespace Muon {
 
     //================================================================================
     MuonClusterOnTrack* MuonClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
-    
+
         if (m_idHelperSvc->isMM(RIO.identify())) {
             // Micromegas
             return calibratedClusterMMG(RIO, GP, GD);
@@ -304,12 +304,12 @@ namespace Muon {
             // sTGC: calibration is currently available for strips.
             return calibratedClusterSTG(RIO, GP, GD);
         }
-    
+
         // Default case
         return createRIO_OnTrack(RIO, GP, GD);
     }
-    
- 
+
+
     //================================================================================
     MuonClusterOnTrack* MuonClusterOnTrackCreator::calibratedClusterMMG(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
         const EventContext& ctx{Gaudi::Hive::currentContext()};
@@ -320,7 +320,7 @@ namespace Muon {
             return nullptr;
         }
 
-        Amg::MatrixX loce = RIO.localCovariance(); 
+        Amg::MatrixX loce = RIO.localCovariance();
         Trk::LocalParameters locpar = loce.cols() > 1 ? Trk::LocalParameters{RIO.localPosition()} : Trk::LocalParameters{Trk::DefinedParameter{RIO.localPosition().x(), Trk::locX}};
 
         // * Local cluster coordinates to feed to the calibration tools
@@ -349,11 +349,11 @@ namespace Muon {
         }
 
         //   calibrate the cluster position along the precision coordinate (updates lp.x())
-        IMMClusterBuilderTool::RIO_Author rotAuthor = m_clusterBuilderToolMM->getCalibratedClusterPosition(ctx, 
-                                                                                               calibratedStrips, 
-                                                                             NswClustering::toLocal(*mmPRD, GD), 
+        IMMClusterBuilderTool::RIO_Author rotAuthor = m_clusterBuilderToolMM->getCalibratedClusterPosition(ctx,
+                                                                                               calibratedStrips,
+                                                                             NswClustering::toLocal(*mmPRD, GD),
                                                                                                       lp, loce);
-                                                                                                                
+
         if (rotAuthor == IMMClusterBuilderTool::RIO_Author::unKnownAuthor) {
             ATH_MSG_WARNING("Could not calibrate the MM Cluster in the RIO on track creator");
             return nullptr;
@@ -365,8 +365,8 @@ namespace Muon {
             ATH_MSG_WARNING("Application of final as-built parameters failed for channel "<<m_idHelperSvc->toString(RIO.identify())<<" local pos = ("<<lp.x()<<"/"<<lp.y()<<").");
         }
 
-        //   Get the direction of the track in the local coordinate system and use it to project 
-        //   the actual hit position onto the nominal surface (locZ = 0), where the intersection 
+        //   Get the direction of the track in the local coordinate system and use it to project
+        //   the actual hit position onto the nominal surface (locZ = 0), where the intersection
         //   of the track is considered. This "effective" position provides a more accurate residual.
         Trk::LocalDirection ld;
         rio_surface.globalToLocalDirection(GD, ld);
@@ -374,14 +374,14 @@ namespace Muon {
         double x_projected = localposition3D.x() - std::tan(a_impact) * localposition3D.z();
 
         // * Set the value of the local parameter (locX) after applying conditions
-        //   The position along strip will be set from the seed (there is no better 
+        //   The position along strip will be set from the seed (there is no better
         //   estimate than that; not used in the track fits anyway)
         locpar[Trk::locX] = x_projected;
-    
+
         ATH_MSG_VERBOSE("generating MMClusterOnTrack in MMClusterBuilder");
         MMClusterOnTrack* cluster = new MMClusterOnTrack(mmPRD, std::move(locpar), std::move(loce), lp[Trk::locY], {}, {});
         cluster->setAuthor(rotAuthor);
-    
+
         return cluster;
     }
 
@@ -396,11 +396,11 @@ namespace Muon {
             return nullptr;
         }
 
-        Amg::MatrixX loce = RIO.localCovariance();    
-        // > 1 in case we want to keep pads in the future ? 
+        Amg::MatrixX loce = RIO.localCovariance();
+        // > 1 in case we want to keep pads in the future ?
         Trk::LocalParameters locpar = loce.cols() > 1 ? Trk::LocalParameters{RIO.localPosition()} : Trk::LocalParameters{Trk::DefinedParameter{RIO.localPosition().x(), Trk::locX}};
-    
-    
+
+
         // * Local cluster coordinates to feed to the calibration tools
         Amg::Vector2D lp{ Amg::Vector2D::Zero() };
 
@@ -419,22 +419,22 @@ namespace Muon {
         Amg::Vector3D localposition3D { Amg::Vector3D::Zero() };
         stgEL->spacePointPosition(RIO.identify(), lp[Trk::locX], lp[Trk::locY], localposition3D);
 
-        //   Get the direction of the track in the local coordinate system and use it to project 
-        //   the actual hit position onto the nominal surface (locZ = 0), where the intersection 
-        //   of the track is considered. This "effective" position provides a more accurate residual. 
+        //   Get the direction of the track in the local coordinate system and use it to project
+        //   the actual hit position onto the nominal surface (locZ = 0), where the intersection
+        //   of the track is considered. This "effective" position provides a more accurate residual.
         Trk::LocalDirection ld;
         rio_surface.globalToLocalDirection(GD, ld);
         double a_impact    = ld.angleXZ() < 0 ? -M_PI_2 - ld.angleXZ() : M_PI_2 - ld.angleXZ();
         double x_projected = localposition3D.x() - std::tan(a_impact) * localposition3D.z();
 
         // * Set the value of the local parameter (locX) after applying conditions
-        //   The position along strip will be set from the seed (there is no better 
+        //   The position along strip will be set from the seed (there is no better
         //   estimate than that; not used in the track fits anyway)
         locpar[Trk::locX] = x_projected;
 
 	const sTgcPrepData* stgPRD = static_cast<const sTgcPrepData*>(&RIO);
         ATH_MSG_VERBOSE("generating sTgcClusterOnTrack in MuonClusterBuilder");
-        MuonClusterOnTrack* cluster = new sTgcClusterOnTrack(stgPRD, locpar, loce, lp[Trk::locY]);
+        MuonClusterOnTrack* cluster = new sTgcClusterOnTrack(stgPRD, std::move(locpar), std::move(loce), lp[Trk::locY]);
 
         return cluster;
     }

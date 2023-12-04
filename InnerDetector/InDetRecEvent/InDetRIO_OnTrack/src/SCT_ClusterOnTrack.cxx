@@ -16,21 +16,6 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 
 // Constructor with parameters - no global position assigned
-InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(
-    const InDet::SCT_Cluster* RIO, const Trk::LocalParameters& locpars,
-    const Amg::MatrixX& locerr, const IdentifierHash& idDE, bool isbroad)
-    : SiClusterOnTrack(locpars, locerr, idDE, RIO->identify(),
-                       isbroad)  // call base class constructor
-{
-  m_detEl = RIO->detectorElement();
-  m_positionAlongStrip = std::numeric_limits<double>::quiet_NaN();
-  m_rio.setElement(RIO);
-  // Set global position
-  Amg::Vector2D lpos(localParameters().get(Trk::locX), m_positionAlongStrip);
-  m_globalPosition = detectorElement()->surface(identify()).localToGlobal(lpos);
-}
-
-// Constructor with parameters - no global position assigned
 InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(const InDet::SCT_Cluster* RIO,
                                               Trk::LocalParameters&& locpars,
                                               Amg::MatrixX&& locerr,
@@ -44,27 +29,6 @@ InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(const InDet::SCT_Cluster* RIO,
   // Set global position
   Amg::Vector2D lpos(localParameters().get(Trk::locX), m_positionAlongStrip);
   m_globalPosition = detectorElement()->surface(identify()).localToGlobal(lpos);
-}
-
-// Constructor with parameters
-InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(
-    const InDet::SCT_Cluster* RIO,
-    const Trk::LocalParameters& locpars,
-    const Amg::MatrixX& locerr,
-    const IdentifierHash& idDE,
-    const Amg::Vector3D& globalPosition,
-    bool isbroad)
-    : SiClusterOnTrack(locpars, locerr, idDE, RIO->identify(), globalPosition,
-                       isbroad),  // call base class constructor
-      m_detEl(RIO->detectorElement()) {
-  m_rio.setElement(RIO);
-
-  // constructing local position provided a global one
-  std::optional<Amg::Vector2D> lpos{
-      detectorElement()->surface(identify()).positionOnSurface(globalPosition)};
-
-  // storing the position along the strip if available
-  m_positionAlongStrip = (lpos) ? (*lpos)[Trk::locY] : 0.;
 }
 
 // Constructor with parameters
@@ -93,7 +57,7 @@ InDet::SCT_ClusterOnTrack::SCT_ClusterOnTrack(
     const Identifier& id,
     bool isbroad,
     double positionAlongStrip)
-    : SiClusterOnTrack(locpars, locerr, idDE, id, isbroad),
+    : SiClusterOnTrack(Trk::LocalParameters(locpars), Amg::MatrixX(locerr), idDE, id, isbroad),
       m_rio(RIO),
       m_detEl(nullptr),
       m_positionAlongStrip(positionAlongStrip) {}

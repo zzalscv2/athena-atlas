@@ -48,8 +48,9 @@ public:
    *             fullfill the Trk::RIO_OnTrack interface.
    */
   HGTD_ClusterOnTrack(const HGTD_Cluster* rio,
-                      const Trk::LocalParameters& locpars,
-                      const Amg::MatrixX& locerr, const float calib_time,
+                      Trk::LocalParameters&& locpars,
+                      Amg::MatrixX&& locerr,
+                      const float calib_time,
                       const float calib_time_res,
                       const IdentifierHash& id_hash);
 
@@ -68,9 +69,11 @@ public:
    *             fullfill the Trk::RIO_OnTrack interface.
    */
   HGTD_ClusterOnTrack(const HGTD_Cluster* rio,
-                      const Trk::LocalParameters& locpars,
-                      const Amg::MatrixX& locerr, const float calib_time,
-                      const float calib_time_res, const IdentifierHash& idDE,
+                      Trk::LocalParameters&& locpars,
+                      Amg::MatrixX&& locerr,
+                      const float calib_time,
+                      const float calib_time_res,
+                      const IdentifierHash& idDE,
                       const Amg::Vector3D& global_position);
 
   /** Pseudo-constructor : needed to avoid excessive RTTI*/

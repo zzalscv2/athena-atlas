@@ -234,7 +234,7 @@ const Trk::TrackParameters* Muon::MuonTGMeasurementTool::layerToDetEl(const Trk:
                           << m_idHelperSvc->rpcIdHelper().doubletPhi(id) << "," << m_idHelperSvc->rpcIdHelper().doubletR(id) << ","
                           << m_idHelperSvc->rpcIdHelper().doubletZ(id));
             Amg::Vector2D locPos;
-            const Amg::Vector3D globPos = parm->position();
+            const Amg::Vector3D& globPos = parm->position();
             bool onSurface = stripSurf->globalToLocal(globPos, globPos, locPos);
             if (onSurface) {
                 pPar[0] = locPos[0];
@@ -344,7 +344,7 @@ const Trk::TrackParameters* Muon::MuonTGMeasurementTool::layerToDetEl(const Trk:
                           << m_idHelperSvc->tgcIdHelper().stationName(id) << "," << m_idHelperSvc->tgcIdHelper().stationEta(id) << ","
                           << m_idHelperSvc->tgcIdHelper().stationPhi(id) << "," << m_idHelperSvc->tgcIdHelper().isStrip(id));
             Amg::Vector2D locPos;
-            const Amg::Vector3D globPos = parm->position();
+            const Amg::Vector3D& globPos = parm->position();
             bool onSurface = stripSurf->globalToLocal(globPos, globPos, locPos);
             if (onSurface) {
                 locPar[0] = locPos[0];
@@ -507,7 +507,7 @@ const Trk::TrackParameters* Muon::MuonTGMeasurementTool::detElToLayer(const Trk:
                           << m_idHelperSvc->rpcIdHelper().doubletPhi(id) << "," << m_idHelperSvc->rpcIdHelper().doubletR(id) << ","
                           << m_idHelperSvc->rpcIdHelper().doubletZ(id));
             Amg::Vector2D locPos;
-            const Amg::Vector3D globPos = parm->position();
+            const Amg::Vector3D& globPos = parm->position();
             bool onSurface = laySurf->globalToLocal(globPos, globPos, locPos);
             if (onSurface) {
                 pPar[0] = locPos[0];
@@ -583,7 +583,7 @@ const Trk::TrackParameters* Muon::MuonTGMeasurementTool::detElToLayer(const Trk:
                           << m_idHelperSvc->tgcIdHelper().stationName(id) << "," << m_idHelperSvc->tgcIdHelper().stationEta(id) << ","
                           << m_idHelperSvc->tgcIdHelper().stationPhi(id) << "," << m_idHelperSvc->tgcIdHelper().isStrip(id));
             Amg::Vector2D locPos;
-            const Amg::Vector3D globPos = parm->position();
+            const Amg::Vector3D& globPos = parm->position();
             bool onSurface = laySurf->globalToLocal(globPos, globPos, locPos);
             if (onSurface) {
                 locPar[0] = locPos[0];
@@ -676,7 +676,7 @@ const Trk::RIO_OnTrack* Muon::MuonTGMeasurementTool::measToLayer(const Trk::Laye
         Muon::MuonDriftCircleErrorStrategy strat(stratbits);
         const Muon::MdtDriftCircleOnTrack* mdtRio =
             new Muon::MdtDriftCircleOnTrack(mdtPrd, Trk::LocalParameters(Trk::DefinedParameter(locLay, Trk::locY)),
-                                            mdtPrd->localCovariance(), 0., Trk::DECIDED, 0.0, strat);
+                                            Amg::MatrixX(mdtPrd->localCovariance()), 0., Trk::DECIDED, 0.0, strat);
         return mdtRio;
     }
 
@@ -706,10 +706,10 @@ const Trk::RIO_OnTrack* Muon::MuonTGMeasurementTool::measToLayer(const Trk::Laye
         const Muon::RpcClusterOnTrack* rpcRio = nullptr;
         if (m_idHelperSvc->rpcIdHelper().measuresPhi(id))
             rpcRio = new Muon::RpcClusterOnTrack(rpcPrd, Trk::LocalParameters(Trk::DefinedParameter(locPos, Trk::locX)),
-                                                 rpcPrd->localCovariance(), parm->localPosition()[Trk::locY]);
+                                                 Amg::MatrixX(rpcPrd->localCovariance()), parm->localPosition()[Trk::locY]);
         else
             rpcRio = new Muon::RpcClusterOnTrack(rpcPrd, Trk::LocalParameters(Trk::DefinedParameter(locPos, Trk::locY)),
-                                                 rpcPrd->localCovariance(), parm->localPosition()[Trk::locX]);
+                                                 Amg::MatrixX(rpcPrd->localCovariance()), parm->localPosition()[Trk::locX]);
         return rpcRio;
     }
 
@@ -753,10 +753,10 @@ const Trk::RIO_OnTrack* Muon::MuonTGMeasurementTool::measToLayer(const Trk::Laye
         const Muon::CscClusterOnTrack* cscRio = nullptr;
         if (m_idHelperSvc->cscIdHelper().measuresPhi(id))
             cscRio = new Muon::CscClusterOnTrack(cscPrd, Trk::LocalParameters(Trk::DefinedParameter(locPos, Trk::locX)),
-                                                 cscPrd->localCovariance(), parm->localPosition()[Trk::locY], cscPrd->status());
+                                                 Amg::MatrixX(cscPrd->localCovariance()), parm->localPosition()[Trk::locY], cscPrd->status());
         else
             cscRio = new Muon::CscClusterOnTrack(cscPrd, Trk::LocalParameters(Trk::DefinedParameter(locPos, Trk::locY)),
-                                                 cscPrd->localCovariance(), parm->localPosition()[Trk::locX], cscPrd->status());
+                                                 Amg::MatrixX(cscPrd->localCovariance()), parm->localPosition()[Trk::locX], cscPrd->status());
         return cscRio;
     }
 
@@ -779,10 +779,10 @@ const Trk::RIO_OnTrack* Muon::MuonTGMeasurementTool::measToLayer(const Trk::Laye
         if (m_idHelperSvc->tgcIdHelper().isStrip(id)) {
             Amg::Vector2D loc(locPos, parm->localPosition()[Trk::locY]);
             tgcRio = new Muon::TgcClusterOnTrack(tgcPrd, Trk::LocalParameters(Trk::DefinedParameter(locPos, Trk::locX)),
-                                                 tgcPrd->localCovariance(), parm->localPosition()[Trk::locY]);
+                                                 Amg::MatrixX(tgcPrd->localCovariance()), parm->localPosition()[Trk::locY]);
         } else {
             tgcRio = new Muon::TgcClusterOnTrack(tgcPrd, Trk::LocalParameters(Trk::DefinedParameter(locPos, Trk::locY)),
-                                                 tgcPrd->localCovariance(), parm->localPosition()[Trk::locX]);
+                                                 Amg::MatrixX(tgcPrd->localCovariance()), parm->localPosition()[Trk::locX]);
         }
         return tgcRio;
     }
@@ -825,7 +825,7 @@ const Identifier Muon::MuonTGMeasurementTool::nearestDetEl(const Trk::Layer* lay
         int tMax = mdtROE->getNtubesperlayer();
         // local position at layer
         Amg::Vector2D locLay;
-        const Amg::Vector3D globPos = parm->position();
+        const Amg::Vector3D& globPos = parm->position();
         bool onSurface = lay->surfaceRepresentation().globalToLocal(globPos, globPos, locLay);
         if (!onSurface || measPhi) { return nid; }
         // nearest tube index
@@ -883,7 +883,7 @@ const Identifier Muon::MuonTGMeasurementTool::nearestDetEl(const Trk::Layer* lay
             const Amg::Vector3D globPosN = rpcROE->stripPos(refPhiN);
             bool onSurfaceN = rpcROE->surface(refPhiN).globalToLocal(globPosN, globPosN, locN);
             Amg::Vector2D loc;
-            const Amg::Vector3D glob = parm->position();
+            const Amg::Vector3D& glob = parm->position();
             bool onSurface = rpcROE->surface(refPhiN).globalToLocal(glob, glob, loc);
 
             int strip = 0;
@@ -935,7 +935,7 @@ const Identifier Muon::MuonTGMeasurementTool::nearestDetEl(const Trk::Layer* lay
             const Amg::Vector3D globPosN = rpcROE->stripPos(refEtaN);
             bool onSurfaceN = rpcROE->surface(refEtaN).globalToLocal(globPosN, globPosN, locN);
             Amg::Vector2D loc;
-            const Amg::Vector3D glob = parm->position();
+            const Amg::Vector3D& glob = parm->position();
             bool onSurface = rpcROE->surface(refEtaN).globalToLocal(glob, glob, loc);
 
             int strip = 0;

@@ -31,7 +31,7 @@ namespace MuonGM
     class TgcReadoutElement;
 }
 
-namespace Trk 
+namespace Trk
 {
     class ITrkEventCnvTool;
 }
@@ -60,20 +60,20 @@ public:
     @param[in] RIO <b>Required</b> (i.e. must not be NULL). Ownership is not taken.
     @param[in] locpos <b>Required</b> (i.e. must not be NULL). Ownership is taken.
     @param[in] locerr <b>Required</b> (i.e. must not be NULL). Ownership is taken.
-    @param[in] positionAlongStrip  <b>Required</b> Used to calculate global position.  
+    @param[in] positionAlongStrip  <b>Required</b> Used to calculate global position.
     */
     TgcClusterOnTrack(
         const TgcPrepData* RIO,
-        const Trk::LocalParameters& locpos,
-        const Amg::MatrixX& locerr, 
+        Trk::LocalParameters&& locpos,
+        Amg::MatrixX&& locerr,
         double positionAlongStrip
     );
 
     // Alternate constructor that doesn't dereference the RIO link.
     TgcClusterOnTrack(
                       const ElementLinkToIDC_TGC_Container& RIO,
-                      const Trk::LocalParameters& locpos,
-                      const Amg::MatrixX& locerr,
+                      Trk::LocalParameters&& locpos,
+                      Amg::MatrixX&& locerr,
                       const Identifier& id,
                       const MuonGM::TgcReadoutElement* detEl,
                       double positionAlongStrip
@@ -92,7 +92,7 @@ public:
     /** @brief Returns the detector element, assoicated with the PRD of this class*/
     virtual const MuonGM::TgcReadoutElement* detectorElement() const;
 
-    /** @brief Returns the surface on which this measurement was taken. 
+    /** @brief Returns the surface on which this measurement was taken.
     (i.e. a surface of a detector element) */
     virtual const Trk::Surface& associatedSurface() const;
 
@@ -101,7 +101,7 @@ public:
 
     /** @brief Dumps information about the PRD*/
     virtual std::ostream& dump( std::ostream& stream) const;
-    
+
 private:
     /**@brief Sets the DetElement and Trk::PrepRawData pointers after reading from disk.
     @warning Only intended for use by persistency convertors.
@@ -128,7 +128,7 @@ inline TgcClusterOnTrack* TgcClusterOnTrack::clone() const
 
 inline const TgcPrepData* TgcClusterOnTrack::prepRawData() const
 {
-    if (m_rio.isValid()) return m_rio.cachedElement(); 
+    if (m_rio.isValid()) return m_rio.cachedElement();
     else return 0;
 }
 

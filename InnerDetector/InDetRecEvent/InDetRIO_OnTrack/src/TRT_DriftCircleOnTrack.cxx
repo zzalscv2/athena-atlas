@@ -22,48 +22,6 @@
 #include <ostream>
 #include <utility>
 
-// Constructor with parameters:
-InDet::TRT_DriftCircleOnTrack::TRT_DriftCircleOnTrack(
-  const InDet::TRT_DriftCircle* RIO,
-  const Trk::LocalParameters& driftRadius,
-  const Amg::MatrixX& errDriftRadius,
-  const IdentifierHash& idDE,
-  double predictedLocZ,
-  const Amg::Vector3D& predictedTrackDirection,
-  const Trk::DriftCircleStatus status)
-  // call base class constructor
-  : Trk::RIO_OnTrack(driftRadius, errDriftRadius, RIO->identify())
-  , m_globalPosition{}
-  , m_positionAlongWire(predictedLocZ)
-  , m_idDE(idDE)
-  , m_status(status)
-  , m_highLevel(RIO->highLevel())
-  , m_timeOverThreshold(RIO->timeOverThreshold())
-  , m_detEl(RIO->detectorElement())
-{
- 
-  m_rio.setElement(RIO);
-
-  const Trk::Surface& detElSurf= m_detEl->surface(RIO->identify());
-  if (detElSurf.type() == Trk::SurfaceType::Line) {
-
-    const Trk::StraightLineSurface& slsf =
-      static_cast<const Trk::StraightLineSurface&>(detElSurf);
-
-    m_globalPosition =
-      slsf.localToGlobal(m_localParams, predictedTrackDirection, predictedLocZ);
-  }
-  Amg::Vector3D  loc_gDirection = predictedTrackDirection; 
-  const double dr = m_localParams[Trk::driftRadius];
-  
-  //scaling the direction with drift radius   
-  if(dr !=0.){
-    m_localAngle = std::atan2(loc_gDirection.y(), loc_gDirection.x());
-  } else {
-    m_localAngle = 0.;
-  }
-}
-
 InDet::TRT_DriftCircleOnTrack::TRT_DriftCircleOnTrack(
   const InDet::TRT_DriftCircle* RIO,
   Trk::LocalParameters&& driftRadius,
@@ -114,7 +72,7 @@ InDet::TRT_DriftCircleOnTrack::TRT_DriftCircleOnTrack(
   const Trk::DriftCircleStatus status,
   bool highLevel,
   double timeOverThreshold)
-  : Trk::RIO_OnTrack(driftRadius, errDriftRadius, id)
+  : Trk::RIO_OnTrack(Trk::LocalParameters(driftRadius), Amg::MatrixX(errDriftRadius), id)
   , m_globalPosition{}
   , m_localAngle(localAngle)
   , m_positionAlongWire(predictedLocZ)
@@ -147,12 +105,12 @@ InDet::TRT_DriftCircleOnTrack::TRT_DriftCircleOnTrack()
 
 //copy constructor:
 InDet::TRT_DriftCircleOnTrack::TRT_DriftCircleOnTrack( const InDet::TRT_DriftCircleOnTrack& rot)
-  
+
 = default;
 
 //assignment operator:
 InDet::TRT_DriftCircleOnTrack& InDet::TRT_DriftCircleOnTrack::operator=( const InDet::TRT_DriftCircleOnTrack& rot)
-{ 
+{
   if ( &rot != this) {
     Trk::RIO_OnTrack::operator= (rot);
     m_globalPosition = rot.m_globalPosition;
@@ -170,7 +128,7 @@ InDet::TRT_DriftCircleOnTrack& InDet::TRT_DriftCircleOnTrack::operator=( const I
 
 //move assignment operator:
 InDet::TRT_DriftCircleOnTrack& InDet::TRT_DriftCircleOnTrack::operator=( InDet::TRT_DriftCircleOnTrack&& rot)
- noexcept { 
+ noexcept {
   if ( &rot != this) {
     Trk::RIO_OnTrack::operator= (rot);
     m_globalPosition        = std::move(rot.m_globalPosition);
@@ -186,28 +144,28 @@ InDet::TRT_DriftCircleOnTrack& InDet::TRT_DriftCircleOnTrack::operator=( InDet::
   return *this;
 }
 
-Trk::DriftCircleSide InDet::TRT_DriftCircleOnTrack::side() const{ 
+Trk::DriftCircleSide InDet::TRT_DriftCircleOnTrack::side() const{
   if (m_status == Trk::UNDECIDED) return Trk::NONE;
   if (localParameters()[Trk::driftRadius] < 0. ) return Trk::LEFT;
-  return Trk::RIGHT; 
+  return Trk::RIGHT;
 }
 
 
 const Trk::Surface& InDet::TRT_DriftCircleOnTrack::associatedSurface() const
-{ 
+{
     assert(0!=m_detEl);
-    return (m_detEl->surface(identify())); 
+    return (m_detEl->surface(identify()));
 }
 
-const Amg::Vector3D& InDet::TRT_DriftCircleOnTrack::globalPosition() const { 
-  
+const Amg::Vector3D& InDet::TRT_DriftCircleOnTrack::globalPosition() const {
+
   return m_globalPosition;
 }
 
 
 //Global Position Helper for the converter
 void
-InDet::TRT_DriftCircleOnTrack::setGlobalPositionHelper() 
+InDet::TRT_DriftCircleOnTrack::setGlobalPositionHelper()
 {
 
   //default
@@ -252,15 +210,15 @@ InDet::TRT_DriftCircleOnTrack::setValues(const Trk::TrkDetElementBase* detEl,
 
 MsgStream& InDet::TRT_DriftCircleOnTrack::dump( MsgStream& sl ) const
 {
-    Trk::RIO_OnTrack::dump(sl); 
+    Trk::RIO_OnTrack::dump(sl);
 	std::string name("TRT_DriftCircleOnTrack: ");
 	sl <<name<< "\t  identifier  = "<< identify()<<endmsg;
         sl <<name<< "\t  time-over-threshold = " << timeOverThreshold()
            << (highLevel() ? " with TR flag ON":" with TR flag OFF") << endmsg;
-	sl <<name<< "\t  driftradius = (" 
+	sl <<name<< "\t  driftradius = ("
 		 << (localParameters())[Trk::loc1] << ") " <<endmsg;
 	sl <<name<< "\t  has Error Matrix: "<<endmsg;
-	sl<<localCovariance()<<endmsg; 
+	sl<<localCovariance()<<endmsg;
 	return sl;
 }
 
@@ -268,7 +226,7 @@ std::ostream& InDet::TRT_DriftCircleOnTrack::dump( std::ostream& sl ) const
 {
     sl << "TRT_DriftCircleOnTrack {"<<std::endl;
 
-    Trk::RIO_OnTrack::dump(sl); 
+    Trk::RIO_OnTrack::dump(sl);
 
     sl << "Global position (x,y,z) = (";
     this->globalPosition();
@@ -279,6 +237,6 @@ std::ostream& InDet::TRT_DriftCircleOnTrack::dump( std::ostream& sl ) const
     sl << "\t  time-over-threshold = " << timeOverThreshold()
         << (highLevel() ? " with TR flag ON":" with TR flag OFF")<<std::endl;
     sl<<"}"<<std::endl;
-    
+
 	return sl;
 }

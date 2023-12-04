@@ -30,25 +30,26 @@ class RIO_OnTrackCnv_p2;
 
 
 namespace Trk {
-  
+
   class PrepRawData;
   class TrkDetElementBase;
   class ITrkEventCnvTool;
 
 /** @class RIO_OnTrack
-    
+
   Class to handle RIO On Tracks  ROT) for InDet and Muons,
-  it inherits from the common MeasurementBase. 
-    
-  The Track holds a vector of TrackStateOnSurface 
+  it inherits from the common MeasurementBase.
+
+  The Track holds a vector of TrackStateOnSurface
   that carry the MeasurmentBase class pointers.
-    
+
   Need a multimap{RIO, ROT} to go from RIO to ROT
-  and a map{ROT, Track} to go from ROT to Track 
-        
-  @author Veronique.Boisvert@cern.ch 
+  and a map{ROT, Track} to go from ROT to Track
+
+  @author Veronique.Boisvert@cern.ch
   @author Edward.Moyse@cern.ch
   @author Andreas.Salzburger@cern.ch
+  @author Christos Anastopoulos (Athena MT)
  */
 
   namespace RIO_OnTrackType{
@@ -69,16 +70,10 @@ namespace Trk {
   {
 
     friend class ITrkEventCnvTool;
-      
-    public:
-      /** Constructor with parameters and without externalPrediction:
-      LocalParameters, LocalAmg::MatrixX, id& This class owns the
-      LocalParameters and the error matrix */
-     RIO_OnTrack(const LocalParameters& locpars, 
-                 const Amg::MatrixX& loccov,
-                 const Identifier& id);
 
-     RIO_OnTrack(LocalParameters&& locpars, 
+    public:
+      /** Constructor with parameters and without externalPrediction*/
+     RIO_OnTrack(LocalParameters&& locpars,
                  Amg::MatrixX&& loccov,
                  const Identifier& id);
 
@@ -102,11 +97,11 @@ namespace Trk {
      std::unique_ptr<RIO_OnTrack> uniqueClone() const {
        return std::unique_ptr<RIO_OnTrack>(clone());
       };
-                
-     /** returns the surface for the local to global transformation 
+
+     /** returns the surface for the local to global transformation
       - interface from MeasurementBase */
       virtual const Surface& associatedSurface() const override = 0;
-     
+
      /**Interface method to get the global Position
       - interface from MeasurementBase */
       virtual const Amg::Vector3D& globalPosition() const override = 0;
@@ -121,43 +116,43 @@ namespace Trk {
       virtual bool rioType(RIO_OnTrackType::Type type) const = 0;
 
       /**returns the some information about this RIO_OnTrack. */
-      virtual MsgStream&    dump( MsgStream& out ) const override;  
+      virtual MsgStream&    dump( MsgStream& out ) const override;
 
       /**returns the some information about this RIO_OnTrack. */
       virtual std::ostream& dump( std::ostream& out ) const override;
-           
+
      /** returns the PrepRawData (also known as  RIO) object to which this RIO_OnTrack is associated.
-      Can be null (in case where the Trk::PrepRawData is not persistified). 
+      Can be null (in case where the Trk::PrepRawData is not persistified).
       Use Detector Element if possible (this is always there).
       - extends MeasurementBase */
       virtual const Trk::PrepRawData* prepRawData() const = 0;
 
-       /** returns the DE hashID 
+       /** returns the DE hashID
       - extends MeasurementBase */
       virtual IdentifierHash idDE() const = 0;
-    
+
        /** returns the detector element, assoicated with the PRD of this class
       - extends MeasurementBase */
       virtual const TrkDetElementBase* detectorElement() const = 0;
-    
+
        /** return the identifier
       -extends MeasurementBase */
       virtual Identifier identify() const final;
-     
+
     protected:
       friend class ::RIO_OnTrackCnv_p1;
       friend class ::RIO_OnTrackCnv_p2;
       /** ONLY for use in custom convertor
       Allows the custom convertor to reset values when persistying/reading back RoTs*/
       virtual void setValues(
-          const Trk::TrkDetElementBase* detEl, 
+          const Trk::TrkDetElementBase* detEl,
           const Trk::PrepRawData* prd)=0;
-        
-      /**Identifier of the RIO_OnTrack (comes from the associated Trk::PrepRawData)*/     
-      Identifier m_identifier{}; 
+
+      /**Identifier of the RIO_OnTrack (comes from the associated Trk::PrepRawData)*/
+      Identifier m_identifier{};
   };
 
-  inline Identifier RIO_OnTrack::identify() const     
+  inline Identifier RIO_OnTrack::identify() const
   { return m_identifier; }
 }
 

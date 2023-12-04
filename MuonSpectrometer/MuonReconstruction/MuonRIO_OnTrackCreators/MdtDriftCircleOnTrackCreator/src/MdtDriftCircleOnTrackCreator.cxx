@@ -25,8 +25,8 @@ namespace Muon {
 using MdtRotPtr = MdtDriftCircleOnTrackCreator::MdtRotPtr;
 using CalibrationOutput = MdtDriftCircleOnTrackCreator::CalibrationOutput;
 
-MdtDriftCircleOnTrackCreator::MdtDriftCircleOnTrackCreator(const std::string& ty, 
-                                                           const std::string& na, 
+MdtDriftCircleOnTrackCreator::MdtDriftCircleOnTrackCreator(const std::string& ty,
+                                                           const std::string& na,
                                                            const IInterface* pa)
     : AthAlgTool(ty, na, pa) {
     // algtool interface - necessary!
@@ -50,8 +50,8 @@ StatusCode MdtDriftCircleOnTrackCreator::initialize() {
     m_errorStrategy.setParameter(MuonDriftCircleErrorStrategy::WireSagGeomCorrection, m_doWireSag);
     m_errorStrategy.setParameter(MuonDriftCircleErrorStrategy::Segment, m_doSegments);
     using ToolSettings = IMdtCalibrationTool::ToolSettings;
-    using Property = ToolSettings::Property;    
-    ToolSettings calibSettings = m_mdtCalibrationTool->getSettings();    
+    using Property = ToolSettings::Property;
+    ToolSettings calibSettings = m_mdtCalibrationTool->getSettings();
     m_errorStrategy.setParameter(MuonDriftCircleErrorStrategy::TofCorrection,
                                  calibSettings.isActive(Property::TofCorrection));
     m_errorStrategy.setParameter(MuonDriftCircleErrorStrategy::PropCorrection,
@@ -145,16 +145,16 @@ StatusCode MdtDriftCircleOnTrackCreator::initialize() {
     return StatusCode::SUCCESS;
 }
 
-MdtRotPtr MdtDriftCircleOnTrackCreator::createRIO_OnTrack(const MdtPrepData& mdtPrd, 
-                                                          const Amg::Vector3D& GP, 
+MdtRotPtr MdtDriftCircleOnTrackCreator::createRIO_OnTrack(const MdtPrepData& mdtPrd,
+                                                          const Amg::Vector3D& GP,
                                                           const Amg::Vector3D* GD,
-                                                          const double t0Shift, 
+                                                          const double t0Shift,
                                                           const MuonDriftCircleErrorStrategy* strategy,
-                                                          const double beta, 
+                                                          const double beta,
                                                           const double tTrack) const {
-    
+
     const EventContext& ctx{Gaudi::Hive::currentContext()};
-    
+
     const MuonDriftCircleErrorStrategy& myStrategy{!strategy ? m_errorStrategy : *strategy};
 
     const Identifier iD = mdtPrd.identify();
@@ -196,7 +196,7 @@ MdtRotPtr MdtDriftCircleOnTrackCreator::createRIO_OnTrack(const MdtPrepData& mdt
             calibInput.setTimeOfFlight(0);
             break;
     }
-    
+
     Amg::Vector2D posOnWire{Amg::Vector2D::Zero()};
     // if wire sag is taken into account, cast the surface to
     // StraightLineSurface so it can be added to the ROT
@@ -209,7 +209,7 @@ MdtRotPtr MdtDriftCircleOnTrackCreator::createRIO_OnTrack(const MdtPrepData& mdt
         if (!posOnSaggedWire) {
             ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" globalToLocal() failed for sagged surface, not applying sagging! ");
             return nullptr;
-        } 
+        }
         /// replace tempLocOnWire with tempLocOnSaggedWire
         posOnWire = std::move(*posOnSaggedWire);
     } else {
@@ -234,7 +234,7 @@ MdtRotPtr MdtDriftCircleOnTrackCreator::createRIO_OnTrack(const MdtPrepData& mdt
     // hack to determine whether we are before or after the spectrum, until we
     // sort this out properly
     if (!calibOutput.calibOk && calibOutput.driftTime > 500.) {
-        ATH_MSG_WARNING("Unable to perform calibration ");      
+        ATH_MSG_WARNING("Unable to perform calibration ");
         return nullptr;
     }
 
@@ -255,50 +255,50 @@ MdtRotPtr MdtDriftCircleOnTrackCreator::createRIO_OnTrack(const MdtPrepData& mdt
         // calculate sign
         double sign = (*pos)[Trk::driftRadius] < 0 ? -1.0 : 1.0;
         calibOutput.locPars[Trk::driftRadius] *= sign;
-        rot = std::make_unique<MdtDriftCircleOnTrack>(&mdtPrd, 
-                                                      calibOutput.locPars, 
-                                                      calibOutput.locErr,
-                                                      calibOutput.driftTime, 
-                                                      Trk::DECIDED, 
-                                                      calibInput.trackDirection(), 
+        rot = std::make_unique<MdtDriftCircleOnTrack>(&mdtPrd,
+                                                      std::move(calibOutput.locPars),
+                                                      std::move(calibOutput.locErr),
+                                                      calibOutput.driftTime,
+                                                      Trk::DECIDED,
+                                                      calibInput.trackDirection(),
                                                       positionAlongWire,
                                                       myStrategy);
-        
+
     } else {
         // If the track direction is missing, the B-field correction was not
         // applied
         if (GD) {
             // do not have access to direction, so have to use partial
             // constructor:
-            rot = std::make_unique<MdtDriftCircleOnTrack>(&mdtPrd, 
-                                                          calibOutput.locPars, 
-                                                          calibOutput.locErr,
-                                                          calibOutput.driftTime, 
-                                                          dcstatus, 
-                                                          positionAlongWire, 
+            rot = std::make_unique<MdtDriftCircleOnTrack>(&mdtPrd,
+                                                          std::move(calibOutput.locPars),
+                                                          std::move(calibOutput.locErr),
+                                                          calibOutput.driftTime,
+                                                          dcstatus,
+                                                          positionAlongWire,
                                                           myStrategy);
         } else {
             MuonDriftCircleErrorStrategy tmpStrategy(myStrategy.getBits());
             tmpStrategy.setParameter(MuonDriftCircleErrorStrategy::MagFieldCorrection, false);
-            rot = std::make_unique<MdtDriftCircleOnTrack>(&mdtPrd, 
-                                                          calibOutput.locPars, 
-                                                          calibOutput.locErr,
-                                                          calibOutput.driftTime, 
-                                                          dcstatus, 
-                                                          positionAlongWire, 
+            rot = std::make_unique<MdtDriftCircleOnTrack>(&mdtPrd,
+                                                          std::move(calibOutput.locPars),
+                                                          std::move(calibOutput.locErr),
+                                                          calibOutput.driftTime,
+                                                          dcstatus,
+                                                          positionAlongWire,
                                                           tmpStrategy);
         }
     }
     ATH_MSG_DEBUG("MDT ROT: radius = "
                   << rot->localParameters().get(Trk::driftRadius) << " error = "
                   << Amg::error(rot->localCovariance(), Trk::locR)
-                  << " error = " << calibOutput.locErr << " ,channel "
+                  <<" ,channel "
                   << m_idHelperSvc->toString(iD));
 
     return rot.release();
 }
 
-void MdtDriftCircleOnTrackCreator::updateSign(MdtDriftCircleOnTrack& caliDriftCircle, 
+void MdtDriftCircleOnTrackCreator::updateSign(MdtDriftCircleOnTrack& caliDriftCircle,
                                               Trk::DriftCircleSide si) const {
     // ************************
     // Apply additional corrections to local position
@@ -317,10 +317,10 @@ void MdtDriftCircleOnTrackCreator::updateSign(MdtDriftCircleOnTrack& caliDriftCi
 }
 
 CalibrationOutput MdtDriftCircleOnTrackCreator::getLocalMeasurement(const EventContext& ctx,
-                                                                    const MdtPrepData& DC, 
+                                                                    const MdtPrepData& DC,
                                                                     const MdtCalibInput& calibInput,
                                                                     const MuonDriftCircleErrorStrategy& myStrategy) const {
-    
+
 
     ATH_MSG_VERBOSE("getLocalMeasurement "<<calibInput<<" with m_doMdt=" << m_doMdt << " and " << myStrategy);
     const Amg::Vector3D& gpos{calibInput.closestApproach()};
@@ -364,7 +364,7 @@ CalibrationOutput MdtDriftCircleOnTrackCreator::getLocalMeasurement(const EventC
     if (!m_doMdt) {
         sigmaR = Amg::error(DC.localCovariance(), Trk::driftRadius);
     } else if (myStrategy.creationParameter(MuonDriftCircleErrorStrategy::ParameterisedErrors)) {
-        sigmaR = parametrisedSigma(errRadius);        
+        sigmaR = parametrisedSigma(errRadius);
     } else {
         sigmaR = calibOutput.driftRadiusUncert();
     }
@@ -391,21 +391,21 @@ CalibrationOutput MdtDriftCircleOnTrackCreator::getLocalMeasurement(const EventC
 
     // return new values
     bool ok = true;
-    return {Trk::LocalParameters(std::move(radiusPar)), newLocalCov, driftTime,
+    return {Trk::LocalParameters(radiusPar), newLocalCov, driftTime,
             ok};
 }
 
-MdtRotPtr MdtDriftCircleOnTrackCreator::correct(const MdtPrepData& prd, 
+MdtRotPtr MdtDriftCircleOnTrackCreator::correct(const MdtPrepData& prd,
                                                 const Trk::TrackParameters& tp,
-                                                const MuonDriftCircleErrorStrategy* strategy, 
+                                                const MuonDriftCircleErrorStrategy* strategy,
                                                 const double beta,
                                                 const double tTrack) const {
-    
-    const Amg::Vector3D momentum = tp.momentum();
+
+    const Amg::Vector3D& momentum = tp.momentum();
     return createRIO_OnTrack(prd, tp.position(), &momentum, 0, strategy, beta, tTrack);
 }
 
-Trk::RIO_OnTrack* MdtDriftCircleOnTrackCreator::correct(const Trk::PrepRawData& prd, 
+Trk::RIO_OnTrack* MdtDriftCircleOnTrackCreator::correct(const Trk::PrepRawData& prd,
                                                         const Trk::TrackParameters& tp) const {
     if (!prd.type(Trk::PrepRawDataType::MdtPrepData)){
         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Incorrect hit type: "
@@ -419,7 +419,7 @@ Trk::RIO_OnTrack* MdtDriftCircleOnTrackCreator::correct(const Trk::PrepRawData& 
 MdtRotPtr MdtDriftCircleOnTrackCreator::updateError(const MdtDriftCircleOnTrack& DCT,
                                                     const Trk::TrackParameters* /**pars*/,
                                                     const MuonDriftCircleErrorStrategy* strategy) const {
-    
+
     const MuonDriftCircleErrorStrategy& myStrategy = (!strategy) ? m_errorStrategy : *strategy;
 
     // calculate error
@@ -488,8 +488,8 @@ MdtRotPtr MdtDriftCircleOnTrackCreator::updateError(const MdtDriftCircleOnTrack&
     return rot.release();
 }
 
-double MdtDriftCircleOnTrackCreator::timeOfFlight(const Amg::Vector3D& pos, 
-                                                  const double beta, 
+double MdtDriftCircleOnTrackCreator::timeOfFlight(const Amg::Vector3D& pos,
+                                                  const double beta,
                                                   const double tTrack,
                                                   const double tShift) const {
     return m_applyToF * (pos.mag() * s_inverseSpeedOfLight / beta) +
@@ -501,20 +501,20 @@ double MdtDriftCircleOnTrackCreator::parametrisedSigma(double r) {
     return 0.23 * std::exp(-std::abs(r) / 6.06) + 0.0362;
 }
 
-double MdtDriftCircleOnTrackCreator::mooreErrorStrategy(const MuonDriftCircleErrorStrategy& myStrategy, 
+double MdtDriftCircleOnTrackCreator::mooreErrorStrategy(const MuonDriftCircleErrorStrategy& myStrategy,
                                                         double sigmaR2,
                                                         const Identifier& id) const {
     if (m_isMC)
         return mooreErrorStrategyMC(myStrategy, sigmaR2, id);
-   
+
     if (m_looseErrors)
         return mooreErrorStrategyLoose(myStrategy, sigmaR2, id);
     else
         return mooreErrorStrategyTight(myStrategy, sigmaR2, id);
-    
+
 }
 
-double MdtDriftCircleOnTrackCreator::mooreErrorStrategyMC(const MuonDriftCircleErrorStrategy& myStrategy, 
+double MdtDriftCircleOnTrackCreator::mooreErrorStrategyMC(const MuonDriftCircleErrorStrategy& myStrategy,
                                                           double sigmaR2,
                                                           const Identifier& id) const {
     ATH_MSG_DEBUG("mooreErrorStrategy sigmaR2=" << sigmaR2<<" "<<m_idHelperSvc->toString(id));
@@ -533,7 +533,7 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyMC(const MuonDriftCircleE
             } else {
                 ATH_MSG_VERBOSE(" segment error, precise ");
                 return sigmaR2 + 0.005;  // Input segments , no T0 refit
-            }            
+            }
         }
         // Don't know how to handle other cases - error?
     } else {  // Track
@@ -597,7 +597,7 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyMC(const MuonDriftCircleE
     return sigmaR2;
 }
 
-double MdtDriftCircleOnTrackCreator::mooreErrorStrategyLoose(const MuonDriftCircleErrorStrategy& myStrategy, 
+double MdtDriftCircleOnTrackCreator::mooreErrorStrategyLoose(const MuonDriftCircleErrorStrategy& myStrategy,
                                                              double sigmaR2,
                                                              const Identifier& id) const {
     ATH_MSG_DEBUG("mooreErrorStrategy sigmaR2=" << sigmaR2<<" "<<m_idHelperSvc->toString(id));
@@ -617,7 +617,7 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyLoose(const MuonDriftCirc
             } else {
                 ATH_MSG_VERBOSE(" segment error, precise ");
                 return sigmaR2 + 0.005;  // Input segments , no T0 refit
-            }            
+            }
         }
         // Don't know how to handle other cases - error?
     } else {  // Track
@@ -634,13 +634,13 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyLoose(const MuonDriftCirc
                        std::abs(m_idHelperSvc->stationEta(id)) >= 7) {
                 ATH_MSG_VERBOSE(" track error BIS78 ");
                 if (std::abs(m_idHelperSvc->stationEta(id)) == 7)
-                    return 1.44 * sigmaR2 + 1.;  // 1.2* + 1. mm                
+                    return 1.44 * sigmaR2 + 1.;  // 1.2* + 1. mm
                 return 4 * sigmaR2 + 25;  // 2* + 5. mm
             } else if (m_idHelperSvc->mdtIdHelper().stationName(id) == m_BME_idx &&
                        m_idHelperSvc->stationPhi(id) == 7) {
                 ATH_MSG_VERBOSE(" track error BME ");
                 return 1.44 * sigmaR2 + 0.25;  // 1.2* + 0.5 mm
-            } 
+            }
             /// Need to check whether this Identifier is still existent
             else if (m_idHelperSvc->chamberIndex(id) == MuonStationIndex::BOL &&
                        std::abs(m_idHelperSvc->stationEta(id)) == 7 &&
@@ -688,11 +688,11 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyLoose(const MuonDriftCirc
                 return 1.44 * sigmaR2 + fixedTerm;
             }
         }
-    }  // End of segment or track    
+    }  // End of segment or track
     return sigmaR2;
 }
 
-double MdtDriftCircleOnTrackCreator::mooreErrorStrategyTight(const MuonDriftCircleErrorStrategy& myStrategy, 
+double MdtDriftCircleOnTrackCreator::mooreErrorStrategyTight(const MuonDriftCircleErrorStrategy& myStrategy,
                                                              double sigmaR2,
                                                              const Identifier& id) const {
     ATH_MSG_DEBUG("mooreErrorStrategy sigmaR2=" << sigmaR2);
@@ -711,7 +711,7 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyTight(const MuonDriftCirc
             } else {
                 ATH_MSG_VERBOSE(" segment error, precise ");
                 return sigmaR2 + 0.005;  // Input segments , no T0 refit
-            }           
+            }
         }
         // Don't know how to handle other cases - error?
     } else {  // Track
@@ -731,14 +731,14 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyTight(const MuonDriftCirc
                 ATH_MSG_VERBOSE(" track error BIS78 ");
                 if (std::abs(m_idHelperSvc->stationEta(id)) == 7)
                     return 1.44 * sigmaR2 + 1.;  // 1.2* + 1. mm
-                
+
                 return 4 * sigmaR2 + 1.;  // 2* + 1. mm
             } else if (stIndex == MuonStationIndex::BM &&
                        m_idHelperSvc->stationPhi(id) == 7 &&
                        (m_idHelperSvc->mdtIdHelper()).stationName(id) == m_BME_idx) {
                 ATH_MSG_VERBOSE(" track error BME ");
                 return 1.21 * sigmaR2 + 0.25;  // 1.1* + 0.5 mm
-            } 
+            }
             /// Need to check whether this Identifier is still valid?
             else if (m_idHelperSvc->chamberIndex(id) == MuonStationIndex::BOL &&
                        std::abs(m_idHelperSvc->stationEta(id)) == 7 &&
@@ -774,7 +774,7 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyTight(const MuonDriftCirc
 
                 // use slightly smaller errors for the barrel
                 //
-                double fixedTerm = 0.01;                
+                double fixedTerm = 0.01;
                 if (m_doIndividualChamberReweights) {
                     if (m_idHelperSvc->chamberIndex(id) == MuonStationIndex::BIL &&
                         m_idHelperSvc->stationEta(id) == 1 &&
@@ -790,11 +790,11 @@ double MdtDriftCircleOnTrackCreator::mooreErrorStrategyTight(const MuonDriftCirc
                 return 1.21 * sigmaR2 + fixedTerm;
             }
         }
-    }  // End of segment or track   
+    }  // End of segment or track
     return sigmaR2;
 }
 
-double MdtDriftCircleOnTrackCreator::muonErrorStrategy(const MuonDriftCircleErrorStrategy& myStrategy, 
+double MdtDriftCircleOnTrackCreator::muonErrorStrategy(const MuonDriftCircleErrorStrategy& myStrategy,
                                                        double sigmaR2,
                                                        const Identifier& /*id*/) const {
 

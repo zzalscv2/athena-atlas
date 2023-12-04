@@ -79,11 +79,11 @@ void TrigFTF_ExtendedTrackState::AddHole() {
 }
 
 void TrigFTF_ExtendedTrackState::AddHit(const Trk::PrepRawData* pPRD, double dchi2, int ndof) {
-  
+
   double cov[15];
   int idx=0;
-  for(int i=0;i<5;i++) 
-    for(int j=0;j<=i;j++) 
+  for(int i=0;i<5;i++)
+    for(int j=0;j<=i;j++)
       cov[idx++] = m_Gk[i][j];
 
   if(m_isSwapped) {
@@ -92,7 +92,7 @@ void TrigFTF_ExtendedTrackState::AddHit(const Trk::PrepRawData* pPRD, double dch
   else {
     m_track.emplace_back(pPRD, m_Xk, &cov[0], dchi2, ndof);
   }
-  
+
   m_chi2 += dchi2;
   m_ndof += ndof;
   m_nClusters++;
@@ -103,7 +103,7 @@ void TrigFTF_ExtendedTrackState::SwapTheEnds() {
   m_isSwapped = !m_isSwapped;
 
   std::swap(m_pS, m_pO);
-  
+
   double tmpX[10];
   memcpy(&tmpX[0], &m_Xk[0], sizeof(tmpX));
 
@@ -131,7 +131,7 @@ void TrigFTF_ExtendedTrackState::report() const {
   std::cout<<"L: ";
   for(int i=0;i<4;i++) std::cout<<m_Xk[i]<<" ";
   std::cout<<1/m_Xk[4]<<" "<<std::sin(m_Xk[3])/m_Xk[4]<<std::endl;
-  
+
 
   std::cout<<"Covariance at last point:"<<std::endl;
 
@@ -186,7 +186,7 @@ const InDet::PixelCluster* TrigInDetTrackFollowingTool::findBestPixelHit(const I
   double bestChi2Dist = m_maxChi2Dist_Pixels;
 
   for(const auto& pPRD : *pColl) {
-    
+
     double cluster_cov[2];
 
     if(m_useHitErrors) {
@@ -201,7 +201,7 @@ const InDet::PixelCluster* TrigInDetTrackFollowingTool::findBestPixelHit(const I
 
     double covsum[2][2] = {{ets.m_Gk[0][0] + cluster_cov[0], ets.m_Gk[0][1]},
                            {ets.m_Gk[0][1], ets.m_Gk[1][1] + cluster_cov[1]}};
-    
+
     double detr = 1/(covsum[0][0]*covsum[1][1] - covsum[0][1]*covsum[1][0]);
 
     double invcov[2][2] = {{detr*covsum[1][1], -detr*covsum[1][0]},
@@ -216,14 +216,14 @@ const InDet::PixelCluster* TrigInDetTrackFollowingTool::findBestPixelHit(const I
       bestChi2Dist = dchi2;
     }
   }
-  
+
   return bestHit;
 }
 
 const InDet::SCT_Cluster* TrigInDetTrackFollowingTool::findBestStripHit(const InDet::SCT_ClusterCollection* pColl, const TrigFTF_ExtendedTrackState& ets, int shape) const {
 
   const InDet::SCT_Cluster* bestHit = nullptr;
-  
+
   if(pColl->empty()) return bestHit;
 
   double bestChi2Dist = m_maxChi2Dist_Strips;
@@ -234,7 +234,7 @@ const InDet::SCT_Cluster* TrigInDetTrackFollowingTool::findBestStripHit(const In
     double track_cov = ets.m_Gk[0][0];
 
     for(const auto& pPRD : *pColl) {
-	  
+
       double resid = pPRD->localPosition().x() - track_pos;
       double covsum = track_cov + pPRD->localCovariance()(0, 0);
       double dchi2 = resid * resid / covsum;
@@ -246,7 +246,7 @@ const InDet::SCT_Cluster* TrigInDetTrackFollowingTool::findBestStripHit(const In
     }
   }
   else {
-    
+
     double invY = 1.0/ets.m_Xk[1];
     double track_tan = ets.m_Xk[0] * invY;
 
@@ -290,10 +290,10 @@ void TrigInDetTrackFollowingTool::update(const InDet::PixelCluster* pPRD, TrigFT
     cluster_cov[1] = pPRD->width().z();
     for(int i=0;i<2;i++) cluster_cov[i] *= cluster_cov[i]/12.0;
   }
-  
+
   double covsum[2][2] = {{ets.m_Gk[0][0] + cluster_cov[0], ets.m_Gk[0][1]},
                          {ets.m_Gk[0][1], ets.m_Gk[1][1] + cluster_cov[1]}};
-    
+
   double detr = 1/(covsum[0][0]*covsum[1][1] - covsum[0][1]*covsum[1][0]);
 
   double invcov[2][2] = {{detr*covsum[1][1], -detr*covsum[1][0]},
@@ -312,9 +312,9 @@ void TrigInDetTrackFollowingTool::update(const InDet::PixelCluster* pPRD, TrigFT
 
   double Gain[10][2];
 
-  for(int i=0;i<10;i++) 
+  for(int i=0;i<10;i++)
     for(int j=0;j<2;j++) Gain[i][j] =  CHT[i][0]*invcov[0][j] + CHT[i][1]*invcov[1][j];
-  
+
   for(int i=0;i<10;i++) {
     ets.m_Xk[i] += Gain[i][0]*resid[0] + Gain[i][1]*resid[1];
 
@@ -333,21 +333,21 @@ void TrigInDetTrackFollowingTool::update(const InDet::SCT_Cluster* pPRD, int sha
   double dchi2 = 0.0;
 
   if(shape == InDetDD::Box) {
-    
+
     double covsum = ets.m_Gk[0][0] + pPRD->localCovariance()(0, 0);
     double invcov = 1/covsum;
-    
+
     double resid = pPRD->localPosition().x() - ets.m_Xk[0];
-    
+
     dchi2 = resid*resid*invcov;
-    
+
     double CHT[10], Gain[10];
-    
+
     for(int i=0;i<10;i++) {
       CHT[i] =  ets.m_Gk[i][0];
       Gain[i] = CHT[i] * invcov;
     }
-    
+
     for(int i=0;i<10;i++) {
       ets.m_Xk[i] += Gain[i]*resid;
       for(int j=0;j<=i;j++) {
@@ -363,26 +363,26 @@ void TrigInDetTrackFollowingTool::update(const InDet::SCT_Cluster* pPRD, int sha
 
     double meas_x = pPRD->localPosition().x();
     double meas_y = pPRD->localPosition().y();
-    
+
     double track_pos = meas_y * track_tan;
-    
+
     double h11 = meas_y * invY;
     double h12 = -track_pos * invY;
-    
+
     double track_cov = h11*h11*ets.m_Gk[0][0] + 2*h11*h12*ets.m_Gk[0][1] + h12*h12*ets.m_Gk[1][1];
     double covsum = track_cov + pPRD->localCovariance()(0, 0);
     double invcov = 1/covsum;
 
     double resid = meas_x - track_pos;
     dchi2 = resid*resid*invcov;
-	
+
     double CHT[10], Gain[10];
-    
+
     for(int i=0;i<10;i++) {
       CHT[i] =  h11*ets.m_Gk[i][0] + h12*ets.m_Gk[i][1];
       Gain[i] = CHT[i] * invcov;
     }
-    
+
     for(int i=0;i<10;i++) {
       ets.m_Xk[i] += Gain[i]*resid;
       for(int j=0;j<=i;j++) {
@@ -406,7 +406,7 @@ std::unique_ptr<TrigFTF_ExtendedTrackState> TrigInDetTrackFollowingTool::fitTheS
   double pb[3] = {SPb.globalPosition().x(), SPb.globalPosition().y(), SPb.globalPosition().z()};
   double pm[3] = {SPm.globalPosition().x(), SPm.globalPosition().y(), SPm.globalPosition().z()};
   double pe[3] = {SPe.globalPosition().x(), SPe.globalPosition().y(), SPe.globalPosition().z()};
-  
+
   double dsp[2] = {pe[0]-pb[0], pe[1]-pb[1]};
   double Lsp = std::sqrt(dsp[0]*dsp[0] + dsp[1]*dsp[1]);
   double cosA = dsp[0]/Lsp;
@@ -471,11 +471,11 @@ std::unique_ptr<TrigFTF_ExtendedTrackState> TrigInDetTrackFollowingTool::fitTheS
     double ds = dist - path;
     //std::cout<<"dist="<<dist<<" ds="<<ds<<std::endl;
     path = dist;
-    
+
     double rk = sp->globalPosition().perp();
     double dr = rk - radius;
     radius = rk;
-    
+
     //update Jacobians
     Fx[0][1] = ds;
     Fx[0][2] = 0.5*ds*ds;
@@ -559,20 +559,20 @@ std::unique_ptr<TrigFTF_ExtendedTrackState> TrigInDetTrackFollowingTool::fitTheS
 	Cy[i][j] = Cey[i][j] - Ky[i]*CHTy[j];
       }
     }
-  } 
+  }
 
   //create initial track state at the last spacepoint of the seed
-  
+
   double B0[3];
-  
+
   fieldCache.getField(pe, B0);
 
   double P0[6];
-  
+
   const Trk::PrepRawData* cle  = SPe.clusterList().first;
-  
+
   const Trk::PlaneSurface* thePlane = static_cast<const Trk::PlaneSurface*>(&cle->detectorElement()->surface());
-  
+
   if(thePlane == nullptr) return nullptr;
 
   P0[0] = cle->localPosition()[0];
@@ -611,7 +611,7 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
   }
 
   const InDet::PixelClusterContainer* p_pixcontainer = pixcontainer.ptr();
- 
+
   SG::ReadHandle<InDet::SCT_ClusterContainer> sctcontainer(m_sctcontainerkey, ctx);
 
   if (!sctcontainer.isValid()) {
@@ -620,9 +620,9 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
   }
 
   const InDet::SCT_ClusterContainer* p_sctcontainer = sctcontainer.ptr();
- 
+
   //3. prepare the initial track state
-  
+
   int nModules = road.size();
 
   std::vector<const Trk::PrepRawData*> knownHits(nModules, nullptr);//assuming maximum one hit per detector element
@@ -641,17 +641,17 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
   //pre-assigning the hits which are already known
 
   int nUnassigned = seedSize;
- 
+
   int startModuleIdx = 0;
-  
+
   for(int moduleIdx = 0;moduleIdx<nModules;moduleIdx++) {
     unsigned int hash = road.at(moduleIdx)->identifyHash();
     for(unsigned int spIdx=0;spIdx<seedSize;spIdx++) {
       if(seedHashes[spIdx] != hash) continue;
-      
+
       knownHits[moduleIdx]    = seed.at(spIdx)->clusterList().first;
       moduleStatus[moduleIdx] = 1;//seed hit assigned
-      
+
       startModuleIdx = moduleIdx;
       --nUnassigned;
       break;
@@ -677,7 +677,7 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
   for(int moduleIdx = startModuleIdx;moduleIdx>=0;moduleIdx--, modCounter++) {
     moduleIndexSequence[modCounter] = moduleIdx;
   }
-  
+
   //4. The track following loop
 
   for(auto const moduleIdx : moduleIndexSequence) {
@@ -685,12 +685,12 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
     int stat = moduleStatus[moduleIdx];
 
     if(stat < 0) continue;//checked and rejected
-    
+
     const InDetDD::SiDetectorElement* de = road.at(moduleIdx);//next module
 
     //extrapolation target surface
     const Trk::PlaneSurface* plane = static_cast<const Trk::PlaneSurface*>(&de->surface());
-    
+
     if(stat > 0) {//a hit has been assigned, extrapolate and run the update
 
       if(moduleIdx != startModuleIdx) {//otherwise we are already on that module
@@ -707,12 +707,12 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
       }
 
       if(de->isPixel()) {
-	
+
 	const InDet::PixelCluster* pPRD = dynamic_cast<const InDet::PixelCluster*>(knownHits[moduleIdx]);
 
 	update(pPRD, theState);
       }
-      
+
       else {//strip
 
 	const InDet::SCT_Cluster* pPRD = dynamic_cast<const InDet::SCT_Cluster*>(knownHits[moduleIdx]);
@@ -724,7 +724,7 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
     }// stat > 0
 
     //general case: no hit assigned, will search first
-    
+
     //tentative extrapolation
     bool inBounds = checkIntersection(theState.m_Xk, theState.m_pS, plane, fieldCache);
 
@@ -732,7 +732,7 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
       moduleStatus[moduleIdx] = -2;//miss
       continue;
     }
-    
+
     //precise extrapolation
     int rkCode = extrapolateTrackState(theState, plane, fieldCache);
 
@@ -743,9 +743,9 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
 
     unsigned int moduleHash = de->identifyHash();
     unsigned int nHits = 0;
-    
+
     if(de->isPixel()) {
-      
+
       if(p_pixcontainer != nullptr) {
 	const InDet::PixelClusterCollection *clustersOnElement = (*p_pixcontainer).indexFindPtr(moduleHash);
 	if(clustersOnElement != nullptr) {
@@ -761,7 +761,7 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
 	}
       }
     }
-    
+
     if(nHits == 0) {// 'no-hits' update
       theState.AddHole();
       moduleStatus[moduleIdx] = -3;//empty module
@@ -769,31 +769,31 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
     }
 
     //there are some hits
-    
+
     bool assigned = false;
 
     if(de->isPixel()) {//Pixels: search and update
-	
+
       if(de->design().shape()!=InDetDD::Box) {
 	ATH_MSG_WARNING("Only Box-shaped pixel modules are currently supported!");
 	break;
       }
-      
+
       const InDet::PixelClusterCollection *clustersOnElement = (*p_pixcontainer).indexFindPtr(moduleHash);
 
       const InDet::PixelCluster* pPRD = findBestPixelHit(clustersOnElement, theState);
 
       if(pPRD != nullptr) {
 	assigned = true;
-	  
+
 	knownHits[moduleIdx] = pPRD;
 	moduleStatus[moduleIdx] = 2;//a new hit assigned
 
-	update(pPRD, theState);	
+	update(pPRD, theState);
       }
     }
     else {//Strips: search and update
-      
+
       const InDet::SCT_ClusterCollection *clustersOnElement = (*p_sctcontainer).indexFindPtr(moduleHash);
 
       const InDet::SCT_Cluster* pPRD = findBestStripHit(clustersOnElement, theState, de->design().shape());
@@ -809,7 +809,7 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
 
     if(!assigned) {// 'no-hits' update
 
-      theState.AddHole();      
+      theState.AddHole();
       moduleStatus[moduleIdx] = -4;//all hits rejected
     }
   }
@@ -822,11 +822,11 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
 
   if(nClusters < m_nClustersMin) return nullptr;
   if(nHoles > m_nHolesMax) return nullptr;
-  
+
   int rkCode = extrapolateTrackState(theState, nullptr, fieldCache);//to perigee
-  
+
   if(rkCode !=0) return nullptr;
-  
+
   int ndoftot   = theState.m_ndof;
   double qOverP = theState.m_Xk[4];
   double pt     = std::sin(theState.m_Xk[3])/qOverP;
@@ -838,7 +838,7 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
   bool bad_cov = false;
 
   auto cov = AmgSymMatrix(5){};
-  
+
   for(int i=0;i<5;i++) {
     for(int j=0;j<=i;j++) {
       double c = theState.m_Gk[i][j];
@@ -857,17 +857,17 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
   }
 
   Trk::PerigeeSurface perigeeSurface;
-  
+
   std::unique_ptr<Trk::TrackParameters> pPP = perigeeSurface.createUniqueTrackParameters(d0, z0, phi0, theta, qOverP, cov);
 
   std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> perType;
   perType.set(Trk::TrackStateOnSurface::Perigee);
-  
+
   auto pParVec    = std::make_unique<Trk::TrackStates>();
 
   pParVec->reserve(50);
   pParVec->push_back(new Trk::TrackStateOnSurface(nullptr, std::move(pPP), nullptr, perType));
-  
+
   std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> rioType(0);
   rioType.set(Trk::TrackStateOnSurface::Measurement);
   rioType.set(Trk::TrackStateOnSurface::Scatterer);
@@ -881,13 +881,13 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
     //create track states on surface
 
     int ndof = ha.m_ndof;
-    
+
     const Trk::PlaneSurface* pPS = dynamic_cast<const Trk::PlaneSurface*>(&pPRD->detectorElement()->surface());
 
     if(pPS==nullptr) continue;
-    
+
     const InDet::SiCluster* pCL = dynamic_cast<const InDet::SiCluster*>(pPRD);
-    
+
     Trk::LocalParameters locPos = Trk::LocalParameters(pCL->localPosition());
 
     const Amg::MatrixX& cov = pCL->localCovariance();
@@ -899,34 +899,36 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
     if(ndof == 2) {
       const InDet::PixelCluster* pPixel = static_cast<const InDet::PixelCluster*>(pCL);
       if(pPixel) {
-	pRIO = std::make_unique<InDet::PixelClusterOnTrack>(pPixel, locPos, cov, hash, pPixel->globalPosition(), pPixel->gangedPixel());
+        pRIO = std::make_unique<InDet::PixelClusterOnTrack>(pPixel, std::move(locPos), Amg::MatrixX(cov),
+                                                            hash, pPixel->globalPosition(), pPixel->gangedPixel());
       }
     }
     else {
       const InDet::SCT_Cluster* pStrip = static_cast<const InDet::SCT_Cluster*>(pCL);
       if(pStrip) {
-	pRIO = std::make_unique<InDet::SCT_ClusterOnTrack>(pStrip, locPos, cov, hash, pStrip->globalPosition());
+        pRIO = std::make_unique<InDet::SCT_ClusterOnTrack>(pStrip, std::move(locPos),
+                                                           Amg::MatrixX(cov), hash, pStrip->globalPosition());
       }
-    } 
-    
+    }
+
     auto pM = AmgSymMatrix(5){};
-    
+
     int idx = 0;
     for(int i=0;i<5;i++) {
       for(int j=0;j<=i;j++) {
-	pM.fillSymmetric(i,j,ha.m_Ck[idx++]);
+        pM.fillSymmetric(i,j,ha.m_Ck[idx++]);
       }
     }
-        
+
     std::unique_ptr<Trk::TrackParameters> pTP = pPS->createUniqueTrackParameters(ha.m_Xk[0], ha.m_Xk[1], ha.m_Xk[2], ha.m_Xk[3], ha.m_Xk[4], pM);
-    
+
     Trk::FitQualityOnSurface FQ    = Trk::FitQualityOnSurface(ha.m_dchi2, ndof);
-    
+
     Trk::TrackStateOnSurface* pTSS = new Trk::TrackStateOnSurface(FQ, std::move(pRIO), std::move(pTP), nullptr, rioType);
-    
+
     pParVec->push_back(pTSS);
   }
-  
+
   auto pFQ = std::make_unique<Trk::FitQuality>(chi2tot, ndoftot);
 
   Trk::TrackInfo info{};
@@ -942,52 +944,52 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
 int TrigInDetTrackFollowingTool::extrapolateTrackState(TrigFTF_ExtendedTrackState& ETS, const Trk::PlaneSurface* pN, MagField::AtlasFieldCache& fieldCache) const {
 
   double Re[5];
-  
+
   memcpy(&Re[0], &ETS.m_Xk[0], sizeof(Re));
 
   double P[8]; //parameters + path
   double Jm[40];//Jacobian
- 
+
   memset(&P[0],0,sizeof(P));
 
   const Amg::Transform3D& Trf = ETS.m_pS->transform();
-  double Ax[3] = {Trf(0,0),Trf(1,0),Trf(2,0)}; //loc1-axis in the global frame 
+  double Ax[3] = {Trf(0,0),Trf(1,0),Trf(2,0)}; //loc1-axis in the global frame
   double Ay[3] = {Trf(0,1),Trf(1,1),Trf(2,1)}; //loc2-axis in the global frame
-  
+
   double gP[3];
   gP[0] = Trf(0,3) + Ax[0]*Re[0] + Ay[0]*Re[1];
   gP[1] = Trf(1,3) + Ax[1]*Re[0] + Ay[1]*Re[1];
   gP[2] = Trf(2,3) + Ax[2]*Re[0] + Ay[2]*Re[1];
-  
+
   double sinf, cosf;
   double sint, cost;
 
   sincos(Re[2], &sinf, &cosf);
   sincos(Re[3], &sint, &cost);
-  
+
   double gV[3]  = {cosf*sint, sinf*sint, cost};
-  
+
   memset(&Jm[0],0,sizeof(Jm));
 
   //Track state and Jacobian initialization
-  
+
   P[6] = Re[4];
   P[7] = 0.0;
-  
+
   for(int i=0;i<3;i++) {
     P[i]    = gP[i];
     P[i+3]  = gV[i];
     Jm[i]   = Ax[i];
     Jm[7+i] = Ay[i];
   }
-  
+
   Jm[17] =-P[4];//17
   Jm[18] = P[3];//18
   Jm[24] = cosf*cost;//24
   Jm[25] = sinf*cost;//25
   Jm[26] =-sint;//26
   Jm[34] = 1.0;//34
-  
+
   int code = RungeKutta34(P, Jm, pN, fieldCache, true);
 
   if(code!=0) return code;
@@ -1015,7 +1017,7 @@ int TrigInDetTrackFollowingTool::extrapolateTrackState(TrigFTF_ExtendedTrackStat
 
     Re[0] = d[0] * Ax2[0] + d[1] * Ax2[1] + d[2] * Ax2[2];
     Re[1] = d[0] * Ay2[0] + d[1] * Ay2[1] + d[2] * Ay2[2];
-    
+
     Re[2] = std::atan2(P[4],P[3]);
     Re[3] = std::acos(P[5]);
     Re[4] = P[6];
@@ -1025,13 +1027,13 @@ int TrigInDetTrackFollowingTool::extrapolateTrackState(TrigFTF_ExtendedTrackStat
   memset(&J[0],0,sizeof(J));
 
   transformJacobianToLocal(pN, P, Jm, J);
-  
+
   const double*  Az = Trf.matrix().col(2).data();
-  
+
   // z-component of track direction vector in the local c.s.
-  
+
   double lV = Az[0]*gV[0] + Az[1]*gV[1] + Az[2]*gV[2];
-  
+
   double xOverX0 = 0.0;
 
   if(m_useDetectorThickness) {
@@ -1045,7 +1047,7 @@ int TrigInDetTrackFollowingTool::extrapolateTrackState(TrigFTF_ExtendedTrackStat
   }
 
   double radLength = xOverX0/std::fabs(lV);
-  
+
   double sigmaMS = 13.6 * std::fabs(Re[4]) * std::sqrt(radLength) * (1.0 + 0.038 * std::log(radLength));
   double s2 = sigmaMS * sigmaMS;
   double a = 1.0 / sint;
@@ -1057,15 +1059,15 @@ int TrigInDetTrackFollowingTool::extrapolateTrackState(TrigFTF_ExtendedTrackStat
   ETS.m_Gk[3][3] += s2;
   ETS.m_Gk[2][3] += s2 * a;
   ETS.m_Gk[3][2] = ETS.m_Gk[2][3];
-  
+
   //energy loss corrections
-  
+
   ETS.m_Gk[4][4] += Re[4] * Re[4] * radLength * (0.415 - 0.744 * radLength);
 
-  //Sym. product J*C*J^T  
+  //Sym. product J*C*J^T
 
   double Be[5][5];//upper off-diagonal block
-  
+
   memset(&Be[0][0],0,sizeof(Be));
 
   for(int i=0;i<4;i++) {
@@ -1103,7 +1105,7 @@ int TrigInDetTrackFollowingTool::extrapolateTrackState(TrigFTF_ExtendedTrackStat
       }
     }
   }
-  
+
   //update the state
 
   ETS.m_pS = pN;//moving forward
@@ -1123,48 +1125,48 @@ bool TrigInDetTrackFollowingTool::checkIntersection(double const* Rk, const Trk:
 
   const double C = 299.9975;
   const double minStep = 100.0;
-  
+
   double Re[5];
-  
+
   memcpy(&Re[0], &Rk[0], sizeof(Re));
 
   const Amg::Transform3D& Trf = pS->transform();
 
-  double Ax[3] = {Trf(0,0),Trf(1,0),Trf(2,0)}; //loc1-axis in the global frame 
+  double Ax[3] = {Trf(0,0),Trf(1,0),Trf(2,0)}; //loc1-axis in the global frame
 
   double Ay[3] = {Trf(0,1),Trf(1,1),Trf(2,1)}; //loc2-axis in the global frame
-  
+
   double gP[3];
 
   gP[0] = Trf(0,3) + Ax[0]*Re[0] + Ay[0]*Re[1];
   gP[1] = Trf(1,3) + Ax[1]*Re[0] + Ay[1]*Re[1];
   gP[2] = Trf(2,3) + Ax[2]*Re[0] + Ay[2]*Re[1];
-  
+
   double sinf, cosf;
   double sint, cost;
 
   sincos(Re[2], &sinf, &cosf);
   sincos(Re[3], &sint, &cost);
-  
+
   double gV[3]  = {cosf*sint, sinf*sint, cost};
 
   const Amg::Vector3D& normal = pN->normal();
   const Amg::Vector3D& center = pN->center();
 
   double D[4] = {normal[0], normal[1], normal[2], 0.0};
-  
+
   for(int i=0;i<3;i++) D[3] += -normal[i]*center[i];
 
   double CQ = C*Re[4];
 
-  double gB[3]; 
+  double gB[3];
 
   fieldCache.getField(gP, gB);
 
   double c = D[0]*gP[0] + D[1]*gP[1] + D[2]*gP[2] + D[3];
   double b = D[0]*gV[0] + D[1]*gV[1] + D[2]*gV[2];
   double a = 0.5*CQ*(gB[0]*(D[1]*gV[2]-D[2]*gV[1]) + gB[1]*(D[2]*gV[0]-D[0]*gV[2]) + gB[2]*(D[0]*gV[1]-D[1]*gV[0]));
-  
+
   double ratio = 4*a*c/(b*b);
 
   bool useExpansion = std::fabs(ratio)<0.1;
@@ -1193,7 +1195,7 @@ bool TrigInDetTrackFollowingTool::checkIntersection(double const* Rk, const Trk:
     nStepMax = (int)(std::fabs(sl)/minStep)+1;
   }
 
-  if((nStepMax<0)||(nStepMax>100)) {  
+  if((nStepMax<0)||(nStepMax>100)) {
     return false;
   }
 
@@ -1220,14 +1222,14 @@ bool TrigInDetTrackFollowingTool::checkIntersection(double const* Rk, const Trk:
     int nStep = nStepMax;
 
     while(nStep > 0) {
-      
+
       c = D[0]*gP[0] + D[1]*gP[1] + D[2]*gP[2] + D[3];
       b = D[0]*gV[0] + D[1]*gV[1] + D[2]*gV[2];
       a = 0.5*CQ*(gB[0]*(D[1]*gV[2]-D[2]*gV[1])+gB[1]*(D[2]*gV[0]-D[0]*gV[2])+gB[2]*(D[0]*gV[1]-D[1]*gV[0]));
-      
+
       ratio = 4*a*c/(b*b);
       useExpansion = std::fabs(ratio) < 0.1;
-      
+
       if(useExpansion) {
 	sl = -c/b;
 	sl = sl*(1-a*sl/b);
@@ -1235,7 +1237,7 @@ bool TrigInDetTrackFollowingTool::checkIntersection(double const* Rk, const Trk:
       else {
 	double discr=b*b-4.0*a*c;
 	if(discr<0.0) {
-	  return false;      
+	  return false;
 	}
 	int signb = (b<0.0)?-1:1;
 	sl = (-b+signb*std::sqrt(discr))/(2*a);
@@ -1244,22 +1246,22 @@ bool TrigInDetTrackFollowingTool::checkIntersection(double const* Rk, const Trk:
       double ds = sl/nStep;
       Av = ds*CQ;
       Ac = 0.5*ds*Av;
-      
+
       DVx = gV[1]*gB[2] - gV[2]*gB[1];
       DVy = gV[2]*gB[0] - gV[0]*gB[2];
       DVz = gV[0]*gB[1] - gV[1]*gB[0];
-      
+
       E[0] = gP[0] + gV[0]*ds + Ac*DVx;
       E[1] = gP[1] + gV[1]*ds + Ac*DVy;
       E[2] = gP[2] + gV[2]*ds + Ac*DVz;
-      
+
       double V[3];
 
       V[0] = gV[0] + Av*DVx;
       V[1] = gV[1] + Av*DVy;
       V[2] = gV[2] + Av*DVz;
-      
-      for(int i=0;i<3;i++) {	  
+
+      for(int i=0;i<3;i++) {
 	gV[i] = V[i];gP[i] = E[i];
       }
 
@@ -1268,7 +1270,7 @@ bool TrigInDetTrackFollowingTool::checkIntersection(double const* Rk, const Trk:
       nStep--;
     }
   }
-  
+
   //global to local
 
   const Amg::Transform3D& Trf2 = pN->transform();
@@ -1280,7 +1282,7 @@ bool TrigInDetTrackFollowingTool::checkIntersection(double const* Rk, const Trk:
 
   double locX = d[0] * Ax2[0] + d[1] * Ax2[1] + d[2] * Ax2[2];
   double locY = d[0] * Ay2[0] + d[1] * Ay2[1] + d[2] * Ay2[2];
-    
+
   return (pN->bounds().inside(Amg::Vector2D(locX, locY), 0.1, 0.1));
 
 }
@@ -1299,7 +1301,7 @@ double TrigInDetTrackFollowingTool::estimateRK_Step(const Trk::PlaneSurface* pN,
   const Amg::Vector3D& center = pN->center();
 
   double D = 0.0;// -(r0,n)
-  
+
   for(int i=0;i<3;i++) D += -normal[i]*center[i];
 
   double Sum = D;
@@ -1307,12 +1309,12 @@ double TrigInDetTrackFollowingTool::estimateRK_Step(const Trk::PlaneSurface* pN,
 
   for(int i=0;i<3;i++) {
     a   += normal[i]*P[i+3];
-    Sum += normal[i]*P[i]; 
+    Sum += normal[i]*P[i];
   }
   if(a==0.0) return Step;
- 
+
   Step = -Sum/a;
- 
+
   return Step;
 }
 
@@ -1330,7 +1332,7 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
   double exStep = 0.0;
 
   if(std::fabs(P[6]) > minQp) return -1;
-  
+
   double Step = estimateRK_Step(pN, P);
 
   if(Step > 1e7) return -2;
@@ -1339,7 +1341,7 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
 
   if(absStep <= min_step) {
     for(int i=0;i<3;i++) P[i] += Step*P[i+3];
-    P[7] += Step; 
+    P[7] += Step;
     return 0;
   }
 
@@ -1355,7 +1357,7 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
 
   memcpy(&Y[0], P, sizeof(Y));
 
-  double B[3]; 
+  double B[3];
 
   fieldCache.getField(Y, B);
 
@@ -1374,7 +1376,7 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
       fieldCache.getField(Y, B);
       for(int i=0;i<3;i++) B[i] *= coeff;
     }
-    
+
     double B2[3], B3[3];
 
     double H = Step;
@@ -1400,7 +1402,7 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
     for(int i=3;i<6;i++) Y2[i] = Y[i] + H3mom*YB[i-3];
 
     double YB2[3];
- 
+
     if(useConstField) {
       crossProduct(B, Y2+3, YB2);
     }
@@ -1418,7 +1420,7 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
     for(int i=3;i<6;i++) Y3[i] = Y[i] + H23mom*YB2[i-3];
 
     double YB3[3];
-    
+
     if(useConstField) {
       crossProduct(B, Y3+3, YB3);
     }
@@ -1438,14 +1440,14 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
     //Jacobian calculations go here ...
 
     if(withJacobian) {
-      
+
       double J1C[9], L2C[9], J2C[9], L3C[9], J3C[9];
-    
+
       double CqB3H34[3];
       double CqB2H23[3];
       double CqBH3[3];
 
-      if(!useConstField) {    
+      if(!useConstField) {
 	for(int i=0;i<3;i++) CqBH3[i]   = H3mom*B[i];
 	for(int i=0;i<3;i++) CqB2H23[i] = H23mom*B2[i];
 	for(int i=0;i<3;i++) CqB3H34[i] = H34mom*B3[i];
@@ -1459,11 +1461,11 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
       crossProduct(CqBH3, J+17, J1C);
       crossProduct(CqBH3, J+24, J1C+3);
       crossProduct(CqBH3, J+31, J1C+6);
-      
+
       J1C[6] += H3*YB[0];
       J1C[7] += H3*YB[1];
       J1C[8] += H3*YB[2];
-    
+
       L2C[0] = J[17] + J1C[0];
       L2C[1] = J[18] + J1C[1];
       L2C[2] = J[19] + J1C[2];
@@ -1475,7 +1477,7 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
       L2C[6] = J[31] + J1C[6];
       L2C[7] = J[32] + J1C[7];
       L2C[8] = J[33] + J1C[8];
-      
+
       crossProduct(CqB2H23, L2C,   J2C);
       crossProduct(CqB2H23, L2C+3, J2C+3);
       crossProduct(CqB2H23, L2C+6, J2C+6);
@@ -1483,7 +1485,7 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
       J2C[6] += H23*YB2[0];
       J2C[7] += H23*YB2[1];
       J2C[8] += H23*YB2[2];
- 
+
       L3C[0] = J[17] + J2C[0];
       L3C[1] = J[18] + J2C[1];
       L3C[2] = J[19] + J2C[2];
@@ -1495,7 +1497,7 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
       L3C[6] = J[31] + J2C[6];
       L3C[7] = J[32] + J2C[7];
       L3C[8] = J[33] + J2C[8];
-    
+
       crossProduct(CqB3H34, L3C,   J3C);
       crossProduct(CqB3H34, L3C+3, J3C+3);
       crossProduct(CqB3H34, L3C+6, J3C+6);
@@ -1503,23 +1505,23 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
       J3C[6] += H34*YB3[0];
       J3C[7] += H34*YB3[1];
       J3C[8] += H34*YB3[2];
-    
+
       for(int i=0;i<9;i++) J1C[i] = 0.75*J1C[i] + J3C[i];
-      
+
       for(int i=0;i<9;i++) J2C[i] *= H34;
-      
+
       J[14] += H*J[17];
       J[15] += H*J[18];
       J[16] += H*J[19];
-      
+
       J[21] += H*J[24];
       J[22] += H*J[25];
       J[23] += H*J[26];
-      
+
       J[28] += H*J[31];
       J[29] += H*J[32];
       J[30] += H*J[33];
-      
+
       J[14] += J2C[0];
       J[15] += J2C[1];
       J[16] += J2C[2];
@@ -1547,7 +1549,7 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
     }
 
     P[7] += Step;
-    
+
     if(fabs(P[7]) > maxPath) return -3;
 
     double norm = 1/std::sqrt(Y1[3]*Y1[3]+Y1[4]*Y1[4]+Y1[5]*Y1[5]);
@@ -1557,13 +1559,13 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
     double newStep = estimateRK_Step(pN, Y1);
 
     if(newStep > 1e7) return -4;
-    
+
     double absNewStep = fabs(newStep);
 
     if(absNewStep <= min_step) {//the boundary is too close, using straight line
-      
+
       if(withJacobian) {
-	if(!useConstField) { 
+	if(!useConstField) {
 	  crossProduct(B3, Y1+3, J+35);
 	}
 	else {
@@ -1575,9 +1577,9 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
 	P[i+3] = Y1[i+3];
 	P[i] = Y1[i] + newStep*Y1[i+3];
       }
-      P[7] += newStep; 
+      P[7] += newStep;
 
-      return 0;  
+      return 0;
     }
 
     double absStep = fabs(Step);
@@ -1589,10 +1591,10 @@ int TrigInDetTrackFollowingTool::RungeKutta34(double* P, double* J, const Trk::P
     else {
       if(absNewStep < absStep) Step = newStep;
     }
-    
+
     for(int i=0;i<6;i++) Y[i] = Y1[i];
   }
-  
+
   return -11;//max. number of iteration reached
 
 }
@@ -1604,7 +1606,7 @@ void TrigInDetTrackFollowingTool::crossProduct(double const * B, double const * 
 }
 
 void TrigInDetTrackFollowingTool::rotateToLocal(const double (&GL)[3][3], double const * X, double (&Y)[3]) const {
-  Y[0] = GL[0][0]*X[0] + GL[0][1]*X[1] + GL[0][2]*X[2]; 
+  Y[0] = GL[0][0]*X[0] + GL[0][1]*X[1] + GL[0][2]*X[2];
   Y[1] = GL[1][0]*X[0] + GL[1][1]*X[1] + GL[1][2]*X[2];
   Y[2] = GL[2][0]*X[0] + GL[2][1]*X[1] + GL[2][2]*X[2];
 }
@@ -1614,7 +1616,7 @@ void TrigInDetTrackFollowingTool::transformJacobianToLocal(const Trk::PlaneSurfa
   if(pN == nullptr) {//to perigee
 
     int d0sign = (P[3]*P[1] - P[4]*P[0]) > 0 ? 1 : -1;
-    
+
     double inv_d0 = d0sign/std::sqrt(P[0]*P[0]+P[1]*P[1]);
 
     double A = P[0]*inv_d0;
@@ -1636,7 +1638,7 @@ void TrigInDetTrackFollowingTool::transformJacobianToLocal(const Trk::PlaneSurfa
 
     double a =  P[3]*Vt;
     double b = -P[4]*Vt;
-  
+
     J[10] = a*G[4]   + b*G[3];
     J[11] = a*G[11]  + b*G[10];
     J[12] = a*G[18]  + b*G[17];//18, 17
@@ -1652,14 +1654,14 @@ void TrigInDetTrackFollowingTool::transformJacobianToLocal(const Trk::PlaneSurfa
     J[19] = sqV*G[33];//33
 
     J[20] = 1.0;
-    
+
     return;
   }
-  
+
   double GL[3][3];//global-to-local rotation matrix
-  
+
   const Amg::Transform3D& Trf = pN->transform();
-  
+
   const double*  Ax = Trf.matrix().col(0).data();
   const double*  Ay = Trf.matrix().col(1).data();
   const double*  Az = Trf.matrix().col(2).data();
@@ -1675,28 +1677,28 @@ void TrigInDetTrackFollowingTool::transformJacobianToLocal(const Trk::PlaneSurfa
   alpha[0] = GL[0][0]*P[3] + GL[0][1]*P[4] + GL[0][2]*P[5];
   alpha[1] = GL[1][0]*P[3] + GL[1][1]*P[4] + GL[1][2]*P[5];
   alpha[2] = GL[2][0]*P[3] + GL[2][1]*P[4] + GL[2][2]*P[5];
-  
+
   double dV0[3], dV1[3], dV2[3], dV3[3], dV4[3];
 
   //transforming the jacobian columns
-  
-  dV0[0] = GL[0][0]*G[0] + GL[0][1]*G[1] + GL[0][2]*G[2]; 
+
+  dV0[0] = GL[0][0]*G[0] + GL[0][1]*G[1] + GL[0][2]*G[2];
   dV0[1] = GL[1][0]*G[0] + GL[1][1]*G[1] + GL[1][2]*G[2];
   dV0[2] = GL[2][0]*G[0] + GL[2][1]*G[1] + GL[2][2]*G[2];
 
-  dV1[0] = GL[0][0]*G[7] + GL[0][1]*G[8] + GL[0][2]*G[9]; 
+  dV1[0] = GL[0][0]*G[7] + GL[0][1]*G[8] + GL[0][2]*G[9];
   dV1[1] = GL[1][0]*G[7] + GL[1][1]*G[8] + GL[1][2]*G[9];
   dV1[2] = GL[2][0]*G[7] + GL[2][1]*G[8] + GL[2][2]*G[9];
 
-  dV2[0] = GL[0][0]*G[14] + GL[0][1]*G[15] + GL[0][2]*G[16]; 
+  dV2[0] = GL[0][0]*G[14] + GL[0][1]*G[15] + GL[0][2]*G[16];
   dV2[1] = GL[1][0]*G[14] + GL[1][1]*G[15] + GL[1][2]*G[16];
   dV2[2] = GL[2][0]*G[14] + GL[2][1]*G[15] + GL[2][2]*G[16];
 
-  dV3[0] = GL[0][0]*G[21] + GL[0][1]*G[22] + GL[0][2]*G[23]; 
+  dV3[0] = GL[0][0]*G[21] + GL[0][1]*G[22] + GL[0][2]*G[23];
   dV3[1] = GL[1][0]*G[21] + GL[1][1]*G[22] + GL[1][2]*G[23];
   dV3[2] = GL[2][0]*G[21] + GL[2][1]*G[22] + GL[2][2]*G[23];
 
-  dV4[0] = GL[0][0]*G[28] + GL[0][1]*G[29] + GL[0][2]*G[30]; 
+  dV4[0] = GL[0][0]*G[28] + GL[0][1]*G[29] + GL[0][2]*G[30];
   dV4[1] = GL[1][0]*G[28] + GL[1][1]*G[29] + GL[1][2]*G[30];
   dV4[2] = GL[2][0]*G[28] + GL[2][1]*G[29] + GL[2][2]*G[30];
 
@@ -1709,7 +1711,7 @@ void TrigInDetTrackFollowingTool::transformJacobianToLocal(const Trk::PlaneSurfa
   J[2] = dV2[0] - dV2[2]*L0;
   J[3] = dV3[0] - dV3[2]*L0;
   J[4] = dV4[0] - dV4[2]*L0;
- 
+
   J[5] = dV0[1] - dV0[2]*L1;
   J[6] = dV1[1] - dV1[2]*L1;
   J[7] = dV2[1] - dV2[2]*L1;
@@ -1720,18 +1722,18 @@ void TrigInDetTrackFollowingTool::transformJacobianToLocal(const Trk::PlaneSurfa
 
   double a =  P[3]*Vt;
   double b = -P[4]*Vt;
-  
+
   alpha[2] *= P[6];
-  
+
   double T = (a*G[36]+b*G[35])*alpha[2];//36, 35
-  
+
   J[12] = a*G[18] + b*G[17] - dV2[2]*T;//18, 17
   J[13] = a*G[25] + b*G[24] - dV3[2]*T;//25, 24
   J[14] = a*G[32] + b*G[31] - dV4[2]*T;//32, 31
-  
+
   double sqV = -std::sqrt(Vt);
   T = sqV*G[37]*alpha[2];//37
-  
+
   J[17] = sqV*G[19] - dV2[2]*T;//19
   J[18] = sqV*G[26] - dV3[2]*T;//26
   J[19] = sqV*G[33] - dV4[2]*T;//33

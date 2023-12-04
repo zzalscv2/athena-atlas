@@ -163,7 +163,7 @@ namespace Muon {
                 ATH_MSG_WARNING("RIO not of type RpcPrepData, cannot create ROT");
                 return nullptr;
             }
-            MClT = new RpcClusterOnTrack(MClus, locpar, loce, positionAlongStrip);
+            MClT = new RpcClusterOnTrack(MClus, std::move(locpar), std::move(loce), positionAlongStrip);
 
         } else if (m_doTgc && m_idHelperSvc->isTgc(RIO.identify())) {
             // cast to TgcPrepData
@@ -205,7 +205,7 @@ namespace Muon {
                 loce = mat;
             }
 
-            MClT = new TgcClusterOnTrack(MClus, locpar, loce, positionAlongStrip);
+            MClT = new TgcClusterOnTrack(MClus, std::move(locpar), std::move(loce), positionAlongStrip);
 
         } else if (m_doCsc && m_idHelperSvc->isCsc(RIO.identify())) {
             // cast to CscPrepData
@@ -216,7 +216,8 @@ namespace Muon {
             }
 
             // current not changing CscClusterStatus but passing status of RIO
-            MClT = new CscClusterOnTrack(MClus, locpar, loce, positionAlongStrip, MClus->status(), MClus->timeStatus(), MClus->time());
+            MClT = new CscClusterOnTrack(MClus, std::move(locpar), std::move(loce),
+                                         positionAlongStrip, MClus->status(), MClus->timeStatus(), MClus->time());
         }
 
         return MClT;
@@ -284,7 +285,7 @@ namespace Muon {
         // postion Error is re-estimate only for precision fit cluster (eta)
         if (m_have_csc_tools && MClus->status() != Muon::CscStatusUnspoiled && MClus->status() != Muon::CscStatusSplitUnspoiled) {
             // current not changing CscClusterStatus but passing status of RIO
-            MClT = new CscClusterOnTrack(MClus, locpar, loce, positionAlongStrip, MClus->status(), MClus->timeStatus(), MClus->time());
+            MClT = new CscClusterOnTrack(MClus, std::move(locpar), std::move(loce), positionAlongStrip, MClus->status(), MClus->timeStatus(), MClus->time());
 
         } else {
             const MuonGM::CscReadoutElement* ele = MClus->detectorElement();
@@ -298,7 +299,8 @@ namespace Muon {
 
             if (results.empty() || results0.empty()) {
                 ATH_MSG_VERBOSE("No fit result");
-                return new CscClusterOnTrack(MClus, locpar, loce, positionAlongStrip, MClus->status(), MClus->timeStatus(), MClus->time());
+                return new CscClusterOnTrack(MClus, std::move(locpar), std::move(loce),
+                                             positionAlongStrip, MClus->status(), MClus->timeStatus(), MClus->time());
             }
             ICscClusterFitter::Result res, res0;
             res = results[0];
@@ -307,7 +309,8 @@ namespace Muon {
             if (fitresult) {
                 ATH_MSG_VERBOSE("  Precision fit failed which was succeeded: return="
                                 << "cluStatus: " << res.clusterStatus << "fitStatus: " << res.fitStatus);
-                return new CscClusterOnTrack(MClus, locpar, loce, positionAlongStrip, MClus->status(), MClus->timeStatus(), MClus->time());
+                return new CscClusterOnTrack(MClus, std::move(locpar), std::move(loce),
+                                             positionAlongStrip, MClus->status(), MClus->timeStatus(), MClus->time());
             } else {
                 ATH_MSG_VERBOSE("  Precision fit succeeded");
             }
@@ -339,7 +342,8 @@ namespace Muon {
             ATH_MSG_VERBOSE("All: new err matrix is " << newloce);
             ATH_MSG_VERBOSE("  dpos changed ====> " << Amg::error(newloce, Trk::loc1));
 
-            MClT = new CscClusterOnTrack(MClus, locpar, newloce, positionAlongStrip, MClus->status(), MClus->timeStatus(), MClus->time());
+            MClT = new CscClusterOnTrack(MClus, std::move(locpar), std::move(newloce),
+                                         positionAlongStrip, MClus->status(), MClus->timeStatus(), MClus->time());
             ATH_MSG_VERBOSE("global postion of MClT :::: " << MClT->globalPosition());
         }
 
@@ -355,7 +359,7 @@ namespace Muon {
     MuonClusterOnTrack* CscClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
         return createRIO_OnTrack(RIO, GP, GD);
     }
-                
+
     /// These functions are provided from the interface
     const ToolHandle<ICscStripFitter>& CscClusterOnTrackCreator::GetICscStripFitter() const { return m_stripFitter; }
     const ToolHandle<ICscClusterFitter>& CscClusterOnTrackCreator::GetICscClusterFitter() const { return m_clusterFitter; }

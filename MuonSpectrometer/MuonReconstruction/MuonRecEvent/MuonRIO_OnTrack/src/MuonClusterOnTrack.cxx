@@ -36,19 +36,14 @@ MuonClusterOnTrack::MuonClusterOnTrack():
 
 
 // Constructor with parameters
-MuonClusterOnTrack::MuonClusterOnTrack
-    (
-    const Trk::LocalParameters& locpos, 
-    const Amg::MatrixX& locerr, 
-    const Identifier& id,
-    const double positionAlongStrip
-    )
-   : 
-    RIO_OnTrack( locpos, locerr, id), //call base class constructor
-    m_globalPosition(),
-    m_positionAlongStrip(positionAlongStrip)
-{
-}
+MuonClusterOnTrack::MuonClusterOnTrack(
+  Trk::LocalParameters&& locpos,
+  Amg::MatrixX&& locerr,
+  const Identifier& id,
+  const double positionAlongStrip)
+    : RIO_OnTrack(std::move(locpos), std::move(locerr), id),  // call base class constructor
+      m_globalPosition(),
+      m_positionAlongStrip(positionAlongStrip) {}
 
 // Destructor:
 MuonClusterOnTrack::~MuonClusterOnTrack() = default;
@@ -68,8 +63,8 @@ MsgStream& MuonClusterOnTrack::dump( MsgStream&    stream) const
 {
   stream << MSG::INFO<<"MuonClusterOnTrack {"<<std::endl;
 
-  Trk::RIO_OnTrack::dump(stream); 
-  
+  Trk::RIO_OnTrack::dump(stream);
+
   stream << "Global position (x,y,z) = (";
   stream  <<this->globalPosition().x()<<", "
           <<this->globalPosition().y()<<", "
@@ -84,14 +79,14 @@ std::ostream& MuonClusterOnTrack::dump( std::ostream&    stream) const
   stream << "MuonClusterOnTrack {"<<std::endl;
   std::ios_base::fmtflags originalFormat = stream.flags();
 
-  Trk::RIO_OnTrack::dump(stream); 
+  Trk::RIO_OnTrack::dump(stream);
 
   stream << std::setiosflags(std::ios::fixed)<< std::setprecision(3);
 
   stream << "Position along strip: "<<m_positionAlongStrip<<std::endl;
   stream<<"}"<<std::endl;
   stream.flags( originalFormat );
-  
+
   return stream;
 }
 
@@ -114,7 +109,7 @@ const Amg::Vector3D& MuonClusterOnTrack::globalPosition() const {
 
     m_globalPosition.set(std::make_unique<const Amg::Vector3D>(gpos));
   }
-  
+
   return *m_globalPosition;
 }
 

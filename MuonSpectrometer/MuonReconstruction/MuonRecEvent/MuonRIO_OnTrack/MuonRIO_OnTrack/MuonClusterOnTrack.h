@@ -32,7 +32,7 @@ namespace Muon {
 
   /** @brief Base class for Muon cluster RIO_OnTracks.*/
   class MuonClusterOnTrack :   public Trk::RIO_OnTrack {
-    
+
     // /////////////////////////////////////////////////////////////////
     // Public methods:
     // /////////////////////////////////////////////////////////////////
@@ -40,16 +40,14 @@ namespace Muon {
 
     /** @brief Pool constructor*/
     MuonClusterOnTrack();
-    
 
-    /**@brief Constructor with parameters.
-       @warning You should not try to construct this class - use one of the concrete implementations,
-       i.e. CscClusterOnTrack.*/
-    MuonClusterOnTrack( const Trk::LocalParameters& locpos, 
-            const Amg::MatrixX& locerr, 
+
+    /**@brief Constructor with parameters*/
+    MuonClusterOnTrack(Trk::LocalParameters&& locpos,
+            Amg::MatrixX&& locerr,
             const Identifier& id,
             const double positionAlongStrip
-            ); 
+            );
 
 
     MuonClusterOnTrack(const MuonClusterOnTrack &);
@@ -57,7 +55,7 @@ namespace Muon {
 
     /** @brief Destructor*/
     virtual ~MuonClusterOnTrack();
-    
+
     /** @brief Clone this ROT */
     virtual MuonClusterOnTrack* clone() const override = 0;
 
@@ -87,14 +85,14 @@ namespace Muon {
 
     /** @brief Dumps information about the PRD*/
     virtual std::ostream& dump( std::ostream& stream) const override;
-    
+
     /** @brief Returns the detector element, associated with the PRD of this class*/
     virtual const MuonGM::MuonClusterReadoutElement* detectorElement() const override = 0;
-    
+
   protected:
     /** cache global position, the global position has to be calculated in the inheriting classes */
     CxxUtils::CachedUniquePtr<const Amg::Vector3D> m_globalPosition;
-    
+
     /** The position along the strip - used to calculate the GlobalPosition*/
     double m_positionAlongStrip;
 
@@ -103,21 +101,21 @@ namespace Muon {
 
     /** Used by custom convertors*/
     virtual void setValues(const Trk::TrkDetElementBase*, const Trk::PrepRawData*) override = 0 ;
-    
+
   };
 
   // /////////////////////////////////////////////////////////////////
   // Inline methods:
   // /////////////////////////////////////////////////////////////////
-  
-  inline IdentifierHash MuonClusterOnTrack::collectionHash() const { 
+
+  inline IdentifierHash MuonClusterOnTrack::collectionHash() const {
     if( this->prepRawData() ) return prepRawData()->collectionHash();
     return IdentifierHash();
   }
-  
-  inline IdentifierHash MuonClusterOnTrack::idDE() const { 
-      return IdentifierHash(); 
-  } 
+
+  inline IdentifierHash MuonClusterOnTrack::idDE() const {
+      return IdentifierHash();
+  }
 
 } // end of namespace
 

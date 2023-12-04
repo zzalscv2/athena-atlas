@@ -17,7 +17,7 @@ void Muon::STGC_RawDataContainerCnv_p3::transToPers(const Muon::STGC_RawDataCont
   
   persCont->resize(numColl);
   unsigned int i=0;
-  for ( auto collection : *transCont){
+  for ( const auto *collection : *transCont){
     STGC_RawDataCollection_p3& persColl = (*persCont)[i++];
     persColl.resize(collection->size());
     persColl.m_idHash = collection->m_idHash;

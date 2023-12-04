@@ -17,7 +17,7 @@ void Muon::MM_RawDataContainerCnv_p1::transToPers(const Muon::MM_RawDataContaine
   
   persCont->resize(numColl);
   unsigned int i=0;
-  for ( auto collection : *transCont){
+  for ( const auto *collection : *transCont){
     MM_RawDataCollection_p1& persColl = (*persCont)[i++];
     persColl.resize(collection->size());
     persColl.m_idHash = collection->m_idHash;

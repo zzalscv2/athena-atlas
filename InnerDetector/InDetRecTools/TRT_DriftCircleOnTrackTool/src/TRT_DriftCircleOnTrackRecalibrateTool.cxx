@@ -39,7 +39,7 @@ InDet::TRT_DriftCircleOnTrackRecalibrateTool::TRT_DriftCircleOnTrackRecalibrateT
 }
 
 ///////////////////////////////////////////////////////////////////
-// Destructor  
+// Destructor
 ///////////////////////////////////////////////////////////////////
 
 InDet::TRT_DriftCircleOnTrackRecalibrateTool::~TRT_DriftCircleOnTrackRecalibrateTool()= default;
@@ -92,11 +92,11 @@ Trk::RIO_OnTrack* InDet::TRT_DriftCircleOnTrackRecalibrateTool::correct
   bool isOK=false;
   double t0=0.;
   double rawtime     = m_drifttool->rawTime(DC->driftTimeBin());
-  
+
   if (m_useToTCorrection) {
-        rawtime -= m_drifttool->driftTimeToTCorrection(DC->timeOverThreshold(), DC->identify());      
-  } 
-  
+        rawtime -= m_drifttool->driftTimeToTCorrection(DC->timeOverThreshold(), DC->identify());
+  }
+
   double driftradius = m_drifttool->driftRadius(rawtime,DC->identify(),t0,isOK);
   double error       = m_drifttool->errorOfDriftRadius(rawtime-t0,DC->identify());
 
@@ -106,7 +106,7 @@ Trk::RIO_OnTrack* InDet::TRT_DriftCircleOnTrackRecalibrateTool::correct
   msg(MSG::VERBOSE)<<"Old radius: "<< DC->localPosition()[Trk::driftRadius]<<" -> new radius: "<<driftradius<<endmsg;
 
   if(distance>error*m_scalefactor){
-    
+
     //tube hit
     //
     rot=m_riontrackTube->correct(rio,TP);
@@ -117,16 +117,16 @@ Trk::RIO_OnTrack* InDet::TRT_DriftCircleOnTrackRecalibrateTool::correct
     const InDetDD::TRT_BaseElement* pE = DC->detectorElement(); if(!pE) return nullptr;
     IdentifierHash iH = pE->identifyHash();
     const Amg::VectorX& P = TP.parameters();
-    double se = sin(P[3]); 
+    double se = sin(P[3]);
     Amg::Vector3D dir(cos(P[2])*se,sin(P[2])*se,cos(P[3]));
-    
+
     double predictedLocZ=P[1];
-    
+
     double sign = (TP.parameters()[0] < 0.) ? -1. : 1.;
 
     // only create objects within the active area
     //
-    double sl = pE->strawLength()*.5;  
+    double sl = pE->strawLength()*.5;
     if     (predictedLocZ > sl) predictedLocZ = sl;
     else if(predictedLocZ <-sl) predictedLocZ =-sl;
 
@@ -150,11 +150,11 @@ Trk::RIO_OnTrack* InDet::TRT_DriftCircleOnTrackRecalibrateTool::correct
     }
 
     Trk::DefinedParameter  radius(sign*driftradius,Trk::locX);
-    Trk::LocalParameters lp(radius);  
+    Trk::LocalParameters lp(radius);
 
-    rot=new InDet::TRT_DriftCircleOnTrack(DC,lp,cov,iH,predictedLocZ,dir,Trk::DECIDED);
+    rot=new InDet::TRT_DriftCircleOnTrack(DC,std::move(lp),std::move(cov),iH,predictedLocZ,dir,Trk::DECIDED);
   }
   return rot;
-}  
+}
 
 

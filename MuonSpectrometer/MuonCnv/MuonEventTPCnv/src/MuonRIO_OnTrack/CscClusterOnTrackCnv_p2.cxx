@@ -18,7 +18,7 @@ persToTrans( const Muon::CscClusterOnTrack_p2 *persObj,
   Muon::CscClusterOnTrack *transObj, MsgStream &log )
 {
   ElementLinkToIDC_CSC_Container rio;
-  m_elCnv.persToTrans(&persObj->m_prdLink,&rio,log);  
+  m_elCnv.persToTrans(&persObj->m_prdLink,&rio,log);
 
   Trk::LocalParameters localParams;
   fillTransFromPStore( &m_localParCnv, persObj->m_localParams, &localParams, log );
@@ -29,8 +29,8 @@ persToTrans( const Muon::CscClusterOnTrack_p2 *persObj,
   EigenHelpers::vectorToEigenMatrix(dummy.values, localCovariance, "CscClusterOnTrackCnv_p2");
 
   *transObj = Muon::CscClusterOnTrack (rio,
-                                       localParams,
-                                       localCovariance,
+                                       std::move(localParams),
+                                       std::move(localCovariance),
                                        Identifier(persObj->m_id),
                                        nullptr, // detEL
                                        persObj->m_positionAlongStrip,
@@ -39,7 +39,7 @@ persToTrans( const Muon::CscClusterOnTrack_p2 *persObj,
                                        persObj->m_time);
 
   m_eventCnvTool->recreateRIO_OnTrack(transObj);
-  if (transObj->detectorElement()==nullptr) 
+  if (transObj->detectorElement()==nullptr)
     log << MSG::WARNING<<"Unable to reset DetEl for this RIO_OnTrack, "
     << "probably because of a problem with the Identifier/IdentifierHash : ("
     << transObj->identify()<<"/"<<transObj->idDE()<<endmsg;
@@ -48,22 +48,22 @@ persToTrans( const Muon::CscClusterOnTrack_p2 *persObj,
 
 void CscClusterOnTrackCnv_p2::
 transToPers( const Muon::CscClusterOnTrack *transObj,
-  Muon::CscClusterOnTrack_p2 *persObj, MsgStream &log ) 
+  Muon::CscClusterOnTrack_p2 *persObj, MsgStream &log )
 {
  // Prepare ELs
   Trk::IEventCnvSuperTool::ELKey_t key;
   Trk::IEventCnvSuperTool::ELIndex_t index;
   m_eventCnvTool->prepareRIO_OnTrackLink(transObj, key, index);
   ElementLinkToIDC_CSC_Container eltmp (key, index);
-  m_elCnv.transToPers(&eltmp, &persObj->m_prdLink,log);  
+  m_elCnv.transToPers(&eltmp, &persObj->m_prdLink,log);
 
   persObj->m_id = transObj->identify().get_identifier32().get_compact();
   persObj->m_localParams = toPersistent( &m_localParCnv, &transObj->localParameters(), log );
-  // persObj->m_localErrMat = toPersistent( &m_errorMxCnv, &transObj->m_localErrMat, log );   
+  // persObj->m_localErrMat = toPersistent( &m_errorMxCnv, &transObj->m_localErrMat, log );
   Trk::ErrorMatrix pMat;
   EigenHelpers::eigenMatrixToVector(pMat.values, transObj->localCovariance(), "CscClusterOnTrackCnv_p2");
   persObj->m_localErrMat = toPersistent( &m_errorMxCnv, &pMat, log );
-  
+
   persObj->m_status         = (transObj->timeStatus()<<8); // First 8 bits reserved for ClusterStatus.
   persObj->m_status         += transObj->status();
   persObj->m_positionAlongStrip = transObj->positionAlongStrip();

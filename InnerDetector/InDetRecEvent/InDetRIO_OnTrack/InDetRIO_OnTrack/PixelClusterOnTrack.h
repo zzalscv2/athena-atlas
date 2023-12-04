@@ -64,20 +64,7 @@ class PixelClusterOnTrack final : public SiClusterOnTrack {
   PixelClusterOnTrack& operator=(PixelClusterOnTrack&&) = default;
   ///destructor
   virtual ~PixelClusterOnTrack() = default;
-  /** Constructor with parameters :
-  RIO/PrepRawData pointer, LocalPosition, LocalErrorMatrix, idDE&
-  Everything else is owned elsewhere. */
-  PixelClusterOnTrack(const PixelCluster* RIO,
-                      const Trk::LocalParameters& locpars,
-                      const Amg::MatrixX& locerr,
-                      const IdentifierHash& idDE,
-                      bool hasAmbiguity = false,
-                      // this parameter is ignored,
-                      // information taken from RIO
-                      // Just kept not to break the interface to
-                      // already existing code.
-                      bool isbroad = false);
-
+  /** Constructor with parameters*/
   PixelClusterOnTrack(const PixelCluster* RIO,
                       Trk::LocalParameters&& locpars,
                       Amg::MatrixX&& locerr,
@@ -90,22 +77,7 @@ class PixelClusterOnTrack final : public SiClusterOnTrack {
                       bool isbroad = false);
 
 
-  /** Constructor with parameters :
-  RIO/PrepRawData pointer, LocalPosition, LocalErrorMatrix, idDE&,
-  Global Position.
-  Everything else is owned elsewhere. */
-  PixelClusterOnTrack(const PixelCluster* RIO,
-                      const Trk::LocalParameters& locpars,
-                      const Amg::MatrixX& locerr,
-                      const IdentifierHash& idDE,
-                      const Amg::Vector3D& globalPosition,
-                      bool hasAmbiguity = false,
-                      // this parameter is ignored,
-                      // information taken from RIO
-                      // Just kept not to break the interface to
-                      // already existing code.
-                      bool isbroad = false);
-
+  /** Constructor with parameters */
   PixelClusterOnTrack(const PixelCluster* RIO,
                       Trk::LocalParameters&& locpars,
                       Amg::MatrixX&& locerr,

@@ -22,7 +22,7 @@ namespace MuonGM
     class RpcReadoutElement;
 }
 
-namespace Trk 
+namespace Trk
 {
     class ITrkEventCnvTool;
 }
@@ -50,12 +50,12 @@ public:
     @param[in] RIO <b>Required</b> (i.e. must not be NULL). Ownership is not taken.
     @param[in] locpos <b>Required</b> (i.e. must not be NULL). Ownership is taken.
     @param[in] locerr <b>Required</b> (i.e. must not be NULL). Ownership is taken.
-    @param[in] positionAlongStrip  <b>Required</b> Used to calculate global position.  
+    @param[in] positionAlongStrip  <b>Required</b> Used to calculate global position.
     */
     RpcClusterOnTrack(
         const RpcPrepData* RIO,
-        const Trk::LocalParameters& locpos,
-        const Amg::MatrixX& locerr,
+        Trk::LocalParameters&& locpos,
+        Amg::MatrixX&& locerr,
         double positionAlongStrip,
         float time=0.0
     );
@@ -63,8 +63,8 @@ public:
     // Alternate constructor that doesn't dereference the RIO link.
     RpcClusterOnTrack(
                       const ElementLinkToIDC_RPC_Container& RIO,
-                      const Trk::LocalParameters& locpos,
-                      const Amg::MatrixX& locerr,
+                      Trk::LocalParameters&& locpos,
+                      Amg::MatrixX&& locerr,
                       const Identifier& id,
                       const MuonGM::RpcReadoutElement* detEl,
                       double positionAlongStrip,
@@ -83,23 +83,23 @@ public:
     /** @brief Returns the detector element, assoicated with the PRD of this class*/
     virtual const MuonGM::RpcReadoutElement* detectorElement() const override final;
 
-    /** @brief Returns the surface on which this measurement was taken. 
+    /** @brief Returns the surface on which this measurement was taken.
     (i.e. a surface of a detector element) */
     virtual const Trk::Surface& associatedSurface() const override final;
-    
+
     /** Return the time (ns)*/
   float time() const;
-    
+
     /** @brief Dumps information about the PRD*/
     virtual MsgStream&    dump( MsgStream&    stream) const override final;
 
     /** @brief Dumps information about the PRD*/
     virtual std::ostream& dump( std::ostream& stream) const override final;
-    
+
 
 private:
     /**@brief Sets the DetElement and Trk::PrepRawData pointers after reading from disk.
-    @warning Only intended for use by persistency convertors    
+    @warning Only intended for use by persistency convertors
     @todo Throw exception if TrkDetElementBase isn't correct concrete type*/
   virtual void setValues(const Trk::TrkDetElementBase*,
                          const Trk::PrepRawData*) override final;
@@ -126,7 +126,7 @@ inline RpcClusterOnTrack* RpcClusterOnTrack::clone() const
 
 inline const RpcPrepData* RpcClusterOnTrack::prepRawData() const
 {
-    if (m_rio.isValid()) return m_rio.cachedElement(); 
+    if (m_rio.isValid()) return m_rio.cachedElement();
     else return 0;
 }
 

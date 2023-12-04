@@ -1448,7 +1448,7 @@ void CscSegmentUtilTool::find_2dseg3hit(bool measphi, int station, int eta, int 
                 for (pCluster3 = clus3.begin(); pCluster3 != clus3.end(); ++pCluster3) {
                     // Use these three clusters as a segment.
                     fitclus = {*pCluster1, *pCluster2, *pCluster3};
-                    
+
                     // Check if these hits are used by any other segments
                     if (!unique_hits(fitclus, segs4hit)) {
                         ATH_MSG_VERBOSE(" hits already used by other segments ");
@@ -2144,7 +2144,7 @@ void CscSegmentUtilTool::getRios(const ICscSegmentFinder::Segment& seg, ICscSegm
                 Trk::DefinedParameter locPar(lpos.x(), Trk::locX);
                 Trk::LocalParameters ppars(locPar);
 
-                Trk::RIO_OnTrack* pclu2 = new CscClusterOnTrack(prd, ppars, cov, 0.0, prd->status(), prd->timeStatus(), prd->time());
+                Trk::RIO_OnTrack* pclu2 = new CscClusterOnTrack(prd, std::move(ppars), std::move(cov), 0.0, prd->status(), prd->timeStatus(), prd->time());
                 prios->push_back(pclu2);
             }
             // Just put into list of RIO_OnTrack
