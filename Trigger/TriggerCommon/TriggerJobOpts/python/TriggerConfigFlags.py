@@ -241,6 +241,9 @@ def createTriggerFlags(doTriggerRecoFlags):
                   'HI' in prevFlags.Trigger.triggerMenuSetup,
                   help='modify min-pt-to-Topo threshold for TOBs to HI values')
 
+    flags.addFlag('Trigger.L1.errorOnMissingTOB', False,
+                  help='Set to true to enable strict-mode which will generate an ERROR on missing (non-overflow) TOB events in HLT-seeding from L1')
+
     # Online category
     flags.addFlag('Trigger.Online.partitionName', os.getenv('TDAQ_PARTITION') or '',
                   help='partition name used to determine online vs offline BS result writing')

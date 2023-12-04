@@ -316,7 +316,8 @@ def HLTSeedingCfg(flags, seqName = None):
 
         decoderAlg.L1DataConsistencyChecker = CompFactory.L1DataConsistencyChecker(
             ThresholdToDecisionMap = dict([(k,v) for k,v in _mapL1ThresholdToDecisionCollection.items() if checkConsistency(k)]),
-            MonTool = L1DataConsistencyMonitoring(flags) )
+            MonTool = L1DataConsistencyMonitoring(flags),
+            ErrorOnMissingTOB = flags.Trigger.L1.errorOnMissingTOB )
 
     #Transient bytestream
     from AthenaConfiguration.Enums import Format

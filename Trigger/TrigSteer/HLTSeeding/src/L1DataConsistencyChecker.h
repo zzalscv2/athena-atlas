@@ -42,6 +42,9 @@ private:
   ToolHandle<GenericMonitoringTool> m_monTool {
     this, "MonTool", "", "Monitoring tool"};
 
+  Gaudi::Property<bool> m_errorOnMissingTOB {
+    this, "ErrorOnMissingTOB", true, "Set to true to enable strict-mode which will generate an ERROR on missing (non-overflow) TOB events in HLT-seeding from L1"};
+
   Gaudi::Property<std::map<std::string,std::string>> m_thresholdToDecisionMap {
     this, "ThresholdToDecisionMap", {}, "Map between L1 threshold type and the corresponding DecisionContainer name"};
 
