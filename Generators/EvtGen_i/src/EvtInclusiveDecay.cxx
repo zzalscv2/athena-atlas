@@ -100,6 +100,7 @@ EvtInclusiveDecay::EvtInclusiveDecay(const std::string& name, ISvcLocator* pSvcL
   declareProperty("userSelMinDimuMass", m_userSelMinDimuMass=0.);
   declareProperty("userSelMaxDimuMass", m_userSelMaxDimuMass=-1.); // set to negative to not apply cut
   declareProperty("isfHerwig", m_isfHerwig=false);
+  declareProperty("setVMtransversePol", m_setVMtransversePol=false);
 
   // We have decided to blacklist Tau decays because we are not sure whether the polarization
   // would be properly passed to EvtGen
@@ -508,6 +509,10 @@ void EvtInclusiveDecay::decayParticle(HepMC::GenEvent* hepMC, HepMC::GenParticle
   double pz=(part->momentum()).pz()/1000.;
   EvtVector4R evtP(en,px,py,pz);
   EvtParticle* evtPart = EvtParticleFactory::particleFactory(evtId,evtP);
+  
+  // set transverse polarization to vector mesons (relevant for coherent production of J/Psi etc in UPC)
+  if(m_setVMtransversePol && (id==113 || id== 443 || id==100443 || id==553 || id==100553 || id==200553) )evtPart->setVectorSpinDensity();
+  
   m_myEvtGen->generateDecay(evtPart);
   if (msgLvl(MSG::VERBOSE)) evtPart->printTree();
   double ct_s = part->production_vertex()->position().t();
