@@ -19,18 +19,6 @@ namespace {
 
 using namespace Trk::MultiComponentStateAssembler;
 
-/** @brief Helper for ordering by larger to smaller weight*/
-class SortByLargerSimpleComponentWeight
-{
-public:
-  SortByLargerSimpleComponentWeight() = default;
-  bool operator()(const Trk::ComponentParameters& firstComponent,
-                  const Trk::ComponentParameters& secondComponent) const
-  {
-    return firstComponent.second > secondComponent.second;
-  }
-};
-
 /** @bried Method to check the validity of of the cached state */
 inline bool
 isStateValid(const Cache& cache)
@@ -87,9 +75,11 @@ prepareStateForAssembly(Cache& cache)
     return false;
   }
   // Sort Multi-Component State by weights
-  std::sort(cache.multiComponentState.begin(),
-            cache.multiComponentState.end(),
-            SortByLargerSimpleComponentWeight());
+  std::sort(
+      cache.multiComponentState.begin(), cache.multiComponentState.end(),
+      [](const Trk::ComponentParameters& x, const Trk::ComponentParameters& y) {
+        return x.second > y.second;
+      });
 
   double totalWeight(cache.validWeightSum + cache.invalidWeightSum);
   if (totalWeight != 0.) {
@@ -102,10 +92,11 @@ prepareStateForAssembly(Cache& cache)
 
     const Trk::ComponentParameters dummySmallestWeight(nullptr, minimumWeight);
 
-    auto lower_than = std::upper_bound(cache.multiComponentState.begin(),
-                                       cache.multiComponentState.end(),
-                                       dummySmallestWeight,
-                                       SortByLargerSimpleComponentWeight());
+    auto lower_than = std::upper_bound(
+        cache.multiComponentState.begin(), cache.multiComponentState.end(),
+        dummySmallestWeight,
+        [](const Trk::ComponentParameters& x,
+           const Trk::ComponentParameters& y) { return x.second > y.second; });
 
     // reverse iterate , so as to delete removing the last
     auto lower_than_reverse = std::make_reverse_iterator(lower_than);
