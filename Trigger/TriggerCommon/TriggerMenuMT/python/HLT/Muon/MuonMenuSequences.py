@@ -43,14 +43,14 @@ def muFastAlgSequenceCfg(flags, selCAName="", is_probe_leg=False):
 
     from .MuonRecoSequences  import  isCosmic
     acc = ComponentAccumulator()
-    seql2sa = seqAND("L2MuonSASeq")
+    seql2sa = seqAND("L2MuonSASeq{}".format("_probe" if is_probe_leg else ""))
     acc.addSequence(seql2sa)
     muFastRecoSeq = muFastRecoSequenceCfg( muonflags, viewName+'RoIs', doFullScanID= isCosmic(flags), extraLoads=extraLoads )
     sequenceOut = muNames.L2SAName
     acc.merge(muFastRecoSeq, sequenceName=seql2sa.name)
 
     ##### L2 mutli-track mode #####
-    seqFilter = seqAND("L2MuonMTSeq")
+    seqFilter = seqAND("L2MuonMTSeq{}".format("_probe" if is_probe_leg else ""))
     acc.addSequence(seqFilter)
     from TrigMuonEF.TrigMuonEFConfig import MuonChainFilterAlgCfg
     MultiTrackChains = getMultiTrackChainNames()
@@ -199,7 +199,7 @@ def muCombAlgSequenceCfg(flags, selCAName="", is_probe_leg=False):
         recoCB.mergeReco(muonIDFastTrackingSequenceCfg(flags, viewName+"RoIs", "muon", extraLoads, extraLoads ))
 
     # for nominal muComb
-    seql2cb = seqAND("l2muCombFilterSequence")
+    seql2cb = seqAND("l2muCombFilterSequence{}".format("_probe" if is_probe_leg else ""))
     acc.addSequence(seql2cb)
 
     #Filter algorithm to run muComb only if non-Bphysics muon chains are active
@@ -222,7 +222,7 @@ def muCombAlgSequenceCfg(flags, selCAName="", is_probe_leg=False):
                                                   WriteMuComb = True, NotGate = True)
 
 
-    seql2cbmt = seqAND("l2mtmuCombFilterSequence")
+    seql2cbmt = seqAND("l2mtmuCombFilterSequence{}".format("_probe" if is_probe_leg else ""))
     acc.addSequence(seql2cbmt)
     acc.merge(MultiTrackChainFilter, sequenceName=seql2cbmt.name)
 
@@ -233,7 +233,7 @@ def muCombAlgSequenceCfg(flags, selCAName="", is_probe_leg=False):
 
 
     # for Inside-out L2SA
-    seql2iocb = seqAND("l2muFastIOFilterSequence")
+    seql2iocb = seqAND("l2muFastIOFilterSequence{}".format("_probe" if is_probe_leg else ""))
     acc.addSequence(seql2iocb)
 
     from .MuonRecoSequences  import isCosmic
@@ -456,12 +456,12 @@ def muEFCBAlgSequenceCfg(flags, selCAName='', is_probe_leg=False):
     from .MuonRecoSequences import muEFCBRecoSequenceCfg, muEFInsideOutRecoSequenceCfg
 
     acc = ComponentAccumulator()
-    seqmerge = seqAND("muonCBInsideOutMergingSequence")
+    seqmerge = seqAND("muonCBInsideOutMergingSequence{}".format("_probe" if is_probe_leg else ""))
     acc.addSequence(seqmerge)
 
     #outside-in reco sequence
     acc2 = ComponentAccumulator()
-    seqreco = parOR("muonEFCBandInsideOutRecoSequence")
+    seqreco = parOR("muonEFCBandInsideOutRecoSequence{}".format("_probe" if is_probe_leg else ""))
     acc2.addSequence(seqreco)
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
     acc2.merge(muEFCBRecoSequenceCfg(muonflagsCB, viewName+"RoIs", "RoI" ), sequenceName=seqreco.name)
@@ -469,14 +469,14 @@ def muEFCBAlgSequenceCfg(flags, selCAName='', is_probe_leg=False):
 
     #Algorithm to filter events with no muons
     acc3 = ComponentAccumulator()
-    seqfilter = seqAND("muonEFInsideOutSequence")
+    seqfilter = seqAND("muonEFInsideOutSequence{}".format("_probe" if is_probe_leg else ""))
     acc3.addSequence(seqfilter)
     muonFilter = MuonFilterAlgCfg(flags, name="FilterZeroMuons", MuonContainerLocation=sequenceOutCB)
     acc3.merge(muonFilter, sequenceName=seqfilter.name)
 
     #inside-out reco sequence - runs only if filter is passed
     acc4 = ComponentAccumulator()
-    seqio = parOR("efmuInsideOutViewNode_RoI")
+    seqio = parOR("efmuInsideOutViewNode_RoI{}".format("_probe" if is_probe_leg else ""))
     acc4.addSequence(seqio)
     acc4.merge(muEFInsideOutRecoSequenceCfg(muonflagsCB, viewName+"RoIs", "RoI"), sequenceName=seqio.name)
     sequenceOutInsideOut = muNames.EFCBInOutName
@@ -685,12 +685,12 @@ def muEFCBFSAlgSequenceCfg(flags, is_probe_leg=False):
     from .MuonRecoSequences import muEFCBRecoSequenceCfg, muEFInsideOutRecoSequenceCfg
     #outside-in reco sequence
     acc = ComponentAccumulator()
-    seqmerge = seqAND("muonCBInsideOutMergingSequenceEFCBFS")
+    seqmerge = seqAND("muonCBInsideOutMergingSequenceEFCBFS{}".format("_probe" if is_probe_leg else ""))
     acc.addSequence(seqmerge)
 
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
     acc2 = ComponentAccumulator()
-    seqreco = parOR("muonEFCBFSInsideOutRecoSequence")
+    seqreco = parOR("muonEFCBFSInsideOutRecoSequence{}".format("_probe" if is_probe_leg else ""))
     acc2.addSequence(seqreco)
 
     acc2.merge(muEFCBRecoSequenceCfg(muonflagsCB, viewName+"RoIs", "FS" ), sequenceName=seqreco.name)
@@ -700,14 +700,14 @@ def muEFCBFSAlgSequenceCfg(flags, is_probe_leg=False):
     muonFilter =  MuonFilterAlgCfg(flags, name="FilterZeroMuonsEFCBFS", MuonContainerLocation = sequenceOutCB)
 
     acc3 = ComponentAccumulator()
-    seqfilt = seqAND("muonEFCBFSInsideOutSequence")
+    seqfilt = seqAND("muonEFCBFSInsideOutSequence{}".format("_probe" if is_probe_leg else ""))
     acc3.addSequence(seqfilt)
     acc3.merge(muonFilter, sequenceName=seqfilt.name)
 
 
     #If filter passed
     acc4 = ComponentAccumulator()
-    seqio = parOR("efmuInsideOutViewNode_FS")
+    seqio = parOR("efmuInsideOutViewNode_FS{}".format("_probe" if is_probe_leg else ""))
     acc4.addSequence(seqio)
 
     muonEFInsideOutRecoAlgSequence = muEFInsideOutRecoSequenceCfg(muonflagsCB, viewName+"RoIs", "FS" )
