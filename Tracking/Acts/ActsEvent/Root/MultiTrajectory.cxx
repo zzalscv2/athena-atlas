@@ -451,52 +451,57 @@ const Acts::Surface* ActsTrk::MutableMultiTrajectory::referenceSurface_impl(Inde
   return toSurfacePtr(m_surfaces[istate]);
 }
 
-
+void ActsTrk::MutableMultiTrajectory::trim() {
+  m_trackStatesAux->resize(m_trackStatesSize);
+  m_trackMeasurementsAux->resize(m_trackMeasurementsSize);
+  m_trackJacobiansAux->resize(m_trackJacobiansSize);
+  m_trackParametersAux->resize(m_trackParametersSize);
+}
 
 /////////////////////////////////////////////////////////
 // ReadOnly MTJ
 ActsTrk::MultiTrajectory::MultiTrajectory(
-    DataLink<xAOD::TrackStateContainer> trackStates,
-    DataLink<xAOD::TrackParametersContainer> trackParameters,
-    DataLink<xAOD::TrackJacobianContainer> trackJacobians,
-    DataLink<xAOD::TrackMeasurementContainer> trackMeasurements)
-    : m_trackStates(trackStates),
-      m_trackParameters(trackParameters),
-      m_trackJacobians(trackJacobians),
-      m_trackMeasurements(trackMeasurements) {
-      INSPECTCALL("ctor " << this << " " << m_trackStates->size());
-      m_trackStatesAux = dynamic_cast<const xAOD::TrackStateAuxContainer*>(m_trackStates->getConstStore());
+    DataLink<xAOD::TrackStateAuxContainer> trackStates,
+    DataLink<xAOD::TrackParametersAuxContainer> trackParameters,
+    DataLink<xAOD::TrackJacobianAuxContainer> trackJacobians,
+    DataLink<xAOD::TrackMeasurementAuxContainer> trackMeasurements)
+    : m_trackStatesAux(trackStates),
+      m_trackParametersAux(trackParameters),
+      m_trackJacobiansAux(trackJacobians),
+      m_trackMeasurementsAux(trackMeasurements) {
+      INSPECTCALL("ctor " << this << " " << m_trackStatesAux->size());
 
-      for ( auto id : m_trackStates->getConstStore()->getAuxIDs() ) {
+      for ( auto id : m_trackStatesAux->getAuxIDs() ) {
 
         const std::string name = SG::AuxTypeRegistry::instance().getName(id);
         if ( hasColumn_impl(Acts::hashString(name)) ) { // already known columns
           continue;
         }
-        const std::type_info* typeInfo = SG::AuxTypeRegistry::instance().getType(id);
+        // TODO restore in following MR
+        // const std::type_info* typeInfo = SG::AuxTypeRegistry::instance().getType(id);
 
-        // try making decoration accessor of matching type
-        // there is a fixed set of supported types (as there is a fixed set available in MutableMTJ)
-        // setters are not needed so replaced by a "nullptr"
-        if ( *typeInfo == typeid(float) ) {
-          m_decorations.emplace_back( name,
-            ActsTrk::detail::constDecorationGetter<xAOD::TrackStateContainer, float>,
-            ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, float>);
-        } else if ( *typeInfo == typeid(double) ) {
-          m_decorations.emplace_back( name,
-            ActsTrk::detail::constDecorationGetter<xAOD::TrackStateContainer, double>,
-            ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, double>);
+        // // try making decoration accessor of matching type
+        // // there is a fixed set of supported types (as there is a fixed set available in MutableMTJ)
+        // // setters are not needed so replaced by a "nullptr"
+        // if ( *typeInfo == typeid(float) ) {
+        //   m_decorations.emplace_back( name,
+        //     ActsTrk::detail::constDecorationGetter<xAOD::TrackStateContainer, float>,
+        //     ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, float>);
+        // } else if ( *typeInfo == typeid(double) ) {
+        //   m_decorations.emplace_back( name,
+        //     ActsTrk::detail::constDecorationGetter<xAOD::TrackStateContainer, double>,
+        //     ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, double>);
 
-        } else if ( *typeInfo == typeid(short) ) {
-          m_decorations.emplace_back( name,
-            ActsTrk::detail::constDecorationGetter<xAOD::TrackStateContainer, short>,
-            ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, short>);
+        // } else if ( *typeInfo == typeid(short) ) {
+        //   m_decorations.emplace_back( name,
+        //     ActsTrk::detail::constDecorationGetter<xAOD::TrackStateContainer, short>,
+        //     ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, short>);
 
-        } else if ( *typeInfo == typeid(uint32_t) ) {
-          m_decorations.emplace_back( name,
-            ActsTrk::detail::constDecorationGetter<xAOD::TrackStateContainer, uint32_t>,
-            ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, uint32_t>);
-        }
+        // } else if ( *typeInfo == typeid(uint32_t) ) {
+        //   m_decorations.emplace_back( name,
+        //     ActsTrk::detail::constDecorationGetter<xAOD::TrackStateContainer, uint32_t>,
+        //     ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, uint32_t>);
+        // }
 
     }
 }
@@ -518,41 +523,39 @@ bool ActsTrk::MultiTrajectory::has_impl(Acts::HashedString key,
 const std::any ActsTrk::MultiTrajectory::component_impl(
     Acts::HashedString key, ActsTrk::IndexType istate) const {
   using namespace Acts::HashedStringLiteral;
-  const auto& trackStates = *m_trackStates;
   switch (key) {
     case "previous"_hash:
-      return trackStates[istate]->previousPtr();
+      return &(m_trackStatesAux->previous[istate]);
     case "chi2"_hash:
-      return trackStates[istate]->chi2Ptr();
+      return &(m_trackStatesAux->chi2[istate]);
     case "pathLength"_hash:
-      return trackStates[istate]->pathLengthPtr();
+      return &(m_trackStatesAux->pathLength[istate]);
     case "predicted"_hash:
-      return trackStates[istate]->predictedPtr();
+      return &(m_trackStatesAux->predicted[istate]);
     case "filtered"_hash:
-      return trackStates[istate]->filteredPtr();
+      return &(m_trackStatesAux->filtered[istate]);
     case "smoothed"_hash:
-      return trackStates[istate]->smoothedPtr();
+      return &(m_trackStatesAux->smoothed[istate]);
     case "jacobian"_hash:
-      return trackStates[istate]->jacobianPtr();
+      return &(m_trackStatesAux->jacobian[istate]);
     case "projector"_hash: {
-      const auto& trackMeasurements = *m_trackMeasurements;
-      return trackMeasurements.at(trackStates[istate]->calibrated())
-          ->projectorPtr();
+      return &(m_trackMeasurementsAux->projector.at(m_trackStatesAux->calibrated[istate]));
     }
     case "calibrated"_hash: {
-      return trackStates[istate]->calibratedPtr();
+      return &(m_trackStatesAux->calibrated[istate]);
     }
     case "calibratedCov"_hash: {
-      return trackStates[istate]->calibratedPtr();
+      return &(m_trackStatesAux->calibrated[istate]);
     }
     case "measdim"_hash:
-      return trackStates[istate]->measDimPtr();
+      return &(m_trackStatesAux->measDim[istate]);
     case "typeFlags"_hash:
-      return trackStates[istate]->typeFlagsPtr();
+      return &(m_trackStatesAux->typeFlags[istate]);
     default: {
       for (auto& d : m_decorations) {
         if (d.hash == key) {
-          return  d.getter(m_trackStates.cptr(), istate, d.name);
+          // TODO 
+          // return  d.getter(m_trackStates.cptr(), istate, d.name);
         }
       }
       throw std::runtime_error("MultiTrajectory::component_impl no such component " + std::to_string(key));
@@ -589,7 +592,7 @@ bool ActsTrk::MultiTrajectory::hasColumn_impl(
 
   ActsTrk::IndexType
   ActsTrk::MultiTrajectory::calibratedSize_impl(ActsTrk::IndexType istate) const {
-    return m_trackStates->at(istate)->measDim();
+    return m_trackStatesAux->measDim[istate];
     }
 
 
@@ -615,9 +618,9 @@ void ActsTrk::MultiTrajectory::moveLinks(const ActsTrk::MutableMultiTrajectory* 
 void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, const ActsGeometryContext& geoContext ) {
   if ( not m_surfaces.empty() )
     return;
-  m_surfaces.resize(m_trackStates->size(), nullptr);
-  for ( IndexType i = 0; i < m_trackStates->size(); i++ ) {
-      auto geoID = (*m_trackStates)[i]->geometryId();
+  m_surfaces.resize(m_trackStatesAux->size(), nullptr);
+  for ( IndexType i = 0; i < m_trackStatesAux->size(); i++ ) {
+      auto geoID = m_trackStatesAux->geometryId[i];
       if ( geoID ==  InvalidGeoID ) {
         m_surfaces[i] = nullptr;
         continue;
@@ -625,7 +628,7 @@ void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, c
       if ( geoID != 0 ) {
         m_surfaces[i] = geo->findSurface(geoID);
       } else {
-        ElementLink<xAOD::TrackSurfaceContainer> backendLink = (*m_trackStates)[i]->surfaceLink();
+        ElementLink<xAOD::TrackSurfaceContainer> backendLink = m_trackStatesAux->surfaceLink[i];
         std::shared_ptr<const Acts::Surface> surface = decodeSurface( *backendLink, geoContext);
         m_surfaces[i] = surface; // TODO
 

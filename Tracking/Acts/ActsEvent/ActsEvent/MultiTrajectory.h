@@ -17,14 +17,10 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "CxxUtils/concepts.h"
 #include "xAODTracking/TrackJacobianAuxContainer.h"
-#include "xAODTracking/TrackJacobianContainer.h"
-#include "xAODTracking/TrackMeasurement.h"
 #include "xAODTracking/TrackMeasurementAuxContainer.h"
-#include "xAODTracking/TrackMeasurementContainer.h"
 #include "xAODTracking/TrackParametersAuxContainer.h"
-#include "xAODTracking/TrackParametersContainer.h"
+#include "xAODTracking/TrackStateContainer.h" // TODO remove once decorations are fixed
 #include "xAODTracking/TrackStateAuxContainer.h"
-#include "xAODTracking/TrackStateContainer.h"
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 #include "xAODTracking/TrackSurfaceContainer.h"
 
@@ -329,7 +325,7 @@ class MutableMultiTrajectory final
 
 
   // access to some backends (for debugging purposes)
-  // the reciever should not assume ownership or similar
+  // the receiver should not assume ownership or similar
   inline xAOD::TrackStateAuxContainer* trackStatesAux() { return m_trackStatesAux.get(); }
 
   inline const xAOD::TrackParametersAuxContainer* trackParametersAux() const {
@@ -354,25 +350,21 @@ class MutableMultiTrajectory final
 
  private:
 
-  // std::unique_ptr<xAOD::TrackStateContainer> m_trackStates;
   std::unique_ptr<xAOD::TrackStateAuxContainer> m_trackStatesAux;
   size_t m_trackStatesSize = 0;
 
-  // std::unique_ptr<xAOD::TrackParametersContainer> m_trackParameters;
   std::unique_ptr<xAOD::TrackParametersAuxContainer> m_trackParametersAux;
   size_t m_trackParametersSize = 0;
 
-  // std::unique_ptr<xAOD::TrackJacobianContainer> m_trackJacobians;
   std::unique_ptr<xAOD::TrackJacobianAuxContainer> m_trackJacobiansAux;
   size_t m_trackJacobiansSize = 0;
 
-  // std::unique_ptr<xAOD::TrackMeasurementContainer> m_trackMeasurements;
   std::unique_ptr<xAOD::TrackMeasurementAuxContainer> m_trackMeasurementsAux;
   size_t m_trackMeasurementsSize = 0;
 
   std::unique_ptr<xAOD::TrackSurfaceContainer> m_surfacesBackend;
   std::unique_ptr<xAOD::TrackSurfaceAuxContainer> m_surfacesBackendAux;
-  using DecorationAccess = ActsTrk::detail::Decoration<xAOD::TrackStateContainer>;
+  using DecorationAccess = ActsTrk::detail::Decoration<xAOD::TrackStateAuxContainer>;
   std::vector<DecorationAccess> m_decorations;
 
   std::vector<std::optional<Acts::SourceLink>> m_calibratedSourceLinks;
@@ -380,6 +372,9 @@ class MutableMultiTrajectory final
 
   std::vector<StoredSurface> m_surfaces;
   ActsGeometryContext m_geoContext;
+
+  // addjust prealocated size to actualy used
+  void trim();
 };
 
 /**
@@ -392,10 +387,10 @@ class MultiTrajectory
  public:
 
   MultiTrajectory(
-      DataLink<xAOD::TrackStateContainer> trackStates,
-      DataLink<xAOD::TrackParametersContainer> trackParameters,
-      DataLink<xAOD::TrackJacobianContainer> trackJacobians,
-      DataLink<xAOD::TrackMeasurementContainer> trackMeasurements);
+      DataLink<xAOD::TrackStateAuxContainer> trackStates,
+      DataLink<xAOD::TrackParametersAuxContainer> trackParameters,
+      DataLink<xAOD::TrackJacobianAuxContainer> trackJacobians,
+      DataLink<xAOD::TrackMeasurementAuxContainer> trackMeasurements);
 
   bool has_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
 
@@ -405,34 +400,34 @@ class MultiTrajectory
 
   typename ConstTrackStateProxy::Parameters parameters_impl(
       ActsTrk::IndexType index) const {
-    return m_trackParameters->at(index)->paramsEigen();
+    return typename ConstTrackStateProxy::Parameters{m_trackParametersAux->params[index].data()};
   }
 
   typename ConstTrackStateProxy::Covariance covariance_impl(
       ActsTrk::IndexType index) const {
-    return m_trackParameters->at(index)->covMatrixEigen();
+    return  typename ConstTrackStateProxy::Covariance{m_trackParametersAux->covMatrix[index].data()};
   }
 
   inline typename ConstTrackStateProxy::Covariance jacobian_impl(
       ActsTrk::IndexType istate) const {
-    xAOD::TrackStateIndexType jacIdx = (*m_trackStates)[istate]->jacobian();
-    return m_trackJacobians->at(jacIdx)->jacEigen();
+    xAOD::TrackStateIndexType jacIdx = m_trackStatesAux->jacobian[istate];
+    return typename ConstTrackStateProxy::Covariance{m_trackJacobiansAux->jac[jacIdx].data()};
   }
 
   template <std::size_t measdim>
   inline typename ConstTrackStateProxy::template Measurement<measdim>
-  measurement_impl(IndexType index) const {
-    xAOD::TrackStateIndexType measIdx = (*m_trackStates)[index]->calibrated();
-    return m_trackMeasurements->at(measIdx)->template measEigen<measdim>();
+  measurement_impl(IndexType istate) const {
+    xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[istate];
+    return typename ConstTrackStateProxy::template Measurement<measdim>{m_trackMeasurementsAux->meas[measIdx].data()};
   }
 
   template <std::size_t measdim>
   inline typename ConstTrackStateProxy::template MeasurementCovariance<measdim>
   measurementCovariance_impl(IndexType index) const {
-    xAOD::TrackStateIndexType measIdx = (*m_trackStates)[index]->calibrated();
-    return m_trackMeasurements->at(measIdx)->template covMatrixEigen<measdim>();
+    xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[index];
+    return typename ConstTrackStateProxy::template MeasurementCovariance<measdim>{m_trackMeasurementsAux->covMatrix[measIdx].data()};
   }
-  inline size_t size_impl() const { return m_trackStates->size(); }
+  inline size_t size_impl() const { return m_trackStatesAux->size(); }
 
   ActsTrk::IndexType calibratedSize_impl(ActsTrk::IndexType istate) const;
   typename Acts::SourceLink getUncalibratedSourceLink_impl(ActsTrk::IndexType istate) const;
@@ -452,12 +447,10 @@ class MultiTrajectory
   void moveLinks(const ActsTrk::MutableMultiTrajectory* mtj);
 
  private:
-  // TODO these 4 DATA links will be replaced by a reference to storable object that would contain those
-  const DataLink<xAOD::TrackStateContainer> m_trackStates;
-  const xAOD::TrackStateAuxContainer* m_trackStatesAux{};
-  const DataLink<xAOD::TrackParametersContainer> m_trackParameters;
-  const DataLink<xAOD::TrackJacobianContainer> m_trackJacobians;
-  const DataLink<xAOD::TrackMeasurementContainer> m_trackMeasurements;
+  const DataLink<xAOD::TrackStateAuxContainer> m_trackStatesAux;
+  const DataLink<xAOD::TrackParametersAuxContainer> m_trackParametersAux;
+  const DataLink<xAOD::TrackJacobianAuxContainer> m_trackJacobiansAux;
+  const DataLink<xAOD::TrackMeasurementAuxContainer> m_trackMeasurementsAux;
   using DecorationAccess = ActsTrk::detail::Decoration<xAOD::TrackStateContainer>;
   std::vector<DecorationAccess> m_decorations;
   // TODO remove once tracking code switches to sourceLinks with EL
