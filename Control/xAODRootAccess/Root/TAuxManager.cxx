@@ -40,9 +40,9 @@ namespace xAOD {
       return *this;
    }
 
-   ::Int_t TAuxManager::getEntry( ::Long64_t entry, ::Int_t getall ) {
+   ::Int_t TAuxManager::getEntry( ::Int_t getall ) {
 
-      return m_storePtr->getEntry( entry, getall );
+      return m_storePtr->getEntry( getall );
    }
 
    const void* TAuxManager::object() const {

@@ -97,8 +97,8 @@ namespace xAOD {
       /// Connect the object to an output TTree
       StatusCode writeTo( ::TTree* tree );
 
-      /// Read the values from the specified TTree entry
-      Int_t getEntry( Long64_t entry, Int_t getall = 0 );
+      /// Read the values from the TTree entry that was loaded with TTree::LoadTree()
+      Int_t getEntry( Int_t getall = 0 );
 
       /// Tell the object that all branches will need to be re-read
       void reset();
@@ -198,7 +198,6 @@ namespace xAOD {
       static ::Bool_t isContainerBranch( TBranch* br, auxid_t auxid );
       /// Check if the auxiliary variable has a registered type
       static ::Bool_t isRegisteredType( auxid_t auxid );
-
       /// Static prefix for the branch names
       std::string m_prefix;
       /// Dynamic prefix for the branch names
@@ -213,9 +212,6 @@ namespace xAOD {
       ::Int_t m_basketSize;
       /// The split level for the output branches
       ::Int_t m_splitLevel;
-
-      /// Current entry being read from an input tree
-      ::Long64_t m_entry;
 
       /// The TTree being read from
       ::TTree* m_inTree;
@@ -262,8 +258,8 @@ namespace xAOD {
                         const std::type_info* ti, void* obj,
                         SG::auxid_t auxid, const std::string* prefix );
 
-         /// Get an entry from the branch
-         ::Int_t getEntry( ::Long64_t entry );
+         /// Get entry from the branch that was loaded with TTree::LoadTree()
+         ::Int_t getEntry();
          /// Get a pointer to the branch being held
          ::TBranch** branchPtr();
          /// Get a pointer to the object
@@ -280,6 +276,8 @@ namespace xAOD {
       private:
          /// The branch that this object is handling
          ::TBranch* m_branch;
+         /// The last entry that was loaded for this branch
+         ::Long64_t m_entry;
          /// The pointer to the object in memory
          void* m_object;
          /// Is this a static variable in question?

@@ -10,6 +10,7 @@
 #include <TFile.h>
 #include <TTree.h>
 #include <TChain.h>
+#include <TFriendElement.h>
 #include <TChainElement.h>
 #include <TBranch.h>
 #include <TError.h>
@@ -408,6 +409,15 @@ namespace xAOD {
          return StatusCode::FAILURE;
       }
 
+      // Set metadata entry to be read 
+      // NB: no reading is done calling LoadTree
+      if ( m_inMetaTree->LoadTree(0) < 0 ){
+         ::Error( "xAOD::TEvent::readFrom",
+                  XAOD_MESSAGE( "Failed to load entry for metadata tree=%s" ),
+                  m_inMetaTree->GetName() );
+         return StatusCode::FAILURE;
+      }
+
       // A sanity check:
       if( m_inMetaTree->GetEntries() != 1 ) {
          ::Info( "xAOD::TEvent::readFrom",
@@ -463,6 +473,77 @@ namespace xAOD {
       // all hell breaks loose...
       delete format;
 
+
+      // List all the other Metadata trees in the input file 
+      // Having several metatrees can happen for augmented files for instance 
+      // as one metadata tree per stream is produced  
+      std::set<std::string> lOtherMetaTreeNames = {};
+      TList *lKeys = file->GetListOfKeys();
+
+      if (lKeys){
+         for (int iKey = 0; iKey < lKeys->GetEntries() ; iKey++){
+            // iterate over keys and add 
+            std::string keyName = lKeys->At(iKey)->GetName();
+            // Make sure the key corresponds to a metadata tree but  
+            // do not add the current metadata tree in the list of other trees
+            // and do not add the metadata tree handlers to the list  
+            if (  (keyName != METADATA_TREE_NAME) 
+               && (keyName.find("MetaData") != std::string::npos)
+               && !(keyName.find("MetaDataHdr") != std::string::npos)){
+               // key is corresponds to a metadata tree 
+               lOtherMetaTreeNames.insert(keyName);
+            }
+         }
+      }
+
+      // Loop over the other metadata trees found (if any) 
+      for (const std::string & metaTreeName : lOtherMetaTreeNames){
+         TTree *tmpMetaTree =  dynamic_cast< ::TTree* >( file->Get( metaTreeName.c_str() ) );
+
+         if (!tmpMetaTree){ 
+            ::Warning( "xAOD::TEvent::readFrom", "Could not read metadata tree=%s",metaTreeName.c_str());
+         }
+
+         // Set metadata entry to be read 
+         // NB: no reading is done calling LoadTree
+         if ( tmpMetaTree->LoadTree(0) < 0 ){
+            ::Error( "xAOD::TEvent::readFrom",
+                     XAOD_MESSAGE( "Failed to load entry for metadata tree=%s" ),
+                     tmpMetaTree->GetName() );
+            return StatusCode::FAILURE;
+         }
+
+         // Check if the EventFormat branch is available:
+         const std::string tmpEventFormatBranchName =
+            Utils::getFirstBranchMatch( tmpMetaTree, "EventFormat");
+         if( ! tmpMetaTree->GetBranch( tmpEventFormatBranchName.c_str() ) ) {
+           // skip the additionnal metadata tree 
+           ::Warning( "xAOD::TEvent::readFrom", "No EventFormat branch found in metadata tree=%s",tmpMetaTree->GetName() );
+            continue ;
+         }
+         // Read in the event format object:
+         EventFormat* tmpFormat = 0; ::TBranch* tmpBr = 0;
+         const Int_t status =
+            tmpMetaTree->SetBranchAddress( tmpEventFormatBranchName.c_str(),
+                                          &tmpFormat, &tmpBr );
+         if( status < 0 ) {
+            ::Error( "xAOD::TEvent::readFrom",
+                     XAOD_MESSAGE( "Failed to connect to EventFormat object for metadata tree = %s"), tmpMetaTree->GetName() );
+            return StatusCode::FAILURE;
+         }
+         // Read in the object 
+         tmpBr->GetEntry( 0 );
+         // read all objects contained in the event format 
+         for (const std::pair<const std::string, xAOD::EventFormatElement> &evtElem : *tmpFormat){
+            // if element is not existing 
+            // then add it to the private event format member
+            if (!m_inputEventFormat.exists(evtElem.first)){
+               m_inputEventFormat.add(evtElem.second);
+            }
+         }
+         delete tmpFormat;
+      }
+ 
       // Look for the event tree in the input file:
       m_inTree = dynamic_cast< ::TTree* >( file->Get( treeName ) );
       if( ! m_inTree ) {
@@ -471,7 +552,7 @@ namespace xAOD {
          // that needs to be collected.
          m_inTreeMissing = kTRUE;
       }
-
+     
       // Turn on the cache if requested:
       if( m_inTree && useTreeCache && ( ! m_inTree->GetCacheSize() ) ) {
          m_inTree->SetCacheSize( CACHE_SIZE );
@@ -505,7 +586,7 @@ namespace xAOD {
       return StatusCode::SUCCESS;
    }
 
-   /// This version of the function sets up the object to readin information
+   /// This version of the function sets up the object to read information
    /// from a tree/chain. Using it with a TTree pointer makes not much sense,
    /// but using it with a TChain pointer could be a very valid usage mode.
    ///
@@ -1277,7 +1358,14 @@ namespace xAOD {
          m_entry = entry;
       }
 
-      // In order to make the tree cache work:
+      // In order to make the reading of branches+tree cache work 
+      // NB: TTree::LoadTree() only set the entry that should be read for each branch 
+      // but no reading of the branch content is performed when calling that function.
+      // The entry set that can be retrieved with 
+      // branch->GetTree()->GetReadEntry()
+      // For friend trees, if an index was built, then the entry which is set for the related branches
+      // is found by the LoadTree function by matching 
+      // the the major and minor values of the main tree and friend tree  
       if( m_inTree && m_inTree->LoadTree( m_entry ) < 0 ) {
          ::Error( "xAOD::TEvent::getEntry",
                   XAOD_MESSAGE( "Failure in loading entry %i from the input "
@@ -1326,7 +1414,7 @@ namespace xAOD {
       } else {
          // In a "reasonable" access mode, we do something very simple:
          for( auto& inObj : m_inputObjects ) {
-            result += inObj.second->getEntry( m_entry, getall );
+            result += inObj.second->getEntry( getall );
          }
       }
 
@@ -1630,12 +1718,43 @@ namespace xAOD {
       // The results go in here
       std::set<std::string> keys;
 
-      // Check input objects
-      TTree * tree = ( metadata ? m_inMetaTree : m_inTree );
-      if (tree) {
-         const TObjArray * in = tree->GetListOfBranches();
-         ::Info("xAOD::TEvent::getNames", "scanning input objects");
-
+      // Get list of branches from 
+      // the input metadata tree or input tree 
+      std::vector<TObjArray*> fullListOfBranches = {};
+      if (metadata){
+         if (m_inMetaTree){
+            // No friend tree expected for metadata tree
+            // Only add the list of branches of the metadata tree 
+            ::Info("xAOD::TEvent::getNames", "scanning input objects");
+            fullListOfBranches.push_back(m_inMetaTree->GetListOfBranches());
+         }
+      }
+      else {
+         if (m_inTree){
+            ::Info("xAOD::TEvent::getNames", "scanning input objects");
+             // Add the list of branches of the main tree 
+            fullListOfBranches.push_back(m_inTree->GetListOfBranches());
+            // If input tree has friend trees 
+            // add as well the list of friend tree branches  
+            if (m_inTree->GetListOfFriends()){
+               // Get the list of friends 
+               TList *fList = m_inTree->GetListOfFriends();
+               // Loop over friend elements 
+               for (TObject * feObj : *fList){
+                  if (feObj){
+                     // Get corresponding friend tree 
+                     TTree *friendTree = dynamic_cast<TFriendElement*>(feObj)->GetTree();
+                     // Add list of branches of the friend tree 
+                     fullListOfBranches.push_back(friendTree->GetListOfBranches());
+                  }
+               }
+            }
+         }
+      }
+      
+      // Loop over all list of branches (if any)
+      for (const TObjArray * in : fullListOfBranches){
+         // Loop over all branches inside the current list of branches 
          for ( Int_t index = 0; index < in->GetEntriesFast(); ++index ) {
             const TObject * obj = in->At(index);
             if ( ! obj ) continue;
@@ -1647,8 +1766,8 @@ namespace xAOD {
             std::string objClassName = element->GetClassName();
             std::string key = obj->GetName();
             ::Info("xAOD::TEvent::getNames",
-                   "Inspecting %s / %s",
-                   objClassName.c_str(), key.c_str());
+                  "Inspecting %s / %s",
+                  objClassName.c_str(), key.c_str());
             if (objClassName == targetClassName) {
                ::Info("xAOD::TEvent::getNames",
                      "Matched %s to key %s",
@@ -1657,7 +1776,7 @@ namespace xAOD {
             }
          }
       }
-
+      
       const Object_t& inAux = ( metadata ?
                                 m_inputMetaObjects : m_inputObjects );
 
@@ -1683,7 +1802,7 @@ namespace xAOD {
 
 
       // check output objects
-      tree = ( metadata ? nullptr : m_outTree );
+      TTree *tree = ( metadata ? nullptr : m_outTree );
       if (tree) {
          const TObjArray * out = tree->GetListOfBranches();
          ::Info("xAOD::TEvent::getNames", "scanning output objects");
@@ -1876,13 +1995,36 @@ namespace xAOD {
                // not be performance critical code after all...
                ::Bool_t auxFound = kFALSE;
                const std::string dynName = Utils::dynBranchPrefix( branchName );
-               TObjArray* branches = m_inTree->GetListOfBranches();
-               for( Int_t i = 0; i < branches->GetEntries(); ++i ) {
-                  const TString name( branches->At( i )->GetName() );
-                  if( name.BeginsWith( branchName ) ||
-                      name.BeginsWith( dynName ) ) {
-                     auxFound = kTRUE;
-                     break;
+
+               std::vector<TObjArray*> fullListOfBranches = {};
+               // Add the list of branches of the main tree 
+               fullListOfBranches.push_back(m_inTree->GetListOfBranches());
+               // If input tree has friend trees 
+               // add as well the list of friend tree branches  
+               if (m_inTree->GetListOfFriends()){
+                  // Get the list of friends 
+                  TList *fList = m_inTree->GetListOfFriends();
+                  // Loop over friend elements 
+                  for (TObject * feObj : *fList){
+                     if (feObj){
+                        // Get corresponding friend tree 
+                        TTree *friendTree = dynamic_cast<TFriendElement*>(feObj)->GetTree();
+                        // Add list of branches of the friend tree 
+                        fullListOfBranches.push_back(friendTree->GetListOfBranches());
+                     }
+                  }
+               }
+
+               for (TObjArray* branches : fullListOfBranches){
+                  for( Int_t i = 0; i < branches->GetEntriesFast(); ++i ){
+                     if (!branches->At( i )) continue ;
+
+                     const TString name( branches->At( i )->GetName() );
+                     if( name.BeginsWith( branchName ) ||
+                        name.BeginsWith( dynName ) ) {
+                        auxFound = kTRUE;
+                        break;
+                     }
                   }
                }
                if( auxFound ) {
@@ -2101,7 +2243,7 @@ namespace xAOD {
 
       // Make sure that the current entry is loaded for event data objects:
       if( ! metadata ) {
-         if( mgr->getEntry( m_entry ) ) {
+         if( mgr->getEntry() ) {
             // Connect the auxiliary store to objects needing it. This call also
             // takes care of updating the dynamic store of auxiliary containers,
             // when they are getting accessed directly.
@@ -2443,10 +2585,9 @@ namespace xAOD {
       }
 
       // Check if the branch exists in our input tree:
-      assert( m_inTree->GetListOfBranches() != nullptr );
-      ::TObject* brObject =
-         m_inTree->GetListOfBranches()->FindObject( key.c_str() );
-      if( ! brObject ) {
+      ::TBranch* br =
+         m_inTree->GetBranch( key.c_str() );
+      if( ! br ) {
          if( ! silent ) {
             ::Warning( "xAOD::TEvent::connectBranch",
                        "Branch \"%s\" not available on input",
@@ -2455,9 +2596,6 @@ namespace xAOD {
          m_inputMissingObjects.insert( key );
          return StatusCode::RECOVERABLE;
       }
-
-      // Statically cast it to a TBranch.
-      ::TBranch* br = static_cast< TBranch* >( brObject );
 
       // Make sure that it's not in "MakeClass mode":
       br->SetMakeClass( 0 );
@@ -2666,7 +2804,7 @@ namespace xAOD {
       }
 
       // Read in the object:
-      if( mgr->getEntry( 0 ) < 0 ) {
+      if( mgr->getEntry() < 0 ) {
          ::Error( "xAOD::TEvent::connectMetaBranch",
                   XAOD_MESSAGE( "Couldn't read in metadata object with key "
                                 "\"%s\"" ), key.c_str() );
@@ -3056,7 +3194,7 @@ namespace xAOD {
 
       if( ! metadata ) {
          // Make sure the auxiliary object is up to date:
-         ::Int_t readBytes = auxMgr->getEntry( m_entry );
+         ::Int_t readBytes = auxMgr->getEntry();
 
          // Check if there is a separate auxiliary object for the dynamic
          // variables:
@@ -3070,7 +3208,7 @@ namespace xAOD {
             if( m_auxMode != kAthenaAccess ) {
                // In "normal" access modes just tell the dynamic store object
                // to switch to a new event.
-               dynAuxMgr->second->getEntry( m_entry );
+               dynAuxMgr->second->getEntry();
             } else {
                // In "Athena mode" this object has already been deleted when
                // the main auxiliary store object was switched to the new
@@ -3090,7 +3228,7 @@ namespace xAOD {
                            XAOD_MESSAGE( "Internal logic error detected" ) );
                   return StatusCode::FAILURE;
                }
-               dynAuxMgr->second->getEntry( m_entry );
+               dynAuxMgr->second->getEntry();
             }
          }
       }

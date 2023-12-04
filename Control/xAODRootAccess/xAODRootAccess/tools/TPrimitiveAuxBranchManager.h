@@ -61,21 +61,21 @@ namespace xAOD {
       THolder* holder();
 
        /// Function for updating the object in memory if needed
-      virtual ::Int_t getEntry( ::Long64_t entry, ::Int_t getall = 0 );
+      virtual ::Int_t getEntry( ::Int_t getall = 0 ) override;
 
       /// Function getting a const pointer to the object being handled
-      virtual const void* object() const;
+      virtual const void* object() const override;
       /// Function getting a pointer to the object being handled
       virtual void* object();
       /// Function replacing the object being handled
-      virtual void setObject( void* obj );
+      virtual void setObject( void* obj ) override;
 
       /// Create the object for the current event
-      virtual ::Bool_t create();
+      virtual ::Bool_t create() override;
       /// Check if the object was set for the current event
-      virtual ::Bool_t isSet() const;
+      virtual ::Bool_t isSet() const override;
       /// Reset the object at the end of processing of an event
-      virtual void reset();
+      virtual void reset() override;
 
    private:
       /// Pointer keeping track of the branch

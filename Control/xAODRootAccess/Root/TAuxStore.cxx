@@ -59,7 +59,7 @@ namespace xAOD {
       : SG::IAuxStore(), SG::IAuxStoreIO(),
         m_prefix( prefix ), m_dynPrefix( Utils::dynBranchPrefix( prefix ) ),
         m_topStore( topStore ), m_structMode( mode ), m_basketSize( basketSize ),
-        m_splitLevel( splitLevel ), m_entry( 0 ), m_inTree( 0 ), m_outTree( 0 ),
+        m_splitLevel( splitLevel ), m_inTree( 0 ), m_outTree( 0 ),
         m_inputScanned( kFALSE ), m_selection(), m_transientStore( 0 ),
         m_auxIDs(), m_vecs(), m_size( 0 ), m_locked( kFALSE ), m_isDecoration(),
         m_mutex1(), m_mutex2(),
@@ -180,15 +180,12 @@ namespace xAOD {
       // Check if we'll be likely to be able to read the "static"
       // variables:
       assert( m_inTree != nullptr );
-      assert( m_inTree->GetListOfBranches() != nullptr );
-      TObject* brObject =
-         m_inTree->GetListOfBranches()->FindObject( m_prefix.c_str() );
-      if( ! brObject ) {
+      TBranch* br = m_inTree->GetBranch( m_prefix.c_str() );
+      if( ! br ) {
          // We might not even have static branches, so this is not an error
          // by itself...
          return StatusCode::SUCCESS;
       }
-      TBranch* br = static_cast< TBranch* >( brObject );
       // In order to read complex objects, like smart pointers from an
       // auxiliary container variable-by-variable, the split level of the
       // branch must be exactly 1.
@@ -227,13 +224,10 @@ namespace xAOD {
       return StatusCode::SUCCESS;
    }
 
-   ::Int_t TAuxStore::getEntry( ::Long64_t entry, ::Int_t getall ) {
+   ::Int_t TAuxStore::getEntry( ::Int_t getall ) {
 
       // Guard against multi-threaded execution:
       guard_t guard( m_mutex1 );
-
-      // Remember the entry:
-      m_entry = entry;
 
       // Reset the transient store. TEvent::fill() calls this function with
       // getall==99. When that is happening, we need to keep the transient
@@ -267,7 +261,7 @@ namespace xAOD {
       std::vector< TBranchHandle* >::iterator end = m_branches.end();
       for( ; itr != end; ++itr ) {
          if( *itr ) {
-            bytesRead += ( *itr )->getEntry( entry );
+            bytesRead += ( *itr )->getEntry();
          }
       }
 
@@ -312,7 +306,7 @@ namespace xAOD {
       }
 
       // Make sure the variable is up to date:
-      const ::Int_t readBytes = m_branches[ auxid ]->getEntry( m_entry );
+      const ::Int_t readBytes = m_branches[ auxid ]->getEntry();
       if( readBytes < 0 ) {
          ::Error( "xAOD::TAuxStore::getData",
                   XAOD_MESSAGE( "Couldn't read in variable %s" ),
@@ -715,7 +709,7 @@ namespace xAOD {
       // If the variable is connected to already:
       if( ( auxid < m_branches.size() ) && m_branches[ auxid ] ) {
          // Make sure that the right payload is in memory:
-         m_branches[ auxid ]->getEntry( m_entry );
+         m_branches[ auxid ]->getEntry();
          // Return the pointer:
          return m_branches[ auxid ]->objectPtr();
       }
@@ -748,7 +742,7 @@ namespace xAOD {
       }
 
       // Make sure that the right payload is in memory:
-      m_branches[ auxid ]->getEntry( m_entry );
+      m_branches[ auxid ]->getEntry();
 
       // Return the pointer:
       return m_branches[ auxid ]->objectPtr();
@@ -898,12 +892,11 @@ namespace xAOD {
       // Check if the branch exists:
       Bool_t staticBranch = kTRUE;
       TString brName = statBrName;
-      TObjArray* branches = m_inTree->GetListOfBranches();
-      assert( branches != nullptr );
-      TObject* brObject = branches->FindObject( statBrName );
-      if( ! brObject ) {
-         brObject = branches->FindObject( dynBrName );
-         if( ! brObject ) {
+
+      TBranch* br = m_inTree->GetBranch( statBrName );
+      if( ! br ) {
+         br = m_inTree->GetBranch( dynBrName );
+         if( ! br ) {
             // Since TTree::GetBranch / TTObjArray::FindObject is expensive,
             // remember that we didn't find this branch in this file.
             if( m_missingBranches.size() <= auxid ) {
@@ -918,7 +911,6 @@ namespace xAOD {
          staticBranch = kFALSE;
          brName = dynBrName;
       }
-      TBranch* br = static_cast< TBranch* >( brObject );
 
       // Check if it's a "primitive branch":
       const Bool_t primitiveBranch = isPrimitiveBranch( br );
@@ -1065,7 +1057,7 @@ namespace xAOD {
       }
 
       // Get the current entry:
-      m_branches[ auxid ]->getEntry( m_entry );
+      m_branches[ auxid ]->getEntry();
 
       // Remember which variable got created:
       m_auxIDs.insert( auxid );
@@ -1864,20 +1856,18 @@ namespace xAOD {
                                             const std::type_info* ti,
                                             void* obj, SG::auxid_t auxid,
                                             const std::string* prefix )
-      : m_branch( 0 ), m_object( obj ), m_static( staticBranch ),
+      : m_branch( 0 ), m_entry( 0 ) , m_object( obj ), m_static( staticBranch ),
         m_primitive( primitiveBranch ),
         m_typeInfo( ti ), m_needsRead( kTRUE ), m_auxid( auxid ),
         m_prefix( prefix ) {
-
    }
 
    /// This function takes care of implementing just-in-time reading of
    /// branches for us.
    ///
-   /// @param entry The entry to read in for the managed branch
    /// @returns The number of bytes read. A negative number in case of error.
    //
-   ::Int_t TAuxStore::TBranchHandle::getEntry( ::Long64_t entry ) {
+   ::Int_t TAuxStore::TBranchHandle::getEntry() {
 
       // A little sanity check:
       if( ! m_branch ) {
@@ -1889,8 +1879,40 @@ namespace xAOD {
       // Update the I/O monitoring:
       IOStats::instance().stats().readBranch( *m_prefix, m_auxid );
 
+      // Make sure that the branch is associated to a tree 
+      // as the entry to be read is retrieved from the tree
+      if (!m_branch->GetTree()){
+         Error("xAOD::TAuxStore::TBranchHandle::getEntry",
+            XAOD_MESSAGE("Branch=%s is not associated to any tree while reading of branches within this class relies on that"),
+            m_branch->GetName());
+         return -1;
+      }
+
+      // Get the entry that should be read 
+      // The entry to be read is set with TTree::LoadTree()
+      // NB: for a branch from a friend tree and if the friend tree has an index built,
+      // then the entry to read is found when calling the TTree::LoadTree() function 
+      // that matches the major and minor values between the main tree and the friend tree 
+      ::Long64_t entry = m_branch->GetTree()->GetReadEntry();
+      
+      if ( entry  < 0 ){
+         // Raise error as it implies 
+         // either that the TTree::LoadTree() function has not been called 
+         // or 
+         // the entry requested to be read by the user 
+         // is not corresponding to any entry for the friend tree 
+         Error("xAOD::TAuxStore::TBranchHandle::getEntry", 
+            XAOD_MESSAGE( "Entry to read is not set for branch=%s from tree=%s. " 
+            "It is either because TTree::LoadTree(entry) was not called "
+            "beforehand in the TEvent class OR "
+            "the entry requested to be read for the main tree is not corresponding to an event for the friend tree"), 
+            m_branch->GetName(),
+            m_branch->GetTree()->GetName());
+         return -1;
+      }
+
       // Check if anything needs to be done:
-      if( ( m_branch->GetReadEntry() == entry ) && ( ! m_needsRead ) ) {
+      if( ( entry == m_entry ) && ( ! m_needsRead ) ) {
          return 0;
       }
 
@@ -1906,11 +1928,18 @@ namespace xAOD {
          }
       }
 
-      // The reading will now be done:
-      m_needsRead = kFALSE;
+      // Load the entry.
+      const ::Int_t nbytes = m_branch->GetEntry( entry );
 
-      // Read the entry:
-      return m_branch->GetEntry( entry );
+      // If the load was successful, remember that we loaded this entry.
+      if( nbytes >= 0 ) {
+         m_entry = entry;
+         // The reading will now be done:
+         m_needsRead = kFALSE;
+      }
+
+      // Return the number of bytes read.
+      return nbytes;
    }
 
    /// No magic here. <code>TTree::SetBranchAddress</code> needs a pointer
@@ -1920,7 +1949,6 @@ namespace xAOD {
    /// @returns A pointer to the branch object handled by this object
    ///
    ::TBranch** TAuxStore::TBranchHandle::branchPtr() {
-
       return &m_branch;
    }
 
