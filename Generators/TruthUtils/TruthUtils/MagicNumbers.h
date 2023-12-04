@@ -48,6 +48,8 @@ constexpr int SUPPRESSED_PILEUP_BARCODE(std::numeric_limits<int32_t>::max());
 
 constexpr int INVALID_PARTICLE_BARCODE = -1;
 
+constexpr int SINGLE_PARTICLE = 10001;
+
 /// @brief Method to establish if a particle (or barcode) corresponds to truth-suppressed pile-up (TODO update to be status based)
 template <class T>  inline bool is_truth_suppressed_pileup(const T& p){ return (barcode(p) == SUPPRESSED_PILEUP_BARCODE);}
 

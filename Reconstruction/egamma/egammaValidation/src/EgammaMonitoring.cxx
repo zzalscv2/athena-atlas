@@ -19,6 +19,7 @@
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/xAODTruthHelpers.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 EgammaMonitoring::EgammaMonitoring(const std::string &name, ISvcLocator *pSvcLocator) :
   AthAlgorithm(name, pSvcLocator) {}
@@ -451,7 +452,7 @@ StatusCode EgammaMonitoring::execute() {
 
       // Check if it is the prompt electron
       if (TO == MCTruthPartClassifier::SingleElec &&
-          TT == MCTruthPartClassifier::IsoElectron && truth->barcode() == 10001) {
+          TT == MCTruthPartClassifier::IsoElectron && MC::isSingleParticle(truth)) {
         truthPromptElectronAll->fill(truth);
         promptElectronTruthIndex = truth->index();
       }
