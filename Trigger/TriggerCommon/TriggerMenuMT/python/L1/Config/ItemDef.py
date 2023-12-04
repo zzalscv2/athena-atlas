@@ -800,6 +800,9 @@ class ItemDef:
         #MenuItem('L1_EM13VH_3J20' ).setLogic( d.EM13VH  & d.J20.x(3)  & physcond).setTriggerType(TT.calo)
         ### ATR-15524
         #MenuItem('L1_EM18VH_3J20' ).setLogic( d.EM18VH  & d.J20.x(3)  & physcond).setTriggerType(TT.calo)
+        ### ATR-28443 test eEMX{} + {{3,4jJY{}}} L1 seeds
+        MenuItem('L1_eEM22M_3jJ40p0ETA25' ).setLogic( d.eEM22M & d.jJ400ETA25.x(3)  & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_eEM22M_4jJ30p0ETA25' ).setLogic( d.eEM22M & d.jJ300ETA25.x(4)  & physcond).setTriggerType(TT.calo)
 
 
         # combined mu - jet
