@@ -61,7 +61,7 @@ class ONNXWrapper {
     const std::map<std::string, std::vector<int64_t>> GetModelOutputs();
     
     const std::map<std::string, std::string> GetMETAData();
-    const std::string& GetMETADataByKey(const char * key);
+    std::string GetMETADataByKey(const char * key);
     const std::vector<int64_t>& getInputShape(int input_nr);
     const std::vector<int64_t>& getOutputShape(int output_nr);
     const std::vector<const char*>& getInputNames();

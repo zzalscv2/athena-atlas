@@ -146,7 +146,7 @@ const std::map<std::string, std::string> ONNXWrapper::GetMETAData() {
   return METAData_map;
 }
 
-const std::string& ONNXWrapper::GetMETADataByKey(const char * key){
+std::string ONNXWrapper::GetMETADataByKey(const char * key){
   auto metadata = m_onnxSession->GetModelMetadata();
   return metadata.LookupCustomMetadataMapAllocated(key, m_allocator).get();
 }
