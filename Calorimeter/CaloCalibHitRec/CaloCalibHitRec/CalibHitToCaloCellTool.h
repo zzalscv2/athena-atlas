@@ -49,9 +49,6 @@ class CalibHitToCaloCellTool: virtual public AthAlgTool {
  private:
   int m_caloGain;
   std::vector<std::string> m_calibHitContainerNames;
-  //bool m_writeTruthCellContainers;
-  //bool m_writeTruthClusterContainers;
-  int m_singleParticleBarcode;
   
   std::string m_tileActiveHitCnt;
   std::string m_tileInactiveHitCnt;

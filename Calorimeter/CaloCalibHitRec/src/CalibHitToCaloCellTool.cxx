@@ -21,7 +21,7 @@
 
 #include "LArRecEvent/LArCell.h"
 #include "TileEvent/TileCell.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 
 CalibHitToCaloCellTool::CalibHitToCaloCellTool(const std::string& t, const std::string& n, const IInterface* p)
   : AthAlgTool(t,n,p),
@@ -33,8 +33,7 @@ CalibHitToCaloCellTool::CalibHitToCaloCellTool(const std::string& t, const std::
 
   declareProperty("CaloGain", m_caloGain);
   declareProperty("CalibHitContainers", m_calibHitContainerNames);
-  declareProperty("SingleParticleBarcode", m_singleParticleBarcode = 10001);
-  
+ 
   declareProperty("CellTotEne",    m_caloCell_Tot);
   declareProperty("CellVisEne",    m_caloCell_Vis);
   declareProperty("CellEmEne",     m_caloCell_Em);
@@ -135,7 +134,7 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle(int barcode) con
   int unknown_nchan = 0 ;
   
   std::vector<Identifier> ID;
-  if (barcode<0) barcode = m_singleParticleBarcode; // if no barcode is specified for this event, use the default
+  if (barcode<0) barcode = HepMC::SINGLE_PARTICLE; // if no barcode is specified for this event, use the default
 
 
   std::vector<CaloCell*> CellsEtot;

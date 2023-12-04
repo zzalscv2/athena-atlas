@@ -48,6 +48,8 @@ namespace MC
 
   /// @brief Identify a photon with zero energy. Probably a workaround for a generator bug.
   template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton<T>(p) && p->e() == 0;}
+  
+  template <class T> inline bool isSingleParticle(const T&  p) { return p->barcode() == HepMC::SINGLE_PARTICLE;}
 
   template <class T> inline bool isSpecialNonInteracting(const T& p) {
     const int apid = std::abs(p->pdg_id());

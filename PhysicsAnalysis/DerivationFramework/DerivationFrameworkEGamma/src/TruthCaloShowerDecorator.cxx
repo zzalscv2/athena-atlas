@@ -8,6 +8,7 @@
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODTruth/TruthParticle.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace DerivationFramework {
 
@@ -17,9 +18,6 @@ TruthCaloShowerDecorator::TruthCaloShowerDecorator(const std::string& t,
   : AthAlgTool(t, n, p)
 {
   declareInterface<DerivationFramework::IAugmentationTool>(this);
-  declareProperty("SingleParticleBarcode",
-                  m_singleParticleBarcode = 10001,
-                  "Barcode of single particle");
 }
 
 StatusCode
@@ -69,9 +67,8 @@ TruthCaloShowerDecorator::addBranches() const
 
   // create truth clusters
   ATH_MSG_DEBUG("Creating truth clusters");
-  int singleElectronBarcode = 10001;
   if (!m_calibhitToCaloCellTool
-         ->processCalibHitsFromParticle(singleElectronBarcode)
+         ->processCalibHitsFromParticle(HepMC::SINGLE_PARTICLE)
          .isSuccess()) {
     ATH_MSG_FATAL("Tool " << m_calibhitToCaloCellTool << " failed.");
     return StatusCode::FAILURE;
@@ -117,10 +114,8 @@ TruthCaloShowerDecorator::addBranches() const
 
   ATH_MSG_DEBUG("Decorating truth parts with truth cluster energy");
   for (const auto* const truthPart : *truthPartContainer) {
-    if (!truthPart)
-      continue;
-    if (truthPart->barcode() != m_singleParticleBarcode)
-      continue;
+    if (!truthPart) continue;
+    if (!MC::isSingleParticle(truthPart)) continue;
     linkDecoratorClusterEtot(*truthPart) = truthClusterEtot;
     linkDecoratorClusterEvis(*truthPart) = truthClusterEvis;
     linkDecoratorClusterEem(*truthPart) = truthClusterEem;

@@ -61,9 +61,6 @@ private:
   SG::WriteDecorHandleKey<xAOD::TruthParticleContainer>
     m_linkDecoratorClusterEem{ this, "truthLArClusterEemLink", "", "" };
 
-  /** @brief barcode cut for egamma helpers **/
-  int m_singleParticleBarcode;
-
   ToolHandle<CalibHitToCaloCellTool> m_calibhitToCaloCellTool{
     this,
     "CalibHitToCaloCellTool",

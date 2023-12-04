@@ -18,6 +18,7 @@
 #include "InDetBCM_RawData/BCM_RDO_Collection.h"
 #include "xAODEventInfo/EventInfo.h"             // NEW EDM
 #include "xAODEventInfo/EventAuxInfo.h"          // NEW EDM
+#include "TruthUtils/HepMCHelpers.h"          // NEW EDM
 
 //----------------------------------------------------------------------
 // Constructor with parameters:
@@ -118,7 +119,7 @@ void BCM_DigitizationTool::processSiHit(const SiHit &currentHit, double eventTim
   const HepMcParticleLink::PositionFlag idxFlag = (evtIndex==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
   const HepMcParticleLink particleLink{HepMcParticleLink(currentHit.trackNumber(), evtIndex, evColl, idxFlag, ctx)};
   const int barcode = particleLink.barcode();
-  if (barcode == 0 || barcode == 10001){
+  if (barcode == 0 || barcode == HepMC::SINGLE_PARTICLE){
     return;
   }
   m_depositVect[moduleNo].emplace_back(particleLink,currentHit.energyLoss());
