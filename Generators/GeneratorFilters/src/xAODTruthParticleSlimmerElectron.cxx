@@ -75,14 +75,7 @@ StatusCode xAODTruthParticleSlimmerElectron::execute()
                 xTruthParticleContainerElectron->push_back( xTruthParticle );
 
                 // Fill with numerical content
-                xTruthParticle->setPdgId(theParticle->pdgId());
-                xTruthParticle->setBarcode(theParticle->barcode());
-                xTruthParticle->setStatus(theParticle->status());
-                xTruthParticle->setM(theParticle->m());
-                xTruthParticle->setPx(theParticle->px());
-                xTruthParticle->setPy(theParticle->py());
-                xTruthParticle->setPz(theParticle->pz());
-                xTruthParticle->setE(theParticle->e());
+                *xTruthParticle=*theParticle;
             }   
         }
     }

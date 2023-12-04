@@ -67,14 +67,7 @@ StatusCode xAODTruthParticleSlimmerLightLepton::execute(const EventContext& cont
                 xTruthParticleContainerLightLepton->push_back( xTruthParticle );
 
                 // Fill with numerical content
-                xTruthParticle->setPdgId(particle->pdgId());
-                xTruthParticle->setBarcode(particle->barcode());
-                xTruthParticle->setStatus(particle->status());
-                xTruthParticle->setM(particle->m());
-                xTruthParticle->setPx(particle->px());
-                xTruthParticle->setPy(particle->py());
-                xTruthParticle->setPz(particle->pz());
-                xTruthParticle->setE(particle->e());
+                *xTruthParticle=*particle;
             }
         }
 

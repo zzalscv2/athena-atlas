@@ -204,15 +204,9 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
 		}
 	      }
 
-	      xTruthParticle->setBarcode(motherUniqueID);
-              xTruthParticle->setPdgId(theParticle->pdgId());
-              xTruthParticle->setStatus(theParticle->status());
-              xTruthParticle->setM(theParticle->m());
-              xTruthParticle->setPx(theParticle->px());
-              xTruthParticle->setPy(theParticle->py());
-              xTruthParticle->setPz(theParticle->pz());
-              xTruthParticle->setE(theParticle->e());
-              originDecorator(*xTruthParticle) = motherPDGid;
+          *xTruthParticle=*theParticle;
+          xTruthParticle->setBarcode(motherUniqueID);
+          originDecorator(*xTruthParticle) = motherPDGid;
 	      typeDecorator(*xTruthParticle) = motherUniqueID;
 	      typeDecoratorMass(*xTruthParticle) = mothermass;
 	      
