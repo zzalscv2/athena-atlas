@@ -139,7 +139,7 @@ const std::map<std::string, std::string> ONNXWrapper::GetMETAData() {
 
   auto keys = metadata.GetCustomMetadataMapKeysAllocated(m_allocator);
   // auto status = OrtApi::ModelMetadataGetCustomMetadataMapKeys(metadata, m_allocator, keys, nkeys)
-  for (int64_t i = 0; i < keys.size(); i++) {
+  for (size_t i = 0; i < keys.size(); i++) {
     METAData_map[keys[i].get()]=this->GetMETADataByKey(keys[i].get());
   }
 
