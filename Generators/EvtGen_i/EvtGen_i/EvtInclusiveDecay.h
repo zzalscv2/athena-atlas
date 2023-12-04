@@ -167,6 +167,7 @@ private:
   double m_userSelMinDimuMass;
   double m_userSelMaxDimuMass;
   bool m_isfHerwig;
+  bool m_setVMtransversePol;
 };
 
 #endif

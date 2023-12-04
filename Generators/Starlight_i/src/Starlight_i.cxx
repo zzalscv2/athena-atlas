@@ -161,6 +161,9 @@ Starlight_i::fillEvt(HepMC::GenEvent* evt)
     int ipart = 0;
     std::vector<starlightParticle>::const_iterator part =
       (m_event->getParticles())->begin();
+    double px_tot=0;
+    double py_tot=0;
+    double pz_tot=0;
     for (part = m_event->getParticles()->begin();
          part != m_event->getParticles()->end(); ++part, ++ipart)
       {
@@ -185,11 +188,41 @@ Starlight_i::fillEvt(HepMC::GenEvent* evt)
         if(std::abs(pid)==22) {
           e  = std::sqrt(px*px + py*py + pz*pz);
         }
-
+	
         ATH_MSG_DEBUG( "saving particle " << ipart  );
+        px_tot+=px;
+        py_tot+=py;
+        pz_tot+=pz;
 
-        v1->add_particle_out(
+        if(!m_suppressVMdecay) v1->add_particle_out(
                              HepMC::newGenParticlePtr(HepMC::FourVector(px, py, pz, e), pid, 1) );
+      }
+      if(m_suppressVMdecay) {
+        int pid = 113;
+        double mass  = 0.770;
+        if(m_prodParticleId == 443011 || m_prodParticleId == 443013){
+          pid = 443;
+          mass  = 3.0969;
+        } 
+        if(m_prodParticleId == 444011 || m_prodParticleId == 444013){
+          pid = 100443;
+          mass  = 3.6861;
+        } 
+        if(m_prodParticleId == 553011 || m_prodParticleId == 553013){
+          pid = 553;
+          mass  = 9.4604;
+        }
+        if(m_prodParticleId == 554011 || m_prodParticleId == 554013){
+          pid = 100553;
+          mass  = 10.023;
+        }
+        if(m_prodParticleId == 555011 || m_prodParticleId == 555013){
+          pid = 200553;
+          mass  = 10.355;
+        }
+        double e  = sqrt(px_tot*px_tot + py_tot*py_tot + pz_tot*pz_tot + mass*mass);
+        v1->add_particle_out(
+                             HepMC::newGenParticlePtr(HepMC::FourVector(px_tot, py_tot, pz_tot, e), pid, 1) );
       }
     ATH_MSG_DEBUG( "Saved " << ipart << " tracks "  );
 

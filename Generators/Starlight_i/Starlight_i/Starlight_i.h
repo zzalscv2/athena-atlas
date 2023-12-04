@@ -43,6 +43,7 @@ protected:
   BooleanProperty  m_lheOutput{this, "lheOutput", false};
   UnsignedIntegerProperty m_maxevents{this, "maxevents", 5500};
   BooleanProperty m_doTauolappLheFormat{this, "doTauolappLheFormat", false};
+  BooleanProperty m_suppressVMdecay{this, "suppressVMdecay", false};
   // Commands to setup starlight
   StringArrayProperty m_InitializeVector{this, "Initialize", {} };
 
