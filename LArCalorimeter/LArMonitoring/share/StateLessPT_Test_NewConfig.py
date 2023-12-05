@@ -150,7 +150,8 @@ if __name__=='__main__':
    flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2016-03"
 
    flags.GeoModel.Layout="atlas"
-   flags.GeoModel.AtlasVersion="ATLAS-R2-2015-04-00-00"
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags
+   flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN2
 
    flags.Exec.MaxEvents=-1
 
