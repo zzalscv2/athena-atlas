@@ -527,7 +527,7 @@ namespace Muon {
         // in case of a single station overlap fit, calculate a global position that is more or less located at
         // the overlap. It is used to decide on which side of the tube the fake should be produced
         std::unique_ptr<Amg::Vector3D> overlapPos;
-         std::unique_ptr<const Amg::Vector3D> phiPos;
+        std::unique_ptr<const Amg::Vector3D> phiPos;
         if (fitterData.numberOfSLOverlaps() > 0 || (fitterData.numberOfSmallChambers() > 0 && fitterData.numberOfLargeChambers() > 0)) {
             // in case of SL overlaps, pass average position of the two segments
             //       overlapPos = new Amg::Vector3D( 0.5*(fitterData.firstEntry->etaHits().front()->globalPosition() +
@@ -773,7 +773,8 @@ namespace Muon {
                         Amg::MatrixX cov(1, 1);
                         cov(0, 0) = 100.;
                         fake = std::make_unique<Trk::PseudoMeasurementOnTrack>(
-                            Trk::LocalParameters(Trk::DefinedParameter(mdtpar->parameters()[Trk::locY], Trk::locY)), cov,
+                            Trk::LocalParameters(Trk::DefinedParameter(mdtpar->parameters()[Trk::locY], Trk::locY)),
+                            std::move(cov),
                             mdtpar->associatedSurface());
 
                     }
@@ -800,7 +801,8 @@ namespace Muon {
                         Amg::MatrixX cov(1, 1);
                         cov(0, 0) = 100.;
                         fake = std::make_unique<Trk::PseudoMeasurementOnTrack>(
-                            Trk::LocalParameters(Trk::DefinedParameter(mdtpar->parameters()[Trk::locY], Trk::locY)), cov,
+                            Trk::LocalParameters(Trk::DefinedParameter(mdtpar->parameters()[Trk::locY], Trk::locY)),
+                            std::move(cov),
                             mdtpar->associatedSurface());
                     }
                 } else{
@@ -948,7 +950,8 @@ namespace Muon {
         // Error matrix
         Amg::MatrixX cov(1, 1);
         cov(0, 0) = errPos * errPos;
-        std::unique_ptr<Trk::PseudoMeasurementOnTrack> fake = std::make_unique<Trk::PseudoMeasurementOnTrack>(locPars, cov, surf);
+        std::unique_ptr<Trk::PseudoMeasurementOnTrack> fake = std::make_unique<Trk::PseudoMeasurementOnTrack>(std::move(locPars),
+                                                                                                              std::move(cov), surf);
 
         if (msgLvl(MSG::DEBUG)) {
             Amg::Vector2D LocVec2D(0., fake->localParameters().get(Trk::locY));

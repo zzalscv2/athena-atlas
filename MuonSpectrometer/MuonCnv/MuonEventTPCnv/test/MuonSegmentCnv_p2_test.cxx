@@ -139,7 +139,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   Trk::PlaneSurface plsurf (Amg::Vector3D (100, 50, 150),
                             Trk::CurvilinearUVT (Amg::Vector3D (150, 100, 50)));
-  Trk::PseudoMeasurementOnTrack pmeas (locpars, cov, plsurf);
+  Trk::PseudoMeasurementOnTrack pmeas (Trk::LocalParameters(locpars), Amg::MatrixX(cov), plsurf);
   DataVector<const Trk::MeasurementBase> mvec (SG::VIEW_ELEMENTS);
   mvec.push_back (&pmeas);
 

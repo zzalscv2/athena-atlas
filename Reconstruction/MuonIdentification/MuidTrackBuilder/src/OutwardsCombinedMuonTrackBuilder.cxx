@@ -224,7 +224,7 @@ namespace Rec {
 
                             auto meotNew =
                               std::make_unique<Trk::MaterialEffectsOnTrack>(X0,
-                                                              std::move(scatNew),
+                                                              scatNew,
                                                               std::move(energyLossNew),
                                                               surfNew,
                                                               meotPattern);
@@ -587,7 +587,7 @@ namespace Rec {
 
                             auto meotNew =
                               std::make_unique<Trk::MaterialEffectsOnTrack>(X0,
-                                                              std::move(scatNew),
+                                                              scatNew,
                                                               std::move(energyLossNew),
                                                               surfNew,
                                                               meotPattern);
@@ -659,7 +659,9 @@ namespace Rec {
         const Amg::MatrixX& cov = vertex.covariancePosition();
         covarianceMatrix = cov.similarity(jacobian);
 
-        return std::make_unique<Trk::PseudoMeasurementOnTrack>(localParameters, covarianceMatrix, surface);
+        return std::make_unique<Trk::PseudoMeasurementOnTrack>(std::move(localParameters),
+                                                               std::move(covarianceMatrix),
+                                                               surface);
     }
     double OutwardsCombinedMuonTrackBuilder::normalizedChi2(const Trk::Track& track) const {
         double chi2 = 999999.;

@@ -30,20 +30,20 @@ const Amg::Vector3D INVALID_VECTOR3D(NaN, NaN, NaN);
 }
 
 Trk::PseudoMeasurementOnTrack::PseudoMeasurementOnTrack(
-  const LocalParameters& locpars,
-  const Amg::MatrixX& locerr,
+  LocalParameters&& locpars,
+  Amg::MatrixX&& locerr,
   const Surface& assocSurf)
-  : Trk::MeasurementBase(locpars, locerr)
+  : Trk::MeasurementBase(std::move(locpars), std::move(locerr))
   , SurfacePtrHolder(assocSurf)
   , m_globalPosition(m_associatedSurface->center())
 {
 }
 
 Trk::PseudoMeasurementOnTrack::PseudoMeasurementOnTrack(
-  const LocalParameters& locpars,
-  const Amg::MatrixX& locerr,
+  LocalParameters&& locpars,
+  Amg::MatrixX&& locerr,
   Trk::ConstSurfaceUniquePtr assocSurf)
-  : Trk::MeasurementBase(locpars, locerr)
+  : Trk::MeasurementBase(std::move(locpars), std::move(locerr))
   , SurfacePtrHolder(assocSurf.release())
   , m_globalPosition(m_associatedSurface->center())
 {

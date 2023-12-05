@@ -54,12 +54,12 @@ public:
     default;
   PseudoMeasurementOnTrack& operator=(PseudoMeasurementOnTrack&&) noexcept =
     default;
-  PseudoMeasurementOnTrack(const LocalParameters& locpars,
-                           const Amg::MatrixX& locerr,
+  PseudoMeasurementOnTrack(LocalParameters&& locpars,
+                           Amg::MatrixX&& locerr,
                            const Surface& assocSurf);
 
-  PseudoMeasurementOnTrack(const LocalParameters& locpars,
-                           const Amg::MatrixX& locerr,
+  PseudoMeasurementOnTrack(LocalParameters&& locpars,
+                           Amg::MatrixX&& locerr,
                            ConstSurfaceUniquePtr assocSurf);
 
   //! Destructor

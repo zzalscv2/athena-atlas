@@ -48,7 +48,7 @@ RefitTracksAndVertex::RefitTracksAndVertex( const std::string& name, ISvcLocator
   , m_nRejectTRT(0)
   , m_nRejectPM(0)
 {
-  // declare algorithm parameters   
+  // declare algorithm parameters
   declareProperty("VertexListInput"     , m_vertexListInput) ;
   declareProperty("TrackListOutput"    , m_trackListOutput) ;
   declareProperty("OutputVertexContainer"        , m_outputVertexContainerName) ;
@@ -73,7 +73,7 @@ StatusCode RefitTracksAndVertex::initialize() {
   if( status.isFailure() ) {
     ATH_MSG_FATAL(  "DetectorStore service not found !" );
     return status;
-  }else{ 
+  }else{
     ATH_MSG_DEBUG( "DetectorStore retrieved!" );
   }
 
@@ -134,7 +134,7 @@ StatusCode RefitTracksAndVertex::execute() {
     delete outputtracks;
     return StatusCode::SUCCESS; //?? really
   }
-  
+
   if( evtStore()->record( outputtracks, m_trackListOutput ).isFailure() ) {
     ATH_MSG_ERROR( "Failed to record trackcollection with name " << m_trackListOutput );
   }
@@ -146,21 +146,21 @@ StatusCode RefitTracksAndVertex::execute() {
   CHECK( evtStore()->record(theVertexContainer,  m_outputVertexContainerName) );
   CHECK( evtStore()->record(theVertexAuxContainer, m_outputVertexContainerName + "Aux.") );
 
-  const xAOD::Vertex* primaryVertex = nullptr;  
+  const xAOD::Vertex* primaryVertex = nullptr;
   for( const xAOD::Vertex* vertex: *vertices ) {
     if( vertex->vertexType() == xAOD::VxType::PriVtx ) {
       primaryVertex = vertex;
       break;
     }
   }
-  
+
   std::vector< const Trk::TrackParameters*  > trackParametersToFit;
-  
+
   // Check we have found a PV
   if( primaryVertex ){
     if(primaryVertex->nTrackParticles() < 2)
       return StatusCode::SUCCESS;
-    
+
     //Loop over all tracks in the PV
     for(unsigned int i =0; i< primaryVertex->nTrackParticles(); ++i ){
       auto trackParticle  = primaryVertex->trackParticle( i );
@@ -173,8 +173,8 @@ StatusCode RefitTracksAndVertex::execute() {
           if(newTrack){
             outputtracks->push_back( newTrack ) ;
             if(newTrack->perigeeParameters())
-              trackParametersToFit.push_back( newTrack->perigeeParameters() ); 
-          } 
+              trackParametersToFit.push_back( newTrack->perigeeParameters() );
+          }
         } else {
           if(track->perigeeParameters())
             trackParametersToFit.push_back( track->perigeeParameters() );
@@ -184,13 +184,13 @@ StatusCode RefitTracksAndVertex::execute() {
     m_nTracksProcessed += primaryVertex->nTrackParticles() ;
     m_nTracksAccepted  += outputtracks->size() ;
     // Make sure there are at least 2 tracks to fit in the vertex fit
-    
+
     ATH_MSG_DEBUG(" From: " << primaryVertex->nTrackParticles()  << " tracks " << trackParametersToFit.size() << " will be used" );
-    
+
     if(trackParametersToFit.size() > 1){
-      
+
       Amg::Vector3D position = primaryVertex->position();
-      // Fit and store vertex 
+      // Fit and store vertex
       auto vertex =  m_vertexFitter->fit(trackParametersToFit, position );
       if(vertex){
         theVertexContainer->push_back (vertex);
@@ -200,10 +200,10 @@ StatusCode RefitTracksAndVertex::execute() {
         ATH_MSG_DEBUG("New Vtx " << vertex->position());
       }
     }
-  }	
+  }
 
-  
-  
+
+
 
 
   return StatusCode::SUCCESS;
@@ -219,16 +219,16 @@ const Trk::PseudoMeasurementOnTrack* RefitTracksAndVertex::createPMfromSi ( cons
   if( !mp->covariance() )  return nullptr;
   Trk::LocalParameters  parFromSi( defPar ) ;
   AmgSymMatrix(2) covFromSi;
-  
+
   covFromSi( 0, 0 ) = (*mp->covariance())( Trk::z0,Trk::z0 ) ;
   covFromSi( 1, 1 ) = (*mp->covariance())( Trk::theta,Trk::theta ) ;
   covFromSi( 1, 0 ) = (*mp->covariance())( Trk::z0, Trk::theta ) ;
   covFromSi( 0, 1 ) = (*mp->covariance())( Trk::z0, Trk::theta ) ;
- 
+
   const Trk::Surface& mpSurf = mp->associatedSurface() ;
-  
-  Trk::PseudoMeasurementOnTrack *pm = new Trk::PseudoMeasurementOnTrack( parFromSi
-                                                                       , covFromSi
+
+  Trk::PseudoMeasurementOnTrack *pm = new Trk::PseudoMeasurementOnTrack( std::move(parFromSi)
+                                                                       , std::move(covFromSi)
                                                                        , mpSurf
                                                                        ) ;
   return pm ;
@@ -253,18 +253,18 @@ Trk::Track* RefitTracksAndVertex::fitSCTOnlyTrack(const Trk::Track* track) {
     ATH_MSG_WARNING("RefitTracksAndVertex() : No Perigee parameter on track!");
     return nullptr ;
   }
- 
+
   if( perTrk->eta() < m_selEtaMin || perTrk->eta() > m_selEtaMax)
     return nullptr ;
 
   if( perTrk->pT() < m_selPtMin)
     return nullptr ;
-    
-  
+
+
   //store all silicon measurements into the measurementset
   DataVector<const Trk::MeasurementBase>::const_iterator it      = track->measurementsOnTrack()->begin();
-  DataVector<const Trk::MeasurementBase>::const_iterator itEnd   = track->measurementsOnTrack()->end(); 
-  for ( ; it!=itEnd; ++it){ 
+  DataVector<const Trk::MeasurementBase>::const_iterator itEnd   = track->measurementsOnTrack()->end();
+  for ( ; it!=itEnd; ++it){
     if( !(*it) ) {
       //      log (MSG::WARNING) << "The MeasurementBase set has a void"
       //    << "  member! Skip it.." << endmsg;
@@ -277,14 +277,14 @@ Trk::Track* RefitTracksAndVertex::fitSCTOnlyTrack(const Trk::Track* track) {
         } else if( m_idHelper->is_trt(surfaceID) ) {
           setTRT.push_back ( *it ) ;
         } else if( m_idHelper->is_pixel(surfaceID) ){
-          setPix.push_back ( *it ) ; 
+          setPix.push_back ( *it ) ;
         }
       }
     }
   }
-  
-  if( (int)setSCT.size() <  m_selNHitSCTMin ) 
-    return nullptr; 
+
+  if( (int)setSCT.size() <  m_selNHitSCTMin )
+    return nullptr;
 
   ATH_MSG_DEBUG("RefitTracksAndVertex() : Found " << setSCT.size()  << " SCT measurm's!" ) ;
   ATH_MSG_DEBUG("RefitTracksAndVertex() : Found " << setPix.size()  << " Pix measurm's!" ) ;
@@ -306,19 +306,19 @@ Trk::Track* RefitTracksAndVertex::fitSCTOnlyTrack(const Trk::Track* track) {
     ATH_MSG_DEBUG( "RefitTracksAndVertex() : pmFromSi " << *pmFromSi) ;
     Trk::MeasurementSet setSCT = addPM( setSCT, pmFromSi ) ;
   }
-  
+
   // Add TRT hits as they do no harm
   for( int i=0, i_max=setTRT.size() ; i!=i_max ; ++i ) {
     setSCT.push_back( setTRT[i] ) ;
   }
-  
+
   ATH_MSG_VERBOSE ( "RefitTracksAndVertex() : Si+PM MeasurementSet : " );
   for( int i=0, i_max=setSCT.size() ; i!=i_max ; ++i ) {
     ATH_MSG_VERBOSE ("============== i=" << i << " =============");
     ATH_MSG_VERBOSE ( *(setSCT[i]));
   }
    ATH_MSG_VERBOSE ("==========================================");
-  
+
   // fit TRT part of the track with PseudoMeas on z_0, theta
   Trk::Track* trkSCT=(m_trackFitter->fit(Gaudi::Hive::currentContext()
                                        ,setSCT
@@ -336,7 +336,7 @@ Trk::Track* RefitTracksAndVertex::fitSCTOnlyTrack(const Trk::Track* track) {
   ATH_MSG_VERBOSE( "RefitTracksAndVertex() : perSCT " << *perSCT) ;
 
   return trkSCT;
-} 
+}
 
 MsgStream& operator<<( MsgStream& outst, const RefitTracksAndVertex& alg ) {
   return alg.dump( outst ) ;
@@ -346,36 +346,36 @@ MsgStream& RefitTracksAndVertex::dump( MsgStream& outst ) const {
   outst << std::endl ;
   outst << "|-------------------------------------------------------------------";
   outst << "-----------------------------|" << std::endl ;
-  outst << "|  processed                      : " 
-        << std::setw(7) << m_nTracksProcessed 
+  outst << "|  processed                      : "
+        << std::setw(7) << m_nTracksProcessed
         << " tracks                                               |"
         << std::endl ;
-  outst << "|  accepted by track presel.      : " 
-        << std::setw(7) << m_nTracksPresel 
+  outst << "|  accepted by track presel.      : "
+        << std::setw(7) << m_nTracksPresel
         << " tracks                                               |"
         << std::endl ;
-  outst << "|  accepted by track presel. + PM : " 
-        << std::setw(7) << m_nTracksAccepted 
-        << " tracks                                               |"
-        << std::endl ;
-  outst << "| ------------------------------------------------------------------";
-  outst << "---------------------------- |" << std::endl ;
-  outst << "|  reject by # PIX hits           : " 
-        << std::setw(7) << m_nRejectPIX 
-        << " tracks                                               |"
-        << std::endl ;
-  outst << "|  reject by # SCT hits           : " 
-        << std::setw(7) << m_nRejectSCT 
-        << " tracks                                               |"
-        << std::endl ;
-  outst << "|  reject by # TRT hits           : " 
-        << std::setw(7) << m_nRejectTRT 
+  outst << "|  accepted by track presel. + PM : "
+        << std::setw(7) << m_nTracksAccepted
         << " tracks                                               |"
         << std::endl ;
   outst << "| ------------------------------------------------------------------";
   outst << "---------------------------- |" << std::endl ;
-  outst << "|  reject by exist. PM(TRT)       : " 
-        << std::setw(7) << m_nRejectPM 
+  outst << "|  reject by # PIX hits           : "
+        << std::setw(7) << m_nRejectPIX
+        << " tracks                                               |"
+        << std::endl ;
+  outst << "|  reject by # SCT hits           : "
+        << std::setw(7) << m_nRejectSCT
+        << " tracks                                               |"
+        << std::endl ;
+  outst << "|  reject by # TRT hits           : "
+        << std::setw(7) << m_nRejectTRT
+        << " tracks                                               |"
+        << std::endl ;
+  outst << "| ------------------------------------------------------------------";
+  outst << "---------------------------- |" << std::endl ;
+  outst << "|  reject by exist. PM(TRT)       : "
+        << std::setw(7) << m_nRejectPM
         << " tracks                                               |"
         << std::endl ;
   outst << "|-------------------------------------------------------------------";

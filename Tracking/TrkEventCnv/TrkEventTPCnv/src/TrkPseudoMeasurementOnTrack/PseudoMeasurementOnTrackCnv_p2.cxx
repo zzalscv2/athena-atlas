@@ -16,7 +16,7 @@ void PseudoMeasurementOnTrackCnv_p2::persToTrans( const Trk :: PseudoMeasurement
   Trk::LocalParameters localParams;
   fillTransFromPStore( &m_localParamsCnv, persObj->m_localParams, &localParams, log );
   // fillTransFromPStore( &m_localErrMatCnv, persObj->m_localErrMat, &transObj->m_localErrMat, log );
-   
+
   Trk::ErrorMatrix dummy;
   Amg::MatrixX localCovariance;
   fillTransFromPStore( &m_localErrMatCnv, persObj->m_localErrMat, &dummy, log );
@@ -26,10 +26,12 @@ void PseudoMeasurementOnTrackCnv_p2::persToTrans( const Trk :: PseudoMeasurement
     (this->createTransFromPStore( (ITPConverterFor<Trk::Surface>**)nullptr, persObj->m_associatedSurface, log ));
   if (!surf){
     log<<MSG::WARNING<<"PseudoMeasurementOnTrackCnv_p2: Could not recreate Surface (null pointer)"<<endmsg;
-    log<<MSG::VERBOSE<<(*transObj)<<endmsg;    
-   } 
+    log<<MSG::VERBOSE<<(*transObj)<<endmsg;
+   }
 
-  *transObj = Trk::PseudoMeasurementOnTrack (localParams, localCovariance, std::move(surf));
+  *transObj = Trk::PseudoMeasurementOnTrack (std::move(localParams),
+                                             std::move(localCovariance),
+                                             std::move(surf));
 }
 
 void PseudoMeasurementOnTrackCnv_p2::transToPers( const Trk :: PseudoMeasurementOnTrack    * transObj,

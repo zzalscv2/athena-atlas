@@ -62,11 +62,11 @@ InDet::TRT_TrackSegmentsMaker_ECcosmics::TRT_TrackSegmentsMaker_ECcosmics
   declareProperty("ToTCutUpper",m_cutToTUpper);
   declareProperty("MinDCperSeed",m_minDCSeed);
   declareProperty("HitLimit",m_hitLimit=2000);
-  
+
 }
 
 ///////////////////////////////////////////////////////////////////
-// Destructor  
+// Destructor
 ///////////////////////////////////////////////////////////////////
 
 InDet::TRT_TrackSegmentsMaker_ECcosmics::~TRT_TrackSegmentsMaker_ECcosmics()
@@ -101,7 +101,7 @@ Double_t fitf_zphi_approx(const Double_t *x, const Double_t *par)
 
 StatusCode InDet::TRT_TrackSegmentsMaker_ECcosmics::initialize()
 {
-  StatusCode sc = AthAlgTool::initialize(); 
+  StatusCode sc = AthAlgTool::initialize();
 
   // Initialize ReadHandle
   ATH_CHECK(m_trtname.initialize());
@@ -175,7 +175,7 @@ StatusCode InDet::TRT_TrackSegmentsMaker_ECcosmics::finalize()
 }
 
 ///////////////////////////////////////////////////////////////////
-// Initialize tool for new event 
+// Initialize tool for new event
 ///////////////////////////////////////////////////////////////////
 
 std::unique_ptr<InDet::ITRT_TrackSegmentsMaker::IEventData>
@@ -196,10 +196,10 @@ InDet::TRT_TrackSegmentsMaker_ECcosmics::newEvent (const EventContext& /*ctx*/) 
   //loop over good hits and sort them into sectors
 
   for(;it!=itE;++it){
-    
+
     int straw = m_trtid->straw((*it)->identify());
     const Amg::Vector3D& sc = (*it)->detectorElement()->strawCenter(straw);
-    
+
     int phi = int((std::atan2(sc.y(),sc.x())+M_PI)*8./M_PI);
 
     if     ( phi<0  ) phi = 15;
@@ -207,7 +207,7 @@ InDet::TRT_TrackSegmentsMaker_ECcosmics::newEvent (const EventContext& /*ctx*/) 
 
     int z=0;
     if(sc.z()<0) z=1;
-    
+
     int zslice=int((std::abs(sc.z())-800.)/100.);
 
     event_data->m_sectors[z][zslice][phi].push_back(*it);
@@ -236,7 +236,7 @@ InDet::TRT_TrackSegmentsMaker_ECcosmics::newRegion
 
   // @TODO here the retrieve_hits method should be called with the list of the idhash
 
- 
+
   std::list<const InDet::TRT_DriftCircle*>::iterator it,itE;
   it=event_data->m_goodHits.begin();
   itE=event_data->m_goodHits.end();
@@ -244,10 +244,10 @@ InDet::TRT_TrackSegmentsMaker_ECcosmics::newRegion
   //loop over good hits and sort them into sectors
 
   for(;it!=itE;++it){
-    
+
     int straw = m_trtid->straw((*it)->identify());
     const Amg::Vector3D& sc = (*it)->detectorElement()->strawCenter(straw);
-    
+
     int phi = int((std::atan2(sc.y(),sc.x())+M_PI)*8./M_PI);
 
     if     ( phi<0  ) phi = 15;
@@ -290,7 +290,7 @@ namespace InDet{
 
     const Amg::Vector3D& sc2 = y->detectorElement()->center();
     double z2=sc2.z();
-    
+
     return z1<z2;
   }
 
@@ -298,11 +298,11 @@ namespace InDet{
   {
     const Amg::Vector3D& sc = x->detectorElement()->center();
     double y1=sc.y();
-    
-    
+
+
     const Amg::Vector3D& sc2 = y->detectorElement()->center();
     double y2=sc2.y();
-    
+
     return y1>y2;
   }
 
@@ -310,11 +310,11 @@ namespace InDet{
   {
     const Amg::Vector3D& sc = x->detectorElement()->center();
     double z1=sc.z();
-    
-    
+
+
     const Amg::Vector3D& sc2 = y->detectorElement()->center();
     double z2=sc2.z();
-    
+
     return z1>z2;
   }
 }
@@ -325,7 +325,7 @@ namespace InDet{
 // Methods of TRT segment reconstruction in one event
 ///////////////////////////////////////////////////////////////////
 
-void InDet::TRT_TrackSegmentsMaker_ECcosmics::find(const EventContext & /*ctx*/, 
+void InDet::TRT_TrackSegmentsMaker_ECcosmics::find(const EventContext & /*ctx*/,
                                                    InDet::ITRT_TrackSegmentsMaker::IEventData &virt_event_data,
                                                    InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap &) const
 {
@@ -337,7 +337,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::find(const EventContext & /*ctx*/,
   //loop over both endcaps
   for(int endcap=0;endcap<2;endcap++){
 
-    // 1st step: find sector with the maximal number of hits until no one is left 
+    // 1st step: find sector with the maximal number of hits until no one is left
     //           with at least 5 hits
 
     int max=m_minDCSeed;
@@ -384,7 +384,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::find(const EventContext & /*ctx*/,
   }
 
   ATH_MSG_DEBUG("Found "<<event_data.m_seeds.size()<<" initial seeds !");
-  
+
 
   //now loop over all seeds and try to create segments out of them
 
@@ -450,14 +450,14 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
   if(dc.size()>=40) return false;
 
   //fill arrays for the fit
-  
+
   vit=dc.begin();
   vitE=dc.end();
 
 
   for(;vit!=vitE;++vit){
     int straw = m_trtid->straw((*vit)->identify());
-    const Amg::Vector3D& sc = (*vit)->detectorElement()->strawCenter(straw); 
+    const Amg::Vector3D& sc = (*vit)->detectorElement()->strawCenter(straw);
 
     if(sc.phi()<phimin)
       phimin=sc.phi();
@@ -480,12 +480,12 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
   for(vit=dc.begin();vit!=vitE;++vit){
     int straw = m_trtid->straw((*vit)->identify());
     const Amg::Vector3D& sc = (*vit)->detectorElement()->strawCenter(straw);
-    
+
     double orig=sc.phi();
 
     double corr=orig-shift;
 
-    if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI; 
+    if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI;
     else if(corr <-M_PI) corr = std::fmod(corr-M_PI,2.*M_PI)+M_PI;
 
     if(count>500){
@@ -533,35 +533,35 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
 
   if(maxdc>=4){
     //ok, we've found a seed
-    
+
     double zmin=1e4;
     double zmax=-1e4;
-    
+
 
     int muster[3][3];
     for(auto & i : muster)
       for(int & j : i)
 	j=0;
-    
+
     std::vector<const InDet::TRT_DriftCircle*> *seed=new std::vector<const InDet::TRT_DriftCircle*>;
-    
+
     for(int zsl=zslice-1;zsl<=zslice+1;zsl++){
       for(int ps=sector-1;ps<=sector+1;ps++){
-	
+
 	//make sure that the slices exist ...
 	if(zsl<0 || zsl>=20) continue;
-	
+
 	int ps2=ps;
 	if(ps2<0) ps2+=16;
 	else if(ps2>15) ps2-=16;
-	
+
 	for(it=event_data.m_sectors[endcap][zsl][ps2].begin();it!=event_data.m_sectors[endcap][zsl][ps2].end();++it){
 	  int straw = m_trtid->straw((*it)->identify());
 	  const Amg::Vector3D& sc = (*it)->detectorElement()->strawCenter(straw);
-	  
+
 	  double pred_phi=sc.z()*p_best[0]+p_best[1];
 	  double corr=sc.phi()-p_best[2];
-	  
+
 	  if(p_best[0]==1e10){
 	    if(sc.z()==p_best[1]) {
 	      pred_phi=corr; //z=const ...
@@ -569,10 +569,10 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
 	      pred_phi=corr+0.5;
 	    }
 	  }
-	  if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI; 
+	  if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI;
 	  else if(corr <-M_PI) corr = std::fmod(corr-M_PI,2.*M_PI)+M_PI;
-	  
-	  
+
+
 	  if(std::abs(phidiff(pred_phi,corr))<=4./650.){
 	    seed->push_back(*it);
 	    if(sc.z()<zmin) zmin=sc.z();
@@ -584,10 +584,10 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
     }
 
     std::vector<const InDet::TRT_DriftCircle*>::iterator vit,vitE;
-    
+
 
     //do we need to extend the range ??
-    
+
     ATH_MSG_VERBOSE("Pattern:");
     ATH_MSG_VERBOSE("\t"<<muster[0][0]<<" "<<muster[1][0]<<" "<<muster[2][0]);
     ATH_MSG_VERBOSE("\t"<<muster[0][1]<<" "<<muster[1][1]<<" "<<muster[2][1]);
@@ -597,23 +597,23 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
     if(muster[2][0] || muster[2][1] || muster[2][2]){
       //extend towards higher z-values
       zsl=zslice+2;
-    
+
       for(int ps=sector-2;ps<=sector+2;ps++){
-	
+
 	//make sure that the slices exist ...
 	if(zsl<0 || zsl>=20) continue;
-	
+
 	int ps2=ps;
 	if(ps2<0) ps2+=16;
 	else if(ps2>15) ps2-=16;
-	
+
 	for(it=event_data.m_sectors[endcap][zsl][ps2].begin();it!=event_data.m_sectors[endcap][zsl][ps2].end();++it){
 	  int straw = m_trtid->straw((*it)->identify());
 	  const Amg::Vector3D& sc = (*it)->detectorElement()->strawCenter(straw);
-	  
+
 	  double pred_phi=sc.z()*p_best[0]+p_best[1];
 	  double corr=sc.phi()-p_best[2];
-	  
+
 	  if(p_best[0]==1e10){
 	    if(sc.z()==p_best[1]) {
 	      pred_phi=corr; //z=const ...
@@ -621,10 +621,10 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
 	      pred_phi=corr+0.5;
 	    }
 	  }
-	  if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI; 
+	  if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI;
 	  else if(corr <-M_PI) corr = std::fmod(corr-M_PI,2.*M_PI)+M_PI;
-	  
-	  
+
+
 	  if(std::abs(phidiff(pred_phi,corr))<=4./650.){
 	    if (msgLvl(MSG::VERBOSE)) msg()<<"extended hit at z= "<<sc.z()<<endmsg;
 	    if(sc.z()<zmin) zmin=sc.z();
@@ -638,23 +638,23 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
     if(muster[0][0] || muster[0][1] || muster[0][2]){
       //extend towards lower z-values
       zsl=zslice-2;
-    
+
       for(int ps=sector-2;ps<=sector+2;ps++){
-	
+
 	//make sure that the slices exist ...
 	if(zsl<0 || zsl>=20) continue;
-	
+
 	int ps2=ps;
 	if(ps2<0) ps2+=16;
 	else if(ps2>15) ps2-=16;
-	
+
 	for(it=event_data.m_sectors[endcap][zsl][ps2].begin();it!=event_data.m_sectors[endcap][zsl][ps2].end();++it){
 	  int straw = m_trtid->straw((*it)->identify());
 	  const Amg::Vector3D& sc = (*it)->detectorElement()->strawCenter(straw);
-	  
+
 	  double pred_phi=sc.z()*p_best[0]+p_best[1];
 	  double corr=sc.phi()-p_best[2];
-	  
+
 	  if(p_best[0]==1e10){
 	    if(sc.z()==p_best[1]) {
 	      pred_phi=corr; //z=const ...
@@ -662,10 +662,10 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
 	      pred_phi=corr+0.5;
 	    }
 	  }
-	  if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI; 
+	  if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI;
 	  else if(corr <-M_PI) corr = std::fmod(corr-M_PI,2.*M_PI)+M_PI;
-	  
-	  
+
+
 	  if(std::abs(phidiff(pred_phi,corr))<=4./650.){
 	    ATH_MSG_VERBOSE("extended hit at z= "<<sc.z());
 	    if(sc.z()<zmin) zmin=sc.z();
@@ -687,20 +687,20 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
 
     vit=seed->begin();
     vitE=seed->end();
-    
+
     for(;vit!=vitE;++vit){
       int straw = m_trtid->straw((*vit)->identify());
       const Amg::Vector3D& sc = (*vit)->detectorElement()->strawCenter(straw);
 
       int phi = int((std::atan2(sc.y(),sc.x())+M_PI)*8./M_PI);
-      
+
       if     ( phi<0  ) phi = 15;
       else if( phi>15 ) phi = 0 ;
-      
+
       int z=0;
       if(sc.z()<0) z=1;
       int zslic=int((std::abs(sc.z())-800.)/100.);
-      
+
       event_data.m_sectors[z][zslic][phi].remove(*vit);
 
     }
@@ -710,27 +710,27 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
     std::list<const InDet::TRT_DriftCircle*>::iterator lit,litE;
     lit=event_data.m_noiseHits.begin();
     litE=event_data.m_noiseHits.end();
-    
+
     for(;lit!=litE;++lit){
-      
+
       //don't add hits that really look like noise
       if((*lit)->timeOverThreshold()<m_cutToTLoose) continue;
-      
+
       int straw = m_trtid->straw((*lit)->identify());
       const Amg::Vector3D& sc = (*lit)->detectorElement()->strawCenter(straw);
-      
+
       int phi = int((std::atan2(sc.y(),sc.x())+M_PI)*8./M_PI);
-      
+
       if     ( phi<0  ) phi = 15;
       else if( phi>15 ) phi = 0 ;
-      
-      
+
+
       int zsl=int((std::abs(sc.z())-800.)/100.);
-      
+
       if(std::abs(zsl-zslice)<2){
 	double pred_phi=sc.z()*p_best[0]+p_best[1];
 	double corr=sc.phi()-p_best[2];
-	
+
 	if(p_best[0]==1e10){
 	  if(sc.z()==p_best[1]) {
 	    pred_phi=corr; //z=const ...
@@ -738,20 +738,20 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
 	    pred_phi=corr+0.5;
 	  }
 	}
-	if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI; 
+	if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI;
 	else if(corr <-M_PI) corr = std::fmod(corr-M_PI,2.*M_PI)+M_PI;
-	
-	
+
+
 	if(std::abs(phidiff(pred_phi,corr))<=4./650.){
 	  if(sc.z()>zmin && sc.z()<zmax){
 	    seed->push_back(*lit);
 	    ATH_MSG_VERBOSE("\t\t noise hit matched seed! z="<< sc.z());
 	  }
 	}
-	
+
       }
-      
-      
+
+
     }
 
 
@@ -764,7 +764,7 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
 
 
   return false;
-  
+
 }
 
 int InDet::TRT_TrackSegmentsMaker_ECcosmics::evaluate_seed(int endcap,
@@ -795,10 +795,10 @@ int InDet::TRT_TrackSegmentsMaker_ECcosmics::evaluate_seed(int endcap,
       for(it=event_data.m_sectors[endcap][zsl][ps2].begin();it!=itE;++it){
 	int straw = m_trtid->straw((*it)->identify());
 	const Amg::Vector3D& sc = (*it)->detectorElement()->strawCenter(straw);
-	
+
 	double pred_phi=sc.z()*p[0]+p[1];
 	double corr=sc.phi()-p[2];
-	
+
 	if(p[0]==1e10){
 	  if(sc.z()==p[1]) {
 	    pred_phi=corr; //z=const ...
@@ -806,12 +806,12 @@ int InDet::TRT_TrackSegmentsMaker_ECcosmics::evaluate_seed(int endcap,
 	    pred_phi=corr+0.5;
 	  }
 	}
-	if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI; 
+	if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI;
 	else if(corr <-M_PI) corr = std::fmod(corr-M_PI,2.*M_PI)+M_PI;
-	
-	
+
+
 	if(std::abs(phidiff(pred_phi,corr))<=4./650.){
-	  count=count+1;	  
+	  count=count+1;
 	}
       }
     }
@@ -827,7 +827,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
 {
 
   ATH_MSG_VERBOSE("Number of hits in initial seed: "<<seed->size());
-  
+
   double shift=0.;
   double phimin=10.;
   double phimax=-10.;
@@ -844,7 +844,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
   for(;vit!=vitE;++vit){
     int straw = m_trtid->straw((*vit)->identify());
     const Amg::Vector3D& sc = (*vit)->detectorElement()->strawCenter(straw);
-    
+
     if(sc.z()<zmin) zmin=sc.z();
     if(sc.z()>zmax) zmax=sc.z();
 
@@ -862,13 +862,13 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
 
     if(sc.phi()<phimin)
       phimin=sc.phi();
-    
+
     if(sc.phi()>phimax)
       phimax=sc.phi();
-    
+
     count++;
   }
-  
+
   shift=(phimax+phimin)/2.-M_PI_4;
   ATH_MSG_VERBOSE("Phimin="<<phimin<<" Phimax="<<phimax<<" shift="<<shift);
 
@@ -880,12 +880,12 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
 
 
   //correct the phi values
-  
+
   for(int i=0;i<count;i++){
     double orig=event_data.m_a_phi[i];
-    
+
     double corr=orig-shift;
-    if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI; 
+    if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI;
     else if(corr <-M_PI) corr = std::fmod(corr-M_PI,2.*M_PI)+M_PI;
 
     event_data.m_a_phi[i]=corr;
@@ -913,7 +913,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
     double fitted_phi=fit->Eval(sc.z(),0.,0.);
     fitted_phi+=shift;
 
-    if     (fitted_phi > M_PI) fitted_phi = std::fmod(fitted_phi+M_PI,2.*M_PI)-M_PI; 
+    if     (fitted_phi > M_PI) fitted_phi = std::fmod(fitted_phi+M_PI,2.*M_PI)-M_PI;
     else if(fitted_phi <-M_PI) fitted_phi = std::fmod(fitted_phi-M_PI,2.*M_PI)+M_PI;
 
     if(std::abs(phidiff(fitted_phi,sc.phi()))<m_scaleTube*4./800.){
@@ -998,7 +998,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
   }
   tobeadded.clear();
 
-  
+
 
   //fit again
   std::sort(seed->begin(),seed->end(), CompareDCz);
@@ -1010,7 +1010,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
   for(;vit!=vitE;++vit){
     int straw = m_trtid->straw((*vit)->identify());
     const Amg::Vector3D& sc = (*vit)->detectorElement()->strawCenter(straw);
-    
+
     if(count>500){
       return; // a seed cannot contain that many hits
     }
@@ -1025,13 +1025,13 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
 
     if(sc.phi()<phimin)
       phimin=sc.phi();
-    
+
     if(sc.phi()>phimax)
       phimax=sc.phi();
-    
+
     count++;
   }
-  
+
   shift=(phimax+phimin)/2.-M_PI_4;
   ATH_MSG_VERBOSE("Phimin="<<phimin<<" Phimax="<<phimax<<" shift="<<shift);
 
@@ -1042,12 +1042,12 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
   }
 
   //correct the phi values
-  
+
   for(int i=0;i<count;i++){
     double orig=event_data.m_a_phi[i];
     double corr=orig-shift;
 
-    if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI; 
+    if     (corr > M_PI) corr = std::fmod(corr+M_PI,2.*M_PI)-M_PI;
     else if(corr <-M_PI) corr = std::fmod(corr-M_PI,2.*M_PI)+M_PI;
 
     event_data.m_a_phi[i]=corr;
@@ -1056,14 +1056,14 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
     event_data.m_a_tan_err[i]=(1.15/700.)/(cosCorr*cosCorr);
   }
 
-  
+
   fit=perform_fit(count, event_data);
   if(!fit) return;
 
   //add the ones from the noise list
   lit=event_data.m_noiseHits.begin();
   litE=event_data.m_noiseHits.end();
-  
+
   for(;lit!=litE;++lit){
 
     //don't add hits that really look like noise
@@ -1076,7 +1076,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
     double fitted_phi=fit->Eval(sc.z(),0.,0.);
     fitted_phi+=shift;
 
-    if     (fitted_phi > M_PI) fitted_phi = std::fmod(fitted_phi+M_PI,2.*M_PI)-M_PI; 
+    if     (fitted_phi > M_PI) fitted_phi = std::fmod(fitted_phi+M_PI,2.*M_PI)-M_PI;
     else if(fitted_phi <-M_PI) fitted_phi = std::fmod(fitted_phi-M_PI,2.*M_PI)+M_PI;
 
     //only look into the same endcap for noise hits
@@ -1134,10 +1134,10 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
   laststraw=(*seed)[seed->size()-1]->detectorElement()->strawCenter(  m_trtid->straw((*seed)[seed->size()-1]->identify()) );
   z1=firststraw.z();
   z2=laststraw.z();
-  
+
 
   if(z1>z2) {
-    Theta=M_PI-std::atan2(400.,std::abs(z1-z2)); 
+    Theta=M_PI-std::atan2(400.,std::abs(z1-z2));
     state=2;
   }else{
     Theta=std::atan2(400.,std::abs(z1-z2));
@@ -1195,7 +1195,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
 
   vit=seed->begin();
   vitE=seed->end();
-  
+
   count=0;
   for(;vit!=vitE;++vit){
     count++;
@@ -1220,36 +1220,36 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
     for(;vit!=vitE;++vit){
       int straw = m_trtid->straw((*vit)->identify());
       const Amg::Vector3D& sc = (*vit)->detectorElement()->strawCenter(straw);
-      
+
       double fitted_phi=fit->Eval(sc.z(),0.,0.);
       fitted_phi+=shift;
 
-      if     (fitted_phi > M_PI) fitted_phi = std::fmod(fitted_phi+M_PI,2.*M_PI)-M_PI; 
+      if     (fitted_phi > M_PI) fitted_phi = std::fmod(fitted_phi+M_PI,2.*M_PI)-M_PI;
       else if(fitted_phi <-M_PI) fitted_phi = std::fmod(fitted_phi-M_PI,2.*M_PI)+M_PI;
 
       int sign=1;
       if(fitted_phi<sc.phi()) sign=-1;
-      
+
 
       double driftr  = (*vit)->localPosition()(Trk::driftRadius);
       double drifte  = 2*std::sqrt((*vit)->localCovariance()(0,0));
-      
+
       double straw_r=640+400./std::abs(z2-z1)*std::abs(sc.z()-z1);
-      
+
       double dphi=sign*driftr/straw_r;
-      
-      
+
+
       event_data.m_a_z[count]=sc.z();
       event_data.m_a_phi[count]=sc.phi()+dphi;
       event_data.m_a_phi_err[count]=drifte/straw_r;
-      
+
       event_data.m_a_tan[count]=std::tan(event_data.m_a_phi[count]-shift);
       const auto cosPhiMinShift{std::cos(event_data.m_a_phi[count]-shift)};
       event_data.m_a_tan_err[count]=(event_data.m_a_phi_err[count])/(  cosPhiMinShift
                                                                      * cosPhiMinShift);
 
       event_data.m_a_z_err[count]=0.;
-      
+
       ATH_MSG_VERBOSE(count<<" z="<<event_data.m_a_z[count]<<" phi="<<event_data.m_a_phi[count]<<" +- "<< event_data.m_a_phi_err[count]);
       count++;
     }
@@ -1274,7 +1274,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
       double driftr  = (*vit)->localPosition()(Trk::driftRadius);
       double drifte  = 2*std::sqrt((*vit)->localCovariance()(0,0));
       int sign=1;
-      
+
       if(fitted_phi<sc.phi()) sign=-1;
 
       double straw_r=640+400./std::abs(z2-z1)*std::abs(sc.z()-z1);
@@ -1319,23 +1319,23 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
     for(;vit!=vitE;++vit){
       int straw = m_trtid->straw((*vit)->identify());
       const Amg::Vector3D& sc = (*vit)->detectorElement()->strawCenter(straw);
-      
+
       double fitted_phi=fit->Eval(sc.z(),0.,0.);
       fitted_phi+=shift;
 
-      if     (fitted_phi > M_PI) fitted_phi = std::fmod(fitted_phi+M_PI,2.*M_PI)-M_PI; 
+      if     (fitted_phi > M_PI) fitted_phi = std::fmod(fitted_phi+M_PI,2.*M_PI)-M_PI;
       else if(fitted_phi <-M_PI) fitted_phi = std::fmod(fitted_phi-M_PI,2.*M_PI)+M_PI;
 
       double driftr  = (*vit)->localPosition()(Trk::driftRadius);
       double drifte  = 2*std::sqrt((*vit)->localCovariance()(0,0));
       int sign=1;
-      
+
       if(fitted_phi<sc.phi()) sign=-1;
 
       double straw_r=640+400./std::abs(z2-z1)*std::abs(sc.z()-z1);
       double dphi=sign*driftr/straw_r;
 
-      
+
       ATH_MSG_VERBOSE("z="<<sc.z()<<" phi="<<sc.phi()<<" fitted_phi = "<<fitted_phi);
       if(std::abs(phidiff(fitted_phi,sc.phi()-dphi)) <  m_scaleFactorDrift* drifte/straw_r){
         ATH_MSG_VERBOSE("\t\t matched!!!");
@@ -1349,7 +1349,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
 
 
   //create the segment
-  
+
 
 
   if(count<m_minDCSeed) return; //too short segments don't make sense
@@ -1381,7 +1381,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
 
     double z=sc.z();
     //    double phi=sc.phi();
-    
+
     double locz=0.;
 
     if(std::abs(z2-z1)>0.000001){
@@ -1394,7 +1394,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
     double fitted_phi=fit->Eval(z,0.,0.);
     fitted_phi+=shift;
 
-    if     (fitted_phi > M_PI) fitted_phi = std::fmod(fitted_phi+M_PI,2.*M_PI)-M_PI; 
+    if     (fitted_phi > M_PI) fitted_phi = std::fmod(fitted_phi+M_PI,2.*M_PI)-M_PI;
     else if(fitted_phi <-M_PI) fitted_phi = std::fmod(fitted_phi-M_PI,2.*M_PI)+M_PI;
 
     double fitted_r=(phidiff(fitted_phi,sc.phi()))*(840+locz);
@@ -1405,7 +1405,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
       initial_locz=locz;
     }
 
-    if     (temp_phi > M_PI) temp_phi = std::fmod(temp_phi+M_PI,2.*M_PI)-M_PI; 
+    if     (temp_phi > M_PI) temp_phi = std::fmod(temp_phi+M_PI,2.*M_PI)-M_PI;
     else if(temp_phi <-M_PI) temp_phi = std::fmod(temp_phi-M_PI,2.*M_PI)+M_PI;
 
     ATH_MSG_VERBOSE(count<<" fitted_r = "<<fitted_r<<" locz="<<locz<<" temp_phi="<<temp_phi);
@@ -1429,9 +1429,9 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
       double driftr  = (*vit)->localPosition()(Trk::driftRadius);
       double drifte  = 2*std::sqrt((*vit)->localCovariance()(0,0));
       int sign=1;
-      
+
       if(fitted_phi<sc.phi()) sign=-1;
-      
+
       double straw_r=640+400./std::abs(z2-z1)*std::abs(sc.z()-z1);
       double dphi=sign*driftr/straw_r;
 
@@ -1459,7 +1459,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
     if(count==1 || (size_t)count==seed->size()){
       Trk::DefinedParameter dp(locz,Trk::locZ);
       Trk::LocalParameters par(dp);
-      Amg::MatrixX cov(1,1); 
+      Amg::MatrixX cov(1,1);
       cov<<1.;
 
       //create new surface
@@ -1474,7 +1474,10 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
       Trk::StraightLineSurface* surface = new Trk::StraightLineSurface(T);
 
 
-      Trk::PseudoMeasurementOnTrack *pseudo=new Trk::PseudoMeasurementOnTrack( par,cov,*surface);
+      Trk::PseudoMeasurementOnTrack *pseudo=new Trk::PseudoMeasurementOnTrack(
+        std::move(par),
+        std::move(cov),
+        *surface);
 
       delete surface;
 
@@ -1505,12 +1508,12 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
 
   Trk::LocalParameters par(defPar);
 
-  
+
   ATH_MSG_VERBOSE("Track parameters from segment:"<<par);
 
   double universal=1.15;
 
- 
+
   Amg::MatrixX cov(5,5);
   cov<<
     universal*universal,          0., 0.,   0., 0.,
@@ -1590,24 +1593,24 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::retrieveHits(TRT_TrackSegmentsMake
     }
     prd_to_track_map_cptr = prd_to_track_map.cptr();
   }
-  
+
   const InDet::TRT_DriftCircleContainer*   mjo_trtcontainer = trtcontainer.get();
   if (!mjo_trtcontainer) return;
 
   InDet::TRT_DriftCircleContainer::const_iterator
     w = trtcontainer->begin(),we = trtcontainer->end();
   for(; w!=we; ++w) {
-    
+
     Identifier ID = (*w)->identify();
     if(std::abs(m_trtid->barrel_ec(ID))!=2) continue; // only endcaps please!!!
 
-    InDet::TRT_DriftCircleCollection::const_iterator 
+    InDet::TRT_DriftCircleCollection::const_iterator
       c  = (*w)->begin(), ce = (*w)->end();
 
     for(; c!=ce; ++c) {
 
       if(prd_to_track_map_cptr &&  prd_to_track_map_cptr->isUsed(*(*c))) continue; //don't use hits that have already been used
- 
+
       if( (*c)->isNoise() || (*c)->timeOverThreshold()<m_cutToTLoose) {
         event_data.m_noiseHits.push_back(*c);
       }else{
@@ -1656,12 +1659,12 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::retrieveHits(TRT_TrackSegmentsMake
   }
 
   //2nd pass through good hits with increased ToT cut
-  
+
   it=event_data.m_goodHits.begin();
   itE=event_data.m_goodHits.end();
-  
+
   remove=false;
-  
+
   for(;it!=itE;++it){
 
     if(remove){
@@ -1712,9 +1715,9 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::retrieveHits(TRT_TrackSegmentsMake
 
 }
 
-bool 
+bool
 InDet::TRT_TrackSegmentsMaker_ECcosmics::accepted(
-  const std::list<const InDet::TRT_DriftCircle*>::iterator it, 
+  const std::list<const InDet::TRT_DriftCircle*>::iterator it,
   std::list<const InDet::TRT_DriftCircle*> & container,
   double dPhiLimit, double dzLimit) const{
   //
@@ -1779,17 +1782,17 @@ TF1 *InDet::TRT_TrackSegmentsMaker_ECcosmics::perform_fit(int count,
   event_data.m_fitf_zphi->SetParameter(0,event_data.m_fitf_ztanphi->GetParameter(0));
   event_data.m_fitf_zphi->SetParameter(1,event_data.m_fitf_ztanphi->GetParameter(1));
   event_data.m_fitf_zphi->SetParameter(2,event_data.m_fitf_ztanphi->GetParameter(2));
-  
+
   delete gre;
 
   gre=new TGraphErrors(count,event_data.m_a_z,event_data.m_a_phi,event_data.m_a_z_err,event_data.m_a_phi_err);
   int fitresult2=gre->Fit(event_data.m_fitf_zphi_approx,"Q");
 
-  
+
   ATH_MSG_VERBOSE( "Fit result (zphi): a0="<< event_data.m_fitf_zphi_approx->GetParameter(0)
                    <<" a1="<< event_data.m_fitf_zphi_approx->GetParameter(1)<<" a2="
                    << event_data.m_fitf_zphi_approx->GetParameter(2)<<" fitresult="<<fitresult2);
-  
+
   double p1=event_data.m_fitf_ztanphi->GetProb();
   double p2=event_data.m_fitf_zphi_approx->GetProb();
 
@@ -1879,7 +1882,7 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::is_suspicious(const InDet::TRT_Dri
 
   for(int i=0;i<count;i++){
     double zmin=10000;
-    
+
     if(i-1>=0)
       if(std::abs(dcz[i]-dcz[i-1])<zmin) zmin=std::abs(dcz[i]-dcz[i-1]);
     if(i+1<count)

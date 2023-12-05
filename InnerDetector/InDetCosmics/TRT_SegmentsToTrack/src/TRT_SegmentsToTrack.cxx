@@ -75,9 +75,9 @@ InDet::TRT_SegmentsToTrack::~TRT_SegmentsToTrack()
 
 StatusCode InDet::TRT_SegmentsToTrack::initialize()
 {
- 
+
   ATH_MSG_DEBUG("TrkSegmenttoTrack initialize()");
-  
+
   m_n_combined_fit=0;
 
   m_nTracksReal=0;
@@ -159,7 +159,7 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
 
 
   //output collections for fitted tracks
-  
+
   SG::WriteHandle<TrackCollection> final_outputTrackCollection(m_outputTrackCollectionName,ctx);
   ATH_CHECK(final_outputTrackCollection.record(std::make_unique<TrackCollection>()));
 
@@ -181,12 +181,12 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
 
 
  for(iseg=inputSegments->begin(); iseg != isegEnd; ++ iseg) {
-    
+
     segmentCounter++;
-    
-    
+
+
     if((*iseg)->numberOfMeasurementBases()<10) continue; //only convert segments that are large enough
-    
+
     Trk::MeasurementSet myset;
     for(unsigned int i=0;i<(*iseg)->numberOfMeasurementBases();++i){
       const Amg::VectorX& LocalParameters = (*iseg)->measurement(i)->localParameters();
@@ -199,19 +199,19 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
 
     if((*iseg)->numberOfMeasurementBases()>0){
       ATH_MSG_DEBUG("numberOfContainedRots: " << (*iseg)->numberOfMeasurementBases());
-      
+
       const Trk::StraightLineSurface* testSf
       	= dynamic_cast<const Trk::StraightLineSurface*>(&((*iseg)->associatedSurface()));
-      
-      
+
+
       const Trk::AtaStraightLine* inputMatchLine =nullptr;
       const Trk::Perigee* inputMatchPerigee =nullptr;
-      const Amg::VectorX &p = dynamic_cast<const Amg::VectorX&>((**iseg).localParameters());      
-      
+      const Amg::VectorX &p = dynamic_cast<const Amg::VectorX&>((**iseg).localParameters());
+
       if(!testSf){
 	ATH_MSG_DEBUG("No straightLineSurface !! Trying Perigee ...");
 	const Trk::PerigeeSurface *testPSf=dynamic_cast<const Trk::PerigeeSurface*>(&((*iseg)->associatedSurface()));
-	
+
 	if(!testPSf){
 	  ATH_MSG_DEBUG("Associated surface dynamic_cast into PerigeeSurface failed: "<<(*iseg)->associatedSurface());
 	  ATH_MSG_DEBUG("Leaving input matching perigee as nullptr, will not get a fittedTrack");
@@ -220,8 +220,8 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
 	  inputMatchPerigee = new Trk::Perigee(p(0),p(1),p(2),p(3),p(4), *testPSf);
 	}
       }else{
-	inputMatchLine = new Trk::AtaStraightLine(p(0),p(1),p(2),p(3),p(4),*testSf);   
-       
+	inputMatchLine = new Trk::AtaStraightLine(p(0),p(1),p(2),p(3),p(4),*testSf);
+
 	ATH_MSG_DEBUG("Created testSf : " << (*inputMatchLine));
         int nmeas=(*iseg)->numberOfMeasurementBases();
         Amg::Vector3D surfpos(.5*((*iseg)->measurement(nmeas/2)->globalPosition()+(*iseg)->measurement(nmeas/2+1)->globalPosition()));
@@ -233,7 +233,7 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
         }
       }
       ATH_MSG_DEBUG("Created inputMatchLine");
-      
+
       std::unique_ptr<Trk::Track> fittedTrack;
       const Trk::TrackParameters *inputpar=nullptr;
       if (inputMatchPerigee) inputpar=inputMatchPerigee;
@@ -334,7 +334,7 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
 	ATH_MSG_DEBUG("Quality of Track:  chi^2 /ndof "<<fittedTrack->fitQuality()->chiSquared()<<" / "<<fittedTrack->fitQuality()->numberDoF());
 	ATH_MSG_DEBUG("Noise probability: "<<getNoiseProbability(fittedTrack.get()));
 	ATH_MSG_DEBUG((*fittedTrack));
-	
+
 	if( nTRTHits(fittedTrack.get())>=m_minTRTHits){
           if(getNoiseProbability(fittedTrack.get())>m_noiseCut){
             double truefraction=getRealFractionTRT(fittedTrack.get(),ctx);
@@ -368,14 +368,14 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
 	}else{
           ATH_MSG_DEBUG("This tracks has only "<<nTRTHits(fittedTrack.get())<<" Hits! Will reject it!");
 	}
-        
+
       }else{
 	ATH_MSG_DEBUG("Fit did not converge!");
       } //end of if(fittedTrack)
 
       delete inputMatchLine;
       delete inputMatchPerigee;
-      
+
     } //end of if: (*iseg)->numberOfMeasurementBases()>0
   } //end of loop over segments
 
@@ -395,7 +395,7 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
        ATH_CHECK( m_assoTool->addPRDs(*prd_to_track_map, *track) );
      }
   }
-  // @TODO sort output track collection ? 
+  // @TODO sort output track collection ?
   final_outputTrackCollection->reserve(output_track_collection.size());
   if (m_trkSummaryTool.isEnabled()) {
      for (std::unique_ptr<Trk::Track> &track : output_track_collection) {
@@ -455,7 +455,7 @@ double InDet::TRT_SegmentsToTrack::getRealFractionTRT(const Trk::Track *track,co
     const Trk::RIO_OnTrack* hitOnTrack = dynamic_cast <const Trk::RIO_OnTrack*>(tsos->measurementOnTrack());
     if (hitOnTrack) {
       const Identifier& surfaceID = hitOnTrack->identify();
-      
+
       //take only TRT hits
       if(m_idHelper->is_trt(surfaceID)){
 
@@ -465,10 +465,10 @@ double InDet::TRT_SegmentsToTrack::getRealFractionTRT(const Trk::Track *track,co
 
 	  if(dc){
             int nreal=getNumberReal(dc,ctx);
-    
+
 	    if(nreal>0) nDriftReal++;
 	    else nDriftNoise++;
-  
+
 	  }
 	}
       }
@@ -489,11 +489,11 @@ int InDet::TRT_SegmentsToTrack::nHTHits(const Trk::Track *track) const
 
   //loop over the hits
   for (const Trk::TrackStateOnSurface* tsos : *track->trackStateOnSurfaces()) {
-    
+
     const Trk::RIO_OnTrack* hitOnTrack = dynamic_cast <const Trk::RIO_OnTrack*>(tsos->measurementOnTrack());
     if (hitOnTrack != nullptr) {
       const Identifier& surfaceID = hitOnTrack->identify();
-      
+
       //take only TRT hits
       if(m_idHelper->is_trt(surfaceID) && !tsos->type(Trk::TrackStateOnSurface::Outlier)){
         const InDet::TRT_DriftCircleOnTrack* trtcirc = dynamic_cast<const InDet::TRT_DriftCircleOnTrack*>(hitOnTrack);
@@ -517,11 +517,11 @@ int InDet::TRT_SegmentsToTrack::nTRTHits(const Trk::Track *track) const
 
   //loop over the hits
   for (const Trk::TrackStateOnSurface* tsos : *track->trackStateOnSurfaces()) {
-    
+
     const Trk::RIO_OnTrack* hitOnTrack = dynamic_cast <const Trk::RIO_OnTrack*>(tsos->measurementOnTrack());
     if (hitOnTrack != nullptr) {
       const Identifier& surfaceID = hitOnTrack->identify();
-      
+
       //take only TRT hits
       if(m_idHelper->is_trt(surfaceID) && !tsos->type(Trk::TrackStateOnSurface::Outlier)){
 	nhits++;
@@ -544,16 +544,16 @@ double InDet::TRT_SegmentsToTrack::getNoiseProbability(const Trk::Track *track) 
     const Trk::RIO_OnTrack* hitOnTrack = dynamic_cast <const Trk::RIO_OnTrack*>(tsos->measurementOnTrack());
     if (hitOnTrack) {
       const Identifier& surfaceID = hitOnTrack->identify();
-      
+
       //take only TRT hits
       if(m_idHelper->is_trt(surfaceID)){
 
 	const InDet::TRT_DriftCircleOnTrack *dcot= dynamic_cast <const InDet::TRT_DriftCircleOnTrack*>(hitOnTrack);
 	if (dcot) {
 	  const InDet::TRT_DriftCircle *dc=dcot->prepRawData();
-  
+
 	  if(dc){
-    
+
 	    if(dc->isNoise())
 	      nDriftNoise++;
 	    else
@@ -574,7 +574,7 @@ double InDet::TRT_SegmentsToTrack::getNoiseProbability(const Trk::Track *track) 
 
 void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
 {
-  //Idea: 
+  //Idea:
   // - get from endcap segment z-phi dependence
   // - get from barrel segment r-phi dependence and z dependence from endcap segment fit
 
@@ -599,7 +599,7 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
   }
 
   ATH_MSG_VERBOSE("Got both barrel and endcap segment collections of size "<<BarrelSegments->size()<<" "<<EndcapSegments->size());
-  
+
   Trk::SegmentCollection::const_iterator iseg = BarrelSegments->begin();
   Trk::SegmentCollection::const_iterator isegE = BarrelSegments->end();
 
@@ -628,21 +628,21 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
     //loop over all Barrel Segments
     for(;isegBarrel!=isegBarrelE;++isegBarrel){
       for(;isegEndcap!=isegEndcapE;++isegEndcap){
-	
+
 	std::vector< Trk::PseudoMeasurementOnTrack*> tobedeleted;
 
 	ATH_MSG_VERBOSE("Barrel Segment : phi="<<(*isegBarrel)->localParameters()[Trk::phi]<<" with "<<(*isegBarrel)->numberOfMeasurementBases()<<" hits");
 	ATH_MSG_VERBOSE("Endcap Segment : phi="<<(*isegEndcap)->localParameters()[Trk::phi]<<" with "<<(*isegEndcap)->numberOfMeasurementBases()<<" hits");
-	
+
 	int count=0;
 	Trk::MeasurementSet myset,myset2,echits=(*isegEndcap)->containedMeasurements();
 
-        bool barreldown=((*isegBarrel)->measurement((*isegBarrel)->numberOfMeasurementBases()/2)->globalPosition().y()<0);	
+        bool barreldown=((*isegBarrel)->measurement((*isegBarrel)->numberOfMeasurementBases()/2)->globalPosition().y()<0);
         double theta=0;
         if((*isegEndcap)->localParameters().contains(Trk::theta)){
           theta = (*isegEndcap)->localParameters()[Trk::theta];
         }
-              
+
         //correct theta to point towards the barrel
         if(( (*isegEndcap)->globalPosition().y()>0 && (*isegEndcap)->globalPosition().z()>0) ||
            ((*isegEndcap)->globalPosition().y()<0 && (*isegEndcap)->globalPosition().z()<0)
@@ -652,9 +652,9 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
           if(theta<M_PI/2.) {
             theta=M_PI-theta;
             std::reverse(echits.begin(),echits.end());
-          }   
+          }
         }else{
-          //Theta between 0 and 90 degrees   
+          //Theta between 0 and 90 degrees
           if(theta>M_PI/2.) {
             theta=M_PI-theta;
             std::reverse(echits.begin(),echits.end());
@@ -675,14 +675,14 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
         int firstechit=0,lastechit=0;
 	if((*isegEndcap)->globalPosition().y()>0){
 	  //first endcap then barrel
-	  for(int i=0;i<(int)echits.size();++i){ 
+	  for(int i=0;i<(int)echits.size();++i){
             const Trk::MeasurementBase *meas=echits[i];
 	    const Amg::VectorX LocalParameters = meas->localParameters();
 	    const Amg::MatrixX LocalErrorMatrix = meas->localCovariance();
 	    double z=meas->globalPosition().z();
 	    double phi=meas->globalPosition().phi();
 	    double r=meas->globalPosition().perp();
-	    
+
 	    const InDet::TRT_DriftCircleOnTrack* trtcirc = dynamic_cast<const InDet::TRT_DriftCircleOnTrack*>(meas);
 	    if(trtcirc){
 	      myset.push_back(meas);
@@ -699,7 +699,7 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
 	    double z=(*isegBarrel)->measurement(i)->globalPosition().z();
 	    double phi=(*isegBarrel)->measurement(i)->globalPosition().phi();
 	    double r=(*isegBarrel)->measurement(i)->globalPosition().perp();
-	  
+
 	    const Trk::MeasurementBase *mesb=(*isegBarrel)->measurement(i);
 	    const InDet::TRT_DriftCircleOnTrack* trtcirc = dynamic_cast<const InDet::TRT_DriftCircleOnTrack*>(mesb);
 	    if(trtcirc){
@@ -707,7 +707,7 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
 	      ATH_MSG_VERBOSE("Barrel : (phi,r,z) = ( "<<phi<<" , "<<r<<" , "<<z<<" ) ");
 	      count++;
 	    }
-	    
+
 	  }
 	}else{
 	  //first barrel then endcap
@@ -717,7 +717,7 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
 	    double z=(*isegBarrel)->measurement(i)->globalPosition().z();
 	    double phi=(*isegBarrel)->measurement(i)->globalPosition().phi();
 	    double r=(*isegBarrel)->measurement(i)->globalPosition().perp();
-	  
+
 	    const Trk::MeasurementBase *mesb=(*isegBarrel)->measurement(i);
 	    const InDet::TRT_DriftCircleOnTrack* trtcirc = dynamic_cast<const InDet::TRT_DriftCircleOnTrack*>(mesb);
 	    if(trtcirc){
@@ -725,7 +725,7 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
 	      ATH_MSG_VERBOSE("Barrel : (phi,r,z) = ( "<<phi<<" , "<<r<<" , "<<z<<" ) ");
 	      count++;
 	    }
-	    
+
 	  }
           firstechit=count;
 
@@ -736,20 +736,20 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
 	    double z=meas->globalPosition().z();
 	    double phi=meas->globalPosition().phi();
 	    double r=meas->globalPosition().perp();
-	    
+
 	    const InDet::TRT_DriftCircleOnTrack* trtcirc = dynamic_cast<const InDet::TRT_DriftCircleOnTrack*>(meas);
 	    if(trtcirc){
 	      myset.push_back(meas);
 	      ATH_MSG_VERBOSE("Endcap : (phi,r,z) = ( "<<phi<<" , "<<r<<" , "<<z<<" ) ");
 	      count++;
 	    }
-	    
+
 	  }
           lastechit=count-1;
 	}
-	
-	
-	
+
+
+
 	Amg::Vector3D inputMatchingPos((*isegBarrel)->globalPosition());
 
 	if((*isegEndcap)->globalPosition().y()>0)
@@ -757,22 +757,22 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
 
 	Amg::Vector3D inputMatchingMom;
 	double p = 10e7;
-	
+
 	if((*isegBarrel)->localParameters().contains(Trk::qOverP)){
 	  p = ((*isegBarrel)->localParameters()[Trk::qOverP]!=0.) ? fabs(1./((*isegBarrel)->localParameters()[Trk::qOverP])) : 10e7;
 	}
-	
+
 	double phi=0.;
 	if((*isegBarrel)->localParameters().contains(Trk::phi)){
 	  phi = (*isegBarrel)->localParameters()[Trk::phi];
 	}
-	
-	
+
+
 	inputMatchingMom[Trk::px] = p * cos(phi) * sin(theta);
 	inputMatchingMom[Trk::py] = p * sin(phi) * sin(theta);
 	inputMatchingMom[Trk::pz] = p * cos(theta);
-	
-	
+
+
 	ATH_MSG_VERBOSE("Global position: "<<inputMatchingPos<<" Globalmomentum: "<<inputMatchingMom);
 
 
@@ -815,19 +815,21 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
 		}else{
 		  C[1]-=1.;
 		}
-      
-      
+
+
 		Amg::Transform3D T;
 		T = line->transform().rotation();
 		T *= Amg::Translation3D(C.x(),C.y(),C.z());
 		Trk::StraightLineSurface* surface = new Trk::StraightLineSurface(T);
-     
-		Trk::PseudoMeasurementOnTrack *pseudo=new Trk::PseudoMeasurementOnTrack( par,cov,*surface);
-     
+
+		Trk::PseudoMeasurementOnTrack *pseudo=new Trk::PseudoMeasurementOnTrack( std::move(par),
+                                                                             std::move(cov),
+                                                                             *surface);
+
 		tobedeleted.push_back(pseudo);
 
 		delete surface;
-      
+
 		myset2.push_back(pseudo);
 	      }
 	    }
@@ -835,23 +837,23 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
 	  count2++;
 	}
 
-       
-	
+
+
 	const Trk::StraightLineSurface* testSf;
 	if((*isegEndcap)->globalPosition().y()>0){
 	  testSf= dynamic_cast<const Trk::StraightLineSurface*>(&((*isegEndcap)->associatedSurface()));
 	}else{
 	  testSf= dynamic_cast<const Trk::StraightLineSurface*>(&((*isegBarrel)->associatedSurface()));
 	}
-	
+
 	const Trk::AtaStraightLine* inputMatchLine = nullptr;
 	const Trk::Perigee* inputMatchPerigee = nullptr;
-	
+
 	if(!testSf){
 	  ATH_MSG_VERBOSE("No straightLineSurface !! Trying Perigee ...");
-	  
+
 	  const Trk::PerigeeSurface *testPSf=dynamic_cast<const Trk::PerigeeSurface*>(&((*isegBarrel)->associatedSurface()));
-	  
+
 	  if(!testPSf){
 	    ATH_MSG_VERBOSE("Associated surface dynamic_cast into PerigeeSurface failed. "<<(*isegBarrel)->associatedSurface());
 	    ATH_MSG_VERBOSE("Leaving input matching perigee as nullptr, will not get a fittedTrack");
@@ -859,9 +861,9 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
 	    ATH_MSG_VERBOSE("Ok, it seems to be a PerigeeSurface");
 	    inputMatchPerigee = new Trk::Perigee(inputMatchingPos,inputMatchingMom, 1., *testPSf);
 	  }
-	  
+
 	}else{
-	  inputMatchLine = new Trk::AtaStraightLine(inputMatchingPos,inputMatchingMom, 1., *testSf);          
+	  inputMatchLine = new Trk::AtaStraightLine(inputMatchingPos,inputMatchingMom, 1., *testSf);
 	  ATH_MSG_VERBOSE("Created testSf : " << (*inputMatchLine));
 	}
 
@@ -900,7 +902,7 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
 					   );
 	  }
 	}
-	
+
 	if(fittedTrack){
 	  n_combined_fit++;
 	  ATH_MSG_DEBUG("Successful Barrel+Endcap fit of segment. ");
@@ -908,7 +910,7 @@ void InDet::TRT_SegmentsToTrack::combineSegments(const EventContext& ctx) const
 	  ATH_MSG_VERBOSE(*fittedTrack);
 	  outputCombiCollection->push_back(std::move(fittedTrack));
 }
-	
+
 	delete inputMatchPerigee;
 	delete inputMatchLine;
 
