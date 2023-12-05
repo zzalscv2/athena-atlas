@@ -52,10 +52,11 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("flipDelay",  flipDelay = 0, "comment");
   declareProperty("reprocZdc",  reprocZdc = 0, "comment");
   declareProperty("auxSuffix",  auxSuffix = "", "comment");
-  declareProperty("nsamplesZdc",  nsamplesZdc = 24, "comment");
-  declareProperty("lhcf2022", lhcf2022 = true,"comment");
-  declareProperty("lhcf2022afp", lhcf2022afp = true,"comment");
-  declareProperty("lhcf2022zdc", lhcf2022zdc = true,"comment");
+  declareProperty("nsamplesZdc",  nsamplesZdc = 24, "number of samples, 7 = most of Run 2, 24 = Run 3");
+  declareProperty("lhcf2022", lhcf2022 = false,"LHCf2022 general config");
+  declareProperty("lhcf2022afp", lhcf2022afp = false,"LHCf2022 AFP-specific config");
+  declareProperty("lhcf2022zdc", lhcf2022zdc = false,"LHCf2022 ZDC-specific config");
+  declareProperty("pbpb2023", pbpb2023 = true, "PbPb2023 config");
   declareProperty("zdcConfig", zdcConfig = "PbPb2018", "argument to configure ZdcAnalysisTool");
   declareProperty("doZdcCalib", doZdcCalib = false, "perform ZDC energy calibration");
   declareProperty("enableRPD",enableRPD = false,"enable reading RPD decorations");
@@ -856,19 +857,44 @@ bool ZdcNtuple::processTriggerDecision()
     int ic = 0;
     for (auto cg : m_chainGroups)
     {
-      if (cg->isPassed())
-      {
-        t_trigger += (1 << ic);
-        t_decisions[ic] = true;
-        t_prescales[ic] = cg->getPrescale();
-        passTrigger = true;
-      }
+      
+      if (zdcCalib)
+	{
+	  std::string name = cg->getListOfTriggers().at(0);
+	  const unsigned int triggerbits = m_trigDecisionTool->isPassedBits(name);
+	  // deferred functionality
+	  //bool tbp = triggerbits&TrigDefs::L1_isPassedBeforePrescale;
+	  //bool tap = triggerbits&TrigDefs::L1_isPassedAfterPrescale;
+	  bool tav = triggerbits&TrigDefs::L1_isPassedAfterVeto;
+	  ANA_MSG_DEBUG("TD: checking trigger name=" << name<< " tav=" << tav);
+	  if (tav)
+	    {
+	      t_trigger += (1 << ic);
+	      t_decisions[ic] = true;
+	      t_prescales[ic] = cg->getPrescale();
+	      passTrigger = true;	      
+	    }
+	  else
+	    {
+	      t_decisions[ic] = 0;
+	      t_prescales[ic] = 0;
+	    }
+	}
       else
-      {
-        t_decisions[ic] = 0;
-        t_prescales[ic] = 0;
-      }
-
+	{
+	  if (cg->isPassed())
+	    {
+	      t_trigger += (1 << ic);
+	      t_decisions[ic] = true;
+	      t_prescales[ic] = cg->getPrescale();
+	      passTrigger = true;
+	    }
+	  else
+	    {
+	      t_decisions[ic] = 0;
+	      t_prescales[ic] = 0;
+	    }
+	}
 
       if (cg->isPassedBits()&TrigDefs::EF_passedRaw)
       {
@@ -1601,23 +1627,31 @@ void ZdcNtuple::setupTriggerHistos()
   // ZDC triggers
   if (zdc_triggers)
   {
-    if (zdcCalib)
+    if (zdcCalib) // lists for calibration data
       {
 	if (lhcf2022)
 	  {
 	    triggers.push_back("HLT_noalg_ZDCPEB_L1LHCF");
 	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
 	  }
-	else
+
+	if (pbpb2023)
 	  {
-	    triggers.push_back("L1_ZDC_A");
-	    triggers.push_back("L1_ZDC_C");
-	    triggers.push_back("L1_ZDC_AND");
-	    triggers.push_back("L1_ZDC_A_C");
-	    triggers.push_back("L1_MBTS_2");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR_EMPTY");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR_UNPAIRED_NONISO");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C_EMPTY");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C_UNPAIRED_NONISO");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_EMPTY");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_UNPAIRED_NONISO");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C_EMPTY");
+	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C_UNPAIRED_NONISO");
 	  }
       }
-    else
+    else // lists for physics data
       {
 	if (lhcf2022)
           {
