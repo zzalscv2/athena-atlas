@@ -5,9 +5,11 @@
 #include "../RpcSensitiveDetectorTool.h"
 #include "../MmSensitiveDetectorTool.h"
 #include "../TgcSensitiveDetectorTool.h"
+#include "../sTgcSensitiveDetectorTool.h"
+
 
 DECLARE_COMPONENT( MuonG4R4::MdtSensitiveDetectorTool )
 DECLARE_COMPONENT( MuonG4R4::RpcSensitiveDetectorTool )
 DECLARE_COMPONENT( MuonG4R4::MmSensitiveDetectorTool )
 DECLARE_COMPONENT( MuonG4R4::TgcSensitiveDetectorTool )
-
+DECLARE_COMPONENT( MuonG4R4::sTgcSensitiveDetectorTool )

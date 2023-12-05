@@ -39,8 +39,6 @@ class sTgcReadoutElement : public MuonReadoutElement {
         double gasTck{0.};
         /// Number of gas gap layers
         unsigned int numLayers{0};
-        /// Multilayer of the chamber
-        unsigned int stMultilayer{0};
         /// Number of channel types
         unsigned int nChTypes{0};
         /// Diamond cutout height
@@ -78,6 +76,9 @@ class sTgcReadoutElement : public MuonReadoutElement {
     double sChamberLength() const; //sWidth
     /// Length of the chamber on the long side
     double lChamberLength() const; //lWidth
+    /// Distance between 2 gas gaps
+    double gasGapPitch() const;
+
     /// Length of gas Gap on short side
     double sGapLength() const;
     /// Length of gas Gap on long side
@@ -152,6 +153,8 @@ class sTgcReadoutElement : public MuonReadoutElement {
 
         parameterBook m_pars{};
         const sTgcIdHelper& m_idHelper{idHelperSvc()->stgcIdHelper()};
+        const int m_multiLayer{m_idHelper.multilayer(identify())};
+        double m_gasGapPitch{-1.};
 
         /// Auxillary variables to translate the Identifier to a measurement hash and back
         const unsigned int m_hashShiftChType{2*CxxUtils::count_ones(static_cast<unsigned int>(numLayers()))};

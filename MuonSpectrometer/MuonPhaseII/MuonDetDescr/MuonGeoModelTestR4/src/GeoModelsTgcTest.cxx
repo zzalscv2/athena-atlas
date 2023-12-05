@@ -152,7 +152,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
     ///
     m_numLayers = reElement->numLayers();
     m_yCutout = reElement->yCutout();
-    m_gasTck = reElement->gasGapThickness();
+    m_gasTck = reElement->gasGapPitch();
     ///
     m_sChamberLength = reElement->sChamberLength();
     m_lChamberLength = reElement->lChamberLength();

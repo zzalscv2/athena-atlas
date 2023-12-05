@@ -19,6 +19,9 @@
 
 using namespace ActsTrk;
 
+namespace {
+   constexpr double tolerance = 10. * Gaudi::Units::micrometer;
+}
 // construction/destruction
 namespace MuonG4R4 {
 
@@ -82,8 +85,8 @@ G4bool TgcSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
     const Amg::Vector3D lPosAtGap = locPos + (*travelDist) * locDir;
     ATH_MSG_VERBOSE("Extrpolated by "<<(*travelDist)<<" mm to the gasGap center "<<Amg::toString(lPosAtGap, 2));
     
-    const Identifier etaHitID = getIdentifier(readOutEle, 
-                                               globalToLocal.inverse() * lPosAtGap, false);
+    const Amg::Vector3D gapCenterCross = globalToLocal.inverse() * lPosAtGap;
+    const Identifier etaHitID = getIdentifier(readOutEle, gapCenterCross, false);
     if (!etaHitID.is_valid()) {
         ATH_MSG_VERBOSE("No valid hit found");
         return true;
@@ -92,8 +95,14 @@ G4bool TgcSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
     const double globalTime = currentTrack->GetGlobalTime() + (*travelDist) / currentTrack->GetVelocity();
     const Amg::Transform3D& gapTrans{readOutEle->globalToLocalTrans(m_gctx, etaHitID)};
     const Amg::Vector3D locHitDir = gapTrans.linear() * Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection());
-    const Amg::Vector3D locHitPos = gapTrans * lPosAtGap;
-  
+    const Amg::Vector3D locHitPos = gapTrans * gapCenterCross;
+    
+    /// Final check that the hit is located at zero
+    if (std::abs(locHitPos.z()) > tolerance) {
+        ATH_MSG_FATAL("The hit "<<Amg::toString(locHitPos)<<" doest not match "<<m_detMgr->idHelperSvc()->toString(etaHitID));
+        throw std::runtime_error("Picked wrong gas gap");
+    }
+
     xAOD::MuonSimHit* hit = new xAOD::MuonSimHit();
     m_writeHandle->push_back(hit);  
   
@@ -135,10 +144,10 @@ Identifier TgcSensitiveDetector::getIdentifier(const MuonGMR4::TgcReadoutElement
  
     const Amg::Vector3D locHitPos{readOutEle->globalToLocalTrans(m_gctx, firstChan) * hitAtGapPlane};   
   
-    const int gasGap = (std::abs(locHitPos.z()) /  readOutEle->gasGapThickness()) + 1;
+    const int gasGap = std::round(std::abs(locHitPos.z()) /  readOutEle->gasGapPitch()) + 1;
     ATH_MSG_VERBOSE("Detector element: "<<m_detMgr->idHelperSvc()->toStringDetEl(firstChan)
                   <<" locPos: "<<Amg::toString(locHitPos, 2)
-                  <<" gap thickness: "<<readOutEle->gasGapThickness()
+                  <<" gap thickness: "<<readOutEle->gasGapPitch()
                   <<" gasGap: "<<gasGap);
 
     return idHelper.channelID(readOutEle->identify(), gasGap, phiGap, 1);
