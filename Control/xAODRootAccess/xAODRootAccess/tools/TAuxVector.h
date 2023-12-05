@@ -54,6 +54,7 @@ namespace xAOD {
       virtual SG::auxid_t auxid() const override;
       /// Return a pointer to the start of the vector's data
       virtual void* toPtr() override;
+      const void* toPtr() const;
       /// Return a pointer to the STL vector itself
       virtual void* toVector() override;
 
@@ -80,7 +81,10 @@ namespace xAOD {
       /// The parent factory object
       const SG::IAuxTypeVectorFactory* m_factory;
       /// ROOT's description of the vector type
-      ::TVirtualCollectionProxy* m_proxy;
+      /// Cloned from the proxy held by the TClass and permanently bound
+      /// to m_vec.  That makes things a bit more efficient, and prevents
+      /// potential thread-safety problems.
+      std::unique_ptr<::TVirtualCollectionProxy> m_proxy;
       /// Pointer to the vector object
       void* m_vec;
       /// ID of the variable we represent.

@@ -18,7 +18,7 @@ namespace xAOD {
                            SG::auxid_t auxid,
                            const ::TClass* cl, size_t size, size_t )
       : m_factory( factory ),
-        m_proxy( cl->GetCollectionProxy() ), m_vec( cl->New() ),
+        m_proxy( cl->GetCollectionProxy()->Generate() ), m_vec( cl->New() ),
         m_auxid( auxid ) {
 
       // A little sanity check:
@@ -27,15 +27,18 @@ namespace xAOD {
                   XAOD_MESSAGE( "No collection proxy found for type %s" ),
                   cl->GetName() );
       }
+      m_proxy->PushProxy( m_vec );
 
       // Make sure the object is of the right size:
       this->resize( size );
    }
 
    TAuxVector::TAuxVector( const TAuxVector& parent )
-      : m_factory( parent.m_factory ), m_proxy( parent.m_proxy ),
+      : m_factory( parent.m_factory ), m_proxy( parent.m_proxy->Generate() ),
         m_vec( parent.m_proxy->GetCollectionClass()->New() ),
         m_auxid( parent.m_auxid ) {
+
+      m_proxy->PushProxy( m_vec );
 
       // Check the size of the parent object:
       const size_t size = parent.size();
@@ -48,11 +51,7 @@ namespace xAOD {
       this->resize( size );
 
       // Get a pointer to the start of the parent's payload:
-      const void* parentPtr = 0;
-      {
-         TVirtualCollectionProxy::TPushPop bind( m_proxy, parent.m_vec );
-         parentPtr = m_proxy->At( 0 );
-      }
+      const void* parentPtr = parent.toPtr();
 
       // Do the copy:
       this->copyRange( parentPtr, this->toPtr(), size );
@@ -75,11 +74,12 @@ namespace xAOD {
 
       // Get the information from the other object:
       m_factory = other.m_factory;
-      m_proxy   = other.m_proxy;
+      m_proxy.reset( other.m_proxy->Generate() );
       m_auxid = other.m_auxid;
 
       // Create a new vector:
       m_vec = m_proxy->GetCollectionClass()->New();
+      m_proxy->PushProxy( m_vec );
 
       // Check the size of the other object:
       const size_t size = other.size();
@@ -89,11 +89,7 @@ namespace xAOD {
       }
 
       // Get a pointer to the start of the other object's payload:
-      const void* otherPtr = 0;
-      {
-         TVirtualCollectionProxy::TPushPop bind( m_proxy, other.m_vec );
-         otherPtr = m_proxy->At( 0 );
-      }
+      const void* otherPtr = other.toPtr();
 
       // Do the copy:
       this->copyRange( otherPtr, this->toPtr(), size );
@@ -116,7 +112,11 @@ namespace xAOD {
 
    void* TAuxVector::toPtr() {
 
-      TVirtualCollectionProxy::TPushPop bind( m_proxy, m_vec );
+      return m_proxy->At( 0 );
+   }
+
+   const void* TAuxVector::toPtr() const {
+
       return m_proxy->At( 0 );
    }
 
@@ -127,13 +127,11 @@ namespace xAOD {
 
    size_t TAuxVector::size() const {
 
-      TVirtualCollectionProxy::TPushPop bind( m_proxy, m_vec );
       return m_proxy->Size();
    }
 
    bool TAuxVector::resize( size_t sz ) {
 
-      TVirtualCollectionProxy::TPushPop bind( m_proxy, m_vec );
       const void* orig = toPtr();
       m_proxy->Allocate( sz, false );
       return toPtr() == orig;
@@ -168,7 +166,6 @@ namespace xAOD {
     */
    void TAuxVector::shift( size_t pos, ptrdiff_t offs ) {
 
-      TVirtualCollectionProxy::TPushPop bind( m_proxy, m_vec );
       size_t eltsz = m_proxy->GetIncrement();
       if( offs < 0 ) {
 
@@ -197,7 +194,6 @@ namespace xAOD {
 
    bool TAuxVector::insertMove (size_t pos, void* beg, void* end)
    {
-     TVirtualCollectionProxy::TPushPop bind (m_proxy, m_vec);
      size_t eltsz = m_proxy->GetIncrement();
      const void* orig = this->toPtr();
 
