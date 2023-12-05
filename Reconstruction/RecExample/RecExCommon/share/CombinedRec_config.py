@@ -166,7 +166,8 @@ if (jetOK or rec.readESD()) and rec.doBTagging() and  DetFlags.ID_on() and DetFl
 pdr.flag_domain('tau')
 from tauRec.tauRecFlags import tauFlags
 if (jetOK or tauFlags.isStandalone) and rec.doTau():
-    protectedInclude ("tauRec/tauRec_config.py")    
+    from tauRec.TauConfig import TauReconstructionCfg
+    CAtoGlobalWrapper(TauReconstructionCfg, ConfigFlags)
 AODFix_posttauRec()
 
 #
