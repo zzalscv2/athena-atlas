@@ -49,6 +49,8 @@ class TrigITkModuleCuda : public TrigAccel::WorkFactory {
     //1. "const" data: managed by the Factory
 
     unsigned char* m_h_detmodel;
+
+    std::map<int, unsigned char*> m_d_detmodel_ptrs;
     
     int m_maxDevice;
 

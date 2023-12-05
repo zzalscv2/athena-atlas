@@ -26,17 +26,13 @@ TrigITkModuleCuda::TrigITkModuleCuda() : m_maxDevice(0), m_dumpTimeLine(false) {
   for(unsigned int i=0;i<getProvidedAlgs().size();i++) {
     m_workItemCounters[i] = 0;
   }
-  
-  m_h_detmodel = (unsigned char*) malloc(sizeof(TrigAccel::ITk::DETECTOR_MODEL));
 
   m_timeLine.clear();
 
 }
 
 TrigITkModuleCuda::~TrigITkModuleCuda() {
-  
-  free(m_h_detmodel);
-  m_h_detmodel = 0;
+
   if(m_dumpTimeLine) {
     if(m_timeLine.size() > 0) {
        tbb::tick_count t0 = m_timeLine[0].m_time;
@@ -54,6 +50,10 @@ TrigITkModuleCuda::~TrigITkModuleCuda() {
       m_timeLine.clear();
     }
  }
+
+  for(auto pair: m_d_detmodel_ptrs){
+    cudaFree(pair.second);
+  }
 }
 
 bool TrigITkModuleCuda::configure() {
@@ -111,6 +111,8 @@ SeedMakingDeviceContext* TrigITkModuleCuda::createSeedMakingContext(int id) cons
   cudaMallocHost((void **)&p->h_outputseeds, sizeof(TrigAccel::ITk::OUTPUT_SEED_STORAGE));
 
   p->h_size = sizeof(TrigAccel::ITk::SEED_FINDER_SETTINGS) + sizeof(TrigAccel::ITk::SPACEPOINT_STORAGE) + sizeof(TrigAccel::ITk::OUTPUT_SEED_STORAGE);
+
+  p->d_detmodel = m_d_detmodel_ptrs.at(id);
   
   checkError(14);
   return p;
@@ -160,6 +162,8 @@ SeedMakingManagedDeviceContext* TrigITkModuleCuda::createManagedSeedMakingContex
   
   p->m_size = sizeof(TrigAccel::ITk::SEED_FINDER_SETTINGS) + sizeof(TrigAccel::ITk::SPACEPOINT_STORAGE) + sizeof(TrigAccel::ITk::OUTPUT_SEED_STORAGE);
 
+  p->d_detmodel = m_d_detmodel_ptrs.at(id);
+
   checkError(14);
   return p;
 }
@@ -167,8 +171,17 @@ SeedMakingManagedDeviceContext* TrigITkModuleCuda::createManagedSeedMakingContex
 TrigAccel::Work* TrigITkModuleCuda::createWork(int workType, std::shared_ptr<TrigAccel::OffloadBuffer> data){
   
   if(workType == TrigAccel::InDetJobControlCode::SIL_LAYERS_EXPORT){
+    unsigned char* d_detmodel;
+    int deviceId = 0;//always using device 0 for the time being
 
-    memcpy(m_h_detmodel, (unsigned char*)data->get(), sizeof(TrigAccel::ITk::DETECTOR_MODEL));
+    cudaSetDevice(deviceId);
+    cudaMalloc(&d_detmodel, sizeof(TrigAccel::DETECTOR_MODEL));
+    checkError();
+
+    m_d_detmodel_ptrs[deviceId] = d_detmodel;
+
+    cudaMemcpy(d_detmodel, (unsigned char*)data->get(), sizeof(TrigAccel::ITk::DETECTOR_MODEL), cudaMemcpyHostToDevice);
+    checkError(21);
 
     return 0;
   }
@@ -181,8 +194,6 @@ TrigAccel::Work* TrigITkModuleCuda::createWork(int workType, std::shared_ptr<Tri
 
     SeedMakingDeviceContext* ctx = createSeedMakingContext(deviceId);
 
-    cudaMemcpy(ctx->d_detmodel, m_h_detmodel, sizeof(TrigAccel::ITk::DETECTOR_MODEL), cudaMemcpyHostToDevice);
-    checkError(21);
     TrigAccel::ITk::SEED_MAKING_JOB *pArray = reinterpret_cast<TrigAccel::ITk::SEED_MAKING_JOB*>(data->get());
     
     //1. copy settings to the context host array
@@ -212,8 +223,6 @@ TrigAccel::Work* TrigITkModuleCuda::createWork(int workType, std::shared_ptr<Tri
 
     SeedMakingManagedDeviceContext* ctx = createManagedSeedMakingContext(deviceId);
 
-    cudaMemcpy(ctx->d_detmodel, m_h_detmodel, sizeof(TrigAccel::ITk::DETECTOR_MODEL), cudaMemcpyHostToDevice);//TO-DO: try CoW here
-    checkError(21);
     TrigAccel::ITk::SEED_MAKING_JOB *pArray = reinterpret_cast<TrigAccel::ITk::SEED_MAKING_JOB*>(data->get());
     
     //1. copy settings to the context host array
