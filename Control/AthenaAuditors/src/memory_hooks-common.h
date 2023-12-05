@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // common code for memory_hooks for tcmalloc and stdcmalloc which are used for the AthMemoryAuditor
@@ -106,7 +106,8 @@ class myBlocks_tc : public boost::intrusive::bs_set_base_hook<boost::intrusive::
 
 myBlocks_tc *bg_tc;
 
-typedef boost::intrusive::splay_set< myBlocks_tc, boost::intrusive::base_hook<boost::intrusive::bs_set_base_hook<> > > allocSet_tc;
+using allocSet_tc = boost::intrusive::splay_set< myBlocks_tc, boost::intrusive::base_hook<boost::intrusive::bs_set_base_hook<> > > ;
+using allocSet_deleter = std::default_delete<myBlocks_tc>;
 
 static allocSet_tc::iterator allocset_last;
 static allocSet_tc allocset_tc;

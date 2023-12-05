@@ -94,9 +94,7 @@ void athena_DeleteHook(const void* ptr)
       allocSet_tc::iterator i = allocset_tc.find( *bg_tc );
       if ( i != allocset_tc.end() )
 	{
-          myBlocks_tc* ptr1 = &*i;
-	  allocset_tc.erase(i);
-	  delete ptr1;
+	  allocset_tc.erase_and_dispose(i, allocSet_deleter());
 	}
     }
   else
