@@ -11,6 +11,7 @@ class Campaign(FlagEnum):
     MC21a = 'mc21a'
     MC23a = 'mc23a'
     MC23c = 'mc23c'
+    MC23d = 'mc23d'
     PhaseII = 'phaseII'
 
 # Campaign run numbers (only latest campaigns that do not have metadata present)
