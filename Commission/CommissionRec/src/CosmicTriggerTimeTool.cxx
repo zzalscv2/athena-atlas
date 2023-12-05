@@ -57,7 +57,7 @@ double CosmicTriggerTimeTool::trackRecordTime()
 {
 
   // const TimedTrackRecordCollection* coll;
-  const TrackRecordCollection* coll; 
+  const TrackRecordCollection* coll = nullptr; 
   StatusCode sc = evtStore()->retrieve(coll,"CaloMuonRecorder"); 
   if (sc!=StatusCode::SUCCESS) { 
     ATH_MSG_ERROR( "can not retrieve CaloMuonRecorder" ); 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNTAA_TBScint.h"
@@ -33,8 +33,8 @@ StatusCode CBNTAA_TBScint::CBNT_execute() {
   unsigned i;
   
   // Get scint. hits
-  const LArG4H6FrontHitCollection *frontcoll;
-  const LArG4H6FrontHitCollection *movecoll;
+  const LArG4H6FrontHitCollection *frontcoll = nullptr;
+  const LArG4H6FrontHitCollection *movecoll = nullptr;
   StatusCode sc = evtStore()->retrieve(frontcoll,"Front::Hits");
   if (sc.isSuccess()){
      for (const LArG4H6FrontHit* hit : *frontcoll) {
