@@ -1106,7 +1106,7 @@ Trk::GaussianSumFitter::addCCOT(
   Trk::LocalParameters locpars(locX);
 
   auto pseudoMeasurement = std::make_unique<Trk::PseudoMeasurementOnTrack>(
-    locpars, covMatrix, *currentSurface);
+    std::move(locpars), std::move(covMatrix), *currentSurface);
 
   //  Combine the state  and find the mode of the distribution
   std::unique_ptr<Trk::TrackParameters> combinedState =

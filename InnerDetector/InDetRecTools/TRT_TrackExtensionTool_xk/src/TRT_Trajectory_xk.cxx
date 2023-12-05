@@ -674,7 +674,7 @@ InDet::TRT_Trajectory_xk::pseudoMeasurements(const Trk::Surface *firstsurf, cons
           std::make_pair(0, Trk::locZ), std::make_pair(pseudotheta, Trk::theta))
       : Trk::LocalParameters(std::make_pair(0, Trk::locZ));
 
-  pmon = new Trk::PseudoMeasurementOnTrack(par, cov, surn);
+  pmon = new Trk::PseudoMeasurementOnTrack(std::move(par), std::move(cov), surn);
 
   if (bec==0) return std::make_pair(pmon,pmon2);
   cov = Amg::MatrixX(1,1);
@@ -683,7 +683,9 @@ InDet::TRT_Trajectory_xk::pseudoMeasurements(const Trk::Surface *firstsurf, cons
   T    = Amg::Transform3D(Amg::Translation3D(pseudopoint)*pseudorot);
   Trk::StraightLineSurface surn2(T,100.,1000.);
 
-  pmon2 =  new Trk::PseudoMeasurementOnTrack(par,cov,surn2);
+  pmon2 =  new Trk::PseudoMeasurementOnTrack(std::move(par),
+                                             std::move(cov),
+                                             surn2);
 
   //delete surn;
   return std::make_pair(pmon,pmon2);

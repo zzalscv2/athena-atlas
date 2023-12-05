@@ -529,7 +529,9 @@ namespace InDet {
                                       std::make_pair(myqoverp, Trk::qOverP));
           auto newpseudo =
             std::make_unique<Trk::PseudoMeasurementOnTrack>(
-              newpar, newcov, firstmeas->associatedSurface());
+              std::move(newpar),
+              std::move(newcov),
+              firstmeas->associatedSurface());
           // hack replace first measurement with pseudomeasurement
           ntsos->erase(ntsos->begin());
           ntsos->insert(ntsos->begin(),
@@ -628,7 +630,7 @@ namespace InDet {
       double P[5] = { myd0, myz0, myphi, mytheta, myqoverp };
 
       // create perigee TSOS and add as first (!) TSOS
-      
+
       auto per =
         std::make_unique<Trk::Perigee>(P[0], P[1], P[2], P[3], P[4], Trk::PerigeeSurface());
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
@@ -867,7 +869,7 @@ namespace InDet {
       event_data.m_trackScores.emplace_back(-score, trk );
     }
 
-    
+
   }
 
 

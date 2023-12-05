@@ -64,7 +64,7 @@ void compare (const Trk::TrackParameters& p1,
     offs = 2;
   else
     assert (typeid (*&p1) == typeid (*&p2));
-          
+
   assert (p1.parameters().size() == p2.parameters().size());
   for (int i = 0; i < offs; i++)
     assert (p2.parameters()[i] == 0);
@@ -75,7 +75,7 @@ void compare (const Trk::TrackParameters& p1,
   else
     assert (!p2.covariance());
 
-  
+
   for (int i = 0; i < 3; i++) {
     assert (Athena_test::isEqual (p1.position()[i], p2.position()[i]));
     assert (Athena_test::isEqual (p1.momentum()[i], p2.momentum()[i]));
@@ -138,7 +138,7 @@ void compare (const Trk::TrackStateOnSurface& p1,
 
   assert (p1.types() == p2.types());
 }
-              
+
 void testit (const Trk::TrackStateOnSurface& trans1)
 {
   MsgStream log (nullptr, "test");
@@ -165,7 +165,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   Trk::PerigeeSurface psurf (Amg::Vector3D (50, 100, 150));
   Trk::LocalParameters parms1 (1.5, 2.5, 3.5, 4.5, 5.5);
-  Trk::PseudoMeasurementOnTrack pmeas (parms1, cov, psurf);
+  Trk::PseudoMeasurementOnTrack pmeas (Trk::LocalParameters(parms1), Amg::MatrixX(cov), psurf);
   Trk::Perigee perigee (100, 200, 1.5, 0.5, 1e-3, psurf, std::nullopt);
   Trk::FitQualityOnSurface fq (10, 20);
   Trk::MaterialEffectsOnTrack me (12.5, psurf);

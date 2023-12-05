@@ -472,9 +472,8 @@ StatusCode MSConstraintTracksProvider::trackCollection(const TrackCollection*& o
           Amg::MatrixX covFromMS( 1,1 ) ;
           covFromMS( 1, 1 )   = (*METrkMeasuredPerigee->covariance())( Trk::qOverP, Trk::qOverP ) ;
 
-          auto pmot = std::make_unique<Trk::PseudoMeasurementOnTrack>( Trk::LocalParameters( parFromMSVec ),
-										   covFromMS, *surf) ;
-
+          auto pmot = std::make_unique<Trk::PseudoMeasurementOnTrack>(
+              Trk::LocalParameters(parFromMSVec), std::move(covFromMS), *surf);
 
           auto trackStateOnSurfaces = std::make_unique<Trk::TrackStates>();
           trackStateOnSurfaces->reserve(muon->inDetTrackParticle()->originalTrack()->trackStateOnSurfaces()->size() + 1);
@@ -501,7 +500,7 @@ StatusCode MSConstraintTracksProvider::trackCollection(const TrackCollection*& o
               nullptr);
 
             Trk::Track* MSConstraintFittedTrack = (m_trackFitter->fit(Gaudi::Hive::currentContext(),
-                                                                     *tmpTrack, m_runOutlierRemoval, 
+                                                                     *tmpTrack, m_runOutlierRemoval,
                                                                      Trk::muon)).release();
 
             if(!MSConstraintFittedTrack){

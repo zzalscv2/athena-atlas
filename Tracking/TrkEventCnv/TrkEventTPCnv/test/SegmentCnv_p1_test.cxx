@@ -40,7 +40,7 @@ public:
     : Trk::Segment (locpars, locerr, std::move(measurements), fitq, author),
       m_surf (&sf)
   {}
-  
+
   virtual Trk::Segment* clone() const override
   { std::abort(); }
   virtual const Trk::Surface& associatedSurface() const override
@@ -158,7 +158,8 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
 
   Trk::PerigeeSurface psurf (Amg::Vector3D (50, 100, 150));
-  Trk::PseudoMeasurementOnTrack pmeas (locpars, cov, psurf);
+  Trk::PseudoMeasurementOnTrack pmeas (Trk::LocalParameters(locpars),
+                                       Amg::MatrixX (cov), psurf);
   DataVector<const Trk::MeasurementBase> mvec (SG::VIEW_ELEMENTS);
   mvec.push_back (&pmeas);
 

@@ -540,7 +540,7 @@ namespace Trk {
           LocalParameters(
             DefinedParameter(updpar->parameters()[Trk::locY], Trk::locY)
           ),
-          covMatrix,
+          std::move(covMatrix),
           pseudopar->associatedSurface()
         );
 
@@ -1233,7 +1233,7 @@ namespace Trk {
 
         std::unique_ptr<const PseudoMeasurementOnTrack> newpseudo = std::make_unique<const PseudoMeasurementOnTrack>(
           LocalParameters(DefinedParameter(pseudopar->parameters()[Trk::locY], Trk::locY)),
-          covMatrix,
+          std::move(covMatrix),
           pseudopar->associatedSurface()
         );
 
@@ -1653,7 +1653,7 @@ namespace Trk {
 
         newpseudo = std::make_unique<PseudoMeasurementOnTrack>(
           LocalParameters(DefinedParameter(par2->parameters()[Trk::locY], Trk::locY)),
-          covMatrix,
+          std::move(covMatrix),
           par2->associatedSurface()
         );
 
@@ -1697,7 +1697,7 @@ namespace Trk {
           covMatrix(0, 0) = 100;
 
           std::unique_ptr<const PseudoMeasurementOnTrack> newpseudo = std::make_unique<const PseudoMeasurementOnTrack>(
-            LocalParameters(DefinedParameter(0, Trk::locY)), covMatrix, slsurf
+            LocalParameters(DefinedParameter(0, Trk::locY)), std::move(covMatrix), slsurf
           );
 
           std::unique_ptr<GXFTrackState> pseudostate1 = std::make_unique<GXFTrackState>(std::move(newpseudo), nullptr);
@@ -1725,7 +1725,7 @@ namespace Trk {
           covMatrix(0, 0) = 100;
 
           std::unique_ptr<const PseudoMeasurementOnTrack> newpseudo = std::make_unique<const PseudoMeasurementOnTrack>(
-            LocalParameters(DefinedParameter(0, Trk::locY)), covMatrix, slsurf
+            LocalParameters(DefinedParameter(0, Trk::locY)), std::move(covMatrix), slsurf
           );
 
           std::unique_ptr<GXFTrackState> pseudostate2 = std::make_unique<GXFTrackState>(std::move(newpseudo), nullptr);
@@ -1790,7 +1790,7 @@ namespace Trk {
 
         std::unique_ptr<const PseudoMeasurementOnTrack> newpseudo = std::make_unique<const PseudoMeasurementOnTrack>(
           LocalParameters(DefinedParameter(par2->parameters()[Trk::locY], Trk::locY)),
-          covMatrix,
+          std::move(covMatrix),
           par2->associatedSurface()
         );
         firstpseudostate->setMeasurement(std::move(newpseudo));
@@ -2184,7 +2184,7 @@ namespace Trk {
 
         std::unique_ptr<const PseudoMeasurementOnTrack> newpseudo = std::make_unique<const PseudoMeasurementOnTrack>(
           LocalParameters(DefinedParameter(updpar->parameters()[Trk::locY], Trk::locY)),
-          covMatrix,
+          std::move(covMatrix),
           pseudopar->associatedSurface()
         );
 
@@ -2498,7 +2498,7 @@ namespace Trk {
 
         std::unique_ptr<const PseudoMeasurementOnTrack> newpseudo = std::make_unique<const PseudoMeasurementOnTrack>(
           LocalParameters(DefinedParameter(firstpar->parameters()[Trk::locY], Trk::locY)),
-          covMatrix,
+          std::move(covMatrix),
           firstpar->associatedSurface()
         );
 
@@ -2511,7 +2511,7 @@ namespace Trk {
 
         std::unique_ptr<const PseudoMeasurementOnTrack> newpseudo = std::make_unique<const PseudoMeasurementOnTrack>(
           LocalParameters(DefinedParameter(lastpar->parameters()[Trk::locY], Trk::locY)),
-          covMatrix,
+          std::move(covMatrix),
           lastpar->associatedSurface()
         );
 
@@ -2552,7 +2552,7 @@ namespace Trk {
 
         std::unique_ptr<const PseudoMeasurementOnTrack> newpseudo = std::make_unique<const PseudoMeasurementOnTrack>(
           LocalParameters(DefinedParameter(firstpar->parameters()[Trk::locY], Trk::locY)),
-          covMatrix,
+          std::move(covMatrix),
           firstpar->associatedSurface()
         );
 
@@ -2571,7 +2571,7 @@ namespace Trk {
 
         std::unique_ptr<const PseudoMeasurementOnTrack> newpseudo = std::make_unique<const PseudoMeasurementOnTrack>(
           LocalParameters(DefinedParameter(lastpar->parameters()[Trk::locY], Trk::locY)),
-          covMatrix,
+          std::move(covMatrix),
           lastpar->associatedSurface()
         );
 
@@ -5243,7 +5243,7 @@ namespace Trk {
 
           std::unique_ptr<const PseudoMeasurementOnTrack> newpseudo = std::make_unique<const PseudoMeasurementOnTrack>(
             LocalParameters(DefinedParameter(currenttrackpar->parameters()[Trk::locY], Trk::locY)),
-            covMatrix,
+            std::move(covMatrix),
             currenttrackpar->associatedSurface()
           );
 

@@ -715,7 +715,6 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::convert(std::vector<const InDe
     Amg::MatrixX cov(1,1); cov<<1.33333;
     const InDet::TRT_DriftCircleOnTrack *element = new InDet::TRT_DriftCircleOnTrack(DC, std::move(lp), std::move(cov),
                                                                                      iH, 1., dir, Trk::NODRIFTTIME);
-
     rio.push_back( dynamic_cast<const Trk::MeasurementBase *>(element) );
   } // end fill rio
 
@@ -739,7 +738,10 @@ if (1) { // limit the scope of all these variables
   Amg::Transform3D     faketransf = Amg::Transform3D(linerot* Amg::Translation3D(faketransl));
   Trk::StraightLineSurface *pseudoSurface = new Trk::StraightLineSurface( faketransf, 99999., 99999. );
 
-  Trk::PseudoMeasurementOnTrack *pseudo = new Trk::PseudoMeasurementOnTrack( pseudoPar, pseudocov, *pseudoSurface );
+  Trk::PseudoMeasurementOnTrack *pseudo = new Trk::PseudoMeasurementOnTrack(
+    std::move(pseudoPar),
+    std::move(pseudocov),
+    *pseudoSurface );
   rio.push_back( pseudo );
   delete pseudoSurface;
 }

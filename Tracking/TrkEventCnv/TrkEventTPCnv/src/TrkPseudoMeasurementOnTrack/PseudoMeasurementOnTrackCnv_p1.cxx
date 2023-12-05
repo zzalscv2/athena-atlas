@@ -17,23 +17,25 @@ void PseudoMeasurementOnTrackCnv_p1::persToTrans( const Trk :: PseudoMeasurement
   Trk::LocalParameters localParams;
   fillTransFromPStore( &m_localParamsCnv, persObj->m_localParams, &localParams, log );
   // fillTransFromPStore( &m_localErrMatCnv, persObj->m_localErrMat, &transObj->m_localErrMat, log );
-   
+
   Trk::ErrorMatrix dummy;
   Amg::MatrixX localCovariance;
   fillTransFromPStore( &m_localErrMatCnv, persObj->m_localErrMat, &dummy, log );
   EigenHelpers::vectorToEigenMatrix(dummy.values, localCovariance, "PseudoMeasurementOnTrackCnv_p1");
-   
+
   ITPConverterFor<Trk::Surface>* surfaceCnv=nullptr;
   Trk::ConstSurfaceUniquePtr surf
     (this->createTransFromPStore( &surfaceCnv, persObj->m_associatedSurface, log ));
 
-  DetElementSurfaceCnv_p1* detElCnv = dynamic_cast<DetElementSurfaceCnv_p1*>(surfaceCnv); 
+  DetElementSurfaceCnv_p1* detElCnv = dynamic_cast<DetElementSurfaceCnv_p1*>(surfaceCnv);
   if (detElCnv) {
       // have a DetElementSurface
     surf = Trk::ConstSurfaceUniquePtr (detElCnv->createSurface(log));
   }
 
-  *transObj = Trk::PseudoMeasurementOnTrack (localParams, localCovariance, std::move(surf));
+  *transObj = Trk::PseudoMeasurementOnTrack (std::move(localParams),
+                                             std::move(localCovariance),
+                                             std::move(surf));
 }
 
 void PseudoMeasurementOnTrackCnv_p1::transToPers( const Trk :: PseudoMeasurementOnTrack    * transObj,

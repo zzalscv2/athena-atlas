@@ -30,7 +30,7 @@ void compare (const Trk::PseudoMeasurementOnTrack& p1,
   }
   assert (p1.localCovariance() == p2.localCovariance());
 
-  
+
   for (int i = 0; i < 3; i++) {
     assert (Athena_test::isEqual (p1.globalPosition()[i], p2.globalPosition()[i]));
   }
@@ -56,7 +56,7 @@ void compare (const Trk::PseudoMeasurementOnTrack& p1,
     }
   }
 }
-              
+
 void testit (const Trk::PseudoMeasurementOnTrack& trans1)
 {
   MsgStream log (nullptr, "test");
@@ -83,7 +83,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   Trk::PerigeeSurface psurf (Amg::Vector3D (50, 100, 150));
   Trk::LocalParameters parms1 (1.5, 2.5, 3.5, 4.5, 5.5);
-  Trk::PseudoMeasurementOnTrack trans (parms1, cov, psurf);
+  Trk::PseudoMeasurementOnTrack trans (std::move(parms1), cov, psurf);
 
   testit (trans);
 }

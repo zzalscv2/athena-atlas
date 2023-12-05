@@ -31,12 +31,12 @@ namespace {
             return static_cast<const MuonGM::sTgcReadoutElement*>(ele)->getDesign(cl->identify());
         return nullptr;
     }
-    
+
     int clusterSize(const Muon::MuonClusterOnTrack* cl) {
         const Trk::PrepRawData* prd = cl->prepRawData();
         if (prd->type(Trk::PrepRawDataType::MMPrepData)) {
             return static_cast<const Muon::MMPrepData*>(prd)->stripNumbers().size();
-        } 
+        }
         if (prd->type(Trk::PrepRawDataType::sTgcPrepData)) {
           return static_cast<const Muon::sTgcPrepData*>(prd)->stripNumbers().size();
         }
@@ -51,7 +51,7 @@ namespace {
     /// Coarse eta cut on the segment direction if the beam spot constraint is activated
     constexpr double minEtaNSW = 1.2;
     constexpr double maxEtaNSW = 2.8;
-    
+
 }  // namespace
 namespace Muon {
     ///  Stereo seeds can be formed using hits from 4 independent layers by solving the following system of equations
@@ -66,17 +66,17 @@ namespace Muon {
     ///     K * \vec{C}_{2} + \gamma * K * \vec{e}_{2} - G*\vec{C}_{3} - G* \kappa  \vec{e}_{3} = (K-G) * \vec{X}_{\mu}
     ///
     ///  ---> (K-G) * (I):
-    ///   (K-G) * \vec{C}_{0} + (K-G) * \lambda \vec{e}_{0} = K * \vec{C}_{2} + \gamma * K * \vec{e}_{2} - G*\vec{C}_{3} - G* \kappa  \vec{e}_{3}  
+    ///   (K-G) * \vec{C}_{0} + (K-G) * \lambda \vec{e}_{0} = K * \vec{C}_{2} + \gamma * K * \vec{e}_{2} - G*\vec{C}_{3} - G* \kappa  \vec{e}_{3}
     ///   (K-G) * \lambda = <K * \vec{C}_{2} - G*\vec{C}_{3} - (K-G) * \vec{C}_{0}, \vec{e}_{0}> + \gamma * K * <\vec{e}_{2},\vec{e}_{0}> - G* \kappa  <\vec{e}_{3} ,\vec{e}_{0}>
     ///  ---> Define: \vec{Y}_{0} = K * \vec{C}_{2} - G*\vec{C}_{3} - (K-G) * \vec{C}_{0}
     ///
     ///     (K-G) * \lambda = <\vec{Y}_{0}, \vec{e}_{0}> + \gamma * K * <\vec{e}_{2},\vec{e}_{0}> - G* \kappa  <\vec{e}_{3} ,\vec{e}_{0}>
-    ///  --> (K-G) \vec{X}_{\mu} = (K-G) * \vec{C}_{0} + <\vec{Y}_{0}, \vec{e}_{0}> \vec{e}_{0} 
-    ///                             + \gamma * K * <\vec{e}_{2},\vec{e}_{0}>\vec{e}_{0} 
+    ///  --> (K-G) \vec{X}_{\mu} = (K-G) * \vec{C}_{0} + <\vec{Y}_{0}, \vec{e}_{0}> \vec{e}_{0}
+    ///                             + \gamma * K * <\vec{e}_{2},\vec{e}_{0}>\vec{e}_{0}
     ///                            - G* \kappa  <\vec{e}_{3} ,\vec{e}_{0}>\vec{e}_{0}
     ///
     ///  (III) - (II) = V:
-    ///     \vec{C}_{1} + \alpha \vec{e}_{1} - \vec{C}_{2} - \gamma  \vec{e}_{2} = (A-G) * \vec{D}_{\mu} 
+    ///     \vec{C}_{1} + \alpha \vec{e}_{1} - \vec{C}_{2} - \gamma  \vec{e}_{2} = (A-G) * \vec{D}_{\mu}
     ///  (IV) - (III) = VI:
     ///     \vec{C}_{3} + \kappa \vec{e}_{3} - \vec{C}_{2} - \gamma  \vec{e}_{2} = (K-G) * \vec{D}_{\mu}
 
@@ -84,19 +84,19 @@ namespace Muon {
     /// ---> (K-G) *\vec{C}_{1} + (K-G) *\alpha \vec{e}_{1} - (K-G) *\vec{C}_{2} - (K-G) *\gamma  \vec{e}_{2} =
     ///         (A-G) *\vec{C}_{3} + (A-G) *\kappa \vec{e}_{3} - (A-G) *\vec{C}_{2} - (A-G) *\gamma  \vec{e}_{2}
     ///
-    /// ==>  (K-G) *\alpha \vec{e}_{1} = (A-G) *\vec{C}_{3} - (K-G) *\vec{C}_{1} + (A-G) *\kappa \vec{e}_{3} 
-    ///                                   + (K-A) *\vec{C}_{2} + (K-A) *\gamma  \vec{e}_{2} 
+    /// ==>  (K-G) *\alpha \vec{e}_{1} = (A-G) *\vec{C}_{3} - (K-G) *\vec{C}_{1} + (A-G) *\kappa \vec{e}_{3}
+    ///                                   + (K-A) *\vec{C}_{2} + (K-A) *\gamma  \vec{e}_{2}
     ///
     /// Define: \vec{Y}_{1} = (A-G) *\vec{C}_{3} - (K-G) *\vec{C}_{1} + (K-A) *\vec{C}_{2}
-    ///   (K-G) * \alpha = <\vec{Y}_{1}, \vec{e}_{1}> + 
-    ///                       (A-G) *\kappa <\vec{e}_{3}, \vec{e}_{1}> + 
+    ///   (K-G) * \alpha = <\vec{Y}_{1}, \vec{e}_{1}> +
+    ///                       (A-G) *\kappa <\vec{e}_{3}, \vec{e}_{1}> +
     ///                       (K-A) *\gamma * <\vec{e}_{2}, \vec{e}_{1}>
 
     /// (K-G) * II:
     ///    (K-G)* \vec{C}_{1} + (K-G) * \alpha \vec{e}_{1} = (K-G)*\vec{X}_{\mu} + A*(K-G)*\vec{D}_{\mu}
-    ///    (K-G)* \vec{C}_{1} + (K-G) * \alpha \vec{e}_{1} = (K-G) * \vec{C}_{0} + <\vec{Y}_{0}, \vec{e}_{0}> \vec{e}_{0} 
-    ///                                                       + \gamma * K * <\vec{e}_{2},\vec{e}_{0}>\vec{e}_{0} 
-    ///                                                       - G* \kappa  <\vec{e}_{3} ,\vec{e}_{0}>\vec{e}_{0} 
+    ///    (K-G)* \vec{C}_{1} + (K-G) * \alpha \vec{e}_{1} = (K-G) * \vec{C}_{0} + <\vec{Y}_{0}, \vec{e}_{0}> \vec{e}_{0}
+    ///                                                       + \gamma * K * <\vec{e}_{2},\vec{e}_{0}>\vec{e}_{0}
+    ///                                                       - G* \kappa  <\vec{e}_{3} ,\vec{e}_{0}>\vec{e}_{0}
     ///                                                       + A*[\vec{C}_{3} + \kappa \vec{e}_{3} - \vec{C}_{2} - \gamma  \vec{e}_{2}]
     ///
     using MeasVec= NSWSeed::MeasVec;
@@ -107,26 +107,26 @@ namespace Muon {
     NSWSeed::NSWSeed(const MuonNSWSegmentFinderTool* parent, const std::array<SeedMeasurement, 4>& seed,
                      const std::array<double,2>& lengths) :
       m_parent{parent},
-      m_pos{seed[0].pos() + lengths[0] * seed[0].dir()} {       
-       
+      m_pos{seed[0].pos() + lengths[0] * seed[0].dir()} {
+
         const Amg::Vector3D un_dir = (seed[1].pos() + lengths[1] *seed[1].dir() - m_pos);
         m_dir = un_dir.unit()*(un_dir.z() * seed[0].pos().z() > 0 ? 1 : -1);
 
         if (m_parent->msgLvl(MSG::VERBOSE))
             m_parent->msgStream() << MSG::VERBOSE << m_parent->printSeed(seed)<<" is a valid seed "<<to_string(m_pos) <<" pointing to "<<to_string(m_dir)<<"."<<endmsg;
-        
+
         /// Insert the measurements
         for (const SeedMeasurement& cl : seed) {
             insert(cl);
             m_width = std::hypot(m_width, Amg::error(cl->localCovariance(), Trk::locX));
         }
-        m_width /= std::sqrt(3);        
+        m_width /= std::sqrt(3);
     }
     NSWSeed::NSWSeed(const MuonNSWSegmentFinderTool* parent, const SeedMeasurement& _leftM,
                      const SeedMeasurement& _rightM) :
         m_parent{parent}, m_pos{_leftM.pos()} {
         m_dir = (_rightM.pos() - m_pos).unit();
-        m_width = std::hypot(Amg::error(_leftM->localCovariance(), Trk::locX), 
+        m_width = std::hypot(Amg::error(_leftM->localCovariance(), Trk::locX),
                              Amg::error(_rightM->localCovariance(), Trk::locX)) / std::sqrt(2);
         insert(_leftM);
         insert(_rightM);
@@ -179,25 +179,25 @@ namespace Muon {
             const MuonGM::MuonPadDesign* design = prd->detectorElement()->getPadDesign(prd->identify());
             if (!design) return false;
             Amg::Vector2D padDist = design->distanceToPad(lpos_seed, channel(meas));
-            const double dist = std::hypot(padDist.x(), padDist.y()); 
+            const double dist = std::hypot(padDist.x(), padDist.y());
             meas.setDistance(dist);
             const double uncertD = std::max(1., m_width);
             return (meas.distance() / uncertD < max_uncert) && insert(meas);
-        }  
+        }
         meas.setDistance(distance(meas));
         const double uncertD = std::max(1.,std::hypot(m_width, Amg::error(meas->localCovariance(), Trk::locX)));
         if (m_parent->msgLvl(MSG::VERBOSE)) {
-            m_parent->msgStream() << MSG::VERBOSE << m_parent->print(meas) << " is separated  from " 
+            m_parent->msgStream() << MSG::VERBOSE << m_parent->print(meas) << " is separated  from "
                                   << to_string(pos())<<" + lambda " <<to_string(dir())<<" " << meas.distance()
                                   << ". covariance: " << (meas.distance() / uncertD) << endmsg;
-        }        
+        }
         return (meas.distance() / uncertD < max_uncert) && insert(meas);
     }
     NSWSeed::SeedOR NSWSeed::overlap(const NSWSeed& other) const {
         SeedOR res{SeedOR::Same};
         unsigned int only_th{0}, only_oth{0};
         for (size_t m = 0; m < m_measurements.size(); ++m) {
-            if (m_measurements[m]== other.m_measurements[m] && 
+            if (m_measurements[m]== other.m_measurements[m] &&
                 m_phiMeasurements[m] == other.m_phiMeasurements[m])
                 continue;
             res = SeedOR::NoOverlap;
@@ -229,7 +229,7 @@ namespace Muon {
         return insert(std::move(meas));
     }
     bool NSWSeed::insert(SeedMeasurement meas) {
-        SeedMeasCache& seed_vec = m_parent->idHelper()->measuresPhi(meas->identify()) ? 
+        SeedMeasCache& seed_vec = m_parent->idHelper()->measuresPhi(meas->identify()) ?
                                  (m_parent->isPad(meas) ? m_padMeasurements : m_phiMeasurements ): m_measurements;
         SeedMeasurement& seed = seed_vec[m_parent->layerNumber(meas)];
         if (!seed || meas.distance() < seed.distance()) {
@@ -242,8 +242,8 @@ namespace Muon {
         }
         return false;
     }
-    const Muon::MuonClusterOnTrack* NSWSeed::newCalibClust(std::unique_ptr<const Muon::MuonClusterOnTrack> new_clust) { 
-        return m_calibClust.emplace(std::move(new_clust)).first->get();       
+    const Muon::MuonClusterOnTrack* NSWSeed::newCalibClust(std::unique_ptr<const Muon::MuonClusterOnTrack> new_clust) {
+        return m_calibClust.emplace(std::move(new_clust)).first->get();
     }
     bool NSWSeed::find(const SeedMeasurement& meas) const {
         const int lay = m_parent->layerNumber(meas);
@@ -268,7 +268,7 @@ namespace Muon {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_trackCleaner.retrieve());
         ATH_CHECK(m_trackSummary.retrieve());
-        ATH_CHECK(m_muonClusterCreator.retrieve());        
+        ATH_CHECK(m_muonClusterCreator.retrieve());
         ATH_MSG_DEBUG(" Max cut " << m_maxClustDist);
         return StatusCode::SUCCESS;
     }
@@ -276,17 +276,17 @@ namespace Muon {
     const IMuonIdHelperSvc* MuonNSWSegmentFinderTool::idHelper() const { return m_idHelperSvc.get(); }
     //============================================================================
     void MuonNSWSegmentFinderTool::find(const EventContext& ctx, SegmentMakingCache& cache) const {
-       
+
         std::vector<const Muon::MuonClusterOnTrack*> muonClusters{};
         muonClusters.reserve(cache.inputClust.size());
-        std::transform(cache.inputClust.begin(), cache.inputClust.end(), std::back_inserter(muonClusters), 
+        std::transform(cache.inputClust.begin(), cache.inputClust.end(), std::back_inserter(muonClusters),
                         [](const std::unique_ptr<const MuonClusterOnTrack>& cl){return cl.get();});
         ATH_MSG_DEBUG("Entering MuonNSWSegmentFinderTool with " << muonClusters.size() << " clusters to be fit");
-        
+
         MuonSegmentVec out_segments{};
         {
             MuonSegmentVec stereoSegs = findStereoSegments(ctx, muonClusters, 0);
-            out_segments.insert(out_segments.end(), std::make_move_iterator(stereoSegs.begin()), 
+            out_segments.insert(out_segments.end(), std::make_move_iterator(stereoSegs.begin()),
                                                     std::make_move_iterator(stereoSegs.end()));
         }
 
@@ -296,7 +296,7 @@ namespace Muon {
                 for (const Trk::MeasurementBase* meas : seg->containedMeasurements()) {
                      const Muon::MuonClusterOnTrack* clus = dynamic_cast<const Muon::MuonClusterOnTrack*>(meas);
                      if (clus) cache.usedHits.insert(clus->identify());
-                }       
+                }
                 cache.constructedSegs.push_back(std::move(seg));
             }
         };
@@ -310,7 +310,7 @@ namespace Muon {
                 if (clus) masked_segs[layerNumber(clus)].insert(clus->identify());
             }
         }
-        
+
         if (!out_segments.empty()) {
             clustPostStereo.reserve(muonClusters.size());
             for (const Muon::MuonClusterOnTrack* clus : muonClusters) {
@@ -323,8 +323,8 @@ namespace Muon {
         {
             MuonSegmentVec etaSegs = findStgcPrecisionSegments(ctx, segmentInput);
             MuonSegmentVec precSegs = find3DSegments(ctx, segmentInput, etaSegs);
-            out_segments.insert(out_segments.end(), 
-                                std::make_move_iterator(precSegs.begin()), 
+            out_segments.insert(out_segments.end(),
+                                std::make_move_iterator(precSegs.begin()),
                                 std::make_move_iterator(precSegs.end()));
         }
 
@@ -335,7 +335,7 @@ namespace Muon {
             return;
         }
         /// Single wedge segments. Important for the alignment runs
-        for (std::unique_ptr<Muon::MuonSegment>& seg : out_segments) {            
+        for (std::unique_ptr<Muon::MuonSegment>& seg : out_segments) {
             std::vector<const MuonClusterOnTrack*> seg_hits{};
             seg_hits.reserve(seg->containedMeasurements().size());
             for (const Trk::MeasurementBase* meas : seg->containedMeasurements()) {
@@ -349,7 +349,7 @@ namespace Muon {
                 if ( quad_hits.size () < 2 || ((iWedge == 2 || iWedge == 3) && quad_hits.size() < 4)) continue;
                 std::vector<const Trk::MeasurementBase*> fit_meas{};
                 std::unique_ptr<Trk::PseudoMeasurementOnTrack> pseudoVtx{ipConstraint(ctx)};
-                if (pseudoVtx) fit_meas.push_back(pseudoVtx.get());            
+                if (pseudoVtx) fit_meas.push_back(pseudoVtx.get());
                 std::copy(quad_hits.begin(), quad_hits.end(), std::back_inserter(fit_meas));
                 /// Create the perigee parameter
                 const Trk::Surface& surf = quad_hits.front()->associatedSurface();
@@ -365,7 +365,7 @@ namespace Muon {
 
                 std::unique_ptr<MuonSegment> seg{m_trackToSegmentTool->convert(ctx, *segtrack)};
                 if (seg) {
-                    ATH_MSG_VERBOSE(" adding new quad segment " << m_printer->print(*seg) << std::endl 
+                    ATH_MSG_VERBOSE(" adding new quad segment " << m_printer->print(*seg) << std::endl
                                             <<"position: "<<to_string(seg->globalPosition())<< std::endl
                                             <<"direction: "<<to_string(seg->globalDirection())<< std::endl
                                             << m_printer->print(seg->containedMeasurements()));
@@ -373,24 +373,24 @@ namespace Muon {
                     cache.quadSegs.emplace_back(std::move(seg));
                 }
             }
-        }        
+        }
         dump_output();
     }
-    MuonSegmentVec MuonNSWSegmentFinderTool::findStereoSegments(const EventContext& ctx, 
-                                                                const std::vector<const Muon::MuonClusterOnTrack*>& allClusts, 
-                                                                int singleWedge) const {      
-        
+    MuonSegmentVec MuonNSWSegmentFinderTool::findStereoSegments(const EventContext& ctx,
+                                                                const std::vector<const Muon::MuonClusterOnTrack*>& allClusts,
+                                                                int singleWedge) const {
+
         if (!m_useStereoSeeding) return {};
         /// Order any parsed hit into the layer structure
         LayerMeasVec orderedClust =
             classifyByLayer(cleanClusters(allClusts, HitType::Eta | HitType::Phi, singleWedge), HitType::Wire | HitType::Pad);
-        
+
         for (MeasVec& hitsInLayer : orderedClust) hitsInLayer = vetoBursts(std::move(hitsInLayer));
         orderedClust.erase(std::remove_if(orderedClust.begin(), orderedClust.end(),
                                              [](const MeasVec& vec) { return vec.empty(); }),
                               orderedClust.end());
-        if (orderedClust.empty()) return {};      
-        
+        if (orderedClust.empty()) return {};
+
 
         std::vector<NSWSeed> seeds = segmentSeedFromMM(orderedClust);
         if (seeds.empty()) return {};
@@ -415,7 +415,7 @@ namespace Muon {
             if (perpos.dot(gdir_seg) < 0) gdir_seg *= -1;
 
             Trk::Perigee startpar{perpos, gdir_seg, 0, perpos};
-            
+
             /// Create the segment
             std::unique_ptr<Trk::Track> segtrack = fit(ctx, fit_meas, startpar);
             if (segtrack) trackSegs.push_back(std::move(segtrack));
@@ -426,7 +426,7 @@ namespace Muon {
     std::unique_ptr<Trk::Track> MuonNSWSegmentFinderTool::fit(const EventContext& ctx,
                                                               const std::vector<const Trk::MeasurementBase*>& fit_meas,
                                                               const Trk::TrackParameters& perigee) const {
-        ATH_MSG_VERBOSE("Fit segment from (" << to_string(perigee.position())<< "  pointing to " << 
+        ATH_MSG_VERBOSE("Fit segment from (" << to_string(perigee.position())<< "  pointing to " <<
                                             to_string(perigee.momentum())<<". Contained measurements in candidate: " << std::endl
                                             << m_printer->print(fit_meas));
         std::unique_ptr<Trk::Track> segtrack = m_slTrackFitter->fit(ctx, fit_meas, perigee, false, Trk::nonInteracting);
@@ -454,8 +454,8 @@ namespace Muon {
 
     //============================================================================
     // find the precision (eta) segments
-    MuonSegmentVec MuonNSWSegmentFinderTool::findStgcPrecisionSegments(const EventContext& ctx, 
-                                                                       const std::vector<const Muon::MuonClusterOnTrack*>& muonClusters, 
+    MuonSegmentVec MuonNSWSegmentFinderTool::findStgcPrecisionSegments(const EventContext& ctx,
+                                                                       const std::vector<const Muon::MuonClusterOnTrack*>& muonClusters,
                                                                        int singleWedge) const {
         // clean the muon clusters; select only the eta hits.
         // in single-wedge mode the eta seeds are retrieved from the specific wedge
@@ -473,7 +473,7 @@ namespace Muon {
         MeasVec etaHitVec, phiHitVec;
         TrackCollection segTrkColl{SG::OWN_ELEMENTS};
 
-        for (NSWSeed& seed : seeds) {            
+        for (NSWSeed& seed : seeds) {
             if (seed.size() < 4) continue;
 
             etaHitVec = seed.measurements();
@@ -505,7 +505,7 @@ namespace Muon {
         /// Resolve the ambiguities amongsty the tracks and convert the result
         return resolveAmbiguities(ctx, segTrkColl, Trk::Segment::Author::NswStgcSeeded);
     }
-    MuonSegmentVec MuonNSWSegmentFinderTool::resolveAmbiguities(const EventContext& ctx, 
+    MuonSegmentVec MuonNSWSegmentFinderTool::resolveAmbiguities(const EventContext& ctx,
                                                                 const TrackCollection& segTrkColl,
                                                                 const Trk::Segment::Author a) const {
         if (msgLvl(MSG::DEBUG)) {
@@ -542,16 +542,16 @@ namespace Muon {
         return segments;
     }
     //============================================================================
-    MuonSegmentVec MuonNSWSegmentFinderTool::find3DSegments(const EventContext& ctx, 
+    MuonSegmentVec MuonNSWSegmentFinderTool::find3DSegments(const EventContext& ctx,
                                                             const std::vector<const Muon::MuonClusterOnTrack*>& muonClusters,
-                                                            MuonSegmentVec& etaSegs, 
+                                                            MuonSegmentVec& etaSegs,
                                                             int singleWedge) const {
         MuonSegmentVec segments{};
         // cluster cleaning #1; select only phi hits (must be from all wedges, in order to phi-seed)
-        MeasVec phiClusters = cleanClusters(muonClusters, HitType::Phi | HitType::Wire, singleWedge);  
+        MeasVec phiClusters = cleanClusters(muonClusters, HitType::Phi | HitType::Wire, singleWedge);
         ATH_MSG_DEBUG("After hit cleaning, there are " << phiClusters.size() << " phi clusters to be fit");
         // classify the phi clusters by layer
-        LayerMeasVec orderedWireClusters = classifyByLayer(phiClusters, HitType::Wire);  
+        LayerMeasVec orderedWireClusters = classifyByLayer(phiClusters, HitType::Wire);
         LayerMeasVec orderedPadClusters = classifyByLayer(phiClusters, HitType::Pad);  // pads only
         if (orderedWireClusters.size() + orderedPadClusters.size() < 2) {
             ATH_MSG_DEBUG("Not enough phi hits present, cannot perform the 3D fit!");
@@ -560,7 +560,7 @@ namespace Muon {
         }
 
         // cluster cleaning #2; select only eta hits
-        MeasVec etaClusters = cleanClusters(muonClusters, HitType::Eta, singleWedge);  
+        MeasVec etaClusters = cleanClusters(muonClusters, HitType::Eta, singleWedge);
         LayerMeasVec orderedEtaClusters = classifyByLayer(etaClusters, HitType::Eta);
 
         // loop on eta segments
@@ -673,10 +673,10 @@ namespace Muon {
         return m_idHelperSvc->issTgc(id) && m_idHelperSvc->stgcIdHelper().channelType(id) == sTgcIdHelper::Wire;
     }
     //============================================================================
-    bool MuonNSWSegmentFinderTool::hitsToTrack(const EventContext& ctx, 
+    bool MuonNSWSegmentFinderTool::hitsToTrack(const EventContext& ctx,
                                                const MeasVec& etaHitVec,
                                                const MeasVec& phiHitVec,
-                                               const Trk::TrackParameters& startpar, 
+                                               const Trk::TrackParameters& startpar,
                                                TrackCollection& segTrkColl) const {
         // vector of hits for the fit
         std::vector<const Trk::MeasurementBase*> vecFitPts;
@@ -691,7 +691,7 @@ namespace Muon {
         if (!nHitsPhi) {
             // generate two pseudo phi measurements for the fit,
             // one on the first hit surface and one on the last hit surface.
-            const unsigned int nMM = std::count_if(etaHitVec.begin(), etaHitVec.end(), 
+            const unsigned int nMM = std::count_if(etaHitVec.begin(), etaHitVec.end(),
                                                         [this](const Muon::MuonClusterOnTrack* hit) {
                                                             return m_idHelperSvc->isMM(hit->identify());
                                                         });
@@ -699,8 +699,12 @@ namespace Muon {
             Amg::MatrixX cov(1, 1);
             cov(0, 0) = errPos * errPos;
             static const Trk::LocalParameters loc_pseudopars{Trk::DefinedParameter(0, Trk::locY)};
-            pseudoPhi1 = std::make_unique<Trk::PseudoMeasurementOnTrack>(loc_pseudopars, cov, etaHitVec.front()->associatedSurface());
-            pseudoPhi2 = std::make_unique<Trk::PseudoMeasurementOnTrack>(loc_pseudopars, cov, etaHitVec.back()->associatedSurface());
+            pseudoPhi1 = std::make_unique<Trk::PseudoMeasurementOnTrack>(Trk::LocalParameters(loc_pseudopars),
+                                                                         Amg::MatrixX(cov),
+                                                                         etaHitVec.front()->associatedSurface());
+            pseudoPhi2 = std::make_unique<Trk::PseudoMeasurementOnTrack>(Trk::LocalParameters(loc_pseudopars),
+                                                                         Amg::MatrixX(cov),
+                                                                         etaHitVec.back()->associatedSurface());
 
             // add the first pseudo phi hit, the hit vector, and the second pseudo phi hit
             vecFitPts.push_back(pseudoPhi1.get());
@@ -778,23 +782,23 @@ namespace Muon {
         orderedClusters.erase(std::remove_if(orderedClusters.begin(), orderedClusters.end(),
                                              [](const MeasVec& vec) { return vec.empty(); }),
                               orderedClusters.end());
-       
-           
+
+
         for( MeasVec& lays: orderedClusters){
             std::sort(lays.begin(),lays.end(), [this](const SeedMeasurement& a, const SeedMeasurement& b){
                 return channel(a) < channel(b);
             });
             ATH_MSG_DEBUG("Found in layer "<<m_idHelperSvc->toStringDetEl(lays[0]->identify())<<" "<<lays.size()<<" clusters");
-            
-       
+
+
         }
         ATH_MSG_VERBOSE("Collected clusters "<<print(orderedClusters));
-        
+
         return orderedClusters;
     }
 
     //============================================================================
-    std::vector<NSWSeed> MuonNSWSegmentFinderTool::segmentSeedFromStgc(const LayerMeasVec& orderedClusters, 
+    std::vector<NSWSeed> MuonNSWSegmentFinderTool::segmentSeedFromStgc(const LayerMeasVec& orderedClusters,
                                                                        bool usePhi) const {
         std::vector<NSWSeed> seeds;
 
@@ -810,7 +814,7 @@ namespace Muon {
         for (unsigned int ilayerL{0}; (ilayerL < orderedClusters.size() && seedingLayersL < m_nOfSeedLayers); ++ilayerL) {
             bool usedLayerL{false};
             for (const SeedMeasurement& hitL : orderedClusters[ilayerL]) {
-                /// Reject 
+                /// Reject
                 if (usePhi != m_idHelperSvc->measuresPhi(hitL->identify())) continue;
                 else if(m_idHelperSvc->isMM(hitL->identify())) break;
 
@@ -829,12 +833,12 @@ namespace Muon {
                             if (eta < minEtaNSW || eta > maxEtaNSW) {
                                 continue;
                             }
-                        }  
+                        }
                         usedLayerR = true;
                         usedLayerL = true;
                         getClustersOnSegment(orderedClusters, seed, {ilayerL, ilayerR});
                         seeds.emplace_back(std::move(seed));
-                        
+
                     }
                     if (usedLayerR) ++seedingLayersR;
                 }
@@ -1005,9 +1009,9 @@ namespace Muon {
         /// layers 12-15 contain stgcs and are not of interest...
         constexpr size_t lastMMLay = 11;
         std::vector<NSWSeed> laySeeds;
-        
+
         /// Combinatorics  debugging stream
-        std::stringstream sstr{};       
+        std::stringstream sstr{};
         for (int e4  = std::min(lastMMLay, orderedClusters.size() -1); e4 >= 3 ; --e4) {
             layers[3] = e4;
             for (int e3 = e4 -1 ; e3 >= 2; --e3) {
@@ -1019,11 +1023,11 @@ namespace Muon {
                         const unsigned int old_trials = trials;
                         laySeeds = segmentSeedFromMM(orderedClusters,layers, trials);
                         if (old_trials == trials) continue;
-                        
+
                         used_layers += !laySeeds.empty();
                         seeds.insert(seeds.end(), std::make_move_iterator(laySeeds.begin()),
                                                   std::make_move_iterator(laySeeds.end()));
-                            
+
                         if (msgLvl(MSG::VERBOSE)) {
                             sstr<<" Attempts thus far "<<old_trials<<" attempts now "<<trials<<" --- "<<e1<<","<<e2<<","<<e3<<","<<e4<<std::endl;
                             for (int lay : layers) {
@@ -1032,10 +1036,10 @@ namespace Muon {
                                     sstr<<" **** "<< print(meas)<<std::endl;
                                 }
                                 sstr<<std::endl<<std::endl<<std::endl;
-                            } 
+                            }
                         }
                     }
-                }                
+                }
             }
         }
         if (trials > 100000) {
@@ -1044,7 +1048,7 @@ namespace Muon {
         ATH_MSG_VERBOSE("Out of "<<trials<<" possible seeds, "<<seeds.size()<<" were finally built. Used in total "<<used_layers<<" layers");
         return resolveAmbiguities(std::move(seeds));
     }
-  
+
     #if defined(FLATTEN) && defined(__GNUC__)
     __attribute__((flatten))
     #endif
@@ -1056,14 +1060,14 @@ namespace Muon {
         std::array<unsigned int, 4> lay_ord{};
         for (size_t s = 0; s < selLayers.size(); ++s) {
             unsigned int lay = selLayers[s];
-            const SeedMeasurement& seed = orderedClusters[lay].front();            
-            const Identifier id = seed->identify(); 
+            const SeedMeasurement& seed = orderedClusters[lay].front();
+            const Identifier id = seed->identify();
             if (!m_idHelperSvc->isMM(id)) return seeds;
             const MuonGM::MuonChannelDesign* design = getDesign(seed);
             /// Determine whether the layer is X(1) / U(2) or V(3)
             if (!design->hasStereoAngle())  lay_ord[s] = 1;
             else if (design->stereoAngle() >0.) lay_ord[s] = 2;
-            else lay_ord[s] = 3;                        
+            else lay_ord[s] = 3;
         }
        auto swap_strips = [&selLayers, &lay_ord] (unsigned int i, unsigned j){
             std::swap(lay_ord[i], lay_ord[j]);
@@ -1072,7 +1076,7 @@ namespace Muon {
         /// Order the strips such that the first and second pair consist each of crossing strips
         if (lay_ord[0] == lay_ord[1]){
             if (lay_ord[1] != lay_ord[2]) swap_strips(1,2);
-             else if (lay_ord[1] != lay_ord[3]) swap_strips(1,3);               
+             else if (lay_ord[1] != lay_ord[3]) swap_strips(1,3);
              else {
                 ATH_MSG_VERBOSE("Strips are all parallel.");
                 return seeds;
@@ -1080,21 +1084,21 @@ namespace Muon {
         }
         /// The second pair is parallel
         if (lay_ord[2] == lay_ord[3]) {
-            // Check if the last hit can be exchanged by the first one. 
+            // Check if the last hit can be exchanged by the first one.
             // But also ensure that the second and fourth are not the same
-            if (lay_ord[3] != lay_ord[0] && lay_ord[3] != lay_ord[1]) swap_strips(3,0);                
+            if (lay_ord[3] != lay_ord[0] && lay_ord[3] != lay_ord[1]) swap_strips(3,0);
             else {
                ATH_MSG_VERBOSE("No way to rearrange the strips such that the latter two strips cross.");
                return seeds;
             }
         }
         /// Assign the first measurement of each layer to calculate the linear transformation
-        std::array<SeedMeasurement, 4> base_seed{}; 
+        std::array<SeedMeasurement, 4> base_seed{};
         for (size_t s = 0; s < selLayers.size(); ++s) {
             unsigned int lay = selLayers[s];
-            base_seed[s] = orderedClusters[lay].front();            
+            base_seed[s] = orderedClusters[lay].front();
         }
-        
+
         const double A = (base_seed[1].pos().z() - base_seed[0].pos().z());
         const double G = (base_seed[2].pos().z() - base_seed[0].pos().z());
         const double K = (base_seed[3].pos().z() - base_seed[0].pos().z());
@@ -1108,20 +1112,20 @@ namespace Muon {
                                                     << diamond << std::endl
                                                     << " is singular " << diamond.determinant() << " with rank "
                                                     << (Eigen::FullPivLU<AmgSymMatrix(2)>{diamond}.rank()));
-           
+
             return seeds;
         }
         ATH_MSG_VERBOSE("The combination of " << printSeed(base_seed) << " to " << std::endl
                                               << diamond << std::endl
                                               << "May give a couple of stereo seeds " << diamond.determinant());
-      
+
         /// Habemus valid strip quartett
         const AmgSymMatrix(2) seed_builder = diamond.inverse();
         /// Function to calculate the muon crossing
         const double KmG = K-G;
         const double KmA = K-A;
         const double AmG = A-G;
-        
+
         const double TwoDotZero = base_seed[2].dirDot(base_seed[0]);
         const double ThreeDotZero = base_seed[3].dirDot(base_seed[0]);
         const double ThreeDotOne = base_seed[3].dirDot(base_seed[1]);
@@ -1133,8 +1137,8 @@ namespace Muon {
             const double Y0dotE0 = base_seed[0].dirDot(Y0);
             const double Y1dotE1 = base_seed[1].dirDot(Y1);
 
-            const AmgVector(2) centers = (KmG * (base_seed[0].pos() - base_seed[1].pos()) + 
-                                           Y0dotE0 * base_seed[0].dir() + 
+            const AmgVector(2) centers = (KmG * (base_seed[0].pos() - base_seed[1].pos()) +
+                                           Y0dotE0 * base_seed[0].dir() +
                                            A * (base_seed[3].pos() - base_seed[2].pos()) -
                                           Y1dotE1 * base_seed[1].dir())
                                          .block<2, 1>(0, 0);
@@ -1157,7 +1161,7 @@ namespace Muon {
                         ATH_MSG_VERBOSE("Position "<<to_string(*seg_pos));
                     }
                     if (!seg_dir){
-                            seg_dir = std::make_optional<Amg::Vector3D>((base_seed[1].pos() + 
+                            seg_dir = std::make_optional<Amg::Vector3D>((base_seed[1].pos() +
                                                                     lengths[1] *base_seed[1].dir() - (*seg_pos)).unit());
                         ATH_MSG_VERBOSE("Direction "<<to_string(*seg_dir));
                     }
@@ -1174,30 +1178,30 @@ namespace Muon {
         /// Reserve space for 200 seeds
         seeds.reserve(200);
         MeasVec::const_iterator begin2{orderedClusters[selLayers[1]].begin()};
-        MeasVec::const_iterator begin3{orderedClusters[selLayers[2]].begin()};       
-        MeasVec::const_iterator begin4{orderedClusters[selLayers[3]].begin()};       
-                
+        MeasVec::const_iterator begin3{orderedClusters[selLayers[2]].begin()};
+        MeasVec::const_iterator begin4{orderedClusters[selLayers[3]].begin()};
+
         const MeasVec::const_iterator end2{orderedClusters[selLayers[1]].end()};
         const MeasVec::const_iterator end3{orderedClusters[selLayers[2]].end()};
         const MeasVec::const_iterator end4{orderedClusters[selLayers[3]].end()};
-     
-        for (const SeedMeasurement& lay1 : orderedClusters[selLayers[0]]) { 
+
+        for (const SeedMeasurement& lay1 : orderedClusters[selLayers[0]]) {
             base_seed[0] = lay1;
-            for (MeasVec::const_iterator lay2 = begin2; lay2 != end2; ++lay2) { 
-                
+            for (MeasVec::const_iterator lay2 = begin2; lay2 != end2; ++lay2) {
+
                 base_seed[1] = *lay2;
                 ChannelConstraint chCheck = compatiblyFromIP(lay1, *lay2);
-                /// The two channels are too narrow. 
+                /// The two channels are too narrow.
                 /// Same conclusion holds for all previous hits from this layer combined with the next ones of layer 1
                 if (chCheck == ChannelConstraint::TooNarrow) {
                     begin2 = lay2 + 1;
                     continue;
-                } 
+                }
                 /// The opening angle of these two channels is just too wide
                 else if (chCheck == ChannelConstraint::TooWide) {
                     break;
                 }
-                /// The first or the second one can cross with the third one             
+                /// The first or the second one can cross with the third one
                 for (MeasVec::const_iterator lay3 = begin3; lay3 != end3; ++lay3) {
                     chCheck = compatiblyFromIP(lay1, *lay3);
                     const ChannelConstraint chCheck1 = compatiblyFromIP(*lay2, *lay3);
@@ -1207,9 +1211,9 @@ namespace Muon {
                     } else if (chCheck == ChannelConstraint::TooWide && chCheck1 == ChannelConstraint::TooWide) {
                         break;
                     }
-                    base_seed[2] = *lay3;                    
+                    base_seed[2] = *lay3;
                     /// Reject combinations that consist only of 1 strip clusters
-                    for (MeasVec::const_iterator lay4 = begin4 ; lay4 != end4; ++lay4) { 
+                    for (MeasVec::const_iterator lay4 = begin4 ; lay4 != end4; ++lay4) {
                         chCheck = compatiblyFromIP(*lay3, *lay4);
                         if (chCheck == ChannelConstraint::TooNarrow) {
                             begin4 = lay4 + 1;
@@ -1217,13 +1221,13 @@ namespace Muon {
                         }  else if (chCheck == ChannelConstraint::TooWide) {
                             break;
                         }
-                                
+
                         base_seed[3] = (*lay4);
                         std::optional<std::array<double, 2>> isects = estimate_muon();
                         ++trial_counter;
                         if (!isects) continue;
                         NSWSeed seed{this, base_seed, *isects};
-                                          
+
                         if (seed.size() < 4) continue;
                         if (m_ipConstraint) {
                             const double eta = std::abs(seed.dir().eta());
@@ -1235,24 +1239,24 @@ namespace Muon {
                             static const Muon::MuonSectorMapping  sector_mapping{};
                             const double deltaPhi = std::abs(seed.dir().deltaPhi(seed.pos()));
                             if (deltaPhi > sector_mapping.sectorWidth(m_idHelperSvc->sector(base_seed[0]->identify()))) continue;
-                        }                   
+                        }
                         getClustersOnSegment(orderedClusters, seed, {selLayers[0], selLayers[1],selLayers[2], selLayers[3]});
                         seeds.emplace_back(std::move(seed));
                     }
                 }
             }
         }
-        return seeds;    
+        return seeds;
     }
-    inline MuonNSWSegmentFinderTool::ChannelConstraint 
-        MuonNSWSegmentFinderTool::compatiblyFromIP(const SeedMeasurement& meas1, const SeedMeasurement& meas2) const { 
+    inline MuonNSWSegmentFinderTool::ChannelConstraint
+        MuonNSWSegmentFinderTool::compatiblyFromIP(const SeedMeasurement& meas1, const SeedMeasurement& meas2) const {
         if (!m_ipConstraint) return ChannelConstraint::InWindow;
-        
-        // For a given dZ the measurements can only be separated by a certain dR such that the 
+
+        // For a given dZ the measurements can only be separated by a certain dR such that the
         /// direction of final segment is well compatible with the IP cut
-        const double dZ = std::abs(meas2->globalPosition().z()) - 
+        const double dZ = std::abs(meas2->globalPosition().z()) -
                           std::abs(meas1->globalPosition().z());
-       
+
         /// Use the Identity that 1./sinh(eta) = tan(theta)
         /// https://www.wolframalpha.com/input?i=1.%2Fsinh%28-ln%28tan%28x%2F2%29%29%29+-+tan%28x%29
         /// Add another 0.25 as safety margin
@@ -1261,27 +1265,27 @@ namespace Muon {
 
         const double minDR = minTanTheta * std::abs(dZ);
         const double maxDR = maxTanTheta * std::abs(dZ);
-       
+
         const std::pair<double, double> rad1 = coveredRadii(meas1);
         const std::pair<double, double> rad2 = coveredRadii(meas2);
-        /// Calculate the transverse radii at the edges of the 
+        /// Calculate the transverse radii at the edges of the
         const double dlR = rad2.first - rad1.first;
         const double drR = rad2.second - rad1.second;
         ATH_MSG_VERBOSE("compatiblyFromIP() -- Measurements "<<std::endl
                         <<print(meas1)<<std::endl<<print(meas2)
                         <<std::endl<<". Separation in dR (left/right) "<<dlR<<"/"<<drR<<", dZ "<<dZ
                         <<" --> dR has to be in "<<minDR<<" "<<maxDR);
-        if ((std::abs(dlR) < minDR && std::abs(drR) < minDR) || 
+        if ((std::abs(dlR) < minDR && std::abs(drR) < minDR) ||
             (dZ > 0 &&  dlR <0 && drR <0) || (dZ < 0 &&  dlR >0 && drR > 0)) {
             return ChannelConstraint::TooNarrow;
         } if (std::abs(dlR) > maxDR && std::abs(drR) > maxDR && dlR * drR > 0.){
             return ChannelConstraint::TooWide;
-        }     
-        return ChannelConstraint::InWindow;        
-    } 
+        }
+        return ChannelConstraint::InWindow;
+    }
     inline std::pair<double, double> MuonNSWSegmentFinderTool::coveredRadii(const SeedMeasurement& meas) const {
         const MuonGM::MuonChannelDesign* design = getDesign(meas);
-        const int chNum = channel(meas);        
+        const int chNum = channel(meas);
         Amg::Vector2D left{Amg::Vector2D::Zero()}, right{Amg::Vector2D::Zero()};
         design->leftEdge(chNum, left);
         design->rightEdge(chNum, right);
@@ -1436,13 +1440,13 @@ namespace Muon {
             } else if (m_idHelperSvc->issTgc(hitID)) {
                 // build a  new sTGC cluster on track with correct position
                 std::unique_ptr<const Muon::MuonClusterOnTrack> newClus {m_muonClusterCreator->correct(*clus->prepRawData(), intersect.position, seed.dir())};
-                calibratedClusters.emplace_back(seed.newCalibClust(std::move(newClus)));                             
+                calibratedClusters.emplace_back(seed.newCalibClust(std::move(newClus)));
             }
         }
 
         return calibratedClusters;
     }
-    
+
     //============================================================================
     template <size_t N>
     std::string MuonNSWSegmentFinderTool::printSeed(const std::array<SeedMeasurement, N>& seed) const {
@@ -1455,9 +1459,9 @@ namespace Muon {
     //============================================================================
     std::string MuonNSWSegmentFinderTool::print(const SeedMeasurement& cl) const {
         std::stringstream sstr{};
-        sstr << m_idHelperSvc->toString(cl->identify()) << " at " <<to_string(cl.pos()) 
+        sstr << m_idHelperSvc->toString(cl->identify()) << " at " <<to_string(cl.pos())
             <<" pointing to (" <<to_string(cl.dir())<<" cluster size: "<<clusterSize(cl);
-        
+
         return sstr.str();
     }
     std::string MuonNSWSegmentFinderTool::print(const MeasVec& measurements) const {
@@ -1478,7 +1482,7 @@ namespace Muon {
         }
         return sstr.str();
     }
-     
+
     MeasVec MuonNSWSegmentFinderTool::vetoBursts( MeasVec && clustInLay ) const {
         if (clustInLay.size() < m_ocupMmNumPerBin || m_idHelperSvc->issTgc(clustInLay[0]->identify())) return clustInLay;
         /// The micromegas are slobbering quite a lot in the 2023 data taking leading to uncopable comptuing times.
@@ -1487,7 +1491,7 @@ namespace Muon {
         /// Bins with large activity are then cleared. In the second step, pairs of bins where their sum is too exhaustive
         /// are removed.
         MeasVec prunedMeas{};
-        prunedMeas.reserve(clustInLay.size());       
+        prunedMeas.reserve(clustInLay.size());
         const unsigned int firstCh = channel(clustInLay[0]);
         const unsigned int lastCh = channel(clustInLay[clustInLay.size() -1]);
         /// Define the number of bins
@@ -1495,7 +1499,7 @@ namespace Muon {
         const unsigned int nBins = deltaCh / m_ocupMmBinWidth + (deltaCh % m_ocupMmBinWidth > 0);
         ATH_MSG_VERBOSE("Clusters in layer "<<print(clustInLay)<<" lowest channel: "<<
                         firstCh<<", highest channel: "<<lastCh<<" bin width: "<<m_ocupMmBinWidth<<" number of bins"<<nBins);
-        
+
         LayerMeasVec occupancyHisto{};
         occupancyHisto.resize(nBins);
         for (MeasVec& bin : occupancyHisto) {
