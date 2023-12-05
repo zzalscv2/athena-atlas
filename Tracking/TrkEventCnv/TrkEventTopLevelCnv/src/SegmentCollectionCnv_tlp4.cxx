@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkEventTopLevelCnv/SegmentCollectionCnv_tlp4.h"
@@ -63,16 +63,16 @@ void SegmentCollectionCnv_tlp4::setPStorage( PERS *storage )
 
   // when reading (createTrans) these will be non-null if extension is present
   // when writing, they will be null at first end set afterwards in createPersisten()
-  if( storage->m_muonMeasurementsExt ) m_muonMeasurementsCnv.setPStorage( storage->m_muonMeasurementsExt );
-  if( storage->m_inDetTrackExt )       m_inDetTrackCnv      .setPStorage( storage->m_inDetTrackExt );
+  if( storage->m_muonMeasurementsExt ) m_muonMeasurementsCnv.setPStorage( storage->m_muonMeasurementsExt.get() );
+  if( storage->m_inDetTrackExt )       m_inDetTrackCnv      .setPStorage( storage->m_inDetTrackExt.get() );
 }   
 
 
 BaseSegmentCollectionCnv::PERS* SegmentCollectionCnv_tlp4::createPersistent(const TRANS* transObj, MsgStream &log)
  {
     PERS *pers = BaseSegmentCollectionCnv::createPersistent(transObj, log);
-    pers->m_muonMeasurementsExt = m_muonMeasurementsCnv.releaseTLPersObject();
-    pers->m_inDetTrackExt = m_inDetTrackCnv.releaseTLPersObject();
+    pers->m_muonMeasurementsExt.reset( m_muonMeasurementsCnv.releaseTLPersObject() );
+    pers->m_inDetTrackExt.reset( m_inDetTrackCnv.releaseTLPersObject() );
     return pers;
  }
 

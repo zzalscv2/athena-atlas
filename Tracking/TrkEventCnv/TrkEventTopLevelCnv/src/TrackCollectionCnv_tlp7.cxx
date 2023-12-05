@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkEventTopLevelCnv/TrackCollectionCnv_tlp7.h"
@@ -123,9 +123,9 @@ void TrackCollectionCnv_tlp7::setPStorage( PERS *storage )
 
   // when reading (createTrans) these will be non-null if extension is present
   // when writing, they will be null at first end set afterwards in createPersistentWithKey()
-  if( storage->m_inDetTrackExt )       m_inDetTrackCnv      .setPStorage( storage->m_inDetTrackExt );
-  if( storage->m_muonMeasurementsExt ) m_muonMeasurementsCnv.setPStorage( storage->m_muonMeasurementsExt );
-  if( storage->m_muonCaloEnergiesExt ) m_muonCaloEnergiesCnv.setPStorage( storage->m_muonCaloEnergiesExt );
+  if( storage->m_inDetTrackExt )       m_inDetTrackCnv      .setPStorage( storage->m_inDetTrackExt.get() );
+  if( storage->m_muonMeasurementsExt ) m_muonMeasurementsCnv.setPStorage( storage->m_muonMeasurementsExt.get() );
+  if( storage->m_muonCaloEnergiesExt ) m_muonCaloEnergiesCnv.setPStorage( storage->m_muonCaloEnergiesExt.get() );
 }
 
 
@@ -137,9 +137,9 @@ TrackCollectionCnv_tlp7::createPersistentWithKey(const TRANS* transObj,
    PERS *pers = BaseTrackCollectionCnv_tlp7::createPersistentWithKey(transObj, key, log);
 
    // get extending objects (nullptr if there was no extending data types)
-   pers->m_muonMeasurementsExt = m_muonMeasurementsCnv.releaseTLPersObject();
-   pers->m_inDetTrackExt       = m_inDetTrackCnv.releaseTLPersObject();
-   pers->m_muonCaloEnergiesExt = m_muonCaloEnergiesCnv.releaseTLPersObject();
+   pers->m_muonMeasurementsExt.reset( m_muonMeasurementsCnv.releaseTLPersObject() );
+   pers->m_inDetTrackExt.reset( m_inDetTrackCnv.releaseTLPersObject() );
+   pers->m_muonCaloEnergiesExt.reset( m_muonCaloEnergiesCnv.releaseTLPersObject() );
 
    return pers;
 }
