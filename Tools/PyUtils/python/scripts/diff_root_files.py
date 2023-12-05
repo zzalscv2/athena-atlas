@@ -113,13 +113,7 @@ def _vecdiff (v1, v2, nan_equal):
 @acmdlib.argument('--exact-branches',
                   action='store_true',
                   default=False,
-                  mutual=True,
                   help="""Only allow exact list of branches present""")
-@acmdlib.argument('--inexact-branches',
-                  action='store_true',
-                  default=False,
-                  mutual=True,
-                  help="""Allow inexact list of branches present""")
 @acmdlib.argument('--mode',
                   choices=g_ALLOWED_MODES,
                   default='detailed',
@@ -192,7 +186,6 @@ def main(args):
     msg.info('error mode:           %s', args.error_mode)
     msg.info('order trees:          %s', args.order_trees)
     msg.info('exact branches:       %s', args.exact_branches)
-    msg.info('inexact branches:       %s', args.inexact_branches)
 
     import PyUtils.Helpers as H
     with H.ShutUp() :
@@ -319,10 +312,19 @@ def main(args):
             leafname = '.'.join([s for s in entry2 if not s.isdigit()])
             return skip_leaf (leafname, skip_leaves)
 
+        def filter_branches(leaves):
+            good_leaves = set()
+            for regex in args.branches_of_interest:
+                test = re.compile(regex)
+                good_leaves.update(l for l in leaves if test.match(l))
+            return good_leaves
+
         skipset = frozenset(args.ignore_leaves)
         old_leaves = infos['old']['leaves'] - infos['new']['leaves']
-        old_leaves = set(
-            l for l in old_leaves if not skip_leaf(l, skipset))
+        if args.branches_of_interest:
+            old_leaves = filter_branches(old_leaves)
+        else:
+            old_leaves = {l for l in old_leaves if not skip_leaf(l, skipset)}
         if old_leaves:
             old_leaves_list = list(old_leaves)
             old_leaves_list.sort()
@@ -330,15 +332,15 @@ def main(args):
                 msg.error('the following variables exist only in the old file !')
                 for l in old_leaves_list:
                     msg.error(' - [%s]', l)
-            elif args.inexact_branches:
-                pass
             else:
                 msg.warning('the following variables exist only in the old file !')
                 for l in old_leaves_list:
                     msg.warning(' - [%s]', l)
         new_leaves = infos['new']['leaves'] - infos['old']['leaves']
-        new_leaves = set(
-            l for l in new_leaves if not skip_leaf(l, skipset))
+        if args.branches_of_interest:
+            new_leaves = filter_branches(new_leaves)
+        else:
+            new_leaves = {l for l in new_leaves if not skip_leaf(l, skipset)}
         if new_leaves:
             new_leaves_list = list(new_leaves)
             new_leaves_list.sort()
@@ -346,8 +348,6 @@ def main(args):
                 msg.error('the following variables exist only in the new file !')
                 for l in new_leaves_list:
                     msg.error(' - [%s]', l)
-            elif args.inexact_branches:
-                pass
             else:
                 msg.warning('the following variables exist only in the new file !')
                 for l in new_leaves_list:
