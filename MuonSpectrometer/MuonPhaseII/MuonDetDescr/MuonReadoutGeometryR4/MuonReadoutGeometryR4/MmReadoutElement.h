@@ -69,6 +69,8 @@ class MmReadoutElement : public MuonReadoutElement {
     double moduleWidthL() const;
     /// Returns the module thickness
     double moduleThickness() const;
+    /// Returns the number of gas gaps
+    unsigned int nGasGaps() const;
 
     StatusCode initElement() override final;
 
@@ -79,9 +81,10 @@ class MmReadoutElement : public MuonReadoutElement {
     IdentifierHash layerHash(const Identifier& measId) const override final;
     Identifier measurementId(const IdentifierHash& measHash) const override final;
 
+    static IdentifierHash createHash(const int strip, const int gasGap);
    private:
        
-    static IdentifierHash createHash(const int strip, const int gasGap);
+    
 
     static unsigned int gasGapNumber(const IdentifierHash& measHash);
     static unsigned int stripNumber(const IdentifierHash& measHash);
