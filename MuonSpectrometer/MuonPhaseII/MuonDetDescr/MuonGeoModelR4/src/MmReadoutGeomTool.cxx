@@ -90,24 +90,23 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
       I'm sorting the gas gap with the first one being closest to the experiment's origin.
       I doing this in case the gaps aren't sorted in that way within the Full Phys Vol Quadruplet.
       Also, now the stereoAngles and totalActiveStrips vectors will match the sequence of the allGasGaps vector.*/
-    const int stationEta = m_idHelperSvc->stationEta(define.detElId);
+
     std::sort(allGasGaps.begin(), allGasGaps.end(),
-              [&stationEta](const physVolWithTrans&gapI, const physVolWithTrans & gapJ) {
+              [](const physVolWithTrans&gapI, const physVolWithTrans & gapJ) {
                 const Amg::Vector3D posGapI = gapI.transform.translation();
-                const Amg::Vector3D posGapJ = gapJ.transform.translation();
-                if (stationEta>0) // stationEta 1 or 2.
-                    return posGapI.x() < posGapJ.x();
-                else // stationEta -1 or -2.
-                    return posGapI.x() > posGapJ.x();             
+                const Amg::Vector3D posGapJ = gapJ.transform.translation();                
+                return posGapI.x() < posGapJ.x();
+                       
               });
 
     for (unsigned int gap = 0; gap < allGasGaps.size(); ++gap) {
-        const physVolWithTrans& gapVol = allGasGaps[gap];
+        physVolWithTrans& gapVol = allGasGaps[gap];
         const GeoShape* gapShape = m_geoUtilTool->extractShape(gapVol.physVol);
         if (gapShape->typeID() != GeoTrd::getClassTypeID()) {
             ATH_MSG_FATAL("Failed to extract a geo shape");
             return StatusCode::FAILURE;
         }
+        gapVol.transform = gapVol.transform *  Amg::getRotateY3D(-90. * Gaudi::Units::degree);
         const GeoTrd* gapTrd = static_cast<const GeoTrd*>(gapShape);
         ATH_MSG_DEBUG("MicroMegas Gas gap dimensions "<<m_geoUtilTool->dumpShape(gapTrd));
 

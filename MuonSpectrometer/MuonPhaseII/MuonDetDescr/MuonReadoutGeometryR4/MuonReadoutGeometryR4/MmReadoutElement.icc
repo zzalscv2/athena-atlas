@@ -13,7 +13,7 @@ inline double MmReadoutElement::moduleHeight() const { return 2.*m_pars.halfHeig
 inline double MmReadoutElement::moduleWidthS() const { return 2.*m_pars.halfShortWidth; }
 inline double MmReadoutElement::moduleWidthL() const { return 2.*m_pars.halfLongWidth; }
 inline double MmReadoutElement::moduleThickness() const { return 2.*m_pars.halfThickness; }
-
+inline unsigned int MmReadoutElement::nGasGaps() const { return m_pars.layers.size(); }
 inline IdentifierHash MmReadoutElement::measurementHash(const Identifier& measId) const {
     if (m_idHelper.elementID(measId) != m_idHelper.elementID(identify()) ) {
         ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
@@ -29,7 +29,7 @@ inline IdentifierHash MmReadoutElement::createHash(const int strip, const int ga
       (gasGap-1) --> is the binary representation of the gasGap.
       (strip-1) --> is the binary representation of the strip.
     */
-    IdentifierHash hash = (gasGap - 1) | (strip - 1) << 4;
+    IdentifierHash hash = (gasGap - 1) | strip  << 4;
     return hash;
 }
 
@@ -53,7 +53,7 @@ inline unsigned int MmReadoutElement::gasGapNumber(const IdentifierHash& measHas
 // Extract the strip number from the remaining bits after removing the gas gap bits
 inline unsigned int MmReadoutElement::stripNumber(const IdentifierHash& measHash) {
     // Right shift by 4 to get rid of the lower 4 bits (gas gap bits).
-    return (measHash >> 4) + 1;
+    return (measHash >> 4);
 }
 
 
