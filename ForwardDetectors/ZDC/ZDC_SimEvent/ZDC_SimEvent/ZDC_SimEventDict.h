@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ZDC_SimEvent/ZDC_SimStripHit.h"
-#include "ZDC_SimEvent/ZDC_SimStripHit_Collection.h"
-#include "ZDC_SimEvent/ZDC_SimPixelHit.h"
-#include "ZDC_SimEvent/ZDC_SimPixelHit_Collection.h"
+#include "ZDC_SimEvent/ZDC_SimFiberHit.h"
+#include "ZDC_SimEvent/ZDC_SimFiberHit_Collection.h"

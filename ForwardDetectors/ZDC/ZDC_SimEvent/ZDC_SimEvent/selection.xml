@@ -8,4 +8,9 @@
  <class name="AtlasHitsVector<ZDC_SimPixelHit>" />
  <class name="std::vector<ZDC_SimPixelHit>" />
  <class name="ZDC_SimPixelHit" />
+ 
+ <class name="ZDC_SimFiberHit_Collection" id="92374D8F-1A24-4A38-86B4-611AAFA89CFB" />
+ <class name="AtlasHitsVector<ZDC_SimFiberHit>" />
+ <class name="std::vector<ZDC_SimFiberHit>" />
+ <class name="ZDC_SimFiberHit" />
 </lcgdict>

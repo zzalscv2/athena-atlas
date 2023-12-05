@@ -4,8 +4,8 @@
 
 #include "ZDCHitsTestTool.h"
 
-#include "ZDC_SimEvent/ZDC_SimStripHit.h"
-#include "ZDC_SimEvent/ZDC_SimStripHit_Collection.h"
+#include "ZDC_SimEvent/ZDC_SimFiberHit.h"
+#include "ZDC_SimEvent/ZDC_SimFiberHit_Collection.h"
 
 
 #include <TH2D.h>
@@ -13,86 +13,71 @@
 #include <TProfile.h>
 
 ZDCHitsTestTool::ZDCHitsTestTool(const std::string& type, const std::string& name, const IInterface* parent)
-    : SimTestToolBase(type, name, parent),
-      m_zdc_sidea_0(0),m_zdc_sidea_1(0),m_zdc_sidea_2(0),m_zdc_sidea_3(0),
-      m_zdc_sidec_0(0),m_zdc_sidec_1(0),m_zdc_sidec_2(0),m_zdc_sidec_3(0)
+    : SimTestToolBase(type, name, parent)
 {  
-  
+  for(int side : {0,1}){
+    for(int module = 0; module < 4; module++){
+      m_zdc[side][module] = nullptr;
+    }
+    for(int channel = 0; channel < 16; channel++){
+      m_rpd[side][channel] = nullptr;
+    }
+  }
+  const ZdcID* zdcId = nullptr;
+  if (detStore()->retrieve( zdcId ).isFailure() ) {
+    ATH_MSG_ERROR("execute: Could not retrieve ZdcID object from the detector store");
+  }
+  else {
+    ATH_MSG_DEBUG("execute: retrieved ZdcID");
+  }
+  m_ZdcID = zdcId;
 }
 
 StatusCode ZDCHitsTestTool::initialize()
 {
   m_path+="ZDC/";
-  // Modules - Side A
-  _TH1D(m_zdc_sidea_0,"zdc_sidea_0",100,0.,1.e6);
-  _SET_TITLE(m_zdc_sidea_0, "Energy deposit in ZDC - Side A - Module 0 (EM)","E (eV)","N/10keV");
-  _TH1D(m_zdc_sidea_1,"zdc_sidea_1",100,0.,1.e6);
-  _SET_TITLE(m_zdc_sidea_1, "Energy deposit in ZDC - Side A - Module 1 (Had1)","E (eV)","N/10keV");
-  _TH1D(m_zdc_sidea_2,"zdc_sidea_2",100,0.,1.e6);
-  _SET_TITLE(m_zdc_sidea_2, "Energy deposit in ZDC - Side A - Module 2 (Had2)","E (eV)","N/10keV");
-  _TH1D(m_zdc_sidea_3,"zdc_sidea_3",100,0.,1.e6);
-  _SET_TITLE(m_zdc_sidea_3, "Energy deposit in ZDC - Side A - Module 3 (Had3)","E (eV)","N/10keV");
-  // Modules - Side C
-  _TH1D(m_zdc_sidec_0,"zdc_sidec_0",100,0.,1.e6);
-  _SET_TITLE(m_zdc_sidec_0, "Energy deposit in ZDC - Side C - Module 0 (EM)","E (eV)","N/10keV");
-  _TH1D(m_zdc_sidec_1,"zdc_sidec_1",100,0.,1.e6);
-  _SET_TITLE(m_zdc_sidec_1, "Energy deposit in ZDC - Side C - Module 1 (Had1)","E (eV)","N/10keV");
-  _TH1D(m_zdc_sidec_2,"zdc_sidec_2",100,0.,1.e6);
-  _SET_TITLE(m_zdc_sidec_2, "Energy deposit in ZDC - Side C - Module 2 (Had2)","E (eV)","N/10keV");
-  _TH1D(m_zdc_sidec_3,"zdc_sidec_3",100,0.,1.e6);
-  _SET_TITLE(m_zdc_sidec_3, "Energy deposit in ZDC - Side C - Module 3 (Had3)","E (eV)","N/10keV");
 
+  for(int side : {0,1}){
+    std::string sideStr = (side == 0) ? "A" : "C";
+    //ZDCs
+    for(int module = 0; module < 4; module++){
+      _TH1D(m_zdc[side][module],Form("zdc_side%c_%d", std::tolower(sideStr[0]), module),100,0.,1.e6);
+      _SET_TITLE(m_zdc[side][module], Form("Cherenkov photons in ZDC - Side %s - Module %d", sideStr.c_str(), module),"n_{gamma}","counts");
+    }
+    //RPDs
+    for(int channel = 0; channel < 16; channel++){
+      _TH1D(m_rpd[side][channel],Form("rpd_side%c_%d", std::tolower(sideStr[0]), channel),100,0.,1.e4);
+      _SET_TITLE(m_rpd[side][channel], Form("Cherenkov photons in RPD - Side %s - Channel %d", sideStr.c_str(), channel),"n_{gamma}","counts");
+    }
+  }
   
   return StatusCode::SUCCESS;
 }
 
 StatusCode ZDCHitsTestTool::processEvent() {
 
-  ZDC_SimStripHit_ConstIterator hi;
+  const ZDC_SimFiberHit_Collection* iter;
+  CHECK( evtStore()->retrieve(iter,"ZDC_SimFiberHit_Collection") );
 
-  const ZDC_SimStripHit_Collection* iter;
-  CHECK( evtStore()->retrieve(iter,"ZDC_SimStripHit_Collection") );
-  
-  for (hi=(*iter).begin(); hi != (*iter).end(); ++hi) {
-    ZDC_SimStripHit ghit(*hi);
-    
-    double ene = ghit.GetEdep();
-    int side = ghit.GetSide();
-    int mod = ghit.GetMod();
-    
-    if (side==1) {
-      switch (mod) {
-        case 0: 
-	  m_zdc_sidea_0->Fill(ene);
-	  break;
-        case 1: 
-	  m_zdc_sidea_1->Fill(ene);
-	  break;
-        case 2: 
-	  m_zdc_sidea_2->Fill(ene);
-	  break;
-        case 3: 
-	  m_zdc_sidea_3->Fill(ene);
-	  break;
-      }
-    } else {
-      switch (mod) {
-        case 0: 
-	  m_zdc_sidec_0->Fill(ene);
-	  break;
-        case 1: 
-	  m_zdc_sidec_1->Fill(ene);
-	  break;
-        case 2: 
-	  m_zdc_sidec_2->Fill(ene);
-	  break;
-        case 3: 
-	  m_zdc_sidec_3->Fill(ene);
-	  break;
-      }
+  ZDC_SimFiberHit_ConstIterator it;
+  for (it=(*iter).begin(); it != (*iter).end(); ++it) {
+    ZDC_SimFiberHit ghit(*it);
+
+    Identifier id = ghit.getID( );
+    int side = (m_ZdcID->side(id) == -1) ? 0 : 1;
+    int module = m_ZdcID->module(id);
+    int channel = m_ZdcID->channel(id);
+
+    if(module < 4){//ZDC
+      m_zdc[side][module]->Fill(ghit.getNPhotons());
+
+    }else if(module == 4){//RPD
+      m_rpd[side][channel]->Fill(ghit.getNPhotons());
+
+    }else{//Undefined
+      ATH_MSG_ERROR("ZDCHitsTestTool::processEvent Hit detected in an undefined module. Module# " << module);
     }
   }
-
 
   return StatusCode::SUCCESS;
 }

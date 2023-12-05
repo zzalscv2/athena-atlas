@@ -7,7 +7,7 @@ atlas_subdir( ZDC_SimEvent )
 atlas_add_library( ZDC_SimEvent
                    src/*.cxx
                    PUBLIC_HEADERS ZDC_SimEvent
-                   LINK_LIBRARIES AthenaKernel HitManagement )
+                   LINK_LIBRARIES AthenaKernel HitManagement Identifier )
 
 atlas_add_dictionary( ZDC_SimEventDict
                       ZDC_SimEvent/ZDC_SimEventDict.h

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ZdcEventTPCnv )
@@ -36,7 +36,7 @@ atlas_add_test( ZdcRawChannelCollectionCnv_p1_test
                 test/ZdcRawChannelCollectionCnv_p1_test.cxx
                 LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
 
-atlas_add_test( ZDC_SimPixelHitCnv_p1_test
+                atlas_add_test( ZDC_SimPixelHitCnv_p1_test
                 SOURCES
                 test/ZDC_SimPixelHitCnv_p1_test.cxx
                 LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
@@ -55,3 +55,13 @@ atlas_add_test( ZDC_SimStripHit_CollectionCnv_p1_test
                 SOURCES
                 test/ZDC_SimStripHit_CollectionCnv_p1_test.cxx
                 LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
+
+atlas_add_test( ZDC_SimFiberHitCnv_p1_test
+                SOURCES
+                test/ZDC_SimFiberHitCnv_p1_test.cxx
+                LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils ZdcIdentifier )
+
+atlas_add_test( ZDC_SimFiberHit_CollectionCnv_p1_test
+                SOURCES
+                test/ZDC_SimFiberHit_CollectionCnv_p1_test.cxx
+                LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils ZdcIdentifier )
