@@ -206,9 +206,7 @@ StatusCode sTgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         const int ml = atoi(key_tokens[4]);
         /// Uncomment to avoid dumping diamonds
         //if (stName == "STL" && std::abs(stEta) == 3) continue; 
-        defineArgs define{};
-        define.stMultilayer = ml;
-        
+        defineArgs define{};        
 #ifndef SIMULATIONBASE
         define.layerBounds = layerBounds;
 #endif

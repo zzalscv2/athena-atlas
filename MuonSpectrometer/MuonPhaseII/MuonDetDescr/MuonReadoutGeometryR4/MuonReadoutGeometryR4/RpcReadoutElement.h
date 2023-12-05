@@ -90,7 +90,7 @@ class RpcReadoutElement : public MuonReadoutElement {
     /// Returns the length of a phi strip
     double stripPhiLength() const;
     /// Returns the thickness of a RPC gasgap
-    double gasGapThickness() const;
+    double gasGapPitch() const;
 
 
     /// Returns the position of the strip center

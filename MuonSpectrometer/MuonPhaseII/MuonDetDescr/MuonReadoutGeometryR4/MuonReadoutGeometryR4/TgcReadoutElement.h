@@ -77,7 +77,7 @@ class TgcReadoutElement : public MuonReadoutElement {
     /// Returns the number of wire gangs for a given gasGap [1-3]
     unsigned int numWireGangs(unsigned int gasGap) const;
     /// Returns the thickness of the gasGap
-    double gasGapThickness() const;
+    double gasGapPitch() const;
 
     /// Returns the center of the measurement channel
     ///  eta measurement:  wire gang center

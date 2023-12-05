@@ -16,10 +16,11 @@ inline double sTgcReadoutElement::gapHeight() const { return (m_pars.stripDesign
 inline double sTgcReadoutElement::thickness() const { return 2.* m_pars.halfChamberTck; }
 inline double sTgcReadoutElement::sFrameWidth() const { return m_pars.sFrameWidth; }
 inline double sTgcReadoutElement::lFrameWidth() const { return m_pars.lFrameWidth; }
-inline int sTgcReadoutElement::multilayer() const { return m_pars.stMultilayer; }
+inline int sTgcReadoutElement::multilayer() const { return m_multiLayer; }
 inline int sTgcReadoutElement::numLayers() const { return m_pars.numLayers; }
 inline unsigned int sTgcReadoutElement::nChTypes() const { return m_pars.nChTypes; }
 inline double sTgcReadoutElement::gasGapThickness() const { return m_pars.gasTck; }
+inline double sTgcReadoutElement::gasGapPitch() const { return m_gasGapPitch; }
 inline double sTgcReadoutElement::yCutout() const { return m_pars.yCutout; }
 inline unsigned int sTgcReadoutElement::numStrips() const { return (m_pars.stripDesign ? m_pars.stripDesign->numStrips(): 0u); }
 inline double sTgcReadoutElement::stripPitch() const { return (m_pars.stripDesign ? m_pars.stripDesign->stripPitch(): 0.); }

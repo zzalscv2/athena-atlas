@@ -41,6 +41,10 @@ StatusCode sTgcReadoutElement::initElement() {
                                     return toStation(store) * fromGapToChamOrigin(hash); 
                                  }));
    }
+   ActsGeometryContext gctx{};
+   m_gasGapPitch = (center(gctx, createHash(1, sTgcIdHelper::sTgcChannelTypes::Strip, 0)) -
+                   center(gctx, createHash(2, sTgcIdHelper::sTgcChannelTypes::Strip, 0))).mag();
+    
    return StatusCode::SUCCESS;
 }
 
