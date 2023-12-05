@@ -66,7 +66,7 @@ namespace xAOD {
       /// Function getting a const pointer to the object being handled
       virtual const void* object() const override;
       /// Function getting a pointer to the object being handled
-      virtual void* object();
+      virtual void* object() override;
       /// Function replacing the object being handled
       virtual void setObject( void* obj ) override;
 
