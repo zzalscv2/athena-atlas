@@ -16,4 +16,8 @@
   <class name="std::vector<ZDC_SimPixelHit_p1>"  />
   <class name="ZDC_SimPixelHit_Collection_p1"  id="EBCA37BF-38FF-4F19-B577-E5D0EFFA51D0" />
 
+  <class name="ZDC_SimFiberHit_p1" />
+  <class name="std::vector<ZDC_SimFiberHit_p1>" />
+  <class name="ZDC_SimFiberHit_Collection_p1"  id="92374D8F-1A24-4A38-86B4-611AAFA89CFB" />
+  
 </lcgdict>
