@@ -22,7 +22,7 @@ atlas_add_test( testR4Geometry
 
 
 atlas_add_test( testR4SensitiveDetectors
-                SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors --noMM --noSTGC --nEvents 5 
+                SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 10 
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
 
