@@ -2,6 +2,8 @@
 
 Tau offline monitoring package.
 
+To add or remove chains from the monitoring, add/remove the `tauMon:t0`, `tauMon:shifter`, or `tauMon:val` monitoring groups in the [Trigger Menu definition files](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Menu/) as required. If the Monitoring framework is executed standalone on AOD files that don't contain Monitoring information for the used Menu in the Metadata, the manual chain list defined in [ManualChains.py](python/ManualChains.py) will be loaded.
+
 ## How to Run standalone:
 
 Execute the tau monitoring locally excluding all other signatures monitoring.
@@ -38,3 +40,13 @@ pathena --trf "Run3DQTestingDriver.py --dqOffByDefault DQ.Steering.doHLTMon=True
 
 ```
 
+## Additional options
+
+### Calculate total efficiencies
+
+All HLT efficiencies are estimated by the Tau monitoring with respect to the L1 accepted RoIs. The total efficiencies, with respect to all offline objects, can also be estimated for single-tau and di-tau chains, by adding the following configuration:
+
+```
+--preExec 'from TrigTauMonitoring.TrigTauMonitoringConfig import TrigTauMonAlgBuilder; TrigTauMonAlgBuilder.do_total_efficiency=True'
+```
+**Be careful!** You shouldn't enable these options when running over data samples acquired with the usual data-taking conditions, since comparisons between chains can be meaningless due to using different prescales! This is mainly to be used on Enhanced Bias and Monte Carlo samples.
