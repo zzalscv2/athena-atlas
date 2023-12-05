@@ -6,6 +6,7 @@
 #define G4AT_ZDCHITSTESTTOOL
 
 #include "SimTestToolBase.h"
+#include "ZdcIdentifier/ZdcID.h"
 
 
 class ZDCHitsTestTool : public SimTestToolBase {
@@ -21,8 +22,8 @@ public:
  private:
 
   // globals
-  TH1 *m_zdc_sidea_0,*m_zdc_sidea_1,*m_zdc_sidea_2,*m_zdc_sidea_3;
-  TH1 *m_zdc_sidec_0,*m_zdc_sidec_1,*m_zdc_sidec_2,*m_zdc_sidec_3;
+  TH1 *m_zdc[2][4],*m_rpd[2][16];
+  const ZdcID* m_ZdcID;
 
 };
 

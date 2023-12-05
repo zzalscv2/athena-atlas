@@ -107,6 +107,13 @@ def createTriggerFlags(doTriggerRecoFlags):
 
     flags.addFlag('Trigger.ZdcLUT', 'TrigT1ZDC/zdcRun3T1LUT_v2_08_08_2023.json',
                   help='path to Run3 ZDC LUT')
+    
+    # Enable TRT fast-OR trigger
+    flags.addFlag('Trigger.doTRT', False)
+
+    # Set TTC multiplicity required for the TRT fast-OR trigger
+    flags.addFlag('Trigger.TRT.TTCMultiplicity', 5)
+
 
     flags.addFlag('Trigger.doValidationMonitoring', False,
                   help='enable additional validation histograms')

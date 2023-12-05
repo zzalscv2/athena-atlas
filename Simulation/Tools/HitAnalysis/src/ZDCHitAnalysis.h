@@ -14,6 +14,7 @@
 #include <vector>
 #include "TH1.h"
 #include "TTree.h"
+#include "ZdcIdentifier/ZdcID.h"
 
 class TH1;
 class TTree;
@@ -32,27 +33,28 @@ class ZDCHitAnalysis : public AthAlgorithm {
  private:
 
    /** Some variables**/
-   TH1*  m_h_zdc_sidea_0;
-   TH1*  m_h_zdc_sidea_1;
-   TH1*  m_h_zdc_sidea_2;
-   TH1*  m_h_zdc_sidea_3;
-   TH1*  m_h_zdc_sidec_0;
-   TH1*  m_h_zdc_sidec_1;
-   TH1*  m_h_zdc_sidec_2;
-   TH1*  m_h_zdc_sidec_3;
-
-   std::vector<int>* m_zdc_strip_side;
-   std::vector<int>* m_zdc_strip_mod;
-   std::vector<double>* m_zdc_strip_energy;
-
-   std::vector<int>* m_zdc_pix_side;
-   std::vector<int>* m_zdc_pix_mod;
-   std::vector<double>* m_zdc_pix_energy;
+   TH1*  m_h_zdc_photons[2][5];
+   TH1*  m_h_zdc_calibTot[2][5];
+   TH1*  m_h_zdc_calibEM[2][5];
+   TH1*  m_h_zdc_calibNonEM[2][5];
+   
+   std::vector<int>* m_zdc_fiber_side;
+   std::vector<int>* m_zdc_fiber_mod;
+   std::vector<int>* m_zdc_fiber_channel;
+   std::vector<int>* m_zdc_fiber_photons;
+   
+   std::vector<int>* m_zdc_calib_side;
+   std::vector<int>* m_zdc_calib_mod;
+   std::vector<int>* m_zdc_calib_channel;
+   std::vector<float>* m_zdc_calib_Total;
+   std::vector<float>* m_zdc_calib_EM;
+   std::vector<float>* m_zdc_calib_NonEM;
 
    TTree * m_tree;
    std::string m_ntupleFileName; 
    std::string m_path;
    ServiceHandle<ITHistSvc>  m_thistSvc;
+   ZdcID *m_ZdcID;
 
 };
 

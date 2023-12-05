@@ -77,6 +77,7 @@ public:
   bool lhcf2022;
   bool lhcf2022zdc;
   bool lhcf2022afp;
+  bool pbpb2023;
   bool enableRPD;
   bool enableCentroid;
 
