@@ -159,7 +159,7 @@ namespace LVL1 {
             uint32_t gFEXtowerID = tmpTower->getFWID(iPhiFW, iEtaFW);
             std::unique_ptr<xAOD::gFexTower> gTowerEDM (new xAOD::gFexTower());
             gTowersContainer->push_back(std::move(gTowerEDM));
-            gTowersContainer->back()->initialize(iPhiFW, iEtaFW, Eta, Phi, TowerEt, Fpga, IsSaturated, gFEXtowerID);
+            gTowersContainer->back()->initialize(iEtaFW, iPhiFW, Eta, Phi, TowerEt, Fpga, IsSaturated, gFEXtowerID);
             
          }
       }
