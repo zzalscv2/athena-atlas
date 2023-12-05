@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SEGMENT_COLLECTION_TLP4_TRK_H
 #define SEGMENT_COLLECTION_TLP4_TRK_H
 
+#include <memory>
 
 //-----------------------------------------------------------------------------
 // TrkSegment
@@ -35,7 +36,7 @@
 //-----------------------------------------------------------------------------
 // Top Level Pers Objects from InnerDetector and MuonSpectrometer
 // Previously stored as separate Extening TP objects, now integrated
-// including full declarations for dictionary's sake
+// including full declarations for dictionary's sake (and for unique_ptr)
 
 #include "InDetEventTPCnv/InDetTrack_tlp2.h"
 #include "MuonEventTPCnv/MuonMeasurements_tlp2.h"
@@ -47,11 +48,6 @@ namespace Trk
     public:
      SegmentCollection_tlp4() {}
      
-     ~SegmentCollection_tlp4() {
-        delete m_inDetTrackExt; 
-        delete m_muonMeasurementsExt;
-     }
-
      // This object should not be copied
      SegmentCollection_tlp4 (const SegmentCollection_tlp4&) = delete;
      SegmentCollection_tlp4& operator= (const SegmentCollection_tlp4&) = delete;
@@ -69,10 +65,10 @@ namespace Trk
      std::vector< Trk::PseudoMeasurementOnTrack_p2 >    m_pseudoMeasurementOnTrack;
      std::vector< Trk::CompetingRIOsOnTrack_p1 >        m_competingRotsOnTrack; 
 
-     // TLP converters from other packages 
-     // for subclass types found in Tracking polymorphic collections
-     InDet::Track_tlp2                   *m_inDetTrackExt = nullptr;
-     TPCnv::MuonMeasurements_tlp2        *m_muonMeasurementsExt = nullptr;
+     // TLP objects for Inner and Muon subdetector data
+     // for derived object types found in Tracking polymorphic collections
+     std::unique_ptr<InDet::Track_tlp2>                 m_inDetTrackExt;
+     std::unique_ptr<TPCnv::MuonMeasurements_tlp2>      m_muonMeasurementsExt;
   };
 }
 

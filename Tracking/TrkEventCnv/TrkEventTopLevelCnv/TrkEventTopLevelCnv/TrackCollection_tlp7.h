@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACK_COLLECTION_TLP7_TRK_H
 #define TRACK_COLLECTION_TLP7_TRK_H
 
+#include <memory>
 
 //-----------------------------------------------------------------------------
 // TrkTrack
@@ -61,7 +62,7 @@
 //-----------------------------------------------------------------------------
 // Top Level Pers Objects from InnerDetector and MuonSpectrometer
 // Previously stored as separate Extending TP objects, now integrated
-// including full declarations for dictionary's sake
+// including full declarations for dictionary's sake  (and for unique_ptr)
 
 #include "InDetEventTPCnv/InDetTrack_tlp2.h"
 #include "MuonEventTPCnv/MuonMeasurements_tlp2.h"
@@ -74,12 +75,6 @@ namespace Trk
    public:
     TrackCollection_tlp7() { }
     
-    ~TrackCollection_tlp7() {
-       delete m_inDetTrackExt; 
-       delete m_muonMeasurementsExt;
-       delete m_muonCaloEnergiesExt;
-    }
-
     TrackCollection_tlp7 (const TrackCollection_tlp7&) = delete;
     TrackCollection_tlp7& operator= (const TrackCollection_tlp7&) = delete; 
 
@@ -117,11 +112,11 @@ namespace Trk
      std::vector< Trk::LocalPosition_p1 >               m_localPositions;
      std::vector< Trk::LocalParameters_p1 >             m_localParameters;
 
-     // TLP converters from other packages 
-     // for subclass types found in Tracking polymorphic collections
-     InDet::Track_tlp2                   *m_inDetTrackExt = nullptr;
-     TPCnv::MuonMeasurements_tlp2        *m_muonMeasurementsExt = nullptr;
-     MuonCaloEnergyContainer_tlp1        *m_muonCaloEnergiesExt = nullptr;
+     // TLP objects for Inner and Muon subdetector data
+     // for derived object types found in Tracking polymorphic collections
+     std::unique_ptr<InDet::Track_tlp2>                 m_inDetTrackExt;
+     std::unique_ptr<TPCnv::MuonMeasurements_tlp2>      m_muonMeasurementsExt;
+     std::unique_ptr<MuonCaloEnergyContainer_tlp1>      m_muonCaloEnergiesExt;
   };
 }
 
