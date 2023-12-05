@@ -45,17 +45,20 @@ namespace FlavorTagDiscriminants {
     std::string fullPathToOnnxFile = PathResolverFindCalibFile(nn_file);
     m_onnxUtil = std::make_shared<OnnxUtil>(fullPathToOnnxFile);
 
-    std::string gnn_config_str = m_onnxUtil->getMetaData("gnn_config");
-    m_config_gnn = m_onnxUtil->get_config();
+    // get the configuration of the model outputs
+    GNNConfig::Config gnn_output_config = m_onnxUtil->getOutputConfig();
+
+    // get metadata as a string from the onnx file, mostly containing input information
+    std::string gnn_config_str = m_onnxUtil->getMetadataString("gnn_config");
 
     std::stringstream gnn_config_stream;
 
-    // adding "outputs" to the config if it is not present or lwtnn will fail
+    // for the new metadata format, the outputs are inferred from the model
+    // but we still need to add an empty "outputs" key to the config so that
+    // the lwt::parse_json_graph function doesn't throw an exception
     if (m_onnxUtil->getOnnxModelVersion() != OnnxModelVersion::V0){
       nlohmann::json j = nlohmann::json::parse(gnn_config_str);
       j["outputs"] = nlohmann::json::object();
-
-      // dump the json to a stringstream
       gnn_config_stream << j.dump();
     } else {
       gnn_config_stream << gnn_config_str;
@@ -65,27 +68,38 @@ namespace FlavorTagDiscriminants {
     auto [inputs, track_sequences, options] = dataprep::createGetterConfig(
         config, o.flip_config, o.variable_remapping, o.track_link_type);
 
+    // jet and b-tagging inputs
     auto [vb, vj, ds] = dataprep::createBvarGetters(inputs);
     m_varsFromBTag = vb;
     m_varsFromJet = vj;
     m_dataDependencyNames = ds;
 
-    auto [tsb, td, rt] = dataprep::createTrackGetters(
-      track_sequences, options);
+    // track inputs
+    auto [tsb, td, rt] = dataprep::createTrackGetters(track_sequences, options);
     m_trackSequenceBuilders = tsb;
     m_dataDependencyNames += td;
 
     FlavorTagDiscriminants::FTagDataDependencyNames dd;
     std::set<std::string> rd;
 
-    std::tie(m_decorators_float, m_decorators_vecchar, m_decorators_vecfloat, m_decorators_tracklinks, m_decorators_track_char, m_decorators_track_float, dd, rd) = dataprep::createGNDecorators(
-      m_config_gnn, options);
+    // get all the possible output decorators
+    std::tie(
+        m_decorators_float,
+        m_decorators_vecchar,
+        m_decorators_vecfloat,
+        m_decorators_tracklinks,
+        m_decorators_track_char,
+        m_decorators_track_float,
+        dd,
+        rd
+    ) = dataprep::createGNDecorators(gnn_output_config, options);
 
     m_dataDependencyNames += dd;
 
     rd.merge(rt);
     dataprep::checkForUnusedRemaps(options.remap_scalar, rd);
   }
+
   GNN::GNN(const std::string& file,
            const FlipTagConfig& flip,
            const std::map<std::string, std::string>& remap,
@@ -93,14 +107,14 @@ namespace FlavorTagDiscriminants {
            float def_out_val,
            bool dt):
     GNN( file, GNNOptions { flip, remap, link_type, def_out_val, dt} )
-  {
-  }
+  {}
 
   GNN::GNN(GNN&&) = default;
   GNN::GNN(const GNN&) = default;
   GNN::~GNN() = default;
 
   void GNN::decorate(const xAOD::BTagging& btag) const {
+    /* tag a b-tagging object */
     auto jetLink = m_jetLink(btag);
     if (!jetLink.isValid()) {
       throw std::runtime_error("invalid jetLink");
@@ -108,9 +122,12 @@ namespace FlavorTagDiscriminants {
     const xAOD::Jet& jet = **jetLink;
     decorate(jet, btag);
   }
+
   void GNN::decorate(const xAOD::Jet& jet) const {
+    /* tag a jet */
     decorate(jet, jet);
   }
+
   void GNN::decorateWithDefaults(const xAOD::Jet& jet) const {
     for (const auto& dec: m_decorators_float) {
       dec.second(jet) = m_defaultValue;
@@ -118,9 +135,11 @@ namespace FlavorTagDiscriminants {
   }
 
   void GNN::decorate(const xAOD::Jet& jet, const SG::AuxElement& btag) const {
-
+    /* Main function for decorating a jet or b-tagging object with GNN outputs. */
     using namespace internal;
 
+    // prepare input
+    // -------------
     std::map<std::string, input_pair> gnn_input;
 
     std::vector<float> jet_feat;
@@ -173,33 +192,37 @@ namespace FlavorTagDiscriminants {
       gnn_input.insert({"track_features", track_info});
     }
 
-    auto [out_f, out_vc, out_vf]
-      = m_onnxUtil->runInference(gnn_input);
+    // run inference
+    // -------------
+    auto [out_f, out_vc, out_vf] = m_onnxUtil->runInference(gnn_input);
 
-    // with old metadata
+    // decorate outputs
+    // ----------------
+
+    // with old metadata, doesn't support writing aux tasks
     if (m_onnxUtil->getOnnxModelVersion() == OnnxModelVersion::V0){
       for (const auto& dec: m_decorators_float) {
         if (out_vf.at(dec.first).size() != 1){
-          throw std::logic_error(
-            "expected vectors of length 1 for float decorators");
+          throw std::logic_error("expected vectors of length 1 for float decorators");
         }
         dec.second(btag) = out_vf.at(dec.first).at(0);
       }
     }
-
-    else {
+    // the new metadata format supports writing aux tasks
+    else if (m_onnxUtil->getOnnxModelVersion() == OnnxModelVersion::V1) {
+      // float outputs, e.g. jet probabilities
       for (const auto& dec: m_decorators_float) {
         dec.second(btag) = out_f.at(dec.first);
       }
-
+      // vector outputs, e.g. track predictions
       for (const auto& dec: m_decorators_vecchar) {
         dec.second(btag) = out_vc.at(dec.first);
       }
-
       for (const auto& dec: m_decorators_vecfloat) {
         dec.second(btag) = out_vf.at(dec.first);
       }
 
+      // decorate links to the input tracks to the b-tagging object
       for (const auto& dec: m_decorators_tracklinks) {
         internal::TrackLinks links;
         for (const xAOD::TrackParticle* it: input_tracks) {
@@ -213,6 +236,7 @@ namespace FlavorTagDiscriminants {
         dec.second(btag) = links;
       }
 
+      // decorate tracks directly
       if (m_decorate_tracks) {
         for (const auto& dec: m_decorators_track_char) {
           std::vector<char>& values = out_vc.at(dec.first);
@@ -238,6 +262,9 @@ namespace FlavorTagDiscriminants {
           }
         }
       }
+    }
+    else {
+      throw std::logic_error("unsupported ONNX metadata version");
     }
   } // end of decorate()
 

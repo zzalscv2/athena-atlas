@@ -55,8 +55,6 @@ namespace FlavorTagDiscriminants {
 
   private:
 
-    GNNConfig::Config m_config_gnn;
-
     SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
     std::string m_input_node_name;
     std::vector<internal::VarFromBTag> m_varsFromBTag;

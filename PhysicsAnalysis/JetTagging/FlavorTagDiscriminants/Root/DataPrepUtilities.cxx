@@ -674,7 +674,7 @@ namespace FlavorTagDiscriminants {
       TrackLinkType track_link_type
     ){
 
-      // we rewrite the inputs if we're using flip taggers
+      // get the regex to rewrite the inputs if we're using flip taggers
       StringRegexes flip_converters = getFlipConverters(flip_config);
 
       // some sequences also need to be sign-flipped. We apply this by
@@ -972,15 +972,16 @@ namespace FlavorTagDiscriminants {
       std::map<std::string, std::string> remap = options.remap_scalar;
       std::set<std::string> used_remap;
 
-      // we rewrite the inputs if we're using flip taggers
+      // get the regex to rewrite the outputs if we're using flip taggers
       StringRegexes flip_converters = getFlipConverters(options.flip);
       std::string context = "building negative tag b-btagger";
 
+      // for each model output
       for (const auto& out_node: config.outputs) {
 
         std::string name = out_node.label;
-
-        // name needs to get regexed
+        
+        // modify the output name if we're using flip taggers
         if (options.flip != FlipTagConfig::STANDARD) {
           name = sub_first(flip_converters, name, context);  
         }
@@ -992,6 +993,7 @@ namespace FlavorTagDiscriminants {
         }
         deps.bTagOutputs.insert(name);
 
+        // create a decorator for this output depending on the rank and type
         switch (out_node.type) {
           case GNNConfig::OutputNodeType::FLOAT: {
             SG::AuxElement::Decorator<float> f(name);
@@ -1031,7 +1033,7 @@ namespace FlavorTagDiscriminants {
         }
       }
 
-      // TrackLinks decorator
+      // create a decorator for the track links
       if (decorators_vc.size() > 0 || decorators_vf.size() > 0){
         std::string name = "TrackLinks";
         if (auto h = remap.extract(name)){
@@ -1039,7 +1041,6 @@ namespace FlavorTagDiscriminants {
           used_remap.insert(h.key());
         }
         deps.bTagOutputs.insert(name);
-
         SG::AuxElement::Decorator<internal::TrackLinks> tl(name);
         decorators_tl.emplace_back("TrackLinks", tl);
       }
