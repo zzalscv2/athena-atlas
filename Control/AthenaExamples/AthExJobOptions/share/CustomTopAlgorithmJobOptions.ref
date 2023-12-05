@@ -67,7 +67,7 @@ Py:Athena            INFO including file "AthExJobOptions/AthExJobOptions_Custom
 | |-PrivateToolList            = PrivateToolHandleArray(['ConcreteTool/Tool1','ToolUsingTool/Tool2','ToolSpace::TemplatedTool<double>/Tool3'])
 | |-PublicToolList             = PublicToolHandleArray(['ConcreteTool/Tool4','ToolUsingTool/Tool5','ToolSpace::TemplatedTool<double>/Tool6'])
 | |-RegisterForContextService  = False
-| |-RndmFactor                 = 33  (default: 42.0)
+| |-RndmFactor                 = 33.0  (default: 42.0)
 | |-ThePublicTool              = PublicToolHandle('ConcreteTool')
 | |-TheSvc                     = ServiceHandle('ConcreteSvc')
 | |-TheTool                    = PrivateToolHandle('ConcreteTool/ConcreteTool')

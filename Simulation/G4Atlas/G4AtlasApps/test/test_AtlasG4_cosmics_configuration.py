@@ -122,12 +122,12 @@ class TestAtlasG4Cosmics(unittest.TestCase):
 
 
     def test___CosmicGenerator_emin_setCorrectly(self):
-        expected_property_value = 10000
+        expected_property_value = 10000.0
         self._assert_Algorithm_property_equal('CosmicGenerator', 'emin', expected_property_value)
 
 
     def test___CosmicGenerator_emax_setCorrectly(self):
-        expected_property_value = 5000000
+        expected_property_value = 5000000.0
         self._assert_Algorithm_property_equal('CosmicGenerator', 'emax', expected_property_value)
 
 
