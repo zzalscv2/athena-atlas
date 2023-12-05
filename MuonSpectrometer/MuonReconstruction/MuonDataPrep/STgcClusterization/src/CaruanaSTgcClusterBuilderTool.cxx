@@ -64,6 +64,7 @@ StatusCode Muon::CaruanaSTgcClusterBuilderTool::getClusters(const EventContext& 
 
       // Loop over the clusters of that gap
       for (std::vector<Muon::sTgcPrepData>& cluster: layerClusters) {
+        sTgcPrepData::Author author = sTgcPrepData::Author::unKnown;
         std::vector<Identifier> rdoList;
         //vectors to hold the properties of the elements of a cluster
         std::vector<int> elementsCharge;
@@ -96,6 +97,7 @@ StatusCode Muon::CaruanaSTgcClusterBuilderTool::getClusters(const EventContext& 
           clusterId = (*optStripCluster).getClusterId();
           reconstructedPosX = (*optStripCluster).getMeanPosition();
           sigmaSq = (*optStripCluster).getErrorSquared();
+          author = sTgcPrepData::Author::Caruana;
         } else {
           ATH_MSG_DEBUG("sTGC cluster reconstruction using the Caruana method failed, reversing to the weighted average");
 
@@ -103,7 +105,6 @@ StatusCode Muon::CaruanaSTgcClusterBuilderTool::getClusters(const EventContext& 
           bool isStrip = (channelType == sTgcIdHelper::sTgcChannelTypes::Strip);
           // Calculate the cluster position and error using the weighted average
           std::optional<Muon::STgcClusterPosition> optClusterWA = stgcClusterCommon.weightedAverage(cluster, resolution, isStrip);
-
           // Skip the cluster if the weighted average also fails
           if (!optClusterWA) {
             if (msgLvl(MSG::VERBOSE)) {
@@ -118,6 +119,7 @@ StatusCode Muon::CaruanaSTgcClusterBuilderTool::getClusters(const EventContext& 
             }
             continue;
           }
+          author = sTgcPrepData::Author::SimpleClusterBuilder;
 
           clusterId = (*optClusterWA).getClusterId();
           reconstructedPosX = (*optClusterWA).getMeanPosition();
@@ -142,7 +144,7 @@ StatusCode Muon::CaruanaSTgcClusterBuilderTool::getClusters(const EventContext& 
                                                                             std::move(elementsChannel),
                                                                             std::move(elementsTime),
                                                                             std::move(elementsCharge));
-        prdN->setAuthor(sTgcPrepData::Author::Caruana);
+        prdN->setAuthor(author);
         clustersVect.push_back(std::move(prdN));
       }
   }

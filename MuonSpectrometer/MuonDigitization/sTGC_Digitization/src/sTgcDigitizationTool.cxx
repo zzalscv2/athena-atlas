@@ -91,7 +91,7 @@ StatusCode sTgcDigitizationTool::initialize() {
   // calibration tool
   ATH_CHECK(m_calibTool.retrieve());
   // initialize ReadCondHandleKey
-  ATH_CHECK(m_condThrshldsKey.initialize());
+  ATH_CHECK(m_condThrshldsKey.initialize(m_useCondThresholds));
   // Initialize ReadHandleKey
   ATH_CHECK(m_hitsContainerKey.initialize());
 
@@ -382,12 +382,9 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
       // project the hit position to wire surface (along the incident angle)
       ATH_MSG_VERBOSE("Projecting hit to Wire Surface" );
       const Amg::Vector3D& HPOS{hit.globalPosition()};  //Global position of the hit
-      const Amg::Vector3D GLOBAL_ORIG{Amg::Vector3D::Zero()};
-      const Amg::Vector3D GLOBAL_Z{Amg::Vector3D::UnitZ()};
       const Amg::Vector3D& GLODIRE{hit.globalDirection()};
       Amg::Vector3D global_preStepPos{hit.globalPrePosition()};
 
-      ATH_MSG_VERBOSE("Global Z " << Amg::toString(GLOBAL_Z, 2) );
       ATH_MSG_VERBOSE("Global Direction " << Amg::toString(GLODIRE, 2) );
       ATH_MSG_VERBOSE("Global Position " << Amg::toString(HPOS, 2) );
 
@@ -398,75 +395,15 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
       ATH_MSG_VERBOSE("Wire Surface Defined " <<Amg::toString(SURF_WIRE.center(), 2) );
 
       const Amg::Transform3D wireTrans = SURF_WIRE.transform().inverse(); 
-      Amg::Vector3D LOCAL_Z = wireTrans*(GLOBAL_Z - GLOBAL_ORIG);
-      Amg::Vector3D LOCDIRE = wireTrans*(GLODIRE - GLOBAL_ORIG);
+      Amg::Vector3D LOCDIRE = wireTrans.linear()*GLODIRE;
       Amg::Vector3D LPOS = wireTrans * HPOS;  //Position of the hit on the wire plane in local coordinates
 
-      ATH_MSG_VERBOSE("Local Z: "<<Amg::toString(LOCAL_Z, 2) );
       ATH_MSG_VERBOSE("Local Direction: "<<Amg::toString(LOCDIRE, 2));
       ATH_MSG_VERBOSE("Local Position: " << Amg::toString(LPOS, 2));
 
-      /* Backward compatibility with old sTGCSimHitCollection persistent class
-       *  Two parameters (kinetic energy, pre-step position) are added in
-       *  sTGCSimHitCollection_p3, and the direction parameter is removed.
-       *  To preserve backwards compatibility, the digitization should be able
-       *  to process hits from the old persistent classes (_p1 and _p2).
-       *  When reading the old persistent classes, the kinetic energy is
-       *  initialized to a negative value, while the pre-step position is not
-       *  defined. So the pre-step position has to be derived from the
-       *  direction vector.
-       */
-
-      constexpr double e = 1e-5;
-
-      bool X_1 = std::abs( std::abs(LOCAL_Z.x()) - 1. ) < e;
-      bool Y_1 = std::abs( std::abs(LOCAL_Z.y()) - 1. ) < e;
-      bool Z_1 = std::abs( std::abs(LOCAL_Z.z()) - 1. ) < e;
-      bool X_s = std::abs(LOCAL_Z.x()) < e;
-      bool Y_s = std::abs(LOCAL_Z.y()) < e;
-      bool Z_s = std::abs(LOCAL_Z.z()) < e;
-
-      double scale = 0.;
-      if (X_1 && Y_s && Z_s && std::abs(LOCDIRE.x()) > e)
-        scale = -LPOS.x() / LOCDIRE.x();
-      else if (X_s && Y_1 && Z_s && std::abs(LOCDIRE.y()) > e)
-        scale = -LPOS.y() / LOCDIRE.y();
-      else if (X_s && Y_s && Z_1 && std::abs(LOCDIRE.z()) > e)
-        scale = -LPOS.z() / LOCDIRE.z();
-      else
-        ATH_MSG_DEBUG(" Wrong scale! ");
-
+      const double scale = Amg::intersect<3>(LPOS, LOCDIRE, Amg::Vector3D::UnitZ(), 0.).value_or(0);
       // Hit on the wire surface in local coordinates
       Amg::Vector3D hitOnSurf_wire = LPOS + scale * LOCDIRE;
-
-      // Some hits are created inside the gas gap, thus they pass through only a portion of the gap.
-      if (hit_kineticEnergy > 0.0) {
-        // Processing HITS format with valid pre-step position
-        double segment_length = (HPOS - global_preStepPos).mag();
-        // If segment doesn't intersect the wire plane, then find the hit position on the segment
-        // and project onto the wire plane.
-        if (std::abs(scale) > segment_length) {
-          Amg::Vector3D temp_hit_pos = LPOS + (scale / std::abs(scale)) * segment_length * LOCDIRE;
-          hitOnSurf_wire = Amg::Vector3D(temp_hit_pos.x(), temp_hit_pos.y(), 0.0);
-        }
-      } else {
-        // Processing an old HITS format, so assume the particle passes through the gas gap following a straight line.
-        // However, skip electron hit with scale factor greater than 8.0mm. For half-gap thickness of 1.425mm,
-        //   a scale factor of 8 corresponds to an incident angle of about 80deg and the final position on the wire plane
-        //   is more than two strips away from the post-step position.
-        // With how the extrapolation is done, electron hit with large scale factor might result in a ionization
-        //   position far from where it should be if the electron is created inside the gas gap.
-        //if ((std::abs(hit.particleEncoding()) == 11) && (std::abs(scale) > 8.0)) {
-        //  continue;
-        //}
-        Amg::Vector3D local_preStepPos = LPOS + 2 * scale * LOCDIRE;
-        global_preStepPos = SURF_WIRE.transform() * local_preStepPos;
-      }
-
-      // In the local frame of the wire plane, the z-component of the hit on the wire surface is zero
-      if (hitOnSurf_wire.z() > e) {
-        ATH_MSG_DEBUG("Local Hit position on Wire surface "<<Amg::toString(hitOnSurf_wire, 2)<<" has non-zero z-component.");
-      }
 
       //The hit on the wire in Global coordinates
       Amg::Vector3D glob_hitOnSurf_wire = SURF_WIRE.transform() * hitOnSurf_wire;

@@ -160,7 +160,7 @@ private:
   SG::ReadHandleKey<sTGCSimHitCollection> m_hitsContainerKey{this, "InputObjectName", "sTGC_Hits", "name of the input object"};
   std::string m_inputObjectName{""};
 
-  Gaudi::Property<bool> m_useCondThresholds{this, "useCondThresholds", true, "Use conditions data to get VMM charge threshold values"};
+  Gaudi::Property<bool> m_useCondThresholds{this, "useCondThresholds", false, "Use conditions data to get VMM charge threshold values"};
   SG::ReadCondHandleKey<NswCalibDbThresholdData> m_condThrshldsKey {this, "CondThrshldsKey", "NswCalibDbThresholdData", "Key of NswCalibDbThresholdData object containing calibration data (VMM thresholds)"};
 
   Gaudi::Property<int> m_doChannelTypes{this,"doChannelTypes",3};
@@ -175,7 +175,7 @@ private:
   Gaudi::Property<double> m_energyDepositThreshold{this,"energyDepositThreshold",300.0*CLHEP::eV,"Minimum energy deposit for hit to be digitized"};
   Gaudi::Property<double> m_limitElectronKineticEnergy{this,"limitElectronKineticEnergy",5.0*CLHEP::MeV,"Minimum kinetic energy for electron hit to be digitized"};
 
-  Gaudi::Property<double> m_chargeThreshold{this,"chargeThreshold", 0.03, "vmm charge threshold in pC, need to set useCondThresholds to false if one wants to use this threshold value otherwise the one from the conditions database is used"};
+  Gaudi::Property<double> m_chargeThreshold{this,"chargeThreshold", 0.002, "vmm charge threshold in pC, need to set useCondThresholds to false if one wants to use this threshold value otherwise the one from the conditions database is used"};
 
   Gaudi::Property<double> m_stripChargeScale{this, "stripChargeScale",0.4, "strip charge scale"};
 
