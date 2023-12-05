@@ -179,6 +179,10 @@ def athenaCfg():
    if args.postExec:
       exec(args.postExec)
 
+   # Apply flags.Exec.XXXMessageComponents logic to configured job
+   from AthenaConfiguration.Utils import setupLoggingLevels
+   setupLoggingLevels(flags, cfg)
+
    return cfg
 
 
