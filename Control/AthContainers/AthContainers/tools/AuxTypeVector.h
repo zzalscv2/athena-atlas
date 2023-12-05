@@ -335,18 +335,19 @@ protected:
  *
  * This is a derived class of @c AuxTypeVectorHolder that holds the vector
  * instance as a member variable (and thus manages memory internally).
+ * It is templated on the base class, so that we can also use this
+ * for classes which derive from AuxTypeVectorHolder.
  */
-template <class T,
-          class ALLOC = AuxAllocator_t<T>,
-          class CONT = typename AuxDataTraits<T, ALLOC>::vector_type>
-class AuxTypeVector
-  : public AuxTypeVectorHolder<T, CONT>
+template <class HOLDER>
+class AuxTypeVectorT
+  : public HOLDER
 {
 public:
-  typedef AuxTypeVectorHolder<T, CONT> Base;
-  typedef typename Base::vector_type vector_type;
-  typedef typename Base::element_type element_type;
-  typedef typename Base::vector_value_type vector_value_type;
+  using Base = HOLDER;
+  using vector_type = typename Base::vector_type;
+  using element_type = typename Base::element_type;
+  using vector_value_type = typename Base::vector_value_type;
+
 
   /**
    * @brief Constructor.  Makes a new vector.
@@ -354,32 +355,32 @@ public:
    * @param size Initial size of the new vector.
    * @param capacity Initial capacity of the new vector.
    */
-  AuxTypeVector (auxid_t auxid, size_t size, size_t capacity);
+  AuxTypeVectorT (auxid_t auxid, size_t size, size_t capacity);
 
 
 
   /**
    * @brief Copy constructor.
    */
-  AuxTypeVector (const AuxTypeVector& other);
+  AuxTypeVectorT (const AuxTypeVectorT& other);
 
 
   /**
    * @brief Move constructor.
    */
-  AuxTypeVector (AuxTypeVector&& other);
+  AuxTypeVectorT (AuxTypeVectorT&& other);
 
 
   /**
    * @brief Assignment.
    */
-  AuxTypeVector& operator= (const AuxTypeVector& other);
+  AuxTypeVectorT& operator= (const AuxTypeVectorT& other);
 
 
   /**
    * @brief Move assignment.
    */
-  AuxTypeVector& operator= (AuxTypeVector&& other);
+  AuxTypeVectorT& operator= (AuxTypeVectorT&& other);
 
 
   /**
@@ -392,6 +393,14 @@ private:
   /// The contained vector.
   vector_type m_vec;
 };
+
+
+/// Default type derives directly from AuxTypeVectorHolder.
+template <class T,
+          class ALLOC = AuxAllocator_t<T>,
+          class CONT = typename AuxDataTraits<T, ALLOC>::vector_type>
+using AuxTypeVector = AuxTypeVectorT<AuxTypeVectorHolder<T, CONT> >;
+
 
 
 } // namespace SG

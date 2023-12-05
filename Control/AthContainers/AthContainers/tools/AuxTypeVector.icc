@@ -617,10 +617,8 @@ void AuxTypeVectorHolder<T, CONT>::clear (void* dst, size_t dst_index)
  * @param size Initial size of the new vector.
  * @param capacity Initial capacity of the new vector.
  */
-template <class T, class ALLOC, class CONT>
-AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (auxid_t auxid,
-                                              size_t size,
-                                              size_t capacity)
+template <class HOLDER>
+AuxTypeVectorT<HOLDER>::AuxTypeVectorT (auxid_t auxid, size_t size, size_t capacity)
   : Base (auxid, &m_vec, false)
 {
   m_vec.reserve (capacity * Base::SCALE);
@@ -631,8 +629,8 @@ AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (auxid_t auxid,
 /**
  * @brief Copy constructor.
  */
-template <class T, class ALLOC, class CONT>
-AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (const AuxTypeVector& other)
+template <class HOLDER>
+AuxTypeVectorT<HOLDER>::AuxTypeVectorT (const AuxTypeVectorT& other)
   : Base (other.m_auxid, &m_vec, false),
     m_vec (other.m_vec)
 {
@@ -642,8 +640,8 @@ AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (const AuxTypeVector& other)
 /**
  * @brief Move constructor.
  */
-template <class T, class ALLOC, class CONT>
-AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (AuxTypeVector&& other)
+template <class HOLDER>
+AuxTypeVectorT<HOLDER>::AuxTypeVectorT (AuxTypeVectorT&& other)
   : Base (other.m_auxid, &m_vec, false),
     m_vec (std::move (other.m_vec))
 {
@@ -653,9 +651,9 @@ AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (AuxTypeVector&& other)
 /**
  * @brief Assignment.
  */
-template <class T, class ALLOC, class CONT>
-AuxTypeVector<T, ALLOC, CONT>&
-AuxTypeVector<T, ALLOC, CONT>::operator= (const AuxTypeVector& other)
+template <class HOLDER>
+AuxTypeVectorT<HOLDER>&
+AuxTypeVectorT<HOLDER>::operator= (const AuxTypeVectorT& other)
 {
   if (this != &other) {
     Base::m_auxid = other.m_auxid;
@@ -668,9 +666,9 @@ AuxTypeVector<T, ALLOC, CONT>::operator= (const AuxTypeVector& other)
 /**
  * @brief Move assignment.
  */
-template <class T, class ALLOC, class CONT>
-AuxTypeVector<T, ALLOC, CONT>&
-AuxTypeVector<T, ALLOC, CONT>::operator= (AuxTypeVector&& other)
+template <class HOLDER>
+AuxTypeVectorT<HOLDER>&
+AuxTypeVectorT<HOLDER>::operator= (AuxTypeVectorT&& other)
 {
   if (this != &other) {
     Base::m_auxid = other.m_auxid;
@@ -685,11 +683,11 @@ AuxTypeVector<T, ALLOC, CONT>::operator= (AuxTypeVector&& other)
 /**
  * @brief Make a copy of this vector.
  */
-template <class T, class ALLOC, class CONT>
+template <class HOLDER>
 inline
-std::unique_ptr<IAuxTypeVector> AuxTypeVector<T, ALLOC, CONT>::clone() const
+std::unique_ptr<IAuxTypeVector> AuxTypeVectorT<HOLDER>::clone() const
 {
-  return std::make_unique<AuxTypeVector<T, ALLOC, CONT> > (*this);
+  return std::make_unique<AuxTypeVectorT> (*this);
 }
 
 
