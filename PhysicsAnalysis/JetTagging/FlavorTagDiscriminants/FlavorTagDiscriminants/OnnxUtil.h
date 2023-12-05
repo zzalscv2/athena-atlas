@@ -58,12 +58,12 @@ namespace FlavorTagDiscriminants {
       runInference(
         std::map<std::string, input_pair> & gnn_inputs) const;
 
-      std::string getMetaData(const std::string& key) const;
-      GNNConfig::Config get_config() const;
+      std::string getMetadataString(const std::string& key) const;
+      GNNConfig::Config getOutputConfig() const;
       GNNConfig::OutputNodeType getOutputNodeType(
         const ONNXTensorElementDataType& type, int rank) const;
+      
       GNNConfig::OutputNodeTarget getOutputNodeTarget(int rank) const;
-
       std::vector<ONNXOutputNode> getOutputNodeInfo() const;
 
       OnnxModelVersion getOnnxModelVersion() const;

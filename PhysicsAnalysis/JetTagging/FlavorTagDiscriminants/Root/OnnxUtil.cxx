@@ -31,13 +31,16 @@ namespace FlavorTagDiscriminants {
                                                  session_options);
 
 
-    std::string metadata = getMetaData("gnn_config");
+    std::string metadata = getMetadataString("gnn_config");
     nlohmann::json j = nlohmann::json::parse(metadata);
+
+    // metadata version is explicitly set
     if (j.contains("onnx_model_version")){
       m_onnx_model_version = j["onnx_model_version"].get<OnnxModelVersion>();
       if (m_onnx_model_version == OnnxModelVersion::UNKNOWN){
         throw std::runtime_error("Unknown Onnx model version!");
       }
+    // metadata version is not set, infer from the presence of "outputs" key
     } else {
       if (j.contains("outputs")){
         m_onnx_model_version = OnnxModelVersion::V0;
@@ -85,8 +88,8 @@ namespace FlavorTagDiscriminants {
   // Destructor
   OnnxUtil::~OnnxUtil() = default;
 
-  std::string OnnxUtil::getMetaData(const std::string& key) const {
-
+  std::string OnnxUtil::getMetadataString(const std::string& key) const {
+    /* retrieve metadata from the onnx model with the given key */
     Ort::AllocatorWithDefaultOptions allocator;
     Ort::ModelMetadata metadata = m_session->GetModelMetadata();
     std::string val(metadata.LookupCustomMetadataMapAllocated(key.c_str(), allocator).get());
@@ -107,12 +110,10 @@ namespace FlavorTagDiscriminants {
     if (type == ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT) {
       if (rank == 0) {
         return GNNConfig::OutputNodeType::FLOAT;
-      }
-      else if (rank == 1) {
+      } else if (rank == 1) {
         return GNNConfig::OutputNodeType::VECFLOAT;
       }
-    }
-    else if (type == ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8) {
+    } else if (type == ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8) {
       return GNNConfig::OutputNodeType::VECCHAR;
     }
     return GNNConfig::OutputNodeType::UNKNOWN;
@@ -123,7 +124,6 @@ namespace FlavorTagDiscriminants {
     // Currently it decides the target based on the output data type and shape.
     // It should be replaced with a better implementation in future, 
     // where the `target` can be obtained from the model metadata.
-
     if (rank == 0) {
       return GNNConfig::OutputNodeTarget::JET;
     }
@@ -133,20 +133,19 @@ namespace FlavorTagDiscriminants {
     return GNNConfig::OutputNodeTarget::UNKNOWN;
   }
 
-  GNNConfig::Config OnnxUtil::get_config() const {
+  GNNConfig::Config OnnxUtil::getOutputConfig() const {
 
     GNNConfig::Config config;
-    std::vector<FlavorTagDiscriminants::ONNXOutputNode> 
-      outputnodes = getOutputNodeInfo();
+    std::vector<FlavorTagDiscriminants::ONNXOutputNode> out_nodes = getOutputNodeInfo();
 
-    for (const auto& output : outputnodes) {
+    for (const auto& out_node : out_nodes) {
       GNNConfig::OutputNodeConfig output_config;
-      output_config.label = output.name;
+      output_config.label = out_node.name;
 
-      GNNConfig::OutputNodeType type = getOutputNodeType(output.type, output.rank);
+      GNNConfig::OutputNodeType type = getOutputNodeType(out_node.type, out_node.rank);
       output_config.type = type;
 
-      GNNConfig::OutputNodeTarget target = getOutputNodeTarget(output.rank);
+      GNNConfig::OutputNodeTarget target = getOutputNodeTarget(out_node.rank);
       output_config.target = target;
 
       config.outputs.push_back(output_config);
@@ -161,10 +160,8 @@ namespace FlavorTagDiscriminants {
     std::map<std::string, std::vector<float>> >
   OnnxUtil::runInference(
     std::map<std::string, input_pair>& gnn_inputs) const {
-
     // Args:
     //    gnn_inputs : {string: input_pair}
-    //    outputs    : {string: float}
 
     std::vector<float> input_tensor_values;
 
@@ -172,7 +169,6 @@ namespace FlavorTagDiscriminants {
     auto memory_info = Ort::MemoryInfo::CreateCpu(
       OrtArenaAllocator, OrtMemTypeDefault
     );
-
     std::vector<Ort::Value> input_tensors;
     for (auto const &node_name : m_input_node_names){
       input_tensors.push_back(Ort::Value::CreateTensor<float>(
@@ -201,10 +197,11 @@ namespace FlavorTagDiscriminants {
       output_node_names.data(), output_node_names.size()
     );
 
+
+    // extract outputs
     std::map<std::string, float> output_f;
     std::map<std::string, std::vector<char>> output_vc;
     std::map<std::string, std::vector<float>> output_vf;
-
     for (unsigned int node_idx=0; node_idx<m_output_nodes.size(); node_idx++){
 
       auto tensor_type = 
