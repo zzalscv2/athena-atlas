@@ -83,6 +83,7 @@ StatusCode L1DataConsistencyChecker::start() {
 // =============================================================================
 StatusCode L1DataConsistencyChecker::consistencyCheck(const HLT::IDVec& l1SeededChains, const EventContext& ctx) const {
   auto monTimer = Monitored::Timer<std::chrono::duration<float, std::milli>>("TIME_consistencyCheck");
+  StatusCode sc = StatusCode::SUCCESS;
 
   // ---------------------------------------------------------------------------
   // Get information from TOBs
@@ -193,9 +194,16 @@ StatusCode L1DataConsistencyChecker::consistencyCheck(const HLT::IDVec& l1Seeded
     bool missing = (tobThresholdCounts.find(thrNameHash)==tobThresholdCounts.end());
 
     if (missing) {
-      ATH_MSG_WARNING("No TOBs found passing the threshold " << thrName
-                      << " accepted by the CTP with multiplicity " << ctpCount
-                      << (overflow ? ", likely due to overflow" : ""));
+      if (overflow || !m_errorOnMissingTOB) {
+        ATH_MSG_WARNING("No TOBs found passing the threshold " << thrName
+                        << " accepted by the CTP with multiplicity " << ctpCount
+                        << (overflow ? ", likely due to overflow" : ""));
+
+      } else {
+        ATH_MSG_ERROR("No TOBs found passing the threshold " << thrName
+                << " accepted by the CTP with multiplicity " << ctpCount);
+        sc = StatusCode::FAILURE;
+      }
     }
     else {
       tobCount = tobThresholdCounts.at(thrNameHash);
@@ -204,9 +212,15 @@ StatusCode L1DataConsistencyChecker::consistencyCheck(const HLT::IDVec& l1Seeded
     }
 
     if (tooFew) {
-      ATH_MSG_WARNING("Too few (" << tobCount << ") TOBs found passing the threshold " << thrName
-                      << " accepted by the CTP with multiplicity " << ctpCount
-                      << (overflow ? ", likely due to overflow" : ""));
+      if (overflow || !m_errorOnMissingTOB) {
+        ATH_MSG_WARNING("Too few (" << tobCount << ") TOBs found passing the threshold " << thrName
+                        << " accepted by the CTP with multiplicity " << ctpCount
+                        << (overflow ? ", likely due to overflow" : ""));
+      } else {
+        ATH_MSG_ERROR("Too few (" << tobCount << ") TOBs found passing the threshold " << thrName
+                          << " accepted by the CTP with multiplicity " << ctpCount);
+        sc = StatusCode::FAILURE;
+      }
     }
 
     if (missing || tooFew) {
@@ -243,5 +257,5 @@ StatusCode L1DataConsistencyChecker::consistencyCheck(const HLT::IDVec& l1Seeded
   }
 
   Monitored::Group(m_monTool, monTimer);
-  return StatusCode::SUCCESS;
+  return sc;
 }
