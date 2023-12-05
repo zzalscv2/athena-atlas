@@ -118,18 +118,18 @@ def MC21SimulationLowMuRun(flags):
     """MC21 flags for low mu run simulation"""
     MC21SimulationNoIoV(flags)
 
-    flags.Input.RunNumber = [420000]
+    flags.Input.RunNumbers = [420000]
     flags.Input.OverrideRunNumber = True
-    flags.Input.LumiBlockNumber = [1] # dummy value
+    flags.Input.LumiBlockNumbers = [1] # dummy value
 
 
 def MC21SimulationSingleIoV(flags):
     """MC21 flags for simulation"""
     MC21SimulationNoIoV(flags)
 
-    flags.Input.RunNumber = [410000]
+    flags.Input.RunNumbers = [410000]
     flags.Input.OverrideRunNumber = True
-    flags.Input.LumiBlockNumber = [1] # dummy value
+    flags.Input.LumiBlockNumbers = [1] # dummy value
 
 
 def MC21Simulation(flags):

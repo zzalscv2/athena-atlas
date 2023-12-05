@@ -62,7 +62,7 @@ def TileRODMonitoringConfig(flags, **kwargs):
     for k, v in kwargs.items():
         setattr(tileRODMonAlg, k, v)
 
-    run = str(flags.Input.RunNumber[0])
+    run = str(flags.Input.RunNumbers[0])
 
     # Configure histogram with TileRODMonAlg algorithm execution time
     executeTimeGroup = helper.addGroup(tileRODMonAlg, 'TileRODMonExecuteTime', 'Tile/')

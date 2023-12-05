@@ -101,8 +101,8 @@ if __name__=="__main__":
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Input.RunNumber=rlb[0]
-    flags.Input.TimeStamp=TimeStamp
+    flags.Input.RunNumbers=[rlb[0]]
+    flags.Input.TimeStamps=[TimeStamp]
     flags.Input.Files=[]
     flags.IOVDb.DatabaseInstance="CONDBR2"
   

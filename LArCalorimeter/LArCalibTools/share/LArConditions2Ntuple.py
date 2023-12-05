@@ -62,7 +62,7 @@ if __name__=='__main__':
   from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
   addLArCalibFlags(flags, args.isSC)
    
-  flags.Input.RunNumber=args.run
+  flags.Input.RunNumbers=[args.run]
   from AthenaConfiguration.TestDefaults import defaultGeometryTags
   flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
 
@@ -76,7 +76,7 @@ if __name__=='__main__':
   flags.LAr.OFCShapeFolder=args.ofcfolder
 
   from AthenaConfiguration.Enums import LHCPeriod
-  if flags.Input.RunNumber < 222222:
+  if flags.Input.RunNumbers[0] < 222222:
     #Set to run1 for early run-numbers
     flags.GeoModel.Run=LHCPeriod.Run1 
     flags.IOVDb.DatabaseInstance="OFLP200" if flags.Input.isMC else "COMP200" 
@@ -103,7 +103,6 @@ if __name__=='__main__':
   #MC Event selector since we have no input data file
   from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
   cfg.merge(McEventSelectorCfg(flags,
-                               RunNumber         = flags.Input.RunNumber,
                                EventsPerRun      = 1,
                                FirstEvent	      = 1,
                                InitialTimeStamp  = 0,
@@ -205,8 +204,7 @@ if __name__=='__main__':
                                                 ))
 
 
-  rootfile=args.out  
-  import os
+  rootfile=args.out
   if os.path.exists(rootfile):
     os.remove(rootfile)
   cfg.addService(CompFactory.NTupleSvc(Output = [ "FILE1 DATAFILE='"+rootfile+"' OPT='NEW'" ]))

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import re
 
@@ -232,11 +232,14 @@ def fastChainOverlayMetadataCheck(flags):
 def writeOverlayDigitizationMetadata(flags,pileupDict):
     from IOVDbMetaDataTools import ParameterDbFiller
     dbFiller = ParameterDbFiller.ParameterDbFiller()
-    runNumber = flags.Input.RunNumber[0]
+    runNumber = flags.Input.RunNumbers[0]
+    runNumberEnd = flags.Input.RunNumbers[-1]
+    if runNumberEnd == runNumber:
+        runNumberEnd += 1
     logger.debug('ParameterDbFiller BeginRun = %s', str(runNumber) )
     dbFiller.setBeginRun(runNumber)
-    logger.debug('ParameterDbFiller EndRun   = %s', str(runNumber+1) )
-    dbFiller.setEndRun(runNumber+1)
+    logger.debug('ParameterDbFiller EndRun   = %s', str(runNumberEnd) )
+    dbFiller.setEndRun(runNumberEnd)
 
     logger.info('Filling Digitization MetaData')
 

@@ -31,8 +31,6 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     commonRunArgsToFlags(runArgs, flags)
-    from RecJobTransforms.RecoConfigFlags import recoRunArgsToFlags
-    recoRunArgsToFlags(runArgs, flags)
 
     # Autoconfigure enabled subdetectors
     if hasattr(runArgs, 'detectors'):
@@ -154,6 +152,10 @@ def fromRunArgs(runArgs):
         flags.addFlag(f'Output.{streamName}FileName', runArgs.outputDESDM_ALLCELLSFile)
         flags.addFlag(f'Output.doWrite{streamName}', True)
         log.info("---------- Configured "+streamName+" output")
+
+    # Reconstruction flags should be parsed after inputs are set
+    from RecJobTransforms.RecoConfigFlags import recoRunArgsToFlags
+    recoRunArgsToFlags(runArgs, flags)
 
     from AthenaConfiguration.Enums import ProductionStep
     flags.Common.ProductionStep=ProductionStep.Reconstruction

@@ -83,8 +83,8 @@ def fromRunArgs(runArgs):
     # Fix campaign metadata
     from Campaigns.Utils import Campaign, campaign_runs
     if flags.Input.isMC and flags.Input.MCCampaign is Campaign.Unknown:
-        if flags.Input.RunNumber:
-            mc_campaign = campaign_runs.get(flags.Input.RunNumber[0], Campaign.Unknown)
+        if flags.Input.RunNumbers:
+            mc_campaign = campaign_runs.get(flags.Input.RunNumbers[0], Campaign.Unknown)
 
             if mc_campaign is not Campaign.Unknown:
                 flags.Input.MCCampaign = mc_campaign

@@ -161,9 +161,9 @@ if __name__=='__main__':
    flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN2
 
    #overwrite the run number 
-   flags.Input.RunNumber=[runnumber]
+   flags.Input.RunNumbers=[runnumber]
    # overwrite LB number for playback partition if needed....
-   flags.Input.LumiBlockNumber=[0]
+   flags.Input.LumiBlockNumbers=[0]
 
    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
    setupDetectorFlags(flags, ['LAr'], toggle_geometry=True)

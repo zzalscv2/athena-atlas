@@ -532,7 +532,7 @@ if __name__=='__main__':
 
    flags.Input.Files = ["/eos/atlas/atlascerngroupdisk/proj-spot/spot-job-inputs/data23_13p6TeV/data23_13p6TeV.00451569.physics_Main.daq.RAW._lb0260._SFO-14._0001.data"]
 
-   flags.Input.RunNumber=[451569]
+   flags.Input.RunNumbers=[451569]
    flags.Output.HISTFileName = 'LArDigitalTriggMonOutput.root'
 
    flags.DQ.useTrigger = False

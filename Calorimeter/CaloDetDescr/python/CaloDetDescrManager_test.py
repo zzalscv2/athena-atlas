@@ -74,7 +74,7 @@ def testCfg(configFlags):
 
 
 ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-ConfigFlags.Input.TimeStamp = 1000
+ConfigFlags.Input.TimeStamps = [1000]
 ConfigFlags.Detector.GeometryLAr = True
 ConfigFlags.Detector.GeometryTile = True
 ConfigFlags.needFlagsCategory('Tile')

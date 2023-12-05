@@ -48,7 +48,7 @@ if __name__=='__main__':
    flags.Input.Files=[]
    flags.LArCalib.Input.Files = [ args.infile ]
    flags.LArCalib.Input.RunNumbers = [int(args.run),]
-   flags.Input.RunNumber = int(args.run)
+   flags.Input.RunNumbers = [int(args.run)]
    gainNumMap={"HIGH":0,"MEDIUM":1,"LOW":2}
    flags.LArCalib.Gain=gainNumMap[args.gain.upper()]
 

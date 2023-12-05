@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -68,12 +68,12 @@ if __name__=='__main__':
      flags.Input.Files = GetInputFilesFromPrefix(args.indir,args.inpref)
 
   if args.run != 0:
-     flags.Input.RunNumber = [args.run]
+     flags.Input.RunNumbers = [args.run]
 
   # first autoconfig
   from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
   try:
-     runinfo=getLArDTInfoForRun(flags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
+     runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
   except Exception:
      log.warning("Could not get DT run info, using defaults !")
      flags.LArSCDump.doEt=True

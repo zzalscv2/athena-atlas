@@ -46,9 +46,9 @@ if __name__ == "__main__":
     flags.Input.ProjectName=flags.Input.Files[0].split('/')[-1].split('.')[0]
     data = flags.Input.Files[0].split('/')[-1].split('.')
     if data[1][2:].isdigit():
-        flags.Input.RunNumber = [int(data[1][2:])]
+        flags.Input.RunNumbers = [int(data[1][2:])]
     else:
-        flags.Input.RunNumber = [0]  #bogus run number in case parsing filename failed
+        flags.Input.RunNumbers = [0]  #bogus run number in case parsing filename failed
     
     flags.Detector.GeometryMDT   = True 
     flags.Detector.GeometryTGC   = True

@@ -1,6 +1,6 @@
 """Define method to configure and test SCT_TdaqEnabledTestAlg
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -23,8 +23,8 @@ if __name__=="__main__":
     flags.Input.Files = []
     flags.Input.isMC = False
     flags.Input.ProjectName = "data16_13TeV"
-    flags.Input.RunNumber = 310809
-    flags.Input.TimeStamp = 1476741326 # LB 18 of run 310809, 10/17/2016 @ 9:55pm (UTC)
+    flags.Input.RunNumbers = [310809]
+    flags.Input.TimeStamps = [1476741326] # LB 18 of run 310809, 10/17/2016 @ 9:55pm (UTC)
     flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2017-06"
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2

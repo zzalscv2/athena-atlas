@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import sys
 import os
@@ -60,7 +60,7 @@ def fromRunArgs(runArgs):
 
     from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
     try:
-       runinfo=getLArDTInfoForRun(flags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
+       runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
     except Exception:
        mlog_SCD.warning("Could not get DT run info, using defaults !")   
        flags.LArSCDump.doEt=True

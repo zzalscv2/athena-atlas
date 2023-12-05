@@ -144,9 +144,9 @@ def PhaseIISimulationSingleIoV(flags):
     """Phase-II Upgrade / Run 4 flags for simulation"""
     PhaseIISimulationNoIoV(flags)
 
-    flags.Input.RunNumber = [242000]
+    flags.Input.RunNumbers = [242000]
     flags.Input.OverrideRunNumber = True
-    flags.Input.LumiBlockNumber = [1] # dummy value
+    flags.Input.LumiBlockNumbers = [1] # dummy value
 
 
 def PhaseIISimulation(flags):
@@ -280,9 +280,9 @@ def MC23PhaseIISimulationSingleIoV(flags):
     """Phase-II Upgrade / Run 4 flags for simulation"""
     MC23PhaseIISimulationNoIoV(flags)
 
-    flags.Input.RunNumber = [350000]
+    flags.Input.RunNumbers = [350000]
     flags.Input.OverrideRunNumber = True
-    flags.Input.LumiBlockNumber = [1] # dummy value
+    flags.Input.LumiBlockNumbers = [1] # dummy value
 
 
 def MC23PhaseIISimulation(flags):

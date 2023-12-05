@@ -58,7 +58,7 @@ def defaultTestFlags(flags, args):
     flags.Sim.ISFRun = False
     flags.Sim.BeamPipeSimMode = BeamPipeSimMode.FastSim
 
-    flags.Input.RunNumber = [284500]
+    flags.Input.RunNumbers = [284500]
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumbers = [1]
 

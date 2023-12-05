@@ -70,7 +70,7 @@ if __name__=='__main__':
         log.error('Input files must be provided! For example: --filesInput=file1,file2,... or --run RUNNUMBER')
         sys.exit(-1)
 
-    runNumber = flags.Input.RunNumber[0]
+    runNumber = flags.Input.RunNumbers[0]
 
     # Set up LHC Run period
     if not any([args.run2, args.run3]):

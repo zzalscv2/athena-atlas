@@ -59,7 +59,7 @@ def TileDigitsMonitoringConfig(flags, **kwargs):
     for k, v in kwargs.items():
         setattr(tileDigitsMonAlg, k, v)
 
-    run = str(flags.Input.RunNumber[0])
+    run = str(flags.Input.RunNumbers[0])
 
     # 1) Configure histogram with TileDigiNoiseMonAlg algorithm execution time
     executeTimeGroup = helper.addGroup(tileDigitsMonAlg, 'TileDigitsMonExecuteTime', 'Tile/')
@@ -275,7 +275,7 @@ if __name__=='__main__':
     cfg.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
     cfg.getService('ByteStreamCnvSvc').ROD2ROBmap = [ "-1" ]
 
-    runNumber = flags.Input.RunNumber[0]
+    runNumber = flags.Input.RunNumbers[0]
     from AthenaConfiguration.ComponentFactory import CompFactory
     cfg.addPublicTool( CompFactory.TileROD_Decoder(fullTileMode = runNumber) )
 

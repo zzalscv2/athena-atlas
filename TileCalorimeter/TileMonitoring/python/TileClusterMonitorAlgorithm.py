@@ -43,7 +43,7 @@ def TileClusterMonitoringConfig(flags, **kwargs):
     for k, v in kwargs.items():
         setattr(tileClusterMonAlg, k, v)
 
-    run = str(flags.Input.RunNumber[0])
+    run = str(flags.Input.RunNumbers[0])
 
     # 1) Configure histogram with TileClusterMonAlg algorithm execution time
     executeTimeGroup = helper.addGroup(tileClusterMonAlg, 'TileClusterMonExecuteTime', 'Tile/')

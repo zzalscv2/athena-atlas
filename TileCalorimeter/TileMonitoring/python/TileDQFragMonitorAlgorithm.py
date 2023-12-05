@@ -52,7 +52,7 @@ def TileDQFragMonitoringConfig(flags, **kwargs):
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(flags, 'TileDQFragMonAlgCfg')
 
-    runNumber = flags.Input.RunNumber[0]
+    runNumber = flags.Input.RunNumbers[0]
     from AthenaConfiguration.ComponentFactory import CompFactory
     _TileDQFragMonitoringCore(helper, CompFactory.TileDQFragMonitorAlgorithm,
                              runNumber, **kwargs)

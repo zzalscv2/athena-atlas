@@ -42,7 +42,7 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
                                      title = 'Time for execute TileDigitsFlxMonAlg algorithm;time [#mus]',
                                      xbins = 300, xmin = 0, xmax = 300000)
 
-    runNumber = flags.Input.RunNumber[0]
+    runNumber = flags.Input.RunNumbers[0]
     from TileCalibBlobObjs.Classes import TileCalibUtils as Tile
 
     modules = []

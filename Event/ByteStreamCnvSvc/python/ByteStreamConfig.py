@@ -112,7 +112,7 @@ def ByteStreamWriteCfg(flags, type_names=None):
         A component accumulator fragment containing the components required to
         write to bytestream. Should be merged into main job configuration.
     """
-    all_runs = set(flags.Input.RunNumber)
+    all_runs = set(flags.Input.RunNumbers)
     assert (
         len(all_runs) == 1
     ), "Input is from multiple runs, do not know which one to use {}".format(

@@ -86,8 +86,8 @@ def getTrigConfigFromFlag( flags ):
     smk, l1psk, hltpsk, bgsk = (int(k) if k!="" else None for k in (smk, l1psk, hltpsk, bgsk))
 
     if source == "DB" and (smk is None or l1psk is None or hltpsk is None or bgsk is None):
-        runNumber = flags.Input.RunNumber[0]
-        lbNumber = flags.Input.LumiBlockNumber[0]
+        runNumber = flags.Input.RunNumbers[0]
+        lbNumber = flags.Input.LumiBlockNumbers[0]
         if dbconn == "":
             dbconn = getTrigConfFromCool(runNumber, lbNumber)["DB"]
         if dbconn in ["TRIGGERDB_RUN3", "TRIGGERDBDEV1_I8", "TRIGGERDBDEV1", "TRIGGERDBDEV2"]:
@@ -216,8 +216,8 @@ def L1ConfigSvcCfg( flags ):
     if cfg["SOURCE"] == "FILE":
         if _doMenuConversion(flags):
             # Save the menu in JSON format
-            dbKeys = createJsonMenuFiles(run = flags.Input.RunNumber[0],
-                                         lb = flags.Input.LumiBlockNumber[0])
+            dbKeys = createJsonMenuFiles(run = flags.Input.RunNumbers[0],
+                                         lb = flags.Input.LumiBlockNumbers[0])
             l1ConfigSvc.SMK = dbKeys['SMK']
 
         l1ConfigSvc.InputType = "FILE"
@@ -247,8 +247,8 @@ def HLTConfigSvcCfg( flags ):
     if cfg["SOURCE"] == "FILE":
         if _doMenuConversion(flags):
             # Save the menu in JSON format
-            dbKeys = createJsonMenuFiles(run = flags.Input.RunNumber[0],
-                                         lb = flags.Input.LumiBlockNumber[0])
+            dbKeys = createJsonMenuFiles(run = flags.Input.RunNumbers[0],
+                                         lb = flags.Input.LumiBlockNumbers[0])
             hltConfigSvc.SMK = dbKeys['SMK']
 
         hltConfigSvc.InputType = "FILE"
@@ -301,8 +301,8 @@ def L1PrescaleCondAlgCfg( flags ):
         l1PrescaleCondAlg.Filename = getL1PrescalesSetFileName( flags )
         if _doMenuConversion(flags):
             # Save the menu in JSON format
-            dbKeys = createJsonMenuFiles(run = flags.Input.RunNumber[0],
-                                         lb = flags.Input.LumiBlockNumber[0])
+            dbKeys = createJsonMenuFiles(run = flags.Input.RunNumbers[0],
+                                         lb = flags.Input.LumiBlockNumbers[0])
             l1PrescaleCondAlg.L1Psk = dbKeys['L1PSK']
     else:
         raise RuntimeError("trigger configuration flag 'trigConfig' starts with %s, which is not understood" % tc["SOURCE"])
@@ -327,8 +327,8 @@ def BunchGroupCondAlgCfg( flags ):
         bunchGroupCondAlg.Filename = getBunchGroupSetFileName( flags )
         if _doMenuConversion(flags):
             # Save the menu in JSON format
-            dbKeys = createJsonMenuFiles(run = flags.Input.RunNumber[0],
-                                         lb = flags.Input.LumiBlockNumber[0])
+            dbKeys = createJsonMenuFiles(run = flags.Input.RunNumbers[0],
+                                         lb = flags.Input.LumiBlockNumbers[0])
             bunchGroupCondAlg.BGSK = dbKeys['BGSK']
     else:
         raise RuntimeError("trigger configuration flag 'trigConfig' starts with %s, which is not understood" % tc["SOURCE"])
@@ -359,8 +359,8 @@ def HLTPrescaleCondAlgCfg( flags ):
         hltPrescaleCondAlg.Filename = getHLTPrescalesSetFileName( flags )
         if _doMenuConversion(flags):
             # Save the menu in JSON format
-            dbKeys = createJsonMenuFiles(run = flags.Input.RunNumber[0],
-                                         lb = flags.Input.LumiBlockNumber[0])
+            dbKeys = createJsonMenuFiles(run = flags.Input.RunNumbers[0],
+                                         lb = flags.Input.LumiBlockNumbers[0])
             hltPrescaleCondAlg.HLTPsk = dbKeys['HLTPSK']
     else:
         raise RuntimeError("trigger configuration flag 'trigConfig' starts with %s, which is not understood" % tc["SOURCE"])

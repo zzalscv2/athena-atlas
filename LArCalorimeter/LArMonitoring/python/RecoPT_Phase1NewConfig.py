@@ -30,10 +30,10 @@ def LArDTMonitoringConfig(ConfigFlags,STREAM):
     mlog = logging.getLogger( 'RecoPT_Phase1' )
 
     from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
-    mlog.info("Run number: "+str(ConfigFlags.Input.RunNumber[0]))
+    mlog.info("Run number: "+str(ConfigFlags.Input.RunNumbers[0]))
 
     try:
-        runinfo=getLArDTInfoForRun(ConfigFlags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
+        runinfo=getLArDTInfoForRun(ConfigFlags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
         streams=runinfo.streamTypes()
         nsamples=int(runinfo.streamLengths()[0])
     except Exception as e:

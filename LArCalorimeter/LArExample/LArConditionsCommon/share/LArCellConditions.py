@@ -1,5 +1,5 @@
 #!/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ##=======================================================================================
 ## Name:        LArCellConditions.py
@@ -113,9 +113,9 @@ sys.argv = sys.argv[:1] + ['-b']
 from AthenaConfiguration.AllConfigFlags import initConfigFlags 
 flags=initConfigFlags()
 flags.Input.Files = []
-flags.Input.TimeStamp = 1000
+flags.Input.TimeStamps = [1000]
 flags.Input.isMC=False
-flags.Input.RunNumber=run
+flags.Input.RunNumbers=[run]
 flags.IOVDb.DatabaseInstance="CONDBR2" if run>222222 else "COMP200"
 flags.IOVDb.GlobalTag=tag
 flags.LAr.doAlign=False

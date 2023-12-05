@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -10,14 +10,10 @@ def McEventSelectorCfg(flags, **kwargs):
     cfg.addService(CompFactory.EvtPersistencySvc("EventPersistencySvc",
                                                  CnvServices=[service.getFullJobOptName()]))
 
-    runNumber = flags.Input.RunNumber
-    if isinstance(runNumber, type([])) and runNumber:
-        runNumber = runNumber[0]
-    kwargs.setdefault("RunNumber", runNumber)
-    timeStamp = flags.Input.TimeStamp
-    if isinstance(timeStamp, type([])) and timeStamp:
-        timeStamp = timeStamp[0]
-    kwargs.setdefault("InitialTimeStamp", timeStamp)
+    if flags.Input.RunNumbers:
+        kwargs.setdefault("RunNumber", flags.Input.RunNumbers[0])
+    if flags.Input.TimeStamps:
+        kwargs.setdefault("InitialTimeStamp", flags.Input.TimeStamps[0])
 
     evSel = CompFactory.McEventSelector("EventSelector", **kwargs)
     cfg.addService(evSel)

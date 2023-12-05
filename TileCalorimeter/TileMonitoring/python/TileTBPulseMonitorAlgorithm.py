@@ -102,7 +102,7 @@ def TileTBPulseMonitoringConfig(flags, timeRange=[-100, 100], fragIDs=[0x100, 0x
     for k, v in kwargs.items():
         setattr(tileTBPulseMonAlg, k, v)
 
-    run = str(flags.Input.RunNumber[0])
+    run = str(flags.Input.RunNumbers[0])
 
     # Configure histogram with TileTBPulseMonAlg algorithm execution time
     executeTimeGroup = helper.addGroup(tileTBPulseMonAlg, 'TileTBPulseMonExecuteTime', 'TestBeam')
@@ -211,7 +211,7 @@ if __name__=='__main__':
 
     rawChannels = args.channels
     if flags.Input.Format is Format.BS:
-        cfg.addPublicTool(CompFactory.TileROD_Decoder(fullTileMode=flags.Input.RunNumber[0]))
+        cfg.addPublicTool(CompFactory.TileROD_Decoder(fullTileMode=flags.Input.RunNumbers[0]))
 
         from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
         tileTypeNames = [f'TileDigitsContainer/{args.digits}', 'TileRawChannelContainer/TileRawChannelCnt']

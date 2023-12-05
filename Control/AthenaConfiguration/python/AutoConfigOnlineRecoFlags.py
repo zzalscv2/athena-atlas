@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import GeV, TeV
 from AthenaCommon.Logging import logging
@@ -20,9 +20,9 @@ def setDefaultOnlineRecoFlags(flags):
 
     flags.Input.Files = []
     flags.Input.isMC = False
-    flags.Input.RunNumber = [-1]
-    flags.Input.LumiBlockNumber = [-1]
-    flags.Input.TimeStamp = [-1]
+    flags.Input.RunNumbers = [-1]
+    flags.Input.LumiBlockNumbers = [-1]
+    flags.Input.TimeStamps = [-1]
     flags.Input.ProjectName = 'data_test'
     flags.Input.Format = Format.BS
     flags.Input.ProcessingTags = []
@@ -74,7 +74,7 @@ def trySetFlagsFromIS(flags, partition=None):
         # Run number
         run_number = tryReadFromISObject(runparams, 'run_number')
         if run_number is not None:
-            flags.Input.RunNumber = [run_number]
+            flags.Input.RunNumbers = [run_number]
         # Tier-0 project name
         project_name = tryReadFromISObject(runparams, 'T0_project_tag')
         if project_name is not None:
@@ -109,11 +109,11 @@ def trySetFlagsFromIS(flags, partition=None):
         # LB number
         lb_number = tryReadFromISObject(lbinfo, 'LumiBlockNumber')
         if lb_number is not None:
-            flags.Input.LumiBlockNumber = [lb_number]
+            flags.Input.LumiBlockNumbers = [lb_number]
         # Timestamp
         time_ns = tryReadFromISObject(lbinfo, 'Time')
         if time_ns is not None:
-            flags.Input.TimeStamp = [int(time_ns / 1e9)]
+            flags.Input.TimeStamps = [int(time_ns / 1e9)]
 
     # Solenoid status
     solenoid_curr_is = tryReadISObject('DCS_GENERAL.MagnetSolenoidCurrent.value', 'DdcFloatInfo', part_name='initial')

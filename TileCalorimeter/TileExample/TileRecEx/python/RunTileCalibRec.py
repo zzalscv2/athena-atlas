@@ -186,7 +186,7 @@ if __name__=='__main__':
     if args.phys_timing and flags.Tile.RunType == 'LAS':
         flags.Tile.TimingType = 'GAP/LAS'
 
-    runNumber = flags.Input.RunNumber[0]
+    runNumber = flags.Input.RunNumbers[0]
 
     # Set up LHC Run period
     if not any([args.run2, args.run3]):

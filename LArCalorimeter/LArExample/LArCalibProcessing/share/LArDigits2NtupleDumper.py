@@ -57,12 +57,12 @@ if __name__=='__main__':
      ConfigFlags.Input.Files = GetInputFilesFromPrefix(args.indir,args.inpref)
 
   if args.run != 0:
-     ConfigFlags.Input.RunNumber = [args.run]
+     ConfigFlags.Input.RunNumbers = [args.run]
 
   # first autoconfig
   from LArConditionsCommon.LArRunFormat import getLArFormatForRun
   try:
-     runinfo=getLArFormatForRun(ConfigFlags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
+     runinfo=getLArFormatForRun(ConfigFlags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
   except Exception:
      log.warning("Could not get  run info, using defaults !")
      if args.nsamp > 0:

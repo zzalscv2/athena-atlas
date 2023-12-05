@@ -79,7 +79,7 @@ def TileTMDBRawChannelMonitoringConfig(flags, MuRcvRawChCnt = "MuRcvRawChCnt", F
     tileTMDBRawChanMonAlg.FillRawChannelHistograms = FillRawChannelHistograms
 
     topPath = 'Tile/TMDBRawChannel/DSP' if isDSP else 'Tile/TMDBRawChannel'
-    run = str(flags.Input.RunNumber[0])
+    run = str(flags.Input.RunNumbers[0])
 
     if FillRawChannelHistograms:
 

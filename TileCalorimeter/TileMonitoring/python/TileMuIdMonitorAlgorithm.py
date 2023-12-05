@@ -40,7 +40,7 @@ def TileMuIdMonitoringConfig(flags, **kwargs):
     for k, v in kwargs.items():
         setattr(tileMuIdMonAlg, k, v)
 
-    run = str(flags.Input.RunNumber[0])
+    run = str(flags.Input.RunNumbers[0])
 
     # 1) Configure histogram with TileMuIdMonAlg algorithm execution time
     executeTimeGroup = helper.addGroup(tileMuIdMonAlg, 'TileMuIdMonExecuteTime', 'Tile/')

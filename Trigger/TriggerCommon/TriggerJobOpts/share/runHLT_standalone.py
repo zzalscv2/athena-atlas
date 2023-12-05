@@ -139,8 +139,8 @@ import TriggerJobOpts.Modifiers
 if len(athenaCommonFlags.FilesInput())>0:
     flags.Input.Files = athenaCommonFlags.FilesInput()
     flags.Common.isOnline = not flags.Input.isMC
-    TriggerJobOpts.Modifiers._run_number = flags.Input.RunNumber[0]
-    TriggerJobOpts.Modifiers._lb_number = flags.Input.LumiBlockNumber[0]
+    TriggerJobOpts.Modifiers._run_number = flags.Input.RunNumbers[0]
+    TriggerJobOpts.Modifiers._lb_number = flags.Input.LumiBlockNumbers[0]
 # athenaHLT: most flags are already set
 else:
     flags.IOVDb.DatabaseInstance = 'CONDBR2'

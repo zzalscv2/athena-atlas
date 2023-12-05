@@ -46,7 +46,7 @@ def TileMBTSMonitoringConfig(flags, **kwargs):
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     _TileMBTSMonitoringConfigCore(helper, CompFactory.TileMBTSMonitorAlgorithm,
-                                  flags.Input.RunNumber[0],
+                                  flags.Input.RunNumbers[0],
                                   flags.Beam.Type is BeamType.Cosmics,
                                   **kwargs)
 

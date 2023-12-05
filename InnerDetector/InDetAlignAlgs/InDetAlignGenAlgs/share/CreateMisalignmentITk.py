@@ -15,7 +15,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def getFlags(**kwargs):
     flags=initConfigFlags()
-    flags.Input.RunNumber = 2222222 # Set to either MC DSID or MC Run Number
+    flags.Input.RunNumbers = [2222222] # Set to either MC DSID or MC Run Number
 
     ## Just enable ID for the moment.
     flags.Input.isMC             = True

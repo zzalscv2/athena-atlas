@@ -52,7 +52,7 @@ def TileRawChannelNoiseMonitoringConfig(flags, **kwargs):
     for k, v in kwargs.items():
         setattr(tileRawChanNoiseMonAlg, k, v)
 
-    run = str(flags.Input.RunNumber[0])
+    run = str(flags.Input.RunNumbers[0])
 
     # 1) Configure histogram with TileRawChanNoiseMonAlg algorithm execution time
     executeTimeGroup = helper.addGroup(tileRawChanNoiseMonAlg, 'TileRawChanNoiseMonExecuteTime', 'Tile/')

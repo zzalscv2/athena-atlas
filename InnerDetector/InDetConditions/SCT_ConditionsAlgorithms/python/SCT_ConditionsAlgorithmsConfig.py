@@ -142,7 +142,7 @@ if __name__=="__main__":
     flags.Input.isMC = False
     flags.Input.Files = ["./myESD.pool.root"]
     flags.Input.ProjectName = "data17_13TeV" # q431 input
-    flags.Input.RunNumber = 330470 # q431 input
+    flags.Input.RunNumbers = [330470] # q431 input
     flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2018-03" # q431 setup
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2

@@ -50,10 +50,10 @@ def PixelConfigCondAlgCfg(flags, name="PixelConfigCondAlg", **kwargs):
                 IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping_Run2.dat"
         else:
             IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping.dat"
-    elif not flags.Input.RunNumber:
+    elif not flags.Input.RunNumbers:
         IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping_344494.dat"
     else:
-        runNum = flags.Input.RunNumber[0]
+        runNum = flags.Input.RunNumbers[0]
         if runNum < 222222:
             IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping_May08.dat"
         else:
@@ -117,7 +117,7 @@ def PixelCablingCondAlgCfg(flags, name="PixelCablingCondAlg", **kwargs):
     if not flags.Input.isMC and not flags.Overlay.DataOverlay and not flags.GeoModel.Run < LHCPeriod.Run2 :
         acc.merge(addFoldersSplitOnline(flags, "PIXEL", "/PIXEL/Onl/CablingMap","/PIXEL/CablingMap", className="AthenaAttributeList"))
         kwargs.setdefault("ReadKey", "/PIXEL/CablingMap")
-        if flags.Input.RunNumber and flags.Input.RunNumber[0]<222222:
+        if flags.Input.RunNumbers and flags.Input.RunNumbers[0]<222222:
             kwargs.setdefault("ReadKey", "")
     else:
         kwargs.setdefault("ReadKey", "")

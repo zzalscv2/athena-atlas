@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -22,14 +22,14 @@ def EventSelectorAthenaPoolCfg(flags):
                 FirstLB = 1
                 InitialTimeStamp = flags.IOVDb.RunToTimestampDict.get(DataRunNumber, 1) # TODO fix repeated configuration
                 if not flags.Sim.DoFullChain:
-                    OldRunNumber = flags.Input.RunNumber[0] # CHECK this should be the Run Number from the HITS file
-            elif flags.Input.RunNumber:
+                    OldRunNumber = flags.Input.RunNumbers[0] # CHECK this should be the Run Number from the HITS file
+            elif flags.Input.RunNumbers:
                 # Behaviour for Simulation jobs
-                DataRunNumber = flags.Input.RunNumber[0]
-                FirstLB = flags.Input.LumiBlockNumber[0]
-                InitialTimeStamp = flags.Input.TimeStamp[0]
+                DataRunNumber = flags.Input.RunNumbers[0]
+                FirstLB = flags.Input.LumiBlockNumbers[0]
+                InitialTimeStamp = flags.Input.TimeStamps[0]
             assert DataRunNumber >= 0, (
-                "configFlags.Input.OverrideRunNumber was True, but provided DataRunNumber (%d) is negative. "
+                "flags.Input.OverrideRunNumber was True, but provided DataRunNumber (%d) is negative. "
                 "Use a real run number from data." % DataRunNumber)
             evSel.OverrideRunNumber = flags.Input.OverrideRunNumber
             evSel.RunNumber = DataRunNumber
@@ -54,12 +54,13 @@ def EventSelectorAthenaPoolCfg(flags):
             pass
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
         result.merge(EvtIdModifierSvcCfg(flags))
-    elif flags.Common.ProductionStep in [ProductionStep.Simulation] and len(flags.Input.RunNumber) and flags.Sim.ISF.ReSimulation:
+    elif flags.Common.ProductionStep in [ProductionStep.Simulation] and len(flags.Input.RunNumbers) and flags.Sim.ISF.ReSimulation:
         # ReSimulation case
         evSel.OverrideRunNumber = True
-        evSel.RunNumber = flags.Input.RunNumber[0]
-        if flags.Input.LumiBlockNumber: evSel.FirstLB = flags.Input.LumiBlockNumber[0]
-        evSel.InitialTimeStamp = flags.IOVDb.RunToTimestampDict.get(flags.Input.RunNumber[0], 1)
+        evSel.RunNumber = flags.Input.RunNumbers[0]
+        if flags.Input.LumiBlockNumbers:
+            evSel.FirstLB = flags.Input.LumiBlockNumbers[0]
+        evSel.InitialTimeStamp = flags.IOVDb.RunToTimestampDict.get(flags.Input.RunNumbers[0], 1)
 
     result.addService(evSel)
     return result
