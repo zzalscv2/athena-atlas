@@ -66,9 +66,10 @@ RootAuxVector::RootAuxVector (const RootAuxVectorFactory* factory,
     m_auxid (auxid)
 {
   const TClass* vecClass = factory->vecClass();
-  m_proxy = vecClass->GetCollectionProxy();
+  m_proxy.reset (vecClass->GetCollectionProxy()->Generate());
   m_obj = factory->objClass()->New ();
   m_vec = reinterpret_cast<char*> (m_obj) + factory->offset();
+  m_proxy->PushProxy (m_vec);
   this->resize (size);
 }
 
@@ -98,9 +99,10 @@ RootAuxVector::RootAuxVector (const RootAuxVectorFactory* factory,
 {
   if (isPacked) std::abort();
   const TClass* vecClass = factory->vecClass();
-  m_proxy = vecClass->GetCollectionProxy();
+  m_proxy.reset (vecClass->GetCollectionProxy()->Generate());
   m_obj = data;
   m_vec = reinterpret_cast<char*> (m_obj) + factory->offset();
+  m_proxy->PushProxy (m_vec);
 }
 
 
@@ -110,24 +112,19 @@ RootAuxVector::RootAuxVector (const RootAuxVectorFactory* factory,
  */
 RootAuxVector::RootAuxVector (const RootAuxVector& other)
   : m_factory (other.m_factory),
-    m_proxy (other.m_proxy),
+    m_proxy (other.m_proxy->Generate()),
     m_ownFlag (true),
     m_auxid (other.m_auxid)
 {
   m_obj = m_factory->objClass()->New ();
   m_vec = reinterpret_cast<char*> (m_obj) + m_factory->offset();
+  m_proxy->PushProxy (m_vec);
   size_t sz = other.size();
   this->resize (sz);
 
   if (sz > 0) {
     const RootUtils::Type& rootType = m_factory->rootType();
-
-    const void* otherPtr = 0;
-    {
-      TVirtualCollectionProxy::TPushPop bind (m_proxy, other.m_vec);
-      otherPtr = m_proxy->At(0);
-    }
-    
+    const void* otherPtr = other.toPtr();
     rootType.copyRange (this->toPtr(), otherPtr, sz);
   }
 }
@@ -168,10 +165,21 @@ SG::auxid_t RootAuxVector::auxid() const
  */
 void* RootAuxVector::toPtr ()
 {
-  TVirtualCollectionProxy::TPushPop bind (m_proxy, m_vec);
   if (m_proxy->Size() == 0)
     return 0;
   return m_proxy->At(0);
+}
+
+
+/**
+ * @brief Return a pointer to the start of the vector's data.
+ */
+const void* RootAuxVector::toPtr () const
+{
+  if (m_proxy->Size() == 0)
+    return 0;
+  TVirtualCollectionProxy* proxy ATLAS_THREAD_SAFE = m_proxy.get();
+  return proxy->At(0);
 }
 
 
@@ -189,9 +197,6 @@ void* RootAuxVector::toVector ()
  */
 size_t RootAuxVector::size() const
 {
-  TVirtualCollectionProxy* proxy ATLAS_THREAD_SAFE = m_proxy;
-  void* vec ATLAS_THREAD_SAFE = m_vec;
-  TVirtualCollectionProxy::TPushPop bind (proxy, vec);
   return m_proxy->Size();
 }
 
@@ -204,7 +209,6 @@ size_t RootAuxVector::size() const
  */
 bool RootAuxVector::resize (size_t sz)
 {
-  TVirtualCollectionProxy::TPushPop bind (m_proxy, m_vec);
   const void* orig = this->toPtr();
   m_proxy->Allocate(sz, false);
   return this->toPtr() == orig;
@@ -244,7 +248,6 @@ void RootAuxVector::reserve (size_t /*sz*/)
  */
 void RootAuxVector::shift (size_t pos, ptrdiff_t offs)
 {
-  TVirtualCollectionProxy::TPushPop bind (m_proxy, m_vec);
   size_t eltsz = m_proxy->GetIncrement();
 
   const RootUtils::Type& rootType = m_factory->rootType();
@@ -292,7 +295,6 @@ void RootAuxVector::shift (size_t pos, ptrdiff_t offs)
  */
 bool RootAuxVector::insertMove (size_t pos, void* beg, void* end)
 {
-  TVirtualCollectionProxy::TPushPop bind (m_proxy, m_vec);
   size_t eltsz = m_proxy->GetIncrement();
   const void* orig = this->toPtr();
   const RootUtils::Type& rootType = m_factory->rootType();

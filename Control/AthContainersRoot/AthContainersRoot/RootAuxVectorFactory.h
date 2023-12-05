@@ -120,6 +120,12 @@ public:
 
 
   /**
+   * @brief Return a pointer to the start of the vector's data.
+   */
+  const void* toPtr() const;
+
+
+  /**
    * @brief Return a pointer to the overall object.
    */
   virtual void* toVector() override;
@@ -215,7 +221,10 @@ private:
   const RootAuxVectorFactory* m_factory;
 
   /// The collection proxy for the vector.
-  TVirtualCollectionProxy* m_proxy;
+  /// Cloned from the proxy held by the TClass and permanently bound
+  /// to m_vec.  That makes things a bit more efficient, and prevents
+  /// potential thread-safety problems.
+  std::unique_ptr<TVirtualCollectionProxy> m_proxy;
 
   /// Pointer to the overall object itself.
   void* m_obj;
