@@ -86,6 +86,7 @@ namespace DerivationFramework{
           || (m_DSID>=407345 && m_DSID<=407347) //Powheg+P8 ttbar MET-filtered
           || (m_DSID>=407348 && m_DSID<=407350) //aMC@NLO+P8 ttbar HT-filtered
           ||  m_DSID==504330 || m_DSID==504331 || m_DSID==504332 || m_DSID==504334 || m_DSID==504335 || m_DSID==504336 || m_DSID==504338 || m_DSID==504342 || m_DSID==504343 || m_DSID==504344 || m_DSID==504346//aMC@NLO+P8 refined ttZ
+          || (m_DSID>=601356 && m_DSID<=601357) //Pow+Py8 ttbar FSR variations 
           ||  m_DSID==601491 || m_DSID==601492  //Pow+Py8 ttbar pTHard variations - ATLMCPROD-10168
           || (m_DSID>=601495 && m_DSID<=601498) //Pow+Py8 ttbar pTHard variations - ATLMCPROD-10168
           || (m_DSID>=601669 && m_DSID<=601672) //Pow+Py8 ttbar FSR variations 
