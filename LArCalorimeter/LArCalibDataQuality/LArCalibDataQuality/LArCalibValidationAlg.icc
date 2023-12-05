@@ -282,17 +282,17 @@ void LArCalibValidationAlg<CONDITIONSCONTAINER, REFCONTAINER>::findFailedPattern
       //Fill channel status fer FEB
       const HWIdentifier febId=m_onlineHelper->feb_Id(chid);
       if (isGood)
-	statiPerFEB[febId].first++;
+	++statiPerFEB[febId].first;
       else
-        statiPerFEB[febId].second++;
+        ++statiPerFEB[febId].second;
 	     
       //Fill channel status per calibLine
       const std::vector<HWIdentifier>& calibIdvec=clCont->calibSlotLine(chid);
       for (const HWIdentifier& hwid : calibIdvec) {
 	if (isGood)
-	  statiPerCalibLine[hwid].first++;
+	  ++statiPerCalibLine[hwid].first;
 	else
-	  statiPerCalibLine[hwid].second++;
+	  ++statiPerCalibLine[hwid].second;
       }
     }//end loop over identifiers of suspicious channels
     //Check fraction of failed channels per FEBs
