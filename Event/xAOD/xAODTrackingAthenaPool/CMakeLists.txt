@@ -27,6 +27,8 @@ atlas_add_poolcnv_library( xAODTrackingAthenaPoolPoolCnv
    xAODTracking/TrackMeasurementAuxContainer.h
    xAODTracking/TrackParametersContainer.h
    xAODTracking/TrackParametersAuxContainer.h
+   xAODTracking/TrackSurfaceContainer.h
+   xAODTracking/TrackSurfaceAuxContainer.h
    TYPES_WITH_NAMESPACE xAOD::TrackParticleContainer
    xAOD::TrackParticleAuxContainer xAOD::NeutralParticleContainer
    xAOD::NeutralParticleAuxContainer xAOD::VertexContainer
@@ -39,6 +41,7 @@ atlas_add_poolcnv_library( xAODTrackingAthenaPoolPoolCnv
    xAOD::TrackJacobianContainer xAOD::TrackJacobianAuxContainer
    xAOD::TrackMeasurementContainer xAOD::TrackMeasurementAuxContainer
    xAOD::TrackParametersContainer xAOD::TrackParametersAuxContainer
+   xAOD::TrackSurfaceContainer xAOD::TrackSurfaceAuxContainer
    CNV_PFX xAOD
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthenaKernel

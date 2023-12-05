@@ -405,7 +405,7 @@ ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
   // TODO see setUncalibratedSourceLink_impl
   // auto el = trackStates()[istate]->uncalibratedMeasurementLink();
   // return Acts::SourceLink(el);
-  return m_uncalibratedSourceLinks[istate].value();
+return m_uncalibratedSourceLinks[istate].value();
 }
 Acts::SourceLink
 ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
