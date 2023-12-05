@@ -157,9 +157,11 @@ def main(args):
     import PyUtils.RootUtils as ru
     root = ru.import_root()  # noqa: F841
 
-    # Force load some dictionaries to work around ATLASRECTS-6261/ROOT-10940
+    # Force load some dictionaries to work around ATLASRECTS-6261/ROOT-10940/ATEAM-942
     if 'AtlasProject' in environ and environ['AtlasProject'] == 'Athena':
         root.xAOD.Init().ignore()
+        root.xAOD.ParticleContainer_v1
+        root.xAOD.DiTauJetContainer_v1
 
     import PyUtils.Logging as L
     msg = L.logging.getLogger('diff-root')
