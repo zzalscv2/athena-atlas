@@ -102,6 +102,9 @@ def process_log_file(url, branch, test_name):
     if 'ERROR    Your change breaks the frozen tier0 policy in test' in text:
         failing_tests[branch].append(process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_name))
 
+    if 'ERROR    Your change breaks the frozen derivation policy in test' in text:
+        failing_tests[branch].append(process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_name))
+    
     return
 
 def process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_name):
@@ -122,8 +125,8 @@ def process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_
         exit(1)
 
     ref_file_path = ref_file_match.group().split('location')[1].strip()
-    existing_version_number= ref_file_path.split('/')[-1]
-    branch = ref_file_path.split('/')[-3]
+    existing_version_number= ref_file_path.split('/')[-2]
+    branch = ref_file_path.split('/')[-4]
     new_version_number = 'v'+str(int(existing_version_number[1:])+1)
     new_version_directory = eos_path_root+branch+'/'+ami_tag+'/'+new_version_number 
     old_version_directory = eos_path_root+branch+'/'+ami_tag+'/'+existing_version_number 
@@ -135,7 +138,7 @@ def process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_
         exit(1)
     
     # Sanity checks
-    ami_tag_check = ref_file_path.split('/')[-2].strip()
+    ami_tag_check = ref_file_path.split('/')[-3].strip()
     if ami_tag_check!=ami_tag:
         print('FATAL: Sanity check: "{}" from reference file path "{}" does not match ami tag "{}" extracted previously.'.format(ami_tag_check, ref_file_path, ami_tag))
         exit(1)
