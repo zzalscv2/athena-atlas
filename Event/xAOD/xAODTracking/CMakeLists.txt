@@ -29,7 +29,7 @@ atlas_add_xaod_smart_pointer_dicts(
               "xAOD::TrackStateValidationContainer_v1"
               "xAOD::SCTRawHitValidationContainer_v1" 
               "xAOD::TrackStorageContainer_v1"
-              "xAOD::SurfaceBackendContainer_v1")
+              "xAOD::TrackSurfaceContainer_v1")
 
 atlas_add_dictionary( xAODTrackingDict
    xAODTracking/xAODTrackingDict.h

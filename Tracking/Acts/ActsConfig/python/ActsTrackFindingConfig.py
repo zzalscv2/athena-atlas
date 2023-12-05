@@ -106,6 +106,15 @@ def ActsTrackFindingCfg(flags,
     # if all eta bins are >=0. the counter will be categorized by abs(eta) otherwise eta
     kwargs.setdefault("StatisticEtaBins", [eta/10. for eta in range(5, 40, 5)]) # eta 0.0 - 4.0 in steps of 0.5
     kwargs.setdefault("DumpEtaBinsForAll", False)
+    from OutputStreamAthenaPool.OutputStreamConfig import addToESD
+    collections = ["xAOD::TrackStorageContainer#SiSPSeededActsTrackAODTrackStorage", "xAOD::TrackStorageAuxContainer#SiSPSeededActsTrackAODTrackStorageAux."] 
+    collections += ["xAOD::TrackStateContainer#SiSPSeededActsTrackStates", "xAOD::TrackStateAuxContainer#SiSPSeededActsTrackStatesAux."]
+    collections += ["xAOD::TrackParametersContainer#SiSPSeededActsTrackParameters", "xAOD::TrackParametersAuxContainer#SiSPSeededActsTrackParametersAux."]
+    collections += ["xAOD::TrackJacobianContainer#SiSPSeededActsTrackJacobians", "xAOD::TrackJacobianAuxContainer#SiSPSeededActsTrackJacobiansAux."]
+    collections += ["xAOD::TrackMeasurementContainer#SiSPSeededActsTrackMeasurements", "xAOD::TrackMeasurementAuxContainer#SiSPSeededActsTrackMeasurementsAux."]
+    collections += ["xAOD::TrackSurfaceContainer#SiSPSeededActsTrackSurfaces", "xAOD::TrackSurfaceAuxContainer#SiSPSeededActsTrackSurfacesAux."]
+
+    acc.merge(addToESD(flags, collections))
 
     if 'FitterTool' not in kwargs:
         from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg 

@@ -107,16 +107,16 @@ template <class C>
 MutableMultiTrajectoryHandle<C>::MutableMultiTrajectoryHandle(
     C* algorithm, const std::string& propertyNamePrefix,
     const std::string& namePrefix)
-    : m_statesKey(algorithm, propertyNamePrefix + "TrackStatesKey",
-                  namePrefix + "TrackStates"),
-      m_parametersKey(algorithm, propertyNamePrefix + "TrackParametersKey",
-                      namePrefix + "TrackParameters"),
-      m_jacobiansKey(algorithm, propertyNamePrefix + "TrackJacobiansKey",
-                     namePrefix + "TrackJacobians"),
-      m_measurementsKey(algorithm, propertyNamePrefix + "TrackMeasurementsKey",
-                        namePrefix + "TrackMeasurements"),
-      m_surfacesKey(algorithm, propertyNamePrefix + "SurfacesBaackendKey",
-                    namePrefix + "SurfacesBackend") {}
+    : m_statesKey(algorithm, propertyNamePrefix + "StatesKey",
+                  namePrefix + "States"),
+      m_parametersKey(algorithm, propertyNamePrefix + "ParametersKey",
+                      namePrefix + "Parameters"),
+      m_jacobiansKey(algorithm, propertyNamePrefix + "JacobiansKey",
+                     namePrefix + "Jacobians"),
+      m_measurementsKey(algorithm, propertyNamePrefix + "MeasurementsKey",
+                        namePrefix + "Measurements"),
+      m_surfacesKey(algorithm, propertyNamePrefix + "SurfacesKey",
+                    namePrefix + "Surfaces") {}
 
 template <class C>
 StatusCode MutableMultiTrajectoryHandle<C>::initialize() {
