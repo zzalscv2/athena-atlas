@@ -631,7 +631,7 @@ void InDetAlignDBTool::dispGroup(const int dettype, const int bec,
              << " type " << syst );
 }
 
-void InDetAlignDBTool::writeFile(const bool ntuple, const std::string file) 
+void InDetAlignDBTool::writeFile(const bool ntuple, const std::string& file) 
   const {
   std::ofstream* outfile=nullptr;
   INTupleSvc* ntsvc;
@@ -755,7 +755,7 @@ void InDetAlignDBTool::writeFile(const bool ntuple, const std::string file)
 }
 
 // write extra txt file for new IBLDist
-void InDetAlignDBTool::writeIBLDistFile( const std::string file) 
+void InDetAlignDBTool::writeIBLDistFile( const std::string& file) 
   const {
   std::ofstream* outfile=nullptr;
  
@@ -787,7 +787,7 @@ void InDetAlignDBTool::writeIBLDistFile( const std::string file)
 
 
 // write extra txt file for new IBLDist                                                                                                                                        
-void InDetAlignDBTool::writeGlobalFolderFile( const std::string file)
+void InDetAlignDBTool::writeGlobalFolderFile( const std::string& file)
   const {
   std::ofstream* outfile=nullptr;
 
@@ -836,7 +836,7 @@ void InDetAlignDBTool::writeGlobalFolderFile( const std::string file)
 
 
 
-void InDetAlignDBTool::readTextFile(const std::string file) const {
+void InDetAlignDBTool::readTextFile(const std::string& file) const {
   //  if (m_par_oldTextFile) return readOldTextFile(file);
 
   ATH_MSG_DEBUG("readTextFile - set alignment constants from text file: " << file );
@@ -1031,7 +1031,7 @@ void InDetAlignDBTool::readOldTextFile(const std::string file) const {
 */
 
 
-void InDetAlignDBTool::readNtuple(const std::string file) const {
+void InDetAlignDBTool::readNtuple(const std::string& file) const {
   ATH_MSG_DEBUG("readNtuple - set alignment constants from ntuple path: " << file );
   INTupleSvc* ntsvc;
   if (StatusCode::SUCCESS!=service("NTupleSvc",ntsvc,true))
@@ -1309,7 +1309,7 @@ StatusCode InDetAlignDBTool::outputObjs() {
   return StatusCode::SUCCESS;
 }
 
-void InDetAlignDBTool::fillDB(const std::string tag, 
+void InDetAlignDBTool::fillDB(const std::string& tag, 
             const unsigned int run1, const unsigned int event1,
             const unsigned int run2, const unsigned int event2) const {
   

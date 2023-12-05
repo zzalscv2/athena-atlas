@@ -56,13 +56,13 @@ virtual public IInDetAlignDBTool, public AthAlgTool {
 		 const IInterface* parent);
   virtual ~InDetAlignDBTool();
 
-  virtual StatusCode initialize();
-  virtual StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
 
   // tool methods
   // create null database in TDS for subsequent manipulation
 
-  virtual void createDB() const;
+  virtual void createDB() const override;
 
   // displace a group of modules
   // modules to effect are specified by dettype (1=pixel, 2=SCT, -1 both),
@@ -79,101 +79,101 @@ virtual public IInDetAlignDBTool, public AthAlgTool {
   virtual void dispGroup(const int dettype, const int bec, const int layer,
                           const int ring, const int sector,
                           const float rphidisp, const float rdisp, const float zdisp, 
-                          const int syst, const int level, const int skip) const;
+                          const int syst, const int level, const int skip) const override;
 
   // write database contents to flat text file or ntuple
   // for flat file, file gives filename, for ntuple, file is e.g. 
   //  /NTUPLES/FILE1
-  virtual void writeFile(const bool ntuple, const std::string file) const;
+  virtual void writeFile(const bool ntuple, const std::string& file) const override;
 
   // write IBLDist txt files
-  virtual void writeIBLDistFile( const std::string file) const; 
+  virtual void writeIBLDistFile( const std::string& file) const override;
 
   // write GlobalFolder txt files
-  virtual void writeGlobalFolderFile( const std::string file) const;
+  virtual void writeGlobalFolderFile( const std::string& file) const override;
 
   // read back database from text file
-  virtual void readTextFile(const std::string file) const;
+  virtual void readTextFile(const std::string& file) const override;
 
   // read back database from text file
   //  void readOldTextFile(const std::string file) const;
 
   // read back database from ntuple
-  virtual void readNtuple(const std::string file) const;
+  virtual void readNtuple(const std::string& file) const override;
 
   // convert an Identifier to a set of integers specifying detector, barrel/ec
   // (0 for barrel, -1 for endcap C, +1 for endcap A), layer, ring (eta), 
   // sector (phi), and side (0/1, pixel always 0)
   // same as the fields of the Identifier, except bec is +-1 not +-2 for endcap
   virtual bool idToDetSet(const Identifier ident,
-          int& det,int& bec,int& layer,int& ring,int& sector,int& side) const;
+          int& det,int& bec,int& layer,int& ring,int& sector,int& side) const override;
 
   // return the AlignableTransform name where the transform for the given
   // module can be found, 3 levels corresponding to alignment hierarchy
-  virtual std::string dirkey(const Identifier&, const int) const;
-  virtual std::string dirkey(const int,const int,const int, const int) const;
-  virtual std::string dirkey(const int,const int,const int, const int, const int) const;
-  virtual std::string DBMkey(const int,const int,const int, const int) const;
+  virtual std::string dirkey(const Identifier&, const int) const override;
+  virtual std::string dirkey(const int,const int,const int, const int) const override;
+  virtual std::string dirkey(const int,const int,const int, const int, const int) const override;
+  virtual std::string DBMkey(const int,const int,const int, const int) const override;
   
   // set a particular transform specified by Identifier
   virtual bool setTrans(const Identifier& ident, const int level,
-    const Amg::Transform3D& trans) const;
+    const Amg::Transform3D& trans) const override;
 
   // As above but takes translation and rotations alpha, beta, gamma (rotations around x,y,z axes) as input.
   // Calculates transform as HepGeom::Translate3D(translate) * HepGeom::RotateX3D(alpha) * HepGeom::RotateY3D(beta) * HepGeom::RotateZ3D(gamma)
   virtual bool setTrans(const Identifier& ident, const int level,
-			const Amg::Vector3D& translate, double alpha, double beta, double gamma) const;
+			const Amg::Vector3D& translate, double alpha, double beta, double gamma) const override;
 
 
   // tweak a particular transform specified by Identifier (i.e. add to 
   //   already existing transformation)
   virtual bool tweakTrans(const Identifier& ident, const int level,
-    const Amg::Transform3D& trans) const;
+    const Amg::Transform3D& trans) const override;
 
   // As above but takes translation and rotations alpha, beta, gamma (rotations around x,y,z axes) as input.
   // Calculates transform as HepGeom::Translate3D(translate) * HepGeom::RotateX3D(alpha) * HepGeom::RotateY3D(beta) * HepGeom::RotateZ3D(gamma)
   virtual bool tweakTrans(const Identifier& ident, const int level,
-                        const Amg::Vector3D& translate, double alpha, double beta, double gamma) const;
+                        const Amg::Vector3D& translate, double alpha, double beta, double gamma) const override;
 
   /** This is the tweak function for the IBLDist DB **/
-  virtual bool tweakIBLDist(const int, const float) const;
+  virtual bool tweakIBLDist(const int, const float) const override;
 
   /** This is the tweak function for the GlobalFolder DB **/
   virtual bool tweakGlobalFolder(const Identifier& ident, const int level,
-				 const Amg::Transform3D& trans) const ;
+				 const Amg::Transform3D& trans) const;
 
   /** convert L3 module identifier to L1 or L2 */
   virtual Identifier getL1L2fromL3Identifier( const Identifier& ident
                                             , const int& level
-                                            ) const ;
+                                            ) const override;
 
   /** get cumulative L1, L2, L3 trafo for (L3-) module. Result is in local frame. */
-  virtual Amg::Transform3D getTransL123( const Identifier& ident ) const ;
+  virtual Amg::Transform3D getTransL123( const Identifier& ident ) const override;
 
   /** return value of particular transform specified by identifier and level
   calculates L1 and L2 identifiers automatically by getL1L2fromL3Identifier 
   if L3 identifier passed. L1, L2 are in global, L3 in local frame. */
   virtual Amg::Transform3D getTrans( const Identifier& ident
                                  , const int level
-                                 ) const ;
+                                 ) const override;
 
   // write the transforms to outputstream
-  virtual StatusCode outputObjs();
+  virtual StatusCode outputObjs() override;
 
   // write the transform IOVs to IOVDB
-  virtual void fillDB(const std::string tag, 
+  virtual void fillDB(const std::string& tag, 
      const unsigned int run1, const unsigned int event1,
-     const unsigned int run2, const unsigned int event2) const;
+     const unsigned int run2, const unsigned int event2) const override;
 
   // print the transforms, level=1 lists sizes, level=2 lists all transforms
-  virtual void printDB(const int level) const;
+  virtual void printDB(const int level) const override;
 
   // sort all the AlignableTransform objects so searches/inserts work properly
-  virtual void sortTrans() const;
+  virtual void sortTrans() const override;
   
   //calculate three rotations around locX,locY,locY = alpha,beta,gamma out of an HepGeom::Transform3D
   void extractAlphaBetaGamma(const Amg::Transform3D & trans, 
-                             double& alpha, double& beta, double &gamma) const; 
+                             double& alpha, double& beta, double &gamma) const override;
   
  private:
 

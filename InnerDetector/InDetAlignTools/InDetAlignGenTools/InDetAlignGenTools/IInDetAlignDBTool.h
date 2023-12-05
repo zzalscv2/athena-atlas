@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNTOOLS_ALIGNDBTOOL_IH
@@ -29,11 +29,11 @@ class IInDetAlignDBTool: virtual public IAlgTool {
                       const float, const float, const float, 
                       const int, const int, const int) const =0;
 
-  virtual void writeFile(const bool, const std::string) const =0;
-  virtual void writeIBLDistFile( const std::string file) const =0;
-  virtual void writeGlobalFolderFile( const std::string file) const =0;
-  virtual void readTextFile(const std::string) const =0;
-  virtual void readNtuple(const std::string) const =0;
+  virtual void writeFile(const bool, const std::string&) const =0;
+  virtual void writeIBLDistFile( const std::string& file) const =0;
+  virtual void writeGlobalFolderFile( const std::string& file) const =0;
+  virtual void readTextFile(const std::string&) const =0;
+  virtual void readNtuple(const std::string&) const =0;
 
   virtual bool idToDetSet(const Identifier,
                           int&,int&,int&,int&,int&,int&) const =0;
@@ -59,7 +59,7 @@ class IInDetAlignDBTool: virtual public IAlgTool {
   virtual Amg::Transform3D getTransL123( const Identifier& ident ) const=0 ;
   virtual Amg::Transform3D getTrans(const Identifier&, const int) const=0;
   virtual StatusCode outputObjs() =0;
-  virtual void fillDB(const std::string, const unsigned int,const unsigned int,
+  virtual void fillDB(const std::string&, const unsigned int,const unsigned int,
                       const unsigned  int, const unsigned int) const=0;
   virtual void printDB(const int) const=0;
   virtual void sortTrans() const=0; 
