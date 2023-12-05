@@ -24,17 +24,12 @@ TrigInDetModuleCuda::TrigInDetModuleCuda() : m_maxDevice(0), m_dumpTimeLine(fals
   for(unsigned int i=0;i<getProvidedAlgs().size();i++) {
     m_workItemCounters[i] = 0;
   }
-  
-  m_h_detmodel = (unsigned char*) malloc(sizeof(TrigAccel::DETECTOR_MODEL));
 
   m_timeLine.clear();
 
 }
 
 TrigInDetModuleCuda::~TrigInDetModuleCuda() {
-  
-  free(m_h_detmodel);
-  m_h_detmodel = 0;
   if(m_dumpTimeLine) {
     if(m_timeLine.size() > 0) {
        tbb::tick_count t0 = m_timeLine[0].m_time;
@@ -51,6 +46,10 @@ TrigInDetModuleCuda::~TrigInDetModuleCuda() {
        tl.close();
       m_timeLine.clear();
     }
+ }
+
+ for(auto pair: m_d_detmodel_ptrs){
+  cudaFree(pair.second);
  }
 }
 
@@ -93,7 +92,6 @@ SeedMakingDeviceContext* TrigInDetModuleCuda::createSeedMakingContext(int id) co
   
   cudaMalloc((void **)&p->d_settings,    sizeof(TrigAccel::SEED_FINDER_SETTINGS));
   cudaMalloc((void **)&p->d_spacepoints, sizeof(TrigAccel::SPACEPOINT_STORAGE));
-  cudaMalloc((void **)&p->d_detmodel,    sizeof(TrigAccel::DETECTOR_MODEL));
   checkError();
   cudaMalloc((void **)&p->d_outputseeds, sizeof(TrigAccel::OUTPUT_SEED_STORAGE));
   cudaMalloc((void **)&p->d_doubletstorage, sizeof(DOUBLET_STORAGE));
@@ -110,6 +108,8 @@ SeedMakingDeviceContext* TrigInDetModuleCuda::createSeedMakingContext(int id) co
 
   p->h_size = sizeof(TrigAccel::SEED_FINDER_SETTINGS) + sizeof(TrigAccel::SPACEPOINT_STORAGE) + sizeof(TrigAccel::OUTPUT_SEED_STORAGE);
   
+  p->d_detmodel = m_d_detmodel_ptrs.at(id); //get the detmodel pointer for the selected device
+
   checkError(14);
   return p;
 }
@@ -146,7 +146,6 @@ SeedMakingManagedDeviceContext* TrigInDetModuleCuda::createManagedSeedMakingCont
   cudaMallocManaged((void **)&p->m_spacepoints, sizeof(TrigAccel::SPACEPOINT_STORAGE));
   cudaMallocManaged((void **)&p->m_outputseeds, sizeof(TrigAccel::OUTPUT_SEED_STORAGE));
 
-  cudaMalloc((void **)&p->d_detmodel,    sizeof(TrigAccel::DETECTOR_MODEL));
   checkError();
   cudaMalloc((void **)&p->d_doubletstorage, sizeof(DOUBLET_STORAGE));
   cudaMalloc((void **)&p->d_doubletinfo, sizeof(DOUBLET_INFO));
@@ -158,15 +157,25 @@ SeedMakingManagedDeviceContext* TrigInDetModuleCuda::createManagedSeedMakingCont
   
   p->m_size = sizeof(TrigAccel::SEED_FINDER_SETTINGS) + sizeof(TrigAccel::SPACEPOINT_STORAGE) + sizeof(TrigAccel::OUTPUT_SEED_STORAGE);
 
+  p->d_detmodel = m_d_detmodel_ptrs.at(id); //get the detmodel pointer for the selected device
+
   checkError(14);
   return p;
 }
 
 TrigAccel::Work* TrigInDetModuleCuda::createWork(int workType, std::shared_ptr<TrigAccel::OffloadBuffer> data){
-  
   if(workType == TrigAccel::InDetJobControlCode::SIL_LAYERS_EXPORT){
+    unsigned char* d_detmodel;
+    int deviceId = 0;//always using device 0 for the time being
 
-    memcpy(m_h_detmodel, (unsigned char*)data->get(), sizeof(TrigAccel::DETECTOR_MODEL));
+    cudaSetDevice(deviceId);
+    cudaMalloc(&d_detmodel, sizeof(TrigAccel::DETECTOR_MODEL));
+    checkError();
+
+    m_d_detmodel_ptrs[deviceId] = d_detmodel;
+
+    cudaMemcpy(d_detmodel, (unsigned char*)data->get(), sizeof(TrigAccel::DETECTOR_MODEL), cudaMemcpyHostToDevice);
+    checkError(21);
 
     return 0;
   }
@@ -179,8 +188,6 @@ TrigAccel::Work* TrigInDetModuleCuda::createWork(int workType, std::shared_ptr<T
 
     SeedMakingDeviceContext* ctx = createSeedMakingContext(deviceId);
 
-    cudaMemcpy(ctx->d_detmodel, m_h_detmodel, sizeof(TrigAccel::DETECTOR_MODEL), cudaMemcpyHostToDevice);
-    checkError(21);
     TrigAccel::SEED_MAKING_JOB *pArray = reinterpret_cast<TrigAccel::SEED_MAKING_JOB*>(data->get());
     
     //1. copy settings to the context host array
@@ -210,8 +217,6 @@ TrigAccel::Work* TrigInDetModuleCuda::createWork(int workType, std::shared_ptr<T
 
     SeedMakingManagedDeviceContext* ctx = createManagedSeedMakingContext(deviceId);
 
-    cudaMemcpy(ctx->d_detmodel, m_h_detmodel, sizeof(TrigAccel::DETECTOR_MODEL), cudaMemcpyHostToDevice);//TO-DO: try CoW here
-    checkError(21);
     TrigAccel::SEED_MAKING_JOB *pArray = reinterpret_cast<TrigAccel::SEED_MAKING_JOB*>(data->get());
     
     //1. copy settings to the context host array

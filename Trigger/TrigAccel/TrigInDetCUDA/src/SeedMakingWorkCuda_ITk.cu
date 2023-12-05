@@ -43,7 +43,6 @@ SeedMakingWorkCudaITk::~SeedMakingWorkCudaITk() {
 
   cudaFree(p->d_settings);
   cudaFree(p->d_spacepoints);
-  cudaFree(p->d_detmodel);
   
   cudaFree(p->d_outputseeds);
   cudaFree(p->d_doubletstorage);
@@ -190,7 +189,6 @@ SeedMakingWorkCudaManagedITk::~SeedMakingWorkCudaManagedITk() {
 
   cudaFree(p->m_settings);
   cudaFree(p->m_spacepoints);
-  cudaFree(p->d_detmodel);
   
   cudaFree(p->m_outputseeds);
   cudaFree(p->d_doubletstorage);
