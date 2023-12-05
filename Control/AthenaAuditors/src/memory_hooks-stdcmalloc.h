@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // memory_hooks which are used for the AthMemoryAuditor
@@ -295,9 +295,7 @@ my_free_hook (void *ptr, const void* /* caller */)
       np->setNext(nn);
 
 
-      myBlocks_tc* bptr = &*i;
-      allocset_tc.erase(i);
-      delete bptr;
+      allocset_tc.erase_and_dispose(i, allocSet_deleter());
     }
   else
     {
@@ -373,9 +371,7 @@ my_realloc_hook(void *ptr, size_t size, const void * /* caller */)
       np->setNext(nn);
       
       // remove from list
-      myBlocks_tc* ptr1 = &*i;
-      allocset_tc.erase(i);
-      delete ptr1;
+      allocset_tc.erase(i, allocSet_deleter());
     }
   
   // call real realloc
@@ -443,9 +439,7 @@ my_realloc_hook(void *ptr, size_t size, const void * /* caller */)
 		    }
 		  
 		  // remove old location from current list 
-                  myBlocks_tc* ptr1 = &*i;
-		  allocset_tc.erase(i);
-		  delete ptr1;
+		  allocset_tc.erase(i, allocSet_deleter());
 		}
 	      else
 		// memory was not with redzones, but stayed at the same place in memory
@@ -496,9 +490,7 @@ my_realloc_hook(void *ptr, size_t size, const void * /* caller */)
       np->setNext(nn);
       
       // remove from list
-      myBlocks_tc* ptr1 = &*i;
-      allocset_tc.erase(i);
-      delete ptr1;
+      allocset_tc.erase_and_dispose(i, allocSet_deleter());
       
       char* start((char*)result);
       if ( size > deltaLow+deltaHigh )
@@ -564,8 +556,7 @@ my_realloc_hook(void *ptr, size_t size, const void * /* caller */)
 /* 	  np->setNext(nn); */
 	  
 /* 	  // remove from list */
-/* 	  allocset_tc.erase(i); */
-/* 	  delete &(*i); */
+/* 	  allocset_tc.erase(i, allocSet_deleter()); */
 /* 	} */
 /*     } */
   
@@ -630,8 +621,7 @@ my_realloc_hook(void *ptr, size_t size, const void * /* caller */)
 /* 	  if ( i != allocset_tc.end() ) */
 /* 	    { */
 /* 	      // remove from list */
-/* 	      allocset_tc.erase(i); */
-/* 	      delete &(*i); */
+/* 	      allocset_tc.erase(i, allocSet_deleter()); */
 /* 	    } */
 	  
 /* 	  // different pointer, need to overwrite some values... */
@@ -651,8 +641,7 @@ my_realloc_hook(void *ptr, size_t size, const void * /* caller */)
 /* 		counter_rs++; */
 	      
 /* 	      // remove old location from current list  */
-/* 	      allocset_tc.erase(i); */
-/* 	      delete &(*i); */
+/* 	      allocset_tc.erase(i, allocSet_deleter()); */
 /* 	    } */
 	  
 /* 	  // now create new entry at new position */
