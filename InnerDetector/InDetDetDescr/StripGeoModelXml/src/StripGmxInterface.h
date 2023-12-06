@@ -53,7 +53,8 @@ public:
                       std::map<std::string, int> &index,
                       std::pair<std::string, int> &extraIndex,
                       int sequentialId,
-                      GeoVFullPhysVol *fpv) override final;
+                      GeoVFullPhysVol *fpv,
+		      int splitLevel) override final;
   virtual void addAlignable(int level,
                             std::map<std::string, int> &index,
                             GeoVFullPhysVol *fpv,

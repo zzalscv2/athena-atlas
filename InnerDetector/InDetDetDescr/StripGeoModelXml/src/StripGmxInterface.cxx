@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StripGmxInterface.h"
@@ -448,7 +448,8 @@ void StripGmxInterface::addSplitSensor(const std::string& typeName,
                                        std::map<std::string, int> &index,
                                        std::pair<std::string, int> &extraIndex,
                                        int /* hitIdOfWafer */,
-                                       GeoVFullPhysVol *fpv)
+                                       GeoVFullPhysVol *fpv,
+				       int /* splitLevel */)
 {
   std::map<std::string, int> updatedIndex;
   splitSensorId(index,extraIndex,updatedIndex);
@@ -692,7 +693,7 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
             for(int i=0;i<splitLevel;i++){
               std::string field = "eta_module";//eventually specify in Xml the field to split in?
               std::pair<std::string,int> extraIndex(field,i);
-              addSplitSensor(typeName,index,extraIndex,0,fullPhysVolPointer);
+              addSplitSensor(typeName,index,extraIndex,0,fullPhysVolPointer,splitLevel);
             }
         }
         else addSensor(typeName,index,0,fullPhysVolPointer);
