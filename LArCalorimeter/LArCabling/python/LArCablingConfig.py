@@ -64,6 +64,9 @@ def LArOnOffIdMappingCfg(configFlags):
 
 def LArOnOffIdMappingSCCfg(configFlags):
     result = ComponentAccumulator()
+    # mapping requires the geometry to be loaded
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+    result.merge(LArGMCfg(configFlags))
     if configFlags.Input.isMC:
        result.merge(_larCablingCfg(configFlags,LArOnOffMappingAlg,"/LAR/IdentifierOfl/OnOffIdMap_SC","LArOnOffMappingAlgSC"))
        from IOVDbSvc.IOVDbSvcConfig import addOverride
