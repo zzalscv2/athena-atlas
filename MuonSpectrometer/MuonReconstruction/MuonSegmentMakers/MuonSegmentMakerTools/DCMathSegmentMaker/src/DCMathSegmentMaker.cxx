@@ -194,7 +194,7 @@ namespace Muon {
         TrkDriftCircleMath::Road road(TrkDriftCircleMath::LocVec2D{0.,0.}, road_angleYZ, chamber_angleYZ, angle);
 
         // call segment finder
-        TrkDriftCircleMath::SegVec segs = m_segmentFinder->findSegments(dcs, cls, std::move(road), dcStatistics, multiGeo.get());
+        TrkDriftCircleMath::SegVec segs = m_segmentFinder->findSegments(dcs, cls, road, dcStatistics, multiGeo.get());
 
         if (msgLvl(MSG::VERBOSE)) {
             std::stringstream sstr{};
@@ -1038,7 +1038,7 @@ namespace Muon {
             ATH_MSG_VERBOSE(" " << m_idHelperSvc->toString(id) << "  clid: " << clid.id() << " central phi "
                                 << meas->detectorElement()->center().phi() << " index " << index);
           
-            cls.emplace_back(std::move(lp), clust.error, std::move(clid), index);            
+            cls.emplace_back(lp, clust.error, clid, index);            
         }
         return cls;
     }
@@ -1084,7 +1084,7 @@ namespace Muon {
             double preciseError = dr;
             if (m_usePreciseError) { preciseError = m_preciseErrorScale * (0.23 * std::exp(-std::abs(r) / 6.06) + 0.0362); }
             // create new DriftCircle
-            TrkDriftCircleMath::DriftCircle dc(lpos, r, dr, preciseError, TrkDriftCircleMath::DriftCircle::InTime, std::move(mdtid), index, rot);
+            TrkDriftCircleMath::DriftCircle dc(lpos, r, dr, preciseError, TrkDriftCircleMath::DriftCircle::InTime, mdtid, index, rot);
 
             TubeEnds tubeEnds = localTubeEnds(*rot, gToStation, amdbToGlobal);
             if (firstMdt) {
@@ -1282,7 +1282,7 @@ namespace Muon {
             TrkDriftCircleMath::DriftCircle new_dc(dcit.position(), std::abs(nonconstDC->driftRadius()), dcit.dr(), dcit.drPrecise(),
                                                    dcit.driftState(), dcit.id(),
                                                    dcit.index(), nonconstDC.get());
-            TrkDriftCircleMath::DCOnTrack new_dc_on_track(std::move(new_dc), dcit.residual(), dcit.errorTrack());
+            TrkDriftCircleMath::DCOnTrack new_dc_on_track(new_dc, dcit.residual(), dcit.errorTrack());
             dcit = std::move(new_dc_on_track);
 
             if (hasT0) {

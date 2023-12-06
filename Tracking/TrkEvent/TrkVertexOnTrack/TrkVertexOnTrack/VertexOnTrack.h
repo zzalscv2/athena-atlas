@@ -59,12 +59,12 @@ public:
 
   /** Constructor with (LocalParameters&, LocalErrorMatrix&, PerigeeSurface&)
   The associated PerigeeSurface is cloned*/
-  VertexOnTrack(const LocalParameters& locpars,
-                const Amg::MatrixX& locerr,
+  VertexOnTrack(LocalParameters&& locpars,
+                Amg::MatrixX&& locerr,
                 const PerigeeSurface& assocSurf);
 
-  VertexOnTrack(const LocalParameters& locpars,
-                const Amg::MatrixX& locerr,
+  VertexOnTrack(LocalParameters&& locpars,
+                Amg::MatrixX&& locerr,
                 SurfaceUniquePtrT<const PerigeeSurface> assocSurf);
 
   /** Constructor from: RedVertex, Perigee - the perigee is needed for the

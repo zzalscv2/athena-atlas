@@ -282,7 +282,7 @@ const Trk::PseudoMeasurementOnTrack* AddTRTMomConstr::createPMfromSi ( const Trk
   const Trk::Surface& mpSurf = mp->associatedSurface() ;
 
   Trk::PseudoMeasurementOnTrack *pm = new Trk::PseudoMeasurementOnTrack( std::move(parFromSi)
-                                                                       , std::move(covFromSi)
+                                                                       , covFromSi
                                                                        , mpSurf
                                                                        ) ;
   return pm ;
@@ -320,7 +320,7 @@ const Trk::PseudoMeasurementOnTrack* AddTRTMomConstr::createPMfromTRT( const Trk
   const Trk::Surface& mpTRTSurf = mpSi->associatedSurface()  ;
 
   Trk::PseudoMeasurementOnTrack *pm = new Trk::PseudoMeasurementOnTrack( std::move(parFromTRT)
-                                                                       , std::move(covFromTRT)
+                                                                       , covFromTRT
                                                                        , mpTRTSurf
                                                                        ) ;
   return pm ;

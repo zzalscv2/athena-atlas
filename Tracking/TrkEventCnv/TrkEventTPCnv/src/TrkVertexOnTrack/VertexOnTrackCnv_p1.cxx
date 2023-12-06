@@ -21,10 +21,12 @@ void VertexOnTrackCnv_p1::persToTrans( const Trk :: VertexOnTrack_p1 *persObj,
   Amg::MatrixX localCovariance;
   fillTransFromPStore( &m_localErrMatCnv, persObj->m_localErrMat, &dummy, log );
   EigenHelpers::vectorToEigenMatrix(dummy.values, localCovariance, "RIO_OnTrackCnv_p2");
-   
+
   Trk::SurfaceUniquePtrT<const Trk::PerigeeSurface> surf
     (createTransFromPStore( &m_surfaceCnv, persObj->m_associatedSurface, log ));
-  *transObj = Trk::VertexOnTrack (localParams, localCovariance, std::move(surf));
+  *transObj = Trk::VertexOnTrack (std::move(localParams),
+                                  std::move(localCovariance),
+                                  std::move(surf));
 }
 
 void VertexOnTrackCnv_p1::transToPers( const Trk :: VertexOnTrack    * /**transObj*/,
