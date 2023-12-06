@@ -28,7 +28,8 @@ if __name__ == "__main__":
     flags.Output.ESDFileName = args.output
     flags.Input.Files = args.inputFile
     flags.Muon.applyMMPassivation = True
-    flags.GeoModel.AtlasVersion = "ATLAS-R3S-2021-03-02-00"
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     flags.IOVDb.GlobalTag = "OFLCOND-MC23-SDR-RUN3-02"
     flags.lock()
     #### 
