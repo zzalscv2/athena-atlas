@@ -53,7 +53,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
 
     // Date from which jFEX database parameters should be used
     // noise cuts fix: 2023-09-19
-    bool validTimeStamp = (ctx.eventID().time_stamp() < 1695127624) ? false : true;
+    bool validTimeStamp = (ctx.eventID().time_stamp() < m_dbBeginTimestamp) ? false : true;
 
     // Set DB to false if any of keys not provided
     bool anyKeyEmpty = ( m_JfexModuleSettingsKey.empty() ||  m_JfexNoiseCutsKey.empty() || m_JfexSystemSettingsKey.empty() );
@@ -303,7 +303,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
     writeDBTool->set_NoiseCuts(NoiseCuts);
     writeDBTool->set_PileUpValues(PileUpWeight);    
     
-    if(m_printVals){
+    if(msgLvl(MSG::DEBUG)){
 
         std::stringstream myprint;
 	if (useDBparams)
@@ -321,7 +321,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
         }
         myprint << std::endl;
 
-        ATH_MSG_INFO(myprint.str());
+        ATH_MSG_DEBUG(myprint.str());
 
 
         std::stringstream myprint1;
@@ -345,7 +345,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
         myprint1 << "PileUpThresholdLowFcal: "          << writeDBTool->get_PUThrLowFcal()          <<std::endl;
         myprint1 << "PileUpThresholdHighFcal: "         << writeDBTool->get_PUThrHighFcal()         <<std::endl;
 
-        ATH_MSG_INFO(myprint1.str());
+        ATH_MSG_DEBUG(myprint1.str());
 
         std::stringstream myprint2;
         
@@ -361,7 +361,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
             myprint2 <<"OnlineID: 0x"<< std::hex<<key<<std::dec<< " - CutJetEM: "<< CutJetEM<< ", CutJetHad:"<< CutJetHad<< ", CutMetEM:"<< CutMetEM<< ", CutMetHad:"<< CutMetHad<< ", PileUpWeightEM: "<< PileUpWeightEM<< ", PileUpWeightHad:"<< PileUpWeightHad<< ", InverseWeightEM:"<< InverseWeightEM<< ", InverseWeightHad:"<< InverseWeightHad<< std::endl;
         }
 
-        ATH_MSG_INFO(myprint2.str());
+        ATH_MSG_DEBUG(myprint2.str());
 
     }
 

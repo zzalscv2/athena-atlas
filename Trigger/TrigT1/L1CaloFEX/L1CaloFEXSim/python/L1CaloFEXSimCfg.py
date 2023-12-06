@@ -74,7 +74,7 @@ def TriggerTowersInputCfg(flags):
         return LVL1CaloRun2ReadBSCfg(flags)
 
 
-def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulatedTowers"],deadMaterialCorrections=True, eFEXDebug=False):
+def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulatedTowers"],deadMaterialCorrections=True, outputSuffix=""):
     from AthenaConfiguration.Enums import Format
 
     acc = ComponentAccumulator()
@@ -84,8 +84,9 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
     # Configure SCell inputs
     sCellType = flags.Trigger.L1.L1CaloSuperCellContainerName
     if flags.Input.Format is Format.POOL:
-        # Read SCell directly from input RDO file
-        acc.merge(ReadSCellFromPoolFileCfg(flags,sCellType))
+        # Read SCell directly from input RDO file unless not necessary
+        if 'L1_eFexEmulatedTowers' in eFexTowerInputs and "L1_eFexEmulatedTowers" not in flags.Input.Collections:
+            acc.merge(ReadSCellFromPoolFileCfg(flags,sCellType))
         if flags.Input.isMC:
             # wont have eFexDataTowers available so remove that if it appears in input list
             eFexTowerInputs = [l for l in eFexTowerInputs if l != "L1_eFexDataTowers"]
@@ -98,14 +99,15 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
             from TrigT1CaloFexPerf.EmulationConfig import emulateSC_Cfg
             acc.merge(emulateSC_Cfg(flags))
         else:
-            # Run-3+ data inputs, decode SCells from ByteStream
-            acc.merge(ReadSCellFromByteStreamCfg(flags,key=sCellType))
+            # Run-3+ data inputs, decode SCells from ByteStream if needed
+            if 'L1_eFexEmulatedTowers' in eFexTowerInputs and "L1_eFexEmulatedTowers" not in flags.Input.Collections:
+                acc.merge(ReadSCellFromByteStreamCfg(flags,key=sCellType))
 
     # Need also TriggerTowers as input .. so reconstruct if not in input collections already
     if "xAODTriggerTowers" not in flags.Input.Collections:
         acc.merge(TriggerTowersInputCfg(flags))
 
-    if 'L1_eFexEmulatedTowers' in eFexTowerInputs:
+    if 'L1_eFexEmulatedTowers' in eFexTowerInputs and "L1_eFexEmulatedTowers" not in flags.Input.Collections:
         acc.addEventAlgo( CompFactory.LVL1.eFexTowerBuilder("L1_eFexEmulatedTowers",CaloCellContainerReadKey=sCellType) ) # builds the emulated towers to use as secondary input to eTowerMaker - name has to match what it gets called in other places to avoid conflict
 
     if flags.Trigger.L1.doeFex:
@@ -114,8 +116,8 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
             eFEXInputs = CompFactory.LVL1.eTowerMakerFromSuperCells('eTowerMakerFromSuperCells',
                eSuperCellTowerMapperTool = CompFactory.LVL1.eSuperCellTowerMapper('eSuperCellTowerMapper', SCell=sCellType))
         else:
-            # if primary is DataTowers, check that caloInputs are enabled. If it isn't then skip this
-            if (not flags.Trigger.L1.doCaloInputs) and eFexTowerInputs[0] == "L1_eFexDataTowers":
+            # if primary is DataTowers, check that caloInputs are enabled (if data towers not already available). If it isn't then skip this
+            if (not flags.Trigger.L1.doCaloInputs) and eFexTowerInputs[0] == "L1_eFexDataTowers" and ("L1_eFexDataTowers" not in flags.Input.Collections):
                 if len(eFexTowerInputs)==1:
                     log.fatal("Requested L1_eFexDataTowers but Trigger.L1.doCaloInputs is False, but not secondary collection given")
                     import sys
@@ -128,9 +130,6 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
             eFEXInputs.SecondaryInputTowers = eFexTowerInputs[1] if len(eFexTowerInputs) > 1 else ""
 
         eFEX = CompFactory.LVL1.eFEXDriver('eFEXDriver')
-        if eFEXDebug:
-            from AthenaCommon.Constants import DEBUG
-            eFEX.OutputLevel = DEBUG
         eFEX.eFEXSysSimTool = CompFactory.LVL1.eFEXSysSim('eFEXSysSimTool')
         eFEX.eFEXSysSimTool.eFEXSimTool = CompFactory.LVL1.eFEXSim('eFEXSimTool')
         eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool = CompFactory.LVL1.eFEXFPGA('eFEXFPGATool')
@@ -167,9 +166,10 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
             decoderTools += [inputjFexTool]
             decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=[inputjFexTool], MaybeMissingROBs=maybeMissingRobs)
             acc.addEventAlgo(decoderAlg)
-            
-        from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
-        acc.merge(jFexEmulatedTowersCfg(flags))   
+
+        if "L1_jFexEmulatedTowers" not in flags.Input.Collections:
+            from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
+            acc.merge(jFexEmulatedTowersCfg(flags))
         
         from L1CaloFEXCond.L1CaloFEXCondConfig import jFexDBConfig
         acc.merge(jFexDBConfig(flags))      
@@ -249,8 +249,9 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         # Rename outputs for monitoring resimulation to avoid clash with standard SG keys
         def getSimHandle(key):
             """
-            Add 'Sim' to the standard handle path
+            Add 'Sim' to the standard handle path and include user-specified suffix
             """
+            key += outputSuffix
             if not key.endswith("Sim"): key += "Sim"
             return key
 
@@ -308,7 +309,7 @@ if __name__ == '__main__':
                    help='Number of events to process if --execute is used, default=%(default)s')
     p.add_argument('-d', '--efexdebug',
                    action='store_true',
-                   help='Activate DEBUG mode for eFEX driver for unit tests')
+                   help='Activate DEBUG mode for eFEX driver .. this option is required by a unit test')
 
     args = p.parse_args()
 
@@ -389,7 +390,10 @@ if __name__ == '__main__':
     ##################################################
     # The configuration fragment to be tested
     ##################################################
-    acc.merge(L1CaloFEXSimCfg(flags, eFEXDebug=args.efexdebug))
+    acc.merge(L1CaloFEXSimCfg(flags))
+    if args.efexdebug:
+        from AthenaCommon.Constants import DEBUG
+        acc.getEventAlgo("eFEXDriver").OutputLevel = DEBUG
 
     ##################################################
     # Save and optionally run the configuration

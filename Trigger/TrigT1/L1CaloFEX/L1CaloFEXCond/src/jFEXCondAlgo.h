@@ -43,7 +43,8 @@ class jFEXCondAlgo : public AthReentrantAlgorithm {
         SG::ReadCondHandleKey<CondAttrListCollection> m_JfexNoiseCutsKey     {this,"JfexNoiseCuts"     , "", "Key to store JfexNoiseCuts DB path"     };
         SG::ReadCondHandleKey<CondAttrListCollection> m_JfexSystemSettingsKey{this,"JfexSystemSettings", "", "Key to store JfexSystemSettings DB path"};
 
-        Gaudi::Property<bool> m_printVals   {this, "jFexTowerMapping", false, "Prints all the information obtained from the COOL DB"};
+        UnsignedIntegerProperty m_dbBeginTimestamp {this,"BeginTimestamp",1695127624,"Earliest timestamp that db parameters will be loaded. Default is start of 2023-09-19"};
+
 
 };
 

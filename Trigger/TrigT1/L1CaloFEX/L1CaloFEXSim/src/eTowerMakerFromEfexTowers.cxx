@@ -48,11 +48,16 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
   bool useHardcodedCuts = false;
   if(!m_noiseCutsKey.empty()) {
       // check timestamp of event is not *before* date when started using database
-      if (ctx.eventID().time_stamp() < 1672531200) { //start of 2023
+      if (ctx.eventID().time_stamp() < m_noiseCutBeginTimestamp) {
         useHardcodedCuts = true;
       } else {
         SG::ReadCondHandle <CondAttrListCollection> noiseCuts{m_noiseCutsKey, ctx};
         if (noiseCuts.isValid()) {
+            if(msgLvl(MSG::DEBUG) && !m_printedNoiseCuts) {
+                m_printedNoiseCuts = true;
+                ATH_MSG_DEBUG("DB Noise cuts are:");
+                noiseCuts->dump();
+            }
             for (auto itr = noiseCuts->begin(); itr != noiseCuts->end(); ++itr) {
                 if (itr->first >= 50) continue;
                 noiseCutsMap[std::pair(itr->first, 0)] = itr->second["EmPS"].data<int>();
