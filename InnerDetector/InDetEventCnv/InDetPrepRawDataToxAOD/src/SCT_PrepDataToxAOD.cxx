@@ -274,20 +274,19 @@ void SCT_PrepDataToxAOD::addSDOInformation(xAOD::TrackMeasurementValidation* xpr
   // find hit
   for (const auto& hitIdentifier: prd->rdoList()) {
     auto pos{sdoCollection->find(hitIdentifier)};
-    if (pos != sdoCollection->end()) {
-      sdo_word.push_back(pos->second.word());
-      std::vector<int> sdoDepBC(pos->second.getdeposits().size(), -1);
-      std::vector<float> sdoDepEnergy(pos->second.getdeposits().size());
-      unsigned int nDepos{0};
-      for (auto& deposit: pos->second.getdeposits()) {
+    if (pos == sdoCollection->end()) continue;
+    sdo_word.push_back(pos->second.word());
+    std::vector<int> sdoDepBC(pos->second.getdeposits().size(), -1);
+    std::vector<float> sdoDepEnergy(pos->second.getdeposits().size());
+    unsigned int nDepos{0};
+    for (auto& deposit: pos->second.getdeposits()) {
         if (deposit.first) sdoDepBC[nDepos] = deposit.first.barcode();
         ATH_MSG_DEBUG(" SDO Energy Deposit " << deposit.second);
         sdoDepEnergy[nDepos] = deposit.second;
         nDepos++;
-      }
-      sdo_depositsBarcode.push_back(sdoDepBC);
-      sdo_depositsEnergy.push_back(sdoDepEnergy);
     }
+    sdo_depositsBarcode.push_back(sdoDepBC);
+    sdo_depositsEnergy.push_back(sdoDepEnergy);
   }
   AUXDATA(xprd, std::vector<int>, sdo_words) = sdo_word;
   AUXDATA(xprd, std::vector<std::vector<int>>, sdo_depositsBarcode) = sdo_depositsBarcode;
@@ -399,14 +398,15 @@ void SCT_PrepDataToxAOD::findAllHitsCompatibleWithCluster(const InDet::SCT_Clust
     ajoiningHits.push_back(*siHitIter);
   
     siHitIter2 = siHitIter+1;
+    auto bc = (*siHitIter)->particleLink().barcode();
     while (siHitIter2 != multiMatchingHits.end()) {
       // Need to come from the same truth particle
-      if ((*siHitIter)->particleLink().barcode() != (*siHitIter2)->particleLink().barcode()) {
+      if ( bc != (*siHitIter2)->particleLink().barcode()) {
         ++siHitIter2;
         continue;
       }
 
-      const double maxDiff{0.00005};
+      constexpr double maxDiff = 0.00005;
       // Check to see if the SiHits are compatible with each other.
       if (std::abs((highestXPos->localEndPosition().x()-(*siHitIter2)->localStartPosition().x()))<maxDiff and
           std::abs((highestXPos->localEndPosition().y()-(*siHitIter2)->localStartPosition().y()))<maxDiff and

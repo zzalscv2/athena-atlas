@@ -251,7 +251,7 @@ void InDet::TrackStatHelper::addEvent(const TrackCollection              * recTr
       }
       else{   // no link  
 	  
-	// ME : change logic, secondaries from G4 processes are truncated, so Barcode 0 is possible 
+	// ME : change logic, secondaries from G4 processes are truncated
 	const HepMcParticleLink& HMPL=trtruth.particleLink();
 	if (! HMPL.isValid()) {
 	  tracks.m_counter[kTracks_rec][TRACK_NOHEPMCPARTICLELINK][Region]++;
