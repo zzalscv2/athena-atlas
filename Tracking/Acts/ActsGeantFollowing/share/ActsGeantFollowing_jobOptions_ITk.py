@@ -33,7 +33,8 @@ def defaultTestFlags(flags, args):
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
     setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
-    flags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-03-00-00"
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
     flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
     flags.GeoModel.Align.Dynamic = False
     # flags.Acts.TrackingGeometry.MaterialSource = "Input"
@@ -59,7 +60,7 @@ def defaultTestFlags(flags, args):
 
     flags.Input.RunNumber = [284500]
     flags.Input.OverrideRunNumber = True
-    flags.Input.LumiBlockNumber = [1]
+    flags.Input.LumiBlockNumbers = [1]
 
 def printAndRun(accessor, flags, args):
     """debugging and execution"""
@@ -146,11 +147,7 @@ def ActsGeantFollowerCfg(flags, name="ActsGeantFollowerTool", **kwargs):
 
     #Setting up the CA for the ActsGeantFollower
     from ActsConfig.ActsGeantFollowingConfig import ActsGeantFollowerToolCfg
-    actionAcc = ComponentAccumulator()
-    actions = []
-    actions += [actionAcc.popToolsAndMerge(ActsGeantFollowerToolCfg(flags))
-    actionAcc.setPrivateTools(actions)
-    ActsGeantFollowerAction = result.popToolsAndMerge(actionAcc)
+    ActsGeantFollowerAction = result.popToolsAndMerge(ActsGeantFollowerToolCfg(flags))
     
     #Retrieving the default action list
     from G4AtlasServices.G4AtlasUserActionConfig import getDefaultActions
@@ -205,7 +202,7 @@ acc.merge(G4AtlasAlgCfg(flags, "ITkG4AtlasAlg", **kwargs))
 
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
-                acc.merge( OutputStreamCfg(flags,"HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=True, AcceptAlgs=['ITkG4AtlasAlg']) )
+acc.merge( OutputStreamCfg(flags,"HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=True, AcceptAlgs=['ITkG4AtlasAlg']) )
 
 # dump pickle
 with open("ITkTest.pkl", "wb") as f:
