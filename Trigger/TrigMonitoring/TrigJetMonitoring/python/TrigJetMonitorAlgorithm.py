@@ -255,7 +255,9 @@ def getChains2Monitor(inputFlags, monMode):
     # logic to define HLTColl, RefChain, OfflineColl
     for chainName in Chains2Monitor['pp']:
       Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt4EMTopoJets_subjesIS"
-      if '_pf_' in chainName and 'a10' not in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf"
+      if '_pf_' in chainName and 'a10' not in chainName: 
+        Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf"
+        Chains2Monitor['pp'][chainName]["OfflineColl"] = "AntiKt4EMPFlowJets"
       elif 'a10' in chainName:
         if 'a10t' in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes"
         elif 'sd_cssk_pf' in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf"
@@ -267,6 +269,15 @@ def getChains2Monitor(inputFlags, monMode):
         if 'jJ' in chainName or 'gJ' in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf"
         if 'jLJ' in chainName or 'gLJ' in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf"
       else: continue
+
+    # additional hard-coded chains for efficiency monitoring # Phase-I equivalents added by logic below, for now using legacy as reference
+    if Chains2Monitor['pp'].get('HLT_j420_L1J100'): Chains2Monitor['pp']['HLT_j420_L1J100'].update({"RefChain": "HLT_j85_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"})
+    if Chains2Monitor['pp'].get('HLT_3j200_L1J100'): Chains2Monitor['pp']['HLT_3j200_L1J100'].update({"RefChain": "HLT_j85_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"})    
+    if Chains2Monitor['pp'].get('HLT_4j120_L13J50'): Chains2Monitor['pp']['HLT_4j120_L13J50'].update({"RefChain": "HLT_j85_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"}) 
+    if Chains2Monitor['pp'].get('HLT_5j80_pf_ftf_presel5j50_L14J15'): Chains2Monitor['pp']['HLT_5j80_pf_ftf_presel5j50_L14J15'].update({"RefChain": "HLT_j45_pf_ftf_preselj20_L1J15", "OfflineColl": "AntiKt4EMPFlowJets"})    
+    if Chains2Monitor['pp'].get('HLT_j400_pf_ftf_L1J100'): Chains2Monitor['pp']['HLT_j400_pf_ftf_L1J100'].update({"RefChain": "HLT_j85_pf_ftf_preselj50_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"})    
+    if Chains2Monitor['pp'].get('HLT_j400_pf_ftf_preselj225_L1J100'): Chains2Monitor['pp']['HLT_j400_pf_ftf_preselj225_L1J100'].update({"RefChain": "HLT_j85_pf_ftf_preselj50_L1jJ50", "OfflineColl": "AntiKt4EMPFlowJets"})
+
 
     # Phase1: duplicate all relevant chains with jFex algos
     temp_Phase1_chains = dict()
@@ -325,9 +336,10 @@ def getBinningFromThreshold(chain,varname):
   #pt and et binning based on threshold
   if varname == "pt" or varname == "et":
     if 'noalg' in chain:
-        return 60,xmin,300000 # good enough for L1 jJ40 & jJ100
+        return 100,xmin,500000 # good enough for L1 jJ40 & jJ100
     else:
-        threshold = int(chain.split("_")[1].split('j')[1])
+        #threshold = int(chain.split("_")[1].split('j')[1])
+        threshold = int(re.search(r'\d+',chain.split("_")[1].split('j')[1]).group())
     if threshold < 50:
       return 40, 0., 100000.
     if threshold < 120:
