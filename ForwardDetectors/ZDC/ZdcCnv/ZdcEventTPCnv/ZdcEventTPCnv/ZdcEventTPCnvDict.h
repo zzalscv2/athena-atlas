@@ -13,12 +13,17 @@
 #include "ZdcEventTPCnv/ZDC_SimStripHit_Collection_p1.h"
 #include "ZdcEventTPCnv/ZDC_SimPixelHit_p1.h"
 #include "ZdcEventTPCnv/ZDC_SimPixelHit_Collection_p1.h"
+#include "ZdcEventTPCnv/ZDC_SimFiberHit_p1.h"
+#include "ZdcEventTPCnv/ZDC_SimFiberHit_Collection_p1.h"
 
 namespace GCCXML_DUMMY_INSTANTIATION_ZDCEVENTTPCNV {
   std::vector<ZDC_SimStripHit_p1>                  zdc0;
   std::vector<ZDC_SimPixelHit_p1>                  zdc1;
   std::vector<ZdcDigits_p1>                        zdc2;
   std::vector<ZdcRawChannel_p1>                    zdc3;
+  std::vector<ZDC_SimFiberHit_p1>                  zdc4;
+  std::vector<ZdcDigits_p1>                        zdc5;
+  std::vector<ZdcRawChannel_p1>                    zdc6;
 
 }
 
