@@ -654,20 +654,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   if (MC::isW(motherPDG)) return WBoson;
   if (MC::isZ(motherPDG)) return ZBoson;
 
-  //-- Exotics
-//AV: please note that "barcode=-5" is generator-dependent.
-  if (abs(motherPDG) < 7 && numOfParents == 2 && numOfDaug == 2 && NumOfEl == 1 && NumOfPos == 1 && partOriVert->barcode() == -5) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    const xAOD::TruthVertex* TmpVert = partOriVert->outgoingParticle(0)->decayVtx();
 
-    if (abs(pdg1) == abs(pdg2) && TmpVert->nIncomingParticles() == 2) return ZorHeavyBoson;
-  }
-//AV: please note that "barcode=-5" is generator-dependent.
-  if (abs(motherPDG) < 7 && numOfParents == 2 && numOfDaug == 2 && (NumOfEl == 1 || NumOfPos == 1) && NumOfElNeut == 1 && partOriVert->barcode() == -5) {
-    const xAOD::TruthVertex* TmpVert = partOriVert->outgoingParticle(0)->decayVtx();
-    if (TmpVert->nIncomingParticles() == 2) return HeavyBoson;
-  }
 
   // MadGraphPythia ZWW*->lllnulnu
   if (numOfParents == 1 && numOfDaug > 4 && (abs(motherPDG) < 7 || motherPDG == 21)) {
@@ -761,12 +748,6 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   }
 
   //-- McAtNLo
-//AV: please note that "barcode=-1" is generator-dependent.
-  if (abs(motherPDG) < 7 && numOfParents == 2 && NumOfEl == 1 && NumOfPos == 1 && partOriVert->barcode() == -1) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if (abs(pdg1) == abs(pdg2)) return ZBoson;
-  }
 
   if (abs(motherPDG) == 25) return Higgs;
 
@@ -975,20 +956,6 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
   }
 
   //-- Exotics
-//AV: please note that "barcode=-5" is generator-dependent.
-  if (std::abs(motherPDG) < 7 && numOfParents == 2 && NumOfMuPl == 1 && NumOfMuMin == 1 && NumOfEl + NumOfPos == 0 && NumOfTau == 0 && partOriVert->barcode() == -5) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    const xAOD::TruthParticle* theDaug = partOriVert->outgoingParticle(0);
-    const xAOD::TruthVertex* TmpVert = theDaug->decayVtx();
-    if (abs(pdg1) == abs(pdg2) && TmpVert->nIncomingParticles() == 2) return ZorHeavyBoson;
-  }
-
-  if (std::abs(motherPDG) < 7 && numOfParents == 2 && (NumOfMuMin == 1 || NumOfMuPl == 1) && NumOfMuNeut == 1 && NumOfEl + NumOfPos == 0 && NumOfTau == 0 && partOriVert->barcode() == -5) {
-    const xAOD::TruthParticle* theDaug = partOriVert->outgoingParticle(0);
-    const xAOD::TruthVertex* TmpVert = theDaug->decayVtx();
-    if (TmpVert->nIncomingParticles() == 2) return HeavyBoson;
-  }
 
   // MadGraphPythia ZWW*->lllnulnu
 
@@ -1075,13 +1042,6 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
   }
 
   //-- McAtNLo
-//AV: please note that "barcode=-1" is generator-dependent.
-  if (abs(motherPDG) < 7 && numOfParents == 2 && NumOfMuPl == 1 && NumOfMuMin == 1 && partOriVert->barcode() == -1) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if (abs(pdg1) == abs(pdg2))
-      return ZBoson;
-  }
 
   if (abs(motherPDG) == 25) return Higgs;
 
@@ -1503,57 +1463,7 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   if (MC::isMuon(motherPDG) && NumOfMu == 0) return Mu;
   if (MC::isTau(motherPDG) && NumOfTau == 0) return TauLep;
 
-  //-- to find prompt photon
-//AV: please note that "barcode=-5" is generator-dependent.
-  if (partOriVert->barcode() == -5) {
-    int nqin(0);
-    int ngin(0);
-    int nqout(0);
-    int ngout(0);
-    int npartin(0);
-    int npartout(0);
-    int nphtout(0);
-    //note: partOriVert is already derereferenced before here, so cannot be null
-    npartin = partOriVert->nIncomingParticles();
-    for (unsigned int ipIn = 0; ipIn < partOriVert->nIncomingParticles(); ipIn++) {
-      if (!partOriVert->incomingParticle(ipIn)) continue;
-      if (abs(partOriVert->incomingParticle(ipIn)->pdgId()) < 7) nqin++;
-      if (abs(partOriVert->incomingParticle(ipIn)->pdgId()) == 21) ngin++;
-    }
-
-    npartout = partOriVert->nOutgoingParticles();
-    for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ipOut++) {
-      if (!partOriVert->outgoingParticle(ipOut)) continue;
-      if (abs(partOriVert->outgoingParticle(ipOut)->pdgId()) < 7) nqout++;
-      if (abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 21)  ngout++;
-      if (abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 22) nphtout++;
-    }
-    
-
-    if (npartout == 2 && npartin == 2 &&
-        (((nqin == 2 && ngin == 0) && (nqout == 0 && ngout == 1 && nphtout == 1)) ||
-         ((nqin == 2 && ngin == 0) && (nqout == 0 && ngout == 0 && nphtout == 2)) ||
-         ((nqin == 1 && ngin == 1) && (nqout == 1 && ngout == 0 && nphtout == 1)) ||
-         ((nqin == 0 && ngin == 2) && (nqout == 0 && ngout == 0 && nphtout == 2)) ||
-         ((nqin == 0 && ngin == 2) && (nqout == 0 && ngout == 1 && nphtout == 1))))
-      return PromptPhot;
-  }
-
-  //-- to find initial and final state raiation and underline photons
-  //-- dijets and min bias
   if (numOfParents == 1 && motherStatus == 3) {
-//AV: please note that "barcode=-5" is generator-dependent.
-    if (mothOriVert != nullptr && mothOriVert->barcode() == -5)
-      return FSRPhot;
-
-    for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ipOut++) {
-      if (!partOriVert->outgoingParticle(ipOut)) continue;
-      if (partOriVert->outgoingParticle(ipOut)->status() != 3 || motherPDG != partOriVert->outgoingParticle(ipOut)->pdgId()) continue;
-      const xAOD::TruthVertex* Vrtx = partOriVert->outgoingParticle(ipOut)->decayVtx();
-      if (!Vrtx) continue;
-      if (Vrtx->barcode() == -5)
-        foundISR = true;
-    }
     return (foundISR)? ISRPhot:UndrPhot;
   }
 
@@ -1576,14 +1486,6 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
 
   //-- to find final  state radiation
   //-- Exotics
-  if (numOfParents == 1 && abs(motherPDG) == 11 && motherStatus == 2 && mothOriVert != nullptr &&
-      mothOriVert->nIncomingParticles() != 0) {
-    const xAOD::TruthParticle* itrP = mothOriVert->incomingParticle(0);
-    const xAOD::TruthVertex* Vrtx = itrP->hasProdVtx() ? itrP->prodVtx() : nullptr;
-//AV: please note that "barcode=-5" is generator-dependent.
-    if (mothOriVert->nIncomingParticles() == 1 && abs(itrP->pdgId()) == 11 && Vrtx != nullptr && Vrtx->barcode() == -5 && itrP->status() == 3)
-      return FSRPhot;
-  }
 
   // FSR  from Photos
   //-- Exotics- CompHep
@@ -1907,21 +1809,6 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   if (MC::isZ(motherPDG)) return ZBoson;
 
   //-- Exotics
-//AV: please note that "barcode=-5" is generator-dependent.
-  if (abs(motherPDG) < 7 && numOfParents == 2 && numOfDaug == 2 && (NumOfEl == 1 || NumOfMu == 1 || NumOfTau == 1) && partOriVert->barcode() == -5) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    const xAOD::TruthVertex* TmpVert = partOriVert->outgoingParticle(0)->decayVtx();
-
-    if (abs(pdg1) == abs(pdg2) && TmpVert->nIncomingParticles() == 2) return ZorHeavyBoson;
-  }
-
-//AV: please note that "barcode=-5" is generator-dependent.
-  if (std::abs(motherPDG) < 7 && numOfParents == 2 && numOfDaug == 2 && (NumOfEl == 1 || NumOfMu == 1 || NumOfTau == 1) &&
-      (NumOfElNeut == 1 || NumOfMuNeut == 1 || NumOfTauNeut == 1) && partOriVert->barcode() == -5) {
-    const xAOD::TruthVertex* TmpVert = partOriVert->outgoingParticle(0)->decayVtx();
-    if (TmpVert->nIncomingParticles() == 2) return HeavyBoson;
-  }
 
   // MadGraphPythia ZWW*->lllnulnu or ZWW*->nunulnulnu (don't even know if the latter is generated)
   if (numOfParents == 1 && numOfDaug > 4 && (abs(motherPDG) < 7 || motherPDG == 21)) {
@@ -2021,12 +1908,6 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   }
 
   //-- McAtNLo
-//AV: please note that "barcode=-5" is generator-dependent.
-  if (abs(motherPDG) < 7 && numOfParents == 2 && (NumOfElNeut == 2 || NumOfMuNeut == 2 || NumOfTauNeut == 2) && partOriVert->barcode() == -1) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if (abs(pdg1) == abs(pdg2)) return ZBoson;
-  }
 
   if (abs(motherPDG) == 25) return Higgs;
   if (abs(motherPDG) == 35 || abs(motherPDG) == 36 || abs(motherPDG) == 37) return HiggsMSSM;
