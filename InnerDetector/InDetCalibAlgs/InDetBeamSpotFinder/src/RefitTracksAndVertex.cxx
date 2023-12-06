@@ -228,7 +228,7 @@ const Trk::PseudoMeasurementOnTrack* RefitTracksAndVertex::createPMfromSi ( cons
   const Trk::Surface& mpSurf = mp->associatedSurface() ;
 
   Trk::PseudoMeasurementOnTrack *pm = new Trk::PseudoMeasurementOnTrack( std::move(parFromSi)
-                                                                       , std::move(covFromSi)
+                                                                       , covFromSi
                                                                        , mpSurf
                                                                        ) ;
   return pm ;

@@ -21,19 +21,19 @@ const Amg::Vector3D INVALID_VECTOR3D(NaN, NaN, NaN);
 }
 
 // Constructor with parameters:
-Trk::VertexOnTrack::VertexOnTrack(const LocalParameters& locpars,
-                                  const Amg::MatrixX& locerr,
+Trk::VertexOnTrack::VertexOnTrack(LocalParameters&& locpars,
+                                  Amg::MatrixX&& locerr,
                                   const PerigeeSurface& assocSurf)
-  : Trk::MeasurementBase(locpars, locerr)
+  : Trk::MeasurementBase(std::move(locpars), std::move(locerr))
   , PerigeeSurfacePtrHolder(assocSurf)
   , m_globalPosition(std::nullopt)
 {}
 
 Trk::VertexOnTrack::VertexOnTrack(
-  const LocalParameters& locpars,
-  const Amg::MatrixX& locerr,
+  LocalParameters&& locpars,
+  Amg::MatrixX&& locerr,
   Trk::SurfaceUniquePtrT<const PerigeeSurface> assocSurf)
-  : Trk::MeasurementBase(locpars, locerr)
+  : Trk::MeasurementBase(std::move(locpars), std::move(locerr))
   , PerigeeSurfacePtrHolder(assocSurf.release())
   , m_globalPosition(std::nullopt)
 {}

@@ -157,7 +157,7 @@ StatusCode BeamspotVertexPreProcessor::initialize()
     } else {
       ATH_MSG_INFO ( "Retrieved TrackToVertexIPEstimator Tool " << m_trackToVertexIPEstimatorTool.typeAndName() );
     }
-   
+
     // configure Atlas extrapolator
     if (m_extrapolator.retrieve().isFailure()) {
       msg(MSG::FATAL) << "Failed to retrieve tool "<<m_extrapolator<<endmsg;
@@ -442,7 +442,7 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromVertex(const Trac
         m_extrapolator->extrapolateTrack(ctx, *track, surface);
       //pass ownership only if of correct type
       if (tmp && tmp->associatedSurface().type() == Trk::SurfaceType::Perigee) {
-         perigee = static_cast<const Perigee*> (tmp.release()); 
+         perigee = static_cast<const Perigee*> (tmp.release());
       }
       if (!perigee) {
         const Perigee * trackPerigee = track->perigeeParameters();
@@ -504,7 +504,7 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromVertex(const Trac
       LocalParameters localParams = Trk::LocalParameters(Amg::Vector2D(0,0));
 
       // VertexOnTrack Object
-      vot = new VertexOnTrack(localParams, errorMatrix, surface);
+      vot = new VertexOnTrack(std::move(localParams), std::move(errorMatrix), surface);
       ATH_MSG_DEBUG("the VertexOnTrack created from vertex: "<<*vot);
     }
   }
@@ -518,7 +518,7 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromBeamspot(const Tr
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
   const VertexOnTrack * vot = nullptr;
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx }; 
+  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
   Amg::Vector3D  bpos = beamSpotHandle->beamPos();
   ATH_MSG_DEBUG("beam spot: "<<bpos);
   float beamSpotX = bpos.x();
@@ -592,7 +592,9 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromBeamspot(const Tr
     delete perigee;
   }
   if (surface){
-    vot = new VertexOnTrack(beamSpotParameters, errorMatrix, *surface);
+    vot = new VertexOnTrack(std::move(beamSpotParameters),
+                            std::move(errorMatrix),
+                            *surface);
   } else {
     ATH_MSG_WARNING("surface is nullptr in "<<__FILE__<<":"<<__LINE__);
   }
@@ -657,12 +659,12 @@ BeamspotVertexPreProcessor::doConstraintRefit(
       const TrackParameters* parsATvertex=m_extrapolator->extrapolateTrack(ctx, *track, surface).release();
 
       ATH_MSG_DEBUG(" Track will be refitted at this surface  ");
-      newTrack = (fitter->fit(ctx, measurementCollection, 
+      newTrack = (fitter->fit(ctx, measurementCollection,
                              *parsATvertex, m_runOutlierRemoval, particleHypothesis)).release();
       delete parsATvertex;
     } else {
       newTrack = (fitter->fit(ctx,
-                             measurementCollection, *(track->trackParameters()->front()), 
+                             measurementCollection, *(track->trackParameters()->front()),
                              m_runOutlierRemoval, particleHypothesis)).release();
     }
      //     delete vot;
@@ -803,7 +805,7 @@ AlignTrack* BeamspotVertexPreProcessor::doTrackRefit(const Track* track) {
       }
   }
 
-  
+
 
 
 
@@ -866,7 +868,7 @@ AlignTrack* BeamspotVertexPreProcessor::doTrackRefit(const Track* track) {
   // garbage collection:
   if(vot)  delete vot;
 
-  ATH_MSG_DEBUG( "doTrackRefit ** COMPLETED ** "); 
+  ATH_MSG_DEBUG( "doTrackRefit ** COMPLETED ** ");
   return alignTrack;
 }
 
@@ -896,7 +898,7 @@ DataVector<Track> * BeamspotVertexPreProcessor::processTrackCollection(const Dat
   // loop over tracks
   TrackCollection::const_iterator itr     = tracks->begin();
   TrackCollection::const_iterator itr_end = tracks->end();
-  
+
   ATH_MSG_DEBUG( "Starting loop on input track collection: "<<index);
   for ( ; itr != itr_end; ++itr, ++index) {
     ATH_MSG_DEBUG("Processing track "<<index);
@@ -937,7 +939,7 @@ DataVector<Track> * BeamspotVertexPreProcessor::processTrackCollection(const Dat
     if (alignTrack)  newTrks->push_back(alignTrack);
   } // end of loop over tracks
 
-  ATH_MSG_INFO( "Processing of input track collection completed (size: " << tracks->size() << "). Size of the alignTrack collection: " << newTrks->size() ); 
+  ATH_MSG_INFO( "Processing of input track collection completed (size: " << tracks->size() << "). Size of the alignTrack collection: " << newTrks->size() );
   // delete the collection if it's empty
   if (newTrks->empty()) {
     delete newTrks;
