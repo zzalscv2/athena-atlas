@@ -32,6 +32,6 @@ class CsvMdtDriftCircleDumperMuonCnv: public AthAlgorithm {
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-   int m_event = 0;
+   size_t m_event = 0;
 
 };

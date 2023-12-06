@@ -8,6 +8,7 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 #include<fstream>
+#include<TString.h>
 
 
 CsvMdtDriftCircleDumperMuonCnv::CsvMdtDriftCircleDumperMuonCnv(const std::string& name, ISvcLocator* pSvcLocator):
@@ -23,38 +24,37 @@ CsvMdtDriftCircleDumperMuonCnv::CsvMdtDriftCircleDumperMuonCnv(const std::string
  StatusCode CsvMdtDriftCircleDumperMuonCnv::execute(){
 
    const EventContext & context = Gaudi::Hive::currentContext();
-
-   std::ofstream file{"MuonDriftCircle__" + std::to_string(++m_event)+".csv"};
+   const std::string delim = ",";
+   std::ofstream file{std::string(Form("event%09zu-",++m_event))+"MuonDriftCircle.csv"};
    
-    file<<"driftRadius"<<"\t";
-    file<<"tubePositionx"<<"\t";
-    file<<"tubePositiony"<<"\t";
-    file<<"tubePositionz"<<"\t";
-    file<<"stationName"<<"\t";
-    file<<"stationEta"<<"\t";
-    file<<"stationPhi"<<"\t";
-    file<<"multilayer"<<"\t";
-    file<<"tubelayer"<<"\t";
+    file<<"driftRadius"<<delim;
+    file<<"tubePositionx"<<delim;
+    file<<"tubePositiony"<<delim;
+    file<<"tubePositionz"<<delim;
+    file<<"stationName"<<delim;
+    file<<"stationEta"<<delim;
+    file<<"stationPhi"<<delim;
+    file<<"multilayer"<<delim;
+    file<<"tubelayer"<<delim;
     file<<"tube"<<std::endl;
 
 
-   SG::ReadHandle<xAOD::MdtDriftCircleContainer> readDriftCircles(
-            m_inDriftCircleKey, context);
-
+   SG::ReadHandle<xAOD::MdtDriftCircleContainer> readDriftCircles{m_inDriftCircleKey, context};
+   ATH_CHECK(readDriftCircles.isPresent());
    const MdtIdHelper& mdtHelper{m_idHelperSvc->mdtIdHelper()};
 
    for(const xAOD::MdtDriftCircle* driftCircle : *readDriftCircles){
       const Amg::Vector3D tubePos{xAOD::toEigen(driftCircle->tubePosInStation())};
       const Identifier tubeId{(Identifier::value_type)driftCircle->identifier()};
-      file<<driftCircle->driftRadius()<<" \t";
-      file<<tubePos.x()<<"\t";
-      file<<tubePos.y()<<"\t";
-      file<<tubePos.z()<<"\t";
-      file<<m_idHelperSvc->stationName(tubeId)<<"\t";
-      file<<m_idHelperSvc->stationEta(tubeId)<<"\t";
-      file<<m_idHelperSvc->stationPhi(tubeId)<<"\t";
-      file<<mdtHelper.multilayer(tubeId)<<"\t";
-      file<<mdtHelper.tubeLayer(tubeId)<<"\t";
+      file<<driftCircle->driftRadius()<<delim;
+      file<<tubePos.x()<<delim;
+      file<<tubePos.y()<<delim;
+      file<<tubePos.z()<<delim;
+      file<<m_idHelperSvc->stationName(tubeId)<<delim;
+      file<<m_idHelperSvc->stationEta(tubeId)<<delim;
+      file<<m_idHelperSvc->stationPhi(tubeId)<<delim;
+      file<<mdtHelper.multilayer(tubeId)<<delim;
+      file<<mdtHelper.tubeLayer(tubeId)<<delim;
       file<<mdtHelper.tube(tubeId)<<std::endl;
 
    }
