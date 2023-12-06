@@ -16,7 +16,7 @@
 #include "xAODTruth/TruthVertexContainer.h"
 #include "xAODTruth/TruthVertexAuxContainer.h"
 
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // STL includes
 #include <vector>

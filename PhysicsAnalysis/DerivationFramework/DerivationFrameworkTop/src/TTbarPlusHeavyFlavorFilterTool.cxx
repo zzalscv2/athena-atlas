@@ -3,11 +3,10 @@
 */
 
 #include "DerivationFrameworkTop/TTbarPlusHeavyFlavorFilterTool.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace DerivationFramework{
 
-//--------------------------------------------------------------------------
 TTbarPlusHeavyFlavorFilterTool::TTbarPlusHeavyFlavorFilterTool(const std::string& t, const std::string& n, const IInterface* p)
   : AthAlgTool(t,n,p)
 {
@@ -28,26 +27,19 @@ TTbarPlusHeavyFlavorFilterTool::TTbarPlusHeavyFlavorFilterTool(const std::string
 
 }
 
-//--------------------------------------------------------------------------
- TTbarPlusHeavyFlavorFilterTool::~TTbarPlusHeavyFlavorFilterTool(){
-   /////
-}
+ TTbarPlusHeavyFlavorFilterTool::~TTbarPlusHeavyFlavorFilterTool(){}
 
-//---------------------------------------------------------------------------
 StatusCode TTbarPlusHeavyFlavorFilterTool::initialize() {
   ATH_MSG_INFO("Initialize " );
   return StatusCode::SUCCESS;
 }
 
-//---------------------------------------------------------------------------
 StatusCode TTbarPlusHeavyFlavorFilterTool::finalize() {
   return StatusCode::SUCCESS;
 }
 
 
-//---------------------------------------------------------------------------
 int TTbarPlusHeavyFlavorFilterTool::filterFlag() const{
-//---------------------------------------------------------------------------
 
   int nB=0;
   int nC=0;
@@ -94,16 +86,15 @@ int TTbarPlusHeavyFlavorFilterTool::filterFlag() const{
       else if(pdgid == 4 ){
 	iscquark=true;
       }
-      else if ( isBHadron(part) ){
+      else if ( MC::isBottomHadron(part) && !HepMC::is_simulation_particle(part)){
 	isbhadron=true;
       }
-      else if ( isCHadron(part) ){
+      else if ( MC::isCharmHadron(part) && !HepMC::is_simulation_particle(part)){
 	ischadron=true;
       }
       else{
 	continue;
       }
-
 
       if( (isbquark || isbhadron) && !passBSelection(part) ) continue;
       if( (iscquark || ischadron) && !passCSelection(part) ) continue;
@@ -161,7 +152,6 @@ int TTbarPlusHeavyFlavorFilterTool::filterFlag() const{
 
   return flavortype;
 
-
 }
 
 
@@ -188,60 +178,17 @@ bool TTbarPlusHeavyFlavorFilterTool::passCSelection(const xAOD::TruthParticle* p
   return true;
 }
 
-
-int TTbarPlusHeavyFlavorFilterTool::hadronType(int pdgid) const{
-
-  int rest1(std::abs(pdgid%1000));
-  int rest2(std::abs(pdgid%10000));
-
-  if ( rest2 >= 5000 && rest2 < 6000 ) return 5;
-  if( rest1 >= 500 && rest1 < 600 ) return 5;
-
-  if ( rest2 >= 4000 && rest2 < 5000 ) return 4;
-  if( rest1 >= 400 && rest1 < 500 ) return 4;
-
-  return 0;
-
-}
-
-
-bool TTbarPlusHeavyFlavorFilterTool::isBHadron(const xAOD::TruthParticle* part) const{
-
-  if(HepMC::is_simulation_particle(part)) return false;
-  int type = hadronType(part->pdgId());
-  if(type == 5)  return true;
-
-  return false;
-
-}
-
-
-bool TTbarPlusHeavyFlavorFilterTool::isCHadron(const xAOD::TruthParticle* part) const{
-
-  if(HepMC::is_simulation_particle(part)) return false;
-  int type = hadronType(part->pdgId());
-  if(type == 4)  return true;
-
-  return false;
-
-}
-
-
-
 bool TTbarPlusHeavyFlavorFilterTool::isInitialHadron(const xAOD::TruthParticle* part) const{
 
-
-  int type = hadronType(part->pdgId());
+  int type = std::abs(MC::leadingQuark(part));
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
       if( part->barcode() < parent->barcode() ) continue; /// protection for sherpa
-      int mothertype = hadronType( parent->pdgId() );
+      int mothertype = std::abs(MC::leadingQuark(parent));
       if( mothertype == type ){
 	return false;
       }
     }
-
-
 
   return true;
 }
@@ -249,11 +196,11 @@ bool TTbarPlusHeavyFlavorFilterTool::isInitialHadron(const xAOD::TruthParticle* 
 
 bool TTbarPlusHeavyFlavorFilterTool::isFinalHadron(const xAOD::TruthParticle* part) const{
 
-  int type = hadronType(part->pdgId());
+  int type = std::abs(MC::leadingQuark(part));
   for(unsigned j = 0; j < part->nChildren(); j++){
     const xAOD::TruthParticle* child = part->child(j);
     if( part->barcode() > child->barcode() ) continue; /// protection for sherpa
-    int childtype = hadronType( child->pdgId() );
+    int childtype = std::abs(MC::leadingQuark(child));
     if( childtype == type ){
       return false;
     }
@@ -263,14 +210,12 @@ bool TTbarPlusHeavyFlavorFilterTool::isFinalHadron(const xAOD::TruthParticle* pa
 
 }
 
-
-
 bool TTbarPlusHeavyFlavorFilterTool::isQuarkFromHadron(const xAOD::TruthParticle* part) const{
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
     if( part->barcode() < parent->barcode() ) continue; /// protection for sherpa
-    int mothertype = hadronType( parent->pdgId() );
+    int mothertype = std::abs(MC::leadingQuark(parent));
     if( 4 == mothertype || 5 == mothertype ){
       return true;
     }
@@ -283,22 +228,21 @@ bool TTbarPlusHeavyFlavorFilterTool::isQuarkFromHadron(const xAOD::TruthParticle
 
 bool TTbarPlusHeavyFlavorFilterTool::isCHadronFromB(const xAOD::TruthParticle* part) const{
 
-  if(!isCHadron(part)) return false;
+  if(!MC::isCharmHadron(part)||HepMC::is_simulation_particle(part)) return false;
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
     if( part->barcode() < parent->barcode() ) continue; /// protection for sherpa
-    if( isBHadron(parent) ){
+    if( MC::isBottomHadron(parent)&&!HepMC::is_simulation_particle(parent) ){
       return true;
     }
-    if(isCHadron(parent)){
+    if(MC::isCharmHadron(parent)&&!HepMC::is_simulation_particle(parent)){
       if(isCHadronFromB(parent))return true;
     }
   }
 
   return false;
 }
-
 
 bool TTbarPlusHeavyFlavorFilterTool::isLooping(const xAOD::TruthParticle* part, std::set<const xAOD::TruthParticle*> init_part) const{
 
@@ -315,8 +259,6 @@ bool TTbarPlusHeavyFlavorFilterTool::isLooping(const xAOD::TruthParticle* part, 
   return false;
 
 }
-
-
 
 const xAOD::TruthParticle*  TTbarPlusHeavyFlavorFilterTool::findInitial(const xAOD::TruthParticle* part, bool looping) const{
 
@@ -344,8 +286,6 @@ bool TTbarPlusHeavyFlavorFilterTool::isFromTop(const xAOD::TruthParticle* part, 
 
 bool TTbarPlusHeavyFlavorFilterTool::isDirectlyFromTop(const xAOD::TruthParticle* part, bool looping) const{
 
-
-
   if(!part->nParents()) return false;
 
   for(unsigned int i=0; i<part->nParents(); ++i){
@@ -357,24 +297,19 @@ bool TTbarPlusHeavyFlavorFilterTool::isDirectlyFromTop(const xAOD::TruthParticle
   return false;
 }
 
-
-
 bool TTbarPlusHeavyFlavorFilterTool::isDirectlyFromWTop(const xAOD::TruthParticle * part, bool looping) const{
-
 
   if(!part->nParents()) return false;
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
     if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
-    if( abs( parent->pdgId() ) == 24 ){
+    if( MC::isW(parent) ){
       if( isFromTop(parent, looping) ) return true;
     }
   }
 
   return false;
-
-
 }
 
 
