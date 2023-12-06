@@ -40,6 +40,7 @@ namespace MuonGM {
         GeoFullPhysVol *build(StoredMaterialManager& matManager,
                               const MYSQL& mysql,
                               std::vector<Cutout *>&);
+	void processCutouts(std::vector<Cutout *>& vcutdef);
         virtual void print() const override;
 
       private:
