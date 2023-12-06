@@ -89,7 +89,8 @@ if __name__ == "__main__":
 
     # AFP align constants are not included in these (yet)
     flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2017-16"
-    flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
 
     acc = MainServicesCfg(flags)
     parser = flags.getArgumentParser()
