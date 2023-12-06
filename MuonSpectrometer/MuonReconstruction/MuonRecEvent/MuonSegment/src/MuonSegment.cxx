@@ -55,13 +55,14 @@ MuonSegment::operator=(const MuonSegment& seg)
   return (*this);
 }
 
-MuonSegment::MuonSegment(const Trk::LocalParameters& locpars,
-                         const Amg::MatrixX& locerr,
+MuonSegment::MuonSegment(Trk::LocalParameters&& locpars,
+                         Amg::MatrixX&& locerr,
                          Trk::PlaneSurface* psf,
                          DataVector<const Trk::MeasurementBase>&& cmeas,
                          Trk::FitQuality* fqual,
                          Segment::Author author)
-  : Segment(locpars, locerr, std::move(cmeas), fqual, author)
+  : Segment(std::move(locpars), std::move(locerr),
+            std::move(cmeas), fqual, author)
   , SpaceTimePointBase(kNoValue, kNoValue, 1.)
   , Trk::SurfacePtrHolderImplDetEl<Trk::PlaneSurface>(psf)
   , m_globalPosition()
@@ -74,12 +75,13 @@ MuonSegment::MuonSegment(const Trk::LocalParameters& locpars,
 
 MuonSegment::MuonSegment(const Amg::Vector2D& locSegPos,
                          const Trk::LocalDirection& locSegDir,
-                         const Amg::MatrixX& locErr,
+                         Amg::MatrixX&& locErr,
                          Trk::PlaneSurface* psf,
                          DataVector<const Trk::MeasurementBase>&& cmeas,
                          Trk::FitQuality* fqual,
                          Segment::Author author)
-  : Segment(Trk::LocalParameters(), locErr, std::move(cmeas), fqual, author)
+  : Segment(Trk::LocalParameters(), std::move(locErr),
+            std::move(cmeas), fqual, author)
   , SpaceTimePointBase(kNoValue, kNoValue, 1.)
   , Trk::SurfacePtrHolderImplDetEl<Trk::PlaneSurface>(psf)
   , m_globalPosition()

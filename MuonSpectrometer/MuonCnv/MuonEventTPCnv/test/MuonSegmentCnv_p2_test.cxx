@@ -143,8 +143,8 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   DataVector<const Trk::MeasurementBase> mvec (SG::VIEW_ELEMENTS);
   mvec.push_back (&pmeas);
 
-  Muon::MuonSegment trans1 (locpars,
-                      cov,
+  Muon::MuonSegment trans1 (std::move(locpars),
+                      std::move(cov),
                       new Trk::PlaneSurface (plsurf),
                       DataVector<const Trk::MeasurementBase> (mvec),
                       new Trk::FitQuality(fq),

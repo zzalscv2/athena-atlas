@@ -1522,7 +1522,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
     0.                     ,          0.,  0.,  1., 0.,
     0.                     ,          0.,  0.,  0., 1.;
   Trk::TrackSegment* segment = new Trk::TrackSegment(
-    par, cov, sur, std::move(rio), fqu, Trk::Segment::TRT_SegmentMaker);
+    std::move(par), std::move(cov), sur, std::move(rio), fqu, Trk::Segment::TRT_SegmentMaker);
 
   //add segment to list of segments
 

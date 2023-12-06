@@ -31,13 +31,13 @@ class TestSegment
 {
 public:
   TestSegment() : m_surf(nullptr) {}
-  TestSegment( const Trk::LocalParameters& locpars,
-               const Amg::MatrixX& locerr,
+  TestSegment( Trk::LocalParameters&& locpars,
+               Amg::MatrixX&& locerr,
                DataVector<const Trk::MeasurementBase>&& measurements,
                Trk::FitQuality* fitq,
                Trk::Segment::Author author,
                const Trk::Surface& sf)
-    : Trk::Segment (locpars, locerr, std::move(measurements), fitq, author),
+    : Trk::Segment (std::move(locpars), std::move(locerr), std::move(measurements), fitq, author),
       m_surf (&sf)
   {}
 
@@ -163,48 +163,14 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   DataVector<const Trk::MeasurementBase> mvec (SG::VIEW_ELEMENTS);
   mvec.push_back (&pmeas);
 
-  TestSegment trans1 (locpars,
-                      cov,
+  TestSegment trans1 (Trk::LocalParameters(locpars),
+                      Amg::MatrixX(cov),
                       DataVector<const Trk::MeasurementBase> (mvec),
                       new Trk::FitQuality(fq),
                       Trk::Segment::Muonboy,
                       psurf);
   testit (trans1);
 
-#if 0
-  Trk::PerigeeSurface psurf (Amg::Vector3D (50, 100, 150));
-  Trk::LocalParameters parms1 (1.5, 2.5, 3.5, 4.5, 5.5);
-  Trk::PseudoMeasurementOnSegment pmeas (parms1, cov, psurf);
-  Trk::Perigee perigee (100, 200, 1.5, 0.5, 1e-3, psurf, nullptr);
-  Trk::FitQuality fq (10, 20);
-  Trk::MaterialEffectsOnSegment me (12.5, psurf);
-
-  Trk::SegmentStateOnSurface tsos1 (new Trk::PseudoMeasurementOnSegment (pmeas),
-                                  new Trk::Perigee (perigee),
-                                  new Trk::FitQuality (fq),
-                                  new Trk::MaterialEffectsOnSegment (me),
-                                  nullptr);
-
-  DataVector<const Trk::SegmentStateOnSurface> tsvec (SG::VIEW_ELEMENTS);
-  tsvec.push_back (&tsos1);
-
-  std::bitset<Trk::SegmentInfo::NumberOfSegmentProperties> properties;
-  std::bitset<Trk::SegmentInfo::NumberOfSegmentRecoInfo> patrec;
-  properties[0] = true;
-  properties[2] = true;
-  properties[3] = true;
-  patrec[1] = true;
-  patrec[3] = true;
-  Trk::SegmentInfo info (Trk::SegmentInfo::GlobalChi2Fitter,
-                       Trk::electron,
-                       properties,
-                       patrec);
-
-  Trk::Segment trans1 (info,
-                     new DataVector<const Trk::SegmentStateOnSurface> (tsvec),
-                     new Trk::FitQuality (fq));
-  testit (trans1);
-  #endif
 }
 
 

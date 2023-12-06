@@ -21,12 +21,12 @@ Trk::Segment::Segment()
 {
 }
 
-Trk::Segment::Segment(const Trk::LocalParameters& locpars,
-                      const Amg::MatrixX& locerr,
+Trk::Segment::Segment(Trk::LocalParameters&& locpars,
+                      Amg::MatrixX&& locerr,
                       DataVector<const MeasurementBase>&& measurements,
                       FitQuality* fitqual,
                       Author author)
-  : Trk::MeasurementBase(locpars, locerr)
+  : Trk::MeasurementBase(std::move(locpars), std::move(locerr))
   , Trk::ObjectCounter<Trk::Segment>()
   , m_fitQuality(fitqual)
   , m_containedMeasBases(std::move(measurements))
@@ -129,10 +129,10 @@ std::string Trk::Segment::dumpAuthor() const {
       break;
     case NswStereoSeeded:
       author = "Nsw MM stereo seeded";
-      break;    
+      break;
     case NswStgcSeeded:
       author = "Nsw sTgc seeded";
-      break;    
+      break;
     case NswQuadAlign:
       author = "Nsw single quad";
       break;

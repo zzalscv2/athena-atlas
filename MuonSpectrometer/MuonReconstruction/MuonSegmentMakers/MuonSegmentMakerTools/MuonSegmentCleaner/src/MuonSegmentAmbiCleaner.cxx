@@ -52,7 +52,7 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
 
   auto meas_keep = DataVector<const Trk::MeasurementBase>();
 
-// create new surface 
+// create new surface
   Trk::PlaneSurface* psf = (segment->associatedSurface()).clone();
   Amg::Transform3D globalToLocal = psf->transform().inverse();
   Amg::Vector3D lSegmentPos = globalToLocal*(segment->globalPosition());
@@ -70,7 +70,7 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
   int netarpc = 0;
   int netatgc = 0;
   int netacsc = 0;
-  
+
   std::vector<const Trk::RIO_OnTrack*> rots;
   std::vector<const Trk::CompetingRIOsOnTrack*> crots; // lookup vector to check if rot is part of competing rio. vector contains 0 if not part of competing rio
   rots.reserve(2*meas.size()); // factor 2, to be on safe side
@@ -79,16 +79,16 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
   for( ; mit!=mit_end;++mit ){
 
     //dynamic cast to either rio or competingrio:
-    const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(*mit);    
+    const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(*mit);
     if (rot)
       {
 	rots.push_back(rot);
 	crots.push_back(nullptr);
       }
 
-    else 
+    else
       {
-	const Trk::CompetingRIOsOnTrack* crio = dynamic_cast<const Trk::CompetingRIOsOnTrack*>(*mit);    
+	const Trk::CompetingRIOsOnTrack* crio = dynamic_cast<const Trk::CompetingRIOsOnTrack*>(*mit);
 	if (crio)
 	  {
 	    for (unsigned int i = 0; i<crio->numberOfContainedROTs(); i++)
@@ -104,21 +104,21 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
   unsigned int nMeas = rots.size();
   unsigned int nphi = 0;
 
-  // Vectors for the phi hits 
+  // Vectors for the phi hits
   std::vector <const Trk::RIO_OnTrack*> rots_phi(nMeas);
   std::vector <const Trk::CompetingRIOsOnTrack*> crots_phi(nMeas);
   std::vector <const Trk::MeasurementBase*> meas_phi(nMeas);
   std::vector <double> dis_phi(nMeas); // distance to segment
-  std::vector <int> chambercode_phi(nMeas); 
+  std::vector <int> chambercode_phi(nMeas);
   std::vector <int> stripcode_phi(nMeas);
   std::vector <int> ok_phi(nMeas); // 0 Not selected 1 selected/
   std::vector <int> det_phi(nMeas); // 1 = RPC 2 = TGC /
   std::vector <Identifier> id_phi(nMeas); // 1 = RPC 2 = TGC /
 
-  if  (m_debug) std::cout << " MuonSegmentAmbiCleanerTool nMeas " << nMeas << " competing rios: " << crots.size() << std::endl; 
+  if  (m_debug) std::cout << " MuonSegmentAmbiCleanerTool nMeas " << nMeas << " competing rios: " << crots.size() << std::endl;
 
   for (unsigned int i=0; i<rots.size(); i++){
-    
+
     const Trk::RIO_OnTrack* rot = rots[i];
     const Trk::PrepRawData* prd = rot->prepRawData();
     Identifier id = prd->identify();
@@ -154,9 +154,9 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
     crots_phi[nphi] = crots[i];
     chambercode_phi[nphi] = 0;
     stripcode_phi[nphi] = 0;
-    ok_phi[nphi] = 0; 
-    det_phi[nphi] = 0; 
-    dis_phi[nphi] = 10000000; 
+    ok_phi[nphi] = 0;
+    det_phi[nphi] = 0;
+    dis_phi[nphi] = 10000000;
     if (m_idHelperSvc->isRpc( rot->identify())) {
       nphirpc++;
       int code = 1000000*(m_idHelperSvc->rpcIdHelper().stationName(id));
@@ -164,7 +164,7 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
       chambercode_phi[nphi] = code;
       stripcode_phi[nphi] = m_idHelperSvc->rpcIdHelper().strip(id);
       ok_phi[nphi] = 1;
-      det_phi[nphi] = 1; 
+      det_phi[nphi] = 1;
       const Muon::RpcClusterOnTrack* rrot = dynamic_cast<const Muon::RpcClusterOnTrack*>(rot);
       if( !rrot ){
 	ATH_MSG_WARNING("This is not a  RpcClusterOnTrack!!! ");
@@ -173,8 +173,8 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
       const Muon::RpcPrepData* rprd = rrot->prepRawData();
       Amg::Vector3D gHitPos = rprd->globalPosition();
       Amg::Vector3D lHitPos = globalToLocal*gHitPos;
-      
-      // In the barrel local z is measured 
+
+      // In the barrel local z is measured
       double disRPC = lSegmentPos.z() - lHitPos.z() + lSegmentDir.z()*(lHitPos.y()-lSegmentPos.y())/lSegmentDir.y();
       if (m_debug) {
 	std::cout << " ghit pos x " << gHitPos.x() << " y " << gHitPos.y() << " z "  << gHitPos.z() << std::endl;
@@ -188,8 +188,8 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
       chambercode_phi[nphi] = code;
       stripcode_phi[nphi] = m_idHelperSvc->tgcIdHelper().channel(id);
       ok_phi[nphi] = 1;
-      det_phi[nphi] = 2; 
-      
+      det_phi[nphi] = 2;
+
       const Muon::TgcClusterOnTrack* rrot = dynamic_cast<const Muon::TgcClusterOnTrack*>(rot);
       if( !rrot ){
 	ATH_MSG_WARNING("This is not a  TgcClusterOnTrack!!! ");
@@ -198,7 +198,7 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
       const Muon::TgcPrepData* rprd = rrot->prepRawData();
       Amg::Vector3D gHitPos = rprd->globalPosition();
       Amg::Vector3D lHitPos = globalToLocal*gHitPos;
-      // In the forward local y is measured 
+      // In the forward local y is measured
       double disTGC = lSegmentPos.y() - lHitPos.y() + lSegmentDir.y()*(lHitPos.z()-lSegmentPos.z())/lSegmentDir.z();
       if (m_debug) {
           std::cout << " ghit pos x " << gHitPos.x() << " y " << gHitPos.y() << " z "  << gHitPos.z() << std::endl;
@@ -208,14 +208,14 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
     } else {
       dis_phi[nphi] = 0.;
     }
-    if (m_debug) std::cout << " Distance to segment " << dis_phi[nphi] << std::endl; 
+    if (m_debug) std::cout << " Distance to segment " << dis_phi[nphi] << std::endl;
     if (ok_phi[nphi] == 1 ) nphi++;
   }
 // Code to select and flag ambiguous phi hits
 
   bool changeSegment = false;
- int nphirpcn = 0;   
- int nphitgcn = 0;   
+ int nphirpcn = 0;
+ int nphitgcn = 0;
  if (nphi > 0) {
    for(unsigned int i = 0; i < nphi-1  ; ++i )  {
      if (ok_phi[i] == 0) continue;
@@ -249,9 +249,9 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
 	   ATH_MSG_DEBUG(" index " << i << " strip " << stripcode_phi [i] << " chambercode " << chambercode_phi[i] << " selected " << ok_phi[i] <<  " segment distance " << dis_phi[i]);
 	   ATH_MSG_DEBUG(" index " << j << " strip " << stripcode_phi [j] << " chambercode " << chambercode_phi[j] << " selected " << ok_phi[j] <<  " segment distance " << dis_phi[j]);
 	 }
-       }    
-     } 
-   } 
+       }
+     }
+   }
 
    // if any phi hits belonging to a competing rio is removed, remove the pointer to the competing rio and only store the single phi hit
 
@@ -270,7 +270,7 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
 
 //  Put kept hits on segment
 //  Put selected phi  hits on segment
-   
+
    std::set <const Trk::CompetingRIOsOnTrack*> selected_crots;
 
    for (unsigned int i=0;i<nphi;++i){
@@ -292,35 +292,34 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
        changeSegment = true;
      }
    }
- }  
+ }
 
  if ((m_summary&&changeSegment)||m_debug) {
     std::cout << " Summary MuonSegmentAmbiCleaner (not accurate with competing rios!)"  << std::endl;
     std::cout << " Input Segment with " << netamdt << " MDT hits " << netacsc << " eta CSC hits " << netatgc << " eta TGC Hits " << netarpc << " eta RPC hits "  << std::endl;
     std::cout << " and " << nphicsc << " phi CSC hits " << nphitgc << " phi TGC Hits " << nphirpc << " phi RPC hits " << std::endl;
     std::cout << " Output after Ambiguity removal "  << nphitgcn << " phi TGC Hits " << nphirpcn << " phi RPC hits " << std::endl;
- } 
+ }
 
   // Make new segment with cleaned up rios
 // MuonSegment( const Trk::LocalPosition& segLocPos,         // 2 local position coordinates
 //          const Trk::LocalDirection* segLocDir,        // 2 local direction coordinates
-//          const Trk::ErrorMatrix* segLocalErr,         // 4 x 4 full local error 
+//          const Trk::ErrorMatrix* segLocalErr,         // 4 x 4 full local error
 //          Trk::PlaneSurface* psf,                      // plane surface to define frame
 //          std::vector<const Trk::RIO_OnTrack*>* crots, // vector of contained rios on track
-//          Trk::FitQuality* fqual);  
+//          Trk::FitQuality* fqual);
 
- 
+
   const Trk::LocalDirection locSegmentDir(segment->localDirection());
   Amg::Vector2D locSegmentPos(lSegmentPos.x(),lSegmentPos.y());
-  const Amg::MatrixX& locSegmenterr(segment->localCovariance());
   Trk::FitQuality* fitQuality = segment->fitQuality()->clone();
   Muon::MuonSegment* newSegment = new Muon::MuonSegment(locSegmentPos,
                                                         locSegmentDir,
-                                                        locSegmenterr,
+                                                        Amg::MatrixX(segment->localCovariance()),
                                                         psf,
                                                         std::move(meas_keep),
                                                         fitQuality);
 
-  return newSegment; 
+  return newSegment;
 } // execute
 

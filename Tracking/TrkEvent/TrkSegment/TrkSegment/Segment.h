@@ -92,8 +92,8 @@ public:
   Segment& operator=(Segment&&) noexcept;
 
   /** Constructor with parameters */
-  Segment(const LocalParameters& locpars,
-          const Amg::MatrixX& locerr,
+  Segment(LocalParameters&& locpars,
+          Amg::MatrixX&& locerr,
           DataVector<const MeasurementBase>&& measurements,
           FitQuality* fitq = nullptr,
           Author author = AuthorUnknown);

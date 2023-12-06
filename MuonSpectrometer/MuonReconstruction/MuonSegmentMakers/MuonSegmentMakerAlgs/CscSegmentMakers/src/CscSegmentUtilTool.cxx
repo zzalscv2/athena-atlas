@@ -869,7 +869,7 @@ MuonSegment* CscSegmentUtilTool::build_segment(const ICscSegmentFinder::Segment&
     cov(3, 3) = 1.0;
     MuonSegment* pseg_ref = new MuonSegment(pos,
                                             pdir,
-                                            cov,
+                                            std::move(cov),
                                             psrf,
                                             std::move(prios),
                                             pfq,
@@ -990,7 +990,7 @@ MuonSegment* CscSegmentUtilTool::build_segment(const ICscSegmentFinder::Segment&
         MuonSegment* pseg_new =
           new MuonSegment(pos_new,
                           pdir_new,
-                          cov,
+                          std::move(cov),
                           pseg->associatedSurface().clone(),
                           std::move(prios_new),
                           pfq_new,
@@ -2014,7 +2014,7 @@ MuonSegment* CscSegmentUtilTool::make_4dMuonSegment(const MuonSegment& rsg, cons
     ATH_MSG_DEBUG("Segment " << rios.size() << " : ");
     MuonSegment* pseg = new MuonSegment(pos,
                                         pdir,
-                                        cov,
+                                        std::move(cov),
                                         psrf,
                                         std::move(rios),
                                         pfq,

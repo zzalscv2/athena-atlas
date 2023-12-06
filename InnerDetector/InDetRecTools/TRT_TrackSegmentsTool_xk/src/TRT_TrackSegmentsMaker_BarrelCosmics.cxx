@@ -753,7 +753,7 @@ if (1) { // limit the scope of all these variables
   Trk::FitQuality      * fqu = new Trk::FitQuality(chi2, ndf);
 
   Trk::TrackSegment* segment = new Trk::TrackSegment(
-    par, cov, sur, std::move(rio), fqu, Trk::Segment::TRT_SegmentMaker);
+    std::move(par),  std::move(cov), sur, std::move(rio), fqu, Trk::Segment::TRT_SegmentMaker);
 
   //add segment to list of segments
   ATH_MSG_DEBUG( "Add " << event_data.m_segments.size() << "th segment to list" );
