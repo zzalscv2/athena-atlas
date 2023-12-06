@@ -288,10 +288,20 @@ ServiceMgr.MessageSvc.Format = '% F%45W%S%5W%e%s%7W%R%T %0W%M'
 
 #==========================================================
 # Use ZLIB for compression of all temporary outputs
+# Otherwise, use LZMA
+# In all cases, flush at every 10 events
+# This makes things compatible w/ AthenaPoolCnvSvc/PoolWriteConfig.py
 #==========================================================
+from AthenaPoolCnvSvc import PoolAttributeHelper as pah
 if '_000' in overlayArgs.outputRDOFile or 'tmp.' in overlayArgs.outputRDOFile:
-    ServiceMgr.AthenaPoolCnvSvc.PoolAttributes += [ "DatabaseName = '" +  athenaCommonFlags.PoolRDOOutput()+ "'; COMPRESSION_ALGORITHM = '1'" ]
-    ServiceMgr.AthenaPoolCnvSvc.PoolAttributes += [ "DatabaseName = '" +  athenaCommonFlags.PoolRDOOutput()+ "'; COMPRESSION_LEVEL = '1'" ]
+    ServiceMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setFileCompAlg( athenaCommonFlags.PoolRDOOutput(), 1 ) ]
+    ServiceMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setFileCompLvl( athenaCommonFlags.PoolRDOOutput(), 1 ) ]
+else:
+    ServiceMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setFileCompAlg( athenaCommonFlags.PoolRDOOutput(), 2 ) ]
+    ServiceMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setFileCompLvl( athenaCommonFlags.PoolRDOOutput(), 1 ) ]
+ServiceMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setTreeAutoFlush( athenaCommonFlags.PoolRDOOutput(), "CollectionTree", 10 ) ]
+ServiceMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setTreeAutoFlush( athenaCommonFlags.PoolRDOOutput(), "POOLContainer", 10 ) ]
+ServiceMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setTreeAutoFlush( athenaCommonFlags.PoolRDOOutput(), "POOLContainerForm", 10 ) ]
 
 # Post-include
 if hasattr(overlayArgs, 'postInclude'):
