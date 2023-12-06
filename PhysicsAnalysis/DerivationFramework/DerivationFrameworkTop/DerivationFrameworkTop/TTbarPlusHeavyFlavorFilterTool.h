@@ -59,10 +59,6 @@ private:
   bool passBSelection(const xAOD::TruthParticle* part) const;
   bool passCSelection(const xAOD::TruthParticle* part) const;
 
-  int hadronType(int pdgid) const;
-  bool isBHadron(const xAOD::TruthParticle* part) const;
-  bool isCHadron(const xAOD::TruthParticle* part) const;
-
   bool isInitialHadron(const xAOD::TruthParticle* part) const;
   bool isFinalHadron(const xAOD::TruthParticle* part) const;
 
@@ -78,9 +74,6 @@ private:
   bool isFromTop(const xAOD::TruthParticle* part, bool looping) const;
   bool isDirectlyFromTop(const xAOD::TruthParticle* part, bool looping) const;
   bool isDirectlyFromWTop(const xAOD::TruthParticle* part, bool looping) const;
-
-
-
 
 };
 

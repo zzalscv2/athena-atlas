@@ -13,7 +13,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // Constructor
 DerivationFramework::TruthPVCollectionMaker::TruthPVCollectionMaker(const std::string& t,

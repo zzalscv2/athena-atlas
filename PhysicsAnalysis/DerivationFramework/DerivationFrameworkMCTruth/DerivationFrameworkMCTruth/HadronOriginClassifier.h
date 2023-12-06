@@ -63,10 +63,6 @@ namespace DerivationFramework{
     void buildPartonsHadronsMaps(std::map<const xAOD::TruthParticle*,int>& mainHadronMap,
                                  std::map<const xAOD::TruthParticle*,HF_id>& partonsOrigin) const;
 
-    static int hadronType(int pdgid) ;
-    static bool isBHadron(const xAOD::TruthParticle* part) ;
-    static bool isCHadron(const xAOD::TruthParticle* part) ;
-
     bool passHadronSelection(const xAOD::TruthParticle* part) const;
 
 

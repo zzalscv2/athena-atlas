@@ -2,7 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "DerivationFrameworkMCTruth/HadronOriginClassifier.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace DerivationFramework{
 
@@ -251,7 +251,7 @@ namespace DerivationFramework{
         else if(pdgid == 4 ){
           iscquark=true;
         }
-        else if(isBHadron(part) || isCHadron(part)){
+        else if(MC::isBottomHadron(part) || MC::isCharmHadron(part)){
           isHFhadron=true;
         }
         else{
@@ -334,46 +334,12 @@ namespace DerivationFramework{
   }
 
 
-  int HadronOriginClassifier::hadronType(int pdgid) {
-
-    int rest1(abs(pdgid%1000));
-    int rest2(abs(pdgid%10000));
-
-    if ( rest2 >= 5000 && rest2 < 6000 ) return 5;
-    if( rest1 >= 500 && rest1 < 600 ) return 5;
-
-    if ( rest2 >= 4000 && rest2 < 5000 ) return 4;
-    if( rest1 >= 400 && rest1 < 500 ) return 4;
-
-    return 0;
-
-  }
-
-
-  bool HadronOriginClassifier::isBHadron(const xAOD::TruthParticle* part) {
-
-    if(HepMC::is_simulation_particle(part)) return false;
-    int type = hadronType(part->pdgId());
-    return type == 5;
-
-  }
-
-
-  bool HadronOriginClassifier::isCHadron(const xAOD::TruthParticle* part) {
-
-    if(HepMC::is_simulation_particle(part)) return false;
-    int type = hadronType(part->pdgId());
-    return type == 4;
-
-  }
-
-
   bool HadronOriginClassifier::isQuarkFromHadron(const xAOD::TruthParticle* part) const{
 
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if( part->barcode() < parent->barcode() ) continue; /// protection for sherpa
-      int mothertype = hadronType( parent->pdgId() );
+      int mothertype = std::abs(MC::leadingQuark(parent));
       if( 4 == mothertype || 5 == mothertype ){
         return true;
       }
@@ -386,15 +352,15 @@ namespace DerivationFramework{
 
   bool HadronOriginClassifier::isCHadronFromB(const xAOD::TruthParticle* part) const{
 
-    if(!isCHadron(part)) return false;
+    if(!MC::isCharmHadron(part)) return false;
 
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if( part->barcode() < parent->barcode() ) continue; /// protection for sherpa
-      if( isBHadron(parent) ){
+      if( MC::isBottomHadron(parent) ){
         return true;
       }
-      if(isCHadron(parent)){
+      if(MC::isCharmHadron(parent)){
         if(isCHadronFromB(parent))return true;
       }
     }
@@ -420,9 +386,9 @@ namespace DerivationFramework{
         isFinal=false;
       }
       else{
-        child_flav = hadronType(child->pdgId());
+        child_flav = std::abs(MC::leadingQuark(child));
         if(child_flav!=4 && child_flav!=5) continue;
-        parent_flav = hadronType(mainhad->pdgId());
+        parent_flav = std::abs(MC::leadingQuark(mainhad));
         if(child_flav!=parent_flav) continue;
         fillHadronMap(mainHadronMap,mainhad,child);
         isFinal=false;
@@ -432,7 +398,7 @@ namespace DerivationFramework{
 
     if(isFinal && !decayed){
 
-      mainHadronMap[mainhad]=hadronType(mainhad->pdgId());
+      mainHadronMap[mainhad]=std::abs(MC::leadingQuark(mainhad));
 
       for(unsigned int j=0; j<ihad->nChildren(); ++j){
         const xAOD::TruthParticle* child = ihad->child(j);
@@ -485,7 +451,7 @@ namespace DerivationFramework{
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
-      if( abs( parent->pdgId() ) == 24 ){
+      if( MC::isW(parent)){
         if( isFromTop(parent, looping) ) return true;
       }
     }
@@ -507,7 +473,7 @@ namespace DerivationFramework{
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
-      if( abs( parent->pdgId() ) == 21 || abs(parent->pdgId())<5 ) return true;
+      if( MC::isPhoton(parent) || abs(parent->pdgId())<5 ) return true;
     }
 
     return false;
@@ -530,7 +496,7 @@ namespace DerivationFramework{
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
-      if(abs( parent->pdgId() ) == 24){
+      if(!MC::isW(parent)) continue;
         if(abs(part->pdgId())==4){
           //trick to get at least 50% of PowhegPythia c from FSR
           if(part->pdgId()==-(parent->pdgId())/6){
@@ -540,12 +506,8 @@ namespace DerivationFramework{
         else{
           if( isFromGluonQuark(parent, looping) ) return true;
         }
-      }
     }
-
     return false;
-
-
   }
 
 
@@ -559,7 +521,7 @@ namespace DerivationFramework{
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
-      if( abs(parent->pdgId())== 21 || abs(parent->pdgId())==22 ){
+      if( MC::isPhoton(parent) || MC::isGluon(parent) ){
         if( isFromQuarkTop( parent,looping ) ) return true;
       }
 
@@ -612,7 +574,7 @@ namespace DerivationFramework{
     for(unsigned int i=0; i<part->nParents(); ++i){
       const xAOD::TruthParticle* parent = part->parent(i);
       if( part->barcode() < parent->barcode() &&  looping ) continue; /// protection for sherpa
-      if( abs(parent->pdgId())== 21 || abs(parent->pdgId())==22 ){
+      if( MC::isPhoton(parent) || MC::isGluon(parent) ){
         if( isFromQuarkTopPythia8( parent,looping ) ) return true;
       }
 
@@ -728,10 +690,3 @@ namespace DerivationFramework{
   }
 
 }//namespace
-
-
-
-
-
-
-
