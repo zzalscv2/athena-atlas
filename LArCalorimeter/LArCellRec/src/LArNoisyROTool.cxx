@@ -159,7 +159,7 @@ std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const CaloCellContain
   // loop on all FEBs and check whether FEB can be declared as bad for the different type of flags:
   // regular noise burst, weighted noise burst, MNB tight and loose
   for ( FEBEvtStatMapCstIt it = FEBStats.begin(); it != FEBStats.end(); ++it ) {
-    ATH_MSG_DEBUG(" bad FEB " << it->first << " with " << it->second.badChannels() << " bad channels");
+    ATH_MSG_VERBOSE(" candidate FEB " << it->first << " with " << it->second.badChannels() << " bad channels");
     if ( it->second.badChannels() > m_BadChanPerFEB ) {
       noisyRO->add_noisy_feb(HWIdentifier(it->first));
     }
@@ -167,6 +167,7 @@ std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const CaloCellContain
     // Loose MNBs
     if ( it->second.badChannels() > m_MNBLooseCut ){
        noisyRO->add_MNBLoose_feb(HWIdentifier(it->first));
+       ATH_MSG_DEBUG("Loose bad FEB " << it->first << " " << m_onlineID->channel_name(HWIdentifier(it->first)) << " with " << it->second.badChannels() << " bad channels");
        // Tight_PsVeto MNBs
        if ( it->second.badChannels() > m_MNBTight_PsVetoCut[0] ){
          unsigned int associatedPSFEB = m_mapPSFEB.find(it->first)->second;
