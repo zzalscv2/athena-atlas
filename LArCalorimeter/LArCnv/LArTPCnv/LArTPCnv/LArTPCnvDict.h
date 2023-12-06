@@ -39,6 +39,9 @@ struct GCCXML_DUMMY_INSTANTIATION_LARTPCNV {
 
     std::pair<HWIdentifier, std::vector<int> >  m_pair2;
     std::vector<std::pair<HWIdentifier, std::vector<int> >  > m_vpair2;
+
+    std::vector<LArRawChannel_p2> m_vLArRawChannel;
+    std::vector<LArTTL1_p1> m_vLArTTL1;
 };
 
 #endif
