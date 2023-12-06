@@ -257,7 +257,7 @@ Py:Athena            INFO Can't set non-existing property (this is correct)
 | | |-EvtStore          = ServiceHandle('StoreGateSvc')
 | | |-ExtraInputs       = []  (default: [])
 | | |-ExtraOutputs      = []  (default: [])
-| | |-Factor            = 30  (default: 1.0)
+| | |-Factor            = 30.0  (default: 1.0)
 | | |-MonitorService    = 'MonitorSvc'
 | | |-OutputLevel       = 2  (default: 0)
 | | \----- (End of Private AlgTool ToolSpace::TemplatedTool<double>/PyTSTT3) ---------------------------
@@ -273,7 +273,7 @@ Py:Athena            INFO Can't set non-existing property (this is correct)
 | | |-EvtStore          = ServiceHandle('StoreGateSvc')
 | | |-ExtraInputs       = []  (default: [])
 | | |-ExtraOutputs      = []  (default: [])
-| | |-Factor            = 40  (default: 1.0)
+| | |-Factor            = 40.0  (default: 1.0)
 | | |-MonitorService    = 'MonitorSvc'
 | | |-OutputLevel       = 2  (default: 0)
 | | \----- (End of Private AlgTool ToolSpace::TemplatedTool<double>/PyTSTT4) ---------------------------
@@ -289,7 +289,7 @@ Py:Athena            INFO Can't set non-existing property (this is correct)
 | | |-EvtStore          = ServiceHandle('StoreGateSvc')
 | | |-ExtraInputs       = []  (default: [])
 | | |-ExtraOutputs      = []  (default: [])
-| | |-Factor            = 37  (default: 1.0)
+| | |-Factor            = 37.0  (default: 1.0)
 | | |-MonitorService    = 'MonitorSvc'
 | | |-OutputLevel       = 2  (default: 0)
 | | |-TheToolPubTool    = PublicToolHandle('ConcreteTool/PublicConcreteTool')

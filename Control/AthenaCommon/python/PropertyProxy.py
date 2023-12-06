@@ -57,7 +57,7 @@ def _isCompatible( tp, value, context = "" ):
    else:
     # all other types: accept if conversion allowed
       try:
-         tp( value )
+         dummy = tp( value )
       except ValueError as verr:
          if isinstance( value, tp ):
           # this is a conversion mismatch, but an "ok" type (i.e. the type can
@@ -70,7 +70,7 @@ def _isCompatible( tp, value, context = "" ):
             raise ValueError( "received an instance of %s, but %s expected, reason: %s, context: %s" % (type(value),tp, str(verr), context) )
       except TypeError as  terr:
          raise TypeError( "received an instance of %s, but %s expected, reason: %s, context: %s" % (type(value),tp, str(terr), context) )
-   return value         # in case of e.g. classes with __int__, __iter__, etc. implemented
+   return dummy         # in case of e.g. classes with __int__, __iter__, etc. implemented
 
 
 class PropertyProxy( object ):
