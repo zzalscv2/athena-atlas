@@ -439,10 +439,7 @@ StatusCode EgammaMonitoring::execute() {
 	}
 
 	ATH_MSG_DEBUG( " ******** Truth electron found: "
-		       << " STATUS  " << truth->status()
-		       << " barcode  " << truth->barcode()
-		       << " charge   " << truth->charge()
-		       << " index    " << truth->index()
+		       << truth 
 		       << " TO  " << TO
 		       << " TT   " << TT
 		       << " Rprod = " << rProd
@@ -533,10 +530,7 @@ StatusCode EgammaMonitoring::execute() {
 	MCTruthPartClassifier::ParticleOrigin bkgTO = res2.second;
 	MCTruthPartClassifier::ParticleType bkgTT = res2.first;
 	ATH_MSG_DEBUG(" ** Truth particle associated to track Found: "
-		      << " STATUS  " << truth->status()
-		      << " type  " << truth->type()
-		      << " barcode  " << truth->barcode()
-		      << " PDG id   " << truth->pdgId()
+		      << truth
 		      << " index    " << truth->index()
 		      << " bkg T0  " << bkgTO
 		      << " bkg TT   " << bkgTT
@@ -557,11 +551,7 @@ StatusCode EgammaMonitoring::execute() {
         const xAOD::TruthParticle *firstElTruth = xAOD::EgammaHelpers::getBkgElectronMother(truth);
         if (!firstElTruth) continue;
         ATH_MSG_DEBUG( "********----- Getting Mother-----********" );
-        ATH_MSG_DEBUG( " STATUS  " << firstElTruth->status()
-                << " type  " << firstElTruth->type()
-                << " barcode  " << firstElTruth->barcode()
-                << " PDG id   " << firstElTruth->pdgId()
-                << " index    " << firstElTruth->index() );
+        ATH_MSG_DEBUG( " STATUS  " << firstElTruth << " index    " << firstElTruth->index() );
         // this is not a prompt electron, we need to check the parents
         // but we need to make sure that we double count if already found the track
         // foundPromptElectron will check that
