@@ -125,7 +125,6 @@ def LRTElectronMergerAlg(ConfigFlags, name="LLP1_ElectronLRTMergingAlg", **kwarg
 
 # Photon IsEM setup for LLP1
 def PhotonIsEMSelectorsCfg(ConfigFlags):
-
     acc = ComponentAccumulator()
     from ROOT import egammaPID
     from ElectronPhotonSelectorTools.AsgPhotonIsEMSelectorsConfig import (
