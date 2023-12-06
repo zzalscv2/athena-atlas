@@ -153,7 +153,8 @@ if __name__=='__main__':
    from AthenaConfiguration.Enums import BeamType
    ConfigFlags.Beam.Type = BeamType.Collisions
    ConfigFlags.DQ.DataType = DQDataType.Collisions
-   ConfigFlags.GeoModel.AtlasVersion = 'ATLAS-R2-2016-01-00-01'
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags
+   ConfigFlags.GeoModel.AtlasVersion=defaultGeometryTags.RUN2
    ConfigFlags.Detector.GeometryCSC=False
    ConfigFlags.Detector.GeometrysTGC=False
    ConfigFlags.Detector.GeometryMM=False

@@ -63,7 +63,8 @@ if __name__=='__main__':
   addLArCalibFlags(flags, args.isSC)
    
   flags.Input.RunNumber=args.run
-  flags.GeoModel.AtlasVersion="ATLAS-R3S-2021-03-02-00"
+  from AthenaConfiguration.TestDefaults import defaultGeometryTags
+  flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
 
   flags.Input.Files=[]
 

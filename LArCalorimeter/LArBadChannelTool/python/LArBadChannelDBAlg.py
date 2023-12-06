@@ -93,7 +93,8 @@ if __name__=="__main__":
     flags.LAr.doAlign=False
     flags.Input.RunNumber=args.runnumber if args.runnumber>0 else 300000
     flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2022-06"
-    flags.GeoModel.AtlasVersion="ATLAS-R3S-2021-03-00-00"
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     flags.LArCalib.isSC=args.SC
 
     flags.IOVDb.DBConnection="sqlite://;schema="+args.output+";dbname=CONDBR2"
