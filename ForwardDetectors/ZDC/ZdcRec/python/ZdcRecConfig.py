@@ -348,6 +348,9 @@ if __name__ == '__main__':
  
     # supply missing metadata based on project name
     pn = flags.Input.ProjectName
+    if not pn:
+        raise ValueError('Unknown project name')
+    
     if not isLED:
         year = int(pn.split('_')[0].split('data')[1])
         if (year < 20):
