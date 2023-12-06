@@ -26,8 +26,9 @@ int PrimaryParticleInformation::GetParticleUniqueID() const
 {
   if (m_uniqueID !=  HepMC::INVALID_PARTICLE_BARCODE) return m_uniqueID;
   if (m_theParticle) {
-      m_uniqueID = HepMC::uniqueID(m_theParticle);
-      return m_uniqueID;
+    HepMC::ConstGenParticlePtr particle = m_theParticle;
+    m_uniqueID = HepMC::uniqueID(particle);
+    return m_uniqueID;
   }
   return 0;
 }

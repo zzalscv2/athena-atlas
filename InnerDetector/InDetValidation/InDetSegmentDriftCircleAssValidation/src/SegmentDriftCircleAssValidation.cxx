@@ -502,7 +502,11 @@ std::list<int> InDet::SegmentDriftCircleAssValidation::kine
   
     // pT cut
     //
+#if defined(HEPMC3)
     double pt = pa->momentum().pt();
+#else
+    double pt = pa->momentum().perp();
+#endif
     if( pt < m_pTmin ) continue;
     
     // Rapidity cut
@@ -553,7 +557,11 @@ std::list<PRD_MultiTruthCollection::const_iterator> InDet::SegmentDriftCircleAss
   
     // pT cut
     //
+#if defined(HEPMC3)
     double pt = pa->momentum().pt();
+#else
+    double pt = pa->momentum().perp();
+#endif
     if( pt < m_pTmin ) continue;
 
 
