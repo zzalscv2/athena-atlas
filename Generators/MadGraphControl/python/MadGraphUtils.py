@@ -530,7 +530,9 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
 
     if grid_pack:
         # Name dictacted by https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PmgMcSoftware
-        gridpack_name='mc_'+str(int(beamEnergy*2/1000))+'TeV.'+get_physics_short()+'.GRID.tar.gz'
+        energy = '%1.1f'%(beamEnergy*2./1000.)
+        energy = energy.replace('.0','').replace('.','p')
+        gridpack_name='mc_'+energy+'TeV.'+get_physics_short()+'.GRID.tar.gz'
         mglog.info('Tidying up gridpack '+gridpack_name)
 
         if not isNLO:
