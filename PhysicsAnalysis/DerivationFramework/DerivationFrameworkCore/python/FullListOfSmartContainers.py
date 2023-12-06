@@ -10,7 +10,6 @@ def FullListOfSmartContainers(flags=None):
       "Muons",
       "MuonsLRT",
       "TauJets",
-      "TauMVATESJets",
       "DiTauJets",
       "DiTauJetsLowPt",
       "TauJets_MuonRM",
