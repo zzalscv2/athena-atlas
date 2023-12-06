@@ -8,6 +8,7 @@
 #include <MuonReadoutGeometry/GlobalUtilities.h>
 
 #include<fstream>
+#include <TString.h>
 
 CsvMuonSimHitDumperMuonCnv::CsvMuonSimHitDumperMuonCnv(const std::string& name, ISvcLocator* pSvcLocator):
    AthAlgorithm{name, pSvcLocator} {}
@@ -30,20 +31,20 @@ StatusCode CsvMuonSimHitDumperMuonCnv::execute(){
 
    const EventContext & context = Gaudi::Hive::currentContext();
    
-   SG::ReadHandle<xAOD::MuonSimHitContainer> readSimHits(m_inSimHitKey,
-                                                              context);
-
-   std::ofstream file{"MuonSimHit_" + std::to_string(++m_event)+".csv"};
-   
-   file<<"pdgId"<<"\t";
-   file<<"StationName"<<"\t";
-   file<<"StationEta"<<"\t";
-   file<<"StationPhi"<<"\t";
-   file<<"LocalPositionExtrx"<<"\t";
-   file<<"LocalPositionExtry"<<"\t";
-   file<<"LocalPositionExtrz"<<"\t";
-   file<<"LocalDirectionx"<<"\t";
-   file<<"LocalDirectiony"<<"\t";
+   SG::ReadHandle<xAOD::MuonSimHitContainer> readSimHits{m_inSimHitKey, context};
+   ATH_CHECK(readSimHits.isPresent());
+   // these are the conventions by ACTS
+   std::ofstream file{std::string(Form("event%09zu-",++m_event))+"MuonSimHit.csv"};
+   const std::string delim = ",";
+   file<<"pdgId"<<delim;
+   file<<"StationName"<<delim;
+   file<<"StationEta"<<delim;
+   file<<"StationPhi"<<delim;
+   file<<"LocalPositionExtrx"<<delim;
+   file<<"LocalPositionExtry"<<delim;
+   file<<"LocalPositionExtrz"<<delim;
+   file<<"LocalDirectionx"<<delim;
+   file<<"LocalDirectiony"<<delim;
    file<<"LocalDirectionz"<<std::endl;
 
 
@@ -57,8 +58,8 @@ StatusCode CsvMuonSimHitDumperMuonCnv::execute(){
       const Identifier ID = simHit->identify();
       if (!usedStations.insert(m_idHelperSvc->chamberId(ID)).second) continue;
 
-      ATH_MSG_ALWAYS("Dump simulation hit for " <<m_idHelperSvc->toString(ID));
-      const MuonGMR4::MdtReadoutElement* reElement = m_r4DetMgr->getMdtReadoutElement(ID);
+      ATH_MSG_VERBOSE("Dump simulation hit for " <<m_idHelperSvc->toString(ID));
+      const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(ID);
       
       //transform from local (w.r.t tube's frame) to global (ATLAS frame) and then to chamber's frame
       const Amg::Transform3D toChamber = m_surfaceProvTool->globalToChambCenter(gctx, ID) *
@@ -67,22 +68,21 @@ StatusCode CsvMuonSimHitDumperMuonCnv::execute(){
       const Amg::Vector3D localPos{toChamber * xAOD::toEigen(simHit->localPosition())};
       const Amg::Vector3D localDir{toChamber.linear() * xAOD::toEigen(simHit->localDirection())};
 
-    
-      const std::optional<double> lamda = Amg::intersect<3>(localPos, localDir, Amg::Vector3D::UnitY(), 0.);
-      const Amg::Vector3D localPosExtr = localPos + (*lamda)*localDir;
+      const std::optional<double> lambda = Amg::intersect<3>(localPos, localDir, Amg::Vector3D::UnitZ(), 0.);
+      const Amg::Vector3D localPosExtr = localPos + (*lambda)*localDir;
 
 
-      file<<simHit->pdgId()<<"\t";
-      file<<mdtHelper.stationName(ID)<<"\t";
-      file<<mdtHelper.stationEta(ID)<<"\t";
-      file<<mdtHelper.stationPhi(ID)<<"\t";
+      file<<simHit->pdgId()<<delim;
+      file<<mdtHelper.stationName(ID)<<delim;
+      file<<mdtHelper.stationEta(ID)<<delim;
+      file<<mdtHelper.stationPhi(ID)<<delim;
    
-      file<<localPosExtr.x()<<"\t";
-      file<<localPosExtr.y()<<"\t";
-      file<<localPosExtr.z()<<"\t";
+      file<<localPosExtr.x()<<delim;
+      file<<localPosExtr.y()<<delim;
+      file<<localPosExtr.z()<<delim;
 
-      file<<localDir.x()<<"\t";
-      file<<localDir.y()<<"\t";
+      file<<localDir.x()<<delim;
+      file<<localDir.y()<<delim;
       file<<localDir.z()<<std::endl;   
 
 

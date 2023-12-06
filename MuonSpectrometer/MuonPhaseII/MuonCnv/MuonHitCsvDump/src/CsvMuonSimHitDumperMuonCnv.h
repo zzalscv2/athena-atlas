@@ -38,5 +38,5 @@
    const MuonGMR4::MuonDetectorManager* m_r4DetMgr{nullptr};
   PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_surfaceProvTool{this, "LayerGeoTool", ""};
 
-  int m_event = 0;
+  size_t m_event = 0;
 };
