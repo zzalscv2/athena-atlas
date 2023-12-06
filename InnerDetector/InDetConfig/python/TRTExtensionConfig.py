@@ -10,16 +10,13 @@ def NewTrackingTRTExtensionCfg(flags,
                                SiTrackCollection = None,
                                ExtendedTrackCollection = None,
                                ExtendedTracksMap = None):
-    from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
-    acc = TRTPreProcessingCfg(flags)
     #
     # Track extension to TRT algorithm
     #
     from InDetConfig.TRT_TrackExtensionAlgConfig import TRT_TrackExtensionAlgCfg
-    acc.merge(TRT_TrackExtensionAlgCfg(
-        flags,
-        InputTracksLocation = SiTrackCollection,
-        ExtendedTracksLocation = ExtendedTracksMap))
+    acc = TRT_TrackExtensionAlgCfg(flags,
+                                   InputTracksLocation = SiTrackCollection,
+                                   ExtendedTracksLocation = ExtendedTracksMap)
 
     from InDetConfig.InDetExtensionProcessorConfig import (
         InDetExtensionProcessorCfg)
@@ -43,17 +40,14 @@ def NewTrackingTRTExtensionPhaseCfg(flags,
                                     SiTrackCollection = None,
                                     ExtendedTrackCollection = None,
                                     ExtendedTracksMap = None):
-    from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
-    acc = TRTPreProcessingCfg(flags)
     #
     # Track extension to TRT algorithm
     #
     from InDetConfig.TRT_TrackExtensionAlgConfig import (
         TRT_Phase_TrackExtensionAlgCfg)
-    acc.merge(TRT_Phase_TrackExtensionAlgCfg(
-        flags,
-        InputTracksLocation = SiTrackCollection,
-        ExtendedTracksLocation = ExtendedTracksMap))
+    acc = TRT_Phase_TrackExtensionAlgCfg(flags,
+                                         InputTracksLocation = SiTrackCollection,
+                                         ExtendedTracksLocation = ExtendedTracksMap)
 
     from InDetConfig.InDetExtensionProcessorConfig import (
         InDetExtensionProcessorCfg)
