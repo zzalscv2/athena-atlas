@@ -81,6 +81,7 @@ namespace LVL1 {
     SG::ReadCondHandleKey<CondAttrListCollection> m_dmCorrectionsKey{this,"DMCorrectionsKey","",
                                                                  "Key to dead material corrections (AttrListCollection)"};
     static thread_local bool s_dmCorrectionsLoaded;
+    std::mutex m_dmCorrectionsMutex; // used while loading dm corrections into static map
 
   };
   

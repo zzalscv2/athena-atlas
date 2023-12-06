@@ -39,6 +39,10 @@ class eTowerMakerFromEfexTowers : public AthReentrantAlgorithm
 
     SG::ReadCondHandleKey<CondAttrListCollection> m_noiseCutsKey{this,"NoiseCutsKey","",
                                                                  "Key to noise cuts (AttrListCollection)"};
+    UnsignedIntegerProperty m_noiseCutBeginTimestamp {this,"NoiseCutsBeginTimestamp",1672531200,"Earliest timestamp that noise cuts will be applied from db. Default is start of 2023"};
+
+    mutable std::atomic<bool> m_printedNoiseCuts = false;
+
 };
 
 } // end of LVL1 namespace

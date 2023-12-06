@@ -326,6 +326,7 @@ unsigned int LVL1::eFEXegAlgo::dmCorrection (unsigned int ET, unsigned int layer
   }
 
   if (!s_dmCorrectionsLoaded) {
+      std::lock_guard<std::mutex> lk(m_dmCorrectionsMutex); // ensure only one thread tries to load corrections
       if (!m_dmCorrectionsKey.empty()) {
           // replace s_corrections values with values from database ... only try this once
           SG::ReadCondHandle <CondAttrListCollection> dmCorrections{m_dmCorrectionsKey/*, ctx*/ };
@@ -335,6 +336,8 @@ unsigned int LVL1::eFEXegAlgo::dmCorrection (unsigned int ET, unsigned int layer
                   s_corrections[0][itr->first - 25] = itr->second["EmPS"].data<int>();
                   s_corrections[1][itr->first - 25] = itr->second["EmFR"].data<int>();
                   s_corrections[2][itr->first - 25] = itr->second["EmMD"].data<int>();
+                  ATH_MSG_DEBUG("DM Correction for etaIdx=" << (itr->first - 25) << " : [" << s_corrections[0][itr->first - 25] << ","
+                   << s_corrections[1][itr->first - 25] << "," << s_corrections[2][itr->first - 25] << "]" );
               }
           }
           ATH_MSG_INFO("Loaded DM Corrections from database");
