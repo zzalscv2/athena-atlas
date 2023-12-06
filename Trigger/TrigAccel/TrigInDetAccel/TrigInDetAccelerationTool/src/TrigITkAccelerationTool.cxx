@@ -46,7 +46,6 @@ size_t TrigITkAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSetti
   //0. get InDet geometry information
 
   const std::vector<short>& pixelLayers = m_accelSvc->getLayerInformation(1);
-  const std::vector<short>& sctLayers   = m_accelSvc->getLayerInformation(2);
   const std::vector<short>& layerTypes  = m_accelSvc->getLayerInformation(0);
   
 
@@ -109,15 +108,7 @@ size_t TrigITkAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSetti
     const std::pair<IdentifierHash, IdentifierHash>& els = sp.offlineSpacePoint()->elementIdList();
 
     IdentifierHash hashId = els.first;
-    short layerId = -1;
-    if(sp.isPixel()) {
-      layerId = pixelLayers[hashId];
-    } else if (sfs.m_maxEta < 3) { // Run 3 geometry
-      layerId = sctLayers[hashId];
-    } else {
-      // Ignore SPs from Strips for ITk Track Seeding
-      continue;
-    }
+    short layerId = pixelLayers[hashId];
 
     int phiIdx = (sp.phi()+M_PI)/phiSliceWidth; 
     if (phiIdx >= tcs.m_nMaxPhiSlice) { 
@@ -155,7 +146,7 @@ size_t TrigITkAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSetti
       for(std::vector<std::pair<int, const TrigSiSpacePointBase*> >::iterator it = v.begin();it!=v.end();++it) {
         const TrigSiSpacePointBase* sp  = (*it).second;
         sps.m_index[spIdx] = (*it).first;
-        sps.m_type[spIdx] = sp->isPixel() ? 1 : 2;
+        sps.m_type[spIdx] = 1; // always Pixel
         sps.m_x[spIdx] = sp->x();
         sps.m_y[spIdx] = sp->y();
         sps.m_z[spIdx] = sp->z();
