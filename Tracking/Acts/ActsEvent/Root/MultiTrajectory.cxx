@@ -425,12 +425,12 @@ void ActsTrk::MutableMultiTrajectory::setReferenceSurface_impl(IndexType istate,
   m_trackStatesAux->geometryId[istate] = surface->geometryId().value();
 
   if (surface->geometryId().value() == 0) { // free surface, needs recording of properties
-    m_surfaces[istate] = std::move(surface); // and memory management
     auto surfaceBackend = new xAOD::TrackSurface();
     m_surfacesBackend->push_back(surfaceBackend);
     encodeSurface(surfaceBackend, surface.get(), m_geoContext); // TODO
     auto el = ElementLink<xAOD::TrackSurfaceContainer>(*m_surfacesBackend, m_surfacesBackend->size()-1);
     m_trackStatesAux->surfaceLink[istate] =  el;
+    m_surfaces[istate] = std::move(surface); // and memory management
 
   } else {
     m_surfaces[istate] = surface.get(); // no memory management, bare pointer
