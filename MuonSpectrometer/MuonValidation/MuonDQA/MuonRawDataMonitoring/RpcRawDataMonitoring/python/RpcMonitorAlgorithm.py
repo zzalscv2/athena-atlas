@@ -341,7 +341,8 @@ if __name__=="__main__":
 
     flags.Input.Files = file_list
     flags.Output.HISTFileName = 'RPCMonitoringOutput.root'
-    flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
 
     flags.lock()
     flags.dump()
