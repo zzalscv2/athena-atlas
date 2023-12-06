@@ -11,6 +11,8 @@
 
 #include "AsgDataHandles/VarHandleKeyArray.h"
 
+class EventContext;
+
 namespace SG {
 
   /**
@@ -96,19 +98,19 @@ namespace SG {
       return hndl;
     }
 
-    // /**
-    //  * @brief create a vector of Handles from the HandleKeys
-    //  * in the array, with explicit EventContext.
-    //  */
-    // std::vector< T_Handle > makeHandles (const EventContext& ctx) const
-    // {
-    //   std::vector< T_Handle > hndl;
-    //   typename std::vector<T_HandleKey>::const_iterator itr;
-    //   for (itr = this->begin(); itr != this->end(); ++itr) {
-    //     hndl.push_back ( T_Handle( *itr, ctx) );
-    //   }
-    //   return hndl;
-    // }
+    /**
+     * @brief create a vector of Handles from the HandleKeys
+     * in the array, with explicit EventContext.
+     */
+    std::vector< T_Handle > makeHandles (const EventContext& ctx) const
+    {
+      std::vector< T_Handle > hndl;
+      typename std::vector<T_HandleKey>::const_iterator itr;
+      for (itr = this->begin(); itr != this->end(); ++itr) {
+        hndl.push_back ( T_Handle( *itr, ctx) );
+      }
+      return hndl;
+    }
 
   };
 

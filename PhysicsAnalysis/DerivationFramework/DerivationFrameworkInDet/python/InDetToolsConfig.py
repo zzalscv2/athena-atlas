@@ -11,29 +11,15 @@ from AthenaConfiguration.Enums import BeamType
 from AthenaCommon.Constants import INFO
 
 # Track collection merger
-
-
-def TrackParticleMergerCfg(
-        flags, name="TrackParticleMerger", **kwargs):
-    """Configure the track particle merger tool"""
+def InDetLRTMergeCfg(flags, name="InDetLRTMerge", **kwargs):
     acc = ComponentAccumulator()
-
+    alg = CompFactory.CP.TrackParticleMergerAlg(name, **kwargs)
     kwargs.setdefault("TrackParticleLocation",
                       ["InDetTrackParticles", "InDetLargeD0TrackParticles"])
     kwargs.setdefault("OutputTrackParticleLocation",
                       "InDetWithLRTTrackParticles")
     kwargs.setdefault("CreateViewColllection", True)
-
-    acc.addPublicTool(CompFactory.DerivationFramework.TrackParticleMerger(
-        name, **kwargs), primary=True)
-    return acc
-
-def InDetLRTMergeCfg(flags, name="InDetLRTMerge", **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("AugmentationTools",
-                      [acc.getPrimaryAndMerge(TrackParticleMergerCfg(flags))])
-    acc.addEventAlgo(
-        CompFactory.DerivationFramework.CommonAugmentation(name, **kwargs))
+    acc.addEventAlgo(alg, primary=True)
     return acc
 
 # Used in vertex fit track decorator
