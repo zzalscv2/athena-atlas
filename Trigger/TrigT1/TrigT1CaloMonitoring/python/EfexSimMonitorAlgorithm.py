@@ -14,6 +14,10 @@ def EfexSimMonitoringConfig(flags):
     # uncomment if you want to see all the flags
     #flags.dump() # print all the configs
 
+    # sim monitoring requires knowing how close to a LAr masking the event is, add MaskedSCCondAlg
+    from LArBadChannelTool.LArBadChannelConfig import LArMaskedSCCfg
+    result.merge( LArMaskedSCCfg(flags) )
+
     # make the athena monitoring helper
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(flags,'EfexSimMonitoringCfg')
