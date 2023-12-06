@@ -50,6 +50,13 @@ StatusCode LArNoisyROAlg::execute (const EventContext& ctx) const
 
     return StatusCode::SUCCESS;      
   } 
+
+  const EventIDBase& EIHandle = ctx.eventID();
+  long int thisTimeStamp    = (EIHandle).time_stamp();
+  long int thisTimeStampns  = (EIHandle).time_stamp_ns_offset();
+  uint32_t thisLB           = (EIHandle).lumi_block();
+  unsigned long long thisEv = (EIHandle).event_number();
+  ATH_MSG_DEBUG ( name() << " processing EN : " << thisEv << " in LB : " << thisLB << " TS : " << thisTimeStamp << " TSNS : " << thisTimeStampns );
   
   std::set<unsigned int> bf;
   std::vector<HWIdentifier> MNBfeb;

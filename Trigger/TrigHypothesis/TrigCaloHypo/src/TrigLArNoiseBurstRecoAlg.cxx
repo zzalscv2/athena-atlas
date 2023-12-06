@@ -76,6 +76,13 @@ StatusCode TrigLArNoiseBurstRecoAlg::execute( const EventContext& context ) cons
   auto mon = Monitored::Group(m_monTool,timer);
   std::string bitWise_flags("bitWise_flags");
 
+  const EventIDBase& EIHandle = context.eventID();
+  long int thisTimeStamp    = (EIHandle).time_stamp();
+  long int thisTimeStampns  = (EIHandle).time_stamp_ns_offset();
+  uint32_t thisLB           = (EIHandle).lumi_block();
+  unsigned long long thisEv = (EIHandle).event_number();
+  ATH_MSG_DEBUG ( name() << " processing EN : " << thisEv << " in LB : " << thisLB << " TS : " << thisTimeStamp << " TSNS : " << thisTimeStampns );
+
   // get cells
   SG::ReadHandle<CaloCellContainer> cellsHandle(m_cellContainerKey, context);
   ATH_CHECK( cellsHandle.isValid() );
@@ -162,7 +169,7 @@ StatusCode TrigLArNoiseBurstRecoAlg::execute( const EventContext& context ) cons
   }
 
   if ( (flag & m_mask) != 0x0 ) {
-     ATH_MSG_DEBUG("LAr Noise detected : ");
+     ATH_MSG_DEBUG("LAr Noise detected !");
      pass = true;
      if ( monitor ) {
         auto bitWise = Monitored::Scalar<std::string>(bitWise_flags,"Output");
@@ -177,11 +184,6 @@ StatusCode TrigLArNoiseBurstRecoAlg::execute( const EventContext& context ) cons
   if ( pass && (m_IsObject != nullptr) ) {
     // lock the IS publishing
     std::lock_guard<std::mutex> lock( m_pubIS_mtx );
-    const EventIDBase& EIHandle = context.eventID();
-    long int thisTimeStamp    = (EIHandle).time_stamp();
-    long int thisTimeStampns  = (EIHandle).time_stamp_ns_offset();
-    uint32_t thisLB           = (EIHandle).lumi_block();
-    unsigned long long thisEv = (EIHandle).event_number();
     boost::property_tree::ptree event_tree;
     event_tree.put("eventNumber",thisEv);
     event_tree.put("LBNumber",thisLB);
