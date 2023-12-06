@@ -433,9 +433,7 @@ int InDet::TRT_SegmentsToTrack::getNumberReal(const InDet::TRT_DriftCircle* drif
     SG::ReadHandle<PRD_MultiTruthCollection> truthCollectionTRT(m_multiTruthCollectionTRTName,ctx);
     if(truthCollectionTRT.isValid()){
       std::pair<iter,iter> range = truthCollectionTRT->equal_range(driftcircle->identify());
-      for(iter i = range.first; i != range.second; ++i){
-	numBarcodes++;
-      }
+      numBarcodes+=std::distance(range.first,range.second);
     }
   }
   return numBarcodes;

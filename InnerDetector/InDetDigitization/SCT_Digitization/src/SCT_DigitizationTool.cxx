@@ -33,8 +33,6 @@
 #include <memory>
 #include <sstream>
 
-// Barcodes at the HepMC level are int
-
 using InDetDD::SiCellId;
 
 SCT_DigitizationTool::SCT_DigitizationTool(const std::string& type,

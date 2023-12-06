@@ -440,23 +440,19 @@ std::vector< std::vector< int > > PixelPrepDataToxAOD::addSDOInformation( xAOD::
   // find hit
   for( const auto &hitIdentifier : prd->rdoList() ){
     auto pos = sdoCollection.find(hitIdentifier);
-    if( pos != sdoCollection.end() ) {
-      sdo_word.push_back( pos->second.word() ) ;
+    if( pos == sdoCollection.end() ) continue;
+    sdo_word.push_back( pos->second.word() ) ;
       
-      std::vector< int > sdoDepBC;
-      std::vector< float > sdoDepEnergy;
-      for( const auto& deposit : pos->second.getdeposits() ){
-        if(deposit.first){
-          sdoDepBC.push_back(deposit.first.barcode());
-        } else {
-          sdoDepBC.push_back( -1 );   
-        }
+    size_t toreserve = pos->second.getdeposits().size();
+    std::vector< int > sdoDepBC; sdoDepBC.reserve(toreserve);
+    std::vector< float > sdoDepEnergy; sdoDepEnergy.reserve(toreserve);
+    for( const auto& deposit : pos->second.getdeposits() ){
+        sdoDepBC.push_back(deposit.first?deposit.first.barcode():-1);
         sdoDepEnergy.push_back( deposit.second  );
         ATH_MSG_DEBUG(" SDO Energy Deposit " << deposit.second  ) ;
-      }
-      sdo_depositsBarcode.push_back( sdoDepBC );
-      sdo_depositsEnergy.push_back( sdoDepEnergy );
     }
+    sdo_depositsBarcode.push_back( sdoDepBC );
+    sdo_depositsEnergy.push_back( sdoDepEnergy );
   }
   AUXDATA(xprd,std::vector<int>,sdo_words)  = sdo_word;
   AUXDATA(xprd,std::vector< std::vector<int> >,sdo_depositsBarcode)  = sdo_depositsBarcode;
@@ -576,13 +572,12 @@ std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const 
     }
     else
     {
-	for ( const auto& barcodeSDOColl : trkBCs )
-	{
-           auto bc = siHit->particleLink().barcode();
+    auto bc = siHit->particleLink().barcode();
+    for ( const auto& barcodeSDOColl : trkBCs ) {
            if (std::find(barcodeSDOColl.begin(),barcodeSDOColl.end(),bc) == barcodeSDOColl.end() ) continue;
            multiMatchingHits.push_back(siHit);
            break;   
-	}
+    }
     }
   }
   //Now we will now make 1 SiHit for each true particle if the SiHits "touch" other 
@@ -599,10 +594,11 @@ std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const 
     ajoiningHits.push_back( *siHitIter );
     
     siHitIter2 = siHitIter+1;    
+    auto bc = (*siHitIter)->particleLink().barcode();
     while ( siHitIter2 != multiMatchingHits.end() ) {
       // Need to come from the same truth particle 
             
-      if( (*siHitIter)->particleLink().barcode() != (*siHitIter2)->particleLink().barcode() ){
+      if( bc != (*siHitIter2)->particleLink().barcode() ){
         ++siHitIter2;
         continue;
       }
