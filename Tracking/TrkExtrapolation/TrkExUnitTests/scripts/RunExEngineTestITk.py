@@ -1,12 +1,12 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg    
 from AthenaCommon.Logging import log
 import sys
 
-if(len(sys.argv[1:])):
+if len(sys.argv[1:]):
   cmdargs=dict(arg.split('=') for arg in sys.argv[1:])
-  if not 'MisalignMode' in cmdargs.keys():
+  if 'MisalignMode' not in cmdargs.keys():
     MisalignMode = -1
   else:
     MisalignMode=int(cmdargs.get('MisalignMode',11))
@@ -14,27 +14,29 @@ if(len(sys.argv[1:])):
 else:
   MisalignMode = -1
 
+flags = initConfigFlags()
 ## Just enable ID for the moment.
-ConfigFlags.Input.isMC             = True
+flags.Input.isMC             = True
 
-ConfigFlags.Input.Files = []
+flags.Input.Files = []
 
-ConfigFlags.ITk.Geometry.AllLocal = False
-if ConfigFlags.ITk.Geometry.AllLocal:
+flags.ITk.Geometry.AllLocal = False
+if flags.ITk.Geometry.AllLocal:
   detectors = [
     "ITkPixel",
     "ITkStrip",
     "Bpipe"
   ]
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
-ConfigFlags.TrackingGeometry.MaterialSource = "Input"
+setupDetectorFlags(flags, detectors, toggle_geometry=True)
+flags.TrackingGeometry.MaterialSource = "Input"
 
-ConfigFlags.Detector.GeometryHGTD = False
+flags.Detector.GeometryHGTD = False
 
-ConfigFlags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-03-00-00"
-ConfigFlags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
-ConfigFlags.GeoModel.Align.Dynamic = False
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
+flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
+flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
+flags.GeoModel.Align.Dynamic = False
 if(MisalignMode!=-1):
   tag=""
   BFile=""
@@ -57,28 +59,28 @@ if(MisalignMode!=-1):
     tag="InDetSi_MisalignmentMode_99"
     DBFile="MisalignmentSet99.db"
   DBName="OFLCOND"
-  ConfigFlags.IOVDb.DBConnection ="sqlite://;schema="+DBFile+";dbname="+DBName
+  flags.IOVDb.DBConnection ="sqlite://;schema="+DBFile+";dbname="+DBName
 
-ConfigFlags.Detector.GeometryCalo = False
-ConfigFlags.Detector.GeometryMuon = False
+flags.Detector.GeometryCalo = False
+flags.Detector.GeometryMuon = False
 
 # This should run serially for the moment.
-ConfigFlags.Concurrency.NumThreads = 1
-ConfigFlags.Concurrency.NumConcurrentEvents = 1
+flags.Concurrency.NumThreads = 1
+flags.Concurrency.NumConcurrentEvents = 1
 
 log.debug('Lock config flags now.')
-ConfigFlags.lock()
+flags.lock()
 
 log.debug('dumping config flags now.')
-ConfigFlags.dump()
+flags.dump()
 
-cfg=MainServicesCfg(ConfigFlags)    
+cfg=MainServicesCfg(flags)    
 if(MisalignMode!=-1):
   from IOVDbSvc.IOVDbSvcConfig import addFolders
-  cfg.merge(addFolders(ConfigFlags,"/Indet/AlignITk",db=DBName,detDb=DBFile,tag=tag))
+  cfg.merge(addFolders(flags,"/Indet/AlignITk",db=DBName,detDb=DBFile,tag=tag))
 
 from TrkExUnitTests.TrkExUnitTestsConfig import ExtrapolationEngineTestCfg
-topoAcc=ExtrapolationEngineTestCfg(ConfigFlags,
+topoAcc=ExtrapolationEngineTestCfg(flags,
                                    NumberOfTestsPerEvent   = 100,
                                    # parameters mode: 0 - neutral tracks, 1 - charged particles
                                    ParametersMode          = 1,
@@ -99,7 +101,7 @@ topoAcc=ExtrapolationEngineTestCfg(ConfigFlags,
                                    CollectPassive          = True,
                                    CollectBoundary         = True,
                                    CollectMaterial         = True,
-                                   UseHGTD                 = ConfigFlags.Detector.GeometryHGTD,
+                                   UseHGTD                 = flags.Detector.GeometryHGTD,
                                    # the path limit to test
                                    PathLimit               = -1.,
                                    )

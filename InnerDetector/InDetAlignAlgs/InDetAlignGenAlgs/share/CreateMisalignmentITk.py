@@ -29,11 +29,12 @@ def getFlags(**kwargs):
     ]
     setupDetectorFlags(flags, custom_list=detectors, toggle_geometry=True)
     flags.TrackingGeometry.MaterialSource = "Input"
-    flags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-03-00-00"
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
     flags.GeoModel.Align.Dynamic = False
 
     #Define the output database file name and add it to the flags
-    if not 'MisalignMode' in kwargs.keys():
+    if 'MisalignMode' not in kwargs.keys():
         MisalignMode = 11 # Radial
     else:
         MisalignMode=int(kwargs.get('MisalignMode',11))
