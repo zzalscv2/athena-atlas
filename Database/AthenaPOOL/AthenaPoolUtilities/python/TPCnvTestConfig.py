@@ -37,7 +37,8 @@ def TPCnvTest(infile, keys, useGeoModelSvc=False, useIOVDbSvc=False, doPixel=Fal
     flags = initConfigFlags()
     flags.Input.Files = [infile]
     flags.GeoModel.Run = LHCPeriod.Run1
-    flags.GeoModel.AtlasVersion = 'ATLAS-R1-2012-03-02-00'
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN1_2012
     if useGeoModelSvc:
         flags.GeoModel.Align.Dynamic = False
         flags.Detector.GeometryPixel = doPixel

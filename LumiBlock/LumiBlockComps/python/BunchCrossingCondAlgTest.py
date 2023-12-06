@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
@@ -83,7 +83,8 @@ flags.Input.isMC=False
 flags.Beam.BunchStructureSource=BunchStructureSource.FILLPARAMS
 flags.IOVDb.DatabaseInstance="CONDBR2"
 flags.IOVDb.GlobalTag="CONDBR2-BLKPA-2017-05"
-flags.GeoModel.AtlasVersion="ATLAS-R2-2016-01-00-01"
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
+flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN2
 flags.lock()
 
 result=MainServicesCfg(flags)
