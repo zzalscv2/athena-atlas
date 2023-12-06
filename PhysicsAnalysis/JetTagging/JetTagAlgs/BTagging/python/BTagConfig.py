@@ -12,7 +12,10 @@ from FlavorTagDiscriminants.BTagJetAugmenterAlgConfig import (
     BTagJetAugmenterAlgCfg)
 from FlavorTagDiscriminants.BTagMuonAugmenterAlgConfig import (
     BTagMuonAugmenterAlgCfg)
-from FlavorTagDiscriminants.FlavorTagNNConfig import FlavorTagNNCfg
+from FlavorTagDiscriminants.FlavorTagNNConfig import (
+    FlavorTagNNCfg,
+    MultifoldGNNCfg,
+)
 from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
 from JetHitAssociation.JetHitAssociationConfig import JetHitAssociationCfg
@@ -375,6 +378,22 @@ def BTagAlgsCfg(inputFlags,
                         FlipConfig=flip_config,
                     )
                 )
+
+    # multifold models
+    for networks in inputFlags.BTagging.NNs.get(jetcol, []):
+        args = dict(
+            flags=inputFlags,
+            BTaggingCollection=BTagCollection,
+            TrackCollection=trackCollection,
+            nnFilePaths=networks['folds'],
+            remapping=networks.get('remapping', {})
+        )
+        result.merge(MultifoldGNNCfg(**args))
+        if inputFlags.BTagging.RunFlipTaggers and networks.get('flip', True):
+            for flip_config in _get_flip_config(dl2):
+                result.merge(MultifoldGNNCfg(**args, FlipConfig=flip_config))
+
+
 
     return result
 
