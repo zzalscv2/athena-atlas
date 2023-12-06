@@ -68,8 +68,8 @@ public:
   TrackSegment& operator=(TrackSegment&&) noexcept = default;
 
   /** Constructor with parameters */
-  TrackSegment(const LocalParameters& locpars,
-               const Amg::MatrixX& locerr,
+  TrackSegment(LocalParameters&& locpars,
+               Amg::MatrixX&& locerr,
                const Surface* sf,
                DataVector<const MeasurementBase>&& crots,
                FitQuality* fqual,

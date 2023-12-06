@@ -25,13 +25,14 @@ Trk::TrackSegment::TrackSegment()
 }
 
 // explicit constructor
-Trk::TrackSegment::TrackSegment(const Trk::LocalParameters& locpars,
-                                const Amg::MatrixX& locerr,
+Trk::TrackSegment::TrackSegment(Trk::LocalParameters&& locpars,
+                                Amg::MatrixX&& locerr,
                                 const Trk::Surface* sf,
                                 DataVector<const MeasurementBase>&& crots,
                                 FitQuality* fqual,
                                 Segment::Author author)
-  : Trk::Segment(locpars, locerr, std::move(crots), fqual, author)
+  : Trk::Segment(std::move(locpars), std::move(locerr),
+                 std::move(crots), fqual, author)
   , SurfacePtrHolderDetEl(sf)
   , m_globalPosition(INVALID_VECTOR3D)
 {

@@ -69,8 +69,8 @@ public:
       @param author enum to indicate author, see Segment.h for the possible
      authors
    */
-  MuonSegment(const Trk::LocalParameters& locpars,
-              const Amg::MatrixX& locerr,
+  MuonSegment(Trk::LocalParameters&& locpars,
+              Amg::MatrixX&& locerr,
               Trk::PlaneSurface* psf,
               DataVector<const Trk::MeasurementBase>&& cmeas,
               Trk::FitQuality* fqual,
@@ -89,7 +89,7 @@ public:
   */
   MuonSegment(const Amg::Vector2D& segLocPos, // 2 local position coordinates
               const Trk::LocalDirection& segLocDir, //
-              const Amg::MatrixX& segLocalErr,      //
+              Amg::MatrixX&& segLocalErr,      //
               Trk::PlaneSurface* psf, // plane surface to define frame
               DataVector<const Trk::MeasurementBase>&& cmeas, // vector of contained measurements on track
               Trk::FitQuality* fqual, // fit quality object
