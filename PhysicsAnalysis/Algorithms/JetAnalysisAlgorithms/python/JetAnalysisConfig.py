@@ -102,7 +102,13 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('systematicsModelJES', "Global", type=str)
         self.addOption ('systematicsModelJER', "Simple", type=str)
         self.addOption ('recalibratePhyslite', True, type=bool)
-
+        # Calibration tool options
+        self.addOption ('calibToolConfigFile', None, type=str)
+        self.addOption ('calibToolCalibArea', None, type=str)
+        # Uncertainties tool options
+        self.addOption ('uncertToolConfigPath', None, type=str)
+        self.addOption ('uncertToolCalibArea', None, type=str)
+        self.addOption ('uncertToolMCType', None, type=str)
 
     def makeAlgs (self, config) :
 
@@ -134,6 +140,10 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 else:
                     configFile = "JES_MC16Recommendation_Consolidated_{0}_Apr2019_Rel21.config"
                 configFile = configFile.format(self.jetInput)
+            if self.calibToolCalibArea is not None:
+                alg.calibrationTool.CalibArea = self.calibToolCalibArea
+            if self.calibToolConfigFile is not None:
+                configFile = self.calibToolConfigFile
             alg.calibrationTool.ConfigFile = configFile
             if config.dataType() is DataType.Data:
                 alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Insitu'
@@ -166,9 +176,16 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+postfix )
         config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
         alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
-        # Add the correct directory on the front
-        alg.uncertaintiesTool.ConfigFile = "rel21/Fall2018/"+configFile
-        alg.uncertaintiesTool.MCType = "AFII" if config.dataType() is DataType.FastSim else "MC16"
+        if self.uncertToolCalibArea is not None:
+            alg.uncertaintiesTool.CalibArea = self.uncertToolCalibArea
+        if self.uncertToolConfigPath is not None:
+            alg.uncertaintiesTool.ConfigFile = self.uncertToolConfigPath
+        else: # Default config
+            alg.uncertaintiesTool.ConfigFile = "rel21/Fall2018/"+configFile    # Add the correct directory on the front
+        if self.uncertToolMCType is not None:
+            alg.uncertaintiesTool.MCType = self.uncertToolMCType
+        else: # Default config
+            alg.uncertaintiesTool.MCType = "AFII" if config.dataType() is DataType.FastSim else "MC16"
         alg.uncertaintiesTool.IsData = (config.dataType() is DataType.Data)
         alg.jets = config.readName (self.containerName)
         alg.jetsOut = config.copyName (self.containerName)
