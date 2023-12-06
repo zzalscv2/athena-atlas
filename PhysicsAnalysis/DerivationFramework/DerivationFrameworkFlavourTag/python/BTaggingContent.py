@@ -2,6 +2,10 @@
 
 from AthenaConfiguration.Enums import LHCPeriod
 
+def _getGN2v(n, new_flavors=[]):
+    variants = ["", "Flip","Neg", "Simple"]
+    flavors = list('cub') + new_flavors
+    return [f'GN2v{n:02d}{v}_p{f}' for v in variants for f in flavors]
 
 JetStandardAux = \
     [ "pt"
@@ -52,23 +56,10 @@ BTaggingStandardRun3Aux = \
     , "dipsLoose20220314v2flip_pu"
     , "dipsLoose20220314v2flip_pc"
     , "dipsLoose20220314v2flip_pb"
-
-    , "GN2v00_pb"
-    , "GN2v00_pc"
-    , "GN2v00_pu"
-
-    , "GN2v00Flip_pb"
-    , "GN2v00Flip_pc"
-    , "GN2v00Flip_pu"
-
-    , "GN2v00Neg_pb"
-    , "GN2v00Neg_pc"
-    , "GN2v00Neg_pu"
-
-    , "GN2v00Simple_pb"
-    , "GN2v00Simple_pc"
-    , "GN2v00Simple_pu"
     ]
+
+BTaggingStandardRun3Aux += _getGN2v(0) + _getGN2v(1, new_flavors=['tau'])
+
 
 BTaggingStandardRun4Aux = [
     "SV1_NGTinSvx",

@@ -177,16 +177,16 @@ def MultifoldGNNCfg(
         BTaggingCollection,
         TrackCollection,
         FlipConfig="STANDARD",
+        nnFilePaths=None,
+        remapping={},
 ):
-    # dummy paths for now
-    rawpath = 'BTagging/20230306/gn2v00/antikt4empflow/network.onnx'
-    nnFilePaths = [rawpath]*4
+    if nnFilePaths is None:
+        raise ValueError('nnFilePaths must be specified')
     common = commonpath(nnFilePaths)
     nn_name = '_'.join(PurePath(common).with_suffix('').parts)
     algname = f'{nn_name}_{FlipConfig}'
     veto_list = getStaticTrackVars(TrackCollection)
     veto_list += getUndeclaredBtagVars(BTaggingCollection)
-    flavors = list('cub') + [] # todo: add tau when we have it
     acc = ComponentAccumulator()
     acc.addEventAlgo(
         CompFactory.FlavorTagDiscriminants.BTagDecoratorAlg(
@@ -198,10 +198,7 @@ def MultifoldGNNCfg(
                 foldHashName='jetFoldHash',
                 nnFiles=nnFilePaths,
                 flipTagConfig=FlipConfig,
-                # todo: don't remap anything with final NN
-                variableRemapping={
-                    f'GN2v00_p{x}':f'GN2v00Fold_p{x}' for x in flavors
-                }
+                variableRemapping=remapping,
             ),
             undeclaredReadDecorKeys=veto_list,
         )

@@ -64,10 +64,28 @@ def runOldSecVrtSecIncl(prevFlags):
     return prevFlags.Common.ProductionStep is ProductionStep.Derivation
 
 
-def runFlipTag(flags):
+def isRun3Derivation(flags):
     derivation = flags.Common.ProductionStep is ProductionStep.Derivation
     before_the_future = flags.GeoModel.Run < LHCPeriod.Run4
     return derivation and before_the_future
+
+
+def runFlipTag(flags):
+    return isRun3Derivation(flags)
+
+def getNNs(flags):
+    # dummy for now
+    caldir = 'BTagging/20231205/GN2v01/antikt4empflow'
+    pf_nns = [f'{caldir}/network_fold{n}.onnx' for n in range(4)]
+    if isRun3Derivation(flags):
+        return {
+            'AntiKt4EMPFlowJets': [
+                {
+                    'folds': pf_nns,
+                },
+            ]
+        }
+    return {}
 
 
 def createBTaggingConfigFlags():
@@ -123,5 +141,11 @@ def createBTaggingConfigFlags():
 
     # a flag to add V0finder
     btagcf.addFlag("BTagging.AddV0Finder", False)
+
+    # (multifold) NN trainings, each jet collection maps to a list of
+    # dicts. The dict has several keys:
+    #  - folds: list of NNs to run
+    #  - remapping (optional): any variable remapping
+    btagcf.addFlag("BTagging.NNs", getNNs)
 
     return btagcf
