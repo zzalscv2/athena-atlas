@@ -9,7 +9,7 @@ number_of_events=$1
 
 #Option for sim/digi/reco
 default_geometry="ATLAS-P2-RUN4-03-00-01"
-default_condition="OFLCOND-MC15c-SDR-14-05"
+default_condition="OFLCOND-MC21-SDR-RUN4-01"
 
 #Post-processing for ID/ITk and FTag
 ftag_merge_DQA="${Athena_DIR}/src/PhysicsAnalysis/JetTagging/JetTagValidation/JetTagDQA/scripts/"
@@ -42,7 +42,7 @@ run "Simulation" Sim_tf.py \
   --geometryVersion "default:${default_geometry}" \
   --multithreaded "True" \
   --postInclude "default:PyJobTransforms.UseFrontier" \
-  --preInclude "EVNTtoHITS:Campaigns.PhaseIISimulation" \
+  --preInclude "EVNTtoHITS:Campaigns.MC23PhaseIISimulation" \
   --simulator "FullG4MT" \
   --inputEVNTFile ${ArtInFile} \
   --outputHITSFile "HITS.pool.root" \
@@ -62,7 +62,7 @@ run "RAWtoALL" Reco_tf.py \
   --geometryVersion "all:${default_geometry}" \
   --multithreaded "True" \
   --postInclude "all:PyJobTransforms.UseFrontier" \
-  --preInclude "all:Campaigns.PhaseIINoPileUp" \
+  --preInclude "all:Campaigns.MC23PhaseIINoPileUp" \
   --inputHitsFile "HITS.pool.root" \
   --outputAODFile "AOD.pool.root" \
   --maxEvents ${number_of_events}
