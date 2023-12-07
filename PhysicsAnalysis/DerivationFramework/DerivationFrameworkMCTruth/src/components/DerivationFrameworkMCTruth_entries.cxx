@@ -20,6 +20,10 @@
 #include "src/GenFilterTool.h"
 #include "src/TruthEDDecorator.h"
 #include "src/TruthMetaDataWriter.h"
+#include "DerivationFrameworkMCTruth/ClassifyAndCalculateHFAugmentation.h"
+#include "DerivationFrameworkMCTruth/ClassifyAndCalculateHFTool.h"
+#include "DerivationFrameworkMCTruth/HadronOriginClassifier.h"
+#include "DerivationFrameworkMCTruth/JetMatchingTool.h"
 
 using namespace DerivationFramework;
 
@@ -45,3 +49,7 @@ DECLARE_COMPONENT( TruthPVCollectionMaker )
 DECLARE_COMPONENT( GenFilterTool )
 DECLARE_COMPONENT( TruthEDDecorator )
 DECLARE_COMPONENT( TruthMetaDataWriter )
+DECLARE_COMPONENT( ClassifyAndCalculateHFAugmentation )
+DECLARE_COMPONENT( ClassifyAndCalculateHFTool )
+DECLARE_COMPONENT( HadronOriginClassifier )
+DECLARE_COMPONENT( JetMatchingTool )

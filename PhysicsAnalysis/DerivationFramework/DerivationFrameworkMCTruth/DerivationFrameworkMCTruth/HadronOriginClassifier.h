@@ -10,10 +10,8 @@
  
  */
 
-
 #ifndef  DerivationFrameworkMCTruth_HadronOriginClassifier_H
 #define  DerivationFrameworkMCTruth_HadronOriginClassifier_H
-
 
 #include <vector>
 #include <map>
@@ -24,9 +22,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODEventInfo/EventInfo.h"
-
-
-
 
 namespace DerivationFramework{
 
@@ -58,7 +53,7 @@ namespace DerivationFramework{
     
   private:
 
-    void fillHadronMap(std::map<const xAOD::TruthParticle*,int>& mainHadronMap, const xAOD::TruthParticle* mainhad, const xAOD::TruthParticle* ihad, bool decayed=false) const;
+    void fillHadronMap(std::set<const xAOD::TruthParticle*>& usedHadron, std::map<const xAOD::TruthParticle*,int>& mainHadronMap, const xAOD::TruthParticle* mainhad, const xAOD::TruthParticle* ihad, bool decayed=false) const;
 
     void buildPartonsHadronsMaps(std::map<const xAOD::TruthParticle*,int>& mainHadronMap,
                                  std::map<const xAOD::TruthParticle*,HF_id>& partonsOrigin) const;
