@@ -146,12 +146,12 @@ namespace LVL1 {
   StatusCode TrigT1TRT::execute(const EventContext &ctx) const {
 
     // initialise and empty board score table 
-    int barrel_trigger_board[2][32][9] = {0};
-    int endcap_trigger_board[2][32][20] = {0};
+    int barrel_trigger_board[2][32][9] = {{{0}}};
+    int endcap_trigger_board[2][32][20] = {{{0}}};
 
     // initialise and empty empty ttc score table 
-    int barrel_trigger_ttc[2][8] = {0};
-    int endcap_trigger_ttc[2][16] = {0};
+    int barrel_trigger_ttc[2][8] = {{0}};
+    int endcap_trigger_ttc[2][16] = {{0}};
 
     // access TRT RDO hits container
     SG::ReadHandle<TRT_RDO_Container> trtRDOs(m_trtRDOKey, ctx);
