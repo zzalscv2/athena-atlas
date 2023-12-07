@@ -332,7 +332,8 @@ TFCSONNXHandler::computeTemplate(VNetworkBase::NetworkInputs const &inputs) {
   std::vector<Ort::Value> node_values;
   // Non const values that will be needed at each step.
   std::string node_name;
-  int n_dimensions, elements_in_node;
+  int n_dimensions, elements_in_node, key_number;
+  size_t first_digit;
   // Move along the list of node names gathered in the constructor
   // we need both the node name, and the dimension
   // so we cannot itterate directly on the vector.
@@ -355,15 +356,20 @@ TFCSONNXHandler::computeTemplate(VNetworkBase::NetworkInputs const &inputs) {
     };
     // Get the node content and remove any common prefix from the elements
     const std::map<std::string, double> node_inputs = inputs.at(node_name);
+    std::vector<Tin> node_elements(elements_in_node);
 
     ATH_MSG_DEBUG("Found node named " << node_name << " with "
                                       << elements_in_node << " elements.");
-    // The shape of the nodes is just the number of elements
-    // const std::vector<int64_t> shape = {elements_in_node};
-    // Node elements are always ints in string form
-    for (auto element : node_inputs) {
-      input_values[node_n].push_back(element.second);
+    // Then the rest should be numbers from 0 up
+    for (auto element : node_inputs){
+      first_digit = element.first.find_first_of("0123456789");
+      // if there is no digit, it's not an element
+      if (first_digit < element.first.length()){
+        key_number = std::stoi(element.first.substr(first_digit));
+        node_elements[key_number] = element.second;
+      }
     }
+    input_values[node_n] = node_elements;
 
     ATH_MSG_DEBUG("Creating ort tensor n_dimensions = "
                   << n_dimensions

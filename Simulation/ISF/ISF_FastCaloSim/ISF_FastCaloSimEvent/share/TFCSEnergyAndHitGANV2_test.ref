@@ -268,14 +268,13 @@ ISF_FastCaloSim...   INFO 14  Ekin_bin=all ; calosample=14
 ISF_FastCaloSim...   INFO 14  Weight for extrapolated position: 0.5
 ISF_FastCaloSim...SUCCESS Before running GAN2->simulate()
 
-ISF_FastCaloSim...   INFO Ebin=-1 E=44594.9 #cells=0
-ISF_FastCaloSim...   INFO   E0(PreSamplerB)=416.923 E0/E=0.0093491
-ISF_FastCaloSim...   INFO   E1(EMB1)=986.647 E1/E=0.0221246
-ISF_FastCaloSim...   INFO   E2(EMB2)=8034.39 E2/E=0.180164
-ISF_FastCaloSim...   INFO   E3(EMB3)=1004.8 E3/E=0.0225316
-ISF_FastCaloSim...   INFO   E12(TileBar0)=12879.5 E12/E=0.288811
-ISF_FastCaloSim...   INFO   E13(TileBar1)=19938.7 E13/E=0.447106
-ISF_FastCaloSim...   INFO   E14(TileBar2)=1334.03 E14/E=0.0299143
+ISF_FastCaloSim...   INFO Ebin=-1 E=52495.7 #cells=0
+ISF_FastCaloSim...   INFO   E0(PreSamplerB)=381.776 E0/E=0.00727251
+ISF_FastCaloSim...   INFO   E1(EMB1)=3608.98 E1/E=0.0687481
+ISF_FastCaloSim...   INFO   E2(EMB2)=21686.3 E2/E=0.413106
+ISF_FastCaloSim...   INFO   E3(EMB3)=999.672 E3/E=0.0190429
+ISF_FastCaloSim...   INFO   E12(TileBar0)=15264.8 E12/E=0.290782
+ISF_FastCaloSim...   INFO   E13(TileBar1)=10554.2 E13/E=0.201048
 ISF_FastCaloSim...   INFO   AuxInfo has 2 elements
 ISF_FastCaloSim...SUCCESS Program ends
 
