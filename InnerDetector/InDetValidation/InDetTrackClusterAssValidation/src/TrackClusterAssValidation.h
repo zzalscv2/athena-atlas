@@ -121,7 +121,7 @@ namespace InDet {
         std::multimap<int,const Trk::PrepRawData*> m_kinecluster    ;
         std::multimap<int,const Trk::PrepRawData*> m_kineclusterTRT ;
         std::multimap<int,const Trk::SpacePoint*>  m_kinespacepoint ;
-        std::vector<std::list<Barcode> >           m_particles      ;
+        std::vector<std::list<PartPropCache> >           m_particles      ;
         std::vector<std::list<int> >               m_difference     ;
         std::vector<std::multimap<int,int> >       m_tracks         ;
         std::vector<TrackCollectionStat_t>         m_trackCollectionStat;

@@ -8,25 +8,25 @@
 namespace InDet {
 
   /////////////////////////////////////////////////////////////////////////////////
-  //  Header file for class Barcode
+  //  Header file for class PartPropCache
   /////////////////////////////////////////////////////////////////////////////////
 
-  class Barcode
+  class PartPropCache
     {
       ///////////////////////////////////////////////////////////////////
       // Public methods:
       ///////////////////////////////////////////////////////////////////
     public:
       ///default c'tor
-      Barcode()  {};
+      PartPropCache()  {};
       ///copy c'tor defaulted
-      Barcode(const Barcode&) = default;
+      PartPropCache(const PartPropCache&) = default;
       ///c'tor 
-      Barcode(int charge,int rapidity);
+      PartPropCache(int charge,int rapidity);
       ///destructor does nothing
-      ~Barcode() = default;
+      ~PartPropCache() = default;
       ///assignment defaulted
-      Barcode& operator = (const Barcode&) = default;
+      PartPropCache& operator = (const PartPropCache&) = default;
       ///getters
       int barcode () const {return abs(m_barcharge);}
       int charge  () const {return ((m_barcharge>0) - (m_barcharge<0));} //returns 1, -1 or 0 depending on sign
@@ -41,7 +41,7 @@ namespace InDet {
   // Inline methods
   /////////////////////////////////////////////////////////////////////////////////
 
-  inline Barcode::Barcode (int bc,int rap)
+  inline PartPropCache::PartPropCache (int bc,int rap)
     {
       m_barcharge = bc ;
       m_rapidity  = rap;
