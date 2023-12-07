@@ -192,11 +192,11 @@ StatusCode OldSpclMcFilterTool::selectSpclMcBarcodes()
     }
     // e, mu, tau, neutrino 
     // Hard coded cut pt>2GeV to remove beam-jet Dalitz decays, etc.
-    if( ida>10 && ida<17 && pt>2.*GeV && std::abs(eta) < m_etaRange ) isSpcl = true;
+    if( MC::isSMLepton(part) && pt>2.*GeV && std::abs(eta) < m_etaRange ) isSpcl = true;
 
    /// Save photons
    ///
-   if ( ida==22 && pt>m_ptGamMin && std::abs(eta) < m_etaRange ) {
+   if ( MC::isPhoton(part) && pt>m_ptGamMin && std::abs(eta) < m_etaRange ) {
      /// Save photon only if it does not decay (ie no end_vertex)
      if ( nullptr == part->end_vertex() ) {
         isSpcl=true;
