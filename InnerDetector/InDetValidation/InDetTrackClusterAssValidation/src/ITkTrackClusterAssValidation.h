@@ -125,7 +125,7 @@ namespace ITk {
         const PRD_MultiTruthCollection           * m_truthStrip{}   ;
         std::multimap<int,const Trk::PrepRawData*> m_kinecluster    ;
         std::multimap<int,const Trk::SpacePoint*>  m_kinespacepoint ;
-        std::vector<std::list<InDet::Barcode> >           m_particles      ;
+        std::vector<std::list<InDet::PartPropCache> >           m_particles      ;
         std::vector<std::list<int> >               m_difference     ;
         std::vector<std::multimap<int,int> >       m_tracks         ;
         std::vector<InDet::TrackCollectionStat_t>  m_trackCollectionStat;

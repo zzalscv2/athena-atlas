@@ -1013,7 +1013,7 @@ int InDet::TrackClusterAssValidation::qualityTracksSelection(InDet::TrackCluster
     else if(event_data.m_kinespacepoint.count(k0)< m_spcut   ) worskine.push_back(k0);
     else if(event_data.m_kineclusterTRT.count(k0)< m_clcutTRT) worskine.push_back(k0);
     else {
-      InDet::Barcode BC(q0,rp); event_data.m_particles[0].push_back(BC); ++t;
+      event_data.m_particles[0].push_back(InDet::PartPropCache(q0,rp)); ++t;
     }
 
     k0 = (*c).first;
@@ -1031,7 +1031,7 @@ int InDet::TrackClusterAssValidation::qualityTracksSelection(InDet::TrackCluster
   else if(event_data.m_kinespacepoint.count(k0)< m_spcut   ) worskine.push_back(k0);
   else if(event_data.m_kineclusterTRT.count(k0)< m_clcutTRT) worskine.push_back(k0);
   else {
-    InDet::Barcode BC(q0,rp); event_data.m_particles[0].push_back(BC); ++t;
+     event_data.m_particles[0].push_back(InDet::PartPropCache(q0,rp)); ++t;
   }
   for(auto & pThisCluster: worskine) {
     event_data.m_kinecluster   .erase(pThisCluster);
@@ -1067,10 +1067,9 @@ int InDet::TrackClusterAssValidation::qualityTracksSelection(InDet::TrackCluster
   }
 
 
-  std::list<InDet::Barcode>::iterator p = event_data.m_particles[0].begin(), pe =event_data.m_particles[0].end();
 
-  for(; p!=pe; ++p) {
-    for(SG::ReadHandleKeyArray<TrackCollection>::size_type nc=1; nc<m_tracklocation.size(); ++nc) event_data.m_particles[nc].push_back((*p));
+  for(const auto& p: event_data.m_particles[0]) {
+    for(SG::ReadHandleKeyArray<TrackCollection>::size_type nc=1; nc<m_tracklocation.size(); ++nc) event_data.m_particles[nc].push_back(p);
   }
   return t;
 }
@@ -1195,7 +1194,7 @@ void InDet::TrackClusterAssValidation::efficiencyReconstruction(InDet::TrackClus
   for(SG::ReadHandleKeyArray<TrackCollection>::size_type nc = 0; nc!=m_tracklocation.size(); ++nc) {
 
     event_data.m_difference[nc].clear();
-    std::list<InDet::Barcode>::const_iterator p = event_data.m_particles[nc].begin(), pe =event_data.m_particles[nc].end();
+    auto p = event_data.m_particles[nc].begin(), pe =event_data.m_particles[nc].end();
     if(p==pe) return;
     std::multimap<int,int>::const_iterator t, te = event_data.m_tracks[nc].end();
 
@@ -1409,7 +1408,7 @@ bool InDet::TrackClusterAssValidation::noReconstructedParticles(const InDet::Tra
 
   for(SG::ReadHandleKeyArray<TrackCollection>::size_type nc=0; nc!=m_tracklocation.size(); ++nc) {
 
-    std::list<InDet::Barcode>::const_iterator p = event_data.m_particles[nc].begin(), pe =event_data.m_particles[nc].end();
+    auto p = event_data.m_particles[nc].begin(), pe =event_data.m_particles[nc].end();
     if(p==pe) continue;
 
     std::list<int>::const_iterator dif = event_data.m_difference[nc].begin();
