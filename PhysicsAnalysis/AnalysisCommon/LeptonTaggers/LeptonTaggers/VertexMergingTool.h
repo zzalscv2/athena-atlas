@@ -47,7 +47,7 @@ namespace Prompt
 
     virtual StatusCode initialize() override;
 
-    virtual MergeResult mergeInitVertices(
+    virtual MergeResultNotOwner mergeInitVertices(
       const FittingInput &input,
       const xAOD::TrackParticle *tracklep,
       std::vector<std::unique_ptr<xAOD::Vertex>> &init_vtxs,
@@ -60,13 +60,13 @@ namespace Prompt
 
     bool makeClusters(
       std::vector<std::unique_ptr<VtxCluster>> &clusters,
-      std::vector<std::unique_ptr<xAOD::Vertex>> &init_vtxs
+      std::vector<xAOD::Vertex*> &init_vtxs
     );
 
     bool matchVtxToCluster(const VtxCluster &cluster, const xAOD::Vertex *vtx) const;
 
     bool addInitVtxToCluster(
-      VtxCluster &cluster, std::unique_ptr<xAOD::Vertex> vtx
+      VtxCluster &cluster, xAOD::Vertex* vtx
     ) const;
 
     bool fitVertexCluster(

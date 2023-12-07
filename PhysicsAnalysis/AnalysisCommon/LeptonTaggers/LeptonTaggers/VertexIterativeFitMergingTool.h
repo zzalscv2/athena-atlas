@@ -96,7 +96,7 @@ namespace Prompt
 
     virtual StatusCode initialize() override;
 
-    virtual MergeResult mergeInitVertices(
+    virtual MergeResultNotOwner mergeInitVertices(
       const FittingInput &input,
       const xAOD::TrackParticle *tracklep,
       std::vector<std::unique_ptr<xAOD::Vertex>> &initVtxs,
@@ -131,7 +131,7 @@ namespace Prompt
     void plotVertexDistances(const std::vector<TwoTrackVtx> &others);
 
     std::vector<const xAOD::TrackParticle *> getTracksWithoutVertex(
-      const std::vector<std::unique_ptr<xAOD::Vertex>> &passVtxs,
+      const std::vector<xAOD::Vertex*> &passVtxs,
       const std::vector<const xAOD::TrackParticle *> &selectedTracks
     );
 

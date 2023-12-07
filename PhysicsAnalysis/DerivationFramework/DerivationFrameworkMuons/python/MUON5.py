@@ -181,6 +181,10 @@ def MUON5Cfg(ConfigFlags):
 
     # Common augmentations
     acc.merge(MUON5KernelCfg(ConfigFlags, name="MUON5Kernel", StreamName = stream_name, TriggerListsHelper = MUON5TriggerListsHelper))
+    
+    #Adding Lepton Taggers
+    from LeptonTaggers.LeptonTaggersConfig import DecorateImprovedPromptLeptonAlgsCfg
+    acc.merge(DecorateImprovedPromptLeptonAlgsCfg(ConfigFlags))
 
     # ============================
     # Define contents of the format
@@ -299,6 +303,10 @@ def MUON5Cfg(ConfigFlags):
                                               "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ",
                                               "TauJets.jetLink",
                                            ]
+    from LeptonTaggers.LeptonTaggersConfig import GetExtraPromptVariablesForDxAOD, GetExtraImprovedPromptVariablesForDxAOD
+    MUON5SlimmingHelper.ExtraVariables += GetExtraPromptVariablesForDxAOD(onlyBDT=False)
+    MUON5SlimmingHelper.ExtraVariables += GetExtraImprovedPromptVariablesForDxAOD()
+    
     from DerivationFrameworkEGamma.ElectronsCPDetailedContent import ElectronsCPDetailedContent
     MUON5SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
     from DerivationFrameworkEGamma.ElectronsCPDetailedContent import GSFTracksCPDetailedContent
@@ -368,7 +376,7 @@ def MUON5Cfg(ConfigFlags):
             MUON5SlimmingHelper.AllVariables += ['HLTNav_R2ToR3Summary']
         ##
         #####################################################
-
+    
     # Output stream    
     MUON5ItemList = MUON5SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_MUON5", ItemList=MUON5ItemList, AcceptAlgs=["MUON5Kernel"]))

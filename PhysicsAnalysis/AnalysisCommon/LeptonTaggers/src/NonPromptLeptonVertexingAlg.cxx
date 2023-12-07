@@ -249,10 +249,15 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
       fittingInput, tracklep, ifit_tracks
     );
 
-    //
-    // Deep merge 2-track vertices.
-    //
-    Prompt::MergeResult deep_merged_result = m_vertexMerger->mergeInitVertices(fittingInput, tracklep, twoTrk_vertices, ifit_tracks);
+    /*
+      Deep merge 2-track vertices.
+
+      Ownership of the vertices should stay in this scope,
+      as this is where the vertices will be saved to the store.
+    */
+    Prompt::MergeResultNotOwner deep_merged_result = m_vertexMerger->mergeInitVertices(
+      fittingInput, tracklep, twoTrk_vertices, ifit_tracks
+    );
 
     //
     // Save secondary vertices
@@ -266,11 +271,13 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
     //
     // Record 2-track vertexes and simple merged vertexes
     //
+    ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg::execute --- recording 2-track and simple merged vertices");
     saveSecondaryVertices(twoTrk_vertices, index_vector_twoTrk, sv_links, SVContainerRef, svSet);
 
     //
     // Record both merged multi-track vertices and also unmerged 2-track vertices
     //
+    ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg::execute --- recording merged multi-track and unmerged 2-track vertices");
     saveSecondaryVertices(deep_merged_result.vtxsNewMerged, index_vector_deep_merged, deepmerge_sv_links, SVContainerRef, svSet);
     saveSecondaryVertices(deep_merged_result.vtxsInitPassedNotMerged, index_vector_deep_merged, deepmerge_sv_links, SVContainerRef, svSet);
 

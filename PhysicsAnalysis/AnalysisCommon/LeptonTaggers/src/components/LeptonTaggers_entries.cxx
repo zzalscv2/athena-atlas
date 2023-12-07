@@ -10,6 +10,7 @@
 #include "LeptonTaggers/DecoratePromptLeptonRNN.h"
 #include "LeptonTaggers/DecoratePromptLeptonImproved.h"
 
+DECLARE_COMPONENT(Prompt::PrimaryVertexReFitter)
 DECLARE_COMPONENT(Prompt::VertexFittingTool)
 DECLARE_COMPONENT(Prompt::VertexIterativeFitMergingTool)
 DECLARE_COMPONENT(Prompt::NonPromptLeptonVertexingAlg)
