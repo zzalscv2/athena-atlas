@@ -37,7 +37,7 @@ namespace Prompt
   {
     VtxCluster():vtxMerged(nullptr) {}
 
-    std::vector<std::unique_ptr<xAOD::Vertex>> vtxsInit;
+    std::vector<xAOD::Vertex*> vtxsInit;
     std::vector<xAOD::Vertex *>                vtxsFittedBad;
 
     std::vector<const xAOD::TrackParticle *>   trksInit;
@@ -55,6 +55,14 @@ namespace Prompt
     std::vector<std::unique_ptr<xAOD::Vertex>> vtxsInitPassedNotMerged;
   };
 
+  struct MergeResultNotOwner
+  {
+    std::vector<std::unique_ptr<xAOD::Vertex>> vtxsNewMerged;
+
+    std::vector<xAOD::Vertex*> vtxsInitPassed;
+    std::vector<std::unique_ptr<xAOD::Vertex>> vtxsInitPassedNotMerged;
+  };
+
   struct FittingInput;
 
   //======================================================================================================
@@ -65,7 +73,7 @@ namespace Prompt
   public:
     DeclareInterfaceID(Prompt::IVertexMergingTool, 1, 0);
 
-    virtual MergeResult mergeInitVertices(
+    virtual MergeResultNotOwner mergeInitVertices(
       const FittingInput &input,
       const xAOD::TrackParticle *tracklep,
       std::vector<std::unique_ptr<xAOD::Vertex>> &initVtxs,

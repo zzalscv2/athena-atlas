@@ -118,9 +118,6 @@ namespace Prompt {
         std::unique_ptr<SG::AuxElement::Decorator<float> >     m_normDistToRefittedPriVtx;
         std::unique_ptr<SG::AuxElement::Decorator<float> >     m_distToRefittedRmLepPriVtx;
         std::unique_ptr<SG::AuxElement::Decorator<float> >     m_normDistToRefittedRmLepPriVtx;
-
-        std::unique_ptr<SG::AuxElement::Decorator<int> >       m_indexDec;
-        std::unique_ptr<SG::AuxElement::Decorator<int> >       m_decoratorType;
     };
 } // namespace DerivationFramework
 #endif  // LEPTONTAGGERS_VertexFittingTool_H

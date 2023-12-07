@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DerivationFrameworkMuons )
@@ -12,10 +12,7 @@ atlas_add_library( DerivationFrameworkMuonsLib
    DerivationFrameworkMuons/*.h src/*.cxx
    PUBLIC_HEADERS DerivationFrameworkMuons
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers AthenaBaseComps AthenaKernel CaloEvent DerivationFrameworkInterfaces ExpressionEvaluationLib 
-				    FourMomUtils GaudiKernel ICaloTrkMuIdTools InDetTrackSelectionToolLib MCTruthClassifierLib RecoToolInterfaces TrigDecisionToolLib 
-				    TriggerMatchingToolLib TrigMuonMatchingLib TrkExInterfaces TrkParameters TrkSurfaces muonEvent xAODBase xAODCaloEvent xAODEventInfo MuonDetDescrUtils
-				    xAODJet xAODMuon xAODPrimitives xAODTracking xAODTruth MuonAnalysisInterfacesLib)
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers AthenaBaseComps AthenaKernel CaloEvent DerivationFrameworkInterfaces ExpressionEvaluationLib FourMomUtils GaudiKernel ICaloTrkMuIdTools InDetTrackSelectionToolLib MCTruthClassifierLib RecoToolInterfaces TrigDecisionToolLib TriggerMatchingToolLib TrigMuonMatchingLib TrkExInterfaces TrkParameters TrkSurfaces muonEvent xAODBase xAODCaloEvent xAODEventInfo MuonDetDescrUtils xAODJet xAODMuon xAODPrimitives xAODTracking xAODTruth MuonAnalysisInterfacesLib LeptonTaggersLib)
 
 atlas_add_component( DerivationFrameworkMuons
    src/components/*.cxx

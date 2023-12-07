@@ -44,9 +44,6 @@ StatusCode Prompt::VertexFittingTool::initialize()
   m_distToRefittedRmLepPriVtx      = std::make_unique<SG::AuxElement::Decorator<float> > (m_distToRefittedRmLepPriVtxName);
   m_normDistToRefittedRmLepPriVtx  = std::make_unique<SG::AuxElement::Decorator<float> > (m_normDistToRefittedRmLepPriVtxName);
 
-  m_indexDec                       = std::make_unique<SG::AuxElement::Decorator<int> >   ("SecondaryVertexIndex");
-  m_decoratorType                  = std::make_unique<SG::AuxElement::Decorator<int> >   ("SVType");
-
   m_timer.Reset();
 
   ATH_MSG_DEBUG("VertexFittingSvc::initialize - doSeedVertexFit = " << m_doSeedVertexFit);
@@ -89,6 +86,7 @@ std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::fitVertexWithPrimarySee
     return nullptr;
   }
 
+  // Fit a new secondary vertex
   std::unique_ptr<xAOD::Vertex> secondaryVtx = getSecondaryVertexWithSeed(
     tracks, input.inDetTracks, input.priVtx->position()
   );
@@ -108,8 +106,12 @@ std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::fitVertexWithPrimarySee
 
   m_secondaryVertexIndex++;
 
-  (*m_indexDec)           (*secondaryVtx) = m_secondaryVertexIndex;
-  (*m_decoratorType)      (*secondaryVtx) = static_cast<int>(vtxType);
+  // Decorate the newly created vertex
+  static const SG::AuxElement::Accessor<int> indexAcc("SecondaryVertexIndex");
+  static const SG::AuxElement::Accessor<int> typeAcc("SVType");
+
+  indexAcc(*secondaryVtx) = m_secondaryVertexIndex;
+  typeAcc(*secondaryVtx) = static_cast<int>(vtxType);
 
   decorateNewSecondaryVertex(input, secondaryVtx.get());
 
@@ -150,8 +152,12 @@ std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::fitVertexWithSeed(
 
   m_secondaryVertexIndex++;
 
-  (*m_indexDec)           (*secondaryVtx) = m_secondaryVertexIndex;
-  (*m_decoratorType)      (*secondaryVtx) = static_cast<int>(vtxType);
+  // Decorate the newly created vertex
+  static const SG::AuxElement::Accessor<int> indexAcc("SecondaryVertexIndex");
+  static const SG::AuxElement::Accessor<int> typeAcc("SVType");
+
+  indexAcc(*secondaryVtx) = m_secondaryVertexIndex;
+  typeAcc(*secondaryVtx) = static_cast<int>(vtxType);
 
   decorateNewSecondaryVertex(input, secondaryVtx.get());
 

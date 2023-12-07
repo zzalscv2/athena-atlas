@@ -32,7 +32,7 @@ StatusCode Prompt::VertexMergingTool::initialize()
 }
 
 //=============================================================================
-Prompt::MergeResult Prompt::VertexMergingTool::mergeInitVertices(
+Prompt::MergeResultNotOwner Prompt::VertexMergingTool::mergeInitVertices(
   const FittingInput &input,
   const xAOD::TrackParticle *tracklep,
   std::vector<std::unique_ptr<xAOD::Vertex>> &init_vtxs,
@@ -42,11 +42,11 @@ Prompt::MergeResult Prompt::VertexMergingTool::mergeInitVertices(
   //
   // Merge initial (2-track) vertices into new merged vertices with three tracks or more
   //
-  MergeResult result;
+  MergeResultNotOwner result;
 
   for(std::unique_ptr<xAOD::Vertex> &vtx: init_vtxs) {
     if(passVertexSelection(vtx.get())) {
-      result.vtxsInitPassed.push_back(std::move(vtx));
+      result.vtxsInitPassed.push_back(vtx.get());
     }
   }
 
@@ -107,8 +107,8 @@ Prompt::MergeResult Prompt::VertexMergingTool::mergeInitVertices(
         << "        trksInit size=" << cluster->trksInit.size() << endl
         << "        trksCurr size=" << cluster->trksCurr.size() );
 
-    for(const std::unique_ptr<xAOD::Vertex> &vtx: cluster->vtxsInit) {
-      ATH_MSG_DEBUG("   init vtx:  " << vtxAsStr(vtx.get(), true));
+    for(const xAOD::Vertex *vtx: cluster->vtxsInit) {
+      ATH_MSG_DEBUG("   init vtx:  " << vtxAsStr(vtx, true));
     }
     for(const xAOD::TrackParticle *trk: cluster->trksInit) {
       ATH_MSG_DEBUG("   init trk:  " << trkAsStr(trk));
@@ -170,13 +170,13 @@ bool Prompt::VertexMergingTool::passVertexSelection(const xAOD::Vertex *vtx) con
 //=============================================================================
 bool Prompt::VertexMergingTool::makeClusters(
   std::vector<std::unique_ptr<VtxCluster>> &clusters,
-  std::vector<std::unique_ptr<xAOD::Vertex>> &init_vtxs
+  std::vector<xAOD::Vertex*> &init_vtxs
 )
 {
   //
   // Make clusters from initial vertexes
   //
-  std::vector<std::unique_ptr<xAOD::Vertex>>::iterator icurr_vtx = init_vtxs.begin();
+  std::vector<xAOD::Vertex*>::iterator icurr_vtx = init_vtxs.begin();
 
   //
   // Seed initial cluster with the first vertex on the list
@@ -188,8 +188,8 @@ bool Prompt::VertexMergingTool::makeClusters(
     // First check whether this vertex can be included with existing clusters
     //
     for(std::unique_ptr<VtxCluster> &cluster: clusters) {
-      if(matchVtxToCluster(*cluster, icurr_vtx->get())) {
-        addInitVtxToCluster(*cluster, std::move(*icurr_vtx));
+      if(matchVtxToCluster(*cluster, *icurr_vtx)) {
+        addInitVtxToCluster(*cluster, *icurr_vtx);
         match_curr = true;
         break;
       }
@@ -230,11 +230,11 @@ bool Prompt::VertexMergingTool::matchVtxToCluster(const VtxCluster &cluster, con
   //
   bool match_vtx = false;
 
-  for(const std::unique_ptr<xAOD::Vertex> &cluster_vtx: cluster.vtxsInit) {
-    double dist = Prompt::getDistance(cluster_vtx.get(), vtx);
+  for(const xAOD::Vertex *cluster_vtx: cluster.vtxsInit) {
+    double dist = Prompt::getDistance(cluster_vtx, vtx);
 
-    if(m_useMinNormDist) { dist = getMinNormDistVtx  (cluster_vtx.get(), vtx); }
-    else                 { dist = Prompt::getDistance(cluster_vtx.get(), vtx); }
+    if(m_useMinNormDist) { dist = getMinNormDistVtx  (cluster_vtx, vtx); }
+    else                 { dist = Prompt::getDistance(cluster_vtx, vtx); }
 
     if(dist < m_minDistanceClusterVtx) {
       match_vtx = true;
@@ -247,7 +247,7 @@ bool Prompt::VertexMergingTool::matchVtxToCluster(const VtxCluster &cluster, con
 
 //=============================================================================
 bool Prompt::VertexMergingTool::addInitVtxToCluster(
-  VtxCluster &cluster, std::unique_ptr<xAOD::Vertex> vtx
+  VtxCluster &cluster, xAOD::Vertex* vtx
 ) const
 {
   //
@@ -273,7 +273,7 @@ bool Prompt::VertexMergingTool::addInitVtxToCluster(
     }
   }
 
-  cluster.vtxsInit.push_back(std::move(vtx));
+  cluster.vtxsInit.push_back(vtx);
 
   return true;
 }
