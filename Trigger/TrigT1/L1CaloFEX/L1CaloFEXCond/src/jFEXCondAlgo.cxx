@@ -40,7 +40,8 @@ StatusCode jFEXCondAlgo::initialize() {
 
 
 StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
-    
+   
+ 
     // Construct the output Cond Object and fill it in
     std::unique_ptr<jFEXDBCondData> writeDBTool(std::make_unique<jFEXDBCondData>() );
     
@@ -52,7 +53,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
     }
 
     // Date from which jFEX database parameters should be used
-    // noise cuts fix: 2023-09-19
+    // PU fix: 2023-10-27
     bool validTimeStamp = (ctx.eventID().time_stamp() < m_dbBeginTimestamp) ? false : true;
 
     // Set DB to false if any of keys not provided
@@ -221,7 +222,17 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
         
         SG::ReadCondHandle <CondAttrListCollection> load_jFexNoiseCut{m_JfexNoiseCutsKey, ctx };
 
-        const std::vector<std::string> myStringsNoise { "CutJetEM", "CutJetHad", "CutMetEM", "CutMetHad"        };
+        std::vector<std::string> myStringsNoise;
+ 
+        if (PileUpCorrectionJet == 0 and PileUpCorrectionMET == 0)
+            myStringsNoise = { "CutJetEM", "CutJetHad", "CutMetEM", "CutMetHad"             };
+        else if (PileUpCorrectionJet == 1 and PileUpCorrectionMET == 0)
+            myStringsNoise = { "CutJetPUEM", "CutJetPUHad", "CutMetEM", "CutMetHad"         };
+        else if (PileUpCorrectionJet == 0 and PileUpCorrectionMET == 1)
+            myStringsNoise = { "CutJetEM", "CutJetHad", "CutMetPUEM", "CutMetPUHad"         };
+        else // (PileUpCorrectionJet == 1 and PileUpCorrectionMET == 1)
+            myStringsNoise = { "CutJetPUEM", "CutJetPUHad", "CutMetPUEM", "CutMetPUHad"     };
+       
         const std::vector<std::string> myStringsPileup{ "PileUpWeightEM", "PileUpWeightHad", "InverseWeightEM", "InverseWeightHad" };
 
         // we should check if it is valid and the size is 6 (corresponding to the 6 jfex modules)
