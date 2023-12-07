@@ -110,7 +110,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
   if (!MC::isStable(thePart) && !MC::isDecayed(thePart) && thePart->status() != HepMC::SPECIALSTATUS) {
     return std::make_pair(GenParticle, partOrig);
   }
-  bool isPartHadr = isHadron(thePart);
+  bool isPartHadr = MC::isHadron(thePart)&&!MC::isBeam(thePart);
   if (MC::isDecayed(thePart) && (!MC::isTau(thePart) && !isPartHadr)) {
     return std::make_pair(GenParticle, partOrig);
   }
@@ -120,7 +120,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     const xAOD::TruthVertex* endVert = thePart->decayVtx();
     if (endVert != nullptr) {
       int numOfDaught = endVert->nOutgoingParticles();
-      if (numOfDaught == 1 && abs(endVert->outgoingParticle(0)->pdgId()) == 15) {
+      if (numOfDaught == 1 && MC::isTau(endVert->outgoingParticle(0))) {
         return std::make_pair(GenParticle, partOrig);
       }
     }
@@ -362,7 +362,7 @@ std::tuple<unsigned int, const xAOD::TruthParticle*> MCTruthClassifier::defOrigO
 bool MCTruthClassifier::fromHadron(const xAOD::TruthParticle* p, 
                                    const xAOD::TruthParticle* hadptr, 
                                    bool &fromTau, bool &fromBSM) {
-  if (isHadron(p))  return true; // trivial case
+  if (MC::isHadron(p)&&!MC::isBeam(p))  return true; // trivial case
   const xAOD::TruthVertex* vtx = p->hasProdVtx() ? p->prodVtx() : nullptr;
   if (!vtx)  return false;
   bool fromHad = false;
@@ -377,7 +377,7 @@ bool MCTruthClassifier::fromHadron(const xAOD::TruthParticle* p,
     // not at all clear why and unfortunately there's no documentation in the code
     if (!MC::isPhysical(parent) && parent->status() != HepMC::SPECIALSTATUS)  return false;
     fromTau |= MC::isTau(parent);
-    if (isHadron(parent)) {
+    if (MC::isHadron(parent)&&!MC::isBeam(parent)) {
       if (!hadptr)  hadptr = parent; // assumes linear hadron parentage
       return true;
     }
@@ -1377,7 +1377,7 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
     }
   }
   partOriVert = mother->decayVtx();
-  numOfParents = partOriVert->nIncomingParticles();
+  numOfParents = partOriVert->nIncomingParticles();  
   int numOfDaug = partOriVert->nOutgoingParticles();
   int NumOfNucFr(0);
   int NumOfEl(0);
@@ -1787,7 +1787,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   } // cycle itrDaug
 
   // Quark weak decay
-  if (std::abs(motherPDG) < 7 && numOfParents == 1 && numOfDaug == 3 && NumOfquark == 1 && (NumOfEl == 1 || NumOfMu == 1 || NumOfTau == 1)) return QuarkWeakDec;
+  if (MC::isQuark(motherPDG) && numOfParents == 1 && numOfDaug == 3 && NumOfquark == 1 && (NumOfEl == 1 || NumOfMu == 1 || NumOfTau == 1)) return QuarkWeakDec;
   if (std::abs(motherPDG) == 6) return top;
 
   if (MC::isW(motherPDG) && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
@@ -1985,9 +1985,6 @@ ParticleOrigin MCTruthClassifier::defHadronType(int pdg) {
   int q2 = (pdg / 100) % 10;
   int q3 = (pdg / 10) % 10;
 
-  // di quark
-  // if( q3 == 0 && q2 >=q3 )   cout<<"di quark"<<endl;
-
   if (q1 == 0 && MC::BQUARK == q2 && MC::BQUARK == q3)
     return BBbarMeson;
   else if (q1 == 0 && MC::CQUARK == q3 && MC::CQUARK == q2)
@@ -2079,11 +2076,6 @@ bool MCTruthClassifier::isHardScatVrtx(const xAOD::TruthVertex* pVert) {
 }
 
 //---------------------------------------------------------------------------------
-bool MCTruthClassifier::isHadron(const xAOD::TruthParticle* thePart) {  
-  return (thePart && MC::isHadron(thePart) && !(thePart->pdg_id() == 2212 && thePart->status() == 4));
-} 
-
-//---------------------------------------------------------------------------------
 const xAOD::TruthParticle* MCTruthClassifier::getMother(const xAOD::TruthParticle* thePart) const {
   ATH_MSG_DEBUG("executing getMother");
 
@@ -2168,7 +2160,7 @@ ParticleOutCome MCTruthClassifier::defOutComeOfElectron(const xAOD::TruthParticl
     if (!EndVert->outgoingParticle(ipOut)) continue;
     EndDaugType = EndVert->outgoingParticle(ipOut)->pdgId();
     if (MC::isElectron(EndDaugType)) ElecOutNumOfElec++;
-    if (isHadron(EndVert->outgoingParticle(ipOut))) NumOfHadr++;
+    if (MC::isHadron(EndVert->outgoingParticle(ipOut)) && !MC::isBeam(EndVert->outgoingParticle(ipOut))) NumOfHadr++;
     if (EndDaugType > 1000000000 || EndDaugType == 0 || abs(EndDaugType) == 2212 || abs(EndDaugType) == 2112) ElecOutNumOfNucFr++;
   } // cycle itrDaug
 
@@ -2198,7 +2190,7 @@ ParticleOutCome MCTruthClassifier::defOutComeOfMuon(const xAOD::TruthParticle* t
     if (MC::isElectron(EndDaugType)) NumOfElec++;
     if (abs(EndDaugType) == 12) NumOfEleNeutr++;
     if (abs(EndDaugType) == 14) NumOfMuonNeutr++;
-    if (isHadron(EndVert->outgoingParticle(ipOut))) NumOfHadr++;
+    if (MC::isHadron(EndVert->outgoingParticle(ipOut)) && !MC::isBeam(EndVert->outgoingParticle(ipOut))) NumOfHadr++;
     if (EndDaugType > 1000000000 || EndDaugType == 0 || abs(EndDaugType) == 2212 || abs(EndDaugType) == 2112) MuOutNumOfNucFr++;
   } // cycle itrDaug
 
@@ -2293,7 +2285,7 @@ ParticleOutCome MCTruthClassifier::defOutComeOfPhoton(const xAOD::TruthParticle*
       PhtOutNumOfEl++;
     if (EndDaugType == -11)
       PhtOutNumOfPos++;
-    if (isHadron(EndVert->outgoingParticle(ipOut)))
+    if (MC::isHadron(EndVert->outgoingParticle(ipOut))&& !MC::isBeam(EndVert->outgoingParticle(ipOut)) )
       PhtOutNumOfHadr++;
   } // cycle itrDaug
 
@@ -2338,7 +2330,7 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
 
   if ((MC::isElectron(info->photonMotherPDG) || MC::isMuon(info->photonMotherPDG) ||
        MC::isTau(info->photonMotherPDG) ||
-       isHadron(info->photonMother)) // Note: local isHadron rejects beam protons
+       (MC::isHadron(info->photonMother)&&!MC::isBeam(info->photonMother))  )
       && info->photonMotherStatus < 3) {
     do {
       const xAOD::TruthParticle* theMotherPart =
@@ -2351,7 +2343,7 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
       part = particleTruthClassifier(thePart, info);
     } while (part.first == BkgElectron && part.second == PhotonConv &&
              (MC::isElectron(info->photonMotherPDG) || MC::isMuon(info->photonMotherPDG) ||
-              MC::isTau(info->photonMotherPDG) || isHadron(info->photonMother)));
+              MC::isTau(info->photonMotherPDG) || (MC::isHadron(info->photonMother)&&!MC::isBeam(info->photonMother)  )));
 
     if (part.first == BkgElectron && part.second == PhotonConv) {
       // in case of photon from gen particle  classify photon
@@ -2360,7 +2352,7 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
       if (thePart != nullptr)
         part = particleTruthClassifier(thePart, info);
 
-    } else if (part.first == GenParticle && isHadron(thePart)) {
+    } else if (part.first == GenParticle && (MC::isHadron(thePart)&&!MC::isBeam(thePart))) {
       // to fix Alpgen hadrons with status code !=1 (>100)
       part.first = Hadron;
       part.second = NonDefined;

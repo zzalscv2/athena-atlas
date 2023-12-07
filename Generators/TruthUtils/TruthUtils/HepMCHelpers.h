@@ -25,6 +25,7 @@ namespace MC
   /// @brief Identify if the particle with given PDG ID would produce ID tracks but not shower in the detector if stable
   template <class T> inline  bool isChargedNonShowering(const T& p) { return (isMuon<T>(p) || isSUSY<T>(p)); }
 
+  template <class T> inline bool isBeam(const T& p)  { return p->status()%HepMC::SIM_STATUS_THRESHOLD == 4;}
   template <class T> inline bool isDecayed(const T& p)  { return p->status()%HepMC::SIM_STATUS_THRESHOLD == 2;}
   template <class T> inline bool isStable(const T& p)   { return p->status()%HepMC::SIM_STATUS_THRESHOLD == 1;}
   template <class T> inline bool isFinalState(const T& p)   { return p->status()%HepMC::SIM_STATUS_THRESHOLD == 1 && !p->end_vertex();}
