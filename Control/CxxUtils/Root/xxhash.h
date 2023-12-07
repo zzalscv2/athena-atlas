@@ -1855,7 +1855,7 @@ static void* XXH_memcpy(void* dest, const void* src, size_t size)
 #  endif
 #endif
 
-#if (XXH_DEBUGLEVEL>=1)
+#if (XXH_DEBUGLEVEL>=1) || __CPPCHECK__
 #  include <assert.h>   /* note: can still be disabled with NDEBUG */
 #  define XXH_ASSERT(c)   assert(c)
 #else

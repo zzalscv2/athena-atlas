@@ -812,7 +812,7 @@ auto CONCURRENTSTRMAP::put (std::unique_ptr<key_type> key,
   auto [it, flag] = m_impl.put (keyAsVal(key.get()), hash,
                                 mappedAsVal (val),
                                 overwrite, ctx);
-  if (flag) key.release();
+  if (flag) (void)key.release();
   return std::make_pair (const_iterator (it), flag);
 }
 
@@ -842,7 +842,7 @@ auto CONCURRENTSTRMAP::put (const Lock_t& lock,
                                 keyAsVal(key.get()), hash,
                                 mappedAsVal (val),
                                 overwrite, ctx);
-  if (flag) key.release();
+  if (flag) (void)key.release();
   return std::make_pair (const_iterator (it), flag);
 }
 
