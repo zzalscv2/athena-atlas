@@ -101,10 +101,12 @@ PhotonVertexSelectionWrapper::addBranches() const
     }
 
     // write decorations
-    vtxPt(*vertex) = pt;
-    vtxEta(*vertex) = eta;
-    vtxPhi(*vertex) = phi;
-    vtxSumPt(*vertex) = sumPt;
+    if(!isMomentum_available){
+      vtxPt(*vertex) = pt;
+      vtxEta(*vertex) = eta;
+      vtxPhi(*vertex) = phi;
+    }
+    if(!isSumPt_available) vtxSumPt(*vertex) = sumPt;
     // For events where no PV is reconstructed, beamspot is saved and isSumPt2_available = False
     // Need to also check found_PV to avoid modifying locked store
     if(!isSumPt2_available && found_PV) vtxSumPt2(*vertex) = sumPt2;
