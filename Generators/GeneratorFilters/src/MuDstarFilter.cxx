@@ -43,7 +43,7 @@
 
 #include "TLorentzVector.h"
 
-#include "TruthUtils/AtlasPID.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 //--------------------------------------------------------------------------
 MuDstarFilter::MuDstarFilter(const std::string & name,
@@ -159,7 +159,7 @@ StatusCode MuDstarFilter::filterEvent() {
       if (pitr -> status() == 3) continue; // photos history line
 
       // muons
-      if (std::abs(pitr -> pdg_id()) == MUON) {
+      if (MC::isMuon(pitr)) {
         if ((pitr -> momentum().perp() >= m_PtMinMuon) &&
           (pitr -> momentum().perp() < m_PtMaxMuon) &&
           (std::abs(pitr -> momentum().eta()) < m_EtaRangeMuon)) {
@@ -177,7 +177,7 @@ StatusCode MuDstarFilter::filterEvent() {
       if (pitr -> status() == 3) continue; // photos history line
 
       // Dstars
-      if (std::abs(pitr -> pdg_id()) == DSTAR) {
+      if (std::abs(pitr -> pdg_id()) == MC::DSTAR) {
         if ((pitr -> momentum().perp() >= m_PtMinDstar) &&
           (pitr -> momentum().perp() < m_PtMaxDstar) &&
           (std::abs(pitr -> momentum().eta()) < m_EtaRangeDstar)) {
@@ -224,7 +224,7 @@ StatusCode MuDstarFilter::filterEvent() {
 
             if (( * thisChild) -> status() == 3) continue; // photos history line
 
-            if (std::abs(( * thisChild) -> pdg_id()) == PIPLUS) {
+            if (std::abs(( * thisChild) -> pdg_id()) == MC::PIPLUS) {
               if ((( * thisChild) -> momentum().perp() >= m_PtMinPis) &&
                 (( * thisChild) -> momentum().perp() < m_PtMaxPis) &&
                 (std::abs(( * thisChild) -> momentum().eta()) < m_EtaRangePis)) {
@@ -258,7 +258,7 @@ StatusCode MuDstarFilter::filterEvent() {
 
             if (( * thisChild) -> status() == 3) continue; // photos history line
 
-            if (std::abs(( * thisChild) -> pdg_id()) == D0) {
+            if (std::abs(( * thisChild) -> pdg_id()) == MC::D0) {
               if ((( * thisChild) -> end_vertex())) {
                 #ifdef HEPMC3
                 auto firstChild1 = ( * thisChild) -> end_vertex() -> particles_out().begin();
@@ -277,8 +277,8 @@ StatusCode MuDstarFilter::filterEvent() {
 
                   if (( * thisChild1) -> status() == 3) continue; // photos history line
 
-                  if (std::abs(( * thisChild1) -> pdg_id()) == ELECTRON || std::abs(( * thisChild1) -> pdg_id()) == MUON ||
-                    std::abs(( * thisChild1) -> pdg_id()) == PIPLUS || std::abs(( * thisChild1) -> pdg_id()) == KPLUS) {
+                  if (std::abs(( * thisChild1) -> pdg_id()) == MC::ELECTRON || std::abs(( * thisChild1) -> pdg_id()) == MC::MUON ||
+                    std::abs(( * thisChild1) -> pdg_id()) == MC::PIPLUS || std::abs(( * thisChild1) -> pdg_id()) == MC::KPLUS) {
 
                     ++NumChildD0;
 
@@ -289,8 +289,8 @@ StatusCode MuDstarFilter::filterEvent() {
 
                       if (NumChildD0Charged == 1) {
                         D0Child1 = ( * thisChild1);
-                        if (( * thisChild1) -> pdg_id() == -ELECTRON || ( * thisChild1) -> pdg_id() == -MUON ||
-                          ( * thisChild1) -> pdg_id() == PIPLUS || ( * thisChild1) -> pdg_id() == KPLUS) {
+                        if (( * thisChild1) -> pdg_id() == -MC::ELECTRON || ( * thisChild1) -> pdg_id() == -MC::MUON ||
+                          ( * thisChild1) -> pdg_id() == MC::PIPLUS || ( * thisChild1) -> pdg_id() == MC::KPLUS) {
                           ChargeD0Child1 = +1;
                         } else {
                           ChargeD0Child1 = -1;
@@ -298,32 +298,32 @@ StatusCode MuDstarFilter::filterEvent() {
                       }
                       if (NumChildD0Charged == 2) {
                         D0Child2 = ( * thisChild1);
-                        if (( * thisChild1) -> pdg_id() == -ELECTRON || ( * thisChild1) -> pdg_id() == -MUON ||
-                          ( * thisChild1) -> pdg_id() == PIPLUS || ( * thisChild1) -> pdg_id() == KPLUS) {
+                        if (( * thisChild1) -> pdg_id() == -MC::ELECTRON || ( * thisChild1) -> pdg_id() == -MC::MUON ||
+                          ( * thisChild1) -> pdg_id() == MC::PIPLUS || ( * thisChild1) -> pdg_id() == MC::KPLUS) {
                           ChargeD0Child2 = +1;
                         } else {
                           ChargeD0Child2 = -1;
                         }
                       }
-                      if (std::abs(( * thisChild1) -> pdg_id()) == MUON) {
+                      if (std::abs(( * thisChild1) -> pdg_id()) == MC::MUON) {
                         ++NumChildD0mu;
                         D0ChildMu = ( * thisChild1);
                       }
-                      if (std::abs(( * thisChild1) -> pdg_id()) == PIPLUS) ++NumChildD0pi;
-                      if (std::abs(( * thisChild1) -> pdg_id()) == KPLUS) {
+                      if (std::abs(( * thisChild1) -> pdg_id()) == MC::PIPLUS) ++NumChildD0pi;
+                      if (std::abs(( * thisChild1) -> pdg_id()) == MC::KPLUS) {
                         ++NumChildD0K;
                         K_pdg = ( * thisChild1) -> pdg_id();
                       }
                     }
 
-                  } else if (std::abs(( * thisChild1) -> pdg_id()) == PI0) {
+                  } else if (std::abs(( * thisChild1) -> pdg_id()) == MC::PI0) {
                     ++NumChildD0;
-                  } else if (std::abs(( * thisChild1) -> pdg_id()) == NU_E || std::abs(( * thisChild1) -> pdg_id()) == NU_MU) {
+                  } else if (std::abs(( * thisChild1) -> pdg_id()) == MC::NU_E || std::abs(( * thisChild1) -> pdg_id()) == MC::NU_MU) {
                     ++NumChildD0neutrinos;
-                  } else if (std::abs(( * thisChild1) -> pdg_id()) == PHOTON) {
+                  } else if (std::abs(( * thisChild1) -> pdg_id()) == MC::PHOTON) {
                     ++NumChildD0gammas;
-                  } else if (std::abs(( * thisChild1) -> pdg_id()) == K0 || std::abs(( * thisChild1) -> pdg_id()) == K0L ||
-                    std::abs(( * thisChild1) -> pdg_id()) == K0S) {
+                  } else if (std::abs(( * thisChild1) -> pdg_id()) == MC::K0 || std::abs(( * thisChild1) -> pdg_id()) == MC::K0L ||
+                    std::abs(( * thisChild1) -> pdg_id()) == MC::K0S) {
                     ++NumChildD0;
                     ++NumChildD0;
                   } else if ((( * thisChild1) -> end_vertex())) {
@@ -345,8 +345,8 @@ StatusCode MuDstarFilter::filterEvent() {
 
                       if (( * thisChild2) -> status() == 3) continue; // photos history line
 
-                      if (std::abs(( * thisChild2) -> pdg_id()) == ELECTRON || std::abs(( * thisChild2) -> pdg_id()) == MUON ||
-                        std::abs(( * thisChild2) -> pdg_id()) == PIPLUS || std::abs(( * thisChild2) -> pdg_id()) == KPLUS) {
+                      if (std::abs(( * thisChild2) -> pdg_id()) == MC::ELECTRON || std::abs(( * thisChild2) -> pdg_id()) == MC::MUON ||
+                        std::abs(( * thisChild2) -> pdg_id()) == MC::PIPLUS || std::abs(( * thisChild2) -> pdg_id()) == MC::KPLUS) {
 
                         ++NumChildD0;
 
@@ -357,8 +357,8 @@ StatusCode MuDstarFilter::filterEvent() {
 
                           if (NumChildD0Charged == 1) {
                             D0Child1 = ( * thisChild2);
-                            if (( * thisChild2) -> pdg_id() == -ELECTRON || ( * thisChild2) -> pdg_id() == -MUON ||
-                              ( * thisChild2) -> pdg_id() == PIPLUS || ( * thisChild2) -> pdg_id() == KPLUS) {
+                            if (( * thisChild2) -> pdg_id() == -MC::ELECTRON || ( * thisChild2) -> pdg_id() == -MC::MUON ||
+                              ( * thisChild2) -> pdg_id() == MC::PIPLUS || ( * thisChild2) -> pdg_id() == MC::KPLUS) {
                               ChargeD0Child1 = +1;
                             } else {
                               ChargeD0Child1 = -1;
@@ -366,27 +366,27 @@ StatusCode MuDstarFilter::filterEvent() {
                           }
                           if (NumChildD0Charged == 2) {
                             D0Child2 = ( * thisChild2);
-                            if (( * thisChild2) -> pdg_id() == -ELECTRON || ( * thisChild2) -> pdg_id() == -MUON ||
-                              ( * thisChild2) -> pdg_id() == PIPLUS || ( * thisChild2) -> pdg_id() == KPLUS) {
+                            if (( * thisChild2) -> pdg_id() == -MC::ELECTRON || ( * thisChild2) -> pdg_id() == -MC::MUON ||
+                              ( * thisChild2) -> pdg_id() == MC::PIPLUS || ( * thisChild2) -> pdg_id() == MC::KPLUS) {
                               ChargeD0Child2 = +1;
                             } else {
                               ChargeD0Child2 = -1;
                             }
                           }
-                          if (std::abs(( * thisChild2) -> pdg_id()) == MUON) {
+                          if (std::abs(( * thisChild2) -> pdg_id()) == MC::MUON) {
                             ++NumChildD0mu;
                             D0ChildMu = ( * thisChild2);
                           }
                         }
 
-                      } else if (std::abs(( * thisChild2) -> pdg_id()) == PI0) {
+                      } else if (std::abs(( * thisChild2) -> pdg_id()) == MC::PI0) {
                         ++NumChildD0;
-                      } else if (std::abs(( * thisChild2) -> pdg_id()) == NU_E || std::abs(( * thisChild2) -> pdg_id()) == NU_MU) {
+                      } else if (std::abs(( * thisChild2) -> pdg_id()) == MC::NU_E || std::abs(( * thisChild2) -> pdg_id()) == MC::NU_MU) {
                         ++NumChildD0neutrinos;
-                      } else if (std::abs(( * thisChild2) -> pdg_id()) == PHOTON) {
+                      } else if (std::abs(( * thisChild2) -> pdg_id()) == MC::PHOTON) {
                         ++NumChildD0gammas;
-                      } else if (std::abs(( * thisChild2) -> pdg_id()) == K0 || std::abs(( * thisChild2) -> pdg_id()) == K0L ||
-                        std::abs(( * thisChild2) -> pdg_id()) == K0S) {
+                      } else if (std::abs(( * thisChild2) -> pdg_id()) == MC::K0 || std::abs(( * thisChild2) -> pdg_id()) == MC::K0L ||
+                        std::abs(( * thisChild2) -> pdg_id()) == MC::K0S) {
                         ++NumChildD0;
                         ++NumChildD0;
                       } else if ((( * thisChild2) -> end_vertex())) {
