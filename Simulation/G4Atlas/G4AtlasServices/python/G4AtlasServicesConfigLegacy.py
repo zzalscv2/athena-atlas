@@ -35,7 +35,7 @@ def getPhysicsListSvc(name="PhysicsListSvc", **kwargs):
     from AthenaCommon.DetFlags import DetFlags
     if DetFlags.simulate.TRT_on():
         PhysOptionList +=["TRTPhysicsTool"]
-    if DetFlags.simulate.Lucid_on() or DetFlags.simulate.AFP_on():
+    if DetFlags.simulate.Lucid_on() or DetFlags.simulate.AFP_on() or DetFlags.simulate.ZDC_on():
         PhysOptionList +=["LucidPhysicsTool"]
     kwargs.setdefault("PhysOption", PhysOptionList)
     kwargs.setdefault("PhysicsDecay", PhysDecaysList)
