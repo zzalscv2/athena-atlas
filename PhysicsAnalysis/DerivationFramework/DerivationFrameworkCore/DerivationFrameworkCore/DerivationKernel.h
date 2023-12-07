@@ -30,7 +30,7 @@ namespace DerivationFramework {
     private:
         // Tools etc
         ToolHandleArray<ISkimmingTool>     m_skimmingTools;
-	ToolHandleArray<IThinningTool>     m_thinningTools;
+        ToolHandleArray<IThinningTool>     m_thinningTools;
         ToolHandleArray<IAugmentationTool> m_augmentationTools;
         ServiceHandle<IChronoStatSvc>      m_chronoSvc;
 

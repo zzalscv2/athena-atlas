@@ -88,12 +88,13 @@ def PHYSCfg(ConfigFlags):
     ## Higgs augmentations - create 4l vertex
     from DerivationFrameworkHiggs.HiggsPhysContent import  HiggsAugmentationAlgsCfg
     acc.merge(HiggsAugmentationAlgsCfg(ConfigFlags))
-
-    ## CloseByIsolation correction augmentation
-    ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
-    from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
-    acc.merge(IsoCloseByAlgsCfg(ConfigFlags, suff = "_PHYS", isPhysLite = False, stream_name = stream_name))
-
+    
+    #===================================================
+    # HEAVY FLAVOR CLASSIFICATION FOR ttbar+jets EVENTS
+    #===================================================
+    from DerivationFrameworkMCTruth.HFClassificationCommonConfig import HFClassificationCommonCfg
+    acc.merge(HFClassificationCommonCfg(ConfigFlags))
+    
     # ============================
     # Define contents of the format
     # =============================
@@ -141,7 +142,7 @@ def PHYSCfg(ConfigFlags):
                                               "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.isJvtHS.isJvtPU",
                                               "TruthPrimaryVertices.t.x.y.z",
                                               "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
-                                              "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ",
+                                              "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification",
                                               "TauJets.dRmax.etOverPtLeadTrk",
                                               "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
@@ -173,6 +174,7 @@ def PHYSCfg(ConfigFlags):
     ## Higgs content - 4l vertex and Higgs STXS truth variables
     from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsSlimmingVariables
     setupHiggsSlimmingVariables(ConfigFlags, PHYSSlimmingHelper)
+
    
     ## CloseByIsolation content - CloseBy isolation correction (for all analyses)
     from IsolationSelection.IsolationSelectionConfig import  setupIsoCloseBySlimmingVariables
