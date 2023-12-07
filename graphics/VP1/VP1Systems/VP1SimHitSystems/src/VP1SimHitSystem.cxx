@@ -105,6 +105,7 @@ QWidget* VP1SimHitSystem::buildController()
   m_clockwork->checkBoxNamesMap.insert(ui.chbxTGCHits,"TGC");
   m_clockwork->checkBoxNamesMap.insert(ui.chbxCSCHits,"CSC");
   m_clockwork->checkBoxNamesMap.insert(ui.chbxMMHits,"MM");
+  m_clockwork->checkBoxNamesMap.insert(ui.chbxsTGCHits,"sTGC");
   m_clockwork->checkBoxNamesMap.insert(ui.chbxLArEMBHits,"LArEMB");
   m_clockwork->checkBoxNamesMap.insert(ui.chbxLArEMECHits,"LArEMEC");
   m_clockwork->checkBoxNamesMap.insert(ui.chbxLArFCALHits,"LArFCAL");
@@ -133,7 +134,8 @@ void VP1SimHitSystem::systemcreate(StoreGateSvc* detstore)
   m_clockwork->colorMap.insert("RPC",SbColor(0,.44,.28));
   m_clockwork->colorMap.insert("TGC",SbColor(0,.631244,.748016));
   m_clockwork->colorMap.insert("CSC",SbColor(.21,.64,1.));
-  m_clockwork->colorMap.insert("MM",SbColor(VP1ColorUtils::getSbColorFromRGB(247, 187, 109))); // Mellow Apricot 
+  m_clockwork->colorMap.insert("MM",SbColor(VP1ColorUtils::getSbColorFromRGB(28, 162, 230))); // Carolina Blue 
+  m_clockwork->colorMap.insert("sTGC",SbColor(VP1ColorUtils::getSbColorFromRGB(255, 255, 255))); // White
   m_clockwork->colorMap.insert("LArEMB",SbColor(VP1ColorUtils::getSbColorFromRGB(247, 187, 109))); // Mellow Apricot 
   m_clockwork->colorMap.insert("LArEMEC",SbColor(VP1ColorUtils::getSbColorFromRGB(230, 151, 48))); // Carrot Orange
   m_clockwork->colorMap.insert("LArFCAL",SbColor(VP1ColorUtils::getSbColorFromRGB(212, 134, 32))); // Fulvous
@@ -457,7 +459,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
   else if(detector=="MM")
   {
     //
-    // MM:
+    // NSW / MM:
     //
     const MMSimHitCollection* mm_collection;
     if(sg->retrieve(mm_collection)==StatusCode::SUCCESS)
@@ -472,6 +474,25 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     }
     else
       message("Unable to retrieve MM Hits");
+  }
+  else if(detector=="sTGC")
+  {
+    //
+    // NSW / sTGC:
+    //
+    const sTGCSimHitCollection* stgc_collection;
+    if(sg->retrieve(stgc_collection)==StatusCode::SUCCESS)
+    {
+      for(sTGCSimHitConstIterator i_hit=stgc_collection->begin(); i_hit!=stgc_collection->end(); ++i_hit)
+      {
+        GeosTGCHit ghit(*i_hit);
+        if(!ghit) continue;
+        Amg::Vector3D u = ghit.getGlobalPosition();
+        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
+      }
+    }
+    else
+      message("Unable to retrieve sTGC Hits");
   }
   else if(detector=="Generic Muon")
     {
