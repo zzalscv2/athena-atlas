@@ -65,36 +65,50 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
 
     # Get from the last chainPart in order to avoid to specify preselection for every leg
     #TODO: add protection for cases where the preselection is not specified in the last chainPart
-    presel_matched = re.match(r'presel(?P<cut>\d?\d?[jacf](HT)?(Z)?[\d\D]+)', trkpresel)
+    presel_matched = re.match(r'presel(?P<cut>\d?\d?(Z[\d\D]+)?[jacf](HT)?[\d\D]+)', trkpresel)
     assert presel_matched is not None, "Impossible to match preselection pattern for self.trkpresel=\'{0}\'.".format(trkpresel)
     presel_cut_str = presel_matched.groupdict()['cut'] #This is the cut string you want to parse. For example 'presel2j50XXj40'
     
+    usingDIPZ = bool(re.match(r'.*Z', presel_cut_str)) # Need to determine if there's DIPZ leg anywhere to enforce central jets across all calopresel legs
+    if usingDIPZ:
+        findAllJets = re.findall(r'(?P<nJet>\d?\d?[jacf])', presel_cut_str)
+        findAllJets = ['1'+el if len(el) == 1 else el for el in findAllJets]
+        nAllJets = sum(int(i[:-1]) for i in findAllJets)
+        nCentralJets = sum(int(i[:-1]) if 'c' in i else 0 for i in findAllJets)
+        assert nAllJets == nCentralJets, "Your preselection has a DIPZ part but not only central jets were required. Please investigate."
+
     preselCommonJetParts = dict(JetChainParts_Default)
 
     for ip,p in enumerate(presel_cut_str.split('XX')):
         hascalSel= bool(re.match(r'.*e\w?\d+', p))
-        if not doBJetSel:  # Removing b-jet parts if b-jet presel is not requested (same for DIPZ as they use same input)
-            p = re.sub(r'b\w?\d+|Z\d+', '', p)
+        if not doBJetSel:  # Removing b-jet parts if b-jet presel is not requested
+            p = re.sub(r'b\w?\d+', '', p)
         hasBjetSel = bool(re.match(r'.*b\w?\d+', p))
         hasDIPZsel = bool(re.match(r'.*Z', p))
-        
-        assert not ( (hasBjetSel or hasDIPZsel) and not doBJetSel), "Your jet preselection has a b-jet part but a calo-only preselection was requested instead. This should not be possible. Please investigate."
-        
+        if hasDIPZsel and not doBJetSel: continue # Skipping calopresel step when DIPZ is run
+
+        assert not ( (hasBjetSel or hasDIPZsel) and not doBJetSel), "Your jet preselection has a b-jet or DIPZ part but a calo-only preselection was requested instead. This should not be possible. Please investigate."        
+
         pattern_to_test = r'(?P<mult>\d?\d?)(?P<region>[jacf])' # jet multiplicity and region
-        pattern_to_test += r'(?P<cut>\d+)(?P<scenario>(Z(?P<dipzwp>\d+))?)(?P<prefilt>(MAXMULT\d+)?)' if hasDIPZsel else r'(?P<scenario>(HT)?)(?P<cut>\d+)' # scenario string # could be made more general
+        pattern_to_test += r'(?P<scenario>(HT)?)(?P<cut>\d+)' # scenario string # could be made more general
         pattern_to_test += r'b(?P<btagger>\D?)(?P<bwp>\d+)' if hasBjetSel else '' # b-tagging if needed
         pattern_to_test += r'e(?P<emf>\D?)(?P<emfc>\d+)' if hascalSel else ''
+        if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)((?P<dipzwp>\d+))?(?P<prefilt>(MAXMULT\d+)?)'
         matched = re.match(pattern_to_test, p)
         assert matched is not None, "Impossible to extract preselection cut for \'{0}\' substring. Please investigate.".format(p)
         cut_dict = matched.groupdict()
+        if hasDIPZsel: cut_dict['region'] = 'c'
 
+        if 'mult' not in cut_dict.keys(): cut_dict['mult'] = ''
         if 'emfc' not in cut_dict.keys(): cut_dict['emfc'] = ''
         if 'bwp' not in cut_dict.keys(): cut_dict['bwp'] = ''
         if 'btagger' not in cut_dict.keys(): cut_dict['btagger'] = ''
+        if 'cut' not in cut_dict.keys(): cut_dict['cut'] = ''
         if 'dipzwp' not in cut_dict.keys(): cut_dict['dipzwp'] = ''
+        if 'cut_add' not in cut_dict.keys(): cut_dict['cut_add'] = ''
         if 'prefilt' not in cut_dict.keys(): cut_dict['prefilt'] = ''
 
-        mult,region,scenario,cut,btagger,bwp,dipzwp,prefilt,emfc=cut_dict['mult'],cut_dict['region'],cut_dict['scenario'],cut_dict['cut'],cut_dict['btagger'], cut_dict['bwp'], cut_dict['dipzwp'], cut_dict['prefilt'],cut_dict['emfc']
+        mult,region,scenario,cut,btagger,bwp,dipzwp,emfc=cut_dict['mult'],cut_dict['region'],cut_dict['scenario'],cut_dict['cut'],cut_dict['btagger'],cut_dict['bwp'],cut_dict['dipzwp'],cut_dict['emfc']
 
         if mult=='': mult='1'
         etarange = etaRangeAbbrev[region]
@@ -102,8 +116,10 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
             hyposcenario=f'HT{cut}XX{etarange}'
             threshold='0'
             chainPartName=f'j0_{hyposcenario}'
-        elif scenario == "Z%s"%str(dipzwp):
-            hyposcenario=f'Z{dipzwp}XX{mult}j{cut}ptXX{etarange}'
+        elif scenario == "Z":
+            #hyposcenario=f'Z{dipzwp}j{nCentralJets}'
+            hyposcenario=f'Z{dipzwp}XX{nCentralJets}c'
+            prefilt = cut_dict['prefilt']            
             if prefilt != '': hyposcenario += f'_{prefilt}'
             threshold='0'
             chainPartName=f'j0_{hyposcenario}'

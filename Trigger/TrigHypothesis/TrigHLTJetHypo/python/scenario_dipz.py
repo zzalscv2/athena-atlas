@@ -7,39 +7,26 @@ from TrigHLTJetHypo.make_treevec import make_treevec
 
 import re
 
-pattern_dipz = r'^Z(?P<WP>\d+)XX(?P<N>\d+)j(?P<ptlo>\d*)'
-pattern_pt_threshold = r'(pt(?P<pthi>\d*))?'
-pattern_eta_threshold = r'(XX(?P<etalo>\d*)eta(?P<etahi>\d*))?' # TODO: can I just use the a,c,f here?
-
-pattern_full = pattern_dipz + pattern_pt_threshold + pattern_eta_threshold
-rgx_pattern = re.compile(pattern_full)
+pattern_dipz = r'^Z(?P<WP>\d+)XX(?P<N>\d+)c(?P<ptlo>\d*)'
+rgx_pattern = re.compile(pattern_dipz)
 
 
 def get_kin_args_from_matchdict(groupdict):
     """ Get kinematic cuts on jets for DIPZ MLPL hypo """
     
-    # care! if pt no match, etlo and ethi are None.
-    #       if pt match, missing ptlo, pthi = '' 
-    # same for eta
-
     if groupdict['ptlo'] is None:  # then default filtering for pt
         groupdict['ptlo'] = '20'
-        groupdict['pthi'] = ''   # will be assigned default value        
-
-    if groupdict['etalo'] is None:  # then default filtering for eta
-        groupdict['etalo'] = ''  # will be assigned default value
-        groupdict['etahi'] = '240'
-
+        groupdict['pthi'] = ''
+    
     condargs = []
-
     vals = defaults('pt',
                     groupdict['ptlo'],
-                    groupdict['pthi'])
+                    '')  # will be assigned default value 
     condargs.append(('pt', vals))
         
     vals = defaults('eta',
-                    groupdict['etalo'],
-                    groupdict['etahi'])
+                    '', # will be assigned default value 
+                    '240')  
     condargs.append(('eta', vals))
 
     return condargs
