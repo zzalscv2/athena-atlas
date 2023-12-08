@@ -299,12 +299,13 @@ std::unique_ptr<Trk::FitQuality> InDet::SiTrajectory_xk::convertToFitQuality() c
 bool InDet::SiTrajectory_xk::isNewTrack
 (std::multimap<const Trk::PrepRawData*,const Trk::Track*>& map) const
 {
+  if (m_firstElement==-100) return false;//i.e. the int array never had elements inserted
   const Trk::PrepRawData* prd   [100];
   std::multimap<const Trk::PrepRawData*,const Trk::Track*>::const_iterator 
     ti,t[100],te = map.end();
   int n = 0 ;
-  if (m_firstElement==-100) return false;//i.e. the int array never had elements inserted
   for (int i=m_firstElement; i<=m_lastElement; ++i) {
+    if (n >= 100) break;
     int m = m_elementsMap[i];
     
     if (m_elements[m].cluster()) {
