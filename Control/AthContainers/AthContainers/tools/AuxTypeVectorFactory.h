@@ -6,7 +6,7 @@
  * @file AthContainers/tools/AuxTypeVectorFactory.h
  * @author scott snyder <snyder@bnl.gov>
  * @date May, 2014
- * @brief Factory objects that creates vectors using @c AuxTypeVector.
+ * @brief Factory object that creates vectors using @c AuxTypeVector.
  */
 
 
@@ -24,16 +24,24 @@ namespace SG {
 
 
 /**
- * @brief Factory objects that creates vectors using @c AuxTypeVector.
+ * @brief Factory object that creates vectors using @c AuxTypeVector.
  *
  * This is an implementation of @c IAuxTypeVectorFactory that makes
  * vectors using the @c AuxTypeVector implementation.
+ *
+ * All of the actual code is broken out into this base class of
+ * @c AuxTypeVectorFactory to make it easier to specialize that type
+ * while still allowing the specializations to share this code.
  */
 template <class T, class ALLOC = AuxAllocator_t<T> >
-class AuxTypeVectorFactory
+class AuxTypeVectorFactoryImpl
   : public IAuxTypeVectorFactory
 {
 public:
+  using AuxTypeVector_t = AuxTypeVector<T, ALLOC>;
+
+  using vector_value_type = typename AuxTypeVector_t::vector_value_type;
+
   /**
    * @brief Create a vector object of this type.
    * @param auxid ID for the variable being created.
@@ -158,6 +166,24 @@ private:
   std::unique_ptr<IAuxTypeVector>
   createFromData (auxid_t auxid, void* data, bool isPacked, bool ownFlag,
                   std::false_type) const;
+};
+
+
+
+/**
+ * @brief Factory object that creates vectors using @c AuxTypeVector.
+ *
+ * This is an implementation of @c IAuxTypeVectorFactory that makes
+ * vectors using the @c AuxTypeVector implementation.
+ */
+template <class T, class ALLOC = AuxAllocator_t<T> >
+class AuxTypeVectorFactory
+  : public AuxTypeVectorFactoryImpl<T, ALLOC>
+{
+  using Base = AuxTypeVectorFactoryImpl<T, ALLOC>;
+  using AuxTypeVector_t = typename Base::AuxTypeVector_t;
+  using vector_value_type = typename Base::vector_value_type;
+  using Base::Base;
 };
 
 
