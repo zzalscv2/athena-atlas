@@ -286,10 +286,6 @@ namespace DerivationFramework {
 
     int mpifsr_code=0;
 
-    // Create an integer variable to go through the information of the jets in m_flav_vec, m_id_vec and m_count_vec
-
-    int n_jet = 0;
-
     for(const xAOD::Jet* jet : *jets){
 
       // Check if the jet passes the cuts and if it does not, then skip it.
@@ -434,11 +430,6 @@ namespace DerivationFramework {
       else if(id==-2 && flav==4) { // c FSR
         mpifsr_code -= 1;
       }
-
-      // Add 1 to n_jet.
-
-      n_jet ++;
-
     }
 
     // Compute the ext_code using the number of additional jets with HF hadrons.
