@@ -15,7 +15,7 @@
 namespace xAOD
 {
   /**
-   * @brief TrackSurface for Acts MultiTrajectory and TrackStorage
+   * @brief TrackSurface for Acts MultiTrajectory and TrackSummary
    **/
 
   class TrackSurface_v1 : public SG::AuxElement

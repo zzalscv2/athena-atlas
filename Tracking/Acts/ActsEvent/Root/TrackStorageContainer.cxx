@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsEvent/TrackStorageContainer.h"
+#include "xAODTracking/TrackSummary.h"
 
-#include "xAODTracking/TrackStorage.h"
 // this is list of xAOD container varaible names that are "hardcoded" in TrackStorage_v1
 // their compatibility is maintained by the unit tests: AllStaticxAODVaraiblesAreKnown
 const std::set<std::string> ActsTrk::TrackStorageContainer::staticVariables = {
@@ -12,7 +12,7 @@ const std::set<std::string> ActsTrk::TrackStorageContainer::staticVariables = {
 
 
 ActsTrk::TrackStorageContainer::TrackStorageContainer(
-    const DataLink<xAOD::TrackStorageContainer>& link,
+    const DataLink<xAOD::TrackSummaryContainer>& link,
     const DataLink<xAOD::TrackSurfaceContainer>& surfLink)
     : m_trackBackend(link), m_surfBackend(surfLink) {}
 
@@ -118,30 +118,30 @@ void ActsTrk::TrackStorageContainer::restoreDecorations() {
     if (*typeInfo == typeid(float)) {
       m_decorations.emplace_back(
           name,
-          ActsTrk::detail::constDecorationGetter<xAOD::TrackStorageContainer,
+          ActsTrk::detail::constDecorationGetter<xAOD::TrackSummaryContainer,
                                                  float>,
-          ActsTrk::detail::decorationCopier<xAOD::TrackStorageContainer,
+          ActsTrk::detail::decorationCopier<xAOD::TrackSummaryContainer,
                                             float>);
     } else if (*typeInfo == typeid(double)) {
       m_decorations.emplace_back(
           name,
-          ActsTrk::detail::constDecorationGetter<xAOD::TrackStorageContainer,
+          ActsTrk::detail::constDecorationGetter<xAOD::TrackSummaryContainer,
                                                  double>,
-          ActsTrk::detail::decorationCopier<xAOD::TrackStorageContainer,
+          ActsTrk::detail::decorationCopier<xAOD::TrackSummaryContainer,
                                             double>);
     } else if (*typeInfo == typeid(short)) {
       m_decorations.emplace_back(
           name,
-          ActsTrk::detail::constDecorationGetter<xAOD::TrackStorageContainer,
+          ActsTrk::detail::constDecorationGetter<xAOD::TrackSummaryContainer,
                                                  short>,
-          ActsTrk::detail::decorationCopier<xAOD::TrackStorageContainer,
+          ActsTrk::detail::decorationCopier<xAOD::TrackSummaryContainer,
                                             short>);
     } else if (*typeInfo == typeid(uint32_t)) {
       m_decorations.emplace_back(
           name,
-          ActsTrk::detail::constDecorationGetter<xAOD::TrackStorageContainer,
+          ActsTrk::detail::constDecorationGetter<xAOD::TrackSummaryContainer,
                                                  uint32_t>,
-          ActsTrk::detail::decorationCopier<xAOD::TrackStorageContainer,
+          ActsTrk::detail::decorationCopier<xAOD::TrackSummaryContainer,
                                             uint32_t>);
     } else {
       throw std::runtime_error(
@@ -157,8 +157,8 @@ void ActsTrk::TrackStorageContainer::restoreDecorations() {
 ////////////////////////////////////////////////////////////////////
 ActsTrk::MutableTrackStorageContainer::MutableTrackStorageContainer() {
 
-  m_mutableTrackBackend = std::make_unique<xAOD::TrackStorageContainer>();
-  m_mutableTrackBackendAux = std::make_unique<xAOD::TrackStorageAuxContainer>();
+  m_mutableTrackBackend = std::make_unique<xAOD::TrackSummaryContainer>();
+  m_mutableTrackBackendAux = std::make_unique<xAOD::TrackSummaryAuxContainer>();
   m_mutableTrackBackend->setStore(m_mutableTrackBackendAux.get());
 
   TrackStorageContainer::m_trackBackend = m_mutableTrackBackend.get();
@@ -187,7 +187,7 @@ ActsTrk::MutableTrackStorageContainer::MutableTrackStorageContainer(
 }
 
 ActsTrk::IndexType ActsTrk::MutableTrackStorageContainer::addTrack_impl() {
-  m_mutableTrackBackend->push_back(std::make_unique<xAOD::TrackStorage>());
+  m_mutableTrackBackend->push_back(std::make_unique<xAOD::TrackSummary>());
   m_mutableTrackBackend->back()->resize();
   m_particleHypothesis.resize(m_mutableTrackBackend->size(),
                               Acts::ParticleHypothesis::pion());

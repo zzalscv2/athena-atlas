@@ -10,10 +10,10 @@
 
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsEvent/TrackStorageContainer.h"
-#include "xAODTracking/TrackStorageContainer.h"
-#include "xAODTracking/TrackStorageAuxContainer.h"
+#include "xAODTracking/TrackSummaryContainer.h"
+#include "xAODTracking/TrackSummaryAuxContainer.h"
 
-#include "xAODTracking/TrackStorage.h"
+#include "xAODTracking/TrackSummary.h"
 #include "xAODTracking/TrackSurface.h"
 #include "xAODTracking/TrackSurfaceContainer.h"
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
@@ -145,16 +145,16 @@ void testSurface(surfType surf, std::shared_ptr<const Acts::Surface> outSurf, co
 // Test of const TrackStorageContainer with TrackSurfaceContainer
 BOOST_AUTO_TEST_CASE(ConstSurfaceBackend_test){
 
-    // Create filled xAOD::TrackStorageContainer
+    // Create filled xAOD::TrackSummaryContainer
     constexpr static size_t sz = 6;
 
-    xAOD::TrackStorageContainer backend;
-    xAOD::TrackStorageAuxContainer aux;
+    xAOD::TrackSummaryContainer backend;
+    xAOD::TrackSummaryAuxContainer aux;
     backend.setStore(&aux);
 
     std::vector<double> semirandoms = {0.12, 0.92};
     for (const double sr : semirandoms) {    
-        auto par = new xAOD::TrackStorage();    
+        auto par = new xAOD::TrackSummary();    
         backend.push_back(par);
         par->resize();
         for ( size_t i = 0; i < sz; ++i) {

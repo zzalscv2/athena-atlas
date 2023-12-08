@@ -31,9 +31,9 @@
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 
-#include "xAODTracking/TrackStorage.h"
-#include "xAODTracking/TrackStorageContainer.h"
-#include "xAODTracking/TrackStorageAuxContainer.h"
+#include "xAODTracking/TrackSummary.h"
+#include "xAODTracking/TrackSummaryContainer.h"
+#include "xAODTracking/TrackSummaryAuxContainer.h"
 
 #include "xAODTracking/TrackSurface.h"
 #include "xAODTracking/TrackSurfaceContainer.h"
@@ -217,13 +217,13 @@ BOOST_AUTO_TEST_CASE(TrackJacobian_build) {
 BOOST_AUTO_TEST_CASE(TrackBackend_build) {
     constexpr static size_t sz = 6;
 
-    xAOD::TrackStorageContainer backend;
-    xAOD::TrackStorageAuxContainer aux;
+    xAOD::TrackSummaryContainer backend;
+    xAOD::TrackSummaryAuxContainer aux;
     backend.setStore(&aux);
 
     std::vector<double> semirandoms = {0.12, 0.92};
     for (const double sr : semirandoms) {    
-        auto par = new xAOD::TrackStorage();    
+        auto par = new xAOD::TrackSummary();    
         backend.push_back(par);
         par->resize();
         for ( size_t i = 0; i < sz; ++i) {
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(TrackBackend_build) {
     }
 
     for ( size_t p=0; p < semirandoms.size(); ++p) {
-        const xAOD::TrackStorage* par = backend.at(p);
+        const xAOD::TrackSummary* par = backend.at(p);
         for ( size_t i = 0; i < sz; ++i) {
             const double stored = par->paramsEigen()(i);
             const double expected = i * semirandoms[p];
