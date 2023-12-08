@@ -29,7 +29,7 @@ def PhysicsListSvcCfg(flags, name="PhysicsListSvc", **kwargs):
     #PhysOptionList += flags.Sim.PhysicsOptions # FIXME Missing functionality
     if flags.Detector.GeometryTRT:
         PhysOptionList +=[ result.popToolsAndMerge(TRTPhysicsToolCfg(flags)) ]
-    if flags.Detector.GeometryLucid or flags.Detector.GeometryAFP:
+    if flags.Detector.GeometryLucid or flags.Detector.GeometryAFP or flags.Detector.GeometryZDC:
         LucidPhysicsTool = CompFactory.LucidPhysicsTool
         PhysOptionList +=[LucidPhysicsTool("LucidPhysicsTool")]
     kwargs.setdefault("PhysOption", PhysOptionList)

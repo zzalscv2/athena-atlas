@@ -12,7 +12,8 @@ from .MC23 import (MC23a, MC23aSingleBeamspot, MC23LowMu, MC23NoPileUp, MC23NoPi
   MC23SimulationSingleIoVCalibrationHits, MC23aSimulationMultipleIoVCalibrationHits,
   MC23c, MC23cSingleBeamspot, BeamspotSplitMC23c,
   MC23cSimulationNoIoV, MC23cSimulationSingleIoV, MC23cSimulationMultipleIoV,
-  MC23cSimulationMultipleIoVCalibrationHits)
+  MC23cSimulationMultipleIoVCalibrationHits,
+  MC23d, MC23dSingleBeamspot, BeamspotSplitMC23d)
 from .PhaseII import (PhaseIIPileUp1, PhaseIIPileUp60, PhaseIIPileUp140, PhaseIIPileUp200,
   PhaseIIPileUpMC21a, PhaseIINoPileUp,
   PhaseIISimulationNoIoV, PhaseIISimulationSingleIoV, PhaseIISimulation)
@@ -36,6 +37,7 @@ __all__ = [
   'MC23c', 'MC23cSingleBeamspot', 'BeamspotSplitMC23c',
   'MC23cSimulationNoIoV', 'MC23cSimulationSingleIoV', 'MC23cSimulationMultipleIoV',
   'MC23cSimulationMultipleIoVCalibrationHits',
+  'MC23d', 'MC23dSingleBeamspot', 'BeamspotSplitMC23d',
   'PhaseIIPileUp1', 'PhaseIIPileUp60', 'PhaseIIPileUp140', 'PhaseIIPileUp200',
   'PhaseIIPileUpMC21a', 'PhaseIINoPileUp',
   'PhaseIISimulationNoIoV', 'PhaseIISimulationSingleIoV', 'PhaseIISimulation',
