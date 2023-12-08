@@ -7,12 +7,13 @@ if __name__=="__main__":
     cfgFlags.Concurrency.NumThreads=8
     cfgFlags.Exec.MaxEvents=100
     cfgFlags.Input.isMC=True
-    cfgFlags.Input.Files= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PFlowTests/mc16_13TeV/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.ESD.e6337_e5984_s3170_r12674/ESD.25732025._000034.pool.root.1"]
+    cfgFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PFlowTests/mc21_13p6TeV/mc21_13p6TeV.601589.PhPy8EG_A14_ttbar_hdamp258p75_nonallhadron.recon.ESD.e8485_s3986_r14060/ESD.31373517._000035.pool.root.1"]
     cfgFlags.Output.AODFileName="output_AOD.root"
     cfgFlags.Output.doWriteAOD=True
     #This flag enables CaloCalTopoCluster to be created, in addition to CaloTopoCluster
     cfgFlags.Calo.TopoCluster.doTopoClusterLocalCalib=True
     cfgFlags.Calo.TopoCluster.addCalibrationHitDecoration=True
+    cfgFlags.Tau.doDiTauRec = False #does not run from ESD - tries to use aux variables which do not exist
     cfgFlags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -22,7 +23,7 @@ if __name__=="__main__":
     cfg.merge(PoolReadCfg(cfgFlags))
 
     from eflowRec.PFRun3Config import PFFullCfg
-    cfg.merge(PFFullCfg(cfgFlags))
+    cfg.merge(PFFullCfg(cfgFlags,runTauReco=True))
     
     from eflowRec.PFRun3Remaps import ListRemaps
 
@@ -30,7 +31,12 @@ if __name__=="__main__":
     for mapping in list_remaps:
         cfg.merge(mapping)    
 
+    from PFlowUtils.configureRecoForPFlow import configureRecoForPFlowCfg
+    cfg.merge(configureRecoForPFlowCfg(cfgFlags))
+
     from PFlowUtils.PFlowCalibHitDecoratorCfg import PFlowCalibHitDecoratorCfg
     cfg.merge(PFlowCalibHitDecoratorCfg(cfgFlags))
+
+    cfg.getEventAlgo("PFlowCalibPFODecoratorAlgorithm").PFOWriteDecorHandleKey_NLeadingTruthParticles="GlobalNeutralParticleFlowObjects.calpfo_NLeadingTruthParticleBarcodeEnergyPairs"
 
     cfg.run()
