@@ -168,7 +168,17 @@ def BeamspotSplitMC23a():
 
 
 def BeamspotSplitMC23c():
-    """MC23a beamspot splitting configuration"""
+    """MC23c beamspot splitting configuration"""
+    substeps = 4
+    event_fractions = [0.22, 0.22, 0.22, 0.34]
+
+    return substeps, event_fractions
+
+
+def BeamspotSplitMC23d():
+    """MC23d beamspot splitting configuration, matches MC23c, but only the
+    first two substep are considered levelling rather than the first
+    three."""
     substeps = 4
     event_fractions = [0.22, 0.22, 0.22, 0.34]
 
