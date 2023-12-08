@@ -688,11 +688,6 @@ def getFatrasSimServiceID(name="ISF_FatrasSimSvc", **kwargs):
     return CfgMgr.ISF__LegacySimSvc(name, **kwargs )
 
 
-def getFatrasNewExtrapolationSimServiceID(name="ISF_FatrasNewExtrapolationSimSvc", **kwargs):
-    kwargs.setdefault("SimulatorTool"  , "ISF_FatrasNewExtrapolationSimulatorToolST")
-    return getFatrasSimServiceID(name, **kwargs )
-
-
 # Not used anywhere - not migrated to CA config
 def getFatrasGeoIDFixSimServiceID(name="ISF_FatrasGeoIDFixSimSvc", **kwargs):
     kwargs.setdefault("EnableGeoIDOverride"      , True  )
@@ -724,19 +719,6 @@ def getFatrasSimulatorTool(name="ISF_FatrasSimulatorTool", **kwargs):
     kwargs.setdefault("CaloSimulationSelectors"     , [ 'ISF_MuonFatrasSelector' ]    )
     kwargs.setdefault("MSSimulationSelectors"       , [ 'ISF_DefaultFatrasSelector' ] )
     return getFatrasSimulatorToolST(name, **kwargs)
-
-
-def getFatrasNewExtrapolationSimulatorToolST(name="ISF_FatrasNewExtrapolationSimulatorToolST", **kwargs):
-    kwargs.setdefault("IDSimulationTool"  , getPublicTool('ISF_FatrasSimEngine'))
-    kwargs.setdefault("UseSimulationTool" , True)
-    return getFatrasSimulatorToolST(name, **kwargs)
-
-# Not used anywhere - not migrated to CA config
-def getFatrasNewExtrapolationSimulatorTool(name="ISF_FatrasSNewExtrapolationimulatorTool", **kwargs):
-    kwargs.setdefault("IDSimulationSelectors"       , [ 'ISF_DefaultFatrasSelector' ] )
-    kwargs.setdefault("CaloSimulationSelectors"     , [ 'ISF_MuonFatrasSelector' ]    )
-    kwargs.setdefault("MSSimulationSelectors"       , [ 'ISF_DefaultFatrasSelector' ] )
-    return getFatrasNewExtrapolationSimulatorToolST(name, **kwargs)
 
 
 def getFatrasPileupSimulatorToolST(name="ISF_FatrasPileupSimulatorToolST", **kwargs):

@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 from ISF_Geant4Tools.ISF_Geant4ToolsConfig import (
-    Geant4ToolCfg, FullGeant4ToolCfg, LongLivedGeant4ToolCfg, PassBackGeant4ToolCfg,
+    Geant4ToolCfg, FullGeant4ToolCfg, PassBackGeant4ToolCfg,
     AFIIGeant4ToolCfg, AFII_QS_Geant4ToolCfg
 )
 
@@ -34,14 +34,6 @@ def FullGeant4SimCfg(flags, name="ISF_FullGeant4SimSvc", **kwargs):
     if "SimulatorTool" not in kwargs:
         kwargs.setdefault("SimulatorTool", result.addPublicTool(result.popToolsAndMerge(FullGeant4ToolCfg(flags))))
     svc = result.getPrimaryAndMerge(Geant4SimCfg(flags, name, **kwargs))
-    result.addService(svc, primary = True)
-    return result
-
-
-def LongLivedGeant4SimCfg(flags, name="ISF_LongLivedGeant4SimSvc", **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("SimulatorTool", result.addPublicTool(result.popToolsAndMerge(LongLivedGeant4ToolCfg(flags))))
-    svc = result.getPrimaryAndMerge(FullGeant4SimCfg(flags, name, **kwargs))
     result.addService(svc, primary = True)
     return result
 

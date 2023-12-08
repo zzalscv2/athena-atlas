@@ -551,30 +551,6 @@ def getKernel_ATLFAST3F_ACTSMT(name="ISF_Kernel_ATLFAST3F_ACTSMT", **kwargs):
     simFlags.SimulationFlavour = "ATLFAST3F_ACTSMT"
     return getKernel_GenericSimulatorMT(name, **kwargs)
 
-############## Simulator: Fatras_newExtrapolation ###############
-def getKernel_Fatras_newExtrapolation(name="ISF_Kernel_Fatras_newExtrapolation", **kwargs):
-    kwargs.setdefault("BeamPipeSimulationSelectors" , [ 'ISF_DefaultFatrasNewExtrapolationSelector' ] )
-    kwargs.setdefault("IDSimulationSelectors"       , [ 'ISF_DefaultFatrasNewExtrapolationSelector' ] )
-    kwargs.setdefault("CaloSimulationSelectors"     , [ 'ISF_DefaultFatrasNewExtrapolationSelector' ] )
-    kwargs.setdefault("MSSimulationSelectors"       , [ 'ISF_DefaultFatrasNewExtrapolationSelector' ] )
-    kwargs.setdefault("CavernSimulationSelectors"   , [ 'ISF_DefaultFatrasNewExtrapolationSelector' ] )
-    # set the simFlags accordingly (TODO: is this even needed?)
-    from G4AtlasApps.SimFlags import simFlags
-    simFlags.SimulationFlavour = "Fatras_newExtrapolation"
-    return getKernel_GenericSimulatorNoG4(name, **kwargs)
-
-############## Simulator: Fatras_newExtrapolation_IDOnly ###############
-def getKernel_Fatras_newExtrapolation_IDOnly(name="ISF_Kernel_Fatras_newExtrapolation_IDOnly", **kwargs):
-    kwargs.setdefault("BeamPipeSimulationSelectors" , [ 'ISF_DefaultFatrasNewExtrapolationSelector' ] )
-    kwargs.setdefault("IDSimulationSelectors"       , [ 'ISF_DefaultFatrasNewExtrapolationSelector' ] )
-    kwargs.setdefault("CaloSimulationSelectors"     , [ 'ISF_DefaultParticleKillerSelector' ]         )
-    kwargs.setdefault("MSSimulationSelectors"       , [ 'ISF_DefaultParticleKillerSelector' ]         )
-    kwargs.setdefault("CavernSimulationSelectors"   , [ 'ISF_DefaultParticleKillerSelector' ]         )
-    # set the simFlags accordingly (TODO: is this even needed?)
-    from G4AtlasApps.SimFlags import simFlags
-    simFlags.SimulationFlavour = "Fatras_newExtrapolation_IDOnly"
-    return getKernel_GenericSimulatorNoG4(name, **kwargs)
-
 ############## Simulator: DNNOnly ###############
 # run DNNCaloSim standalone, for faster tests
 def getKernel_DNNOnly(name="ISF_Kernel_DNNOnly", **kwargs):

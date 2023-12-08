@@ -38,13 +38,11 @@ addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasPdgG4Particl
 addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasParticleDecayHelper",               "ISF_FatrasParticleDecayHelper")
 addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasKinematicFilter",                   "ISF_FatrasKinematicFilter")
 addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasSimTool",                           "ISF_FatrasSimTool")
-addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasSimEngine",                         "ISF_FatrasSimEngine")
 addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasPileupSimTool",                     "ISF_FatrasPileupSimTool")
 addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getG4RunManagerHelper",                      "ISF_G4RunManagerHelper")
 
 addService("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasTrackingGeometrySvc",            "ISF_FatrasTrackingGeometrySvc")
 addService("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasSimServiceID",                   "ISF_FatrasSimSvc")
-addService("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasNewExtrapolationSimServiceID",   "ISF_FatrasNewExtrapolationSimSvc")
 addService("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasPileupSimServiceID",             "ISF_FatrasPileupSimSvc")
 
 addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasPileupHitCreatorPixel",             "ISF_FatrasPileupHitCreatorPixel")
@@ -54,7 +52,5 @@ addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasPileupSimHit
 
 addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasSimulatorToolST"                  , "ISF_FatrasSimulatorToolST"                    )
 addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasSimulatorTool"                    , "ISF_FatrasSimulatorTool"                    )
-addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasNewExtrapolationSimulatorToolST"  , "ISF_FatrasNewExtrapolationSimulatorToolST"    )
-addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasNewExtrapolationSimulatorTool"    , "ISF_FatrasNewExtrapolationSimulatorTool"    )
 addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasPileupSimulatorToolST"            , "ISF_FatrasPileupSimulatorToolST"                )
 addTool("ISF_FatrasServices.ISF_FatrasServicesConfigLegacy.getFatrasPileupSimulatorTool"              , "ISF_FatrasPileupSimulatorTool"                )
