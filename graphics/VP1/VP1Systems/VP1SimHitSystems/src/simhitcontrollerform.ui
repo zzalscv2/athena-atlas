@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>592</width>
-    <height>614</height>
+    <height>712</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -224,6 +224,20 @@
              <widget class="QCheckBox" name="chbxCSCHits">
               <property name="text">
                <string>CSC Hits</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="chbxMMHits">
+              <property name="text">
+               <string>MM Hits</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="chbxsTGCHits">
+              <property name="text">
+               <string>sTGC Hits</string>
               </property>
              </widget>
             </item>
