@@ -50,9 +50,12 @@ def set_flags(flags):
    flags.Input.FailOnUnknownCollections = True
    flags.Scheduler.AutoLoadUnmetDependencies = False
 
-   ### TEMPORARY settings:
-   # FIXME: disable coherent prescales during development phase to allow menu with single-chain CPS groups
-   flags.Trigger.disableCPS = True
+   #-------------------------------------------------------------
+   # Switch off CPS mechanism if we only run selected
+   # signatures or chains, to avoid single-chain sets
+   #-------------------------------------------------------------
+   if flags.Trigger.selectChains or len(flags.Trigger.enabledSignatures) == 1:
+       flags.Trigger.disableCPS = True
   
   
 def runHLTCfg(flags):
