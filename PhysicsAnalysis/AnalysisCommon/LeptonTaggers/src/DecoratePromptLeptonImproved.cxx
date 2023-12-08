@@ -18,8 +18,7 @@
 
 //======================================================================================================
 Prompt::DecoratePromptLeptonImproved::DecoratePromptLeptonImproved(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name, pSvcLocator),
-  m_BDTVarKey(Def::NONE)
+  AthAlgorithm(name, pSvcLocator)
 {}
 
 //=============================================================================
@@ -68,16 +67,6 @@ StatusCode Prompt::DecoratePromptLeptonImproved::initialize()
   m_allVars.insert(m_allVars.end(), m_floatVars.begin(), m_floatVars.end());
 
   m_varTMVA.resize(m_allVars.size());
-
-  //
-  // Get key for recording BDT output
-  //
-  m_BDTVarKey = m_vars->registerDynamicVar(m_BDTName);
-
-  if(m_BDTVarKey == Def::NONE) {
-    ATH_MSG_ERROR("Failed to create key for BDT name=" << m_BDTName);
-    return StatusCode::FAILURE;
-  }
 
   //
   // Fill decorator maps
@@ -140,6 +129,18 @@ StatusCode Prompt::DecoratePromptLeptonImproved::execute()
     << "\n\t\t\t  Size of track jet container: " << trackJets->size()
     << "\n-----------------------------------------------------------------");
 
+  //
+  // Find default Primary Vertex
+  //
+  const xAOD::Vertex *primaryVertex = nullptr;
+
+  for(const xAOD::Vertex *vertex: *vertices) {
+    if(vertex->vertexType() == xAOD::VxType::PriVtx) {
+      primaryVertex = vertex;
+      break;
+    }
+  }
+
   if(m_leptonsName == "Electrons") {
     //
     // Process electrons
@@ -148,7 +149,7 @@ StatusCode Prompt::DecoratePromptLeptonImproved::execute()
     SG::ReadHandle<xAOD::ElectronContainer> electrons(m_electronsKey);
 
     for(const xAOD::Electron *elec: *electrons) {
-      decorateElec(*elec, *trackJets);
+      decorateElec(*elec, *trackJets, *clusters, primaryVertex);
     }
   } else if(m_leptonsName == "Muons") {
     //
@@ -158,7 +159,7 @@ StatusCode Prompt::DecoratePromptLeptonImproved::execute()
     SG::ReadHandle<xAOD::MuonContainer> muons(m_muonsKey);
 
     for(const xAOD::Muon *muon: *muons) {
-      decorateMuon(*muon, *trackJets);
+      decorateMuon(*muon, *trackJets, primaryVertex);
       ATH_MSG_DEBUG("Muon decorated");
     }
   } else {
@@ -199,10 +200,6 @@ StatusCode Prompt::DecoratePromptLeptonImproved::initializeDecorators()
   //
   // Fill additional variables
   //
-  if(!m_floatMap.insert(floatDecoratorMap::value_type(m_BDTVarKey, SG::AuxElement::Decorator<float>(m_BDTName))).second) {
-    ATH_MSG_ERROR("Failed to add variable: " << m_BDTVarKey);
-    return StatusCode::FAILURE;
-  }
 
   for(const std::string &evar: m_extraDecoratorFloatVars) {
     const Def::Var ekey = m_vars->registerDynamicVar(evar);
@@ -333,8 +330,10 @@ void Prompt::DecoratePromptLeptonImproved::initializeConstAccessors()
 
 //=============================================================================
 void Prompt::DecoratePromptLeptonImproved::decorateElec(
-  const xAOD::Electron             &electron,
-  const xAOD::JetContainer         &trackJets
+  const xAOD::Electron &electron,
+  const xAOD::JetContainer &trackJets,
+  const xAOD::CaloClusterContainer &clusters,
+  const xAOD::Vertex *primaryVertex
 )
 {
   //
@@ -350,13 +349,12 @@ void Prompt::DecoratePromptLeptonImproved::decorateElec(
     //
     // Get muon calorimeter energy variable, RNN and secondary vertex variables
     //
-    ATH_MSG_WARNING("Removed getElectronAnpVariables... this needs to be restored!");
-    // getElectronAnpVariables(electron, clusters, vars, primaryVertex);
+    getElectronAnpVariables(electron, clusters, vars, primaryVertex);
 
     //
     // Get mutual variables, passing track as argument
     //
-    getMutualVariables(electron, *track_jet, electron.trackParticle());
+    getMutualVariables(electron, *track_jet, electron.trackParticle(), vars);
 
     //
     // Pass variables to TMVA
@@ -367,7 +365,7 @@ void Prompt::DecoratePromptLeptonImproved::decorateElec(
     //
     // Decorate electron with default values
     //
-    fillVarDefault();
+    fillVarDefault(vars);
 
     ATH_MSG_DEBUG("No track jet found near to electron");
   }
@@ -375,16 +373,16 @@ void Prompt::DecoratePromptLeptonImproved::decorateElec(
   //
   // Decorate electron with input vars and BDT weight
   //
-  decorateAuxLepton(electron);
-
-  // ATH_MSG_DEBUG("Electron BDT score: " << electron.auxdataConst<float>(m_BDTName)
-  // 	<< "\n-----------------------------------------------------------------");
+  decorateAuxLepton(electron, vars);
 }
 
 
 //=============================================================================
-void Prompt::DecoratePromptLeptonImproved::decorateMuon(const xAOD::Muon         &muon,
-                     const xAOD::JetContainer &trackJets)
+void Prompt::DecoratePromptLeptonImproved::decorateMuon(
+  const xAOD::Muon         &muon,
+  const xAOD::JetContainer &trackJets,
+  const xAOD::Vertex *primaryVertex
+)
 {
   //
   // Find nearest track jet to muon
@@ -399,13 +397,12 @@ void Prompt::DecoratePromptLeptonImproved::decorateMuon(const xAOD::Muon        
     //
     // Get muon calorimeter energy variable, RNN and secondary vertex variables
     //
-    ATH_MSG_WARNING("REMOVED getMuonAnpVariables... this needs to be undone in the future!");
-    // getMuonAnpVariables(muon, vars, primaryVertex);
+    getMuonAnpVariables(muon, vars, primaryVertex);
 
     //
     // Get mutual variables, passing track as argument
     //
-    getMutualVariables(muon, *track_jet, muon.primaryTrackParticle());
+    getMutualVariables(muon, *track_jet, muon.primaryTrackParticle(), vars);
 
     //
     // Add variables to TMVA Reader
@@ -416,7 +413,7 @@ void Prompt::DecoratePromptLeptonImproved::decorateMuon(const xAOD::Muon        
     //
     // Decorate muon with default values
     //
-    fillVarDefault();
+    fillVarDefault(vars);
 
     ATH_MSG_DEBUG("No track jet found near to muon");
   }
@@ -424,17 +421,14 @@ void Prompt::DecoratePromptLeptonImproved::decorateMuon(const xAOD::Muon        
   //
   // Decorate muon with input vars and BDT weight
   //
-  ATH_MSG_WARNING("Muon Aux Lepton decorations have been removed. This needs to be restored!");
-  // decorateAuxLepton(muon, vars);
-
-  // ATH_MSG_DEBUG("Muon BDT score: " << muon.auxdataConst<float>(m_BDTName)
-  // 	<< "\n-----------------------------------------------------------------");
+  decorateAuxLepton(muon, vars);
 }
 
 //=============================================================================
 void Prompt::DecoratePromptLeptonImproved::getElectronAnpVariables(
   const xAOD::Electron             &elec,
   const xAOD::CaloClusterContainer &clusters,
+  Prompt::VarHolder                &vars,
   const xAOD::Vertex               *primaryVertex
 )
 {
@@ -460,7 +454,7 @@ void Prompt::DecoratePromptLeptonImproved::getElectronAnpVariables(
 
   if(elec.pt() > 0.0) CaloClusterSumEtRel = sumCoreEt_large/elec.pt();
 
-  m_vars->addVar(Prompt::Def::CaloClusterSumEtRel, CaloClusterSumEtRel);
+  vars.addVar(Prompt::Def::CaloClusterSumEtRel, CaloClusterSumEtRel);
 
   //
   // Get lepton isolation variables
@@ -468,8 +462,8 @@ void Prompt::DecoratePromptLeptonImproved::getElectronAnpVariables(
   const double Topoetcone30rel = accessIsolation(*m_accessCalIsolation30,   elec);
   const double Ptvarcone30rel  = accessIsolation(*m_accessTrackIsolation30, elec);
 
-  m_vars->addVar(Prompt::Def::Topoetcone30rel, Topoetcone30rel);
-  m_vars->addVar(Prompt::Def::Ptvarcone30rel,  Ptvarcone30rel);
+  vars.addVar(Prompt::Def::Topoetcone30rel, Topoetcone30rel);
+  vars.addVar(Prompt::Def::Ptvarcone30rel,  Ptvarcone30rel);
 
   //
   // Get secondary vertex variable
@@ -514,13 +508,14 @@ void Prompt::DecoratePromptLeptonImproved::getElectronAnpVariables(
     best_vertex_ndist_long = goodVertexNdistLong.back();
   }
 
-  m_vars->addVar(Prompt::Def::CandVertex_normDistToPriVtxLongitudinalBest_ThetaCutVtx, best_vertex_ndist_long);
-  m_vars->addVar(Prompt::Def::CandVertex_NPassVtx,                         goodVertexNdistLong.size());
+  vars.addVar(Prompt::Def::CandVertex_normDistToPriVtxLongitudinalBest_ThetaCutVtx, best_vertex_ndist_long);
+  vars.addVar(Prompt::Def::CandVertex_NPassVtx,                         goodVertexNdistLong.size());
 }
 
 //=============================================================================
 void Prompt::DecoratePromptLeptonImproved::getMuonAnpVariables(
   const xAOD::Muon   &muon,
+  Prompt::VarHolder                &vars,
   const xAOD::Vertex *primaryVertex
 )
 {
@@ -543,7 +538,7 @@ void Prompt::DecoratePromptLeptonImproved::getMuonAnpVariables(
     }
   }
 
-  m_vars->addVar(Prompt::Def::CaloClusterERel, caloClusterERel);
+  vars.addVar(Prompt::Def::CaloClusterERel, caloClusterERel);
 
   //
   // Get lepton isolation variables
@@ -551,8 +546,8 @@ void Prompt::DecoratePromptLeptonImproved::getMuonAnpVariables(
   const double Topoetcone30rel              = accessIsolation(*m_accessCalIsolation30,       muon);
   const double ptvarcone30TightTTVAPt500rel = accessIsolation(*m_accessTrackIsolation30TTVA, muon);
 
-  m_vars->addVar(Prompt::Def::Topoetcone30rel,              Topoetcone30rel);
-  m_vars->addVar(Prompt::Def::Ptvarcone30_TightTTVA_pt500rel, ptvarcone30TightTTVAPt500rel);
+  vars.addVar(Prompt::Def::Topoetcone30rel,              Topoetcone30rel);
+  vars.addVar(Prompt::Def::Ptvarcone30_TightTTVA_pt500rel, ptvarcone30TightTTVAPt500rel);
 
   //
   // Get Muon Secondary Vertex variable
@@ -565,8 +560,8 @@ void Prompt::DecoratePromptLeptonImproved::getMuonAnpVariables(
 
     for(ElementLink<xAOD::VertexContainer> &vtxLink: vtxLinks) {
       if(!vtxLink.isValid()) {
-  ATH_MSG_WARNING("VertexContainer : invalid link");
-  continue;
+        ATH_MSG_WARNING("VertexContainer : invalid link");
+        continue;
       }
 
       const xAOD::Vertex *vtx = *vtxLink;
@@ -574,9 +569,9 @@ void Prompt::DecoratePromptLeptonImproved::getMuonAnpVariables(
       const double fitProb = Prompt::getVertexFitProb(vtx);
 
       if(fitProb > m_vertexMinChiSquaredProb) {
-  const double vertex_ndist_long = getVertexLongitudinalNormDist(muon, vtx, primaryVertex);
+        const double vertex_ndist_long = getVertexLongitudinalNormDist(muon, vtx, primaryVertex);
 
-  goodVertexNdistLong.push_back(vertex_ndist_long);
+        goodVertexNdistLong.push_back(vertex_ndist_long);
       }
     }
   }
@@ -591,15 +586,16 @@ void Prompt::DecoratePromptLeptonImproved::getMuonAnpVariables(
     best_vertex_ndist_long = goodVertexNdistLong.back();
   }
 
-  m_vars->addVar(Prompt::Def::CandVertex_normDistToPriVtxLongitudinalBest, best_vertex_ndist_long);
-  m_vars->addVar(Prompt::Def::CandVertex_NPassVtx,                         goodVertexNdistLong.size());
+  vars.addVar(Prompt::Def::CandVertex_normDistToPriVtxLongitudinalBest, best_vertex_ndist_long);
+  vars.addVar(Prompt::Def::CandVertex_NPassVtx,                         goodVertexNdistLong.size());
 }
 
 //=============================================================================
 void Prompt::DecoratePromptLeptonImproved::getMutualVariables(
   const xAOD::IParticle     &particle,
   const xAOD::Jet           &track_jet,
-  const xAOD::TrackParticle *track
+  const xAOD::TrackParticle *track,
+  Prompt::VarHolder         &vars
 )
 {
   //
@@ -622,20 +618,20 @@ void Prompt::DecoratePromptLeptonImproved::getMutualVariables(
   //
   // Add vars to VarHolder
   //
-  m_vars->addVar(Prompt::Def::PtFrac,         PtFrac);
-  m_vars->addVar(Prompt::Def::PtRel,          PtRel);
-  m_vars->addVar(Prompt::Def::DRlj,           track_jet.p4().DeltaR(particle.p4()));
-  m_vars->addVar(Prompt::Def::TrackJetNTrack, track_jet.getConstituents().size());
+  vars.addVar(Prompt::Def::PtFrac,         PtFrac);
+  vars.addVar(Prompt::Def::PtRel,          PtRel);
+  vars.addVar(Prompt::Def::DRlj,           track_jet.p4().DeltaR(particle.p4()));
+  vars.addVar(Prompt::Def::TrackJetNTrack, track_jet.getConstituents().size());
 
   //
   // Get RNN variables
   //
   for(floatAccessorMap::value_type &acc: m_accessRNNMap) {
     if(acc.second.isAvailable(particle)) {
-      m_vars->addVar(acc.first, acc.second(particle));
+      vars.addVar(acc.first, acc.second(particle));
     }
     else {
-      ATH_MSG_WARNING("LeptonTagger RNN not found in auxiliary store for variable=" << m_vars->asStr(acc.first));
+      ATH_MSG_WARNING("LeptonTagger RNN not found in auxiliary store for variable=" << vars.asStr(acc.first));
     }
   }
 
@@ -659,8 +655,8 @@ void Prompt::DecoratePromptLeptonImproved::getMutualVariables(
     curr_bin = 1;
   }
 
-  m_vars->addVar(Prompt::Def::MVAXBin, curr_bin);
-  m_vars->addVar(Prompt::Def::RawPt,   lepPt);
+  vars.addVar(Prompt::Def::MVAXBin, curr_bin);
+  vars.addVar(Prompt::Def::RawPt,   lepPt);
 
   ATH_MSG_DEBUG("getMutualVariables - lepPt = " << lepPt << ", MVAXBin = " << curr_bin);
 }
@@ -686,23 +682,24 @@ float Prompt::DecoratePromptLeptonImproved::accessIsolation(AccessFloat         
 }
 
 //=============================================================================
-void Prompt::DecoratePromptLeptonImproved::fillVarDefault()
+void Prompt::DecoratePromptLeptonImproved::fillVarDefault(Prompt::VarHolder &vars) const
 {
   //
   // Add default values to VarHolder
   //
   for(const floatDecoratorMap::value_type &dec: m_floatMap) {
-    m_vars->addVar(dec.first, -99.0);
+    vars.addVar(dec.first, -99.0);
   }
 
   for(const shortDecoratorMap::value_type &dec: m_shortMap) {
-    m_vars->addVar(dec.first, -99.0);
+    vars.addVar(dec.first, -99.0);
   }
 }
 
 //=============================================================================
 void Prompt::DecoratePromptLeptonImproved::decorateAuxLepton(
-  const xAOD::IParticle   &particle
+  const xAOD::IParticle &particle,
+  Prompt::VarHolder &vars
 )
 {
   //
@@ -711,13 +708,13 @@ void Prompt::DecoratePromptLeptonImproved::decorateAuxLepton(
   for(shortDecoratorMap::value_type &dec: m_shortMap) {
     double val = 0.0;
 
-    if(m_vars->getVar(dec.first, val)) {
+    if(vars.getVar(dec.first, val)) {
       dec.second(particle) = static_cast<short>(val);
 
-      ATH_MSG_DEBUG("Short variable: " << m_vars->asStr(dec.first) << " = " << val);
+      ATH_MSG_DEBUG("Short variable: " << vars.asStr(dec.first) << " = " << val);
     }
     else {
-      ATH_MSG_WARNING("Variable " << m_vars->asStr(dec.first) << " not decorated to lepton");
+      ATH_MSG_WARNING("Short variable " << vars.asStr(dec.first) << " not decorated to lepton");
     }
   }
 
@@ -727,13 +724,13 @@ void Prompt::DecoratePromptLeptonImproved::decorateAuxLepton(
   for(floatDecoratorMap::value_type &dec: m_floatMap) {
     double val = 0.0;
 
-    if(m_vars->getVar(dec.first, val)) {
+    if(vars.getVar(dec.first, val)) {
       dec.second(particle) = val;
 
-      ATH_MSG_DEBUG("Float variable: " << m_vars->asStr(dec.first) << " = " << val);
+      ATH_MSG_DEBUG("Float variable: " << vars.asStr(dec.first) << " = " << val);
     }
     else {
-      ATH_MSG_WARNING("Variable " << m_vars->asStr(dec.first) << " not decorated to lepton");
+      ATH_MSG_WARNING("Float variable " << vars.asStr(dec.first) << " not decorated to lepton");
     }
   }
 }
