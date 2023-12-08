@@ -17,7 +17,7 @@ StatusCode ElectronFilter::filterEvent() {
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = *itr;
     for (const auto& part: *genEvt) {
-      if (MC::isStable(part) && std::abs(part->pdg_id()) == 11) { // electron
+      if (MC::isStable(part) && MC::isElectron(part)) { // electron
         if (part->momentum().perp() >= m_Ptmin && std::abs(part->momentum().pseudoRapidity()) <= m_EtaRange) {
           return StatusCode::SUCCESS;
         }

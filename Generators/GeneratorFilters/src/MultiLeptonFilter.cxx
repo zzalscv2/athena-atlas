@@ -22,7 +22,7 @@ StatusCode MultiLeptonFilter::filterEvent() {
     const HepMC::GenEvent* genEvt = *itr;
     for (const auto& part: *genEvt) {
       if ( !MC::isStable(part)) continue;
-	  if ( std::abs(part->pdg_id()) == 11 || abs(part->pdg_id()) == 13 ) {
+	  if ( MC::isElectron(part) || MC::isMuon(part) ) {
 	    if (part->momentum().perp() >= m_Ptmin && std::abs(part->momentum().pseudoRapidity()) <= m_EtaRange) {
 	      numLeptons += 1;
 	    }

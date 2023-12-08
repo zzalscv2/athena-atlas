@@ -209,7 +209,6 @@ void XtoVVDecayFilterExtended::FindAncestor(const HepMC::ConstGenVertexPtr&  sea
                                     int targetPDGID, bool& okPDGChild1, bool& okPDGChild2) const{
   if (!searchvertex) return;
   for (const auto& thisAncestor:  *searchvertex){
-    //ATH_MSG_DEBUG(" child " << thisAncestor->pdg_id());
     if (std::abs(thisAncestor->pdg_id()) == targetPDGID) { //same particle as parent
       FindAncestor(thisAncestor->end_vertex(), targetPDGID, okPDGChild1, okPDGChild2);
     } else {

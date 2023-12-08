@@ -72,7 +72,7 @@ StatusCode M4MuIntervalFilter::filterEvent() {
     for (const auto& pitr: *genEvt){
 
 	   // muon
-	   if (std::abs((pitr)->pdg_id()) == 13 && MC::isStable(pitr) &&
+	   if (MC::isMuon(pitr) && MC::isStable(pitr) &&
 	      (pitr)->momentum().perp() >= m_minPt &&
 	       std::abs((pitr)->momentum().pseudoRapidity()) <= m_maxEta) {
            HepMC::FourVector tmp((pitr)->momentum().px(), (pitr)->momentum().py(), (pitr)->momentum().pz(), (pitr)->momentum().e());

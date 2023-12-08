@@ -159,10 +159,7 @@ StatusCode LeptonPairFilter::filterEvent() {
 	// save pdg ids of found leptons
 	// do not consider taus
 	{
-	  if( ((*pitr)->pdg_id() ==  11)  || 
-	      ((*pitr)->pdg_id() == -11)  ||
-	      ((*pitr)->pdg_id() ==  13)  || 
-	      ((*pitr)->pdg_id() == -13) ){
+	  if( MC::isElectron(*pitr) || MC::isMuon(*pitr) ){
 	      	//only consider leptons which satisfy  pt and eta requirements
 	        if( ((*pitr)->momentum().perp() >= m_Ptmin) && std::abs((*pitr)->momentum().pseudoRapidity()) <=m_EtaRange){
 			  if(m_onlyMassiveParents)
@@ -175,8 +172,7 @@ StatusCode LeptonPairFilter::filterEvent() {
 					  if(!vxp) break;
 					  if(vxp->particles_in_size()!=1) break;
 					  p = *vxp->particles_in_const_begin();
-					  const int pdg = abs(p->pdg_id());
-					  if(!((pdg>=11 && pdg<=16) || pdg==22))
+					  if(!MC::isSMLepton(p) || MC::isPhoton(p))
 					  {
 						  massiveParent = (p->generated_mass()>20000);
 						  break;
