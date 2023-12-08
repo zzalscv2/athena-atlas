@@ -33,7 +33,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
     const HepMC::GenEvent* genEvt = *itr;
     for (const auto& pitr: *genEvt) {
       // Electrons and muons
-      if (MC::isStable(pitr) && (std::abs(pitr->pdg_id()) == 11 || std::abs(pitr->pdg_id()) == 13)) {
+      if (MC::isStable(pitr) && (MC::isElectron(pitr) || MC::isMuon(pitr))) {
         if (pitr->momentum().perp() >= m_minPt && std::abs(pitr->momentum().pseudoRapidity()) <= m_maxEta) {
           ATH_MSG_DEBUG("Found lepton with PDG ID = " << pitr->pdg_id()
                         << ", status = " <<  pitr->status()
@@ -52,7 +52,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
       if (!m_incHadTau) continue;
       HepMC::ConstGenParticlePtr   tau= nullptr;
       HepMC::ConstGenParticlePtr   taunu= nullptr;
-      if (std::abs(pitr->pdg_id()) != 15 || pitr->status() == 3) continue;
+      if (MC::isTau(pitr) || pitr->status() == 3) continue;
         tau = pitr;
         if(!tau->end_vertex()) continue;
         // Loop over children and:

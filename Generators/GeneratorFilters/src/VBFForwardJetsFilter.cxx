@@ -99,19 +99,19 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
 #ifdef HEPMC3
     for (const auto& pitr: *genEvt) {
       // photon
-      if ( pitr->pdg_id() == 22 && MC::isStable(pitr) &&
+      if ( MC::isPhoton(pitr) && MC::isStable(pitr) &&
            pitr->momentum().perp() >= m_LGMinPt && std::abs(pitr->momentum().pseudoRapidity()) <= m_LGMaxEta) {
         MCTruthPhotonList.push_back(pitr);
         ATH_MSG_INFO("photon pt(Gaudi::Units::GeV) = " << pitr->momentum().perp()/Gaudi::Units::GeV << " eta = " << pitr->momentum().pseudoRapidity());
       }
       // electon
-      if ( std::abs(pitr->pdg_id()) == 11 && MC::isStable(pitr) &&
+      if ( MC::isElectron(pitr) && MC::isStable(pitr) &&
            pitr->momentum().perp() >= m_LGMinPt && std::abs(pitr->momentum().pseudoRapidity()) <= m_LGMaxEta) {
         MCTruthElectronList.push_back(pitr);
         ATH_MSG_INFO("electron pt(Gaudi::Units::GeV) = " << pitr->momentum().perp()/Gaudi::Units::GeV << " eta = " << pitr->momentum().pseudoRapidity());
       }
       // tau
-      if ( std::abs(pitr->pdg_id()) == 15 && pitr->status() != 3 ) {
+      if ( MC::isTau(pitr) && pitr->status() != 3 ) {
         auto& tau = pitr;
         int leptonic = 0;
         for (const auto& beg: tau->end_vertex()->particles_out() ) {
@@ -137,19 +137,19 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
 #else
     for (HepMC::GenEvent::particle_const_iterator pitr = genEvt->particles_begin(); pitr != genEvt->particles_end(); ++pitr) {
       // photon
-      if ( (*pitr)->pdg_id() == 22 && MC::isStable(*pitr) &&
+      if ( MC::isPhoton(*pitr) && MC::isStable(*pitr) &&
            (*pitr)->momentum().perp() >= m_LGMinPt && std::abs((*pitr)->momentum().pseudoRapidity()) <= m_LGMaxEta) {
         MCTruthPhotonList.push_back((*pitr));
         ATH_MSG_INFO("photon pt(Gaudi::Units::GeV) = " << (*pitr)->momentum().perp()/Gaudi::Units::GeV << " eta = " << (*pitr)->momentum().pseudoRapidity());
       }
       // electon
-      if ( std::abs((*pitr)->pdg_id()) == 11 && MC::isStable(*pitr) &&
+      if ( MC::isElectron(*pitr) && MC::isStable(*pitr) &&
            (*pitr)->momentum().perp() >= m_LGMinPt && std::abs((*pitr)->momentum().pseudoRapidity()) <= m_LGMaxEta) {
         MCTruthElectronList.push_back((*pitr));
         ATH_MSG_INFO("electron pt(Gaudi::Units::GeV) = " << (*pitr)->momentum().perp()/Gaudi::Units::GeV << " eta = " << (*pitr)->momentum().pseudoRapidity());
       }
       // tau
-      if ( std::abs((*pitr)->pdg_id()) == 15 && (*pitr)->status() != 3 ) {
+      if ( MC::isTau(*pitr) && (*pitr)->status() != 3 ) {
         HepMC::GenParticle *tau = (*pitr);
         HepMC::GenVertex::particles_out_const_iterator begin = tau->end_vertex()->particles_out_const_begin();
         HepMC::GenVertex::particles_out_const_iterator end = tau->end_vertex()->particles_out_const_end();

@@ -79,10 +79,7 @@ StatusCode JetFilter::filterEvent() {
   for (const auto& part: *genEvt) {
     /// @todo Use MCPID to identify leptons
       if(MC::isGenStable(part)) { //stables only
-      if ( (part->pdg_id() != 13 ) &&  (part->pdg_id() != -13 ) &&
-           (part->pdg_id() != 12 ) && (part->pdg_id() != -12 ) &&
-           (part->pdg_id() != 14 ) && (part->pdg_id() != -14 ) &&
-           (part->pdg_id() != 16 ) && (part->pdg_id() != -16 ) &&
+      if ( (!MC::isSMLepton(part)||MC::isTau(part)) &&
            (std::abs(part->momentum().pseudoRapidity()) <= m_emaxeta) ) { // no neutrinos or muons and particles must be in active range
         int ip, ie;
         ip = (int) ((M_PI+ part->momentum().phi())/m_edphi); //phi is in range -CLHEP::pi to CLHEP::pi

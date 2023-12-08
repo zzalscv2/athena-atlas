@@ -17,7 +17,7 @@ StatusCode MuonFilter::filterEvent() {
   for (itr = events()->begin(); itr!=events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
     for (const auto& pitr: *genEvt){
-    if (!MC::isStable(pitr) || std::abs(pitr->pdg_id()) != 13)  continue;
+    if (!MC::isStable(pitr) || !MC::isMuon(pitr))  continue;
     if (pitr->momentum().perp() < m_Ptmin || std::abs(pitr->momentum().pseudoRapidity()) > m_EtaRange) continue;
     return StatusCode::SUCCESS;
     }

@@ -24,7 +24,7 @@ StatusCode PhotonFilter::filterEvent() {
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
     for (const auto& pitr: *genEvt) {
-      if (pitr->pdg_id() == 22 && MC::isStable(pitr) &&
+      if (MC::isPhoton(pitr) && MC::isStable(pitr) &&
           pitr->momentum().perp() >= m_Ptmin &&
           pitr->momentum().perp() <  m_Ptmax &&
           std::abs(pitr->momentum().pseudoRapidity()) <= m_EtaRange) NPhotons++;

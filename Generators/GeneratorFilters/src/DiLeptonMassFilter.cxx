@@ -70,7 +70,7 @@ StatusCode DiLeptonMassFilter::filterEvent() {
       if(!MC::isStable(*pitr1)) continue;
 
       // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
-      if (std::abs(pdgId1) == 11 || std::abs(pdgId1) == 13) {
+      if (MC::isElectron(*pitr1) || MC::isMuon(*pitr1)) {
         if ((*pitr1)->momentum().perp() >= m_minPt && std::abs((*pitr1)->momentum().pseudoRapidity()) <= m_maxEta){
 
           // Loop over all remaining particles in the event

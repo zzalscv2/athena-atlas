@@ -1,4 +1,3 @@
-
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
 */
@@ -6,6 +5,7 @@
 #include "CLHEP/Vector/LorentzVector.h"
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 TauFilter::TauFilter( const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter( name,pSvcLocator ),
@@ -146,7 +146,7 @@ StatusCode TauFilter::filterEvent() {
 
     for (const auto& pitr: *genEvt) {
       // Look for the first tau with genstat != 3
-      if (std::abs((pitr)->pdg_id()) == 15 && (pitr)->status() != 3) {
+      if (MC::isTau(pitr) && (pitr)->status() != 3) {
         tau = pitr;
         ATH_MSG_DEBUG("found tau " << tau );
         ATH_MSG_DEBUG("pT\t\teta\tphi\tid");

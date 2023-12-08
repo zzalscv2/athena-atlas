@@ -22,7 +22,7 @@ StatusCode MultiElectronFilter::filterEvent() {
     const HepMC::GenEvent* genEvt = (*itr);
     for (const auto& part: *genEvt) {
       if ( !MC::isStable(part)) continue;
-      if ( std::abs(part->pdg_id()) != 11) continue;
+      if ( !MC::isElectron(part)) continue;
 	  if ( (part->momentum().perp() >= m_Ptmin) && std::abs(part->momentum().pseudoRapidity()) <= m_EtaRange) {
 	    numElectrons++;
 	  }
