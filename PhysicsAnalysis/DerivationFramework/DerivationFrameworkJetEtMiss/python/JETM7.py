@@ -46,16 +46,9 @@ def JETM7KernelCfg(ConfigFlags, name='JETM7Kernel', **kwargs):
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("JETM7CommonKernel", AugmentationTools = [DFCommonTrackSelection]))
 
     # Thinning tools...
-    from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, JetTrackParticleThinningCfg
+    from DerivationFrameworkInDet.InDetToolsConfig import MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, JetTrackParticleThinningCfg
     # from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import GenericTruthThinningCfg
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
-
-
-    JETM7TPThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(ConfigFlags,
-                                                                    name                    = "JETM7TPThinningTool",
-                                                                    StreamName              = kwargs['StreamName'],
-                                                                    SelectionString         = "InDetTrackParticles.pt > 1*GeV",
-                                                                    InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     muonSelectionString = "(Muons.pt > 5*GeV)"
     electronSelectionString = "(Electrons.pt > 5*GeV)"
@@ -127,8 +120,7 @@ def JETM7KernelCfg(ConfigFlags, name='JETM7Kernel', **kwargs):
     acc.merge(JETM7ExtraContentCfg(ConfigFlags))
 
     # Finally the kernel itself
-    thinningTools = [JETM7TPThinningTool,
-                     JETM7MuonTPThinningTool,
+    thinningTools = [JETM7MuonTPThinningTool,
                      JETM7ElectronTPThinningTool,
                      JETM7Akt4JetTPThinningTool,
                      JETM7Akt4PFlowByVertexJetThinningTool,
@@ -217,7 +209,7 @@ def JETM7Cfg(ConfigFlags):
     
     JETM7SlimmingHelper = SlimmingHelper("JETM7SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
-    JETM7SlimmingHelper.SmartCollections = ["Electrons","Photons", "Muons",
+    JETM7SlimmingHelper.SmartCollections = ["Electrons", "Photons", "Muons",
                                             "PrimaryVertices",
                                             "InDetTrackParticles",
                                             "AntiKt4EMPFlowJets",
@@ -225,6 +217,8 @@ def JETM7Cfg(ConfigFlags):
                                             ]
 
     
+    JETM7SlimmingHelper.ExtraVariables = ["InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights"]
+
     # Truth containers
     if ConfigFlags.Input.isMC:
 
@@ -239,20 +233,20 @@ def JETM7Cfg(ConfigFlags):
         JETM7SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices",
                                              "AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", "TruthParticles",
                                              "TruthVertices", "TruthEvents"]
-        JETM7SlimmingHelper.ExtraVariables = ["InDetTrackParticles.truthMatchProbability", "TruthVertices.barcode.z"]
+        JETM7SlimmingHelper.ExtraVariables += ["InDetTrackParticles.truthMatchProbability", "TruthVertices.barcode.z"]
 
 
     # Trigger content
     JETM7SlimmingHelper.IncludeTriggerNavigation = True
-    JETM7SlimmingHelper.IncludeJetTriggerContent = True
-    JETM7SlimmingHelper.IncludeMuonTriggerContent = True
-    JETM7SlimmingHelper.IncludeEGammaTriggerContent = True
-    JETM7SlimmingHelper.IncludeJetTauEtMissTriggerContent = True
-    JETM7SlimmingHelper.IncludeTauTriggerContent = True
-    JETM7SlimmingHelper.IncludeEtMissTriggerContent = True
-    JETM7SlimmingHelper.IncludeBJetTriggerContent = True
-    JETM7SlimmingHelper.IncludeBPhysTriggerContent = True
-    JETM7SlimmingHelper.IncludeMinBiasTriggerContent = True
+    JETM7SlimmingHelper.IncludeJetTriggerContent = False
+    JETM7SlimmingHelper.IncludeMuonTriggerContent = False
+    JETM7SlimmingHelper.IncludeEGammaTriggerContent = False
+    JETM7SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
+    JETM7SlimmingHelper.IncludeTauTriggerContent = False
+    JETM7SlimmingHelper.IncludeEtMissTriggerContent = False
+    JETM7SlimmingHelper.IncludeBJetTriggerContent = False
+    JETM7SlimmingHelper.IncludeBPhysTriggerContent = False
+    JETM7SlimmingHelper.IncludeMinBiasTriggerContent = False
 
     # Trigger matching
     # Run 2
