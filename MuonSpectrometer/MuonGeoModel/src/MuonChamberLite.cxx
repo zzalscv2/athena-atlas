@@ -501,8 +501,9 @@ namespace MuonGM {
                 } else if (((manager->IncludeCutoutsFlag() && mdtCutoutFlag) || (manager->IncludeCutoutsBogFlag() && stName.compare(0, 3, "BOG")) == 0) && zi < 0) {
                     key += "m" + buildString(mysql.allocPosFindSubtype(statType, fi, zi), 0) + "_" + buildString(mysql.allocPosFindCutout(statType, fi, zi), 0);
                 }
-
-        lvm = (*m_mapFPV)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)+"_"+std::to_string(md->index)];
+		std::unique_ptr<Mdt> r = std::make_unique<Mdt>(mysql, c, stName + techname);
+		r->processCutouts(vcutdef);
+		lvm = (*m_mapFPV)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)+"_"+std::to_string(md->index)];
 
             } else if (type == "RPC") {
                 // position stuff needed for cutout, used to be below:
