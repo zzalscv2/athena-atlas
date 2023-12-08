@@ -18,6 +18,7 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 
 class MuonPerformanceAlg : public AthAlgorithm {
 public:
@@ -46,6 +47,7 @@ private:
 
     // Containers
     SG::ReadHandleKey<xAOD::MuonContainer> m_muonsNameKey{this, "MuonContainerName", "Muons", "muon container"};
+    SG::ReadDecorHandleKey<xAOD::MuonContainer> m_muonTruthParticleKey {this,"muonTruthParticleLinkKey", m_muonsNameKey, "truthParticleLink"};
     unsigned int m_nevents;
     std::vector<std::string> m_hitCutString;
     std::vector<int> m_ntruth;
@@ -63,6 +65,9 @@ private:
 
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfo", "EventInfo", "event info"};
     SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthMuons{this, "TruthMuons", "MuonTruthParticles", "truth muons"};
+    SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthMuonRecoMuonLinkKey {this,"truthMuonRecoMuonLinkKey",m_truthMuons, "recoMuonLink"};
+    SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthMuonTruthType {this,"truthMuonTruthType",m_truthMuons, "truthType"};
+    SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthMuonTruthOrigin {this,"truthMuonTruthOrigin",m_truthMuons, "truthOrigin"};
 
     int m_runNumber;
     int m_eventNumber;

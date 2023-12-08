@@ -34,6 +34,7 @@ StatusCode MuonSegmentPerformanceAlg::initialize() {
 
     if (!m_segmentKey.key().empty()) ATH_CHECK(m_segmentKey.initialize());
     if (!m_truthSegmentKey.key().empty()) ATH_CHECK(m_truthSegmentKey.initialize());
+    if (!m_truthSegmenLinkKey.key().empty()) ATH_CHECK(m_truthSegmenLinkKey.initialize());
 
     return StatusCode::SUCCESS;
 }
