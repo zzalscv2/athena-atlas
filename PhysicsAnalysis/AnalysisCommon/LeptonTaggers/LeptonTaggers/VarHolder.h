@@ -67,7 +67,7 @@ namespace Prompt
       PromptLeptonRNN_prompt,
       CandVertex_normDistToPriVtxLongitudinalBest,
       CandVertex_normDistToPriVtxLongitudinalBest_ThetaCutVtx,
-      CandVertex_NPassVtx,
+      CandVertex_NPassVtx
     };
 
     void StringTok(std::vector<std::string>& ls,
@@ -110,9 +110,9 @@ namespace Prompt
     bool  addVar    (unsigned key, double value);
     bool  delVar    (unsigned key);
 
-    double getVar   (unsigned key) const;
-    bool   getVar   (unsigned key, double &value) const;
-    bool   getVar   (unsigned key, float  &value) const;
+    double getVar   (const unsigned key) const;
+    bool   getVar   (const unsigned key, double &value) const;
+    bool   getVar   (const unsigned key, float  &value) const;
 
     bool  hasKey(unsigned key) const;
     bool  hasVar(unsigned key) const;
@@ -121,14 +121,14 @@ namespace Prompt
     bool registerVar(Prompt::Def::Var var, const std::string &name);
     Prompt::Def::Var registerDynamicVar(const std::string &name);
 
-    std::string convert2Str(Prompt::Def::Var var);
+    std::string convert2Str(const Prompt::Def::Var var) const;
     Prompt::Def::Var convert2Var (const std::string &var);
-    Prompt::Def::Var convert2Var(uint32_t key);
+    Prompt::Def::Var convert2Var(const uint32_t key);
 
     void getAllVarEnums();
 
-    std::string asStr(uint32_t key, double val);
-    std::string asStr(Prompt::Def::Var var);
+    std::string asStr(const uint32_t key, const double val);
+    std::string asStr(const Prompt::Def::Var var);
 
     std::vector<Prompt::Def::Var> readVars(const std::string &config);
     std::vector<Prompt::Def::Var> readVectorVars(
@@ -190,12 +190,14 @@ namespace Prompt
 
   inline bool VarHolder::addVar(const unsigned key, const double value)
   {
+    using namespace asg::msgUserCode;
+
     if(!hasKey(key)) {
       m_fVars.push_back(VarEntry(key, value));
       return true;
     }
 
-    std::cout << getObjectType() << "::addVar(" << key << ", " << value << ") - key already exists" << std::endl;
+    ANA_MSG_DEBUG(getObjectType() << "::addVar(" << key << ", " << value << ") - key already exists");
     return false;
   }
 
@@ -223,7 +225,7 @@ namespace Prompt
     return std::find(m_fVars.begin(), m_fVars.end(), key) != m_fVars.end();
   }
 
-  inline bool VarHolder::getVar(unsigned key, float &value) const
+  inline bool VarHolder::getVar(const unsigned key, float &value) const
   {
     //
     // Read variable
@@ -237,7 +239,7 @@ namespace Prompt
     return false;
   }
 
-  inline bool VarHolder::getVar(unsigned key, double &value) const
+  inline bool VarHolder::getVar(const unsigned key, double &value) const
   {
     //
     // Read variable

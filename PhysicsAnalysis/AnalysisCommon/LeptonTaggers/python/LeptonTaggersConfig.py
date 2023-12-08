@@ -60,9 +60,7 @@ def DecorateReFitPrimaryVertexCfg(
     """
     CA to run the PrimaryVertexReFitter algorithm.
     """
-    
-    lep_tag_log.info("calling DecorateReFitPrimaryVertexCfg with lepton_type="+lepton_type)
-    
+
     if lepton_type not in ['Electrons', 'Muons']:
         raise ValueError(f'DecorateReFitPrimaryVertex - unknown lepton type: "{lepton_type}"')
 
@@ -82,7 +80,7 @@ def DecorateReFitPrimaryVertexCfg(
     kwargs.setdefault("VertexFittingTool", acc.popToolsAndMerge(
         VtxFittingToolCfg(ConfigFlags)
     ))
-    lep_tag_log.info("DecorateReFitPrimaryVertexCfg adding refitter algo="+alg_name)
+
     the_alg = CompFactory.Prompt.PrimaryVertexReFitter(alg_name, **kwargs)
 
     acc.addEventAlgo(the_alg, primary = True)
@@ -96,7 +94,7 @@ def VtxItrMergingToolCfg(flags, name="VertexIterativeMergingTool",
     Generate a VtxItrMergingTool configuration.
     """
     lep_tag_log.info("creating VtxItrMergingToolCfg configuration")
-    
+
     acc = ComponentAccumulator()
 
     kwargs.setdefault("minFitProb", 0.03)
@@ -117,8 +115,6 @@ def DecorateNonPromptVertexCfg(flags, name="DecorateNonPromptVertex",
     """
     Configure the non-prompt vertex decorator.
     """
-    lep_tag_log.info("calling DecorateNonPromptVertexCfg")
-    
     if lepton_name not in ['Electrons', 'Muons']:
         raise ValueError(f'DecorateNonPromptVertex - unknown lepton type: "{lepton_name}"')
 
@@ -162,7 +158,7 @@ def RNNToolCfg(flags, name="RNNTool",
     Configure the RNN tool.
     """
     lep_tag_log.info("calling RNNToolCfg with name"+RNN_name+" with lepton_name="+lepton_name)
-    
+
     if lepton_name not in ["Electrons", "Muons"]:
         raise ValueError(f'RNNTool - unknown lepton type: "{lepton_name}"')
 
@@ -359,7 +355,6 @@ def DecorateImprovedPromptLeptonAlgsCfg(
     """
     CA to decorate with PLIV input algorithms
     """
-    lep_tag_log.info("calling DecorateImprovedPromptLeptonAlgsCfg with lepton_type="+lepton_type)
     valid_lepton_types = ["", "Electrons", "Muons"]
     if lepton_type not in valid_lepton_types:
         lep_tag_log.error("Requested lepton type: %s", lepton_type)
@@ -416,8 +411,8 @@ def GetExtraPromptVariablesForDxAOD(name='', addSpectators=False, onlyBDT=True):
             prompt_lep_vars += ["Muons.PromptLeptonVeto.PromptLeptonIso.LowPtPLV."]
 
         return prompt_lep_vars
- 
- 
+
+
     prompt_vars  = "PromptLeptonVeto.PromptLeptonIso.LowPtPLV."
     prompt_vars += "PromptLeptonInput_TrackJetNTrack.PromptLeptonInput_sv1_jf_ntrkv."
     prompt_vars += "PromptLeptonInput_ip2.PromptLeptonInput_ip3."
@@ -432,13 +427,13 @@ def GetExtraPromptVariablesForDxAOD(name='', addSpectators=False, onlyBDT=True):
 
 
     secondaryvertex_vars = "SVType.trackParticleLinks.trackWeights.neutralParticleLinks.neutralWeights.SecondaryVertexIndex.SecondaryVertexIndexVectorInput.chiSquared.numberDoF.x.y.z.covariance.vertexType.energyFraction.mass.normDist.ntrk.distToPriVtx.normDistToPriVtx.distToRefittedPriVtx.normDistToRefittedPriVtx.distToRefittedRmLepPriVtx.normDistToRefittedRmLepPriVtx"
-    
+
     if addSpectators :
         prompt_vars += "PromptLeptonInput_JetPt.PromptLeptonInput_JetEta.PromptLeptonInput_JetPhi.PromptLeptonInput_JetM."
-    
+
     if name == "" or name == "Electrons":
         prompt_vars += "ptvarcone40.topoetcone20.topoetcone20ptCorrection.ptcone20_TightTTVA_pt500.ptcone20_TightTTVA_pt1000.ptvarcone20_TightTTVA_pt1000.ptvarcone30_TightTTVA_pt500.ptvarcone30_TightTTVA_pt1000.ptvarcone40_TightTTVALooseCone_pt500"
-        
+
         prompt_lep_vars += ["Electrons.%s" %prompt_vars]
         prompt_lep_vars += ["SecVtxContainer_Electrons.%s" %secondaryvertex_vars]
         prompt_lep_vars += ["SecVtx_ConvVtxContainer_Electrons.%s" %secondaryvertex_vars]

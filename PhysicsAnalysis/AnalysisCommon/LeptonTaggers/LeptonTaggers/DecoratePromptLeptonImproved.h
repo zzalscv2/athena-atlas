@@ -69,35 +69,48 @@ namespace Prompt
     StatusCode initializeDecorators();
     void initializeConstAccessors();
 
-    void decorateElec(const xAOD::Electron             &electron,
-          const xAOD::JetContainer         &trackJets);
+    void decorateElec(
+      const xAOD::Electron &electron,
+      const xAOD::JetContainer &trackJets,
+      const xAOD::CaloClusterContainer &clusters,
+      const xAOD::Vertex *primaryVertex
+    );
 
     void decorateMuon(
       const xAOD::Muon         &muon,
-      const xAOD::JetContainer &trackJets
+      const xAOD::JetContainer &trackJets,
+      const xAOD::Vertex *primaryVertex
     );
 
     void getMutualVariables(
       const xAOD::IParticle     &particle,
       const xAOD::Jet           &track_jet,
-      const xAOD::TrackParticle *track
+      const xAOD::TrackParticle *track,
+      Prompt::VarHolder         &vars
     );
 
-    void getMuonAnpVariables(const xAOD::Muon   &muon,
-                             const xAOD::Vertex *primaryVertex);
+    void getMuonAnpVariables(
+      const xAOD::Muon &muon,
+      Prompt::VarHolder &vars,
+      const xAOD::Vertex *primaryVertex
+    );
 
     void getElectronAnpVariables(
       const xAOD::Electron             &elec,
       const xAOD::CaloClusterContainer &clusters,
+      Prompt::VarHolder                &vars,
       const xAOD::Vertex               *primaryVertex
     );
 
     float accessIsolation(SG::AuxElement::ConstAccessor<float> &isoAccessor,
         const xAOD::IParticle &particle);
 
-    void fillVarDefault();
+    void fillVarDefault(Prompt::VarHolder &vars) const;
 
-    void decorateAuxLepton(const xAOD::IParticle &particle);
+    void decorateAuxLepton(
+      const xAOD::IParticle &particle,
+      Prompt::VarHolder &vars
+    );
 
     template<class T> const xAOD::Jet* findTrackJet(const T &part, const xAOD::JetContainer &jets);
 
@@ -176,8 +189,6 @@ namespace Prompt
     std::vector<Prompt::Def::Var>                        m_allVars;
 
     std::unique_ptr<Prompt::VarHolder> m_vars;
-
-    Prompt::Def::Var                                     m_BDTVarKey;
 
     shortDecoratorMap                                    m_shortMap;
     floatDecoratorMap                                    m_floatMap;

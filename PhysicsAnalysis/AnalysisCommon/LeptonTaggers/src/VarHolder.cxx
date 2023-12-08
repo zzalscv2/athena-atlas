@@ -74,7 +74,7 @@ void Prompt::VarHolder::getAllVarEnums()
 }
 
 //======================================================================================================
-std::string Prompt::VarHolder::convert2Str(Prompt::Def::Var var)
+std::string Prompt::VarHolder::convert2Str(const Prompt::Def::Var var) const
 {
   const VarMap::const_iterator vit = m_gPromptVars.find(var);
 
@@ -101,7 +101,7 @@ Prompt::Def::Var Prompt::VarHolder::convert2Var (const std::string &var)
 }
 
 //======================================================================================================
-Prompt::Def::Var Prompt::VarHolder::convert2Var(uint32_t key)
+Prompt::Def::Var Prompt::VarHolder::convert2Var(const uint32_t key)
 {
   getAllVarEnums();
 
@@ -169,13 +169,13 @@ std::vector<Prompt::Def::Var> Prompt::VarHolder::readVectorVars(
 }
 
 //======================================================================================================
-std::string Prompt::VarHolder::asStr(Prompt::Def::Var var)
+std::string Prompt::VarHolder::asStr(const Prompt::Def::Var var)
 {
   return convert2Str(var);
 }
 
 //======================================================================================================
-std::string Prompt::VarHolder::asStr(uint32_t key, double val)
+std::string Prompt::VarHolder::asStr(const uint32_t key, const double val)
 {
   std::stringstream s;
 
@@ -185,7 +185,7 @@ std::string Prompt::VarHolder::asStr(uint32_t key, double val)
     s << asStr(var) << ": " << val;
   }
   else {
-    s <<       var  << ": " << val;
+    s << var << ": " << val;
   }
 
   return s.str();
