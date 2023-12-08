@@ -62,11 +62,6 @@ public:
   MeasurementBase() = default;
 
   /** constructor  */
-  MeasurementBase(const LocalParameters& pars, const Amg::MatrixX& cov)
-    : m_localParams(pars)
-    , m_localCovariance(cov)
-  {}
-
   MeasurementBase(LocalParameters&& pars, Amg::MatrixX&& cov)
     : m_localParams(std::move(pars))
     , m_localCovariance(std::move(cov))
@@ -106,7 +101,7 @@ public:
   virtual std::ostream& dump(std::ostream& out) const = 0;
 
 protected:
-  // Here to help implement the relevant semantics for 
+  // Here to help implement the relevant semantics for
   // the derived classes
   MeasurementBase(const MeasurementBase&) = default;
   MeasurementBase(MeasurementBase&&) noexcept = default;
