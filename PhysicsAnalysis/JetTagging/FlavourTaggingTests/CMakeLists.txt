@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( FlavourTaggingTests )
@@ -21,6 +21,7 @@ if (NOT XAOD_ANALYSIS)
   atlas_install_python_modules( python/*.py )
   atlas_install_joboptions( share/*.py )
   atlas_install_scripts( test/*.sh test/*.py )
+  atlas_install_scripts( share/test_*.sh )
 endif()
 
 # add the test utility
