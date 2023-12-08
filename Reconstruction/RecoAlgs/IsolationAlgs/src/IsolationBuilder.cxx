@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // IsolationBuilder.cxx
@@ -534,6 +534,14 @@ IsolationBuilder::executeCaloIso(
     }
     auto& readHandle =
       handles.isoDeco[0]; // can treat the writeDecorHandle as a read handle;
+    
+    if (readHandle.isAvailable()){ // This must be before readHandle.isValid() or else the isValid call
+                                   // will crash if the deocration already exists
+      ATH_MSG_DEBUG("read (actually a write) handle for " << keys.isoDeco[0].key() << " already exists.  "
+                    << "Will not recompute." );
+      return StatusCode::SUCCESS;
+    }
+
     if (!readHandle.isValid()) {
       ATH_MSG_FATAL("Could not retrieve read handle for "
                     << keys.isoDeco[0].key());
@@ -640,6 +648,14 @@ IsolationBuilder::executeTrackIso(
     }
     auto& readHandle =
       handles.isoDeco[0]; // can treat the writeDecorHandle as a read handle;
+
+    if (readHandle.isAvailable()){ // This must be before readHandle.isValid() or else the isValid call
+                                   // will crash if the deocration already exists
+      ATH_MSG_DEBUG("Decoration for for " << keys.isoDeco[0].key() << " already exists.  "
+                    << "Will not recompute." );
+      return StatusCode::SUCCESS;
+    }
+
     if (!readHandle.isValid()) {
       ATH_MSG_FATAL("Could not retrieve read handle for "
                     << keys.isoDeco[0].key());
