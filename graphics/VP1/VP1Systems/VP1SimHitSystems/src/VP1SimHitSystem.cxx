@@ -464,9 +464,9 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     const MMSimHitCollection* mm_collection;
     if(sg->retrieve(mm_collection)==StatusCode::SUCCESS)
     {
-      for(MMSimHitConstIterator i_hit=mm_collection->begin();i_hit!=mm_collection->end();++i_hit)
+      for( const MMSimHit& hit : *mm_collection )
       {
-        GeoMMHit ghit(*i_hit);
+        GeoMMHit ghit(hit);
         if(!ghit) continue;
         Amg::Vector3D u = ghit.getGlobalPosition();
         hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
@@ -483,9 +483,9 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     const sTGCSimHitCollection* stgc_collection;
     if(sg->retrieve(stgc_collection)==StatusCode::SUCCESS)
     {
-      for(sTGCSimHitConstIterator i_hit=stgc_collection->begin(); i_hit!=stgc_collection->end(); ++i_hit)
+      for( const sTGCSimHit& hit : *stgc_collection )
       {
-        GeosTGCHit ghit(*i_hit);
+        GeosTGCHit ghit(hit);
         if(!ghit) continue;
         Amg::Vector3D u = ghit.getGlobalPosition();
         hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
