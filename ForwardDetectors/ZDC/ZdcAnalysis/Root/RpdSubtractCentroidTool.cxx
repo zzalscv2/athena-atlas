@@ -182,7 +182,7 @@ bool RpdSubtractCentroidTool::readAOD(xAOD::ZdcModuleContainer const& moduleCont
 
   ATH_MSG_DEBUG("Processing modules");
 
-  for (const auto &zdcModule : moduleContainer) {
+  for (const auto zdcModule : moduleContainer) {
     int side = -1;
     if (zdcModule->zdcSide() == -1) {
       side = 0;
@@ -233,7 +233,7 @@ bool RpdSubtractCentroidTool::readAOD(xAOD::ZdcModuleContainer const& moduleCont
     }
   }
 
-  for (const auto &zdcSum: moduleSumContainer) {
+  for (const auto zdcSum: moduleSumContainer) {
     int side = -1;
     if (zdcSum->zdcSide() == -1) {
       side = 0;
@@ -419,7 +419,7 @@ void RpdSubtractCentroidTool::writeAOD(xAOD::ZdcModuleContainer const& moduleSum
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> reactionPlaneAngleHandle(m_reactionPlaneAngleKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> cosDeltaReactionPlaneAngleHandle(m_cosDeltaReactionPlaneAngleKey);
 
-  for (const auto &zdcSum: moduleSumContainer) {
+  for (const auto zdcSum: moduleSumContainer) {
     int side = -1;
     if (zdcSum->zdcSide() == -1) {
       side = 0;
