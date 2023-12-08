@@ -455,7 +455,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     }
     else
       message("Unable to retrieve CSC Hits");
-    }
+  }
   else if(detector=="MM")
   {
     //
