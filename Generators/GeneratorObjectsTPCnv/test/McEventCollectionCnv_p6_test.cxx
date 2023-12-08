@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file GeneratorObjectsTPCnv/test/McEventCollectionCnv_p6_test.cxx
@@ -210,6 +210,10 @@ void populateGenEvent(HepMC::GenEvent & ge)
   ge.add_vertex( myVertex );
   HepMC::set_signal_process_vertex(&ge, myVertex );
   ge.set_beam_particles(inParticle1,inParticle2);
+  HepMC::suggest_barcode(inParticle1,1);
+  HepMC::suggest_barcode(inParticle2,2);
+  HepMC::suggest_barcode(inParticle3,3);
+  HepMC::suggest_barcode(inParticle4,4);
 #if HEPMC3
   ge.add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(0));
   ge.add_attribute("MyFloatProp",std::make_shared<HepMC3::FloatAttribute>(0.5));
@@ -236,6 +240,10 @@ void populateGenEvent2(HepMC::GenEvent & ge)
   ge.add_vertex( myVertex );
   HepMC::set_signal_process_vertex(&ge, myVertex );
   ge.set_beam_particles(inParticle1,inParticle2);
+  HepMC::suggest_barcode(inParticle1,10001);
+  HepMC::suggest_barcode(inParticle2,10002);
+  HepMC::suggest_barcode(inParticle3,10003);
+  HepMC::suggest_barcode(inParticle4,10004);
 #if HEPMC3
   ge.add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(25));
   ge.add_attribute("MyFloatProp",std::make_shared<HepMC3::FloatAttribute>(1.5));

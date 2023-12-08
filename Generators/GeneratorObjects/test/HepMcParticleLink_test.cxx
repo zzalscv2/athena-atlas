@@ -84,43 +84,54 @@ namespace MCTesting {
     // create vertex 1 and vertex 2, together with their inparticles
     HepMC::GenVertexPtr v1 = HepMC::newGenVertexPtr();
     evt->add_vertex( v1 );
-    v1->add_particle_in( HepMC::newGenParticlePtr( HepMC::FourVector(0,0,7000,7000),
-                                                 2212, 3 ) );
+    HepMC::GenParticlePtr p1 =
+      HepMC::newGenParticlePtr( HepMC::FourVector(0,0,7000,7000),
+                                2212, 3 );
+    v1->add_particle_in(  p1 );
+    HepMC::suggest_barcode(p1,10001);
     HepMC::GenVertexPtr v2 = HepMC::newGenVertexPtr();
     evt->add_vertex( v2 );
-    v2->add_particle_in( HepMC::newGenParticlePtr(  HepMC::FourVector(0,0,-7000,7000),
-                                                 2212, 3 ) );
+    HepMC::GenParticlePtr p2 = HepMC::newGenParticlePtr(  HepMC::FourVector(0,0,-7000,7000),
+                                                          2212, 3 );
+    v2->add_particle_in( p2 );
+    HepMC::suggest_barcode(p2,10002);
     //
     // create the outgoing particles of v1 and v2
     HepMC::GenParticlePtr p3 =
       HepMC::newGenParticlePtr( HepMC::FourVector(.750,-1.569,32.191,32.238), 1, 3 );
     v1->add_particle_out( p3 );
+    HepMC::suggest_barcode(p3,10003);
     HepMC::GenParticlePtr p4 =
       HepMC::newGenParticlePtr( HepMC::FourVector(-3.047,-19.,-54.629,57.920), -2, 3 );
     v2->add_particle_out( p4 );
+    HepMC::suggest_barcode(p4,10004);
     //
     // create v3
     HepMC::GenVertexPtr v3 = HepMC::newGenVertexPtr();
     evt->add_vertex( v3 );
     v3->add_particle_in( p3 );
     v3->add_particle_in( p4 );
-    v3->add_particle_out(
-                         HepMC::newGenParticlePtr( HepMC::FourVector(-3.813,0.113,-1.833,4.233 ), 22, 1 )
-                         );
     HepMC::GenParticlePtr p5 =
+      HepMC::newGenParticlePtr( HepMC::FourVector(-3.813,0.113,-1.833,4.233 ), 22, 1 );
+    v3->add_particle_out( p5   );
+    HepMC::suggest_barcode(p5,10005);
+    HepMC::GenParticlePtr p6 =
       HepMC::newGenParticlePtr( HepMC::FourVector(1.517,-20.68,-20.605,85.925), -24,3);
-    v3->add_particle_out( p5 );
+    v3->add_particle_out( p6 );
+    HepMC::suggest_barcode(p6,10006);
     //
     // create v4
     HepMC::GenVertexPtr v4 = HepMC::newGenVertexPtr();
     evt->add_vertex( v4 );
-    v4->add_particle_in( p5 );
-    v4->add_particle_out(
-                         HepMC::newGenParticlePtr( HepMC::FourVector(-2.445,28.816,6.082,29.552), 1,1 )
-                         );
-    v4->add_particle_out(
-                         HepMC::newGenParticlePtr( HepMC::FourVector(3.962,-49.498,-26.687,56.373), -2,1 )
-                         );
+    v4->add_particle_in( p6 );
+    HepMC::GenParticlePtr p7 =
+      HepMC::newGenParticlePtr( HepMC::FourVector(-2.445,28.816,6.082,29.552), 1,1 );
+    v4->add_particle_out( p7 );
+    HepMC::suggest_barcode(p7,10007);
+    HepMC::GenParticlePtr p8 =
+      HepMC::newGenParticlePtr( HepMC::FourVector(3.962,-49.498,-26.687,56.373), -2,1 );
+    v4->add_particle_out( p8 );
+    HepMC::suggest_barcode(p8,10008);
     //
     // tell the event which vertex is the signal process vertex
     HepMC::set_signal_process_vertex(evt, v3 );
@@ -159,6 +170,10 @@ namespace MCTesting {
     HepMC::GenParticlePtr inParticle4 = HepMC::newGenParticlePtr(fourMomentum4, -2, 10);
     myVertex->add_particle_out(inParticle4);
     ge.add_vertex( myVertex );
+    HepMC::suggest_barcode(inParticle1,1);
+    HepMC::suggest_barcode(inParticle2,2);
+    HepMC::suggest_barcode(inParticle3,3);
+    HepMC::suggest_barcode(inParticle4,4);
     HepMC::set_signal_process_vertex(&ge, myVertex );
     ge.set_beam_particles(inParticle1,inParticle2);
     return inParticle3;
@@ -181,6 +196,10 @@ namespace MCTesting {
     HepMC::GenParticlePtr inParticle4 = HepMC::newGenParticlePtr(fourMomentum4, -2, 10);
     myVertex->add_particle_out(inParticle4);
     ge.add_vertex( myVertex );
+    HepMC::suggest_barcode(inParticle1,1);
+    HepMC::suggest_barcode(inParticle2,2);
+    HepMC::suggest_barcode(inParticle3,3);
+    HepMC::suggest_barcode(inParticle4,4);
     HepMC::set_signal_process_vertex(&ge, myVertex );
     ge.set_beam_particles(inParticle1,inParticle2);
     return inParticle4;
@@ -236,6 +255,7 @@ namespace MCTesting {
 
     //.....add new vertex with geantino
     ge.add_vertex(genVertex);
+    HepMC::suggest_barcode(genPart, std::numeric_limits<int32_t>::max());
 
     return genPart;
   }
@@ -273,7 +293,7 @@ namespace MCTesting {
     out << "Testing HepMcParticleLink streamer "
               << gammaLink1 << " --- " << gammaLink11 <<std::endl;
 #ifdef HEPMC3
-    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0, Barcode 5, McEventCollection CollectionNotSet(a) --- Event index 1, Barcode 5, McEventCollection CollectionNotSet(a)\n");
+    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0, Barcode 10005, McEventCollection CollectionNotSet(a) --- Event index 1, Barcode 10005, McEventCollection CollectionNotSet(a)\n");
 #else
     ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0, Barcode 10005, McEventCollection CollectionNotSet(a) --- Event index 1, Barcode 10005, McEventCollection CollectionNotSet(a)\n");
 #endif

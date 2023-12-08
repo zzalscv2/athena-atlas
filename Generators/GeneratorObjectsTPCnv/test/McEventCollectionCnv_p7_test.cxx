@@ -240,6 +240,10 @@ void populateGenEvent2(HepMC::GenEvent & ge)
   ge.add_vertex( myVertex );
   HepMC::set_signal_process_vertex(&ge, myVertex );
   ge.set_beam_particles(inParticle1,inParticle2);
+  HepMC::suggest_barcode(inParticle1,10001);
+  HepMC::suggest_barcode(inParticle2,10002);
+  HepMC::suggest_barcode(inParticle3,10003);
+  HepMC::suggest_barcode(inParticle4,10004);
 #if HEPMC3
   ge.add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(25));
   ge.add_attribute("MyFloatProp",std::make_shared<HepMC3::FloatAttribute>(1.5));

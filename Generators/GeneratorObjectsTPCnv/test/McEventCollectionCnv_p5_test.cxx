@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file GeneratorObjectsTPCnv/test/McEventCollectionCnv_p5_test.cxx
@@ -195,6 +195,10 @@ void populateGenEvent(HepMC::GenEvent & ge)
   ge.add_vertex( myVertex );
   HepMC::set_signal_process_vertex(&ge, myVertex );
   ge.set_beam_particles(inParticle1,inParticle2);
+  HepMC::suggest_barcode(inParticle1,1);
+  HepMC::suggest_barcode(inParticle2,2);
+  HepMC::suggest_barcode(inParticle3,3);
+  HepMC::suggest_barcode(inParticle4,4);
 }
 
 void populateGenEvent2(HepMC::GenEvent & ge)
@@ -216,6 +220,10 @@ void populateGenEvent2(HepMC::GenEvent & ge)
   ge.add_vertex( myVertex );
   HepMC::set_signal_process_vertex(&ge, myVertex );
   ge.set_beam_particles(inParticle1,inParticle2);
+  HepMC::suggest_barcode(inParticle1,10001);
+  HepMC::suggest_barcode(inParticle2,10002);
+  HepMC::suggest_barcode(inParticle3,10003);
+  HepMC::suggest_barcode(inParticle4,10004);
 }
 
 void testit (const McEventCollection& trans1)
