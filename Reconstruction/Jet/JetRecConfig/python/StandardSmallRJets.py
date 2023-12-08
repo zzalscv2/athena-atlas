@@ -169,6 +169,14 @@ AntiKt4EMTopoNoPtCut = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
                                      lock = True
 )
 
+AntiKt4UFOCSSKLowPt = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
+                                    infix = "LowPt",
+                                    ghostdefs = standardghosts+flavourghosts,
+                                    modifiers = calibmods_noCut+("Filter:7000","EMScaleMom","JetPtAssociation","CaloEnergiesClus",)+truthmods+standardmods_ufo,
+                                    ptmin = 1,
+                                    lock = True
+)
+
 AntiKt4EMPFlowLowPt = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                     infix = "LowPt",
                                     ghostdefs = standardghosts+flavourghosts,
