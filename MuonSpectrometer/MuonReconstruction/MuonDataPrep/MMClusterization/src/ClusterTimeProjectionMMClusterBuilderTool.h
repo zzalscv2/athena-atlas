@@ -25,7 +25,7 @@ namespace Muon {
                               std::vector<Muon::MMPrepData>&& stripsVect,
                               std::vector<std::unique_ptr<Muon::MMPrepData>>& clustersVect) const override;
 
-        virtual RIO_Author getCalibratedClusterPosition(const EventContext& ctx, 
+        virtual RIO_Author getCalibratedClusterPosition(const EventContext& ctx,
                                                         const std::vector<NSWCalib::CalibratedStrip>& calibratedStrips,
                                                         const Amg::Vector3D& directionEstimate, 
                                                         Amg::Vector2D& clusterLocalPosition,
@@ -47,7 +47,9 @@ namespace Muon {
 
         std::vector<std::vector<uint>> clusterLayer(const std::vector<Muon::MMPrepData>& MMPrdsPerLayer) const;
 
-        std::pair<double, double> getClusterPositionPRD(const std::vector<NSWCalib::CalibratedStrip>& features, 
+        std::pair<double, double> getClusterPositionPRD(const NswErrorCalibData& errorCalibDB,
+                                                        uint8_t author,
+                                                        const std::vector<NSWCalib::CalibratedStrip>& features, 
                                                         const Amg::Vector3D& thetaEstimate) const;
 
         StatusCode writeClusterPrd(const EventContext& ctx,

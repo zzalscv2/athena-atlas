@@ -67,7 +67,18 @@ StatusCode ClusterTimeProjectionMMClusterBuilderTool::getClusters(const EventCon
                 stripFeatures.emplace_back(std::move(clusFeat));
                 clustConstituents.emplace_back(std::move(toMerge));
             }
-            std::pair<double, double> posAndErrorSq = getClusterPositionPRD(stripFeatures, clustDir.unit());
+
+            SG::ReadCondHandle<NswErrorCalibData> errorCalibDB{m_uncertCalibKey, ctx};
+            if (!errorCalibDB.isValid()) {
+                ATH_MSG_FATAL("Failed to retrieve the parameterized errors "<<m_uncertCalibKey.fullKey());
+                return StatusCode::FAILURE;
+            }
+
+            constexpr uint8_t toolAuthor = static_cast<uint8_t>(MMPrepData::Author::ClusterTimeProjectionClusterBuilder);
+            std::pair<double, double> posAndErrorSq = getClusterPositionPRD(**errorCalibDB, 
+                                                                            toolAuthor, 
+                                                                            stripFeatures, 
+                                                                            clustDir.unit());
 
             ATH_CHECK(writeClusterPrd(ctx, clustConstituents, posAndErrorSq.first, posAndErrorSq.second, clustersVec));
 
@@ -132,7 +143,9 @@ ClusterTimeProjectionMMClusterBuilderTool::LaySortedPrds
 }  // end of cluster layer
 
 std::pair<double, double>
-    ClusterTimeProjectionMMClusterBuilderTool::getClusterPositionPRD(const std::vector<NSWCalib::CalibratedStrip>& constituents,
+    ClusterTimeProjectionMMClusterBuilderTool::getClusterPositionPRD(const NswErrorCalibData& errorCalibDB,
+                                                                     uint8_t author, 
+                                                                     const std::vector<NSWCalib::CalibratedStrip>& constituents,
                                                                      const Amg::Vector3D& dirEstimate) const {
                                                                       
     
@@ -174,11 +187,22 @@ std::pair<double, double>
     clusterPosition = meanPosX + correction;
     clusterPositionErrorSq = correctionErrorSq + meanPosXErrorSq;
 
+    
+    NswErrorCalibData::Input errorCalibIn{};
+    errorCalibIn.stripId = constituents[0].identifier;
+    errorCalibIn.clusterAuthor = author;
+    errorCalibIn.locPhi = dirEstimate.phi();
+    errorCalibIn.locTheta = dirEstimate.theta();
+    errorCalibIn.localPos = Amg::Vector2D{clusterPosition, 0.};
+    errorCalibIn.clusterSize = constituents.size();
+     
+    const double localUncertainty = errorCalibDB.clusterUncertainty(errorCalibIn);
+
     ATH_MSG_DEBUG("Cluster Properties"
                   << " meanX " << meanPosX << " +-" << std::sqrt(meanPosXErrorSq) << "  mean drift dist " << meanDriftDist << " +- "
                   << std::sqrt(meanDriftDistErrorSq) << " correction " << correction << " +- " << std::sqrt(correctionErrorSq)
                   << " final position " << clusterPosition << " +- " << std::sqrt(clusterPositionErrorSq));
-    return std::make_pair(clusterPosition, clusterPositionErrorSq);
+    return std::make_pair(clusterPosition, localUncertainty*localUncertainty);
 }
 
 StatusCode ClusterTimeProjectionMMClusterBuilderTool::writeClusterPrd(const EventContext& ,
@@ -231,13 +255,20 @@ StatusCode ClusterTimeProjectionMMClusterBuilderTool::writeClusterPrd(const Even
     return StatusCode::SUCCESS;
 }
 
-RIO_Author ClusterTimeProjectionMMClusterBuilderTool::getCalibratedClusterPosition(const EventContext& /*ctx*/, 
+RIO_Author ClusterTimeProjectionMMClusterBuilderTool::getCalibratedClusterPosition(const EventContext& ctx, 
                                                                                    const std::vector<NSWCalib::CalibratedStrip>& calibratedStrips,
                                                                                    const Amg::Vector3D& directionEstimate, 
                                                                                    Amg::Vector2D& clusterLocalPosition,
                                                                                    Amg::MatrixX& covMatrix) const{
 
-    std::pair<double, double> posAndErrorSq = getClusterPositionPRD(calibratedStrips, directionEstimate);
+    SG::ReadCondHandle<NswErrorCalibData> errorCalibDB{m_uncertCalibKey, ctx};
+    if (!errorCalibDB.isValid()) {
+        ATH_MSG_FATAL("Failed to retrieve the parameterized errors "<<m_uncertCalibKey.fullKey());
+        return RIO_Author::unKnownAuthor;
+    }
+
+    constexpr uint8_t toolAuthor = static_cast<uint8_t>(RIO_Author::ClusterTimeProjectionClusterBuilder);
+    std::pair<double, double> posAndErrorSq = getClusterPositionPRD(*errorCalibDB.cptr(), toolAuthor, calibratedStrips, directionEstimate);
 
     clusterLocalPosition[Trk::locX] = posAndErrorSq.first;
     Amg::MatrixX covN(1, 1);
