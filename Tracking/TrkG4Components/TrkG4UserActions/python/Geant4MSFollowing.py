@@ -37,10 +37,10 @@ def setupArgParser():
                         default=998, 
                         type=int,
                         help="PDG for particle gun sim. 998 = Charged Geantino 999 = neutral Geantino, 13 = Muon")
-    parser.add_arument("--maxEvents",
-                       default=100,
-                       type = int,
-                       help="Maximum number of events to run on.")
+    parser.add_argument("--maxEvents",
+                        default=100,
+                        type = int,
+                        help="Maximum number of events to run on.")
     return parser
   
 
@@ -224,18 +224,22 @@ if __name__ =="__main__":
     flags.GeoModel.Align.Dynamic = False
     flags.Concurrency.NumThreads =1
     flags.Concurrency.NumConcurrentEvents = 1
+    from AthenaConfiguration.Enums import  ProductionStep
+    flags.Common.ProductionStep = ProductionStep.FastChain 
+    flags.LAr.doAlign = True
+
+
     # Setup detector   
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-    detectors = ["Muon","ID","Bpipe"]  
+    detectors = ["Muon","ID","Bpipe", "Calo"]  
     setupDetectorsFromList(flags, detectors, toggle_geometry=True)
 
     flags.lock()
-    flags.dump()
+    flags.dump(evaluate = True)
 
 
     # Construct component accumulator
     acc = MSCfg(flags)    
-    acc.printConfig(withDetails=True)
     acc.merge(GeantFollowerMSCfg(flags))
     
     #DEV#
@@ -243,6 +247,7 @@ if __name__ =="__main__":
     from TrkG4UserActions.TrkG4UserActionsConfig import GeantFollowerMSToolCfg
     GeantFollowerMSTool = acc.getPrimaryAndMerge(GeantFollowerMSToolCfg(flags))
     #DEV#
+
 
     from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
     acc.merge(G4AtlasAlgCfg(flags,UserActionTools=[GeantFollowerMSTool],
@@ -254,5 +259,6 @@ if __name__ =="__main__":
     #acc.merge(OutputStreamCfg(flags,"HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=True, AcceptAlgs=['MSG4AtlasAlg']))
 
     # Execute
-    import sys
-    sys.exit(not acc.run(maxEvents=args.maxEvents).isSuccess())
+    acc.printConfig(withDetails=True)
+    if not acc.run(maxEvents=args.maxEvents).isSuccess():
+        exit(1)
