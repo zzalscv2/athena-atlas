@@ -7,71 +7,11 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "TrkFitterUtils/TrackFitInputPreparator.h"
-#include "TrkEventUtils/IdentifierExtractor.h"
 #include "TrkEventUtils/PrepRawDataComparisonFunction.h"
-#include "TrkEventUtils/TrackStateOnSurfaceComparisonFunction.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
-#include "TrkToolInterfaces/IUpdator.h"
 #include "TrkTrack/Track.h"
-#include "TrkTrack/TrackStateOnSurface.h"
 
-
-// fill a new track object from track+measurements using flags for sorting and
-// outliers.
-//
-Trk::Track*
-Trk::TrackFitInputPreparator::copyToTrack(const Trk::Track& inputTrk,
-                                          const Trk::MeasurementSet& inputMbs,
-                                          const SortInputFlag doSorting,
-                                          const bool reintegrateOutliers)
-{
-
-  auto newListOfStates = std::make_unique<Trk::TrackStates>();
-  TS_iterator itStates = inputTrk.trackStateOnSurfaces()->begin();
-  for (; itStates != inputTrk.trackStateOnSurfaces()->end(); ++itStates)
-    if ((*itStates)->type(Trk::TrackStateOnSurface::Measurement) ||
-        (*itStates)->type(Trk::TrackStateOnSurface::Outlier)) {
-      std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
-        typePattern(0);
-      if ((*itStates)->type(Trk::TrackStateOnSurface::Outlier) &&
-          !reintegrateOutliers)
-        typePattern.set(TrackStateOnSurface::Outlier);
-      else
-        typePattern.set(TrackStateOnSurface::Measurement);
-      newListOfStates->push_back(new TrackStateOnSurface(
-        (*itStates)->measurementOnTrack()->uniqueClone(),
-        ((*itStates)->trackParameters()
-           ? (*itStates)->trackParameters()->uniqueClone()
-           : nullptr),
-        ((*itStates)->materialEffectsOnTrack()
-           ? (*itStates)->materialEffectsOnTrack()->uniqueClone()
-           : nullptr),
-        typePattern));
-    }
-  // add MBs from input list
-  MeasurementSet::const_iterator itSet = inputMbs.begin();
-  for (; itSet != inputMbs.end(); ++itSet)
-    if ((*itSet)) {
-      std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
-        typePattern(0);
-      typePattern.set(TrackStateOnSurface::Measurement);
-      newListOfStates->push_back(new TrackStateOnSurface(
-        (*itSet)->uniqueClone(), nullptr, nullptr, typePattern));
-    }
-
-  if (doSorting) {
-    Trk::TrackStateOnSurfaceComparisonFunction CompFunc =
-        Trk::TrackStateOnSurfaceComparisonFunction(
-            (*inputTrk.trackParameters()->begin())->momentum());
-    if (!std::is_sorted(newListOfStates->begin(), newListOfStates->end(),
-                              CompFunc))
-      std::sort(newListOfStates->begin(), newListOfStates->end(), CompFunc);
-  }
-  TrackInfo info;
-  return new Trk::Track(info, std::move(newListOfStates), nullptr);
-}
 
 // give back the Measurements stripped of a track+measurement input combination.
 //

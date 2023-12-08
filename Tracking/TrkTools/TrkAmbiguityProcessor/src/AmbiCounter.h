@@ -31,36 +31,36 @@ public:
       throw std::runtime_error(errMsgPrefix + "in ascending order.");
     }
   }
-  
+
   //convert Category to array index
-  size_t 
+  size_t
   idx(const Categories & categoryIndex) const{
     return static_cast<size_t>(categoryIndex);
   }
-  
-  void 
+
+  void
   resetGlobalCounters(){
     m_globalCounter.fill(0);
   }
-  
+
   //increment event count
-  void 
+  void
   newEvent(){
     ++m_globalCounter[nEvents];
   }
-  
+
   //return number of events
-  int 
+  int
   numberOfEvents() const{
     return m_globalCounter[nEvents];
   }
   // increment one bin
-  void 
+  void
   increment(Categories category, unsigned int etaBinIdx) {
     if ((category>= Categories::kNCounter) or (etaBinIdx >=nRegions)){
       throw std::out_of_range("in AmbiCounter.icc::increment()");
     }
-    ++m_counter[idx(category)][etaBinIdx];    
+    ++m_counter[idx(category)][etaBinIdx];
   }
   //
   AmbiCounter<EnumType> & operator +=(const AmbiCounter<EnumType> &a) {
@@ -94,7 +94,7 @@ public:
     }
   }
   //
-  std::string 
+  std::string
   dumpRegions(const std::string & head,Categories categoryIdx, const int iw =9) const {
     std::stringstream out;
     out << head;
@@ -109,11 +109,11 @@ public:
     return out.str();
   }
   //
-  int 
+  int
   globalCount(GlobalCounterIndices i) const{
-    return m_globalCounter[i]; 
+    return m_globalCounter[i];
   }
-  
+
 private:
   std::array<std::array<int, nRegions>,static_cast<size_t>(Categories::kNCounter)> m_counter{};
   std::array<int,nGlobalCounters>                      m_globalCounter{};

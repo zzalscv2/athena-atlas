@@ -19,7 +19,7 @@
 #include "TrkTrack/TrackSeedMap.h"
 #include "TrkParameters/TrackParameters.h"
 //
-#include "AmbiCounter.icc"
+#include "AmbiCounter.h"
 //
 #include <map>
 #include <vector>
@@ -65,11 +65,6 @@ namespace Trk {
     virtual Track*
     refitPrds( const Track* track, Trk::PRDtoTrackMap &prd_to_track_map,
     Counter &stat) const override final;
-
-    /** refit ROTs corresponding to PRDs*/
-    //TODO or Q: new created track, why const
-    /**Track*
-    refitRots( const Track* track, Counter &stat) const override final;**/
 
     virtual std::unique_ptr<Trk::Track>
     doBremRefit(const Trk::Track & track) const override final;
