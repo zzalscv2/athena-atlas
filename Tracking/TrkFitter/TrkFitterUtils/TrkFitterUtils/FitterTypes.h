@@ -15,32 +15,28 @@
 #define TRK_FITTERTYPES_H
 
 #include <vector>
-#include "AthContainers/DataVector.h"
 
 namespace Trk {
 
-    //! switch to toggle quality processing after fit
-	typedef bool RunOutlierRemoval;
-	
-	class PrepRawData;
-    //! vector of clusters and drift circles
-	typedef std::vector<const PrepRawData*>	      PrepRawDataSet;
+//! switch to toggle quality processing after fit
+typedef bool RunOutlierRemoval;
 
+class PrepRawData;
+//! vector of clusters and drift circles
+using PrepRawDataSet = std::vector<const PrepRawData*>;
 
-	class MeasurementBase;
-    //! vector of fittable measurements
-	typedef std::vector<const MeasurementBase*>	  MeasurementSet;
+class MeasurementBase;
+//! vector of fittable measurements
+using MeasurementSet = std::vector<const MeasurementBase*>;
 
-	class RIO_OnTrack;
-    //! vector of detector hits on a track
-	typedef std::vector<const RIO_OnTrack*>	      RIO_OnTrackSet;
+class RIO_OnTrack;
+//! vector of detector hits on a track
+using RIO_OnTrackSet = std::vector<const RIO_OnTrack*>;
 
-	class SpacePoint;
-    //! vector of space points
-	typedef std::vector<const SpacePoint*>	      SpacePointSet;
-	
-	class TrackStateOnSurface;
+class SpacePoint;
+//! vector of space points
+using SpacePointSet = std::vector<const SpacePoint*>;
 
-} // end of namespace
+}  // namespace Trk
 
-#endif // TRK_FITTERTYPES_H
+#endif  // TRK_FITTERTYPES_H
