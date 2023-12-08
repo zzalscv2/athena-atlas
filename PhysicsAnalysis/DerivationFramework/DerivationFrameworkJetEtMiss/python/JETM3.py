@@ -174,7 +174,7 @@ def JETM3ExtraContentCfg(ConfigFlags):
     from JetRecConfig.JetRecConfig import JetRecCfg, getModifier
     from JetRecConfig.JetConfigFlags import jetInternalFlags
     from JetRecConfig.StandardJetMods import stdJetModifiers
-    from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4EMPFlowLowPt, AntiKt4EMTopoLowPt
+    from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4EMPFlowLowPt, AntiKt4EMTopoLowPt, AntiKt4UFOCSSKLowPt
 
     #=======================================
     # Schedule additional jet decorations
@@ -187,7 +187,7 @@ def JETM3ExtraContentCfg(ConfigFlags):
     #======================================= 
     # Low pT cut containers
     #=======================================
-    jetList = [AntiKt4EMPFlowLowPt, AntiKt4EMTopoLowPt]
+    jetList = [AntiKt4EMPFlowLowPt, AntiKt4EMTopoLowPt, AntiKt4UFOCSSKLowPt]
 
     jetInternalFlags.isRecoJob = True
 
@@ -313,7 +313,7 @@ def JETM3Cfg(ConfigFlags):
                                          TriggerList = JETM3TriggerListsHelper.Run3TriggerNamesNoTau)
 
 
-    jetOutputList = ["AntiKt4EMPFlowLowPtJets","AntiKt4EMTopoLowPtJets"]
+    jetOutputList = ["AntiKt4EMPFlowLowPtJets","AntiKt4EMTopoLowPtJets", "AntiKt4UFOCSSKLowPtJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(JETM3SlimmingHelper, jetOutputList, JETM3SlimmingHelper.SmartCollections)
 

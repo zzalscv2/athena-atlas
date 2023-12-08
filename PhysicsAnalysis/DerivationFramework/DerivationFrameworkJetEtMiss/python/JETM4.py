@@ -137,8 +137,8 @@ def JETM4ExtraContentCfg(ConfigFlags):
 
     from JetRecConfig.JetRecConfig import JetRecCfg
     from JetRecConfig.JetConfigFlags import jetInternalFlags
-    from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSK
-    jetList = [AntiKt4UFOCSSK]
+    from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKLowPt
+    jetList = [AntiKt4UFOCSSKLowPt]
     jetInternalFlags.isRecoJob = True
     for jd in jetList:
         acc.merge(JetRecCfg(ConfigFlags,jd))
@@ -172,7 +172,7 @@ def JETM4Cfg(ConfigFlags):
     JETM4SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles", "PrimaryVertices",
                                             "Electrons", "Photons", "Muons", "TauJets",
                                             "MET_Baseline_AntiKt4EMTopo","MET_Baseline_AntiKt4EMPFlow",
-                                            "AntiKt4EMPFlowJets","AntiKt4EMTopoJets","AntiKt4UFOCSSKJets",
+                                            "AntiKt4EMPFlowJets","AntiKt4EMTopoJets","AntiKt4UFOCSSKLowPtJets",
                                             "AntiKt10UFOCSSKJets",
                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                             "AntiKtVR30Rmax4Rmin02PV0TrackJets",
