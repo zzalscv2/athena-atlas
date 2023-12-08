@@ -4,7 +4,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 from AthenaConfiguration.Enums import Format
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-from L1TopoSimulation.L1TopoSimulationConfig import L1TopoSimulationOldStyleCfg, RoiB2TopoInputDataCnv
 from TrigConfIO.L1TriggerConfigAccess import L1MenuAccess
 from TrigConfigSvc.TrigConfigSvcCfg   import getL1MenuFileName
 from libpyeformat_helper import SourceIdentifier, SubDetector
@@ -14,28 +13,18 @@ def getL1TopoOnlineMonitorHypo(flags):
     return hypo
 
 def L1TopoOnlineMonitorHypoToolGen(chainDict):
-    tool = CompFactory.L1TopoOnlineMonitorHypoTool(chainDict['chainName'])
-
-    isLegacy = False
-    for chainPart in chainDict['chainParts']:
-        if 'isLegacyL1' in chainPart and 'legacy' in chainPart['isLegacyL1']:
-            isLegacy = True
-            break
-
-    if isLegacy:
-        tool.ErrorFlagsKey = 'L1TopoErrorFlags_Legacy'
-    else:
-        tool.ErrorFlagsKey = 'L1TopoErrorFlags'
-
-    # Select error flags to accept events
-    tool.AcceptOnGenericRoiError = True
-    tool.AcceptOnGenericDaqError = True
-    tool.AcceptOnCrcTobError = True
-    tool.AcceptOnCrcFibreError = True
-    tool.AcceptOnCrcDaqError = True
-    tool.AcceptOnRoibDaqDifference = True
-    tool.AcceptOnRoibCtpDifference = True
-    tool.AcceptOnDaqCtpDifference = True
+    tool = CompFactory.L1TopoOnlineMonitorHypoTool(
+        chainDict['chainName'],
+        # Select error flags to accept events
+        ErrorFlagsKey = 'L1TopoErrorFlags',
+        AcceptOnGenericRoiError = True,
+        AcceptOnGenericDaqError = True,
+        AcceptOnCrcTobError = True,
+        AcceptOnCrcFibreError = True,
+        AcceptOnCrcDaqError = True,
+        AcceptOnRoibDaqDifference = True,
+        AcceptOnRoibCtpDifference = True,
+        AcceptOnDaqCtpDifference = True)
 
     return tool
 
@@ -377,10 +366,3 @@ def configureLegacyHistograms(alg, flags):
                                 xlabels=mon_failure_labels, xbins=len(mon_failure_labels),
                                 xmin=0, xmax=len(mon_failure_labels))
     # ==========================================================================
-
-def getL1TopoPhase1SimForOnlineMonitor(flags):
-    return [L1TopoSimulationOldStyleCfg(flags, isLegacy=False)]
-
-def getL1TopoLegacySimForOnlineMonitor(flags):
-    return [RoiB2TopoInputDataCnv(),
-            L1TopoSimulationOldStyleCfg(flags, isLegacy=True)]
