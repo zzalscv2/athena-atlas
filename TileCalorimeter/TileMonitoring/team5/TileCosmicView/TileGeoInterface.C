@@ -647,7 +647,7 @@ bool tgGetSelected(int &sector, int &drawer, int &pmt1, int &pmt2, string *sec_n
 		
 		if (cell_index == 27){
 			pmt2 = 1;
-		}else{
+		}else{
 		  if ((cell_index <0) or (cell_index >38)){
 		    throw std::runtime_error("cell_index out of range in tgGetSelected");
 		  }
