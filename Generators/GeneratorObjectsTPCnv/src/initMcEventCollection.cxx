@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeneratorObjectsTPCnv/initMcEventCollection.h"
 
@@ -48,8 +48,20 @@ namespace Athena_test {
     return true;
   }
 
+  int maximumBarcode(std::vector<HepMC::GenParticlePtr>& genPartList)
+  {
+    int maxBarcode{0};
+    if (genPartList.empty()) { return maxBarcode; }
+    for (HepMC::GenParticlePtr genPart : genPartList)
+      {
+        maxBarcode = std::max(maxBarcode, HepMC::barcode(genPart));
+      }
+    return maxBarcode;
+  }
+
   void populateGenEvent(HepMC::GenEvent & ge, int pdgid1, int pdgid2, std::vector<HepMC::GenParticlePtr>& genPartList)
   {
+    int maxBarcode = maximumBarcode(genPartList);
     HepMC::FourVector myPos( 0.0, 0.0, 0.0, 0.0);
     HepMC::GenVertexPtr myVertex = HepMC::newGenVertexPtr( myPos, -1 );
     HepMC::FourVector fourMomentum1( 0.0, 0.0, 1.0, 1.0*CLHEP::TeV);
@@ -67,6 +79,10 @@ namespace Athena_test {
     myVertex->add_particle_out(inParticle4);
     genPartList.push_back(inParticle4);
     ge.add_vertex( myVertex );
+    HepMC::suggest_barcode(inParticle1,maxBarcode+1);
+    HepMC::suggest_barcode(inParticle2,maxBarcode+2);
+    HepMC::suggest_barcode(inParticle3,maxBarcode+3);
+    HepMC::suggest_barcode(inParticle4,maxBarcode+4);
     HepMC::set_signal_process_vertex(&ge, myVertex );
     ge.set_beam_particles(inParticle1,inParticle2);
   }
