@@ -111,7 +111,11 @@ inline bool is_same_generator_particle(const T1& p1,const T2& p2) { int b1 = bar
 template <class T1,class T2>
 inline bool is_sim_descendant(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return b1 % SIM_REGENERATION_INCREMENT == b2;}
 
+#if  defined(HEPMC3)
 template <class T> inline int uniqueID(const T& p) { return barcode(p); }
+#else
+template <class T> inline int uniqueID(const T* p) { return barcode(p); }
+#endif
 #if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
 template <>  inline int uniqueID(const ConstGenParticlePtr& p1){ return p1->id();}
 template <>  inline int uniqueID(const GenParticlePtr& p1){ return p1->id();}
