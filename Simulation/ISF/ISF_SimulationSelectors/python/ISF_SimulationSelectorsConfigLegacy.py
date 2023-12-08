@@ -81,25 +81,11 @@ def getDefaultFatrasSelector(name="ISF_DefaultFatrasSelector", **kwargs):
     kwargs.setdefault('SimulationFlavor', SimulationFlavor.Fatras)
     return getDefaultSimSelector(name, **kwargs )
 
-def getDefaultFatrasNewExtrapolationSelector(name="ISF_DefaultFatrasNewExtrapolationSelector", **kwargs):
-    if usesSimKernelMT():
-        kwargs.setdefault('Simulator', '')
-    kwargs.setdefault("Simulator"   , 'ISF_FatrasNewExtrapolationSimSvc')
-    kwargs.setdefault('SimulationFlavor', SimulationFlavor.Fatras)
-    return getDefaultSimSelector(name, **kwargs )
-
 def getDefaultActsSelector(name="ISF_DefaultActsSelector", **kwargs):
     if not usesSimKernelMT():
         raise RuntimeError("SimulationSelector '%s' does not support running with SimKernel." % name)
     kwargs.setdefault('SimulationFlavor', SimulationFlavor.Fatras)
     return getDefaultSimSelector(name, **kwargs)
-
-def getDefaultParametricSimulationSelector(name="ISF_DefaultParametricSimulationSelector", **kwargs):
-    if usesSimKernelMT():
-        kwargs.setdefault('Simulator', '')
-    kwargs.setdefault("Simulator"   , 'ISF_ParametricSimSvc')
-    kwargs.setdefault('SimulationFlavor', SimulationFlavor.Parametric)
-    return getDefaultSimSelector(name, **kwargs )
 
 ### KinematicSimSelector Configurations
 
@@ -143,21 +129,11 @@ def getElectronGeant4Selector(name="ISF_ElectronGeant4Selector", **kwargs):
     kwargs.setdefault('ParticlePDG'     , 11)
     return getKinematicGeant4Selector(name, **kwargs)
 
-# Neutrals
-def getNeutralGeant4Selector(name="ISF_NeutralGeant4Selector", **kwargs):
-    kwargs.setdefault('Charge'      , 0)
-    return getKinematicGeant4Selector(name, **kwargs)
-
 # Protons
 def getProtonAFIIGeant4Selector(name="ISF_ProtonAFIIGeant4Selector", **kwargs):
     kwargs.setdefault('MaxMom'          , 750)
     kwargs.setdefault('ParticlePDG'     , 2212)
     return getKinematicAFIIGeant4Selector(name, **kwargs)
-
-def getProtonAFII_QS_Geant4Selector(name="ISF_ProtonAFII_QS_Geant4Selector", **kwargs):
-    kwargs.setdefault('MaxMom'          , 750)
-    kwargs.setdefault('ParticlePDG'     , 2212)
-    return getKinematicAFII_QS_Geant4Selector(name, **kwargs)
 
 def getProtonATLFAST3Geant4Selector(name="ISF_ProtonATLFAST3Geant4Selector", **kwargs):
     kwargs.setdefault('MaxEkin'         , 400)
@@ -174,11 +150,6 @@ def getPionAFIIGeant4Selector(name="ISF_PionAFIIGeant4Selector", **kwargs):
     kwargs.setdefault('MaxMom'          , 200)
     kwargs.setdefault('ParticlePDG'     , 211)
     return getKinematicAFIIGeant4Selector(name, **kwargs)
-
-def getPionAFII_QS_Geant4Selector(name="ISF_PionAFII_QS_Geant4Selector", **kwargs):
-    kwargs.setdefault('MaxMom'          , 200)
-    kwargs.setdefault('ParticlePDG'     , 211)
-    return getKinematicAFII_QS_Geant4Selector(name, **kwargs)
 
 def getPionATLFAST3Geant4Selector(name="ISF_PionATLFAST3Geant4Selector", **kwargs):
     kwargs.setdefault('MaxEkin'          , 200)
@@ -212,11 +183,6 @@ def getChargedKaonATLFAST3Geant4Selector(name="ISF_ChargedKaonATLFAST3Geant4Sele
     kwargs.setdefault('ParticlePDG'     , 321)
     return getKinematicAFIIGeant4Selector(name, **kwargs)
 
-def getChargedKaonAFII_QS_Geant4Selector(name="ISF_ChargedKaonAFII_QS_Geant4Selector", **kwargs):
-    kwargs.setdefault('MaxMom'          , 750)
-    kwargs.setdefault('ParticlePDG'     , 321)
-    return getKinematicAFII_QS_Geant4Selector(name, **kwargs)
-
 def getChargedKaonATLFAST3_QS_Geant4Selector(name="ISF_ChargedKaonATLFAST3_QS_Geant4Selector", **kwargs):
     kwargs.setdefault('MaxEkin'         , 400)
     kwargs.setdefault('ParticlePDG'     , 321)
@@ -232,11 +198,6 @@ def getKLongATLFAST3Geant4Selector(name="ISF_KLongATLFAST3Geant4Selector", **kwa
     kwargs.setdefault('MaxEkin'         , 400)
     kwargs.setdefault('ParticlePDG'     , 130)
     return getKinematicAFIIGeant4Selector(name, **kwargs)
-
-def getKLongAFII_QS_Geant4Selector(name="ISF_KLongAFII_QS_Geant4Selector", **kwargs):
-    kwargs.setdefault('MaxMom'          , 750)
-    kwargs.setdefault('ParticlePDG'     , 130)
-    return getKinematicAFII_QS_Geant4Selector(name, **kwargs)
 
 def getKLongATLFAST3_QS_Geant4Selector(name="ISF_KLongATLFAST3_QS_Geant4Selector", **kwargs):
     kwargs.setdefault('MaxEkin'         , 400)

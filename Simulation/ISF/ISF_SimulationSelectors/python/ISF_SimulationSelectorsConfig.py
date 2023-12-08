@@ -8,7 +8,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from ISF_SimulationSelectors import SimulationFlavor
 from ISF_Services.ISF_ServicesCoreConfig import ParticleKillerSvcCfg
 from ISF_Geant4Services.ISF_Geant4ServicesConfig import (
-    Geant4SimCfg, AFIIGeant4SimCfg, LongLivedGeant4SimCfg, AFII_QS_Geant4SimCfg,
+    Geant4SimCfg, AFIIGeant4SimCfg, AFII_QS_Geant4SimCfg,
     FullGeant4SimCfg, PassBackGeant4SimCfg,
 )
 
@@ -37,16 +37,6 @@ def DefaultAFIIGeant4SelectorCfg(flags, name="ISF_DefaultAFIIGeant4Selector", **
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
         acc.merge(AFIIGeant4SimCfg(flags))
         kwargs.setdefault("Simulator", acc.getService("ISF_AFIIGeant4SimSvc"))
-    tool = acc.popToolsAndMerge(DefaultGeant4SelectorCfg(flags, name, **kwargs))
-    acc.setPrivateTools(tool)
-    return acc
-
-
-def DefaultLongLivedGeant4SelectorCfg(flags, name="ISF_DefaultLongLivedGeant4Selector", **kwargs):
-    acc = ComponentAccumulator()
-    if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        acc.merge(LongLivedGeant4SimCfg(flags))
-        kwargs.setdefault("Simulator", acc.getService("ISF_LongLivedGeant4SimSvc"))
     tool = acc.popToolsAndMerge(DefaultGeant4SelectorCfg(flags, name, **kwargs))
     acc.setPrivateTools(tool)
     return acc
@@ -148,22 +138,6 @@ def DefaultActsSelectorCfg(flags, name="ISF_DefaultActsSelector", **kwargs):
     return acc
 
 
-def DefaultFatrasNewExtrapolationSelectorCfg(flags, name="ISF_DefaultFatrasNewExtrapolationSelector", **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("SimulationFlavor", SimulationFlavor.Fatras)
-    acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
-    return acc
-
-
-def DefaultParametricSimulationSelectorCfg(flags, name="ISF_DefaultParametricSimulationSelector", **kwargs):
-    acc = ComponentAccumulator()
-    if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        kwargs.setdefault("Simulator", "ISF_ParametricSimSvc") # TODO
-    kwargs.setdefault("SimulationFlavor", SimulationFlavor.Parametric)
-    acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
-    return acc
-
-
 ### KinematicSimSelector Configurations
 
 # BASE METHODS
@@ -225,35 +199,11 @@ def BaseKinematicParticleKillerSimSelectorCfg(flags, name="DONOTUSEDIRECTLY", **
     return acc
 
 
-# Electrons
-def ElectronGeant4SelectorCfg(flags, name="ISF_ElectronGeant4Selector", **kwargs):
-    kwargs.setdefault("ParticlePDG", 11)
-    return BaseKinematicGeant4SelectorCfg(flags, name, **kwargs)
-
-
-#Neutrals
-def NeutralGeant4SelectorCfg(flags, name="ISF_NeutralGeant4Selector", **kwargs):
-    kwargs.setdefault("Charge", 0)
-    return BaseKinematicGeant4SelectorCfg(flags, name, **kwargs)
-
-
 #Protons
-def ProtonAFIIGeant4SelectorCfg(flags, name="ISF_ProtonAFIIGeant4Selector", **kwargs):
-    kwargs.setdefault("MaxMom", 750)
-    kwargs.setdefault("ParticlePDG", 2212)
-    return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
-
-
 def ProtonATLFAST3Geant4SelectorCfg(flags, name="ISF_ProtonATLFAST3Geant4Selector", **kwargs):
     kwargs.setdefault("MaxEkin", 400)
     kwargs.setdefault("ParticlePDG", 2212)
     return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
-
-
-def ProtonAFII_QS_Geant4SelectorCfg(flags, name="ISF_ProtonAFII_QS_Geant4Selector", **kwargs):
-    kwargs.setdefault("MaxMom", 750)
-    kwargs.setdefault("ParticlePDG", 2212)
-    return BaseKinematicAFII_QS_Geant4SelectorCfg(flags, name, **kwargs)
 
 
 def ProtonATLFAST3_QS_Geant4SelectorCfg(flags, name="ISF_ProtonATLFAST3_QS_Geant4Selector", **kwargs):
@@ -263,22 +213,10 @@ def ProtonATLFAST3_QS_Geant4SelectorCfg(flags, name="ISF_ProtonATLFAST3_QS_Geant
 
 
 #Pions
-def PionAFIIGeant4SelectorCfg(flags, name="ISF_PionAFIIGeant4Selector", **kwargs):
-    kwargs.setdefault("MaxMom", 200)
-    kwargs.setdefault("ParticlePDG", 211)
-    return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
-
-
 def PionATLFAST3Geant4SelectorCfg(flags, name="ISF_PionATLFAST3Geant4Selector", **kwargs):
     kwargs.setdefault("MaxEkin", 200)
     kwargs.setdefault("ParticlePDG", 211)
     return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
-
-
-def PionAFII_QS_Geant4SelectorCfg(flags, name="ISF_PionAFII_QS_Geant4Selector", **kwargs):
-    kwargs.setdefault("MaxEkin", 200)
-    kwargs.setdefault("ParticlePDG", 211)
-    return BaseKinematicAFII_QS_Geant4SelectorCfg(flags, name, **kwargs)
 
 
 def PionATLFAST3_QS_Geant4SelectorCfg (flags, name="ISF_PionATLFAST3_QS_Geant4Selector", **kwargs):
@@ -301,22 +239,10 @@ def NeutronATLFAST3_QS_Geant4SelectorCfg(flags, name="ISF_NeutronATLFAST3_QS_Gea
 
 
 # Charged Kaons
-def ChargedKaonAFIIGeant4SelectorCfg(flags, name="ISF_ChargedKaonAFIIGeant4Selector", **kwargs):
-    kwargs.setdefault("MaxMom", 750)
-    kwargs.setdefault("ParticlePDG", 321)
-    return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
-
-
 def ChargedKaonATLFAST3Geant4SelectorCfg(flags, name="ISF_ChargedKaonATLFAST3Geant4Selector", **kwargs):
     kwargs.setdefault("MaxEkin", 400)
     kwargs.setdefault("ParticlePDG", 321)
     return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
-
-
-def ChargedKaonAFII_QS_Geant4SelectorCfg(flags, name="ISF_ChargedKaonAFII_QS_Geant4Selector", **kwargs):
-    kwargs.setdefault("MaxMom", 750)
-    kwargs.setdefault("ParticlePDG", 321)
-    return BaseKinematicAFII_QS_Geant4SelectorCfg(flags, name, **kwargs)
 
 
 def ChargedKaonATLFAST3_QS_Geant4SelectorCfg(flags, name="ISF_ChargedKaonATLFAST3_QS_Geant4Selector", **kwargs):
@@ -326,22 +252,10 @@ def ChargedKaonATLFAST3_QS_Geant4SelectorCfg(flags, name="ISF_ChargedKaonATLFAST
 
 
 # KLongs
-def KLongAFIIGeant4SelectorCfg(flags, name="ISF_KLongAFIIGeant4Selector", **kwargs):
-    kwargs.setdefault("MaxMom", 750)
-    kwargs.setdefault("ParticlePDG", 130)
-    return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
-
-
 def KLongATLFAST3Geant4SelectorCfg(flags, name="ISF_KLongATLFAST3Geant4Selector", **kwargs):
     kwargs.setdefault("MaxEkin", 400)
     kwargs.setdefault("ParticlePDG", 130)
     return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
-
-
-def KLongAFII_QS_Geant4SelectorCfg(flags, name="ISF_KLongAFII_QS_Geant4Selector", **kwargs):
-    kwargs.setdefault("MaxMom", 750)
-    kwargs.setdefault("ParticlePDG", 130)
-    return BaseKinematicAFII_QS_Geant4SelectorCfg(flags, name, **kwargs)
 
 
 def KLongATLFAST3_QS_Geant4SelectorCfg(flags, name="ISF_KLongATLFAST3_QS_Geant4Selector", **kwargs):
@@ -351,11 +265,6 @@ def KLongATLFAST3_QS_Geant4SelectorCfg(flags, name="ISF_KLongATLFAST3_QS_Geant4S
 
 
 #Muons
-def MuonGeant4SelectorCfg(flags, name="ISF_MuonGeant4Selector", **kwargs):
-    kwargs.setdefault("ParticlePDG", 13)
-    return BaseKinematicGeant4SelectorCfg(flags, name, **kwargs)
-
-
 def MuonAFIIGeant4SelectorCfg(flags, name="ISF_MuonAFIIGeant4Selector", **kwargs):
     kwargs.setdefault("ParticlePDG", 13)
     return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
@@ -364,11 +273,6 @@ def MuonAFIIGeant4SelectorCfg(flags, name="ISF_MuonAFIIGeant4Selector", **kwargs
 def MuonAFII_QS_Geant4SelectorCfg(flags, name="ISF_MuonAFII_QS_Geant4Selector", **kwargs):
     kwargs.setdefault("ParticlePDG", 13)
     return BaseKinematicAFII_QS_Geant4SelectorCfg(flags, name, **kwargs)
-
-
-def MuonFatrasSelectorCfg(flags, name="ISF_MuonFatrasSelector", **kwargs):
-    kwargs.setdefault("ParticlePDG", 13)
-    return BaseKinematicFatrasSelectorCfg(flags, name, **kwargs)
 
 
 # General Eta-based selectors
