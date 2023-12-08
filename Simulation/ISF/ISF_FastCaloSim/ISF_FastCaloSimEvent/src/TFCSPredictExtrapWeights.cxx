@@ -184,7 +184,7 @@ TFCSPredictExtrapWeights::prepareInputs(TFCSSimulationState &simulstate,
   if (is_match_pdgid(22)) {
     inputVariables["pdgId"] = 1; // one hot enconding
   } else if (is_match_pdgid(11) || is_match_pdgid(-11)) {
-    flat_inputs["pdgId"] = 0; // one hot enconding
+    inputVariables["pdgId"] = 0; // one hot enconding
   } else {
     ATH_MSG_ERROR("have no one-hot encoding for pdgId; pottential issue with "
                  "predicted weights.");
