@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef _ZDCWaveformSampler_h_
-#define _ZDCWaveformSampler_h_
+#ifndef ZDCUTILS_ZDCWAVEFORMSAMPLER_H
+#define ZDCUTILS_ZDCWAVEFORMSAMPLER_H
 
 // Class that provides the ability to "sample" waveforms -- i.e. generate the analog
 //   of Flash ADC samples -- at a specified frequency. The time at which the pulse is generated
@@ -52,7 +52,7 @@ public:
   {}
 
   ZDCWaveformSampler(float freqMHz, float timeMin, unsigned int numSamples, unsigned int nBits, unsigned int pedestal,
-		     std::vector<std::shared_ptr<ZDCWaveformBase> > waveformPtrVec) :
+		     const std::vector<std::shared_ptr<ZDCWaveformBase> >& waveformPtrVec) :
     m_timeMin(timeMin),
     m_numSamples(numSamples),
     m_pedestal(pedestal),

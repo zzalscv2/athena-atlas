@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef _ZDCWaveformLTLinStep_h_
-#define _ZDCWaveformLTLinStep_h_
+#ifndef ZDCUTILS_ZDCWAVEFORMLTLINSTEP_H
+#define ZDCUTILS_ZDCWAVEFORMLTLINSTEP_H
 
 #include "ZDCWaveform.h"
 
@@ -24,7 +24,7 @@ public:
     ZDCWaveformBase("default", 1, 6, std::vector<std::string>({"tauLin"}), std::vector<double>({1.0}))
   {  }
 
-  ZDCWaveformLTLinStep(std::string tag, double initialTauRise, double initialTauFall, double initialTauLin) :
+  ZDCWaveformLTLinStep(const std::string& tag, double initialTauRise, double initialTauFall, double initialTauLin) :
     ZDCWaveformBase(tag, initialTauRise, initialTauFall, std::vector<std::string>({"tauLin"}), std::vector<double>({initialTauLin}))
   {}
 

@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef _ZDCWaveform_h_
-#define _ZDCWaveform_h_
+#ifndef ZDCUTILS_ZDCWAVEFORM_H
+#define ZDCUTILS_ZDCWAVEFORM_H
 
 #include <string>
 #include <vector>
@@ -105,7 +105,7 @@ protected:
   double getTauFall() const {return m_tauFall;}
 
   unsigned int getNumAddtlShapeValues() const {return m_numAddtlShapePars;}
-  double getAddtlShapeValue(std::string name) const {return m_addtlShapeValues.at(m_addtlShapeNames.find(name)->second);}
+  double getAddtlShapeValue(const std::string& name) const {return m_addtlShapeValues.at(m_addtlShapeNames.find(name)->second);}
   double getAddtlShapeValue(unsigned int index) const {return m_addtlShapeValues.at(index);}
   
   void setAddtlShapeValue(std::string name, double value);

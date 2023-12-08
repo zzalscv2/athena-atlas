@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef _ZDCWaveformFermiExp_h_
-#define _ZDCWaveformFermiExp_h_
+#ifndef ZDCUTILS_ZDCWAVEFORMFERMIEXP_H
+#define ZDCUTILS_ZDCWAVEFORMFERMIEXP_H
 
 #include "ZDCWaveform.h"
 
@@ -23,7 +23,7 @@ public:
     ZDCWaveformBase("default", 1, 6, std::vector<std::string>(), std::vector<double>())
   {}
 
-  ZDCWaveformFermiExp(std::string tag, double initialTauRise, double initialTauFall) :
+  ZDCWaveformFermiExp(const std::string& tag, double initialTauRise, double initialTauFall) :
     ZDCWaveformBase(tag, initialTauRise, initialTauFall, std::vector<std::string>(), std::vector<double>())
   {}
 
@@ -53,7 +53,7 @@ public:
     setAddtlShapeParameters(std::vector<std::string>({"tailFrac"}), std::vector<double>({0}));
   }
 
-  ZDCWaveformFermiExpTail(std::string tag, double initialTauRise, double initialTauFall, double tailShiftFrac) :
+  ZDCWaveformFermiExpTail(const std::string& tag, double initialTauRise, double initialTauFall, double tailShiftFrac) :
     ZDCWaveformFermiExp(tag, initialTauRise, initialTauFall)
   {
     double tailShiftScaled = tailShiftFrac*ZDCWaveformFermiExp::doEvaluate(0);
