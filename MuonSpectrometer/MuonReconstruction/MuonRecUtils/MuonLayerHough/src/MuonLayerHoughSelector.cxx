@@ -22,7 +22,7 @@ namespace MuonHough {
         if (getMinCutValue() < 0) std::cout << std::endl << "MuonLayerHoughSelector: Negative cuts found!!!" << std::endl;
     }
 
-    MuonLayerHoughSelector::~MuonLayerHoughSelector() {}
+    MuonLayerHoughSelector::~MuonLayerHoughSelector() = default;
 
     float MuonLayerHoughSelector::getCutValue(float position) const {
         const float pos = std::abs(position);

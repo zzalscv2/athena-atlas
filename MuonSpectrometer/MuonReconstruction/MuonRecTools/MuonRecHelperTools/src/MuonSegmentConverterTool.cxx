@@ -9,15 +9,15 @@
 #include "TrkEventPrimitives/FitQuality.h"
 
 namespace {
-    static const SG::AuxElement::Accessor<float> acc_clusterTime("clusterTime");
-    static const SG::AuxElement::Accessor<float> acc_clusterTimeError("clusterTimeError");
-    static const SG::AuxElement::Accessor<bool>  acc_clusterTimeValid("clusterTimeValid");
+    const SG::AuxElement::Accessor<float> acc_clusterTime("clusterTime");
+    const SG::AuxElement::Accessor<float> acc_clusterTimeError("clusterTimeError");
+    const SG::AuxElement::Accessor<bool>  acc_clusterTimeValid("clusterTimeValid");
     
-    static const SG::AuxElement::Accessor<uint8_t> acc_mmStereoHits("N_MicromegaStereoHits");
-    static const SG::AuxElement::Accessor<uint8_t> acc_mmEtaHits("N_MicromegaEtaHits");
+    const SG::AuxElement::Accessor<uint8_t> acc_mmStereoHits("N_MicromegaStereoHits");
+    const SG::AuxElement::Accessor<uint8_t> acc_mmEtaHits("N_MicromegaEtaHits");
 
-    static const SG::AuxElement::Accessor<uint8_t> acc_stgcEtaHits("N_StgcEtaHits");
-    static const SG::AuxElement::Accessor<uint8_t> acc_stgcPhiHits("N_StgcPhiHits");
+    const SG::AuxElement::Accessor<uint8_t> acc_stgcEtaHits("N_StgcEtaHits");
+    const SG::AuxElement::Accessor<uint8_t> acc_stgcPhiHits("N_StgcPhiHits");
 }
 
 namespace Muon {

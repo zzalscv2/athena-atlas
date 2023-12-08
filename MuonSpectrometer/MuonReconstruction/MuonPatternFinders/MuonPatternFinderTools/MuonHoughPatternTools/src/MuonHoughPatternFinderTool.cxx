@@ -601,7 +601,7 @@ namespace Muon {
             TrkDriftCircleMath::MdtId mdtid(mdtHelper.isBarrel(hitId), mdtHelper.multilayer(hitId) - 1, mdtHelper.tubeLayer(hitId) - 1,
                                             mdtHelper.tube(hitId) - 1);
             TrkDriftCircleMath::DriftCircle dc(TrkDriftCircleMath::LocVec2D(globalpos.perp(), globalpos.z()), mdt_hit.radius(),
-                                               mdt_hit.errradius(), TrkDriftCircleMath::DriftCircle::InTime, std::move(mdtid), mdt_hit.index);
+                                               mdt_hit.errradius(), TrkDriftCircleMath::DriftCircle::InTime, mdtid, mdt_hit.index);
             dcs.emplace_back(std::move(dc));
         }
 
@@ -1191,7 +1191,6 @@ namespace Muon {
         unsigned int nPassedTubes = 0;
         double roadWidth = 1.5;
         TrkDriftCircleMath::DCOnTrackVec hitsOnLineSel;
-        TrkDriftCircleMath::TangentToCircles tanCreator;
         TrkDriftCircleMath::MatchDCWithLine matchWithLine;
         bool stop = false;
         for (int i = 0; i < 8; i++) {
@@ -1219,7 +1218,7 @@ namespace Muon {
                         double norm = std::hypot(hitx, hity);
                         double cphi = hitx / norm;
                         double sphi = hity / norm;
-                        TrkDriftCircleMath::TangentToCircles::LineVec lines = tanCreator.tangentLines(*iti, *itj);
+                        TrkDriftCircleMath::TangentToCircles::LineVec lines = TrkDriftCircleMath::TangentToCircles::tangentLines(*iti, *itj);
                         for (TrkDriftCircleMath::TangentToCircles::LineVec::const_iterator lit = lines.begin(); lit != lines.end(); ++lit) {
                             double coshit = std::cos((*lit).phi());
                             double sinhit = std::sin((*lit).phi());

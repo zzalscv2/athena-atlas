@@ -29,7 +29,7 @@ namespace ClusterSeg {
     void fill( const std::vector<Cluster*>& clusters );
 
     bool read( std::vector<Cluster*>& clusters);
-    void clean( std::vector<Cluster*>& clusters);   
+    static void clean( std::vector<Cluster*>& clusters);   
 
     void reset();
     void init();

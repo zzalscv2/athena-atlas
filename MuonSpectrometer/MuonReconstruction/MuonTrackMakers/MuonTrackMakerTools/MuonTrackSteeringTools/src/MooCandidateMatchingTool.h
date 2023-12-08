@@ -137,12 +137,12 @@ namespace Muon {
 
         /** @brief extract Idenfitiers from a vector of measurements and copy them
          * into a set */
-        void getIdentifierSet(const std::vector<const Trk::MeasurementBase*>& measurements, std::set<Identifier>& ids) const;
+        static void getIdentifierSet(const std::vector<const Trk::MeasurementBase*>& measurements, std::set<Identifier>& ids) ;
 
         /** @brief evaluate overlap between phi hits of two entries.
             returns true if the entries share all phi hits or the phi hits of one of
            the entries are subset of the other  */
-        bool checkPhiHitConsistency(const MuPatCandidateBase& entry1, const MuPatCandidateBase& entry2) const;
+        static bool checkPhiHitConsistency(const MuPatCandidateBase& entry1, const MuPatCandidateBase& entry2) ;
 
         /** @brief evaluate distance between two segments, if too large return false
          * (cut at 3000.).  */

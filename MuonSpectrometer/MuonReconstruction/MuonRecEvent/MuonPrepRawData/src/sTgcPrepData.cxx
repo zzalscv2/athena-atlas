@@ -19,7 +19,7 @@ sTgcPrepData::sTgcPrepData(const Identifier& RDOId,
                            std::vector<uint16_t>&& stripNumbers,
                            std::vector<short int>&& stripTimes,
                            std::vector<int>&& stripCharges)
-  : MuonCluster(RDOId, idDE, std::move(locpos), std::move(rdoList),std::move(locErrMat))
+  : MuonCluster(RDOId, idDE, locpos, std::move(rdoList),std::move(locErrMat))
   , m_detEl(detEl)
   , m_charge(charge)
   , m_time(time)
@@ -37,7 +37,7 @@ sTgcPrepData::sTgcPrepData(const Identifier& RDOId,
                            const int charge,
                            const short int time,
                            const uint16_t bcBitMap)
-  : MuonCluster(RDOId, idDE, std::move(locpos), std::move(rdoList), std::move(locErrMat))
+  : MuonCluster(RDOId, idDE, locpos, std::move(rdoList), std::move(locErrMat))
   , m_detEl(detEl)
   , m_charge(charge)
   , m_time(time)

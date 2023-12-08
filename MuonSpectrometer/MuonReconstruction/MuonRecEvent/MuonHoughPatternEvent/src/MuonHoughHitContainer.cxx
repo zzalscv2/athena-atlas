@@ -5,7 +5,7 @@
 #include "MuonHoughPatternEvent/MuonHoughHitContainer.h"
 
 
-void MuonHoughHitContainer::addHit(std::shared_ptr<MuonHoughHit> hit) {
+void MuonHoughHitContainer::addHit(const std::shared_ptr<MuonHoughHit>& hit) {
     if (hit->getId() == -1) { hit->setId(size()); }
     m_hit.push_back(hit);
 }

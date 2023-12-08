@@ -298,7 +298,7 @@ MuonPatternCalibration::insertCluster(const MuonCluster& clus, RegionMap& region
         region.regionPos = patpose;
         region.init = true;
     }   
-    region.triggerPrds.push_back(std::make_pair(intersect, &clus));
+    region.triggerPrds.emplace_back(intersect, &clus);
 }
 
 
@@ -401,7 +401,7 @@ MuonPatternCalibration::insertMdt(const MdtPrepData& mdt, RegionMap& regionMap, 
         region.regionDir = patdire;
         region.init = true;        
     }
-    region.mdtPrdsPerChamber[chFlag].push_back(std::make_pair(intersect, &mdt));
+    region.mdtPrdsPerChamber[chFlag].emplace_back(intersect, &mdt);
 }
 
 void

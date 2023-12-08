@@ -80,8 +80,7 @@ void Muon::MuonTrackSummaryHelperTool::analyse(const Trk::Track& /**trk*/, const
         ATH_MSG_ERROR("Unknown muon detector type ");
         ATH_MSG_ERROR("Dumping TrackStateOnSurface " << *tsos);
     }
-    return;
-}
+    }
 
 void Muon::MuonTrackSummaryHelperTool::analyse(const Trk::Track& trk, const Trk::CompetingRIOsOnTrack* crot,
                                                const Trk::TrackStateOnSurface* tsos, std::vector<int>& information,
@@ -93,7 +92,7 @@ void Muon::MuonTrackSummaryHelperTool::analyse(const Trk::Track& trk, const Trk:
         Identifier layId = m_idHelperSvc->layerId(rot->identify());
         ATH_MSG_DEBUG("ROT " << i << "\t LayerId=" << m_idHelperSvc->toString(layId));
         std::pair<std::set<Identifier>::iterator, bool> pr = layIds.insert(layId);
-        if (pr.second == true) {
+        if (pr.second) {
             // layer not seen before
             ATH_MSG_DEBUG("Have found hit on new layer. # of layers for this cROT currently=" << layIds.size());
             analyse(trk, rot, tsos, information, hitPattern);
@@ -101,12 +100,11 @@ void Muon::MuonTrackSummaryHelperTool::analyse(const Trk::Track& trk, const Trk:
     }
 }
 
-void Muon::MuonTrackSummaryHelperTool::increment(int& type) const {
+void Muon::MuonTrackSummaryHelperTool::increment(int& type) {
     if (type < 0)
         type = 1;  // they all start off at -1, so can't just increment
     else
         ++type;
-    return;
 }
 
 void Muon::MuonTrackSummaryHelperTool::searchForHoles(const Trk::Track& /**track*/, std::vector<int>& /**information*/,
@@ -184,7 +182,7 @@ void Muon::MuonTrackSummaryHelperTool::addDetailedTrackSummary(const Trk::Track&
                     if (currentChamberSummary && !currentChamberSummary->isMdt()) { updateHoleContent(*currentChamberSummary); }
 
                     ATH_MSG_VERBOSE(" Adding new chamber (holes) " << m_idHelperSvc->toString(id) << " " << *pars);
-                    trackSummary.m_chamberHitSummary.push_back(Trk::MuonTrackSummary::ChamberHitSummary(chId, isMdt));
+                    trackSummary.m_chamberHitSummary.emplace_back(chId, isMdt);
                     currentChamberSummary = &trackSummary.m_chamberHitSummary.back();
                     currentChamberPars = pars;
                 }
@@ -328,7 +326,7 @@ void Muon::MuonTrackSummaryHelperTool::addDetailedTrackSummary(const Trk::Track&
             if (currentChamberSummary && !currentChamberSummary->isMdt()) { updateHoleContent(*currentChamberSummary); }
 
             ATH_MSG_VERBOSE(" Adding new chamber " << m_idHelperSvc->toString(id) << " " << *pars);
-            trackSummary.m_chamberHitSummary.push_back(Trk::MuonTrackSummary::ChamberHitSummary(chId, isMdt));
+            trackSummary.m_chamberHitSummary.emplace_back(chId, isMdt);
             currentChamberSummary = &trackSummary.m_chamberHitSummary.back();
             currentChamberPars = pars;
         }
@@ -562,7 +560,7 @@ const Muon::MdtPrepDataCollection* Muon::MuonTrackSummaryHelperTool::findMdtPrdC
     IdentifierHash hash_id;
     m_idHelperSvc->mdtIdHelper().get_module_hash(chId, hash_id);
 
-    auto coll = mdtPrdContainer->indexFindPtr(hash_id);
+    const auto *coll = mdtPrdContainer->indexFindPtr(hash_id);
     if (coll == nullptr) {
         ATH_MSG_DEBUG(" MdtPrepDataCollection for:   " << m_idHelperSvc->toStringChamber(chId) << "  not found in container ");
         return nullptr;

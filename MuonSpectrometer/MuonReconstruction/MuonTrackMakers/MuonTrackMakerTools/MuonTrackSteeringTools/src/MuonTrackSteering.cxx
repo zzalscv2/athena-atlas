@@ -261,7 +261,7 @@ namespace Muon {
                 }
 
                 int phiHitDiff = sit1->phiHits().size() + sit2->phiHits().size() - shared_phi - segInfo->phiHits().size();
-                if (phiHitDiff > 1 || (sit1->phiHits().size() + sit2->phiHits().size() > 0 && segInfo->phiHits().size() == 0)) {
+                if (phiHitDiff > 1 || (sit1->phiHits().size() + sit2->phiHits().size() > 0 && segInfo->phiHits().empty())) {
                     ATH_MSG_VERBOSE("resolveSLOverlaps::more than one phi measurement removed, dropping track "
                                     << std::endl
                                     << m_printer->print(*segInfo->segment));
@@ -408,13 +408,13 @@ namespace Muon {
                 // Loop through layers and do a little sort
                 std::vector<std::pair<int, unsigned int> > occupancy;  // layer , occ
                 for (unsigned int lit = 0; lit < mySegColVec.size(); ++lit) {
-                    occupancy.push_back(std::pair<int, unsigned int>(mySegColVec[lit].size(), lit));
+                    occupancy.emplace_back(mySegColVec[lit].size(), lit);
                 }
                 std::stable_sort(occupancy.begin(), occupancy.end());
                 for (unsigned int lit = 0; lit < occupancy.size(); ++lit) { seeds.push_back(occupancy[lit].second); }
             } else {
                 seeds = strategy.seeds();
-                if (0 == seeds.size()) {
+                if (seeds.empty()) {
                     for (unsigned int j = 0; j < mySegColVec.size(); ++j) seeds.push_back(j);
                 }
             }
@@ -581,7 +581,7 @@ namespace Muon {
 
             std::vector<std::unique_ptr<MuPatTrack> > tracks;
 
-            if (matchedSegs.size() != 0 && m_useTightMatching)
+            if (!matchedSegs.empty() && m_useTightMatching)
                 tracks = m_trackBTool->find(ctx, seedSeg, matchedSegs);
             else
                 tracks = m_trackBTool->find(ctx, seedSeg, segs[ilayer]);
@@ -695,7 +695,6 @@ namespace Muon {
             }
         }
 
-        return;
     }
 
     //-----------------------------------------------------------------------------------------------------------
@@ -810,7 +809,7 @@ namespace Muon {
 
     //-----------------------------------------------------------------------------------------------------------
 
-    bool MuonTrackSteering::decodeList(const std::string& input, std::vector<std::string>& list) const {
+    bool MuonTrackSteering::decodeList(const std::string& input, std::vector<std::string>& list) {
         bool result = true;
         std::string::size_type begIdx = 0;
         std::string::size_type endIdx = 0;

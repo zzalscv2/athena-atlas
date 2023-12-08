@@ -423,7 +423,7 @@ namespace Muon {
         }
 
         if (m_ntuple) {
-            fillNtuple(*(state.houghDataPerSectorVec.get()));
+            fillNtuple(*(state.houghDataPerSectorVec));
             // Tuple not used in MT configurations.
             TTree* tree ATLAS_THREAD_SAFE = m_tree.get();
             tree->Fill();
@@ -1603,23 +1603,23 @@ namespace Muon {
 
                 for (const IdentifierHash& id_hash : hashes) {
                     // !?! else if made by Felix
-                    if (mdtCont && mdtCont->size() > 0 && tech == MuonStationIndex::MDT) {
+                    if (mdtCont && !mdtCont->empty() && tech == MuonStationIndex::MDT) {
                         const MdtPrepDataCollection* pos = mdtCont->indexFindPtr(id_hash);
                         if (pos) fill(ctx, state.truthHits, *pos, houghData.hitVec[layerHash]);
-                    } else if (rpcCont && rpcCont->size() > 0 && tech == MuonStationIndex::RPC) {
+                    } else if (rpcCont && !rpcCont->empty() && tech == MuonStationIndex::RPC) {
                         const RpcPrepDataCollection* pos = rpcCont->indexFindPtr(id_hash);
                         if (pos) fill(ctx, state.truthHits, *pos, houghData.hitVec[layerHash], houghData.phiHitVec[regionLayer.first]);
-                    } else if (tgcCont && tgcCont->size() > 0 && tech == MuonStationIndex::TGC) {
+                    } else if (tgcCont && !tgcCont->empty() && tech == MuonStationIndex::TGC) {
                         const TgcPrepDataCollection* pos = tgcCont->indexFindPtr(id_hash);
                         if (pos)
                             fill(ctx, state.truthHits, state.houghDataPerSectorVec->tgcClusteringObjs, *pos, houghData.hitVec[layerHash],
                                  houghData.phiHitVec[regionLayer.first], collectionsPerSector.sector);
-                    } else if (stgcCont && stgcCont->size() > 0 && tech == MuonStationIndex::STGC) {
+                    } else if (stgcCont && !stgcCont->empty() && tech == MuonStationIndex::STGC) {
                         const sTgcPrepDataCollection* pos = stgcCont->indexFindPtr(id_hash);
                         if (pos)
                             fill(ctx, state.truthHits, *pos, houghData.hitVec[layerHash], houghData.phiHitVec[regionLayer.first],
                                  collectionsPerSector.sector);
-                    } else if (mmCont && mmCont->size() > 0 && tech == MuonStationIndex::MM) {
+                    } else if (mmCont && !mmCont->empty() && tech == MuonStationIndex::MM) {
                         const MMPrepDataCollection* pos = mmCont->indexFindPtr(id_hash);
                         if (pos) fill(ctx, state.truthHits, *pos, houghData.hitVec[layerHash]);
                     }
@@ -1715,7 +1715,7 @@ namespace Muon {
     void MuonLayerHoughTool::fill(const EventContext& ctx, std::set<Identifier>& truthHits, const CscPrepDataCollection& cscs, HitVec& hits,
                                   PhiHitVec& phiHits) const {
         /// CSCs were not part of the pattern finding yet..
-        if (true || cscs.empty()) return;
+        return;
         auto truthCollections = m_truthNames.makeHandles(ctx);
         Identifier chid = cscs.identify();
         unsigned int technology = m_idHelperSvc->technologyIndex(chid);

@@ -13,7 +13,7 @@
 #include "TrkEventPrimitives/LocalDirection.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 
-Muon::MuonSegmentKey::MuonSegmentKey() {}
+Muon::MuonSegmentKey::MuonSegmentKey() = default;
 
 Muon::MuonSegmentKey::MuonSegmentKey(const Muon::MuonSegment& segment) {
     // to ensure consistent usage of MDT signs flip
@@ -68,4 +68,4 @@ void Muon::MuonSegmentKey::calculateKeys(const std::vector<const Trk::Measuremen
     }
 }
 
-Muon::MuonSegmentKey::~MuonSegmentKey() {}
+Muon::MuonSegmentKey::~MuonSegmentKey() = default;

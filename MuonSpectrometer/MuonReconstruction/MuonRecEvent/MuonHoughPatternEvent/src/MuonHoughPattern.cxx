@@ -10,7 +10,7 @@
 
 MuonHoughPattern::MuonHoughPattern(int id_number) : MuonHoughHitContainer(), m_id_number(id_number) {}
 
-void MuonHoughPattern::resetTracksegment() {   
+void MuonHoughPattern::resetTracksegment() {
     m_hit.clear();
 }
 
@@ -186,8 +186,7 @@ Amg::Vector3D MuonHoughPattern::getEDir() const {
     ///
     CxxUtils::sincos scphi(m_ephi);
     CxxUtils::sincos sctheta(m_etheta);
-    const Amg::Vector3D dir{scphi.cs * sctheta.sn, scphi.sn * sctheta.sn, sctheta.cs};
-    return dir;
+    return {scphi.cs * sctheta.sn, scphi.sn * sctheta.sn, sctheta.cs};
 }
 
 void MuonHoughPattern::updateParametersRPhi(bool cosmics) {

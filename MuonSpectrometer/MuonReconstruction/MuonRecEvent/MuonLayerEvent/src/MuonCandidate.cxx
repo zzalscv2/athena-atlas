@@ -5,7 +5,7 @@
 #include "MuonLayerEvent/MuonCandidate.h"
 
 namespace Muon {
-    MuonCandidate::MuonCandidate() {}
+    MuonCandidate::MuonCandidate() = default;
 
     MuonCandidate::MuonCandidate(std::vector<MuonLayerIntersection>&& layerIntersections_) : layerIntersections(layerIntersections_) {}
 

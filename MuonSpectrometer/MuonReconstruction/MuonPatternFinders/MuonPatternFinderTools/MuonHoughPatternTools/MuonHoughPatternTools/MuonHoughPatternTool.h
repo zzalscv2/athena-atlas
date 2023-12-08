@@ -101,7 +101,7 @@ private:
     int maxLevelHoughPattern(const MuonHoughPatternContainerShip& houghpattern, int id_number) const;
 
     /** corrects the maximum of the histogram with a factor (not in use anymore, used for old rz transform) */
-    void transformCoordsMaximum(std::pair<double, double>& coordsmaximum, double r0_true) const;
+    static void transformCoordsMaximum(std::pair<double, double>& coordsmaximum, double r0_true) ;
 
     /** converts hough pattern to EDM eta patterns */
     std::unique_ptr<Muon::MuonPrdPattern> houghPatternToEtaPattern(const MuonHoughPattern& houghpattern) const;

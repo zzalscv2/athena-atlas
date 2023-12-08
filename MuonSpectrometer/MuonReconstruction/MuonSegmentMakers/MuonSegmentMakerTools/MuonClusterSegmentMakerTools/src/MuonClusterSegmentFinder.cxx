@@ -97,7 +97,7 @@ namespace Muon {
                                                       const PRD_MultiTruthCollection* rpcTruthColl, Trk::SegmentCollection* segColl) const {
         if (tgcCols) {
             Muon::TgcPrepDataContainer* clusterPRD = new Muon::TgcPrepDataContainer(m_idHelperSvc->tgcIdHelper().module_hash_max());
-            for (const auto tgcCol : *tgcCols) {
+            for (const auto *const tgcCol : *tgcCols) {
                 Muon::TgcPrepDataCollection* clusteredCol = m_clusterTool->cluster(*tgcCol);
                 if (clusteredCol) clusterPRD->addCollection(clusteredCol, tgcCol->identifyHash()).ignore();
             }
@@ -109,7 +109,7 @@ namespace Muon {
 
         if (rpcCols) {
             Muon::RpcPrepDataContainer* clusterPRD = new Muon::RpcPrepDataContainer(m_idHelperSvc->rpcIdHelper().module_hash_max());
-            for (const auto rpcCol : *rpcCols) {
+            for (const auto *const rpcCol : *rpcCols) {
                 Muon::RpcPrepDataCollection* clusteredCol = m_clusterTool->cluster(*rpcCol);
                 if (clusteredCol) clusterPRD->addCollection(clusteredCol, rpcCol->identifyHash()).ignore();
             }
@@ -157,7 +157,7 @@ namespace Muon {
         std::vector<std::vector<ClusterSeg::SpacePoint>> sPoints = theAnalysis.analyse(thisEvent->Clust());
 
         processSpacePoints(thisEvent, sPoints);
-        if (thisEvent->segTrkColl()->size() > 0)
+        if (!thisEvent->segTrkColl()->empty())
             ATH_MSG_DEBUG("it made at least one track ");
         else
             ATH_MSG_DEBUG("processSpacePoints didn't make anything");
@@ -193,7 +193,7 @@ namespace Muon {
         std::vector<std::vector<ClusterSeg::SpacePoint>> sPoints = theAnalysis.analyse(thisEvent->Clust());
 
         processSpacePoints(thisEvent, sPoints);
-        if (thisEvent->segTrkColl()->size() > 0)
+        if (!thisEvent->segTrkColl()->empty())
             ATH_MSG_DEBUG("it made at least one track ");
         else
             ATH_MSG_DEBUG("processSpacePoints didn't make anything");
@@ -214,7 +214,7 @@ namespace Muon {
         delete thisEvent;
     }
 
-    void MuonClusterSegmentFinder::findOverlap(std::map<int, bool>& themap, candEvent* theEvent) const {
+    void MuonClusterSegmentFinder::findOverlap(std::map<int, bool>& themap, candEvent* theEvent) {
         CompareMuonSegmentKeys compareKeys{};
         if (theEvent->keyVector().size() > 1) {
             for (unsigned int i = 0; i < theEvent->keyVector().size(); i++) { themap.insert(std::pair<int, bool>(i, true)); }
@@ -393,7 +393,7 @@ namespace Muon {
                 }
                 ATH_MSG_DEBUG("the chi2 is " << chi2 << "the dof are " << dof << " and the chi2/dof is " << chi2 / dof);
                 theEvent->segTrkColl()->push_back(segtrack);
-                theEvent->trackSeeds().push_back(std::make_pair(gp, gd));
+                theEvent->trackSeeds().emplace_back(gp, gd);
                 theEvent->hits().push_back(vec1);
             } else {
                 ATH_MSG_DEBUG("segment fit failed");
@@ -403,14 +403,14 @@ namespace Muon {
 
     void MuonClusterSegmentFinder::resolveCollections(const std::map<int, bool>& themap, candEvent* theEvent) const {
         for (unsigned int i = 0; i < theEvent->keyVector().size(); i++) {
-            if (themap.at(i) == true) {
-                theEvent->resolvedTrackSeeds().push_back(std::make_pair(theEvent->trackSeeds()[i].first, theEvent->trackSeeds()[i].second));
+            if (themap.at(i)) {
+                theEvent->resolvedTrackSeeds().emplace_back(theEvent->trackSeeds()[i].first, theEvent->trackSeeds()[i].second);
                 theEvent->resolvedhits().push_back(theEvent->hits()[i]);
                 theEvent->resolvedTracks()->push_back(new Trk::Track(*(theEvent->segTrkColl()->at(i))));
             }
         }
         if (theEvent->keyVector().size() == 1) {
-            theEvent->resolvedTrackSeeds().push_back(std::make_pair(theEvent->trackSeeds()[0].first, theEvent->trackSeeds()[0].second));
+            theEvent->resolvedTrackSeeds().emplace_back(theEvent->trackSeeds()[0].first, theEvent->trackSeeds()[0].second);
             theEvent->resolvedhits().push_back(theEvent->hits()[0]);
             theEvent->resolvedTracks()->push_back(new Trk::Track(*(theEvent->segTrkColl()->at(0))));
         }
@@ -451,7 +451,7 @@ namespace Muon {
                     continue;
                 }
                 std::vector<const Muon::MdtDriftCircleOnTrack*> MDTs;
-                for (auto mdtCol : mdtCols) {
+                for (const auto *mdtCol : mdtCols) {
                     if (!m_muonPRDSelectionTool->calibrateAndSelectMdt(intersection, *mdtCol, MDTs)) {
                         ATH_MSG_DEBUG("Failed to calibrate MDT PRD collection ");
                         continue;
@@ -486,7 +486,7 @@ namespace Muon {
         // loop over hashes
         for (MuonLayerHashProviderTool::HashVec::const_iterator it = hashes.begin(); it != hashes.end(); ++it) {
             // skip if not found
-            auto col = input->indexFindPtr(*it);
+            const auto *col = input->indexFindPtr(*it);
             if (!col) {
                 // ATH_MSG_WARNING("Cannot find hash " << *it << " in container at " << location);
                 continue;

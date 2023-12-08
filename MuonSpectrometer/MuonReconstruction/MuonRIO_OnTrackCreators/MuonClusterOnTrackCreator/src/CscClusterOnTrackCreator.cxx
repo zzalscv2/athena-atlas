@@ -2,6 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <cmath>
+
 #include "CscClusterOnTrackCreator.h"
 
 #include "EventPrimitives/EventPrimitivesHelpers.h"
@@ -43,7 +45,7 @@ namespace Muon {
         declareProperty("MinimumError", m_minimumError = 0.05);
     }
 
-    CscClusterOnTrackCreator::~CscClusterOnTrackCreator() {}
+    CscClusterOnTrackCreator::~CscClusterOnTrackCreator() = default;
 
     /////////////////////////////////
     StatusCode CscClusterOnTrackCreator::initialize() {
@@ -182,7 +184,7 @@ namespace Muon {
                 const MuonGM::TgcReadoutElement* ele = MClus->detectorElement();
 
                 double stripLength = ele->stripLength(gasGap, stripNo);
-                double stripWidth = fabs(ele->stripMaxX(gasGap, stripNo, lp[Trk::locZ]) - ele->stripMinX(gasGap, stripNo, lp[Trk::locZ]));
+                double stripWidth = std::fabs(ele->stripMaxX(gasGap, stripNo, lp[Trk::locZ]) - ele->stripMinX(gasGap, stripNo, lp[Trk::locZ]));
 
                 double localX1 = ele->stripCtrX(gasGap, stripNo, stripLength / 2.);
                 double localX2 = ele->stripCtrX(gasGap, stripNo, -stripLength / 2.);

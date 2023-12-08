@@ -102,7 +102,7 @@ namespace Muon {
 
         StatusCode decodeStrategyVector(const std::vector<std::string>& strategy);
         std::unique_ptr<const MuonTrackSteeringStrategy> decodeStrategy(const std::string& strategy) const;
-        bool decodeList(const std::string& input, std::vector<std::string>& list) const;
+        static bool decodeList(const std::string& input, std::vector<std::string>& list) ;
 
         std::vector<std::unique_ptr<MuPatTrack>> extendWithLayer(const EventContext& ctx, MuPatTrack& candidate, const SegColVec& segcol, unsigned int nextlayer,
                                                                  const unsigned int endlayer, int cutLevel = 0) const;

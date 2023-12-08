@@ -515,7 +515,7 @@ namespace Muon {
         return sout.str();
     }
 
-    std::string MuonSegmentCombinationCleanerTool::print(MuonSegmentCombiOverlapSummary& summary) const {
+    std::string MuonSegmentCombinationCleanerTool::print(MuonSegmentCombiOverlapSummary& summary) {
         std::ostringstream sout;
 
         sout << "SegmentCombi overlap " << std::endl

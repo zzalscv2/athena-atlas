@@ -23,9 +23,7 @@ namespace Muon {
                               std::back_inserter(intersection));
 
         unsigned int intersectionSize = intersection.size();
-        if (intersectionSize == 0) return false;
-
-        return true;
+        return intersectionSize != 0;
     }
 
     const std::set<MuonStationIndex::StIndex>& MuPatCandidateBase::stations() const { return m_stations; }

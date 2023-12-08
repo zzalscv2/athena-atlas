@@ -46,8 +46,7 @@ namespace Muon
 
 // Destructor:
 TgcPrepData::~TgcPrepData()
-{
-}
+= default;
 
 // Default constructor:
 TgcPrepData::TgcPrepData():
@@ -57,11 +56,9 @@ TgcPrepData::TgcPrepData():
 { }
 
 //copy constructor:
-TgcPrepData::TgcPrepData(const TgcPrepData& RIO):
-  MuonCluster(RIO),
-  m_detEl( RIO.m_detEl ),
-  m_bcBitMap(RIO.m_bcBitMap)
-{ }
+TgcPrepData::TgcPrepData(const TgcPrepData& RIO)
+  
+= default;
 
 //assignment operator
 TgcPrepData& TgcPrepData::operator=(const TgcPrepData& RIO)

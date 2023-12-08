@@ -268,7 +268,7 @@ MuonSegmentInOverlapResolvingTool::bestPhiMatchAnalytic(const MuonSegment& seg1,
     Trk::LocalDirection segLocDir2;
     seg2.associatedSurface().globalToLocalDirection(segDir2Min, segLocDir2);
     double dyz = std::abs(segLocDir1.angleYZ() - segLocDir2.angleYZ());
-    return SegmentPhiMatchResult(segDir1Min, segDir2Min, dyz);
+    return {segDir1Min, segDir2Min, dyz};
 }
 
 MuonSegmentInOverlapResolvingTool::SegmentPhiMatchResult
@@ -297,7 +297,7 @@ MuonSegmentInOverlapResolvingTool::bestPhiMatch(const MuonSegment& seg1, const M
             // bestBin = i;
         }
     }
-    return SegmentPhiMatchResult(segDir1Min, updateSegmentDirection(seg2, segDir1Min.phi()), dthetaMin);
+    return {segDir1Min, updateSegmentDirection(seg2, segDir1Min.phi()), dthetaMin};
 }
 
 
@@ -404,9 +404,9 @@ MuonSegmentInOverlapResolvingTool::bestPositionAlongTubeMatch(const MuonSegment&
         goodMatch = false;
     }
 
-    return SegmentPositionMatchResult(distPosMin, distPosInTube, segmentGeometry.shortestChannelLength, distPosMin2,
+    return {distPosMin, distPosInTube, segmentGeometry.shortestChannelLength, distPosMin2,
                                       distPosInTube2, segmentGeometry2.shortestChannelLength, resyMin, goodMatch,
-                                      segPos);
+                                      segPos};
 }
 
 

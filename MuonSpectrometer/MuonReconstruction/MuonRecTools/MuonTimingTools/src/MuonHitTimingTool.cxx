@@ -52,18 +52,18 @@ namespace Muon {
   IMuonHitTimingTool::TimingResult MuonHitTimingTool::calculateTimingResult( const std::vector<const MuonClusterOnTrack*>& hits ) const {
     
     // treat case of no hits and the case the first pointer is zero (should not happen)
-    if( hits.empty() || !hits.front() )       return TimingResult();
+    if( hits.empty() || !hits.front() )       return {};
 
     // for now assume that all hits are of the same technolgy
     Identifier id = hits.front()->identify();
     MuonStationIndex::TechnologyIndex tech = m_idHelperSvc->technologyIndex(id);
-    if( !m_acceptedTechnologies.count(tech) ) return TimingResult();
+    if( !m_acceptedTechnologies.count(tech) ) return {};
     
     // get handle and use it if it is not empty
     const ToolHandle<IMuonHitTimingTool>& toolHandle = m_hitTimingTools[tech];
     if( toolHandle.empty() ) {
       ATH_MSG_WARNING("Unable to fill timing, timing tool missing. Tech = " << MuonStationIndex::technologyName(tech) );
-      return TimingResult();
+      return {};
     }
     return toolHandle->calculateTimingResult(hits);
   }

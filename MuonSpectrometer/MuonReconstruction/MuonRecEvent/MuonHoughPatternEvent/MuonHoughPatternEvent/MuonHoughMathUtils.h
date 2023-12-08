@@ -67,7 +67,7 @@ public:
     static std::string intToString(int i);
 
     /** distance from (x0,y0) to line (r,phi) */
-    double distanceToLine2D(double x0, double y0, double r, double phi) const;
+    static double distanceToLine2D(double x0, double y0, double r, double phi) ;
     /** distance from (x0,y0,z0) to line (x,y,z,phi,theta) */
     static double distanceToLine3D(const Amg::Vector3D& point, const Amg::Vector3D& l_trans, double phi, double theta);
 

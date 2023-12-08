@@ -7,14 +7,14 @@
 
 using Muon::CscStripPrepData;
 
-typedef ICscStripFitter::Result Result;
+using Result = ICscStripFitter::Result;
 using ChargeList = ICscStripFitter::ChargeList;
 
 // Result ICscStripFitter::fit(const ChargeList&, double, Identifier& /*sid*/) const {
 //  return Result();
 //}
 Result ICscStripFitter::fit(const ChargeList& /*ChargeList*/, double /*samplingTime*/, bool /*samplingPhase*/, Identifier& /*sid*/) const {
-    return Result();
+    return {};
 }
 
 Result ICscStripFitter::fit(const CscStripPrepData& strip) const {

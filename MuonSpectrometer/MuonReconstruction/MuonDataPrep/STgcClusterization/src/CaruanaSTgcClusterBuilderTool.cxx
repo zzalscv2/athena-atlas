@@ -175,5 +175,4 @@ void CaruanaSTgcClusterBuilderTool::dumpStrips( std::vector<Muon::sTgcPrepData>&
 
   }
 
-  return;
-}
+  }

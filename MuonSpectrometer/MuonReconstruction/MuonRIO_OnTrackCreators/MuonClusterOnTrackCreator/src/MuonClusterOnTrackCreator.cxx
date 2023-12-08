@@ -8,6 +8,7 @@
 
 #include "MuonClusterOnTrackCreator.h"
 
+#include <cmath>
 #include <sstream>
 
 #include "MuonPrepRawData/CscPrepData.h"
@@ -190,7 +191,7 @@ namespace Muon {
                 const MuonGM::TgcReadoutElement* ele = MClus->detectorElement();
 
                 double stripLength = ele->stripLength(gasGap, stripNo);
-                double stripWidth = fabs(ele->stripMaxX(gasGap, stripNo, lp[Trk::locZ]) - ele->stripMinX(gasGap, stripNo, lp[Trk::locZ]));
+                double stripWidth = std::fabs(ele->stripMaxX(gasGap, stripNo, lp[Trk::locZ]) - ele->stripMinX(gasGap, stripNo, lp[Trk::locZ]));
 
                 double localX1 = ele->stripCtrX(gasGap, stripNo, stripLength / 2.);
                 double localX2 = ele->stripCtrX(gasGap, stripNo, -stripLength / 2.);

@@ -83,7 +83,7 @@ namespace Muon {
         if (seedSeg){
             m_seedSeg = seedSeg;
             addToTrash(seedSeg->garbage());
-        } else if (segments.size())
+        } else if (!segments.empty())
             m_seedSeg = segments[0];
         for (MuPatSegment* seg : segments){
             addToTrash(seg->garbage());
@@ -188,7 +188,7 @@ namespace Muon {
         return hasMomentum(*m_track);
     }
 
-    bool MuPatTrack::hasMomentum(const Trk::Track& track) const {
+    bool MuPatTrack::hasMomentum(const Trk::Track& track) {
         // use track info if set properly
         if (track.info().trackProperties(Trk::TrackInfo::StraightTrack)) return false;
 

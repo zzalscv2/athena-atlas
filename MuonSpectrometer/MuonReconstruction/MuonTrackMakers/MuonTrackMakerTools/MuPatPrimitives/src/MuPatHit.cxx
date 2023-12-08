@@ -17,7 +17,7 @@ namespace Muon {
     MuPatHit::MuPatHit(std::shared_ptr<const Trk::TrackParameters> pars, std::shared_ptr<const Trk::MeasurementBase> presMeas,
                        std::shared_ptr<const Trk::MeasurementBase> broadMeas,  Info info) :
         Trk::ObjectCounter<MuPatHit>{},
-        m_pars(std::move(pars)), m_precisionMeas(std::move(presMeas)), m_broadMeas(std::move(broadMeas)), m_info(std::move(info)) {
+        m_pars(std::move(pars)), m_precisionMeas(std::move(presMeas)), m_broadMeas(std::move(broadMeas)), m_info(info) {
 
     }
 

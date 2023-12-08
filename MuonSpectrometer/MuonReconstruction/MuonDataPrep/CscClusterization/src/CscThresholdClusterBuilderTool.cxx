@@ -82,7 +82,7 @@ CscThresholdClusterBuilderTool::CscThresholdClusterBuilderTool(const std::string
 
 // Destructor.
 
-CscThresholdClusterBuilderTool::~CscThresholdClusterBuilderTool() {}
+CscThresholdClusterBuilderTool::~CscThresholdClusterBuilderTool() = default;
 
 //******************************************************************************
 

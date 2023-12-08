@@ -64,7 +64,7 @@ namespace Muon {
         void updateHoleContent(Trk::MuonTrackSummary::ChamberHitSummary& chamberHitSummary) const;
 
         /**increment the 'type'*/
-        void increment(int& type) const;
+        static void increment(int& type) ;
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 

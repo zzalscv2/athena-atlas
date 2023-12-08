@@ -198,7 +198,7 @@ namespace Muon {
   }
 
   void HitClusteringObj::findBest(std::vector<ClusterObj>& clustersEta,
-                                  std::vector<ClusterObj>& clustersPhi) const {
+                                  std::vector<ClusterObj>& clustersPhi) {
     std::vector<ClusterObj>::iterator it = clustersEta.begin();
     std::vector<ClusterObj>::iterator it_end = clustersEta.end();
     std::stable_sort(it,it_end,SortClusterObjs());

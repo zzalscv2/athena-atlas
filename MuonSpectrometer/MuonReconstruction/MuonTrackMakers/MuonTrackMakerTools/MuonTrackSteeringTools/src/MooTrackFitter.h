@@ -111,7 +111,7 @@ namespace Muon {
         std::unique_ptr<Trk::Track> refit(const EventContext& ctx, const Trk::Track& track) const;
 
         /** impose upper and lower bound on momentum */
-        double restrictedMomentum(double momentum) const;
+        static double restrictedMomentum(double momentum) ;
 
         /** create perigee parameter to initialize fit */
         std::unique_ptr<Trk::Perigee> createPerigee(const EventContext& ctx, const Trk::TrackParameters& firstPars, const Trk::MeasurementBase& firstMeas) const;
@@ -234,7 +234,7 @@ namespace Muon {
                                                                 const Amg::Vector3D* phiPos, double error) const;
 
         /** get q/p from entry */
-        double qOverPFromEntry(const MuPatCandidateBase& entry) const;
+        static double qOverPFromEntry(const MuPatCandidateBase& entry) ;
 
         /** get q/p using angle + position of the two entries */
         double qOverPFromEntries(const EventContext& ctx, const MuPatCandidateBase& firstEntry, const MuPatCandidateBase& secondEntry) const;

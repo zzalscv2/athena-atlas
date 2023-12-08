@@ -151,7 +151,7 @@ namespace Muon {
         void modifySegmentCounters(int change);
 
         /** @brief check whether track measures momentum */
-        bool hasMomentum(const Trk::Track& track) const;
+        static bool hasMomentum(const Trk::Track& track) ;
 
         std::vector<MuPatSegment*> m_segments{};          //<! list of associated segments
         std::vector<MuPatSegment*> m_excludedSegments{};  //<! list of associated segments

@@ -7,7 +7,7 @@
 namespace Muon {
 
     MuonSegmentCombiSummary::MuonSegmentCombiSummary(const MuonSegmentCombination& combi) { m_observer_ptr = &combi; }
-    bool MuonSegmentCombiSummary::has_ownership() const { return m_owner_combi.get() != nullptr; }
+    bool MuonSegmentCombiSummary::has_ownership() const { return m_owner_combi != nullptr; }
     MuonSegmentCombiSummary::MuonSegmentCombiSummary(std::unique_ptr<MuonSegmentCombination> segment) : m_owner_combi(std::move(segment)) {
         m_observer_ptr = m_owner_combi.get();
     }

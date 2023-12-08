@@ -21,7 +21,7 @@ using Muon::CscPrepData;
 using Muon::CscStripPrepData;
 using MuonGM::CscReadoutElement;
 
-typedef ICscClusterFitter::DataNames DataNames;
+using DataNames = ICscClusterFitter::DataNames;
 using Result = ICscClusterFitter::Result;
 using Results = std::vector<Result>;
 
@@ -312,16 +312,16 @@ const DataNames& QratCscClusterFitter::dataNames() const {
             if (m_erropt_eta == "CHARGE") docharge = true;
         }
         if (dofixed || docharge) {
-            dnames.push_back("scor1");
-            dnames.push_back("scor2");
-            dnames.push_back("scor");
+            dnames.emplace_back("scor1");
+            dnames.emplace_back("scor2");
+            dnames.emplace_back("scor");
         }
         if (docharge) {
-            dnames.push_back("dscor1");
-            dnames.push_back("dscor2");
-            dnames.push_back("dscor");
-            dnames.push_back("scordiff");
-            dnames.push_back("dscordiff");
+            dnames.emplace_back("dscor1");
+            dnames.emplace_back("dscor2");
+            dnames.emplace_back("dscor");
+            dnames.emplace_back("scordiff");
+            dnames.emplace_back("dscordiff");
         }
         return dnames;
     };
@@ -342,10 +342,10 @@ Results QratCscClusterFitter::fit(const StripFitList& sfits, double tantheta) co
         ATH_MSG_VERBOSE("  Input has fewer than three strips.");
         if (nstrip == 2) {
             Muon::CscTimeStatus tstatus = (sfits[0].charge > sfits[1].charge) ? sfits[0].timeStatus : sfits[1].timeStatus;
-            results.push_back(Result(1, Muon::CscStatusNarrow, tstatus));
+            results.emplace_back(1, Muon::CscStatusNarrow, tstatus);
         } else if (nstrip == 1) {
             Muon::CscTimeStatus tstatus = sfits[0].timeStatus;
-            results.push_back(Result(1, Muon::CscStatusNarrow, tstatus));
+            results.emplace_back(1, Muon::CscStatusNarrow, tstatus);
         }
         return results;
     }
@@ -354,7 +354,7 @@ Results QratCscClusterFitter::fit(const StripFitList& sfits, double tantheta) co
     for (unsigned int istrip = 0; istrip < nstrip; ++istrip) {
         if (sfits[istrip].strip == nullptr) {
             ATH_MSG_WARNING("Strip pointer is null.");
-            results.push_back(Result(2));
+            results.emplace_back(2);
             return results;
         }
     }
@@ -381,7 +381,7 @@ Results QratCscClusterFitter::fit(const StripFitList& sfits, double tantheta) co
     CscPlane plane = findPlane(station, measphi);
     if (plane == UNKNOWN_PLANE) {
         ATH_MSG_WARNING("Invalid CSC plane: station=" << station << "; measphi=" << measphi);
-        results.push_back(Result(3));
+        results.emplace_back(3);
         return results;
     }
 
@@ -421,7 +421,7 @@ Results QratCscClusterFitter::fit(const StripFitList& sfits, double tantheta) co
         // Record if peak.
         if (ispeak) {
             if (istrip_peak) {                                           // Error if multiple peaks are found.
-                results.push_back(Result(6, Muon::CscStatusMultiPeak));  // Time status should be defined in SimpleClusterFit...
+                results.emplace_back(6, Muon::CscStatusMultiPeak);  // Time status should be defined in SimpleClusterFit...
                 return results;
             }
             istrip_peak = istrip;
@@ -431,7 +431,7 @@ Results QratCscClusterFitter::fit(const StripFitList& sfits, double tantheta) co
 
     // Check we are not on the edge.
     if (strip0 <= 0 || strip0 + nstrip > maxstrip) {
-        results.push_back(Result(4, Muon::CscStatusEdge, sfits[istrip_peak].timeStatus));
+        results.emplace_back(4, Muon::CscStatusEdge, sfits[istrip_peak].timeStatus);
         return results;
     }
 
@@ -449,13 +449,13 @@ Results QratCscClusterFitter::fit(const StripFitList& sfits, double tantheta) co
     bool is_even = 2 * (nstrip / 2) == nstrip;
     bool atcenter = istrip_peak == nstrip / 2 || (is_even && istrip_peak + 1 == nstrip / 2);
     if (!atcenter) {
-        results.push_back(Result(7, Muon::CscStatusSkewed, sfits[istrip_peak].timeStatus));
+        results.emplace_back(7, Muon::CscStatusSkewed, sfits[istrip_peak].timeStatus);
         return results;
     }
 
     if (sfits[istrip_peak].stripStatus == Muon::CscStrStatSaturated || sfits[istrip_peak - 1].stripStatus == Muon::CscStrStatSaturated ||
         sfits[istrip_peak + 1].stripStatus == Muon::CscStrStatSaturated) {
-        results.push_back(Result(15, Muon::CscStatusSaturated, sfits[istrip_peak].timeStatus));
+        results.emplace_back(15, Muon::CscStatusSaturated, sfits[istrip_peak].timeStatus);
         return results;
     }
 
@@ -464,11 +464,11 @@ Results QratCscClusterFitter::fit(const StripFitList& sfits, double tantheta) co
         //       || sfits[istrip_peak-1].stripStatus != Muon::CscStrStatSuccess
         //       || sfits[istrip_peak+1].stripStatus != Muon::CscStrStatSuccess ) {
     ) {
-        results.push_back(Result(14, Muon::CscStatusStripFitFailed, sfits[istrip_peak].timeStatus));
+        results.emplace_back(14, Muon::CscStatusStripFitFailed, sfits[istrip_peak].timeStatus);
         return results;
     } else if (sfits[istrip_peak - 1].stripStatus == Muon::CscStrStatHot || sfits[istrip_peak - 1].stripStatus == Muon::CscStrStatDead ||
                sfits[istrip_peak + 1].stripStatus == Muon::CscStrStatHot || sfits[istrip_peak + 1].stripStatus == Muon::CscStrStatDead) {
-        results.push_back(Result(14, Muon::CscStatusStripFitFailed, sfits[istrip_peak].timeStatus));
+        results.emplace_back(14, Muon::CscStatusStripFitFailed, sfits[istrip_peak].timeStatus);
         return results;
     }
 
@@ -514,7 +514,7 @@ Results QratCscClusterFitter::fit(const StripFitList& sfits, double tantheta) co
             pcor = &m_qratcor_csl_eta;
         } else {
             ATH_MSG_WARNING("    Invalid QRAT plane: " << splane(plane));
-            results.push_back(Result(8));
+            results.emplace_back(8);
             return results;
         }
         if (pcor) {
@@ -537,7 +537,7 @@ Results QratCscClusterFitter::fit(const StripFitList& sfits, double tantheta) co
             x0 = m_atanh_x0_csl_eta;
         } else {
             ATH_MSG_WARNING("    Invalid QRAT plane: " << splane(plane));
-            results.push_back(Result(8));
+            results.emplace_back(8);
             return results;
         }
         stat1 = qrat_atanh(a, b, c, x0, qrat1, scor1, dscordqrat1);
@@ -545,12 +545,12 @@ Results QratCscClusterFitter::fit(const StripFitList& sfits, double tantheta) co
 
     } else {
         ATH_MSG_WARNING("    Invalid position option: " << posopt);
-        results.push_back(Result(9));
+        results.emplace_back(9);
         return results;
     }
     if (stat1 || stat2) {
         ATH_MSG_VERBOSE("    QRAT correction failed: SPOILED");
-        results.push_back(Result(10));
+        results.emplace_back(10);
         return results;
     }
     ATH_MSG_VERBOSE("  QRAT strip corrs: " << scor1 << " " << scor2);
@@ -578,7 +578,7 @@ Results QratCscClusterFitter::fit(const StripFitList& sfits, double tantheta) co
         // Exit if measurements are inconsistent.
         if (scor_diff > m_qrat_maxdiff) {
             ATH_MSG_VERBOSE("  SPOILED (scor_diff=" << scor_diff << ")");
-            results.push_back(Result(11, Muon::CscStatusQratInconsistent));
+            results.emplace_back(11, Muon::CscStatusQratInconsistent);
             return results;
         }
         // Calculation using the (independent) errors in the three charges.
@@ -634,12 +634,12 @@ Results QratCscClusterFitter::fit(const StripFitList& sfits, double tantheta) co
         // Exit if measurements are inconsistent.
         if (scor_sig > m_qrat_maxsig) {
             ATH_MSG_VERBOSE("  SPOILED (scor_sig=" << scor_sig << ")");
-            results.push_back(Result(12, Muon::CscStatusQratInconsistent, sfits[istrip_peak].timeStatus));
+            results.emplace_back(12, Muon::CscStatusQratInconsistent, sfits[istrip_peak].timeStatus);
             return results;
         }
     } else {
         ATH_MSG_WARNING("    Invalid error option: " << erropt);
-        results.push_back(Result(13, Muon::CscStatusUndefined, sfits[istrip_peak].timeStatus));
+        results.emplace_back(13, Muon::CscStatusUndefined, sfits[istrip_peak].timeStatus);
         return results;
     }
 

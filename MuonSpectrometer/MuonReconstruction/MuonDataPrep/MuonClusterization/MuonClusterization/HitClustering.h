@@ -161,8 +161,8 @@ namespace Muon {
       return &clusters.front();
     }
 
-    void findBest(std::vector<ClusterObj>& clustersEta,
-                  std::vector<ClusterObj>& clustersPhi) const;
+    static void findBest(std::vector<ClusterObj>& clustersEta,
+                  std::vector<ClusterObj>& clustersPhi) ;
 
   private:
     const MuonIdHelper*       m_muonIdHelper;

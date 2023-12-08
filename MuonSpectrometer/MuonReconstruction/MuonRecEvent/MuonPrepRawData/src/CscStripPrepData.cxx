@@ -63,8 +63,7 @@ namespace Muon
 
   // Destructor:
   CscStripPrepData::~CscStripPrepData()
-  {
-  }
+  = default;
 
   // Default constructor:
   CscStripPrepData::CscStripPrepData():

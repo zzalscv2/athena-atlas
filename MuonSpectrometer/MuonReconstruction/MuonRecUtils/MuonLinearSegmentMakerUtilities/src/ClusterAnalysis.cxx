@@ -229,7 +229,7 @@ namespace ClusterSeg {
         m_h_xy->Fill(it.x(),it.y());
       }
       ++m_ncalls;
-      m_ntuple.clean(clust);
+      ClusterSeg::ClusterNtuple::clean(clust);
     }
   }
 
@@ -249,7 +249,7 @@ namespace ClusterSeg {
     std::vector<SpacePoint> layer3Points;
     std::vector<std::vector<SpacePoint>> seeds;
 
-    for(auto &it: points){
+    for(const auto &it: points){
       if (it.phiIndex() == Muon::MuonStationIndex::PhiIndex::T1) layer1Points.push_back(it);
       else if(it.phiIndex() == Muon::MuonStationIndex::PhiIndex::T2) layer2Points.push_back(it);
       else if(it.phiIndex() == Muon::MuonStationIndex::PhiIndex::T3) layer3Points.push_back(it);
@@ -294,7 +294,7 @@ namespace ClusterSeg {
     std::vector<SpacePoint> layer2Points;
     std::vector<std::vector<SpacePoint>> seeds;
 
-    for(auto &it: points){
+    for(const auto &it: points){
       if (it.phiIndex() == Muon::MuonStationIndex::PhiIndex::BM1) layer1Points.push_back(it);
       else if (it.phiIndex() == Muon::MuonStationIndex::PhiIndex::BM2) layer2Points.push_back(it);
     }
@@ -328,8 +328,8 @@ namespace ClusterSeg {
                                              std::vector<std::vector<SpacePoint>>& seeds){
 
     if(!layer1Points.empty() && !layer3Points.empty()){
-      for(auto &it1: layer1Points){
-      for(auto &it3: layer3Points){
+      for(const auto &it1: layer1Points){
+      for(const auto &it3: layer3Points){
       if (TMath::Sign(1.,it1.z()) != TMath::Sign(1.,it3.z())) continue;
         std::vector<SpacePoint> theSeed;
         Cluster point = Cluster(it3.x()-it1.x(),it3.y()-it1.y(),it3.z()-it1.z(),false,0,0,false,0);
@@ -354,7 +354,7 @@ namespace ClusterSeg {
 
     if(angle < m_ang_cut) {
           if(!layer2Points.empty()){
-            for(auto &it2: layer2Points){
+            for(const auto &it2: layer2Points){
               std::vector<SpacePoint> theSeed;
               if (TMath::Sign(1.,it2.z()) != TMath::Sign(1.,it1.z())) continue;
               double seedR = (it2.z()-it1.z())*tan(point.theta()) + it1.rCyl();
@@ -390,8 +390,8 @@ namespace ClusterSeg {
 
   void ClusterAnalysis::createSeedsTwoLayers(const std::vector<SpacePoint>& layer1Points,const std::vector<SpacePoint>& layer2Points,
                                              std::vector<std::vector<SpacePoint>>& seeds){
-    for(auto &it1: layer1Points){
-          for(auto &it3: layer2Points){
+    for(const auto &it1: layer1Points){
+          for(const auto &it3: layer2Points){
             if (TMath::Sign(1.,it1.z()) != TMath::Sign(1.,it3.z())) continue;
             std::vector<SpacePoint> theSeed;
             Cluster point = Cluster(it3.x()-it1.x(),it3.y()-it1.y(),it3.z()-it1.z(),false,0,0,false,0);
@@ -427,9 +427,9 @@ namespace ClusterSeg {
     std::vector<SpacePoint> spacePoints;
 
     int citer(0);
-    for(auto it: clust){
-      if(it->isPhi()) phiClusters.push_back(std::make_pair(it,citer));
-      else etaClusters.push_back(std::make_pair(it,citer));
+    for(auto *it: clust){
+      if(it->isPhi()) phiClusters.emplace_back(it,citer);
+      else etaClusters.emplace_back(it,citer);
       citer++;
     }  
     for(auto &pit: phiClusters){

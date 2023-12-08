@@ -34,7 +34,7 @@ namespace ClusterSeg {
 			      std::vector<std::vector<SpacePoint>>& seeds);
     void createSeedsTwoLayers(const std::vector<SpacePoint>& layer1Points,const std::vector<SpacePoint>& layer2Points,
 			      std::vector<std::vector<SpacePoint>>& seeds);
-    std::vector<SpacePoint> createSpacePoints(const std::vector<Cluster*>& clust);
+    static std::vector<SpacePoint> createSpacePoints(const std::vector<Cluster*>& clust);
 
     TTree*        m_tree;
     ClusterNtuple m_ntuple{};

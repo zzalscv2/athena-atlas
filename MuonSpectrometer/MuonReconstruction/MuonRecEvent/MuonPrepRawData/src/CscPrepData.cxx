@@ -58,8 +58,7 @@ namespace Muon
 
   // Destructor:
   CscPrepData::~CscPrepData()
-  {
-  }
+  = default;
 
   // Default constructor:
   CscPrepData::CscPrepData():

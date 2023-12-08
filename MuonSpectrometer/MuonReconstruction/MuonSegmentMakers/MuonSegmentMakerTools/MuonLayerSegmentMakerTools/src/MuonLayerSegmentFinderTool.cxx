@@ -15,7 +15,7 @@
 #include <typeinfo>
 using namespace xAOD::P4Helpers;
 namespace {
-    static const float OneOverSqrt12 = 1. / std::sqrt(12);
+    const float OneOverSqrt12 = 1. / std::sqrt(12);
 }
 namespace Muon {
 
@@ -354,8 +354,6 @@ namespace Muon {
             ATH_MSG_DEBUG("  Done maximum: new segments " << segments.size() - nprevSegments);
         }
         ATH_MSG_DEBUG("  Done with layer: new segments " << segments.size() - nprevSegments);
-
-        return;
-    }
+   }
 
 }  // namespace Muon

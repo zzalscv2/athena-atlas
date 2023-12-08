@@ -79,7 +79,7 @@ CscPeakThresholdClusterBuilderTool::CscPeakThresholdClusterBuilderTool(const std
 
 // Destructor.
 
-CscPeakThresholdClusterBuilderTool::~CscPeakThresholdClusterBuilderTool() {}
+CscPeakThresholdClusterBuilderTool::~CscPeakThresholdClusterBuilderTool() = default;
 
 //******************************************************************************
 

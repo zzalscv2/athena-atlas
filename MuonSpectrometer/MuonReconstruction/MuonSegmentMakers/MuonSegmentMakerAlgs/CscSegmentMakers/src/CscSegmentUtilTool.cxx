@@ -62,20 +62,14 @@ namespace {
         int nHitLayer_eta = 0;
         int nHitLayer_phi = 0;
         for (int i = 0; i < 4; ++i) {
-            if (eta_clus[i].size() > 0) ++nHitLayer_eta;
-            if (phi_clus[i].size() > 0) ++nHitLayer_phi;
+            if (!eta_clus[i].empty()) ++nHitLayer_eta;
+            if (!phi_clus[i].empty()) ++nHitLayer_phi;
         }
-        if (nHitLayer_eta < 2 && nHitLayer_phi < 2)
-            return false;
-        else
-            return true;
+        return nHitLayer_eta >= 2 || nHitLayer_phi >= 2;
     }
 
     bool IsUnspoiled(const Muon::CscClusterStatus status) {
-        if (status == Muon::CscStatusUnspoiled || status == Muon::CscStatusSplitUnspoiled)
-            return true;
-        else
-            return false;
+        return status == Muon::CscStatusUnspoiled || status == Muon::CscStatusSplitUnspoiled;
     }
 }  // namespace
 
@@ -223,10 +217,7 @@ void CscSegmentUtilTool::fit_segment(const ICscSegmentFinder::TrkClusters& clus,
 
     if (measphi) return;  // No need to do the second try
     fit_detailCalcPart1(clus, lpos000, s0, s1, d0, d1, d01, chsq, measphi, time, dtime, zshift, true, outlierHitLayer,
-                        ctx);  // IsSlopeGiven should be true
-
-    return;
-}
+                        ctx);  }
 
 /////
 // if outlierid == iclu... error should be blown out in case of precision measurements..
@@ -392,7 +383,6 @@ void CscSegmentUtilTool::fit_detailCalcPart1(const ICscSegmentFinder::TrkCluster
     if (IsSlopeGiven && q2 * q0 - q1 * q1 == 0.0) return;
 
     fit_detailCalcPart2(q0, q1, q2, q01, q11, q02, s0, s1, d0, d1, d01, chsq);
-    return;
 }
 
 //******************************************************************************
@@ -600,7 +590,6 @@ void CscSegmentUtilTool::fit_rio_segment(const Trk::PlaneSurface& ssrf, bool /*d
 
     // detailed calc part2
     fit_detailCalcPart2(q0, q1, q2, q01, q11, q02, s0, s1, d0, d1, d01, chsq);
-    return;
 }
 
 //******************************************************************************
@@ -939,7 +928,7 @@ MuonSegment* CscSegmentUtilTool::build_segment(const ICscSegmentFinder::Segment&
                 ATH_MSG_VERBOSE(" !!         !! ");
             ATH_MSG_VERBOSE(Amg::error(pcl->localCovariance(), Trk::loc1));
 
-            fitclus.push_back(ICscSegmentFinder::Cluster(lpos, pcl, measphi));
+            fitclus.emplace_back(lpos, pcl, measphi);
             cnt++;
         }
 
@@ -1288,7 +1277,7 @@ void CscSegmentUtilTool::add_2dsegments(ICscSegmentFinder::Segments& segs4, ICsc
 /////////////////////////////////////////
 // stores 2-hit segments
 void CscSegmentUtilTool::add_2dseg2hits(ICscSegmentFinder::Segments& segs, ICscSegmentFinder::Segments& segs2, int layStat) const {
-    if (segs2.size() == 0) return;
+    if (segs2.empty()) return;
     ATH_MSG_DEBUG(" Total Input 2-layer segment size " << segs2.size());
 
     int lay0 = -1, lay1 = -1;
@@ -1641,8 +1630,6 @@ void CscSegmentUtilTool::fit_detailCalcPart2(double q0, double q1, double q2, do
 
     ATH_MSG_VERBOSE("  details s0 = " << s0 << " " << d0 << " => " << r00);
     ATH_MSG_VERBOSE("  details s1 = " << s1 << " " << d1 << " " << d01 << " => " << r11 << " " << r10 << "chsq = " << chsq);
-
-    return;
 }
 
 MuonSegmentCombination* CscSegmentUtilTool::get4dMuonSegmentCombination(const MuonSegmentCombination* insegs,
@@ -2245,7 +2232,7 @@ double CscSegmentUtilTool::matchLikelihood(const MuonSegment& rsg, const MuonSeg
 }
 
 // Function to return pdf value for signal distribution in xy matching.
-double CscSegmentUtilTool::pdf_sig(const double x) const {
+double CscSegmentUtilTool::pdf_sig(const double x) {
     double f1, f2;
     double par[6] = {1.25049, 1.02934, 0.0517436, 0.0229711, 0.900799, 0.374422};
 
@@ -2263,7 +2250,7 @@ double CscSegmentUtilTool::pdf_sig(const double x) const {
 }
 
 // function to return pdf value for background distribution.
-double CscSegmentUtilTool::pdf_bkg(const double x) const {
+double CscSegmentUtilTool::pdf_bkg(const double x) {
     double e1, e2;
     double par[8] = {0.0394188, 0.0486057, 0.0869231, 1.16153, -0.109998, 0.009729, 0.36183, 0.228344};
 
@@ -2286,7 +2273,7 @@ double CscSegmentUtilTool::pdf_bkg(const double x) const {
 }
 
 // likelihood function for charge ratio
-double CscSegmentUtilTool::qratio_like(const double pdf_sig, const double pdf_bkg) const {
+double CscSegmentUtilTool::qratio_like(const double pdf_sig, const double pdf_bkg) {
     double like = 0;
 
     // return zero if both probability distribution functions are zero.

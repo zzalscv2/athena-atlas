@@ -21,7 +21,7 @@ namespace Muon {
   IMuonHitTimingTool::TimingResult RPC_TimingTool::calculateTimingResult( const std::vector<const MuonClusterOnTrack*>& hits ) const {
     
     // sanity check
-    if( hits.empty() )     return TimingResult();
+    if( hits.empty() )     return {};
     
     ATH_MSG_DEBUG(" calculating timing for hits " << hits.size() );
 
@@ -31,7 +31,7 @@ namespace Muon {
     float invbinwidth = 1./binwidth;
     
     
-    for( auto hit : hits ){
+    for( const auto *hit : hits ){
       const RpcClusterOnTrack* rpc = dynamic_cast<const RpcClusterOnTrack*>(hit);
       if( !rpc ) continue;
       int bin = invbinwidth*(rpc->time()-minTime);
@@ -52,7 +52,7 @@ namespace Muon {
       double time = 0.;
       unsigned int nhits = 0;
       double error = getError(*hits.front());
-      for( auto hit : hits ){
+      for( const auto *hit : hits ){
         const RpcClusterOnTrack* rpc = dynamic_cast<const RpcClusterOnTrack*>(hit);
         if( !rpc ) continue;
         int bin = invbinwidth*(rpc->time()-minTime);
@@ -62,12 +62,12 @@ namespace Muon {
         time += rpc->time();
         ++nhits;
       }
-      if( nhits == 0 ) return TimingResult();
+      if( nhits == 0 ) return {};
       time /= nhits;
       ATH_MSG_DEBUG( " final time " << time << " error " << error );
-      return TimingResult(true,time,error);
+      return {true,time,error};
     }
-    return TimingResult();
+    return {};
   }
 
   double RPC_TimingTool::getError(const MuonClusterOnTrack& rpcRIO) const { 

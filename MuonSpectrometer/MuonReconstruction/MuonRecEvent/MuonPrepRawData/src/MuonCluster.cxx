@@ -44,8 +44,7 @@ MuonCluster::MuonCluster( const Identifier& RDOId,
 
   // Destructor:
   MuonCluster::~MuonCluster()
-  {
-  }
+  = default;
 
   // Default constructor:
   MuonCluster::MuonCluster():

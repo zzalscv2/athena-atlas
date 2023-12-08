@@ -657,7 +657,7 @@ int MuonHoughPatternTool::maxLevelHoughPattern(const MuonHoughPatternContainerSh
     return maxlevel;
 }  // maxLevelHoughPattern
 
-void MuonHoughPatternTool::transformCoordsMaximum(std::pair<double, double>& coordsmaximum, double r0_true) const {
+void MuonHoughPatternTool::transformCoordsMaximum(std::pair<double, double>& coordsmaximum, double r0_true) {
     double z_true = coordsmaximum.first;
     double theta_true = coordsmaximum.second;
 

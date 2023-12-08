@@ -9,7 +9,7 @@
 
 namespace Muon {
 
-  TimePointBetaFitter::FitResult TimePointBetaFitter::fit( TimePointBetaFitter::HitVec& hits ) const {
+  TimePointBetaFitter::FitResult TimePointBetaFitter::fit( TimePointBetaFitter::HitVec& hits ) {
     
     /** Formula
        chi2 = sum( t_meas-t_pred)^2/sigma_meas^2 )
@@ -21,7 +21,7 @@ namespace Muon {
      */
 
     // we need at least one hit
-    if( hits.empty() ) return FitResult();
+    if( hits.empty() ) return {};
 
     MsgStream log(Athena::getMessageSvc(),"TimePointBetaFitter");
     if (log.level()<=MSG::VERBOSE) log << MSG::VERBOSE << "Performing fit, hits " << hits.size() << endmsg;
@@ -52,7 +52,7 @@ namespace Muon {
       sum2 += it->distance*it->time*it->weight2;
     } 
     // check if sum2 is none zero
-    if( sum2 == 0 ) return FitResult();
+    if( sum2 == 0 ) return {};
 
     // calculate beta and chi2
     float beta = sum1/sum2;
@@ -72,7 +72,7 @@ namespace Muon {
       ++ndof;
       chi2 += res*res*it->weight2;
     } 
-    if( ndof == 0 ) return FitResult();
+    if( ndof == 0 ) return {};
 
     FitResult result(1,beta,chi2,ndof);
     if (log.level()<=MSG::VERBOSE) log << "beta " << beta << " chi2 " << chi2 << " ndof " <<  ndof << " chi2/ndof " << result.chi2PerDOF() << endmsg;
