@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DCMATH_SEGMENTFINDER_H
@@ -26,7 +26,6 @@
 #include "TrkDriftCircleMath/ResolvedCollection.h"
 #include "TrkDriftCircleMath/Segment.h"
 #include "TrkDriftCircleMath/SortDcsByY.h"
-#include "TrkDriftCircleMath/TangentToCircles.h"
 
 namespace TrkDriftCircleMath {
 
@@ -121,7 +120,6 @@ namespace TrkDriftCircleMath {
         bool m_useSegmentQuality{false};
         bool m_recoverMdtHits{true};
 
-        TangentToCircles m_tanCreator;
         std::shared_ptr<const DCSLFitter> m_fitter;
         DCSLHitSelector m_hitSelector;
         MatchCrossedTubes m_matchCrossed;
