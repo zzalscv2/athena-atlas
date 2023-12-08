@@ -114,7 +114,7 @@ checkstep "NTUP_BTAG_PHYSVAL"
 if [ -d art_core_* ]
 then
   echo "Merging histograms"
-  hadd NTUP_PHYS.root art_core_*/NTUP_PHYSVAL.root
+  hadd NTUP_PHYSVAL.root art_core_*/NTUP_PHYSVAL.root
   $idpvm_merge_script NTUP_PHYSVAL.root
   python $ftag_merge_DQA/$ftag_merge_script --input art_core_*/* --pattern "*BTAG_PHYSVAL*" --output NTUP_BTAG_MERGE_PHYSVAL.root -d BTag
 else
