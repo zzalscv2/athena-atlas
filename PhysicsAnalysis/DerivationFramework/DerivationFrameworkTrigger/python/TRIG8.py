@@ -114,7 +114,8 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
     # Add specific triggers
     additional_triggers = [
         "HLT_mu20_msonly",
-        "HLT_j180_2dispjet_2p_L1J100"
+        "HLT_j180_2dispjet_2p_L1J100",
+        "HLT_j45_pf_ftf_preselj20_L1J15"
     ]    
     idtrig_keys += additional_triggers
 
@@ -186,7 +187,7 @@ def TRIG8Cfg(flags):
                                             "BTagging_AntiKt4EMPFlow",
                                             "TauJets"]
 
-    TRIG8SlimmingHelper.AllVariables =  ["HLT_IDTrack_Electron_FTF", 
+    TRIG8SlimmingHelper.AllVariables = ["HLT_IDTrack_Electron_FTF", 
                                         "HLT_IDTrack_ElecLRT_FTF", 
                                         "HLT_IDTrack_Electron_IDTrig", 
                                         "HLT_IDTrack_ElecLRT_IDTrig", 
@@ -224,28 +225,57 @@ def TRIG8Cfg(flags):
                                         "HLT_IDVertex_Tau"]
 
 
-    TRIG8SlimmingHelper.StaticContent = [
-                        "TrigRoiDescriptorCollection#HLT_Roi_Bjet",
-                        "TrigRoiDescriptorCollection#HLT_Roi_DJ",
-                        "TrigRoiDescriptorCollection#HLT_Roi_FS",
-                        "TrigRoiDescriptorCollection#HLT_Roi_FastElectron",
-                        "TrigRoiDescriptorCollection#HLT_Roi_FastElectron_LRT",
-                        "TrigRoiDescriptorCollection#HLT_Roi_FastPhoton",
-                        "TrigRoiDescriptorCollection#HLT_Roi_IDCalibPEB",
-                        "TrigRoiDescriptorCollection#HLT_Roi_JetSuper",
-                        "TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon",
-                        "TrigRoiDescriptorCollection#HLT_Roi_L2SAMuonForEF",
-                        "TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon_LRT",
-                        "TrigRoiDescriptorCollection#HLT_Roi_LArPEBHLT",
-                        "TrigRoiDescriptorCollection#HLT_Roi_MuonIso",
-                        "TrigRoiDescriptorCollection#HLT_Roi_Tau",
-                        "TrigRoiDescriptorCollection#HLT_Roi_TauCore",
-                        "TrigRoiDescriptorCollection#HLT_Roi_TauIso",
-                        "TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT",
-                        "TrigRoiDescriptorCollection#HLT_Roi_TauLRT",
-                        "TrigInDetTrackTruthMap#TrigInDetTrackTruthMap"
-                        ]
-
+    TRIG8SlimmingHelper.StaticContent = [ 
+                            "TrigRoiDescriptorCollection#HLT_FSRoI",
+                            "TrigRoiDescriptorCollection#HLT_MURoIs",
+                            "TrigRoiDescriptorCollection#HLT_eEMRoIs",
+                            "TrigRoiDescriptorCollection#HLT_eTAURoIs",
+                            "TrigRoiDescriptorCollection#HLT_jTAURoIs",
+                            "TrigRoiDescriptorCollection#HLT_cTAURoIs",
+                            "TrigRoiDescriptorCollection#HLT_jEMRoIs",
+                            "TrigRoiDescriptorCollection#HLT_jJRoIs",
+                            "TrigRoiDescriptorCollection#HLT_jLJRoIs",
+                            "TrigRoiDescriptorCollection#HLT_gJRoIs",
+                            "TrigRoiDescriptorCollection#HLT_gLJRoIs",
+                            "TrigRoiDescriptorCollection#HLT_EMRoIs",
+                            "TrigRoiDescriptorCollection#HLT_METRoI",
+                            "TrigRoiDescriptorCollection#HLT_JETRoI",
+                            "TrigRoiDescriptorCollection#HLT_TAURoI",
+                            "TrigRoiDescriptorCollection#HLT_Roi_LArPEBHLT",
+                            "TrigRoiDescriptorCollection#HLT_Roi_IDCalibPEB",
+                            "TrigRoiDescriptorCollection#HLT_Roi_FastElectron",
+                            "TrigRoiDescriptorCollection#HLT_Roi_FastElectron_probe",
+                            "TrigRoiDescriptorCollection#HLT_Roi_FastElectron_LRT",
+                            "TrigRoiDescriptorCollection#HLT_Roi_FastElectron_LRT_probe",
+                            "TrigRoiDescriptorCollection#HLT_Roi_FastPhoton",
+                            "TrigRoiDescriptorCollection#HLT_Roi_FastPhoton_probe",
+                            "TrigRoiDescriptorCollection#HLT_Roi_Bmumux",
+                            "TrigRoiDescriptorCollection#MuonCandidates_FS_ROIs",
+                            "TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon",
+                            "TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon_probe",
+                            "TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon_LRT",
+                            "TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon_LRT_probe",
+                            "TrigRoiDescriptorCollection#HLT_Roi_L2SAMuonForEF",
+                            "TrigRoiDescriptorCollection#HLT_Roi_L2SAMuonForEF_probe",
+                            "TrigRoiDescriptorCollection#HLT_Roi_MuonIso",
+                            "TrigRoiDescriptorCollection#HLT_Roi_MuonIso_probe",
+                            "TrigRoiDescriptorCollection#HLT_Roi_Tau",
+                            "TrigRoiDescriptorCollection#HLT_Roi_Tau_probe",
+                            "TrigRoiDescriptorCollection#HLT_Roi_TauCore",
+                            "TrigRoiDescriptorCollection#HLT_Roi_TauCore_probe",
+                            "TrigRoiDescriptorCollection#HLT_Roi_TauLRT",
+                            "TrigRoiDescriptorCollection#HLT_Roi_TauLRT_probe",
+                            "TrigRoiDescriptorCollection#HLT_Roi_TauIso",
+                            "TrigRoiDescriptorCollection#HLT_Roi_TauIso_probe",
+                            "TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT",
+                            "TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT_probe",
+                            "TrigRoiDescriptorCollection#HLT_Roi_JetPEBPhysicsTLA",
+                            "TrigRoiDescriptorCollection#HLT_Roi_DV",
+                            "TrigRoiDescriptorCollection#HLT_Roi_Bjet",
+                            "TrigRoiDescriptorCollection#HLT_Roi_FS",
+                            "TrigRoiDescriptorCollection#HLT_Roi_JetSuper",
+                            "TrigRoiDescriptorCollection#HLT_Roi_DJ",
+                            "TrigInDetTrackTruthMap#TrigInDetTrackTruthMap" ]
 
     TRIG8SlimmingHelper.ExtraVariables += [ 
                         "Electrons.Tight.Medium.Loose.LHTight.LHMedium.LHLoose",
