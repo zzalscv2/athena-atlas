@@ -12,6 +12,7 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODMuon/MuonSegmentContainer.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 
 class MuonSegmentPerformanceAlg : public AthAlgorithm {
 public:
@@ -40,6 +41,7 @@ private:
 
     SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentLocation", "MuonSegments"};
     SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegmentKey{this, "TruthSegmentLocation", "MuonTruthSegments"};
+    SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_truthSegmenLinkKey{this, "truthSegmentsRecoSegmentLinkKey", m_truthSegmentKey, "recoSegmentLink" };
 
     unsigned int m_nevents;
     std::vector<int> m_nhitCuts;

@@ -53,6 +53,10 @@ StatusCode MuonPerformanceAlg::initialize() {
 
     ATH_CHECK(m_eventInfo.initialize());
     ATH_CHECK(m_truthMuons.initialize());
+    ATH_CHECK(m_muonTruthParticleKey.initialize());
+    ATH_CHECK(m_truthMuonRecoMuonLinkKey.initialize());
+    ATH_CHECK(m_truthMuonTruthType.initialize());
+    ATH_CHECK(m_truthMuonTruthOrigin.initialize());
     return StatusCode::SUCCESS;
 }
 
