@@ -1,16 +1,16 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef XAODTRACKING_VERSIONS_TRACKSTORAGEAUXCONTAINER_V1_H
-#define XAODTRACKING_VERSIONS_TRACKSTORAGEAUXCONTAINER_V1_H
+#ifndef XAODTRACKING_VERSIONS_TRACKSUMMARYAUXCONTAINER_V1_H
+#define XAODTRACKING_VERSIONS_TRACKSUMMARYAUXCONTAINER_V1_H
 
 
 #include "xAODCore/AuxContainerBase.h"
 #include <vector>
 namespace xAOD {
- class TrackStorageAuxContainer_v1 : public AuxContainerBase {
+ class TrackSummaryAuxContainer_v1 : public AuxContainerBase {
     public:
-        TrackStorageAuxContainer_v1();
+        TrackSummaryAuxContainer_v1();
         // we use vector instead of array even though the size is fixed
         // this saves on generating ROOT dictionaries for all array dimensions
         
@@ -31,7 +31,7 @@ namespace xAOD {
 }
 
 #include "xAODCore/BaseInfo.h"
-SG_BASE(xAOD::TrackStorageAuxContainer_v1, xAOD::AuxContainerBase);
+SG_BASE(xAOD::TrackSummaryAuxContainer_v1, xAOD::AuxContainerBase);
 
 
 #endif

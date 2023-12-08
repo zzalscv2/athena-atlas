@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef XAODTRACKING_VERSIONS_TRACKSTORAGE_V1_H
-#define XAODTRACKING_VERSIONS_TRACKSTORAGE_V1_H
+#ifndef XAODTRACKING_VERSIONS_TRACKSUMMARY_V1_H
+#define XAODTRACKING_VERSIONS_TRACKSUMMARY_V1_H
 #include <cstdint>
 #include <vector>
 #include "AthLinks/ElementLink.h"
@@ -13,15 +13,15 @@
 namespace xAOD
 {
   /**
-   * @brief Track Storage for Acts MultiTrajectory
+   * @brief Track Summary for Acts MultiTrajectory
    **/
 
-  class TrackStorage_v1 : public SG::AuxElement
+  class TrackSummary_v1 : public SG::AuxElement
   {
   private:
     static const SG::AuxElement::Accessor<std::vector<double> > s_paramsAcc, s_covParamsAcc;
   public:
-    TrackStorage_v1() = default;
+    TrackSummary_v1() = default;
     /**
      * access track backend vector of const element
      **/
@@ -205,7 +205,7 @@ namespace xAOD
     void resize(size_t sz = 6);
 
     /**
-     * @brief retrieve the size of the internal vectors for the data storage
+     * @brief retrieve the size of the internal vectors for the data summary
      */
     size_t size() const;
   };

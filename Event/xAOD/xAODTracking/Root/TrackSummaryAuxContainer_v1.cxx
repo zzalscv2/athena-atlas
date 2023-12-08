@@ -1,10 +1,10 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#include "xAODTracking/versions/TrackStorageAuxContainer_v1.h"
+#include "xAODTracking/versions/TrackSummaryAuxContainer_v1.h"
 
 namespace xAOD {
-  TrackStorageAuxContainer_v1::TrackStorageAuxContainer_v1()
+  TrackSummaryAuxContainer_v1::TrackSummaryAuxContainer_v1()
     : AuxContainerBase() {
     AUX_VARIABLE(params);
     AUX_VARIABLE(covParams);

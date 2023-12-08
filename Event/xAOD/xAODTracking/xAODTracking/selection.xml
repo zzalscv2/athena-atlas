@@ -143,17 +143,17 @@
           id="DDCD13AD-AB54-4D53-9D3F-6726AFF12CC7" />
    <typedef name="xAOD::TrackMeasurementAuxContainer" />
 
-   <!-- xAOD::TrackStorage interface type(s). -->
-   <class name="xAOD::TrackStorage_v1" />
-   <class name="xAOD::TrackStorageContainer_v1"
+   <!-- xAOD::TrackSummary interface type(s). -->
+   <class name="xAOD::TrackSummary_v1" />
+   <class name="xAOD::TrackSummaryContainer_v1"
           id="21C40007-DCB6-4D4C-93D1-DDBFAC344A6C" />
-   <typedef name="xAOD::TrackStorage" />
-   <typedef name="xAOD::TrackStorageContainer" />
+   <typedef name="xAOD::TrackSummary" />
+   <typedef name="xAOD::TrackSummaryContainer" />
 
-   <!-- xAOD::TrackStorage auxiliary type(s). -->
-   <class name="xAOD::TrackStorageAuxContainer_v1"
+   <!-- xAOD::TrackSummary auxiliary type(s). -->
+   <class name="xAOD::TrackSummaryAuxContainer_v1"
           id="4155ADB5-84BF-4A66-98E3-365BD7FCEA4C" />
-   <typedef name="xAOD::TrackStorageAuxContainer" />
+   <typedef name="xAOD::TrackSummaryAuxContainer" />
 
    <!-- xAOD::TrackMeasurementValidation interface type(s). -->
    <class name="xAOD::TrackMeasurementValidation_v1" />

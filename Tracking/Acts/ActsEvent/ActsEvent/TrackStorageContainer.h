@@ -9,8 +9,8 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/HashedString.hpp"
 #include "ActsEvent/Decoration.h"
-#include "xAODTracking/TrackStorageContainer.h"
-#include "xAODTracking/TrackStorageAuxContainer.h"
+#include "xAODTracking/TrackSummaryContainer.h"
+#include "xAODTracking/TrackSummaryAuxContainer.h"
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 #include "xAODTracking/TrackSurfaceContainer.h"
 #include "ActsEvent/SurfaceEncoding.h"
@@ -56,7 +56,7 @@ class TrackStorageContainer {
  public:
   using IndexType = uint32_t; // TODO find common place for it
   static constexpr auto kInvalid = Acts::MultiTrajectoryTraits::kInvalid;
-  TrackStorageContainer(const DataLink<xAOD::TrackStorageContainer>& lin = nullptr,
+  TrackStorageContainer(const DataLink<xAOD::TrackSummaryContainer>& lin = nullptr,
                         const DataLink<xAOD::TrackSurfaceContainer>& surfLink = nullptr);
   static const std::set<std::string> staticVariables;
   /**
@@ -103,7 +103,7 @@ class TrackStorageContainer {
 
   void restoreDecorations();
 
-  const xAOD::TrackStorageContainer* trackBackend() const{
+  const xAOD::TrackSummaryContainer* trackBackend() const{
     return m_trackBackend.cptr();
   }
 
@@ -112,10 +112,10 @@ class TrackStorageContainer {
   }
 
  protected:
-  using DecorationAccess = ActsTrk::detail::Decoration<xAOD::TrackStorageContainer>;
+  using DecorationAccess = ActsTrk::detail::Decoration<xAOD::TrackSummaryContainer>;
 
   std::vector<DecorationAccess> m_decorations;
-  DataLink<xAOD::TrackStorageContainer> m_trackBackend = nullptr;
+  DataLink<xAOD::TrackSummaryContainer> m_trackBackend = nullptr;
   DataLink<xAOD::TrackSurfaceContainer> m_surfBackend = nullptr;
 
 
@@ -221,7 +221,7 @@ class MutableTrackStorageContainer : public TrackStorageContainer {
   friend class MutableTrackContainerHandle;
 
 
-  xAOD::TrackStorageContainer* trackBackend(){
+  xAOD::TrackSummaryContainer* trackBackend(){
     return m_mutableTrackBackend.get();
   }
 
@@ -230,8 +230,8 @@ class MutableTrackStorageContainer : public TrackStorageContainer {
   }
 
  private:
-  std::unique_ptr<xAOD::TrackStorageContainer> m_mutableTrackBackend;
-  std::unique_ptr<xAOD::TrackStorageAuxContainer> m_mutableTrackBackendAux;
+  std::unique_ptr<xAOD::TrackSummaryContainer> m_mutableTrackBackend;
+  std::unique_ptr<xAOD::TrackSummaryAuxContainer> m_mutableTrackBackendAux;
 
   std::unique_ptr<xAOD::TrackSurfaceContainer> m_mutableSurfBackend;
   std::unique_ptr<xAOD::TrackSurfaceAuxContainer> m_mutableSurfBackendAux;
@@ -277,9 +277,9 @@ constexpr void MutableTrackStorageContainer::addColumn_impl(
   }
   m_decorations.push_back(DecorationAccess(
       name,
-      ActsTrk::detail::constDecorationGetter<xAOD::TrackStorageContainer, T>,
-      ActsTrk::detail::decorationCopier<xAOD::TrackStorageContainer, T>,
-      ActsTrk::detail::decorationSetter<xAOD::TrackStorageContainer, T>
+      ActsTrk::detail::constDecorationGetter<xAOD::TrackSummaryContainer, T>,
+      ActsTrk::detail::decorationCopier<xAOD::TrackSummaryContainer, T>,
+      ActsTrk::detail::decorationSetter<xAOD::TrackSummaryContainer, T>
       ));
 }
 

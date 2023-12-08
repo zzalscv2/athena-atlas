@@ -54,7 +54,7 @@ class MutableTrackContainerHandle {
   SG::WriteHandleKey<ActsTrk::MultiTrajectory> m_mtjKey;
 
   // track and its backend
-  SG::WriteHandleKey<xAOD::TrackStorageContainer> m_xAODTrackStorageKey;
+  SG::WriteHandleKey<xAOD::TrackSummaryContainer> m_xAODTrackStorageKey;
   SG::WriteHandleKey<ActsTrk::TrackStorageContainer> m_trackBackendKey;
 };
 
@@ -106,7 +106,7 @@ MutableTrackContainerHandle<C>::moveToConst(
 
   auto constTrackStorage =
       std::make_unique<ActsTrk::TrackStorageContainer>(
-          DataLink<xAOD::TrackStorageContainer>(m_xAODTrackStorageKey.key(),
+          DataLink<xAOD::TrackSummaryContainer>(m_xAODTrackStorageKey.key(),
                                                 context));
   constTrackStorage->restoreDecorations();
   constTrackStorage->fillFrom(tc.container());
