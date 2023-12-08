@@ -10,7 +10,7 @@ find_package( pyyaml )
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.py )
-atlas_install_scripts( bin/dumpBeamSpot.py bin/checkJobs.py bin/runJobs.py bin/beamSpotT0_ESDToDPD_trf.py bin/beamSpotT0_Vertex_tf.py bin/taskman.py bin/beamspotman.py bin/beamspotnt.py bin/pickleTool.py bin/plotBeamSpotMon.py bin/plotBeamSpotVert.py bin/plotBeamSpotVxVal.py bin/beamSpotT1_Vertex_trf.py bin/dumpLBFileMap.py bin/makeDatasetOnDiskList bin/plotBeamSpotCompare.py bin/dqBeamSpot.py bin/periodInfo.py bin/resolveBeamSpotTag.py bin/bsCompare.py bin/getLatestRuns.py bin/updateCoolNtuple.py bin/extractScanInfo.py )
+atlas_install_scripts( bin/*.py test/*.sh)
 
 # Aliases:
 atlas_add_alias( plotBeamSpotVert "plotBeamSpotVert.py" )
