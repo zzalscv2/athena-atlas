@@ -145,7 +145,7 @@ namespace Muon {
         return true;
     }
 
-    MuPatHitList MuPatHitTool::merge(const MuPatHitList& hitList1, const MuPatHitList& hitList2) const {
+    MuPatHitList MuPatHitTool::merge(const MuPatHitList& hitList1, const MuPatHitList& hitList2) {
         // copy first list into outList
         MuPatHitList tmpList{};
         tmpList.reserve(hitList1.size() + hitList2.size());
@@ -169,7 +169,7 @@ namespace Muon {
     }
 
     bool MuPatHitTool::extract(const MuPatHitList& hitList, std::vector<const Trk::MeasurementBase*>& measVec, bool usePreciseHits,
-                               bool /*getReducedTrack*/) const {
+                               bool /*getReducedTrack*/) {
         // make sure the vector is sufficiently large
         measVec.reserve(hitList.size());
 
@@ -182,7 +182,7 @@ namespace Muon {
         return true;
     }
 
-    bool MuPatHitTool::remove(const Identifier& id, MuPatHitList& hitList) const {
+    bool MuPatHitTool::remove(const Identifier& id, MuPatHitList& hitList) {
         // loop over hit list
         MuPatHitIt lit = hitList.begin(), lit_end = hitList.end();
         for (; lit != lit_end; ++lit) {
@@ -378,7 +378,7 @@ namespace Muon {
 
         return sout.str();
     }
-    bool MuPatHitTool::isSorted(const MuPatHitList& hitList) const {
+    bool MuPatHitTool::isSorted(const MuPatHitList& hitList) {
         MuPatHitCit it = hitList.begin();
         MuPatHitCit it_end = hitList.end();
         MuPatHitCit itNext = it;

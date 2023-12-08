@@ -29,7 +29,7 @@ public:
     const std::vector<std::shared_ptr<MuonHoughHit>>& getHits() const;
 
     /** add hit to container */
-    void addHit(std::shared_ptr<MuonHoughHit> hit);
+    void addHit(const std::shared_ptr<MuonHoughHit>& hit);
 
     /** remove hit from container */
     void removeHit(unsigned int hitno);

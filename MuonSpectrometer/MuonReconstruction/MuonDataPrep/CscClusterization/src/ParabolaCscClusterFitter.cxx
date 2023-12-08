@@ -21,7 +21,7 @@ using Muon::CscPrepData;
 using Muon::CscStripPrepData;
 using MuonGM::CscReadoutElement;
 
-typedef ICscClusterFitter::DataNames DataNames;
+using DataNames = ICscClusterFitter::DataNames;
 using Result = ICscClusterFitter::Result;
 using Results = std::vector<Result>;
 
@@ -161,7 +161,7 @@ Results ParabolaCscClusterFitter::fit(const StripFitList& sfits, double tantheta
     unsigned int nstrip = sfits.size();  // number of strips in this cluster
     if (nstrip < 3) {
         ATH_MSG_VERBOSE(" CscStatusNarrow: Input has fewer than three strips.");
-        results.push_back(Result(1, Muon::CscStatusNarrow));
+        results.emplace_back(1, Muon::CscStatusNarrow);
         return results;
     }
 
@@ -169,7 +169,7 @@ Results ParabolaCscClusterFitter::fit(const StripFitList& sfits, double tantheta
     for (unsigned int istrip = 0; istrip < nstrip; istrip++) {
         if (sfits[istrip].strip == nullptr) {
             ATH_MSG_WARNING("Strip pointer is null.");
-            results.push_back(Result(2));
+            results.emplace_back(2);
             return results;
         }
     }
@@ -196,7 +196,7 @@ Results ParabolaCscClusterFitter::fit(const StripFitList& sfits, double tantheta
     CscPlane plane = findPlane(station, measphi);
     if (plane == UNKNOWN_PLANE) {
         ATH_MSG_WARNING("Invalid CSC plane: station=" << station << "; measphi=" << measphi);
-        results.push_back(Result(3));
+        results.emplace_back(3);
         return results;
     }
 
@@ -240,13 +240,13 @@ Results ParabolaCscClusterFitter::fit(const StripFitList& sfits, double tantheta
 
     ATH_MSG_VERBOSE(" Peak is at index " << istrip_peak << " amp = " << qpeak / 1000);
     if (numPeaks > 1) {  // Error if more than one peak above threshold was found.
-        results.push_back(Result(6, Muon::CscStatusMultiPeak));
+        results.emplace_back(6, Muon::CscStatusMultiPeak);
         ATH_MSG_VERBOSE(" CscStatusMultiPeak: multiple peaks are found: " << numPeaks);
         return results;
     }
 
     if (istrip_peak == 0) {  // no peak (even below threshold) was found.
-        results.push_back(Result(11));
+        results.emplace_back(11);
         ATH_MSG_VERBOSE(" No peak was found.");
         return results;
     }
@@ -255,7 +255,7 @@ Results ParabolaCscClusterFitter::fit(const StripFitList& sfits, double tantheta
     // This cannot happen due to the prev. loop
     /** @todo Remove this useless test. */
     if (strip0 + istrip_peak <= 0 || strip0 + istrip_peak >= maxstrip - 1) {
-        results.push_back(Result(4, Muon::CscStatusEdge));
+        results.emplace_back(4, Muon::CscStatusEdge);
         ATH_MSG_VERBOSE(" CscStatusEdge: strip0+istrip_peak = " << strip0 + istrip_peak);
         return results;
     }
@@ -300,7 +300,7 @@ Results ParabolaCscClusterFitter::fit(const StripFitList& sfits, double tantheta
     double denominator = 2 * qB - qA - qC;  // denominator for parabola
     if (denominator <= 0) {                 // not a peak, should not happen
         ATH_MSG_WARNING("  Bad parabola denominator: " << denominator);
-        results.push_back(Result(9));
+        results.emplace_back(9);
         return results;
     } else {
         raw = 0.5 * (qC - qA) / denominator;  // peak of parabola through (qA, qB, qC)

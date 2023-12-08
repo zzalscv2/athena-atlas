@@ -89,7 +89,7 @@ std::unique_ptr<MuonSegmentCombinationCollection> Csc2dSegmentMaker::find(const 
 
     for (unsigned int icol = 0; icol < pcols.size(); ++icol) {
         const CscPrepDataCollection* clus = pcols[icol];
-        if (clus->size() == 0) continue;  // skip zero cluster collection
+        if (clus->empty()) continue;  // skip zero cluster collection
         break;
     }
 
@@ -100,7 +100,7 @@ std::unique_ptr<MuonSegmentCombinationCollection> Csc2dSegmentMaker::find(const 
         ++col_count;
         ATH_MSG_VERBOSE("** Collection " << col_count << " has " << clus->size() << " clusters");
 
-        if (clus->size() == 0) continue;  // skip zero cluster collection
+        if (clus->empty()) continue;  // skip zero cluster collection
         MuonSegmentCombination* pcol = findSegmentCombination(*clus, ctx);
         if (pcol) {
             mpsegs->push_back(pcol);
@@ -210,10 +210,10 @@ MuonSegmentCombination* Csc2dSegmentMaker::findSegmentCombination(const CscPrepD
         Amg::Vector3D lpos = gToLocal * ptclu->globalPosition();
         if (measphi) {
             phi_id = id;
-            phi_clus[iwlay - 1].push_back(Cluster(lpos, ptclu, measphi));
+            phi_clus[iwlay - 1].emplace_back(lpos, ptclu, measphi);
         } else {
             eta_id = id;
-            eta_clus[iwlay - 1].push_back(Cluster(lpos, ptclu, measphi));
+            eta_clus[iwlay - 1].emplace_back(lpos, ptclu, measphi);
         }
     }
 
@@ -222,8 +222,8 @@ MuonSegmentCombination* Csc2dSegmentMaker::findSegmentCombination(const CscPrepD
     int nHitLayer_eta = 0;
     int nHitLayer_phi = 0;
     for (int i = 0; i < 4; ++i) {
-        if (eta_clus[i].size() > 0) ++nHitLayer_eta;
-        if (phi_clus[i].size() > 0) ++nHitLayer_phi;
+        if (!eta_clus[i].empty()) ++nHitLayer_eta;
+        if (!phi_clus[i].empty()) ++nHitLayer_phi;
     }
     ATH_MSG_DEBUG("there are " << nHitLayer_eta << " eta hit layers and " << nHitLayer_phi << " phi hit layers");
 
@@ -248,5 +248,5 @@ MuonSegmentCombination* Csc2dSegmentMaker::findSegmentCombination(const CscPrepD
 //******************************************************************************
 std::unique_ptr<MuonSegmentCombinationCollection> Csc2dSegmentMaker::find(const MuonSegmentCombinationCollection&,
                                                                           const EventContext&) const {
-    return std::unique_ptr<MuonSegmentCombinationCollection>();
+    return {};
 }

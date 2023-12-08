@@ -254,7 +254,7 @@ MuonEDMPrinterTool::printMeasurements(const Trk::Track& track) const
 
 
 std::string
-MuonEDMPrinterTool::printPatRec(const Trk::Track& track) const
+MuonEDMPrinterTool::printPatRec(const Trk::Track& track) 
 {
     if (track.info().patternRecoInfo(Trk::TrackInfo::STACO)) return "STACO";
     if (track.info().patternRecoInfo(Trk::TrackInfo::StacoLowPt)) return "StacoLowPt";
@@ -794,7 +794,7 @@ MuonEDMPrinterTool::print(const MuonPatternChamberIntersect& intersect) const
             mdtPrdContainer = rh_mdt.cptr();
             IdentifierHash hash_id;
             m_idHelperSvc->mdtIdHelper().get_module_hash(chId, hash_id);
-            auto coll = mdtPrdContainer->indexFindPtr(hash_id);
+            const auto *coll = mdtPrdContainer->indexFindPtr(hash_id);
             if (coll != nullptr)
                 nchHitsEta = coll->size();
             else
@@ -809,7 +809,7 @@ MuonEDMPrinterTool::print(const MuonPatternChamberIntersect& intersect) const
             rpcPrdContainer = rh_rpc.cptr();
             IdentifierHash hash_id;
             m_idHelperSvc->rpcIdHelper().get_module_hash(chId, hash_id);
-            auto coll = rpcPrdContainer->indexFindPtr(hash_id);
+            const auto *coll = rpcPrdContainer->indexFindPtr(hash_id);
             if (coll != nullptr) {
                 RpcPrepDataCollection::const_iterator rpcIt     = coll->begin();
                 RpcPrepDataCollection::const_iterator rpcIt_end = coll->end();
@@ -831,7 +831,7 @@ MuonEDMPrinterTool::print(const MuonPatternChamberIntersect& intersect) const
             tgcPrdContainer = rh_tgc.cptr();
             IdentifierHash hash_id;
             m_idHelperSvc->tgcIdHelper().get_module_hash(chId, hash_id);
-            auto coll = tgcPrdContainer->indexFindPtr(hash_id);
+            const auto *coll = tgcPrdContainer->indexFindPtr(hash_id);
             if (coll != nullptr) {
                 TgcPrepDataCollection::const_iterator tgcIt     = coll->begin();
                 TgcPrepDataCollection::const_iterator tgcIt_end = coll->end();
@@ -870,7 +870,7 @@ MuonEDMPrinterTool::print(const MuonPatternChamberIntersect& intersect) const
 }
 
 std::string
-MuonEDMPrinterTool::print(const Trk::TrackParameters& pars) const
+MuonEDMPrinterTool::print(const Trk::TrackParameters& pars) 
 {
     std::ostringstream sout;
     sout << "r " << std::fixed << std::setprecision(0) << std::setw(5)
@@ -886,7 +886,7 @@ MuonEDMPrinterTool::print(const Trk::TrackParameters& pars) const
 }
 
 std::string
-MuonEDMPrinterTool::print(const Trk::ResidualPull& resPull) const
+MuonEDMPrinterTool::print(const Trk::ResidualPull& resPull) 
 {
     std::ostringstream sout;
 
@@ -962,7 +962,7 @@ MuonEDMPrinterTool::printData(const Trk::MeasurementBase& measurement) const
             nlayers = layers.size();
             sout << "  CompRot: hits " << nhits << " layers " << nlayers;
             // add time for RPC
-            if (rpcTimes.size()) {
+            if (!rpcTimes.empty()) {
                 sout << (rpcTimes.size() == 1 ? "  time" : "  times") << std::fixed << std::setprecision(2);
                 std::vector<double>::iterator itD = rpcTimes.begin(), itD_end = rpcTimes.end();
                 for (; itD != itD_end; ++itD) sout << " " << std::setw(5) << *itD;
@@ -994,7 +994,7 @@ MuonEDMPrinterTool::printId(const Trk::MeasurementBase& measurement) const
     return idStr;
 }
 
-std::string MuonEDMPrinterTool::print(const Trk::MaterialEffectsBase& mat) const {
+std::string MuonEDMPrinterTool::print(const Trk::MaterialEffectsBase& mat) {
     std::stringstream mat_string{};
     const Trk::MaterialEffectsOnTrack* matOnTrk = dynamic_cast<const Trk::MaterialEffectsOnTrack*>(&mat);
     if (matOnTrk) {
@@ -1020,7 +1020,7 @@ std::string MuonEDMPrinterTool::print(const Trk::MaterialEffectsBase& mat) const
     }
     return mat_string.str();
 }
-std::string MuonEDMPrinterTool::print(const Trk::AlignmentEffectsOnTrack& aeot) const {
+std::string MuonEDMPrinterTool::print(const Trk::AlignmentEffectsOnTrack& aeot) {
     std::stringstream aeot_string;
     aeot_string<<"dTrans: "<<aeot.deltaTranslation()<<" +- "<<aeot.sigmaDeltaTranslation();
     aeot_string<<" dAngle: "<<aeot.deltaAngle()<<" +- "<<aeot.sigmaDeltaAngle();

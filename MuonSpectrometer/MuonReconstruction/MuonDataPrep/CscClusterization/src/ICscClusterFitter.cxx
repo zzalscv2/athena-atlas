@@ -5,7 +5,7 @@
 // ICscClusterFitter.cxx
 #include "CscClusterization/ICscClusterFitter.h"
 
-typedef ICscClusterFitter::DataNames DataNames;
+using DataNames = ICscClusterFitter::DataNames;
 
 // const InterfaceID& ICscClusterFitter::interfaceID() {
 //  return IID_ICscClusterFitter;

@@ -63,8 +63,6 @@ void CscClusterUtilTool::getStripFits(const Trk::RIO_OnTrack* rot, ICscClusterFi
         return;
     }
     getStripFits(pclu, sfits);
-
-    return;
 }
 
 void CscClusterUtilTool::getStripFits(const Muon::CscClusterOnTrack* pclu, ICscClusterFitter::StripFitList& sfits) const {
@@ -79,7 +77,6 @@ void CscClusterUtilTool::getStripFits(const Muon::CscClusterOnTrack* pclu, ICscC
     }
 
     getStripFits(pprd, sfits);
-    return;
 }
 ////////////////////////////////////////////////////////////
 void CscClusterUtilTool::getStripFits(const CscPrepData* MClus, ICscClusterFitter::StripFitList& sfits) const {
@@ -99,8 +96,7 @@ void CscClusterUtilTool::getStripFits(const CscPrepData* MClus, ICscClusterFitte
         //      sfit.charge = 40.;  // 0 charge is set to minimal non zero to do fit e.g. dead channel case
         sfits.push_back(sfit);
     }
-    return;
-}
+    }
 ///////////////////////////////////////////////////////////
 ICscClusterFitter::Results CscClusterUtilTool::getRefitCluster(const CscPrepData* MClus, double tantheta) const {
     ICscClusterFitter::Results results;

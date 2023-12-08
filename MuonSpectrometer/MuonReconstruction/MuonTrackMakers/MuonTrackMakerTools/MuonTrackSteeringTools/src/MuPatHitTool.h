@@ -70,7 +70,7 @@ namespace Muon {
             @param outList  the resulting list
             @return true if merge succeded
         */
-        MuPatHitList merge(const MuPatHitList& hitList1, const MuPatHitList& hitList2) const;
+        static MuPatHitList merge(const MuPatHitList& hitList1, const MuPatHitList& hitList2) ;
 
         /** @brief merge two MuPatHitLists into a new one. The first list will be added to the second
             @param hitList1 the first  list
@@ -78,17 +78,17 @@ namespace Muon {
             @return true if merge succeded
         */
 
-        bool extract(const MuPatHitList& hitList, std::vector<const Trk::MeasurementBase*>& measVec, bool usePreciseHits = true,
-                     bool getReducedTrack = false) const;
+        static bool extract(const MuPatHitList& hitList, std::vector<const Trk::MeasurementBase*>& measVec, bool usePreciseHits = true,
+                     bool getReducedTrack = false) ;
 
         /** @brief check whether the list is correctly sorted */
-        bool isSorted(const MuPatHitList& hitList) const;
+        static bool isSorted(const MuPatHitList& hitList) ;
 
         /** print the list of hits, with optional parts of the printout (position,direction,momentum) */
         std::string print(const MuPatHitList& hitList, bool printPos = true, bool printDir = true, bool printMom = true) const;
 
         /** remove hit with a give Identifier */
-        bool remove(const Identifier& id, MuPatHitList& hitList) const;
+        static bool remove(const Identifier& id, MuPatHitList& hitList) ;
 
         /** remove hit containing give measurement (uses pointer comparison) */
         bool remove(const Trk::MeasurementBase& meas, MuPatHitList& hitList) const;

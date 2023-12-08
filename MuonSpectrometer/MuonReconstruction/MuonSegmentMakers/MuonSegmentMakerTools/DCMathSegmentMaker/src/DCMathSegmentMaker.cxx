@@ -1037,7 +1037,7 @@ namespace Muon {
             }
             ATH_MSG_VERBOSE(" " << m_idHelperSvc->toString(id) << "  clid: " << clid.id() << " central phi "
                                 << meas->detectorElement()->center().phi() << " index " << index);
-            cls.emplace_back(std::move(lp), clust.error, std::move(clid), index);
+            cls.emplace_back(lp, clust.error, clid, index);
         }
         return cls;
     }
@@ -1062,7 +1062,7 @@ namespace Muon {
 
             if (!detEl) {
                 ATH_MSG_WARNING(" aborting not detEl found ");
-                return TrkDriftCircleMath::DCVec();
+                return {};
             }
 
             Identifier id = rot->identify();
@@ -1138,7 +1138,7 @@ namespace Muon {
         const MuonGM::MuonDetectorManager* MuonDetMgr{*DetectorManagerHandle};
         if (!MuonDetMgr) {
           ATH_MSG_ERROR("Null pointer to the read MuonDetectorManager conditions object");
-          return TrkDriftCircleMath::MdtChamberGeometry();
+          return {};
         }
 
         // get detEL for first ml (always there)
@@ -1298,16 +1298,16 @@ namespace Muon {
             }
             m_mdtCreator->updateSign(*nonconstDC, side);
             double dist = pointOnHit.x();
-            rioDistVec.push_back(std::make_pair(dist, std::move(nonconstDC)));
+            rioDistVec.emplace_back(dist, std::move(nonconstDC));
         }
     }
 
     template <class T> struct IdDataVec {
-        typedef T Entry;
-        typedef std::vector<Entry> EntryVec;
+        using Entry = T;
+        using EntryVec = std::vector<Entry>;
 
         IdDataVec() = default;
-        IdDataVec(const Identifier& i) : id(i) {}
+        explicit IdDataVec(const Identifier& i) : id(i) {}
 
         Identifier id{0};
         EntryVec data{};
@@ -1387,13 +1387,13 @@ namespace Muon {
             if (spacePoint.detElId == chamber.id) {
                 // if chamber empty or new gas gap, add gasp gap
                 if (chamber.data.empty() || chamber.data.back().id != spacePoint.gasGapId) {
-                    chamber.data.push_back(GasGapData(spacePoint.gasGapId));
+                    chamber.data.emplace_back(spacePoint.gasGapId);
                 }
             }
 
             // reference to current gas gap data
             GasGapData& gasGap = chamber.data.back();
-            gasGap.data.push_back(std::make_pair(resPull.second, spacePoint));
+            gasGap.data.emplace_back(resPull.second, spacePoint);
         }
 
         // calculate the distance between the first and last station, use r in barrel and z in endcaps
@@ -1431,7 +1431,7 @@ namespace Muon {
                             if (m_createCompetingROTsEta)
                                 etaClusterVec.push_back(sp.etaHit->prepRawData());
                             else {
-                                rioDistVec.push_back(std::make_pair(dist, sp.etaHit->uniqueClone()));
+                                rioDistVec.emplace_back(dist, sp.etaHit->uniqueClone());
                                 ++netaPhiHits.first.first;
                             }
                         }
@@ -1446,7 +1446,7 @@ namespace Muon {
                         } else {
                             // can have multiple phi hits per cluster, loop over phi hits and add them
                             for (const MuonClusterOnTrack* phi_hit : sp.phiHits) {
-                                rioDistVec.push_back(std::make_pair(dist, phi_hit->uniqueClone()));
+                                rioDistVec.emplace_back(dist, phi_hit->uniqueClone());
                                 ++netaPhiHits.first.second;
                                 phiHits.push_back(phi_hit);
 
@@ -1481,7 +1481,7 @@ namespace Muon {
                                     "               content:  " << m_idHelperSvc->toString(etaCompCluster->containedROTs()[i]->identify()));
                             }
                         }
-                        rioDistVec.push_back(std::make_pair(dist, std::move(etaCompCluster)));
+                        rioDistVec.emplace_back(dist, std::move(etaCompCluster));
                     }
                 }
             }
@@ -1512,7 +1512,7 @@ namespace Muon {
                                                    phiCompCluster->globalPosition().perp();
                         posFirstPhiStation = std::min(phiPos,posFirstPhiStation);
                         posLastPhiStation = std::max(phiPos,posLastPhiStation);
-                        rioDistVec.push_back(std::make_pair(dist, std::move(phiCompCluster)));
+                        rioDistVec.emplace_back(dist, std::move(phiCompCluster));
 
                     }
                 }
@@ -1604,7 +1604,7 @@ namespace Muon {
 
                 // perform bound check
                 double stripLength = detEl->StripLength(1);
-                bool inBounds = std::abs(residual) < 0.5 * stripLength + 2. + segError ? true : false;
+                bool inBounds = std::abs(residual) < 0.5 * stripLength + 2. + segError;
                 if (msgLvl(MSG::DEBUG)) {
                     ATH_MSG_DEBUG(" Unassociated " << m_idHelperSvc->toString(phi_clus->phiHit->identify()) << " pos x " << cl.position().x()
                                                    << " pos y " << cl.position().y() << " : residual " << residual << " strip half length "
@@ -1654,7 +1654,7 @@ namespace Muon {
                                 "               content:  " << m_idHelperSvc->toString(phiCompCluster->containedROTs()[i]->identify()));
                         }
                     }
-                    rioDistVec.push_back(std::make_pair(dist, std::move(phiCompCluster)));
+                    rioDistVec.emplace_back(dist, std::move(phiCompCluster));
                 }
             }
             ATH_MSG_VERBOSE("Added " << addedPhiHits << " unass phi hits out of " << spVecs.second.size()
@@ -1673,7 +1673,7 @@ namespace Muon {
     }
 
     double DCMathSegmentMaker::distanceToSegment(const TrkDriftCircleMath::Segment& segment, const Amg::Vector3D& hitPos,
-                                                 const Amg::Transform3D& gToStation) const {
+                                                 const Amg::Transform3D& gToStation) {
         const TrkDriftCircleMath::Line& line = segment.line();
         TrkDriftCircleMath::TransformToLine toLine(line);
         double cos_sinLine = cot(line.phi());
@@ -1696,7 +1696,7 @@ namespace Muon {
     }
 
     DataVector<const Trk::MeasurementBase> DCMathSegmentMaker::createROTVec(
-        std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const {
+        std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) {
         // sort hits according to they distance to the segment position
         std::sort(rioDistVec.begin(), rioDistVec.end(), SortByDistanceToSegment());
 
@@ -1709,7 +1709,7 @@ namespace Muon {
 
     std::pair<double, double> DCMathSegmentMaker::residualAndPullWithSegment(const TrkDriftCircleMath::Segment& segment,
                                                                              const Cluster2D& spacePoint,
-                                                                             const Amg::Transform3D& gToStation) const {
+                                                                             const Amg::Transform3D& gToStation) {
         const TrkDriftCircleMath::Line& line = segment.line();
         double cos_sinLine = cot(line.phi());
 
@@ -2148,7 +2148,7 @@ namespace Muon {
         return tubeEnds;
     }
 
-    void DCMathSegmentMaker::updatePhiRanges(double phiminNew, double phimaxNew, double& phiminRef, double& phimaxRef) const {
+    void DCMathSegmentMaker::updatePhiRanges(double phiminNew, double phimaxNew, double& phiminRef, double& phimaxRef) {
         // check whether we are at the boundary where phi changes sign
         if (phiminRef * phimaxRef < 0.) {
             if (phiminRef < -1.1) {

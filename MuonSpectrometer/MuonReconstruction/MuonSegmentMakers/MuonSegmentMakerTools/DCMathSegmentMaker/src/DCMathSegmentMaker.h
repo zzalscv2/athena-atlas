@@ -301,13 +301,13 @@ namespace Muon {
             const TrkDriftCircleMath::Segment& segment, const Identifier& chid, const Amg::Transform3D& gToStation, ClusterVecPair& spVecs,
             double phimin, double phimax, std::vector<std::pair<double, std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const;
         
-        DataVector<const Trk::MeasurementBase> createROTVec(
-            std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const;
+        static DataVector<const Trk::MeasurementBase> createROTVec(
+            std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) ;
 
-        double distanceToSegment(const TrkDriftCircleMath::Segment& segment, const Amg::Vector3D& hitPos,
-                                 const Amg::Transform3D& gToStation) const;
-        std::pair<double, double> residualAndPullWithSegment(const TrkDriftCircleMath::Segment& segment, const Cluster2D& spacePoint,
-                                                             const Amg::Transform3D& gToStation) const;
+        static double distanceToSegment(const TrkDriftCircleMath::Segment& segment, const Amg::Vector3D& hitPos,
+                                 const Amg::Transform3D& gToStation) ;
+        static std::pair<double, double> residualAndPullWithSegment(const TrkDriftCircleMath::Segment& segment, const Cluster2D& spacePoint,
+                                                             const Amg::Transform3D& gToStation) ;
 
         TrkDriftCircleMath::MdtChamberGeometry createChamberGeometry(const Identifier& chid, const Amg::Transform3D& gToStation) const;
 
@@ -325,7 +325,7 @@ namespace Muon {
                                const Amg::Transform3D& segmentToG) const;
 
         /** update phi ranges */
-        void updatePhiRanges(double phiminNew, double phimaxNew, double& phiminRef, double& phimaxRef) const;
+        static void updatePhiRanges(double phiminNew, double phimaxNew, double& phiminRef, double& phimaxRef) ;
 
         /** check whether phi is consistent with segment phi */
         bool checkPhiConsistency(double phi, double phimin, double phimax) const;

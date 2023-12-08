@@ -115,7 +115,7 @@ namespace Muon
          * \param points The list of data points
          * \param stats [output] The statistics results
          */
-        void SimpleStatistics(const PointArray& points, SimpleStats& stats);
+        static void SimpleStatistics(const PointArray& points, SimpleStats& stats);
 
         /**
          * Fit a straight line through the given points
@@ -124,7 +124,7 @@ namespace Muon
          * \param bDump Write details to log
          * \param stats [output] The fit results
          */
-        void fitLine(PointArray& points, double fExclChi2, bool bDump, LinStats& stats);
+        static void fitLine(PointArray& points, double fExclChi2, bool bDump, LinStats& stats);
 
         /**
          * Estimate a new point from the given points
@@ -133,7 +133,7 @@ namespace Muon
          * \param bDump Write details to log
          * \param stats [output] The fit results
          */
-        void fitPoint(PointArray& points, double fExclChi2, bool bDump, SimpleStats& stats);
+        static void fitPoint(PointArray& points, double fExclChi2, bool bDump, SimpleStats& stats);
     };
 
     inline Fit2D::Point::Point() :

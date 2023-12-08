@@ -10,7 +10,7 @@
 
 using Muon::CscStripPrepData;
 
-typedef ICscStripFitter::Result Result;
+using Result = ICscStripFitter::Result;
 using ChargeList = ICscStripFitter::ChargeList;
 
 //**********************************************************************

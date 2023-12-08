@@ -202,13 +202,13 @@ private:
     double matchLikelihood(const Muon::MuonSegment& rsg, const Muon::MuonSegment& psg) const;
 
     // pdf distribution function for signal events.
-    double pdf_sig(const double x) const;
+    static double pdf_sig(const double x) ;
 
     // pdf distribution function for background events.
-    double pdf_bkg(const double x) const;
+    static double pdf_bkg(const double x) ;
 
     // Likelihood function = psig/(psig +pbkg)
-    double qratio_like(const double pdf_sig, const double pdf_bkg) const;
+    static double qratio_like(const double pdf_sig, const double pdf_bkg) ;
 
     bool isGood(const uint32_t stripHashId, const EventContext& ctx) const;
     int stripStatusBit(const uint32_t stripHashId, const EventContext& ctx) const;

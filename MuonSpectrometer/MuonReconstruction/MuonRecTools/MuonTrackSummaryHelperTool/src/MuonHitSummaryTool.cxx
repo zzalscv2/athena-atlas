@@ -53,7 +53,7 @@ namespace Muon {
     IMuonHitSummaryTool::CompactSummary MuonHitSummaryTool::summary(const Trk::TrackSummary& sum) const {
         // check if the track summary has a MuonTrackSummary, if so use it
         if (sum.muonTrackSummary()) return summary(*sum.muonTrackSummary());
-        return CompactSummary();
+        return {};
     }
 
     IMuonHitSummaryTool::CompactSummary MuonHitSummaryTool::summary(const Trk::MuonTrackSummary& s) const {
@@ -136,7 +136,7 @@ namespace Muon {
         return sum;
     }
 
-    void MuonHitSummaryTool::calculateSummaryCounts(IMuonHitSummaryTool::CompactSummary& sum) const {
+    void MuonHitSummaryTool::calculateSummaryCounts(IMuonHitSummaryTool::CompactSummary& sum) {
         sum.nprecisionLayers = 0;
         sum.nprecisionGoodLayers = 0;
         sum.nprecisionHoleLayers = 0;
@@ -156,14 +156,8 @@ namespace Muon {
                 ++sum.nprecisionLayers;
                 if (hitSummary.nprecisionGoodHits > 2) {
                     ++sum.nprecisionGoodLayers;
-                    if (hitSummary.isEndcap)
-                        sum.isEndcap = true;
-                    else
-                        sum.isEndcap = false;
-                    if (hitSummary.isSmall)
-                        sum.isSmall = true;
-                    else
-                        sum.isSmall = false;
+                    sum.isEndcap = hitSummary.isEndcap;
+                    sum.isSmall = hitSummary.isSmall;
                 }
             } else if (hitSummary.nprecisionHoles > 2)
                 ++sum.nprecisionHoleLayers;

@@ -4,7 +4,7 @@
 
 #include "MuonHoughPatternEvent/MuonHoughMathUtils.h"
 
-#include <float.h>
+#include <cfloat>
 
 #include <cassert>
 #include <iostream>
@@ -14,7 +14,7 @@
 #include "CxxUtils/sincos.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
-MuonHoughMathUtils::MuonHoughMathUtils() {}
+MuonHoughMathUtils::MuonHoughMathUtils() = default;
 
 int MuonHoughMathUtils::sgn(double d) { return d >= 0 ? 1 : -1; }
 
@@ -65,7 +65,7 @@ std::string MuonHoughMathUtils::intToString(int i) {
 }
 
 double MuonHoughMathUtils::distanceToLine2D(double x0, double y0, double r0, double phi)
-    const  // distance from (x0,y0) to line (r,phi) // from mathworld.wolfram.com/Point-LineDistance2-Dimensional.html // better to use
+     // distance from (x0,y0) to line (r,phi) // from mathworld.wolfram.com/Point-LineDistance2-Dimensional.html // better to use
            // distancetoline()
 {
     // need two points on line:
@@ -133,8 +133,7 @@ Amg::Vector3D MuonHoughMathUtils::shortestPointOfLineToOrigin3D(
 
     double z0 = vec[Amg::z] - radius / std::tan(theta);
 
-    const Amg::Vector3D p{x0, y0, z0};
-    return p;
+    return {x0, y0, z0};
 }
 
 Amg::Vector3D MuonHoughMathUtils::shortestPointOfLineToOrigin(

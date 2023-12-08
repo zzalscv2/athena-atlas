@@ -146,7 +146,7 @@ namespace Muon {
 
     TrackSegmentMatchCuts::TrackSegmentMatchCuts() { TrackSegmentMatchCuts::clear(); }
 
-    TrackSegmentMatchCuts::~TrackSegmentMatchCuts() {}
+    TrackSegmentMatchCuts::~TrackSegmentMatchCuts() = default;
 
     void TrackSegmentMatchCuts::clear() {
         posXCut = 0.0;

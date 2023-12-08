@@ -20,7 +20,7 @@ MMPrepData::MMPrepData(const Identifier& RDOId,
                        std::vector<uint16_t>&& stripNumbers,
                        std::vector<short int>&& stripTimes,
                        std::vector<int>&& stripCharges)
-  : MuonCluster(RDOId, idDE,std::move(locpos), std::move(rdoList), std::move(locErrMat))
+  : MuonCluster(RDOId, idDE,locpos, std::move(rdoList), std::move(locErrMat))
   , m_detEl(detEl)
   , m_time(time)
   , m_charge(charge)
@@ -37,7 +37,7 @@ MMPrepData::MMPrepData(const Identifier& RDOId,
                        const MuonGM::MMReadoutElement* detEl,
                        const short int time,
                        const int charge)
-  : MuonCluster(RDOId, idDE, std::move(locpos), std::move(rdoList), std::move(locErrMat))
+  : MuonCluster(RDOId, idDE, locpos, std::move(rdoList), std::move(locErrMat))
   , m_detEl(detEl)
   , m_time(time)
   , m_charge(charge){}
@@ -51,7 +51,7 @@ MMPrepData::MMPrepData(const Identifier& RDOId,
                        const short int time,
                        const int charge,
                        const float driftDist)
-  : MuonCluster(RDOId, idDE, std::move(locpos), std::move(rdoList), std::move(locErrMat))
+  : MuonCluster(RDOId, idDE, locpos, std::move(rdoList), std::move(locErrMat))
   , m_detEl(detEl)
   , m_time(time)
   , m_charge(charge)
@@ -63,7 +63,7 @@ MMPrepData::MMPrepData(const Identifier& RDOId,
                        std::vector<Identifier>&& rdoList,
                        Amg::MatrixX&& locErrMat,
                        const MuonGM::MMReadoutElement* detEl)
-  : MuonCluster(RDOId, idDE, std::move(locpos), std::move(rdoList), std::move(locErrMat))
+  : MuonCluster(RDOId, idDE, locpos, std::move(rdoList), std::move(locErrMat))
   , m_detEl(detEl) {}
 
 
@@ -115,6 +115,7 @@ std::ostream& MMPrepData::dump( std::ostream& stream) const {
 
 std::vector<float> MMPrepData::stripDriftErrors_0_0 () const {
     std::vector<float> ret;
+    ret.reserve(m_stripDriftErrors.size());
     for (const Amg::MatrixX& mat: m_stripDriftErrors) {
       ret.push_back(mat(0,0));
     }
@@ -123,6 +124,7 @@ std::vector<float> MMPrepData::stripDriftErrors_0_0 () const {
   
 std::vector<float> MMPrepData::stripDriftErrors_1_1 () const {
   std::vector<float> ret;
+  ret.reserve(m_stripDriftErrors.size());
   for (const Amg::MatrixX& mat: m_stripDriftErrors) {
       ret.push_back(mat(1,1));
   }

@@ -68,7 +68,7 @@ namespace Muon {
     private:
         /** helper function to calculate MuonTrackSummary from track */
         void getMuonTrackSummary(Trk::MuonTrackSummary& muonSummary, const Trk::Track& track) const;
-        void calculateSummaryCounts(CompactSummary& sum) const;
+        static void calculateSummaryCounts(CompactSummary& sum) ;
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
             this,
             "MuonIdHelperSvc",

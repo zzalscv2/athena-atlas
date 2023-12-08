@@ -68,7 +68,7 @@ class MuonEDMPrinterTool : public AthAlgTool {
     std::string print(const Trk::MuonTrackSummary& summary) const;
 
     /** @brief produce a string indicating who produced the track */
-    std::string printPatRec(const Trk::Track& track) const;
+    static std::string printPatRec(const Trk::Track& track) ;
 
     /** @brief print segment parameters to string */
     std::string print(const MuonSegment& segment) const;
@@ -111,15 +111,15 @@ class MuonEDMPrinterTool : public AthAlgTool {
     std::string print(const MuonPatternChamberIntersect& intersect) const;
 
     /** @brief print Trk::TrackParameters */
-    std::string print(const Trk::TrackParameters& pars) const;
+    static std::string print(const Trk::TrackParameters& pars) ;
 
     /** @brief  print ResidualPull object to string*/
-    std::string print(const Trk::ResidualPull& resPull) const;
+    static std::string print(const Trk::ResidualPull& resPull) ;
 
     /** @brief print the material effects object to the string */
-    std::string print(const Trk::MaterialEffectsBase& mat) const;
+    static std::string print(const Trk::MaterialEffectsBase& mat) ;
     /** @brief print the alignment effects on track object to the string*/
-    std::string print(const Trk::AlignmentEffectsOnTrack& aeot) const;
+    static std::string print(const Trk::AlignmentEffectsOnTrack& aeot) ;
     
     /** @brief print the track state on surface to the string */
     std::string print(const Trk::TrackStateOnSurface& tsos) const;

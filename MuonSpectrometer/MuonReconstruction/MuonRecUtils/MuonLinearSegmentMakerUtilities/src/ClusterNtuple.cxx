@@ -48,7 +48,7 @@ namespace ClusterSeg {
   }
  
   void ClusterNtuple::fill( const std::vector<Cluster*>& clusters) {
-    for(auto& it: clusters) fill(*it);
+    for(const auto& it: clusters) fill(*it);
   }
 
   void ClusterNtuple::fill( const Cluster& cluster ){

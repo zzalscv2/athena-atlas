@@ -497,7 +497,7 @@ namespace Muon {
         for (; sit != sit_end; ++sit) {
             Trk::Segment* tseg = *sit;
             MuonSegment* mseg = dynamic_cast<MuonSegment*>(tseg);
-            segKeys.push_back(std::make_pair(MuonSegmentKey(*mseg), sit));
+            segKeys.emplace_back(MuonSegmentKey(*mseg), sit);
         }
 
         // create a vector with pairs of MuonSegmentKey and a pointer to the corresponding segment to resolve ambiguities
@@ -507,7 +507,7 @@ namespace Muon {
         // loop over reference segments and make keys
         std::vector<const MuonSegment*>::iterator vit = referenceSegments.begin();
         std::vector<const MuonSegment*>::iterator vit_end = referenceSegments.end();
-        for (; vit != vit_end; ++vit) { referenceSegKeys.push_back(MuonSegmentKey(**vit)); }
+        for (; vit != vit_end; ++vit) { referenceSegKeys.emplace_back(**vit); }
 
         // loop over segments and compare the current segment with the reference ones
         std::vector<std::pair<MuonSegmentKey, Trk::SegmentCollection::iterator> >::iterator skit = segKeys.begin();
@@ -776,7 +776,7 @@ namespace Muon {
 
             // check whether state is a measurement
             if ((*tsit)->type(Trk::TrackStateOnSurface::Outlier)) {
-                outlierStates.push_back(std::make_pair(measuresPhi, in_tsos));
+                outlierStates.emplace_back(measuresPhi, in_tsos);
                 continue;
             }
 
@@ -1047,12 +1047,12 @@ namespace Muon {
             ATH_MSG_VERBOSE(" Track found " << m_printer->print(*track)<<std::endl<<m_printer->printMeasurements(*track));
 
             // add new solution
-            extensions.push_back(std::make_pair(seg, std::move(track)));
+            extensions.emplace_back(seg, std::move(track));
 
         }  // for (sit)
 
         // loop over solutions and add them
-        if (extensions.size() >= 1) {
+        if (!extensions.empty()) {
             candidates.reserve(extensions.size());
 
             // additional check in case the candidate is a MuPatTrack
@@ -1305,9 +1305,7 @@ namespace Muon {
         }
 
         // if more hits are compatible with reference track than are not consider as split track
-        if (nmatching > noff) return true;
-
-        return false;
+        return nmatching > noff;
     }
 
     TrackCollection* MooTrackBuilder::mergeSplitTracks(const EventContext& ctx, const TrackCollection& tracks) const {
@@ -1364,7 +1362,7 @@ namespace Muon {
             // if this track was not merged with another track insert it into goodTracks
             if (!mergedTrack) {
                 std::unique_ptr<Trk::Track> newTrack = std::make_unique<Trk::Track>(*in_track);
-                goodTracks.push_back(std::make_pair(false, std::move(newTrack)));
+                goodTracks.emplace_back(false, std::move(newTrack));
             }
         }
 

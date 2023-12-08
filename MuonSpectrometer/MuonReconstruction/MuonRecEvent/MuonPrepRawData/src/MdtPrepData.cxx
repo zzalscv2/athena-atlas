@@ -69,8 +69,7 @@ MdtPrepData::MdtPrepData(
     
     // Destructor:
     MdtPrepData::~MdtPrepData()
-{
-}
+= default;
 
 
 // Default constr

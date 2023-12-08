@@ -109,7 +109,7 @@ namespace Muon {
             @param[in] can the MuPatTrack to be copied
             @param[out] the new candidate, ownership is passed to caller. The new candidate will not own the track (lazy pointer copy)
         */
-        std::unique_ptr<MuPatTrack> copyCandidate(MuPatTrack* canIn) const;
+        static std::unique_ptr<MuPatTrack> copyCandidate(MuPatTrack* canIn) ;
 
         /** @brief create a MuPatSegment object from a segment
             @param[in] segment  input segment

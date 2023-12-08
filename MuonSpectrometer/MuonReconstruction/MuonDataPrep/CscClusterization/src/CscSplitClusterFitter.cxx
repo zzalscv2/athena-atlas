@@ -17,7 +17,7 @@ using Muon::CscPrepData;
 using Muon::CscStripPrepData;
 using MuonGM::CscReadoutElement;
 
-typedef ICscClusterFitter::DataNames DataNames;
+using DataNames = ICscClusterFitter::DataNames;
 using Result = ICscClusterFitter::Result;
 using Results = std::vector<Result>;
 

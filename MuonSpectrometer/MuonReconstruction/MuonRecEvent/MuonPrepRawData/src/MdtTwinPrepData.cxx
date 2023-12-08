@@ -42,8 +42,7 @@ namespace Muon
     
   // Destructor:
   MdtTwinPrepData::~MdtTwinPrepData()
-  {
-  }
+  = default;
 
 
   // Default constr

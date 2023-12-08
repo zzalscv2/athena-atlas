@@ -4,7 +4,7 @@
 
 #include "MuonAmbiTrackSelectionTool.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 #include <ext/functional>
 #include <iostream>
@@ -52,8 +52,8 @@ std::tuple<Trk::Track *, bool> Muon::MuonAmbiTrackSelectionTool::getCleanedOutTr
         if (!rot || !rot->prepRawData()) return;
         const Identifier rot_id = rot->prepRawData()->identify();
         numPhiHits += m_idHelperSvc->isMuon(rot_id) && m_idHelperSvc->measuresPhi(rot_id);
-        if (!(m_idHelperSvc->isMdt(rot_id) || m_idHelperSvc->isMM(rot_id) || m_idHelperSvc->issTgc(rot_id) ||
-              (m_idHelperSvc->isCsc(rot_id) && !m_idHelperSvc->measuresPhi(rot_id)))) {
+        if (!m_idHelperSvc->isMdt(rot_id) && !m_idHelperSvc->isMM(rot_id) && !m_idHelperSvc->issTgc(rot_id) &&
+              (!m_idHelperSvc->isCsc(rot_id) || m_idHelperSvc->measuresPhi(rot_id))) {
             ATH_MSG_VERBOSE("Measurement " << m_printer->print(*rot) << " is not a precision one");
             return;
         }

@@ -98,7 +98,7 @@ namespace Muon {
         return recalculateCandidateSegmentContent(can);
     }
 
-    std::unique_ptr<MuPatTrack> MuPatCandidateTool::copyCandidate(MuPatTrack* canIn) const {
+    std::unique_ptr<MuPatTrack> MuPatCandidateTool::copyCandidate(MuPatTrack* canIn) {
         // copy and update hits
         std::unique_ptr<MuPatTrack> can = std::make_unique<MuPatTrack>(*canIn);
         return can;
@@ -182,7 +182,7 @@ namespace Muon {
             if (isMdt) {
                 // if in MDT recreation mode, recreate MDT using ROT creator. Store the pointer as we have to delete it ourselfs.
                 if (recreateMDT) {
-                    if (recreateMDT && !m_doMdtRecreation) {
+                    if ( !m_doMdtRecreation) {
                         ATH_MSG_WARNING(
                             " recreation of MDTs requiered although not configured via jobO, ignoring request. Please check jobO ");
                     } else {

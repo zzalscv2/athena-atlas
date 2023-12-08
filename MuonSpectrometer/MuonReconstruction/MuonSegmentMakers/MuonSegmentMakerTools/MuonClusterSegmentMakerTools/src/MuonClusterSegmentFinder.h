@@ -187,7 +187,7 @@ namespace Muon {
                              candEvent* theEvent) const;
         void makeClusterVecs(const PRD_MultiTruthCollection* truthCollectionRPC, const std::vector<const RpcPrepDataCollection*>& rpcCols,
                              candEvent* theEvent) const;
-        void findOverlap(std::map<int, bool>& themap, candEvent* theEvent) const;
+        static void findOverlap(std::map<int, bool>& themap, candEvent* theEvent) ;
         void processSpacePoints(candEvent* theEvent, std::vector<std::vector<ClusterSeg::SpacePoint>>& sPoints) const;
         void resolveCollections(const std::map<int, bool>& themap, candEvent* theEvent) const;
         void getSegments(candEvent* theEvent, const Muon::MdtPrepDataContainer* mdtPrdCont, Trk::SegmentCollection* segColl) const;

@@ -1266,7 +1266,7 @@ namespace Muon {
         return nullptr;
     }
 
-    double MooTrackFitter::qOverPFromEntry(const MuPatCandidateBase& entry) const {
+    double MooTrackFitter::qOverPFromEntry(const MuPatCandidateBase& entry) {
         return entry.entryPars().charge() / entry.entryPars().momentum().mag();
     }
 
@@ -1582,7 +1582,7 @@ namespace Muon {
         return perigee;
     }
 
-    double MooTrackFitter::restrictedMomentum(double momentum) const {
+    double MooTrackFitter::restrictedMomentum(double momentum) {
         // restrict range of momenta to 2 GeV / 10 GeV
         if (momentum > 0) {
             if (momentum > 20000.)
@@ -1936,7 +1936,7 @@ namespace Muon {
             ATH_MSG_VERBOSE(" new MDT hit " << m_idHelperSvc->toString(id));
 
             dcs.push_back(dcOnTrack);
-            indexIdMap.push_back(std::make_pair(id, false));
+            indexIdMap.emplace_back(id, false);
 
             ++index;
         }
@@ -2018,7 +2018,7 @@ namespace Muon {
         // check whether the perigee is expressed at the point of closes approach or at muon entry
         const Trk::Perigee* perigee = track.perigeeParameters();
         if (perigee) {
-            bool atIP = std::abs(perigee->position().dot(perigee->momentum().unit())) < 10 ? true : false;
+            bool atIP = std::abs(perigee->position().dot(perigee->momentum().unit())) < 10;
             if (atIP) {
                 ATH_MSG_DEBUG(" track extressed at perigee, cannot split it ");
                 return std::make_pair<std::unique_ptr<Trk::Track>, std::unique_ptr<Trk::Track>>(nullptr, nullptr);

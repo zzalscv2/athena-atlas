@@ -375,21 +375,13 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
         else if (isBEE_a || isBEE_b)
         {
             ATH_MSG_VERBOSE(" check BEE result ");
-            if (result.deltaTheta > 0.300) {
-                return false;
-            } else {
-                return true;
-            }
+            return result.deltaTheta <= 0.300;
         }
         // Barrel/endcap overlap
         else if (isEndcap_a != isEndcap_b)
         {
             ATH_MSG_VERBOSE(" check B-E result ");
-            if (result.deltaTheta > 0.300) {
-                return false;
-            } else {
-                return true;
-            }
+            return result.deltaTheta <= 0.300;
         }
         // Phi-sector overlap
         else if (result.phiSector_a != result.phiSector_b)
@@ -407,17 +399,9 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
         {
             ATH_MSG_VERBOSE(" check BI BM result ");
             if (result.phiSector_a % 2 == 0) {
-                if (result.deltaTheta > 6.67 * m_matchingbibm_sphisec) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.deltaTheta <= 6.67 * m_matchingbibm_sphisec;
             } else if (result.phiSector_a % 2 == 1) {
-                if (result.deltaTheta > 6.67 * m_matchingbibm_lphisec) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.deltaTheta <= 6.67 * m_matchingbibm_lphisec;
             }
         }
         // Barrel inner to outer station
@@ -425,17 +409,9 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
         {
             ATH_MSG_VERBOSE(" check BI BO result ");
             if (result.phiSector_a % 2 == 0) {
-                if (result.deltaTheta > 6.67 * m_matchingbibo_sphisec) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.deltaTheta <= 6.67 * m_matchingbibo_sphisec;
             } else if (result.phiSector_a % 2 == 1) {
-                if (result.deltaTheta > 6.67 * m_matchingbibo_lphisec) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.deltaTheta <= 6.67 * m_matchingbibo_lphisec;
             }
         }
 
@@ -444,17 +420,9 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
         {
             ATH_MSG_VERBOSE(" check BM BO result ");
             if (result.phiSector_a % 2 == 0) {
-                if (result.deltaTheta > 6.67 * m_matchingbmbo_sphisec) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.deltaTheta <= 6.67 * m_matchingbmbo_sphisec;
             } else if (result.phiSector_a % 2 == 1) {
-                if (result.deltaTheta > 6.67 * m_matchingbmbo_lphisec) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.deltaTheta <= 6.67 * m_matchingbmbo_lphisec;
             }
         }
         // Endcap inner to middle station
@@ -503,17 +471,9 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
             // 5 mrad
             ATH_MSG_VERBOSE(" check EM EO result ");
             if (result.phiSector_a % 2 == 0) {
-                if (result.deltaTheta > 6.67 * m_matchingemeo_sphisec) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.deltaTheta <= 6.67 * m_matchingemeo_sphisec;
             } else if (result.phiSector_a % 2 == 1) {
-                if (result.deltaTheta > 6.67 * m_matchingemeo_lphisec) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.deltaTheta <= 6.67 * m_matchingemeo_lphisec;
             }
         }
 
@@ -544,28 +504,17 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
     // BEE
     else if (isBEE_a || isBEE_b)
     {
-        if (result.deltaTheta > 0.200) {
-            return false;
-        } else {
-            return true;
-        }
+        return result.deltaTheta <= 0.200;
     }
     // Looser cut for segment in two different phi sectors
     else if (result.phiSector_a != result.phiSector_b)
     {
-        if (result.deltaTheta > 0.150) {
-            return false;
-        }
-        return true;
+        return result.deltaTheta <= 0.150;
     }
     // Barrel/endcap overlap
     else if (isEndcap_a != isEndcap_b)
     {
-        if (result.deltaTheta > 0.150) {
-            return false;
-        } else {
-            return true;
-        }
+        return result.deltaTheta <= 0.150;
     }
     // Phi-sector overlap
     else if (result.phiSector_a != result.phiSector_b)
@@ -584,51 +533,27 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
     else if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BM)
     {
         if (result.phiSector_a % 2 == 0) {
-            if (result.deltaTheta > m_matchingbibm_sphisec) {
-                return false;
-            } else {
-                return true;
-            }
+            return result.deltaTheta <= m_matchingbibm_sphisec;
         } else if (result.phiSector_a % 2 == 1) {
-            if (result.deltaTheta > m_matchingbibm_lphisec) {
-                return false;
-            } else {
-                return true;
-            }
+            return result.deltaTheta <= m_matchingbibm_lphisec;
         }
     }
     // Barrel inner to outer station
     else if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BO)
     {
         if (result.phiSector_a % 2 == 0) {
-            if (result.deltaTheta > m_matchingbibo_sphisec) {
-                return false;
-            } else {
-                return true;
-            }
+            return result.deltaTheta <= m_matchingbibo_sphisec;
         } else if (result.phiSector_a % 2 == 1) {
-            if (result.deltaTheta > m_matchingbibo_lphisec) {
-                return false;
-            } else {
-                return true;
-            }
+            return result.deltaTheta <= m_matchingbibo_lphisec;
         }
     }
     // Barrel middle to outer station
     else if (station_a == MuonStationIndex::BM && station_b == MuonStationIndex::BO)
     {
         if (result.phiSector_a % 2 == 0) {
-            if (result.deltaTheta > m_matchingbmbo_sphisec) {
-                return false;
-            } else {
-                return true;
-            }
+            return result.deltaTheta <= m_matchingbmbo_sphisec;
         } else if (result.phiSector_a % 2 == 1) {
-            if (result.deltaTheta > m_matchingbmbo_lphisec) {
-                return false;
-            } else {
-                return true;
-            }
+            return result.deltaTheta <= m_matchingbmbo_lphisec;
         }
     }
     // Endcap inner to middle station
@@ -670,17 +595,9 @@ MuonSegmentMatchingTool::suppressNoise(const MuonSegment& seg1, const MuonSegmen
     else if (station_a == MuonStationIndex::EM && station_b == MuonStationIndex::EO)
     {
         if (result.phiSector_a % 2 == 0) {
-            if (result.deltaTheta > m_matchingemeo_sphisec) {
-                return false;
-            } else {
-                return true;
-            }
+            return result.deltaTheta <= m_matchingemeo_sphisec;
         } else if (result.phiSector_a % 2 == 1) {
-            if (result.deltaTheta > m_matchingemeo_lphisec) {
-                return false;
-            } else {
-                return true;
-            }
+            return result.deltaTheta <= m_matchingemeo_lphisec;
         }
     }
 
@@ -726,28 +643,16 @@ MuonSegmentMatchingTool::suppressNoisePhi(const MuonSegment& seg1, const MuonSeg
             if (result.phiposerr_a < 10001.000 && result.phiposerr_b < 10001.000) {
 
                 if (!isEndcap_a && !isEndcap_b) {
-                    if (result.deltaPhipos > 0.1) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return result.deltaPhipos <= 0.1;
                 }
                 if (isEndcap_a && isEndcap_b) {
                     // small sectors
                     if (result.phiSector_a % 2 == 0) {
-                        if (result.deltaPhipos > 0.1) {
-                            return false;
-                        } else {
-                            return true;
-                        }
+                        return result.deltaPhipos <= 0.1;
                     }
                     // large sectors
                     if (result.phiSector_a % 2 == 1) {
-                        if (result.deltaPhipos > 0.2) {
-                            return false;
-                        } else {
-                            return true;
-                        }
+                        return result.deltaPhipos <= 0.2;
                     }
                 }
             }
@@ -756,18 +661,10 @@ MuonSegmentMatchingTool::suppressNoisePhi(const MuonSegment& seg1, const MuonSeg
         if (result.phiSector_a != result.phiSector_b) {
             if (result.phiposerr_a < 10001.000 && result.phiposerr_b < 10001.000) {
                 if (!isEndcap_a && !isEndcap_b) {
-                    if (result.deltaPhipos > 0.1) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return result.deltaPhipos <= 0.1;
                 }
                 if (isEndcap_a && isEndcap_b) {
-                    if (result.deltaPhipos > 0.2) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return result.deltaPhipos <= 0.2;
                 }
             }
          }
@@ -778,64 +675,32 @@ MuonSegmentMatchingTool::suppressNoisePhi(const MuonSegment& seg1, const MuonSeg
             // measured inner segment
             if (result.phiposerr_a < 10001.000) {
                 if (station_a == MuonStationIndex::BM && station_b == MuonStationIndex::BO) {
-                    if (result.shorttube_a > 800) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return result.shorttube_a <= 800;
                 }
                 if (station_a == MuonStationIndex::EI && station_b == MuonStationIndex::EM) {
                     // MM or STGC have result.shorttube = 99999.
-                    if (result.shorttube_a > 3500 && result.shorttube_a != 99999.) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return result.shorttube_a <= 3500 || result.shorttube_a == 99999.;
                 }
                 if (station_a == MuonStationIndex::EI && station_b == MuonStationIndex::EO) {
-                    if (result.shorttube_a > 3500 && result.shorttube_a != 99999.) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return result.shorttube_a <= 3500 || result.shorttube_a == 99999.;
                 }
                 if (station_a == MuonStationIndex::EM && station_b == MuonStationIndex::EO) {
-                    if (result.shorttube_a > 800) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return result.shorttube_a <= 800;
                 }
             }
             // measured outer segment
             if (result.phiposerr_b < 10001.000) {
                 if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BM) {
-                    if (result.shorttube_b > 800) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return result.shorttube_b <= 800;
                 }
                 if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BO) {
-                    if (result.shorttube_b > 800) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return result.shorttube_b <= 800;
                 }
                 if (station_a == MuonStationIndex::BM && station_b == MuonStationIndex::BO) {
-                    if (result.shorttube_b > 800) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return result.shorttube_b <= 800;
                 }
                 if (station_a == MuonStationIndex::EI && station_b == MuonStationIndex::EM) {
-                    if (result.shorttube_b > 1400) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return result.shorttube_b <= 1400;
                 }
             }
         }
@@ -848,28 +713,16 @@ MuonSegmentMatchingTool::suppressNoisePhi(const MuonSegment& seg1, const MuonSeg
     if (result.phiSector_a == result.phiSector_b) {
         if (result.phiposerr_a < 10001.000 && result.phiposerr_b < 10001.000) {
             if (!isEndcap_a && !isEndcap_b) {
-                if (result.deltaPhipos > 0.1) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.deltaPhipos <= 0.1;
             }
             if (isEndcap_a && isEndcap_b) {
                 // small sectors
                 if (result.phiSector_a % 2 == 0) {
-                    if (result.deltaPhipos > 0.08) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return result.deltaPhipos <= 0.08;
                 }
                 // large sectors
                 if (result.phiSector_a % 2 == 1) {
-                    if (result.deltaPhipos > 0.1) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return result.deltaPhipos <= 0.1;
                 }
             }
         }
@@ -879,18 +732,10 @@ MuonSegmentMatchingTool::suppressNoisePhi(const MuonSegment& seg1, const MuonSeg
     if (result.phiSector_a != result.phiSector_b) {
         if (result.phiposerr_a < 10001.000 && result.phiposerr_b < 10001.000) {
             if (!isEndcap_a && !isEndcap_b) {
-                if (result.deltaPhipos > 0.05) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.deltaPhipos <= 0.05;
             }
             if (isEndcap_a && isEndcap_b) {
-                if (result.deltaPhipos > 0.1) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.deltaPhipos <= 0.1;
             }
         }
         
@@ -898,63 +743,31 @@ MuonSegmentMatchingTool::suppressNoisePhi(const MuonSegment& seg1, const MuonSeg
         // measured inner segment
         if (result.phiposerr_a < 10001.000) {
             if (station_a == MuonStationIndex::BM && station_b == MuonStationIndex::BO) {
-                if (result.shorttube_a > 600) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.shorttube_a <= 600;
             }
             if (station_a == MuonStationIndex::EI && station_b == MuonStationIndex::EM) {
-                if (result.shorttube_a > 3500 && result.shorttube_a != 99999.) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.shorttube_a <= 3500 || result.shorttube_a == 99999.;
             }
             if (station_a == MuonStationIndex::EI && station_b == MuonStationIndex::EO) {
-                if (result.shorttube_a > 3500 && result.shorttube_a != 99999.) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.shorttube_a <= 3500 || result.shorttube_a == 99999.;
             }
             if (station_a == MuonStationIndex::EM && station_b == MuonStationIndex::EO) {
-                if (result.shorttube_a > 500) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.shorttube_a <= 500;
             }
         }
         // measured outer segment
         if (result.phiposerr_b < 10001.000) {
             if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BM) {
-                if (result.shorttube_b > 600) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.shorttube_b <= 600;
             }
             if (station_a == MuonStationIndex::BI && station_b == MuonStationIndex::BO) {
-                if (result.shorttube_b > 700) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.shorttube_b <= 700;
             }
             if (station_a == MuonStationIndex::BM && station_b == MuonStationIndex::BO) {
-                if (result.shorttube_b > 700) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.shorttube_b <= 700;
             }
             if (station_a == MuonStationIndex::EI && station_b == MuonStationIndex::EM) {
-                if (result.shorttube_b > 700) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return result.shorttube_b <= 700;
             }
         }
         

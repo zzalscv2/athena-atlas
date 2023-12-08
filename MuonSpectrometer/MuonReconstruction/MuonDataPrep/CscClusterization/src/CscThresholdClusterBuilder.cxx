@@ -21,7 +21,7 @@ CscThresholdClusterBuilder::CscThresholdClusterBuilder(const std::string& aname,
 
 // Destructor.
 
-CscThresholdClusterBuilder::~CscThresholdClusterBuilder() {}
+CscThresholdClusterBuilder::~CscThresholdClusterBuilder() = default;
 
 //******************************************************************************
 

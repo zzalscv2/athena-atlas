@@ -73,7 +73,7 @@ namespace {
   
   class FunctionToMinimize : public ROOT::Math::IMultiGenFunction {
     public:      
-      FunctionToMinimize(const int used) :m_used{used} {}
+      explicit FunctionToMinimize(const int used) :m_used{used} {}
      
       double DoEval(const double* xx) const override {
         const double ang = xx[0];
@@ -113,7 +113,7 @@ namespace {
       unsigned int NDim() const override {return 3;}
       void setT0Error(const int t0Error){m_t0Error=t0Error;}
       void addCoords(HitCoords coord){
-        m_data.emplace_back(std::move(coord));
+        m_data.emplace_back(coord);
       }
     private:
       std::vector<HitCoords> m_data{};
@@ -434,7 +434,7 @@ namespace TrkDriftCircleMath {
 	      const DriftCircle* ds  = & dcs[i];
         if(std::abs(ds->r()-ds->rot()->driftRadius())>m_dRTol) ATH_MSG_DEBUG("Different radii on dc " << ds->r() << " rot " << ds->rot()->driftRadius());
         DriftCircle dc_keep(ds->position(), ds->rot()->driftRadius(), ds->dr(), ds->drPrecise(), ds->driftState(), ds->id(), ds->index(),ds->rot() );
-        DCOnTrack dc_new(std::move(dc_keep), 0., 0.);
+        DCOnTrack dc_new(dc_keep, 0., 0.);
         dc_new.state(dcs[i].state());
         dcs_new.push_back( std::move(dc_new) );
         if( selection[i] == 0 ){
@@ -602,7 +602,7 @@ namespace TrkDriftCircleMath {
       if (m_propagateErrors) drad = coords.dr;
       
       DriftCircle dc_newrad(keep_me.position(), rad, drad, ds->driftState(), keep_me.id(), keep_me.index(),ds->rot() );
-      DCOnTrack dc_new(std::move(dc_newrad), residuals, covsq);
+      DCOnTrack dc_new(dc_newrad, residuals, covsq);
       dc_new.state(keep_me.state());
 
       ATH_MSG_DEBUG("T0 Segment hit res "<<residuals<<" eres "<<errorResiduals<<" covsq "<<covsq<<" ri " << coords.r<<" ro "<<rad<<" drad "<<drad << " sel "<<selection[i]<< " inv error " << coords.w);

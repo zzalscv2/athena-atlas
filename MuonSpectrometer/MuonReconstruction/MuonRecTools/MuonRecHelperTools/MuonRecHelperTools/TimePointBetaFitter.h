@@ -49,7 +49,7 @@ namespace Muon {
     TimePointBetaFitter() {}
 
     /// fit beta 
-    FitResult fit( HitVec& hits ) const;
+    static FitResult fit( HitVec& hits ) ;
 
     /// fit beta with outlier logic 
     FitResult fitWithOutlierLogic( HitVec& hits ) const;

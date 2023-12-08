@@ -94,7 +94,7 @@ namespace Muon {
         }
     }
 
-    MooCandidateMatchingTool::~MooCandidateMatchingTool() {}
+    MooCandidateMatchingTool::~MooCandidateMatchingTool() = default;
 
     StatusCode MooCandidateMatchingTool::initialize() {
         ATH_CHECK(m_atlasExtrapolator.retrieve());
@@ -1089,7 +1089,6 @@ namespace Muon {
 
         }  // else !straighLineMatch && !entry1.hasMomemtum()
 
-        return;
     }
 
     bool MooCandidateMatchingTool::sameSide(const MuPatSegment& entry1, const MuPatSegment& entry2, bool sameSideOfPerigee) const {
@@ -1175,7 +1174,7 @@ namespace Muon {
     }
 
     void MooCandidateMatchingTool::getIdentifierSet(const std::vector<const Trk::MeasurementBase*>& measurements,
-                                                    std::set<Identifier>& ids) const {
+                                                    std::set<Identifier>& ids) {
         // loop over measurements and extract all identifiers
         std::vector<const Trk::MeasurementBase*>::const_iterator it = measurements.begin();
         std::vector<const Trk::MeasurementBase*>::const_iterator it_end = measurements.end();
@@ -1195,7 +1194,7 @@ namespace Muon {
         }
     }
 
-    bool MooCandidateMatchingTool::checkPhiHitConsistency(const MuPatCandidateBase& entry1, const MuPatCandidateBase& entry2) const {
+    bool MooCandidateMatchingTool::checkPhiHitConsistency(const MuPatCandidateBase& entry1, const MuPatCandidateBase& entry2) {
         // check whether one of the two entries has no phi hits in which case return true
         if (entry1.phiHits().empty() || entry2.phiHits().empty()) return true;
 

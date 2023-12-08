@@ -153,7 +153,7 @@ TriggerChamberClusterOnTrackCreator::applyClusterConsistency(
 std::vector<const Muon::MuonClusterOnTrack*> TriggerChamberClusterOnTrackCreator::createPrdRots(const std::list<const Trk::PrepRawData*>& prds) const {
     // create clusterRot for each PRD
     auto rots = std::vector<const Muon::MuonClusterOnTrack*>();
-    if (!prds.size()) {
+    if (prds.empty()) {
         ATH_MSG_WARNING("empty PRD list ");
         return rots;
     }
@@ -177,7 +177,7 @@ std::vector<const Muon::MuonClusterOnTrack*> TriggerChamberClusterOnTrackCreator
 
 void
 TriggerChamberClusterOnTrackCreator::makeClustersBySurface(std::list<int>& limitingChannels, std::list<const Muon::MuonClusterOnTrack*>& limitingRots, const std::list<const Trk::PrepRawData*>& prds, const std::vector<const Muon::MuonClusterOnTrack*>& rots) const {
-    if (!prds.size()) {
+    if (prds.empty()) {
         ATH_MSG_WARNING("makeClustersBySurface- empty PRD list ");
         return;
     }

@@ -35,15 +35,15 @@ namespace Muon {
     if( crot ) {
       if( crot->containedROTs().empty() ){
 	      ATH_MSG_WARNING(" CompetingMuonClustersOnTrack without contained ROTs ");
-	      return Identifier();
+	      return {};
       }
       if( !crot->containedROTs().front() ) {
       	ATH_MSG_WARNING(" CompetingMuonClustersOnTrack contains a ROT pointer that is zero ");
-	      return Identifier();
+	      return {};
       }
       return crot->containedROTs().front()->identify();
     }
-    return Identifier();
+    return {};
   }
 
 
