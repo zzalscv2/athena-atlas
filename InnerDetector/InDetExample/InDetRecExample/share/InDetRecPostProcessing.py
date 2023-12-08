@@ -426,30 +426,7 @@ if InDetFlags.doConversions():
       printfunc (InDetConversionVertexCuts.printInfo())
     pass
   pass
-  #
-  # --- configure the conversion finder
-  #
 
-  # Utility for conversion tool
-  from TrkVertexFitterUtils.TrkVertexFitterUtilsConf import Trk__NeutralParticleParameterCalculator
-  convUtils = Trk__NeutralParticleParameterCalculator(
-      name                   = "convUtils",
-      LinearizedTrackFactory = None)
-  ToolSvc+= convUtils
-
-  from InDetRecExample.ConfiguredSecVertexFinding import ConfiguredSecVertexFinding
-  InDetConversionFinding = ConfiguredSecVertexFinding (prefix           = "InDetConversion",
-                                                       VertexCuts       = InDetConversionVertexCuts,
-                                                       TrackParticles   = InDetKeys.xAODTrackParticleContainer(),
-                                                       SecVertices      = InDetKeys.Conversions(),
-                                                       Extrapolator     = TrackingCommon.getInDetExtrapolator(), # @TODO use AtlasExtrapolator ?
-                                                       printConfig      = InDetFlags.doPrintConfigurables())
-  # --- we need the driving algorithm
-  InDetConversionFinding.addAlgorithm()
-
-  from egammaTrackTools.egammaTrackToolsFactories import EMExtrapolationTools
-  topSequence.InDetConversionFinder.ExtrapolationTool  =  EMExtrapolationTools.copyPublic('egammaExtrapolationTool')()
-  topSequence.InDetConversionFinder.doExtrapolation = True
 
 
 # [XXX JDC: problems with the association tool (Tracks already in SG)
