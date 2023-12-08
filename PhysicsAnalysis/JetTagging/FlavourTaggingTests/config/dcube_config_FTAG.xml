@@ -1,0 +1,122 @@
+<?xml version="1.0" ?>
+<!--
+ DCube configuration XML file = dcube_config.xml
+ Statistics tests:
+ "['KS']"
+ Legend:
+ * KS    - Kolmogorov-Smirnov test (default)
+ * chi2  - chi2 test
+ * bbb   - bin-by-bin comparision
+ * meany - avg eff mean y [TProfiles only!]
+ * all   - all above tests
+ Tweaks:
+ [1] remove or comment out (using HTML comments tags) histograms not relevant
+     to your analysis
+ [2] provide a new content to "ref_desc" and "mon_desc" tags to something
+     more meaningful
+ [3] and of course feel free to change attribute "tests" in each "hist" tag
+ [4] limits of p-value warning and failure can be set by changing attributes
+     in <plimit> tag
+ [5] if you want to make plots FOR EVERY histogram in your monitored file
+     change attribute "inclusive" in <mode> tag to "true"
+-->
+<dcube_client_config>
+ <dcube branch="*" cmtconfig="*" install="*" jobId="*" project="*">
+  <!--
+  ###################################################
+  DCubeClient for:
+  [1] branch: *
+  [2] install: *
+  [3] cmtconfig: *
+  [4] project: *
+  [5] jobId: *
+  [6] p-values limits FAIL = 0.750000 WARN = 0.950000
+  ###################################################
+-->
+  <reference file="NTUP_MERGE_PHYSVAL.root"/>
+  <ref_desc>Last release</ref_desc>
+  <test_desc>PUT YOUR TEST DESCRIPTION HERE</test_desc>
+  <plimit fail="0.75" warn="0.95"/>
+  <TDirectory name="/">
+   <TDirectory name="BTag">
+    <TDirectory name="AntiKt4EMPFlowJets">
+     <TDirectory name="other_histograms">
+      <TDirectory name="histos">
+       <hist1D name="BTag_AntiKt4EMPFlowJets_global_nTracks" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_global_nPrimVtx" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_global_nTracksPrimVtx" type="TH1F" plotopts="" tests="KS"/>
+      </TDirectory>
+     </TDirectory>
+     <TDirectory name="jet">
+      <TDirectory name="jet">
+       <hist1D name="BTag_AntiKt4EMPFlowJets_jet_nJets" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_jet_jet_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_jet_jet_eta" type="TH1F" plotopts="" tests="KS"/>
+      </TDirectory>
+     </TDirectory>
+     <TDirectory name="tracks">
+      <TDirectory name="_incl">
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_sigd0_incl" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_sigz0_incl" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nBLHits_incl" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nsharedBLHits_incl" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nsplitBLHits_incl" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nSCTHits_incl" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nSCTHoles_incl" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nsharedSCTHits_incl" type="TH1F" plotopts="" tests="KS"/>
+      </TDirectory>
+     </TDirectory>
+     <TDirectory name="SV">
+      <TDirectory name="_incl">
+       <hist1D name="BTag_AntiKt4EMPFlowJets_SV_SV1_masssvx_incl" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_SV_SV1_efracsvx_incl" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_SV_SV1_Lxy_incl" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_SV_JetFitter_mass_incl" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_SV_JetFitter_energyFraction_incl" type="TH1F" plotopts="" tests="KS"/>
+      </TDirectory>
+     </TDirectory>
+     <TDirectory name="tagger_IP3D">
+      <TDirectory name="other">
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_pb" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_pc" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_pu" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_NTracks_incl" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_gradeOfTracks_incl" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_valD0wrtPVofTracks" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_valZ0wrtPVofTracks" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_sigD0wrtPVofTracks" type="TH1F" plotopts="" tests="KS"/>
+      </TDirectory>
+     </TDirectory>
+     <TDirectory name="tagger_DIPS">
+      <TDirectory name="other">
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DIPS_pb" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DIPS_pc" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DIPS_pu" type="TH1F" plotopts="" tests="KS"/>
+      </TDirectory>
+     </TDirectory>
+     <TDirectory name="tagger_SV1">
+      <TDirectory name="other">
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_SV1_pb" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_SV1_pc" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_SV1_pu" type="TH1F" plotopts="" tests="KS"/>
+      </TDirectory>
+     </TDirectory>
+     <TDirectory name="tagger_DL1dv00">
+      <TDirectory name="other">
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv00_pb" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv00_pc" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv00_pu" type="TH1F" plotopts="" tests="KS"/>
+      </TDirectory>
+     </TDirectory>
+     <TDirectory name="tagger_GN1">
+      <TDirectory name="other">
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_GN1_pb" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_GN1_pc" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_GN1_pu" type="TH1F" plotopts="" tests="KS"/>
+      </TDirectory>
+     </TDirectory>
+    </TDirectory>
+   </TDirectory>
+  </TDirectory>
+ </dcube>
+</dcube_client_config>
