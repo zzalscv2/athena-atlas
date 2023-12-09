@@ -13,9 +13,9 @@ namespace CP {
   {}
 
   StatusCode ChargeSelectorAlg::initialize() {
-    ANA_CHECK(m_electronsHandle.initialize(m_systematicsList));
+    ANA_CHECK(m_electronsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_electronSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
-    ANA_CHECK(m_muonsHandle.initialize(m_systematicsList));
+    ANA_CHECK(m_muonsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_muonSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
     ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
 
@@ -41,25 +41,31 @@ namespace CP {
 
       // retrieve the electron container
       const xAOD::ElectronContainer *electrons = nullptr;
-      ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
+      if (m_electronsHandle)
+	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
       // retrieve the muon container
       const xAOD::MuonContainer *muons = nullptr;
-      ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+      if (m_muonsHandle)
+	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
 
       // apply the requested selection and compute the local charge
       int total_charge = 0;
       int total_leptons = 0;
-      for (const xAOD::Electron *el : *electrons) {
-        if (!m_electronSelection || m_electronSelection.getBool(*el, sys)){
-          total_charge += el->charge();
-          total_leptons++;
-        }
+      if (m_electronsHandle) {
+	for (const xAOD::Electron *el : *electrons) {
+	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)){
+	    total_charge += el->charge();
+	    total_leptons++;
+	  }
+	}
       }
-      for (const xAOD::Muon *mu : *muons) {
-        if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)){
-          total_charge += mu->charge();
-          total_leptons++; 
-        }
+      if (m_muonsHandle) {
+	for (const xAOD::Muon *mu : *muons) {
+	  if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)){
+	    total_charge += mu->charge();
+	    total_leptons++; 
+	  }
+	}
       }
 
       // check that there are only 2 leptons

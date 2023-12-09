@@ -14,9 +14,9 @@ namespace CP {
 
   StatusCode MissingETPlusTransverseMassSelectorAlg::initialize() {
     ANA_CHECK(m_metHandle.initialize(m_systematicsList));
-    ANA_CHECK(m_electronsHandle.initialize(m_systematicsList));
+    ANA_CHECK(m_electronsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_electronSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
-    ANA_CHECK(m_muonsHandle.initialize(m_systematicsList));
+    ANA_CHECK(m_muonsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_muonSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
     ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
 
@@ -47,10 +47,12 @@ namespace CP {
       ANA_CHECK(m_metHandle.retrieve(met, sys));
       // retrieve the electron container
       const xAOD::ElectronContainer *electrons = nullptr;
-      ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
+      if (m_electronsHandle)
+	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
       // retrieve the electron container
       const xAOD::MuonContainer *muons = nullptr;
-      ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+      if (m_muonsHandle)
+	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
 
       // compute the W boson transverse mass
       float etmiss_pt = (*met)["Final"]->met();
@@ -58,21 +60,25 @@ namespace CP {
       float lep_pt, lep_phi;
       int lep_count = 0;
 
-      for (const xAOD::Electron *el : *electrons) {
-        if (!m_electronSelection || m_electronSelection.getBool(*el, sys)){
-          lep_pt = el->pt();
-          lep_phi = el->phi();
-          lep_count++;
-          break;
-        }
+      if (m_electronsHandle) {
+	for (const xAOD::Electron *el : *electrons) {
+	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)){
+	    lep_pt = el->pt();
+	    lep_phi = el->phi();
+	    lep_count++;
+	    break;
+	  }
+	}
       }
-      for (const xAOD::Muon *mu : *muons) {
-        if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
-          lep_pt = mu->pt();
-          lep_phi = mu->phi();
-          lep_count++;
-          break;
-        }
+      if (m_muonsHandle) {
+	for (const xAOD::Muon *mu : *muons) {
+	  if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
+	    lep_pt = mu->pt();
+	    lep_phi = mu->phi();
+	    lep_count++;
+	    break;
+	  }
+	}
       }
 
       if (lep_count == 0){

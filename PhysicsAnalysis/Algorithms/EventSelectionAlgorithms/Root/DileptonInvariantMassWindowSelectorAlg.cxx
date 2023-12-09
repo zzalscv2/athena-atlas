@@ -13,9 +13,9 @@ namespace CP {
   {}
 
   StatusCode DileptonInvariantMassWindowSelectorAlg::initialize() {
-    ANA_CHECK(m_electronsHandle.initialize(m_systematicsList));
+    ANA_CHECK(m_electronsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_electronSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
-    ANA_CHECK(m_muonsHandle.initialize(m_systematicsList));
+    ANA_CHECK(m_muonsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_muonSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
     ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
 
@@ -41,42 +41,48 @@ namespace CP {
 
       // retrieve the electron container
       const xAOD::ElectronContainer *electrons = nullptr;
-      ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
+      if (m_electronsHandle)
+	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
       // retrieve the electron container
       const xAOD::MuonContainer *muons = nullptr;
-      ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+      if (m_muonsHandle)
+	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
 
       // apply the requested selection
       TLorentzVector lepton0, lepton1;
       int total_leptons = 0;
       bool isfilled0(false), isfilled1(false);
-      for (const xAOD::Electron *el : *electrons) {
-        if (!m_electronSelection || m_electronSelection.getBool(*el, sys)) {
-	  total_leptons++;
-          if (!isfilled0){
-            lepton0 = el->p4();
-            isfilled0 = true;
-          } else if (!isfilled1){
-            lepton1 = el->p4();
-            isfilled1 = true;
-          } else {
-            break;
-          }
-        } 
+      if (m_electronsHandle) {
+	for (const xAOD::Electron *el : *electrons) {
+	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)) {
+	    total_leptons++;
+	    if (!isfilled0){
+	      lepton0 = el->p4();
+	      isfilled0 = true;
+	    } else if (!isfilled1){
+	      lepton1 = el->p4();
+	      isfilled1 = true;
+	    } else {
+	      break;
+	    }
+	  } 
+	}
       }
-      for (const xAOD::Muon *mu : *muons) {
-        if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
-	  total_leptons++;
-          if (!isfilled0){
-            lepton0 = mu->p4();
-            isfilled0 = true;
-          } else if (!isfilled1){
-            lepton1 = mu->p4();
-            isfilled1 = true;
-          } else {
-            break;
-          }
-        }  
+      if (m_muonsHandle) {
+	for (const xAOD::Muon *mu : *muons) {
+	  if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
+	    total_leptons++;
+	    if (!isfilled0){
+	      lepton0 = mu->p4();
+	      isfilled0 = true;
+	    } else if (!isfilled1){
+	      lepton1 = mu->p4();
+	      isfilled1 = true;
+	    } else {
+	      break;
+	    }
+	  }  
+	}
       }
 
       if (total_leptons != 2){
