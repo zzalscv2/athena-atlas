@@ -197,7 +197,7 @@ double TrigInDetTrackFollowingTool::processHit(const InDet::PixelCluster* pPRD, 
     for(int i=0;i<2;i++) cluster_cov[i] *= cluster_cov[i]/12.0;
   }
  
-  double covsum[2][2] = {ets.m_Gk[0][0] + cluster_cov[0], ets.m_Gk[0][1], ets.m_Gk[0][1], ets.m_Gk[1][1] + cluster_cov[1]};
+  double covsum[2][2] = {{ets.m_Gk[0][0] + cluster_cov[0], ets.m_Gk[0][1]}, {ets.m_Gk[0][1], ets.m_Gk[1][1] + cluster_cov[1]}};
     
   double detr = 1/(covsum[0][0]*covsum[1][1] - covsum[0][1]*covsum[1][0]);
   
@@ -294,7 +294,7 @@ const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDe
   }
 
   double Gain[10][2];
-  double V[2][2] = {invcov[0], invcov[1],  invcov[1],  invcov[2]};
+  double V[2][2] = {{invcov[0], invcov[1]}, {invcov[1], invcov[2]}};
     
   for(int i=0;i<10;i++) 
     for(int j=0;j<2;j++) Gain[i][j] =  CHT[i][0]*V[0][j] + CHT[i][1]*V[1][j];
@@ -463,8 +463,6 @@ std::unique_ptr<TrigFTF_ExtendedTrackState> TrigInDetTrackFollowingTool::fitTheS
   double sigma_x2 = std::pow(0.08,2);
   double sigma_y2 = std::pow(0.3,2);
 
-  double chi2 = 0.0;
-  
   for(const auto& sp : seed) {
 
     //1. extrapolate
@@ -542,10 +540,6 @@ std::unique_ptr<TrigFTF_ExtendedTrackState> TrigInDetTrackFollowingTool::fitTheS
 
     double resid = measx - Rex[0];
 
-    double dchi2 = resid*resid*Dx;
-
-    chi2 += dchi2;
-
     double Kx[3] = {Dx*CHTx[0], Dx*CHTx[1], Dx*CHTx[2]};
 
     for(int i=0;i<3;i++) Rx[i] = Rex[i] + Kx[i]*resid;
@@ -559,10 +553,6 @@ std::unique_ptr<TrigFTF_ExtendedTrackState> TrigInDetTrackFollowingTool::fitTheS
     double Dy = 1/(Cey[0][0] + sigma_y2);
 
     resid = measy - Rey[0];
-
-    dchi2 = resid*resid*Dy;
-
-    chi2 += dchi2;
 
     double Ky[2] = {Dy*CHTy[0], Dy*CHTy[1]};
 
