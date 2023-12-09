@@ -47,7 +47,7 @@ namespace yampl {
   class ISocket;
 }
 
-class ATLAS_NOT_THREAD_SAFE AthenaMtesEventLoopMgr
+class AthenaMtesEventLoopMgr
   : virtual public IEventSeek,
     virtual public ICollectionSize,
     virtual public IIncidentListener,

@@ -1380,7 +1380,8 @@ std::unique_ptr<AthenaMtesEventLoopMgr::RangeStruct> AthenaMtesEventLoopMgr::get
      memcpy(ready_message,strReady.data(),strReady.size());
      socket->send(ready_message,strReady.size());
      void* eventRangeMessage;
-     ssize_t eventRangeSize = socket->recv(eventRangeMessage);
+     std::string strPeerId;
+     ssize_t eventRangeSize = socket->recv(eventRangeMessage,strPeerId);
      range = std::string((const char*)eventRangeMessage,eventRangeSize);
      leftString(range, '\n');
   }
