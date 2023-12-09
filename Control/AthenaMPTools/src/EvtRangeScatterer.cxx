@@ -241,7 +241,8 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::exec_func(
     memcpy(ready_message,strReady.data(),strReady.size());
     socket2Pilot->send(ready_message,strReady.size());
     void* eventRangeMessage;
-    ssize_t eventRangeSize = socket2Pilot->recv(eventRangeMessage);
+    std::string strPeerId;
+    ssize_t eventRangeSize = socket2Pilot->recv(eventRangeMessage,strPeerId);
     std::string eventRange((const char*)eventRangeMessage,eventRangeSize);
     size_t carRet = eventRange.find('\n');
     if(carRet!=std::string::npos)
@@ -478,7 +479,8 @@ std::string EvtRangeScatterer::getNewRangeRequest(yampl::ISocket* socket2Process
 					       , int& procReportPending)
 {
   void* processor_request(0);
-  ssize_t processorRequestSize = socket2Processor->tryRecv(processor_request);
+  std::string strPeerId;
+  ssize_t processorRequestSize = socket2Processor->tryRecv(processor_request,0,strPeerId);
 
   if(processorRequestSize==-1) return std::string("");
   if(processorRequestSize==sizeof(pid_t)+sizeof(AthenaMPToolBase::ESRange_Status)) {
