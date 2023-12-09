@@ -99,6 +99,9 @@ class EventSelectionConfig(ConfigBlock):
     def raise_misconfig(self, text, keyword):
         raise ValueError (f"[EventSelectionConfig] Misconfiguration! Check {keyword} in: {text}")
 
+    def raise_missinginput(self, collection):
+        raise ValueError (f"[EventSelectionConfig] Misconfiguration! Missing input collection for {collection}")
+
     def check_float(self, test, requirePositive=True):
         try:
             value = float(test)
@@ -183,6 +186,8 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "EL_N")
         if len(items) != 4 and len(items) != 5:
             self.raise_misconfig(text, "number of arguments")
+        if not self.electrons:
+            self.raise_missinginput("electrons")
         thisalg = f'{self.name}_NEL_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.electrons)
@@ -209,6 +214,8 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "MU_N")
         if len(items) != 4 and len(items) != 5:
             self.raise_misconfig(text, "number of arguments")
+        if not self.muons:
+            self.raise_missinginput("muons")
         thisalg = f'{self.name}_NMU_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.muons)
@@ -235,6 +242,8 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "JET_N")
         if len(items) != 4 and len(items) != 5:
             self.raise_misconfig(text, "number of arguments")
+        if not self.jets:
+            self.raise_missinginput("jets")
         thisalg = f'{self.name}_NJET_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.jets)
@@ -261,6 +270,8 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "JET_N_BTAG")
         if len(items) != 3 and len(items) != 4:
             self.raise_misconfig(text, "number of arguments")
+        if not self.jets:
+            self.raise_missinginput("jets")
         thisalg = f'{self.name}_NBJET_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         particles, selection = config.readNameAndSelection(self.jets)
@@ -286,6 +297,8 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "PH_N")
         if len(items) != 4 and len(items) != 5:
             self.raise_misconfig(text, "number of arguments")
+        if not self.photons:
+            self.raise_missinginput("photons")
         thisalg = f'{self.name}_NPH_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.photons)
@@ -312,6 +325,8 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "TAU_N")
         if len(items) != 4 and len(items) != 5:
             self.raise_misconfig(text, "number of arguments")
+        if not self.taus:
+            self.raise_missinginput("taus")
         thisalg = f'{self.name}_NTAU_{self.step}'
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         alg.particles, alg.objectSelection = config.readNameAndSelection(self.taus)
@@ -338,6 +353,8 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "MET")
         if len(items) != 3:
             self.raise_misconfig(text, "number of arguments")
+        if not self.met:
+            self.raise_missinginput("MET")
         thisalg = f'{self.name}_MET_{self.step}'
         alg = config.createAlgorithm('CP::MissingETSelectorAlg', thisalg)
         alg.met = config.readName(self.met)
@@ -353,6 +370,8 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "MWT")
         if len(items) != 3:
             self.raise_misconfig(text, "number of arguments")
+        if not self.electrons and not self.muons:
+            self.raise_missinginput("electrons or muons")
         thisalg = f'{self.name}_MWT_{self.step}'
         alg = config.createAlgorithm('CP::TransverseMassSelectorAlg', thisalg)
         alg.met = config.readName(self.met)
@@ -370,6 +389,10 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "MET+MWT")
         if len(items) != 3:
             self.raise_misconfig(text, "number of arguments")
+        if not self.met:
+            self.raise_missinginput("MET")
+        if not self.electrons and not self.muons:
+            self.raise_missinginput("electrons or muons")
         thisalg = f'{self.name}_METMWT_{self.step}'
         alg = config.createAlgorithm('CP::MissingETPlusTransverseMassSelectorAlg', thisalg)
         alg.met = config.readName(self.met)
@@ -387,10 +410,14 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "MLL")
         if len(items) != 3:
             self.raise_misconfig(text, "number of arguments")
+        if not self.electrons and not self.muons:
+            self.raise_missinginput("electrons or muons")
         thisalg = f'{self.name}_MLL_{self.step}'
         alg = config.createAlgorithm('CP::DileptonInvariantMassSelectorAlg', thisalg)
-        alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
-        alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        if self.electrons:
+            alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
+        if self.muons:
+            alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.sign = self.check_sign(items[1])
         alg.refMLL = self.check_float(items[2])
         alg.eventPreselection = f'{self.currentDecoration}'
@@ -403,10 +430,14 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "MLLWINDOW")
         if len(items) != 3:
             self.raise_misconfig(text, "number of arguments")
+        if not self.electrons and not self.muons:
+            self.raise_missinginput("electrons or muons")
         thisalg = f'{self.name}_MLLWINDOW_{self.step}'
         alg = config.createAlgorithm('CP::DileptonInvariantMassWindowSelectorAlg', thisalg)
-        alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
-        alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        if self.electrons:
+            alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
+        if self.muons:
+            alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.lowMLL = self.check_float(items[1])
         alg.highMLL = self.check_float(items[2])
         # if high<low we are trying to veto events in that window; otherwise we select them
@@ -419,10 +450,14 @@ class EventSelectionConfig(ConfigBlock):
         items = text.split()
         if len(items) != 1:
             self.raise_misconfig(text, "number of arguments")
+        if not self.electrons and not self.muons:
+            self.raise_missinginput("electrons or muons")
         thisalg = f'{self.name}_OS_{self.step}'
         alg = config.createAlgorithm('CP::ChargeSelectorAlg', thisalg)
-        alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
-        alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        if self.electrons:
+            alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
+        if self.muons:
+            alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.OS = True
         alg.eventPreselection = f'{self.currentDecoration}'
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
@@ -432,10 +467,14 @@ class EventSelectionConfig(ConfigBlock):
         items = text.split()
         if len(items) != 1:
             self.raise_misconfig(text, "number of arguments")
+        if not self.electrons and not self.muons:
+            self.raise_missinginput("electrons or muons")
         thisalg = f'{self.name}_SS_{self.step}'
         alg = config.createAlgorithm('CP::ChargeSelectorAlg', thisalg)
-        alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
-        alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        if self.electrons:
+            alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
+        if self.muons:
+            alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.OS = False
         alg.eventPreselection = f'{self.currentDecoration}'
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
