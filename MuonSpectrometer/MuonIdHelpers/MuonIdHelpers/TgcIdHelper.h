@@ -103,16 +103,16 @@ public:
     // Access to min and max of level ranges
     // to be remove when we moved to compact ids
 
-    int stationEtaMin() const;
-    int stationEtaMax() const;
-    int stationPhiMin(bool endcap) const;
-    int stationPhiMax(bool endcap) const;
-    int gasGapMin() const;
-    int gasGapMax(bool triplet) const;
-    int isStripMin() const;
-    int isStripMax() const;
-    int channelMin() const;
-    int channelMax() const;
+    static int stationEtaMin() ;
+    static int stationEtaMax() ;
+    static int stationPhiMin(bool endcap) ;
+    static int stationPhiMax(bool endcap) ;
+    static int gasGapMin() ;
+    static int gasGapMax(bool triplet) ;
+    static int isStripMin() ;
+    static int isStripMax() ;
+    static int channelMin() ;
+    static int channelMax() ;
 
     // Access to min and max of level ranges
 
@@ -129,7 +129,7 @@ public:
 
     // Utility methods
 
-    int chamberType(const std::string& stationName, int stationEta) const;
+    static int chamberType(const std::string& stationName, int stationEta) ;
     int chamberType(int stationName, int stationEta) const;
 
     // Public validation of levels

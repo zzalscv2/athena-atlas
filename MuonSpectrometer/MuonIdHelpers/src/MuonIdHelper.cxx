@@ -775,7 +775,7 @@ bool MuonIdHelper::validTechnology(int technology) const {
 }
 
 /*******************************************************************************/
-void MuonIdHelper::addStationID(ExpandedIdentifier& id, int stationName, int stationEta, int stationPhi, int technology) const {
+void MuonIdHelper::addStationID(ExpandedIdentifier& id, int stationName, int stationEta, int stationPhi, int technology) {
     id << stationName << stationEta << stationPhi << technology;
 }
 /*******************************************************************************/

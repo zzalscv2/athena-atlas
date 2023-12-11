@@ -1102,37 +1102,37 @@ int RpcIdHelper::channel(const Identifier& id) const { return strip(id); }
 
 // Access to min and max of level ranges
 
-int RpcIdHelper::stationEtaMin() const { return StationEtaMin; }
+int RpcIdHelper::stationEtaMin() { return StationEtaMin; }
 
-int RpcIdHelper::stationEtaMax() const { return StationEtaMax; }
+int RpcIdHelper::stationEtaMax() { return StationEtaMax; }
 
-int RpcIdHelper::stationPhiMin() const { return StationPhiMin; }
+int RpcIdHelper::stationPhiMin() { return StationPhiMin; }
 
-int RpcIdHelper::stationPhiMax() const { return StationPhiMax; }
+int RpcIdHelper::stationPhiMax() { return StationPhiMax; }
 
-int RpcIdHelper::doubletRMin() const { return DoubletRMin; }
+int RpcIdHelper::doubletRMin() { return DoubletRMin; }
 
-int RpcIdHelper::doubletRMax() const { return DoubletRMax; }
+int RpcIdHelper::doubletRMax() { return DoubletRMax; }
 
-int RpcIdHelper::doubletZMin() const { return DoubletZMin; }
+int RpcIdHelper::doubletZMin() { return DoubletZMin; }
 
-int RpcIdHelper::doubletZMax() const { return DoubletZMax; }
+int RpcIdHelper::doubletZMax() { return DoubletZMax; }
 
-int RpcIdHelper::doubletPhiMin() const { return DoubletPhiMin; }
+int RpcIdHelper::doubletPhiMin() { return DoubletPhiMin; }
 
-int RpcIdHelper::doubletPhiMax() const { return DoubletPhiMax; }
+int RpcIdHelper::doubletPhiMax() { return DoubletPhiMax; }
 
-int RpcIdHelper::gasGapMin() const { return GasGapMin; }
+int RpcIdHelper::gasGapMin() { return GasGapMin; }
 
 int RpcIdHelper::gasGapMax() const { return m_gasGapMax; }
 
-int RpcIdHelper::measuresPhiMin() const { return MeasuresPhiMin; }
+int RpcIdHelper::measuresPhiMin() { return MeasuresPhiMin; }
 
-int RpcIdHelper::measuresPhiMax() const { return MeasuresPhiMax; }
+int RpcIdHelper::measuresPhiMax() { return MeasuresPhiMax; }
 
-int RpcIdHelper::stripMin() const { return StripMin; }
+int RpcIdHelper::stripMin() { return StripMin; }
 
-int RpcIdHelper::stripMax() const { return StripMax; }
+int RpcIdHelper::stripMax() { return StripMax; }
 
 /// Utility methods
 
@@ -1152,7 +1152,7 @@ int RpcIdHelper::zIndex(const Identifier& id) const {
     return zIndex(name, eta, dR, dZ, dP);
 }
 
-int RpcIdHelper::zIndex(const std::string& name, int eta, int dR, int dZ, int dP) const {
+int RpcIdHelper::zIndex(const std::string& name, int eta, int dR, int dZ, int dP) {
     /** - from Stefania
         BMS5 which has the following structure:
         for dbr=1 there are 3 dbZ, first and second are made of a single

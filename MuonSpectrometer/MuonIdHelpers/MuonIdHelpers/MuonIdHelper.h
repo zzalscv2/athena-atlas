@@ -304,7 +304,7 @@ protected:
 
     void addStationID(Identifier& id, int stationName, int stationEta, int stationPhi, int technology) const;
 
-    void addStationID(ExpandedIdentifier& id, int stationName, int stationEta, int stationPhi, int technology) const;
+    static void addStationID(ExpandedIdentifier& id, int stationName, int stationEta, int stationPhi, int technology) ;
     
     inline void resetAndSet(const IdDictFieldImplementation & dict, const int new_val, Identifier& id ) const {
         dict.reset(id);

@@ -650,25 +650,25 @@ int TgcIdHelper::channel(const Identifier& id) const { return m_cha_impl.unpack(
 
 // Access to min and max of level ranges
 
-int TgcIdHelper::stationEtaMin() const { return StationEtaMin; }
+int TgcIdHelper::stationEtaMin() { return StationEtaMin; }
 
-int TgcIdHelper::stationEtaMax() const { return StationEtaMax; }
+int TgcIdHelper::stationEtaMax() { return StationEtaMax; }
 
-int TgcIdHelper::stationPhiMin(bool endcap) const { return endcap ? StationPhiEndcapMin : StationPhiForwardMin; }
+int TgcIdHelper::stationPhiMin(bool endcap) { return endcap ? StationPhiEndcapMin : StationPhiForwardMin; }
 
-int TgcIdHelper::stationPhiMax(bool endcap) const { return endcap ? StationPhiEndcapMax : StationPhiForwardMax; }
+int TgcIdHelper::stationPhiMax(bool endcap) { return endcap ? StationPhiEndcapMax : StationPhiForwardMax; }
 
-int TgcIdHelper::gasGapMin() const { return GasGapMin; }
+int TgcIdHelper::gasGapMin() { return GasGapMin; }
 
-int TgcIdHelper::gasGapMax(bool triplet) const { return triplet ? GasGapTripletMax : GasGapDoubletMax; }
+int TgcIdHelper::gasGapMax(bool triplet) { return triplet ? GasGapTripletMax : GasGapDoubletMax; }
 
-int TgcIdHelper::isStripMin() const { return IsStripMin; }
+int TgcIdHelper::isStripMin() { return IsStripMin; }
 
-int TgcIdHelper::isStripMax() const { return IsStripMax; }
+int TgcIdHelper::isStripMax() { return IsStripMax; }
 
-int TgcIdHelper::channelMin() const { return ChannelMin; }
+int TgcIdHelper::channelMin() { return ChannelMin; }
 
-int TgcIdHelper::channelMax() const { return ChannelMax; }
+int TgcIdHelper::channelMax() { return ChannelMax; }
 /// Utility methods
 
 int TgcIdHelper::tgcTechnology() const {
@@ -687,7 +687,7 @@ bool TgcIdHelper::tripletChamber(int stationName) const {
     return ('1' == name[1]);
 }
 
-int TgcIdHelper::chamberType(const std::string& stationName, int stationEta) const {
+int TgcIdHelper::chamberType(const std::string& stationName, int stationEta) {
     if ('1' == stationName[1]) {
         if ('F' == stationName[2])
             return 1;

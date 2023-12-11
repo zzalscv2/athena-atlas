@@ -296,7 +296,7 @@ Identifier MmIdHelper::multilayerID(const Identifier& moduleID, int multilayer, 
     return Identifier{0};
 }
 /*******************************************************************************/
-int MmIdHelper::getFirstPcbChnl(int stationEta, int pcb) const {
+int MmIdHelper::getFirstPcbChnl(int stationEta, int pcb) {
 	int pcbNb = std::abs(stationEta)==1 ? pcb : pcb-5;
 	return (pcbNb-1)*1024+1;
 }
@@ -332,7 +332,7 @@ Identifier MmIdHelper::pcbID(const Identifier& channelId) const {
 	return pcbID(channelId, pcb);
 }
 /*******************************************************************************/
-int MmIdHelper::getFirstRadiusChnl(int stationEta, int radius) const {
+int MmIdHelper::getFirstRadiusChnl(int stationEta, int radius) {
 	int radiusNb = std::abs(stationEta)==1 ? radius : radius-10;
 	return radiusNb*512+1;
 }
@@ -800,19 +800,19 @@ int MmIdHelper::gasGap(const Identifier& id) const { return m_gap_impl.unpack(id
 int MmIdHelper::channel(const Identifier& id) const { return m_cha_impl.unpack(id); }
 /*******************************************************************************/
 // Access to min and max of level ranges
-int MmIdHelper::stationEtaMin() const { return StationEtaMin; }
+int MmIdHelper::stationEtaMin() { return StationEtaMin; }
 /*******************************************************************************/
-int MmIdHelper::stationEtaMax() const { return StationEtaMax; }
+int MmIdHelper::stationEtaMax() { return StationEtaMax; }
 /*******************************************************************************/
-int MmIdHelper::stationPhiMin() const { return StationPhiMin; }
+int MmIdHelper::stationPhiMin() { return StationPhiMin; }
 /*******************************************************************************/
-int MmIdHelper::stationPhiMax() const { return StationPhiMax; }
+int MmIdHelper::stationPhiMax() { return StationPhiMax; }
 /*******************************************************************************/
-int MmIdHelper::multilayerMin() const { return MultilayerMin; }
+int MmIdHelper::multilayerMin() { return MultilayerMin; }
 /*******************************************************************************/
-int MmIdHelper::multilayerMax() const { return MultilayerMax; }
+int MmIdHelper::multilayerMax() { return MultilayerMax; }
 /*******************************************************************************/
-int MmIdHelper::gasGapMin() const { return GasGapMin; }
+int MmIdHelper::gasGapMin() { return GasGapMin; }
 /*******************************************************************************/
 bool MmIdHelper::isStereo(const Identifier& id) const {
     bool isStereo = false;
@@ -824,11 +824,11 @@ bool MmIdHelper::isStereo(const Identifier& id) const {
 /*******************************************************************************/
 bool MmIdHelper::measuresPhi(const Identifier& /*id*/) const { return false; }
 /*******************************************************************************/
-int MmIdHelper::gasGapMax() const { return GasGapMax; }
+int MmIdHelper::gasGapMax() { return GasGapMax; }
 /*******************************************************************************/
-int MmIdHelper::channelMin() const { return ChannelMin; }
+int MmIdHelper::channelMin() { return ChannelMin; }
 /*******************************************************************************/
-int MmIdHelper::channelMax() const { return ChannelMax; }
+int MmIdHelper::channelMax() { return ChannelMax; }
 /*******************************************************************************/
 /// Utility methods
 int MmIdHelper::mmTechnology() const {
@@ -842,7 +842,7 @@ bool MmIdHelper::LargeSector(int stationName) const { return ('L' == stationName
 bool MmIdHelper::SmallSector(int stationName) const { return ('S' == stationNameString(stationName)[2]); }
 /*******************************************************************************/
 // Nektar: Modified for MicroMegas, but is almost certainly wrong
-int MmIdHelper::sectorType(const std::string& stationName, int stationEta) const {
+int MmIdHelper::sectorType(const std::string& stationName, int stationEta) {
     if ('L' == stationName[2]) {
         return (abs(stationEta) + 1);
     } else if ('S' == stationName[2]) {

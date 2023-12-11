@@ -151,7 +151,7 @@ namespace Muon {
         // if yes, the MDT chambers must be sMDTs
         if (m_mdtIdHelper && m_rpcIdHelper) {
             m_BIS_stat = m_mdtIdHelper->stationNameIndex("BIS");
-            for (int eta = m_mdtIdHelper->stationEtaMin(true); eta <= m_mdtIdHelper->stationEtaMax(true); ++eta) {
+            for (int eta = MdtIdHelper::stationEtaMin(true); eta <= MdtIdHelper::stationEtaMax(true); ++eta) {
                 for (int phi = 1; phi <= 8; ++phi) {
                     // now, let's check if we are in the inner barrel layer, and if there are RPCs installed
                     // if yes, the MDT chambers must be sMDTs

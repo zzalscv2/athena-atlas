@@ -280,7 +280,7 @@ int CscIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     }
 
     // check whether the current layout contains chamberLayer 1 Identifiers (pre-Run3) in the vector of module Identifiers
-    if (m_module_vec.size() && chamberLayer(m_module_vec.at(0)) == 1) m_hasChamLay1 = true;
+    if (!m_module_vec.empty() && chamberLayer(m_module_vec.at(0)) == 1) m_hasChamLay1 = true;
     m_init = true;
     return (status);
 }
@@ -779,29 +779,29 @@ int CscIdHelper::channel(const Identifier& id) const { return strip(id); }
 
 /// Access to min and max of level ranges
 
-int CscIdHelper::stationEtaMin() const { return StationEtaMin; }
+int CscIdHelper::stationEtaMin() { return StationEtaMin; }
 
-int CscIdHelper::stationEtaMax() const { return StationEtaMax; }
+int CscIdHelper::stationEtaMax() { return StationEtaMax; }
 
-int CscIdHelper::stationPhiMin() const { return StationPhiMin; }
+int CscIdHelper::stationPhiMin() { return StationPhiMin; }
 
-int CscIdHelper::stationPhiMax() const { return StationPhiMax; }
+int CscIdHelper::stationPhiMax() { return StationPhiMax; }
 
-int CscIdHelper::chamberLayerMin() const { return ChamberLayerMin; }
+int CscIdHelper::chamberLayerMin() { return ChamberLayerMin; }
 
-int CscIdHelper::chamberLayerMax() const { return ChamberLayerMax; }
+int CscIdHelper::chamberLayerMax() { return ChamberLayerMax; }
 
-int CscIdHelper::wireLayerMin() const { return WireLayerMin; }
+int CscIdHelper::wireLayerMin() { return WireLayerMin; }
 
-int CscIdHelper::wireLayerMax() const { return WireLayerMax; }
+int CscIdHelper::wireLayerMax() { return WireLayerMax; }
 
-int CscIdHelper::measuresPhiMin() const { return MeasuresPhiMin; }
+int CscIdHelper::measuresPhiMin() { return MeasuresPhiMin; }
 
-int CscIdHelper::measuresPhiMax() const { return MeasuresPhiMax; }
+int CscIdHelper::measuresPhiMax() { return MeasuresPhiMax; }
 
-int CscIdHelper::stripMin() const { return StripMin; }
+int CscIdHelper::stripMin() { return StripMin; }
 
-int CscIdHelper::stripMax() const { return StripMax; }
+int CscIdHelper::stripMax() { return StripMax; }
 
 /// Utility methods
 

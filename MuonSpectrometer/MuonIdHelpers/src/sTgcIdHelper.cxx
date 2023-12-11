@@ -990,37 +990,37 @@ bool sTgcIdHelper::measuresPhi(const Identifier& id) const { return (channelType
 int sTgcIdHelper::channel(const Identifier& id) const { return m_cha_impl.unpack(id); }
 /*******************************************************************************/
 // Access to min and max of level ranges
-int sTgcIdHelper::stationEtaMin() const { return StationEtaMin; }
+int sTgcIdHelper::stationEtaMin() { return StationEtaMin; }
 /*******************************************************************************/
-int sTgcIdHelper::stationEtaMax() const { return StationEtaMax; }
+int sTgcIdHelper::stationEtaMax() { return StationEtaMax; }
 /*******************************************************************************/
-int sTgcIdHelper::stationPhiMin() const { return StationPhiMin; }
+int sTgcIdHelper::stationPhiMin() { return StationPhiMin; }
 /*******************************************************************************/
-int sTgcIdHelper::stationPhiMax() const { return StationPhiMax; }
+int sTgcIdHelper::stationPhiMax() { return StationPhiMax; }
 /*******************************************************************************/
-int sTgcIdHelper::multilayerMin() const { return MultilayerMin; }
+int sTgcIdHelper::multilayerMin() { return MultilayerMin; }
 /*******************************************************************************/
-int sTgcIdHelper::multilayerMax() const { return MultilayerMax; }
+int sTgcIdHelper::multilayerMax() { return MultilayerMax; }
 /*******************************************************************************/
-int sTgcIdHelper::gasGapMin() const { return GasGapMin; }
+int sTgcIdHelper::gasGapMin() { return GasGapMin; }
 /*******************************************************************************/
-int sTgcIdHelper::gasGapMax() const { return GasGapMax; }
+int sTgcIdHelper::gasGapMax() { return GasGapMax; }
 /*******************************************************************************/
-int sTgcIdHelper::channelTypeMin() const { return ChannelTypeMin; }
+int sTgcIdHelper::channelTypeMin() { return ChannelTypeMin; }
 /*******************************************************************************/
-int sTgcIdHelper::channelTypeMax() const { return ChannelTypeMax; }
+int sTgcIdHelper::channelTypeMax() { return ChannelTypeMax; }
 /*******************************************************************************/
-int sTgcIdHelper::channelMin() const { return ChannelMin; }
+int sTgcIdHelper::channelMin() { return ChannelMin; }
 /*******************************************************************************/
-int sTgcIdHelper::channelMax() const { return ChannelMax; }
+int sTgcIdHelper::channelMax() { return ChannelMax; }
 /*******************************************************************************/
-int sTgcIdHelper::padEtaMin() const { return PadEtaMin; }
+int sTgcIdHelper::padEtaMin() { return PadEtaMin; }
 /*******************************************************************************/
-int sTgcIdHelper::padEtaMax() const { return PadEtaMax; }
+int sTgcIdHelper::padEtaMax() { return PadEtaMax; }
 /*******************************************************************************/
-int sTgcIdHelper::padPhiMin() const { return PadPhiMin; }
+int sTgcIdHelper::padPhiMin() { return PadPhiMin; }
 /*******************************************************************************/
-int sTgcIdHelper::padPhiMax() const { return PadPhiMax; }
+int sTgcIdHelper::padPhiMax() { return PadPhiMax; }
 /*******************************************************************************/
 /// Utility methods
 int sTgcIdHelper::stgcTechnology() const {

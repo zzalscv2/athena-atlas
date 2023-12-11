@@ -131,22 +131,22 @@ public:
 
     // Access to min and max of level ranges
 
-    int stationEtaMin() const;
-    int stationEtaMax() const;
-    int stationPhiMin() const;
-    int stationPhiMax() const;
-    int doubletRMin() const;
-    int doubletRMax() const;
-    int doubletZMin() const;
-    int doubletZMax() const;
-    int doubletPhiMin() const;
-    int doubletPhiMax() const;
-    int gasGapMin() const;
+    static int stationEtaMin() ;
+    static int stationEtaMax() ;
+    static int stationPhiMin() ;
+    static int stationPhiMax() ;
+    static int doubletRMin() ;
+    static int doubletRMax() ;
+    static int doubletZMin() ;
+    static int doubletZMax() ;
+    static int doubletPhiMin() ;
+    static int doubletPhiMax() ;
+    static int gasGapMin() ;
     int gasGapMax() const;
-    int measuresPhiMin() const;
-    int measuresPhiMax() const;
-    int stripMin() const;
-    int stripMax() const;
+    static int measuresPhiMin() ;
+    static int measuresPhiMax() ;
+    static int stripMin() ;
+    static int stripMax() ;
 
     // Access to min and max of level ranges
 
@@ -179,7 +179,7 @@ private:
     virtual int init_detectorElement_hashes() override;
     int init_id_to_hashes();
     int zIndex(const Identifier& id) const;
-    int zIndex(const std::string& name, int eta, int dR, int dZ, int dP) const;
+    static int zIndex(const std::string& name, int eta, int dR, int dZ, int dP) ;
     unsigned int m_module_hashes[60][20][8][2]{};
     unsigned int m_detectorElement_hashes[60][20][8][2][4]{};
 

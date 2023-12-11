@@ -129,16 +129,16 @@ public:
 
     // Access to min and max of level ranges
     // to be remove when we moved to compact ids
-    int stationEtaMin() const;
-    int stationEtaMax() const;
-    int stationPhiMin() const;
-    int stationPhiMax() const;
-    int multilayerMin() const;
-    int multilayerMax() const;
-    int gasGapMin() const;
-    int gasGapMax() const;
-    int channelMin() const;
-    int channelMax() const;
+    static int stationEtaMin() ;
+    static int stationEtaMax() ;
+    static int stationPhiMin() ;
+    static int stationPhiMax() ;
+    static int multilayerMin() ;
+    static int multilayerMax() ;
+    static int gasGapMin() ;
+    static int gasGapMax() ;
+    static int channelMin() ;
+    static int channelMax() ;
 
     // Access to min and max of level ranges
     int stationEtaMin(const Identifier& id) const;
@@ -153,7 +153,7 @@ public:
     int channelMax(const Identifier& id) const;
 
     // Utility methods
-    int sectorType(const std::string& stationName, int stationEta) const;
+    static int sectorType(const std::string& stationName, int stationEta) ;
     int sectorType(int stationName, int stationEta) const;
 
     // Public validation of levels
@@ -161,8 +161,8 @@ public:
     bool validElement(const Identifier& id) const;
 
 private:
-    int getFirstPcbChnl(int stationEta, int pcb) const;
-    int getFirstRadiusChnl(int stationEta, int pcb) const;
+    static int getFirstPcbChnl(int stationEta, int pcb) ;
+    static int getFirstRadiusChnl(int stationEta, int pcb) ;
     bool isStNameInTech(const std::string& stationName) const override;
 
     int init_id_to_hashes();

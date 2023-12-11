@@ -737,7 +737,7 @@ int MdtIdHelper::channel(const Identifier& id) const { return tube(id); }
 
 /// Access to min and max of level ranges
 
-int MdtIdHelper::stationEtaMin(bool barrel) const {
+int MdtIdHelper::stationEtaMin(bool barrel) {
     if (barrel) {
         return StationEtaBarrelMin;
     } else {
@@ -745,7 +745,7 @@ int MdtIdHelper::stationEtaMin(bool barrel) const {
     }
 }
 
-int MdtIdHelper::stationEtaMax(bool barrel) const {
+int MdtIdHelper::stationEtaMax(bool barrel) {
     if (barrel) {
         return StationEtaBarrelMax;
     } else {
@@ -753,19 +753,19 @@ int MdtIdHelper::stationEtaMax(bool barrel) const {
     }
 }
 
-int MdtIdHelper::stationPhiMin() const { return StationPhiMin; }
+int MdtIdHelper::stationPhiMin() { return StationPhiMin; }
 
-int MdtIdHelper::stationPhiMax() const { return StationPhiMax; }
+int MdtIdHelper::stationPhiMax() { return StationPhiMax; }
 
-int MdtIdHelper::multilayerMin() const { return MultilayerMin; }
+int MdtIdHelper::multilayerMin() { return MultilayerMin; }
 
-int MdtIdHelper::multilayerMax() const { return MultilayerMax; }
+int MdtIdHelper::multilayerMax() { return MultilayerMax; }
 
-int MdtIdHelper::tubeLayerMin() const { return TubeLayerMin; }
+int MdtIdHelper::tubeLayerMin() { return TubeLayerMin; }
 
-int MdtIdHelper::tubeLayerMax() const { return TubeLayerMax; }
+int MdtIdHelper::tubeLayerMax() { return TubeLayerMax; }
 
-int MdtIdHelper::tubeMin() const { return TubeMin; }
+int MdtIdHelper::tubeMin() { return TubeMin; }
 
 int MdtIdHelper::tubeMax() const { return m_tubesMax; }
 /// Utility methods
