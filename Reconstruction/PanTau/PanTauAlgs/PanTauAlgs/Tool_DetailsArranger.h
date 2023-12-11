@@ -65,23 +65,23 @@ namespace PanTau {
 	
         StatusCode arrangePFOLinks(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, xAOD::ParticleContainer& pi0Container, xAOD::PFOContainer& neutralPFOContainer) const;
 
-        void SetHLVTau(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, const std::string& inputAlg, const std::string& varTypeName_Basic) const;
+        static void SetHLVTau(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, const std::string& inputAlg, const std::string& varTypeName_Basic) ;
 
 	bool HasMultPi0sInOneCluster(const xAOD::PFO* pfo, int decayModeProto, const std::string& inputAlg) const ;
 
-	void SetNeutralConstituentMass(xAOD::PFO* neutral_pfo, double mass) const;
+	static void SetNeutralConstituentMass(xAOD::PFO* neutral_pfo, double mass) ;
 
-	void SetNeutralConstituentVectorMasses(const std::vector< ElementLink<xAOD::PFOContainer> >& neutralPFOLinks, xAOD::PFOContainer& neutralPFOContainer, double mass) const;
+	static void SetNeutralConstituentVectorMasses(const std::vector< ElementLink<xAOD::PFOContainer> >& neutralPFOLinks, xAOD::PFOContainer& neutralPFOContainer, double mass) ;
 
 	std::vector< ElementLink< xAOD::PFOContainer > > CollectConstituentsAsPFOLinks( PanTau::PanTauSeed* inSeed,
 											const std::vector< ElementLink< xAOD::PFOContainer > >& cellbased_neutralPFOLinks,
 											PanTau::TauConstituent::Type type ) const;
 
-	void createPi0Vectors(xAOD::TauJet* tauJet, std::vector<TLorentzVector>& vPi0s, std::vector< std::vector< ElementLink<xAOD::PFOContainer> > > &vec_pi0pfos) const;
+	static void createPi0Vectors(xAOD::TauJet* tauJet, std::vector<TLorentzVector>& vPi0s, std::vector< std::vector< ElementLink<xAOD::PFOContainer> > > &vec_pi0pfos) ;
 	
 	static const constexpr float MASS_PI0 = 134.98; // in MeV
         
-        double m_CoreCone;
+        double m_CoreCone = 0.0;
         std::vector<double> m_EtaBinEdges;
         std::vector<double> m_EtaBinnedEtCuts;
         

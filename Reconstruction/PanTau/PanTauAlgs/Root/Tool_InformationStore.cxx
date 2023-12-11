@@ -133,8 +133,7 @@ PanTau::Tool_InformationStore::Tool_InformationStore(const std::string& name) :
   declareProperty("Infos_VecDouble",  m_Infos_VecDouble, "Map with double type infos");
 }
 
-PanTau::Tool_InformationStore::~Tool_InformationStore() {
-}
+PanTau::Tool_InformationStore::~Tool_InformationStore() = default;
 
 StatusCode PanTau::Tool_InformationStore::initialize() {
   ATH_MSG_INFO( name() << " initialize()" );

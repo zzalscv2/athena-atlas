@@ -75,10 +75,10 @@ namespace PanTau
         std::string               m_Tool_DetailsArrangerName;
         
         std::vector<double>                                 m_Config_PtBins;
-        double                                              m_Config_MinPt;
-        double                                              m_Config_MaxPt;
+        double                                              m_Config_MinPt = 0.0;
+        double                                              m_Config_MaxPt = 0.0;
         
-        void                                                fillDefaultValuesToTau(xAOD::TauJet* tauJet) const;
+        static void                                                fillDefaultValuesToTau(xAOD::TauJet* tauJet) ;
         
         
     }; //end class

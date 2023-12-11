@@ -31,9 +31,7 @@ DiTauDiscriminantTool::DiTauDiscriminantTool( const std::string& name )
 
 //______________________________________________________________________________
 DiTauDiscriminantTool::~DiTauDiscriminantTool( )
-{
-
-}
+= default;
 
 //______________________________________________________________________________
 StatusCode DiTauDiscriminantTool::initialize()

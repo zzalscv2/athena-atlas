@@ -33,8 +33,8 @@
 using namespace DiTauRecTools;
 using namespace fastjet;
 
-typedef std::vector< ElementLink< xAOD::TrackParticleContainer > >  TrackParticleLinks_t;
-typedef ElementLink< xAOD::JetContainer > JetLink_t;
+using TrackParticleLinks_t = std::vector<ElementLink<xAOD::TrackParticleContainer>>;
+using JetLink_t = ElementLink<xAOD::JetContainer>;
 
 //=================================PUBLIC-PART==================================
 //______________________________________________________________________________
@@ -50,8 +50,7 @@ DiTauIDVarCalculator::DiTauIDVarCalculator( const std::string& name )
 
 //______________________________________________________________________________
 DiTauIDVarCalculator::~DiTauIDVarCalculator( )
-{
-}
+= default;
 
 //______________________________________________________________________________
 StatusCode DiTauIDVarCalculator::initialize()
@@ -141,7 +140,7 @@ std::string DiTauIDVarCalculator::getDecayMode(){
 //=================================PRIVATE-PART=================================
 //______________________________________________________________________________
 
-float DiTauIDVarCalculator::n_subjets(const xAOD::DiTauJet& xDiTau) const
+float DiTauIDVarCalculator::n_subjets(const xAOD::DiTauJet& xDiTau) 
 {
   int nSubjet = 0;
   while (xDiTau.subjetPt(nSubjet) > 0. )
@@ -284,7 +283,7 @@ float DiTauIDVarCalculator::R_max(const xAOD::DiTauJet& xDiTau, int iSubjet) con
 
 
 //______________________________________________________________________________;
-int DiTauIDVarCalculator::n_track(const xAOD::DiTauJet& xDiTau) const
+int DiTauIDVarCalculator::n_track(const xAOD::DiTauJet& xDiTau) 
 { 
   return xDiTau.nTracks();
 }
@@ -333,7 +332,7 @@ int DiTauIDVarCalculator::n_tracks(const xAOD::DiTauJet& xDiTau, int iSubjet) co
 }
 
 //______________________________________________________________________________;
-int DiTauIDVarCalculator::n_isotrack(const xAOD::DiTauJet& xDiTau) const
+int DiTauIDVarCalculator::n_isotrack(const xAOD::DiTauJet& xDiTau) 
 { 
   return xDiTau.nIsoTracks();
 }
@@ -363,7 +362,7 @@ float DiTauIDVarCalculator::R_tracks(const xAOD::DiTauJet& xDiTau, int iSubjet) 
     
   TLorentzVector tlvTrack;
 
-  for (auto xTrack: xTracks) 
+  for (const auto& xTrack: xTracks) 
   { 
     tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
                            (*xTrack)->eta(),
@@ -410,7 +409,7 @@ float DiTauIDVarCalculator::R_core(const xAOD::DiTauJet& xDiTau, int iSubjet) co
     
   TLorentzVector tlvTrack;
 
-  for (auto xTrack: xTracks) 
+  for (const auto& xTrack: xTracks) 
   { 
     tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
                            (*xTrack)->eta(),
@@ -460,7 +459,7 @@ float DiTauIDVarCalculator::R_track_core(const xAOD::DiTauJet& xDiTau) const
       
     TLorentzVector tlvTrack;
 
-    for (auto xTrack: xTracks) 
+    for (const auto& xTrack: xTracks) 
     { 
       tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
                              (*xTrack)->eta(),
@@ -509,7 +508,7 @@ float DiTauIDVarCalculator::R_track(const xAOD::DiTauJet& xDiTau) const
       
     TLorentzVector tlvTrack;
 
-    for (auto xTrack: xTracks) 
+    for (const auto& xTrack: xTracks) 
     { 
       tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
                              (*xTrack)->eta(),
@@ -554,7 +553,7 @@ float DiTauIDVarCalculator::R_track_all(const xAOD::DiTauJet& xDiTau) const
       
     TLorentzVector tlvTrack;
 
-    for (auto xTrack: xTracks) 
+    for (const auto& xTrack: xTracks) 
     { 
       tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
                              (*xTrack)->eta(),
@@ -605,7 +604,7 @@ float DiTauIDVarCalculator::R_isotrack(const xAOD::DiTauJet& xDiTau) const
       
     TLorentzVector tlvIsoTrack;
 
-    for (auto xIsoTrack: xIsoTracks) 
+    for (const auto& xIsoTrack: xIsoTracks) 
     { 
       tlvIsoTrack.SetPtEtaPhiE( (*xIsoTrack)->pt(),
                                 (*xIsoTrack)->eta(),
@@ -656,7 +655,7 @@ float DiTauIDVarCalculator::mass_track_core(const xAOD::DiTauJet& xDiTau) const
     
     TLorentzVector tlvTrack;
 
-    for (auto xTrack: xTracks) 
+    for (const auto& xTrack: xTracks) 
     { 
       tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
                              (*xTrack)->eta(),
@@ -703,7 +702,7 @@ float DiTauIDVarCalculator::mass_core(const xAOD::DiTauJet& xDiTau, int iSubjet)
   
   TLorentzVector tlvTrack;
 
-  for (auto xTrack: xTracks) 
+  for (const auto& xTrack: xTracks) 
   { 
     tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
                            (*xTrack)->eta(),
@@ -749,7 +748,7 @@ float DiTauIDVarCalculator::mass_tracks(const xAOD::DiTauJet& xDiTau, int iSubje
   
   TLorentzVector tlvTrack;
 
-  for (auto xTrack: xTracks) 
+  for (const auto& xTrack: xTracks) 
   { 
     tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
                            (*xTrack)->eta(),
@@ -783,7 +782,7 @@ float DiTauIDVarCalculator::mass_track(const xAOD::DiTauJet& xDiTau) const
     
   TLorentzVector tlvTrack;
 
-  for (auto xTrack: xTracks) 
+  for (const auto& xTrack: xTracks) 
   { 
     tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
                            (*xTrack)->eta(),
@@ -814,7 +813,7 @@ float DiTauIDVarCalculator::mass_track_all(const xAOD::DiTauJet& xDiTau) const
     
   TLorentzVector tlvTrack;
 
-  for (auto xTrack: xTracks) 
+  for (const auto& xTrack: xTracks) 
   { 
     tlvTrack.SetPtEtaPhiE( (*xTrack)->pt(),
                            (*xTrack)->eta(),
@@ -829,7 +828,7 @@ float DiTauIDVarCalculator::mass_track_all(const xAOD::DiTauJet& xDiTau) const
 
   TLorentzVector tlvIsoTrack;
 
-  for (auto xIsoTrack: xIsoTracks) 
+  for (const auto& xIsoTrack: xIsoTracks) 
   { 
     tlvIsoTrack.SetPtEtaPhiE( (*xIsoTrack)->pt(),
                              (*xIsoTrack)->eta(),
@@ -940,7 +939,7 @@ float DiTauIDVarCalculator::f_isotracks(const xAOD::DiTauJet& xDiTau) const
 
   TLorentzVector tlvIsoTrack;
 
-  for (auto xIsoTrack: xIsoTracks) 
+  for (const auto& xIsoTrack: xIsoTracks) 
   { 
     tlvIsoTrack.SetPtEtaPhiE( (*xIsoTrack)->pt(),
                               (*xIsoTrack)->eta(),

@@ -53,11 +53,11 @@ namespace PanTau {
         
         virtual bool passesPreselectionEnergy(double energy) const;
         
-        int     m_Config_UsePionMass;
-        int     m_Config_TauConstituents_UseShrinkingCone;
+        int     m_Config_UsePionMass = 0;
+        int     m_Config_TauConstituents_UseShrinkingCone = 0;
         
-        double  m_Config_TauConstituents_Types_DeltaRCore;
-        double  m_Config_TauConstituents_PreselectionMinEnergy;
+        double  m_Config_TauConstituents_Types_DeltaRCore = 0.0;
+        double  m_Config_TauConstituents_PreselectionMinEnergy = 0.0;
         
         std::vector<double>  m_Config_CellBased_BinEdges_Eta;
         std::vector<double>  m_Config_CellBased_EtaBinned_Pi0MVACut_1prong;

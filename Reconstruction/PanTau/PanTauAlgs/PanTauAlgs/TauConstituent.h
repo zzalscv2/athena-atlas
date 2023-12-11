@@ -68,7 +68,7 @@ namespace PanTau {
      * @param itsType The type of this particle using this class' enumeration 
      * @param itsBDTValue If a BDT was used ot ID this particle, provide the BDT response
      */
-    TauConstituent(TLorentzVector   itsMomentum,
+    TauConstituent(const TLorentzVector&   itsMomentum,
                    int              itsCharge,
                    const std::vector<int>& itsType,
                    double           itsBDTValue,

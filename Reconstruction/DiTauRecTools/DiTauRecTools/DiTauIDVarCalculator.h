@@ -66,16 +66,16 @@ public:
 private:
   virtual StatusCode calculateHadHadIDVariables(const xAOD::DiTauJet& xDiTau);
 
-  float n_subjets(const xAOD::DiTauJet& xDiTau) const;
+  static float n_subjets(const xAOD::DiTauJet& xDiTau) ;
   float ditau_pt(const xAOD::DiTauJet& xDiTau) const;
   float f_core(const xAOD::DiTauJet& xDiTau, int iSubjet) const;
   float f_subjet(const xAOD::DiTauJet& xDiTau, int iSubjet) const;
   float f_subjets(const xAOD::DiTauJet& xDiTau) const;
   float f_track(const xAOD::DiTauJet& xDiTau, int iSubjet) const;
   float R_max(const xAOD::DiTauJet& xDiTau, int iSubjet) const;
-  int n_track(const xAOD::DiTauJet& xDiTau) const;
+  static int n_track(const xAOD::DiTauJet& xDiTau) ;
   int n_tracks(const xAOD::DiTauJet& xDiTau, int iSubjet) const;
-  int n_isotrack(const xAOD::DiTauJet& xDiTau) const;
+  static int n_isotrack(const xAOD::DiTauJet& xDiTau) ;
   int n_othertrack(const xAOD::DiTauJet& xDiTau) const;
   float R_track(const xAOD::DiTauJet& xDiTau) const;
   float R_track_all(const xAOD::DiTauJet& xDiTau) const;
@@ -103,7 +103,7 @@ private:
   DecayChannel m_eDecayChannel;
   float m_dDefault;
   
-  StatusCode decorNtracks (const xAOD::DiTauJet& xDiTau);
+  static StatusCode decorNtracks (const xAOD::DiTauJet& xDiTau);
   //TauEventData m_data;
 }; // class DiTauIDVarCalculator
 

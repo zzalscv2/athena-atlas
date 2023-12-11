@@ -17,8 +17,7 @@ PanTau::TauFeature::TauFeature():
 
 
 PanTau::TauFeature::~TauFeature()
-{
-}
+= default;
 
 
 double PanTau::TauFeature::value(const std::string& name, bool& isValid) const

@@ -28,8 +28,7 @@ PanTau::Tool_DecayModeDeterminator::Tool_DecayModeDeterminator(const std::string
 }
 
 
-PanTau::Tool_DecayModeDeterminator::~Tool_DecayModeDeterminator() {
-}
+PanTau::Tool_DecayModeDeterminator::~Tool_DecayModeDeterminator() = default;
 
 
 StatusCode PanTau::Tool_DecayModeDeterminator::initialize() {

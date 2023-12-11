@@ -14,7 +14,7 @@ PanTau::PanTauSeed::PanTauSeed()
   m_IsValidSeed(false),
   m_TechnicalQuality(),
   m_NameInputAlgorithm("InvalidAlg"),
-  m_TauJet(0),
+  m_TauJet(nullptr),
   m_Constituents(),
   m_TypeHLVs(),
   m_ConstituentsList_Core(),
@@ -24,7 +24,7 @@ PanTau::PanTauSeed::PanTauSeed()
   m_DecayMode_BySubAlg(0),
   m_DecayMode_ByPanTau(0),
   m_decayModeHack_CellBasedShots(false),
-  m_Features(0)
+  m_Features(nullptr)
 {
 }
 
@@ -32,12 +32,12 @@ PanTau::PanTauSeed::PanTauSeed()
 // destructor
 PanTau::PanTauSeed::~PanTauSeed()
 {
-  if(m_Features != 0) delete m_Features;
+  if(m_Features != nullptr) delete m_Features;
 
   //delete the constituents                                                                                                                                                                                                                      
   for(unsigned int iConst=0; iConst<m_ConstituentsList_All.size(); iConst++) {
     PanTau::TauConstituent* curConst = m_ConstituentsList_All[iConst];
-    if(curConst != 0) delete curConst;
+    if(curConst != nullptr) delete curConst;
   }
   m_ConstituentsList_All.clear();
   m_ConstituentsList_AllSelected.clear();
@@ -73,7 +73,7 @@ PanTau::PanTauSeed::PanTauSeed(const PanTau::PanTauSeed& rhs)
   m_DecayMode_ByPanTau(rhs.m_DecayMode_ByPanTau),
   m_decayModeHack_CellBasedShots(rhs.m_decayModeHack_CellBasedShots),
 
-  m_Features( (rhs.m_Features ? new PanTau::TauFeature(*rhs.m_Features) : 0) )
+  m_Features( (rhs.m_Features ? new PanTau::TauFeature(*rhs.m_Features) : nullptr) )
 {
 }
 
@@ -100,7 +100,7 @@ PanTau::PanTauSeed& PanTau::PanTauSeed::operator=(const PanTau::PanTauSeed& seed
     m_decayModeHack_CellBasedShots  = seed.m_decayModeHack_CellBasedShots;
 
     if(m_Features) delete m_Features;
-    m_Features              = (seed.m_Features ? new PanTau::TauFeature(*seed.m_Features) : 0);
+    m_Features              = (seed.m_Features ? new PanTau::TauFeature(*seed.m_Features) : nullptr);
   }
   return *this;
 }
@@ -219,17 +219,17 @@ PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInpu
     bool isCoreNeut = tauConstituents[iConst]->isOfType(PanTau::TauConstituent::t_Neutral);
     bool isCorePi0  = tauConstituents[iConst]->isOfType(PanTau::TauConstituent::t_Pi0Neut);
 
-    if(isCoreChrg == true || isCoreNeut == true || isCorePi0 == true) m_ConstituentsList_Core.push_back(tauConstituents[iConst]); // Core only contains the currently used objects                                                             
+    if(isCoreChrg || isCoreNeut || isCorePi0) m_ConstituentsList_Core.push_back(tauConstituents[iConst]); // Core only contains the currently used objects                                                             
 
     bool isWideChrg = tauConstituents[iConst]->isOfType(PanTau::TauConstituent::t_OutChrg);
     bool isWideNeut = tauConstituents[iConst]->isOfType(PanTau::TauConstituent::t_OutNeut);
-    if(isWideChrg == true || isWideNeut == true) m_ConstituentsList_Wide.push_back(tauConstituents[iConst]); // Wide contains objectsin 0.2-0.4                                                                                                
+    if(isWideChrg || isWideNeut) m_ConstituentsList_Wide.push_back(tauConstituents[iConst]); // Wide contains objectsin 0.2-0.4                                                                                                
   }
 
   //create the constituents lists                                                                                                                                                                                                                
   for(int iType=0; iType<PanTau::TauConstituent::t_nTypes; iType++) {
-    m_Constituents.push_back( std::vector<PanTau::TauConstituent*>(0) );
-    m_TypeHLVs.push_back( TLorentzVector(0,0,0,0) );
+    m_Constituents.emplace_back(0 );
+    m_TypeHLVs.emplace_back(0,0,0,0 );
   }
 
   //assign tauConstituents                                                                                                                                                                                                                       
@@ -275,7 +275,7 @@ PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInpu
   m_DecayMode_BySubAlg = PanTau::PanTauSeed::getDecayMode(nCharged, nPi0Neut);
   m_DecayMode_ByPanTau = xAOD::TauJetParameters::Mode_Error;
 
-  if(isOfTechnicalQuality(PanTau::PanTauSeed::t_NoValidInputTau) == true) {
+  if(isOfTechnicalQuality(PanTau::PanTauSeed::t_NoValidInputTau)) {
     m_DecayMode_ByPanTau = xAOD::TauJetParameters::Mode_NotSet;
   }
 
@@ -379,7 +379,7 @@ int PanTau::PanTauSeed::getNumberOfConstituentsOfType(int tauConstituent_Type) {
 TLorentzVector PanTau::PanTauSeed::getSubsystemHLV(int tauConstituent_Type, bool& foundit) {
   if(tauConstituent_Type > PanTau::TauConstituent::t_nTypes) {
     foundit = false;
-    return TLorentzVector(0,0,0,0);
+    return {0,0,0,0};
   }
   foundit = true;
   return m_TypeHLVs.at(tauConstituent_Type);

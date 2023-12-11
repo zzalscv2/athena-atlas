@@ -17,8 +17,7 @@ PanTau::Tool_TauConstituentSelector::Tool_TauConstituentSelector(const std::stri
 }
 
 
-PanTau::Tool_TauConstituentSelector::~Tool_TauConstituentSelector() {
-}
+PanTau::Tool_TauConstituentSelector::~Tool_TauConstituentSelector() = default;
 
 
 StatusCode PanTau::Tool_TauConstituentSelector::initialize() {
@@ -172,9 +171,7 @@ bool PanTau::Tool_TauConstituentSelector::passesSelection_ChargedConstituent(Pan
 bool PanTau::Tool_TauConstituentSelector::passesSelection_OutNeutConstituent(TauConstituent* TauConstituent) const {
   TLorentzVector tlv_Constituent = TauConstituent->p4();
    
-  if (tlv_Constituent.Et() < getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_OutNeut)) return false;
-  
-  return true;
+  return tlv_Constituent.Et() >= getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_OutNeut);
 
 }
 
@@ -188,16 +185,12 @@ bool PanTau::Tool_TauConstituentSelector::passesSelection_OutChrgConstituent(Tau
 bool PanTau::Tool_TauConstituentSelector::passesSelection_NeutLowAConstituent(TauConstituent* TauConstituent) const {
   TLorentzVector tlv_Constituent = TauConstituent->p4();
     
-  if (tlv_Constituent.Pt() < getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_NeutLowA)) return false;
-
-  return true;
+  return tlv_Constituent.Pt() >= getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_NeutLowA);
 }
 
 
 bool PanTau::Tool_TauConstituentSelector::passesSelection_NeutLowBConstituent(TauConstituent* TauConstituent) const {
   TLorentzVector tlv_Constituent = TauConstituent->p4();
    
-  if (tlv_Constituent.Pt() < getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_NeutLowB)) return false;
-
-  return true;
+  return tlv_Constituent.Pt() >= getEtCut(std::abs(tlv_Constituent.Eta()), PanTau::TauConstituent::t_NeutLowB);
 }
