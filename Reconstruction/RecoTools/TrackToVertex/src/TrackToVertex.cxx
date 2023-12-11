@@ -177,7 +177,7 @@ Reco::TrackToVertex::perigeeAtBeamline(
   pAmgTransf *= Amg::AngleAxis3D(tilty, Amg::Vector3D(0., 1., 0.));
   pAmgTransf *= Amg::AngleAxis3D(tiltx, Amg::Vector3D(1., 0., 0.));
   // preparation
-  Trk::PerigeeSurface persf(std::move(pAmgTransf));
+  Trk::PerigeeSurface persf(pAmgTransf);
 
   std::unique_ptr<Trk::Perigee> vertexPerigee;
   std::unique_ptr<Trk::TrackParameters> extrapResult =

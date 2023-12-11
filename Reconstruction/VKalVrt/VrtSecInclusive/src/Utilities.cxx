@@ -37,9 +37,9 @@ namespace VKalVrtAthena {
       const xAOD::TrackParticle *trk_from_gsf;
       // get ID track matched to GSF track
       trk_from_gsf = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(trk);
-      for( auto* vtx : *vertices ) {
+      for( const auto* vtx : *vertices ) {
         for( size_t iv = 0; iv < vtx->nTrackParticles(); iv++ ) {
-          auto* pvtrk = vtx->trackParticle( iv );
+          const auto* pvtrk = vtx->trackParticle( iv );
           if (pvtrk == nullptr) continue;
           // when using lepton-only selection, also need to check if the ID track matched to the GSF track is associated to the PV
            if ( (trk_from_gsf == pvtrk) or (trk == pvtrk) ) {
@@ -250,7 +250,7 @@ namespace VKalVrtAthena {
     }
     // end of workaround
 
-    for( auto vertex : new_vertices ) {
+    for( const auto& vertex : new_vertices ) {
       ATH_MSG_VERBOSE(" >> disassembleVertex(): > emplace_back new vertex" );
       workVerticesContainer->emplace_back( vertex );
     }
@@ -537,7 +537,7 @@ namespace VKalVrtAthena {
     ATH_MSG_VERBOSE( " >>> refitVertex: ListBaseTracks.size = " << ListBaseTracks.size()
                    << ", #selectedBaseTracks = " << workVertex.selectedTrackIndices.size()
                    << ", #assocTracks = " << workVertex.associatedTrackIndices.size() );
-    for( auto *trk : ListBaseTracks ) {
+    for( const auto *trk : ListBaseTracks ) {
       ATH_MSG_VERBOSE( " >>> refitVertex: track index = " << trk->index() );
     }
 
@@ -626,7 +626,7 @@ namespace VKalVrtAthena {
     ATH_MSG_VERBOSE( " >>> " << __FUNCTION__ <<": ListBaseTracks.size = " << ListBaseTracks.size()
                    << ", #selectedBaseTracks = " << workVertex.selectedTrackIndices.size()
                    << ", #assocTracks = " << workVertex.associatedTrackIndices.size() );
-    for( auto *trk : ListBaseTracks ) {
+    for( const auto *trk : ListBaseTracks ) {
       ATH_MSG_VERBOSE( " >>> " << __FUNCTION__ << ": track index = " << trk->index() );
     }
 
@@ -659,7 +659,7 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  size_t VrtSecInclusive::nTrkCommon( std::vector<WrkVrt> *workVerticesContainer, const std::pair<unsigned, unsigned>& pairIndex) const
+  size_t VrtSecInclusive::nTrkCommon( std::vector<WrkVrt> *workVerticesContainer, const std::pair<unsigned, unsigned>& pairIndex)
   {
     //
     //  Number of common tracks for 2 vertices
@@ -830,7 +830,7 @@ namespace VKalVrtAthena {
 
     // Loop over PV container and get number of tracks of each PV
 
-    for( auto *vertex : *m_primaryVertices ) {
+    for( const auto *vertex : *m_primaryVertices ) {
 
       // Hide (2015-04-21): xAOD::Vertex may contain several types of vertices
       // e.g. if VertexType==NoVtx, this is a dummy vertex.
@@ -871,7 +871,7 @@ namespace VKalVrtAthena {
     // Use the dummy PV if no PV is composed
     if( !m_thePV ) {
       ATH_MSG_DEBUG("No Reconstructed PV was found. Using the dummy PV instead.");
-      for( auto *vertex : *m_primaryVertices ) {
+      for( const auto *vertex : *m_primaryVertices ) {
   if( xAOD::VxType::NoVtx != vertex->vertexType() ) continue;
 
         if( m_jp.FillNtuple ) {
@@ -1009,18 +1009,18 @@ namespace VKalVrtAthena {
     for( auto& pair : m_matchMap ) { previous.emplace( pair.first, pair.second ); }
 
     m_matchMap.clear();
-    for( auto* truthVertex : m_tracingTruthVertices ) { m_matchMap.emplace( truthVertex, false ); }
+    for( const auto* truthVertex : m_tracingTruthVertices ) { m_matchMap.emplace( truthVertex, false ); }
 
     for(size_t iv=0; iv<workVerticesContainer->size(); iv++) {
-      auto& wrkvrt = workVerticesContainer->at(iv);
+      const auto& wrkvrt = workVerticesContainer->at(iv);
 
       if( wrkvrt.nTracksTotal() < 2 ) continue;
 
       std::string sels    = concatenateIndicesToString( wrkvrt.selectedTrackIndices,   *m_selectedTracks   );
       std::string assocs  = concatenateIndicesToString( wrkvrt.associatedTrackIndices, *m_associatedTracks );
 
-      for( auto& index : wrkvrt.selectedTrackIndices )   { usedTracks.insert( m_selectedTracks->at(index) );   }
-      for( auto& index : wrkvrt.associatedTrackIndices ) { usedTracks.insert( m_associatedTracks->at(index) ); }
+      for( const auto& index : wrkvrt.selectedTrackIndices )   { usedTracks.insert( m_selectedTracks->at(index) );   }
+      for( const auto& index : wrkvrt.associatedTrackIndices ) { usedTracks.insert( m_associatedTracks->at(index) ); }
 
       ATH_MSG_DEBUG( " >> " << __FUNCTION__ << ": " << name << " vertex [" <<  iv << "]: " << &wrkvrt
                      << ", isGood  = "           << (wrkvrt.isGood? "true" : "false")
@@ -1058,7 +1058,7 @@ namespace VKalVrtAthena {
 
     ATH_MSG_DEBUG( " >> " << __FUNCTION__ << ": number of used tracks = " << usedTracks.size() );
 
-    if( previous.size() > 0 && previous.size() == m_matchMap.size() ) {
+    if( !previous.empty() && previous.size() == m_matchMap.size() ) {
       for( auto& pair : m_matchMap ) {
         if( previous.find( pair.first ) == previous.end() ) continue;
         if( pair.second != previous.at( pair.first ) ) {
@@ -1074,7 +1074,7 @@ namespace VKalVrtAthena {
     }
 
     std::string msg;
-    for( auto* trk : usedTracks ) { msg += Form("%ld, ", trk->index() ); }
+    for( const auto* trk : usedTracks ) { msg += Form("%ld, ", trk->index() ); }
 
     ATH_MSG_DEBUG( " >> " << __FUNCTION__ << ": used tracks = " << msg );
     ATH_MSG_DEBUG( " >> " << __FUNCTION__ << ": ===============================================================" );
@@ -1146,7 +1146,7 @@ namespace VKalVrtAthena {
 
         }
 
-        if( pattern->size() > 0 ) {
+        if( !pattern->empty() ) {
 
           ATH_MSG_VERBOSE(" >> " << __FUNCTION__ << ", track " << trk << ": position = (" << position.Perp() << ", " << position.z() << ", " << position.Phi() << "), detElement ID = " << id << ", good = " << good
                           << ": (det, bec, layer) = (" << std::get<1>( pattern->back() ) << ", " << std::get<2>( pattern->back() ) << ", "  << std::get<3>( pattern->back() ) << ")" );
@@ -1185,7 +1185,7 @@ namespace VKalVrtAthena {
     using LayerCombination = std::vector<int>;
 
     std::map<LayerCombination, unsigned> layerMap;
-    if( layerMap.size() == 0 ) {
+    if( layerMap.empty() ) {
       layerMap[ { 1, 0, 0 } ] = Trk::pixelBarrel0;
       layerMap[ { 1, 0, 1 } ] = Trk::pixelBarrel1;
       layerMap[ { 1, 0, 2 } ] = Trk::pixelBarrel2;
@@ -1255,8 +1255,8 @@ namespace VKalVrtAthena {
 
       ATH_MSG_VERBOSE( " > " <<  __FUNCTION__ << ": isGood = " << std::get<isGood>( point ) );
 
-      auto& thisPos = std::get<position>( point );
-      auto& nextPos = std::get<position>( nextPoint );
+      const auto& thisPos = std::get<position>( point );
+      const auto& nextPos = std::get<position>( nextPoint );
 
       auto sectionVector = nextPos - thisPos;
       auto vertexVector  = TVector3( vertex.x(), vertex.y(), vertex.z() ) - thisPos;
@@ -1277,7 +1277,7 @@ namespace VKalVrtAthena {
 
       // if the front-end module is not active, then the hit is not expected,
       // which means the hit may be present
-      if( false == std::get<isGood>( point ) ) {
+      if( !static_cast<bool>(std::get<isGood>( point )) ) {
         expectedHitPattern.at( detectorType ) = kMayHaveHit;
         continue;
       }
@@ -1314,8 +1314,8 @@ namespace VKalVrtAthena {
       const auto& point      = *itr;
       const auto& nextPoint  = *( std::next( itr ) );
 
-      auto& thisPos = std::get<position>( point );
-      auto& nextPos = std::get<position>( nextPoint );
+      const auto& thisPos = std::get<position>( point );
+      const auto& nextPos = std::get<position>( nextPoint );
 
       auto sectionVector = nextPos - thisPos;
       auto vertexVector  = TVector3( vertex.x(), vertex.y(), vertex.z() ) - thisPos;
@@ -2220,7 +2220,7 @@ namespace VKalVrtAthena {
     using LayerCombination = std::vector<int>;
 
     std::map<LayerCombination, unsigned> layerMap;
-    if( layerMap.size() == 0 ) {
+    if( layerMap.empty() ) {
       layerMap[ { 1, 0, 0 } ] = Trk::pixelBarrel0;
       layerMap[ { 1, 0, 1 } ] = Trk::pixelBarrel1;
       layerMap[ { 1, 0, 2 } ] = Trk::pixelBarrel2;
@@ -2394,14 +2394,13 @@ namespace VKalVrtAthena {
       // neutralino in daughters
       bool hasNeutralino = false;
       for( unsigned ip = 0; ip < truthVertex->nOutgoingParticles(); ip++ ) {
-        auto* p = truthVertex->outgoingParticle(ip);
+        const auto* p = truthVertex->outgoingParticle(ip);
         if( abs( p->pdgId() ) == 1000022 ) {
           hasNeutralino = true;
           break;
         }
       }
-      if( !hasNeutralino ) return false;
-      return true;
+      return hasNeutralino;
     };
 
     auto selectHNL = [](const xAOD::TruthVertex* truthVertex ) -> bool {
@@ -2428,7 +2427,7 @@ namespace VKalVrtAthena {
     auto selectBhadron = [](const xAOD::TruthVertex* truthVertex ) -> bool {
       if( truthVertex->nIncomingParticles() != 1 )                      return false;
       if( !truthVertex->incomingParticle(0) )                           return false;
-      if( !( abs(truthVertex->incomingParticle(0)->pdgId()) > 500 && abs(truthVertex->incomingParticle(0)->pdgId()) < 600 ) ) return false;
+      if( abs(truthVertex->incomingParticle(0)->pdgId()) <= 500 || abs(truthVertex->incomingParticle(0)->pdgId()) >= 600 ) return false;
       return true;
     };
 
@@ -2436,23 +2435,22 @@ namespace VKalVrtAthena {
       if( truthVertex->nIncomingParticles() != 1 )                      return false;
       if( !truthVertex->incomingParticle(0) )                           return false;
 
-      auto* parent = truthVertex->incomingParticle(0);
+      const auto* parent = truthVertex->incomingParticle(0);
       if( parent->isLepton() )                                          return false;
 
       TLorentzVector p4sum_in;
       TLorentzVector p4sum_out;
       for( unsigned ip = 0; ip < truthVertex->nIncomingParticles(); ip++ ) {
-        auto* particle = truthVertex->incomingParticle(ip);
+        const auto* particle = truthVertex->incomingParticle(ip);
         TLorentzVector p4; p4.SetPtEtaPhiM( particle->pt(), particle->eta(), particle->phi(), particle->m() );
         p4sum_in += p4;
       }
       for( unsigned ip = 0; ip < truthVertex->nOutgoingParticles(); ip++ ) {
-        auto* particle = truthVertex->outgoingParticle(ip);
+        const auto* particle = truthVertex->outgoingParticle(ip);
         TLorentzVector p4; p4.SetPtEtaPhiM( particle->pt(), particle->eta(), particle->phi(), particle->m() );
         p4sum_out += p4;
       }
-      if( p4sum_out.E() - p4sum_in.E() < 100. )                         return false;
-      return true;
+      return p4sum_out.E() - p4sum_in.E() >= 100.;
     };
 
 
@@ -2487,7 +2485,7 @@ namespace VKalVrtAthena {
     }
 
     if( m_jp.FillHist ) {
-      for( auto* truthVertex : m_tracingTruthVertices ) {
+      for( const auto* truthVertex : m_tracingTruthVertices ) {
         m_hists["nMatchedTruths"]->Fill( 0., truthVertex->perp() );
       }
     }

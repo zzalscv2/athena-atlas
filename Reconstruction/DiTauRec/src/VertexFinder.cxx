@@ -22,8 +22,7 @@ VertexFinder::VertexFinder(const std::string& type,
 }
 
 
-VertexFinder::~VertexFinder() {
-}
+VertexFinder::~VertexFinder() = default;
 
 
 StatusCode VertexFinder::initialize() {
@@ -51,7 +50,7 @@ StatusCode VertexFinder::execute(DiTauCandidateData * data,
   // find default PrimaryVertex
   // see https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/VertexReselectionOnAOD
   // and https://svnweb.cern.ch/trac/atlasoff/browser/Tracking/TrkEvent/VxVertex/trunk/VxVertex/PrimaryVertexSelector.h
-  for (const auto vtx : *vxContainer) {
+  for (const auto *const vtx : *vxContainer) {
     // the first and only primary vertex candidate is picked
     if ( vtx->vertexType() ==  xAOD::VxType::PriVtx) {
       vxPrimary = vtx;
@@ -102,7 +101,7 @@ ElementLink<xAOD::VertexContainer> VertexFinder::getPV_TJVA(const xAOD::DiTauJet
   std::vector<const xAOD::TrackParticle*> assocTracks;
   if (! pJetSeed->getAssociatedObjects(m_assocTracksName, assocTracks)) {
     ATH_MSG_ERROR("Could not retrieve the AssociatedObjects named \""<< m_assocTracksName <<"\" from jet");
-    return ElementLink<xAOD::VertexContainer>();
+    return {};
   }
 
   // Get the TVA object
@@ -135,7 +134,7 @@ ElementLink<xAOD::VertexContainer> VertexFinder::getPV_TJVA(const xAOD::DiTauJet
 // reimplementation of JetVertexFractionTool::getJetVertexFraction(const xAOD::Vertex* vertex, const std::vector<const xAOD::TrackParticle*>& tracks, const jet::TrackVertexAssociation* tva) const
 // avoid to call this specific tool only for this easy purpose
 // see https://svnweb.cern.ch/trac/atlasoff/browser/Reconstruction/Jet/JetMomentTools/trunk/Root/JetVertexFractionTool.cxx
-float VertexFinder::getJetVertexFraction(const xAOD::Vertex* vertex, const std::vector<const xAOD::TrackParticle*>& tracks, const jet::TrackVertexAssociation* tva) const
+float VertexFinder::getJetVertexFraction(const xAOD::Vertex* vertex, const std::vector<const xAOD::TrackParticle*>& tracks, const jet::TrackVertexAssociation* tva) 
 {
   float sumTrackPV = 0.;
   float sumTrackAll = 0.;

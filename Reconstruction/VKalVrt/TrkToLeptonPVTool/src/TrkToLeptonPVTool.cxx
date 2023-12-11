@@ -58,7 +58,7 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
      }
 
      //---DAOD case     
-     if( !eventINFO ) return std::unique_ptr<xAOD::Vertex>(nullptr);
+     if( !eventINFO ) return {nullptr};
      std::unique_ptr< SG::AuxStoreInternal > pAux;
      xAOD::TrackParticleContainer   TPC;
      std::vector<const xAOD::TrackParticle*>     wrkTrkC(1);
@@ -66,7 +66,7 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
      TPC.setStore( pAux.get() );
      TPC.reserve( 1 );
      TPC.push_back(new (std::nothrow) xAOD::TrackParticle(*trk));
-     if(!TPC[0])return std::unique_ptr<xAOD::Vertex>(nullptr);
+     if(!TPC[0])return {nullptr};
      const EventContext& ctx = Gaudi::Hive::currentContext();
      const float mvx= (eventINFO) ? eventINFO->beamPosX() : 0.;
      const float mvy= (eventINFO) ? eventINFO->beamPosY() : 0.;
@@ -81,14 +81,14 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
    std::unique_ptr<xAOD::Vertex>TrkToLeptonPVTool::npartVertex( const std::vector<const xAOD::TrackParticle*> & particles,
                                                                       const xAOD::EventInfo * eventINFO) const
    {
-     if(particles.empty()) return std::unique_ptr<xAOD::Vertex>(nullptr);
+     if(particles.empty()) return {nullptr};
 
      std::vector<const xAOD::TrackParticle*> tmpp(particles);
      std::sort(tmpp.begin(),tmpp.end());
      auto tst=std::unique(tmpp.begin(),tmpp.end());
      if( tst !=  tmpp.end()) {
        ATH_MSG_DEBUG(" Duplicated particles on input!");
-       return std::unique_ptr<xAOD::Vertex>(nullptr);
+       return {nullptr};
      }
 
      bool fullxAOD=false;   if(particles[0]->isAvailable<float>("vy")) fullxAOD=true;
@@ -139,7 +139,7 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
        //---If beam is tilted -> make pre-fit and translate beam constraint to pre-fitted position
        if( beamtiltX!=0. || beamtiltY!=0.) { 
           std::unique_ptr<xAOD::Vertex> iniVertex = m_fitterSvc->fit(ctx,particles,BEAM);
-          if(!iniVertex) return std::unique_ptr<xAOD::Vertex>(nullptr);
+          if(!iniVertex) return {nullptr};
           BEAM.setX(BEAM.x()+beamtiltX*iniVertex->z());
           BEAM.setY(BEAM.y()+beamtiltY*iniVertex->z());
        }
@@ -158,7 +158,7 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
      TPC.reserve( NPRT );
      for(int i=0; i<NPRT; i++){
 	TPC.push_back(new (std::nothrow) xAOD::TrackParticle(*particles[i]));
-	if(!TPC[i])return std::unique_ptr<xAOD::Vertex>(nullptr);
+	if(!TPC[i])return {nullptr};
 	const float mvx= (eventINFO) ? eventINFO->beamPosX() : 0.;
 	const float mvy= (eventINFO) ? eventINFO->beamPosY() : 0.;
 	const float mvz= (particles[i]->isAvailable<float>("vz")) ? particles[i]->vz() : 0.;
@@ -169,7 +169,7 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
      //---If beam is tilted -> make pre-fit and translate beam constraint to pre-fitted position
      if( beamtiltX!=0. || beamtiltY!=0.) { 
         std::unique_ptr<xAOD::Vertex> iniVertex = m_fitterSvc->fit(ctx,wrkTrkC,BEAM);
-        if(!iniVertex) return std::unique_ptr<xAOD::Vertex>(nullptr);
+        if(!iniVertex) return {nullptr};
         BEAM.setX(BEAM.x()+beamtiltX*iniVertex->z());
         BEAM.setY(BEAM.y()+beamtiltY*iniVertex->z());
      }

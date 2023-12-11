@@ -191,11 +191,11 @@ namespace Rec {
 // Functions and structure below are for algorithm development, debugging and calibration
 // NOT USED IN PRODUCTION!
 
-     int notFromBC(int PDGID) const;
-     const xAOD::TruthParticle * getPreviousParent(const xAOD::TruthParticle * child, int & ParentPDG) const;
+     static int notFromBC(int PDGID) ;
+     static const xAOD::TruthParticle * getPreviousParent(const xAOD::TruthParticle * child, int & ParentPDG) ;
      int getIdHF(const xAOD::TrackParticle* TP ) const;
-     int getG4Inter( const xAOD::TrackParticle* TP ) const;
-     int getMCPileup(const xAOD::TrackParticle* TP ) const;
+     static int getG4Inter( const xAOD::TrackParticle* TP ) ;
+     static int getMCPileup(const xAOD::TrackParticle* TP ) ;
 
      struct DevTuple 
      { 
@@ -304,28 +304,28 @@ namespace Rec {
 
 //
 // Gives correct mass assignment in case of nonequal masses
-      double massV0(const std::vector< std::vector<double> >& TrkAtVrt, double massP, double massPi ) const;
+      static double massV0(const std::vector< std::vector<double> >& TrkAtVrt, double massP, double massPi ) ;
 
 
       TLorentzVector momAtVrt(const std::vector<double>& inpTrk) const; 
-      double  vrtRadiusError(const Amg::Vector3D & secVrt, const std::vector<double>  & vrtErr) const;
+      static double  vrtRadiusError(const Amg::Vector3D & secVrt, const std::vector<double>  & vrtErr) ;
 
-      int   nTrkCommon( std::vector<WrkVrt> *WrkVrtSet, int indexV1, int indexV2) const;
+      static int   nTrkCommon( std::vector<WrkVrt> *WrkVrtSet, int indexV1, int indexV2) ;
       double minVrtVrtDist( std::vector<WrkVrt> *WrkVrtSet, int & indexV1, int & indexV2, std::vector<double> & check) const;
-      bool isPart( const std::deque<long int>& test, std::deque<long int> base) const;
-      std::vector<double> estimVrtPos( int nTrk, std::deque<long int> &selTrk, std::map<long int,std::vector<double>> & vrt) const;
+      static bool isPart( const std::deque<long int>& test, std::deque<long int> base) ;
+      static std::vector<double> estimVrtPos( int nTrk, std::deque<long int> &selTrk, std::map<long int,std::vector<double>> & vrt) ;
 
-      double vrtVrtDist(const xAOD::Vertex & primVrt, const Amg::Vector3D & secVrt, 
-                                  const std::vector<double>& vrtErr,double& signif ) const;
-      double vrtVrtDist2D(const xAOD::Vertex & primVrt, const Amg::Vector3D & secVrt, 
-                                  const std::vector<double>& vrtErr,double& signif ) const;
-      double vrtVrtDist(const Amg::Vector3D & vrt1, const std::vector<double>& vrtErr1,
-                        const Amg::Vector3D & vrt2, const std::vector<double>& vrtErr2) const;
-      double PntPntDist(const Amg::Vector3D & Vrt1, const Amg::Vector3D & Vrt2) const;
+      static double vrtVrtDist(const xAOD::Vertex & primVrt, const Amg::Vector3D & secVrt, 
+                                  const std::vector<double>& vrtErr,double& signif ) ;
+      static double vrtVrtDist2D(const xAOD::Vertex & primVrt, const Amg::Vector3D & secVrt, 
+                                  const std::vector<double>& vrtErr,double& signif ) ;
+      static double vrtVrtDist(const Amg::Vector3D & vrt1, const std::vector<double>& vrtErr1,
+                        const Amg::Vector3D & vrt2, const std::vector<double>& vrtErr2) ;
+      static double PntPntDist(const Amg::Vector3D & Vrt1, const Amg::Vector3D & Vrt2) ;
 
 
-      double projSV_PV(const Amg::Vector3D & SV, const xAOD::Vertex & PV, const TLorentzVector & Direction) const;
-      double MomProjDist(const Amg::Vector3D & SV, const xAOD::Vertex & PV, const TLorentzVector & Direction) const;
+      static double projSV_PV(const Amg::Vector3D & SV, const xAOD::Vertex & PV, const TLorentzVector & Direction) ;
+      static double MomProjDist(const Amg::Vector3D & SV, const xAOD::Vertex & PV, const TLorentzVector & Direction) ;
 
       double distToMatLayerSignificance(Vrt2Tr & Vrt) const;
 
@@ -333,7 +333,7 @@ namespace Rec {
                           Trk::IVKalState& istate,
                           bool ifCovV0) const;
 
-      int mostHeavyTrk(WrkVrt V, std::vector<const xAOD::TrackParticle*> AllTracks) const;
+      static int mostHeavyTrk(WrkVrt V, std::vector<const xAOD::TrackParticle*> AllTracks) ;
       double refineVerticesWithCommonTracks( WrkVrt &v1, WrkVrt &v2, std::vector<const xAOD::TrackParticle*> & allTrackList,
                                                         Trk::IVKalState& istate) const;
       double mergeAndRefitVertices( WrkVrt & v1, WrkVrt & v2, WrkVrt & newvrt,
@@ -354,9 +354,9 @@ namespace Rec {
                         compatibilityGraph_t& compatibilityGraph) const;
 
 
-     void  getPixelDiscs   (const xAOD::TrackParticle* Part, int &d0Hit, int &d1Hit, int &d2Hit) const;
-     int   getIBLHit(const xAOD::TrackParticle* Part) const;
-     int   getBLHit(const xAOD::TrackParticle* Part) const;
+     static void  getPixelDiscs   (const xAOD::TrackParticle* Part, int &d0Hit, int &d1Hit, int &d2Hit) ;
+     static int   getIBLHit(const xAOD::TrackParticle* Part) ;
+     static int   getBLHit(const xAOD::TrackParticle* Part) ;
 
      Hists& getHists() const;
    };

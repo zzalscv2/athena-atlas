@@ -33,7 +33,7 @@ DiTauBuilder::DiTauBuilder( const std::string& name, ISvcLocator* pSvcLocator ) 
 }
 
 
-DiTauBuilder::~DiTauBuilder() {}
+DiTauBuilder::~DiTauBuilder() = default;
 
 
 StatusCode DiTauBuilder::initialize() {

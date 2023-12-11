@@ -24,7 +24,7 @@ namespace Rec{
 //-----------------------------------------------------------------------------------
 //  Find track contributing most to the vertex invariant mass
    int NewVrtSecInclusiveTool::mostHeavyTrk(WrkVrt V, std::vector<const xAOD::TrackParticle*> AllTracks)
-   const
+   
    {
       int NTrk=V.selTrk.size(), SelT=-1;
       if(NTrk<3)return -1;
@@ -46,7 +46,7 @@ namespace Rec{
 //  Number of common tracks for 2 vertices
 //
    int NewVrtSecInclusiveTool::nTrkCommon( std::vector<WrkVrt> *wrkVrtSet, int V1, int V2)
-   const
+   
    {
       int nTrk_V1 = (*wrkVrtSet).at(V1).selTrk.size(); if( nTrk_V1< 2) return 0;   /* Bad vertex */
       int nTrk_V2 = (*wrkVrtSet).at(V2).selTrk.size(); if( nTrk_V2< 2) return 0;   /* Bad vertex */
@@ -250,7 +250,7 @@ namespace Rec{
 
 
    bool NewVrtSecInclusiveTool::isPart( const std::deque<long int>& test, std::deque<long int> base)
-   const
+   
    {
       for (long int trk : test)
          if(std::find(base.begin(), base.end(), trk) == base.end()) return false;  //element not found => test is not part of base
@@ -258,7 +258,7 @@ namespace Rec{
    }
 
    double NewVrtSecInclusiveTool::MomProjDist(const Amg::Vector3D & SecVrt,const xAOD::Vertex &primVrt,const TLorentzVector &Mom)
-   const
+   
    {
       Amg::Vector3D vv=SecVrt-primVrt.position();
       return ( vv.x()*Mom.X()+vv.y()*Mom.Y()+vv.z()*Mom.Z() )/ Mom.P();

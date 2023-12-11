@@ -20,13 +20,14 @@
 #include "TTree.h"
 #include "TROOT.h"
 
-#include <string>
-#include <new>
-#include <iostream>
-#include <tuple>
-#include <functional>
 #include <chrono>
 #include <exception> 
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <new>
+#include <string>
+#include <tuple>
 
 using namespace std;
 
@@ -65,7 +66,7 @@ namespace VKalVrtAthena {
     this->declareProperties();
     
     if( m_jp.FillNtuple ) {
-      m_ntupleVars.reset( new NtupleVars );
+      m_ntupleVars = std::make_unique<NtupleVars>( );
     }
     
   }
@@ -83,7 +84,7 @@ namespace VKalVrtAthena {
   StatusCode VrtSecInclusive::initialize()
   {
     //---------------- HBOOK
-    ITHistSvc*     hist_root=0;
+    ITHistSvc*     hist_root=nullptr;
     ATH_MSG_INFO("initialize: begin");
     //
     // first instantiate tools
@@ -163,27 +164,27 @@ namespace VKalVrtAthena {
     
     
     // Vertexing algorithm configuration
-    m_vertexingAlgorithms.emplace_back( std::pair<std::string, vertexingAlg>( "extractIncompatibleTrackPairs", &VrtSecInclusive::extractIncompatibleTrackPairs )     );
-    m_vertexingAlgorithms.emplace_back( std::pair<std::string, vertexingAlg>( "findNtrackVertices",            &VrtSecInclusive::findNtrackVertices )                );
-    m_vertexingAlgorithms.emplace_back( std::pair<std::string, vertexingAlg>( "rearrangeTracks",               &VrtSecInclusive::rearrangeTracks)                    );
+    m_vertexingAlgorithms.emplace_back( "extractIncompatibleTrackPairs", &VrtSecInclusive::extractIncompatibleTrackPairs     );
+    m_vertexingAlgorithms.emplace_back( "findNtrackVertices",            &VrtSecInclusive::findNtrackVertices                );
+    m_vertexingAlgorithms.emplace_back( "rearrangeTracks",               &VrtSecInclusive::rearrangeTracks                   );
     
     if( m_jp.doReassembleVertices ) {
-      m_vertexingAlgorithms.emplace_back( std::pair<std::string, vertexingAlg>( "reassembleVertices",          &VrtSecInclusive::reassembleVertices )                );
+      m_vertexingAlgorithms.emplace_back( "reassembleVertices",          &VrtSecInclusive::reassembleVertices                );
     }
       
     if( m_jp.doMergeByShuffling ) {
-      m_vertexingAlgorithms.emplace_back( std::pair<std::string, vertexingAlg>( "mergeByShuffling",           &VrtSecInclusive::mergeByShuffling )                   );
+      m_vertexingAlgorithms.emplace_back( "mergeByShuffling",           &VrtSecInclusive::mergeByShuffling                   );
     }
       
     if ( m_jp.doMergeFinalVerticesDistance ) {
-      m_vertexingAlgorithms.emplace_back( std::pair<std::string, vertexingAlg>( "mergeFinalVertices",          &VrtSecInclusive::mergeFinalVertices )                );
+      m_vertexingAlgorithms.emplace_back( "mergeFinalVertices",          &VrtSecInclusive::mergeFinalVertices                );
     }
     
     if( m_jp.doAssociateNonSelectedTracks ) {
-      m_vertexingAlgorithms.emplace_back( std::pair<std::string, vertexingAlg>( "associateNonSelectedTracks",  &VrtSecInclusive::associateNonSelectedTracks )        );
+      m_vertexingAlgorithms.emplace_back( "associateNonSelectedTracks",  &VrtSecInclusive::associateNonSelectedTracks        );
     }
     
-    m_vertexingAlgorithms.emplace_back( std::pair<std::string, vertexingAlg>( "refitAndSelect",                &VrtSecInclusive::refitAndSelectGoodQualityVertices ) );
+    m_vertexingAlgorithms.emplace_back( "refitAndSelect",                &VrtSecInclusive::refitAndSelectGoodQualityVertices );
 
     
     // now make histograms/ntuples
@@ -376,9 +377,9 @@ namespace VKalVrtAthena {
 
     
     // Later use elsewhere in the algorithm
-    m_selectedTracks.reset  ( new std::vector<const xAOD::TrackParticle*> );
-    m_associatedTracks.reset( new std::vector<const xAOD::TrackParticle*> );
-    m_leptonicTracks.reset  ( new std::vector<const xAOD::TrackParticle*> );
+    m_selectedTracks = std::make_unique<std::vector<const xAOD::TrackParticle*>>  ( );
+    m_associatedTracks = std::make_unique<std::vector<const xAOD::TrackParticle*>>( );
+    m_leptonicTracks = std::make_unique<std::vector<const xAOD::TrackParticle*>>  ( );
 
     m_extrapolatedPatternBank.clear();
     
@@ -469,7 +470,7 @@ namespace VKalVrtAthena {
       
         auto end = std::remove_if( workVerticesContainer->begin(), workVerticesContainer->end(),
                                    []( WrkVrt& wrkvrt ) {
-                                     return ( wrkvrt.isGood == false || wrkvrt.nTracksTotal() < 2 ); }
+                                     return ( !wrkvrt.isGood || wrkvrt.nTracksTotal() < 2 ); }
                                    );
       
         workVerticesContainer->erase( end, workVerticesContainer->end() );

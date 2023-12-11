@@ -21,16 +21,16 @@ using namespace std;
 namespace VKalVrtAthena {
   
   //____________________________________________________________________________________________________
-  const xAOD::TruthParticle*  VrtSecInclusive::getTrkGenParticle ( const xAOD::TrackParticle *trkPart ) const 
+  const xAOD::TruthParticle*  VrtSecInclusive::getTrkGenParticle ( const xAOD::TrackParticle *trkPart ) 
   {
     typedef ElementLink< xAOD::TruthParticleContainer > Link_t;
     constexpr const char* NAME = "truthParticleLink";
     if(  ! trkPart->isAvailable< Link_t >( NAME ) ) {
-      return 0;
+      return nullptr;
     }
     const Link_t& link = trkPart->auxdata< Link_t >(  NAME );
     if(  ! link.isValid() ) {
-      return 0;
+      return nullptr;
     }
     return *link;
   }
@@ -108,7 +108,7 @@ namespace VKalVrtAthena {
     vector< tuple<const xAOD::TruthVertex*, size_t> > truth_vertex_histogram;
     for(  const auto *v : truth_vertices_types ) {
       size_t count = truth_vertices.count(  v );
-      truth_vertex_histogram.emplace_back(  tuple<const xAOD::TruthVertex*, size_t>( v, count ) );
+      truth_vertex_histogram.emplace_back(  v, count );
     }
     
     // Determine the truth vertex associated to this vertex by majority decision
@@ -123,7 +123,7 @@ namespace VKalVrtAthena {
     // Add truth track pattern to the reco vertex
     ATH_MSG_VERBOSE( "categorizeVertexTruthTopology(): Add truth track pattern to the reco vertex" );
     char truth_vtx_pattern = 0;
-    if(  truth_vertices_types.size() == 0 ) {
+    if(  truth_vertices_types.empty() ) {
       truth_vtx_pattern = noTruthVertex;
     } else if(  truth_vertices_types.size() == 1 ) {
       truth_vtx_pattern = uniqueTruthVertex;

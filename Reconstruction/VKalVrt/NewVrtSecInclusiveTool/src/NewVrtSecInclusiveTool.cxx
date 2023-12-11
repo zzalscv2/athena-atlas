@@ -145,7 +145,7 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
 
 //------------------------------------------       
 //
-     ITHistSvc*     hist_root=0;
+     ITHistSvc*     hist_root=nullptr;
      if(m_fillHist){
        if (Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 1) {
          ATH_MSG_FATAL("Filling histograms not supported in MT jobs.");

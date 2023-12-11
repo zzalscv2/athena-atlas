@@ -17,8 +17,7 @@ SeedJetBuilder::SeedJetBuilder(const std::string& type,
 }
 
 
-SeedJetBuilder::~SeedJetBuilder() {
-}
+SeedJetBuilder::~SeedJetBuilder() = default;
 
 
 StatusCode SeedJetBuilder::initialize() {

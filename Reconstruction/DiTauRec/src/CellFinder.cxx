@@ -36,8 +36,7 @@ CellFinder::CellFinder(const std::string& type,
 }
 
 
-CellFinder::~CellFinder() {
-}
+CellFinder::~CellFinder() = default;
 
 
 StatusCode CellFinder::initialize() {
@@ -77,12 +76,12 @@ StatusCode CellFinder::execute(DiTauCandidateData * data,
   std::vector<const CaloCell*> subjetCells;
 
   // loop over seed jet constituents
-  for (const auto seedConst: pSeed->getConstituents()) {
+  for (const auto *const seedConst: pSeed->getConstituents()) {
     // cast jet constituent to cluster object
     const xAOD::CaloCluster* cluster = dynamic_cast<const xAOD::CaloCluster*>( seedConst->rawConstituent() );
 
     // loop over cells which are linked to the cluster
-    for (const auto cc : *(cluster->getCellLinks())) {
+    for (const auto *const cc : *(cluster->getCellLinks())) {
       // skip if pt<0 or cell already encountered
       if (cc->pt() < 0) continue;
       if (cellSeen.test(cc->caloDDE()->calo_hash())) continue;

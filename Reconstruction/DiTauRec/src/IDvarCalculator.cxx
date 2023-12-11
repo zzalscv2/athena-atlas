@@ -21,8 +21,7 @@ IDVarCalculator::IDVarCalculator(const std::string& type,
 }
 
 
-IDVarCalculator::~IDVarCalculator() {
-}
+IDVarCalculator::~IDVarCalculator() = default;
 
 
 StatusCode IDVarCalculator::initialize() {
