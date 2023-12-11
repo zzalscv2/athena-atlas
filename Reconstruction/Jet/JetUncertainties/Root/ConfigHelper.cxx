@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -24,8 +24,7 @@ ComponentHelper::ComponentHelper(const TString name)
 { }
 
 ComponentHelper::ComponentHelper(TEnv& settings, const TString& compPrefix, const TString& MCtype, const float energyScaleVal)
-    : energyScale(energyScaleVal)
-{
+    : energyScale(energyScaleVal),
     // Read in information on the uncertainty component
     //      - Name: component name
     //      - Param: parametrization
@@ -38,48 +37,49 @@ ComponentHelper::ComponentHelper(TEnv& settings, const TString& compPrefix, cons
     //      - SubComp: sub-components for simple groups
     //      - Group: the number of the group this component belongs to (0 == single-component group)
     // Overwrite MCTYPE with the specified type if applicable
-    name        = TString(settings.GetValue(compPrefix+"Name","")).ReplaceAll("MCTYPE",MCtype);
-    param       = settings.GetValue(compPrefix+"Param","");
-    massDefStr  = settings.GetValue(compPrefix+"MassDef","");
-    scale       = settings.GetValue(compPrefix+"Scale","FourVec");
-    topologyStr = settings.GetValue(compPrefix+"Topology","");
-    interpolStr = settings.GetValue(compPrefix+"Interp","true");
-    special     = settings.GetValue(compPrefix+"Special","");
-    uncNameList = TString(settings.GetValue(compPrefix+"Hists","")).ReplaceAll("MCTYPE",MCtype);
-    validName   = TString(settings.GetValue(compPrefix+"VHist","")).ReplaceAll("MCTYPE",MCtype);
-    subCompList = TString(settings.GetValue(compPrefix+"SubComp","")).ReplaceAll("MCTYPE",MCtype);
-    splitNum    = settings.GetValue(compPrefix+"Split",0);
-    groupNum    = settings.GetValue(compPrefix+"Group",0);
-    combMassStr = settings.GetValue(compPrefix+"CombMassType","");
-    caloMassTerm= settings.GetValue(compPrefix+"CaloMassTerm","");
-    TAMassTerm  = settings.GetValue(compPrefix+"TAMassTerm","");
-    caloMassDef = settings.GetValue(compPrefix+"CaloMassDef","");
-    TAMassDef   = settings.GetValue(compPrefix+"TAMassDef","");
-    truthLabelStr = settings.GetValue(compPrefix+"TruthLabels","");
-    constrainZresponseStr = settings.GetValue(compPrefix+"ConstrainZresponse","");
-    constrainZresponseFunc = settings.GetValue(compPrefix+"ConstrainZresponseFunc","");
-    LargeRJetTruthLabelName = settings.GetValue(compPrefix+"LargeRJetTruthLabelName","R10TruthLabel_R21Consolidated");
-    TString LargeRJetTruthLabelStrOld = settings.GetValue(compPrefix+"FatjetTruthLabels","");
-    TString LargeRJetTruthLabelStrNew = settings.GetValue(compPrefix+"LargeRJetTruthLabels","");
-    LargeRJetTruthLabelsForSFstr = settings.GetValue(compPrefix+"LargeRJetTruthLabelForSF","");
-    RegionForSFstr = settings.GetValue(compPrefix+"RegionForSF","");
-    ResultName = settings.GetValue(compPrefix+"ResultName","");
+      name        (TString(settings.GetValue(compPrefix+"Name","")).ReplaceAll("MCTYPE",MCtype)),
+      param       (settings.GetValue(compPrefix+"Param","")),
+      massDefStr  (settings.GetValue(compPrefix+"MassDef","")),
+      scale       (settings.GetValue(compPrefix+"Scale","FourVec")),
+      topologyStr (settings.GetValue(compPrefix+"Topology","")),
+      interpolStr (settings.GetValue(compPrefix+"Interp","true")),
+      special     (settings.GetValue(compPrefix+"Special","")),
+      uncNameList (TString(settings.GetValue(compPrefix+"Hists","")).ReplaceAll("MCTYPE",MCtype)),
+      validName   (TString(settings.GetValue(compPrefix+"VHist","")).ReplaceAll("MCTYPE",MCtype)),
+      subCompList (TString(settings.GetValue(compPrefix+"SubComp","")).ReplaceAll("MCTYPE",MCtype)),
+      splitNum    (settings.GetValue(compPrefix+"Split",0)),
+      groupNum    (settings.GetValue(compPrefix+"Group",0)),
+      combMassStr (settings.GetValue(compPrefix+"CombMassType","")),
+      caloMassTerm(settings.GetValue(compPrefix+"CaloMassTerm","")),
+      TAMassTerm  (settings.GetValue(compPrefix+"TAMassTerm","")),
+      caloMassDef (settings.GetValue(compPrefix+"CaloMassDef","")),
+      TAMassDef   (settings.GetValue(compPrefix+"TAMassDef","")),
+      truthLabelStr (settings.GetValue(compPrefix+"TruthLabels","")),
+      constrainZresponseStr (settings.GetValue(compPrefix+"ConstrainZresponse","")),
+      constrainZresponseFunc (settings.GetValue(compPrefix+"ConstrainZresponseFunc","")),
+      LargeRJetTruthLabelName (settings.GetValue(compPrefix+"LargeRJetTruthLabelName","R10TruthLabel_R21Consolidated")),
+      LargeRJetTruthLabelsForSFstr (settings.GetValue(compPrefix+"LargeRJetTruthLabelForSF","")),
+      RegionForSFstr (settings.GetValue(compPrefix+"RegionForSF","")),
+      ResultName (settings.GetValue(compPrefix+"ResultName","")),
 
-    // Get enums where appropriate
-    // Leave interpreting/checking the enums to others
-    parametrization = CompParametrization::stringToEnum(param);
-    massDef         = CompMassDef::stringToEnum(massDefStr);
-    scaleVar        = CompScaleVar::stringToEnum(scale);
-    topology        = JetTopology::stringToEnum(topologyStr);
-    isSpecial       = (!special.CompareTo("true",TString::kIgnoreCase)) || (!special.CompareTo("yes",TString::kIgnoreCase));
-    pileupType      = PileupComp::stringToEnum(name);
-    flavourType     = FlavourComp::stringToEnum(name);
-    combMassType    = CombMassComp::stringToEnum(combMassStr);
-    interpolate     = Interpolate::stringToEnum(interpolStr);
-    uncNames        = utils::vectorize<TString>(uncNameList,", ");
-    subComps        = utils::vectorize<TString>(subCompList,", ");
-    truthLabels     = utils::vectorize<int>(truthLabelStr,", ");
-    constrainZresponse = (!constrainZresponseStr.CompareTo("true",TString::kIgnoreCase)) || (!constrainZresponseStr.CompareTo("yes",TString::kIgnoreCase));
+      // Get enums where appropriate
+      // Leave interpreting/checking the enums to others
+      parametrization (CompParametrization::stringToEnum(param)),
+      massDef         (CompMassDef::stringToEnum(massDefStr)),
+      scaleVar        (CompScaleVar::stringToEnum(scale)),
+      topology        (JetTopology::stringToEnum(topologyStr)),
+      isSpecial       ((!special.CompareTo("true",TString::kIgnoreCase)) || (!special.CompareTo("yes",TString::kIgnoreCase))),
+      pileupType      (PileupComp::stringToEnum(name)),
+      flavourType     (FlavourComp::stringToEnum(name)),
+      combMassType    (CombMassComp::stringToEnum(combMassStr)),
+      interpolate     (Interpolate::stringToEnum(interpolStr)),
+      uncNames        (utils::vectorize<TString>(uncNameList,", ")),
+      subComps        (utils::vectorize<TString>(subCompList,", ")),
+      truthLabels     (utils::vectorize<int>(truthLabelStr,", ")),
+      constrainZresponse ((!constrainZresponseStr.CompareTo("true",TString::kIgnoreCase)) || (!constrainZresponseStr.CompareTo("yes",TString::kIgnoreCase)))
+{
+    TString LargeRJetTruthLabelStrOld (settings.GetValue(compPrefix+"FatjetTruthLabels",""));
+    TString LargeRJetTruthLabelStrNew = settings.GetValue(compPrefix+"LargeRJetTruthLabels","");
     if (LargeRJetTruthLabelStrOld != "" && LargeRJetTruthLabelStrNew != "")
         throw std::runtime_error("ERROR: double-specification of the LargeRJetTruthLabels/FatjetTruthLabels property");
     else if (LargeRJetTruthLabelStrNew != "")
@@ -123,31 +123,31 @@ GroupHelper::GroupHelper(const TString name)
     : name(name)
 { }
 
-GroupHelper::GroupHelper(TEnv& settings, const TString& groupPrefix, const TString& MCtype)
-{
-    // Read in information on the uncertainty group
-    //      - Name: group name
-    //      - Desc: description
-    //      - Type: category
-    //      - Corr: correlation type (only need to specify if >1 histogram)
-    //      - Split: Number of sub-components to split this component into (default 1, no split)
-    //      - Reduce: Whether or not a given group is safe for eigenvector reduction
-    //      - Group: The group number to link relevant components to this information
-    //      - SubGroup: subgroup number(s), comma/space-separated list (if not specified, no subgroup)
-    // Overwrite MCTYPE with the specified type if applicable
-    name        = TString(settings.GetValue(groupPrefix+"Name","")).ReplaceAll("MCTYPE",MCtype);
-    desc        = settings.GetValue(groupPrefix+"Desc","");
-    cat         = settings.GetValue(groupPrefix+"Type","");
-    corr        = settings.GetValue(groupPrefix+"Corr","");
-    isRed	= settings.GetValue(groupPrefix+"Reducible","true"); 
-    groupNum    = settings.GetValue(groupPrefix+"Group",0);
-    subgroupNum = settings.GetValue(groupPrefix+"SubGroup",0);
+GroupHelper::GroupHelper(TEnv& settings, const TString& groupPrefix, const TString& MCtype) :
+  // Read in information on the uncertainty group
+  //      - Name: group name
+  //      - Desc: description
+  //      - Type: category
+  //      - Corr: correlation type (only need to specify if >1 histogram)
+  //      - Split: Number of sub-components to split this component into (default 1, no split)
+  //      - Reduce: Whether or not a given group is safe for eigenvector reduction
+  //      - Group: The group number to link relevant components to this information
+  //      - SubGroup: subgroup number(s), comma/space-separated list (if not specified, no subgroup)
+  // Overwrite MCTYPE with the specified type if applicable
+  name        (TString(settings.GetValue(groupPrefix+"Name","")).ReplaceAll("MCTYPE",MCtype)),
+  desc        (settings.GetValue(groupPrefix+"Desc","")),
+  cat         (settings.GetValue(groupPrefix+"Type","")),
+  corr        (settings.GetValue(groupPrefix+"Corr","")),
+  isRed	      (settings.GetValue(groupPrefix+"Reducible","true")),
+  groupNum    (settings.GetValue(groupPrefix+"Group",0)),
+  subgroupNum (settings.GetValue(groupPrefix+"SubGroup",0)),
     
-    // Get enums where appropriate
-    // Leave interpreting/checking the enums to others
-    category        = CompCategory::stringToEnum(cat);
-    correlation     = CompCorrelation::stringToEnum(corr);
-    reducible	    = utils::getTypeObjFromString<bool>(isRed);
+  // Get enums where appropriate
+  // Leave interpreting/checking the enums to others
+  category        (CompCategory::stringToEnum(cat)),
+  correlation     (CompCorrelation::stringToEnum(corr)),
+  reducible	  (utils::getTypeObjFromString<bool>(isRed))
+{
 }
 
 

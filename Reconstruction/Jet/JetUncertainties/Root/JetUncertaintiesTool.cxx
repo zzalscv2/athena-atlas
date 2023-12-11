@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // General package includes
@@ -121,7 +121,7 @@ JetUncertaintiesTool::JetUncertaintiesTool(const std::string& name)
 
     // Set dummy default systematic (do nothing)
     // Prevents NULL access if user tries to apply correction without first calling function
-    if (applySystematicVariation(CP::SystematicSet()) != StatusCode::SUCCESS)
+    if (JetUncertaintiesTool::applySystematicVariation(CP::SystematicSet()) != StatusCode::SUCCESS)
         ATH_MSG_ERROR(Form("Failed to pre-set applySystematicVariation to no variation"));
 }
 
@@ -174,7 +174,7 @@ JetUncertaintiesTool::JetUncertaintiesTool(const JetUncertaintiesTool& toCopy)
     for (size_t iGroup = 0; iGroup < toCopy.m_groups.size(); ++iGroup)
         m_groups.push_back(new UncertaintyGroup(*toCopy.m_groups.at(iGroup)));
 
-    if (applySystematicVariation(m_currentSystSet) != StatusCode::SUCCESS)
+    if (JetUncertaintiesTool::applySystematicVariation(m_currentSystSet) != StatusCode::SUCCESS)
         ATH_MSG_ERROR(Form("Failed to re-set applySystematicVariation in new tool copy"));
 }
 

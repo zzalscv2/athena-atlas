@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /* ***********************************************************************************\
@@ -25,7 +25,7 @@
 namespace CP {
 
 // Constructor
-FFJetSmearingTool::FFJetSmearingTool(const std::string name)
+FFJetSmearingTool::FFJetSmearingTool(const std::string& name)
     : asg::AsgTool(name) 
     , m_isInit(false)
     , m_release("")
@@ -507,7 +507,7 @@ LargeRJetTruthLabel::TypeEnum jetTruthLabel = LargeRJetTruthLabel::intToEnum(acc
 //-----------------------------------------------------------------------------
 // The function "getJMSJMR" read the JMS and JMR uncertainties associated with the systematic 
 //-----------------------------------------------------------------------------
-StatusCode FFJetSmearingTool::getJMSJMR( xAOD::Jet& jet_reco, double jet_mass_value, JetTools::FFJetAllowedMassDefEnum MassDef_of_syst, std::string jetTopology, double& JMS_err,  double& JMR_err) const{
+StatusCode FFJetSmearingTool::getJMSJMR( xAOD::Jet& jet_reco, double jet_mass_value, JetTools::FFJetAllowedMassDefEnum MassDef_of_syst, const std::string& jetTopology, double& JMS_err,  double& JMR_err) const{
 
     //JMS/JMR systematic variations
     JMS_err=0;

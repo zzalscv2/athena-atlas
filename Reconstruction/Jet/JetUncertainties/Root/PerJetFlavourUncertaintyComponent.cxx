@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetUncertainties/PerJetFlavourUncertaintyComponent.h"
@@ -21,6 +21,7 @@ PerJetFlavourUncertaintyComponent::PerJetFlavourUncertaintyComponent(const std::
     , m_flavourType(FlavourComp::UNKNOWN)
     , m_constrainZresponse(false)
     , m_constrainZresponseFunc("Zjet_qFrac_AntiKt4EMPFlow")
+    , m_ZjetQuarkFrac(nullptr)
 {
     JESUNC_NO_DEFAULT_CONSTRUCTOR;
 }
