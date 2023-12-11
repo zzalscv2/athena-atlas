@@ -33,6 +33,8 @@
 #include "MuonRDO/NSW_PadTriggerDataContainer.h"
 
 #include "MuonNSWCommonDecode/NSWPadTriggerL1a.h"
+#include "MuonNSWCommonDecode/MapperSTG.h"
+
 
 // stl includes                                                                                 
 #include <string>
@@ -57,6 +59,7 @@ namespace {
 
 class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   using decoder = Muon::nsw::NSWPadTriggerL1a;
+  using mapper  = Muon::nsw::MapperSTG;
   static constexpr uint32_t NVMMCHAN = Muon::nsw::Constants::N_CHAN_PER_VMM;
   static constexpr uint32_t FIRSTPFEBVMM = 1;
  public:
@@ -82,6 +85,7 @@ class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   std::optional<Identifier> getPadId(uint32_t sourceid, uint32_t pfeb, uint32_t tdschan) const;
   std::optional<std::tuple<Identifier, const Trk::RIO_OnTrack*>> getRotIdAndRotObject(const Trk::TrackStateOnSurface* trkState) const;
   std::optional<Identifier> getRotId(const Trk::TrackStateOnSurface* trkState) const;
+  std::optional<std::tuple<int, int, std::string, std::string, int>> getPadEtaPhiTuple(uint32_t sourceid, uint32_t pfeb, uint32_t tdschan) const;
   
   SG::ReadHandleKey<Muon::sTgcPrepDataContainer> m_sTgcContainerKey{this,"sTgcPrepDataContainerName", "STGC_Measurements"};
   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager","Key of input MuonDetectorManager condition data"}; 

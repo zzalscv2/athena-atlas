@@ -3,6 +3,7 @@
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
+from  StgcRawDataMonitoring.StgcRawMonLabels import labelColumns, labelRows
 
 def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     '''Function to configures some algorithms in the monitoring system.'''
@@ -44,7 +45,8 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     #Expert
     sTgcOccupancyGroup = helper.addGroup(sTgcMonAlg, 'sTgcOccupancy', globalPath + 'Expert/Occupancy')
     sTgcPadTriggerExpertGroup = helper.addGroup(sTgcMonAlg, 'padTriggerExpert', globalPath + 'Expert/')
-    
+    padTriggerOccupancyGroup = helper.addGroup(sTgcMonAlg, 'padTriggerOccupancy', globalPath + 'Expert/PadTrigger/Hits/')
+
     # Layered and occupancy histograms
     side          = ['A', 'C']
     size          = ['L', 'S']
@@ -133,6 +135,12 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
             titlePhiVsIds = f'{sideIndex}{sizeIndex}; Trigger phiID; Trigger bandID; Pad Trigger hits'
             varPhiVsIds   = f'phiIds_{sideIndex}_{sizeIndex},bandIds_{sideIndex}_{sizeIndex};bandIds_vs_phiIds_Side{sideIndex}_Size{sizeIndex}'
             sTgcPadTriggerShifterGroup.defineHistogram(varPhiVsIds, type = 'TH2F', title = titlePhiVsIds, path = 'PadTrigger/Triggers', xbins = 65, xmin = -32.5, xmax = 32.5, ybins = 101, ymin = -0.5, ymax = 100.5, opt = 'kAlwaysCreate')
+            
+            for layerIndex in range(1, layerMax + 1):
+                titleEtaPhiOcc = f'{layerIndex}{sideIndex}{sizeIndex}; Pad column; Pad row; Hits'
+                varEtaPhiOcc = f'padPhi_{sideIndex}_{sizeIndex}_layer_{layerIndex},padEta_{sideIndex}_{sizeIndex}_layer_{layerIndex};padEtaPhiOcc_{layerIndex}{sideIndex}{sizeIndex}'
+                padTriggerOccupancyGroup.defineHistogram(varEtaPhiOcc, type = 'TH2F', title = titleEtaPhiOcc, path = 'padTriggerOccupancy', xbins = 71, xmin = 0.5, xmax = 71.5, xlabels = labelColumns, ybins = 56, ymin = 0.5, ymax = 56.5, ylabels = labelRows, opt = 'kAlwaysCreate')
+
         for sectorIndex in range(1, sectorMax + 1):
             titleBandIdVersusLBperSector = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + '; LB; Trigger bandID; number of triggers'
             varBandIdVersusLBperSector = f'lb_{sideIndex}_sector_{sectorIndex},bandIds_{sideIndex}_sector_{sectorIndex};OccupancyBandId_vs_LB_Side{sideIndex}_Sector{sectorIndex}'
@@ -238,7 +246,7 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--events", default = 100, type = int, help = 'Number of events that you want to run.')
     parser.add_argument("--samples", nargs = "+", default = None, help = 'Path to the input samples. If you want to run multiple samples at once you have to introduce them separated by blank spaces.')
-    parser.add_argument("--output", default = "sTgcExampleOutput.root", help = 'Name of the output ROOT file.')
+    parser.add_argument("--output", default = "HIST.root", help = 'Name of the output ROOT file.')
     args = parser.parse_args()
 
     flags = initConfigFlags()

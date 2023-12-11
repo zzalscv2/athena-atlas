@@ -15,7 +15,7 @@ int sTgcRawDataMonAlg::getSectors(const Identifier& id) const {
 }
 
 int sTgcRawDataMonAlg::getLayer(int multiplet, int gasGap) const {
-  return 4*(multiplet -1 ) + gasGap;
+  return 4*(multiplet - 1) + gasGap;
 }
 
 int32_t sTgcRawDataMonAlg::sourceidToSector(uint32_t sourceid, bool isSideA) const {
@@ -82,4 +82,45 @@ std::optional<Identifier> sTgcRawDataMonAlg::getRotId(const Trk::TrackStateOnSur
   
   return std::make_optional(std::get<Identifier>(rotIDtuple));
 }
+
+std::optional<std::tuple<int, int, std::string, std::string, int>> sTgcRawDataMonAlg::getPadEtaPhiTuple(uint32_t sourceid, uint32_t pfeb, uint32_t tdschan) const {
+  bool isValid = false;
+  const int side = (decoder::isA(sourceid)) ? 1 : -1;
+  const auto vmm = tdschan / NVMMCHAN + FIRSTPFEBVMM;
+  const auto vmmchan = tdschan % NVMMCHAN;
+  const auto sec = decoder::sector(sourceid);
   
+  mapper mapperSTG;
+  
+  int sector_type = decoder::isLarge(sec) ? 1 : 0;
+  int feb_radius = decoder::radius(pfeb);
+  int layer = decoder::layer(pfeb);
+  int channel_number = mapperSTG.channel_number(Muon::nsw::OFFLINE_CHANNEL_TYPE_PAD, sector_type, feb_radius, layer, vmm, vmmchan);
+ 
+  const auto& help = m_idHelperSvc -> stgcIdHelper(); 
+  const auto pad_id = help.channelID(help.elementID(decoder::offlineStationName(sec),
+						    decoder::offlineStationAbsEta(pfeb) * side,
+						    decoder::offlineStationPhi(sourceid)),
+				     decoder::offlineMultilayer(pfeb), 
+				     decoder::offlineGasgap(pfeb),
+				     Muon::nsw::OFFLINE_CHANNEL_TYPE_PAD,
+				     channel_number, isValid);
+
+  
+  if (!isValid) {
+    ATH_MSG_WARNING("Pad Identifier not valid, skipping");
+    return std::nullopt;
+  }
+  
+  int padPhi = help.padPhi(pad_id);
+  int padEta = help.padEta(pad_id);
+  int padPhiMax = help.padPhiMax();
+  int padEtaMax = help.padEtaMax();
+
+  int padPhiTotal = padPhi + (padPhiMax + 1)*(decoder::offlineStationPhi(sourceid) - 1);
+  int padEtaTotal = padEta + (padEtaMax + 1)*(decoder::offlineStationAbsEta(pfeb) - 1);
+  std::string sideName = (side == 1) ? "A" : "C";
+  std::string sizeName = (decoder::offlineStationName(sec) == "STS") ? "S" : "L";
+    
+  return std::make_tuple(padPhiTotal, padEtaTotal, sideName, sizeName, layer + 1);
+}
