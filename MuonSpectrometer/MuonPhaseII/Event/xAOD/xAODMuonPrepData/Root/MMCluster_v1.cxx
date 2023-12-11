@@ -22,7 +22,18 @@ namespace {
          static const SG::AuxElement::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
          acc(*this) = value;                                                     \
       }
-                                                                          
+
+#define IMPLEMENT_VECTOR_SETTER_GETTER( DTYPE, GETTER, SETTER)                          \
+      const std::vector<DTYPE>& MMCluster_v1::GETTER() const {                                  \
+         static const SG::AuxElement::Accessor<std::vector<DTYPE>> acc{preFixStr + #GETTER}; \
+         return acc(*this);                                                      \
+      }                                                                          \
+                                                                                 \
+      void MMCluster_v1::SETTER(const std::vector<DTYPE>& value) {                        \
+         static const SG::AuxElement::Accessor<std::vector<DTYPE>> acc{preFixStr + #GETTER}; \
+         acc(*this) = value;                                                     \
+      }
+
 namespace xAOD {
 
 IMPLEMENT_SETTER_GETTER(uint16_t, time, setTime)
@@ -30,6 +41,12 @@ IMPLEMENT_SETTER_GETTER(uint32_t, charge, setCharge)
 IMPLEMENT_SETTER_GETTER(float, driftDist, setDriftDist)
 IMPLEMENT_SETTER_GETTER(float, angle, setAngle)
 IMPLEMENT_SETTER_GETTER(float, chiSqProb, setChiSqProb)
+IMPLEMENT_SETTER_GETTER(uint16_t, quality, setQuality)
+IMPLEMENT_VECTOR_SETTER_GETTER(uint16_t, stripNumbers, setStripNumbers)
+IMPLEMENT_VECTOR_SETTER_GETTER(int16_t, stripTimes, setStripTimes)
+IMPLEMENT_VECTOR_SETTER_GETTER(int, stripCharges, setStripCharges)
+IMPLEMENT_VECTOR_SETTER_GETTER(float, stripDriftDist, setStripDriftDist)
+IMPLEMENT_VECTOR_SETTER_GETTER(Amg::MatrixX, stripDriftErrors, setStripDriftErrors)
 AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( MMCluster_v1, unsigned int, MMCluster_v1::Author, author)
 AUXSTORE_PRIMITIVE_SETTER_WITH_CAST( MMCluster_v1, unsigned int, MMCluster_v1::Author, author, setAuthor)
 
@@ -41,3 +58,4 @@ IdentifierHash MMCluster_v1::measurementHash() const {
 
 }  // namespace xAOD
 #undef IMPLEMENT_SETTER_GETTER
+#undef IMPLEMENT_VECTOR_SETTER_GETTER
