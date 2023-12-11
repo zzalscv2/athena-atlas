@@ -137,7 +137,7 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
     }
 
     double pt = thePart->pt() / GeV;
-    double q = partCharge(thePart);
+    double q = thePart?thePart->charge():0.0;
     // exclude charged particles with pT<1 GeV
     if (q != 0 && pt < m_pTChargePartCut) {
       continue;
@@ -277,7 +277,7 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
       continue;
 
     double pt = thePart->pt() / GeV;
-    double q = partCharge(thePart);
+    double q = thePart?thePart->charge():0.0;
     // exclude charged particles with pT<1 GeV
     if (q != 0 && pt < m_pTChargePartCut) {
       continue;

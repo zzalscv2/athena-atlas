@@ -2367,10 +2367,6 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
   info->bkgElecMother = thePart;
   return part;
 }
-//------------------------------------------------------------------------
-double MCTruthClassifier::partCharge(const xAOD::TruthParticle* thePart) {
-  return thePart?thePart->charge():0.0;
-}
 
 const xAOD::TruthParticle*
 MCTruthClassifier::find_matching(const xAOD::TruthParticleContainer* TruthTES, const xAOD::TruthParticle* bcin)
