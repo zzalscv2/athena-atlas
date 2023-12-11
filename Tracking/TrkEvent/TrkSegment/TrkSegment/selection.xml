@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
   <class name="Trk::Segment" >
     <field name="s_numberOfInstantiations" transient="true" />
@@ -11,4 +11,5 @@
   <class name="ElementLink< Trk::SegmentCollection >" />
   <class name="std::vector<ElementLink< Trk::SegmentCollection > >" />
   <class name="SG::AuxTypeVectorFactory<ElementLink<Trk::SegmentCollection> >" />
+  <class name="SG::AuxTypeVectorFactoryImpl<ElementLink<Trk::SegmentCollection> >" />
 </lcgdict>
