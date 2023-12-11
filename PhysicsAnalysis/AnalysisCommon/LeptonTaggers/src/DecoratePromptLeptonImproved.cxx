@@ -662,9 +662,10 @@ void Prompt::DecoratePromptLeptonImproved::getMutualVariables(
 }
 
 //=============================================================================
-float Prompt::DecoratePromptLeptonImproved::accessIsolation(AccessFloat           &isoAccessor,
-                        const xAOD::IParticle &particle)
-{
+float Prompt::DecoratePromptLeptonImproved::accessIsolation(
+  AccessFloat           &isoAccessor,
+  const xAOD::IParticle &particle
+) {
   double isolation = -99., isolationrel = -99.;
 
   if(isoAccessor.isAvailable(particle)) {

@@ -54,12 +54,14 @@ namespace Prompt
 
   private:
 
-    std::vector<const xAOD::TrackParticle*> findNearbyTracks(const xAOD::TrackParticle &tracklep,
-                                                             const xAOD::TrackParticleContainer &inDetTracks,
-                                                             const xAOD::Vertex &priVtx);
+    std::vector<const xAOD::TrackParticle*> findNearbyTracks(
+      const xAOD::TrackParticle &tracklep,
+      const xAOD::TrackParticleContainer &inDetTracks,
+      const xAOD::Vertex &priVtx
+    ) const;
 
-    bool passElecCand(const xAOD::Electron &elec);
-    bool passMuonCand(const xAOD::Muon     &muon);
+    bool passElecCand(const xAOD::Electron &elec) const;
+    bool passMuonCand(const xAOD::Muon     &muon) const;
 
     std::vector<std::unique_ptr<xAOD::Vertex>> prepLepWithTwoTrkSVVec(
       const FittingInput &input,
@@ -70,18 +72,18 @@ namespace Prompt
     std::vector<std::unique_ptr<xAOD::Vertex>> prepLepWithMergedSVVec(
       const FittingInput &input,
       const xAOD::TrackParticle* tracklep,
-      std::vector<std::unique_ptr<xAOD::Vertex>> &twoTrk_vertices
+      std::vector<std::unique_ptr<xAOD::Vertex>> &twoTrkVertices
     );
 
     void makeVertexCluster(
-      std::vector<std::unique_ptr<xAOD::Vertex>> &cluster_vtxs,
-      std::vector<std::unique_ptr<xAOD::Vertex>> &input_vtxs
+      std::vector<std::unique_ptr<xAOD::Vertex>> &clusterVtxs,
+      std::vector<std::unique_ptr<xAOD::Vertex>> &inputVtxs
     );
 
     void saveSecondaryVertices(
       std::vector<std::unique_ptr<xAOD::Vertex>> &vtxs,
-      std::vector<int> &index_vector,
-      std::vector<ElementLink<xAOD::VertexContainer> > &sv_links,
+      std::vector<int> &indexVector,
+      std::vector<ElementLink<xAOD::VertexContainer> > &svLinks,
       xAOD::VertexContainer &SVContainer,
       std::set< xAOD::Vertex* >& svSet
     );

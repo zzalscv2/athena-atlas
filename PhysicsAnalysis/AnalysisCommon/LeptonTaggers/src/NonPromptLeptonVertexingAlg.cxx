@@ -197,12 +197,12 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
       // Get original ID track for vertex fitting
       //
       if(passElecCand(*elec) && bestmatchedGSFElTrack) {
-  tracklep = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(bestmatchedGSFElTrack);
+        tracklep = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(bestmatchedGSFElTrack);
       }
     }
     else if(muon) {
       if(passMuonCand(*muon) && muon->inDetTrackParticleLink().isValid()) {
-  tracklep = *(muon->inDetTrackParticleLink());
+        tracklep = *(muon->inDetTrackParticleLink());
       }
     }
     else {
@@ -240,54 +240,60 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
     //
     // Collect tracks around the lepton track
     //
-    std::vector<const xAOD::TrackParticle* > ifit_tracks = findNearbyTracks(*tracklep, inDetTracks, *fittingInput.priVtx);
+    std::vector<const xAOD::TrackParticle* > ifitTracks = findNearbyTracks(*tracklep, inDetTracks, *fittingInput.priVtx);
 
     //
     // Fit 2-track vertices
     //
-    std::vector<std::unique_ptr<xAOD::Vertex>> twoTrk_vertices = prepLepWithTwoTrkSVVec(
-      fittingInput, tracklep, ifit_tracks
+    std::vector<std::unique_ptr<xAOD::Vertex>> twoTrkVertices = prepLepWithTwoTrkSVVec(
+      fittingInput, tracklep, ifitTracks
     );
 
-    /*
-      Deep merge 2-track vertices.
+    // We make a copy so we can store the list of original
+    // two-track vertices
+    std::vector<std::unique_ptr<xAOD::Vertex>> twoTrkVerticesCopy;
+    for (std::unique_ptr<xAOD::Vertex> &vtx : twoTrkVertices) {
+      std::unique_ptr<xAOD::Vertex> newVtx = std::make_unique<xAOD::Vertex>(*vtx);
+      twoTrkVerticesCopy.push_back(std::move(newVtx));
+    }
 
-      Ownership of the vertices should stay in this scope,
-      as this is where the vertices will be saved to the store.
-    */
+    //  Deep merge 2-track vertices.
+    ATH_MSG_DEBUG("Getting deep merged vertices");
+    ATH_MSG_DEBUG("Starting with " << twoTrkVertices.size() << " 2-track vertices");
     Prompt::MergeResultNotOwner deep_merged_result = m_vertexMerger->mergeInitVertices(
-      fittingInput, tracklep, twoTrk_vertices, ifit_tracks
-    );
+        fittingInput, tracklep, twoTrkVertices, ifitTracks);
 
     //
     // Save secondary vertices
     //
-    std::vector<ElementLink<xAOD::VertexContainer> > sv_links;
-    std::vector<ElementLink<xAOD::VertexContainer> > deepmerge_sv_links;
+    std::vector<ElementLink<xAOD::VertexContainer> > svLinks;
+    std::vector<ElementLink<xAOD::VertexContainer> > deepmergeSVLinks;
 
-    std::vector<int> index_vector_twoTrk;
-    std::vector<int> index_vector_deep_merged;
+    std::vector<int> indexVectorTwoTrk;
+    std::vector<int> indexVectorDeepMerged;
 
     //
     // Record 2-track vertexes and simple merged vertexes
     //
-    ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg::execute --- recording 2-track and simple merged vertices");
-    saveSecondaryVertices(twoTrk_vertices, index_vector_twoTrk, sv_links, SVContainerRef, svSet);
+    ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg::execute --- recording " << twoTrkVerticesCopy.size() << " 2-track and simple merged vertices");
+    saveSecondaryVertices(twoTrkVerticesCopy, indexVectorTwoTrk, svLinks, SVContainerRef, svSet);
 
     //
     // Record both merged multi-track vertices and also unmerged 2-track vertices
     //
-    ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg::execute --- recording merged multi-track and unmerged 2-track vertices");
-    saveSecondaryVertices(deep_merged_result.vtxsNewMerged, index_vector_deep_merged, deepmerge_sv_links, SVContainerRef, svSet);
-    saveSecondaryVertices(deep_merged_result.vtxsInitPassedNotMerged, index_vector_deep_merged, deepmerge_sv_links, SVContainerRef, svSet);
+    ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg::execute --- recording " << deep_merged_result.vtxsNewMerged.size() << " merged multi-track vertices");
+    saveSecondaryVertices(deep_merged_result.vtxsNewMerged, indexVectorDeepMerged, deepmergeSVLinks, SVContainerRef, svSet);
 
-    ATH_MSG_DEBUG ("NonPromptLeptonVertexingAlg::execute -- number of two-track   SV = " << twoTrk_vertices.size());
+    ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg::execute --- recording " << deep_merged_result.vtxsInitPassedNotMerged.size() << " unmerged 2-track vertices");
+    saveSecondaryVertices(deep_merged_result.vtxsInitPassedNotMerged, indexVectorDeepMerged, deepmergeSVLinks, SVContainerRef, svSet);
+
+    ATH_MSG_DEBUG ("NonPromptLeptonVertexingAlg::execute -- number of two-track   SV = " << twoTrkVertices.size());
     ATH_MSG_DEBUG ("NonPromptLeptonVertexingAlg::execute -- number of deep merged SV = " << deep_merged_result.vtxsNewMerged.size());
 
-    (*m_lepSVElementLinksDec)          (*lepton) = sv_links;
-    (*m_lepDeepMergedSVElementLinksDec)(*lepton) = deepmerge_sv_links;
-    (*m_indexVectorDec)                (*lepton) = index_vector_twoTrk;
-    (*m_indexVectorDecDeepMerge)       (*lepton) = index_vector_deep_merged;
+    (*m_lepSVElementLinksDec)          (*lepton) = svLinks;
+    (*m_lepDeepMergedSVElementLinksDec)(*lepton) = deepmergeSVLinks;
+    (*m_indexVectorDec)                (*lepton) = indexVectorTwoTrk;
+    (*m_indexVectorDecDeepMerge)       (*lepton) = indexVectorDeepMerged;
 
     ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg - done with lepton pT=" << tracklep->pt() << ", " << truthAsStr(*lepton) << endl
       << "___________________________________________________________________________");
@@ -302,7 +308,7 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
 }
 
 //=============================================================================
-bool Prompt::NonPromptLeptonVertexingAlg::passElecCand(const xAOD::Electron &elec)
+bool Prompt::NonPromptLeptonVertexingAlg::passElecCand(const xAOD::Electron &elec) const
 {
   //
   // Check whether electron candidate passes loose selection
@@ -324,7 +330,7 @@ bool Prompt::NonPromptLeptonVertexingAlg::passElecCand(const xAOD::Electron &ele
 }
 
 //=============================================================================
-bool Prompt::NonPromptLeptonVertexingAlg::passMuonCand(const xAOD::Muon &muon)
+bool Prompt::NonPromptLeptonVertexingAlg::passMuonCand(const xAOD::Muon &muon) const
 {
   //
   // Check whether muon candidate is a combined muon
@@ -341,10 +347,11 @@ bool Prompt::NonPromptLeptonVertexingAlg::passMuonCand(const xAOD::Muon &muon)
 }
 
 //=============================================================================
-std::vector<const xAOD::TrackParticle*> Prompt::NonPromptLeptonVertexingAlg::findNearbyTracks(const xAOD::TrackParticle &tracklep,
-                                                                                              const xAOD::TrackParticleContainer &inDetTracks,
-                            const xAOD::Vertex &priVtx)
-{
+std::vector<const xAOD::TrackParticle*> Prompt::NonPromptLeptonVertexingAlg::findNearbyTracks(
+  const xAOD::TrackParticle &tracklep,
+  const xAOD::TrackParticleContainer &inDetTracks,
+  const xAOD::Vertex &priVtx
+) const {
   //
   // Select tracks -- avoid using track selection tool since z0 definition is different
   //
@@ -427,21 +434,21 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::
   // Decorate lepton with vector of two-track vertices.
   // Return vector of finding vertices
   //
-  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrk_vertices;
-  std::vector<const xAOD::TrackParticle*> tracks_for_fit;
+  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrkVertices;
+  std::vector<const xAOD::TrackParticle*> tracksForFit;
 
   if(!input.priVtx) {
     ATH_MSG_WARNING("prepLepWithTwoTrkSVVec -- invalid primary vertex: nothing to do");
-    return twoTrk_vertices;
+    return twoTrkVertices;
   }
 
   for(const xAOD::TrackParticle *selectedtrack: tracks) {
-    tracks_for_fit.clear();
-    tracks_for_fit.push_back(tracklep);
-    tracks_for_fit.push_back(selectedtrack);
+    tracksForFit.clear();
+    tracksForFit.push_back(tracklep);
+    tracksForFit.push_back(selectedtrack);
 
     std::unique_ptr<xAOD::Vertex> newSecondaryVertex = m_vertexFitterTool->fitVertexWithPrimarySeed(
-      input, tracks_for_fit, kTwoTrackVtx
+      input, tracksForFit, kTwoTrackVtx
     );
 
     if(!newSecondaryVertex) {
@@ -449,34 +456,34 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::
       continue;
     }
 
-    twoTrk_vertices.push_back(std::move(newSecondaryVertex));
+    twoTrkVertices.push_back(std::move(newSecondaryVertex));
   }
 
-  return twoTrk_vertices;
+  return twoTrkVertices;
 }
 
 //=============================================================================
 std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::prepLepWithMergedSVVec(
   const FittingInput &input,
   const xAOD::TrackParticle* tracklep,
-  std::vector<std::unique_ptr<xAOD::Vertex>> &twoTrk_vertices
+  std::vector<std::unique_ptr<xAOD::Vertex>> &twoTrkVertices
 )
 {
   //
   // Merge the two vertices if the distance between them with in 0.5 mm.
   // Re-fit a three-track vertex using the input tracks from the vertices above.
   //
-  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrk_vertices_pass;
-  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrk_vertices_pass_fixed;
-  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrk_vertices_merged;
-  std::vector<std::unique_ptr<xAOD::Vertex>> result_vertices;
+  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrkVerticesPass;
+  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrkVerticesPassFixed;
+  std::vector<std::unique_ptr<xAOD::Vertex>> twoTrkVerticesMerged;
+  std::vector<std::unique_ptr<xAOD::Vertex>> resultVertices;
 
   if(!input.priVtx) {
     ATH_MSG_WARNING("prepLepWithMergedSVVec -- invalid primary vertex: nothing to do");
-    return result_vertices;
+    return resultVertices;
   }
 
-  for(std::unique_ptr<xAOD::Vertex> &vtx: twoTrk_vertices) {
+  for(std::unique_ptr<xAOD::Vertex> &vtx: twoTrkVertices) {
     double chi2OverDoF = -99.;
 
     if(vtx->numberDoF() > 0 && vtx->chiSquared() > 0) {
@@ -484,34 +491,34 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::
     }
 
     if(chi2OverDoF >= 0.0 && chi2OverDoF < m_mergeChi2OverDoF) {
-      twoTrk_vertices_pass      .push_back(std::move(vtx));
-      twoTrk_vertices_pass_fixed.push_back(std::move(vtx));
+      twoTrkVerticesPass      .push_back(std::move(vtx));
+      twoTrkVerticesPassFixed.push_back(std::move(vtx));
     }
   }
 
-  std::vector<std::unique_ptr<xAOD::Vertex>>::iterator curr_iter = twoTrk_vertices_pass.begin();
+  std::vector<std::unique_ptr<xAOD::Vertex>>::iterator curr_iter = twoTrkVerticesPass.begin();
 
-  while(curr_iter != twoTrk_vertices_pass.end()) {
-    std::vector<std::unique_ptr<xAOD::Vertex>> cluster_vtxs;
-    cluster_vtxs.push_back(std::move(*curr_iter));
+  while(curr_iter != twoTrkVerticesPass.end()) {
+    std::vector<std::unique_ptr<xAOD::Vertex>> clusterVtxs;
+    clusterVtxs.push_back(std::move(*curr_iter));
 
-    twoTrk_vertices_pass.erase(curr_iter);
+    twoTrkVerticesPass.erase(curr_iter);
 
-    makeVertexCluster(cluster_vtxs, twoTrk_vertices_pass);
+    makeVertexCluster(clusterVtxs, twoTrkVerticesPass);
 
-    curr_iter = twoTrk_vertices_pass.begin();
+    curr_iter = twoTrkVerticesPass.begin();
 
     //
     // Fit vertex cluster
     //
-    std::vector<const xAOD::TrackParticle*> tracks_for_fit;
+    std::vector<const xAOD::TrackParticle*> tracksForFit;
 
-    for(std::unique_ptr<xAOD::Vertex> &vtx: cluster_vtxs) {
+    for(std::unique_ptr<xAOD::Vertex> &vtx: clusterVtxs) {
       for(unsigned k = 0; k < vtx->nTrackParticles(); ++k) {
         const xAOD::TrackParticle *track  = vtx->trackParticle(k);
 
         if(track) {
-          tracks_for_fit.push_back(track);
+          tracksForFit.push_back(track);
         }
       }
     }
@@ -519,17 +526,17 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::
     //
     // Ignore standalone vertexes
     //
-    if(cluster_vtxs.size() < 2) {
+    if(clusterVtxs.size() < 2) {
       continue;
     }
 
     //
     // Fit merged vertex
     //
-    tracks_for_fit.push_back(tracklep);
+    tracksForFit.push_back(tracklep);
 
     std::unique_ptr<xAOD::Vertex> newSecondaryVertex = m_vertexFitterTool->fitVertexWithPrimarySeed(
-      input, tracks_for_fit, kSimpleMergedVtx
+      input, tracksForFit, kSimpleMergedVtx
     );
 
     if(!newSecondaryVertex) {
@@ -537,10 +544,10 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::
       continue;
     }
 
-    result_vertices.push_back(std::move(newSecondaryVertex));
+    resultVertices.push_back(std::move(newSecondaryVertex));
 
-    for(std::unique_ptr<xAOD::Vertex> &vtx: cluster_vtxs) {
-      twoTrk_vertices_merged.push_back(std::move(vtx));
+    for(std::unique_ptr<xAOD::Vertex> &vtx: clusterVtxs) {
+      twoTrkVerticesMerged.push_back(std::move(vtx));
     }
 
     ATH_MSG_DEBUG("DecorateLepWithMergedSVVec -- NTrack of merged vertex = " << newSecondaryVertex->nTrackParticles());
@@ -549,35 +556,35 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::
   //
   // Include passed 2-track vertexes that were NOT merged
   //
-  for(std::unique_ptr<xAOD::Vertex> &vtx: twoTrk_vertices_pass_fixed) {
+  for(std::unique_ptr<xAOD::Vertex> &vtx: twoTrkVerticesPassFixed) {
     const std::vector<std::unique_ptr<xAOD::Vertex>>::const_iterator fit = std::find(
-      twoTrk_vertices_merged.begin(),
-      twoTrk_vertices_merged.end(),
+      twoTrkVerticesMerged.begin(),
+      twoTrkVerticesMerged.end(),
       vtx
     );
 
-    if(fit == twoTrk_vertices_merged.end()) {
-      result_vertices.push_back(std::move(vtx));
+    if(fit == twoTrkVerticesMerged.end()) {
+      resultVertices.push_back(std::move(vtx));
     }
   }
 
-  return result_vertices;
+  return resultVertices;
 }
 
 //=============================================================================
 void Prompt::NonPromptLeptonVertexingAlg::makeVertexCluster(
-  std::vector<std::unique_ptr<xAOD::Vertex>> &cluster_vtxs,
-  std::vector<std::unique_ptr<xAOD::Vertex>> &input_vtxs
+  std::vector<std::unique_ptr<xAOD::Vertex>> &clusterVtxs,
+  std::vector<std::unique_ptr<xAOD::Vertex>> &inputVtxs
 )
 {
-  ATH_MSG_DEBUG("makeVertexCluster - before: cluster_vtxs.size()=" << cluster_vtxs.size() << ", input_vtxs.size()=" << input_vtxs.size());
+  ATH_MSG_DEBUG("makeVertexCluster - before: clusterVtxs.size()=" << clusterVtxs.size() << ", inputVtxs.size()=" << inputVtxs.size());
 
-  std::vector<std::unique_ptr<xAOD::Vertex>>::iterator vit = input_vtxs.begin();
+  std::vector<std::unique_ptr<xAOD::Vertex>>::iterator vit = inputVtxs.begin();
 
-  while(vit != input_vtxs.end()) {
+  while(vit != inputVtxs.end()) {
     bool pass = false;
 
-    for(std::vector<std::unique_ptr<xAOD::Vertex>>::const_iterator cit = cluster_vtxs.begin(); cit != cluster_vtxs.end(); ++cit) {
+    for(std::vector<std::unique_ptr<xAOD::Vertex>>::const_iterator cit = clusterVtxs.begin(); cit != clusterVtxs.end(); ++cit) {
       if((*vit).get() == (*cit).get()) {
         ATH_MSG_DEBUG("makeVertexCluster - logic error - found the same vertex twice: " << ((*vit).get()));
         continue;
@@ -594,24 +601,24 @@ void Prompt::NonPromptLeptonVertexingAlg::makeVertexCluster(
     }
 
     if(pass) {
-      cluster_vtxs.push_back(std::move(*vit));
-      input_vtxs.erase(vit);
+      clusterVtxs.push_back(std::move(*vit));
+      inputVtxs.erase(vit);
 
-      vit = input_vtxs.begin();
+      vit = inputVtxs.begin();
     }
     else {
       vit++;
     }
   }
 
-  ATH_MSG_DEBUG("makeVertexCluster - after:  cluster_vtxs.size()=" << cluster_vtxs.size() << ", input_vtxs.size()=" << input_vtxs.size());
+  ATH_MSG_DEBUG("makeVertexCluster - after:  clusterVtxs.size()=" << clusterVtxs.size() << ", inputVtxs.size()=" << inputVtxs.size());
 }
 
 //=============================================================================
 void Prompt::NonPromptLeptonVertexingAlg::saveSecondaryVertices(
   std::vector<std::unique_ptr<xAOD::Vertex>> &vtxs,
-  std::vector<int> &index_vector,
-  std::vector<ElementLink<xAOD::VertexContainer> > &sv_links,
+  std::vector<int> &indexVector,
+  std::vector<ElementLink<xAOD::VertexContainer> > &svLinks,
   xAOD::VertexContainer &SVContainer,
   std::set< xAOD::Vertex* >& svSet
 )
@@ -624,7 +631,7 @@ void Prompt::NonPromptLeptonVertexingAlg::saveSecondaryVertices(
   for(std::unique_ptr<xAOD::Vertex> &vtx: vtxs) {
     int index = -99;
     if(getVar(vtx, index, "SecondaryVertexIndex")) {
-      index_vector.push_back(index);
+      indexVector.push_back(index);
     }
     else {
       ATH_MSG_WARNING("saveSecondaryVertices - missing \"SecondaryVertexIndex\" variable");
@@ -635,8 +642,10 @@ void Prompt::NonPromptLeptonVertexingAlg::saveSecondaryVertices(
       // First time seeing this this vertex - record it in output container
       //
       SVContainer.push_back(std::move(vtx));
-      ElementLink<xAOD::VertexContainer> sv_link(SVContainer,SVContainer.size()-1);
-      sv_links.push_back(sv_link);
+      ElementLink<xAOD::VertexContainer> svLink(SVContainer,SVContainer.size()-1);
+      svLinks.push_back(svLink);
+    } else {
+      ATH_MSG_ERROR("saveSecondaryVertices --- the same vertex has been encountered more than once! Is this a logic error?");
     }
   }
 
