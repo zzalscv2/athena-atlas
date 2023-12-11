@@ -13,7 +13,7 @@ find_package( Boost )
 atlas_add_component( PileUpComps
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${BOOST_INCLUDE_DIRS}
+                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                      LINK_LIBRARIES 
                      ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel
                      PileUpToolsLib StoreGateLib EventInfo
