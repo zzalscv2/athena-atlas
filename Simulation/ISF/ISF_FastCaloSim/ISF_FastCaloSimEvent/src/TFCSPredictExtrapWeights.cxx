@@ -185,8 +185,7 @@ TFCSPredictExtrapWeights::prepareInputs(TFCSSimulationState &simulstate,
     inputVariables["pdgId"] = 1; // one hot enconding
   } else if (is_match_pdgid(11) || is_match_pdgid(-11)) {
     inputVariables["pdgId"] = 0; // one hot enconding
-  }
-
+  } 
   return inputVariables;
 }
 
