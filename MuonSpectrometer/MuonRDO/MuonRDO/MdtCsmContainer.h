@@ -32,7 +32,7 @@ public:
   size_type digit_size() const ; 
 
   /// Convert identifier to idhash
-  unsigned int idToHash(unsigned int id) const;
+  static unsigned int idToHash(unsigned int id) ;
 
   // IdentifiableContainer is still a DataObject
   // Put CLID here. 

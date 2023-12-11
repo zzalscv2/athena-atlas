@@ -23,11 +23,11 @@ CscRawDataContainer::CscRawDataContainer(CscRawDataCollection_Cache* cache)
 
 // Destructor.
 CscRawDataContainer::~CscRawDataContainer() 
-{}
+= default;
 
 /// Convert identifier to idhash
 unsigned int 
-CscRawDataContainer::idToHash(unsigned int id) const
+CscRawDataContainer::idToHash(unsigned int id) 
 {
     return (hashFcn()(id));
 }

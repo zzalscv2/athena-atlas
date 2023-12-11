@@ -30,11 +30,11 @@ TgcRdoContainer::TgcRdoContainer(TgcRdo_Cache* cache)
 
 // Destructor.
 TgcRdoContainer::~TgcRdoContainer() 
-{}
+= default;
 
 /// Convert identifier to idhash
 unsigned int 
-TgcRdoContainer::idToHash(unsigned int id) const
+TgcRdoContainer::idToHash(unsigned int id) 
 {
     return (hashFcn()(id));
 }

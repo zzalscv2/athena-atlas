@@ -51,14 +51,12 @@ MdtCsmContainer::MdtCsmContainer(MdtCsm_Cache* cache)
 
 // Destructor.
 
-MdtCsmContainer::~MdtCsmContainer() {
-
-}
+MdtCsmContainer::~MdtCsmContainer() = default;
 
 //**********************************************************************
 /// Convert identifier to idhash
 unsigned int 
-MdtCsmContainer::idToHash(unsigned int id) const
+MdtCsmContainer::idToHash(unsigned int id) 
 {
     return (hashFcn()(Identifier(Identifier32(id))));
 }

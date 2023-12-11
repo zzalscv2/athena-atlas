@@ -40,7 +40,7 @@ public:
   enum {INVALID_ID = 0xFFFF};
 
 private:
-  bool getIsAtlas() const;
+  static bool getIsAtlas() ;
 
   /** total number of IDs */
   int m_size;

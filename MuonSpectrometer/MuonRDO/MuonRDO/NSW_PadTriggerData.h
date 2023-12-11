@@ -95,8 +95,8 @@ public:
 
 private:
 
-    std::tuple< uint32_vt, uint32_vt, uint32_vt >
-      filterNonNulls(uint32_vt bandids, uint32_vt phiids, uint32_vt bcids) const;
+    static std::tuple< uint32_vt, uint32_vt, uint32_vt >
+      filterNonNulls(uint32_vt bandids, uint32_vt phiids, uint32_vt bcids) ;
 
     uint32_t m_sourceid{0};
     uint32_t m_flags{0};

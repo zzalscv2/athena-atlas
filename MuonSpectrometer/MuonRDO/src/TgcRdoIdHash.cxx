@@ -77,7 +77,7 @@ TgcRdoIdHash::TgcRdoIdHash()
 }
 
 
-bool TgcRdoIdHash::getIsAtlas() const
+bool TgcRdoIdHash::getIsAtlas() 
 {
   const char* name = "TgcRdoIdHash::TgcRdoIdHash";
   ServiceHandle<ITGCcablingServerSvc> tgcCabGet ("TGCcablingServerSvc", name);

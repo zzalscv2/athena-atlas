@@ -33,7 +33,7 @@ public:
   typedef IdentifiableContainer<TgcL1Rdo> MyBase; 
   
   /// Convert identifier to idhash
-  unsigned int idToHash(unsigned int id) const;
+  static unsigned int idToHash(unsigned int id) ;
 
   // Insert a RDO
   void push_back(TgcL1RawData* rawData);

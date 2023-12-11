@@ -96,7 +96,7 @@ return m_size;
 
 }
 
-int MdtCsmIdHash::offset() const {
+int MdtCsmIdHash::offset() {
 
 return 0;
 

@@ -34,7 +34,7 @@ class MdtCsmIdHash  {
   ID identifier(int i) const;   
 
   /** return  offset */
-  int offset() const ;
+  static int offset() ;
 
  private:
   /** total number of IDs */
