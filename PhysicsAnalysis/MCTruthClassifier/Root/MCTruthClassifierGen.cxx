@@ -55,7 +55,7 @@ MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr thePart, I
   }
 
   int theBC = HepMC::barcode(thePart);
-  for (const auto entry : *truthParticleLinkVecReadHandle) {
+  for (const auto *const entry : *truthParticleLinkVecReadHandle) {
     if (entry->first.isValid() && entry->second.isValid() && entry->first.barcode() == theBC) {
       const xAOD::TruthParticle* truthParticle = *entry->second;
       if (!compareTruthParticles(thePart, truthParticle)) {
@@ -71,7 +71,7 @@ MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr thePart, I
 }
 //------------------------------------------------------------------------
 bool
-MCTruthClassifier::compareTruthParticles(HepMC::ConstGenParticlePtr genPart, const xAOD::TruthParticle* truthPart) const {
+MCTruthClassifier::compareTruthParticles(const HepMC::ConstGenParticlePtr& genPart, const xAOD::TruthParticle* truthPart) const {
   if (!genPart || !truthPart) return false;
   if (genPart->pdg_id() != truthPart->pdgId() || genPart->status() != truthPart->status() || HepMC::barcode(genPart) != truthPart->barcode()) {
     ATH_MSG_DEBUG("HepMC::GenParticle and xAOD::TruthParticle do not match");
@@ -253,7 +253,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
 }
 
 //---------------------------------------------------------------------------------
-ParticleOrigin MCTruthClassifier::defJetOrig(const std::set<const xAOD::TruthParticle*>& allJetMothers) const {
+ParticleOrigin MCTruthClassifier::defJetOrig(const std::set<const xAOD::TruthParticle*>& allJetMothers) {
   ParticleOrigin partOrig = NonDefined;
   std::set<const xAOD::TruthParticle*>::iterator it;
 
@@ -268,7 +268,7 @@ ParticleOrigin MCTruthClassifier::defJetOrig(const std::set<const xAOD::TruthPar
     if (MC::isW(pdg) && !(partOrig == top)) {
       partOrig = WBoson;
     }
-    if ((pdg < 6 || MC::isGluon(pdg)) && !(partOrig == top || partOrig == ZBoson || partOrig == WBoson)) {
+    if ((pdg < 6 || MC::isGluon(pdg)) && partOrig != top && partOrig != ZBoson && partOrig != WBoson) {
       partOrig = QCD;
     }
     if (MC::isHiggs(pdg)) {
@@ -386,7 +386,7 @@ bool MCTruthClassifier::fromHadron(const xAOD::TruthParticle* p,
   return fromHad;
 }
 //-------------------------------------------------------------------------------
-ParticleType MCTruthClassifier::defTypeOfElectron(ParticleOrigin EleOrig, bool isPrompt) const {
+ParticleType MCTruthClassifier::defTypeOfElectron(ParticleOrigin EleOrig, bool isPrompt) {
 
   if (EleOrig == NonDefined)
     return UnknownElectron;
@@ -776,7 +776,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   return convHadronTypeToOrig(pType, motherPDG);
 }
 //-------------------------------------------------------------------------------
-ParticleType MCTruthClassifier::defTypeOfMuon(ParticleOrigin MuOrig, bool isPrompt) const {
+ParticleType MCTruthClassifier::defTypeOfMuon(ParticleOrigin MuOrig, bool isPrompt) {
 
   if (MuOrig == NonDefined) return UnknownMuon;
 
@@ -1297,7 +1297,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
 
 //-------------------------------------------------------------------------------
 ParticleType
-MCTruthClassifier::defTypeOfPhoton(ParticleOrigin PhotOrig) const
+MCTruthClassifier::defTypeOfPhoton(ParticleOrigin PhotOrig) 
 {
   if (PhotOrig == NonDefined) return UnknownPhoton;
 
@@ -1470,8 +1470,8 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   //-- to find initial and final state raiation and underline photons
   //-- SUSY
   if (numOfParents == 1 && (abs(motherPDG) < 7 || motherPDG == 21) &&
-      !(numOfDaug == NumOfPht + NumOfPartons &&
-        (motherStatus == 62 || motherStatus == 52 || motherStatus == 21 || motherStatus == 22))) {
+      (numOfDaug != NumOfPht + NumOfPartons ||
+        (motherStatus != 62 && motherStatus != 52 && motherStatus != 21 && motherStatus != 22))) {
     for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ipOut++) {
       if (!partOriVert->outgoingParticle(ipOut)) continue;
       if (motherPDG != partOriVert->outgoingParticle(ipOut)->pdgId()) continue;
@@ -2113,7 +2113,7 @@ const xAOD::TruthParticle* MCTruthClassifier::getMother(const xAOD::TruthParticl
 
 //---------------------------------------------------------------------------------
 const xAOD::TruthVertex*
-MCTruthClassifier::findEndVert(const xAOD::TruthParticle* thePart) const
+MCTruthClassifier::findEndVert(const xAOD::TruthParticle* thePart) 
 {
   const xAOD::TruthVertex* EndVert = thePart->decayVtx();
   const xAOD::TruthVertex* pVert(nullptr);
@@ -2142,7 +2142,7 @@ MCTruthClassifier::findEndVert(const xAOD::TruthParticle* thePart) const
   return EndVert;
 }
 //---------------------------------------------------------------------------------
-ParticleOutCome MCTruthClassifier::defOutComeOfElectron(const xAOD::TruthParticle* thePart) const {
+ParticleOutCome MCTruthClassifier::defOutComeOfElectron(const xAOD::TruthParticle* thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
 
   const xAOD::TruthVertex* EndVert = findEndVert(thePart);
@@ -2170,7 +2170,7 @@ ParticleOutCome MCTruthClassifier::defOutComeOfElectron(const xAOD::TruthParticl
   return PartOutCome;
 }
 //---------------------------------------------------------------------------------
-ParticleOutCome MCTruthClassifier::defOutComeOfMuon(const xAOD::TruthParticle* thePart) const {
+ParticleOutCome MCTruthClassifier::defOutComeOfMuon(const xAOD::TruthParticle* thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
   const xAOD::TruthVertex* EndVert = findEndVert(thePart);
 
@@ -2261,7 +2261,7 @@ std::vector<const xAOD::TruthParticle*> MCTruthClassifier::findFinalStatePart(co
   return finalStatePart;
 }
 //---------------------------------------------------------------------------------
-ParticleOutCome MCTruthClassifier::defOutComeOfPhoton(const xAOD::TruthParticle* thePart) const {
+ParticleOutCome MCTruthClassifier::defOutComeOfPhoton(const xAOD::TruthParticle* thePart) {
 
   ParticleOutCome PartOutCome = UnknownOutCome;
   const xAOD::TruthVertex* EndVert = findEndVert(thePart);
