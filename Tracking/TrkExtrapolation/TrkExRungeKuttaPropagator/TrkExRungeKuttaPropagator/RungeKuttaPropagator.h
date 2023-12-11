@@ -370,7 +370,7 @@ public:
     double m_field[3];
     double m_direction;
     double m_step;
-    double m_maxPath = 10000;
+    double m_maxPath = 10000.;
     double m_dlt = .000200;
     double m_helixStep = 1;
     double m_straightStep = 0.01;
@@ -386,7 +386,7 @@ private:
   /////////////////////////////////////////////////////////////////////////////////
   // Private methods:
   /////////////////////////////////////////////////////////////////////////////////
-  void getInitializedCache(Cache& cache, const EventContext& ctx) const;
+  Cache getInitializedCache(const EventContext& ctx) const;
 
   /////////////////////////////////////////////////////////////////////////////////
   // Private data members:
