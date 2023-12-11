@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -274,9 +274,20 @@ void AthMemoryAuditor::report()
 		  // std::cerr << "INIT : nf " << nf << "\n";
 		  nn=nf->getNext();
 		  size_t   size    = nf->getSize();
+#if __GNUC__ >= 14
+                  // gcc14 warns about the use of redzone here...
+                  // when initialized with false, the constructor
+                  // deliberately does not initialize anything
+                  // (instead reinterpreting the computed pointer).
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 		  redzone *r = new ((void*)((uintptr_t)(nf)+deltaLow+size)) redzone( false );
 		  uint32_t stage   = r->getStage();
 		  uint32_t context = r->getAlgIndex();
+#if __GNUC__ >= 14
+# pragma GCC diagnostic pop
+#endif
 		  
 		  np=nf;
 		  nf=nn;
