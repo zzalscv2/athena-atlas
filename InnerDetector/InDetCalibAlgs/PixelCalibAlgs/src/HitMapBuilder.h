@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELCONDITIONSALGS_HITMAPBUILDER_H
@@ -8,21 +8,23 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "GaudiKernel/ITHistSvc.h"
 
 #include <string>
-#include <sstream>
 #include <vector>
-#include <fstream>
 #include <utility> // pair
 
-//yosuke class IInDetConditionsSvc;
-//yosuke class IPixelByteStreamErrorsSvc;
-class ITHistSvc;
+// EDM
+#include "InDetRawData/PixelRDO_Container.h"
+
+#include "TH1.h"
+#include "TH2.h"
+
+
 class PixelID;
-class TH2F;
-class TH1F;
-class TH1;
-//yosuke class ISpecialPixelMapSvc;
+
 
 namespace InDetDD{
   class PixelDetectorManager;
@@ -44,7 +46,10 @@ namespace InDetDD{
 class HitMapBuilder: public AthAlgorithm {
 
  public:
-  HitMapBuilder(const std::string& name, ISvcLocator* pSvcLocator);
+
+  //Delegate to base-class constructor
+  using AthAlgorithm::AthAlgorithm;
+
   ~HitMapBuilder();
 
   StatusCode initialize();
@@ -59,16 +64,16 @@ class HitMapBuilder: public AthAlgorithm {
   const std::string histoSuffix(const int bec, const int layer);
 
  private:
-  ServiceHandle <ITHistSvc> m_tHistSvc;
-  const InDetDD::PixelDetectorManager *m_pixman;
-  const PixelID *m_pixelID;
+  ServiceHandle <ITHistSvc> m_tHistSvc{this, "THistSvc", "THistSvc/THistSvc"};
+  SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey{this,"PixelRDOKey","PixelRDOs","StoreGate Key of Pixel RDOs"};
+
+  const InDetDD::PixelDetectorManager *m_pixman=nullptr;
+  const PixelID *m_pixelID=nullptr;
 
   // vector of modulename and vector(barrel/endcap, layer, phi, eta)
   std::vector< std::pair< std::string, std::vector<int> > > m_pixelMapping;
 
-  std::string m_pixelRDOKey;
-
-  double m_nEvents;
+  double m_nEvents=0;
   std::vector<double> m_nEventsLB; // Events per LB
   std::vector<double> m_nEventsLBCategory; // Events per certain LB for LB category
 
@@ -80,10 +85,9 @@ class HitMapBuilder: public AthAlgorithm {
   std::vector<std::unique_ptr<TH1F>> m_TOTdistributionsIBL2dLB;
   std::vector<std::unique_ptr<TH1F>> m_occupancyLB;
 
-  int m_hist_lbMax;   // max number of LB
-
-  int m_evt_lbMin; // lower limit for LB to be taken into account
-  int m_evt_lbMax; // upper limit for LB to be taken into account
+  Gaudi::Property<int> m_hist_lbMax{this,"nLBmax", 3001, "Maximum number of LB (for histograms binning)"};   // max number of LB
+  Gaudi::Property<int> m_evt_lbMin{this,"LBMin",0,"First lumi block to consider"}; // lower limit for LB to be taken into account
+  Gaudi::Property<int> m_evt_lbMax{this,"LBMax",-1,"Last lumi block to consider"}; // upper limit for LB to be taken into account
 
   int m_LBrange_max = -9999;
 

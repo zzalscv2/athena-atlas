@@ -50,3 +50,5 @@ atlas_add_test( PixelMapping_test
 )
 
 atlas_install_runtime ( share/HashVSdcsID.dat share/table_Run2.txt share/PixelMapping_Run2.dat ChargeCalibration/common/mapping.csv)
+
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
