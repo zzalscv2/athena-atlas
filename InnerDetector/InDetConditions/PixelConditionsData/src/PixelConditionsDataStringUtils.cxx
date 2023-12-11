@@ -13,6 +13,7 @@ namespace PixelConditionsData{
   getParameterString(const std::string& varName, const std::vector<std::string>& buffer){
     std::string sParam = "";
     std::string sMessage = "";
+
     for (size_t i=0; i<buffer.size(); i++) {
       if (buffer[i].find(varName.c_str())!=std::string::npos) {
         std::istringstream iss(buffer[i]);
@@ -20,7 +21,20 @@ namespace PixelConditionsData{
         bool chkParam = false;
         bool chkMessage = false;
         while (iss >> s) {
-          if (s.find("{")!=std::string::npos && s.find("}")!=std::string::npos) {
+          if (s.find("{{")!=std::string::npos) {
+            sParam += s.substr(2,s.length());
+            chkParam = true;
+          }
+          else if (s.find("},")!=std::string::npos) {
+            sParam += s.substr(0,s.length()-2);
+            sParam += ",";
+          }
+          else if (s.find("}}")!=std::string::npos) {
+            sParam += s.substr(0,s.length()-2);
+            chkParam = false;
+            chkMessage = true;
+          }
+          else if (s.find("{")!=std::string::npos && s.find("}")!=std::string::npos) {
             sParam += s.substr(1,s.length()-1);
           }
           else if (s.find("{")!=std::string::npos) {
@@ -32,10 +46,10 @@ namespace PixelConditionsData{
             chkParam = false;
             chkMessage = true;
           }
-          else if (chkParam) {
+          else if (chkParam==true) {
             sParam += s;
           }
-          else if (chkMessage) {
+          else if (chkMessage==true) {
             sMessage += " " + s;
           }
         }

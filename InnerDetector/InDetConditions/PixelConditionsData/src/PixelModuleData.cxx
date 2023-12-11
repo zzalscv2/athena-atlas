@@ -419,6 +419,60 @@ double PixelModuleData::getFEI4ToTSigma(int tot) const
   throw std::range_error(error.str());
 }
 
+void PixelModuleData::setBLayerTimingIndex(const std::vector<float> &BLayerTimingIndex) { m_BLayerTimingIndex = BLayerTimingIndex; }
+void PixelModuleData::setLayer1TimingIndex(const std::vector<float> &Layer1TimingIndex) { m_Layer1TimingIndex = Layer1TimingIndex; }
+void PixelModuleData::setLayer2TimingIndex(const std::vector<float> &Layer2TimingIndex) { m_Layer2TimingIndex = Layer2TimingIndex; }
+void PixelModuleData::setEndcap1TimingIndex(const std::vector<float> &Endcap1TimingIndex) { m_Endcap1TimingIndex = Endcap1TimingIndex; }
+void PixelModuleData::setEndcap2TimingIndex(const std::vector<float> &Endcap2TimingIndex) { m_Endcap2TimingIndex = Endcap2TimingIndex; }
+void PixelModuleData::setEndcap3TimingIndex(const std::vector<float> &Endcap3TimingIndex) { m_Endcap3TimingIndex = Endcap3TimingIndex; }
+
+void PixelModuleData::setBLayerTimingProbability(const std::vector<float> &BLayerTimingProbability) { m_BLayerTimingProbability = BLayerTimingProbability; }
+void PixelModuleData::setLayer1TimingProbability(const std::vector<float> &Layer1TimingProbability) { m_Layer1TimingProbability = Layer1TimingProbability; }
+void PixelModuleData::setLayer2TimingProbability(const std::vector<float> &Layer2TimingProbability) { m_Layer2TimingProbability = Layer2TimingProbability; }
+void PixelModuleData::setEndcap1TimingProbability(const std::vector<float> &Endcap1TimingProbability) { m_Endcap1TimingProbability = Endcap1TimingProbability; }
+void PixelModuleData::setEndcap2TimingProbability(const std::vector<float> &Endcap2TimingProbability) { m_Endcap2TimingProbability = Endcap2TimingProbability; }
+void PixelModuleData::setEndcap3TimingProbability(const std::vector<float> &Endcap3TimingProbability) { m_Endcap3TimingProbability = Endcap3TimingProbability; }
+
+std::vector<float> PixelModuleData::getTimingIndex(int barrel_ec, int layer) const {
+  if (barrel_ec==0) {
+    if (layer==1) { return m_BLayerTimingIndex; }   // b-layer
+    if (layer==2) { return m_Layer1TimingIndex; }   // Layer-1
+    if (layer==3) { return m_Layer2TimingIndex; }   // Layer-2
+  }
+  else if (std::abs(barrel_ec)==2) {
+    if (layer==0) { return m_Endcap1TimingIndex; }   // Endcap-1
+    if (layer==1) { return m_Endcap2TimingIndex; }   // Endcap-2
+    if (layer==2) { return m_Endcap3TimingIndex; }   // Endcap-3
+  }
+  return std::vector<float>(0.0);
+}
+
+std::vector<float> PixelModuleData::getTimingProbability(int barrel_ec, int layer, int eta) const {
+  std::vector<float> prob;
+  if (barrel_ec==0) {
+    if (layer==1) { prob=m_BLayerTimingProbability; }   // b-layer
+    if (layer==2) { prob=m_Layer1TimingProbability; }   // Layer-1
+    if (layer==3) { prob=m_Layer2TimingProbability; }   // Layer-2
+  }
+  else if (std::abs(barrel_ec)==2) {
+    if (layer==0) { prob=m_Endcap1TimingProbability; }   // Endcap-1
+    if (layer==1) { prob=m_Endcap2TimingProbability; }   // Endcap-2
+    if (layer==2) { prob=m_Endcap3TimingProbability; }   // Endcap-3
+  }
+  int nCalibrationPoints = barrel_ec==0 ? prob.size()/7 : prob.size();
+  if (nCalibrationPoints!=(int)getTimingIndex(barrel_ec,layer).size()) {
+    std::stringstream error;
+    error << "PixelModuleData::getTimingProbability: array size(" << nCalibrationPoints << ") mismatch with index array(" << getTimingIndex(barrel_ec,layer).size() << ")";
+    throw std::range_error(error.str());
+  }
+
+  std::vector<float> etaprob;
+  for (int i=0; i<nCalibrationPoints; i++) {
+    etaprob.push_back(prob.at(i+nCalibrationPoints*std::abs(eta)));
+  }
+  return etaprob;
+}
+
 // Charge calibration parameters
 void PixelModuleData::setDefaultQ2TotA(float paramA) { m_paramA = paramA; }
 void PixelModuleData::setDefaultQ2TotE(float paramE) { m_paramE = paramE; }

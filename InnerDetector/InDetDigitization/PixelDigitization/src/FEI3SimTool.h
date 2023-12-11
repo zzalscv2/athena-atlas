@@ -38,12 +38,9 @@ private:
 
   int relativeBunch2009(const double threshold, const double intimethreshold, const SiTotalCharge& totalCharge,
                         CLHEP::HepRandomEngine* rndmEngine) const;
-  int relativeBunch2015(const SiTotalCharge& totalCharge, int barrel_ec, int layer_disk, int moduleID,
-                        CLHEP::HepRandomEngine* rndmEngine) const;
-  int relativeBunch2018(const SiTotalCharge& totalCharge, int barrel_ec, int layer_disk, int moduleID,
-                        CLHEP::HepRandomEngine* rndmEngine) const;
-  int relativeBunch2022(const SiTotalCharge& totalCharge, const double tot, int barrel_ec, int layer_disk, int moduleID, 
-                        CLHEP::HepRandomEngine* rndmEngine) const;
+
+  double getProbability(const std::vector<float> &bounds, const std::vector<float> &probs, const double &val) const;
+
 };
 
 #endif // PIXELDIGITIZATION_FEI3SimTool_H
