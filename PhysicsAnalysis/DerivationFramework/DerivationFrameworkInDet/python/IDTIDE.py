@@ -208,8 +208,8 @@ def DFITkTSOSKernelCfg(flags, name='DFITkTSOSKernel'):
     # ====================================================================
     tsos_augmentationTools = []
 
-    from DerivationFrameworkInDet.InDetToolsConfig import DFITkTSOSKernelCfg
-    DFTSOS = acc.getPrimaryAndMerge(DFITkTSOSKernelCfg(flags))
+    from DerivationFrameworkInDet.InDetToolsConfig import DFITkTrackStateOnSurfaceDecoratorCfg
+    DFTSOS = acc.getPrimaryAndMerge(DFITkTrackStateOnSurfaceDecoratorCfg(flags))
     tsos_augmentationTools.append(DFTSOS)
 
     # shared between IDTIDE and IDTRKVALID

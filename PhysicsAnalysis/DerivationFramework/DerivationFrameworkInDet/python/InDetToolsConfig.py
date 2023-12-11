@@ -263,7 +263,7 @@ def ITkTSOS_CommonKernelCfg(flags, name="ITkTSOS_CommonKernel"):
         name, AugmentationTools=[ITkTrackStateOnSurfaceDecorator]))
     return acc
 
-def DFITkTSOSKernelCfg(
+def DFITkTrackStateOnSurfaceDecoratorCfg(
         flags, name="DFITkTrackStateOnSurfaceDecorator", **kwargs):
     kwargs.setdefault("StorePixel", flags.Detector.EnableITkPixel)
     kwargs.setdefault("StoreSCT", flags.Detector.EnableITkStrip)
