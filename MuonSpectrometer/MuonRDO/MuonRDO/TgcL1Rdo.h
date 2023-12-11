@@ -247,8 +247,8 @@ private:
     uint16_t m_triggerType  = 0U;
 
     // BCID and L1ID on ROD
-    uint16_t m_bcId ;
-    uint16_t m_l1Id ;
+    uint16_t m_bcId = 0U ;
+    uint16_t m_l1Id = 0U ;
 
     struct Errors      m_errors{};
     struct SRodStatus   m_srodStatus{};

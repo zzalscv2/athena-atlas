@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAM_CSCRAWDATA_H
@@ -18,7 +18,7 @@ n sampling ADC data + the address (Identifier of strip == use hash id)
 @author Ketevi A. Assamagan
         Dec 24 2003, BNL
 */
-class CscRawData {
+class CscRawData final {
 
  private:
 
@@ -28,7 +28,7 @@ class CscRawData {
   std::vector<uint16_t> m_amps;
 
   /** online identifier of the first strip in the ROD cluster */
-  uint32_t m_address; 
+  uint32_t m_address;
 
   /** online identifier of the collection in which this strip is */
   uint16_t m_id;
@@ -46,16 +46,16 @@ class CscRawData {
   bool m_isTimeComputed;
 
   /** offline hash identifier of the first strip in the online cluster */
-  uint32_t m_hashId; 
-  
+  uint32_t m_hashId;
+
  public:
 
   /** default constructor */
-  CscRawData () : m_address(0), m_id(0), m_time(0), m_rpuID(0), 
-m_width(0), m_isTimeComputed(false), m_hashId(0) {}
+  CscRawData () : m_address(0), m_id(0), m_time(0), m_rpuID(0),
+  m_width(0), m_isTimeComputed(false), m_hashId(0) {}
 
   /** constructor for a single strip */
-  CscRawData (const std::vector<uint16_t>& p_amp, uint32_t address, uint16_t id) : 
+  CscRawData (const std::vector<uint16_t>& p_amp, uint32_t address, uint16_t id) :
     m_amps (p_amp),
     m_address(address),
     m_id(id),
@@ -68,8 +68,8 @@ m_width(0), m_isTimeComputed(false), m_hashId(0) {}
   }
 
   /** single strip constructor with SPU information */
-  CscRawData (const std::vector<uint16_t>& p_amp, uint32_t address, 
-	      uint16_t id, uint16_t rpuID) : 
+  CscRawData (const std::vector<uint16_t>& p_amp, uint32_t address,
+	      uint16_t id, uint16_t rpuID) :
     m_amps (p_amp),
     m_address(address),
     m_id(id),
@@ -82,8 +82,8 @@ m_width(0), m_isTimeComputed(false), m_hashId(0) {}
   }
 
   /** cluster of strip constructor with cluster width and SPU identifier */
-  CscRawData (const std::vector<uint16_t>& p_amp, uint32_t address, uint16_t id, 
-	      uint16_t rpuID, uint16_t width) : 
+  CscRawData (const std::vector<uint16_t>& p_amp, uint32_t address, uint16_t id,
+	      uint16_t rpuID, uint16_t width) :
     m_amps (p_amp),
     m_address(address),
     m_id(id),
@@ -96,8 +96,8 @@ m_width(0), m_isTimeComputed(false), m_hashId(0) {}
   }
 
   /** full constructor for cluster with timing information */
-  CscRawData (const std::vector<uint16_t>& p_amp, uint32_t address, uint16_t id, 
-              uint16_t time, uint16_t rpuID, uint16_t width, uint32_t hashId) : 
+  CscRawData (const std::vector<uint16_t>& p_amp, uint32_t address, uint16_t id,
+              uint16_t time, uint16_t rpuID, uint16_t width, uint32_t hashId) :
     m_amps (p_amp),
     m_address(address),
     m_id(id),
@@ -108,8 +108,11 @@ m_width(0), m_isTimeComputed(false), m_hashId(0) {}
     m_hashId(hashId)
   {
   }
-
-  virtual ~CscRawData() {}
+  CscRawData(const CscRawData&) = default;
+  CscRawData(CscRawData&&) = default;
+  CscRawData& operator=(const CscRawData&) = default;
+  CscRawData& operator=(CscRawData&&) = default;
+  ~CscRawData() {}
 
   /** construction methods */
   void setRpuID  (uint16_t rpuID) { m_rpuID = rpuID; }
@@ -120,10 +123,10 @@ m_width(0), m_isTimeComputed(false), m_hashId(0) {}
 
   /** data access methods */
   uint16_t rpuID() const { return m_rpuID; }
-  uint16_t identify() const { return m_id; } 
+  uint16_t identify() const { return m_id; }
   uint16_t time() const { return m_time; }
   uint16_t width() const { return m_width; }
-  bool isTimeComputed() const { return m_isTimeComputed; } 
+  bool isTimeComputed() const { return m_isTimeComputed; }
   const std::vector<uint16_t>& samples() const { return m_amps; }
   uint32_t address() const { return m_address; }
   uint32_t hashId() const { return m_hashId; }
@@ -135,7 +138,7 @@ m_width(0), m_isTimeComputed(false), m_hashId(0) {}
 /**Overload of << operator for MsgStream for debug output*/
 MsgStream& operator << ( MsgStream& sl, const CscRawData& coll);
 
-/**Overload of << operator for std::ostream for debug output*/ 
+/**Overload of << operator for std::ostream for debug output*/
 std::ostream& operator << ( std::ostream& sl, const CscRawData& coll);
 
 

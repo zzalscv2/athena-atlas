@@ -37,7 +37,7 @@ Muon::NSW_TrigRawData::NSW_TrigRawData(const Muon::NSW_TrigRawData &trd, const b
   m_sectorId = trd.m_sectorId;
   m_sectorSide = trd.m_sectorSide;
   m_bcId = trd.m_bcId;
-  for (const auto rawSegment : trd) {
+  for (const auto *const rawSegment : trd) {
     Muon::NSW_TrigRawDataSegment* trigRawDataSegment = new Muon::NSW_TrigRawDataSegment(*rawSegment);
     trigRawDataSegment->setPhiRes(phiResBit); // Although the format being the same, this is different for sTGC(true) and MM(false)
     this->push_back(trigRawDataSegment);

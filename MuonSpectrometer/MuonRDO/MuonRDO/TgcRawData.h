@@ -19,7 +19,7 @@ class MsgStream;
 
   @ author Tadashi Maeno
 */
-class TgcRawData
+class TgcRawData final
 {
 public:
     friend class TgcRawDataCnv_p1;
@@ -128,7 +128,7 @@ public:
                int16_t delta,
                uint16_t inner);
 
-    // Sector logic : 14 -> could be ambiguous with NSW 
+    // Sector logic : 14 -> could be ambiguous with NSW
     TgcRawData(uint16_t bcTag,
                uint16_t subDetectorId,
                uint16_t rodId,
@@ -200,7 +200,7 @@ public:
                uint16_t ei,
                uint16_t fi,
                uint16_t cid); // chamber ID
-    
+
     // TMDB : 9
     TgcRawData(uint16_t bcTag,
                uint16_t subDetectorId,
@@ -225,11 +225,13 @@ public:
     static constexpr uint32_t RPC_CAND_BIT = 0x3;
     static constexpr uint32_t RPC_BCID_BITSHIFT = 4;
     static constexpr uint32_t RPC_BCID_BIT = 0xF;
-    
+
+    TgcRawData(const TgcRawData&) = default;
+    TgcRawData(TgcRawData&&) = default;
+    TgcRawData& operator=(const TgcRawData&) = default;
+    TgcRawData& operator=(TgcRawData&&) = default;
     // Destructor
-    virtual ~TgcRawData()
-    {
-    }
+    ~TgcRawData() = default;
 
     // return Information Type Hit:Coincidence
     bool isCoincidence() const

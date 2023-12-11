@@ -34,7 +34,7 @@ public:
   void push_back(CscRawData* rawData);
 
   /// Convert identifier to idhash
-  unsigned int idToHash(unsigned int id) const;
+  static unsigned int idToHash(unsigned int id) ;
 
   /// class ID
   static const CLID& classID(); 

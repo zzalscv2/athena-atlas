@@ -22,9 +22,7 @@ Muon::STGC_RawDataContainer::STGC_RawDataContainer(STGC_RawDataCollection_Cache*
 
 
 // Destructor.
-Muon::STGC_RawDataContainer::~STGC_RawDataContainer() {
-
-}
+Muon::STGC_RawDataContainer::~STGC_RawDataContainer() = default;
 
 const CLID& Muon::STGC_RawDataContainer::classID()    
 {
@@ -35,9 +33,9 @@ const CLID& Muon::STGC_RawDataContainer::classID()
 // Output stream.
 std::ostream& operator<<(std::ostream& lhs, const Muon::STGC_RawDataContainer& rhs) {
   lhs << "STGC_RawDataContainer has " << rhs.size() << " collections:" << std::endl;
-  for (auto col : rhs ){
+  for (const auto *col : rhs ){
     lhs << "Collection with hash ["<<col->identifyHash()<<"] : " << std::endl;
-    for (auto rdo : *col ){
+    for (const auto *rdo : *col ){
       lhs << *rdo;
     }
   }

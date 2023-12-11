@@ -86,7 +86,7 @@ std::string NSW_PadTriggerData::string() const {
 }
 
 std::tuple< uint32_vt, uint32_vt, uint32_vt >
-NSW_PadTriggerData::filterNonNulls(uint32_vt bandids, uint32_vt phiids, uint32_vt bcids) const {
+NSW_PadTriggerData::filterNonNulls(uint32_vt bandids, uint32_vt phiids, uint32_vt bcids) {
   uint32_vt bandidsFiltered{}, phiidsFiltered{}, bcidsFiltered{};
   for (size_t it = 0; it < bandids.size(); ++it) {
     if (bandids.at(it) == NULL_BANDID and phiids.at(it) == NULL_PHIID) {
