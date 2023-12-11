@@ -258,7 +258,7 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
       std::vector<int> photon_uniqueIDs(50);
       photon_uniqueIDs.clear();
       for (const auto& part : listOfParticlesToDress) {
-        //loop over fastjet pseudojets and associate one with this particle by barcode
+        //loop over fastjet pseudojets and associate one with this particle
         bool found=false;
         auto pjItr=sorted_jets.begin();
         while(!found && pjItr!=sorted_jets.end()) {

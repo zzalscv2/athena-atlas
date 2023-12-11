@@ -10,7 +10,7 @@
 // Uses thinning service to remove unwanted xAOD truth particles that
 // can't be dropped earlier in the simulation chain.
 // Not intended for use in derivations!
-// - Keep all truth particles with barcode <200 000
+// - Keep all truth generator particles 
 // - Keep all truth particles associated with reco photons, electrons
 //   and muons, and their ancestors.
 // - Drop any vertices that, after the above thinning, have neither
