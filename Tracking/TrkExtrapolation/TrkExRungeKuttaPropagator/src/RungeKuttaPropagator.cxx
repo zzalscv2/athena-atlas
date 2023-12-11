@@ -38,6 +38,7 @@ namespace {
 /////////////////////////////////////////////////////////////////////////////////
 
 using Cache = Trk::RungeKuttaPropagator::Cache;
+
 void
 getField(Cache& cache, const double* ATH_RESTRICT R, double* ATH_RESTRICT H)
 {
@@ -1453,11 +1454,55 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
                                      const TrackingVolume*) const
 {
   double J[25];
-  Cache cache{};
-  getInitializedCache(cache, ctx);
-
-  cache.m_maxPath = 10000.;
+  Cache cache = getInitializedCache(ctx);
   return propagateRungeKutta(cache, true, Tp, Su, D, B, M, J, returnCurv);
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// Main function for MultiComponentState propagation used by the GSF
+/////////////////////////////////////////////////////////////////////////////////
+Trk::MultiComponentState
+Trk::RungeKuttaPropagator::multiStatePropagate(
+  const ::EventContext& ctx,
+  const Trk::MultiComponentState& multiComponentState,
+  const Trk::Surface& surface,
+  const Trk::MagneticFieldProperties& fieldProperties,
+  const Trk::PropDirection direction,
+  const Trk::BoundaryCheck& boundaryCheck,
+  const Trk::ParticleHypothesis) const
+{
+  Cache cache = getInitializedCache(ctx);
+
+  Trk::MultiComponentState propagatedState{};
+  propagatedState.reserve(multiComponentState.size());
+  double sumw(0);  // sum of the weights of the propagated parameters
+
+  Trk::MultiComponentState::const_iterator component =
+      multiComponentState.begin();
+  for (; component != multiComponentState.end(); ++component) {
+    const Trk::TrackParameters* currentParameters = component->first.get();
+    if (!currentParameters) {
+      continue;
+    }
+    double J[25];
+    auto propagatedParameters =
+        propagateRungeKutta(cache, true, *currentParameters, surface, direction,
+                            boundaryCheck, fieldProperties, J, false);
+
+    if (!propagatedParameters) {
+      continue;
+    }
+    sumw += component->second;
+    // Propagation does not affect the weightings of the states
+    propagatedState.emplace_back(std::move(propagatedParameters),
+                                 component->second);
+  }
+  // Protect low weight propagation
+  constexpr double minPropWeight = (1./12.);
+  if (sumw < minPropWeight) {
+    propagatedState.clear();
+  }
+  return propagatedState;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1478,9 +1523,7 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
                                      const TrackingVolume*) const
 {
   double J[25];
-  Cache cache{};
-  getInitializedCache(cache, ctx);
-
+  Cache cache = getInitializedCache(ctx);
   pathLength < 0. ? cache.m_maxPath = 10000. : cache.m_maxPath = pathLength;
   auto Tpn = propagateRungeKutta(cache, true, Tp, Su, D, B, M, J, returnCurv);
   pathLength = cache.m_step;
@@ -1514,9 +1557,7 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
                                      const TrackingVolume*) const
 {
 
-  Cache cache{};
-  getInitializedCache(cache, ctx);
-
+  Cache cache = getInitializedCache(ctx);
   Sol.erase(Sol.begin(), Sol.end());
   Path = 0.;
   if (DS.empty())
@@ -1706,60 +1747,8 @@ Trk::RungeKuttaPropagator::propagateParameters(const ::EventContext& ctx,
                                                const TrackingVolume*) const
 {
   double J[25];
-  Cache cache{};
-  getInitializedCache(cache, ctx);
-
-  cache.m_maxPath = 10000.;
+  Cache cache = getInitializedCache(ctx);
   return propagateRungeKutta(cache, false, Tp, Su, D, B, M, J, returnCurv);
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-// Main function for MultiComponentState propagation used by the GSF
-/////////////////////////////////////////////////////////////////////////////////
-Trk::MultiComponentState
-Trk::RungeKuttaPropagator::multiStatePropagate(
-  const ::EventContext& ctx,
-  const Trk::MultiComponentState& multiComponentState,
-  const Trk::Surface& surface,
-  const Trk::MagneticFieldProperties& fieldProperties,
-  const Trk::PropDirection direction,
-  const Trk::BoundaryCheck& boundaryCheck,
-  const Trk::ParticleHypothesis particleHypothesis) const
-{
-
-  Trk::MultiComponentState propagatedState{};
-  propagatedState.reserve(multiComponentState.size());
-  Trk::MultiComponentState::const_iterator component =
-    multiComponentState.begin();
-  double sumw(0); // sum of the weights of the propagated parameters
-  for (; component != multiComponentState.end(); ++component) {
-    const Trk::TrackParameters* currentParameters = component->first.get();
-    if (!currentParameters) {
-      continue;
-    }
-    auto propagatedParameters = propagate(ctx,
-                                          *currentParameters,
-                                          surface,
-                                          direction,
-                                          boundaryCheck,
-                                          fieldProperties,
-                                          particleHypothesis,
-                                          false,
-                                          nullptr);
-    if (!propagatedParameters) {
-      continue;
-    }
-    sumw += component->second;
-    // Propagation does not affect the weightings of the states
-    propagatedState.emplace_back(std::move(propagatedParameters),
-                                 component->second);
-  }
-  // Protect low weight propagation
-  constexpr double minPropWeight = (1./12.);
-  if (sumw < minPropWeight) {
-    propagatedState.clear();
-  }
-  return propagatedState;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1779,10 +1768,7 @@ Trk::RungeKuttaPropagator::propagateParameters(const ::EventContext& ctx,
                                                const TrackingVolume*) const
 {
   double J[25];
-  Cache cache{};
-  getInitializedCache(cache, ctx);
-
-  cache.m_maxPath = 10000.;
+  Cache cache = getInitializedCache(ctx);
   auto Tpn{ propagateRungeKutta(cache, true, Tp, Su, D, B, M, J, returnCurv) };
 
   if (Tpn) {
@@ -1815,8 +1801,7 @@ Trk::RungeKuttaPropagator::globalPositions(const ::EventContext& ctx,
   double P[45];
   if (!Trk::RungeKuttaUtils::transformLocalToGlobal(false, Tp, P))
     return;
-  Cache cache{};
-  getInitializedCache(cache, ctx);
+  Cache cache = getInitializedCache(ctx);
 
   cache.m_direction = std::abs(mS);
   if (mS > 0.)
@@ -1838,12 +1823,10 @@ Trk::RungeKuttaPropagator::intersect(const ::EventContext& ctx,
 {
   bool nJ = false;
   const Trk::Surface* su = &Su;
-  Cache cache{};
-  getInitializedCache(cache, ctx);
-
+  Cache cache = getInitializedCache(ctx);
   cache.m_direction = 0.;
-
   cache.m_needgradient = false;
+
   M.magneticFieldMode() == Trk::FastField ? cache.m_solenoid = true : cache.m_solenoid = false;
   M.magneticFieldMode() != Trk::NoField ? cache.m_mcondition = true : cache.m_mcondition = false;
 
@@ -1875,10 +1858,7 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
                                      ParticleHypothesis) const
 {
   double S = 0;
-  Cache cache{};
-  getInitializedCache(cache, ctx);
-
-  cache.m_maxPath = 10000.;
+  Cache cache = getInitializedCache(ctx);
   return propagateRungeKutta(cache, true, Ta, Su, Tb, D, M, S);
 }
 
@@ -1896,10 +1876,7 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
                                      double& S,
                                      ParticleHypothesis) const
 {
-  Cache cache{};
-  getInitializedCache(cache, ctx);
-
-  cache.m_maxPath = 10000.;
+  Cache cache = getInitializedCache(ctx);
   return propagateRungeKutta(cache, true, Ta, Su, Tb, D, M, S);
 }
 
@@ -1917,10 +1894,7 @@ Trk::RungeKuttaPropagator::propagateParameters(const ::EventContext& ctx,
                                                ParticleHypothesis) const
 {
   double S = 0;
-  Cache cache{};
-  getInitializedCache(cache, ctx);
-
-  cache.m_maxPath = 10000.;
+  Cache cache = getInitializedCache(ctx);
   return propagateRungeKutta(cache, false, Ta, Su, Tb, D, M, S);
 }
 
@@ -1938,10 +1912,7 @@ Trk::RungeKuttaPropagator::propagateParameters(const ::EventContext& ctx,
                                                double& S,
                                                ParticleHypothesis) const
 {
-  Cache cache{};
-  getInitializedCache(cache, ctx);
-
-  cache.m_maxPath = 10000.;
+  Cache cache = getInitializedCache(ctx);
   return propagateRungeKutta(cache, false, Ta, Su, Tb, D, M, S);
 }
 
@@ -1956,21 +1927,21 @@ Trk::RungeKuttaPropagator::globalPositions(const ::EventContext& ctx,
                                            const Trk::MagneticFieldProperties& M,
                                            ParticleHypothesis) const
 {
-  Cache cache{};
-  getInitializedCache(cache, ctx);
+  Cache cache = getInitializedCache(ctx);
   globalPositionsImpl(cache, Tp, SU, GP, M);
 }
 
-void
-Trk::RungeKuttaPropagator::getInitializedCache(Cache& cache, const EventContext& ctx) const
+Cache
+Trk::RungeKuttaPropagator::getInitializedCache(const EventContext& ctx) const
 {
-  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{ m_fieldCondObjInputKey, ctx };
-  const AtlasFieldCacheCondObj* fieldCondObj{ *readHandle };
+  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCondObjInputKey,
+                                                        ctx};
+  const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
+  Cache cache{};
   fieldCondObj->getInitializedCache(cache.m_fieldCache);
   cache.m_dlt = m_dlt;
   cache.m_helixStep = m_helixStep;
   cache.m_straightStep = m_straightStep;
   cache.m_usegradient = m_usegradient;
-
+  return cache;
 }
-
