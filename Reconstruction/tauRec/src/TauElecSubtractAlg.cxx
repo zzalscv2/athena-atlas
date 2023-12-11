@@ -95,7 +95,7 @@ StatusCode TauElecSubtractAlg::execute (const EventContext& ctx) const
         );
         if (where == tracks_to_remove.cend())
         {
-            auto new_track = new xAOD::TrackParticle();
+            auto *new_track = new xAOD::TrackParticle();
             tracksOutputContainer->push_back(new_track);
             *new_track = *old_track;
             auto link = ElementLink< xAOD::TrackParticleContainer >( *tracksInput, old_track->index() );
@@ -110,7 +110,7 @@ StatusCode TauElecSubtractAlg::execute (const EventContext& ctx) const
             [&](const xAOD::CaloCluster* target){return (target == old_cluster);}
         );
         if (where == clusters_to_remove.cend()){
-            auto new_cluster = new xAOD::CaloCluster();
+            auto *new_cluster = new xAOD::CaloCluster();
             clustersOutputContainer->push_back(new_cluster);
             *new_cluster = *old_cluster;
             auto link = ElementLink< xAOD::CaloClusterContainer >( *clustersInput, old_cluster->index() );
@@ -123,7 +123,7 @@ StatusCode TauElecSubtractAlg::execute (const EventContext& ctx) const
     xAOD::CaloClusterContainer* removedClustersOutputCont = removedClustersOutputHandle.ptr();
     removedClustersOutputCont->reserve(clusters_to_remove.size());
     for (const xAOD::CaloCluster* cls : clusters_to_remove){
-        auto new_removed_cluster = new xAOD::CaloCluster();
+        auto *new_removed_cluster = new xAOD::CaloCluster();
         *new_removed_cluster = *cls;
         removedClustersOutputCont->push_back(new_removed_cluster);
     }
@@ -131,7 +131,7 @@ StatusCode TauElecSubtractAlg::execute (const EventContext& ctx) const
     xAOD::TrackParticleContainer* removedTracksOutputCont = removedTracksOutputHandle.ptr();
     removedTracksOutputCont->reserve(tracks_to_remove.size());
     for (const xAOD::TrackParticle* trk : tracks_to_remove){
-        auto new_removed_track = new xAOD::TrackParticle();
+        auto *new_removed_track = new xAOD::TrackParticle();
         *new_removed_track = *trk;
         removedTracksOutputCont->push_back(new_removed_track);
     }

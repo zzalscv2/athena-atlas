@@ -78,7 +78,7 @@ StatusCode TauAODRunnerAlg::execute (const EventContext& ctx) const {
     acc_ori_tau_link(*newTau) = link_to_ori_tau;
     //clear the tautrack links to allow relinking.
     newTau->clearTauTrackLinks();
-    for (auto tauTrk : tau->allTracks()) {
+    for (const auto *tauTrk : tau->allTracks()) {
       xAOD::TauTrack *newTauTrk = new xAOD::TauTrack();
       // deep copy the tau track
       newTauTrkCon->push_back(newTauTrk);
@@ -171,7 +171,7 @@ StatusCode TauAODRunnerAlg::execute (const EventContext& ctx) const {
 
 
 //helper 
-bool TauAODRunnerAlg::isTauModified(const xAOD::TauJet* newtau) const {
+bool TauAODRunnerAlg::isTauModified(const xAOD::TauJet* newtau) {
   static const SG::AuxElement::ConstAccessor<char> acc_modified("ModifiedInAOD");
   return acc_modified(*newtau);
 }
