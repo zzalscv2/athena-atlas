@@ -200,8 +200,6 @@ private:
   static bool isHardScatVrtx(const xAOD::TruthVertex*);
   //
   std::vector<const xAOD::TruthParticle*> findFinalStatePart(const xAOD::TruthVertex*) const;
-  //
-  static double partCharge(const xAOD::TruthParticle*);
 
   /* Private functions */
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE) /*Athena Only*/
