@@ -112,7 +112,7 @@ Trk::InDetPrimaryConversionSelector::selectGenSignal (const McEventCollection* S
             auto inParticle=*ItinParticle;
 #endif
 	    ATH_MSG_DEBUG(" --> checking morther: " << inParticle );
-	    if ( std::abs(inParticle->pdg_id()) == 22 || std::abs(inParticle->pdg_id()) == 11 ){
+	    if ( MC::isPhoton(inParticle) || MC::isElectron(inParticle) ){
 	      if (std::fabs(particle->momentum().perp()) >  m_minPt  &&  std::fabs(particle->momentum().pseudoRapidity()) < m_maxEta ) {
 		genSignal->push_back(particle);
 		ATH_MSG_DEBUG ("Selected this electron/positron!");
