@@ -12,12 +12,16 @@
 // Athena
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "AthenaKernel/RNGWrapper.h"
+// Barcode
+#include "BarcodeInterfaces/IBarcodeSvc.h"
+
 #include "CxxUtils/checker_macros.h"
 
 // ISF
 #include "ISF_Event/ISFParticle.h"
 #include "ISF_Interfaces/BaseSimulatorTool.h"
 #include "ISF_Interfaces/IParticleFilter.h"
+#include "ISF_Interfaces/ITruthSvc.h"
 
 // ACTS
 #include "Acts/Utilities/UnitVectors.hpp"
@@ -98,23 +102,20 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
     double pathLimit = 100.0; // lenght in cm
     bool   loopProtection = true;
     double loopFraction = 0.5;
-    double targetTolerance = 0.0001;
+    double stepTolerance = 0.0001;
     double stepSizeCutOff = 0.;
     // parameters for densEnv propagator options
     double meanEnergyLoss = true;
     bool   includeGgradient = true;
     double momentumCutOff = 0.;
 
-    /// Local logger for debug output.
-    std::shared_ptr<const Acts::Logger> localLogger = nullptr;
+  /// Logger for debug output.
+  std::unique_ptr<const Acts::Logger> logger;
 
     /// Alternatively construct the simulator with an external logger.
     SingleParticleSimulation(propagator_t &&propagator_,
-                            std::shared_ptr<const Acts::Logger> localLogger_)
-        : propagator(propagator_), localLogger(localLogger_) {}
-
-    /// Provide access to the local logger instance, e.g. for logging macros.
-    const Acts::Logger &logger() const { return *localLogger; }
+                           std::unique_ptr<const Acts::Logger> _logger)
+      : propagator(propagator_), logger(std::move(_logger)) {}
 
     /// Simulate a single particle without secondaries.
     ///
@@ -130,8 +131,6 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
         const Acts::GeometryContext &geoCtx,
         const Acts::MagneticFieldContext &magCtx, generator_t &generator,
         const ActsFatras::Particle &particle) const {
-      assert(localLogger and "Missing local logger");
-      ACTS_VERBOSE("Using ActsFatrasSimTool simulate()");
       // propagator-related additional types
       using SteppingLogger = Acts::detail::SteppingLogger;
       using Actor = ActsFatras::detail::SimulationActor<generator_t, decay_t, interactions_t, hit_surface_selector_t>;
@@ -158,6 +157,14 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
       options.loopProtection = loopProtection;
       options.maxStepSize = maxStepSize * Acts::UnitConstants::m;
       options.maxSteps = maxStep;
+      options.maxRungeKuttaStepTrials = maxRungeKuttaStepTrials;
+      options.loopFraction = loopFraction;
+      options.stepTolerance = stepTolerance;
+      options.stepSizeCutOff = stepSizeCutOff;
+      // parameters for densEnv propagator options
+      options.meanEnergyLoss = meanEnergyLoss;
+      options.includeGgradient = includeGgradient;
+      options.momentumCutOff = momentumCutOff;
 
       auto result = propagator.propagate(startPoint, options);
       if (not result.ok()) {
@@ -241,6 +248,9 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   Gaudi::Property<std::string> m_randomEngineName{this, "RandomEngineName",
     "RandomEngineName", "Name of random number stream"};
 
+  // barcode
+  ServiceHandle<Barcode::IBarcodeSvc>  m_barcodeSvc{this, "BarcodeSvc", "BarcodeSvc"};
+
   // Tracking geometry
   ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
@@ -255,6 +265,8 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   // ISF Tools
   PublicToolHandle<ISF::IParticleFilter> m_particleFilter{
       this, "ParticleFilter", "", "Particle filter kinematic cuts, etc."};
+
+  ServiceHandle<ISF::ITruthSvc> m_truthRecordSvc{this,"TruthRecordService", "ISF_TruthRecordSvc", "ISF Particle Truth Svc"};
 
   Gaudi::Property<double> m_interact_minPt{this, "Interact_MinPt", 50.0,
       "Min pT of the interactions (MeV)"};
