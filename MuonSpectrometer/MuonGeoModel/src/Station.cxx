@@ -252,7 +252,7 @@ namespace MuonGM {
                 } else {
                     double num = (m_components[i]->dx2 - m_components[i]->dx1) / 2.;
                     double tantheta = num != 0 ? num / m_components[i]->dy : 0;
-                    auto sc = dynamic_cast<StandardComponent*>(m_components[i].get());
+                    auto *sc = dynamic_cast<StandardComponent*>(m_components[i].get());
                     if (not sc){
                       ATH_MSG_ERROR("Dynamic cast to StandardComponent failed at line "<<__LINE__);
                       continue;
@@ -299,7 +299,7 @@ namespace MuonGM {
                 else {
                     double num = (m_components[i]->dx2 - m_components[i]->dx1) / 2.;
                     double tantheta = num != 0 ? num / m_components[i]->dy : 0;
-                    auto sc = dynamic_cast<StandardComponent*>(m_components[i].get());
+                    auto *sc = dynamic_cast<StandardComponent*>(m_components[i].get());
                     if (not sc){
                       ATH_MSG_ERROR("Dynamic cast to StandardComponent failed at line "<<__LINE__);
                       continue;

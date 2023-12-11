@@ -23,7 +23,7 @@ namespace MuonGM {
 
     SimpleVolAction::SimpleVolAction() : GeoVolumeAction(GeoVolumeAction::TOP_DOWN) {}
 
-    SimpleVolAction::~SimpleVolAction() {}
+    SimpleVolAction::~SimpleVolAction() = default;
 
     void SimpleVolAction::handleVPhysVol(const GeoVPhysVol *pv) {
         MsgStream log(Athena::getMessageSvc(), "MuGM::SimpleVolAction");

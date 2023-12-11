@@ -311,7 +311,7 @@ namespace MuonGM {
     void RDBReaderAtlas::ProcessTechnologies(MYSQL& mysql) {
         // here loop over station-components to init technologies at each new entry
         std::vector<std::string> slist;
-        slist.push_back("*");
+        slist.emplace_back("*");
         StationSelector sel(mysql, slist);
         StationSelector::StationIterator it;
         ATH_MSG_DEBUG( " from RDBReaderAtlas --- start " );
@@ -511,34 +511,34 @@ namespace MuonGM {
        
         if (getGeometryVersion().substr(0, 1) == "P") {
 
-            if (m_tgcReadoutMapping.size() == 0) {
+            if (m_tgcReadoutMapping.empty()) {
                 // first time fill the vector
-                m_tgcReadoutMapping.push_back("T1F1"); // 1
+                m_tgcReadoutMapping.emplace_back("T1F1"); // 1
 
-                m_tgcReadoutMapping.push_back("T1E1"); // 2
-                m_tgcReadoutMapping.push_back("T1E2");
-                m_tgcReadoutMapping.push_back("T1E3");
-                m_tgcReadoutMapping.push_back("T1E4");
+                m_tgcReadoutMapping.emplace_back("T1E1"); // 2
+                m_tgcReadoutMapping.emplace_back("T1E2");
+                m_tgcReadoutMapping.emplace_back("T1E3");
+                m_tgcReadoutMapping.emplace_back("T1E4");
 
-                m_tgcReadoutMapping.push_back("T2F1"); // 6
+                m_tgcReadoutMapping.emplace_back("T2F1"); // 6
 
-                m_tgcReadoutMapping.push_back("T2E1"); // 7
-                m_tgcReadoutMapping.push_back("T2E2");
-                m_tgcReadoutMapping.push_back("T2E3");
-                m_tgcReadoutMapping.push_back("T2E4");
-                m_tgcReadoutMapping.push_back("T2E5"); // 11
+                m_tgcReadoutMapping.emplace_back("T2E1"); // 7
+                m_tgcReadoutMapping.emplace_back("T2E2");
+                m_tgcReadoutMapping.emplace_back("T2E3");
+                m_tgcReadoutMapping.emplace_back("T2E4");
+                m_tgcReadoutMapping.emplace_back("T2E5"); // 11
 
-                m_tgcReadoutMapping.push_back("T3F1"); // 12
+                m_tgcReadoutMapping.emplace_back("T3F1"); // 12
 
-                m_tgcReadoutMapping.push_back("T3E1"); // 13
-                m_tgcReadoutMapping.push_back("T3E2");
-                m_tgcReadoutMapping.push_back("T3E3");
-                m_tgcReadoutMapping.push_back("T3E4");
-                m_tgcReadoutMapping.push_back("T3E5"); // 17
+                m_tgcReadoutMapping.emplace_back("T3E1"); // 13
+                m_tgcReadoutMapping.emplace_back("T3E2");
+                m_tgcReadoutMapping.emplace_back("T3E3");
+                m_tgcReadoutMapping.emplace_back("T3E4");
+                m_tgcReadoutMapping.emplace_back("T3E5"); // 17
 
-                m_tgcReadoutMapping.push_back("T4F1"); // 18
+                m_tgcReadoutMapping.emplace_back("T4F1"); // 18
 
-                m_tgcReadoutMapping.push_back("T4E1"); // 19
+                m_tgcReadoutMapping.emplace_back("T4E1"); // 19
             }
 
             if (ichtyp < 1 || ichtyp > 19) {
@@ -549,37 +549,37 @@ namespace MuonGM {
 
             // Layout Q and following
             //
-            if (m_tgcReadoutMapping.size() == 0) {
+            if (m_tgcReadoutMapping.empty()) {
                 // first time fill the vector
 
-                m_tgcReadoutMapping.push_back("T1F1_1"); // 1
+                m_tgcReadoutMapping.emplace_back("T1F1_1"); // 1
 
-                m_tgcReadoutMapping.push_back("T1E1_1"); // 2
-                m_tgcReadoutMapping.push_back("T1E1_2");
-                m_tgcReadoutMapping.push_back("T1E1_3");
-                m_tgcReadoutMapping.push_back("T1E1_4");
+                m_tgcReadoutMapping.emplace_back("T1E1_1"); // 2
+                m_tgcReadoutMapping.emplace_back("T1E1_2");
+                m_tgcReadoutMapping.emplace_back("T1E1_3");
+                m_tgcReadoutMapping.emplace_back("T1E1_4");
 
-                m_tgcReadoutMapping.push_back("T2F1_1"); // 6
+                m_tgcReadoutMapping.emplace_back("T2F1_1"); // 6
 
-                m_tgcReadoutMapping.push_back("T2E1_1"); // 7
-                m_tgcReadoutMapping.push_back("T2E1_2");
-                m_tgcReadoutMapping.push_back("T2E1_3");
-                m_tgcReadoutMapping.push_back("T2E1_4");
-                m_tgcReadoutMapping.push_back("T2E1_5"); // 11
+                m_tgcReadoutMapping.emplace_back("T2E1_1"); // 7
+                m_tgcReadoutMapping.emplace_back("T2E1_2");
+                m_tgcReadoutMapping.emplace_back("T2E1_3");
+                m_tgcReadoutMapping.emplace_back("T2E1_4");
+                m_tgcReadoutMapping.emplace_back("T2E1_5"); // 11
 
-                m_tgcReadoutMapping.push_back("T3F1_1"); // 12
+                m_tgcReadoutMapping.emplace_back("T3F1_1"); // 12
 
-                m_tgcReadoutMapping.push_back("T3E1_1"); // 13
-                m_tgcReadoutMapping.push_back("T3E1_2");
-                m_tgcReadoutMapping.push_back("T3E1_3");
-                m_tgcReadoutMapping.push_back("T3E1_4");
-                m_tgcReadoutMapping.push_back("T3E1_5"); // 17
+                m_tgcReadoutMapping.emplace_back("T3E1_1"); // 13
+                m_tgcReadoutMapping.emplace_back("T3E1_2");
+                m_tgcReadoutMapping.emplace_back("T3E1_3");
+                m_tgcReadoutMapping.emplace_back("T3E1_4");
+                m_tgcReadoutMapping.emplace_back("T3E1_5"); // 17
 
-                m_tgcReadoutMapping.push_back("T4F1_1"); // 18
-                m_tgcReadoutMapping.push_back("T4F2_1"); // 19
+                m_tgcReadoutMapping.emplace_back("T4F1_1"); // 18
+                m_tgcReadoutMapping.emplace_back("T4F2_1"); // 19
 
-                m_tgcReadoutMapping.push_back("T4E1_1"); // 20
-                m_tgcReadoutMapping.push_back("T4E2_1"); // 21
+                m_tgcReadoutMapping.emplace_back("T4E1_1"); // 20
+                m_tgcReadoutMapping.emplace_back("T4E2_1"); // 21
             }
 
             if (ichtyp < 1 || ichtyp > 21) {

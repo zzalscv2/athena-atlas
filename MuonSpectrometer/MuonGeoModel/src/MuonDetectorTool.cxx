@@ -207,7 +207,7 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
         tempLayout = switches->getString("LAYOUTNAME");
         //       m_includeInertMaterials = switches->getInt("BUILDINERTMATERIALS");
         //       m_minimalgeo            = switches->getInt("MINIMALGEO");
-        if (MuonVersion == "") {
+        if (MuonVersion.empty()) {
             MuonVersion = accessSvc->getChildTag("MuonSpectrometer", detectorKey, detectorNode);
             ATH_MSG_INFO("(from GeoModelSvc) in AtlasVersion = <" << AtlasVersion << ">  default MuonVersion is <" << MuonVersion << ">");
         }

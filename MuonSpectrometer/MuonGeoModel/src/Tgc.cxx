@@ -60,7 +60,7 @@ namespace MuonGM {
 
         // Build TGC mother volume out of G10
         const GeoShape *strd = new GeoTrd(thickness / 2, thickness / 2, width / 2, longWidth / 2, length / 2);
-        if (cutoutson && vcutdef.size() > 0) {
+        if (cutoutson && !vcutdef.empty()) {
             Cutout *cut = nullptr;
             GeoShape *cutoutShape = nullptr;
             GeoTrf::Transform3D cutTrans{GeoTrf::Transform3D::Identity()};
@@ -228,7 +228,7 @@ namespace MuonGM {
                     } // loop over wire supports
                 }     // No supports for CTB Simulation
 
-                if (cutoutson && vcutdef.size() > 0) {
+                if (cutoutson && !vcutdef.empty()) {
                     // Make cutout in gas volume a bit larger so that G10 of mother volume
                     // makes a gas boundary
                     Cutout *cut = nullptr;
@@ -262,7 +262,7 @@ namespace MuonGM {
                 // passive structure, Copper, Honeycomb,
                 // except for G10 which is material of the mother volume
                 const GeoShape *strdtmp = new GeoTrd(t->tck[i] / 2, t->tck[i] / 2, width / 2, longWidth / 2, length / 2);
-                if (cutoutson && vcutdef.size() > 0) {
+                if (cutoutson && !vcutdef.empty()) {
                     Cutout *cut = nullptr;
                     GeoShape *cutoutShape = nullptr;
                     GeoTrf::Transform3D cutTrans{GeoTrf::Transform3D::Identity()};
