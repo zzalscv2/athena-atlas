@@ -92,22 +92,12 @@ CaloEnergy::CaloEnergy (float   deltaE,
 
 /** copy constructor */
 CaloEnergy::CaloEnergy (const CaloEnergy& caloEnergy)
-    :   EnergyLoss ( caloEnergy ),
-	m_energyLossType	(caloEnergy.m_energyLossType),
-        m_caloLRLikelihood      (caloEnergy.m_caloLRLikelihood),
-        m_caloMuonIdTag         (caloEnergy.m_caloMuonIdTag),
-        m_fsrCandidateEnergy    (caloEnergy.m_fsrCandidateEnergy),
-        m_deposits              (caloEnergy.m_deposits),
-        m_etCore                (caloEnergy.m_etCore),
-	m_deltaE_param          (caloEnergy.m_deltaE_param),
-	m_sigmaMinusDeltaE_param (caloEnergy.m_sigmaMinusDeltaE_param),
-	m_sigmaPlusDeltaE_param (caloEnergy.m_sigmaPlusDeltaE_param),
-	m_deltaE_meas           (caloEnergy.m_deltaE_meas),
-	m_sigmaDeltaE_meas      (caloEnergy.m_sigmaDeltaE_meas)         
-{}
+    
+	        
+= default;
 
 /** destructor */
-CaloEnergy::~CaloEnergy() {}
+CaloEnergy::~CaloEnergy() = default;
 
 /** Assignment operator */
 CaloEnergy& CaloEnergy::operator=(const CaloEnergy& rhs) {

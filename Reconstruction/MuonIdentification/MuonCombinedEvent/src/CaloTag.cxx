@@ -71,6 +71,6 @@ namespace MuonCombined {
     {
     }
 
-    CaloTag::~CaloTag() {}
+    CaloTag::~CaloTag() = default;
 
 }  // namespace MuonCombined

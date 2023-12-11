@@ -49,7 +49,7 @@ public:
     MuonQualityWord() { m_qualityWord = 0x0; };     
 
     /** destructor */
-    ~MuonQualityWord();
+    ~MuonQualityWord() = default;
 
     /** copy constructor */
     MuonQualityWord (const MuonQualityWord&);

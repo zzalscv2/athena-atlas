@@ -42,7 +42,7 @@ Rec::MuonOverlapDescriptor::MuonOverlapDescriptor(const MuonOverlapDescriptor& i
     m_totalSpectroPhiHits(input.m_totalSpectroPhiHits) {}
 
 /** destructor */
-Rec::MuonOverlapDescriptor::~MuonOverlapDescriptor() {}
+Rec::MuonOverlapDescriptor::~MuonOverlapDescriptor() = default;
 
 /** Assignment operator */
 Rec::MuonOverlapDescriptor& Rec::MuonOverlapDescriptor::operator=(const MuonOverlapDescriptor& rhs) {

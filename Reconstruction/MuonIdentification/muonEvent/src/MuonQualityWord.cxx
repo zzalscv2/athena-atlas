@@ -21,11 +21,11 @@ MuonQualityWord::MuonQualityWord ( uint16_t qualityWord )
 
 /** copy constructor */
 MuonQualityWord::MuonQualityWord (const MuonQualityWord& qualityWord)
-    :   m_qualityWord ( qualityWord.m_qualityWord ) 
-{}
+       
+= default;
 
 /** destructor */
-MuonQualityWord::~MuonQualityWord() {}
+
 
 /** Assignment operator */
 MuonQualityWord& MuonQualityWord::operator=(const MuonQualityWord& rhs) {

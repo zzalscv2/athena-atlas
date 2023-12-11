@@ -51,17 +51,9 @@ MuonSpShower::MuonSpShower(
 }
 
 /** Copy Constructor */
-MuonSpShower::MuonSpShower( const MuonSpShower& rhs ) :
-   m_eta                    ( rhs.m_eta ),
-   m_phi                    ( rhs.m_phi ),
-   m_numberOfTriggerHits    ( rhs.m_numberOfTriggerHits ),
-   m_numberOfInnerHits      ( rhs.m_numberOfInnerHits ),
-   m_numberOfInnerSegments  ( rhs.m_numberOfInnerSegments ),
-   m_numberOfMiddleHits     ( rhs.m_numberOfMiddleHits ),
-   m_numberOfMiddleSegments ( rhs.m_numberOfMiddleSegments ),
-   m_numberOfOuterHits     ( rhs.m_numberOfOuterHits ),
-   m_numberOfOuterSegments ( rhs.m_numberOfOuterSegments )
-{}
+MuonSpShower::MuonSpShower( const MuonSpShower& rhs ) 
+   
+= default;
 
 /** Assignement operator */
 MuonSpShower& MuonSpShower::operator=( const MuonSpShower& rhs )
@@ -82,7 +74,7 @@ MuonSpShower& MuonSpShower::operator=( const MuonSpShower& rhs )
 
 /** Destructor */
 MuonSpShower::~MuonSpShower() 
-{}
+= default;
 
 }
 

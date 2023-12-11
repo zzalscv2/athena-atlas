@@ -55,6 +55,6 @@ MuidTrack::MuidTrack (const Trk::Track*			combinedTrack,
 }
 
 MuidTrack::~MuidTrack (void)
-{}
+= default;
 
 
