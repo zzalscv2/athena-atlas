@@ -6,7 +6,7 @@
 
 PFClusterWidthCalculator::PFClusterWidthCalculator() : m_etaPhiLowerLimit(0.0025),m_etaMean(0.0),m_phiMean(0.0) {}
 
-PFClusterWidthCalculator::~PFClusterWidthCalculator() {}
+
 
 std::pair<double,double> PFClusterWidthCalculator::getPFClusterCoordinateWidth(const std::vector<double>& eta, const std::vector<double>& phi, const double& clusterEta, const double& clusterPhi, unsigned int nCells){
 

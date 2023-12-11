@@ -155,8 +155,8 @@ float PFEnergyPredictorTool::nnEnergyPrediction(const eflowRecTrack *ptr) const{
 
      const std::array<double, 2> track{ptr->getTrack()->eta(), ptr->getTrack()->phi()};
 
-     for(auto clink : links){
-        auto cell = clink->getCluster()->getCluster();
+     for(auto *clink : links){
+        auto *cell = clink->getCluster()->getCluster();
         float clusterE = cell->e()*1e-3;
         float clusterEta = cell->eta();
 
@@ -204,14 +204,14 @@ float PFEnergyPredictorTool::nnEnergyPrediction(const eflowRecTrack *ptr) const{
 
 
 
-     for(auto cptr : matchedClusters){
-        auto clustlink = cptr->getCluster();
+     for(auto *cptr : matchedClusters){
+        auto *clustlink = cptr->getCluster();
 
         for(auto it_cell = clustlink->cell_begin(); it_cell != clustlink->cell_end(); it_cell++){
            const CaloCell* cell = (*it_cell);
            float cellE = cell->e()*(it_cell.weight())*1e-3f;
            if(cellE < 0.005) continue;//Cut from ntuple maker
-           auto theDDE=it_cell->caloDDE();
+           const auto *theDDE=it_cell->caloDDE();
            double cx=theDDE->x();
            double cy=theDDE->y();
 
@@ -256,7 +256,7 @@ float PFEnergyPredictorTool::nnEnergyPrediction(const eflowRecTrack *ptr) const{
     int trk_proj_num = std::accumulate(trk_bool.begin(), trk_bool.end(), 0);
     if(trk_proj_num ==0) {
         trk_proj_num =1;
-        std::array<double,5> trk_arr;
+        std::array<double,5> trk_arr{};
 
         trk_arr[0] = trackP;
         trk_arr[1] = ptr->getTrack()->eta() - eta_ctr;
@@ -267,8 +267,8 @@ float PFEnergyPredictorTool::nnEnergyPrediction(const eflowRecTrack *ptr) const{
         cells.emplace_back(trk_arr);
     } else {
         for(size_t i =0; i<calo_numbers.size(); i++) {
-            if(trk_bool[i]==false) continue;
-            std::array<double,5> trk_arr;
+            if(!trk_bool[i]) continue;
+            std::array<double,5> trk_arr{};
             trk_arr[0]= trackP/double(trk_proj_num);
             trk_arr[1]= trk_full[i][0] - eta_ctr;
             trk_arr[2]= trk_full[i][1] - phi_ctr;

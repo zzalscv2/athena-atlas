@@ -134,7 +134,7 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                 FEMuonLinks.emplace_back(*muonReadHandle, muon->index());
                 // Add flow element link to a vector
                 // index() is the unique index of the cFlowElement in the cFlowElementcontaine
-                muonChargedFEVec.at(muon->index()).push_back(FlowElementLink_t(*ChargedFEReadHandle, FE->index()));
+                muonChargedFEVec.at(muon->index()).emplace_back(*ChargedFEReadHandle, FE->index());
             }  // matching block
         }      // end of muon loop
 
@@ -210,7 +210,7 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                             // index() is the unique index of the muon in the muon container
                             FEMuonLinks.emplace_back(*muonReadHandle, muon->index());
                             // index() is the unique index of the cFlowElement in the cFlowElementcontaine
-                            muonNeutralFEVec.at(muon->index()).push_back(FlowElementLink_t(*NeutralFEReadHandle, FE->index()));            
+                            muonNeutralFEVec.at(muon->index()).emplace_back(*NeutralFEReadHandle, FE->index());            
                             ATH_MSG_VERBOSE("Got a match between NFE and Muon");
                             nMatchedFE++;  // count number of matches between FE and muons
                             if (neg_E_cluster) ATH_MSG_ERROR("Muon cluster matched to negative E topocluster from FE");
@@ -285,7 +285,7 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                         // index() is the unique index of the muon in the muon container
                         FEMuonLinks.emplace_back(*muonReadHandle, muon->index());
                         // index() is the unique index of the nFlowElement in the nFlowElementcontainer
-                        muonNeutralFEVec.at(muon->index()).push_back(FlowElementLink_t(*NeutralFEReadHandle, FE->index()));
+                        muonNeutralFEVec.at(muon->index()).emplace_back(*NeutralFEReadHandle, FE->index());
                         // save the energy fraction used in the cluster matching - mostly for debug/extension studies
                         FE_efrac_clustermatch.push_back(frac_FE_cluster_energy_matched);  // fraction of FE cluster energy matched
                         muonNeutralFE_frac_cluster_energy_matched_Vec.at(muon->index())

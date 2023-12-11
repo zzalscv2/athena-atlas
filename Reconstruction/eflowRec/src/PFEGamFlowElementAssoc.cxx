@@ -139,7 +139,7 @@ StatusCode PFEGamFlowElementAssoc::execute(const EventContext &ctx) const
 	  FEElectronLinks.emplace_back(*electronReadHandle,electron->index() );
 	  //Add Flow Element (FE) link to a vector
 	  //index() is the unique index of the Flow Element in the container
-	  electronNeutralFEVec.at(electron->index()).push_back(FlowElementLink_t(*neutralFEReadHandle, FE->index()) );
+	  electronNeutralFEVec.at(electron->index()).emplace_back(*neutralFEReadHandle, FE->index() );
 	  if(neg_E_cluster){
 	    ATH_MSG_ERROR("Negative energy cluster found and matched to electron");
 	    ATH_MSG_ERROR("Cluster Energy: "<<FE_cluster_E<<"");
@@ -164,7 +164,7 @@ StatusCode PFEGamFlowElementAssoc::execute(const EventContext &ctx) const
 	  FEPhotonLinks.emplace_back(*photonReadHandle,photon->index() );
 	  //Add Flow Element (FE) link to a vector
 	  //index() is the unique index of the Flow Element in the container
-	  photonNeutralFEVec.at(photon->index()).push_back(FlowElementLink_t(*neutralFEReadHandle, FE->index()) );	  
+	  photonNeutralFEVec.at(photon->index()).emplace_back(*neutralFEReadHandle, FE->index() );	  
 
 	  if(neg_E_cluster){
 	    ATH_MSG_ERROR("Negative energy cluster found and matched to photon");
@@ -214,7 +214,7 @@ StatusCode PFEGamFlowElementAssoc::execute(const EventContext &ctx) const
 	  FEElectronLinks.emplace_back(*electronReadHandle, electron->index() );
 	  // Add FE element link to a vector 
 	  // index() is the unique index of the cFE in the cFE container 
-	  electronChargedFEVec.at(electron->index()).push_back( FlowElementLink_t(*chargedFEReadHandle, FE->index()) );
+	  electronChargedFEVec.at(electron->index()).emplace_back(*chargedFEReadHandle, FE->index() );
 	}//end of matching block
 	 
       }//end of loop on clusters
@@ -234,7 +234,7 @@ StatusCode PFEGamFlowElementAssoc::execute(const EventContext &ctx) const
           FEPhotonLinks.emplace_back(*photonReadHandle, photon->index() );
           // Add FE element link to a vector
           // index() is the unique index of the cFE in the cFE container
-          photonChargedFEVec.at(photon->index()).push_back( FlowElementLink_t(*chargedFEReadHandle, FE->index()) );
+          photonChargedFEVec.at(photon->index()).emplace_back(*chargedFEReadHandle, FE->index() );
 	}// end of matching block
 
       }// end of loop on tracks
