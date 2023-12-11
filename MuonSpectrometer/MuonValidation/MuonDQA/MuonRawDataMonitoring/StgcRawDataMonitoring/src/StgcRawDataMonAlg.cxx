@@ -403,6 +403,21 @@ void sTgcRawDataMonAlg::fillsTgcPadTriggerDataHistograms(const xAOD::MuonContain
 	  int sectorNumbers = sourceidToSector(sourceIds, sideA);
 	  int hitRelBCID = rdo -> getHitRelBcids().at(hits);
 	  int hitpfebs = rdo -> getHitPfebs().at(hits);
+	  int hitTdsChannels = rdo->getHitTdsChannels().at(hits);
+
+	  std::optional<std::tuple<int, int, std::string, std::string, int>> statusPadEtaPhi = getPadEtaPhiTuple(sourceIds, hitpfebs, hitTdsChannels);
+	  if (!statusPadEtaPhi.has_value()) continue;
+	  std::tuple<int, int, std::string, std::string, int> padEtaPhiTuple = statusPadEtaPhi.value();
+
+	  int padPhi = std::get<0>(padEtaPhiTuple);
+	  int padEta = std::get<1>(padEtaPhiTuple);
+	  std::string sideName = std::get<2>(padEtaPhiTuple);
+	  std::string sizeName = std::get<3>(padEtaPhiTuple);
+	  int layer = std::get<4>(padEtaPhiTuple);
+	    	    
+	  auto padPhiMon = Monitored::Scalar<int>("padPhi_" + sideName + "_" + sizeName + "_layer_" + std::to_string(layer), padPhi);
+	  auto padEtaMon = Monitored::Scalar<int>("padEta_" + sideName + "_" + sizeName + "_layer_" + std::to_string(layer), padEta);
+	  fill("padTriggerOccupancy", padPhiMon, padEtaMon);
 
 	  auto hitRelBCIDmon = Monitored::Scalar<int>("hitRelBCID", hitRelBCID);
 	  auto hitPfebsMon   = Monitored::Scalar<int>("hitPfebs", hitpfebs);
