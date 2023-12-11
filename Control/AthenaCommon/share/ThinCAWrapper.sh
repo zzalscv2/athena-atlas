@@ -13,6 +13,7 @@ for a in "$@"
 do
     case "$a" in
 	--config-only*)  export PICKLECAFILE=${a#*=};;
+	--tracelevel*) tracelevel=${a#*=};;
 	*.py) topscriptfile=$a;;
 	*.pkl) picklefile=$a;;
 	*) scriptargs+=("$a");;
@@ -43,9 +44,41 @@ if [ -n "${topscriptfile}" ]; then
     fi
 fi
 
+
+if [ -n "${tracelevel}" ]; then
+
+    if [[ "$tracelevel" == "--tracelevel" ]]; then
+       tracelevel="3" #Set to 3 (default) if no number given
+    fi
+    
+    if [[ "$tracelevel" =~ ^[0-3]$ ]]; then
+	echo "Trace level set to $tracelevel"
+    else
+	echo "ERROR, unexpected argument for --tracelevel, expect a number between 0 and 3, got ${tracelevel}"
+	exit 1
+    fi
+	
+    tracecmd=" -m trace --trace "
+    if [ $tracelevel -gt 0 ]; then
+	sysexclude=`python -m AthenaCommon.excludetracepath`
+	tracecmd="${tracecmd} --ignore-dir ${sysexclude}"
+    fi
+    if  [ $tracelevel -gt 1 ]; then
+	excludemods1="_db,__init__,_configurables,GaudiHandles,six"
+	tracecmd="${tracecmd} --ignore-module ${excludemods1}"
+    fi
+    if [ $tracelevel -gt 2 ]; then
+	excludemods2a=",Configurable,Configurables,PropertyProxy,DataHandle,ConfigurableDb,ConfigurableMeta,CfgMgr" #Legacy stuff we pull in b/c PythonAlgorithms and such still derive from old-style configurables
+	excludemods2b=",ComponentAccumulator,Logging,AthConfigFlags,AllConfigFlags,Deduplication,semantics,AccumulatorCache,DebuggingContext,AtlasSemantics,ComponentFactory,LegacySupport,ItemListSemantics" #Internals of the ComponentAccumulator
+	tracecmd="${tracecmd}${excludemods2a}${excludemods2b}"
+    fi
+    echo "Python tracing activated as ",$tracecmd
+fi
+
+
 #Finally: Execute it!
 if [ -z "${picklefile}" ]; then
-    python $topscript "${scriptargs[@]}"
+    python $tracecmd $topscript "${scriptargs[@]}"
 else
     echo "Starting from pickle file $picklefile"
     CARunner.py $picklefile "${scriptargs[@]}"
