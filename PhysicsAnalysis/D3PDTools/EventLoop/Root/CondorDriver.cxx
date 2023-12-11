@@ -22,6 +22,7 @@
 #include <fstream>
 #include <memory>
 #include <sstream>
+#include <boost/filesystem.hpp>
 
 //
 // method implementations
@@ -92,7 +93,18 @@ namespace EL
             file << "when_to_transfer_output = ON_EXIT\n";
             file << "transfer_input_files    = submit/" << tarballName << ", submit/segments, submit/config.root\n";
             file << "transfer_output_files   = fetch, status\n";
-            file << "x509userproxy           = " << gSystem->Getenv("X509_USER_PROXY") <<"\n";
+            if (char* x509userproxy = std::getenv("X509_USER_PROXY")) {
+              boost::filesystem::path proxyPath(x509userproxy);
+              boost::filesystem::path proxyPathDestination(data.submitDir + "/submit/" + proxyPath.filename().string());
+              boost::filesystem::copy_file(proxyPath,
+                                    proxyPathDestination,
+                                    boost::filesystem::copy_option::overwrite_if_exists);
+              file << "x509userproxy           = " << proxyPathDestination.string() <<"\n";
+            }
+            else {
+              ANA_MSG_INFO("X509_USER_PROXY not set");
+            }
+
           }
           file << "arguments               = $(Item)\n";
           file << "\n" << data.options.castString (Job::optCondorConf) << "\n";
