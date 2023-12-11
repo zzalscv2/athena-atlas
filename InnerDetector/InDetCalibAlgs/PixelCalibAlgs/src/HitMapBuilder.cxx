@@ -1,19 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // PixelCalibAlgs
-#include "PixelCalibAlgs/HitMapBuilder.h"
+#include "HitMapBuilder.h"
 #include "PixelCalibAlgs/PixelConvert.h"
 
 // Gaudi
 #include "GaudiKernel/ITHistSvc.h"
-
-// EDM
-#include "InDetRawData/PixelRDO_Container.h"
-
-// InnerDetector/InDetDetDescr/InDetReadtoutGeometry
-
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
@@ -21,36 +15,11 @@
 // geometry
 #include "InDetIdentifier/PixelID.h"
 
-// ROOT
-#include "TH2.h"
-#include "TString.h"
-
 // standard library
 #include <string>
 #include <sstream>
-#include <algorithm>
-#include <map>
 #include <fstream>
-#include <cstdlib>
 
-HitMapBuilder::HitMapBuilder(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator),
-  m_tHistSvc("THistSvc", name),
-  m_pixman(0),
-  m_pixelID(0),
-  m_pixelRDOKey("PixelRDOs"),
-  m_nEvents(0.),
-  m_nEventsHist(nullptr),
-  m_nEventsLBHist(nullptr),
-  m_hist_lbMax(3001),
-  m_evt_lbMin(0),
-  m_evt_lbMax(-1) {
-  declareProperty("PixelRDOKey", m_pixelRDOKey, "StoreGate key of pixel RDOs");
-  declareProperty("nLBmax", m_hist_lbMax, "Maximum number of LB (for histograms binning)");
-  declareProperty("LBMin", m_evt_lbMin, "First lumi block to consider");
-  declareProperty("LBMax", m_evt_lbMax, "Last lumi block to consider");
-  declareProperty("THistSvc", m_tHistSvc, "THistSvc");
-}
 
 HitMapBuilder::~HitMapBuilder() {
 }
@@ -109,6 +78,8 @@ std::vector<std::string> HitMapBuilder::splitter(const std::string &str, char de
 //=========================================================
 StatusCode HitMapBuilder::initialize() {
   ATH_MSG_INFO("Initializing HitMapBuilder");
+
+  ATH_CHECK(m_pixelRDOKey.initialize());
 
   // retrieve THistSvc
   StatusCode sc = m_tHistSvc.retrieve();
@@ -375,13 +346,9 @@ StatusCode HitMapBuilder::execute() {
   // Get max LB range
   if (m_LBrange_max < LB) m_LBrange_max = LB;
 
-  // retrieve PixelRDO container
-  const PixelRDO_Container* pixelRDOs;
-  StatusCode sc = evtStore()->retrieve(pixelRDOs, m_pixelRDOKey);
-  if (!sc.isSuccess()) {
-    ATH_MSG_FATAL( "Unable to retrieve pixel RDO container at " << m_pixelRDOKey );
-    return StatusCode::FAILURE;
-  } ATH_MSG_DEBUG( "Pixel RDO container retrieved" );
+// retrieve PixelRDO container
+  SG::ReadHandle<PixelRDO_Container> pixelRDOs{m_pixelRDOKey,ctx};
+  ATH_MSG_DEBUG( "Pixel RDO container retrieved" );
   // loop in RDO container
   for (const auto pPixelRDOCollection: *pixelRDOs) {
     if (pPixelRDOCollection) {
