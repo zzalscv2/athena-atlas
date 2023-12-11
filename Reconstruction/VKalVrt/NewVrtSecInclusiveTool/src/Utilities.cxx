@@ -49,7 +49,7 @@ namespace Rec{
   }
 
                /*  Technicalities */
-  double NewVrtSecInclusiveTool::projSV_PV(const Amg::Vector3D & SV, const xAOD::Vertex & PV, const TLorentzVector & Direction) const
+  double NewVrtSecInclusiveTool::projSV_PV(const Amg::Vector3D & SV, const xAOD::Vertex & PV, const TLorentzVector & Direction) 
   {  
      TVector3 SV_PV( SV.x()-PV.x(), SV.y()-PV.y(), SV.z()-PV.z() );
      return Direction.Vect().Unit()*SV_PV.Unit();
@@ -57,7 +57,7 @@ namespace Rec{
 
   double NewVrtSecInclusiveTool::vrtVrtDist(const xAOD::Vertex & primVrt, const Amg::Vector3D & secVrt, 
                                           const std::vector<double>& secVrtErr, double& signif)
-  const
+  
   {
     double distx =  primVrt.x()- secVrt.x();
     double disty =  primVrt.y()- secVrt.y();
@@ -90,7 +90,7 @@ namespace Rec{
 
   double NewVrtSecInclusiveTool::vrtVrtDist2D(const xAOD::Vertex & primVrt, const Amg::Vector3D & secVrt, 
                                           const std::vector<double>& secVrtErr, double& signif)
-  const
+  
   {
     double distx =  primVrt.x()- secVrt.x();
     double disty =  primVrt.y()- secVrt.y();
@@ -116,7 +116,7 @@ namespace Rec{
 
   double NewVrtSecInclusiveTool::vrtVrtDist(const Amg::Vector3D & vrt1, const std::vector<double>  & vrtErr1,
                                             const Amg::Vector3D & vrt2, const std::vector<double>  & vrtErr2)
-  const
+  
   {
     double distx =  vrt1.x()- vrt2.x();
     double disty =  vrt1.y()- vrt2.y();
@@ -144,7 +144,7 @@ namespace Rec{
     return signif;
   }
 //
-  double NewVrtSecInclusiveTool::PntPntDist(const Amg::Vector3D & Vrt1, const Amg::Vector3D & Vrt2) const
+  double NewVrtSecInclusiveTool::PntPntDist(const Amg::Vector3D & Vrt1, const Amg::Vector3D & Vrt2) 
   { 
     double dx =  Vrt1.x()- Vrt2.x();
     double dy =  Vrt1.y()- Vrt2.y();
@@ -155,7 +155,7 @@ namespace Rec{
 //----------------------------
 //   Vertex error along radius
 //----------------------------
-  double NewVrtSecInclusiveTool::vrtRadiusError(const Amg::Vector3D & SecVrt, const std::vector<double>  & VrtErr) const
+  double NewVrtSecInclusiveTool::vrtRadiusError(const Amg::Vector3D & SecVrt, const std::vector<double>  & VrtErr) 
   {
     double DirX=SecVrt.x(), DirY=SecVrt.y(); 
     double Covar =    DirX*VrtErr[0]*DirX
@@ -174,7 +174,7 @@ namespace Rec{
 
    double NewVrtSecInclusiveTool::massV0(const std::vector< std::vector<double> >& TrkAtVrt,
                                double massP, double massPi )
-   const
+   
    {
         double ap1i=std::abs(TrkAtVrt[0][2]); double ap2i=std::abs(TrkAtVrt[1][2]);
         CxxUtils::sincos   phi1(TrkAtVrt[0][0]);
@@ -206,12 +206,12 @@ namespace Rec{
      double py = phi.sn  * theta.sn * api;
      double pz =           theta.cs * api;
      double ee = std::sqrt( px*px + py*py + pz*pz + m_massPi*m_massPi);
-     return TLorentzVector(px,py,pz,ee); 
+     return {px,py,pz,ee}; 
    }
 
 
 /*************************************************************************************************************/
-  int   NewVrtSecInclusiveTool::getIBLHit(const xAOD::TrackParticle* Part) const
+  int   NewVrtSecInclusiveTool::getIBLHit(const xAOD::TrackParticle* Part) 
   {
         uint8_t IBLhit,IBLexp;
         if(!Part->summaryValue( IBLexp,  xAOD::expectInnermostPixelLayerHit) )           IBLexp = 0;
@@ -220,7 +220,7 @@ namespace Rec{
         if(IBLhit) return 1;
         else       return 0;
   }
-  int   NewVrtSecInclusiveTool::getBLHit(const xAOD::TrackParticle* Part) const
+  int   NewVrtSecInclusiveTool::getBLHit(const xAOD::TrackParticle* Part) 
   {
         uint8_t BLhit,BLexp;
         if(!Part->summaryValue( BLexp,  xAOD::expectNextToInnermostPixelLayerHit) )           BLexp = 0;
@@ -230,7 +230,7 @@ namespace Rec{
         else      return 0;
   }
 
-  void   NewVrtSecInclusiveTool::getPixelDiscs(const xAOD::TrackParticle* Part, int &d0Hit, int &d1Hit, int &d2Hit) const
+  void   NewVrtSecInclusiveTool::getPixelDiscs(const xAOD::TrackParticle* Part, int &d0Hit, int &d1Hit, int &d2Hit) 
   {
         uint32_t HitPattern=Part->hitPattern();
         d0Hit=0; if( HitPattern&((1<<Trk::pixelEndCap0)) ) d0Hit=1;
@@ -250,7 +250,7 @@ namespace Rec{
           if( (*tplink)->prodVtx()->nIncomingParticles()==1){
              int PDGID1=0, PDGID2=0, PDGID3=0;
              const xAOD::TruthParticle * parTP1=getPreviousParent(*tplink, PDGID1);
-             const xAOD::TruthParticle * parTP2=0;
+             const xAOD::TruthParticle * parTP2=nullptr;
              int noBC1=notFromBC(PDGID1);
              if(noBC1)  parTP2 = getPreviousParent(parTP1, PDGID2);
              int noBC2=notFromBC(PDGID2);
@@ -263,7 +263,7 @@ namespace Rec{
       return 0;
   }
 
-  int NewVrtSecInclusiveTool::notFromBC(int PDGID) const {
+  int NewVrtSecInclusiveTool::notFromBC(int PDGID) {
     int noBC=0;
     if(PDGID<=0)return 1;
     if(PDGID>600 && PDGID<4000)noBC=1;
@@ -274,7 +274,7 @@ namespace Rec{
   //if(PDGID==4114 || PDGID==4214 || PDGID==4224 || PDGID==4314 || PDGID==4324)continue;
     return noBC;
   }
-  const xAOD::TruthParticle * NewVrtSecInclusiveTool::getPreviousParent(const xAOD::TruthParticle * child, int & ParentPDG) const {
+  const xAOD::TruthParticle * NewVrtSecInclusiveTool::getPreviousParent(const xAOD::TruthParticle * child, int & ParentPDG) {
     ParentPDG=0;
     if( child->hasProdVtx() ){
        if( child->prodVtx()->nIncomingParticles()==1 ){
@@ -286,7 +286,7 @@ namespace Rec{
   }
 
 
-  int NewVrtSecInclusiveTool::getG4Inter(const xAOD::TrackParticle* TP ) const {
+  int NewVrtSecInclusiveTool::getG4Inter(const xAOD::TrackParticle* TP ) {
       if( TP->isAvailable< ElementLink< xAOD::TruthParticleContainer> >( "truthParticleLink") ) {
         const ElementLink<xAOD::TruthParticleContainer>& tplink = 
                                TP->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
@@ -294,7 +294,7 @@ namespace Rec{
       }
       return 0;
   }
-  int NewVrtSecInclusiveTool::getMCPileup(const xAOD::TrackParticle* TP ) const {
+  int NewVrtSecInclusiveTool::getMCPileup(const xAOD::TrackParticle* TP ) {
       if( TP->isAvailable< ElementLink< xAOD::TruthParticleContainer> >( "truthParticleLink") ) {
         const ElementLink<xAOD::TruthParticleContainer>& tplink = 
                                TP->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
@@ -311,26 +311,26 @@ namespace Rec{
      Amg::Vector3D momentumP(Vrt.momentum.Px()*normP,Vrt.momentum.Py()*normP,Vrt.momentum.Pz()*normP);
      Amg::Vector3D momentumN=-momentumP;
      
-     const Trk::Layer * someLayer  = 0;
-     const Trk::Layer * nextLayerP = 0;
-     const Trk::Layer * nextLayerN = 0;
-     auto volume = m_extrapolator->trackingGeometry()->lowestTrackingVolume(Vrt.fitVertex);
+     const Trk::Layer * someLayer  = nullptr;
+     const Trk::Layer * nextLayerP = nullptr;
+     const Trk::Layer * nextLayerN = nullptr;
+     const auto *volume = m_extrapolator->trackingGeometry()->lowestTrackingVolume(Vrt.fitVertex);
      someLayer = volume->associatedLayer(Vrt.fitVertex);
-     auto material =  someLayer->layerMaterialProperties();
+     const auto *material =  someLayer->layerMaterialProperties();
      if(material){
        nextLayerP=someLayer;
      } else {
        nextLayerP = someLayer->nextLayer(Vrt.fitVertex,momentumP);
-       if(nextLayerP){ if(!nextLayerP->layerMaterialProperties())nextLayerP=0; }
+       if(nextLayerP){ if(!nextLayerP->layerMaterialProperties())nextLayerP=nullptr; }
        nextLayerN = someLayer->nextLayer(Vrt.fitVertex,momentumN);
-       if(nextLayerN){ if(!nextLayerN->layerMaterialProperties())nextLayerN=0; }
+       if(nextLayerN){ if(!nextLayerN->layerMaterialProperties())nextLayerN=nullptr; }
      }
      momentumP *= 1.e5;   //100GeV to have straight trajectory
      double charge = 1.;
      const Trk::Perigee pseudoVrtPart(Vrt.fitVertex, momentumP, charge, Vrt.fitVertex);
 
-     const Trk::TrackParameters * extrapParP=0; //along momentum
-     const Trk::TrackParameters * extrapParN=0; //backward
+     const Trk::TrackParameters * extrapParP=nullptr; //along momentum
+     const Trk::TrackParameters * extrapParN=nullptr; //backward
      if(nextLayerP){ extrapParP = m_extrapolator->extrapolate(ctx, pseudoVrtPart,
                      nextLayerP->surfaceRepresentation(), Trk::anyDirection, false, Trk::nonInteractingMuon).release();}
      if(nextLayerN){ extrapParN = m_extrapolator->extrapolate(ctx, pseudoVrtPart,
@@ -353,7 +353,7 @@ namespace Rec{
      return signif;
   }
 
-  std::vector<double> NewVrtSecInclusiveTool::estimVrtPos( int nTrk, std::deque<long int> &selTrk, std::map<long int, std::vector<double>> & vrt) const
+  std::vector<double> NewVrtSecInclusiveTool::estimVrtPos( int nTrk, std::deque<long int> &selTrk, std::map<long int, std::vector<double>> & vrt) 
   {
     std::vector<double> estimation(3,0.);
     int ntsel=selTrk.size();

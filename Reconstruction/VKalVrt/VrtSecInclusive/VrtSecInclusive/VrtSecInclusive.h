@@ -70,22 +70,22 @@ namespace Trk {
 namespace VKalVrtAthena {
 
   namespace GeoModel { enum GeoModel { Run1=1, Run2=2 }; }
-  
+
   class IntersectionPos;
   class IntersectionPos_barrel;
   class IntersectionPos_endcap;
-  
+
   class NtupleVars;
 }
 
 
 namespace VKalVrtAthena {
-  
+
   class VrtSecInclusive : public AthAlgorithm {
   public:
     /** Standard Athena-Algorithm Constructor */
     VrtSecInclusive(const std::string& name, ISvcLocator* pSvcLocator);
-    
+
     /** Default Destructor */
     ~VrtSecInclusive();
 
@@ -93,18 +93,18 @@ namespace VKalVrtAthena {
     virtual StatusCode finalize();
     virtual StatusCode execute();
     virtual StatusCode initEvent();
-   
+
   private:
-    
+
     /////////////////////////////////////////////////////////
     //
     //  Member Variables
     //
-    
+
     struct JobProperties {
       // JO: GeoModel
       int    geoModel;
-   
+
       std::string          TrackLocation;
       std::string          MuonLocation;
       std::string          ElectronLocation;
@@ -113,10 +113,10 @@ namespace VKalVrtAthena {
       std::string          mcEventContainerName;
       std::string          augVerString;
       std::string          truthParticleFilter;
-      
+
       std::string all2trksVerticesContainerName;
       std::string secondaryVerticesContainerName;
-      
+
       // common feature flags
       bool   doTruth;
       bool   FillHist;
@@ -125,7 +125,7 @@ namespace VKalVrtAthena {
       bool   doIntersectionPos;
       bool   doMapToLocal;
       bool   extrapPV; //extrapolate reco and prim truth trks to PV (for testing only)
-      
+
       bool   passThroughTrackSelection;
 
       bool   doFastMode; // flag for running in rapid finder mode instead of using graph
@@ -133,7 +133,7 @@ namespace VKalVrtAthena {
       // track selection conditions
       unsigned int SelTrkMaxCutoff;
       bool  SAloneTRT;
-      
+
       /* impact parameters */
       bool   do_PVvetoCut;
       bool   do_d0Cut;
@@ -142,7 +142,7 @@ namespace VKalVrtAthena {
       bool   do_z0errCut;
       bool   do_d0signifCut;
       bool   do_z0signifCut;
-      
+
       bool   ImpactWrtBL;
       double d0TrkPVDstMinCut;
       double d0TrkPVDstMaxCut;
@@ -157,7 +157,7 @@ namespace VKalVrtAthena {
       /* pT anc chi2 */
       double TrkChi2Cut;
       double TrkPtCut;
-      
+
       /* hit requirements */
       bool doTRTPixCut; // Kazuki
       int  CutSctHits;
@@ -168,10 +168,10 @@ namespace VKalVrtAthena {
       int  CutTRTHits; // Kazuki
       int  CutTightSCTHits;
       int  CutTightTRTHits;
-     
+
       /* track extrpolator; 1==VKalGetImpact, 2==m_trackToVertexTool*/
       int trkExtrapolator;
-      
+
       // Vertex reconstruction
       bool   doPVcompatibilityCut;
       bool   doTightPVcompatibilityCut;
@@ -196,24 +196,24 @@ namespace VKalVrtAthena {
       double twoTrVrtAngleCut;
       double twoTrVrtMinDistFromPV;
 
-      // When truncateWrkVertices set to true, maxWrkVertices is the maximum 
-      // number of potential vertices to process, used to truncate the list 
-      // in rare caes where several thousands are found, to avoid algorithm 
+      // When truncateWrkVertices set to true, maxWrkVertices is the maximum
+      // number of potential vertices to process, used to truncate the list
+      // in rare caes where several thousands are found, to avoid algorithm
       // timeout issues
       bool   truncateWrkVertices;
       size_t maxWrkVertices;
-      
+
       double associateMinDistanceToPV;
       double associateMaxD0Signif;
       double associateMaxZ0Signif;
       double associatePtCut;
       double associateChi2Cut;
-      
+
       double reassembleMaxImpactParameterD0;
       double reassembleMaxImpactParameterZ0;
       double mergeByShufflingMaxSignificance;
       double mergeByShufflingAllowance;
-      
+
       double improveChi2ProbThreshold;
 
       // vertexing using muons (test implementation)
@@ -223,32 +223,32 @@ namespace VKalVrtAthena {
       bool doSelectIDAndGSFTracks;
       bool doRemoveNonLeptonVertices;
 
-      // When doSelectTracksWithLRTCuts is set to true, the addtional track cuts 
-      // be applied to the selected tracks to reduce the number of fake tracks in 
+      // When doSelectTracksWithLRTCuts is set to true, the addtional track cuts
+      // be applied to the selected tracks to reduce the number of fake tracks in
       // the selected track collected. These cuts are inspired by the improvments that
-      // were implmented for LRT Run 3. 
+      // were implmented for LRT Run 3.
       bool doSelectTracksWithLRTCuts ;
-      
+
       // Additional dressing option
       bool doAugmentDVimpactParametersToMuons;     // potentially useful for DV + muon search
       bool doAugmentDVimpactParametersToElectrons; // potentially useful for analyses involving electrons
-      
+
       // MC truth
       double               mcTrkResolution;
       double               TruthTrkLen;
-      
+
     };
-    
+
     struct JobProperties m_jp;
-   
+
     // Indicates give-up modes during vertexing
     // 0 if no errors occured
     // 1 if too few selected tracks
     // 2 if too many selected tracks
     // 3 if wrkVertices container is truncated
     // 4 if any uncaught exception is raised at the top level of VSI execute()
-    int m_vertexingStatus;
- 
+    int m_vertexingStatus = 0;
+
     // xAOD Accessors
     const xAOD::VertexContainer*  m_primaryVertices;
     const xAOD::Vertex*           m_thePV;
@@ -256,33 +256,33 @@ namespace VKalVrtAthena {
     std::unique_ptr<std::vector<const xAOD::TrackParticle*> > m_associatedTracks;
     std::unique_ptr<std::vector<const xAOD::TrackParticle*> > m_leptonicTracks;
     std::vector<double>  m_BeamPosition;
-    
+
     /////////////////////////////////////////////////////////
     //
     //  Athena JobOption Properties
     //
-    
+
     ToolHandle <Trk::ITrkVKalVrtFitter>        m_fitSvc;       // VKalVrtFitter tool
     ToolHandle <Trk::ITruthToTrack>            m_truthToTrack; // tool to create trkParam from genPart
-    
+
     /** get a handle on the Track to Vertex tool */
     ToolHandle< Reco::ITrackToVertex >         m_trackToVertexTool;
     ToolHandle<Trk::ITrackToVertexIPEstimator> m_trackToVertexIPEstimatorTool;
     ToolHandle<Trk::IExtrapolator>             m_extrapolator;
     ToolHandle<Trk::IVertexMapper>             m_vertexMapper;
-    
+
     /** Condition service **/
     ToolHandle<IInDetConditionsTool> m_pixelCondSummaryTool{this, "PixelConditionsSummaryTool", "PixelConditionsSummaryTool", "Tool to retrieve Pixel Conditions summary"};
     ToolHandle<IInDetConditionsTool> m_sctCondSummaryTool{this, "InDetSCT_ConditionsSummaryTool", "SCT_ConditionsSummaryTool/InDetSCT_ConditionsSummaryTool", "Tool to retrieve SCT conditions summary"};
-    
-    const AtlasDetectorID* m_atlasId;
-    const PixelID* m_pixelId;
-    const SCT_ID*  m_sctId;
-    
+
+    const AtlasDetectorID* m_atlasId = nullptr;
+    const PixelID* m_pixelId = nullptr;
+    const SCT_ID*  m_sctId = nullptr;
+
     std::string m_checkPatternStrategy;
     using PatternStrategyFunc = bool (VrtSecInclusive::*) ( const xAOD::TrackParticle *trk, const Amg::Vector3D& vertex );
     std::map<std::string, PatternStrategyFunc> m_patternStrategyFuncs;
-    
+
     // AuxElement decorators
     std::unique_ptr< SG::AuxElement::Decorator< char > > m_decor_isSelected;
     std::unique_ptr< SG::AuxElement::Decorator< char > > m_decor_isAssociated;
@@ -301,32 +301,32 @@ namespace VKalVrtAthena {
     std::unique_ptr< IPDecoratorType > m_decor_phi_wrtSVs;
     std::unique_ptr< IPDecoratorType > m_decor_d0err_wrtSVs;
     std::unique_ptr< IPDecoratorType > m_decor_z0err_wrtSVs;
-    
+
     using VertexELType = SG::AuxElement::Decorator< std::vector<ElementLink< xAOD::VertexContainer > > >;
     std::unique_ptr< VertexELType > m_decor_svLink;
-    
+
     //////////////////////////////////////////////////////////////////////////////////////
     //
     // define ntuple variables here
     //
-    
+
     // The standard AANT, CollectionTree, is bare bones
-    TTree      *m_tree_Vert; 
+    TTree      *m_tree_Vert;
     std::unique_ptr<NtupleVars> m_ntupleVars;
-    
+
     // Histograms for stats
     std::map<std::string, TH1*> m_hists;
-    
-    
+
+
     ////////////////////////////////////////////////////////////////////////////////////////
-    // 
+    //
     // Private member functions
     //
-    
+
     // for event info to new ntuple (used to go by default in CollectionTree)
     void declareProperties();
-    
-    StatusCode addEventInfo(); 
+
+    StatusCode addEventInfo();
     StatusCode setupNtupleVariables();
     StatusCode setupNtuple();
     StatusCode clearNtupleVariables();
@@ -334,9 +334,9 @@ namespace VKalVrtAthena {
     StatusCode processPrimaryVertices();
     StatusCode fillAANT_SelectedBaseTracks();
     StatusCode fillAANT_SecondaryVertices( xAOD::VertexContainer* );
-    
+
     //
-    struct WrkVrt { 
+    struct WrkVrt {
       bool isGood;                                    //! flaged true for good vertex candidates
       std::deque<long int> selectedTrackIndices;      //! list if indices in TrackParticleContainer for selectedBaseTracks
       std::deque<long int> associatedTrackIndices;    //! list if indices in TrackParticleContainer for associatedTracks
@@ -350,14 +350,14 @@ namespace VKalVrtAthena {
       std::vector< std::vector<double> > TrkAtVrt;    //! list of track parameters wrt the reconstructed vertex
       unsigned long        closestWrkVrtIndex;        //! stores the index of the closest WrkVrt in std::vector<WrkVrt>
       double               closestWrkVrtValue;        //! stores the value of some observable to the closest WrkVrt ( observable = e.g. significance )
-      
+
       inline double ndof() const { return 2.0*( selectedTrackIndices.size() + associatedTrackIndices.size() ) - 3.0; }
       inline double ndof_core() const { return 2.0*( selectedTrackIndices.size() ) - 3.0; }
       inline unsigned nTracksTotal() const { return selectedTrackIndices.size() + associatedTrackIndices.size(); }
       inline double fitQuality() const { return Chi2 / ndof(); }
     };
-    
-    
+
+
     using Detector = int;
     using Bec      = int;
     using Layer    = int;
@@ -365,33 +365,33 @@ namespace VKalVrtAthena {
     using ExtrapolatedPoint   = std::tuple<const TVector3, Detector, Bec, Layer, Flag>;
     using ExtrapolatedPattern = std::vector< ExtrapolatedPoint >;
     using PatternBank         = std::map<const xAOD::TrackParticle*, std::pair< std::unique_ptr<ExtrapolatedPattern>, std::unique_ptr<ExtrapolatedPattern> > >;
-    
+
     PatternBank m_extrapolatedPatternBank;
-    
+
     std::vector< std::pair<int, int> > m_incomp;
-    
-    // the map used by printWrkSet 
+
+    // the map used by printWrkSet
     std::map<const xAOD::TruthVertex*, bool> m_matchMap;
-    
+
     ////////////////////////////////////////////////////////////////////////////////////////
     ///
     /// Vertexing Algorithm Member Functions
     ///
-    
+
     /** select tracks which become seeds for vertex finding */
     void selectTrack( const xAOD::TrackParticle* );
     StatusCode selectTracksInDet();
     StatusCode selectTracksFromMuons();
     StatusCode selectTracksFromElectrons();
     StatusCode selectInDetAndGSFTracks();
-    
+
     using TrackSelectionAlg = StatusCode (VrtSecInclusive::*)();
     std::vector<TrackSelectionAlg> m_trackSelectionAlgs;
-    
+
     /** track selection */
     using CutFunc = bool (VrtSecInclusive::*) ( const xAOD::TrackParticle* ) const;
     std::vector<CutFunc> m_trackSelectionFuncs;
-    
+
     /** track-by-track selection strategies */
     bool selectTrack_notPVassociated ( const xAOD::TrackParticle* ) const;
     bool selectTrack_pTCut           ( const xAOD::TrackParticle* ) const;
@@ -402,93 +402,93 @@ namespace VKalVrtAthena {
     bool selectTrack_z0Cut           ( const xAOD::TrackParticle* ) const;
     bool selectTrack_d0errCut        ( const xAOD::TrackParticle* ) const;
     bool selectTrack_z0errCut        ( const xAOD::TrackParticle* ) const;
-    bool selectTrack_d0signifCut     ( const xAOD::TrackParticle* ) const;
-    bool selectTrack_z0signifCut     ( const xAOD::TrackParticle* ) const;
+    static bool selectTrack_d0signifCut     ( const xAOD::TrackParticle* ) ;
+    static bool selectTrack_z0signifCut     ( const xAOD::TrackParticle* ) ;
     bool selectTrack_LRTR3Cut        ( const xAOD::TrackParticle* ) const;
-    
+
     /** related to the graph method and verte finding */
     StatusCode extractIncompatibleTrackPairs( std::vector<WrkVrt>* );
     StatusCode findNtrackVertices(std::vector<WrkVrt>* );
     StatusCode rearrangeTracks( std::vector<WrkVrt>* );
-    
+
     /** attempt to merge vertices when all tracks of a vertex A is close to vertex B in terms of impact parameter */
     StatusCode reassembleVertices( std::vector<WrkVrt>* );
-    
+
     /** attempt to merge splitted vertices when they are significantly distant
         due to the long-tail behavior of the vertex reconstruction resolution */
     StatusCode mergeByShuffling( std::vector<WrkVrt>* );
-    
+
     /** attempt to merge vertices by lookng at the distance between two vertices */
     StatusCode mergeFinalVertices( std::vector<WrkVrt>* ); // Kazuki
-    
+
     /** in addition to selected tracks, associate as much tracks as possible */
     StatusCode associateNonSelectedTracks( std::vector<WrkVrt>* );
-    
+
     /** finalization of the vertex and store to xAOD::VertexContainer */
     StatusCode refitAndSelectGoodQualityVertices( std::vector<WrkVrt>* );
 
     /** get secondary vertex impact parameters **/
-    bool getSVImpactParameters(const xAOD::TrackParticle* trk, const Amg::Vector3D& vertex, std::vector<double>& impactParameters, std::vector<double>& impactParErrors); 
+    bool getSVImpactParameters(const xAOD::TrackParticle* trk, const Amg::Vector3D& vertex, std::vector<double>& impactParameters, std::vector<double>& impactParErrors);
 
     enum TrkParameter    { k_d0=0, k_z0=1, k_theta=2, k_phi=3, k_qOverP=4 ,k_nTP=5 };
     enum TrkParameterUnc { k_d0d0=0, k_z0z0=1, k_nTPU=2 };
-    
+
     using vertexingAlg = StatusCode (VrtSecInclusive::*)( std::vector<WrkVrt>* );
     std::vector< std::pair<std::string, vertexingAlg> > m_vertexingAlgorithms;
-    unsigned m_vertexingAlgorithmStep;
-    
-    
+    unsigned m_vertexingAlgorithmStep = 0U;
+
+
     ////////////////////////////////////////////////////////////////////////////////////////
-    // 
+    //
     // Supporting utility functions
-    
+
     /** print the contents of reconstructed vertices */
     void printWrkSet(const std::vector<WrkVrt> *WrkVrtSet, const std::string& name);
 
     /** refit the vertex. */
     StatusCode refitVertex( WrkVrt& );
     StatusCode refitVertex( WrkVrt&, Trk::IVKalState& istate );
-    
+
     /** refit the vertex with suggestion */
     StatusCode refitVertexWithSuggestion( WrkVrt&, const Amg::Vector3D& );
     StatusCode refitVertexWithSuggestion( WrkVrt&, const Amg::Vector3D&, Trk::IVKalState& istate );
-    
-    /** attempt to improve the vertex chi2 by removing the most-outlier track one by one until 
+
+    /** attempt to improve the vertex chi2 by removing the most-outlier track one by one until
         the vertex chi2 satisfies a certain condition. */
     double improveVertexChi2( WrkVrt& );
-    
-    void removeTrackFromVertex(std::vector<WrkVrt>*, 
+
+    static void removeTrackFromVertex(std::vector<WrkVrt>*,
                                std::vector< std::deque<long int> > *,
              const long int & ,const long int & );
- 
+
     StatusCode disassembleVertex(std::vector<WrkVrt> *, const unsigned& vertexIndex );
-    
+
     void trackClassification(std::vector< WrkVrt >* , std::map< long int, std::vector<long int> >& );
-    
+
     double findWorstChi2ofMaximallySharedTrack(std::vector<WrkVrt>*, std::map< long int, std::vector<long int> >&, long int & ,long int & );
-    
+
     /** returns the number of tracks commonly present in both vertices */
-    size_t nTrkCommon( std::vector<WrkVrt> *WrkVrtSet, const std::pair<unsigned, unsigned>& pairIndex ) const;
-    
+    static size_t nTrkCommon( std::vector<WrkVrt> *WrkVrtSet, const std::pair<unsigned, unsigned>& pairIndex ) ;
+
     /** calculate the significance (Mahalanobis distance) between two reconstructed vertices */
     double significanceBetweenVertices( const WrkVrt&, const WrkVrt& ) const;
-    
+
     /** calculate the physical distance */
     double distanceBetweenVertices( const WrkVrt&, const WrkVrt& ) const;
-    
+
     using AlgForVerticesPair = double (VrtSecInclusive::*)( const WrkVrt&, const WrkVrt& ) const;
-    
+
     /** returns the pair of vertices that give minimum in terms of some observable (e.g. distance, significance) */
     double findMinVerticesPair( std::vector<WrkVrt>*, std::pair<unsigned, unsigned>&, AlgForVerticesPair );
-    
+
     /** returns the next pair of vertices that give next-to-minimum distance significance */
-    double findMinVerticesNextPair( std::vector<WrkVrt>*, std::pair<unsigned, unsigned>& );
-    
+    static double findMinVerticesNextPair( std::vector<WrkVrt>*, std::pair<unsigned, unsigned>& );
+
     /** the 2nd vertex is merged into the 1st vertex. A destructive operation. */
     StatusCode mergeVertices( WrkVrt& destination, WrkVrt& source );
-    
+
     enum mergeStep { RECONSTRUCT_NTRK, REASSEMBLE, SHUFFLE1, SHUFFLE2, SHUFFLE3, FINAL };
-    
+
     typedef struct track_summary_properties {
       uint8_t numIBLHits;
       uint8_t numBLayerHits;
@@ -510,69 +510,69 @@ namespace VKalVrtAthena {
       uint8_t numSctHits;
       uint8_t numTrtHits;
     } track_summary;
-   
+
     /** cretrieve the track hit information */
-    void fillTrackSummary( track_summary& summary, const xAOD::TrackParticle *trk );
-    
+    static void fillTrackSummary( track_summary& summary, const xAOD::TrackParticle *trk );
+
     ExtrapolatedPattern* extrapolatedPattern( const xAOD::TrackParticle*, enum Trk::PropDirection );
-   
+
     bool patternCheck    ( const uint32_t& pattern, const Amg::Vector3D& vertex );
-    bool patternCheckRun1( const uint32_t& pattern, const Amg::Vector3D& vertex );
-    bool patternCheckRun2( const uint32_t& pattern, const Amg::Vector3D& vertex );
-    
+    static bool patternCheckRun1( const uint32_t& pattern, const Amg::Vector3D& vertex );
+    static bool patternCheckRun2( const uint32_t& pattern, const Amg::Vector3D& vertex );
+
     bool patternCheckOuterOnly    ( const uint32_t& pattern, const Amg::Vector3D& vertex );
-    bool patternCheckRun1OuterOnly( const uint32_t& pattern, const Amg::Vector3D& vertex );
-    bool patternCheckRun2OuterOnly( const uint32_t& pattern, const Amg::Vector3D& vertex );
-    
+    static bool patternCheckRun1OuterOnly( const uint32_t& pattern, const Amg::Vector3D& vertex );
+    static bool patternCheckRun2OuterOnly( const uint32_t& pattern, const Amg::Vector3D& vertex );
+
     /** A classical method with hard-coded geometry */
     bool checkTrackHitPatternToVertex( const xAOD::TrackParticle *trk, const Amg::Vector3D& vertex );
-    
+
     /** A classical method with hard-coded geometry */
     bool checkTrackHitPatternToVertexOuterOnly( const xAOD::TrackParticle *trk, const Amg::Vector3D& vertex );
-    
+
     /** New method with track extrapolation */
     bool checkTrackHitPatternToVertexByExtrapolation( const xAOD::TrackParticle *trk, const Amg::Vector3D& vertex );
-    
+
     /** New method with track extrapolation */
     bool checkTrackHitPatternToVertexByExtrapolationAssist( const xAOD::TrackParticle *trk, const Amg::Vector3D& vertex );
-    
+
     /** Flag false if the consistituent tracks are not consistent with the vertex position */
     bool passedFakeReject( const Amg::Vector3D& FitVertex, const xAOD::TrackParticle *itrk, const xAOD::TrackParticle *jtrk );
-    
+
     /** Remove inconsistent tracks from vertices */
     void removeInconsistentTracks( WrkVrt& );
-   
+
     template<class Track> void getIntersection(Track *trk, std::vector<IntersectionPos*>& layers, const Trk::Perigee* per);
     template<class Track> void setIntersection(Track *trk, IntersectionPos *bec, const Trk::Perigee* per);
-    
+
     /** monitor the intermediate status of vertexing */
     StatusCode monitorVertexingAlgorithmStep( std::vector<WrkVrt>*, const std::string& name, bool final = false );
-    
+
     ////////////////////////////////////////////////////////////////////////////////////////
-    // 
+    //
     // Truth Information Algorithms Member Functions
     //
-    // 
-    
-    const xAOD::TruthParticle *getTrkGenParticle(const xAOD::TrackParticle*) const;
-    
+    //
+
+    static const xAOD::TruthParticle *getTrkGenParticle(const xAOD::TrackParticle*) ;
+
     StatusCode categorizeVertexTruthTopology( xAOD::Vertex *vertex );
-    
+
     void dumpTruthInformation();
-    
+
     std::vector<const xAOD::TruthVertex*> m_tracingTruthVertices;
-    
+
     ////////////////////////////////////////////////////////////////////////////////////////
-    // 
+    //
     // Additional augmentation
     //
-    // 
-    
+    //
+
     template<class LeptonFlavor>
     StatusCode augmentDVimpactParametersToLeptons( const std::string& containerName );
-    
+
   };
-  
+
 } // end of namespace bracket
 
 

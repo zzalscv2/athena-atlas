@@ -83,7 +83,7 @@ namespace VKalVrtAthena {
         wrkvrt.selectedTrackIndices.emplace_back( jtrk_id );
 
         // Attempt to think the combination is incompatible by default
-        m_incomp.emplace_back( std::pair<int, int>(itrk_id, jtrk_id) );
+        m_incomp.emplace_back( itrk_id, jtrk_id );
         
         if( std::abs( (*itrk)->d0() ) < m_jp.twoTrkVtxFormingD0Cut && std::abs( (*jtrk)->d0() ) < m_jp.twoTrkVtxFormingD0Cut ) continue;
 
@@ -174,7 +174,7 @@ namespace VKalVrtAthena {
           vertex = new xAOD::Vertex;
           twoTrksVertexContainer->emplace_back( vertex );
 
-          for( auto *trk: baseTracks ) {
+          for( const auto *trk: baseTracks ) {
 
             // Acquire link to the track
             ElementLink<xAOD::TrackParticleContainer>  trackElementLink( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), trk->index() );
@@ -629,7 +629,7 @@ namespace VKalVrtAthena {
         wrkvrt.isGood = true;
         wrkvrt.selectedTrackIndices.clear();
       
-        for(auto& index: cluster.tracks) {
+        for(const auto& index: cluster.tracks) {
           wrkvrt.selectedTrackIndices.emplace_back( index );
           baseTracks.emplace_back( m_selectedTracks->at( index ) );
         }
@@ -791,11 +791,11 @@ namespace VKalVrtAthena {
                                                       return std::find( jvrtTrks.begin(), jvrtTrks.end(), index ) != jvrtTrks.end();
                                                     } );
                 
-                significanceTuple.emplace_back( std::tuple< std::pair<unsigned, unsigned>, double, unsigned>( pair, signif, nSharedTracks ) );
+                significanceTuple.emplace_back( pair, signif, nSharedTracks );
               }
             }
             
-            if( significanceTuple.size() == 0 ) {
+            if( significanceTuple.empty() ) {
               ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": no vertex pairs are found --> exit the while loop." );
               break;
             }
@@ -995,7 +995,7 @@ namespace VKalVrtAthena {
           
         }
         
-        auto min_distance = distances.size() > 0 ? *(std::min_element( distances.begin(), distances.end() )) : AlgConsts::invalidFloat;
+        auto min_distance = !distances.empty() ? *(std::min_element( distances.begin(), distances.end() )) : AlgConsts::invalidFloat;
         
         if( mergiableVertex[index] == workVerticesContainer->rend() ) {
           ATH_MSG_VERBOSE(" > " << __FUNCTION__ << ": track " << trk << " --> none : min distance = " << min_distance );
@@ -1080,7 +1080,7 @@ namespace VKalVrtAthena {
       
       std::vector<double> distanceToPVs;
       
-      for( auto* pv : *pvs ) {
+      for( const auto* pv : *pvs ) {
         distanceToPVs.emplace_back( VKalVrtAthena::vtxVtxDistance( vertexPos, pv->position() ) );
       }
       const auto& minDistance = *( std::min_element( distanceToPVs.begin(), distanceToPVs.end() ) );
@@ -1095,7 +1095,7 @@ namespace VKalVrtAthena {
       
       // Search for candidate tracks
       for( auto itr = allTracks->begin(); itr != allTracks->end(); ++itr ) {
-        auto* trk = *itr;
+        const auto* trk = *itr;
         
         // If the track is already used for any DV candidate, reject.
         {
@@ -1478,7 +1478,7 @@ namespace VKalVrtAthena {
     ATH_CHECK( evtStore()->retrieve( trackParticleContainer, m_jp.TrackLocation) );
     
     enum { kPt, kEta, kPhi, kD0, kZ0, kErrP, kErrD0, kErrZ0, kChi2SV };
-    if( 0 == m_trkDecors.size() ) {
+    if( m_trkDecors.empty() ) {
       m_trkDecors.emplace( kPt,     SG::AuxElement::Decorator<float>("pt_wrtSV"    + m_jp.augVerString) );
       m_trkDecors.emplace( kEta,    SG::AuxElement::Decorator<float>("eta_wrtSV"   + m_jp.augVerString) ); 
       m_trkDecors.emplace( kPhi,    SG::AuxElement::Decorator<float>("phi_wrtSV"   + m_jp.augVerString) );
@@ -1494,7 +1494,7 @@ namespace VKalVrtAthena {
     std::map<const WrkVrt*, const xAOD::Vertex*> wrkvrtLinkMap;
     
     //----------------------------------------------------------
-    auto ctx = Gaudi::Hive::currentContext();
+    const auto& ctx = Gaudi::Hive::currentContext();
 
     ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": input #vertices = " << workVerticesContainer->size() );
     
@@ -1625,10 +1625,10 @@ namespace VKalVrtAthena {
       
       for( auto& pair : indicesSet ) {
         
-        auto* indices = pair.first;
-        auto& tracks  = pair.second;
+        const auto* indices = pair.first;
+        const auto& tracks  = pair.second;
         
-        for( auto& itrk : *indices ) {
+        for( const auto& itrk : *indices ) {
           const auto* trk = tracks.at( itrk );
           auto sv_perigee = m_trackToVertexTool->perigeeAtVertex(ctx, *trk, wrkvrt.vertex );
           if( !sv_perigee ) {
@@ -1660,7 +1660,7 @@ namespace VKalVrtAthena {
         auto chi2itr = wrkvrt.Chi2PerTrk.begin();
         
         for( ; ( trkitr!=tracks.end() && chi2itr!=wrkvrt.Chi2PerTrk.end() ); ++trkitr, ++chi2itr ) {
-          trackChi2Pairs.emplace_back( std::make_pair(*trkitr, *chi2itr) );
+          trackChi2Pairs.emplace_back( *trkitr, *chi2itr );
         }
         
       }

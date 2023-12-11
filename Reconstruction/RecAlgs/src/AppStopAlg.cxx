@@ -28,8 +28,8 @@ AppStopAlg::AppStopAlg(const std::string& name, ISvcLocator* pSvcLocator):
 StatusCode AppStopAlg::installHandler() {
   ATH_MSG_INFO("Handling signal: " << m_signal);
 
-  struct sigaction act;
-  struct sigaction oldact;
+  struct sigaction act{};
+  struct sigaction oldact{};
 
   act.sa_handler=nullptr;
   sigemptyset(&act.sa_mask);

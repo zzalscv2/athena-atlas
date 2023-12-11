@@ -35,8 +35,7 @@ SubjetBuilder::SubjetBuilder(const std::string& type,
 }
 
 
-SubjetBuilder::~SubjetBuilder() {
-}
+SubjetBuilder::~SubjetBuilder() = default;
 
 
 StatusCode SubjetBuilder::initialize() {

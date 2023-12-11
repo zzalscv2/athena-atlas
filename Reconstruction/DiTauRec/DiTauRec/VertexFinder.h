@@ -35,7 +35,7 @@ class VertexFinder : public DiTauToolBase {
 						float& maxJVF,
 						const EventContext& ctx) const;
 
-  float getJetVertexFraction(const xAOD::Vertex*, const std::vector<const xAOD::TrackParticle*>&, const jet::TrackVertexAssociation*) const;
+  static float getJetVertexFraction(const xAOD::Vertex*, const std::vector<const xAOD::TrackParticle*>&, const jet::TrackVertexAssociation*) ;
 
 
  private:

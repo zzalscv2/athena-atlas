@@ -52,7 +52,7 @@ namespace Rec {
      if ( !tp_cont.isValid() ) {
         ATH_MSG_WARNING( "No TrackParticle container found in TES" );
      }else{
-        for(auto tp : (*tp_cont)) trkparticles.push_back(tp);
+        for(const auto *tp : (*tp_cont)) trkparticles.push_back(tp);
      }
 
      //-- Extract Primary Vertices
@@ -61,7 +61,7 @@ namespace Rec {
        ATH_MSG_WARNING( "No Primary Vertices container found in TDS" );
      }else{
        //-- Extract PV itself
-       for ( auto v : *pv_cont ) {
+       for ( const auto *v : *pv_cont ) {
          if (v->vertexType()==xAOD::VxType::PriVtx) {    pv = v;   break; }
        }
      }
@@ -73,9 +73,9 @@ namespace Rec {
 
      if( pv &&  trkparticles.size()>2 ){
        std::unique_ptr<Trk::VxSecVertexInfo> foundVrts = m_bvertextool->findAllVertices(trkparticles,*pv);      
-       if(foundVrts && foundVrts->vertices().size()){
+       if(foundVrts && !foundVrts->vertices().empty()){
          const std::vector<xAOD::Vertex*> vtmp=foundVrts->vertices();
-         for(auto & iv :  vtmp) {
+         for(const auto & iv :  vtmp) {
            bVertexContainer->push_back(iv);
            std::vector< Trk::VxTrackAtVertex > & vtrk = iv->vxTrackAtVertex();
            TLorentzVector VSUM(0.,0.,0.,0.);

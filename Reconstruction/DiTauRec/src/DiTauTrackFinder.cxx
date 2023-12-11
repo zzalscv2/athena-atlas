@@ -36,8 +36,7 @@ DiTauTrackFinder::DiTauTrackFinder(const std::string& type,
 }
 
 
-DiTauTrackFinder::~DiTauTrackFinder() {
-}
+DiTauTrackFinder::~DiTauTrackFinder() = default;
 
 
 StatusCode DiTauTrackFinder::initialize() {
@@ -151,7 +150,7 @@ void DiTauTrackFinder::getTracksFromPV( const DiTauCandidateData* data,
 					std::vector<const xAOD::TrackParticle*> &isoTracks,
 					std::vector<const xAOD::TrackParticle*> &otherTracks) const {
     
-  for (const auto track : *pTrackParticleCont ) {
+  for (const auto *const track : *pTrackParticleCont ) {
     DiTauTrackType type = diTauTrackType(data, track, pVertex);
 
     if (type == DiTauSubjetTrack)

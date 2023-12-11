@@ -20,8 +20,7 @@ DiTauToolBase::DiTauToolBase( const std::string &type,
  
 
 DiTauToolBase::~DiTauToolBase()
-{
-}
+= default;
  
 
 StatusCode DiTauToolBase::initialize()

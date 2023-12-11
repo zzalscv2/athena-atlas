@@ -35,7 +35,7 @@ namespace Rec{
     const
     {
       std::vector<const xAOD::NeutralParticle*> neutralPartDummy(0);
-      std::vector<const xAOD::TrackParticle*>  tracksForFit(2,0);
+      std::vector<const xAOD::TrackParticle*>  tracksForFit(2,nullptr);
       std::vector<double> impact,impactError;
       std::vector<double> inpMass(2,m_massPi);
       long int      Charge;
@@ -233,7 +233,7 @@ namespace Rec{
 //
              add_edge(i,j,compatibilityGraph);
              goodVrt[NTracks*i+j]=std::vector<double>{tmpVrt.fitVertex.x(),tmpVrt.fitVertex.y(),tmpVrt.fitVertex.z()};
-             trkCount[i].push_back(std::make_tuple(j,wgtSelect)); trkCount[j].push_back(std::make_tuple(i,wgtSelect));            
+             trkCount[i].emplace_back(j,wgtSelect); trkCount[j].emplace_back(i,wgtSelect);            
          }
       }
       //=== Resolve -!----!- case to speed up cluster finding
@@ -271,8 +271,7 @@ namespace Rec{
          }
       }
 
-      return;
-   }
+        }
 
 
 }  //end of namespace

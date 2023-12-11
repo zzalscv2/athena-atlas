@@ -28,8 +28,8 @@ namespace VKalVrtAthena {
   bool VrtSecInclusive::selectTrack_z0Cut       ( const xAOD::TrackParticle* trk ) const { return ( fabs( trk->z0() ) > m_jp.z0TrkPVDstMinCut && fabs( trk->z0() ) < m_jp.z0TrkPVDstMaxCut ); }
   bool VrtSecInclusive::selectTrack_d0errCut    ( const xAOD::TrackParticle* trk ) const { const double cov11 = trk->definingParametersCovMatrix()(0,0); return cov11 < m_jp.d0TrkErrorCut*m_jp.d0TrkErrorCut; }
   bool VrtSecInclusive::selectTrack_z0errCut    ( const xAOD::TrackParticle* trk ) const { const double cov22 = trk->definingParametersCovMatrix()(1,1); return cov22 < m_jp.z0TrkErrorCut*m_jp.z0TrkErrorCut; }
-  bool VrtSecInclusive::selectTrack_d0signifCut ( const xAOD::TrackParticle*     ) const { return true; }
-  bool VrtSecInclusive::selectTrack_z0signifCut ( const xAOD::TrackParticle*     ) const { return true; }
+  bool VrtSecInclusive::selectTrack_d0signifCut ( const xAOD::TrackParticle*     ) { return true; }
+  bool VrtSecInclusive::selectTrack_z0signifCut ( const xAOD::TrackParticle*     ) { return true; }
   bool VrtSecInclusive::selectTrack_pTCut       ( const xAOD::TrackParticle* trk ) const { return trk->pt() > m_jp.TrkPtCut; }
   bool VrtSecInclusive::selectTrack_chi2Cut     ( const xAOD::TrackParticle* trk ) const { return trk->chiSquared() / (trk->numberDoF()+AlgConsts::infinitesimal) < m_jp.TrkChi2Cut; }
   
@@ -137,7 +137,7 @@ namespace VKalVrtAthena {
     if( !m_decor_isSelected ) m_decor_isSelected = std::make_unique< SG::AuxElement::Decorator< char > >( "is_selected" + m_jp.augVerString );
     
     // Setup cut functions
-    if( 0 == m_trackSelectionFuncs.size() && !m_jp.passThroughTrackSelection ) {
+    if( m_trackSelectionFuncs.empty() && !m_jp.passThroughTrackSelection ) {
       
       // These cuts are optional. Specified by JobProperty
       if( m_jp.do_PVvetoCut )             m_trackSelectionFuncs.emplace_back( &VrtSecInclusive::selectTrack_notPVassociated );
@@ -161,7 +161,8 @@ namespace VKalVrtAthena {
     
     std::vector<bool> cutBits;
     
-    for( auto func : m_trackSelectionFuncs ) cutBits.emplace_back( (this->*func)( trk ) );
+    cutBits.reserve(m_trackSelectionFuncs.size());
+for( auto func : m_trackSelectionFuncs ) cutBits.emplace_back( (this->*func)( trk ) );
       
     if( m_jp.FillHist ) {
       m_hists["trkSelCuts"]->Fill( 0 );
@@ -238,7 +239,7 @@ namespace VKalVrtAthena {
     
     
     // Loop over tracks
-    for( auto *trk : *trackParticleContainer ) { selectTrack( trk ); }
+    for( const auto *trk : *trackParticleContainer ) { selectTrack( trk ); }
     
     ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of total ID tracks   = " << trackParticleContainer->size() );
     ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Number of selected tracks   = " << m_selectedTracks->size() );
@@ -254,7 +255,7 @@ namespace VKalVrtAthena {
     ATH_CHECK( evtStore()->retrieve( muons, m_jp.MuonLocation) );
     
     
-    for( const auto muon : *muons ) {
+    for( const auto *const muon : *muons ) {
       const auto* trk = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
       
       if( !trk ) continue;
@@ -279,7 +280,7 @@ namespace VKalVrtAthena {
     const xAOD::ElectronContainer *electrons( nullptr );
     ATH_CHECK( evtStore()->retrieve( electrons, m_jp.ElectronLocation ) );
     
-    for( const auto electron : *electrons ) {
+    for( const auto *const electron : *electrons ) {
       if( 0 == electron->nTrackParticles() ) continue;
       
       // The first track is the best-matched track

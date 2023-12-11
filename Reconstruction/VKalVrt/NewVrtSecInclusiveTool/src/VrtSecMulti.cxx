@@ -120,7 +120,7 @@ namespace Rec{
 //    tie(neighbourIt, neighbourEnd) = adjacent_vertices(*vertexIt, compatibilityGraph); 
 //    for (; neighbourIt != neighbourEnd; ++neighbourIt) std::cout << *neighbourIt << " ";   std::cout << "\n"; }
 //==================================================================================
-    if((*wrkVrtSet).size()==0)return finalVertices;
+    if((*wrkVrtSet).empty())return finalVertices;
     if(msgLvl(MSG::DEBUG))printWrkSet(wrkVrtSet.get(),"Initial Vertices");
     //
     //--Count track participation in different vertices
@@ -152,7 +152,7 @@ namespace Rec{
           vrtWithCommonTrk.emplace(nTCom+sumChi2,std::make_pair(iv,jv));
           nTComMax=std::max(nTComMax,nTCom);
       } }
-      if(vrtWithCommonTrk.size()==0)break;
+      if(vrtWithCommonTrk.empty())break;
       //============================== DEBUG output
       //for(auto ku : vrtWithCommonTrk)std::cout<<" nCom="<<ku.first<<" v1="<<ku.second.first<<" v2="<<ku.second.second<<'\n';
       //if(msgLvl(MSG::DEBUG))printWrkSet(wrkVrtSet.get(),"Overlapped  Vertex Cleaning");
@@ -180,7 +180,7 @@ namespace Rec{
        refineVerticesWithCommonTracks( v1, v2, xAODwrk->listSelTracks, *state);
     }
     if(m_fillHist){
-      int cvgood=0; for(auto vrt:(*wrkVrtSet)) if(vrt.Good)cvgood++;
+      int cvgood=0; for(const auto& vrt:(*wrkVrtSet)) if(vrt.Good)cvgood++;
       Hists& h = getHists();
       h.m_hb_rawVrtN->Fill( (float)cvgood, m_w_1);
     }
@@ -202,7 +202,7 @@ namespace Rec{
 //-Remove all bad vertices from the working set
 //
     int tmpV=0; while( tmpV<(int)(*wrkVrtSet).size() )if( !(*wrkVrtSet)[tmpV].Good ) { (*wrkVrtSet).erase((*wrkVrtSet).begin()+tmpV);} else {tmpV++;}
-    if((*wrkVrtSet).size()==0)return finalVertices;
+    if((*wrkVrtSet).empty())return finalVertices;
     if(msgLvl(MSG::DEBUG))printWrkSet(wrkVrtSet.get(),"Intermediate Vertices");
     for( auto &tmpV : (*wrkVrtSet) ) tmpV.projectedVrt=MomProjDist(tmpV.vertex, primVrt, tmpV.vertexMom );  //Setup ProjectedVrt
 //----------------------------------------------------------------------------
@@ -397,7 +397,7 @@ namespace Rec{
       Hists& h = getHists();
       for(auto & vrt : (*wrkVrtSet)) {
         if( !vrt.Good || vrt.selTrk.size() != 1 ) continue;  // Good 1track vertices
-        auto xaodtp=xAODwrk->listSelTracks[vrt.selTrk[0]];
+        const auto *xaodtp=xAODwrk->listSelTracks[vrt.selTrk[0]];
         m_fitSvc->VKalGetImpact(xaodtp, primVrt.position(), 1, impact, impactError);
         double SigR2 = std::abs(impact[0]*impact[0]/impactError[0]);
         double SigZ2 = std::abs(impact[1]*impact[1]/impactError[2]);
@@ -475,7 +475,7 @@ namespace Rec{
                                                                      curVrt.trkAtVrt[0][2],
                                                               Trk::PerigeeSurface(curVrt.vertex),
                                                               std::move(CovMtxP) );
-             tmpVTAV.push_back( Trk::VxTrackAtVertex( 1., tmpMeasPer) );
+             tmpVTAV.emplace_back( 1., tmpMeasPer );
              ElementLink<xAOD::TrackParticleContainer> TEL;  TEL.setElement( xAODwrk->tmpListTracks[0] );
              const xAOD::TrackParticleContainer* cont = (const xAOD::TrackParticleContainer* ) (xAODwrk->tmpListTracks[0]->container() );
              TEL.setStorableObject(*cont);

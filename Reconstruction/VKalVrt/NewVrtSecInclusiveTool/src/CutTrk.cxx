@@ -108,7 +108,6 @@ namespace Rec{
       std::map<double,const xAOD::TrackParticle*>::reverse_iterator rt=orderedTrk.rbegin();
       selectedTracks.resize(orderedTrk.size());
       for ( int cntt=0; rt!=orderedTrk.rend(); ++rt,++cntt) {selectedTracks[cntt]=(*rt).second;}
-      return;
-   }
+        }
 
 }//end namespace

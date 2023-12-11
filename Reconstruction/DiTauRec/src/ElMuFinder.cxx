@@ -34,8 +34,7 @@ ElMuFinder::ElMuFinder(const std::string& type,
 }
 
 
-ElMuFinder::~ElMuFinder() {
-}
+ElMuFinder::~ElMuFinder() = default;
 
 
 StatusCode ElMuFinder::initialize() {
@@ -66,7 +65,7 @@ StatusCode ElMuFinder::execute(DiTauCandidateData * data,
   float dR;
   data->electrons.clear();
   if (pElCont.isValid()) {
-    for (const auto el : *pElCont ) {
+    for (const auto *const el : *pElCont ) {
       ATH_MSG_DEBUG("electron pt:" << el->pt() << " eta:" << el->eta() << " phi:" << el->phi());
       if ( !el->author(xAOD::EgammaParameters::AuthorElectron) && 
 	   !el->author(xAOD::EgammaParameters::AuthorAmbiguous) )
@@ -93,7 +92,7 @@ StatusCode ElMuFinder::execute(DiTauCandidateData * data,
   // select muons
   data->muons.clear();
   if (pMuCont.isValid()) {
-    for (const auto mu : *pMuCont) {
+    for (const auto *const mu : *pMuCont) {
       ATH_MSG_DEBUG("muon pt:" << mu->pt() << " eta:" << mu->eta() << " ");
       xAOD::Muon::Quality muonQuality = mu->quality();
       // FIXME: to be checked
