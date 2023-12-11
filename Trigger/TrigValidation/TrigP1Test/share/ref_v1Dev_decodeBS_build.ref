@@ -600,9 +600,7 @@ HLT_2mu4_bBmumux_LbPqKm_L1BPH-2M9-0DR15-2MU3VF:
   eventCount: 0
 HLT_2mu4_bBmux_BdmuDstarX_L12MU3V:
   eventCount: 0
-HLT_2mu4_bBmux_BdmuDstarX_L1BPH-7M11-25DR99-2MU3VF:
-  eventCount: 0
-HLT_2mu4_bBmux_BdmuDstarX_L1BPH-7M14-0DR25-MU5VFMU3VF:
+HLT_2mu4_bBmux_BdmuDstarX_L12MU3VF:
   eventCount: 0
 HLT_2mu4_bDimu_L12MU3V:
   eventCount: 0
@@ -727,6 +725,8 @@ HLT_2mu6_bBmumux_LbPqKm_L12MU5VF:
 HLT_2mu6_bBmumux_LbPqKm_L1BPH-2M9-2DR15-2MU5VF:
   eventCount: 0
 HLT_2mu6_bBmumux_LbPqKm_L1LFV-MU5VF:
+  eventCount: 0
+HLT_2mu6_bBmux_BdmuDstarX_L12MU5VF:
   eventCount: 0
 HLT_2mu6_bDimu_L12MU5VF:
   eventCount: 0
@@ -6917,6 +6917,8 @@ HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan_L1MU14FCH_jXE70:
   eventCount: 0
 HLT_mu20_mu2noL1_invmJPsiOS_L1MU14FCH:
   eventCount: 0
+HLT_mu20_mu4_bBmux_BdmuDstarX_L1MU14FCH:
+  eventCount: 0
 HLT_mu22_2mu4noL1_L1MU14FCH:
   eventCount: 0
 HLT_mu22_L1MU14FCH:
@@ -6956,6 +6958,8 @@ HLT_mu23_msonly_L1MU18VFCH:
 HLT_mu23_mu10noL1_L1MU18VFCH:
   eventCount: 0
 HLT_mu23_mu2noL1_invmJPsiOS_L1MU18VFCH:
+  eventCount: 0
+HLT_mu23_mu4_bBmux_BdmuDstarX_L1MU18VFCH:
   eventCount: 0
 HLT_mu23_mu8noL1_L1MU18VFCH:
   eventCount: 0
@@ -8094,10 +8098,14 @@ HLT_mu6_mu4_bBmumux_LbPqKm_L1MU5VF_2MU3VF:
   eventCount: 0
   stepFeatures:
     0: 4
-HLT_mu6_mu4_bBmux_BdmuDstarX_L1BPH-7M14-0DR25-MU5VFMU3VF:
+HLT_mu6_mu4_bBmux_BdmuDstarX_L1MU5VF_2MU3V:
   eventCount: 0
   stepFeatures:
-    0: 2
+    0: 4
+HLT_mu6_mu4_bBmux_BdmuDstarX_L1MU5VF_2MU3VF:
+  eventCount: 0
+  stepFeatures:
+    0: 4
 HLT_mu6_mu4_bDimu_L1BPH-2M9-0DR15-C-MU5VFMU3V:
   eventCount: 0
 HLT_mu6_mu4_bDimu_L1BPH-2M9-0DR15-MU5VFMU3V:
