@@ -216,11 +216,12 @@ class RootMergeStep(Step):
                 file_list_to_check.remove(new_name)
                 file_list_to_check.append(self.merged_file)
         self.log.debug('%s checking if the input files exist: %s', self.name, str(file_list_to_check))
-        for file_name in file_list_to_check:
-            if len(glob.glob(file_name)) < 1:
-                self.log.warning('%s: file %s requested to be merged but does not exist', self.name, file_name)
-                self.result = 1
-                return self.result, '# (internal) {} in={} out={} -> failed'.format(self.name, self.input_file, self.merged_file)
+        if not dry_run:
+            for file_name in file_list_to_check:
+                if len(glob.glob(file_name)) < 1:
+                    self.log.warning('%s: file %s requested to be merged but does not exist', self.name, file_name)
+                    self.result = 1
+                    return self.result, '# (internal) {} in={} out={} -> failed'.format(self.name, self.input_file, self.merged_file)
         return super(RootMergeStep, self).run(dry_run)
 
 
