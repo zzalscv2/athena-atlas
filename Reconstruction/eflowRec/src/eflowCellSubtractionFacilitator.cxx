@@ -348,7 +348,7 @@ eflowCellSubtractionFacilitator::subtractCells(
   /* Update the cluster four-momenta */
   updateClusterKinematics(tracksClusters);
 
-  if (!(orderedCells.mapSize() > 0 && eSubtracted < eExpect)) {
+  if (orderedCells.mapSize() <= 0 || eSubtracted >= eExpect) {
     return sigmaEExpect;
   }
 

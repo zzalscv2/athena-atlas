@@ -102,7 +102,7 @@ StatusCode PFTauFlowElementAssoc::execute(const EventContext &ctx) const {
         // Link the tau and the neutral FE if the cluster indices match
         if (tauClusterIndex == FEClusterIndex) {
           FETauJetLinks.emplace_back(*tauJetReadHandle,tau->index() );
-          tauNeutralFEVec.at(tau->index()).push_back( FELink_t(*neutralFEReadHandle, FE->index()) );
+          tauNeutralFEVec.at(tau->index()).emplace_back(*neutralFEReadHandle, FE->index() );
         }
 
       } // end tau cluster loop
@@ -142,7 +142,7 @@ StatusCode PFTauFlowElementAssoc::execute(const EventContext &ctx) const {
         // Link the tau and the charged FE if the track indices match
         if (tauIDTrackIndex == FETrackIndex) {
           FETauJetLinks.emplace_back(*tauJetReadHandle,tau->index() );
-          tauChargedFEVec.at(tau->index()).push_back( FELink_t(*chargedFEReadHandle, FE->index()) );
+          tauChargedFEVec.at(tau->index()).emplace_back(*chargedFEReadHandle, FE->index() );
         }
       } // end tau track loop
     } // end tau loop

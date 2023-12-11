@@ -8,7 +8,7 @@ class PFClusterWidthCalculator {
     public:
     
     PFClusterWidthCalculator();
-    ~PFClusterWidthCalculator();
+    ~PFClusterWidthCalculator() = default;
     
     std::pair<double,double> getPFClusterCoordinateWidth(const std::vector<double>& eta, const std::vector<double>& phi,const double& clusterEta, const double& clusterPhi, unsigned int nCells);
     double getEtaMean() const {return m_etaMean;}

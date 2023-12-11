@@ -27,7 +27,7 @@ StatusCode PFClusterWidthDecorator::execute() {
       return StatusCode::SUCCESS;
     }
 
-    for (const auto thisCluster : *clusterContainerWidthEta) {
+    for (const auto *const thisCluster : *clusterContainerWidthEta) {
         const CaloClusterCellLink* theCellLinks = thisCluster->getCellLinks();
         if (!theCellLinks) {
           ATH_MSG_WARNING("No cell links found for cluster");
