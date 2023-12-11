@@ -6,11 +6,13 @@
 #include "AsgMessaging/StatusCode.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include <AsgTools/AsgToolConfig.h>
+
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PATInterfaces/SystematicVariation.h"
 #include "PathResolver/PathResolver.h"
-#include "xAODJet/JetContainer.h"
 #include "TFile.h"
+#include "xAODJet/JetContainer.h"
+#include <memory>
 
 
 namespace CP {
@@ -201,12 +203,12 @@ StatusCode JetJvtEfficiency::initialize(){
     return StatusCode::FAILURE;
   }
 
-  m_jetEtaAcc.reset(new SG::AuxElement::ConstAccessor<float>(m_jetEtaName));
-  m_sfDec.reset(new SG::AuxElement::Decorator< float>(m_sf_decoration_name));
-  m_isHSDec.reset(new SG::AuxElement::Decorator<char>(m_isHS_decoration_name));
-  m_isHSAcc.reset(new SG::AuxElement::ConstAccessor<char>(m_isHS_decoration_name));
+  m_jetEtaAcc = std::make_unique<SG::AuxElement::ConstAccessor<float>>(m_jetEtaName);
+  m_sfDec = std::make_unique<SG::AuxElement::Decorator< float>>(m_sf_decoration_name);
+  m_isHSDec = std::make_unique<SG::AuxElement::Decorator<char>>(m_isHS_decoration_name);
+  m_isHSAcc = std::make_unique<SG::AuxElement::ConstAccessor<char>>(m_isHS_decoration_name);
   if (!m_ORdec.empty()) {
-    m_passORAcc.reset(new SG::AuxElement::ConstAccessor<char>(m_ORdec));
+    m_passORAcc = std::make_unique<SG::AuxElement::ConstAccessor<char>>(m_ORdec);
   }
 
   return StatusCode::SUCCESS;
@@ -246,7 +248,7 @@ CorrectionCode JetJvtEfficiency::applyAllEfficiencyScaleFactor(const xAOD::IPart
     ATH_MSG_ERROR("Unable to match truthJets to jets in tagTruth() method");
     return CP::CorrectionCode::Error;
   }
-  for(const auto ipart : *jets) {
+  for(const auto *const ipart : *jets) {
     if (ipart->type()!=xAOD::Type::Jet) {
       ATH_MSG_ERROR("Input is not a jet");
       return CP::CorrectionCode::Error;
@@ -330,10 +332,10 @@ StatusCode JetJvtEfficiency::sysApplySystematicVariation(const CP::SystematicSet
 }
 
 StatusCode JetJvtEfficiency::tagTruth(const xAOD::IParticleContainer *jets,const xAOD::IParticleContainer *truthJets) {
-    for(const auto jet : *jets) {
+    for(const auto *const jet : *jets) {
       bool ishs = false;
       bool ispu = true;
-      for(const auto tjet : *truthJets) {
+      for(const auto *const tjet : *truthJets) {
         if (tjet->p4().DeltaR(jet->p4())<0.3 && tjet->pt()>10e3) ishs = true;
         if (tjet->p4().DeltaR(jet->p4())<0.6) ispu = false;
       }

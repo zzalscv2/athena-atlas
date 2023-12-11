@@ -117,7 +117,7 @@ namespace CP {
       
     IPair getModulePosition(const xAOD::Jet& jet, JTC::Hole module);
 
-    void loadModulesFromMap(const xAOD::Jet& jet, JTC::TS& status, std::map<std::string,JTC::Hole> hmap, JTC::PART part=JTC::PART::LB, JTC::TYPE type=JTC::TYPE::DB);
+    void loadModulesFromMap(const xAOD::Jet& jet, JTC::TS& status, const std::map<std::string,JTC::Hole>& hmap, JTC::PART part=JTC::PART::LB, JTC::TYPE type=JTC::TYPE::DB);
     StatusCode loadAllModules(const xAOD::Jet& jet, JTC::TS& status);
 
     JTC::Hole partModToHole(int part, int mod); //translate to eta-phi coordinates (+dummy IOV)

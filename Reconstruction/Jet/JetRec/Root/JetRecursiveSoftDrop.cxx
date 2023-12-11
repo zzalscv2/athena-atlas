@@ -27,8 +27,7 @@ JetRecursiveSoftDrop::JetRecursiveSoftDrop(const std::string& name)
 
 //**********************************************************************
 
-JetRecursiveSoftDrop::~JetRecursiveSoftDrop() {
-}
+JetRecursiveSoftDrop::~JetRecursiveSoftDrop() = default;
 
 //**********************************************************************
 

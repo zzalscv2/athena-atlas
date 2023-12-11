@@ -21,12 +21,12 @@ vector<fastjet::PseudoJet> SubjetFinder::result(const fastjet::PseudoJet &jet) c
 {
   vector<fastjet::PseudoJet> constit_pseudojets = jet.constituents();
   vector<fastjet::PseudoJet> subjets;
-  if(constit_pseudojets.size() == 0) { 
+  if(constit_pseudojets.empty()) { 
     cout << "Warning in SubjetFinder: jet has no constituents" << endl;
     return subjets;
   }
 
-  fastjet::ClusterSequence *clust_seq = NULL;
+  fastjet::ClusterSequence *clust_seq = nullptr;
 
   if (m_fj_jetalg==fastjet::ee_kt_algorithm) {
     fastjet::JetDefinition jet_def = fastjet::JetDefinition(fastjet::ee_kt_algorithm);
@@ -46,7 +46,7 @@ vector<fastjet::PseudoJet> SubjetFinder::result(const fastjet::PseudoJet &jet) c
     subjets = fastjet::sorted_by_pt(clust_seq->exclusive_jets_up_to(m_exclusivenjets));
   }
 
-  if(subjets.size() == 0) {
+  if(subjets.empty()) {
     delete clust_seq;
   }
   else {

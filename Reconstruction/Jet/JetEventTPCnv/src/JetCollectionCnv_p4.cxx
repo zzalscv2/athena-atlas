@@ -88,7 +88,7 @@ JetCollectionCnv_p4::persToTrans( const JetCollection_p4* pers,
   trans->reserve(pers->size());
 
   for (const TPObjRef& ref : *pers) {
-    trans->push_back(createTransFromPStore((ITPConverterFor<Jet>**)0, ref, msg));
+    trans->push_back(createTransFromPStore((ITPConverterFor<Jet>**)nullptr, ref, msg));
   }
   
   // now each jet knows its ROI
@@ -104,7 +104,6 @@ JetCollectionCnv_p4::persToTrans( const JetCollection_p4* pers,
   
   msg << MSG::DEBUG << "Loading JetCollection from persistent state [OK]"
       << endmsg;
-  return;
 }
 
 void 
@@ -122,15 +121,11 @@ JetCollectionCnv_p4::transToPers( const JetCollection* trans,
   pers->reserve(trans->size());
 
   for (const Jet* jet : *trans) {
-    pers->push_back(toPersistent((ITPConverterFor<Jet>**)0, jet, msg));
+    pers->push_back(toPersistent((ITPConverterFor<Jet>**)nullptr, jet, msg));
   }
 
   // RS now deal with the JetKeyDescriptor
   DataLinkCnv_p1<DataLink<JetKeyDescriptor> > JetKeyStoreCnv;
   JetKeyStoreCnv.transToPers( &trans->m_keyStore, &pers->m_keyStore, msg );
-  
-//   msg << MSG::DEBUG << "Creating persistent state of JetCollection [OK]"
-//       << endmsg;
-  return;
 }
 

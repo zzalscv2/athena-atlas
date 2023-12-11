@@ -54,7 +54,7 @@ int TrackVertexAssociationTool::execute() const {
     return 1;
   }
 
-  auto trackContainer = handle_tracks.cptr();
+  const auto *trackContainer = handle_tracks.cptr();
 
 
   // If this is a view container, then we assume that it contains elements from only one owning container
@@ -82,7 +82,7 @@ int TrackVertexAssociationTool::execute() const {
     return 2;
   }
 
-  auto vertexContainer = handle_vert.cptr();
+  const auto *vertexContainer = handle_vert.cptr();
 
   auto useCustom = m_tvaTool.empty();
   auto tva = makeTrackVertexAssociation(trackContainer,

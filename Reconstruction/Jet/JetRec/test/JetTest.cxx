@@ -72,8 +72,8 @@ JetContainer* makeJetContainer_(const std::vector<JetFourMom_t>& v,
 
 JetContainer* makeJetContainer_(bool isTrigger=false, bool storeIt = true) {
   std::vector<JetFourMom_t> inMomenta;
-  inMomenta.push_back(JetFourMom_t(50., 0., 0., 0.)); //pt, eta, phi, m
-  inMomenta.push_back(JetFourMom_t(60., 0., 0., 0.)); //pt, eta, phi, m
+  inMomenta.emplace_back(50., 0., 0., 0.); //pt, eta, phi, m
+  inMomenta.emplace_back(60., 0., 0., 0.); //pt, eta, phi, m
   return makeJetContainer_(inMomenta, isTrigger, storeIt);
 }
 
@@ -105,8 +105,8 @@ TEST_F(JetTest, jetFunctions) {
   std::string label("EMTopo");
 
   std::vector<JetFourMom_t> outMomenta;
-  outMomenta.push_back(JetFourMom_t(100., 0., 0., 0.)); //pt, eta, phi, m
-  outMomenta.push_back(JetFourMom_t(110., 0., 0., 0.)); //pt, eta, phi, m
+  outMomenta.emplace_back(100., 0., 0., 0.); //pt, eta, phi, m
+  outMomenta.emplace_back(110., 0., 0., 0.); //pt, eta, phi, m
 
   JetContainer* outputs = makeJetContainer_(outMomenta, false);
   auto jet0 = (*outputs)[0];
@@ -128,8 +128,8 @@ TEST_F(JetTest, jetFunctions) {
 TEST_F(JetTest, triggerJetFunctions) {
 
   std::vector<JetFourMom_t> outMomenta;
-  outMomenta.push_back(JetFourMom_t(100., 0., 0., 0.)); //pt, eta, phi, m
-  outMomenta.push_back(JetFourMom_t(110., 0., 0., 0.)); //pt, eta, phi, m
+  outMomenta.emplace_back(100., 0., 0., 0.); //pt, eta, phi, m
+  outMomenta.emplace_back(110., 0., 0., 0.); //pt, eta, phi, m
 
   JetContainer* outputs = makeJetContainer_(outMomenta, true);
   auto jet0 = (*outputs)[0];

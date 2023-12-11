@@ -36,16 +36,14 @@
 #include <vector>
 using std::vector;
 
-typedef ElementLinkCnv_p3<ElementLink<VxContainer> > VxLinkCnv_t;
+using VxLinkCnv_t = ElementLinkCnv_p3<ElementLink<VxContainer>>;
 
 // pre-allocate converters
 static const VxLinkCnv_t    vxCnv;
 
 
 
-typedef NavigableCnv_p2<
-  Navigable<INavigable4MomentumCollection,double>, float
-           > NavigableCnv_t;
+using NavigableCnv_t = NavigableCnv_p2<Navigable<INavigable4MomentumCollection, double>, float>;
 
 // pre-allocate converters
 // static const P4ImplPxPyPzECnv_p1   momCnv;
@@ -125,18 +123,18 @@ void JetCnv_p6::persToTrans( const Jet_p6* pers,
   // first. We are dealing with pointers here, not actual objects.
   //
   
-  if (pers->m_tagJetInfo.size() == 0) {
-    if (trans->m_tagInfoStore != 0) {
+  if (pers->m_tagJetInfo.empty()) {
+    if (trans->m_tagInfoStore != nullptr) {
       trans->m_tagInfoStore->clear();
     }
   } else {
-    if (trans->m_tagInfoStore != 0) {
+    if (trans->m_tagInfoStore != nullptr) {
       delete trans->m_tagInfoStore;
     }
     
     vector<const JetTagInfoBase *> *ptags =
       m_taginfoCnv.createTransientConst(&(pers->m_tagJetInfo), msg);
-    if (ptags != 0) {
+    if (ptags != nullptr) {
       vector<const JetTagInfoBase*> &tags (*ptags);
       for (unsigned int i = 0; i < tags.size(); i++) {
 	trans->addInfo(tags[i]);
@@ -150,39 +148,38 @@ void JetCnv_p6::persToTrans( const Jet_p6* pers,
   // above.
   //
   
-  if (pers->m_associations.size() == 0) {
-    if (trans->m_assocStore != 0) {
+  if (pers->m_associations.empty()) {
+    if (trans->m_assocStore != nullptr) {
       trans->m_assocStore->clear();
     }
   } else {
-    if (trans->m_assocStore != 0) {
+    if (trans->m_assocStore != nullptr) {
       delete trans->m_assocStore;
     }
     trans->m_assocStore = new vector<const JetAssociationBase*> ();
     vector<const JetAssociationBase *> *pass =
       m_tagAssCnv.createTransientConst(&(pers->m_associations), msg);
 
-    if (pass != 0) {
+    if (pass != nullptr) {
       vector<const JetAssociationBase *> &ass (*pass);
       vector<const JetAssociationBase *> &store (*trans->m_assocStore);
       for (unsigned int i = 0; i < ass.size(); i++) {
 	unsigned int index = ass[i]->m_keyIndex;
 	if (index >= store.size()) {
-	  store.resize(index+1, 0);
+	  store.resize(index+1, nullptr);
 	}
 	store[index] = ass[i];
-	ass[i] = 0; // Make sure nothing bad happens.
+	ass[i] = nullptr; // Make sure nothing bad happens.
       }
       delete pass;
     }
   }
 
   // Force PseudoJet pointer to null
-  trans->setFastjetPtr(NULL);
+  trans->setFastjetPtr(nullptr);
   
   if(msg.level() == MSG::DEBUG )   msg << MSG::DEBUG << "Loaded Jet from persistent state [OK]. Final e=" << trans->e()
 				       << endmsg;
-  return;
 }
 
 
@@ -241,11 +238,11 @@ void JetCnv_p6::transToPers( const Jet* trans,
   /// This most frequently happens due to thinning.
   ///
   
-  if (trans->m_tagInfoStore != 0) {
+  if (trans->m_tagInfoStore != nullptr) {
     vector<const JetTagInfoBase*> goodTagInfo;
     const vector<const JetTagInfoBase*> &tagInfo(*(trans->m_tagInfoStore));
     for (unsigned int i = 0; i < tagInfo.size(); i++) {
-      if (tagInfo[i] != 0) {
+      if (tagInfo[i] != nullptr) {
         goodTagInfo.push_back(tagInfo[i]);
       }
     }
@@ -256,12 +253,12 @@ void JetCnv_p6::transToPers( const Jet* trans,
   /// Same logic for the ass store as the tag info store.
   ///
   
-  if (trans->m_assocStore != 0) {
+  if (trans->m_assocStore != nullptr) {
     vector<const JetAssociationBase*> goodAssInfo;
     const vector<const JetAssociationBase*> &assInfo(*trans->m_assocStore);
     
     for (unsigned int i = 0; i < assInfo.size(); i++) {
-      if( (assInfo[i] != 0) && 
+      if( (assInfo[i] != nullptr) && 
           ( ! bool( dynamic_cast<const JetINav4MomAssociation* >(assInfo[i])) )  ){// don't save JetINav4MomAssociation : we don't have persistant class. THIS IS AN AWFULL HACK
 	goodAssInfo.push_back(assInfo[i]);
       }
@@ -273,5 +270,4 @@ void JetCnv_p6::transToPers( const Jet* trans,
   if(msg.level() == MSG::DEBUG ){
     msg << MSG::DEBUG << "Created persistent state of Jet [OK]" << endmsg;
   }
-  return;
-}
+  }

@@ -13,7 +13,7 @@ using namespace JetSubStructureUtils;
 double ZCut::result(const fastjet::PseudoJet &jet) const
 {
   vector<fastjet::PseudoJet> constit_pseudojets = jet.constituents();
-  if(constit_pseudojets.size() == 0) return -1;
+  if(constit_pseudojets.empty()) return -1;
 
   fastjet::JetDefinition jet_def = fastjet::JetDefinition(fastjet::kt_algorithm, 1.5,
                                                           fastjet::E_scheme, fastjet::Best);
@@ -26,7 +26,7 @@ double ZCut::result(const fastjet::PseudoJet &jet) const
   vector<fastjet::PseudoJet> subjets = kt_clust_seq.exclusive_jets((int)m_nSubJets);
 
   // Find last split jet (cluster_hist_index should be highest for the last created jet)
-  fastjet::PseudoJet *lastSplitSubjet = NULL;
+  fastjet::PseudoJet *lastSplitSubjet = nullptr;
   int max_cluster_hist_index = -1;
   for(size_t iSubjet=0; iSubjet < subjets.size(); iSubjet++) {
     fastjet::PseudoJet parent1, parent2;
@@ -37,7 +37,7 @@ double ZCut::result(const fastjet::PseudoJet &jet) const
     }
   }
 
-  if(lastSplitSubjet == NULL) {
+  if(lastSplitSubjet == nullptr) {
     //None of the subjets were split
     return 0.0;
   }

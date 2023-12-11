@@ -278,7 +278,7 @@ fastjet::AreaDefinition JetClusterer::buildAreaDefinition(bool &seedsok) const
     {
       ATH_MSG_ERROR("Unable to retrieve event info");
       seedsok = false;
-      return fastjet::AreaDefinition();
+      return {};
     }
 
     JetClustererHelper::seedsFromEventInfo(evtInfoHandle.cptr(), seeds);

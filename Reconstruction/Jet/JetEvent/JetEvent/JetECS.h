@@ -63,7 +63,7 @@ class JetECS
 
   // Constructor/destructor
   JetECS(double e, double eta, double phi, double m);
-  ~JetECS();
+  ~JetECS() = default;
 
   // Access functions
   double jetRawE() const { return m_jetRawE; }

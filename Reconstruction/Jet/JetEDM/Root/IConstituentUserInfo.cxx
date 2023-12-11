@@ -18,7 +18,7 @@ IConstituentUserInfo::Index IConstituentUserInfo::index() const {
 //**********************************************************************
 
 const LabelIndex* IConstituentUserInfo::labelMap() const {
-  return 0;
+  return nullptr;
 }
 
 //**********************************************************************

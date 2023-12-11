@@ -74,11 +74,11 @@ StatusCode JetQGTaggerVariableTool::decorate(const xAOD::JetContainer& jetCont) 
     return StatusCode::FAILURE;
   }
 
-  auto vertices = vertexContainer.cptr();
+  const auto *vertices = vertexContainer.cptr();
 
   ATH_MSG_DEBUG("Successfully retrieved VertexContainer: " << m_vertexContainer_key.key());
 
-  if (vertices->size() == 0 ) {
+  if (vertices->empty() ) {
     ATH_MSG_WARNING("There are no vertices in the container. Exiting");
 
     for(const xAOD::Jet* jet : jetCont){
@@ -103,7 +103,7 @@ StatusCode JetQGTaggerVariableTool::decorate(const xAOD::JetContainer& jetCont) 
     return StatusCode::FAILURE;
   }
 
-  auto tva = handle_tva.cptr();
+  const auto *tva = handle_tva.cptr();
 
   //Loop over the jets
   for(const xAOD::Jet* jet : jetCont){
@@ -181,7 +181,7 @@ StatusCode JetQGTaggerVariableTool::decorate(const xAOD::JetContainer& jetCont) 
       return StatusCode::FAILURE;
     }
 
-    auto eventInfo = eventInfoContainer.cptr();
+    const auto *eventInfo = eventInfoContainer.cptr();
 
     bool isMC = eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
     int tntrk = 0;

@@ -12,7 +12,7 @@ PFOMonitorAlgorithm::PFOMonitorAlgorithm( const std::string& name, ISvcLocator* 
 {}
 
 
-PFOMonitorAlgorithm::~PFOMonitorAlgorithm() {}
+PFOMonitorAlgorithm::~PFOMonitorAlgorithm() = default;
 
 
 StatusCode PFOMonitorAlgorithm::initialize() {

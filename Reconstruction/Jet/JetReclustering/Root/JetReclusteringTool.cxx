@@ -34,7 +34,7 @@
 #include "JetSubStructureMomentTools/NSubjettinessTool.h"
 #endif
 
-JetReclusteringTool::JetReclusteringTool(std::string name) :
+JetReclusteringTool::JetReclusteringTool(const std::string& name) :
   AsgTool(name),
   m_jetFilterTool("JetFilterTool/JetFilterTool_" + this->name()),
   m_inputJetFilterTool("JetRecTool/JetRec_InputJetFilterTool_" + this->name()),
@@ -293,5 +293,4 @@ void JetReclusteringTool::print() const {
     ATH_MSG_INFO(m_APP_NAME << " has not been initialized yet");
   }
 
-  return;
-}
+  }

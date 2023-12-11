@@ -23,7 +23,7 @@ StatusCode JetContainerHistoFiller::initialize() {
   CHECK( m_jetContainerName.initialize() );
   CHECK( m_EventInfoKey.initialize() );
 
-  if(m_histoDir=="") m_histoDir =  m_jetContainerName.key()+"/";
+  if(m_histoDir.empty()) m_histoDir =  m_jetContainerName.key()+"/";
 
   return StatusCode::SUCCESS;
 }

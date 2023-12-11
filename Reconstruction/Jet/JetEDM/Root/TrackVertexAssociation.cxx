@@ -13,7 +13,7 @@ namespace jet {
     if(Ntracks>0 && trkCont->ownPolicy() != SG::OWN_ELEMENTS) {
       Ntracks = trkCont->front()->container()->size_v();
     }
-    m_vertex.resize(Ntracks, 0 );
+    m_vertex.resize(Ntracks, nullptr );
   }
 
   void TrackVertexAssociation::associate(const xAOD::TrackParticle* trk, const xAOD::Vertex* vtx){

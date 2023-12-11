@@ -38,5 +38,4 @@ StatusCode ClusterAtEMScaleTool::process_impl(xAOD::IParticleContainer* cont) co
 }
 
 
-ClusterAtEMScaleTool::~ClusterAtEMScaleTool(){
-}
+ClusterAtEMScaleTool::~ClusterAtEMScaleTool()= default;

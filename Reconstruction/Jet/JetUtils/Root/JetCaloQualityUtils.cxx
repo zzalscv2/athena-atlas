@@ -82,7 +82,7 @@ namespace jet {
 
   double JetCaloQualityUtils::presamplerFraction(const Jet* jet)
   {
-    const std::vector<float> einsampling = eperSamplAcc(*jet);
+    const std::vector<float>& einsampling = eperSamplAcc(*jet);
 
     double e_pres = einsampling[CaloSampling::PreSamplerB] + einsampling[CaloSampling::PreSamplerE];
 

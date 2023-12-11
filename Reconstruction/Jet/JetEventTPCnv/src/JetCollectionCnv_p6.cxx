@@ -94,7 +94,7 @@ JetCollectionCnv_p6::persToTrans( const JetCollection_p6* pers,
   // std::cout << " JetCollectionCnv_p6  dalink "<< trans->m_momentMapLink.isValid() << "  "<< trans->m_momentMapLink.dataID() << std::endl;
 
   for (const TPObjRef& ref : *pers) {
-    Jet* j = createTransFromPStore((ITPConverterFor<Jet>**)0, ref, msg);
+    Jet* j = createTransFromPStore((ITPConverterFor<Jet>**)nullptr, ref, msg);
     size_t id = j->m_jetId;
     trans->push_back(j);
     //std::cout << " reading jet "<< id << "  "<< pers->m_jetIdBugFixed << std::endl;
@@ -106,11 +106,10 @@ JetCollectionCnv_p6::persToTrans( const JetCollection_p6* pers,
 
 
   // Force PseudoJet pointer to null
-  trans->setFastjetClustSeq(NULL);
+  trans->setFastjetClustSeq(nullptr);
 
   msg << MSG::DEBUG << "Loading JetCollection from persistent state [OK]"
       << endmsg;
-  return;
 }
 
 void 
@@ -131,14 +130,10 @@ JetCollectionCnv_p6::transToPers( const JetCollection* trans,
   pers->reserve(trans->size());
 
   for (const Jet* jet : *trans) {
-    pers->push_back(toPersistent((ITPConverterFor<Jet>**)0, jet, msg));
+    pers->push_back(toPersistent((ITPConverterFor<Jet>**)nullptr, jet, msg));
   }
 
   // RS now deal with the JetKeyDescriptor
   DataLinkCnv_p2<DataLink<JetKeyDescriptor> > JetKeyStoreCnv;
   JetKeyStoreCnv.transToPers( &trans->m_keyStore, &pers->m_keyStore, msg );
-  
-//   msg << MSG::DEBUG << "Creating persistent state of JetCollection [OK]"
-//       << endmsg;
-  return;
 }

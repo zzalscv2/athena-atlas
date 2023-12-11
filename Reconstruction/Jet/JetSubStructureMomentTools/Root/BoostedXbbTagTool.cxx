@@ -31,7 +31,7 @@ int BoostedXbbTagTool::modifyJet(xAOD::Jet &jet) const
 {
   static const JetSubStructureUtils::BoostedXbbTag tagger(m_working_point, m_recommendations_file, m_boson_type, m_algorithm_name, m_num_bTags, m_decor_prefix, m_debug, m_verbose);
 
-  const xAOD::MuonContainer *muons = 0;
+  const xAOD::MuonContainer *muons = nullptr;
   StatusCode sc = evtStore()->retrieve(muons, m_muon_container_name);
   if ( sc.isFailure() ) {
     ATH_MSG_ERROR("Unable to retrieve MuonContainer from event store: " << m_muon_container_name);

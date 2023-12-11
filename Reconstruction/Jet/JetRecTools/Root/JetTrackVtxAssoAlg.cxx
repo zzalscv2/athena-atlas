@@ -40,13 +40,13 @@ StatusCode JetTrackVtxAssoAlg::execute(const EventContext& ctx) const {
     return StatusCode::FAILURE;
   }
 
-  auto trackContainer = handle_tracks.cptr();
+  const auto *trackContainer = handle_tracks.cptr();
 
   
   // If this is a view container, then we assume that it contains elements from only one owning container
   if ( trackContainer->ownPolicy() != SG::OWN_ELEMENTS ) {
     bool oneOwningContainer(true);
-    for(const auto track : *trackContainer) {
+    for(const auto *const track : *trackContainer) {
       if(track->container() != trackContainer->front()->container()) {
 	oneOwningContainer=false;
 	break;
@@ -68,7 +68,7 @@ StatusCode JetTrackVtxAssoAlg::execute(const EventContext& ctx) const {
     return StatusCode::FAILURE;
   }
 
-  auto vertexContainer = handle_vert.cptr();
+  const auto *vertexContainer = handle_vert.cptr();
 
   auto useCustom = m_tvaTool.empty();
   auto tva = makeTrackVertexAssociation(trackContainer,

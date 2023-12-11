@@ -31,8 +31,7 @@ JetSoftDrop::JetSoftDrop(const std::string& name)
 
 //**********************************************************************
 
-JetSoftDrop::~JetSoftDrop() {
-}
+JetSoftDrop::~JetSoftDrop() = default;
 
 //**********************************************************************
 

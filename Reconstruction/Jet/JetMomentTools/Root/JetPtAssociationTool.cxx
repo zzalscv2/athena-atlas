@@ -68,7 +68,7 @@ StatusCode JetPtAssociationTool::decorate(const xAOD::JetContainer& jets) const 
       return StatusCode::FAILURE;
     }
 
-    auto pjets = handle.cptr();
+    const auto *pjets = handle.cptr();
 
     // Match associated particle to jets.
     FloatVector ptfs;
@@ -110,13 +110,13 @@ ptfrac(const APVector& apins, const xAOD::JetContainer& jets, FloatVector& ptfs)
   ATH_MSG_DEBUG("Match jet count: " << jets.size());
   for ( unsigned int ijet=0; ijet<jets.size(); ++ijet ) {
     const Jet* pjet = jets[ijet];
-    if ( pjet == 0 ) return -3;
+    if ( pjet == nullptr ) return -3;
     APVector apouts;
     double ptsum_target = 0.;
     match(apins, *pjet, apouts, ptsum_target);
     double ptsum = 0.0;
     for ( const IParticle* ppar : apouts ) {
-      if ( ppar == 0 ) return -4;
+      if ( ppar == nullptr ) return -4;
       ptsum += ppar->pt();
     }
     ptfs[ijet] = ptsum/ptsum_target;

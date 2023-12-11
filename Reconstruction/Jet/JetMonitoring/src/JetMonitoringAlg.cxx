@@ -18,7 +18,7 @@ JetMonitoringAlg::JetMonitoringAlg( const std::string& name, ISvcLocator* pSvcLo
 }
 
 
-JetMonitoringAlg::~JetMonitoringAlg() {}
+JetMonitoringAlg::~JetMonitoringAlg() = default;
 
 
 

@@ -24,9 +24,7 @@
 // JetEventTPCnv includes
 #include "JetEventTPCnv/JetCnv_p1.h"
 
-typedef NavigableCnv_p1<
-           Navigable<INavigable4MomentumCollection,double>
-           > NavigableCnv_t;
+using NavigableCnv_t = NavigableCnv_p1<Navigable<INavigable4MomentumCollection, double>>;
 
 // pre-allocate converters
 static const P4ImplPxPyPzECnv_p1   momCnv;
@@ -66,8 +64,6 @@ void JetCnv_p1::persToTrans( const Jet_p1* pers,
 
   static const Jet jtmp;
   trans->particleBase() = jtmp.particleBase();
-  
-  return;
 }
 
 void JetCnv_p1::transToPers( const Jet* /*trans*/, 
@@ -83,5 +79,4 @@ void JetCnv_p1::transToPers( const Jet* /*trans*/,
 
 //   msg << MSG::DEBUG << "Created persistent state of Jet [OK]"
 //       << endmsg;
-  return;
-}
+  }

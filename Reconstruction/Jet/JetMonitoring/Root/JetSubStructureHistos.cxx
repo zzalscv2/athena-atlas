@@ -48,7 +48,7 @@ int JetSubStructureHistos::buildHistos(){
     // build a qualifier in the form "(EMScale, Leading Jet, ...)"
     TString qualif = "(";
     TString tags[] = { scaleTag};
-    for(auto t : tags ) { if(qualif != "(") qualif+=",";qualif += t; }
+    for(const auto& t : tags ) { if(qualif != "(") qualif+=",";qualif += t; }
     qualif += ")";
     // reset all titles :
     for(auto& hdata : m_vBookedHistograms ){

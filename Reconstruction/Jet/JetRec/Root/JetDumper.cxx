@@ -16,8 +16,8 @@ using xAOD::Jet;
 using jet::PseudoJetVector;
 using jet::IConstituentUserInfo;
 
-typedef JetDumper::Name Name;
-typedef JetDumper::NameList NameList;
+using Name = JetDumper::Name;
+using NameList = JetDumper::NameList;
 
 //**********************************************************************
 
@@ -48,14 +48,14 @@ JetDumper::JetDumper(const std::string& myname)
 template<>
 JetDumper::NameList get_moment_keys<Jet, float>(const Jet* pjet) {
   static const NameList empty;
-  if ( pjet == 0 ) return empty;
+  if ( pjet == nullptr ) return empty;
   return empty;
 }
 
 template<>
 JetDumper::NameList get_moment_keys<Jet, int>
   (const Jet*) {
-  return JetDumper::NameList();
+  return {};
 }
 
 //**********************************************************************
@@ -161,14 +161,14 @@ int JetDumper::dump_object_after_prefix(const xAOD::MuonSegment* pseg, const std
 
 //**********************************************************************
 
-void JetDumper::get_moment(const xAOD::Jet* pjet, std::string name, FourVector& val) const {
-  if ( name == "" || name == "jetP4()" ) val = pjet->jetP4();
+void JetDumper::get_moment(const xAOD::Jet* pjet, const std::string& name, FourVector& val) const {
+  if ( name.empty() || name == "jetP4()" ) val = pjet->jetP4();
   else val = pjet->getAttribute<FourVector>(name);
 }
 
 //**********************************************************************
 
-void JetDumper::get_moment(const xAOD::Jet* pjet, std::string name,
+void JetDumper::get_moment(const xAOD::Jet* pjet, const std::string& name,
                            std::vector<int>& vals) const {
   typedef std::vector<int> T;
   vals = pjet->getAttribute<T>(name);
@@ -176,7 +176,7 @@ void JetDumper::get_moment(const xAOD::Jet* pjet, std::string name,
 
 //**********************************************************************
 
-void JetDumper::get_moment(const xAOD::Jet* pjet, std::string name,
+void JetDumper::get_moment(const xAOD::Jet* pjet, const std::string& name,
                            std::vector<float>& vals) const {
   typedef std::vector<float> T;
   vals = pjet->getAttribute<T>(name);
@@ -184,42 +184,42 @@ void JetDumper::get_moment(const xAOD::Jet* pjet, std::string name,
 
 //**********************************************************************
 
-void JetDumper::get_moment(const xAOD::Jet* pjet, std::string name, std::string& val) const {
+void JetDumper::get_moment(const xAOD::Jet* pjet, const std::string& name, std::string& val) const {
   val = pjet->getAttribute<std::string>(name);
 }
 
 //**********************************************************************
 
 void JetDumper::
-getAssociatedParticles(const xAOD::Jet* pobj, std::string name, APVector& val) const {
+getAssociatedParticles(const xAOD::Jet* pobj, const std::string& name, APVector& val) const {
   pobj->getAssociatedObjects(name, val);
 }
 
 //**********************************************************************
 
 void JetDumper::
-getAssociatedLinks(const xAOD::Jet* pobj, std::string name, APELVector& val) const {
+getAssociatedLinks(const xAOD::Jet* pobj, const std::string& name, APELVector& val) const {
   pobj->getAttribute(name, val);
 }
 
 //**********************************************************************
 
 void JetDumper::
-getAssociatedParticles(const xAOD::Jet* pobj, std::string name, MSVector& val) const {
+getAssociatedParticles(const xAOD::Jet* pobj, const std::string& name, MSVector& val) const {
   pobj->getAssociatedObjects(name, val);
 }
 
 //**********************************************************************
 
 void JetDumper::
-getAssociatedLinks(const xAOD::Jet* pobj, std::string name, MSELVector& val) const {
+getAssociatedLinks(const xAOD::Jet* pobj, const std::string& name, MSELVector& val) const {
   pobj->getAttribute(name, val);
 }
 
 //**********************************************************************
 
 std::string
-JetDumper::get_moment_as_string(const xAOD::Jet* pjet, std::string name) const {
+JetDumper::get_moment_as_string(const xAOD::Jet* pjet, const std::string& name) const {
   std::ostringstream sout;
   // May want to try other types here.
   // Or find some way to access the base information of the element link.
@@ -273,7 +273,7 @@ void JetDumper::extra_info(const xAOD::Jet* pjet, std::ostream& out, int iopt) c
 //**********************************************************************
 
 void JetDumper::extra_info(const fastjet::PseudoJet* ppsj, std::ostream& out, int linedetail) const {
-  if ( ppsj == 0 ) {
+  if ( ppsj == nullptr ) {
     out << ", Null pseudojet";
     return;
   }
@@ -284,7 +284,7 @@ void JetDumper::extra_info(const fastjet::PseudoJet* ppsj, std::ostream& out, in
       out << ", ilab=" << cui.index();
       if ( linedetail > 2 ) {
         const xAOD::IParticle* pip = cui.particle();
-        if ( pip == 0 ) {
+        if ( pip == nullptr ) {
           out << ", Associated particle is null";
         } else {
           out << " [" << pip->container() << "/" << pip->index() << "]";

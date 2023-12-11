@@ -15,8 +15,7 @@ JetSelectorAttribute::JetSelectorAttribute(const std::string &t)
   declareProperty("Var", m_var);
 }
 
-JetSelectorAttribute:: ~JetSelectorAttribute(){
-}
+JetSelectorAttribute:: ~JetSelectorAttribute()= default;
 
 StatusCode JetSelectorAttribute::initialize() {
 

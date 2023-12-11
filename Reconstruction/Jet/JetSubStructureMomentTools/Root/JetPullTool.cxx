@@ -34,7 +34,7 @@ int JetPullTool::modifyJet(xAOD::Jet &injet) const {
   injet.setAttribute(m_prefix+"PullMag", values["PullMag"]);
   injet.setAttribute(m_prefix+"PullPhi", values["PullPhi"]);
 
-  if(m_includeTensorMoments == true) {
+  if(m_includeTensorMoments) {
     injet.setAttribute(m_prefix+"Pull_C00", values["Pull_C00"]);
     injet.setAttribute(m_prefix+"Pull_C01", values["Pull_C01"]);
     injet.setAttribute(m_prefix+"Pull_C10", values["Pull_C10"]);

@@ -26,12 +26,12 @@ Dipolarity::Dipolarity(unsigned int n1, unsigned int n2, bool exclusive, double 
 double Dipolarity::result(const fastjet::PseudoJet &jet) const
 {
   vector<fastjet::PseudoJet> constit_pseudojets = jet.constituents();
-  if(constit_pseudojets.size() == 0) return -1;
+  if(constit_pseudojets.empty()) return -1;
 
   vector<fastjet::PseudoJet> kt_subjets;
   fastjet::PseudoJet jet1, jet2;
 
-  if(m_exclusive == false) {
+  if(!m_exclusive) {
     fastjet::JetDefinition jet_def = fastjet::JetDefinition(fastjet::kt_algorithm, m_subjetR,
                                                             fastjet::E_scheme, fastjet::Best);
     fastjet::ClusterSequence kt_clust_seq(constit_pseudojets, jet_def);
@@ -60,7 +60,7 @@ double Dipolarity::result(const fastjet::PseudoJet &jet) const
 }
 
 double Dipolarity::dipolarity(vector<fastjet::PseudoJet> &constit_pseudojets,
-                                  fastjet::PseudoJet jet1, fastjet::PseudoJet jet2) const
+                                  const fastjet::PseudoJet& jet1, const fastjet::PseudoJet& jet2) const
 {
   float dipolarity = 0;
   float sumpt = 0;

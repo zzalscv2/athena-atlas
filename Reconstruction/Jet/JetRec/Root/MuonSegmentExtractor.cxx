@@ -13,7 +13,7 @@ MuonSegmentExtractor::MuonSegmentExtractor(const xAOD::MuonSegmentContainer* ms,
   m_originalParticles(ms), m_label(label){
 }
 
-MuonSegmentExtractor::~MuonSegmentExtractor(){}
+MuonSegmentExtractor::~MuonSegmentExtractor()= default;
 
 MuonSegmentExtractor* MuonSegmentExtractor::clone() const {
   // who is going to delete this?
@@ -60,7 +60,7 @@ std::string MuonSegmentExtractor::toString(int level) const {
 
 
 bool  MuonSegmentExtractor::checkIntegrity() const {
-  for(const auto ip: *m_originalParticles){
+  for(const auto *const ip: *m_originalParticles){
     try{
       ip->pz();
     } catch(...) {

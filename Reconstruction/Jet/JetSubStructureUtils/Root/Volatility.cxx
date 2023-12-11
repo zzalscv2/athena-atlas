@@ -11,7 +11,7 @@ using namespace JetSubStructureUtils;
 double Volatility::result(const fastjet::PseudoJet &jet) const
 {
   vector<fastjet::PseudoJet> constit_pseudojets = jet.constituents();
-  if(constit_pseudojets.size() == 0) return -999;
+  if(constit_pseudojets.empty()) return -999;
 
   QjetsPlugin qjets_plugin(m_zcut, m_dcut_fctr, m_exp_min, m_exp_max, m_rigidity, m_truncation_fctr);
   fastjet::JetDefinition qjets_def(&qjets_plugin);
@@ -25,7 +25,7 @@ double Volatility::result(const fastjet::PseudoJet &jet) const
     fastjet::ClusterSequence clust_seq(constit_pseudojets, qjets_def);
     vector<fastjet::PseudoJet> qjets = fastjet::sorted_by_pt(clust_seq.inclusive_jets());
 
-    if(qjets.size() == 0) {
+    if(qjets.empty()) {
       //cout << "0 jets" << endl;
       continue;
     }

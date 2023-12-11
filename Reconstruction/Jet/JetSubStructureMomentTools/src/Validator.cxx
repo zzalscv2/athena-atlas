@@ -31,13 +31,13 @@ int Validator::execute() const
 	}
 	
 	// Get leading jet
-	const xAOD::JetContainer* jets = 0;
-  if(evtStore()->contains<xAOD::JetContainer>(m_InputContainer) == false) {
+	const xAOD::JetContainer* jets = nullptr;
+  if(!evtStore()->contains<xAOD::JetContainer>(m_InputContainer)) {
     ATH_MSG_ERROR("Unable to retrieve jets from collection: " << m_InputContainer);
     return 1;
   }
 	jets = evtStore()->retrieve<const xAOD::JetContainer>(m_InputContainer);
-	if(jets->size() == 0) return 0;
+	if(jets->empty()) return 0;
 	const xAOD::Jet *jet = jets->at(0); // This assumes the container is sorted
 
 	// Loop over float moments

@@ -29,8 +29,7 @@ JetKeyDescriptorInstance::JetKeyDescriptorInstance(bool create) :
 }
 
 JetKeyDescriptorInstance::~JetKeyDescriptorInstance()
-{
-}
+= default;
 
 void JetKeyDescriptorInstance::createKeyStore() const {
    if (m_ConstStores) {
@@ -219,8 +218,8 @@ JetKeyDescriptor::~JetKeyDescriptor()
 {
   // here, now delete the pointer to the data of the  instance...
   if ( (JetKeyDescriptorInstance::instance())->m_Stores == this ) 
-    (JetKeyDescriptorInstance::instance())->m_Stores = NULL;
+    (JetKeyDescriptorInstance::instance())->m_Stores = nullptr;
   if ( (JetKeyDescriptorInstance::instance())->m_ConstStores == this ) 
-    (JetKeyDescriptorInstance::instance())->m_ConstStores = NULL;
+    (JetKeyDescriptorInstance::instance())->m_ConstStores = nullptr;
 }
 

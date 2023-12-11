@@ -75,7 +75,7 @@ StatusCode JetOriginCorrectionTool::decorate(const xAOD::JetContainer& jetCont) 
     return StatusCode::SUCCESS;
   }
 
-  auto vxContainer = handle.cptr();
+  const auto *vxContainer = handle.cptr();
 
 
   // Retrieve EventInfo to check for a PV# specification != PV0
@@ -85,7 +85,7 @@ StatusCode JetOriginCorrectionTool::decorate(const xAOD::JetContainer& jetCont) 
   // Specifying the PV index is only for special cases
   int PVindex = 0;
   //if (m_eventInfoName.key() != "") {
-  if (m_eventInfo_key.key() != "") {
+  if (!m_eventInfo_key.key().empty()) {
     // retrieve the VertexContainer. if fails, fill the jets with null vector
 
     auto eInfo = SG::makeHandle (m_eventInfo_key);

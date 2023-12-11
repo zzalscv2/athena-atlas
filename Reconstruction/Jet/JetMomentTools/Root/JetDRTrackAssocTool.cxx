@@ -58,7 +58,7 @@ StatusCode JetDRTrackAssocTool::decorate(const xAOD::JetContainer& jets) const {
     // If a jet exists (was in dR range), then add the track for that jet
     if(trkpair.second!= nullptr) {
       // Most efficient constructor is with container + index
-      tracks_per_jet[trkpair.second->index()].emplace_back(ElementLink<xAOD::IParticleContainer>(trkpair.first,*handle_trk));
+      tracks_per_jet[trkpair.second->index()].emplace_back(trkpair.first,*handle_trk);
       ATH_MSG_VERBOSE("Added track " << trkpair.first->index() << " to association list for jet " << trkpair.second->index());
       ATH_MSG_VERBOSE("Verify ElementLink -- track pt: " << trkpair.first->pt() << "; EL pt; " << (*tracks_per_jet[trkpair.second->index()].back())->pt());
     }

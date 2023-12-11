@@ -8,15 +8,15 @@
 #include "JetEDM/LabelIndex.h"
 
 using jet::IndexedConstituentUserInfo;
-typedef IndexedConstituentUserInfo::Label Label;
-typedef IndexedConstituentUserInfo::Index Index;
+using Label = IndexedConstituentUserInfo::Label;
+using Index = IndexedConstituentUserInfo::Index;
 using jet::LabelIndex;
 using xAOD::IParticle;
 
 //**********************************************************************
 
 IndexedConstituentUserInfo::IndexedConstituentUserInfo()
-: m_ppar(0) { }
+: m_ppar(nullptr) { }
 
 //**********************************************************************
 

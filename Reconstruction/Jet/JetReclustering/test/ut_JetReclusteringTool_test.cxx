@@ -52,7 +52,7 @@ int main() {
    }
 
    //if it worked, the reclustered jets will be accessible from the storegate:
-   const xAOD::JetContainer* newJets = 0;
+   const xAOD::JetContainer* newJets = nullptr;
    ANA_CHECK( evt.retrieve( newJets, "MyNewJets" ) );
 
 

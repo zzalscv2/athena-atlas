@@ -33,7 +33,7 @@ int SimpleJetTrackSelectionTool::execute() const {
     return 1;
   }
 
-  auto inCont = handle_in.cptr();
+  const auto *inCont = handle_in.cptr();
 
   using OutContType = ConstDataVector<xAOD::TrackParticleContainer>;
   OutContType* outCont = new OutContType(SG::VIEW_ELEMENTS);
@@ -51,14 +51,13 @@ int SimpleJetTrackSelectionTool::execute() const {
 }
 
 int SimpleJetTrackSelectionTool::keep(const xAOD::TrackParticle& trk) const {
-  if ( trk.pt() < m_ptmin ) return false;
-  return true;
+  return trk.pt() >= m_ptmin;
 }
 
 template<class T>
 void SimpleJetTrackSelectionTool::selectionLoop(const xAOD::TrackParticleContainer& inCont, T& outCont) const {
   for ( const xAOD::TrackParticle* ptrk : inCont ) { 
-    if ( ptrk != 0 && keep(*ptrk) ) outCont.push_back(ptrk) ; 
+    if ( ptrk != nullptr && keep(*ptrk) ) outCont.push_back(ptrk) ; 
   }
 }
 

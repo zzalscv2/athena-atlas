@@ -20,8 +20,7 @@ HistosForJetSelection::HistosForJetSelection(const std::string &t) : JetHistoBas
   declareProperty("InverseToolSelection", m_inverseToolSelection);
 }
   
-HistosForJetSelection::~HistosForJetSelection(){
-}
+HistosForJetSelection::~HistosForJetSelection()= default;
   
 StatusCode HistosForJetSelection::initialize() {
   CHECK( m_histoTools.retrieve() );
@@ -41,7 +40,7 @@ StatusCode HistosForJetSelection::initialize() {
   case FromTool:
     {
       CHECK(m_selTool.retrieve());
-      if( (m_nameSuffix == "" ) || (m_titleSuffix=="") ) {
+      if( (m_nameSuffix.empty() ) || (m_titleSuffix.empty()) ) {
         ATH_MSG_ERROR("When using a selection tool, please set BOTH of HistoTitleSuffix (="<<m_titleSuffix<<") and HistoNameSuffix (="<<m_nameSuffix<<") or set them explicitely to 'none'. This is to avoid histo names clashes.");
         return StatusCode::FAILURE;      
       }
@@ -80,7 +79,7 @@ int HistosForJetSelection::buildHistos(){
 int HistosForJetSelection::fillHistosFromContainer(const xAOD::JetContainer & cont, float weight){
 
   ConstDataVector< xAOD::JetContainer > tmpCont(SG::VIEW_ELEMENTS);
-  const xAOD::JetContainer * contPtr = NULL;
+  const xAOD::JetContainer * contPtr = nullptr;
 
   /// Set the contPtr to the relevant container according to m_selType
   switch((SelectionType)m_selType){

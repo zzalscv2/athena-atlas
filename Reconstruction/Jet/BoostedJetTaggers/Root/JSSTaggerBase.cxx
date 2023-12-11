@@ -286,7 +286,7 @@ StatusCode JSSTaggerBase::initialize() {
 /// Loop over jet collection and decorate each jet
 StatusCode JSSTaggerBase::decorate( const xAOD::JetContainer& jets ) const {
 
-  for ( auto jet : jets ) {
+  for ( const auto *jet : jets ) {
     ATH_CHECK( tag(*jet) );
   }
 
@@ -528,7 +528,7 @@ int JSSTaggerBase::findPV() const{
 
   int indexPV = -1;
 
-  const xAOD::VertexContainer* vxCont = 0;
+  const xAOD::VertexContainer* vxCont = nullptr;
   if ( evtStore()->retrieve( vxCont, "PrimaryVertices" ).isFailure() ) {
     ATH_MSG_WARNING( "Unable to retrieve primary vertex container PrimaryVertices" );
   }
@@ -554,9 +554,9 @@ StatusCode JSSTaggerBase::GetUnGroomTracks( const xAOD::Jet &jet, int indexPV ) 
 
   SG::ReadDecorHandle<xAOD::JetContainer, ElementLink<xAOD::JetContainer> > readParent(m_readParentKey);
 
-  const xAOD::Jet * ungroomedJet = 0;
+  const xAOD::Jet * ungroomedJet = nullptr;
   if ( readParent.isAvailable() ) {
-    ElementLink<xAOD::JetContainer> linkToUngroomed = readParent(jet);
+    const ElementLink<xAOD::JetContainer>& linkToUngroomed = readParent(jet);
     if ( linkToUngroomed.isValid() ) {
       ungroomedJet = *linkToUngroomed;
 
@@ -564,7 +564,7 @@ StatusCode JSSTaggerBase::GetUnGroomTracks( const xAOD::Jet &jet, int indexPV ) 
 
       if ( acc_Ntrk.isAvailable(*ungroomedJet) ) {
 
-	const std::vector<int> NTrkPt500 = acc_Ntrk(*ungroomedJet);
+	const std::vector<int>& NTrkPt500 = acc_Ntrk(*ungroomedJet);
 
 	int jet_ntrk = NTrkPt500.at(indexPV);
 	decNtrk500(jet) = jet_ntrk;
@@ -703,7 +703,7 @@ std::pair<double, double> JSSTaggerBase::getSF( const xAOD::Jet& jet, const std:
     }else if ( m_weightHistograms.count("t") ){
       signal_truthLabel="t";
     }
-    if ( signal_truthLabel != "" && !m_efficiencyHistogramName.empty() ){
+    if ( !signal_truthLabel.empty() && !m_efficiencyHistogramName.empty() ){
       int pt_mPt_bin = (m_weightHistograms.find(signal_truthLabel.c_str())->second)->FindBin(jet.pt()*0.001, logmOverPt);
       eff = (m_efficiencyHistograms.find(signal_truthLabel.c_str())->second)->GetBinContent(pt_mPt_bin);
     }

@@ -18,7 +18,7 @@
 
 namespace CaloConstitHelpers {
   
-  typedef xAOD::JetConstituentVector::iterator JetConstitIterator;
+  using JetConstitIterator = xAOD::JetConstituentVector::iterator;
   
 
   ///****************************************************
@@ -26,9 +26,9 @@ namespace CaloConstitHelpers {
   /// 
   /// Extract cluster moments when JetConstituents are CaloCluster
   struct CaloClusterExtractor : public CaloConstitExtractor {
-    virtual ~CaloClusterExtractor(){}
+    virtual ~CaloClusterExtractor()= default;
     virtual bool valid(JetConstitIterator & it ) const override {
-      return (dynamic_cast<const xAOD::CaloCluster*>(it->rawConstituent())!=0);
+      return (dynamic_cast<const xAOD::CaloCluster*>(it->rawConstituent())!=nullptr);
     }
 
     virtual double moment(JetConstitIterator & it, xAOD::CaloCluster::MomentType momentType) const override {
@@ -54,10 +54,10 @@ namespace CaloConstitHelpers {
   /// 
   /// Extract cluster moments when JetConstituents are PFO particles.
   struct PFOExtractor : public CaloConstitExtractor {
-    virtual ~PFOExtractor(){}
+    virtual ~PFOExtractor()= default;
     virtual bool valid(JetConstitIterator & it ) const override {
       const xAOD::PFO* pfo = dynamic_cast<const xAOD::PFO*>(it->rawConstituent());
-      if (pfo!=0) return (!pfo->isCharged());
+      if (pfo!=nullptr) return (!pfo->isCharged());
       return false;
     }
 
@@ -89,7 +89,7 @@ namespace CaloConstitHelpers {
   /// 
   /// Extract cluster moments when JetConstituents are FlowElements.
   struct FlowElementExtractor : public CaloConstitExtractor {
-    virtual ~FlowElementExtractor(){}
+    virtual ~FlowElementExtractor()= default;
     virtual bool valid(JetConstitIterator & it ) const override {
       const xAOD::FlowElement* fe = dynamic_cast<const xAOD::FlowElement*>(it->rawConstituent());
       if (fe != nullptr) return (!fe->isCharged());
@@ -123,7 +123,7 @@ namespace CaloConstitHelpers {
           //If we have a PFO (in case of fe being a UFO), we need to get the associated cluster first
           else {
             const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(neutralObject);
-            if(pfo->otherObjects().size() > 0 && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
+            if(!pfo->otherObjects().empty() && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
               cluster = dynamic_cast<const xAOD::CaloCluster*> (pfo->otherObject(0));
             }
           }
@@ -165,7 +165,7 @@ namespace CaloConstitHelpers {
 	  //If we have a PFO (in case of fe being a UFO), we need to get the associated cluster first
 	  else {
 	    const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(neutralObject);
-	    if(pfo->otherObjects().size() > 0 && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
+	    if(!pfo->otherObjects().empty() && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
 	      cluster = dynamic_cast<const xAOD::CaloCluster*> (pfo->otherObject(0));
 	    }
 	  }

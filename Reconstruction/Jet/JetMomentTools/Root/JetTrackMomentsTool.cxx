@@ -71,7 +71,7 @@ StatusCode JetTrackMomentsTool::decorate(const xAOD::JetContainer& jets) const {
     return StatusCode::FAILURE;
   }
 
-  auto vertexContainer = handle_v.cptr();
+  const auto *vertexContainer = handle_v.cptr();
 
   // Get the track-vertex association
   auto handle_tva = SG::makeHandle (m_tva_key);
@@ -81,7 +81,7 @@ StatusCode JetTrackMomentsTool::decorate(const xAOD::JetContainer& jets) const {
     return StatusCode::FAILURE;
   }
 
-  auto tva = handle_tva.cptr();
+  const auto *tva = handle_tva.cptr();
 
   for(const xAOD::Jet* jet : jets){
     ATH_MSG_VERBOSE("On jet " << jet->index());

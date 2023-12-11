@@ -4,7 +4,7 @@
 
 #include "JetReclustering/EffectiveRTool.h"
 
-EffectiveRTool::EffectiveRTool(std::string myname):
+EffectiveRTool::EffectiveRTool(const std::string& myname):
   JetModifierBase(myname)
 {}
 

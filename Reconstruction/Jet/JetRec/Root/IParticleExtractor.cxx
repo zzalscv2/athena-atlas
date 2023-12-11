@@ -20,7 +20,7 @@ IParticleExtractor::IParticleExtractor(const xAOD::IParticleContainer* ips,
 {
 }
 
-IParticleExtractor::~IParticleExtractor(){}
+IParticleExtractor::~IParticleExtractor()= default;
 
 IParticleExtractor* IParticleExtractor::clone() const {
   return new IParticleExtractor(*this);
@@ -28,7 +28,7 @@ IParticleExtractor* IParticleExtractor::clone() const {
   
 IParticleExtractor* IParticleExtractor::ghostClone() const {
   // user responsible for deletion.
-  auto clone =  new IParticleExtractor(*this);
+  auto *clone =  new IParticleExtractor(*this);
   (*clone).m_isGhost = true;
   return clone;
 }
@@ -61,7 +61,7 @@ void IParticleExtractor::addToJet(xAOD::Jet& jet,
     jet.setAttribute<int>(m_label+"Count", constituents.size());
   } else {
     // these are constituents
-    for(auto c: constituents) {
+    for(const auto *c: constituents) {
       jet.addConstituent(c);
     }
   }
@@ -102,7 +102,7 @@ std::string IParticleExtractor::toString(int level) const {
 
 
 bool IParticleExtractor::checkIntegrity() const {
-  for(const auto ip: (*m_iParticles)){
+  for(const auto *const ip: (*m_iParticles)){
     try{
       ip->e();
     } catch(...) {

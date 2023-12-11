@@ -13,7 +13,7 @@ JetCollection::JetCollection( SG::OwnershipPolicy own)  :
     m_nextId(Jet::s_defaultJetId+1),
     m_keyDescInstance(false),
     m_ownMap(false),
-    m_fastjetClustSeq(0)
+    m_fastjetClustSeq(nullptr)
 {
   // by default the keyDescInstance points to the global s_instance's stores .
   // The JetCollection cnv replaces that by the store read from file.
@@ -30,7 +30,7 @@ JetCollection::~JetCollection(){
     iterator it = begin();
     iterator itE = end();
     for(;it != itE; ++it){
-      (*it)->m_collection = NULL;
+      (*it)->m_collection = nullptr;
     }
   }
   

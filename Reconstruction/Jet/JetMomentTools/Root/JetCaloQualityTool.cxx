@@ -30,7 +30,7 @@ StatusCode JetCaloQualityTool::decorate(const xAOD::JetContainer& jets) const
   //bool checkedContainer = false;
   const size_t nDecorations = m_writeDecorKeys.size();
 
-  if(m_doFracSamplingMax==true){
+  if(m_doFracSamplingMax){
     // Special case : we want to store more than 1 value (max sampling AND its index).
     // AND there's no code available for direct cell access.
     // So we just use a direct function instead of a calculator for now.

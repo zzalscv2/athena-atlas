@@ -60,7 +60,7 @@ StatusCode JetTrackSumMomentsTool::decorate(const xAOD::JetContainer& jets) cons
     return StatusCode::FAILURE;
   }
 
-  auto vertexContainer = handle_v.cptr();
+  const auto *vertexContainer = handle_v.cptr();
 
   // Get the track-vertex association
   auto handle_tva = SG::makeHandle(m_tva_key);
@@ -70,7 +70,7 @@ StatusCode JetTrackSumMomentsTool::decorate(const xAOD::JetContainer& jets) cons
     return StatusCode::FAILURE;
   }
 
-  auto tva = handle_tva.cptr();
+  const auto *tva = handle_tva.cptr();
 
   SG::WriteDecorHandle<xAOD::JetContainer, float> trackSumPtHandle(m_trackSumPtKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> trackSumMassHandle(m_trackSumMassKey);
@@ -83,7 +83,7 @@ StatusCode JetTrackSumMomentsTool::decorate(const xAOD::JetContainer& jets) cons
       ATH_MSG_DEBUG("Associated tracks not found.");
     }
   
-    if (vertexContainer->size() == 0 ) { 
+    if (vertexContainer->empty() ) { 
       ATH_MSG_WARNING("There are no vertices in the container. Exiting"); 
       return StatusCode::FAILURE;
     }

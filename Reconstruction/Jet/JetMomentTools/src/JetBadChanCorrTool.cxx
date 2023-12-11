@@ -34,7 +34,7 @@ JetBadChanCorrTool::JetBadChanCorrTool(const std::string& name) :
 }
 
 JetBadChanCorrTool::~JetBadChanCorrTool()
-{ }
+= default;
 
 StatusCode JetBadChanCorrTool::initialize()
 {
@@ -43,12 +43,12 @@ StatusCode JetBadChanCorrTool::initialize()
   if(!m_useClusters){
     std::string fname = PathResolver::find_file(m_profileName, "DATAPATH");
 
-    if(fname==""){
+    if(fname.empty()){
       ATH_MSG(ERROR) << "Could not get file " << m_profileName << endmsg;
       return StatusCode::FAILURE;
     }
     TFile tf(fname.c_str());
-    if(tf.IsOpen()==false){
+    if(!tf.IsOpen()){
       ATH_MSG( ERROR ) << "Could not open file " << fname << endmsg;
       return StatusCode::FAILURE;
     }
@@ -88,13 +88,13 @@ StatusCode JetBadChanCorrTool::initialize()
           continue;
         }
 
-        TH1* th=0;
+        TH1* th=nullptr;
         StatusCode sc = m_thistSvc->getHist(location,th);
         if(sc.isFailure()){
           ATH_MSG( ERROR ) << "failed to get histo " << location << endmsg;
           return StatusCode::FAILURE;
         }
-        m_profileDatas[sample].push_back(ProfileData((TH1D*)th,sample,ptMin,ptMax,etaMin,etaMax,phiMin,phiMax));
+        m_profileDatas[sample].emplace_back((TH1D*)th,sample,ptMin,ptMax,etaMin,etaMax,phiMin,phiMax);
         ATH_MSG( DEBUG ) << "read hist=" << th->GetName() 
                          << " tag=" << tag << " sample=" << sample 
                          << " ptMin=" << ptMin << " ptMax=" << ptMax 
@@ -142,7 +142,7 @@ StatusCode JetBadChanCorrTool::decorate(const xAOD::JetContainer& jets) const
     return StatusCode::FAILURE;
   }
 
-  auto badCellMap = handle.cptr();
+  const auto *badCellMap = handle.cptr();
 
   // number of bad cells exceed the limit, set moments -1 and skip
   if((int) badCellMap->cells().size() >m_nBadCellLimit){

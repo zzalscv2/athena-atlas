@@ -5,6 +5,7 @@
 #include "BoostedJetTaggers/JSSWTopTaggerANN.h"
 
 #include <fstream>
+#include <memory>
 
 JSSWTopTaggerANN::JSSWTopTaggerANN( const std::string& name ) :
   JSSTaggerBase( name ),
@@ -168,7 +169,7 @@ StatusCode JSSWTopTaggerANN::initialize() {
 
   /// Build the network
   try {
-    m_lwnn.reset(new lwt::LightweightGraph(config, output_node_name));
+    m_lwnn = std::make_unique<lwt::LightweightGraph>(config, output_node_name);
   } catch (lwt::NNConfigurationException& exc) {
     ATH_MSG_ERROR( "NN configuration problem: " << exc.what() );
     return StatusCode::FAILURE;

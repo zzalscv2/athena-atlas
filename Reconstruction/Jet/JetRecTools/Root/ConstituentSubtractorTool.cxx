@@ -73,7 +73,7 @@ StatusCode ConstituentSubtractorTool::initialize() {
     if (m_doRapidityRescaling){
       if (object->InheritsFrom(TH1D::Class())){
         m_hist.reset(static_cast<TH1D*>(object->Clone("hist_cloned")));
-        m_hist->SetDirectory(0);
+        m_hist->SetDirectory(nullptr);
         m_rescaling.reset(static_cast<fastjet::FunctionOfPseudoJet<double>*>(new contrib::BackgroundRescalingYFromRoot<TH1D>(m_hist.get())));
       }
       else{
@@ -84,7 +84,7 @@ StatusCode ConstituentSubtractorTool::initialize() {
     if (m_doRapidityPhiRescaling){
       if (object->InheritsFrom(TH2D::Class())){
         m_hist2D.reset(static_cast<TH2D*>(object->Clone("hist_cloned")));
-        m_hist2D->SetDirectory(0);
+        m_hist2D->SetDirectory(nullptr);
         m_rescaling.reset(static_cast<fastjet::FunctionOfPseudoJet<double>*>(new contrib::BackgroundRescalingYPhiFromRoot<TH2D>(m_hist2D.get())));
       }
       else{

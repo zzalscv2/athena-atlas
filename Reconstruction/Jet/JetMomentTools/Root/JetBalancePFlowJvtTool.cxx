@@ -38,7 +38,7 @@
  // Destructor
   ///////////////
   JetBalancePFlowJvtTool::~JetBalancePFlowJvtTool()
-  {}
+  = default;
 
   // Athena algtool's Hooks
   ////////////////////////////
@@ -106,7 +106,7 @@
     pileupMomenta=calculateVertexMomenta(&jetCont,m_pvind, m_vertices);
     SG::WriteDecorHandle<xAOD::JetContainer, char> bjvtHandle(m_bjvtKey);
     SG::WriteDecorHandle<xAOD::JetContainer, float> bjvtRawHandle(m_bjvtRawKey);
-    if(pileupMomenta.size()==0) {
+    if(pileupMomenta.empty()) {
       ATH_MSG_DEBUG( "pileupMomenta is empty, this can happen for events with no PU vertices."
                      <<" bJVT won't be computed for this event and will be set to 0 instead." );
       for(const xAOD::Jet* jetC : jetCont) {
@@ -203,7 +203,7 @@
         if (tjet->p4().DeltaR(jet->p4())<0.6 && tjet->pt()>4e3)  ispu = false;
       }
       
-      if (ispu == true){
+      if (ispu){
         //Need to check both containers
         for(const xAOD::Jet *itpujet : *itpujets){
           if (itpujet->p4().DeltaR(jet->p4())<0.3 && itpujet->pt()>10e3) isqcdpu = true;

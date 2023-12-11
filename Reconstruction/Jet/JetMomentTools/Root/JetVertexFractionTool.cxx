@@ -67,7 +67,7 @@ StatusCode JetVertexFractionTool::decorate(const xAOD::JetContainer& jetCont) co
                     << m_vertexContainer_key.key()); 
     return StatusCode::FAILURE;
   }
-  auto vertices = vertexContainer.cptr();
+  const auto *vertices = vertexContainer.cptr();
 
   ATH_MSG_DEBUG("Successfully retrieved VertexContainer: " 
                 << m_vertexContainer_key.key()); 
@@ -79,7 +79,7 @@ StatusCode JetVertexFractionTool::decorate(const xAOD::JetContainer& jetCont) co
                   << m_tracksCont_key.key());
     return StatusCode::FAILURE;
   }
-  auto tracksCont = tracksContainer.cptr();
+  const auto *tracksCont = tracksContainer.cptr();
 
   ATH_MSG_DEBUG("Successfully retrieved TrackParticleContainer: " 
                 << m_tracksCont_key.key());
@@ -91,12 +91,12 @@ StatusCode JetVertexFractionTool::decorate(const xAOD::JetContainer& jetCont) co
                   << m_tva_key.key());
     return StatusCode::FAILURE;
   }
-  auto tva = tvaContainer.cptr();
+  const auto *tva = tvaContainer.cptr();
 
   ATH_MSG_DEBUG("Successfully retrieved TrackVertexAssociation: " 
                 << m_tva_key.key());
 
-  if (vertices->size() == 0 ) {
+  if (vertices->empty() ) {
     ATH_MSG_WARNING("There are no vertices in the container. Exiting");
     return StatusCode::SUCCESS;
   }

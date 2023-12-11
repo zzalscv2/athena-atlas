@@ -84,7 +84,7 @@ VoronoiWeightTool :: VoronoiWeightTool(const std::string& name) :
   declareProperty("IgnoreChargedPFO", m_ignoreChargedPFOs);
 }
 
-VoronoiWeightTool::~VoronoiWeightTool() {}
+VoronoiWeightTool::~VoronoiWeightTool() = default;
 
 StatusCode VoronoiWeightTool::initialize() {
 
@@ -133,7 +133,7 @@ StatusCode VoronoiWeightTool::process_impl(xAOD::IParticleContainer* particlesin
         accept &= !fe->isCharged();
     }
     if(accept) {
-      particles.push_back( fastjet::PseudoJet(part->p4()) );
+      particles.emplace_back(part->p4() );
       // ATH_MSG_VERBOSE( "Accepted particle with pt " << part->pt() );
     }
   }

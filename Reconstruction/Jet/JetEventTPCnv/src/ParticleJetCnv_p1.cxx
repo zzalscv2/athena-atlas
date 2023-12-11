@@ -87,9 +87,6 @@ ParticleJetCnv_p1::persToTrans( const ParticleJet_p1* pers,
 
   const_cast<ParticleJet_p1*>(pers)->m_tagJetInfo.clear();
   const_cast<ParticleJet_p1*>(pers)->m_constituents.clear();
-
-  
-  return;
 }
 
 void 
@@ -99,7 +96,4 @@ ParticleJetCnv_p1::transToPers( const Jet* /*trans*/,
 {
   msg << MSG::ERROR << "Creating persistent state of ParticleJet... This should not happen anymore"
       << endmsg;
-
- 
-  return;
 }

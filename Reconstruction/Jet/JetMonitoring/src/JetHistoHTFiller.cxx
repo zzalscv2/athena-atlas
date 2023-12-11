@@ -40,7 +40,7 @@ StatusCode JetHistoHTFiller::processJetContainer(const JetMonitoringAlg& parentA
   }
 
   auto HT = Monitored::Scalar<float> ("jetHT", 0.0);      
-  for (const auto jetItr : jets) {
+  for (const auto *const jetItr : jets) {
     float pt = jetItr->pt()/1000.;
     if ( pt > m_minPt ) {
       if (fabs(jetItr->eta()) < m_maxEta) HT += pt;

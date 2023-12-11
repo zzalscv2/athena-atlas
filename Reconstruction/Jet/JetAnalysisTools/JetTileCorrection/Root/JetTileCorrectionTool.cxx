@@ -46,7 +46,7 @@ namespace CP {
 
   JetTileCorrectionTool :: JetTileCorrectionTool( const std::string& name )
     : asg::AsgMetadataTool( name ),
-      m_appliedSystematics(0)
+      m_appliedSystematics(nullptr)
   {
     declareProperty("CorrectionFileName", m_rootFileName="JetTileCorrection/JetTile_pFile_010216.root", "Parametrization file");
     declareProperty("MaskedRegionsMap", m_bd_dead_mapFile="JetTileCorrection/Tile_maskedDB_Run2.conf", "Masked regions DB file");
@@ -57,7 +57,7 @@ namespace CP {
   {
     if ( m_rootFile ){                   
       delete m_rootFile;
-      m_rootFile = 0;
+      m_rootFile = nullptr;
     }
   }
 
@@ -114,8 +114,8 @@ namespace CP {
 	//flatten 2D-etaphi-to-1D
 	m_pars_LB[ieta+iphi*Pix_eta]=(TH1F*)m_rootFile->Get("param_LB_fit"+sub);
 	m_pars_EB[ieta+iphi*Pix_eta]=(TH1F*)m_rootFile->Get("param_EB_fit"+sub);
-      	m_pars_LB[ieta+iphi*Pix_eta]->SetDirectory(0);
-	m_pars_EB[ieta+iphi*Pix_eta]->SetDirectory(0);
+      	m_pars_LB[ieta+iphi*Pix_eta]->SetDirectory(nullptr);
+	m_pars_EB[ieta+iphi*Pix_eta]->SetDirectory(nullptr);
       }
     }
 
@@ -170,7 +170,7 @@ namespace CP {
     std::vector<float> cfactors = getCorrections(jet);
 
     //if not correction need it, just leave
-    if(!cfactors.size())    return CorrectionCode::Ok;                                                                                                         
+    if(cfactors.empty())    return CorrectionCode::Ok;                                                                                                         
 
     // Redefine the jet 4vector by scaling both pt and mass
     float newPt = jet.pt();
@@ -310,7 +310,7 @@ namespace CP {
 
       int i_part = 0;
       int i_mod  = atoi((tokens.at(1)).c_str());
-      if (tokens.at(0).find("B") != string::npos)
+      if (tokens.at(0).find('B') != string::npos)
 	i_mod -= 1; // substract 1 from second coor if given in format "LBA 4"
 
       if(tokens.at(0)=="LBA" || tokens.at(0)== "0"){
@@ -442,7 +442,7 @@ namespace CP {
     return make_pair(ineta+8, inphi);
   }
 
-  void JetTileCorrectionTool :: loadModulesFromMap(const xAOD::Jet& jet, JTC::TS &status, std::map<std::string,Hole> hmap, PART part, TYPE type){
+  void JetTileCorrectionTool :: loadModulesFromMap(const xAOD::Jet& jet, JTC::TS &status, const std::map<std::string,Hole>& hmap, PART part, TYPE type){
 
     float cfactor(0.);
     IPair mpos;
@@ -505,7 +505,7 @@ namespace CP {
     //Read dead regions DB if we change run/LB
     if(!m_isMC){
 
-      const xAOD::EventInfo* ei = 0;
+      const xAOD::EventInfo* ei = nullptr;
       if( evtStore()->retrieve( ei, "EventInfo" ).isFailure() ) {
 	ATH_MSG_WARNING( "No EventInfo object could be retrieved" );
       }

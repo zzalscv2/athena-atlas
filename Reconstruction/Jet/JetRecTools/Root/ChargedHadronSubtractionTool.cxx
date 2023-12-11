@@ -69,7 +69,7 @@ const xAOD::Vertex *ChargedHadronSubtractionTool::getPrimaryVertex() const
 
   // Usually the 0th vertex is the primary one, but this is not always
   //  the case. So we will choose the first vertex of type PriVtx
-  for (auto theVertex : *pvtxs)
+  for (const auto *theVertex : *pvtxs)
   {
     if (theVertex->vertexType() == xAOD::VxType::PriVtx)
     {
@@ -79,7 +79,7 @@ const xAOD::Vertex *ChargedHadronSubtractionTool::getPrimaryVertex() const
 
   // If we failed to find an appropriate vertex, return the dummy vertex
   ATH_MSG_DEBUG("Could not find a primary vertex in this event");
-  for (auto theVertex : *pvtxs)
+  for (const auto *theVertex : *pvtxs)
   {
     if (theVertex->vertexType() == xAOD::VxType::NoVtx)
     {

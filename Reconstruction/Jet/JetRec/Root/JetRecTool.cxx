@@ -27,8 +27,8 @@
   #include "AthenaMonitoringKernel/Monitored.h"
 #endif
 
-typedef ToolHandleArray<IJetModifier> ModifierArray;
-typedef ToolHandleArray<IJetConsumer> ConsumerArray;
+using ModifierArray = ToolHandleArray<IJetModifier>;
+using ConsumerArray = ToolHandleArray<IJetConsumer>;
 
 using std::string;
 using std::setw;
@@ -70,13 +70,13 @@ StatusCode JetRecTool::initialize() {
   bool needinp = false;
   bool needout = false;
   string mode = "pseudojets";
-  if ( m_outcoll.key().size() ) {
+  if ( !m_outcoll.key().empty() ) {
     m_outcolls.push_back(m_outcoll.key());
     if ( ! m_finder.empty() ) {
       mode = "find";
       m_find = true;
       needout = true;
-      if ( m_psjsin.size() == 0 ) {
+      if ( m_psjsin.empty() ) {
         ATH_MSG_ERROR("Jet finding requested with no inputs.");
         return StatusCode::FAILURE;
       } else {
@@ -118,19 +118,19 @@ StatusCode JetRecTool::initialize() {
   ATH_MSG_INFO("Jet reconstruction mode: " << mode);
   // Check/set the input jet collection name.
   if ( needinp ) {
-    if ( m_incoll.key().size() == 0 ) {
+    if ( m_incoll.key().empty() ) {
       if ( ! m_intool.retrieve() ) {
         ATH_MSG_ERROR("Input collection must be specified.");
         return StatusCode::FAILURE;
       } else {
         const AsgTool* pasgtool = dynamic_cast<const asg::AsgTool*>(&*m_intool);
-        if ( pasgtool != 0 ) {
+        if ( pasgtool != nullptr ) {
           const string* pval = pasgtool->getProperty<std::string>("OutputContainer");
-          if ( pval != 0 ) {
+          if ( pval != nullptr ) {
             m_incoll = *pval;
           }
         }
-        if ( m_incoll.key().size() == 0 ) {
+        if ( m_incoll.key().empty() ) {
           ATH_MSG_ERROR("Input tool does not have output collection name.");
           return StatusCode::FAILURE;
         }
@@ -143,7 +143,7 @@ StatusCode JetRecTool::initialize() {
   }
   // Check/set the output jet collection name.
   if ( needout ) {
-    if ( m_outcoll.key().size() == 0 ) {
+    if ( m_outcoll.key().empty() ) {
       ATH_MSG_ERROR("Output collection must be specified.");
       return StatusCode::FAILURE;
     } else {
@@ -153,7 +153,7 @@ StatusCode JetRecTool::initialize() {
   }
   // Other checks.
   if ( m_find ) {
-    if ( m_psjsin.size() == 0 ) {
+    if ( m_psjsin.empty() ) {
       ATH_MSG_ERROR("Jet finding requested with no inputs.");
       return StatusCode::FAILURE;
     }
@@ -161,7 +161,7 @@ StatusCode JetRecTool::initialize() {
     m_groomer->setPseudojetRetriever(m_ppjr);
   } else if ( m_copy ) {
   } else {
-    if ( m_psjsin.size() == 0 ) {
+    if ( m_psjsin.empty() ) {
       ATH_MSG_ERROR("No action requested.");
       return StatusCode::FAILURE;
     }
@@ -217,7 +217,7 @@ StatusCode JetRecTool::initialize() {
 const JetContainer* JetRecTool::build() const {
   if ( m_initCount == 0 ) {
     ATH_MSG_WARNING("Build requested before initialization.");
-    return 0;
+    return nullptr;
   }
   ATH_MSG_DEBUG("Building jets with " << name() << ".");
 
@@ -232,13 +232,13 @@ const JetContainer* JetRecTool::build() const {
     ATH_MSG_DEBUG("Check Aux store: " << pjets.get() << " ... " << &pjets->auxbase() << " ... " << pjetsaux.get() );
     if ( pjetsaux.get() == nullptr ) {
       ATH_MSG_ERROR("Unable to retrieve Aux container");
-      return 0;
+      return nullptr;
     }
     ATH_MSG_VERBOSE("Recording new Jet and Aux container.");
     if(jetsHandle.record(std::move(pjets), std::move(pjetsaux)).isFailure()){
       // TODO - put this back how it was
       ATH_MSG_ERROR("Unable to write new Jet collection and aux store to event store: " << m_outcoll.key());
-      return 0;
+      return nullptr;
     }
     #endif
   }
@@ -247,12 +247,12 @@ const JetContainer* JetRecTool::build() const {
     ATH_MSG_DEBUG("Check Aux store: " << pjets.get() << " ... " << &pjets->auxbase() << " ... " << pjetsaux.get() );
     if ( pjetsaux.get() == nullptr ) {
       ATH_MSG_ERROR("Unable to retrieve Aux container");
-      return 0;
+      return nullptr;
     }
     ATH_MSG_VERBOSE("Recording new Jet and Aux container.");
     if(jetsHandle.record(std::move(pjets), std::move(pjetsaux)).isFailure()){
       ATH_MSG_ERROR("Unable to write new Jet collection and aux store to event store: " << m_outcoll.key());
-      return 0;
+      return nullptr;
     }
   }
   ATH_MSG_DEBUG("Created new Jet collection in event store: " << m_outcoll.key());
@@ -303,7 +303,7 @@ const JetContainer* JetRecTool::build() const {
   njets      = jetsHandle->size();
 #endif
 
-  return jetsHandle.isValid() ? &(*jetsHandle) : 0;
+  return jetsHandle.isValid() ? &(*jetsHandle) : nullptr;
 }
 
 //**********************************************************************
@@ -327,14 +327,14 @@ void JetRecTool::print() const {
   ATH_MSG_INFO("Properties for JetRecTool " << name());
 
   ATH_MSG_INFO("  OutputContainer: " << m_outcoll.key());
-  if ( m_incoll.key().size() == 0 ) ATH_MSG_INFO("  InputContainer is not defined");
+  if ( m_incoll.key().empty() ) ATH_MSG_INFO("  InputContainer is not defined");
   else ATH_MSG_INFO("  InputContainer: " << m_incoll.key());
   if ( m_intool.empty() ) {
     ATH_MSG_INFO("  InputTool is not defined");
   } else {
     ATH_MSG_INFO("  InputTool: " << m_intool->name());
   }
-  if ( m_psjsin.size() ) {
+  if ( !m_psjsin.empty() ) {
     ATH_MSG_INFO("  InputPseudoJet container count is " << m_psjsin.size());
     for ( const auto& pjcontkey : m_psjsin ) {
       ATH_MSG_INFO("    " << pjcontkey.key());
@@ -347,7 +347,7 @@ void JetRecTool::print() const {
     m_finder->print();
     ATH_MSG_INFO("    Input type: " << m_inputtype);
     ATH_MSG_INFO("    There are " << m_ghostlabs.size() << " ghost labels:");
-    for ( string lab : m_ghostlabs ) ATH_MSG_INFO("      " << lab);
+    for ( const string& lab : m_ghostlabs ) ATH_MSG_INFO("      " << lab);
   }
   if ( m_groomer.empty() ) {
     ATH_MSG_INFO("  Jet groomer is not defined");
@@ -355,7 +355,7 @@ void JetRecTool::print() const {
     ATH_MSG_INFO("  Jet groomer: " << m_groomer->name());
     m_groomer->print();
   }
-  if ( m_modifiers.size() ) {
+  if ( !m_modifiers.empty() ) {
     ATH_MSG_INFO("  Modifier count is " << m_modifiers.size());
     for ( ModifierArray::const_iterator imod=m_modifiers.begin();
            imod!=m_modifiers.end(); ++imod ) {
@@ -434,7 +434,7 @@ const xAOD::JetContainer* JetRecTool::getOldJets() const{
 
   const xAOD::JetContainer* pjetsin{nullptr};
   auto handle_in = SG::makeHandle (m_incoll);
-  if ( m_incoll.key().size() && handle_in.isValid()) {
+  if ( !m_incoll.key().empty() && handle_in.isValid()) {
     pjetsin = handle_in.cptr();
   }
   if ( pjetsin == nullptr && !m_intool.empty() ) {
@@ -444,7 +444,7 @@ const xAOD::JetContainer* JetRecTool::getOldJets() const{
     }
   }
 
-  if ( pjetsin == 0 ) {
+  if ( pjetsin == nullptr ) {
     ATH_MSG_ERROR("Unable to retrieve input jet container: " << m_incoll.key());
   } else {
     ATH_MSG_DEBUG("Input collection " << m_incoll.key()
@@ -460,7 +460,7 @@ std::unique_ptr<xAOD::JetContainer> JetRecTool::makeOutputContainer() const{
 
   auto pjets = std::make_unique<xAOD::JetContainer>();
 
-  if ( m_outcoll.key().size() ) {
+  if ( !m_outcoll.key().empty() ) {
     if(m_trigger) {
       ATH_MSG_DEBUG("Attaching online Aux container.");
 #ifndef GENERATIONBASE
@@ -499,7 +499,7 @@ std::unique_ptr<xAOD::JetContainer> JetRecTool::groomJets() const{
   auto jets = makeOutputContainer();
 
   // Retrieve the old jet collection.
-  auto jetsIn = getOldJets();
+  const auto *jetsIn = getOldJets();
 
   if(jetsIn == nullptr){
     ATH_MSG_WARNING("Grooming: but input jets not found ");
@@ -511,7 +511,7 @@ std::unique_ptr<xAOD::JetContainer> JetRecTool::groomJets() const{
   // PseudoJetContainer used for jet finding
   auto pseudoJets = collectPseudoJets();
 
-  for (const auto ijet : *jetsIn){ m_groomer->groom(*ijet,
+  for (const auto *const ijet : *jetsIn){ m_groomer->groom(*ijet,
                                                     *pseudoJets,
                                                     *jets);}
 
@@ -526,7 +526,7 @@ std::unique_ptr<xAOD::JetContainer> JetRecTool::copyJets() const{
   auto jets = makeOutputContainer();
 
   // Retrieve the old jet collection.
-  auto jetsIn = getOldJets();
+  const auto *jetsIn = getOldJets();
 
   if(jetsIn == nullptr){
     ATH_MSG_WARNING("Copying: but input jets not found ");

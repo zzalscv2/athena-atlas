@@ -29,7 +29,7 @@ StatusCode CaloClusterConstituentsOrigin::process_impl(xAOD::IParticleContainer*
 
    auto handle = SG::makeHandle(m_readVertexContainer_key);
    ATH_CHECK(handle.isValid());
-   auto vertexContainer = handle.cptr();
+   const auto *vertexContainer = handle.cptr();
        
    for(const xAOD::Vertex* pv : *vertexContainer) {
      // Apply the origin correction iff a PV is identified

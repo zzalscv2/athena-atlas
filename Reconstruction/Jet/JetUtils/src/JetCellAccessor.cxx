@@ -10,13 +10,13 @@
 namespace jet {
   
   namespace {
-    typedef std::vector<std::pair<unsigned, double> > linkAndWeightCollType; // recopied from CaloClusterCellLink.h since it's private there
+    using linkAndWeightCollType = std::vector<std::pair<unsigned int, double>>; // recopied from CaloClusterCellLink.h since it's private there
     static const linkAndWeightCollType voidCont;    
   }
 
   JetCellAccessor::const_iterator::const_iterator( constit_iterator constIt, constit_iterator constItE, bool endIt) :  
-    m_cellIt( NULL, voidCont.begin() ) ,
-    m_endCellItinConstit( NULL, voidCont.end()) ,
+    m_cellIt( nullptr, voidCont.begin() ) ,
+    m_endCellItinConstit( nullptr, voidCont.end()) ,
     m_constitIt(constIt), 
     m_constitItE(constItE) {
 
@@ -47,8 +47,8 @@ namespace jet {
     // return true if the cell iterator could be set from the current constituent
 
     if( part->type() == xAOD::Type::CaloCluster ){
-      auto cellLink = static_cast<const xAOD::CaloCluster*>(part)->getCellLinks();
-      if( cellLink == NULL) return false;
+      const auto *cellLink = static_cast<const xAOD::CaloCluster*>(part)->getCellLinks();
+      if( cellLink == nullptr) return false;
       m_cellIt = cellLink->begin();
       m_endCellItinConstit = cellLink->end();
 
@@ -75,12 +75,12 @@ namespace jet {
 
   JetCellAccessor::const_iterator JetCellAccessor::begin(const xAOD::Jet* jet){
     const std::vector< ElementLink< xAOD::IParticleContainer > >& vec = jet->constituentLinks();
-    return const_iterator(vec.begin(),vec.end());
+    return {vec.begin(),vec.end()};
   }
 
   JetCellAccessor::const_iterator JetCellAccessor::end(const xAOD::Jet* jet){
     const std::vector< ElementLink< xAOD::IParticleContainer > >& vec = jet->constituentLinks();
-    return const_iterator(vec.begin(),vec.end(), true);
+    return {vec.begin(),vec.end(), true};
   }
 
 

@@ -21,6 +21,6 @@ StatusCode JetTrackSelectionTool2::initialize() {
 }
 
 int JetTrackSelectionTool2::keep(const xAOD::TrackParticle& trk) const {
-  return static_cast<bool>(m_hidselector->accept(trk, 0));
+  return static_cast<bool>(m_hidselector->accept(trk, nullptr));
 }
 

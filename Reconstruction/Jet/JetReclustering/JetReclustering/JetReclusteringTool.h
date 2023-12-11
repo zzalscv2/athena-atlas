@@ -33,7 +33,7 @@ class IJetPseudojetRetriever;
 class JetReclusteringTool : public asg::AsgTool, virtual public IJetExecuteTool {
   public:
     ASG_TOOL_CLASS(JetReclusteringTool, IJetExecuteTool)
-    JetReclusteringTool(std::string myname);
+    JetReclusteringTool(const std::string& myname);
 
     // initialization - set up everything
     virtual StatusCode initialize() override;

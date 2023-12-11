@@ -16,7 +16,7 @@ StatusCode EventHistoVarTool::initialize() {
 
   if(m_varName=="") m_varName = name();
 
-  size_t pos = (m_attName.key()).find(".");
+  size_t pos = (m_attName.key()).find('.');
   if (pos == std::string::npos){
       m_attName = "EventInfo."+m_attName.key(); // If no container specified, assuming we want "EventInfo"
       ATH_MSG_INFO("Updated attribute key to "<<m_attName);

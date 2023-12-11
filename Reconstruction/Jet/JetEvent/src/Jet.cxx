@@ -310,7 +310,7 @@ void Jet::copy_from_jet( const Jet* pJet, CopyDataMembers cdm0, CopyDataMembers 
     {
       const shape_map_t* oMap = pJet->getMomentMap();
       //std::cout << "  Copying moment  other map "<< oMap<< "  author="<< pJet->jetAuthor() <<"  id="<< pJet->id()<< std::endl;
-      if ( oMap != 0 ){
+      if ( oMap != nullptr ){
 
         const JetMomentMap::record_t *oldrec = oMap->getRecord( pJet->id() );
         // copy the moments :
@@ -338,7 +338,7 @@ void Jet::copy_from_jet( const Jet* pJet, CopyDataMembers cdm0, CopyDataMembers 
 	m_assocStore->reserve (old.size());
 	for (size_t i = 0; i < old.size(); i++)
 	  if (bool(old[i])) m_assocStore->push_back (old[i]->clone());
-	  else m_assocStore->push_back ( 0 );
+	  else m_assocStore->push_back ( nullptr );
       }
   if ( cdm & CopyTagInfos )
     if ( bool(pJet->m_tagInfoStore) )
@@ -349,7 +349,7 @@ void Jet::copy_from_jet( const Jet* pJet, CopyDataMembers cdm0, CopyDataMembers 
 	m_tagInfoStore->reserve (old.size());
 	for (size_t i = 0; i < old.size(); i++)
 	  if (bool(old[i])) m_tagInfoStore->push_back (old[i]->clone());
-	  else m_tagInfoStore->push_back(0);
+	  else m_tagInfoStore->push_back(nullptr);
       }
   
 }
@@ -376,12 +376,12 @@ Jet::~Jet()
     if(map) map->removeRecord( m_jetId );
   }
 
-  if ( m_assocStore != 0 )   {
+  if ( m_assocStore != nullptr )   {
     for (size_t i = 0; i < m_assocStore->size(); i++)
       delete (*m_assocStore)[i];
     delete m_assocStore;
   }
-  if ( m_tagInfoStore != 0 ) {
+  if ( m_tagInfoStore != nullptr ) {
     for (size_t i = 0; i < m_tagInfoStore->size(); i++)
       delete (*m_tagInfoStore)[i];
     delete m_tagInfoStore;
@@ -609,8 +609,8 @@ bool Jet::isIdentical(const Jet* pJet ) const
       double wJ(pJet->getWeight(fC));
       const_iterator fK(this->begin());
       const_iterator lK(this->end());
-      while ( ( fK != lK ) && !((*fC) == (*fK) &&
-				fabs(this->getWeight(fK)-wJ) < m_ignoreWeight) )
+      while ( ( fK != lK ) && ((*fC) != (*fK) ||
+				fabs(this->getWeight(fK)-wJ) >= m_ignoreWeight) )
  
 	{ ++fK; }
       isEqual = fK != lK;
@@ -653,7 +653,7 @@ void diff(const Jet& rJet1, const Jet& rJet2, std::map<std::string,double> varDi
 // find overlap region
 Jet* Jet::getOverlap(const Jet* pJet, bool /*noKine = false*/) const
 {
-  if ( pJet->size() == 0 || this->size() == 0 ) return (Jet*)0;
+  if ( pJet->size() == 0 || this->size() == 0 ) return (Jet*)nullptr;
 
   // Dereferencing ELs is a little expensive.
   // Get the constituents into a vector so that we only
@@ -665,7 +665,7 @@ Jet* Jet::getOverlap(const Jet* pJet, bool /*noKine = false*/) const
 
   // Defer allocating the new jet until we know we have something
   // to put into it.
-  Jet* newJet = 0;
+  Jet* newJet = nullptr;
   // de-compose Jet
   const_iterator fC(pJet->begin());
   const_iterator lC(pJet->end());
@@ -805,7 +805,7 @@ void Jet::setShape(const mkey_t& shapeName,shape_t shapeValue,
       // access jet moment map
       const shape_map_t* map = this->getMomentMap(createIfMissing);
       // store data
-      if ( map != 0 ) 
+      if ( map != nullptr ) 
 	{
 	  map->setMoment(m_jetId,keyIndex,shapeValue); 
           //	  m_newMomKeys = true;
@@ -818,7 +818,7 @@ std::vector<Jet::mkey_t> Jet::getShapeKeys() const
 {
   std::vector<Jet::mkey_t> keys;
   const shape_map_t* pMap = this->getMomentMap(); 
-  if ( pMap != 0 ) 
+  if ( pMap != nullptr ) 
     {
       size_t n(pMap->numberOfMoments(m_jetId));
       keys.reserve(n/2); 
@@ -840,7 +840,7 @@ Jet::shape_t Jet::getShape(const mkey_t& shapeName,bool addIfMissing) const
   if ( this->checkKey(JetKeyConstants::ShapeCat,shapeName,keyIndex,false) )
     {
       const shape_map_t* pMap = this->getMomentMap(addIfMissing);
-      return pMap != 0 ? pMap->getMoment(m_jetId,keyIndex) : shape_t();
+      return pMap != nullptr ? pMap->getMoment(m_jetId,keyIndex) : shape_t();
     }
   return shape_t();
 }
@@ -872,7 +872,7 @@ void Jet::setTagInfo(const mkey_t& key,
 void Jet::removeInfo (unsigned int index)
 {
   delete (m_tagInfoStore->operator[])(index);
-  (m_tagInfoStore->operator[])(index) = 0;
+  (m_tagInfoStore->operator[])(index) = nullptr;
 }
 
 void Jet::removeInfo(const mkey_t& key )
@@ -993,7 +993,7 @@ double Jet::getFlavourTagWeight() const
     // Fastsim
     w = -30.;
     const JetTagInfoBase* pos(this->tagInfo("SV1IP3D"));
-    if (pos != 0) {
+    if (pos != nullptr) {
       std::vector<double> prob = pos->tagLikelihood();
       if(prob.size()>1) {
         double pb = prob[0];
@@ -1015,7 +1015,7 @@ double Jet::getFlavourTagWeight() const
     bool found = false;
     // get W from IP3D:
     const JetTagInfoBase* pos(this->tagInfo("IP3D"));
-    if( pos != 0 ) {
+    if( pos != nullptr ) {
       found = true;
       std::vector<double> prob = pos->tagLikelihood();
       if(prob.size()>1) {
@@ -1031,7 +1031,7 @@ double Jet::getFlavourTagWeight() const
     }
     // get W from SV:
     pos = this->tagInfo("SV1");
-    if( pos != 0 ) {
+    if( pos != nullptr ) {
       found = true;
       std::vector<double> prob = pos->tagLikelihood();
       if(prob.size()>1) {
@@ -1050,7 +1050,7 @@ double Jet::getFlavourTagWeight(const std::string& infoName) const
 {
   double w = -100.;
   const JetTagInfoBase* pos(this->tagInfo(infoName));
-  if( pos != 0 ) {
+  if( pos != nullptr ) {
     std::vector<double> prob = pos->tagLikelihood();
     if(prob.size() == 1) {
       w = prob[0];
@@ -1096,7 +1096,7 @@ void Jet::setJetAuthor(const mkey_t& author)
   if(m_jetAuthor == 0 ) m_jetAuthor = keyDesc()->getIndex(JetKeyConstants::InfoCat,author,true); 
 
   std::string full_auth = keyDesc()->getKey(JetKeyConstants::InfoCat,m_jetAuthor);  
-  size_t pos = full_auth.find_first_of("_");
+  size_t pos = full_auth.find_first_of('_');
 
   if( pos != std::string::npos) // we add the _XXX_YYY part to author
     m_jetAuthor = keyDesc()->getIndex(JetKeyConstants::InfoCat,author+full_auth.substr(pos),true); 
@@ -1109,7 +1109,7 @@ Jet::mkey_t Jet::jetAuthor() const
 { 
   std::string full_auth = keyDesc()->getKey(JetKeyConstants::InfoCat,m_jetAuthor);  
   // return the first part in JetAuth_XXX_YYY
-  size_t found=full_auth.find_first_of("_");
+  size_t found=full_auth.find_first_of('_');
   return found != std::string::npos ? full_auth.substr(0 , found) : full_auth; 
 }
 
@@ -1133,25 +1133,25 @@ bool Jet::hasCalibTag(const std::string& tag) const{
 
 int  Jet::numCalibTag() const {
   std::string full_auth = keyDesc()->getKey(JetKeyConstants::InfoCat,m_jetAuthor);    
-  size_t p = full_auth.find_first_of("_");
+  size_t p = full_auth.find_first_of('_');
   int c=0;
   while(p != std::string::npos){
     c++;
-    p = full_auth.find_first_of("_",p+1);
+    p = full_auth.find_first_of('_',p+1);
   }
   return c;
 }
 
 std::string Jet::getCalibTag(int i) const{
   std::string full_auth = keyDesc()->getKey(JetKeyConstants::InfoCat,m_jetAuthor);
-  size_t p = full_auth.find_first_of("_");
+  size_t p = full_auth.find_first_of('_');
   int c=0;
   while(p != std::string::npos){
     c++;
     if( c==i ){
-      return full_auth.substr(p+1,full_auth.find_first_of("_",p+1)-p-1);
+      return full_auth.substr(p+1,full_auth.find_first_of('_',p+1)-p-1);
     }
-    p = full_auth.find_first_of("_",p+1);
+    p = full_auth.find_first_of('_',p+1);
   }
   return "";
 }
@@ -1174,7 +1174,7 @@ const Jet::shape_map_t* Jet::getMomentMap() const
 {
 
   // jets must be identified
-  if(m_jetId == s_defaultJetId ) return NULL;
+  if(m_jetId == s_defaultJetId ) return nullptr;
   
   if( m_collection ){ 
     // This jet belongs to a JetCollection, ask the map 

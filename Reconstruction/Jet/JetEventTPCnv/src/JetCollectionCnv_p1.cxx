@@ -73,8 +73,7 @@ JetCollectionCnv_p1::persToTrans( const JetCollection_p1* pers,
     }
 //   msg << MSG::DEBUG << "Loading JetCollection from persistent state [OK]"
 //       << endmsg;
-  return;
-}
+  }
 
 void 
 JetCollectionCnv_p1::transToPers( const JetCollection* trans, 
@@ -100,6 +99,5 @@ JetCollectionCnv_p1::transToPers( const JetCollection* trans,
   
 //   msg << MSG::DEBUG << "Creating persistent state of JetCollection [OK]"
 //       << endmsg;
-  return;
-}
+  }
 

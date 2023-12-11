@@ -36,7 +36,7 @@
  // Destructor
   ///////////////
   JetForwardPFlowJvtTool::~JetForwardPFlowJvtTool()
-  {}
+  = default;
 
   // Athena algtool's Hooks
   ////////////////////////////
@@ -95,7 +95,7 @@
 
     SG::WriteDecorHandle<xAOD::JetContainer, char> fjvtHandle(m_fjvtKey);
     SG::WriteDecorHandle<xAOD::JetContainer, float> fjvtRawHandle(m_fjvtRawKey);
-    if(pileupMomenta.size()==0) {
+    if(pileupMomenta.empty()) {
       ATH_MSG_DEBUG( "pileupMomenta is empty, this can happen for events with no PU vertices."
                      <<" fJVT won't be computed for this event and will be set to 0 instead." );
       for(const xAOD::Jet* jetF : jetCont) {
@@ -371,7 +371,7 @@
       if(vx->vertexType()==xAOD::VxType::PriVtx) return vx->index();
     } 
     // If no verticies are found in the event the Primary Vertex container will just contain a dummy vertex and no primary vertex   
-    if(vxContHandle->size() == 0 ){     
+    if(vxContHandle->empty() ){     
       ATH_MSG_ERROR("Primary vertex container is empty ");
     } else if(vxContHandle->size() != 1 ){     
       ATH_MSG_WARNING("Couldn't identify the hard-scatter primary vertex (no vertex with \"vx->vertexType()==xAOD::VxType::PriVtx\" in the container)! ");
