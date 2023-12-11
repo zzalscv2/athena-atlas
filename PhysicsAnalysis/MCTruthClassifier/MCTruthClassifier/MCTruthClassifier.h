@@ -121,7 +121,7 @@ public:
     HepMC::ConstGenParticlePtr,
     Info* info = nullptr) const override;
 
-  bool compareTruthParticles(HepMC::ConstGenParticlePtr genPart, const xAOD::TruthParticle* truthPart) const;
+  bool compareTruthParticles(const HepMC::ConstGenParticlePtr& genPart, const xAOD::TruthParticle* truthPart) const;
 #endif
 
 #ifndef GENERATIONBASE /*These can not run in Generation only release*/
@@ -153,19 +153,19 @@ private:
   static float detPhi(float, float);
   static float rCone(float x, float y) { return sqrt(x * x + y * y); }
   //
-  MCTruthPartClassifier::ParticleType defTypeOfElectron(MCTruthPartClassifier::ParticleOrigin, bool isPrompt) const;
+  static MCTruthPartClassifier::ParticleType defTypeOfElectron(MCTruthPartClassifier::ParticleOrigin, bool isPrompt) ;
   MCTruthPartClassifier::ParticleOrigin defOrigOfElectron(const xAOD::TruthParticleContainer* xTruthParticleContainer,
                                                           const xAOD::TruthParticle*,
                                                           bool& isPrompt,
                                                           Info* info) const;
-  MCTruthPartClassifier::ParticleOutCome defOutComeOfElectron(const xAOD::TruthParticle*) const;
+  static MCTruthPartClassifier::ParticleOutCome defOutComeOfElectron(const xAOD::TruthParticle*) ;
   //
-  MCTruthPartClassifier::ParticleType defTypeOfMuon(MCTruthPartClassifier::ParticleOrigin, bool isPrompt) const;
+  static MCTruthPartClassifier::ParticleType defTypeOfMuon(MCTruthPartClassifier::ParticleOrigin, bool isPrompt) ;
   MCTruthPartClassifier::ParticleOrigin defOrigOfMuon(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                       const xAOD::TruthParticle*,
                                                       bool& isPrompt,
                                                       Info* info) const;
-  MCTruthPartClassifier::ParticleOutCome defOutComeOfMuon(const xAOD::TruthParticle*) const;
+  static MCTruthPartClassifier::ParticleOutCome defOutComeOfMuon(const xAOD::TruthParticle*) ;
   //
   static MCTruthPartClassifier::ParticleType defTypeOfTau(MCTruthPartClassifier::ParticleOrigin);
   MCTruthPartClassifier::ParticleOrigin defOrigOfTau(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
@@ -174,12 +174,12 @@ private:
                                                      Info* info) const;
   MCTruthPartClassifier::ParticleOutCome defOutComeOfTau(const xAOD::TruthParticle*, Info* info) const;
   //
-  MCTruthPartClassifier::ParticleType defTypeOfPhoton(MCTruthPartClassifier::ParticleOrigin) const;
+  static MCTruthPartClassifier::ParticleType defTypeOfPhoton(MCTruthPartClassifier::ParticleOrigin) ;
   MCTruthPartClassifier::ParticleOrigin defOrigOfPhoton(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                         const xAOD::TruthParticle*,
                                                         bool& isPrompt,
                                                         Info* info) const;
-  MCTruthPartClassifier::ParticleOutCome defOutComeOfPhoton(const xAOD::TruthParticle*) const;
+  static MCTruthPartClassifier::ParticleOutCome defOutComeOfPhoton(const xAOD::TruthParticle*) ;
   //
   MCTruthPartClassifier::ParticleOrigin defOrigOfNeutrino(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                           const xAOD::TruthParticle*,
@@ -190,13 +190,13 @@ private:
   static bool fromHadron(const xAOD::TruthParticle* p, const xAOD::TruthParticle *hadptr, bool &fromTau, bool &fromBSM);
 
   //
-  MCTruthPartClassifier::ParticleOrigin defHadronType(int);
+  static MCTruthPartClassifier::ParticleOrigin defHadronType(int);
   static bool isHadron(const xAOD::TruthParticle*);
   static MCTruthPartClassifier::ParticleType defTypeOfHadron(int);
   static MCTruthPartClassifier::ParticleOrigin convHadronTypeToOrig(MCTruthPartClassifier::ParticleType pType,
                                                                     int motherPDG);
   //
-  const xAOD::TruthVertex* findEndVert(const xAOD::TruthParticle*) const;
+  static const xAOD::TruthVertex* findEndVert(const xAOD::TruthParticle*) ;
   static bool isHardScatVrtx(const xAOD::TruthVertex*);
   //
   std::vector<const xAOD::TruthParticle*> findFinalStatePart(const xAOD::TruthVertex*) const;
@@ -227,7 +227,7 @@ private:
 
   void findAllJetMothers(const xAOD::TruthParticle*, std::set<const xAOD::TruthParticle*>&) const;
   void findParticleDaughters(const xAOD::TruthParticle*, std::set<const xAOD::TruthParticle*>&) const;
-  MCTruthPartClassifier::ParticleOrigin defJetOrig(const std::set<const xAOD::TruthParticle*>&) const;
+  static MCTruthPartClassifier::ParticleOrigin defJetOrig(const std::set<const xAOD::TruthParticle*>&) ;
   //
   /** Searches for matching particle in the container **/
   static const xAOD::TruthParticle* find_matching(const xAOD::TruthParticleContainer*, const xAOD::TruthParticle* xx);

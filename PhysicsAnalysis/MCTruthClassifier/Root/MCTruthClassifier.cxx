@@ -67,7 +67,7 @@ MCTruthClassifier::MCTruthClassifier(const std::string& type)
 }
 
 // DESTRUCTOR:
-MCTruthClassifier::~MCTruthClassifier() {}
+MCTruthClassifier::~MCTruthClassifier() = default;
 
 // INITIALIZE METHOD:
 StatusCode

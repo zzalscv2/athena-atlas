@@ -296,7 +296,7 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, Info* info /*= nul
     return nullptr;
   }
 
-  auto truthLink = tPL(*trk);
+  const auto& truthLink = tPL(*trk);
   if (!truthLink.isValid()) {
     ATH_MSG_DEBUG("Invalid link to truth particle");
     return nullptr;
