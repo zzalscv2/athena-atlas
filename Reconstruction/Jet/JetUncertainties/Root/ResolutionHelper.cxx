@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -319,7 +319,7 @@ StatusCode ResolutionHelper::initialize(TEnv& settings, TFile* histFile, const T
             ATH_MSG_ERROR("Requested full smearing correlations (both data and MC), but only provided the MC nominal histogram for pT");
             return StatusCode::FAILURE;
         }
-        if (m_fvNomHistMC && !m_fvNomHistMC)
+        if (m_fvNomHistMC && !m_fvNomHistData)
         {
             ATH_MSG_ERROR("Requested full smearing correlations (both data and MC), but only provided the MC nominal histogram for fourvec");
             return StatusCode::FAILURE;

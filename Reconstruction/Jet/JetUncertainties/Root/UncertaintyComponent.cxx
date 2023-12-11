@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetUncertainties/UncertaintyComponent.h"
@@ -37,6 +37,7 @@ UncertaintyComponent::UncertaintyComponent(const std::string& name)
     , m_energyScale(1)
     , m_interpolate(Interpolate::UNKNOWN)
     , m_splitNumber(0)
+    , m_numExpectedHist(0)
     , m_uncHist(NULL)
     , m_validHist(NULL)
 {
@@ -87,7 +88,7 @@ UncertaintyComponent::UncertaintyComponent(const UncertaintyComponent& toCopy)
 
 UncertaintyComponent::~UncertaintyComponent()
 {
-    ATH_MSG_DEBUG("Deleting UncertaintyComponent named " << getName().Data());
+    ATH_MSG_DEBUG("Deleting UncertaintyComponent named " << UncertaintyComponent::getName().Data());
     JESUNC_SAFE_DELETE(m_uncHist);
     JESUNC_SAFE_DELETE(m_validHist);
 }

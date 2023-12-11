@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -99,7 +99,7 @@ namespace CP {
 
         public:
             // Constructor/destructor/init
-            FFJetSmearingTool(const std::string name);      
+            FFJetSmearingTool(const std::string& name);      
             virtual ~FFJetSmearingTool();	
 
             virtual StatusCode initialize() override;
@@ -137,7 +137,7 @@ namespace CP {
 
             StatusCode readFFJetSmearingToolSimplifiedData(TEnv& settings);
 
-            StatusCode getJMSJMR( xAOD::Jet& jet_reco, double jet_mass,  JetTools::FFJetAllowedMassDefEnum MassDef_of_syst ,std::string jetTopology, double& JMS_err, double& JMR_err) const;
+            StatusCode getJMSJMR( xAOD::Jet& jet_reco, double jet_mass,  JetTools::FFJetAllowedMassDefEnum MassDef_of_syst ,const std::string& jetTopology, double& JMS_err, double& JMR_err) const;
 
             StatusCode getJetTopology( xAOD::Jet& jet_reco, std::string& jetTopology) const;
 
