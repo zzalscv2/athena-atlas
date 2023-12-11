@@ -124,15 +124,15 @@ public:
 
     // Access to min and max of level ranges
 
-    int stationEtaMin(bool barrel) const;
-    int stationEtaMax(bool barrel) const;
-    int stationPhiMin() const;
-    int stationPhiMax() const;
-    int multilayerMin() const;
-    int multilayerMax() const;
-    int tubeLayerMin() const;
-    int tubeLayerMax() const;
-    int tubeMin() const;
+    static int stationEtaMin(bool barrel) ;
+    static int stationEtaMax(bool barrel) ;
+    static int stationPhiMin() ;
+    static int stationPhiMax() ;
+    static int multilayerMin() ;
+    static int multilayerMax() ;
+    static int tubeLayerMin() ;
+    static int tubeLayerMax() ;
+    static int tubeMin() ;
     int tubeMax() const;
 
     // Access to min and max of level ranges

@@ -140,22 +140,22 @@ public:
 
     // Access to min and max of level ranges
     // to be remove when we moved to compact ids
-    int stationEtaMin() const;
-    int stationEtaMax() const;
-    int stationPhiMin() const;
-    int stationPhiMax() const;
-    int multilayerMin() const;
-    int multilayerMax() const;
-    int gasGapMin() const;
-    int gasGapMax() const;
-    int channelTypeMin() const;
-    int channelTypeMax() const;
-    int channelMin() const;
-    int channelMax() const;
-    int padEtaMin() const;
-    int padEtaMax() const;
-    int padPhiMin() const;
-    int padPhiMax() const;
+    static int stationEtaMin() ;
+    static int stationEtaMax() ;
+    static int stationPhiMin() ;
+    static int stationPhiMax() ;
+    static int multilayerMin() ;
+    static int multilayerMax() ;
+    static int gasGapMin() ;
+    static int gasGapMax() ;
+    static int channelTypeMin() ;
+    static int channelTypeMax() ;
+    static int channelMin() ;
+    static int channelMax() ;
+    static int padEtaMin() ;
+    static int padEtaMax() ;
+    static int padPhiMin() ;
+    static int padPhiMax() ;
 
     // Access to min and max of level ranges
     int stationEtaMin(const Identifier& id) const;

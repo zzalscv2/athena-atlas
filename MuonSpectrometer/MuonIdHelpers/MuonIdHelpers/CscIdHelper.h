@@ -113,18 +113,18 @@ public:
     // Access to min and max of level ranges
     // to be remove when we moved to compact ids
 
-    int stationEtaMin() const;
-    int stationEtaMax() const;
-    int stationPhiMin() const;
-    int stationPhiMax() const;
-    int chamberLayerMin() const;
-    int chamberLayerMax() const;
-    int wireLayerMin() const;
-    int wireLayerMax() const;
-    int measuresPhiMin() const;
-    int measuresPhiMax() const;
-    int stripMin() const;
-    int stripMax() const;
+    static int stationEtaMin() ;
+    static int stationEtaMax() ;
+    static int stationPhiMin() ;
+    static int stationPhiMax() ;
+    static int chamberLayerMin() ;
+    static int chamberLayerMax() ;
+    static int wireLayerMin() ;
+    static int wireLayerMax() ;
+    static int measuresPhiMin() ;
+    static int measuresPhiMax() ;
+    static int stripMin() ;
+    static int stripMax() ;
 
     // Access to min and max of level ranges
 
