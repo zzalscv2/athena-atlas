@@ -1042,7 +1042,7 @@ void testThread_Iterator::operator()()
     }
 
     for (const EventIDRange& r : rvec) {
-      const B* obj;
+      const B* obj = nullptr;
       if (m_map.find (r.start(), obj)) {
         assert (static_cast<int>(r.start().lumi_block()) == static_cast<int>(obj->m_x*10));
       }
@@ -1237,7 +1237,7 @@ void testThread_MixedIterator::operator()()
     }
 
     for (const EventIDRange& r : rvec) {
-      const BM* obj;
+      const BM* obj = nullptr;
       if (m_map.find (r.start(), obj)) {
         if (obj->m_x != static_cast<int> (r.start().lumi_block() + r.start().time_stamp()))
         {
