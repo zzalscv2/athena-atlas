@@ -65,6 +65,8 @@ def setupTrackCaloAssoc(flags, caloClusterName="CaloCalTopoClusters",detectorEta
         VertexContainerName = "PrimaryVertices" if onlyPV0Tracks else "",
         #VertexContainerName = "PrimaryVertices" if onlyPV0Tracks else "TTVA_AMVFVertices",
         AssociatedClusterDecorKey = decorKey("AssoClusters"),
+        UseCovariance = flags.UFO.UseCov,
+        DeltaR = flags.UFO.dR,
 #        OutputLevel=2
     )
 
