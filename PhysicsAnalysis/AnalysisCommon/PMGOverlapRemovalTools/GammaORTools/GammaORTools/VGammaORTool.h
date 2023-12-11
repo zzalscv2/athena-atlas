@@ -101,12 +101,12 @@ public:
                         float dR0, float exponent, float epsilon) const override;
 
 
-  /// Get final state (determined by status and barcode) photons (determined by pdg id) from truthParticleContainer
+  /// Get final state photons from truthParticleContainer
   /// A minimum pT cut and isolation is applied according to tool configuration
   /// Filter function is applied, only photons from relevant origins are kept
   std::vector<TLorentzVector> getPhotonP4s(const xAOD::TruthParticleContainer& truthParticleContainer) const;
 
-  /// Get final state (determined by status and barcode) leptons (determined by pdg id) from truthParticleContainer
+  /// Get final state leptons from truthParticleContainer
   /// Filter function is applied, only leptons from relevant origins are kept
   std::vector<TLorentzVector> getLeptonP4s(const xAOD::TruthParticleContainer& truthParticleContainer) const;
 

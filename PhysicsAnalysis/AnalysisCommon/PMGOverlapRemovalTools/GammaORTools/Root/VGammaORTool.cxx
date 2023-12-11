@@ -250,7 +250,7 @@ std::vector<TLorentzVector> VGammaORTool::getLeptonP4s(const xAOD::TruthParticle
   std::vector<const xAOD::TruthParticle*> tau_candidates;
   std::vector<const xAOD::TruthParticle*> elmu_candidates;
   for (const auto *p : truthParticles) {
-    // ignore all particles with geant barcodes
+    // ignore all particles created in Geant4
     if (HepMC::is_simulation_particle(p)) {
       continue;
     }
