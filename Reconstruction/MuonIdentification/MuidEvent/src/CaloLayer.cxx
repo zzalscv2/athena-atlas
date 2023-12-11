@@ -24,8 +24,7 @@ CaloLayer::CaloLayer(const Trk::Surface*	surface,
 	m_X0		(radLen)
 {}
 
-CaloLayer::~CaloLayer()
-{}
+
 
 void
 CaloLayer::print(void) const

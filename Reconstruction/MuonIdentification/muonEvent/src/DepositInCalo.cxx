@@ -43,11 +43,9 @@ void DepositInCalo::print() const
 
 /** copy constructor */
 DepositInCalo::DepositInCalo (const DepositInCalo& rhs)
-  :	m_subCaloId       ( rhs.m_subCaloId ),
-	m_energyDeposited ( rhs.m_energyDeposited ),
-	m_muonEnergyLoss  ( rhs.m_muonEnergyLoss ),
-        m_etDeposited     ( rhs.m_etDeposited )
-{}
+  
+        
+= default;
 
 /** assignment operator */
 DepositInCalo & DepositInCalo::operator= (const DepositInCalo & rhs) {

@@ -309,7 +309,7 @@ Muon& Muon::operator=( const Muon& rhs )
 
 //------------------------------------------------------------
 /** Destructor */
-Muon::~Muon() {}
+Muon::~Muon() = default;
 
 bool Muon::isAuthor ( const unsigned int author ) const {
   MuonParameters::Author x = static_cast<MuonParameters::Author>(author);
@@ -1019,8 +1019,7 @@ void Muon::fillToken(INavigationToken& theToken) const
     
   }
 
-  return;
-}
+  }
 
 ////////////////////////////////
 // Navigation with parameters //

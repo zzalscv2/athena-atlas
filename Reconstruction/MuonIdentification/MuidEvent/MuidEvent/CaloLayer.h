@@ -26,7 +26,7 @@ public:
 	      double z,
 	      double radLen,
 	      bool isBarrel);
-    ~CaloLayer();
+    ~CaloLayer() = default;
 
     int				geom() const;
     bool			isBarrel() const;
