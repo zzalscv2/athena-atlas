@@ -48,8 +48,8 @@
 
 namespace {
     // the tube number of a tube in a tubeLayer in encoded in the GeoSerialIdentifier (modulo maxNTubesPerLayer)
-    static constexpr unsigned int const maxNTubesPerLayer = MdtIdHelper::maxNTubesPerLayer;
-    static constexpr double linearDensity = 378.954;
+    constexpr unsigned int const maxNTubesPerLayer = MdtIdHelper::maxNTubesPerLayer;
+    constexpr double linearDensity = 378.954;
 }  // namespace
 
 namespace MuonGM {
@@ -65,7 +65,7 @@ namespace MuonGM {
     }
     void MdtReadoutElement::setMultilayer(const int ml) { m_multilayer = ml; }
     void MdtReadoutElement::setNLayers(const int nl) { m_nlayers = nl; }
-    void MdtReadoutElement::clearBLinePar() { m_BLinePar = 0; }
+    void MdtReadoutElement::clearBLinePar() { m_BLinePar = nullptr; }
     std::vector<const Trk::Surface*> MdtReadoutElement::surfaces() const {
         std::vector<const Trk::Surface*> elementSurfaces;
         elementSurfaces.reserve(m_tubeSurfaces.size() + 1);
@@ -281,10 +281,10 @@ namespace MuonGM {
 
     Amg::Vector3D MdtReadoutElement::tubeFrame_localROPos(const int tubeLayer, const int tube) const {
         return signedRODistanceFromTubeCentre(tubeLayer, tube) * Amg::Vector3D::UnitZ();
-    }    
+    }
     Amg::Vector3D MdtReadoutElement::localROPos(const int tubeLayer, const int tube) const {
         return tubeToMultilayerTransf(tubeLayer, tube) * tubeFrame_localROPos(tubeLayer, tube);
-    }   
+    }
     Amg::Vector3D MdtReadoutElement::ROPos(const int tubeLayer, const int tube) const {
         return transform(tubeLayer, tube) * tubeFrame_localROPos(tubeLayer, tube);
     }
@@ -293,7 +293,7 @@ namespace MuonGM {
     }
 
     Amg::Vector3D MdtReadoutElement::nodeform_localTubePos(const int tubeLayer, const int tube) const {
-        ATH_MSG_VERBOSE( " Computing LocalTubePos for "<< idHelperSvc()->toStringDetEl(identify())  
+        ATH_MSG_VERBOSE( " Computing LocalTubePos for "<< idHelperSvc()->toStringDetEl(identify())
                                                        << "/" << tubeLayer << "/" << tube );
         double xtube{0.}, ytube{0.}, ztube{0.};
         if (barrel()) {
@@ -303,7 +303,7 @@ namespace MuonGM {
             xtube = -m_Zsize / 2. + m_firstwire_y[tubeLayer - 1];
             ztube = -m_Rsize / 2. + m_firstwire_x[tubeLayer - 1] + (tube - 1) * m_tubepitch;
         }
-        const Amg::Vector3D tubePos{xtube, ytube, ztube};
+        Amg::Vector3D tubePos{xtube, ytube, ztube};
         if (hasCutouts()) {
             if (manager()->MinimalGeoFlag() == 0) {
                 ATH_MSG_DEBUG( " MdtReadoutElement " << idHelperSvc()->toStringDetEl(identify()) << " has cutouts, check for real position of tubes " );
@@ -311,7 +311,7 @@ namespace MuonGM {
                 int nGrandchildren = cv->getNChildVols();
                 // child vol 0 is foam; 1 to (nGrandchildren-1) should be tubes
                 int ii = (tubeLayer - 1) * m_ntubesperlayer + tube;
-                
+
                 // BIS78 only (the BIS7 of Run1/2 has no cutouts, thus, this block won't be reached)
                 if ((getStationIndex() == m_stIdx_BIS && std::abs(getStationEta()) == 7)) --ii;
                 if (manager()->mdtIdHelper()->isBMG(identify())) {
@@ -340,7 +340,7 @@ namespace MuonGM {
                 PVConstLink tv = cv->getChildVol(ii);
                 constexpr double maxtol = 0.0000001;
 
-                if (std::abs(xtube - tubeTrans(0, 3)) > maxtol || std::abs(ztube - tubeTrans(2, 3)) > maxtol) {                    
+                if (std::abs(xtube - tubeTrans(0, 3)) > maxtol || std::abs(ztube - tubeTrans(2, 3)) > maxtol) {
                     ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"("<<tubeLayer<<","<<tube<<")"<<" - mismatch between local from tube-id/pitch/cutout position"<<
                            Amg::toString(tubePos)<<" and GeoModel "<< Amg::toString(tubeTrans.linear().col(3))<<" for detector element "<<
                             idHelperSvc()->toStringDetEl(identify()) <<"There are "<<nGrandchildren<<" child volumes and "<<
@@ -349,8 +349,8 @@ namespace MuonGM {
                     throw std::runtime_error("Bad tube match");
                 }
                 if (tubeTrans(1, 3) > maxtol) {
-                   
-                    ATH_MSG_DEBUG( "This a tube with cutout stName/Eta/Phi/ml/tl/t = " << idHelperSvc()->toStringDetEl(identify()) 
+
+                    ATH_MSG_DEBUG( "This a tube with cutout stName/Eta/Phi/ml/tl/t = " << idHelperSvc()->toStringDetEl(identify())
                                          << "/" << tubeLayer << "/" << tube);
                     // check only for tubes actually shifted
                     if (std::abs(m_cutoutShift - tubeTrans(1, 3)) > maxtol) {
@@ -374,7 +374,7 @@ namespace MuonGM {
     Amg::Vector3D MdtReadoutElement::nodeform_tubePos(int tubeLayer, int tube) const {
         return transform() * nodeform_localTubePos(tubeLayer, tube);
     }
-    Amg::Vector3D MdtReadoutElement::tubePos(int tubeLayer, int tube) const {       
+    Amg::Vector3D MdtReadoutElement::tubePos(int tubeLayer, int tube) const {
       return transform() * localTubePos(tubeLayer, tube);
     }
     Amg::Transform3D MdtReadoutElement::tubeToMultilayerTransf(const int tubeLayer, const int tube) const {
@@ -393,7 +393,7 @@ namespace MuonGM {
     Amg::Transform3D MdtReadoutElement::globalTransform(const Amg::Vector3D& tubePos, const Amg::Transform3D& toDeform) const {
         return transform() * tubeToMultilayerTransf(tubePos, toDeform);
     }
-    Amg::Transform3D MdtReadoutElement::tubeToMultilayerTransf(const Amg::Vector3D& tubePos, const Amg::Transform3D& toDeform) const {
+    Amg::Transform3D MdtReadoutElement::tubeToMultilayerTransf(const Amg::Vector3D& tubePos, const Amg::Transform3D& toDeform) {
         return toDeform * Amg::Translation3D{tubePos} * Amg::getRotateX3D(90. * CLHEP::deg);
     }
     Amg::Transform3D MdtReadoutElement::nodeform_localToGlobalTransf(const int tubeLayer, const int tube) const {
@@ -402,11 +402,11 @@ namespace MuonGM {
     Amg::Transform3D MdtReadoutElement::globalToLocalTransf(const int tubeLayer, const int tube) const {
         return transform(tubeLayer, tube).inverse();
     }
-   
+
     Amg::Transform3D MdtReadoutElement::nodeform_globalToLocalTransf(const int tubeLayer, const int tube) const {
         return nodeform_localToGlobalTransf(tubeLayer, tube).inverse();
     }
-    double MdtReadoutElement::getNominalTubeLengthWoCutouts(const int tubeLayer, const int tube) const {        
+    double MdtReadoutElement::getNominalTubeLengthWoCutouts(const int tubeLayer, const int tube) const {
         if (barrel())
             return m_Ssize;
         else {
@@ -461,12 +461,12 @@ namespace MuonGM {
 #endif
     Amg::Transform3D
     MdtReadoutElement::deformedTransform(int tubeLayer, int tube) const {
-        
+
         const MuonStation* ms = parentMuonStation();
         if ( !ms->hasBLines() && !ms->hasMdtAsBuiltParams()) {
             return Amg::Transform3D::Identity();
         }
-        
+
         const Amg::Vector3D fixedPoint = ms->getUpdatedBlineFixedPointInAmdbLRS();
 
         int ntot_tubes = m_nlayers * m_ntubesperlayer;
@@ -517,13 +517,13 @@ namespace MuonGM {
 
         // if there are deformation parameters ... apply them here
         if (ms->hasBLines()) {
-        
+
             // Get positions after the deformations applied
             // first wire end point
-            pt_end1_new = posOnDefChamWire(pt_end1_new, width_narrow, width_wide, height, thickness, fixedPoint);           
+            pt_end1_new = posOnDefChamWire(pt_end1_new, width_narrow, width_wide, height, thickness, fixedPoint);
 
             // second wire end point
-            pt_end2_new = posOnDefChamWire(pt_end2_new, width_narrow, width_wide, height, thickness, fixedPoint);           
+            pt_end2_new = posOnDefChamWire(pt_end2_new, width_narrow, width_wide, height, thickness, fixedPoint);
         }
 
         // Switch tube ends back to MGM coordinates
@@ -546,7 +546,7 @@ namespace MuonGM {
         if (rotation_vector.mag() > 10. * std::numeric_limits<double>::epsilon()) {
             const Amg::AngleAxis3D wire_rotation(std::asin(rotation_vector.mag()), rotation_vector.unit());
             return Amg::Transform3D{from_center * wire_rotation * to_center};
-        } 
+        }
         return Amg::Transform3D{from_center * Amg::getRotateX3D(std::asin(rotation_vector.mag())) * to_center};
     }
 
@@ -574,10 +574,10 @@ namespace MuonGM {
     Amg::Vector3D MdtReadoutElement::posOnDefChamWire(const Amg::Vector3D& locAMDBPos,
                                                       const double width_narrow,
                                                       const double width_wide,
-                                                      const double height, 
+                                                      const double height,
                                                       const double thickness,
                                                       const Amg::Vector3D& fixedPoint) const {
-  
+
         using Parameter = BLinePar::Parameter;
         const double sp = m_BLinePar->getParameter(Parameter::sp);
         const double sn = m_BLinePar->getParameter(Parameter::sn);
@@ -607,7 +607,7 @@ namespace MuonGM {
         //                                 the tube delta_s from ep,en must also be considered for the implementation of the realistic tube
         //                                 trajectory induced by ep,en
         // tw,sp,sn,pg (for deltaT and deltaZ) are geometrical effects, that impact on tracking and keep the wire straight.
-        
+
 
 
         Amg::Vector3D deformPos(locAMDBPos);
@@ -712,11 +712,11 @@ namespace MuonGM {
             return;
         }
 
-        ATH_MSG_VERBOSE( "Applying as-built parameters for chamber " << idHelperSvc()->toStringDetEl(identify()) 
+        ATH_MSG_VERBOSE( "Applying as-built parameters for chamber " << idHelperSvc()->toStringDetEl(identify())
                         << " tubeLayer=" << tubeLayer << " tube=" << tube);
 
         constexpr int nsid = 2;
-        using tubeSide_t = MdtAsBuiltPar::tubeSide_t; 
+        using tubeSide_t = MdtAsBuiltPar::tubeSide_t;
         using multilayer_t = MdtAsBuiltPar::multilayer_t;
         std::array<MdtAsBuiltPar::tubeSide_t, nsid> tubeSide{tubeSide_t::POS, tubeSide_t::NEG};
         std::array<Amg::Vector3D, nsid> wireEnd{locAMDBWireEndP, locAMDBWireEndN};
@@ -815,12 +815,12 @@ namespace MuonGM {
     }
 
     const Trk::SaggedLineSurface& MdtReadoutElement::surface(const int tubeLayer, const int tube) const {
-        
-        
-        
 
-  
-        
+
+
+
+
+
 
         int ntot_tubes = m_nlayers * m_ntubesperlayer;
         int itube = (tubeLayer - 1) * m_ntubesperlayer + tube - 1;
@@ -938,7 +938,7 @@ namespace MuonGM {
             m_associatedSurface.release();
         }
         else  ATH_MSG_VERBOSE( "no associated surface to be deleted" );
-        
+
         if (m_associatedBounds) {
             m_associatedBounds.release();
         } ATH_MSG_VERBOSE( "no associated bounds to be deleted" );
@@ -959,7 +959,7 @@ namespace MuonGM {
         clearBLineCache();
     }
 
-    void MdtReadoutElement::setBLinePar(const BLinePar* bLine) {       
+    void MdtReadoutElement::setBLinePar(const BLinePar* bLine) {
         ATH_MSG_DEBUG( "Setting B-line for " << idHelperSvc()->toStringDetEl(identify()) );
         m_BLinePar = bLine;
     }
@@ -975,7 +975,7 @@ namespace MuonGM {
             tmpBounds = dynamic_cast<const Trk::TrapezoidBounds*>(&bounds());
         ATH_MSG_VERBOSE( "global Surface / Bounds pointers " << tmpSurface << " " << tmpBounds );
         ATH_MSG_VERBOSE( "global Normal " << normal() );
-        
+
 #endif
         const Trk::CylinderBounds* tmpCil = nullptr;
         const Trk::SaggedLineSurface* tmpSaggL = nullptr;
@@ -1025,21 +1025,19 @@ namespace MuonGM {
                     ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube center          " << myPoint );
                     ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube bounds pointer  " << tmpCil );
                     ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube surface pointer " << tmpSaggL );
-                    
+
 #endif
                 }
             }
         }
     }
 
-    bool MdtReadoutElement::containsId(const Identifier& id) const {        
+    bool MdtReadoutElement::containsId(const Identifier& id) const {
         if (idHelperSvc()->detElId(id) != identify()) return false;
         int layer = m_idHelper.tubeLayer(id);
         if (layer < 1 || layer > getNLayers()) return false;
         int tube = m_idHelper.tube(id);
-        if (tube < 1 || tube > getNtubesperlayer()) return false;
-
-        return true;
+        return tube >= 1 && tube <= getNtubesperlayer();
     }
 
     // **************************** interfaces related to Tracking *****************************************************)

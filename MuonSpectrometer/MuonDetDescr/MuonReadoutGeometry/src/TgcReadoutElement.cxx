@@ -5,8 +5,8 @@
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
 
 #include <GaudiKernel/IMessageSvc.h>
-#include <assert.h>
-#include <stdlib.h>
+#include <cassert>
+#include <cstdlib>
 
 #include <cmath>
 #include <memory>
@@ -329,7 +329,7 @@ namespace MuonGM {
     }
 
 #ifdef NDEBUG
-    float TgcReadoutElement::gangThickness(int /*gasGap*/, int /*gang*/) const
+    float TgcReadoutElement::gangThickness(int /*gasGap*/, int /*gang*/) 
 #else
     float TgcReadoutElement::gangThickness(int gasGap, int gang) const
 #endif
@@ -617,7 +617,7 @@ namespace MuonGM {
         throw std::runtime_error(Form("%s:%d - Invalid identifier given",__FILE__,__LINE__));
     }
 
-    bool TgcReadoutElement::isAgap(const std::string& volumeMaterial) const { return ("TGCGas" == volumeMaterial); }
+    bool TgcReadoutElement::isAgap(const std::string& volumeMaterial) { return ("TGCGas" == volumeMaterial); }
 
     bool TgcReadoutElement::validGap(int gasGap) const {
         bool isValid = (1 <= gasGap && gasGap <= nGaps());
@@ -708,8 +708,8 @@ namespace MuonGM {
                 m_surfaceData->m_layerSurfaces.emplace_back(std::make_unique<Trk::PlaneSurface>(*this, id));
 
                 if (mp == 1) {
-                    m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back().translation());
-                    m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D(0., 0., 1.));
+                    m_surfaceData->m_layerCenters.emplace_back(m_surfaceData->m_layerTransforms.back().translation());
+                    m_surfaceData->m_layerNormals.emplace_back(m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D(0., 0., 1.));
                 }
             }
         }

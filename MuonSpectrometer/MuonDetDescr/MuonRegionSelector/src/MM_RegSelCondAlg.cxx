@@ -54,7 +54,7 @@ std::unique_ptr<RegSelSiLUT> MM_RegSelCondAlg::createTable( const EventContext& 
 
   if( !manager.range( id_range ) ) {
     ATH_MSG_ERROR("Failed to retrieve validity range for " << manager.key());
-    return std::unique_ptr<RegSelSiLUT>(nullptr);
+    return {nullptr};
   }   
    
 

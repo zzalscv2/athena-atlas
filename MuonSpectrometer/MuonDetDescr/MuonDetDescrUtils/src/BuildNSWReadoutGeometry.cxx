@@ -20,7 +20,7 @@ using namespace MuonGM;
 
 BuildNSWReadoutGeometry::BuildNSWReadoutGeometry() = default;
 
-bool BuildNSWReadoutGeometry::BuildReadoutGeometry(MuonGM::MuonDetectorManager* mgr, const NswPassivationDbData* passivData) const {
+bool BuildNSWReadoutGeometry::BuildReadoutGeometry(MuonGM::MuonDetectorManager* mgr, const NswPassivationDbData* passivData) {
     bool geoBuilt = true;
 
     ServiceHandle<IAGDDtoGeoSvc> svc("AGDDtoGeoSvc", "MMDetectorHelper");

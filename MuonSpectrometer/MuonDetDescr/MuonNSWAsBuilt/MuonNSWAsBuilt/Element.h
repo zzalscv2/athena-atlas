@@ -80,11 +80,11 @@ namespace NswAsBuilt {
 
      /* Transforms a set of vectors in local coordinates of this Element's
       * frame to the coordinates of the mother frame */
-      void transform(ParameterClass iclass, VectorSetRef local) const;
+      void transform(ParameterClass iclass, const VectorSetRef& local) const;
       
      /* Repeatedly call the transform method using all mothers up to frame.
       * Set frame to nullptr to loop on all mothers. */
-      void transformToFrame(ParameterClass iclass, VectorSetRef local, const Element* frame) const;
+      void transformToFrame(ParameterClass iclass, const VectorSetRef& local, const Element* frame) const;
 
      /* Cache the rigid component of the transform, for quicker access */
       void cacheTransforms();
@@ -100,7 +100,7 @@ namespace NswAsBuilt {
 
      /* Applies the callback function to this Element and to all its daughters
       * down to the leaves*/
-      void traverseTree(std::function<void(Element&)> callback);
+      void traverseTree(const std::function<void(Element&)>& callback);
 
 
     private:

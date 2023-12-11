@@ -80,7 +80,7 @@ namespace NswAsBuilt {
       void applyDeformation2(const ParameterVector& parvec, VectorSetRef local) const;
 
       // Basic ingredients of the calculation, called by method applyDeformation
-      Amg::Vector3D DEg( double egx, double egy, double egz, const Amg::Vector3D& d0) const;
+      static Amg::Vector3D DEg( double egx, double egy, double egz, const Amg::Vector3D& d0) ;
       Amg::Vector3D DSagX(double sagx, const Amg::Vector3D& d0) const;
       Amg::Vector3D DSagY(double sagy, const Amg::Vector3D& d0) const;
       Amg::Vector3D DDSagX(double dsagx, const Amg::Vector3D& d0) const;

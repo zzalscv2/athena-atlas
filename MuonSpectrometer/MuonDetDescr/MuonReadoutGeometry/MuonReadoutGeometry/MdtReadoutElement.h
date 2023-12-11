@@ -238,8 +238,8 @@ namespace MuonGM {
                                         const Amg::Transform3D& toDeform) const;
         
         
-        Amg::Transform3D tubeToMultilayerTransf(const Amg::Vector3D& tubePos, 
-                                                const Amg::Transform3D& toDeform) const;
+        static Amg::Transform3D tubeToMultilayerTransf(const Amg::Vector3D& tubePos, 
+                                                const Amg::Transform3D& toDeform) ;
        
        
         struct GeoInfo {

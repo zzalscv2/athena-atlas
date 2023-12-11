@@ -125,7 +125,7 @@ namespace MuonGM {
         m_MuonStationMap[key] = std::move(mst);
     }
 
-    std::string MuonDetectorManager::muonStationKey(const std::string& stName, int statEtaIndex, int statPhiIndex) const {
+    std::string MuonDetectorManager::muonStationKey(const std::string& stName, int statEtaIndex, int statPhiIndex) {
         std::string key;
         if (statEtaIndex < 0)
             key = stName.substr(0, 3) + "_C_zi" + MuonGM::buildString(std::abs(statEtaIndex), 2) + "fi" +
@@ -788,7 +788,7 @@ namespace MuonGM {
     void MuonDetectorManager::setCacheFillingFlag(int value) { m_cacheFillingFlag = value; }
     void MuonDetectorManager::setCachingFlag(int value) { m_cachingFlag = value; }
     void MuonDetectorManager::set_DBMuonVersion(const std::string& version) { m_DBMuonVersion = version; }
-    void MuonDetectorManager::setGeometryVersion(const std::string& version) { m_geometryVersion = std::move(version); }
+    void MuonDetectorManager::setGeometryVersion(const std::string& version) { m_geometryVersion = version; }
     void MuonDetectorManager::setMinimalGeoFlag(int flag) { m_minimalgeo = flag; }
     void MuonDetectorManager::setCutoutsFlag(int flag) { m_includeCutouts = flag; }
     void MuonDetectorManager::setCutoutsBogFlag(int flag) { m_includeCutoutsBog = flag; }

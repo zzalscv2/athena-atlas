@@ -193,7 +193,7 @@ namespace MuonGM {
         float gangLength(int, int) const;
         float gangShortWidth(int, int) const;
         float gangLongWidth(int, int) const;
-        float gangThickness(int, int) const;
+        static float gangThickness(int, int) ;
         int nStrips(int) const;
         float stripDeltaPhi(int) const;
         float stripDeltaPhi(int, int) const;
@@ -212,7 +212,7 @@ namespace MuonGM {
         int findGang(int, const Amg::Vector3D&) const;
         int findStrip(int, const Amg::Vector3D&, const Amg::Vector3D&) const;
         int gapVolume(int) const;
-        bool isAgap(const std::string&) const;
+        static bool isAgap(const std::string&) ;
         bool validGap(int) const;
         bool validGang(int, int) const;
         bool validStrip(int, int) const;

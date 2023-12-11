@@ -4,6 +4,7 @@
 
 #include "MuonNSWAsBuilt/ElementModelScaleSag.h"
 #include <stdexcept>
+#include <utility>
 
 using namespace NswAsBuilt;
 namespace {
@@ -11,7 +12,7 @@ namespace {
 }
 //===============================================================================
 ElementModelScaleSag::ElementModelScaleSag(double lenX, double lenY, Amg::Vector3D defo0)
-: m_lenX(lenX), m_lenY(lenY), m_defo0(defo0)
+: m_lenX(lenX), m_lenY(lenY), m_defo0(std::move(defo0))
 { }
 
 /**
@@ -103,7 +104,7 @@ std::string ElementModelScaleSag::getParameterName(ipar_t ipar) const
 
 //===============================================================================
 // The basic ingredients of the calculation
-Amg::Vector3D ElementModelScaleSag::DEg( double egx, double egy, double egz, const Amg::Vector3D& d0) const 
+Amg::Vector3D ElementModelScaleSag::DEg( double egx, double egy, double egz, const Amg::Vector3D& d0) 
 {
   // Calculate thermal expansion
   return d0.array() * Eigen::Array3d{egx*DivBy1k, egy*DivBy1k, egz*DivBy1k};

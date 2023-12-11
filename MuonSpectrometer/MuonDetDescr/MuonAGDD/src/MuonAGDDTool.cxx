@@ -151,7 +151,7 @@ bool MuonAGDDTool::WritePREsqlFile() const
 	std::vector<std::string> newoutfilelines;
 	std::string outfileline;
 	while( getline(outfile, outfileline) )
-		if( outfileline != "\n" && outfileline != "\r" && outfileline.size() )
+		if( outfileline != "\n" && outfileline != "\r" && !outfileline.empty() )
 		{
 			const auto strBegin = outfileline.find_first_not_of(" \t");
 			const auto strEnd = outfileline.find_last_not_of(" \t");

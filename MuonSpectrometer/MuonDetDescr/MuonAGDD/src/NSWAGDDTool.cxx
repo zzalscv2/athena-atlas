@@ -86,7 +86,7 @@ StatusCode NSWAGDDTool::construct ATLAS_NOT_THREAD_SAFE ()
 	// part needed to build the NSW RO geometry
 	
 	ATH_MSG_INFO("\t Building NSW Readout Geometry ");
-	bool testRet=theHelper.BuildMScomponents();
+	bool testRet=MuonAGDDToolHelper::BuildMScomponents();
 	if (!testRet)
 	{
 		ATH_MSG_ERROR("something went wrong building the RO geometry!!! ");
@@ -135,7 +135,7 @@ bool NSWAGDDTool::WritePREsqlFile() const
 	std::vector<std::string> newoutfilelines;
 	std::string outfileline;
 	while( getline(outfile, outfileline) )
-		if( outfileline != "\n" && outfileline != "\r" && outfileline.size() )
+		if( outfileline != "\n" && outfileline != "\r" && !outfileline.empty() )
 		{
 			const auto strBegin = outfileline.find_first_not_of(" \t");
 			const auto strEnd = outfileline.find_last_not_of(" \t");

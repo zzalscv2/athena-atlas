@@ -237,7 +237,7 @@ namespace MuonGM {
     int  stEta     = std::abs(getStationEta());
     int  Etasign   = getStationEta() / stEta;
     std::string side = (Etasign > 0) ? "A" : "C";
-    m_diamondShape = (sector_l == 'L' && stEta == 3) ? true : false;
+    m_diamondShape = sector_l == 'L' && stEta == 3;
     
     m_phiDesign = std::vector<MuonChannelDesign>(m_nlayers);
     m_etaDesign = std::vector<MuonChannelDesign>(m_nlayers);
@@ -388,7 +388,7 @@ namespace MuonGM {
     int  stEta     = std::abs(getStationEta());
     int  Etasign   = getStationEta() / stEta;
     std::string side = (Etasign > 0) ? "A" : "C";
-    m_diamondShape = (sector_l == 'L' && stEta == 3) ? true : false;
+    m_diamondShape = sector_l == 'L' && stEta == 3;
     
 #ifndef NDEBUG
      MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
@@ -402,7 +402,7 @@ namespace MuonGM {
      log << MSG::DEBUG << "Found sTGC Detector " << stgc->GetName() << endmsg;
 #endif
      
-     auto tech = stgc->GetTechnology();
+     auto *tech = stgc->GetTechnology();
      if (!tech)
        throw std::runtime_error(
                     Form("File: %s, Line: %d\nsTgcReadoutElement::initDesign() - Failed To get Technology for stgc element: %s", __FILE__,  __LINE__, stgc->GetName().c_str()));
@@ -620,8 +620,8 @@ namespace MuonGM {
                * Amg::AngleAxis3D(-90 * CLHEP::deg, Amg::Vector3D(0., 1., 0.))   // x<->z because of GeoTrd definition
                * Amg::AngleAxis3D(-90 * CLHEP::deg, Amg::Vector3D(0., 0., 1.))); // x<->y for wires
 
-            m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back().translation());
-            m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D(0., 0., -1.));
+            m_surfaceData->m_layerCenters.emplace_back(m_surfaceData->m_layerTransforms.back().translation());
+            m_surfaceData->m_layerNormals.emplace_back(m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D(0., 0., -1.));
 
             //-------------------
             // Strips
@@ -637,8 +637,8 @@ namespace MuonGM {
             m_surfaceData->m_layerTransforms.push_back(absTransform() * m_delta * m_Xlg[layer] *Amg::Translation3D(shift, 0., m_offset)
                                                       *Amg::AngleAxis3D(-90 * CLHEP::deg, Amg::Vector3D(0., 1., 0.))); // x<->z because of GeoTrd definition
 
-            m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back().translation());
-            m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D(0., 0., -1.));
+            m_surfaceData->m_layerCenters.emplace_back(m_surfaceData->m_layerTransforms.back().translation());
+            m_surfaceData->m_layerNormals.emplace_back(m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D(0., 0., -1.));
 
             //-------------------
             // Trigger Pads
@@ -653,8 +653,8 @@ namespace MuonGM {
                                                        * Amg::AngleAxis3D(-90 * CLHEP::deg, Amg::Vector3D(0., 1., 0.))   // x<->z because of GeoTrd definition
                                                        * Amg::AngleAxis3D(-90 * CLHEP::deg, Amg::Vector3D(0., 0., 1.))); // x<->y for pads
 
-            m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back().translation());
-            m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D(0., 0., -1.));
+            m_surfaceData->m_layerCenters.emplace_back(m_surfaceData->m_layerTransforms.back().translation());
+            m_surfaceData->m_layerNormals.emplace_back(m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D(0., 0., -1.));
         }
     }
 
@@ -759,7 +759,7 @@ namespace MuonGM {
 
     //============================================================================
     double sTgcReadoutElement::wirePitch(int gas_gap) const {
-        if (m_phiDesign.size() < 1) {
+        if (m_phiDesign.empty()) {
             MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
             log << MSG::WARNING << "no wire design when trying to get the wire pitch" << endmsg;
             return -1.0;

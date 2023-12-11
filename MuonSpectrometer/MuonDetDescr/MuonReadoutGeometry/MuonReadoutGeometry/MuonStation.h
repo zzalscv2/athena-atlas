@@ -123,7 +123,7 @@ namespace MuonGM {
         const MdtAsBuiltPar* getMdtAsBuiltParams() const;
         void setMdtAsBuiltParams(const MdtAsBuiltPar* xtomo);
 
-        void setPhysVol(PVLink vol);
+        void setPhysVol(const PVLink& vol);
         PVConstLink getPhysVol() const;
         PVLink getPhysVol();
     private:

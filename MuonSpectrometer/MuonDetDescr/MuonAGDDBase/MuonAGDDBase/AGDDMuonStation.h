@@ -43,7 +43,7 @@ private:
 	double m_y{0.};
 	double m_z{0.};
 	
-	const GeoMaterial* GetMMMaterial(const std::string&) const;
+	static const GeoMaterial* GetMMMaterial(const std::string&) ;
 };
 
 #endif

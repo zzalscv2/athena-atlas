@@ -30,14 +30,14 @@ const Element::ParameterVector& Element::parameterVector(ParameterClass iclass) 
 
 
 //===============================================================================
-void Element::transform(ParameterClass iclass, VectorSetRef local) const 
+void Element::transform(ParameterClass iclass, const VectorSetRef& local) const 
 {
   m_deformationModel->transform(parameterVector(iclass), local);
 }
 
 
 //===============================================================================
-void Element::transformToFrame(ParameterClass iclass, VectorSetRef local, const Element* frame) const 
+void Element::transformToFrame(ParameterClass iclass, const VectorSetRef& local, const Element* frame) const 
 {
   const Element* el = this;
   while ((el!=nullptr) && (el!=frame)) {
@@ -81,7 +81,7 @@ void Element::setParameter(ParameterClass iclass, ipar_t ipar, double value)
 //===============================================================================
 void Element::setParametersFromMap(ParameterClass iclass, const std::map<std::string, double>& values) 
 {
-  for (auto p : values) {
+  for (const auto& p : values) {
     setParameter(iclass, m_deformationModel->getParameterIndex(p.first), p.second);
   }
   m_deformationModel->cacheTransform(parameterVector(iclass));
@@ -101,7 +101,7 @@ Element* Element::addDaughter(std::unique_ptr<Element> daughter)
 
 
 //===============================================================================
-void Element::traverseTree(std::function<void(Element&)> callback) 
+void Element::traverseTree(const std::function<void(Element&)>& callback) 
 {
   struct tree_t {
     using iter = daughterVec_t::iterator;
@@ -112,7 +112,7 @@ void Element::traverseTree(std::function<void(Element&)> callback)
   };
   std::list<tree_t> dtree;
   callback(*this);
-  dtree.push_back({m_daughters.begin(), m_daughters.end()});
+  dtree.emplace_back(m_daughters.begin(), m_daughters.end());
   while (!dtree.empty()) {
     auto& it = dtree.back().it;
     if (it != dtree.back().end) {

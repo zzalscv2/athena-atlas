@@ -72,8 +72,8 @@ namespace NswAsBuilt {
       // optimizations.
       void applyDeformation2(const ParameterVector& parvec, VectorSetRef local) const;
       
-      Amg::Vector3D stgcOffset(double off) const;
-      Amg::Vector3D stgcRotation(double rot, const Amg::Vector3D& d0) const;
+      static Amg::Vector3D stgcOffset(double off) ;
+      static Amg::Vector3D stgcRotation(double rot, const Amg::Vector3D& d0) ;
       Amg::Vector3D stgcScale(double scl, const Amg::Vector3D& d0) const;
       Amg::Vector3D stgcNonPar(double npar, const Amg::Vector3D& d0) const;
       

@@ -4,12 +4,13 @@
 
 #include "MuonNSWAsBuilt/ElementModelSTGC.h"
 #include <stdexcept>
+#include <utility>
 
 using namespace NswAsBuilt;
 
 ElementModelSTGC::ElementModelSTGC(double /*lenX*/, double lenY, Amg::Vector3D defo0)
   : m_lenY(lenY),
-  m_defo0(defo0)
+  m_defo0(std::move(defo0))
 {
 }
 
@@ -84,12 +85,12 @@ std::string ElementModelSTGC::getParameterName(ipar_t ipar) const {
   }
 }
 
-Amg::Vector3D ElementModelSTGC::stgcOffset(double off) const {
+Amg::Vector3D ElementModelSTGC::stgcOffset(double off) {
 // Offset extracted from combined fit of X-ray data and by CMM/Faro measurement at construction sites
   return off * Amg::Vector3D::UnitY();
 }
 
-Amg::Vector3D ElementModelSTGC::stgcRotation(double rot, const Amg::Vector3D& d0) const {
+Amg::Vector3D ElementModelSTGC::stgcRotation(double rot, const Amg::Vector3D& d0) {
 // Rotation extracted from combined fit of X-ray data and by CMM/Faro measurement at construction sites
   return -rot * d0.cross(Amg::Vector3D::UnitZ());
 }
