@@ -128,7 +128,10 @@ PixelClusterOnTrackTool::correct
         return nullptr;
       }
       // if we try broad errors, get Pixel Cluster to test if it is split
-      const InDet::PixelCluster *pix = dynamic_cast<const InDet::PixelCluster *>(&rio);
+      const InDet::PixelCluster *pix = nullptr;
+      if (rio.type(Trk::PrepRawDataType::PixelCluster)) {
+        pix = static_cast<const InDet::PixelCluster *>(&rio);
+      }
       if (!pix) {
         return nullptr;
       }
@@ -154,11 +157,13 @@ PixelClusterOnTrackTool::correctDefault
   (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar) const {
   using CLHEP::micrometer;
 
+
   const double TOPHAT_SIGMA = 1. / std::sqrt(12.);
-
   const InDet::PixelCluster *pix = nullptr;
-
-  if (!(pix = dynamic_cast<const InDet::PixelCluster *>(&rio))) {
+  if(rio.type(Trk::PrepRawDataType::PixelCluster)) {
+     pix = static_cast<const InDet::PixelCluster *>(&rio);
+  }
+  else{
     return nullptr;
   }
 
@@ -378,7 +383,11 @@ InDet::PixelClusterOnTrack *
 PixelClusterOnTrackTool::correctNN
   (const Trk::PrepRawData &rio,
    const Trk::TrackParameters &trackPar) const {
-  const InDet::PixelCluster *pixelPrepCluster = dynamic_cast<const InDet::PixelCluster *>(&rio);
+
+  const InDet::PixelCluster *pixelPrepCluster = nullptr;
+  if (rio.type(Trk::PrepRawDataType::PixelCluster)) {
+    pixelPrepCluster = static_cast<const InDet::PixelCluster *>(&rio);
+  }
 
   if (pixelPrepCluster == nullptr) {
     ATH_MSG_WARNING("This is not a pixel cluster, return 0.");
@@ -474,7 +483,10 @@ PixelClusterOnTrackTool::getErrorsDefaultAmbi(const InDet::PixelCluster *pixelPr
         ATH_MSG_DEBUG("Found additional split cluster in ambiguity map (+=1).");
         numberOfSubclusters += 1;
         const InDet::SiCluster *otherOne = second;
-        const InDet::PixelCluster *pixelAddCluster = dynamic_cast<const InDet::PixelCluster *>(otherOne);
+        const InDet::PixelCluster *pixelAddCluster = nullptr;
+        if (otherOne->type(Trk::PrepRawDataType::PixelCluster)) {
+          pixelAddCluster = static_cast<const InDet::PixelCluster *>(otherOne);
+        }
         if (pixelAddCluster == nullptr) {
           ATH_MSG_WARNING("Pixel ambiguity map has empty pixel cluster. Please DEBUG!");
           continue;

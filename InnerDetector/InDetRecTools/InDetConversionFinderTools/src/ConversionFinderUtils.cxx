@@ -50,71 +50,6 @@ namespace InDet {
   }
 
   /**
-   * hits counter
-   */
-  void
-  ConversionFinderUtils::countHits(
-    const DataVector<const Trk::MeasurementBase>* mb,
-    int& ntrt,
-    int& nclus)
-  {
-
-    DataVector<const Trk::MeasurementBase>::const_iterator its,
-      itse = mb->end();
-
-    for (its = mb->begin(); its != itse; ++its) {
-
-      const Trk::RIO_OnTrack* ri = dynamic_cast<const Trk::RIO_OnTrack*>(*its);
-      if (!ri)
-        continue;
-
-      const Trk::PrepRawData* rd = ri->prepRawData();
-      if (!rd){
-        continue;
-      }
-
-      if (rd->type(Trk::PrepRawDataType::SiCluster)) {
-        ++nclus;
-        continue;
-      }
-
-      if (rd->type(Trk::PrepRawDataType::TRT_DriftCircle)) {
-        ++ntrt;
-        continue;
-      }
-
-    } // end of loop over meas.bases
-  }   // end of count hits method
-
-  /**
-   * hl trt hits / trt hits ratio calculater
-   */
-  double
-  ConversionFinderUtils::trRatio(
-    const DataVector<const Trk::MeasurementBase>* mb)
-  {
-
-    DataVector<const Trk::MeasurementBase>::const_iterator itp=mb->begin(), itpe=mb->end();
-    int ntrth = 0;
-    int nHL = 0;
-    for(;itp!=itpe;++itp) {
-      const Trk::RIO_OnTrack* ri = dynamic_cast<const Trk::RIO_OnTrack*>(*itp);
-      if(!ri) continue;
-      const Trk::PrepRawData* rd = ri->prepRawData();
-
-      if(!rd) continue;
-      const InDet::TRT_DriftCircle* RawDataClus = dynamic_cast<const InDet::TRT_DriftCircle*>(rd);
-      if(!RawDataClus) continue;
-      ++ntrth;
-
-      if(RawDataClus->highLevel()) ++nHL;
-    }//end of loop over measurement bases
-
-    if(ntrth>0) return double(nHL)/double(ntrth);
-    return 1000.;
-  } // end of trRatio method
-
-  /**
    * mom fraction
    */
   double
@@ -193,30 +128,8 @@ namespace InDet {
     return distance;
   } // end of distBetweenTracks method
 
-  /**
-   * return first track parameters
-   */
-  const Trk::TrackParameters*
-  ConversionFinderUtils::getTrkParameters(const Trk::Track* track)
-  {
-    const Trk::TrackStates* tsos = track->trackStateOnSurfaces();
-    if(!tsos) return nullptr;
-
-    Trk::TrackStates::const_iterator itse = tsos->end();
-    Trk::TrackStates::const_iterator itsb = tsos->begin();
-
-    for(;itsb!=itse;++itsb) {
-      if((*itsb)->measurementOnTrack()) {
-        const Trk::TrackParameters* trkP = (*itsb)->trackParameters();
-        if(trkP->associatedSurface().center().perp()>=10.) return trkP;
-      }//end of meas on track check
-    }//end of loop over all track states on surface
-
-    return nullptr;
-  }
-
   /* add recalculated perigees to the track*/
-  const Trk::Track*
+  std::unique_ptr<Trk::Track>
   ConversionFinderUtils::addNewPerigeeToTrack(const Trk::Track* track,
                                               const Trk::Perigee* mp)
   {
@@ -243,8 +156,7 @@ namespace InDet {
 
     //Construct the new track
     Trk::TrackInfo info;
-    Trk::Track* newTrk = new Trk::Track(info, std::move(ntsos), std::move(fq));
-    return newTrk;
+    return std::make_unique<Trk::Track>(info, std::move(ntsos), std::move(fq));
   }
 
   xAOD::Vertex*
