@@ -3,12 +3,14 @@
 #
 # art-description: RDO to AOD step with trackless b-tagging for Run 3 MC 
 # art-type: grid
+# art-memory: 4096
 # art-include: main/Athena
 # art-output: *.pool.root
 # art-output: *.log
 # art-output: *log.
+# art-athena-mt: 4
 
-ATHENA_CORE_NUMBER=1 Reco_tf.py \
+ATHENA_CORE_NUMBER=4 Reco_tf.py \
 --multithreaded \
 --AMIConfig q445 \
 --imf False \
