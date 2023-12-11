@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSimEvent/CscHitIdHelper.h"
@@ -8,9 +8,9 @@
 #include <array>
 
 namespace {
-    const static std::array<char, 4> v1 = {'B','E','T','C'};
-    const static std::array<char, 9> v2 = {'I','M','O','E','1','2','3','4','S'};
-    const static std::array<char, 6> v3 = {'S','L','E','R','F','G'};
+    constexpr std::array<char, 4> v1 = {'B','E','T','C'};
+    constexpr std::array<char, 9> v2 = {'I','M','O','E','1','2','3','4','S'};
+    constexpr std::array<char, 6> v3 = {'S','L','E','R','F','G'};
 }
 
 //private constructor

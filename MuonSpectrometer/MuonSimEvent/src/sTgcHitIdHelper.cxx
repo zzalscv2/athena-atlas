@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSimEvent/sTgcHitIdHelper.h"
@@ -9,10 +9,10 @@
 #include <array>
 
 namespace {
-    const static std::array<char, 1> v1 = {'Q'};
-    const static std::array<char, 2> v2 = {'S','L'};
-    const static std::array<char, 5> v3 = {'0','1','2','3','4'};
-    const static std::array<char, 2> v4 = {'P','C'};
+    constexpr std::array<char, 1> v1 = {'Q'};
+    constexpr std::array<char, 2> v2 = {'S','L'};
+    constexpr std::array<char, 5> v3 = {'0','1','2','3','4'};
+    constexpr std::array<char, 2> v4 = {'P','C'};
 }
 
 //private constructor

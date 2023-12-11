@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSIMEVENT_CSCHIT_H
@@ -11,11 +11,11 @@
 
 //---------------------
 // back to the situation of tag MuonSimEvent-00-00-25 to avoid
-// uncompatibility between 8.0.2 and 8.2.0 -----> 
+// uncompatibility between 8.0.2 and 8.2.0 ----->
 // redundant time methods are present (globalTime() and meanTime() return the
 // same time) --->NOT TO BE FIXED!!<----
 
-class CSCSimHit {
+class CSCSimHit final{
 
 public:
     //
@@ -25,23 +25,23 @@ public:
     CSCSimHit();
 
     // Destructor:
-    virtual ~CSCSimHit();
-    
-    CSCSimHit(int id, double time, double energy, 
+    ~CSCSimHit();
+
+    CSCSimHit(int id, double time, double energy,
     const Amg::Vector3D& HitStart, const Amg::Vector3D& HitEnd, int particleID);
 
-    CSCSimHit(int id, double time, double energy, 
-    const Amg::Vector3D& HitStart, const Amg::Vector3D& HitEnd, int particleID, 
+    CSCSimHit(int id, double time, double energy,
+    const Amg::Vector3D& HitStart, const Amg::Vector3D& HitEnd, int particleID,
     const int trackNumber);
-    
-    CSCSimHit(int id, double time, double energy, 
-    const Amg::Vector3D& HitStart, const Amg::Vector3D& HitEnd, int particleID, 
+
+    CSCSimHit(int id, double time, double energy,
+    const Amg::Vector3D& HitStart, const Amg::Vector3D& HitEnd, int particleID,
 	      const int trackNumber, double kineticEnergy);
 
-    CSCSimHit(int id, double time, double energy, 
-    const Amg::Vector3D& HitStart, const Amg::Vector3D& HitEnd, int particleID, 
+    CSCSimHit(int id, double time, double energy,
+    const Amg::Vector3D& HitStart, const Amg::Vector3D& HitEnd, int particleID,
 	      const HepMcParticleLink& hmpl, double kineticEnergy);
-    
+
 
     //
     // member functions
@@ -60,14 +60,14 @@ public:
 // number of track which released this energy:
     int trackNumber() const;
     double kineticEnergy() const { return static_cast<double>(m_kineticEnergy); }
-    
+
 
 // link to the particle generating the hit
     const HepMcParticleLink& particleLink() const;
 
     void setGlobalTime( const double time ) { m_globalTime = time; }
 
-private:    
+private:
     //
     // member data
     //
@@ -79,7 +79,7 @@ private:
     int m_particleID;
     HepMcParticleLink m_partLink;
     float m_kineticEnergy;
-    
+
 
 };
 

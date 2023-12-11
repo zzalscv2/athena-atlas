@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSimEvent/MMSimHit.h"
@@ -15,14 +15,14 @@ MMSimHit::MMSimHit():
 {
 }
 /*******************************************************************************/
-MMSimHit::MMSimHit(HitID id, double time, 
+MMSimHit::MMSimHit(HitID id, double time,
                                      const Amg::Vector3D& position,
                                      const int particleEncoding,
                                      const double kineticEnergy,
                                      const Amg::Vector3D& direction,
                                      const double depositEnergy,
                                      const int trackNumber)
-  : m_MMId(id), m_globalTime(time) 
+  : m_MMId(id), m_globalTime(time)
   , m_globalPosition(position)
   , m_particleEncoding(particleEncoding)
   , m_kineticEnergy(kineticEnergy)

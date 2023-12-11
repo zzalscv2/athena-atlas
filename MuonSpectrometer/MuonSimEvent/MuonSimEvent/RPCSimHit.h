@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONG4SIMEVENT_RPCSimHit_H
@@ -12,11 +12,11 @@
 
 //---------------------
 // back to the situation of tag MuonSimEvent-00-00-25 to avoid
-// uncompatibility between 8.0.2 and 8.2.0 -----> 
+// uncompatibility between 8.0.2 and 8.2.0 ----->
 // redundant time methods are present (globalTime() and meanTime() return the
 // same time) --->NOT TO BE FIXED!!<----
 
-class RPCSimHit {
+class RPCSimHit final{
 
 public:
     //
@@ -26,27 +26,27 @@ public:
     RPCSimHit();
 
     // Destructor:
-    virtual ~RPCSimHit();
+    ~RPCSimHit();
     RPCSimHit(int id, double time, const Amg::Vector3D& position);
     RPCSimHit(int id, double time, const Amg::Vector3D& position, const int trackNumber);
-    RPCSimHit(int id, double time, 
-	      const Amg::Vector3D& prePosition,  
-	      const int trackNumber, 	
+    RPCSimHit(int id, double time,
+	      const Amg::Vector3D& prePosition,
+	      const int trackNumber,
 	      const Amg::Vector3D& postPosition,
-	      const double energyDeposit, 
-	      const double stepLength, 
-	      const int particleEncoding, 
+	      const double energyDeposit,
+	      const double stepLength,
+	      const int particleEncoding,
 	      const double kineticEnergy);
-    RPCSimHit(int id, double time, 
-	      const Amg::Vector3D& prePosition,  
-	      const HepMcParticleLink& hmpl, 	
+    RPCSimHit(int id, double time,
+	      const Amg::Vector3D& prePosition,
+	      const HepMcParticleLink& hmpl,
 	      const Amg::Vector3D& postPosition,
-	      const double energyDeposit, 
-	      const double stepLength, 
-	      const int particleEncoding, 
+	      const double energyDeposit,
+	      const double stepLength,
+	      const int particleEncoding,
 	      const double kineticEnergy);
-    
-   
+
+
 
     //
     // member functions
@@ -71,10 +71,10 @@ public:
 
 // link to the particle generating the hit
     const HepMcParticleLink& particleLink() const;
-    
+
     void setGlobalTime( const double time ) { m_globalTime = time; }
 
-private:    
+private:
     //
     // member data
     //
@@ -85,7 +85,7 @@ private:
     Amg::Vector3D m_localPostStepPosition; // post-step position
     float m_energyDeposit;  //Geant4 de/dx
     float m_stepLength;     //Geant4 stepLength
-    int m_particleEncoding; // PDG id 
+    int m_particleEncoding; // PDG id
     float m_kineticEnergy;  // kinetic energy of the particle
 
 

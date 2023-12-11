@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSimEvent/MDTSimHit.h"
@@ -10,7 +10,7 @@
 
 MDTSimHit::MDTSimHit() :
   m_MDTid(0xffff),
-  m_globalTime(0.), 
+  m_globalTime(0.),
   m_driftRadius(0.),
   m_partLink(),
   m_stepLength(0.),
@@ -21,13 +21,13 @@ MDTSimHit::MDTSimHit() :
 {
 }
 
-//virtual destructor required by Pool
-MDTSimHit::~MDTSimHit() {} 
+//default destructor required by Pool
+MDTSimHit::~MDTSimHit() = default;
 
 
-MDTSimHit::MDTSimHit(HitID id, 
-		     double time, 
-	             double radius, 
+MDTSimHit::MDTSimHit(HitID id,
+		     double time,
+	             double radius,
 	             const Amg::Vector3D& position)
     : m_MDTid(id), m_globalTime(time)
     , m_driftRadius(radius)
@@ -39,10 +39,10 @@ MDTSimHit::MDTSimHit(HitID id,
  m_kineticEnergy    = -1.; // energy of the particle
 }
 
-MDTSimHit::MDTSimHit(HitID id, 
-		     double time, 
-	             double radius, 
-	             const Amg::Vector3D& position, 
+MDTSimHit::MDTSimHit(HitID id,
+		     double time,
+	             double radius,
+	             const Amg::Vector3D& position,
 		     const int trackNumber)
     : m_MDTid(id), m_globalTime(time)
     , m_driftRadius(radius)
@@ -57,12 +57,12 @@ MDTSimHit::MDTSimHit(HitID id,
 
 MDTSimHit::MDTSimHit(HitID id,
 		     double time,
-		     double radius, 
-		     const Amg::Vector3D& position, 
+		     double radius,
+		     const Amg::Vector3D& position,
 		     const int trackNumber,
 		     const double stepLength,
 		     const double energyDeposit,
-		     const int particleEncoding, 
+		     const int particleEncoding,
                       const double kineticEnergy)
     : m_MDTid(id), m_globalTime(time)
     , m_driftRadius(radius)
@@ -77,12 +77,12 @@ MDTSimHit::MDTSimHit(HitID id,
 
 MDTSimHit::MDTSimHit(HitID id,
 		     double time,
-		     double radius, 
-		     const Amg::Vector3D& position, 
+		     double radius,
+		     const Amg::Vector3D& position,
 		     const HepMcParticleLink& hmpl,
 		     const double stepLength,
 		     const double energyDeposit,
-		     const int particleEncoding, 
+		     const int particleEncoding,
                       const double kineticEnergy)
     : m_MDTid(id), m_globalTime(time)
     , m_driftRadius(radius)
@@ -98,7 +98,7 @@ MDTSimHit::MDTSimHit(HitID id,
 
 // Implementation of member functions
 std::string MDTSimHit::print() const {
-    
+
     std::stringstream ss;
 
     ss << "MDTSimHit:";
@@ -117,4 +117,4 @@ std::string MDTSimHit::print() const {
 
 int MDTSimHit::trackNumber() const
  { return m_partLink.barcode(); }
- 
+
