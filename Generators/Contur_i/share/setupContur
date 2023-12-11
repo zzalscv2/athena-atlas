@@ -1,0 +1,3 @@
+source setupRivet
+source ${CONTUR_PATH}/conturenv-genser.sh
+source ${CONTUR_PATH}/bin/conturenv.sh

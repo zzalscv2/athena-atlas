@@ -1,0 +1,362 @@
+#! /usr/bin/env python3
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+import tarfile
+import os
+import sys
+import optparse
+import yoda
+import ROOT as r
+
+def raiseError(txt):
+  sys.exit('\033[1;31m[ERROR] ' + txt + '\033[0m') 
+
+def printInfo(txt, section=False):
+  terminal_width = os.get_terminal_size()[0]
+  single_line = '-' * terminal_width
+  if section: 
+    print('\033[92m' + single_line + '\033[0m')
+    print('\033[1;92m[INFO] ' + txt + '\033[0m')
+    print('\033[92m' + single_line + '\033[0m')
+  else:
+    print('\033[32m[INFO] ' + txt + '\033[0m')
+
+
+def printWarning(txt):
+  print('\033[1;33m[WARNING] ' + txt + '\033[0m')
+
+def safeFileName(name):
+  """
+  `name` String 
+  removes the .1 extension on some yoda files 
+  as rivet/Contur don't deal with these extensions
+  """
+  name = name.replace(".gz.1", ".gz")
+  name = name.replace(".yoda.1", ".yoda")
+  return name
+
+
+def UnpackTarballs(fulldir, force=False):
+  """
+  `fulldir` directory for process, containing all the outputs
+  `force` Bool [optional] (re-do untarring even if already done)
+
+  This function goes through the specified directory and unpacks all the tarballs it finds.
+  If it contains multiple tarballs with some unpacked already, the default is to untar those which are not unpacked already
+  And collect all the yoda files in a list for merge, those that are put into the merge queue include :
+      1. yoda files from already unpacked directories 
+      2. yoda files from 'just' unpacked directories via this function
+      3. Those .yoda files or .yoda.gz files which are not packed in a .tgz form.
+
+  If --force option is called, then all existing untarred directories will be removed, and all .tgz files will be processed
+  """
+  tar_res = []
+  samplesToProcess = []
+  filteredSample = []
+  untarredSample = []
+  untarredPrefix = []
+  non_tgz_yodas = []
+
+  if fulldir[-1] == "/": fulldir = fulldir[:-1]
+  if len(os.listdir(fulldir)) == 0:
+    raiseError("Can't run over empty directory: " + fulldir)
+  ##############################################################################################################################
+  ######### Loop through all directories/files in side the pointed directory to collect relevant files in lists
+  ############################################################################################################################## 
+  for sample in os.listdir(fulldir):
+    printInfo("Processing " + sample)
+    sample_path = fulldir + "/" + sample
+
+    if "untarred" in sample and (not force) and (os.path.isdir(sample)):
+      untarredSample.append(sample_path)
+      untarredPrefix.append('.'.join(sample_path.split('.')[:-1]))
+
+    if os.path.isfile(sample_path) and ("yoda" in sample) and ("tgz" in sample):
+      samplesToProcess.append(sample_path)
+    elif os.path.isfile(sample_path) and ("yoda" in sample) and ("tgz" not in sample):
+      non_tgz_yodas.append(fulldir + "/" + safeFileName(sample))
+
+  ###############################################################################################
+  ######### If --force option called, then remove all the unttared directories
+  ######### Otherwise only unpack those with non-matching prefixes to the unttared directories
+  ###############################################################################################
+
+  if force:
+    for untarredPath in untarredSample:
+      os.system("rm -r " + untarredPath)
+    filteredSample = samplesToProcess
+    untarredSample = []
+  else:
+    for i in samplesToProcess:
+      if not any(j in i for j in untarredPrefix):
+        filteredSample.append(i)
+
+  nNonTGZyodas = len(non_tgz_yodas)
+  nSamples = len(filteredSample)
+  nUntarredSamples = len(untarredSample)
+  if (nSamples + nUntarredSamples + nNonTGZyodas) == 0:
+    raiseError("No matching files/directories in %s to process, exit !" % fulldir)
+  else:
+    printInfo("We have %d existing untarred samples \n \
+      %d tarred samples to unpack \n \
+      %d non-tgz yoda files to merge" % (nUntarredSamples, nSamples, nNonTGZyodas)) 
+
+  sys.stdout.flush()
+
+  counter = 0
+  if nSamples == 0:
+    if nUntarredSamples > 0:
+      printInfo("All files have untarred directories, use --force=True to re-untar everything if needed \n \
+      Reading yoda files from those untarred directories")
+    else:
+      printInfo("No .tgz to unpack and no untarred directories exist. \n \
+      Reading purely from non-tgz yoda files")
+  else:
+    ###############################################################
+    ######### Unpack the filtered .tgz files
+    ############################################################### 
+    for subsample in filteredSample:
+      ProcessDir = subsample.replace(".yoda.tgz", ".untarred").replace(".yoda.gz.tgz", ".untarred").replace(".yodaXYZ.tgz", ".untarred").replace(".XYZyoda.tgz", "untarred")
+      counter += 1
+      os.system("mkdir -p %s" % ProcessDir)
+      sys.stdout.write('\r Unpacking job output %s (%d/%d) ' % (subsample, counter, nSamples))
+      sys.stdout.flush()
+      with tarfile.TarFile.open(subsample, 'r:gz') as tar:
+        fnames = tar.getnames()
+        prefix = os.path.commonprefix(fnames)
+        if len(fnames) == 1: prefix = ""
+        if len(fnames) > 0:
+          tar.extractall(ProcessDir)
+          for fn in fnames:
+            newfn = fn.replace(prefix, "")
+            tar_res.append(ProcessDir + "/" + safeFileName(newfn))
+  
+  if nUntarredSamples > 0:
+    tar_res = tar_res + untarredSample
+
+  printInfo("Done untar-ing")
+  return tar_res, non_tgz_yodas
+
+
+
+def mergeInChunks(tar_list, non_tgz_list, proc_dir_path, nFilesPerChunk=100, force=False):
+  """
+  `tar_list`        - list - yoda files from tarred directories
+  `non_tgz_list`    - list - yoda files in non_tgz format
+  `proc_dir_path`   - str - path of currect processing directory
+  `nFilesPerChunk`  - int - [optional] (How many files to do per chunk)
+  `force`           - bool - [optional] by default, if there is already a matching merged file, this function does nothing, makbut `force` forces the merge again
+
+  rivet-merge function is used to merge the files
+  This function safely merges multiple yoda files in chunks of nFilesToProcess at a time (to avoid failing the merge function)
+  Recommended is nFilesPerChunk = 100, but definitely less than 300.
+
+  out.log file contains the logs from rivet-merge
+  """
+  merged_file = []
+  merged_out_dir = proc_dir_path + "/merged"
+  merged_out_tmp = merged_out_dir + "/tmp"
+
+  outfn = merged_out_dir + "/Merged.yoda"
+  reuse = False
+  mergeTool = "rivet-merge -e -o"
+  ###############################################################
+  ######### If the merged yoda file already exist, 
+  ######### we use the existing yoda file unless force is called
+  ###############################################################
+  if os.path.isdir(merged_out_dir):
+    if os.path.isfile(outfn):
+      if not force:
+        total_merge_list = []
+        printWarning("The merged file already exist at %s \nForce option is not called, hence running contur on the existing merged file" % outfn)
+        reuse=True
+      else:
+        total_merge_list = tar_list + non_tgz_list 
+        printInfo("The merged file already exist at %s \nForce option is called, re-merging the files" % outfn)
+        os.system("rm %s" % outfn )
+    else:
+      total_merge_list = tar_list + non_tgz_list  
+  
+  ######################################################################
+  ######### Otherwise create the merged directory to store all the merged outputs
+  ######### If >100 yoda files there needed merging
+  ######### Then split them into chunks of no more than 100 files
+  ######################################################################
+  else:
+    os.system("mkdir -p %s" % merged_out_dir)
+    total_merge_list = tar_list + non_tgz_list
+
+  if len(total_merge_list) > 0:
+    fileMergeString = ''
+    if len(total_merge_list) > nFilesPerChunk:
+      if os.path.isdir(merged_out_tmp):
+        printInfo("Clearing the /tmp folder")
+        os.system("rm -r %s" % merged_out_tmp)
+      else:
+        os.system("mkdir -p %s" % merged_out_tmp)
+      for iChunk in range(0, len(total_merge_list), nFilesPerChunk):
+        chunkPaths = total_merge_list[iChunk:iChunk + nFilesPerChunk]
+        chunkFilesToMerge = ' '.join(chunkPaths)
+        chunkMergedFile = "%s/chunk%d.yoda" % (merged_out_tmp, iChunk)
+        os.system("%s %s %s &> outChunk.%d.log " % (mergeTool, chunkMergedFile, chunkFilesToMerge, iChunk))
+        fileMergeString += chunkMergedFile + " "
+    else:
+      fileMergeString = ' '.join(total_merge_list)
+    os.system("%s %s %s &> out.log " % (mergeTool, outfn, fileMergeString))
+    printInfo("Done Merging")
+  else: 
+    printWarning("No files to merge")
+    if reuse:
+      printInfo("Processing existing merged file %s" %(outfn))
+    else:
+      raiseError("No merged file to usem, also no files to merge. Exit. ")
+
+  return outfn
+
+def read_xsec_yoda(merged_path):
+  """
+  `merged_path` String (path to merged YODA file)
+  `return` Float
+  """
+  if '/_XSEC' not in yoda.read(merged_path, patterns='.*/_XSEC.*').keys():
+    raiseError("XSEC table not found in merged yoda file, Contur can not run.")
+  else:
+    yoda_read = yoda.read(merged_path, patterns='.*/_XSEC.*')['/_XSEC'].points()[0].x()
+    printInfo("Cross-section found in %s is: %e" %(merged_path, yoda_read))
+    return yoda_read
+
+def get_xsec(merged_path, dsid, xsec_input, campaign, campaign_list):
+  """
+  Extract the relevant info from PMG database file
+  supported campaign =[ MC15, MC16, MC21, MC23, 15_14TeV ]
+  """
+  foundDataset = 0
+  sample_xsec = 0.
+  sample_xsec_fin = 0.
+  sample_Kfactor = 0.
+  sample_gen_filter_eff = 0.
+  renewed_list = []
+
+  printInfo("Going through MC%s database to find matching xsec" % campaign)
+  if campaign in campaign_list:
+    pmgXSFile = "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/PMGTools/PMGxsecDB_mc%s.txt" % campaign
+  else:
+    raiseError("MC%s database is not supported here, try entering the Xsec mannually using the --xsec option" %campaign)
+  
+  pmgXSTree = r.TTree()
+  pmgXSTree.ReadFile(pmgXSFile)
+  for l in pmgXSTree:
+    if int(dsid) == int(l.dataset_number):
+      try: 
+        sample_xsec = l.crossSection
+      except:
+        try: 
+          sample_xsec = l.crossSection_pb
+        except:
+          raiseError("Can't find the crossSection/crossSection_pb attribute, try --xsec option")
+      sample_gen_filter_eff = l.genFiltEff
+      sample_Kfactor = l.kFactor
+      sample_xsec_fin = sample_xsec * sample_gen_filter_eff * sample_Kfactor
+      printInfo("Sample %d INFO-- \n \
+      cross-section: %e \n \
+      generator filter efficiency: %e \n \
+      k_factor: %e" %(dsid, sample_xsec,sample_gen_filter_eff, sample_Kfactor))
+      printInfo("Combined Xsec: %e" % sample_xsec_fin)
+      foundDataset = 1
+      break
+  
+  if not foundDataset:
+    printWarning("Sample %d can't be found in MC%s database" % (dsid, campaign))
+    if len(campaign_list)!=0:
+      campaign_list.remove(campaign)
+    else:
+      raiseError("DSID %d can not be found in MC15, MC16, MC21, MC23 and MC15_14TeV libraries, try entering the xsec directly by using --xsec instead" % dsid)
+    sample_xsec_fin = get_xsec(merged_path, dsid, xsec_input, campaign_list[0], campaign_list)
+  
+  return sample_xsec_fin
+    
+
+def rivet_xs_rescale(fn, xsec):
+  # rescaling yoda histograms using Rivet functions
+  merged_dir =  "/".join(fn.split("/")[:-1])
+  merged_scaled_dir = merged_dir + "/merged_scaled"
+  merged_scaled_fn = merged_scaled_dir + "/Merged_scaled.yoda"
+  if os.path.isdir(merged_scaled_dir):
+    os.system("rm -r %s/*" % merged_scaled_dir)
+  else:
+    mkdir_cmd = "mkdir -p %s" % merged_scaled_dir
+    os.system(mkdir_cmd)
+  rescale_cmd = "rivet-merge -o %s %s:%e &> %s/rescale.log" % (merged_scaled_fn, fn, xsec, merged_scaled_dir)
+  os.system(rescale_cmd)
+  return merged_scaled_fn
+
+def Contur_process(outfn, contur_outDir):
+  # running contur on the result file
+  contur_cmd = "contur "
+  if os.path.isfile(outfn) and outfn.endswith(('.yoda', '.yoda.gz')):
+    contur_cmd += outfn
+    if contur_outDir:
+      contur_cmd += " -o " + contur_outDir
+    os.system(contur_cmd)
+  else:
+    raiseError("File format of %s is not supported by Contur or file does not exist" %(outfn))
+
+if __name__ == "__main__":
+  """
+  This is a script aimed at helping with outputs with multiple YODA files from grid
+  Targeted to on-the-fly + RIVET generation via central production system and RIVET grid jobs submitted via PMGSystematicTool
+  This script by defult runs in the downloaded directory containing yoda tarballs, otherwise the path to downloaded tarballs need to be specified via '-d' option
+  Yoda files will be untarred an merged safely via rivet-merge
+  An automatic check on cross-sections will be performed after merging
+  If the identified cross-section is 1pb, then probably rescaling is needed
+  '--dsid' option is needed for this script to extract the relevant rescaling factors in cases where XSEC=1pb
+  The merged yoda file will be rescaled by 'generator efficiency'*'Cross-section'*'K-factor'
+  If the relevant info is not found in the PMG database, then user can mannually enter the rescaling factor via '--xsec' option
+  contur will run on top of the merged (+rescaled) yoda file.
+
+  If previous merging and untarring is already done, by default it will use the existing files
+  '--force' option can be called if we want re-run untarring/merging
+  """
+  parser = optparse.OptionParser(usage="%prog [options]")
+  parser.add_option("-d", "--directory", help="Directory containing the rucio downloads.", dest="directory", default="./")
+  parser.add_option("--force", action="store_true", dest="force", help="By default, if a subsample has already been untarred and merged, it is not done again. This option forces the script to re-untar and re-merge.")
+  parser.add_option("-o", "--ConturDir", help="Name of output Contur Directory", dest="ConturDir", default="")
+  parser.add_option("--dsid", dest="dsid", default="", help="The processed sample's DSID, needed if the cross section in the file is not already scaled")
+  parser.add_option("--xsec", dest="xsec", default="", help="This entry is needed if yoda file needs xsec scaling and the corresponding xsec to that DSID is not found in the PMG database.")
+  (opts, args) = parser.parse_args()
+
+  workingDir = opts.directory
+  pwd = os.getcwd()
+  rescaled_fn = ""
+  if '/afs/' not in workingDir: workingDir = pwd + "/" + opts.directory
+  # construct output dir
+  contur_output = opts.ConturDir
+  printInfo("Unpack Grid outputs, collect files to be processed", section=True)
+  tar_list, non_tgz_list = UnpackTarballs(workingDir, force=opts.force)
+
+  printInfo("Start Merging the files collected", section=True)
+  merged_file = mergeInChunks(tar_list, non_tgz_list, workingDir, force=opts.force)
+
+  # rescaling if needed
+  printInfo("Checking for Cross-section scaling", section=True)
+  yodaxsec = read_xsec_yoda(merged_file)
+  if yodaxsec!=1.0:
+    printInfo("YODA file is already scaled by xsec, no need for extra xsec scaling before running contur")
+  elif (not opts.dsid) and (not opts.xsec):
+    printWarning("YODA file seems like not scaled by xsec, double check if xsec is 1pb for this process, if not enter dsid to grab xsec from database and do the scaling using --dsid option")
+  elif opts.xsec:
+    printInfo("YODA file is not scaled, running scaling by cross-section %s" % opts.xsec)
+    rescaled_fn = rivet_xs_rescale(merged_file, float(opts.xsec))
+  else:
+    printInfo("YODA file is not scaled, searching for Xsec in the database for job %s" % opts.dsid)
+    xsec_scale = get_xsec(merged_file, int(opts.dsid), opts.xsec, "15",["15", "16", "21", "23", "15_14TeV"])
+    printInfo("Re-scaling the merged yoda file with found cross section %e" % xsec_scale, section=True)
+    rescaled_fn = rivet_xs_rescale(merged_file, xsec_scale)
+
+  # running contur
+  printInfo("Start Contur Run", section=True)
+  if rescaled_fn:
+    Contur_process(rescaled_fn, contur_output)
+  else:
+    Contur_process(merged_file, contur_output)
+
+  printInfo("Job Completed", section=True)
