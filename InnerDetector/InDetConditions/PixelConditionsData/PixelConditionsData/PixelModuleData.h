@@ -121,6 +121,21 @@ class PixelModuleData
     void setFEI4ToTSigma(const std::vector<double> &FEI4ToTSigma);
     double getFEI4ToTSigma(int tot) const;
 
+    void setBLayerTimingIndex(const std::vector<float> &BLayerTimingIndex);
+    void setLayer1TimingIndex(const std::vector<float> &Layer1TimingIndex);
+    void setLayer2TimingIndex(const std::vector<float> &Layer2TimingIndex);
+    void setEndcap1TimingIndex(const std::vector<float> &Endcap1TimingIndex);
+    void setEndcap2TimingIndex(const std::vector<float> &Endcap2TimingIndex);
+    void setEndcap3TimingIndex(const std::vector<float> &Endcap3TimingIndex);
+    void setBLayerTimingProbability(const std::vector<float> &BLayerTimingProbability);
+    void setLayer1TimingProbability(const std::vector<float> &Layer1TimingProbability);
+    void setLayer2TimingProbability(const std::vector<float> &Layer2TimingProbability);
+    void setEndcap1TimingProbability(const std::vector<float> &Endcap1TimingProbability);
+    void setEndcap2TimingProbability(const std::vector<float> &Endcap2TimingProbability);
+    void setEndcap3TimingProbability(const std::vector<float> &Endcap3TimingProbability);
+    std::vector<float> getTimingIndex(int barrel_ec, int layer) const;
+    std::vector<float> getTimingProbability(int barrel_ec, int layer, int eta) const;
+
     // Charge calibration parameters
     void setDefaultQ2TotA(float paramA);
     void setDefaultQ2TotE(float paramE);
@@ -282,6 +297,24 @@ class PixelModuleData
     bool m_useFEI4SpecialScalingFunction{true};
 
     std::vector<double> m_FEI4ToTSigma{0.0,0.50,0.50,0.50,0.50,0.50,0.60,0.60,0.60,0.60,0.65,0.70,0.75,0.80,0.80,0.80,0.80};
+
+    std::vector<float> m_BLayerTimingIndex{0.0};
+    std::vector<float> m_BLayerTimingProbability{0.0};
+
+    std::vector<float> m_Layer1TimingIndex{0.0};
+    std::vector<float> m_Layer1TimingProbability{0.0};
+
+    std::vector<float> m_Layer2TimingIndex{0.0};
+    std::vector<float> m_Layer2TimingProbability{0.0};
+
+    std::vector<float> m_Endcap1TimingIndex{0.0};
+    std::vector<float> m_Endcap1TimingProbability{0.0};
+
+    std::vector<float> m_Endcap2TimingIndex{0.0};
+    std::vector<float> m_Endcap2TimingProbability{0.0};
+
+    std::vector<float> m_Endcap3TimingIndex{0.0};
+    std::vector<float> m_Endcap3TimingProbability{0.0};
 
     float m_paramA{70.2f};
     float m_paramE{-3561.25f};

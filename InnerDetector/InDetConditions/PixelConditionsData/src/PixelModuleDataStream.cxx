@@ -483,7 +483,15 @@ std::istream & operator >>(SoshiFormat & f, PixelModuleData & md){
   while (getline(*i,sline)) {
     if (!sline.empty()) {
       if (sline.find("//")==std::string::npos) {
-        if (sline.find("{")!=std::string::npos && sline.find("}")!=std::string::npos) {
+        if (sline.find("{{")!=std::string::npos && sline.find("}")!=std::string::npos) {
+          multiline = sline;
+        }
+        else if (sline.find("{")!=std::string::npos && sline.find("}}")!=std::string::npos) {
+          multiline += sline;
+          lBuffer.push_back(multiline);
+        }
+        else if (sline.find("{")!=std::string::npos && sline.find("}")!=std::string::npos) {
+          multiline += sline;
           lBuffer.push_back(sline);
         }
         else if (sline.find("{")!=std::string::npos) {
@@ -525,6 +533,24 @@ std::istream & operator >>(SoshiFormat & f, PixelModuleData & md){
   md.setEndcapNoiseShape({getParameter<float>("PixelNoiseShape", lBuffer),
                                    getParameter<float>("PixelNoiseShape", lBuffer),
                                    getParameter<float>("PixelNoiseShape", lBuffer)});
+
+  md.setBLayerTimingIndex(getParameter<float>("BLayerTimingIndex", lBuffer));
+  md.setBLayerTimingProbability(getParameter<float>("BLayerTimingProbability", lBuffer));
+
+  md.setLayer1TimingIndex(getParameter<float>("Layer1TimingIndex", lBuffer));
+  md.setLayer1TimingProbability(getParameter<float>("Layer1TimingProbability", lBuffer));
+
+  md.setLayer2TimingIndex(getParameter<float>("Layer2TimingIndex", lBuffer));
+  md.setLayer2TimingProbability(getParameter<float>("Layer2TimingProbability", lBuffer));
+
+  md.setEndcap1TimingIndex(getParameter<float>("Endcap1TimingIndex", lBuffer));
+  md.setEndcap1TimingProbability(getParameter<float>("Endcap1TimingProbability", lBuffer));
+
+  md.setEndcap2TimingIndex(getParameter<float>("Endcap2TimingIndex", lBuffer));
+  md.setEndcap2TimingProbability(getParameter<float>("Endcap2TimingProbability", lBuffer));
+
+  md.setEndcap3TimingIndex(getParameter<float>("Endcap3TimingIndex", lBuffer));
+  md.setEndcap3TimingProbability(getParameter<float>("Endcap3TimingProbability", lBuffer));
 
   // Radiation damage simulation
   md.setFluenceLayer(getParameter<double>("BarrelFluence", lBuffer));

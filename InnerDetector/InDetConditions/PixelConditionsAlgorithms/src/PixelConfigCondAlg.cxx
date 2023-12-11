@@ -127,7 +127,6 @@ StatusCode PixelConfigCondAlg::execute(const EventContext& ctx) const {
   return StatusCode::SUCCESS;
 }
 
-
 std::string 
 PixelConfigCondAlg::getFileName(const int currentRunNumber) const {
   if (m_usePrivateFileName.empty()) {

@@ -28,7 +28,8 @@ def PixelConfigCondAlgCfg(flags, name="PixelConfigCondAlg", **kwargs):
         )
     
     CondArgs.update(
-        PixelParameterConditionsFolder=flags.InDet.PixelConfig.version
+        PixelParameterConditionsFolder=flags.InDet.PixelConfig.version,
+        UsePrivateFileName=flags.InDet.PixelConfig.UserInputFileName
     )
 
     # Cabling parameters
