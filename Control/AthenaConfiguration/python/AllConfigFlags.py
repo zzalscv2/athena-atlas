@@ -419,6 +419,11 @@ def initConfigFlags():
         from JetRecConfig.JetConfigFlags import createJetConfigFlags
         return createJetConfigFlags()
     _addFlagsCategory(acf,"Jet",__jet, 'JetRecConfig')
+    
+    def __ufo():
+        from TrackCaloClusterRecTools.UFOConfigFlags import createUFOConfigFlags
+        return createUFOConfigFlags()
+    _addFlagsCategory(acf,"UFO",__ufo, 'TrackCaloClusterRecTools') 
 
     def __tau():
         from tauRec.TauConfigFlags import createTauConfigFlags
