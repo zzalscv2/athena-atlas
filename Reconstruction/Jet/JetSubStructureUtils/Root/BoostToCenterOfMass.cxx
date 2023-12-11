@@ -6,7 +6,7 @@
 #include "TLorentzVector.h"
 using namespace std;
 
-vector<fastjet::PseudoJet> JetSubStructureUtils::boostToCenterOfMass(fastjet::PseudoJet jet,
+vector<fastjet::PseudoJet> JetSubStructureUtils::boostToCenterOfMass(const fastjet::PseudoJet& jet,
                                                    vector<fastjet::PseudoJet> constit_pseudojets) {
   vector<fastjet::PseudoJet> clusters;
   if(jet.e() < 1e-20) { // FPE

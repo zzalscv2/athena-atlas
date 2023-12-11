@@ -16,7 +16,6 @@
 // StoreGate
 #include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/WriteHandle.h"
-#include "StoreGate/WriteHandle.h"
 
 //
 #include "TileConditions/ITileBadChanTool.h"
@@ -52,7 +51,7 @@ MissingCellListTool::MissingCellListTool(const std::string& name) :
 // Destructor
 ///////////////
 MissingCellListTool::~MissingCellListTool()
-{}
+= default;
 
 // Athena algtool's Hooks
 ////////////////////////////

@@ -15,7 +15,7 @@ AthJetReclusteringAlgo::AthJetReclusteringAlgo( const std::string& name, ISvcLoc
 }
 
 
-AthJetReclusteringAlgo::~AthJetReclusteringAlgo() {}
+AthJetReclusteringAlgo::~AthJetReclusteringAlgo() = default;
 
 
 StatusCode AthJetReclusteringAlgo::initialize() {

@@ -49,7 +49,7 @@ const std::vector<HistoGroupBase::HistData> & HistoGroupBase::bookedHistograms()
 
 void HistoGroupBase::renameAndRegister(TH1* h, const std::string & subD, Interval_t ityp){
 
-  if( h == NULL ) return;
+  if( h == nullptr ) return;
 
   if( ityp == useToolInterval) ityp = (Interval_t) m_interval;
 

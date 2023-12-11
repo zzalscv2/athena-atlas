@@ -46,7 +46,7 @@ public:
   /// Copy pseudojets from srcjets to dstjets.
   int copy(const xAOD::JetContainer& srcjets,
            const xAOD::JetContainer& dstjets,
-           std::string label ="PseudojetMap") const;
+           const std::string& label ="PseudojetMap") const;
 
   /// Copy the pseudojets from srcjets to container with name dstname.
   int copy(const xAOD::JetContainer& srcjets,

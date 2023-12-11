@@ -53,9 +53,7 @@ JetInputElRemovalTool::JetInputElRemovalTool(const std::string& t)
   
 }
 
-JetInputElRemovalTool::~JetInputElRemovalTool(){
-  
-}
+JetInputElRemovalTool::~JetInputElRemovalTool()= default;
 
 
 StatusCode JetInputElRemovalTool::initialize(){
@@ -136,12 +134,12 @@ std::vector<const xAOD::Electron*> JetInputElRemovalTool::selectElectron()const{
     return selected_electrons_v;
   }
     
-  auto electrons = handle.cptr();
+  const auto *electrons = handle.cptr();
 
   selected_electrons_v.clear();
   bool isTight=false;
   
-  for (auto electron_itr : *electrons){
+  for (const auto *electron_itr : *electrons){
     
     isTight=false;
     
@@ -184,7 +182,7 @@ int JetInputElRemovalTool::fillSelectedClusters(std::vector<const xAOD::Electron
     return 0;
   }
     
-  auto clusterContainer = handle.cptr();
+  const auto *clusterContainer = handle.cptr();
   
   //Loop over all the clusters
   for (const xAOD::CaloCluster* cluster_itr : *clusterContainer){
@@ -262,7 +260,7 @@ int JetInputElRemovalTool::fillSelectedClustersInJets(std::vector<const xAOD::El
     return 0;
   }
 
-  auto jetsContainer = handle.cptr();
+  const auto *jetsContainer = handle.cptr();
 
   // const xAOD::JetContainer* jetsContainer;
   // StatusCode sc=evtStore()->retrieve( jetsContainer, m_jetINputContainer );
@@ -339,7 +337,7 @@ int JetInputElRemovalTool::fillSelectedTracks(std::vector<const xAOD::Electron*>
     return 0;
   }
 
-  auto tkPrtclContainer = handle.cptr();
+  const auto *tkPrtclContainer = handle.cptr();
 
   // PS 
   // const xAOD::TrackParticleContainer* tkPrtclContainer;

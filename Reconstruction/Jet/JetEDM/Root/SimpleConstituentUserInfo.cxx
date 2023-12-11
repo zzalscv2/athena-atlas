@@ -4,22 +4,24 @@
 
 // SimpleConstituentUserInfo.cxx
 
+#include <utility>
+
 #include "JetEDM/SimpleConstituentUserInfo.h"
 
 using jet::SimpleConstituentUserInfo;
-typedef SimpleConstituentUserInfo::Label Label;
+using Label = SimpleConstituentUserInfo::Label;
 using xAOD::IParticle;
 
 //**********************************************************************
 
 SimpleConstituentUserInfo::SimpleConstituentUserInfo()
-: m_ppar(0) { }
+: m_ppar(nullptr) { }
 
 //**********************************************************************
 
 SimpleConstituentUserInfo::
 SimpleConstituentUserInfo(const IParticle& par, Label lab)
-: m_ppar(&par), m_label(lab) { }
+: m_ppar(&par), m_label(std::move(lab)) { }
 
 //**********************************************************************
 

@@ -106,7 +106,7 @@ namespace CP {
                     << jvtName << ". Please check the supported working points.");
             return StatusCode::FAILURE;
         }
-        m_jvtHist->SetDirectory(0);
+        m_jvtHist->SetDirectory(nullptr);
         std::string effName = "Eff" + wp;
         m_effHist.reset(fIn->Get<TH2>(effName.c_str()));
         if (!m_effHist) {
@@ -115,7 +115,7 @@ namespace CP {
                     << jvtName << ". Please check the supported working points.");
             return StatusCode::FAILURE;
         }
-        m_effHist->SetDirectory(0);
+        m_effHist->SetDirectory(nullptr);
 
         return StatusCode::SUCCESS;
     }
@@ -155,8 +155,6 @@ namespace CP {
         if (jet.pt() < m_minPtForJvt || jet.pt() > m_maxPtForJvt)
             return false;
         float eta = (*m_etaAcc)(jet);
-        if (std::abs(eta) < m_minEta || std::abs(eta) > m_maxEta)
-            return false;
-        return true;
+        return std::abs(eta) >= m_minEta && std::abs(eta) <= m_maxEta;
     }
 } // namespace CP

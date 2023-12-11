@@ -41,7 +41,7 @@ int JetTrackSelectionTool::execute() const {
     return 1;
   }
   
-  auto inCont = handle_in.cptr();
+  const auto *inCont = handle_in.cptr();
 
   using OutContType = ConstDataVector<xAOD::TrackParticleContainer>;
   OutContType* pOutCont = new OutContType(SG::VIEW_ELEMENTS);
@@ -61,13 +61,13 @@ int JetTrackSelectionTool::execute() const {
 }
 
 int JetTrackSelectionTool::keep(const xAOD::TrackParticle& trk) const {
-  return static_cast<bool>(m_hidselector->accept(trk, 0));
+  return static_cast<bool>(m_hidselector->accept(trk, nullptr));
 }
 
 template<class T>
 void JetTrackSelectionTool::selectionLoop(const xAOD::TrackParticleContainer& inCont, T& outCont) const {
   for ( const xAOD::TrackParticle* ptrk : inCont ) { 
-    if ( ptrk != 0 && keep(*ptrk) ) outCont.push_back(ptrk);
+    if ( ptrk != nullptr && keep(*ptrk) ) outCont.push_back(ptrk);
   }
 }
 

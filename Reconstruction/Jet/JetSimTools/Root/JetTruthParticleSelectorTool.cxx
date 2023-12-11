@@ -88,7 +88,7 @@ namespace {
 	      // std::cout << "isWZDecay: found pdgId: " << p->pdgId() << " status: " << p->status() << std::endl;
 	      // std::cout << "isWZDecay: have " << wzLeptons.size() << " W/Z leptons" << std::endl;
 	    }
-            for( auto lep: wzLeptons) {
+            for( const auto *lep: wzLeptons) {
               double deltaR2 = jet::JetDistances::deltaR2(*p, *lep);
 	      // std::cout << "Photon/lepton dR = " << sqrt(deltaR2) << std::endl;
               if( deltaR2 < photonCone2 ) {
@@ -171,7 +171,7 @@ JetTruthParticleSelectorTool::JetTruthParticleSelectorTool(const std::string& n)
 }
 
 JetTruthParticleSelectorTool::~JetTruthParticleSelectorTool()
-{ }
+= default;
 
 void JetTruthParticleSelectorTool::setupEvent() {
   m_wzLeptons.clear();

@@ -10,11 +10,11 @@
 #define toGeV 1/1000.
 
 JetKinematicHistos::JetKinematicHistos(const std::string &t) : JetHistoBase(t) 
-                                                             ,m_pt(0)
-                                                             ,m_eta(0)
-                                                             ,m_phi(0)
-                                                             ,m_m(0)
-                                                             ,m_e(0)
+                                                             ,m_pt(nullptr)
+                                                             ,m_eta(nullptr)
+                                                             ,m_phi(nullptr)
+                                                             ,m_m(nullptr)
+                                                             ,m_e(nullptr)
                                                              ,m_jetScale("JetAssignedScaleMomentum")
 {
   declareProperty("JetScale", m_jetScale);
@@ -85,7 +85,7 @@ int JetKinematicHistos::buildHistos(){
     // build a qualifier in the form "(EMScale, Leading Jet, ...)"
     TString qualif = "(";
     TString tags[] = { scaleTag};
-    for(auto t : tags ) { if(qualif != "(") qualif+=",";qualif += t; }
+    for(const auto& t : tags ) { if(qualif != "(") qualif+=",";qualif += t; }
     qualif += ")";
     // reset all titles :
     for(auto& hdata : m_vBookedHistograms ){
@@ -110,7 +110,7 @@ int JetKinematicHistos::fillHistosFromContainer(const xAOD::JetContainer & cont,
 
     float JVT_cut = 0.50;
 
-    if(cont.size() > 0){
+    if(!cont.empty()){
       if(cont[0]->isAvailable<float>("Jvt")){
 	xAOD::JetInput::Type inputtype = cont[0]->getInputType();
 	if(inputtype == xAOD::JetInput::EMTopoOrigin || inputtype == xAOD::JetInput::LCTopoOrigin)
@@ -118,7 +118,7 @@ int JetKinematicHistos::fillHistosFromContainer(const xAOD::JetContainer & cont,
       }
     }
 
-    for(auto *jet : cont){
+    for(const auto *jet : cont){
       if(jet->isAvailable<float>("Jvt")){
         if(jet->getAttribute<float>("Jvt") > JVT_cut) counter_passJVT++;
         else counter_failJVT++;

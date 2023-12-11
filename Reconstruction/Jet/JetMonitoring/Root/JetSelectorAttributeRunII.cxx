@@ -32,7 +32,7 @@ JetSelectorAttributeRunII::JetSelectorAttributeRunII(const std::string &t)
   , m_attName("")
   , m_attType("float")
   , m_vectorAttIndex(0)
-  , m_vretriever(NULL)
+  , m_vretriever(nullptr)
 {
 
   declareProperty("CutMin", m_min );
@@ -48,7 +48,7 @@ JetSelectorAttributeRunII:: ~JetSelectorAttributeRunII(){
 }
 
 StatusCode JetSelectorAttributeRunII::initialize() {
-  if(m_attName=="") {
+  if(m_attName.empty()) {
     ATH_MSG_ERROR("Please specify an attribute name");
     return StatusCode::FAILURE;
   }

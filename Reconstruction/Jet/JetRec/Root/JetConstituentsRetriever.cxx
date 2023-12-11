@@ -16,10 +16,10 @@ using std::string;
 using xAOD::IParticle;
 using xAOD::MuonSegment;
 
-typedef std::vector<const IParticle*> IParticleVector;
-typedef std::vector<const MuonSegment*> MuonSegmentVector;
-typedef IJetConstituentsRetriever::PseudoJetVector PseudoJetVector;
-typedef IJetConstituentsRetriever::NameList NameList;
+using IParticleVector = std::vector<const IParticle *>;
+using MuonSegmentVector = std::vector<const MuonSegment *>;
+using PseudoJetVector = IJetConstituentsRetriever::PseudoJetVector;
+using NameList = IJetConstituentsRetriever::NameList;
 
 //**********************************************************************
 
@@ -74,7 +74,7 @@ constituents(const xAOD::Jet& jet, PseudoJetVector& constits,
   if ( evtStore()->contains<jet::LabelIndex>(liname) ) {
     ATH_MSG_DEBUG("Fetching existing pseudojet label map.");
     pli = evtStore()->retrieve<jet::LabelIndex>(liname);
-    if ( pli == 0 ) {
+    if ( pli == nullptr ) {
       ATH_MSG_ERROR("Unable to fetch pseudojet label map.");
       return 1;
     }
@@ -94,7 +94,7 @@ constituents(const xAOD::Jet& jet, PseudoJetVector& constits,
     ATH_MSG_DEBUG("Jet input type is " << lab);
     ATH_MSG_VERBOSE("Looping over " << jet.getConstituents().size()
                     << " real constituents.");
-    for ( const auto pjetcon : jet.getConstituents() ) {
+    for ( const auto *const pjetcon : jet.getConstituents() ) {
       if ( pjetcon == nullptr ) {
         ATH_MSG_WARNING("Jet has null constituent");
       } else {
@@ -115,7 +115,7 @@ constituents(const xAOD::Jet& jet, PseudoJetVector& constits,
   // Add ghosts.
   NameList glabs;
   ATH_MSG_VERBOSE("Looping over " << m_glabs.size() << " ghost labels.");
-  for ( std::string glab : m_glabs ) {
+  for ( const std::string& glab : m_glabs ) {
     string gname = "Ghost" + glab;
     double fac = m_gscale;
     if ( glab == "MuonSegment" ) {
@@ -209,9 +209,9 @@ void JetConstituentsRetriever::print() const {
     }
   }
   ATH_MSG_INFO("  UsePseudojet: " << m_usepj);
-  if ( m_glabs.size() == 0 ) {
+  if ( m_glabs.empty() ) {
     ATH_MSG_INFO("  GhostLabels:");
-    for ( std::string glab : m_glabs ) {
+    for ( const std::string& glab : m_glabs ) {
       ATH_MSG_INFO("    " << glab);
     }
   }

@@ -97,7 +97,7 @@ PseudoJetContainer::extractConstituents(xAOD::Jet& jet,
 
   // send the jet to the each extractor with a vector of EDM
   // indices for that extractor
-  for(auto s : sorter){s.first -> addToJet(jet, s.second);}
+  for(const auto& s : sorter){s.first -> addToJet(jet, s.second);}
   return true;
 }
 
@@ -199,7 +199,7 @@ std::string PseudoJetContainer::toString(int level, int extLevel) const {
 std::string PseudoJetContainer::dumpPseudoJets() const {
   std::ostringstream oss{"PseudoJetContainer at: ", std::ios::ate};
   oss <<"\n PseudoJet energies\n";
-  for(auto& p : m_allConstituents){
+  for(const auto& p : m_allConstituents){
     oss << "pseudojet user ind " << p.user_index()
         << " E " << p.e() << " " << p.eta() << '\n';
   }
@@ -227,7 +227,7 @@ bool PseudoJetContainer::checkInvariants(const std::string& from) const {
 
   // have at least one extractor
   // m_lo == m_hi possible if an empty EDM container has been read in.
-  for(auto ex : m_extractorRanges){
+  for(const auto& ex : m_extractorRanges){
     if (ex.m_lo < 0 or ex.m_lo > ex.m_hi){
       oss << "bad extractor limits: " << ex.m_lo << " " << ex.m_hi;
       return bad_invariants_exit(oss);

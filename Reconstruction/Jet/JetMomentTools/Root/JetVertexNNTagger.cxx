@@ -29,7 +29,7 @@ namespace JetPileupTag {
     JetVertexNNTagger::JetVertexNNTagger(const std::string& name)
     : asg::AsgTool(name) {}
 
-    JetVertexNNTagger::~JetVertexNNTagger() {}
+    JetVertexNNTagger::~JetVertexNNTagger() = default;
 
     StatusCode JetVertexNNTagger::initialize()
     {

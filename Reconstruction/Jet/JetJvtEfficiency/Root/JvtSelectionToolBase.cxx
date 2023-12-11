@@ -29,8 +29,6 @@ namespace CP {
         if (jet->pt() < m_minPtForJvt || jet->pt() > m_maxPtForJvt)
             return false;
         float eta = (*m_etaAcc)(*jet);
-        if (std::abs(eta) < m_minEta || std::abs(eta) > m_maxEta)
-            return false;
-        return true;
+        return std::abs(eta) >= m_minEta && std::abs(eta) <= m_maxEta;
     }
 } // namespace CP

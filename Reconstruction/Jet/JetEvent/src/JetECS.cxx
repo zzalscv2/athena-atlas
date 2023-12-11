@@ -55,6 +55,5 @@ JetECS::JetECS(double e, double eta, double phi, double m)
   
 }
 
-JetECS::~JetECS()
-{ }
+
 

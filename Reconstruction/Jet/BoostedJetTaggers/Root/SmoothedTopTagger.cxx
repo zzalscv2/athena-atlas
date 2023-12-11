@@ -41,7 +41,7 @@ StatusCode SmoothedTopTagger::initialize() {
       // read the cut name corresponding to this variable
       varName = m_configReader.GetValue( prefix+"Var"+std::to_string(i), "");
 
-      if (varName == "") {
+      if (varName.empty()) {
         ATH_MSG_ERROR("Config file does not specify Var" << std::to_string(i) << "!") ; 
         return StatusCode::FAILURE;
       }
@@ -56,7 +56,7 @@ StatusCode SmoothedTopTagger::initialize() {
       // read cut expression
       varCutExpr = m_configReader.GetValue( prefix+m_varCutNames.back()+"Cut", "");
 
-      if (varCutExpr == "") {
+      if (varCutExpr.empty()) {
         ATH_MSG_ERROR("Config file does not specify Var" << std::to_string(i) << " cut!") ; 
         return StatusCode::FAILURE;
       }
@@ -76,7 +76,7 @@ StatusCode SmoothedTopTagger::initialize() {
     m_numTaggerVars = int(m_varCutNames.size());
 
     // make sure all of the tagger variables are recognised
-    for (std::string var: m_varCutNames) {
+    for (const std::string& var: m_varCutNames) {
       if (std::find(m_recognisedCuts.begin(), m_recognisedCuts.end(), var) == m_recognisedCuts.end()) {
         ATH_MSG_ERROR("Unrecognised variable " << var << " provided!") ;
         return StatusCode::FAILURE;

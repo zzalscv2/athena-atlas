@@ -46,7 +46,7 @@ double Puppi::getChi2(const fastjet::PseudoJet& pfo){
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-double Puppi::getWeight(fastjet::PseudoJet pfo){
+double Puppi::getWeight(const fastjet::PseudoJet& pfo){
 
   double chi2Total=getChi2(pfo);
   int nDF=1;
@@ -80,7 +80,7 @@ double Puppi::getWeight(fastjet::PseudoJet pfo){
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-double Puppi::getAlpha(const fastjet::PseudoJet pfo){
+double Puppi::getAlpha(const fastjet::PseudoJet& pfo){
   fastjet::Selector sel = fastjet::SelectorCircle(m_R0);
   sel.set_reference(pfo);
 
@@ -89,7 +89,7 @@ double Puppi::getAlpha(const fastjet::PseudoJet pfo){
 
   if (fabs(pfo.eta())<m_etaBoundary+m_R0){
     vector<fastjet::PseudoJet> chargedHSNeighbors = sel(m_chargedHS);
-    for (auto p: chargedHSNeighbors){
+    for (const auto& p: chargedHSNeighbors){
       float dR=pfo.delta_R(p);
       if (dR>m_Rmin){
 	sum+=p.pt()/pow(dR, m_beta);
@@ -101,7 +101,7 @@ double Puppi::getAlpha(const fastjet::PseudoJet pfo){
   if (m_includeCentralNeutralsInAlpha){
     if (fabs(pfo.eta())<m_etaBoundary+m_R0){
       vector<fastjet::PseudoJet> neutralNeighbors = sel(m_neutral);
-      for (auto p: neutralNeighbors){
+      for (const auto& p: neutralNeighbors){
 	float dR=pfo.delta_R(p);
 	if (dR>m_Rmin){
 	  sum+=pow(p.pt()/dR, m_beta);
@@ -113,7 +113,7 @@ double Puppi::getAlpha(const fastjet::PseudoJet pfo){
 
   if (fabs(pfo.eta())>m_etaBoundary-m_R0){
     vector<fastjet::PseudoJet> forwardNeighbors = sel(m_forward);
-    for (auto p: forwardNeighbors){
+    for (const auto& p: forwardNeighbors){
       float dR=pfo.delta_R(p);
       if (dR>m_Rmin){
 	sum+=pow(p.pt()/dR, m_beta);
@@ -133,7 +133,7 @@ double Puppi::getAlpha(const fastjet::PseudoJet pfo){
 void Puppi::findAlphaMedianAndRMS(){
   vector<double> values;
 
-  for(auto p: m_chargedPU){
+  for(const auto& p: m_chargedPU){
 
     // Don't want to include particles on the boundary
     if( fabs(p.eta()) > m_etaBoundary-m_R0) continue;
@@ -144,7 +144,7 @@ void Puppi::findAlphaMedianAndRMS(){
 
   std::sort(values.begin(),values.end());
 			
-  if(values.size()>0) m_median=values[int(values.size()*0.5)];
+  if(!values.empty()) m_median=values[int(values.size()*0.5)];
   else m_median=-9999;
 
   // now compute the LHS RMS

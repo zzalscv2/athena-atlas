@@ -121,7 +121,6 @@ JetCollectionCnv_p2::persToTrans( const JetCollection_p2* pers,
   
   msg << MSG::DEBUG << "Loading JetCollection from persistent state [OK]"
       << endmsg;
-  return;
 }
 
 void 
@@ -149,9 +148,5 @@ JetCollectionCnv_p2::transToPers( const JetCollection* trans,
   // RS now deal with the JetKeyDescriptor
   DataLinkCnv_p1<DataLink<JetKeyDescriptor> > JetKeyStoreCnv;
   JetKeyStoreCnv.transToPers( &trans->m_keyStore, &pers->m_keyStore, msg );
-  
-//   msg << MSG::DEBUG << "Creating persistent state of JetCollection [OK]"
-//       << endmsg;
-  return;
 }
 

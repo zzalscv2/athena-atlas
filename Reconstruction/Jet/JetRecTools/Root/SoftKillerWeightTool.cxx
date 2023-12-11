@@ -73,7 +73,7 @@ StatusCode SoftKillerWeightTool::initialize() {
 StatusCode SoftKillerWeightTool::process_impl(xAOD::IParticleContainer* cont) const {
   const static SG::AuxElement::Accessor<float> weightAcc("SoftKillerWeight"); // Handle for PU weighting here
   double minPt(0.), minPtECal(0.), minPtHCal(0.);
-  if(m_isCaloSplit == false) {
+  if(!m_isCaloSplit) {
     minPt = getSoftKillerMinPt(*cont);
     ATH_MSG_VERBOSE("For current event, minpt = " << minPt);
   }
@@ -87,7 +87,7 @@ StatusCode SoftKillerWeightTool::process_impl(xAOD::IParticleContainer* cont) co
 
   for(xAOD::IParticle* part : *cont) {
     float w = 1;
-    if(m_isCaloSplit == false) w = calculateWeight(*part, minPt);
+    if(!m_isCaloSplit) w = calculateWeight(*part, minPt);
     else w = calculateSplitWeight(*part, minPtECal, minPtHCal);
     // use parent class's type-sensitive setter
     ATH_CHECK( setEnergyPt(part, part->e()*w, part->pt()*w,&weightAcc) );
@@ -141,7 +141,7 @@ double SoftKillerWeightTool::getSoftKillerMinPt(xAOD::IParticleContainer& cont) 
         accept = !fe->isCharged();
     }
     if(accept) {
-      partPJ.push_back( fastjet::PseudoJet( part->p4() ));
+      partPJ.emplace_back( part->p4() );
     }
   }
 
@@ -183,8 +183,8 @@ std::pair<double,double> SoftKillerWeightTool::getSoftKillerMinPtSplit(xAOD::IPa
     }
     if(accept) {
       double center_lambda = acc_clambda.isAvailable(*part) ? acc_clambda(*part) : 0.;
-      if( center_lambda < m_lambdaCalDivide) partPJ_ECal.push_back( fastjet::PseudoJet( part->p4() ));
-      if( center_lambda >= m_lambdaCalDivide) partPJ_HCal.push_back( fastjet::PseudoJet( part->p4() ));
+      if( center_lambda < m_lambdaCalDivide) partPJ_ECal.emplace_back( part->p4() );
+      if( center_lambda >= m_lambdaCalDivide) partPJ_HCal.emplace_back( part->p4() );
     }
   }
 

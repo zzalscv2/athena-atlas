@@ -24,7 +24,7 @@ using xAOD::JetContainer;
 using fastjet::PseudoJet;
 using jet::JetConstituentFiller;
 
-typedef std::vector<PseudoJet> PseudoJetVector;
+using PseudoJetVector = std::vector<PseudoJet>;
 
 //**********************************************************************
 
@@ -184,7 +184,7 @@ JetFromPseudojet::addjet(const PseudoJet& pj,
   jets.push_back(pjet);
   pjet->setJetP4( xAOD::JetFourMom_t(pt,eta,phi,m) );
 
-  if ( pj.associated_cluster_sequence() == 0 ) {
+  if ( pj.associated_cluster_sequence() == nullptr ) {
     ATH_MSG_VERBOSE("Pseudojet does not have a cluster sequence and so cannot be copied to Jet.");
   }
   pjet->setPseudoJet(&pj);
@@ -215,10 +215,10 @@ JetFromPseudojet::addjet(const PseudoJet& pj,
 
   const PseudoJetVector pjcons = pj.constituents();
   ATH_MSG_VERBOSE("  Adding constituents: multiplicity is " << pjcons.size());
-  if ( pparent != 0 ) {
+  if ( pparent != nullptr ) {
     ATH_MSG_VERBOSE("  Adding parent jet properties");
     const JetContainer* pcon = dynamic_cast<const JetContainer*>(pparent->container());
-    if ( pcon == 0 ) {
+    if ( pcon == nullptr ) {
       ATH_MSG_WARNING("Unable to find parent jet container.");
     } else {
       ATH_MSG_VERBOSE("  Creating parent link.");
@@ -253,7 +253,7 @@ void JetFromPseudojet::print() const {
   ATH_MSG_INFO(" Attribute count: " << m_atts.size());
   for ( std::vector<std::string>::const_iterator inam=m_atts.begin();
         inam!=m_atts.end(); ++inam ) {
-    std::string name = *inam;
+    const std::string& name = *inam;
     ATH_MSG_INFO("  " << name);
   }
 }

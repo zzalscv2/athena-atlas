@@ -117,7 +117,7 @@ int HIEfficiencyResponseHistos::fillHistosFromContainer(const xAOD::JetContainer
     }
   }
 
-  const xAOD::JetContainer* refContainer = 0;
+  const xAOD::JetContainer* refContainer = nullptr;
   CHECK( evtStore()->retrieve( refContainer, m_refContainerName), 1 );
   /// use a list to be a bit more efficient.
   std::list<const xAOD::Jet*> listJets(cont.begin(), cont.end());

@@ -47,7 +47,7 @@ xAOD::Jet& PseudoJetTranslator::translate(const fastjet::PseudoJet& pj,
   xAOD::Jet& jet = translate(pj, pjCont, jetCont, originVertex);
 
   const xAOD::JetContainer* parentCont = dynamic_cast<const xAOD::JetContainer*>(parent.container());
-  if ( parentCont == 0 ) { return jet ;}  // can this happen? if so THIS IS an ERROR ! should do something
+  if ( parentCont == nullptr ) { return jet ;}  // can this happen? if so THIS IS an ERROR ! should do something
 
   ElementLink<xAOD::JetContainer> el(*parentCont, parent.index());
   static const SG::AuxElement::Accessor<ElementLink<xAOD::JetContainer> > parentELacc("Parent"); 

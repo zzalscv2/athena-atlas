@@ -14,7 +14,7 @@ namespace JetVoronoiDiagramHelpers{
     Point operator*(double a, const Point &b){
         coord x = (a * b.x);
         coord y = (a * b.y);
-        return Point (x,y);
+        return {x,y};
     }
 
     Point operator*(const Point &b,double a){
@@ -32,13 +32,13 @@ namespace JetVoronoiDiagramHelpers{
     Point operator+(const Point &a, const Point &b){
         coord x = (a.x + b.x);
         coord y = (a.y + b.y);
-        return Point (x,y);
+        return {x,y};
     }
 
     Point operator+(double a, const Point &b){
         coord x = (a + b.x);
         coord y = (a + b.y);
-        return Point (x,y);
+        return {x,y};
     }
 
     Point operator+(const Point &b, double a){
@@ -50,7 +50,7 @@ namespace JetVoronoiDiagramHelpers{
     Point operator-(const Point &a, const Point &b){
         coord x = (a.x - b.x);
         coord y = (a.y - b.y);
-        return Point (x,y);
+        return {x,y};
     }
 
     Point operator-(const Point &b){
@@ -77,7 +77,7 @@ namespace JetVoronoiDiagramHelpers{
     }
 
     Point Norm(const Point &a) {
-        return  Point(a.y, -a.x);
+        return  {a.y, -a.x};
     }
 
 
@@ -152,7 +152,7 @@ namespace JetVoronoiDiagramHelpers{
             return StatusCode::FAILURE;
         }
         Polygon mypts;
-        for (Point p : m_voro_vtx) mypts.Add(p.x*m_scaleIntFloat,p.y*m_scaleIntFloat);
+        for (const Point& p : m_voro_vtx) mypts.Add(p.x*m_scaleIntFloat,p.y*m_scaleIntFloat);
         VoronoiBoost vd;
         // boost make voronoi
         construct_voronoi(mypts.begin(), mypts.end(), &vd);
@@ -167,9 +167,9 @@ namespace JetVoronoiDiagramHelpers{
                 int csi_ngbr = edge->twin()->cell()->source_index() ; // index of neighbour cell
                 if (edge->is_primary()){ // is nonintersecting edge (or something like that)
                     // first vertex in infinity -- interpolate
-                    if ( vtx0==0 ) cell_area_tmp.push_back( interpolateInfinityVertex( csi, csi_ngbr ) );
+                    if ( vtx0==nullptr ) cell_area_tmp.push_back( interpolateInfinityVertex( csi, csi_ngbr ) );
                     // adding only second vertex if exists
-                    if ( vtx1!=0 ) cell_area_tmp.Add(vtx1->x()/m_scaleIntFloat, vtx1->y()/m_scaleIntFloat); // correct for scale
+                    if ( vtx1!=nullptr ) cell_area_tmp.Add(vtx1->x()/m_scaleIntFloat, vtx1->y()/m_scaleIntFloat); // correct for scale
                     // second vertex in infinity -- interpolate (notice the change of index order)
                     else cell_area_tmp.push_back( interpolateInfinityVertex( csi_ngbr, csi ) );
                 }
@@ -225,7 +225,7 @@ namespace JetVoronoiDiagramHelpers{
         geo2.FillVoroPolygon(pol2);
         // boost make intersection
         intersection(pol1,pol2,pol3);
-        if ( pol3.size() != 0 ){ // it has something our shape is on first place
+        if ( !pol3.empty() ){ // it has something our shape is on first place
             for ( const VoronoiPointBoost vp: pol3.at(0).outer() ) out.Add(vp.x(),vp.y());
         }
         else return 0;

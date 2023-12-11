@@ -131,7 +131,7 @@ int JetFinder::_find(const PseudoJetContainer& pjContainer,
   ATH_MSG_DEBUG("Jet finding input count: " << inps->size());
   fastjet::JetDefinition jetdef(m_fjalg, m_jetrad);
 #ifndef NO_JET_VARIABLER
-  const VariableRPlugin* pvrp = 0;
+  const VariableRPlugin* pvrp = nullptr;
   if ( isVariableR() ) {
     VariableRPlugin::ClusterType vct = VariableRPlugin::AKTLIKE;
     switch(m_fjalg) {
@@ -167,7 +167,7 @@ int JetFinder::_find(const PseudoJetContainer& pjContainer,
       const xAOD::EventInfo* pevinfo = handle.cptr();
 
 
-      if ( pevinfo != 0 ) {
+      if ( pevinfo != nullptr ) {
         auto ievt = pevinfo->eventNumber();
         auto irun = pevinfo->runNumber();
         if ( pevinfo->eventType(xAOD::EventInfo::IS_SIMULATION)) {

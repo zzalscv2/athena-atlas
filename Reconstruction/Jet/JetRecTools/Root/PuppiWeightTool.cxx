@@ -126,7 +126,7 @@ StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::PFOContainer* cont) const{
   }
 
   int nPV=0;
-  for( auto vtx_itr : *pvtxs ){
+  for( const auto *vtx_itr : *pvtxs ){
     if((int)vtx_itr->nTrackParticles() < 2 ) continue;
     ++nPV;
   }
@@ -203,7 +203,7 @@ StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::FlowElementContainer* cont) 
   }
 
   int nPV=0;
-  for( auto vtx_itr : *pvtxs ){
+  for( const auto *vtx_itr : *pvtxs ){
     if((int)vtx_itr->nTrackParticles() < 2 ) continue;
     ++nPV;
   }

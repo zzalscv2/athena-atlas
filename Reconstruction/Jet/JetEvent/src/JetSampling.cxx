@@ -18,7 +18,7 @@ JetSampling::JetSampling()
 }
 
 JetSampling::~JetSampling()
-{}
+= default;
 
 void
 JetSampling::init()

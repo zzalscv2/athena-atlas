@@ -19,7 +19,7 @@ JetHistoPtTool::JetHistoPtTool( const std::string& type,  const std::string & na
 StatusCode JetHistoPtTool::processJetContainer(const JetMonitoringAlg& parentAlg, const xAOD::JetContainer & jets, const EventContext& ) const {
 
   std::vector<float> jetPt_v;      
-  for (const auto jetItr : jets) {
+  for (const auto *const jetItr : jets) {
     jetPt_v.push_back(jetItr->pt()/1000.);        
   }
   auto jetPt = Monitored::Collection("jetPt", jetPt_v);      

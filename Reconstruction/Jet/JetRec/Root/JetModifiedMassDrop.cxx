@@ -38,8 +38,7 @@ JetModifiedMassDrop::JetModifiedMassDrop(const std::string& name)
 
 //**********************************************************************
 
-JetModifiedMassDrop::~JetModifiedMassDrop() {
-}
+JetModifiedMassDrop::~JetModifiedMassDrop() = default;
 
 //**********************************************************************
 
@@ -77,7 +76,7 @@ int JetModifiedMassDrop::groom(const xAOD::Jet& jin,
     return 1;
   }
   const PseudoJet* ppjin = pseudojetRetriever()->pseudojet(jin);
-  if ( ppjin == 0 ) {
+  if ( ppjin == nullptr ) {
     ATH_MSG_WARNING("Jet does not have a pseudojet.");
     return 1;
   }

@@ -63,8 +63,8 @@ const xAOD::CaloCluster* JetClusterMomentsTool::findLeadingCluster(const xAOD::J
 
     // Retrieve the associated clusters.
 
-  if ( jet.numConstituents() == 0 ) return NULL;
-  const xAOD::CaloCluster * cl_leading = NULL;
+  if ( jet.numConstituents() == 0 ) return nullptr;
+  const xAOD::CaloCluster * cl_leading = nullptr;
 
 
   switch( jet.rawConstituent(0)->type() ) {
@@ -95,7 +95,7 @@ float JetClusterMomentsTool::getMoment(const xAOD::CaloCluster* cluster, const x
     if (cluster){ // if we have a pointer than read the moment
         double moment = 0.0;
         bool isRetrieved = cluster->retrieveMoment(momentType, moment);
-        if (isRetrieved == true) return (float) moment;
+        if (isRetrieved) return (float) moment;
     }
     ATH_MSG_WARNING("Can not retrieved moment from cluster");
     return 0.0;

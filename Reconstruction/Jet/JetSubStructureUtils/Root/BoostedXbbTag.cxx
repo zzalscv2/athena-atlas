@@ -439,7 +439,7 @@ int BoostedXbbTag::result(const xAOD::Jet& jet, const std::string& algorithm_nam
       if(m_verbose) printf("<%s>: We need at least two associated track jets for working point %s.\r\n", APP_NAME, m_working_point.c_str());
       return -2;
     }
-    else if(associated_trackJets.size() < 1){
+    else if(associated_trackJets.empty()){
       if(m_verbose) printf("<%s>: We need at least one associated track jet for working point %s.\r\n", APP_NAME, m_working_point.c_str());
       return -2;
     }
@@ -500,7 +500,7 @@ int BoostedXbbTag::result(const xAOD::Jet& jet, const std::string& algorithm_nam
   auto it = std::copy_if(muons->begin(), muons->end(), preselected_muons.begin(), [this](const xAOD::Muon* muon) -> bool { return (muon->pt()/1.e3 > 10.0 && m_muonSelectionTool->getQuality(*muon) <= xAOD::Muon::Medium && fabs(muon->eta()) < 2.5); });
   //auto it = std::copy_if(muons->begin(), muons->end(), preselected_muons.begin(), [this](const xAOD::Muon* muon) -> bool { return false; });
   preselected_muons.resize(std::distance(preselected_muons.begin(), it)); // shrink container to new size
-  if(preselected_muons.size() == 0){
+  if(preselected_muons.empty()){
     if(m_verbose) printf("<%s>: There are no muons that passed the kinematic preselection.\r\n", APP_NAME);
     //return -3;
   } else {
@@ -512,7 +512,7 @@ int BoostedXbbTag::result(const xAOD::Jet& jet, const std::string& algorithm_nam
       float maxDR(0.2);
       trackJet->getAttribute("SizeParameter", maxDR);
       const xAOD::Muon *closest_muon(nullptr);
-      for(const auto muon: preselected_muons){
+      for(const auto *const muon: preselected_muons){
         float DR( trackJet->p4().DeltaR(muon->p4()) );
         if(DR > maxDR) continue;
         maxDR = DR;
@@ -528,7 +528,7 @@ int BoostedXbbTag::result(const xAOD::Jet& jet, const std::string& algorithm_nam
   TLorentzVector corrected_jet = jet.p4(); 
   if(m_verbose) printf("<%s>: There are %d matched muons.\r\n", APP_NAME, (int)matched_muons.size());
   std::vector<ElementLink<xAOD::IParticleContainer> > matched_muons_links;
-  for(auto muon : matched_muons) {
+  for(const auto *muon : matched_muons) {
     float eLoss(0.0);
     muon->parameter(eLoss,xAOD::Muon::EnergyLoss);
     if(m_debug) printf("<%s>: getELossTLV xAOD::Muon eLoss= %0.2f\r\n", APP_NAME, eLoss);
@@ -610,7 +610,7 @@ std::vector<const xAOD::Muon*> BoostedXbbTag::get_matched_muons(const xAOD::Jet&
   std::vector<const xAOD::Muon*> muons;
 
   auto muonsLink = m_matchedMuonsLink(jet);
-  for(auto muonLink : muonsLink) {
+  for(const auto& muonLink : muonsLink) {
     if(!muonLink.isValid()) {
       muons.push_back(nullptr);
     }

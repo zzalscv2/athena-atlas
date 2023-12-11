@@ -11,7 +11,7 @@ namespace jet {
 
   class HistoFiller {
   public:
-    virtual ~HistoFiller() {}
+    virtual ~HistoFiller() = default;
     virtual void fill(const xAOD::Jet &, float /*weight*/ ){};
     // allows to avoid invalid attribute
     virtual bool isValid(const xAOD::Jet &){return false;}
@@ -164,7 +164,7 @@ JetAttributeHisto::JetAttributeHisto(const std::string &t) : JetHistoBase(t)
                                                            , m_attTypes()
                                                            , m_selectedIndex(-1)
                                                            , m_doTProfile(false)
-                                                           , m_histoFiller(0)
+                                                           , m_histoFiller(nullptr)
 {
   declareProperty("HistoDef", m_histoDef);
   declareProperty("SelectIndex", m_selectedIndex);
@@ -288,7 +288,7 @@ int JetAttributeHisto::buildHistos(){
       }
     } // switch
   } //size()==2
-  if(m_histoFiller==NULL) {
+  if(m_histoFiller==nullptr) {
     ATH_MSG_ERROR("Do not support attribute types __ ");
     return 1;
   }

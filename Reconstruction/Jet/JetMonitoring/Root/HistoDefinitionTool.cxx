@@ -32,7 +32,7 @@ HistoDefinitionTool::HistoDefinitionTool(const std::string& n) : asg::AsgTool(n)
 StatusCode HistoDefinitionTool::initialize() {
 
   // Use the name of the tool by default. Extract "Something.Var" -> "Var"
-  if(m_attname=="") {
+  if(m_attname.empty()) {
     auto found = name().rfind('.');    
     if(found != std::string::npos) m_attname = name().substr(++found);
     else m_attname= name();

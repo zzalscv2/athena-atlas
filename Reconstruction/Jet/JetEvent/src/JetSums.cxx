@@ -44,6 +44,5 @@ JetSums::JetSums(double e, double et, double eta, double phi, double m)
 
 }
 
-JetSums::~JetSums()
-{ }
+
 

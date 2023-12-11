@@ -3,7 +3,7 @@
 */
 #include "JetRec/IConstituentExtractor.h"
 
-IConstituentExtractor::~IConstituentExtractor(){}
+IConstituentExtractor::~IConstituentExtractor()= default;
 
 std::ostream& operator << (std::ostream& os, const IConstituentExtractor* e){
   os <<  e->toString(0);

@@ -29,8 +29,7 @@ JetBottomUpSoftDrop::JetBottomUpSoftDrop(const std::string& name)
 
 //**********************************************************************
 
-JetBottomUpSoftDrop::~JetBottomUpSoftDrop() {
-}
+JetBottomUpSoftDrop::~JetBottomUpSoftDrop() = default;
 
 //**********************************************************************
 
@@ -64,7 +63,7 @@ int JetBottomUpSoftDrop::groom(const xAOD::Jet& jin,
     return 1;
   }
   const PseudoJet* ppjin = pseudojetRetriever()->pseudojet(jin);
-  if ( ppjin == 0 ) {
+  if ( ppjin == nullptr ) {
     ATH_MSG_WARNING("Jet does not have a pseudojet.");
     return 1;
   }

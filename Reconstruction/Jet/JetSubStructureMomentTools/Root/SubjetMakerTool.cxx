@@ -15,7 +15,7 @@ SubjetMakerTool::SubjetMakerTool(const std::string& name) :
 }
 
 int SubjetMakerTool::modifyJet(xAOD::Jet &jet) const {
-  if(checkForConstituents(jet) == false) return 1;
+  if(!checkForConstituents(jet)) return 1;
 
   std::vector<float> s_e;
   std::vector<float> s_px;

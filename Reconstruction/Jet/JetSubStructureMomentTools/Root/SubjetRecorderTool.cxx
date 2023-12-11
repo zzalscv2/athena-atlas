@@ -20,30 +20,30 @@ std::vector<xAOD::Jet *> SubjetRecorderTool::recordSubjets(const std::vector<fas
   // Retrieve or set up subjet container
   std::string subjet_name = m_subjetlabel;
   std::string subjet_container_name = m_subjetcontainername;
-  if(subjet_name == "" || subjet_container_name == "") {
+  if(subjet_name.empty() || subjet_container_name.empty()) {
     ATH_MSG_ERROR("Invalid subjet label or container name");
-    return std::vector<xAOD::Jet *>();
+    return {};
   }
-  xAOD::JetContainer *subjet_container = 0;
+  xAOD::JetContainer *subjet_container = nullptr;
 #ifdef ROOTCORE
   subjet_container = evtStore()->retrieve<xAOD::JetContainer>(subjet_container_name);
 #else
   // Need tryRetrieve to supress some Athena warning. Unfortuantely tryRetrieve isn't in RootCore
   subjet_container = evtStore()->tryRetrieve<xAOD::JetContainer>(subjet_container_name);
 #endif
-  if(subjet_container == 0) {
+  if(subjet_container == nullptr) {
     StatusCode sc;
     subjet_container = new xAOD::JetContainer;
     subjet_container->setStore(new xAOD::JetAuxContainer);
     sc = evtStore()->record(subjet_container, subjet_container_name);
     if(sc.isFailure()) {
       ATH_MSG_ERROR("Error recording subjet container (" << subjet_container_name << ")");
-      return std::vector<xAOD::Jet *>();
+      return {};
     }
     sc = evtStore()->record(dynamic_cast<xAOD::JetAuxContainer*>(subjet_container->getStore()), subjet_container_name + "Aux.");
     if(sc.isFailure()) {
       ATH_MSG_ERROR("Error recording subjet aux container (" << subjet_container_name << "Aux.)");
-      return std::vector<xAOD::Jet *>();
+      return {};
     }
   }
 

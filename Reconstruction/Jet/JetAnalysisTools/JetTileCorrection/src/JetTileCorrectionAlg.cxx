@@ -28,9 +28,7 @@ JetTileCorrectionAlg::JetTileCorrectionAlg( const std::string& name, ISvcLocator
 }
 
 
-JetTileCorrectionAlg::~JetTileCorrectionAlg() {
-
-}
+JetTileCorrectionAlg::~JetTileCorrectionAlg() = default;
 
 
 StatusCode JetTileCorrectionAlg::initialize() {
@@ -59,7 +57,7 @@ StatusCode JetTileCorrectionAlg::execute() {
   ATH_MSG_DEBUG ("Executing " << name() << "...");
   
   // Retrieve the jets:
-  const xAOD::JetContainer* jets = 0;
+  const xAOD::JetContainer* jets = nullptr;
   ATH_CHECK( evtStore()->retrieve( jets, m_jetKey ) );
 
   ATH_MSG_INFO("--------------------");
@@ -73,7 +71,7 @@ StatusCode JetTileCorrectionAlg::execute() {
     //if ((*jet_itr)->pt() < 20000. || fabs((*jet_itr)->eta()) > 2.8) continue;
     
     // copy constant objects to non-constant
-    xAOD::Jet* jet = 0;                                                                                                                                                           
+    xAOD::Jet* jet = nullptr;                                                                                                                                                           
     jet = new xAOD::Jet();                                                                                                                                                        
     jet->makePrivateStore( **jet_itr );
         

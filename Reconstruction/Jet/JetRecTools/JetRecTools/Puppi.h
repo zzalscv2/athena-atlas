@@ -27,10 +27,10 @@ class Puppi{
   void setParticles(const std::vector<fastjet::PseudoJet>& chargedHS, const std::vector<fastjet::PseudoJet>& chargedPU, const std::vector<fastjet::PseudoJet>& neutral, const std::vector<fastjet::PseudoJet>& forward, int nPU);
 
   // Returns the weight that would be applied to a particle (assuming it is neutral or forward)
-  double getWeight(const fastjet::PseudoJet pfo);
+  double getWeight(const fastjet::PseudoJet& pfo);
 
   // Returns the value of alpha for this particle
-  double getAlpha(const fastjet::PseudoJet pfo);
+  double getAlpha(const fastjet::PseudoJet& pfo);
 
   double getMedian();
   double getRMS();

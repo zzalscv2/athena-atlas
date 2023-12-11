@@ -181,7 +181,7 @@ namespace CP {
     }
 
     // load in the histograms that store the ntrack systematics
-    if(m_topofile!="")//load topology file only if explicitly configured (default is "")
+    if(!m_topofile.empty())//load topology file only if explicitly configured (default is "")
     ANA_CHECK( this->loadHist(m_topo_hquark,    m_topofile,"h2dquark") );
     ANA_CHECK( this->loadHist(m_exp_hquark_up,  m_expfile,"h2dquark_up")  );
     ANA_CHECK( this->loadHist(m_exp_hquark_down,m_expfile,"h2dquark_down"));
@@ -628,7 +628,7 @@ namespace CP {
     // by default no systematics are applied
     m_appliedSystEnum = QG_NONE;
 
-    if (systSet.size()==0) {
+    if (systSet.empty()) {
       ATH_MSG_DEBUG("No affecting systematics received.");
       return StatusCode::SUCCESS;
     }
@@ -710,7 +710,7 @@ namespace CP {
     }
     TFile* infile = TFile::Open(filename.c_str());
     hist = dynamic_cast<TH2D*>(infile->Get(histname.c_str()));
-    hist->SetDirectory(0);
+    hist->SetDirectory(nullptr);
     return StatusCode::SUCCESS;
   }
 

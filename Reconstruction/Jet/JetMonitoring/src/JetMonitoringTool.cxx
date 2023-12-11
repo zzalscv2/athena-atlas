@@ -22,7 +22,7 @@ JetMonitoringTool::JetMonitoringTool( const std::string& type,
 // Destructor
 ///////////////
 JetMonitoringTool::~JetMonitoringTool()
-{}
+= default;
  
 // Athena algtool's Hooks
 ////////////////////////////

@@ -14,26 +14,26 @@
 #include "xAODMuon/MuonSegmentContainer.h"
 #include <iostream>
 
-typedef std::vector<fastjet::PseudoJet> PseudoJetVector;
+using PseudoJetVector = std::vector<fastjet::PseudoJet>;
 using xAOD::IParticle;
 using jet::IConstituentUserInfo;
-typedef IConstituentUserInfo::Label Label;
-typedef std::vector<const IParticle*> ParticleVector;
-typedef std::vector<ParticleVector> ParticleMap;
-typedef std::vector<double> PtMap;
+using Label = IConstituentUserInfo::Label;
+using ParticleVector = std::vector<const IParticle *>;
+using ParticleMap = std::vector<ParticleVector>;
+using PtMap = std::vector<double>;
 using jet::JetConstituentFiller;
 using xAOD::MuonSegment;
 using jet::IndexedTConstituentUserInfo;
-typedef std::vector<const MuonSegment*> MuonSegmentVector;
-typedef IndexedTConstituentUserInfo<MuonSegment> MuonSegmentCUI;
-typedef std::vector<MuonSegmentVector> MuonSegmentMap;
+using MuonSegmentVector = std::vector<const MuonSegment *>;
+using MuonSegmentCUI = IndexedTConstituentUserInfo<MuonSegment>;
+using MuonSegmentMap = std::vector<MuonSegmentVector>;
 
 //**********************************************************************
 
 namespace {
   enum ParType { UNDEF, IPART, MUSEG };
 }
-typedef std::vector<ParType> ParTypeVector;
+using ParTypeVector = std::vector<ParType>;
 
 //**********************************************************************
 
@@ -45,10 +45,10 @@ extractConstituents(xAOD::Jet& jet, const NameList* pghostlabs,
   const fastjet::PseudoJet* ppseudojet = nullptr; 
   if(pjAccessor.isAvailable(jet)) ppseudojet = pjAccessor(jet);
 
-  if ( ppseudojet == 0 ) {
+  if ( ppseudojet == nullptr ) {
     ppseudojet = ppj2;
   }
-  if ( ppseudojet == 0 ) return -1;
+  if ( ppseudojet == nullptr ) return -1;
   int nbad = 0;
   const PseudoJetVector& cons = ppseudojet->constituents();
   ParticleMap out;
@@ -72,7 +72,7 @@ extractConstituents(xAOD::Jet& jet, const NameList* pghostlabs,
         for ( ParType& partype : partypes ) partype = UNDEF;
         for ( unsigned int idx=0; idx<maxli; ++idx ) {
           std::string lab = pli->label(idx);
-          if ( lab.size() == 0 ) {
+          if ( lab.empty() ) {
             partypes.push_back(UNDEF);
             if ( idx ) return -3;
           } else if ( lab.find("MuonSegment") != std::string::npos ) {
@@ -90,7 +90,7 @@ extractConstituents(xAOD::Jet& jet, const NameList* pghostlabs,
       ParType partype = partypes[icui];
       if ( ppar == nullptr ) {
         const MuonSegmentCUI* pmscui = dynamic_cast<const MuonSegmentCUI*>(&cui);
-        if ( pmscui == 0 ) return -5;
+        if ( pmscui == nullptr ) return -5;
         pms = pmscui->object();
         if ( partype != MUSEG ) return -6;
       } else {
@@ -156,7 +156,7 @@ extractConstituents(xAOD::Jet& jet, const NameList* pghostlabs,
 }
 
 int JetConstituentFiller::extractConstituents(xAOD::Jet& jet, const fastjet::PseudoJet* ppj2) {
-  return extractConstituents(jet, 0, ppj2);
+  return extractConstituents(jet, nullptr, ppj2);
 }
 
 //**********************************************************************
@@ -199,7 +199,7 @@ PseudoJetVector JetConstituentFiller::constituentPseudoJets(const xAOD::Jet& jet
       xAOD::JetConstituentVector constituents_tmp = jet.getConstituents();
       constituents.reserve( jet.numConstituents() );
       for(size_t i = 0; i < constituents_tmp.size(); i++){
-	constituents.push_back( fastjet::PseudoJet( constituents_tmp[i].Px(), constituents_tmp[i].Py(), constituents_tmp[i].Pz(), constituents_tmp[i].E()) );
+	constituents.emplace_back( constituents_tmp[i].Px(), constituents_tmp[i].Py(), constituents_tmp[i].Pz(), constituents_tmp[i].E() );
       }
     }
   }

@@ -163,9 +163,9 @@ FastJetInterfaceTool::FastJetInterfaceTool(const std::string& n)
     // process control ----------------------///////////////////
   , m_failedExecCtr(0)
     // presets                               ////////// private data presets 
-  , m_jetDefinition((fastjet::JetDefinition*)0)
-  , m_clusterSequence((fastjet::ClusterSequence*)0)
-  , m_areaDefinition((fastjet::AreaDefinition*)0)
+  , m_jetDefinition((fastjet::JetDefinition*)nullptr)
+  , m_clusterSequence((fastjet::ClusterSequence*)nullptr)
+  , m_areaDefinition((fastjet::AreaDefinition*)nullptr)
   , m_baseRNDSeed (0)
   , m_userRNDSeed (0)
 {
@@ -424,10 +424,10 @@ StatusCode FastJetInterfaceTool::execute(const fjetlist_t& inJets,
   // clean up
   ATH_MSG_DEBUG( "  FastJetInterfaceTool::execute  injet size = "<< inJets.size() );
 
-  if ( m_clusterSequence != 0 ) 
+  if ( m_clusterSequence != nullptr ) 
     {
       delete m_clusterSequence;
-      m_clusterSequence = (fastjet::ClusterSequence*)0;
+      m_clusterSequence = (fastjet::ClusterSequence*)nullptr;
     }
   
   if ( ((this->*m_processor)(inJets,outJets)).isFailure() )
@@ -537,7 +537,7 @@ StatusCode FastJetInterfaceTool::f_processWithoutArea(const fjetlist_t& inJets,
   ATH_MSG_DEBUG( "  processing without area " );
   m_clusterSequence = new fastjet::ClusterSequence(inJets,*m_jetDefinition);
   ATH_MSG_DEBUG( "  processed without area " );
-  return m_clusterSequence != 0 
+  return m_clusterSequence != nullptr 
     ? (this->*m_extractor)(outJets) : StatusCode::FAILURE;
 }
 
@@ -549,7 +549,7 @@ StatusCode FastJetInterfaceTool::f_processWithArea(const fjetlist_t& inJets,
   m_clusterSequence = (fastjet::ClusterSequence*)
     new fastjet::ClusterSequenceArea(inJets,*m_jetDefinition,*m_areaDefinition);
 
-  return m_clusterSequence != 0 
+  return m_clusterSequence != nullptr 
     ? (this->*m_extractor)(outJets) : StatusCode::FAILURE; 
 }
 
@@ -658,7 +658,7 @@ void FastJetInterfaceTool::updateRandomSeeds()
   unsigned int evnum = 0;
   unsigned int runnum = 0;
   
-  const xAOD::EventInfo* ei = 0;
+  const xAOD::EventInfo* ei = nullptr;
   if (evtStore()->retrieve (ei,"EventInfo").isSuccess()){
     evnum  = ei->eventNumber();
     runnum = ei->runNumber();

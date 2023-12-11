@@ -56,8 +56,7 @@ JetSamplingCollectionCnv_p1::persToTrans( const JetSamplingCollection_p1* pers,
   }
 //   msg << MSG::DEBUG << "Loading JetSamplingCollection from persistent state [OK]"
 //       << endmsg;
-  return;
-}
+  }
 
 void 
 JetSamplingCollectionCnv_p1::transToPers( const JetSamplingCollection* trans, 
@@ -80,6 +79,5 @@ JetSamplingCollectionCnv_p1::transToPers( const JetSamplingCollection* trans,
 
 //   msg << MSG::DEBUG << "Creating persistent state of JetSamplingCollection [OK]"
 //       << endmsg;
-  return;
-}
+  }
 

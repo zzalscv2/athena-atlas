@@ -31,9 +31,7 @@
 #include <vector>
 using std::vector;
 
-typedef NavigableCnv_p1<
-           Navigable<INavigable4MomentumCollection,double>
-           > NavigableCnv_t;
+using NavigableCnv_t = NavigableCnv_p1<Navigable<INavigable4MomentumCollection, double>>;
 
 // pre-allocate converters
 static const P4ImplPxPyPzECnv_p1   momCnv;
@@ -79,7 +77,7 @@ void JetCnv_p4::persToTrans( const Jet_p4* pers,
 
    JetKeyDescriptorInstance * keydesc = JetKeyDescriptorInstance::instance();
    std::vector<std::string> momentNames = keydesc->getKeys(JetKeyConstants::ShapeCat);
-   if( (pers)->m_shapeStore.size() >0 ){
+   if( !(pers)->m_shapeStore.empty() ){
      if( momentNames.size() < (pers)->m_shapeStore.size() ) {}
        //       if( ! pers->m_usedForTrigger ) { msg << MSG::WARNING << " JetCnv_p4 can't convert moments ! num max keys = "<< momentNames.size() << " persistant jet has n="<< (pers)->m_shapeStore.size() <<endmsg; }
      else {
@@ -96,18 +94,18 @@ void JetCnv_p4::persToTrans( const Jet_p4* pers,
   // first. We are dealing with pointers here, not actual objects.
   //
 
-  if (pers->m_tagJetInfo.size() == 0) {
-    if (trans->m_tagInfoStore != 0) {
+  if (pers->m_tagJetInfo.empty()) {
+    if (trans->m_tagInfoStore != nullptr) {
       trans->m_tagInfoStore->clear();
     }
   } else {
-    if (trans->m_tagInfoStore != 0) {
+    if (trans->m_tagInfoStore != nullptr) {
       delete trans->m_tagInfoStore;
     }
     
     vector<const JetTagInfoBase *> *ptags =
       m_taginfoCnv.createTransientConst(&(pers->m_tagJetInfo), msg);
-    if (ptags != 0) {
+    if (ptags != nullptr) {
       vector<const JetTagInfoBase*> &tags (*ptags);
       for (unsigned int i = 0; i < tags.size(); i++) {
 	trans->addInfo(tags[i]);
@@ -121,19 +119,19 @@ void JetCnv_p4::persToTrans( const Jet_p4* pers,
   // above.
   //
 
-  if (pers->m_associations.size() == 0) {
-    if (trans->m_assocStore != 0) {
+  if (pers->m_associations.empty()) {
+    if (trans->m_assocStore != nullptr) {
       trans->m_assocStore->clear();
     }
   } else {
-    if (trans->m_assocStore != 0) {
+    if (trans->m_assocStore != nullptr) {
       delete trans->m_assocStore;
     }
     trans->m_assocStore = new vector<const JetAssociationBase*> ();
     vector<const JetAssociationBase *> *pass =
       m_tagAssCnv.createTransientConst(&(pers->m_associations), msg);
 
-    if (pass != 0) {
+    if (pass != nullptr) {
       vector<const JetAssociationBase *> &ass (*pass);
       vector<const JetAssociationBase *> &store (*trans->m_assocStore);
       for (unsigned int i = 0; i < ass.size(); i++) {
@@ -178,12 +176,12 @@ void JetCnv_p4::persToTrans( const Jet_p4* pers,
           trans->setAssociation (ass[i]);
         else {
           if (index >= store.size()) {
-            store.resize(index+1, 0);
+            store.resize(index+1, nullptr);
           }
           store[index] = ass[i];
         }
 
-	ass[i] = 0; // Make sure nothing bad happens.
+	ass[i] = nullptr; // Make sure nothing bad happens.
       }
       delete pass;
     }
@@ -202,7 +200,6 @@ void JetCnv_p4::persToTrans( const Jet_p4* pers,
 
    msg << MSG::DEBUG << "Loaded Jet from persistent state [OK]"
        << endmsg;
-   return;
 }
 
 void JetCnv_p4::transToPers( const Jet* trans, 
@@ -226,11 +223,11 @@ void JetCnv_p4::transToPers( const Jet* trans,
   /// This most frequently happens due to thinning.
   ///
   
-  if (trans->m_tagInfoStore != 0) {
+  if (trans->m_tagInfoStore != nullptr) {
     vector<const JetTagInfoBase*> goodTagInfo;
     const vector<const JetTagInfoBase*> &tagInfo(*(trans->m_tagInfoStore));
     for (unsigned int i = 0; i < tagInfo.size(); i++) {
-      if (tagInfo[i] != 0) {
+      if (tagInfo[i] != nullptr) {
         goodTagInfo.push_back(tagInfo[i]);
       }
     }
@@ -241,12 +238,12 @@ void JetCnv_p4::transToPers( const Jet* trans,
   /// Same logic for the ass store as the tag info store.
   ///
 
-  if (trans->m_assocStore != 0) {
+  if (trans->m_assocStore != nullptr) {
     vector<const JetAssociationBase*> goodAssInfo;
     const vector<const JetAssociationBase*> &assInfo(*trans->m_assocStore);
 
     for (unsigned int i = 0; i < assInfo.size(); i++) {
-      if (assInfo[i] != 0) {
+      if (assInfo[i] != nullptr) {
 	goodAssInfo.push_back(assInfo[i]);
       }
     }
@@ -265,5 +262,4 @@ void JetCnv_p4::transToPers( const Jet* trans,
 
    msg << MSG::DEBUG << "Created persistent state of Jet [OK]  e="<< pers->m_momentum.m_ene
       << endmsg;
-  return;
 }

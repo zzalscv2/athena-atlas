@@ -5,7 +5,7 @@
 #include "JetEvent/JetINav4MomAssociation.h"
 
 JetINav4MomAssociation::JetINav4MomAssociation()
-{  } 
+= default; 
   
 JetINav4MomAssociation::JetINav4MomAssociation(NameType& name)
 {
@@ -21,9 +21,9 @@ const INavigable4Momentum* JetINav4MomAssociation::inav4momentum() const
 {
   //get jet from Navigable
   if (this->size() ==0) 
-    return 0;
+    return nullptr;
   else if (this->size() > 1)
-    return 0;
+    return nullptr;
   // this shouldn't happen
   else 
     return getConstituentPtr((this->getConstituents()).begin());

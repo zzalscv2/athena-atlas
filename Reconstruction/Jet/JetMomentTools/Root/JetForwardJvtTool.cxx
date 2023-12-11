@@ -31,7 +31,7 @@
   // Destructor
   ///////////////
   JetForwardJvtTool::~JetForwardJvtTool()
-  {}
+  = default;
 
   // Athena algtool's Hooks
   ////////////////////////////
@@ -93,10 +93,10 @@
 
     std::vector<TVector2> pileupMomenta;
     const std::size_t pvind = getPV();
-    if (m_recalculateFjvt && jetCont.size() > 0) {
+    if (m_recalculateFjvt && !jetCont.empty()) {
       pileupMomenta = calculateVertexMomenta(&jetCont, pvind);
     }
-    for(const auto jetF : jetCont) {
+    for(const auto *const jetF : jetCont) {
       outHandle(*jetF) = 1;
       if(m_recalculateFjvt) fjvtDecHandle(*jetF) = 0;
       if (!forwardJet(jetF)) continue;
@@ -138,7 +138,7 @@
     }
 
     std::vector<TVector2> pileupMomenta;
-    for(const auto vx : *vertexContainerHandle) {
+    for(const auto *const vx : *vertexContainerHandle) {
       if(vx->vertexType()!=xAOD::VxType::PriVtx && vx->vertexType()!=xAOD::VxType::PileUp) continue;
       TString vname = "PVTrack_vx";
       vname += vx->index();
@@ -147,7 +147,7 @@
                                        0.5*(*trkMetHandle)[vname.Data()]->mpy()));
     }
 
-    for (const auto jet : *jets) {
+    for (const auto *const jet : *jets) {
       if (!centralJet(jet)) continue;
       int jetvert = getJetVertex(jet);
       if (jetvert>=0) pileupMomenta[jetvert] += TVector2(0.5*jet->pt()*cos(jet->phi()),0.5*jet->pt()*sin(jet->phi()));
@@ -230,13 +230,13 @@
       ATH_MSG_WARNING("Invalid xAOD::VertexContainer datahandle");
       return pvind;
     }
-    auto vxCont = vertexContainer.cptr();
+    const auto *vxCont = vertexContainer.cptr();
 
     if(vxCont->empty()) {
       ATH_MSG_WARNING("Event has no primary vertices!");
     } else {
       ATH_MSG_DEBUG("Successfully retrieved primary vertex container");
-      for(const auto vx : *vxCont) {
+      for(const auto *const vx : *vxCont) {
         if(vx->vertexType()==xAOD::VxType::PriVtx)
           {pvind = vx->index(); break;}
       }
@@ -247,10 +247,10 @@
   StatusCode JetForwardJvtTool::tagTruth(const xAOD::JetContainer *jets,const xAOD::JetContainer *truthJets) {
     SG::WriteDecorHandle<xAOD::JetContainer, bool> isHSHandle(m_isHSKey);
     SG::WriteDecorHandle<xAOD::JetContainer, bool> isPUHandle(m_isPUKey);
-    for(const auto jet : *jets) {
+    for(const auto *const jet : *jets) {
       bool ishs = false;
       bool ispu = true;
-      for(const auto tjet : *truthJets) {
+      for(const auto *const tjet : *truthJets) {
         if (tjet->p4().DeltaR(jet->p4())<0.3 && tjet->pt()>10e3) ishs = true;
         if (tjet->p4().DeltaR(jet->p4())<0.6) ispu = false;
       }

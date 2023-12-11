@@ -6,20 +6,21 @@
 
 #include "JetEDM/LabelIndex.h"
 #include <map>
+#include <utility>
 
 using jet::LabelIndex;
 
-typedef std::map<std::string, LabelIndex*> LIMap;
-typedef LabelIndex::Index Index;
-typedef LabelIndex::Label Label;
+using LIMap = std::map<std::string, LabelIndex *>;
+using Index = LabelIndex::Index;
+using Label = LabelIndex::Label;
 
 //**********************************************************************
 
-LabelIndex::LabelIndex(Label nam) : m_name(nam) { }
+LabelIndex::LabelIndex(Label nam) : m_name(std::move(nam)) { }
 
 //**********************************************************************
 
-Index LabelIndex::addLabel(Label lab) {
+Index LabelIndex::addLabel(const Label& lab) {
   Index idx = index(lab);
   if ( idx ) return idx;
   m_labs.push_back(lab);
@@ -53,7 +54,7 @@ xAOD::JetConstitScale LabelIndex::constitScale(Index idx) const {
 
 //**********************************************************************
 
-Index LabelIndex::index(Label lab) const {
+Index LabelIndex::index(const Label& lab) const {
   for ( Index jdx=0; jdx<m_labs.size(); ++jdx ) {
     if ( m_labs[jdx] == lab ) return jdx + 1;
   }

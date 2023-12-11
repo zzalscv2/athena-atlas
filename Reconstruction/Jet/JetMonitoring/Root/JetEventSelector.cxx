@@ -15,8 +15,7 @@ JetEventSelector::JetEventSelector(const std::string &t)
   declareProperty("Var", m_var);
 }
 
-JetEventSelector:: ~JetEventSelector(){
-}
+JetEventSelector:: ~JetEventSelector()= default;
 
 StatusCode JetEventSelector::initialize() {
 

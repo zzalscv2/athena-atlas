@@ -16,7 +16,7 @@ namespace jet {
 
   namespace JetIsolation {
 
-    typedef TLorentzVector FourMom_t;
+    using FourMom_t = TLorentzVector;
 
     /// IsolationCalculator : base class for isolation calculations
     class IsolationCalculator {
@@ -44,11 +44,11 @@ namespace jet {
       };
       
       
-      virtual ~IsolationCalculator() {}
+      virtual ~IsolationCalculator() = default;
 
       
       virtual string baseName() const {return "";}
-      virtual IsolationCalculator * clone(const xAOD::Jet* ) const {return NULL;}
+      virtual IsolationCalculator * clone(const xAOD::Jet* ) const {return nullptr;}
       virtual void copyFrom( const IsolationCalculator* o, const xAOD::Jet*){
         m_attNames = o->m_attNames;
         m_kinematics = o->m_kinematics;
@@ -58,7 +58,7 @@ namespace jet {
       /// Compute the isolation momentum from jet and jet inputs.
       /// It is assumed the caller has already removed jet constituents from the input list.
       virtual IsolationResult jetIsolation(const xAOD::Jet*, std::vector<jet::ParticlePosition> & ) const {
-        return IsolationResult();
+        return {};
       }
       virtual std::map<std::string, float>
       calcIsolationAttributes(const xAOD::Jet* jet, std::vector<jet::ParticlePosition>& nearbyConstit) const {
@@ -211,7 +211,7 @@ namespace jet {
       if( n == "IsoFixedArea" ) return new  IsolationCalculatorT<IsoFixedArea>( parameter);      
       if( n == "Iso6To8" )      return new  IsolationCalculatorT<Iso6To8>( parameter);
 
-      return NULL;
+      return nullptr;
     }
 
 
@@ -248,7 +248,7 @@ JetIsolationTool::JetIsolationTool(const string& name)
 
 //**********************************************************************
 
-JetIsolationTool::~JetIsolationTool() { }
+JetIsolationTool::~JetIsolationTool() = default;
 
 //**********************************************************************
 
@@ -268,7 +268,7 @@ StatusCode JetIsolationTool::initialize() {
     if ( isoC == nullptr ) {
       isoC = createCalulator( isocriteria, std::stod(param_s)*0.1 );
     }
-    if( isoC == NULL ) {
+    if( isoC == nullptr ) {
       ATH_MSG_ERROR(" Unkown isolation criteria "<< isocriteria << "  from "<< m_isolationCodes[i] );
       return StatusCode::FAILURE;
     }

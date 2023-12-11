@@ -80,10 +80,10 @@ StatusCode JetCaloQualityToolFE::initialize() {
   }
 
   ATH_CHECK(m_writeDecorKeys.initialize());
-  if(m_writeDecorKeys_OOT.size() > 0){
+  if(!m_writeDecorKeys_OOT.empty()){
     ATH_CHECK(m_writeDecorKeys_OOT.initialize());
   }
-  if(m_writeDecorKeys_Nfrac.size() > 0){
+  if(!m_writeDecorKeys_Nfrac.empty()){
     ATH_CHECK(m_writeDecorKeys_Nfrac.initialize());
   }
 
@@ -161,7 +161,7 @@ std::vector<const xAOD::CaloCluster*> JetCaloQualityToolFE::extractConstituents(
 	  
 	  if(fe->type() == xAOD::Type::FlowElement){
 	    const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(fe);
-	    if(pfo->otherObjects().size() > 0 && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
+	    if(!pfo->otherObjects().empty() && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
 	      cluster = dynamic_cast<const xAOD::CaloCluster*> (pfo->otherObject(0));
 	    }
 	  }

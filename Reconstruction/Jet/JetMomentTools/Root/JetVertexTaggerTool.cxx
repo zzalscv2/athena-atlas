@@ -242,7 +242,7 @@ const xAOD::Vertex* JetVertexTaggerTool::findHSVertex() const
   const xAOD::VertexContainer* vertices = vertexHandle.cptr();
   ATH_MSG_DEBUG("Successfully retrieved VertexContainer: " << m_vertexContainer_key.key());
 
-  if (vertices->size() == 0 ) {
+  if (vertices->empty() ) {
     ATH_MSG_WARNING("There are no vertices in the container. Exiting");
     return nullptr;
   }

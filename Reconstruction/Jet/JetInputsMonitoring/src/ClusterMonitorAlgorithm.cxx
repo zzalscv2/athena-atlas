@@ -13,7 +13,7 @@ ClusterMonitorAlgorithm::ClusterMonitorAlgorithm( const std::string& name, ISvcL
 }
 
 
-ClusterMonitorAlgorithm::~ClusterMonitorAlgorithm() {}
+ClusterMonitorAlgorithm::~ClusterMonitorAlgorithm() = default;
 
 
 StatusCode ClusterMonitorAlgorithm::initialize() {

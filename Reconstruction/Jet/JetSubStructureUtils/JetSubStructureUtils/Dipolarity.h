@@ -18,7 +18,7 @@ namespace JetSubStructureUtils {
 
     private:
       double dipolarity(std::vector<fastjet::PseudoJet> &constit_pseudojets,
-                        fastjet::PseudoJet jet1, fastjet::PseudoJet jet2) const;
+                        const fastjet::PseudoJet& jet1, const fastjet::PseudoJet& jet2) const;
 
       bool m_exclusive;
       unsigned int m_n1;

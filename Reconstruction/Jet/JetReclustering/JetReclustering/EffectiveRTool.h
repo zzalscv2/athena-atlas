@@ -18,7 +18,7 @@ class EffectiveRTool : public JetModifierBase {
   public:
     ASG_TOOL_CLASS(EffectiveRTool, IJetModifier)
     // Constructor from tool name.
-    EffectiveRTool(std::string myname);
+    EffectiveRTool(const std::string& myname);
 
     // Inherited method to modify a jet.
     // Calls width and puts the result on the jet.

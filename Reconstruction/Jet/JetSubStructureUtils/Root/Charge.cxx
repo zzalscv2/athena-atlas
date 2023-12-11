@@ -12,7 +12,7 @@ double Charge::result(const xAOD::Jet &jet) const
 {
   vector<const xAOD::TrackParticle*> tracks;
   bool retval = jet.getAssociatedObjects("GhostTrack", tracks);
-  if(retval == false) {
+  if(!retval) {
     return -999;
   }
 

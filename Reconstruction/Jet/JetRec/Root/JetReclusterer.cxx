@@ -10,7 +10,7 @@
 using fastjet::PseudoJet;
 using xAOD::JetContainer;
 
-typedef IJetFinder::NameList NameList;
+using NameList = IJetFinder::NameList;
 
 //**********************************************************************
 
@@ -22,7 +22,7 @@ JetReclusterer::JetReclusterer(const std::string& name)
 
 //**********************************************************************
 
-JetReclusterer::~JetReclusterer() { }
+JetReclusterer::~JetReclusterer() = default;
 
 //**********************************************************************
 
@@ -48,7 +48,7 @@ int JetReclusterer::groom(const xAOD::Jet& jin,
   PseudoJetVector inps;
   NameList ghostlabs;
   m_hcr->constituents(jin, inps, &ghostlabs);
-  if ( inps.size() == 0 ) {
+  if ( inps.empty() ) {
     ATH_MSG_WARNING("Jet has no constituents.");
     return 3;
   }

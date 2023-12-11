@@ -32,7 +32,7 @@ public:
   /// Add a label and get its index.
   /// Current index is returned if the label is already indexed.
   /// Return 0 for error.
-  Index addLabel(Label lab);
+  Index addLabel(const Label& lab);
 
   /// Return the name of this map.
   Label name() const;
@@ -43,7 +43,7 @@ public:
 
   /// Fetch the index for a label.
   /// Returns "" for error, e.g. unknown label.
-  Index index(Label lab) const;
+  Index index(const Label& lab) const;
 
   /// Fetch the constit scale corresponding to the index
   xAOD::JetConstitScale constitScale(Index idx) const ;

@@ -73,7 +73,7 @@ int JetSplitter::groom(const xAOD::Jet& jin,
     return 1;
   }
   const PseudoJet* ppjin = pseudojetRetriever()->pseudojet(jin);
-  if ( ppjin == 0 ) {
+  if ( ppjin == nullptr ) {
     ATH_MSG_WARNING("Jet does not have a pseudojet.");
     return 1;
   }
@@ -139,7 +139,7 @@ int JetSplitter::groom(const xAOD::Jet& jin,
 
   // Add jet to collection.
   xAOD::Jet* pjet = m_bld->add(pjclus, pjContainer, jets, &jin);
-  if ( pjet == 0 ) {
+  if ( pjet == nullptr ) {
     ATH_MSG_ERROR("Unable to add jet to container");
   } else {
     ATH_MSG_DEBUG("Added jet to container.");

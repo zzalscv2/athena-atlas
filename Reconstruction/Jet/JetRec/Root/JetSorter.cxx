@@ -9,7 +9,7 @@
 bool ptCompare(const xAOD::Jet* j1, const xAOD::Jet* j2){ return j1->pt() > j2->pt() ;} 
 
 // A global map for comparison functions
-typedef bool (*compFunc)(const xAOD::Jet*, const xAOD::Jet*);
+using compFunc = bool (*)(const xAOD::Jet *, const xAOD::Jet *);
 const std::map<std::string, compFunc> g_compFuncMap = {
   {"ByPtDown", ptCompare}
 };

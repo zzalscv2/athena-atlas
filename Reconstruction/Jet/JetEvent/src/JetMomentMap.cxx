@@ -12,8 +12,7 @@ JetMomentMap::JetMomentMap() : base_t()
 
 
 JetMomentMap::~JetMomentMap()
-{ 
-}
+= default;
 
 bool 
 JetMomentMap::setMoment(size_t jetIndex,size_t keyIndex,float_t moment)

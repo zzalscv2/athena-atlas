@@ -114,26 +114,26 @@ private:  // methods
   void get_moment(TObj* pobj, std::string name, std::vector<float>&) const;
   template<typename TMom>
   void get_moment(const xAOD::Jet* pobj, std::string name, TMom& val) const;
-  void get_moment(const xAOD::Jet* pobj, std::string name, FourVector& val) const;
-  void get_moment(const xAOD::Jet* pobj, std::string name, std::string& val) const;
-  void get_moment(const xAOD::Jet* pobj, std::string name, std::vector<int>& vals) const;
-  void get_moment(const xAOD::Jet* pobj, std::string name, std::vector<float>& vals) const;
+  void get_moment(const xAOD::Jet* pobj, const std::string& name, FourVector& val) const;
+  void get_moment(const xAOD::Jet* pobj, const std::string& name, std::string& val) const;
+  void get_moment(const xAOD::Jet* pobj, const std::string& name, std::vector<int>& vals) const;
+  void get_moment(const xAOD::Jet* pobj, const std::string& name, std::vector<float>& vals) const;
   template<typename TObj>
   std::string get_moment_as_string(const TObj& obj, std::string name) const;
-  std::string get_moment_as_string(const xAOD::Jet* pobj, std::string name) const;
+  std::string get_moment_as_string(const xAOD::Jet* pobj, const std::string& name) const;
 
   template<typename TObj>
   void getAssociatedParticles(TObj* pobj, std::string name, APVector& val) const;
-  void getAssociatedParticles(const xAOD::Jet* pobj, std::string name, APVector& val) const;
+  void getAssociatedParticles(const xAOD::Jet* pobj, const std::string& name, APVector& val) const;
   template<typename TObj>
   void getAssociatedLinks(TObj* pobj, std::string name, APELVector& val) const;
-  void getAssociatedLinks(const xAOD::Jet* pobj, std::string name, APELVector& val) const;
+  void getAssociatedLinks(const xAOD::Jet* pobj, const std::string& name, APELVector& val) const;
   template<typename TObj>
   void getAssociatedParticles(TObj* pobj, std::string name, MSVector& val) const;
-  void getAssociatedParticles(const xAOD::Jet* pobj, std::string name, MSVector& val) const;
+  void getAssociatedParticles(const xAOD::Jet* pobj, const std::string& name, MSVector& val) const;
   template<typename TObj>
   void getAssociatedLinks(TObj* pobj, std::string name, MSELVector& val) const;
-  void getAssociatedLinks(const xAOD::Jet* pobj, std::string name, MSELVector& val) const;
+  void getAssociatedLinks(const xAOD::Jet* pobj, const std::string& name, MSELVector& val) const;
 
   // Extra information to appear at the end of the line
   // with the object kinematics.

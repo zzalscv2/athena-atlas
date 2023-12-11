@@ -30,7 +30,7 @@ JetForwardJvtToolBDT::JetForwardJvtToolBDT(const std::string& name) :
 
 // Destructor
 ///////////////
-JetForwardJvtToolBDT::~JetForwardJvtToolBDT(){}
+JetForwardJvtToolBDT::~JetForwardJvtToolBDT()= default;
 
 // Athena algtool's Hooks
 ////////////////////////////
@@ -61,7 +61,7 @@ StatusCode JetForwardJvtToolBDT::initialize()
       ATH_MSG_ERROR(m_OP << " working point doesn't exist." );
       return StatusCode::FAILURE;
     }
-    m_mvfjvtThresh->SetDirectory(0);
+    m_mvfjvtThresh->SetDirectory(nullptr);
     m_wpFileIn->Close();
   }
 
@@ -162,9 +162,9 @@ StatusCode JetForwardJvtToolBDT::decorate(const xAOD::JetContainer& jetCont) con
 
     // -- Get PU vertices momenta sums, then compute tagger value for forward jets
     if ( forwardJet(jetF) ){
-      if( pileupMomenta.size()==0 ) {
+      if( pileupMomenta.empty() ) {
 	pileupMomenta = calculateVertexMomenta(&jetCont, pvind);
-	if( pileupMomenta.size()==0 ) { 
+	if( pileupMomenta.empty() ) { 
 	  ATH_MSG_DEBUG( "pileupMomenta is empty, this can happen for events with no PU vertices. fJVT won't be computed for this event and will be set to 0 instead." );
 	  mvfjvtHandle(*jetF) = 0;
 	  continue;
@@ -277,8 +277,7 @@ bool JetForwardJvtToolBDT::passMVfJVT( float mvfjvt, float pt, float eta ) const
 					       m_mvfjvtThresh->GetYaxis()->FindBin(eta),
 					       m_mvfjvtThresh->GetZaxis()->FindBin(mu));
 
-  if(mvfjvt==-2 || mvfjvt>mvfjvtThresh) return true;
-  else return false;
+  return mvfjvt==-2 || mvfjvt>mvfjvtThresh;
 
 }
 

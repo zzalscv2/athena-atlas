@@ -62,7 +62,7 @@ TEST_F(ExtractorTest, addJet) {
   IParticleExtractor ext0(toAssociate, label, isGhost);
  
    
-  EXPECT_TRUE((jet->getConstituents()).size() == 0);
+  EXPECT_TRUE(jet->getConstituents().empty());
    
   std::vector<int> indices {0};
    
@@ -79,7 +79,7 @@ TEST_F(ExtractorTest, addJet) {
   
   std::vector< const Jet* > retrievedJets;
   jet->getAssociatedObjects( "EMTopo", retrievedJets);
-  EXPECT_TRUE(retrievedJets.size() == 0);
+  EXPECT_TRUE(retrievedJets.empty());
 
   ext1.addToJet(*jet, indices); 
   

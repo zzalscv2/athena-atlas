@@ -24,11 +24,11 @@ JetConstitFourMomTool::JetConstitFourMomTool(const std::string& myname)
 StatusCode JetConstitFourMomTool::initialize() {
 
   // Workaround because configuring DataHandleKeyArray directly sneakily removes empty strings
-  for(auto dhn : m_altColls){
+  for(const auto& dhn : m_altColls){
     m_altColls_keys.emplace_back(SG::ReadHandleKey<xAOD::CaloClusterContainer>(dhn));
   }
 
-  for(auto& dh : m_altColls_keys){ATH_CHECK(dh.initialize(!(dh.key() == "")));}
+  for(auto& dh : m_altColls_keys){ATH_CHECK(dh.initialize(!(dh.key().empty())));}
 
   // Check configuration consistency
   if( m_jetScaleNames.empty() ||
@@ -65,7 +65,7 @@ StatusCode JetConstitFourMomTool::modify(xAOD::JetContainer& jets) const {
 
   const size_t nScales=m_jetScaleNames.size();
   // This only really makes sense for clusters now, as signal states don't exist for other types
-  std::vector<const xAOD::CaloClusterContainer*> altCollections(nScales,NULL);
+  std::vector<const xAOD::CaloClusterContainer*> altCollections(nScales,nullptr);
   // Do some setup that doesn't have to be repeated for each jet
   for(size_t iScale=0; iScale<nScales; ++iScale) {
     if(!m_altColls_keys[iScale].key().empty()) { // retrieve alternate constituent collections

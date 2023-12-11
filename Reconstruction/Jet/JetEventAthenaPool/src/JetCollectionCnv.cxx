@@ -49,7 +49,7 @@ JetCollection* JetCollectionCnv::createTransient()
 {
   MsgStream msg( msgSvc(), "JetCollectionCnv" );
 
-  JetCollection *transObj = 0;
+  JetCollection *transObj = nullptr;
 
   msg << MSG::DEBUG << "  JetCollectionCnv::createTransient() "<< endmsg;
 
@@ -139,7 +139,7 @@ StatusCode JetCollectionCnv::initialize (void)
   ///
 
   IConverter *converter = m_athenaPoolCnvSvc->converter(CLID(50623115));
-  if (converter != 0) {
+  if (converter != nullptr) {
     registerExtendingCnv (converter);
   } else {
     m_log << MSG::FATAL << "Could not load the jet tag info converters for readback!" << endmsg;

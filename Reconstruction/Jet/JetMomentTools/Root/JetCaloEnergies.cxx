@@ -14,6 +14,7 @@
 #include "xAODPFlow/PFO.h"
 #include "xAODPFlow/FlowElement.h"
 
+#include <memory>
 #include <vector>
 
 //**********************************************************************
@@ -77,8 +78,7 @@ StatusCode JetCaloEnergies::initialize() {
   ATH_CHECK(m_tile0FracClusterKey.initialize( m_calcClusterBasedVars && isInVector(m_tile0FracKey.key(), m_calculationNames) ));
   ATH_CHECK(m_effNClustsFracClusterKey.initialize( m_calcClusterBasedVars && isInVector(m_effNClustsFracKey.key(), m_calculationNames) ));
   
-  if(isInVector(m_fracSamplingMaxKey.key(), m_calculationNames)) m_doFracSamplingMax = true;
-  else m_doFracSamplingMax = false;
+  m_doFracSamplingMax = isInVector(m_fracSamplingMaxKey.key(), m_calculationNames);
 
   ATH_CHECK(m_fracSamplingMaxClusterKey.initialize(m_calcClusterBasedVars && m_doFracSamplingMax));
   ATH_CHECK(m_fracSamplingMaxIndexClusterKey.initialize(m_calcClusterBasedVars && m_doFracSamplingMax));
@@ -485,7 +485,7 @@ void JetCaloEnergies::fillEperSamplingFEClusterBased(const xAOD::Jet& jet, std::
   float eTot = 0.;
   float e2Tot = 0.;
   size_t numConstit = jet.numConstituents();
-  std::unique_ptr<std::vector<const xAOD::CaloCluster*> > constitV_tot = std::unique_ptr<std::vector<const xAOD::CaloCluster*>>(new std::vector<const xAOD::CaloCluster*>);
+  std::unique_ptr<std::vector<const xAOD::CaloCluster*> > constitV_tot = std::make_unique<std::vector<const xAOD::CaloCluster*>>();
 
   for ( size_t i=0; i<numConstit; i++ ) {
     if(jet.rawConstituent(i)->type()!=xAOD::Type::FlowElement) {
@@ -509,7 +509,7 @@ void JetCaloEnergies::fillEperSamplingFEClusterBased(const xAOD::Jet& jet, std::
       //If we have a PFO, we should still get the associated cluster first
       else {
         const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(fe);
-        if(pfo->otherObjects().size() > 0 && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
+        if(!pfo->otherObjects().empty() && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
           cluster = dynamic_cast<const xAOD::CaloCluster*> (pfo->otherObject(0));
         }
       }

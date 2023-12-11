@@ -8,7 +8,7 @@
 #include "JetRec/JetAlgorithm.h"
 #include "JetInterface/IJetExecuteTool.h"
 
-JetAlgorithm::~JetAlgorithm() { }
+JetAlgorithm::~JetAlgorithm() = default;
 
 //**********************************************************************
 

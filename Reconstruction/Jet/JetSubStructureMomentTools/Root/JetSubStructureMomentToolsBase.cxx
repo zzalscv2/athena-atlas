@@ -21,7 +21,7 @@ StatusCode JetSubStructureMomentToolsBase::initialize() {
     m_prefix = m_inputContainer;
   }
   
-  if(!m_prefix.empty() && m_prefix.find_last_of("_")+1 != m_prefix.size()) m_prefix += "_";
+  if(!m_prefix.empty() && m_prefix.find_last_of('_')+1 != m_prefix.size()) m_prefix += "_";
  
   return StatusCode::SUCCESS;
 }
@@ -43,7 +43,7 @@ bool JetSubStructureMomentToolsBase::SetupDecoration(fastjet::PseudoJet& pseudoj
       decorate = false;
     }
     ATH_MSG_VERBOSE("Found " << AssociatedParticles.size() << " associated particles");
-    if(!AssociatedParticles.size()) decorate = false; 
+    if(AssociatedParticles.empty()) decorate = false; 
     else pseudojet = buildPseudoJet(AssociatedParticles);
   }
 
@@ -59,8 +59,8 @@ fastjet::PseudoJet JetSubStructureMomentToolsBase::buildPseudoJet (const xAOD::J
 fastjet::PseudoJet JetSubStructureMomentToolsBase::buildPseudoJet(const std::vector<const xAOD::IParticle*>& iparticles) const {
   std::vector<fastjet::PseudoJet> pjs;
   pjs.reserve(iparticles.size());
-  for (auto iparticle : iparticles)  
-    pjs.push_back(fastjet::PseudoJet(iparticle->p4()));
+  for (const auto *iparticle : iparticles)  
+    pjs.emplace_back(iparticle->p4());
   return fastjet::join(pjs);
 }
 
@@ -68,6 +68,5 @@ void JetSubStructureMomentToolsBase::print() const {
   ATH_MSG_INFO("Properties for JetSubStructureMomentTool " << name());
   ATH_MSG_INFO("InputContainer: " << m_inputContainer);
   ATH_MSG_INFO("Prefix: " << m_prefix);
-  return;
 }
 

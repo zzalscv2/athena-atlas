@@ -25,9 +25,7 @@
 // JetEventTPCnv includes
 #include "JetEventTPCnv/JetCnv_p2.h"
 
-typedef NavigableCnv_p1<
-           Navigable<INavigable4MomentumCollection,double>
-           > NavigableCnv_t;
+using NavigableCnv_t = NavigableCnv_p1<Navigable<INavigable4MomentumCollection, double>>;
 
 // pre-allocate converters
 static const P4ImplPxPyPzECnv_p1   momCnv;
@@ -68,14 +66,14 @@ void JetCnv_p2::persToTrans( const Jet_p2* pers,
 
    if (trans->m_tagInfoStore)
      const_cast<Jet_p2*>(pers)->m_tagJetInfo.swap (*trans->m_tagInfoStore);
-   else if ( (pers)->m_tagJetInfo.size() > 0 ) {
+   else if ( !(pers)->m_tagJetInfo.empty() ) {
      trans->m_tagInfoStore = new Jet::tagstore_t;
      const_cast<Jet_p2*>(pers)->m_tagJetInfo.swap (*trans->m_tagInfoStore);
    }
 
    if (trans->m_assocStore)
      const_cast<Jet_p2*>(pers)->m_associations.swap (*trans->m_assocStore);
-   else if ( (pers)->m_associations.size() > 0 ) {
+   else if ( !(pers)->m_associations.empty() ) {
      trans->m_assocStore   = new Jet::assostore_t;
      const_cast<Jet_p2*>(pers)->m_associations.swap (*trans->m_assocStore);
    }
@@ -105,7 +103,6 @@ void JetCnv_p2::persToTrans( const Jet_p2* pers,
 
    msg << MSG::DEBUG << "Loaded Jet from persistent state [OK]"
        << endmsg;
-   return;
 }
 
 void JetCnv_p2::transToPers( const Jet* /*trans*/, 

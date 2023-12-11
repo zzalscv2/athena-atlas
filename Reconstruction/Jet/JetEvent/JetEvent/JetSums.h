@@ -62,7 +62,7 @@ class JetSums
 
   // Constructor/destructor
   JetSums(double e, double et, double eta, double phi, double m);
-  ~JetSums();
+  ~JetSums() = default;
 
   // Access functions
   double jetE() const { return m_jetE; }

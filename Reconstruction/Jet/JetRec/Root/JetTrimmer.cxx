@@ -27,8 +27,7 @@ JetTrimmer::JetTrimmer(const std::string& name)
 
 //**********************************************************************
 
-JetTrimmer::~JetTrimmer() {
-}
+JetTrimmer::~JetTrimmer() = default;
 
 //**********************************************************************
 

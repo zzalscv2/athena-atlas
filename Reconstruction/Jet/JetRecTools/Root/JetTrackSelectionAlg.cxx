@@ -38,7 +38,7 @@ StatusCode JetTrackSelectionAlg::execute(const EventContext& ctx) const {
   auto selectedTracks = std::make_unique<OutContType>(SG::VIEW_ELEMENTS);
 
   for ( const xAOD::TrackParticle* trk : *inputTracksH.cptr() ) {
-    if ( trk != 0 && m_selector->accept(*trk, 0) ) {
+    if ( trk != nullptr && m_selector->accept(*trk, nullptr) ) {
       selectedTracks->push_back(trk);
     }
   }

@@ -10,7 +10,7 @@
 //**********************************************************************
 
 jet::BaseIndexedConstituentUserInfo::BaseIndexedConstituentUserInfo()
-: m_idx(0), m_pli(0) { }
+: m_idx(0), m_pli(nullptr) { }
 
 //**********************************************************************
 
@@ -28,7 +28,7 @@ const SG::AuxElement* jet::BaseIndexedConstituentUserInfo::element() const {
 
 jet::BaseIndexedConstituentUserInfo::Label
 jet::BaseIndexedConstituentUserInfo::label() const {
-  if ( m_pli == 0 ) return "";
+  if ( m_pli == nullptr ) return "";
   return m_pli->label(abs(m_idx));
 }
 

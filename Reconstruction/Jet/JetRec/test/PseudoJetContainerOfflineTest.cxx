@@ -115,7 +115,7 @@ TEST_F(PseudoJetContainerOfflineTest, test_noghost) {
 
   auto constituents = m_testjet0->getConstituents();
   EXPECT_TRUE(constituents.size() == m_toAssociate0->size());
-  for (const auto c : constituents) {
+  for (const auto *const c : constituents) {
     EXPECT_TRUE(std::find(m_toAssociate0->begin(),
                           m_toAssociate0->end(),
                           c->rawConstituent()) != m_toAssociate0->end());
@@ -152,7 +152,7 @@ TEST_F(PseudoJetContainerOfflineTest, test_ghost) {
   bool rc = m_testjet0->getAssociatedObjects("EMTopo", associated);
   EXPECT_TRUE(rc);
   EXPECT_FALSE(associated.empty());
-  for(const auto p : associated){
+  for(const auto *const p : associated){
     EXPECT_FALSE(std::find(m_toAssociate1->begin(),
                            m_toAssociate1->end(),
                            p) == m_toAssociate1->end());
@@ -191,11 +191,11 @@ TEST_F(PseudoJetContainerOfflineTest, test_append) {
   
 
   if(debug){
-    for(auto pj : spjVec0){
+    for(const auto& pj : spjVec0){
       std::cout << "pj indx spjVec0 "<<pj.user_index() << '\n';
     }
 
-    for(auto pj : spjVec1){
+    for(const auto& pj : spjVec1){
       std::cout << "pj indx spjVec1 "<<pj.user_index() << '\n';
     }
   }
@@ -226,12 +226,12 @@ TEST_F(PseudoJetContainerOfflineTest, test_append) {
 
   if (debug) {
     std::cout << "constituents0 size() " << constituents0.size() << '\n';
-    for(auto c : constituents0){
+    for(const auto *c : constituents0){
       std::cout<<"tj0 constituent "<<c->rawConstituent() << '\n';
     }
 
     std::cout << "constituents1 size() " << constituents1.size() << '\n';
-    for(auto c : constituents1){
+    for(const auto *c : constituents1){
       std::cout<<"tj1 constituent "<<c->rawConstituent() << '\n';
     }
   }
@@ -245,16 +245,16 @@ TEST_F(PseudoJetContainerOfflineTest, test_append) {
 
   if (debug) {
     std::cout << "associated0 size() " << associated0.size() << '\n';
-    for(auto i : associated0){std::cout << " tj0 associated element "
+    for(const auto *i : associated0){std::cout << " tj0 associated element "
                                         << i <<'\n';}
     
     std::cout << "associated1 size() " << associated1.size() << '\n';
-    for(auto i : associated1){std::cout << " tj1 associated element "
+    for(const auto *i : associated1){std::cout << " tj1 associated element "
                                         << i <<'\n';}
   }
   
   EXPECT_TRUE(constituents0.size() == m_toAssociate0->size());
-  for (const auto c : constituents0) {
+  for (const auto *const c : constituents0) {
     EXPECT_TRUE(std::find(m_toAssociate0->begin(),
                           m_toAssociate0->end(),
                           c->rawConstituent()) != m_toAssociate0->end());
@@ -265,7 +265,7 @@ TEST_F(PseudoJetContainerOfflineTest, test_append) {
   EXPECT_TRUE(constituents1.empty());
 
   EXPECT_FALSE(associated1.empty());
-  for(const auto p : associated1){
+  for(const auto *const p : associated1){
     EXPECT_FALSE(std::find(m_toAssociate1->begin(),
                            m_toAssociate1->end(),
                            p) == m_toAssociate1->end());

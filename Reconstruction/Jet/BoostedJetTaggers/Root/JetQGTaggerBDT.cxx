@@ -355,10 +355,7 @@ namespace CP {
     if(nTracksFromGhostTracks == 0){
       if(expectedNTracks == 0)
         return true;
-      if(abs(expectedNTracks-nTracksFromGhostTracks) < 3)
-        return true;
-      else
-        return false;
+      return abs(expectedNTracks-nTracksFromGhostTracks) < 3;
     }else if(expectedNTracks/nTracksFromGhostTracks < 0.5 && abs(expectedNTracks-nTracksFromGhostTracks) > 5){
       return false;
     }

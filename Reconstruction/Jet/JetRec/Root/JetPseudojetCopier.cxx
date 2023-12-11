@@ -74,7 +74,7 @@ StatusCode JetPseudojetCopier::initialize() {
 //**********************************************************************
 
 int JetPseudojetCopier::
-copy(const JetContainer& srcjets, const JetContainer& dstjets, string pjmapname) const {
+copy(const JetContainer& srcjets, const JetContainer& dstjets, const string& pjmapname) const {
 
   if ( ! m_hpjr.retrieve().isSuccess() ) {
     ATH_MSG_WARNING("Unable to retrieve jet pseudojet retriever.");
