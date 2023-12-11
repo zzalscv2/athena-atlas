@@ -446,6 +446,7 @@ StatusCode AthenaOutputStreamTool::streamObjects(const DataObjectVec& dataObject
       } else {
          // Write object
          IOpaqueAddress* addr = new TokenAddress(0, dobj->clID(), outputConnectionString);
+         addr->addRef();
          if (m_conversionSvc->createRep(dobj, addr).isSuccess()) {
             written.insert(std::pair<DataObject*, IOpaqueAddress*>(dobj, addr));
          } else {
@@ -457,6 +458,7 @@ StatusCode AthenaOutputStreamTool::streamObjects(const DataObjectVec& dataObject
    // End of loop over DataObjects, write DataHeader
    if (m_conversionSvc.type() == "AthenaPoolCnvSvc" && dataHeaderObj != nullptr) {
       IOpaqueAddress* addr = new TokenAddress(0, dataHeaderObj->clID(), outputConnectionString);
+      addr->addRef();
       if (m_conversionSvc->createRep(dataHeaderObj, addr).isSuccess()) {
          written.insert(std::pair<DataObject*, IOpaqueAddress*>(dataHeaderObj, addr));
       } else {
@@ -473,12 +475,13 @@ StatusCode AthenaOutputStreamTool::streamObjects(const DataObjectVec& dataObject
             if (dobj->clID() != 1 || addr->par()[0] != "\n") {
                if (dobj->clID() != ClassID_traits<DataHeader>::ID()) {
                   m_dataHeader->insert(proxy, addr);
-                  if (m_store->storeID() != StoreID::EVENT_STORE) proxy->setAddress(addr);
                } else {
                   m_dataHeader->insert(proxy, addr, m_processTag);
                }
-               if (m_store->storeID() == StoreID::EVENT_STORE) {
-                  delete addr; addr = nullptr;
+               if (proxy->address() == nullptr) {
+                  proxy->setAddress(addr);
+               } else {
+                  addr->release();
                }
             }
          } else {
@@ -502,7 +505,7 @@ StatusCode AthenaOutputStreamTool::streamObjects(const DataObjectVec& dataObject
                } else {
                   m_dataHeader->insert(proxy, addr, m_processTag);
                }
-               delete addr; addr = nullptr;
+               addr->release();
             }
          } else {
             ATH_MSG_ERROR("Could not fill Object Refs for DataHeader");
