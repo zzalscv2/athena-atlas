@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
 
    <!-- xAOD::CaloCluster interface type(s). -->
@@ -43,6 +43,7 @@
    <class name="std::vector<xAOD::CaloClusterBadChannelData_v1>" />
    <class name="std::vector<std::vector<xAOD::CaloClusterBadChannelData_v1> >" />
    <class name="SG::AuxTypeVectorFactory<std::vector<xAOD::CaloClusterBadChannelData_v1> >" />
+   <class name="SG::AuxTypeVectorFactoryImpl<std::vector<xAOD::CaloClusterBadChannelData_v1> >" />
    <typedef name="xAOD::CaloClusterBadChannelData" />
    <typedef name="xAOD::CaloClusterBadChannelList" />
   
