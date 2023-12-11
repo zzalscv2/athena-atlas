@@ -586,7 +586,9 @@ class AthConfigFlags(object):
         parser.add_argument("---",dest="terminator",action='store_true', help=argparse.SUPPRESS) # special hidden option required to convert option terminator -- for --help calls
         parser.add_argument("--pmon", type=str.lower, default=None, choices=['fastmonmt','fullmonmt'], help="Performance monitoring")
         parser.add_argument("--profile-python", type=str, default=None, metavar='FILE', help='profile python code, dump in %(metavar)s. End filename with .txt for quick summary only')
-
+        parser.add_argument("--tracelevel", type=int, default=None, help='Trace python configuration code as it is executed. Verbosity is reduced according to the paramter.'\
+                            ' 0: print everying, 1: exclude System and ROOT libraries, 2: exclude also GaudConfig2, 3: exclude ComponentAccumulator internals.'\
+                            ' Works only when called via athena.py or ThinCAWrapper.py') #Not used here at all, just to get the help-text
         return parser
 
     def parser(self):
