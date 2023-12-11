@@ -49,7 +49,7 @@ void AGDDMuonStation::CreateVolume (AGDDBuilder& builder)
 	}
 }
 
-const GeoMaterial* AGDDMuonStation::GetMMMaterial(const std::string& name) const
+const GeoMaterial* AGDDMuonStation::GetMMMaterial(const std::string& name) 
 {
 	StoreGateSvc* pDetStore=nullptr;
 	ISvcLocator* svcLocator = Gaudi::svcLocator();

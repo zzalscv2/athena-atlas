@@ -895,7 +895,7 @@ namespace MuonGM {
 
                     if (measphi) {
                         m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back() * Amg::Vector3D::Zero());
-                        m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() *
+                        m_surfaceData->m_layerNormals.emplace_back(m_surfaceData->m_layerTransforms.back().linear() *
                                                                 Amg::Vector3D::UnitZ());
                     }
                 }
@@ -920,7 +920,7 @@ namespace MuonGM {
         int doubletPhi = idh->doubletPhi(id);
         if (doubletPhi != getDoubletPhi() && m_nphistrippanels == 1) { return false; }
         if (doubletPhi < 1 || doubletPhi > m_nphistrippanels) {
-            if (!(doubletPhi == 2 && inTheRibs())) { return false; }
+            if (doubletPhi != 2 || !inTheRibs()) { return false; }
         }
 
         int gasgap = idh->gasGap(id);

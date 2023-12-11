@@ -35,10 +35,10 @@ namespace MuonGM {
         m_readoutVersion(Version), 
         m_wirePitch(WireSp), 
         m_nPhiChambers(NCHRNG),
-        m_nGangs{std::move(numWireGangs)},
-        m_gangOffset{std::move(gangOffSet)},
-        m_nStrips{std::move(numStrips)},
-        m_stripOffset{std::move(stripOffSet)}
+        m_nGangs{numWireGangs},
+        m_gangOffset{gangOffSet},
+        m_nStrips{numStrips},
+        m_stripOffset{stripOffSet}
          {
 
         for (int iGang = 0; iGang < MaxNGangs; ++iGang) {
@@ -81,8 +81,8 @@ namespace MuonGM {
                         std::move(gangOffSet), std::move(numStrips), std::move(stripOffSet)){
       
         m_physicalDistanceFromBase = PDIST;
-        m_stripPositionOnLargeBase = std::move(SLARGE);
-        m_stripPositionOnShortBase = std::move(SSHORT);
+        m_stripPositionOnLargeBase = SLARGE;
+        m_stripPositionOnShortBase = SSHORT;
 
     }
 

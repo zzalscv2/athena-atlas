@@ -2,13 +2,15 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <utility>
+
 #include "MuonNSWAsBuilt/PcbElement.h"
 using namespace NswAsBuilt;
 
 
 //===============================================================================
 PcbElement::PcbElement(stripConfiguration_t config, const Element& element)
-  : m_config(config), m_element(element)
+  : m_config(std::move(config)), m_element(element)
 { }
 
 

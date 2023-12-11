@@ -48,7 +48,7 @@ MuonAGDDToolHelper::MuonAGDDToolHelper() :
     p_GeoModelSvc(nullptr),
     m_svcName("AGDDtoGeoSvc") {
 	StatusCode result;
-	
+
 	result=Gaudi::svcLocator()->service("GeoModelSvc",p_GeoModelSvc);
   	if (result.isFailure())
     {
@@ -66,12 +66,12 @@ std::vector<std::string> MuonAGDDToolHelper::ReadAGDDFlags()
    std::vector<std::string> structuresFromFlags;
    std::string agdd2geoVersion = p_RDBAccessSvc->getChildTag("AGDD2GeoSwitches",p_GeoModelSvc->muonVersion(),"MuonSpectrometer");
 
-   if(!agdd2geoVersion.empty()) 
+   if(!agdd2geoVersion.empty())
    {
      std::string TheKEYNAME;
      int TheKEYVALUE;
      IRDBRecordset_ptr pIRDBRecordset = p_RDBAccessSvc->getRecordsetPtr("AGDD2GeoSwitches",p_GeoModelSvc->muonVersion(),"MuonSpectrometer");
-     for(unsigned int i=0; i<pIRDBRecordset->size(); i++) 
+     for(unsigned int i=0; i<pIRDBRecordset->size(); i++)
      {
        const IRDBRecord* record = (*pIRDBRecordset)[i];
        TheKEYNAME = record->getString("KEYNAME");
@@ -85,7 +85,7 @@ std::vector<std::string> MuonAGDDToolHelper::ReadAGDDFlags()
    else
    {
       std::cout<<"MuonAGDDToolHelper\tagdd2geoVersion is empty " <<std::endl;
-   }	
+   }
    return structuresFromFlags;
 }
 
@@ -107,7 +107,7 @@ std::string MuonAGDDToolHelper::GetAGDD(const bool dumpIt, const std::string& ta
    if ( MuonVersion == "CUSTOM"){
      detectorKey  = AtlasVersion ;
      detectorNode = "ATLAS"  ;
-   } 
+   }
 
 
    IRDBRecordset_ptr recordsetAGDD = accessSvc->getRecordsetPtr(tableName.c_str(),detectorKey,detectorNode);
@@ -120,7 +120,7 @@ std::string MuonAGDDToolHelper::GetAGDD(const bool dumpIt, const std::string& ta
    size_t pos=AgddString.find("AGDD.dtd");
    if (pos!=std::string::npos) AgddString.replace(pos-21,32,"-- Reference to AGDD.dtd automatically removed -->");
    std::ofstream  GeneratedFile;
-   if (dumpIt) 
+   if (dumpIt)
    {
 	 	std::ofstream GeneratedFile;
 	 	GeneratedFile.open(outFileName);
@@ -132,17 +132,15 @@ std::string MuonAGDDToolHelper::GetAGDD(const bool dumpIt, const std::string& ta
 
 }
 
-bool MuonAGDDToolHelper::BuildMScomponents() const
+bool MuonAGDDToolHelper::BuildMScomponents()
 {
   StoreGateSvc* pDetStore=nullptr;
   ISvcLocator* svcLocator = Gaudi::svcLocator();
   if (svcLocator->service("DetectorStore",pDetStore).isFailure()) return false;
   MuonGM::MuonDetectorManager* muonMgr=nullptr;
   if (pDetStore->retrieve(muonMgr).isFailure()) return false;
-  BuildNSWReadoutGeometry theBuilder = BuildNSWReadoutGeometry();
-  bool readoutGeoDone =  theBuilder.BuildReadoutGeometry(muonMgr, nullptr/*, GetMSdetectors*/);
-  if (!readoutGeoDone) return false;
-  return true;
+  bool readoutGeoDone =  BuildNSWReadoutGeometry::BuildReadoutGeometry(muonMgr, nullptr/*, GetMSdetectors*/);
+  return readoutGeoDone;
 }
 
 void MuonAGDDToolHelper::SetNSWComponents()
@@ -152,7 +150,7 @@ void MuonAGDDToolHelper::SetNSWComponents()
     throw std::runtime_error("MuonAGDDToolHelper::SetNSWComponents() - Could not retrieve "
                              + m_svcName + " from ServiceLocator");
   }
-	
+
   IAGDDtoGeoSvc::LockedController c = agddsvc->getController();
 
   agddsvc->addHandler(new micromegasHandler("micromegas", *c));
@@ -163,7 +161,7 @@ void MuonAGDDToolHelper::SetNSWComponents()
   agddsvc->addHandler(new mmSpacerHandler("mmSpacer", *c));
   agddsvc->addHandler(new mmSpacer_TechHandler("mmSpacer_Tech", *c));
   agddsvc->addHandler(new mm_readoutHandler("mm_readout", *c));
-}	
+}
 
 void MuonAGDDToolHelper::setAGDDtoGeoSvcName(const std::string& name) {
   m_svcName = name;

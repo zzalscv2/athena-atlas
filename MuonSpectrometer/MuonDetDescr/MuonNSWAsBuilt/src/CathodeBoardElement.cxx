@@ -2,11 +2,13 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <utility>
+
 #include "MuonNSWAsBuilt/CathodeBoardElement.h"
 using namespace NswAsBuilt;
 
 CathodeBoardElement::CathodeBoardElement(stgcStripConfiguration_t config, const Element& element)
-  : m_config_stgc(config), m_element_stgc(element)
+  : m_config_stgc(std::move(config)), m_element_stgc(element)
 {
 }
 /* In the sTGC strip (cathode) boards due to the staggering, the first/last strip could be a half 

@@ -16,7 +16,7 @@ class BuildNSWReadoutGeometry {
 public:
     BuildNSWReadoutGeometry();
 
-    bool BuildReadoutGeometry(MuonGM::MuonDetectorManager* mgr, const NswPassivationDbData*) const;
+    static bool BuildReadoutGeometry(MuonGM::MuonDetectorManager* mgr, const NswPassivationDbData*) ;
 
 private:
 };

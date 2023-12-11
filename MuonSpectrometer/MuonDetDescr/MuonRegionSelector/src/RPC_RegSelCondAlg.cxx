@@ -43,7 +43,7 @@ std::unique_ptr<RegSelSiLUT> RPC_RegSelCondAlg::createTable( const EventContext&
 
   if( !cablingCondData.range( id_range ) ) {
     ATH_MSG_ERROR("Failed to retrieve validity range for " << cablingCondData.key());
-    return std::unique_ptr<RegSelSiLUT>(nullptr);
+    return {nullptr};
   }   
 
 
@@ -53,7 +53,7 @@ std::unique_ptr<RegSelSiLUT> RPC_RegSelCondAlg::createTable( const EventContext&
 
   if( !managerHandle.range( id_range ) ) {
     ATH_MSG_ERROR("Failed to retrieve validity range for " << m_detMgrKey.key());
-    return std::unique_ptr<RegSelSiLUT>(nullptr);
+    return {nullptr};
   }
   const MuonGM::MuonDetectorManager* manager = managerHandle.cptr(); 
 
@@ -83,11 +83,11 @@ std::unique_ptr<RegSelSiLUT> RPC_RegSelCondAlg::createTable( const EventContext&
     std::vector<uint32_t> robIds;
     if ( (cabling->giveROB_fromPRD(prdHashId, robIds)).isFailure() ) { 
       ATH_MSG_ERROR( "RegSelCondAlg_RPC could not get ROBid" );
-      return std::unique_ptr<RegSelSiLUT>(nullptr);
+      return {nullptr};
     }
 
     
-    if (robIds.size() < 1) {
+    if (robIds.empty()) {
       ATH_MSG_DEBUG("There is no ROB associated with the PRD HashId = " << (unsigned int)prdHashId << ". Skipping to the next PRD.");
       continue;
     }

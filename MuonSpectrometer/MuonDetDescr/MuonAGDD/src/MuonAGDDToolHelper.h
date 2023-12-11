@@ -27,7 +27,7 @@ public:
 	
 	std::string GetAGDD(const bool dumpIt, const std::string& tableName, const std::string& outFileName);
 	
-	bool BuildMScomponents() const;
+	static bool BuildMScomponents() ;
 
 	void setAGDDtoGeoSvcName(const std::string& name);
 

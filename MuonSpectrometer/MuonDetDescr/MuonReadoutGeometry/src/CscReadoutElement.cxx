@@ -476,7 +476,7 @@ namespace MuonGM {
 
     //****************************************************************************
     Amg::Vector3D CscReadoutElement::localStripLayerPos(int /*chamberLayer*/, int wireLayer, int measPhi, int /*strip*/) const {
-        if (!(measPhi == 0 || measPhi == 1)) throw std::runtime_error ("CscReadoutElement::localStripLayerPos bad measPhi");
+        if (measPhi != 0 && measPhi != 1) throw std::runtime_error ("CscReadoutElement::localStripLayerPos bad measPhi");
         Amg::Vector3D wireLayerPosition = localWireLayerPos(wireLayer);
         double anodeCathodeDis = anodeCathodeDistance();
         double x = wireLayerPosition.x();
@@ -705,7 +705,7 @@ namespace MuonGM {
                 m_surfaceData->m_layerSurfaces.emplace_back(std::make_unique<Trk::PlaneSurface>(*this, id));
                 if (mp == 1) {
                     m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back() * Amg::Vector3D(0., 0., 0.));
-                    m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D::UnitZ());
+                    m_surfaceData->m_layerNormals.emplace_back(m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D::UnitZ());
                 }
             }
         }

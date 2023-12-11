@@ -74,7 +74,7 @@ StatusCode MuonRegSelCondAlg::execute(const EventContext& ctx ) const {
   // write out new new LUT to a file if need be
   
   if ( m_printTable ) {
-    if (auto lut = dynamic_cast<const RegSelSiLUT*>(rd.get())) {
+    if (const auto *lut = dynamic_cast<const RegSelSiLUT*>(rd.get())) {
       lut->write( name()+".map" );
     }
   }

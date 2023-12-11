@@ -392,9 +392,9 @@ std::unique_ptr<Trk::TrackingGeometry> Muon::MuonTrackingGeometryBuilderImpl::tr
       aLVC.m_msCutoutsIn.push_back(envelopeDef);
     else if (!aLVC.m_msCutoutsIn.empty() && aLVC.m_msCutoutsIn.back().second == m_barrelZ &&
              aLVC.m_msCutoutsIn.back().first != aLVC.m_innerBarrelRadius) {
-      aLVC.m_msCutoutsIn.push_back(RZPair(aLVC.m_innerBarrelRadius, m_barrelZ));
-      aLVC.m_msCutoutsIn.push_back(RZPair(aLVC.m_innerBarrelRadius, -m_barrelZ));
-      aLVC.m_msCutoutsIn.push_back(RZPair(aLVC.m_msCutoutsIn[aLVC.m_msCutoutsIn.size() - 3].first, -m_barrelZ));
+      aLVC.m_msCutoutsIn.emplace_back(aLVC.m_innerBarrelRadius, m_barrelZ);
+      aLVC.m_msCutoutsIn.emplace_back(aLVC.m_innerBarrelRadius, -m_barrelZ);
+      aLVC.m_msCutoutsIn.emplace_back(aLVC.m_msCutoutsIn[aLVC.m_msCutoutsIn.size() - 3].first, -m_barrelZ);
     }
   }
 

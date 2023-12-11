@@ -51,14 +51,14 @@ std::unique_ptr<RegSelSiLUT> MDT_RegSelCondAlg::createTable( const EventContext&
 
   if( !cabling.range( id_range ) ) {
     ATH_MSG_ERROR("Failed to retrieve validity range for " << cabling.key());
-    return std::unique_ptr<RegSelSiLUT>(nullptr);
+    return {nullptr};
   }   
 
   SG::ReadCondHandle<MuonGM::MuonDetectorManager> manager( m_detMgrKey, ctx );
 
   if( !manager.range( id_range ) ) {
     ATH_MSG_ERROR("Failed to retrieve validity range for " << manager.key());
-    return std::unique_ptr<RegSelSiLUT>(nullptr);
+    return {nullptr};
   }   
     
     
@@ -68,7 +68,7 @@ std::unique_ptr<RegSelSiLUT> MDT_RegSelCondAlg::createTable( const EventContext&
        SG::ReadCondHandle<MdtCondDbData> conditions(m_condKey, ctx);
        if( !conditions.range( id_range ) ) {
             ATH_MSG_ERROR("Failed to retrieve validity range for " << conditions.key());
-            return std::unique_ptr<RegSelSiLUT>(nullptr);
+            return {nullptr};
        }
        conditions_ptr = conditions.cptr();
   }

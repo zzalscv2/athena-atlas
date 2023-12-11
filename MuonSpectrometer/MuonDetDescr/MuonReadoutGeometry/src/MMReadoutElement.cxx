@@ -14,7 +14,7 @@
 #include <GeoModelKernel/GeoShape.h>
 #include <GeoModelKernel/GeoVFullPhysVol.h>
 #include <GeoModelKernel/GeoVPhysVol.h>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <cmath>
 #include <memory>
@@ -337,8 +337,8 @@ namespace MuonGM {
                              * Amg::AngleAxis3D(sAngle, Amg::Vector3D::UnitZ())); 
       
       // surface info (center, normal)
-      m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back().translation());
-      m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() * (-Amg::Vector3D::UnitZ()));
+      m_surfaceData->m_layerCenters.emplace_back(m_surfaceData->m_layerTransforms.back().translation());
+      m_surfaceData->m_layerNormals.emplace_back(m_surfaceData->m_layerTransforms.back().linear() * (-Amg::Vector3D::UnitZ()));
       
 #ifndef NDEBUG
           
@@ -361,9 +361,7 @@ namespace MuonGM {
         if (gasgap < 1 || gasgap > m_nlayers) return false;
 
         int strip = manager()->mmIdHelper()->channel(id);
-        if (strip < 1 || strip > m_nStrips[gasgap - 1]) return false;
-
-        return true;
+        return strip >= 1 && strip <= m_nStrips[gasgap - 1];
     }
 
 

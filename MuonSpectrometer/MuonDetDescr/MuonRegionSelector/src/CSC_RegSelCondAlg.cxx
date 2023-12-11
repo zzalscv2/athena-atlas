@@ -49,7 +49,7 @@ std::unique_ptr<RegSelSiLUT> CSC_RegSelCondAlg::createTable( const EventContext&
 
   if( !manager.range( id_range ) ) {
     ATH_MSG_ERROR("Failed to retrieve validity range for " << manager.key());
-    return std::unique_ptr<RegSelSiLUT>(nullptr);
+    return {nullptr};
   }   
   
 
@@ -59,7 +59,7 @@ std::unique_ptr<RegSelSiLUT> CSC_RegSelCondAlg::createTable( const EventContext&
 
   if ( service( "CSCcablingSvc", cabling ).isFailure() ) {  
     ATH_MSG_ERROR( "Could not retrieve CSC cabling for " << name() );
-    return std::unique_ptr<RegSelSiLUT>(nullptr);
+    return {nullptr};
   }
 
 
@@ -161,7 +161,7 @@ std::unique_ptr<RegSelSiLUT> CSC_RegSelCondAlg::createTable( const EventContext&
 	  phi_test=gphis_x1.phi();
 	  // for detector in (-0.25,0.25) phi interval use +-3,14 phi interval
 	  //    if(!(aux1==51 && aux3==1))if (phi_test < 0) phi_test += 2.*M_PI;
-	  if(!(exp_id[1]==51 && exp_id[3]==1))if (phi_test < 0) phi_test += 2.*M_PI;
+	  if(exp_id[1]!=51 || exp_id[3]!=1)if (phi_test < 0) phi_test += 2.*M_PI;
 	      
 
 	  if ( zmin>gphis_x1.z() ) zmin = gphis_x1.z();
@@ -206,7 +206,7 @@ std::unique_ptr<RegSelSiLUT> CSC_RegSelCondAlg::createTable( const EventContext&
 	  phi_test=gphis_x2.phi();
 	  // for detector in (-0.25,0.25) phi interval use +-3,14 phi interval
 	  //  if(!(aux1==51 && aux3==1)) if (phi_test < 0) phi_test += 2.*M_PI;
-	  if(!(exp_id[1]==51 && exp_id[3]==1)) if (phi_test < 0) phi_test += 2.*M_PI;
+	  if(exp_id[1]!=51 || exp_id[3]!=1) if (phi_test < 0) phi_test += 2.*M_PI;
 	         
 	  // phi
 	  if(phi_test > phi_max)  {
@@ -275,7 +275,7 @@ std::unique_ptr<RegSelSiLUT> CSC_RegSelCondAlg::createTable( const EventContext&
 	  phi_test = getas_x1.phi();
 	  // for detector in (-0.25,0.25) phi interval use +-3,14 phi interval
 	  // if(!(aux1==51 && aux3==1)) if (phi_test < 0) phi_test += 2.*M_PI;
-	  if(!(exp_id[1]==51 && exp_id[3]==1)) if (phi_test < 0) phi_test += 2.*M_PI;
+	  if(exp_id[1]!=51 || exp_id[3]!=1) if (phi_test < 0) phi_test += 2.*M_PI;
 	  // phi
 	  if(phi_test > phi_max){
 	    Id_phi_max=etas_id;
@@ -298,7 +298,7 @@ std::unique_ptr<RegSelSiLUT> CSC_RegSelCondAlg::createTable( const EventContext&
 	  phi_test = getas_x2.phi();
 	  // for detector in (-0.25,0.25) phi interval use +-3,14 phi interval
 	  // if (!(aux1==51 && aux3==1))  if (phi_test < 0) phi_test += 2.*M_PI;
-	  if (!(exp_id[1]==51 && exp_id[3]==1))  if (phi_test < 0) phi_test += 2.*M_PI;
+	  if (exp_id[1]!=51 || exp_id[3]!=1)  if (phi_test < 0) phi_test += 2.*M_PI;
 	  // phi
 	  if(phi_test > phi_max){
 	    Id_phi_max=etas_id;
