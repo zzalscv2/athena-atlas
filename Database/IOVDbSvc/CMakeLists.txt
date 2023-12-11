@@ -7,7 +7,7 @@ atlas_subdir( IOVDbSvc )
 find_package( COOL COMPONENTS CoolKernel CoolApplication )
 find_package( CORAL COMPONENTS CoralBase RelationalAccess )
 find_package( ROOT COMPONENTS Core )
-find_package( Boost COMPONENTS unit_test_framework regex )
+find_package( Boost COMPONENTS unit_test_framework regex timer )
 find_package( nlohmann_json )
 
 # Component(s) in the package:
