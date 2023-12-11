@@ -521,7 +521,8 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeProcessor::exec_func(
     // Get the response - list of tokens - from the scatterer. 
     // The format of the response: | ResponseSize | RangeID, | evtEvtRange[,evtToken] |
     char *responseBuffer(0);
-    ssize_t responseSize = socket2Scatterer->recv(responseBuffer);
+    std::string strPeerId;
+    ssize_t responseSize = socket2Scatterer->recv(responseBuffer,strPeerId);
     // If response size is 0 then break the loop
     if(responseSize==1) {
       ATH_MSG_INFO("Empty range received. Terminating the loop");

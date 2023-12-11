@@ -36,7 +36,7 @@ class EvtRangeScatterer final : public AthenaMPToolBase
 
   // _____ Actual working horses ________
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> bootstrap_func() override;
-  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func ATLAS_NOT_THREAD_SAFE () override;
+  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func() override;
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> fin_func() override;
 
  private:
@@ -51,9 +51,9 @@ class EvtRangeScatterer final : public AthenaMPToolBase
 
   // Helper functuion for receiving new messages from the socket2Processor channel
   // If this is an output file report, then it is forwarded to the pilot and an empty string is returned to the caller
-  std::string getNewRangeRequest ATLAS_NOT_THREAD_SAFE (yampl::ISocket* socket2Processor
-							, yampl::ISocket* socket2Pilot
-							, int& procReportPending);
+  std::string getNewRangeRequest (yampl::ISocket* socket2Processor
+				  , yampl::ISocket* socket2Pilot
+			 	  , int& procReportPending);
 
   // Poll the failed PID queue to see if any of the Processors has failed
   pid_t pollFailedPidQueue(AthenaInterprocess::SharedQueue*  sharedFailedPidQueue

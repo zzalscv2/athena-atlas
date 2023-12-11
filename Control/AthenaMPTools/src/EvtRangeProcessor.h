@@ -44,7 +44,7 @@ class EvtRangeProcessor final : public AthenaMPToolBase
 
   // _____ Actual working horses ________
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> bootstrap_func() override;
-  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func ATLAS_NOT_THREAD_SAFE () override;
+  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func() override;
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> fin_func() override;
 
  private:

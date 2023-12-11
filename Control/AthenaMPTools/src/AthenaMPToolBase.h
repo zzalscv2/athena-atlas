@@ -49,7 +49,7 @@ class AthenaMPToolBase : public AthAlgTool
 
   // _____ Actual working horses ________
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> bootstrap_func() = 0;
-  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func ATLAS_NOT_THREAD_SAFE () = 0;
+  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func() = 0;
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> fin_func() = 0;
 
  protected:
