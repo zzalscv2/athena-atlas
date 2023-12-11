@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -12,21 +12,21 @@
 
 RPCSimHit::RPCSimHit( ) :
   m_RPCid(0xffff),
-  m_globalTime(0.), 
+  m_globalTime(0.),
   m_localPosition(0.,0.,0.),         // pre-step position
   m_partLink(),
   m_localPostStepPosition(0.,0.,0.), // post-step position
   m_energyDeposit(-1.),              //Geant4 de/dx
-  m_stepLength(-1.),                 //Geant4 step Length  
+  m_stepLength(-1.),                 //Geant4 step Length
   m_particleEncoding(0),             // PDG id
   m_kineticEnergy(-1.)               // kinetic energy of the particle
 {
 }
-//virtual destructor required by Pool
-RPCSimHit::~RPCSimHit( ) {}
+//default destructor required by Pool
+RPCSimHit::~RPCSimHit( )  = default;
 
-RPCSimHit::RPCSimHit(int id, 
-		     double time, 
+RPCSimHit::RPCSimHit(int id,
+		     double time,
 	             const Amg::Vector3D& position)
     : m_RPCid(id),
       m_globalTime(time),
@@ -34,15 +34,15 @@ RPCSimHit::RPCSimHit(int id,
       m_partLink(),
       m_localPostStepPosition(0.,0.,0.), // post-step position
       m_energyDeposit(-1.),              //Geant4 de/dx
-      m_stepLength(-1.),                 //Geant4 step Length  
+      m_stepLength(-1.),                 //Geant4 step Length
       m_particleEncoding(0),             // PDG id
       m_kineticEnergy(-1.)               // kinetic energy of the particle
 {
 }
 
-RPCSimHit::RPCSimHit(int id, 
-		     double time, 
-	             const Amg::Vector3D& position, 
+RPCSimHit::RPCSimHit(int id,
+		     double time,
+	             const Amg::Vector3D& position,
 		     const int trackNumber)
     : m_RPCid(id),
       m_globalTime(time),
@@ -50,18 +50,18 @@ RPCSimHit::RPCSimHit(int id,
       m_partLink(trackNumber),
       m_localPostStepPosition(0.,0.,0.), // post-step position
       m_energyDeposit(-1.),              //Geant4 de/dx
-      m_stepLength(-1.),                 //Geant4 step Length  
+      m_stepLength(-1.),                 //Geant4 step Length
       m_particleEncoding(0),             // PDG id
       m_kineticEnergy(-1.)               // kinetic energy of the particle
 {
 }
 
-RPCSimHit::RPCSimHit(int id, 
-		     double time, 
+RPCSimHit::RPCSimHit(int id,
+		     double time,
 	             const Amg::Vector3D& prePosition,
-		     const int trackNumber, 
+		     const int trackNumber,
 	             const Amg::Vector3D& postPosition,
-		     const double energyDeposit, const double stepLength, 
+		     const double energyDeposit, const double stepLength,
 		     const int particleEncoding, const double kineticEnergy)
     : m_RPCid(id), m_globalTime(time)
     , m_localPosition(prePosition)
@@ -69,17 +69,17 @@ RPCSimHit::RPCSimHit(int id,
     , m_localPostStepPosition(postPosition)
     , m_energyDeposit(static_cast<float>(energyDeposit))
     , m_stepLength(static_cast<float>(stepLength))
-    , m_particleEncoding(particleEncoding) 
+    , m_particleEncoding(particleEncoding)
     , m_kineticEnergy(static_cast<float>(kineticEnergy))
 {
 }
 
-RPCSimHit::RPCSimHit(int id, 
-		     double time, 
+RPCSimHit::RPCSimHit(int id,
+		     double time,
 	             const Amg::Vector3D& prePosition,
-		     const HepMcParticleLink& hmpl, 
+		     const HepMcParticleLink& hmpl,
 	             const Amg::Vector3D& postPosition,
-		     const double energyDeposit, const double stepLength, 
+		     const double energyDeposit, const double stepLength,
 		     const int particleEncoding, const double kineticEnergy)
     : m_RPCid(id), m_globalTime(time)
     , m_localPosition(prePosition)
@@ -87,7 +87,7 @@ RPCSimHit::RPCSimHit(int id,
     , m_localPostStepPosition(postPosition)
     , m_energyDeposit(static_cast<float>(energyDeposit))
     , m_stepLength(static_cast<float>(stepLength))
-    , m_particleEncoding(particleEncoding) 
+    , m_particleEncoding(particleEncoding)
     , m_kineticEnergy(static_cast<float>(kineticEnergy))
 {
 }
@@ -110,10 +110,10 @@ std::string RPCSimHit::print() const {
        << ")";
     ss << " EnergyDeposit: "<<m_energyDeposit<<" StepLength: "<<m_stepLength
        <<" pdgId: "<<m_particleEncoding<<" kineticEnergy: "<<m_kineticEnergy;
-    
+
     return ss.str();
 }
 
 int RPCSimHit::trackNumber() const
  { return m_partLink.barcode(); }
- 
+

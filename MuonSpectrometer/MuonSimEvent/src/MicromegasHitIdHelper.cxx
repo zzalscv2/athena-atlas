@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSimEvent/MicromegasHitIdHelper.h"
@@ -9,10 +9,10 @@
 #include <array>
 
 namespace {
-    const static std::array<char, 1> v1 = {'M'};
-    const static std::array<char, 5> v2 = {'0','1','2','3','4'};
-    const static std::array<char, 2> v3 = {'S','L'};
-    const static std::array<char, 2> v4 = {'1','2'};
+    constexpr std::array<char, 1> v1 = {'M'};
+    constexpr std::array<char, 5> v2 = {'0','1','2','3','4'};
+    constexpr std::array<char, 2> v3 = {'S','L'};
+    constexpr std::array<char, 2> v4 = {'1','2'};
 }
 
 //private constructor

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSimEvent/GenericMuonSimHit.h"
@@ -7,26 +7,24 @@
 /*******************************************************************************/
 GenericMuonSimHit::GenericMuonSimHit():
   m_GenericId(0xffff),
-  m_globalTime(0.), 
-  m_globalpreTime(0.), 
-  m_particleEncoding(0),// PDG_ID  
+  m_globalTime(0.),
+  m_globalpreTime(0.),
+  m_particleEncoding(0),// PDG_ID
   m_kineticEnergy(-9999.),// energy of the particle
-  m_depositEnergy(-9999.),//Geant4 deposited energy 
+  m_depositEnergy(-9999.),//Geant4 deposited energy
   m_StepLength(-9999.),//total lenght of particle
   m_partLink()
 {
 }
 /*******************************************************************************/
-//virtual destructor required by Pool
-GenericMuonSimHit::~GenericMuonSimHit()
-{
-}
+//default  destructor required by Pool
+GenericMuonSimHit::~GenericMuonSimHit() = default;
 /*******************************************************************************/
 GenericMuonSimHit::GenericMuonSimHit(HitID id, double time, double pretime,
                                      const Amg::Vector3D& position,
                                      const Amg::Vector3D& lposition,
                                      const Amg::Vector3D& preposition,
-                                     const Amg::Vector3D& lpreposition, 
+                                     const Amg::Vector3D& lpreposition,
                                      const int particleEncoding,
                                      const double kineticEnergy,
                                      const Amg::Vector3D& direction,
@@ -51,7 +49,7 @@ GenericMuonSimHit::GenericMuonSimHit(HitID id, double time, double pretime,
                                      const Amg::Vector3D& position,
                                      const Amg::Vector3D& lposition,
                                      const Amg::Vector3D& preposition,
-                                     const Amg::Vector3D& lpreposition, 
+                                     const Amg::Vector3D& lpreposition,
                                      const int particleEncoding,
                                      const double kineticEnergy,
                                      const Amg::Vector3D& direction,
@@ -73,7 +71,7 @@ GenericMuonSimHit::GenericMuonSimHit(HitID id, double time, double pretime,
 }
 /*******************************************************************************/
 std::string GenericMuonSimHit::print() const {
-    
+
   std::stringstream ss;
 
   ss << "-------------------------------------------------------------" << std::endl;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSimEvent/sTGCSimHit.h"
@@ -15,12 +15,10 @@ sTGCSimHit::sTGCSimHit():
 {
 }
 /*******************************************************************************/
-//virtual destructor required by Pool
-sTGCSimHit::~sTGCSimHit()
-{
-}
+//default destructor required by Pool
+sTGCSimHit::~sTGCSimHit() = default;
 /*******************************************************************************/
-sTGCSimHit::sTGCSimHit(HitID id, double time, 
+sTGCSimHit::sTGCSimHit(HitID id, double time,
                                      const Amg::Vector3D& position,
                                      const int particleEncoding,
                                      const Amg::Vector3D& direction,

@@ -1,32 +1,33 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSimEvent/CSCSimHit.h"
 
 
+#include <cmath>
 #include <sstream>
 
 // construction/destruction
 //
 CSCSimHit::CSCSimHit( ) :
     m_CSCid(0xffff),
-    m_globalTime(0.), 
+    m_globalTime(0.),
     m_energyDeposit(0),
     m_particleID(0),
-    m_partLink(), 
+    m_partLink(),
     m_kineticEnergy(-1.)
 {
 }
-//virtual destructor required by Pool
-CSCSimHit::~CSCSimHit( ){}
+//defualt destructor required by Pool
+CSCSimHit::~CSCSimHit( )= default;
 
 
-CSCSimHit::CSCSimHit(int id, 
-		     double time, 
+CSCSimHit::CSCSimHit(int id,
+		     double time,
 		     double  energy,
-	       	     const Amg::Vector3D& HitStart, 
-		     const Amg::Vector3D& HitEnd, 
+	       	     const Amg::Vector3D& HitStart,
+		     const Amg::Vector3D& HitEnd,
 	       	     int particleID)
     : m_CSCid(id), m_globalTime(time)
     , m_energyDeposit(energy)
@@ -38,12 +39,12 @@ CSCSimHit::CSCSimHit(int id,
 
 }
 
-CSCSimHit::CSCSimHit(int id, 
-		     double time, 
+CSCSimHit::CSCSimHit(int id,
+		     double time,
 		     double  energy,
-	             const Amg::Vector3D& HitStart, 
-		     const Amg::Vector3D& HitEnd, 
-	             int particleID, 
+	             const Amg::Vector3D& HitStart,
+		     const Amg::Vector3D& HitEnd,
+	             int particleID,
 		     const int trackNumber)
     : m_CSCid(id), m_globalTime(time)
     , m_energyDeposit(energy)
@@ -56,13 +57,13 @@ CSCSimHit::CSCSimHit(int id,
 
 }
 
-CSCSimHit::CSCSimHit(int id, 
-		     double time, 
+CSCSimHit::CSCSimHit(int id,
+		     double time,
 		     double  energy,
-	             const Amg::Vector3D& HitStart, 
-		     const Amg::Vector3D& HitEnd, 
-	             int particleID, 
-		     const int trackNumber, 
+	             const Amg::Vector3D& HitStart,
+		     const Amg::Vector3D& HitEnd,
+	             int particleID,
+		     const int trackNumber,
                      const double kineticEnergy)
     : m_CSCid(id), m_globalTime(time)
     , m_energyDeposit(energy)
@@ -75,13 +76,13 @@ CSCSimHit::CSCSimHit(int id,
 
 }
 
-CSCSimHit::CSCSimHit(int id, 
-		     double time, 
+CSCSimHit::CSCSimHit(int id,
+		     double time,
 		     double  energy,
-	             const Amg::Vector3D& HitStart, 
-		     const Amg::Vector3D& HitEnd, 
-	             int particleID, 
-		     const HepMcParticleLink& hmpl, 
+	             const Amg::Vector3D& HitStart,
+		     const Amg::Vector3D& HitEnd,
+	             int particleID,
+		     const HepMcParticleLink& hmpl,
                      const double kineticEnergy)
     : m_CSCid(id), m_globalTime(time)
     , m_energyDeposit(energy)
@@ -98,7 +99,7 @@ CSCSimHit::CSCSimHit(int id,
 // Implementation of member functions
 
 std::string CSCSimHit::print() const {
-    
+
     std::string        str;
     std::stringstream  ss;
 
@@ -110,23 +111,23 @@ std::string CSCSimHit::print() const {
     ss << "  Hit start position: ("    << m_hitStart.x()
 	      << ","  << m_hitStart.y()
 	      << ","  << m_hitStart.z()
-	      << ")";  
+	      << ")";
     ss << "  Hit end position: ("    << m_hitEnd.x()
 	      << ","  << m_hitEnd.y()
 	      << ","  << m_hitEnd.z()
-	      << ")"; 	      
+	      << ")";
 
     float distance = pow( m_hitEnd.x()-m_hitStart.x() , 2);
     distance += pow( m_hitEnd.y()-m_hitStart.y() , 2);
     distance += pow( m_hitEnd.z()-m_hitStart.z() , 2);
-    distance = sqrt(distance);
-    
+    distance = std::sqrt(distance);
+
     ss << " Distance: "   << distance;
     ss << " Particle ID: "   << m_particleID;
     ss << " genTrackNumber: "   << m_partLink.barcode();
-    
+
     str = ss.str();
-    
+
     return str;
 
 }
