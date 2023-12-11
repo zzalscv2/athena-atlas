@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
 <!-- Smart pointer dictionaries for xAOD container type: @_type@ -->
 
 <class name="SG::BaseInfo<@_type@>" />
@@ -13,5 +13,8 @@
 <class name="SG::AuxTypeVectorFactory<DataLink<@_type@> >" />
 <class name="SG::AuxTypeVectorFactory<ElementLink<@_type@> >" />
 <class name="SG::AuxTypeVectorFactory<std::vector<ElementLink<@_type@> > >" />
+<class name="SG::AuxTypeVectorFactoryImpl<DataLink<@_type@> >" />
+<class name="SG::AuxTypeVectorFactoryImpl<ElementLink<@_type@> >" />
+<class name="SG::AuxTypeVectorFactoryImpl<std::vector<ElementLink<@_type@> > >" />
 
 <class name="DataVectorBase<@_type@::base_value_type>" />
