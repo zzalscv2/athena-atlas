@@ -42,16 +42,16 @@
 
 namespace Prompt
 {
-  //======================================================================================================
-  // Two track vertex
-  //
+  /*
+    A 2-track vertex.
+  */
   struct TwoTrackVtx
   {
     TwoTrackVtx():vertex(nullptr), trackId0(0), trackId1(0), vertexFitProb(1000.0), sumTrackPt(0.0) {}
 
-    std::unique_ptr<xAOD::Vertex> vertex;
-    const xAOD::TrackParticle                 *trackId0;
-    const xAOD::TrackParticle                 *trackId1;
+    xAOD::Vertex* vertex;
+    const xAOD::TrackParticle* trackId0;
+    const xAOD::TrackParticle* trackId1;
 
     double                                     vertexFitProb;
     double                                     sumTrackPt;
@@ -77,7 +77,7 @@ namespace Prompt
 
     bool operator()(const TwoTrackVtx &lhs, const TwoTrackVtx &rhs)
     {
-      return Prompt::getDistance(seed, lhs.vertex.get()) < Prompt::getDistance(seed, rhs.vertex.get());
+      return Prompt::getDistance(seed, lhs.vertex) < Prompt::getDistance(seed, rhs.vertex);
     }
 
     const xAOD::Vertex *seed;
@@ -96,6 +96,14 @@ namespace Prompt
 
     virtual StatusCode initialize() override;
 
+    /*
+      Perform a deep merge of the initial vertices.
+
+      In the r21 version, the input initVtxs was defined as
+      a const std::vector<xAOD::Vertex*> object. The const-ness
+      had to be removed to work with unique_ptr objects. However,
+      we should avoid modifying the underlying objects in initVtxs.
+    */
     virtual MergeResultNotOwner mergeInitVertices(
       const FittingInput &input,
       const xAOD::TrackParticle *tracklep,
@@ -105,13 +113,39 @@ namespace Prompt
 
   private:
 
-    bool mergeIteratively2TrackVtxs(const FittingInput &input,
-            MergeResult &result,
-            const VtxType vtxType);
-
-    std::unique_ptr<xAOD::Vertex> fitSeedVertexCluster(
+    bool mergeIteratively2TrackVtxs(
       const FittingInput &input,
-      std::unique_ptr<xAOD::Vertex> seedVtx,
+      std::vector<std::unique_ptr<xAOD::Vertex>> &initVtxs,
+      MergeResultNotOwner &result,
+      const VtxType vtxType
+    );
+
+    /*
+      Given a seed vertex, this function generates a new merged vertex.
+
+      A new vertex is created and assigned to the newMergedVtx reference.
+    */
+    void getNewMergedVertex(
+      xAOD::Vertex* seedVtx,
+      std::unique_ptr<xAOD::Vertex> &newMergedVtx,
+      const FittingInput &input,
+      std::vector<TwoTrackVtx>::iterator &currVit,
+      std::vector<TwoTrackVtx> &vtxs2Track,
+      const VtxType vtxType
+    );
+
+    /*
+      Iteratively fit a new vertex from a seed vertex and group
+      of two-track vertices.
+
+      A new vertex will be created. Because of the complicated ownership
+      semantics of the recursive calls, we release the unique_ptr that is
+      generated when this vertex is created. The caller must capture the
+      bare pointer!
+    */
+    xAOD::Vertex* fitSeedVertexCluster(
+      const FittingInput &input,
+      xAOD::Vertex* seedVtx,
       const VtxType vtxType,
       std::vector<TwoTrackVtx> &others
     );
@@ -125,8 +159,16 @@ namespace Prompt
 
     bool passVertexSelection(const xAOD::Vertex *vtx) const;
 
-    unsigned removeMerged2TrackVertexes(const xAOD::Vertex *mergedVtx,
-          std::vector<TwoTrackVtx> &vtxs);
+    /*
+      Remove 2-tracks that are succesfully merged into one vertex.
+
+      This is done by iterating over the list of 2-track vertices and removing
+      those for which both tracks overlap with the mergedVtx.
+    */
+    unsigned removeMerged2TrackVertexes(
+      const xAOD::Vertex *mergedVtx,
+      std::vector<TwoTrackVtx> &vtxs
+    ) const;
 
     void plotVertexDistances(const std::vector<TwoTrackVtx> &others);
 
@@ -135,6 +177,12 @@ namespace Prompt
       const std::vector<const xAOD::TrackParticle *> &selectedTracks
     );
 
+    /*
+      Fit new 2-track vertices from a list of tracks.
+
+      Since this fits new vertices, it returns a list of unique_ptr
+      so that the caller will handle memory.
+    */
     std::vector<std::unique_ptr<xAOD::Vertex>> fit2TrackVertexes(
       const FittingInput &input,
       std::vector<const xAOD::TrackParticle *> &selectedTracks,
