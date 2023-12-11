@@ -21,57 +21,6 @@ using namespace Gaudi::Units;
 
 typedef std::pair<int, int> IndexKey;
 namespace {
-  double charge( const int id ) {
-    // anonymous namespace -> local to that .so
-    /** 3*charge for basic pdgId codes -- used to parse unknown id's
-        Fix from Frank for the charge of the MC Truth Particle */
-    static const std::array<int,100> qcharge =
-      {+0, -1, +2, -1, +2, -1, +2, -1, +2, +0,  // 0-9
-       +0, -3, +0, -3, +0, -3, +0, -3, +0, +0,  // 10-19
-       +0, +0, +0, +3, +0, +0, +0, +0, +0, +0,  // 20-29
-       +0, +0, +0, +3, +0, +0, +0, +3, +0, +0,  // 30-39
-       +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-       +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-       +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-       +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-       +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-       +0, +0, +0, +0, +0, +0, +0, +0, +0, +0};
-
-
-    /** Set charge using PDG convention:
-        id = nnnnijkl
-        i == 0, j == 0:   see qcharge[100]
-        i == 0:           meson, j kbar quarks    l = 2*spin+1
-        i != 0:           baryon, i j k quarks    l = 2*spin+1
-        Default is 0; */
-
-    const int sid = std::abs(id);
-    double q = 0;
-    if ( sid==11 || sid==13 || sid==15 || sid==17 ) q=1; // charged leptons
-    else if (  sid==12 || sid==14 || sid==16 || sid==18 || sid==22 ) q=0; // neutral leptons and photon
-    else if ( sid == 2212 || sid==24 ) q=1; //proton/anti-proton and W
-    else if ( sid == 2112 || sid==23 ) q=0; //neutron/anti-neutron and Z
-    else { // quarks, gluons, measons and other baryons
-      const int idmod = std::abs(id) % 10000;
-      const int q1 = (idmod/10) % 10;
-      const int q2 = (idmod/100) % 10;
-      const int q3 = (idmod/1000) % 10;
-      if( idmod < 100 ) {
-        q = qcharge[idmod]/3.;
-      }
-      else if( idmod < 1000 ) {
-        q = (qcharge[q2]-qcharge[q1])/3.;
-        if (qcharge[q2]==2) q=-q;
-      }
-      else if( idmod < 10000 ) {
-        q = (qcharge[q3]+qcharge[q2]+qcharge[q1])/3.;
-      }
-    }
-
-    q = (id < 0) ? -q : q;
-
-    return q;
-  }
   IndexKey makekey(int signal_process_id, int event_number, int separator_hack=0) {
     //std::size_t key(0);
     //Check for Separtor GenEvents
@@ -611,9 +560,8 @@ MergeMcEventCollTool::puType MergeMcEventCollTool::classifyVertex(const HepMC::C
         double mass(pCurrentVertexParticle->momentum().m());
         if ( mass < 0.0 ) { mass = 0.0; }
         const double kineticEnergy(pCurrentVertexParticle->momentum().e() - mass);
-        if ( !m_doSlimming || ( (kineticEnergy > m_minKinE) && (charge(pCurrentVertexParticle->pdg_id()) != 0) ) ) {
+        if ( !m_doSlimming || ( (kineticEnergy > m_minKinE) && (MC::charge(pCurrentVertexParticle->pdg_id()) != 0) ) ) {
           particleClassification=CAVERN;
-          // cout << "Cavern particle selected: " << "id= " << pCurrentVertexParticle->pdg_id() << " charge = " << charge(pCurrentVertexParticle->pdg_id()) << " pt= " << pCurrentVertexParticle->momentum().perp()) ;
         }
       } // zrange cut
     } // keep unstable
