@@ -107,7 +107,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
             if (m_photonjetoverlap == true)
             {
                 // photon - copied from VBFForwardJetsFilter.cxx
-                if (pitr->pdgId() == 22 && MC::isStable(pitr) &&
+                if (MC::isPhoton(pitr) && MC::isStable(pitr) &&
                     pitr->pt() >= m_olapPt &&
                     std::abs(pitr->eta()) <= m_yMax)
                 {
@@ -117,7 +117,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
             if (m_electronjetoverlap == true)
             {
                 // electron
-                if (std::abs(pitr->pdgId()) == 11 && MC::isStable(pitr) &&
+                if (MC::isElectron(pitr) && MC::isStable(pitr) &&
                     pitr->pt() >= m_olapPt &&
                     std::abs(pitr->eta()) <= m_yMax)
                 {
@@ -127,7 +127,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
             if (m_taujetoverlap == true)
             {
                 // tau - copied from VBFForwardJetsFilter.cxx
-                if (std::abs(pitr->pdgId()) == 15 && pitr->status() != 3)
+                if (MC::isTau(pitr) && pitr->status() != 3)
                 {
                     auto tau = pitr;
                     int leptonic = 0;

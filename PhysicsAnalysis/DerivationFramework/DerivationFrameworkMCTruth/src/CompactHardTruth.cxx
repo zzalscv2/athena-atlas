@@ -989,7 +989,7 @@ StatusCode CompactHardTruth::execute() {
      int nhard = 0;
     for (auto ph: pHard) {
       ++nhard;
-      ATH_MSG_DEBUG("Hard GenParticles " << ph << " " << ph->pdg_id() << " " << ph->momentum().perp() / 1000. << " " << ph->momentum().pz() / 1000.);
+      ATH_MSG_DEBUG("Hard GenParticles " << ph );
     }
     if (doDebug) ATH_MSG_DEBUG("Hard GenParticles total " << nhard);
   }
@@ -1057,7 +1057,7 @@ StatusCode CompactHardTruth::execute() {
     int nhard = 0;
     for (; hItr2 != hItr2E; ++hItr2) {
       ++nhard;
-      ATH_MSG_DEBUG("Hard GenParticles " << HepMC::uniqueID(*hItr2) << " " << (*hItr2)->pdg_id() << " " << (*hItr2)->momentum().perp() / 1000. << " " << (*hItr2)->momentum().pz() / 1000.);
+      ATH_MSG_DEBUG("Hard GenParticles " << (*hItr2) );
     }
     if (doDebug) ATH_MSG_DEBUG("Hard GenParticles total " << nhard);
   }

@@ -210,7 +210,7 @@ bool PhotonTruthTool::isQuarkBremMC
 bool PhotonTruthTool::isFinalStatePhotonMC
   (const xAOD::TruthParticle* truePart) const
 {
-  return ( isFinalState(truePart) && truePart->pdgId()==22 ) ;
+  return ( isFinalState(truePart) && MC::isPhoton(truePart) ) ;
 }
 
 
@@ -224,11 +224,11 @@ PhotonTruthTool::isFinalState(const xAOD::TruthParticle* truePart) const
   if ( !MC::isStable(truePart)) return false; 
   if ( !m_useG4Particles ) return ( !HepMC::is_simulation_particle(truePart) );
     // if it is a photon, keep it regardless of its Geant interaction
-    if ( truePart->pdgId()==22 ) return true ; 
+    if ( MC::isPhoton(truePart) ) return true ; 
     // reject Geant electron from conversion
-    if ( std::abs(truePart->pdgId())==11 && HepMC::is_simulation_particle(truePart) ) {
+    if ( MC::isElectron(truePart) && HepMC::is_simulation_particle(truePart) ) {
       const xAOD::TruthParticle* mother = getMother(truePart) ;
-      if ( mother!=0 && mother->pdgId()==22 )  return false ;
+      if ( mother!=0 && MC::isPhoton(mother) )  return false ;
     }
 
     // reject particles interacted in detector

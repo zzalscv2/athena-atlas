@@ -75,7 +75,7 @@ StatusCode xAODDirectPhotonFilter::filterEvent() {
     unsigned int nPart = genEvt->nTruthParticles();
     for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
         const xAOD::TruthParticle* pitr =  genEvt->truthParticle(iPart);
-      if (pitr->pdgId() == 22 &&
+      if (MC::isPhoton(pitr) &&
           MC::isStable(pitr) &&
           std::abs(pitr->eta()) <= m_EtaRange) {
         

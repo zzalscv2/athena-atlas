@@ -115,21 +115,21 @@ StatusCode xAODVBFForwardJetsFilter::filterEvent()
         {
             const xAOD::TruthParticle *pitr = (*itr)->truthParticle(iPart);
             // photon
-            if (pitr->pdgId() == 22 && MC::isStable(pitr) &&
+            if (MC::isPhoton(pitr) && MC::isStable(pitr) &&
                 pitr->pt() >= m_LGMinPt && std::abs(pitr->eta()) <= m_LGMaxEta)
             {
                 MCTruthPhotonList.push_back(pitr);
                 ATH_MSG_INFO("photon pt(Gaudi::Units::GeV) = " << pitr->pt() / Gaudi::Units::GeV << " eta = " << pitr->eta());
             }
             // electon
-            if (std::abs(pitr->pdgId()) == 11 && MC::isStable(pitr) &&
+            if (MC::isElectron(pitr) && MC::isStable(pitr) &&
                 pitr->pt() >= m_LGMinPt && std::abs(pitr->eta()) <= m_LGMaxEta)
             {
                 MCTruthElectronList.push_back(pitr);
                 ATH_MSG_INFO("electron pt(Gaudi::Units::GeV) = " << pitr->pt() / Gaudi::Units::GeV << " eta = " << pitr->eta());
             }
             // tau
-            if (std::abs(pitr->pdgId()) == 15 && pitr->status() != 3)
+            if (MC::isTau(pitr) && pitr->status() != 3)
             {
                 auto tau = pitr;
                 int leptonic = 0;
