@@ -109,7 +109,7 @@ private:
 
   /** Combines the six output nodes of a multiclass model into one discriminant. */
   double combineOutputs(const std::vector<float>& mvaScores, double eta) const;
-  double combineOutputsCF(const std::vector<float>& mvaScores) const;
+  static double combineOutputsCF(const std::vector<float>& mvaScores) ;
 
   /** Gets the Discriminant Eta bin [0,s_fnDiscEtaBins-1] given the eta*/
   static unsigned int getDiscEtaBin( double eta ) ;

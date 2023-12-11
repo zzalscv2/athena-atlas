@@ -888,7 +888,7 @@ egammaSuperClusterBuilderBase::fillClusterConstrained(
     // And finally add the recovered cells
     const CaloCellContainer* inputcells =
       tofill.getCellLinks()->getCellContainer();
-    for (auto c : info.addedCells) {
+    for (const auto *c : info.addedCells) {
       int index = inputcells->findIndex(c->caloDDE()->calo_hash());
       tofill.addCell(index, 1.);
     }

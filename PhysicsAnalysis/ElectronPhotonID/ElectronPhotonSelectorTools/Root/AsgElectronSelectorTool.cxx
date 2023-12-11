@@ -949,7 +949,7 @@ double AsgElectronSelectorTool::combineOutputs( const std::vector<float>& mvaSco
   return std::log(disc);
 }
 
-double AsgElectronSelectorTool::combineOutputsCF( const std::vector<float>& mvaScores ) const
+double AsgElectronSelectorTool::combineOutputsCF( const std::vector<float>& mvaScores ) 
 {
   double disc = 0;
   disc = mvaScores.at(0) / mvaScores.at(1);
