@@ -31,9 +31,9 @@
 
 namespace {
     // make a const array holding all amdb RPC names corresponding to BI RPCs
-    const static std::array<std::string, 7> biRpcs = {"RPC26", "RPC27", "RPC28", "RPC29", "RPC30", "RPC31", "RPC32"};
-    static constexpr double const &rpc3GapLayerThickness = 11.8; // gas vol. + ( bakelite + graphite + PET )x2
-    static constexpr double const &rpc3GapMaxThickness = 36.0;   // min 35.4 (11.8x3) - max 40.0 mm (tolerance from design)
+    const std::array<std::string, 7> biRpcs = {"RPC26", "RPC27", "RPC28", "RPC29", "RPC30", "RPC31", "RPC32"};
+    constexpr double const &rpc3GapLayerThickness = 11.8; // gas vol. + ( bakelite + graphite + PET )x2
+    constexpr double const &rpc3GapMaxThickness = 36.0;   // min 35.4 (11.8x3) - max 40.0 mm (tolerance from design)
 } // namespace
 
 namespace MuonGM {
@@ -102,7 +102,7 @@ namespace MuonGM {
         const GeoShape *srpc = new GeoTrd(thickness / 2, thickness / 2, width / 2, longWidth / 2, length / 2);
         // Apply cutouts to mother volume
 
-        if (cutoutson && vcutdef.size() > 0) {
+        if (cutoutson && !vcutdef.empty()) {
             Cutout *cut = nullptr;
             GeoShape *cutoutShape = nullptr;
             GeoTrf::Transform3D cutTrans{GeoTrf::Transform3D::Identity()};
@@ -148,7 +148,7 @@ namespace MuonGM {
             pallpan->add(pholpan); // this way the honeycomb is a child of its al skin
 
             // Apply cutouts
-            if (cutoutson && vcutdef.size() > 0) {
+            if (cutoutson && !vcutdef.empty()) {
                 Cutout *cut = nullptr;
                 GeoTrf::Transform3D cutTrans{GeoTrf::Transform3D::Identity()};
                 for (unsigned i = 0; i < vcutdef.size(); i++) {
@@ -180,7 +180,7 @@ namespace MuonGM {
             // bottom RpcLayer
             std::unique_ptr<RpcLayer> rl = std::make_unique<RpcLayer>(name, this);
             GeoVPhysVol *plowergg;
-            if (cutoutson && vcutdef.size() > 0) {
+            if (cutoutson && !vcutdef.empty()) {
                 plowergg = rl->build(matManager, mysql, cutoutson, vcutdef);
             } else {
                 plowergg = rl->build(matManager, mysql);
@@ -213,7 +213,7 @@ namespace MuonGM {
             palcpan->add(phocpan); // this way the honeycomb is a child of its al skin
 
             // Apply cutouts
-            if (cutoutson && vcutdef.size() > 0) {
+            if (cutoutson && !vcutdef.empty()) {
                 Cutout *cut = nullptr;
                 GeoTrf::Transform3D cutTrans{GeoTrf::Transform3D::Identity()};
                 for (unsigned i = 0; i < vcutdef.size(); i++) {
@@ -243,7 +243,7 @@ namespace MuonGM {
             // top RpcLayer
             std::unique_ptr<RpcLayer> ru = std::make_unique<RpcLayer>(name, this);
             GeoVPhysVol *puppergg;
-            if (cutoutson && vcutdef.size() > 0) {
+            if (cutoutson && !vcutdef.empty()) {
                 // This code required to take into account the various
                 // 180 degree rotations of RPC panels in BMS chambers
                 int subtype = 0;
@@ -315,7 +315,7 @@ namespace MuonGM {
                 newpos += rpcLayerThickness / 2.;
                 RpcLayer rthird (name, this);
                 GeoVPhysVol *pthirdgg;
-                if (cutoutson && vcutdef.size() > 0) {
+                if (cutoutson && !vcutdef.empty()) {
                     pthirdgg = rthird.build(matManager, mysql, cutoutson, vcutdef);
                 } else {
                     pthirdgg = rthird.build(matManager, mysql);

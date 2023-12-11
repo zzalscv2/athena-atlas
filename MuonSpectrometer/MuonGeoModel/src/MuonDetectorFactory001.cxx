@@ -55,11 +55,11 @@
 #include <stdexcept>
 #include <vector>
 
-typedef std::stringstream my_sstream;
-typedef std::ostringstream my_osstream;
+using my_sstream = std::stringstream;
+using my_osstream = std::ostringstream;
 
 // The objects for mapping plane indexes in MuonSystem to the record index in RDBRecordset
-typedef std::map<int, unsigned int, std::less<int>> muonsysIndMap;
+using muonsysIndMap = std::map<int, unsigned int, std::less<int>>;
 
 using namespace GeoGenfun;
 using namespace GeoXF;
@@ -369,7 +369,7 @@ namespace MuonGM {
 
         std::vector<std::string> slist;
         if (m_selectedStations.empty())
-            slist.push_back("*");
+            slist.emplace_back("*");
         else
             slist = m_selectedStations;
 
@@ -392,7 +392,7 @@ namespace MuonGM {
         for (it = sel.begin(); it != sel.end(); ++it) {
             Station *station = (*it).second;
             std::string stname(station->GetName(), 0, 3);
-            if (m_selectedStations.size() <= 0) {
+            if (m_selectedStations.empty()) {
                 if (log.level() <= MSG::VERBOSE) {
                     log << MSG::VERBOSE << "Processing Stations named <" << station->GetName() << "> " << nstat_ss << " built until now" << endmsg;
                 }
@@ -425,7 +425,7 @@ namespace MuonGM {
                     sign = zi / abs(zi);
 
                 // if there's a selection of eta location, check if this chamber is selected
-                if (m_selectedStEta.size() > 0) {
+                if (!m_selectedStEta.empty()) {
                     bool selectedEta = false;
                     for (auto i = m_selectedStEta.begin(); i < m_selectedStEta.end(); i++) {
                         if (zi == *i) {
@@ -439,7 +439,7 @@ namespace MuonGM {
                 }
 
                 // if there's a selection of phi location, check if this chamber is selected
-                if (m_selectedStPhi.size() > 0) {
+                if (!m_selectedStPhi.empty()) {
                     bool selectedPhi = false;
                     for (auto i = m_selectedStPhi.begin(); i < m_selectedStPhi.end(); i++) {
                         if ((fi + 1) == *i) {

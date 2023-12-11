@@ -60,13 +60,13 @@
 
 namespace {
     // const maps holding the y/z translation for BIS RPCs (since they cannot be parsed by amdb)
-    const static std::map<std::string, float> rpcYTrans = {
+    const std::map<std::string, float> rpcYTrans = {
         std::make_pair<std::string, float>("RPC26", -9.1),  // big RPC7
         std::make_pair<std::string, float>("RPC27", -9.1),  // small RPC7
         std::make_pair<std::string, float>("RPC28", -27.7), // big RPC8
         std::make_pair<std::string, float>("RPC29", -8.8),  // small RPC8
     };
-    const static std::map<std::string, float> rpcZTrans = {
+    const std::map<std::string, float> rpcZTrans = {
         std::make_pair<std::string, float>("RPC26", 3.22), // big RPC7
         std::make_pair<std::string, float>("RPC27", 3.06), // small RPC7
         std::make_pair<std::string, float>("RPC28", 3.11), // big RPC8
@@ -734,7 +734,7 @@ namespace MuonGM {
                     } else {
                         // for BIL/BIM/BIR, we have 10 RPCs put on 6 MDT stations, thus, need to exploit doubletZ as additional variable on top of stationEta
                         // only for BIL, there are sometimes 2 RPCs per 1 MDT station, namely for stationEta 1,3,4,6
-                        if (stname.find("BIL") != std::string::npos && std::abs(stationEta) < 7 && !(std::abs(stationEta) == 2 || std::abs(stationEta) == 5)) {
+                        if (stname.find("BIL") != std::string::npos && std::abs(stationEta) < 7 && std::abs(stationEta) != 2 && std::abs(stationEta) != 5) {
                             if (rp->posy > 1)
                                 doubletZ = 2; // put the chamber with positive amdb-z to doubletZ=2
                         } else

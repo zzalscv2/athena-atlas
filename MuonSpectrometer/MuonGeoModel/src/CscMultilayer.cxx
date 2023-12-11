@@ -22,8 +22,8 @@
 #include <GaudiKernel/MsgStream.h>
 #include <GeoModelKernel/GeoLogVol.h>
 #include <GeoModelKernel/GeoShape.h>
-#include <math.h>
-#include <stddef.h>
+#include <cmath>
+#include <cstddef>
 #include <string>
 #include <utility>
 #include <vector>

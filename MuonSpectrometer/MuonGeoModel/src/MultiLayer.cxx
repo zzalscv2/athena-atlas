@@ -32,12 +32,11 @@
 
 #include <GaudiKernel/IMessageSvc.h>
 #include <GaudiKernel/MsgStream.h>
-#include <GeoGenericFunctions/AbsFunction.h>
 #include <array>
 #include <cassert>
+#include <cstdlib>
 #include <memory>
 #include <stdexcept>
-#include <stdlib.h>
 #include <utility>
 #include <vector>
 
@@ -142,7 +141,7 @@ namespace MuonGM {
         if (cutoutNsteps == 1 || cutoutAtAngle || (cutoutNsteps < -10000 && cutoutNsteps > -40000)) {
             // No cutouts - layer is a simple box or trapezoid
             slay = new GeoTrd(mdtthickness / 2, mdtthickness / 2, width / 2, longWidth / 2, length / 2);
-        } else if (m_nonCutoutXSteps.size()) {
+        } else if (!m_nonCutoutXSteps.empty()) {
             // there are cutouts sliced along amdb-x (slices in amdb-y)
             double submlthick = mdtthickness / 2.; // corresponds to half amdb-z (chamber height=constant)
 
@@ -226,7 +225,7 @@ namespace MuonGM {
                         << " " << submllength << endmsg;
                 }
 
-                if (!(foamthicknessup == 0 && foamthicknesslow == 0)) {
+                if (foamthicknessup != 0 || foamthicknesslow != 0) {
                     if (foamthicknessup > foamthicknesslow) {
                         if (foamthicknessup * submlwidths * submllength > 0) {
                             if (cutoutFullLength[isub]) {
@@ -288,7 +287,7 @@ namespace MuonGM {
         stube = &((*stube) << GeoTrf::RotateX3D(90. * Gaudi::Units::deg));
         stube->ref();
         const GeoShape *stubewithcut = nullptr;
-        if (cutoutNsteps > 1 && !m_nonCutoutXSteps.size()) { // adaption of tube cuts only needed for cutouts along amdb-y
+        if (cutoutNsteps > 1 && m_nonCutoutXSteps.empty()) { // adaption of tube cuts only needed for cutouts along amdb-y
             double toptubelength = cutoutTubeLength[cutoutNsteps - 1];
             if (cutoutFullLength[cutoutNsteps - 1])
                 toptubelength = longWidth;
@@ -309,7 +308,7 @@ namespace MuonGM {
                 slay = &(slay->subtract((*stube) << GeoTrf::Translate3D(-mdtthickness / 2. + yy[i], 0., -length / 2.)));
                 // add tube at the end
                 // distinguish stations with/without cutouts
-                if (cutoutNsteps == 1 || m_nonCutoutXSteps.size()) {
+                if (cutoutNsteps == 1 || !m_nonCutoutXSteps.empty()) {
                     // no cutouts
                     if (verbose_multilayer) {
                         log << MSG::VERBOSE << " Adding tube at xx = " << yy[i] << " z = " << length / 2. << endmsg;
@@ -391,7 +390,7 @@ namespace MuonGM {
         std::vector<int> Ntubes;
 
         // No cutouts
-        if (cutoutNsteps <= 1 || m_nonCutoutXSteps.size()) { // adaption of tube cuts only needed for cutouts along amdb-y
+        if (cutoutNsteps <= 1 || !m_nonCutoutXSteps.empty()) { // adaption of tube cuts only needed for cutouts along amdb-y
             for (int j = 0; j < nrOfSteps; j++) {
                 tube.length = width + j * diff / nrOfSteps;
 
@@ -611,7 +610,7 @@ namespace MuonGM {
                 }
             } // Loop over layers
 
-        } else if (cutoutNsteps > 1 && !m_nonCutoutXSteps.size()) { // adaption of tube cuts only needed for cutouts along amdb-y
+        } else if (cutoutNsteps > 1 && m_nonCutoutXSteps.empty()) { // adaption of tube cuts only needed for cutouts along amdb-y
             bool arrowpointoutwards = false;
             bool cutAtAngle = cutoutAtAngle;
             if (xx[1] - xx[0] > 0.) {

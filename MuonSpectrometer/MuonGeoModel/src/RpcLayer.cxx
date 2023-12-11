@@ -26,12 +26,12 @@
 #include <utility>
 
 namespace {
-    static constexpr double const rpc3GapLayerThickness = 11.8; // gas vol. + ( bakelite + graphite + PET )x2
-    static constexpr double const rpc3GapStrPanThickness = 3.5;
-    static constexpr double const rpc3GapStrPanCopThickness = 0.3;
-    static constexpr double const rpc3GapBakelThickness = 1.2;
-    static constexpr double const rpc3GapGThickness = 1.0;
-    static constexpr double const rpc3GapTotAirThickness = 0.52; // corresponds to PET+glue, which are not simulated?
+    constexpr double const rpc3GapLayerThickness = 11.8; // gas vol. + ( bakelite + graphite + PET )x2
+    constexpr double const rpc3GapStrPanThickness = 3.5;
+    constexpr double const rpc3GapStrPanCopThickness = 0.3;
+    constexpr double const rpc3GapBakelThickness = 1.2;
+    constexpr double const rpc3GapGThickness = 1.0;
+    constexpr double const rpc3GapTotAirThickness = 0.52; // corresponds to PET+glue, which are not simulated?
 } // namespace
 
 namespace MuonGM {
@@ -97,7 +97,7 @@ namespace MuonGM {
                                          strpanWidth / 2. - strpanCopperThickness, strpanLength / 2. - strpanCopperThickness);
         const GeoShape *scustrpan = sstrpan;
 
-        auto stripMaterial = matManager.getMaterial("muo::RpcFoam");
+        const auto *stripMaterial = matManager.getMaterial("muo::RpcFoam");
         if (m->nGasGaps() == 3) { // for BI RPCs
             stripMaterial = matManager.getMaterial("muo::Forex");
         }
@@ -280,7 +280,7 @@ namespace MuonGM {
         }
 
         // Apply cutouts
-        if (cutoutson && vcutdef.size() > 0) {
+        if (cutoutson && !vcutdef.empty()) {
             GeoPhysVol *tempPhys = nullptr;
             Cutout *cut = nullptr;
             GeoShape *cutoutShape = nullptr;

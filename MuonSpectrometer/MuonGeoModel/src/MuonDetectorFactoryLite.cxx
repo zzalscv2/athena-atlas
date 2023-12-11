@@ -157,12 +157,12 @@ namespace MuonGM {
 
     // Look through the map explicitly for Stations
     std::set<std::string> mappedStations;
-    for (auto i: mapFPV) {
+    for (const auto& i: mapFPV) {
       size_t pos=i.first.find("_Station");
       if (pos!=std::string::npos) mappedStations.insert(i.first.substr(0,pos));
     }
 
-    for (auto i: mappedStations) {
+    for (const auto& i: mappedStations) {
       auto it= mysql->stationMap().find(i);
       if (it==mysql->stationMap().end()) {
 	        throw std::runtime_error("Raw/readout geometry mismatch");

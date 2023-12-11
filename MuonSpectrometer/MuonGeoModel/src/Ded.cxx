@@ -62,7 +62,7 @@ namespace MuonGM {
             pded->add(phon);
 
         // Apply cutouts
-        if (cutoutson && vcutdef.size() > 0) {
+        if (cutoutson && !vcutdef.empty()) {
             GeoPhysVol *tempPhys = nullptr;
             Cutout *cut = nullptr;
             GeoShape *cutoutShape = nullptr;
