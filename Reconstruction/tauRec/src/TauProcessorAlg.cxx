@@ -24,8 +24,7 @@ TauProcessorAlg::TauProcessorAlg(const std::string &name,
 //-----------------------------------------------------------------------------
 // Destructor
 //-----------------------------------------------------------------------------
-TauProcessorAlg::~TauProcessorAlg() {
-}
+TauProcessorAlg::~TauProcessorAlg() = default;
 
 //-----------------------------------------------------------------------------
 // Initializer
@@ -202,7 +201,7 @@ StatusCode TauProcessorAlg::execute(const EventContext& ctx) const {
     const CaloCellContainer* cellPtrs = Pi0CellContainer->asDataVector(); 
     // Check this is needed for the cell container?
     // symlink as INavigable4MomentumCollection (as in CaloRec/CaloCellMaker)
-    ATH_CHECK(evtStore()->symLink(cellPtrs, static_cast<INavigable4MomentumCollection*> (0)));
+    ATH_CHECK(evtStore()->symLink(cellPtrs, static_cast<INavigable4MomentumCollection*> (nullptr)));
  }
 
   ATH_MSG_VERBOSE("The tau candidate container has been modified");
