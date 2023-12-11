@@ -18,21 +18,27 @@ namespace {
     } while (false);
 namespace xAOD {
 MMClusterAuxContainer_v1::MMClusterAuxContainer_v1()
-    : AuxContainerBase() {
-    /// Identifier variable hopefully unique
-    AUX_VARIABLE(m_identifier);
-    AUX_VARIABLE(m_identifierHash);
-  
-    AUX_MEASUREMENTVAR(m_localPosition, 1)
-    AUX_MEASUREMENTVAR(m_localCovariance, 1)
-    
-    /// Names may be shared across different subdetectors
-    PRD_AUXVARIABLE(m_time);
-    PRD_AUXVARIABLE(m_charge);
-    PRD_AUXVARIABLE(m_driftDist);
-    PRD_AUXVARIABLE(m_angle);
-    PRD_AUXVARIABLE(m_chiSqProb);
-    PRD_AUXVARIABLE(m_author);
+   : AuxContainerBase() {
+   /// Identifier variable hopefully unique
+   AUX_VARIABLE(m_identifier);
+   AUX_VARIABLE(m_identifierHash);
+
+   AUX_MEASUREMENTVAR(m_localPosition, 1)
+   AUX_MEASUREMENTVAR(m_localCovariance, 1)
+
+   /// Names may be shared across different subdetectors
+   PRD_AUXVARIABLE(m_time);
+   PRD_AUXVARIABLE(m_charge);
+   PRD_AUXVARIABLE(m_driftDist);
+   PRD_AUXVARIABLE(m_angle);
+   PRD_AUXVARIABLE(m_chiSqProb);
+   PRD_AUXVARIABLE(m_author);
+   PRD_AUXVARIABLE(m_quality);
+   PRD_AUXVARIABLE(m_stripNumbers);
+   PRD_AUXVARIABLE(m_stripTimes);
+   PRD_AUXVARIABLE(m_stripCharges);
+   PRD_AUXVARIABLE(m_stripDriftDist);
+   PRD_AUXVARIABLE(m_stripDriftErrors);
 }
 }  // namespace xAOD
 #undef PRD_AUXVARIABLE

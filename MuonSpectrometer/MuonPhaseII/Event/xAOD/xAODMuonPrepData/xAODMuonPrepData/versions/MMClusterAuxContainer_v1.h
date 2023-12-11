@@ -28,10 +28,17 @@ class MMClusterAuxContainer_v1 : public AuxContainerBase {
 
     std::vector<uint16_t> m_time{};
     std::vector<uint32_t> m_charge{}; 
-    std::vector<float> m_driftDist{};
-    std::vector<float> m_angle{};
-    std::vector<float> m_chiSqProb{};
-    std::vector<uint32_t> m_author{};
+    std::vector<float>    m_driftDist{};
+    std::vector<float>    m_angle{};
+    std::vector<float>    m_chiSqProb{};
+    std::vector<uint16_t> m_author{};
+    std::vector<uint16_t> m_quality{};
+
+    std::vector<std::vector<uint16_t>>      m_stripNumbers{{}};
+    std::vector<std::vector<int16_t>>       m_stripTimes{{}};
+    std::vector<std::vector<int>>           m_stripCharges{{}};
+    std::vector<std::vector<float>>         m_stripDriftDist{{}};
+    std::vector<std::vector<Amg::MatrixX>>  m_stripDriftErrors{{}};
     /// @}
 };
 }  // namespace xAOD
