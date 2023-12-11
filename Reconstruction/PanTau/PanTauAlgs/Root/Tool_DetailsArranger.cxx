@@ -12,7 +12,7 @@
 #include "PanTauAlgs/HelperFunctions.h"
 
 
-bool sortBDTscore(ElementLink< xAOD::PFOContainer > i, ElementLink< xAOD::PFOContainer > j){
+bool sortBDTscore(const ElementLink< xAOD::PFOContainer >& i, const ElementLink< xAOD::PFOContainer >& j){
 
   return ( i.cachedElement()->bdtPi0Score() > j.cachedElement()->bdtPi0Score() );
 }
@@ -27,8 +27,7 @@ PanTau::Tool_DetailsArranger::Tool_DetailsArranger(const std::string& name) :
 }
 
 
-PanTau::Tool_DetailsArranger::~Tool_DetailsArranger() {
-}
+PanTau::Tool_DetailsArranger::~Tool_DetailsArranger() = default;
 
 
 StatusCode PanTau::Tool_DetailsArranger::initialize() {
@@ -165,8 +164,7 @@ void PanTau::Tool_DetailsArranger::addPanTauDetailToTauJet(PanTauSeed* inSeed,
     break;
   }
 
-  return;
-}
+  }
 
 
 StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, xAOD::ParticleContainer& pi0Container, xAOD::PFOContainer& neutralPFOContainer) const {
@@ -236,7 +234,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
     if( decayModeFinal == xAOD::TauJetParameters::Mode_1p1n && decayModeProto == xAOD::TauJetParameters::Mode_1p0n ){
 
       // add the highest BDT-score neutral from the sub-alg:
-      if(preSelected_neutralPFOLinks.size() > 0) preLinkPi0PFOLinks.push_back( preSelected_neutralPFOLinks.at(0) );
+      if(!preSelected_neutralPFOLinks.empty()) preLinkPi0PFOLinks.push_back( preSelected_neutralPFOLinks.at(0) );
       else ATH_MSG_WARNING("No neutral PFO Links although there should be!!");
 
       // set the mass:
@@ -262,7 +260,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
 	// copy all (really only one) pi0s from the sub-alg and add
 	// the highest BDT-score neutral:
 	preLinkPi0PFOLinks=pi0PFOLinks;
-	if(preSelected_neutralPFOLinks.size() > 0) preLinkPi0PFOLinks.push_back( preSelected_neutralPFOLinks.at(0) );
+	if(!preSelected_neutralPFOLinks.empty()) preLinkPi0PFOLinks.push_back( preSelected_neutralPFOLinks.at(0) );
 	else ATH_MSG_WARNING("No neutral PFO Links although there should be!!");
 	  
 	// set the mass:
@@ -281,7 +279,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
     } else if( decayModeFinal == xAOD::TauJetParameters::Mode_3pXn && decayModeProto == xAOD::TauJetParameters::Mode_3p0n ){
 
       // add the highest BDT-score neutral from the sub-alg:
-      if(preSelected_neutralPFOLinks.size() > 0) preLinkPi0PFOLinks.push_back( preSelected_neutralPFOLinks.at(0) );
+      if(!preSelected_neutralPFOLinks.empty()) preLinkPi0PFOLinks.push_back( preSelected_neutralPFOLinks.at(0) );
       else ATH_MSG_WARNING("No neutral PFO Links although there should be!!");
 	
       // set the mass:
@@ -329,12 +327,11 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
 
 
 // Calculate final 4-vector:
-void PanTau::Tool_DetailsArranger::SetHLVTau( PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, const std::string& inputAlg, const std::string& varTypeName_Basic) const {
+void PanTau::Tool_DetailsArranger::SetHLVTau( PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, const std::string& inputAlg, const std::string& varTypeName_Basic) {
 
   std::vector< ElementLink< xAOD::PFOContainer > > finalChrgPFOLinks       = tauJet->chargedPFOLinks();
   std::vector< ElementLink< xAOD::PFOContainer > > finalPi0PFOLinks        = tauJet->pi0PFOLinks();
-  std::vector< ElementLink< xAOD::PFOContainer > > finalNeutralPFOLinks    = tauJet->neutralPFOLinks();
-
+  
   unsigned int NCharged    = finalChrgPFOLinks.size();
   unsigned int NPi0Neut    = finalPi0PFOLinks.size();
 
@@ -355,8 +352,6 @@ void PanTau::Tool_DetailsArranger::SetHLVTau( PanTau::PanTauSeed* inSeed, xAOD::
   featureMap->addFeature(inputAlg + "_" + varTypeName_Basic + "_FinalMomentumCore_eta", tlv_PanTau_Final.Eta() );
   featureMap->addFeature(inputAlg + "_" + varTypeName_Basic + "_FinalMomentumCore_phi", tlv_PanTau_Final.Phi() );
   featureMap->addFeature(inputAlg + "_" + varTypeName_Basic + "_FinalMomentumCore_m", tlv_PanTau_Final.M() );
-
-  return;
 }
 
 
@@ -381,17 +376,15 @@ bool PanTau::Tool_DetailsArranger::HasMultPi0sInOneCluster(const xAOD::PFO* pfo,
 }
 
 
-void PanTau::Tool_DetailsArranger::SetNeutralConstituentMass(xAOD::PFO* neutral_pfo, double mass) const {
+void PanTau::Tool_DetailsArranger::SetNeutralConstituentMass(xAOD::PFO* neutral_pfo, double mass) {
 
   TLorentzVector momentum; 
   PanTau::SetP4EEtaPhiM( momentum, neutral_pfo->e(), neutral_pfo->eta(), neutral_pfo->phi(), mass);
   neutral_pfo->setP4(momentum.Pt(), neutral_pfo->eta(), neutral_pfo->phi(), mass);
-
-  return;    
 }
 
 
-void PanTau::Tool_DetailsArranger::SetNeutralConstituentVectorMasses(const std::vector< ElementLink<xAOD::PFOContainer> >& neutralPFOLinks, xAOD::PFOContainer& neutralPFOContainer, double mass) const {
+void PanTau::Tool_DetailsArranger::SetNeutralConstituentVectorMasses(const std::vector< ElementLink<xAOD::PFOContainer> >& neutralPFOLinks, xAOD::PFOContainer& neutralPFOContainer, double mass) {
 
   for (const auto& link : neutralPFOLinks) {
     size_t index = link.index();
@@ -399,8 +392,7 @@ void PanTau::Tool_DetailsArranger::SetNeutralConstituentVectorMasses(const std::
     SetNeutralConstituentMass(curNeutralPFO, mass);
   }
     
-  return;    
-}
+  }
 
 
 std::vector< ElementLink< xAOD::PFOContainer > > PanTau::Tool_DetailsArranger::CollectConstituentsAsPFOLinks( PanTau::PanTauSeed* inSeed,
@@ -449,7 +441,7 @@ std::vector< ElementLink< xAOD::PFOContainer > > PanTau::Tool_DetailsArranger::C
 
 
 //______________________________________________________________________________
-void PanTau::Tool_DetailsArranger::createPi0Vectors(xAOD::TauJet* tauJet, std::vector<TLorentzVector>& vPi0s, std::vector< std::vector< ElementLink< xAOD::PFOContainer > > > &vec_pi0pfos) const
+void PanTau::Tool_DetailsArranger::createPi0Vectors(xAOD::TauJet* tauJet, std::vector<TLorentzVector>& vPi0s, std::vector< std::vector< ElementLink< xAOD::PFOContainer > > > &vec_pi0pfos) 
 {
   // reset the pi0s
   vPi0s.clear();

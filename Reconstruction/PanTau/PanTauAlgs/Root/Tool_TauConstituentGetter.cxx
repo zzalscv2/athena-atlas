@@ -21,8 +21,7 @@ PanTau::Tool_TauConstituentGetter::Tool_TauConstituentGetter(const std::string& 
   declareProperty("Tool_InputConverterName",      m_Tool_InputConverterName,     "Link to tool to convert into TauConstituents");
 }
 
-PanTau::Tool_TauConstituentGetter::~Tool_TauConstituentGetter() {
-}
+PanTau::Tool_TauConstituentGetter::~Tool_TauConstituentGetter() = default;
 
 StatusCode PanTau::Tool_TauConstituentGetter::initialize() {
 

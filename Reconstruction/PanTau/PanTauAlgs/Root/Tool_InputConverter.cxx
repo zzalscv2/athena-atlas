@@ -20,8 +20,7 @@ PanTau::Tool_InputConverter::Tool_InputConverter( const std::string& name ) :
   declareProperty("Tool_InformationStoreName", m_Tool_InformationStoreName="", "Optional Name for InformationStore insance in ABR");
 }
 
-PanTau::Tool_InputConverter::~Tool_InputConverter() {
-}
+PanTau::Tool_InputConverter::~Tool_InputConverter() = default;
 
 StatusCode PanTau::Tool_InputConverter::initialize() {
 
@@ -45,8 +44,7 @@ StatusCode PanTau::Tool_InputConverter::initialize() {
 
 
 bool PanTau::Tool_InputConverter::passesPreselectionEnergy(double energy) const {
-  if (energy < m_Config_TauConstituents_PreselectionMinEnergy) return false;
-  return true;
+  return energy >= m_Config_TauConstituents_PreselectionMinEnergy;
 }
 
 

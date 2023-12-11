@@ -9,9 +9,9 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
-#include <vector>
+#include <cmath>
 #include <map>
-#include <math.h>
+#include <vector>
 
 #include "PanTauAlgs/Tool_FeatureExtractor.h"
 #include "PanTauAlgs/Tool_InformationStore.h"
@@ -77,7 +77,7 @@ StatusCode PanTau::Tool_FeatureExtractor::initialize() {
 
 
 void PanTau::Tool_FeatureExtractor::fillVariantsSeedEt(const std::vector<PanTau::TauConstituent*>& tauConstituents,
-						       std::map<std::string, double>& variants_SeedEt) const {
+						       std::map<std::string, double>& variants_SeedEt) {
 
   //use different approaches to calculate total energy of seed:
   variants_SeedEt["EtAllConsts"] = 0.0;
@@ -109,14 +109,13 @@ void PanTau::Tool_FeatureExtractor::fillVariantsSeedEt(const std::vector<PanTau:
         
   }//end loop over constituents in seed
     
-  return;
-}
+  }
 
 
 void PanTau::Tool_FeatureExtractor::addFeatureWrtSeedEnergy(PanTau::TauFeature* targetMap,
 							    const std::string& featName,
 							    double numerator,
-							    const std::map<std::string, double>& denominatorMap) const {
+							    const std::map<std::string, double>& denominatorMap) {
   std::map<std::string, double>::const_iterator it = denominatorMap.begin();
   for(; it!=denominatorMap.end(); ++it) {
     std::string FullName = featName + it->first;
@@ -133,7 +132,7 @@ StatusCode PanTau::Tool_FeatureExtractor::execute(PanTau::PanTauSeed* inSeed) co
   bool noSelConstituents           = inSeed->isOfTechnicalQuality(PanTau::PanTauSeed::t_NoSelectedConstituents);
   bool noValidInputTau             = inSeed->isOfTechnicalQuality(PanTau::PanTauSeed::t_NoValidInputTau);
   bool isBadSeed                   = (noAnyConstituents || noSelConstituents || noValidInputTau);
-  if(m_Config_UseEmptySeeds == true) isBadSeed = noValidInputTau;
+  if(static_cast<bool>(m_Config_UseEmptySeeds)) isBadSeed = noValidInputTau;
     
   if (isBadSeed) {
     ATH_MSG_DEBUG("Seed is not valid for feature extraction (no constituents or no valid input tau) - just fill isPanTauCandidate feature");
@@ -325,13 +324,13 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   TLorentzVector  tlv_2nd_Et;
   TLorentzVector  tlv_3rd_Et;
     
-  if(list_TypeConstituents.size() > 0) tlv_1st_Et = list_TypeConstituents[0]->p4();
+  if(!list_TypeConstituents.empty()) tlv_1st_Et = list_TypeConstituents[0]->p4();
   if(list_TypeConstituents.size() > 1) tlv_2nd_Et = list_TypeConstituents[1]->p4();
   if(list_TypeConstituents.size() > 2) tlv_3rd_Et = list_TypeConstituents[2]->p4();
     
     
   TLorentzVector tlv_Last_Et;
-  if(list_TypeConstituents.size() > 0) tlv_Last_Et = list_TypeConstituents.back()->p4();
+  if(!list_TypeConstituents.empty()) tlv_Last_Et = list_TypeConstituents.back()->p4();
     
   //make an additional list of constituents, but now ordered by BDT value
   std::vector<PanTau::TauConstituent*>    list_TypeConstituents_SortBDT = list_TypeConstituents;
@@ -341,7 +340,7 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   TLorentzVector  tlv_2nd_BDT;
   TLorentzVector  tlv_3rd_BDT;
     
-  if(list_TypeConstituents_SortBDT.size() > 0) tlv_1st_BDT = list_TypeConstituents_SortBDT[0]->p4();
+  if(!list_TypeConstituents_SortBDT.empty()) tlv_1st_BDT = list_TypeConstituents_SortBDT[0]->p4();
   if(list_TypeConstituents_SortBDT.size() > 1) tlv_2nd_BDT = list_TypeConstituents_SortBDT[1]->p4();
   if(list_TypeConstituents_SortBDT.size() > 2) tlv_3rd_BDT = list_TypeConstituents_SortBDT[2]->p4();
     
@@ -507,7 +506,7 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   //! Shot information ///////////////////////////////////////////
   prefixVARType = PanTau::Tool_FeatureExtractor::varTypeName_Shots();
   //only execute if the constituent type is neutral
-  if(PanTau::TauConstituent::isNeutralType(tauConstituentType) == true) {
+  if(PanTau::TauConstituent::isNeutralType(tauConstituentType)) {
         
     TLorentzVector          totalTLV_SumShots       = TLorentzVector(0., 0., 0., 0.);
     unsigned int            totalPhotonsInSeed      = 0;
@@ -895,9 +894,9 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
     }
   }    
     
-  PanTau::TauConstituent* tauConst_NeutralLargestAngle = m_HelperFunctions.getNeutralConstWithLargestAngle(tlv_System[et_Charged],
+  PanTau::TauConstituent* tauConst_NeutralLargestAngle = PanTau::HelperFunctions::getNeutralConstWithLargestAngle(tlv_System[et_Charged],
 													    list_NeutralConstituents);
-  if(tauConst_NeutralLargestAngle != 0) {
+  if(tauConst_NeutralLargestAngle != nullptr) {
     TLorentzVector tlv_NeutralLargestAngle = tauConst_NeutralLargestAngle->p4();
         
     tauFeatures->addFeature(inputAlgName + "_" + prefixVARType + "_FarthestNeutral_AngleToCharged", tlv_System[et_Charged].Angle(tlv_NeutralLargestAngle.Vect()) );
@@ -982,7 +981,7 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
       std::string name_cType = PanTau::TauConstituent::getTypeName((PanTau::TauConstituent::Type)et_c);
       std::string name_nType = PanTau::TauConstituent::getTypeName((PanTau::TauConstituent::Type)et_n);
             
-      if(tlv_Sys_OK[et_c]==false || tlv_Sys_OK[et_n]==false) continue;
+      if(!tlv_Sys_OK[et_c] || !tlv_Sys_OK[et_n]) continue;
             
       //mean Et fraction of charged+neutral system wrt total ET
       if(num_EFOs[et_c] + num_EFOs[et_n] > 0.) {

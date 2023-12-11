@@ -51,7 +51,7 @@ namespace PanTau {
     ToolHandle<PanTau::ITool_InformationStore> m_Tool_InformationStore;
     std::string  m_Tool_InformationStoreName;
         
-    double                  m_MaxEta;
+    double                  m_MaxEta = 0.0;
     std::vector<double>     m_BinEdges_Eta;
     std::vector<double>     m_Selection_Neutral_EtaBinned_EtCut;
     std::vector<double>     m_Selection_Pi0Neut_EtaBinned_EtCut;

@@ -17,7 +17,7 @@ PanTau::TauConstituent::TauConstituent() :
 }
 
 
-PanTau::TauConstituent::TauConstituent(TLorentzVector   itsMomentum,
+PanTau::TauConstituent::TauConstituent(const TLorentzVector&   itsMomentum,
 				       int              itsCharge,
 				       const std::vector<int>& itsType,
 				       double           itsBDTValue,
@@ -34,17 +34,9 @@ PanTau::TauConstituent::TauConstituent(TLorentzVector   itsMomentum,
 }
 
 
-PanTau::TauConstituent::TauConstituent(const PanTau::TauConstituent& rhs) :
-  IParticle(rhs),
-  m_p4(rhs.m_p4),
-  m_TypeFlags(rhs.m_TypeFlags),
-  m_BDTValue(rhs.m_BDTValue),
-  m_Charge(rhs.m_Charge),
-  m_PFO(rhs.m_PFO),
-  m_Shots(rhs.m_Shots),
-  m_nPhotonsInShot(rhs.m_nPhotonsInShot)
-{
-}
+PanTau::TauConstituent::TauConstituent(const PanTau::TauConstituent& rhs) 
+  
+= default;
 
 
 PanTau::TauConstituent::~TauConstituent()
@@ -159,7 +151,6 @@ xAOD::Type::ObjectType PanTau::TauConstituent::type() const {
 void PanTau::TauConstituent::removeTypeFlag(TauConstituent::Type aType) {
   unsigned int typeIndex = (unsigned int)aType;
   m_TypeFlags.at(typeIndex) = 0;
-  return;
 }
 
 

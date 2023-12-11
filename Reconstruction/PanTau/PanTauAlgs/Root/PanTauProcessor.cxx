@@ -46,8 +46,7 @@ PanTau::PanTauProcessor::PanTauProcessor(const std::string& name)
 }
 
 
-PanTau::PanTauProcessor::~PanTauProcessor() {
-}
+PanTau::PanTauProcessor::~PanTauProcessor() = default;
 
 
 StatusCode PanTau::PanTauProcessor::initialize() {
@@ -130,12 +129,12 @@ StatusCode PanTau::PanTauProcessor::executePanTau(xAOD::TauJet& pTau, xAOD::Part
     bool hasCoreConstituents = false;
     for(unsigned int iConst=0; iConst<list_SelectedTauConstituents.size(); iConst++) {
       PanTau::TauConstituent* curConst = list_SelectedTauConstituents.at(iConst);
-      if(curConst->isOfType(PanTau::TauConstituent::t_Charged) == true) {hasCoreConstituents = true; break;};
-      if(curConst->isOfType(PanTau::TauConstituent::t_Neutral) == true) {hasCoreConstituents = true; break;};
-      if(curConst->isOfType(PanTau::TauConstituent::t_Pi0Neut) == true) {hasCoreConstituents = true; break;};
+      if(curConst->isOfType(PanTau::TauConstituent::t_Charged)) {hasCoreConstituents = true; break;};
+      if(curConst->isOfType(PanTau::TauConstituent::t_Neutral)) {hasCoreConstituents = true; break;};
+      if(curConst->isOfType(PanTau::TauConstituent::t_Pi0Neut)) {hasCoreConstituents = true; break;};
     }
       
-    if(hasCoreConstituents == false) {
+    if(!hasCoreConstituents) {
       pantauSeed_TechnicalQuality.at((int)PanTau::PanTauSeed::t_NoSelectedConstituents) = 1; //use this flag at the moment as a quick hack
     }      
   }
@@ -179,7 +178,7 @@ StatusCode PanTau::PanTauProcessor::executePanTau(xAOD::TauJet& pTau, xAOD::Part
 }
 
 
-void PanTau::PanTauProcessor::fillDefaultValuesToTau(xAOD::TauJet* tauJet) const {
+void PanTau::PanTauProcessor::fillDefaultValuesToTau(xAOD::TauJet* tauJet) {
   //default four momentum set to previous calibration state: TauEnergyScale
   TLorentzVector defaultP4 = tauJet->p4(xAOD::TauJetParameters::TauEnergyScale);
   tauJet->setP4(xAOD::TauJetParameters::PanTauCellBased, defaultP4.Pt(), defaultP4.Eta(), defaultP4.Phi(), defaultP4.M());
@@ -195,6 +194,4 @@ void PanTau::PanTauProcessor::fillDefaultValuesToTau(xAOD::TauJet* tauJet) const
   //neutrals
   std::vector< ElementLink< xAOD::PFOContainer > > neutralPFOLinks = tauJet->protoNeutralPFOLinks();
   tauJet->setNeutralPFOLinks(neutralPFOLinks);
-    
-  return;
 }

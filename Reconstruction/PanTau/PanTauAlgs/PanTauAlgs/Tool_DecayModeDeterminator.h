@@ -65,12 +65,12 @@ namespace PanTau {
         std::string m_varTypeName_Prefix_Basic;
         
         //cut values for CellBased
-        double           m_BDTCutValue_R10X_CellBased;
-        double           m_BDTCutValue_R11X_CellBased;
-        double           m_BDTCutValue_R110_CellBased;
-        double           m_BDTCutValue_R1XX_CellBased;
-        double           m_BDTCutValue_R30X_CellBased;
-        double           m_BDTCutValue_R3XX_CellBased;
+        double           m_BDTCutValue_R10X_CellBased = 0.0;
+        double           m_BDTCutValue_R11X_CellBased = 0.0;
+        double           m_BDTCutValue_R110_CellBased = 0.0;
+        double           m_BDTCutValue_R1XX_CellBased = 0.0;
+        double           m_BDTCutValue_R30X_CellBased = 0.0;
+        double           m_BDTCutValue_R3XX_CellBased = 0.0;
 
 	bool m_init=false;
   public:

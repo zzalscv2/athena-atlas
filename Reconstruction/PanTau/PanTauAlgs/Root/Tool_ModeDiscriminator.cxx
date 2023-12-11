@@ -28,8 +28,7 @@ PanTau::Tool_ModeDiscriminator::Tool_ModeDiscriminator(const std::string& name) 
 }
 
 
-PanTau::Tool_ModeDiscriminator::~Tool_ModeDiscriminator() {
-}
+PanTau::Tool_ModeDiscriminator::~Tool_ModeDiscriminator() = default;
 
 
 StatusCode PanTau::Tool_ModeDiscriminator::initialize() {
@@ -123,8 +122,7 @@ void PanTau::Tool_ModeDiscriminator::updateReaderVariables(PanTau::PanTauSeed* i
     list_BDTVariableValues[iVar] = static_cast<float>(newValue);
   }//end loop over BDT vars
     
-  return;
-}
+  }
 
 
 double PanTau::Tool_ModeDiscriminator::getResponse(PanTau::PanTauSeed* inSeed, bool& isOK) const {
