@@ -13,13 +13,11 @@ find_package( TBB )
 
 # Component(s) in the package:
 atlas_add_library( ActsGeometryLib
-                   src/AlignmentStore.cxx
                    src/ActsDetectorElement.cxx
                    src/ActsLayerBuilder.cxx
                    src/ActsStrawLayerBuilder.cxx
                    src/ActsHGTDLayerBuilder.cxx
                    src/ActsTrackingGeometrySvc.cxx
-                   src/ATLASSourceLink.cxx
                    src/DetectorVolumeSvc.cxx
                    src/SimpleCylinderDetBuilderTool.cxx
                    src/util/*.cxx
@@ -50,10 +48,6 @@ atlas_add_library( ActsGeometryLib
                    PRIVATE_LINK_LIBRARIES
                    PathResolver
                    TrkGeometry
-                   TrkFitterUtils
-                   TrkTrackSummary
-                   TrkToolInterfaces
-                   TrkFitterInterfaces
                    BeamPipeGeoModelLib
                    )
 
@@ -92,14 +86,8 @@ atlas_add_component( ActsGeometry
                      StoreGateLib
                      TRT_ReadoutGeometry
                      TrkGeometry
-                     TrkExInterfaces
                      TrkParameters
-                     TrkSurfaces
-                     TrkFitterUtils
-                     TrkTrackSummary
-                     xAODTracking 
-                     TrkToolInterfaces
-                     TrkFitterInterfaces)
+                     TrkSurfaces )
 
 # Install files from the package:
 atlas_install_joboptions( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
