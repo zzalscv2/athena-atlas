@@ -190,8 +190,7 @@ private:
   static bool fromHadron(const xAOD::TruthParticle* p, const xAOD::TruthParticle *hadptr, bool &fromTau, bool &fromBSM);
 
   //
-  static MCTruthPartClassifier::ParticleOrigin defHadronType(int);
-  static bool isHadron(const xAOD::TruthParticle*);
+  MCTruthPartClassifier::ParticleOrigin defHadronType(int);
   static MCTruthPartClassifier::ParticleType defTypeOfHadron(int);
   static MCTruthPartClassifier::ParticleOrigin convHadronTypeToOrig(MCTruthPartClassifier::ParticleType pType,
                                                                     int motherPDG);
