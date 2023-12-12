@@ -11,8 +11,8 @@ atlas_add_tpcnv_library( GeneratorObjectsTPCnv
                          src/*.cxx
                          PUBLIC_HEADERS GeneratorObjectsTPCnv
                          PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                         LINK_LIBRARIES AthenaPoolCnvSvcLib AtlasHepMCLib GaudiKernel GeneratorObjects
-                         PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AthAllocators AthenaKernel GenInterfacesLib StoreGateLib TestTools TruthUtils)
+                         LINK_LIBRARIES AthenaPoolCnvSvcLib AtlasHepMCLib GaudiKernel GeneratorObjects GenInterfacesLib
+                         PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AthAllocators AthenaKernel StoreGateLib TestTools TruthUtils)
 
 atlas_add_dictionary( GeneratorObjectsTPCnvDict
                       GeneratorObjectsTPCnv/GeneratorObjectsTPCnvDict.h
