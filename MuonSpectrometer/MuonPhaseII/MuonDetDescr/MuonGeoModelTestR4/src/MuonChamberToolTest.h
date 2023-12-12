@@ -6,7 +6,7 @@
 
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
 
-#include <MuonStationGeoHelpers/IActsMuonChamberTool.h>
+#include <MuonStationGeoHelpers/IMuonStationLayerSurfaceTool.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <ActsGeometryInterfaces/IDetectorVolumeSvc.h>
@@ -48,7 +48,7 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
 
         ServiceHandle<ActsTrk::IDetectorVolumeSvc> m_detVolSvc{this,"DetectorVolumeSvc", "DetectorVolumeSvc"};
         
-        PublicToolHandle<MuonGMR4::IActsMuonChamberTool> m_chambTool{this, "ChamberTool", "" };
+        PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_chambTool{this, "LayerGeoTool", "" };
 
         const MuonDetectorManager* m_detMgr{nullptr};
 

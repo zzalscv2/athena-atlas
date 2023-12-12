@@ -29,7 +29,9 @@ namespace MuonGMR4{
      m_cenCache = m_chambTool->buildChambers();
      return StatusCode::SUCCESS;
   }
-  
+  const ChamberSet& MuonStationLayerSurfaceTool::getAllChambers() const {
+    return m_cenCache;
+  }
   const Amg::Transform3D& MuonStationLayerSurfaceTool::chambCenterToGlobal(const ActsGeometryContext& gctx, 
                                                                            const Identifier& id) const {
         const ChamberSet::const_iterator cache_itr = m_cenCache.find(id);

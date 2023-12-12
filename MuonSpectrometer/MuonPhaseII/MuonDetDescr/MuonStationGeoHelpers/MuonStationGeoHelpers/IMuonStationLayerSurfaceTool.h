@@ -5,7 +5,7 @@
 #define MUONSTATIONLAYERSURFACESVC_IMuonStationLayerSurfaceTool_H
 
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
-
+#include <MuonStationGeoHelpers/MuonChamber.h>
 #include <GaudiKernel/IAlgTool.h>
 #include <GaudiKernel/INamedInterface.h>
 
@@ -21,7 +21,7 @@ namespace MuonGMR4{
      * seeding and segement finding in each muon chamber. 
      * 
      *  The instances of the tool are required to be public. i.e.
-     *  Include it via PublicToolHandle<IMuonStationLayerSurfaceTool> m_surfTool{};
+     *  Include it via PublicToolHandle<IMuonStationLayerSurfaceTool> m_surfTool{this, "LayerGeoTool", ""};
     */  
     class MuonChamber;
     class IMuonStationLayerSurfaceTool: virtual public IAlgTool {        
@@ -42,6 +42,9 @@ namespace MuonGMR4{
         virtual unsigned int storeAlignment(ActsTrk::RawGeomAlignStore& alignStore) const = 0;
         /// Returns the pointer to a chamber object
         virtual const MuonChamber* getChamber(const Identifier& id) const = 0;
+        /// Returns the muon chamber set cache
+        virtual const ChamberSet& getAllChambers() const = 0;
+
     };
 }
 #endif
