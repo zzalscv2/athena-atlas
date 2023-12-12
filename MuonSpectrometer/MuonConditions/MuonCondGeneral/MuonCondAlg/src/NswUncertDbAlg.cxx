@@ -123,14 +123,17 @@ StatusCode NswUncertDbAlg::parseDataFromJSON(const nlohmann::json& lines,
                          <<multilayer<<", "<<gasGap);
             return StatusCode::FAILURE;
         }
-        ATH_MSG_VERBOSE("Load uncertainties for channel " << m_idHelperSvc->toString(errorCalibId));
-
+        
         const uint16_t minStrip = line["minStrip"];
         const uint16_t maxStrip = line["maxStrip"];
         const uint8_t author = line["clusterAuthor"];
         const std::string modelName = line["modelName"];
         std::vector<double> modelPars = line["modelPars"];
-       
+
+        ATH_MSG_VERBOSE("Load uncertainties for channel " <<m_idHelperSvc->toString(errorCalibId)<<" "<<modelPars
+                      <<"model name: "<<modelName<<" author: "<<static_cast<int>(author));
+
+
         NswErrorCalibData::ErrorConstants constants{modelName, author,
                                                     minStrip, maxStrip, std::move(modelPars)};
 

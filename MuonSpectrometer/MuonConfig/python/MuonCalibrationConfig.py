@@ -175,10 +175,15 @@ def NswErrorCalibDbAlgCfg(flags, name = "NswErrorCalibDbAlg", **kwargs):
     folderNames = []
     if flags.Common.isOnline:
         folderNames+=["/MDT/Onl/MM/ClusterUncertainties/SIDEA",
-                      "/MDT/Onl/MM/ClusterUncertainties/SIDEC"]
+                      "/MDT/Onl/MM/ClusterUncertainties/SIDEC",
+                      "/TGC/Onl/NSW/ClusterUncertainties/SIDEA",
+                      "/TGC/Onl/NSW/ClusterUncertainties/SIDEC",
+                      ]
     else:
         folderNames+=["/MDT/MM/ClusterUncertainties/SIDEA", 
-                      "/MDT/MM/ClusterUncertainties/SIDEC"]
+                      "/MDT/MM/ClusterUncertainties/SIDEC",
+                      "/TGC/NSW/ClusterUncertainties/SIDEA",
+                      "/TGC/NSW/ClusterUncertainties/SIDEC"]
     
     kwargs.setdefault("ReadKeys", folderNames)
     if "readFromJSON" not in kwargs:
@@ -188,26 +193,26 @@ def NswErrorCalibDbAlgCfg(flags, name = "NswErrorCalibDbAlg", **kwargs):
             result.merge(addFolders(flags,["/MDT/Onl/MM/ClusterUncertainties/SIDEA"], className='CondAttrListCollection', detDb=sheme, tag="MmClustUncSideA-CentroidOnly-Inflate5-AddClustTimeProj0p4-v2"))
             result.merge(addFolders(flags,["/MDT/Onl/MM/ClusterUncertainties/SIDEC"], className='CondAttrListCollection', detDb=sheme, tag="MmClustUncSideC-CentroidOnly-Inflate5-AddClustTimeProj0p4-v2"))        
 
-            #sheme = "TGC_ONL"
-            #result.merge(addFolders(flags,["/TGC/Onl/NSW/ClusterUncertainties/SIDEA"], className='CondAttrListCollection', detDb=sheme, tag="MmClustUncSideA-CentroidOnly-Inflate5-v1"))
-            #result.merge(addFolders(flags,["/TGC/Onl/NSW/ClusterUncertainties/SIDEC"], className='CondAttrListCollection', detDb=sheme, tag="MmClustUncSideC-CentroidOnly-Inflate5-v1"))        
+            sheme = "TGC_ONL"
+            result.merge(addFolders(flags,["/TGC/Onl/NSW/ClusterUncertainties/SIDEA"], className='CondAttrListCollection', detDb=sheme, tag="sTgcClustUncSideA-CentroidOnly-Inflate5-v1"))
+            result.merge(addFolders(flags,["/TGC/Onl/NSW/ClusterUncertainties/SIDEC"], className='CondAttrListCollection', detDb=sheme, tag="sTgcClustUncSideC-CentroidOnly-Inflate5-v1"))        
         elif flags.Input.isMC:
             sheme = "MDT_OFL"
             result.merge(addFolders(flags,["/MDT/MM/ClusterUncertainties/SIDEA"], className='CondAttrListCollection', detDb=sheme, tag="MmClustUncSideA-CentroidOnly-Nominal-v2"))
             result.merge(addFolders(flags,["/MDT/MM/ClusterUncertainties/SIDEC"], className='CondAttrListCollection', detDb=sheme, tag="MmClustUncSideC-CentroidOnly-Nominal-v2"))        
 
-            #sheme = "TGC_OFL"
-            #result.merge(addFolders(flags,["/TGC/NSW/ClusterUncertainties/SIDEA"], className='CondAttrListCollection', detDb=sheme, tag="MmClustUncSideA-CentroidOnly-Inflate5-v1"))
-            #result.merge(addFolders(flags,["/TGC/NSW/ClusterUncertainties/SIDEC"], className='CondAttrListCollection', detDb=sheme, tag="MmClustUncSideC-CentroidOnly-Inflate5-v1"))        
+            sheme = "TGC_OFL"
+            result.merge(addFolders(flags,["/TGC/NSW/ClusterUncertainties/SIDEA"], className='CondAttrListCollection', detDb=sheme, tag="sTgcClustUncSideA-CentroidOnly-Nominal-v1"))
+            result.merge(addFolders(flags,["/TGC/NSW/ClusterUncertainties/SIDEC"], className='CondAttrListCollection', detDb=sheme, tag="sTgcClustUncSideC-CentroidOnly-Nominal-v1"))        
         
         else: # data
             sheme = "MDT_OFL"
             result.merge(addFolders(flags,["/MDT/MM/ClusterUncertainties/SIDEA"], className='CondAttrListCollection', detDb=sheme, tag="MmClustUncSideA-CentroidOnly-Inflate5-AddClustTimeProj0p4-v2"))
             result.merge(addFolders(flags,["/MDT/MM/ClusterUncertainties/SIDEC"], className='CondAttrListCollection', detDb=sheme, tag="MmClustUncSideC-CentroidOnly-Inflate5-AddClustTimeProj0p4-v2"))        
 
-            #sheme = "TGC_OFL"
-            #result.merge(addFolders(flags,["/TGC/NSW/ClusterUncertainties/SIDEA"], className='CondAttrListCollection', detDb=sheme, tag="MmClustUncSideA-CentroidOnly-Inflate5-v1"))
-            #result.merge(addFolders(flags,["/TGC/NSW/ClusterUncertainties/SIDEC"], className='CondAttrListCollection', detDb=sheme, tag="MmClustUncSideC-CentroidOnly-Inflate5-v1"))        
+            sheme = "TGC_OFL"
+            result.merge(addFolders(flags,["/TGC/NSW/ClusterUncertainties/SIDEA"], className='CondAttrListCollection', detDb=sheme, tag="sTgcClustUncSideA-CentroidOnly-Inflate5-v1"))
+            result.merge(addFolders(flags,["/TGC/NSW/ClusterUncertainties/SIDEC"], className='CondAttrListCollection', detDb=sheme, tag="sTgcClustUncSideC-CentroidOnly-Inflate5-v1"))        
     
     the_alg = CompFactory.NswUncertDbAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)

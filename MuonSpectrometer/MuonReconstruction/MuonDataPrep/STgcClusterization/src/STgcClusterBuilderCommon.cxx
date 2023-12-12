@@ -7,9 +7,10 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 
-Muon::STgcClusterBuilderCommon::STgcClusterBuilderCommon(const sTgcIdHelper& idHelper)
+Muon::STgcClusterBuilderCommon::STgcClusterBuilderCommon(const sTgcIdHelper& idHelper, const NswErrorCalibData& errorCalibData)
         : AthMessaging("STgcClusterBuilderCommon"),
-          m_stgcIdHelper(idHelper)
+          m_stgcIdHelper(idHelper),
+          m_errorCalibData{errorCalibData}
 {
 }
 
@@ -95,6 +96,7 @@ std::optional<Muon::STgcClusterPosition> Muon::STgcClusterBuilderCommon::weighte
   double sumWeight{0.0};
   double sigmaSq{0.0};
   Identifier clusterId;
+  Amg::Vector3D clusDir{Amg::Vector3D::Zero()};
 
   ATH_MSG_DEBUG("Running weighted average method on a cluster with " << cluster.size() << " strips");
   for (const Muon::sTgcPrepData& prd : cluster) {
@@ -107,6 +109,7 @@ std::optional<Muon::STgcClusterPosition> Muon::STgcClusterBuilderCommon::weighte
       weightedPosX += prd.localPosition().x()*weight;
       sumWeight    += weight;
       sigmaSq      += weight*weight*resolution*resolution;
+      clusDir += weight * NswClustering::toLocal(prd);
       ATH_MSG_DEBUG("Channel local position and charge: " << prd.localPosition().x() << " " << prd.charge() );
 
       // Set the cluster identifier to the max charge strip
@@ -127,15 +130,23 @@ std::optional<Muon::STgcClusterPosition> Muon::STgcClusterBuilderCommon::weighte
 
   // Mean position of the cluster
   double reconstructedPosX = weightedPosX / sumWeight;
-  // Error on the cluster position
-  sigmaSq /= (sumWeight * sumWeight);
+
+  NswErrorCalibData::Input errorCalibIn{};
+  errorCalibIn.stripId = clusterId;
+  errorCalibIn.clusterAuthor = static_cast<unsigned>(sTgcPrepData::Author::SimpleClusterBuilder);
+  errorCalibIn.locPhi = clusDir.phi();
+  errorCalibIn.locTheta = clusDir.theta();
+  errorCalibIn.localPos = Amg::Vector2D{reconstructedPosX, 0};
+  errorCalibIn.clusterSize = cluster.size();
+
+  const double localUncertainty = m_errorCalibData.clusterUncertainty(errorCalibIn);
 
   ATH_MSG_DEBUG("Reconstructed a cluster using the weighted average,"
                  << " cluster Id: " << m_stgcIdHelper.print_to_string(clusterId)
                  << ", mean position = " << reconstructedPosX
                  << ", uncertainty = " << std::sqrt(sigmaSq));
 
-  return std::make_optional<Muon::STgcClusterPosition>(clusterId, reconstructedPosX, sigmaSq);
+  return std::make_optional<Muon::STgcClusterPosition>(clusterId, reconstructedPosX, localUncertainty*localUncertainty);
 }
 
 
@@ -328,11 +339,18 @@ std::optional<Muon::STgcClusterPosition> Muon::STgcClusterBuilderCommon::caruana
     }
     return std::nullopt;
   }
+  
+  NswErrorCalibData::Input errorCalibIn{};
+  errorCalibIn.stripId = clusterId;
+  errorCalibIn.clusterAuthor = static_cast<unsigned>(sTgcPrepData::Author::Caruana);
+  errorCalibIn.clusterError = std::sqrt(sigmaSq);
+
+  const double localUncertainty = m_errorCalibData.clusterUncertainty(errorCalibIn);
 
   ATH_MSG_DEBUG("Reconstructed a cluster using the Caruana method,"
                  << " cluster Id: " << m_stgcIdHelper.print_to_string(clusterId)
                  << ", mean position = " << reconstructedPosX
                  << ", uncertainty = " << std::sqrt(sigmaSq));
 
-  return std::make_optional<Muon::STgcClusterPosition>(clusterId, reconstructedPosX, sigmaSq);
+  return std::make_optional<Muon::STgcClusterPosition>(clusterId, reconstructedPosX, localUncertainty*localUncertainty);
 }

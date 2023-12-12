@@ -35,6 +35,8 @@ class NswErrorCalibData: public AthMessaging {
         Amg::Vector2D localPos{Amg::Vector2D::Zero()};
         /// Cluster size
         unsigned int clusterSize{0};
+        /// cluster error as calculated by the cluster builder tool
+        double clusterError{0};
     };
     
     using errorParametrizer = std::function<double(const Input& input, 
@@ -62,6 +64,7 @@ class NswErrorCalibData: public AthMessaging {
             double clusterUncertainty(const Input& clustInfo) const;
 
         bool operator<(const ErrorConstants& other) const;
+        const std::vector<double>& pars() const { return m_pars; }
     private:       
         errorParametrizer m_evalFunc;
         /// Author of the cluster to apply the error

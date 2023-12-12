@@ -9,6 +9,8 @@
 #include "MuonIdHelpers/sTgcIdHelper.h"
 #include "STgcClusterPosition.h"
 
+#include "MuonCondData/NswErrorCalibData.h"
+
 #include <vector>
 #include <array>
 #include <optional>
@@ -28,7 +30,7 @@ namespace Muon
   class STgcClusterBuilderCommon: public AthMessaging {
     public:
       /// Constructor
-      STgcClusterBuilderCommon(const sTgcIdHelper& idHelper);
+      STgcClusterBuilderCommon(const sTgcIdHelper& idHelper, const NswErrorCalibData& errorCalibData);
 
       /// Separate the sTGC PRDs by layer, from 0 to 7, and sort the PRDs per layer in ascending order of strip number
       std::array<std::vector<sTgcPrepData>, 8> sortSTGCPrdPerLayer(std::vector<sTgcPrepData>&& stripPrds) const;
@@ -59,6 +61,7 @@ namespace Muon
 
     private:
       const sTgcIdHelper& m_stgcIdHelper;
+      const NswErrorCalibData& m_errorCalibData;
   };
 }
 

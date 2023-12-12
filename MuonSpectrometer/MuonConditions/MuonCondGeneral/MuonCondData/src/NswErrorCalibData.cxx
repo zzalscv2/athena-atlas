@@ -11,6 +11,10 @@ namespace{
         }
         return result;
     }
+    inline double scaleErrorAndAddSyst(const double val, const std::vector<double>& pars) {
+        return std::hypot(pars[0], pars[1]*val);   
+    }
+        
 }
 
 /**********************************************************
@@ -28,6 +32,10 @@ errorParametrizer NswErrorCalibData::getParametrizer(const std::string& funcName
     } else if (funcName == "thetaPolynomial") {
         return [](const Input & input, const std::vector<double>& pars){
             return evalPoly(input.locTheta, pars);
+        };
+    } else if (funcName == "scaleErrorAndAddSyst"){
+        return [](const Input& input, const std::vector<double> pars){
+            return scaleErrorAndAddSyst(input.clusterError, pars);
         };
     }
     /// Return a surprise box if the function is unknown
@@ -101,11 +109,13 @@ double NswErrorCalibData::clusterUncertainty(const Input& clustInfo) const {
     const ErrorConstantsSet::const_iterator layConstItr = errorsInLay.find(errorId);
     if (layConstItr != errorsInLay.end()) {
         const double uncert = layConstItr->clusterUncertainty(clustInfo);
-        if (uncert < 0.) {
+        if (uncert <= 0.) {
             ATH_MSG_WARNING("Uncertainty of channel "<<m_idHelperSvc->toString(clustInfo.stripId)
                           <<" is smaller than zero ("<<uncert<<").  theta: "<<clustInfo.locTheta
                           <<", eta: "<<(-std::log(std::tan(clustInfo.locTheta/2)))
-                          <<", phi: "<<clustInfo.locPhi<<", cluster size: "<<clustInfo.clusterSize);
+                          <<", phi: "<<clustInfo.locPhi<<", cluster size: "<<clustInfo.clusterSize 
+                          << ", author " << static_cast<uint>(clustInfo.clusterAuthor)
+                          << ", pars " << layConstItr->pars());
         }
         return uncert;
     }

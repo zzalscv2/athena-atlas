@@ -7,6 +7,7 @@
 #include "MuonPrepRawData/sTgcPrepData.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
 using namespace Muon;
 
@@ -19,6 +20,7 @@ StatusCode Muon::CaruanaSTgcClusterBuilderTool::initialize()
 {
   ATH_CHECK( m_idHelperSvc.retrieve() );
   ATH_CHECK(m_DetectorManagerKey.initialize());
+  ATH_CHECK(m_uncertCalibKey.initialize());
   return StatusCode::SUCCESS;
 }
 
@@ -36,8 +38,14 @@ StatusCode Muon::CaruanaSTgcClusterBuilderTool::getClusters(const EventContext& 
     ATH_MSG_DEBUG("Size of the channel vectors is zero");
     return StatusCode::SUCCESS;
   }
+  
+  SG::ReadCondHandle<NswErrorCalibData> errorCalibDB{m_uncertCalibKey, ctx};
+  if (!errorCalibDB.isValid()) {
+      ATH_MSG_FATAL("Failed to retrieve the parameterized errors "<<m_uncertCalibKey.fullKey());
+      return StatusCode::FAILURE;
+  }
 
-  Muon::STgcClusterBuilderCommon stgcClusterCommon(m_idHelperSvc->stgcIdHelper());
+  Muon::STgcClusterBuilderCommon stgcClusterCommon(m_idHelperSvc->stgcIdHelper(), **errorCalibDB);
 
   // define the identifier hash
   Identifier chanId = stripsVect.at(0).identify();
@@ -128,9 +136,9 @@ StatusCode Muon::CaruanaSTgcClusterBuilderTool::getClusters(const EventContext& 
 
         Amg::Vector2D localPosition(reconstructedPosX,posY);
         auto covN = Amg::MatrixX(1,1);
-        covN(0,0) = sigmaSq + m_addError*m_addError;
-        ATH_MSG_DEBUG("Reconstructed a cluster at mean local position: (" << localPosition.x() << ", " << localPosition.y()
-                       << ") with error on cluster: " << std::sqrt((covN)(0,0)) << " and added error: " <<  m_addError);
+        covN(0,0) = sigmaSq;
+        ATH_MSG_DEBUG("Reconstructed a cluster at mean local position: "<< Amg::toString(localPosition,2)
+                  << " with error on cluster: " << std::sqrt((covN)(0,0)));
 
         std::unique_ptr<sTgcPrepData> prdN = std::make_unique<sTgcPrepData>(clusterId,
                                                                             hash,

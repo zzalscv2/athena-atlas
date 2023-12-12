@@ -13,8 +13,8 @@ atlas_add_library( STgcClusterizationLib
                    src/*.cxx
                    PUBLIC_HEADERS STgcClusterization
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES GaudiKernel MuonPrepRawData MuonIdHelpersLib
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps EventPrimitives MuonReadoutGeometry )
+                   LINK_LIBRARIES GaudiKernel MuonPrepRawData MuonIdHelpersLib  MuonCondData
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps EventPrimitives MuonReadoutGeometry)
 
 atlas_add_component( STgcClusterization
                      src/components/*.cxx
