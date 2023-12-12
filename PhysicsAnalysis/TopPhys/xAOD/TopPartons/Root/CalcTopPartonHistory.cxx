@@ -9,7 +9,7 @@
 #include "TopPartons/CalcTtbarPartonHistory.h"
 #include "TopPartons/PartonHistoryUtils.h"
 #include "xAODTruth/TruthVertex.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace top {
   CalcTopPartonHistory::CalcTopPartonHistory(const std::string& name) :
@@ -561,7 +561,7 @@ namespace top {
           // In MG5 generation of ttgamma it is not expected to have any b radiation 'recorded'
           for (size_t b = 0; b < topChildren->nChildren(); b++) {// b Children
             const xAOD::TruthParticle* bChildren = topChildren->child(b);
-            if (bChildren && bChildren->pdgId() == 22) {
+            if (bChildren && MC::isPhoton(bChildren)) {
               // JUST FOR EXTRA SAFETY (not necessary)
               if (has_ph) {
                 if (bChildren->p4().Pt() > Ph_p4.Pt()) {
@@ -580,7 +580,7 @@ namespace top {
               }
             }
           }
-        } else if (abs(topChildren->pdgId()) == 22) {
+        } else if (MC::isPhoton(topChildren)) {
           // JUST FOR EXTRA SAFETY (not necessary)
           if (has_ph) {
             if (topChildren->p4().Pt() > Ph_p4.Pt()) {

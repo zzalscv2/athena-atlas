@@ -38,7 +38,7 @@ TrigTrackSelector::TrigTrackSelector( TrackFilter* selector, double radius, int 
 
 const xAOD::TruthParticle* TrigTrackSelector::fromAncestor(const int pdg_id,  const xAOD::TruthParticle *p) const { 
   if ( p==nullptr ) return nullptr;
-  if (p->absPdgId()==11 || p->absPdgId()==13 ) return nullptr; //don't want light leptons from eg tau decays - they are found directly
+  if ( MC::isElectron(p) || MC::isMuon(p) ) return nullptr; //don't want light leptons from eg tau decays - they are found directly
   if ( p->absPdgId()==pdg_id ) {
     return p;   // recursive stopping conditions
   }
@@ -72,7 +72,7 @@ const xAOD::TruthParticle* TrigTrackSelector::fromAncestor(const int pdg_id,  co
 
 const xAOD::TruthParticle* TrigTrackSelector::fromAncestor( const std::vector<int>& ids,  const xAOD::TruthParticle *p ) const { 
   if ( p==nullptr ) return nullptr;
-  if (p->absPdgId()==11 || p->absPdgId()==13 ) return nullptr; //don't want light leptons from eg tau decays - they are found directly
+  if (MC::isElectron(p) || MC::isMuon(p)) return nullptr; //don't want light leptons from eg tau decays - they are found directly
   for ( size_t i=ids.size() ; i-- ; ) { 
     if ( p->absPdgId()==ids[i] ) return p; // recursive stopping conditions
   }
