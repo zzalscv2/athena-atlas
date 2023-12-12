@@ -229,8 +229,8 @@ namespace ParticleJetTools {
       for (auto itau: particles.tau){
         for (size_t i = 0; i< itau->nChildren(); i++){ // tau children loop
           if (itau->child(i)->absPdgId() == 12 || itau->child(i)->absPdgId() == 14 || itau->child(i)->absPdgId() == 16) continue; 
-          if (itau->child(i)->absPdgId() == 13) hasMuondecay = true;
-          else if (itau->child(i)->absPdgId() == 11) hasElectrondecay = true;
+          if (MC::isMuon(itau->child(i))) hasMuondecay = true;
+          else if (MC::isElectron(itau->child(i))) hasElectrondecay = true;
           else hasHadronicdecay = true;
         }
       }

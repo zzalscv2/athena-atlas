@@ -98,7 +98,7 @@ ElasticTruthTrajectoryBuilder::MotherDaughter
 				for(const auto& candidate: *vtx) {
 					if(candidate->pdg_id() == mother->pdg_id()) {
 
-						if(passed_cuts && (mother->pdg_id() == 11)) { // second negative electron is a special case
+						if(passed_cuts && MC::isElectron(mother)) { // second negative electron is a special case
 							if(candidate->momentum().e() > passed_cuts->momentum().e()) {
 								passed_cuts = candidate; // don't increment num_passed_cuts, we are replacing chosen particle
 							}
