@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2022, 2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BatchedMinbiasSvc.h"
@@ -143,7 +143,7 @@ StatusCode BatchedMinbiasSvc::initialize() {
         });
     std::vector<std::tuple<int, int>> batches_with_counts{};
     // Produce a list of batches, and how many times they appear
-    for (const auto& batch : batches_all) {
+    for (int batch : batches_all) {
       // First entry
       if (batches_with_counts.empty()) {
         batches_with_counts.emplace_back(batch, 1);
