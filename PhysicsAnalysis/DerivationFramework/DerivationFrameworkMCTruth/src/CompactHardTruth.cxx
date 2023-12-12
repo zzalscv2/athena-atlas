@@ -28,6 +28,7 @@
 #include "GeneratorObjects/McEventCollection.h"
 // Needed for FourVector
 #include "AtlasHepMC/SimpleVector.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // ROOT includes
 #include "TH1F.h"
@@ -223,7 +224,7 @@ StatusCode CompactHardTruth::execute() {
     }
     for (const auto& vp:  hadv->particles_out()) {
       if (isParton(vp)) isHadVtx = false;
-      if (isHadron(vp)) isHadOut = true;
+      if (MC::isHadron(vp)) isHadOut = true;
     }
     isHadVtx = isHadVtx && isHadOut;
     if (isHadVtx) hadVertices.push_back(hadv);
@@ -253,7 +254,7 @@ StatusCode CompactHardTruth::execute() {
     HepMC::GenVertex::particles_out_const_iterator vpE = (*hadv)->particles_out_const_end();
     for (; vp != vpE; ++vp) {
       if (isParton(*vp)) isHadVtx = false;
-      if (isHadron(*vp)) isHadOut = true;
+      if (MC::isHadron(*vp)) isHadOut = true;
     }
     isHadVtx = isHadVtx && isHadOut;
     if (isHadVtx) hadVertices.push_back(*hadv);
@@ -1395,13 +1396,6 @@ bool CompactHardTruth::isFinalParton(HepMC::ConstGenParticlePtr p) {
   if (!isParton(p)) return false;
   auto endp = p->end_vertex();
   return endp == nullptr;
-}
-
-// Hadron excludes leptons and BSM particles
-// Includes clusters to find, e.g., partons->cluster vertices
-bool CompactHardTruth::isHadron(HepMC::ConstGenParticlePtr p) {
-  int ida = std::abs(p->pdg_id());
-  return (ida >= 80 && ida < 1000000) || ida > 9000000;
 }
 
 // Total cluster FourVectors
