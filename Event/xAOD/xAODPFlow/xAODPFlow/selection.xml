@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
    <!-- xAOD::PFO interface type(s). -->
    <class name="xAOD::PFO_v1" />
@@ -48,6 +48,7 @@
    <class name="std::vector<std::pair<ElementLink<xAOD::CaloClusterContainer_v1>,double> >" />
    <class name="std::vector<std::vector<std::pair<ElementLink<xAOD::CaloClusterContainer_v1>,double> > >" />
    <class name="SG::AuxTypeVectorFactory<std::vector<std::pair<ElementLink<xAOD::CaloClusterContainer_v1>,double> > >" />
+   <class name="SG::AuxTypeVectorFactoryImpl<std::vector<std::pair<ElementLink<xAOD::CaloClusterContainer_v1>,double> > >" />
    <class name="std::vector<xAOD::PFODetails::PFOLeptonType>" />
 
 </lcgdict>
