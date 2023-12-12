@@ -60,7 +60,7 @@ class MmDigit : public MuonDigit {
           const std::vector<int>& VMM_idForTrigger);
 
   // Is this a valid digit?
-  bool is_valid(const MmIdHelper * mmHelper) const;
+  static bool is_valid(const MmIdHelper * mmHelper) ;
   
    /** strip response info */
   /** Return the time */

@@ -36,7 +36,7 @@ Muon::TGC_RodDecoderRawdata::TGC_RodDecoderRawdata(const std::string& t,
 //================ Destructor =================================================
 
 Muon::TGC_RodDecoderRawdata::~TGC_RodDecoderRawdata()
-{}
+= default;
 
 //================ Initialisation =================================================
 

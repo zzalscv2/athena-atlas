@@ -89,7 +89,7 @@ CSC_IDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
 
     // Get the StoreGate key of this container.
     std::string helperKey  = *( ddAddr->par() );
-    if ("" == helperKey) {
+    if (helperKey.empty()) {
 	log << MSG::DEBUG << "No Helper key " << endmsg;
     }
     else {

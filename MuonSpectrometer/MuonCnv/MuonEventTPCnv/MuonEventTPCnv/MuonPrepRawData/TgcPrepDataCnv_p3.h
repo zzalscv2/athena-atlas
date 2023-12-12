@@ -23,7 +23,7 @@ class TgcPrepDataCnv_p3
     public:
   TgcPrepDataCnv_p3() {}
 
-  Muon::TgcPrepData
+  static Muon::TgcPrepData
   createTgcPrepData( const Muon::TgcPrepData_p3 *persObj,
                      const Identifier& id,
                      const MuonGM::TgcReadoutElement* detEl,

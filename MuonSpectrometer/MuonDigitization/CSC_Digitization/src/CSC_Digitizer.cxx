@@ -616,7 +616,7 @@ double CSC_Digitizer::qWire(const int& nElectrons, const double& gammaDist) cons
 }
 
 // old implementation before Jan 2012:
-double CSC_Digitizer::qStripR(const double x) const {
+double CSC_Digitizer::qStripR(const double x) {
     // induced charge on the r-strip
     // parametrization based on experimental data
 
@@ -665,7 +665,7 @@ double CSC_Digitizer::qStripPhi(const double x, const Identifier& id) const {
     return phiStripCharge;
 }
 
-double CSC_Digitizer::fparamPhi(const double x, const std::array<double, 9>& p) const {
+double CSC_Digitizer::fparamPhi(const double x, const std::array<double, 9>& p) {
     double fparam{0}, pow {1.};
     for (size_t i = 0; i < p.size(); ++i) {
         fparam += p[i] * pow;

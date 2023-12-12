@@ -85,7 +85,7 @@ StatusCode ReadRpcRDO::execute() {
 
     for (; it1 != it2; ++it1) {
         // loop over pads
-        if ((*it1)->size() > 0) {
+        if (!(*it1)->empty()) {
             const RpcPad* pad = (*it1);
             assert(m_nPads < maxPad);
             m_sector[m_nPads] = (long)pad->sector();

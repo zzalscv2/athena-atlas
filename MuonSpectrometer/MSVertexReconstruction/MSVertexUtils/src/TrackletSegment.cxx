@@ -37,16 +37,14 @@ TrackletSegment::TrackletSegment(int ch, int cheta, int chphi, float chmid, floa
 {
 }
 
-TrackletSegment::~TrackletSegment() {}
+TrackletSegment::~TrackletSegment() = default;
 
 // set functions
 void TrackletSegment::clearMdt() {
     m_mdts.clear();
-    return;
 }
 void TrackletSegment::isCombined(bool iscomb) {
     m_isCombined = iscomb;
-    return;
 }
 
 // get functions

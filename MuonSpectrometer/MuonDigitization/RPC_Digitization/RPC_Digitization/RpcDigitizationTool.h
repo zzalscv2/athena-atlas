@@ -99,7 +99,7 @@ private:
     /** */
     long long int PackMCTruth(float proptime, float tof, float posx, float posz) const;
     /** */
-    void UnPackMCTruth(double theWord, float& proptime, float& tof, float& posy, float& posz) const;
+    static void UnPackMCTruth(double theWord, float& proptime, float& tof, float& posy, float& posz) ;
     /** Read parameters for cluster simulation.
         This method reads the file specified by m_paraFile and
         uses the experimental distributions it contains to
@@ -155,7 +155,7 @@ private:
     /** Evaluate detection efficiency */
     StatusCode DetectionEfficiency(const EventContext& ctx, const Identifier& ideta, const Identifier& idphi, bool& undefinedPhiStripStatus,
                                    CLHEP::HepRandomEngine* rndmEngine, const HepMcParticleLink& trkParticle);
-    double FCPEfficiency(HepMC::ConstGenParticlePtr genParticle);
+    double FCPEfficiency(const HepMC::ConstGenParticlePtr& genParticle);
     /** */
     int ClusterSizeEvaluation(const EventContext& ctx, const Identifier& id, float xstripnorm, CLHEP::HepRandomEngine* rndmEngine);
 
@@ -219,7 +219,7 @@ private:
     bool m_SetEtaOn{false};
     Gaudi::Property<bool> m_muonOnlySDOs{this, "MuonOnlySDOs", true, ""};
 
-    double extract_time_over_threshold_value(CLHEP::HepRandomEngine* rndmEngine) const;
+    static double extract_time_over_threshold_value(CLHEP::HepRandomEngine* rndmEngine) ;
     
 protected:
     ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "PileUpMergeSvc", "PileUpMergeSvc", "Pile up service"};

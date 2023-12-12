@@ -63,7 +63,7 @@ StatusCode ReadCscDigit::execute() {
 
     // loop over collections
     for (CscDigitContainer::const_iterator c = csc_container->begin(); c != csc_container->end(); ++c) {
-        if ((*c)->size() > 0) {
+        if (!(*c)->empty()) {
             ATH_MSG_DEBUG("*******************************************");
             ATH_MSG_DEBUG("Collection hash id = " << (unsigned int)(*c)->identifierHash());
             // loop over digits

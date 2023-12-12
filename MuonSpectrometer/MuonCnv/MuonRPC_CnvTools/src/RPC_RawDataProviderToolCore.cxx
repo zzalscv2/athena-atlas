@@ -69,7 +69,7 @@ std::vector<IdentifierHash> Muon::RPC_RawDataProviderToolCore::to_be_converted(c
         std::vector<IdentifierHash>::const_iterator it = coll.begin();
         to_return.reserve(coll.size());
         for (; it != coll.end(); ++it) {
-            if (source_id == readCdo->hash2source(*it)) to_return.push_back(IdentifierHash(*it));
+            if (source_id == readCdo->hash2source(*it)) to_return.emplace_back(*it);
         }
     }
 

@@ -73,7 +73,7 @@ StatusCode ReadMdtPRD::execute() {
         for (; mdtCollection != lastColl; ++mdtCollection) {
             // ch_id = mdtCollection->identify();
 
-            if (mdtCollection->size() > 0) {
+            if (!mdtCollection->empty()) {
                 for (Muon::MdtPrepDataCollection::const_iterator mdtPrd = mdtCollection->begin(); mdtPrd != mdtCollection->end();
                      ++mdtPrd) {
                     dig_id = (*mdtPrd)->identify();

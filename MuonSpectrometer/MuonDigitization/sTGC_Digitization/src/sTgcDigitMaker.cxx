@@ -730,7 +730,7 @@ void sTgcDigitMaker::addDigit(sTgcDigitVec& digits,
                               const Identifier& id, 
                               const uint16_t bctag, 
                               const double digittime,
-                              const double charge) const {
+                              const double charge) {
   
   constexpr double tolerance = 0.1;
   if (std::find_if(digits.begin(),digits.end(), [&](std::unique_ptr<sTgcDigit>& known) {
@@ -786,7 +786,7 @@ sTgcDigitMaker::GammaParameter sTgcDigitMaker::getGammaParameter(double distance
   const double d = std::abs(distance); 
   // Find the parameters assuming the container is sorted in ascending order of 'lowEdge'
   int index{-1};
-  for (auto& par: m_gammaParameter) {
+  for (const auto& par: m_gammaParameter) {
     if (d < par.lowEdge) {
       break;
     }
@@ -851,7 +851,7 @@ double sTgcDigitMaker::getTimeOffsetStrip(size_t neighbor_index) const {
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++
-double sTgcDigitMaker::getPadChargeFraction(double distance) const {
+double sTgcDigitMaker::getPadChargeFraction(double distance) {
   // The charge fraction that is found past a distance x away from the
   // centre of a 2D gaussian distribution of width of cluster profile is
   // described by a modified error function.

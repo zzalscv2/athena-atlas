@@ -5,7 +5,7 @@
 #include "MuonByteStreamCnvTest/RpcByteStreamDecoder.h"
 
 namespace {
-    static constexpr unsigned int const& rpcRawHitWordLength = 7;
+    constexpr unsigned int const& rpcRawHitWordLength = 7;
 }
 
 RpcByteStreamDecoder::RpcByteStreamDecoder(const RPCbytestream* p_bytestream, const RpcCablingCondData* readCdo, const RpcIdHelper* rpcId,

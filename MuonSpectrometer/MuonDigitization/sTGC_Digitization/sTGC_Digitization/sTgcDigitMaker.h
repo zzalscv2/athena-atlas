@@ -87,11 +87,11 @@ class sTgcDigitMaker : public AthMessaging {
   };
 
   //uint16_t bcTagging(const double digittime, const int channelType) const;
-  void addDigit(sTgcDigitVec& digits, 
+  static void addDigit(sTgcDigitVec& digits, 
                 const Identifier& id, 
                 const uint16_t bctag, 
                 const double digittime, 
-                const double charge) const;
+                const double charge) ;
 
   /** Read share/sTGC_Digitization_timeArrival.dat */
   StatusCode readFileOfTimeArrival();
@@ -120,7 +120,7 @@ class sTgcDigitMaker : public AthMessaging {
    */
   double getTimeOffsetStrip(size_t neighbor_index) const;
 
-  double getPadChargeFraction(double distance) const;
+  static double getPadChargeFraction(double distance) ;
 
   /** Find the gamma pdf parameters of a given distance */
   GammaParameter getGammaParameter(double distance) const;

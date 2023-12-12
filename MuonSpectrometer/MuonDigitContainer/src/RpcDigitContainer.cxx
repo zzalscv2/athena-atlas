@@ -33,9 +33,7 @@ RpcDigitContainer::RpcDigitContainer(unsigned int hash_max)
 
 // Destructor.
 
-RpcDigitContainer::~RpcDigitContainer() {
-
-}
+RpcDigitContainer::~RpcDigitContainer() = default;
 
 //**********************************************************************
 

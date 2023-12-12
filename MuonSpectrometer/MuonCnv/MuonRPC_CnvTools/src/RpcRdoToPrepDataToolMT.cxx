@@ -10,7 +10,6 @@
 #include "TrkSurfaces/Surface.h"
 #include "MuonCnvToolInterfaces/IDC_Helper.h"
 #include "MuonRPC_CnvTools/IRPC_RDO_Decoder.h"
-#include "MuonTrigCoinData/RpcCoinDataContainer.h"
 
 using namespace MuonGM;
 using namespace Trk;
@@ -216,12 +215,12 @@ void Muon::RpcRdoToPrepDataToolMT::printMTPrepData(const Muon::RpcPrepDataContai
     msg(MSG::INFO) << "********************************************************************************************************" << endmsg;
     msg(MSG::INFO) << "***************** Listing RpcPrepData collections content **********************************************" << endmsg;
 
-    if (prepData.size() <= 0) msg(MSG::INFO) << "No RpcPrepRawData collections found" << endmsg;
+    if (prepData.empty()) msg(MSG::INFO) << "No RpcPrepRawData collections found" << endmsg;
 
     int ncoll{0}, ict{0}, ictphi{0}, icteta{0}, icttrg{0};
     msg(MSG::INFO) << "--------------------------------------------------------------------------------------------" << endmsg;
     for (const Muon::RpcPrepDataCollection* rpcColl : prepData) {
-        if (rpcColl->size() > 0) {
+        if (!rpcColl->empty()) {
             msg(MSG::INFO) << "PrepData Collection ID " << m_idHelperSvc->toString(rpcColl->identify()) << endmsg;            
             int icc{0}, iccphi{0}, icceta{0};
             for (const RpcPrepData* rpc : *rpcColl) {
@@ -253,13 +252,13 @@ void Muon::RpcRdoToPrepDataToolMT::printMTCoinData(const Muon::RpcCoinDataContai
     msg(MSG::INFO) << "********************************************************************************************************" << endmsg;
     msg(MSG::INFO) << "***************** Listing RpcCoinData collections content **********************************************" << endmsg;
 
-    if (coinData.size() <= 0) msg(MSG::INFO) << "No RpcCoinData collections found" << endmsg;
+    if (coinData.empty()) msg(MSG::INFO) << "No RpcCoinData collections found" << endmsg;
 
     int ncoll{0}, ict{0}, ictphi{0}, icteta{0}, ictphilc{0}, ictphihc{0}, ictetalc{0}, ictetahc{0};
     msg(MSG::INFO) << "--------------------------------------------------------------------------------------------" << endmsg;
     for (const Muon::RpcCoinDataCollection* rpcColl: coinData) {
        
-        if (rpcColl->size() > 0) {
+        if (!rpcColl->empty()) {
             msg(MSG::INFO) << "CoinData Collection ID " << m_idHelperSvc->toString(rpcColl->identify()) << endmsg;
             int icc{0}, iccphi{0}, icceta{0}, iccphilc{0}, iccetahc{0}, iccphihc{0}, iccetalc{0};
             for (const RpcCoinData* rpc : *rpcColl) {
@@ -329,10 +328,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(const EventContext& ctx, Sta
     idVectToBeDecoded.reserve(idVect.size());
 
     if (firstTimeInTheEvent) {
-        if (sizeVectorRequested == 0)
-            state.m_fullEventDone = true;
-        else
-            state.m_fullEventDone = false;
+        state.m_fullEventDone = sizeVectorRequested == 0;
     } else {
         if (state.m_fullEventDone) {
             ATH_MSG_DEBUG("Whole event has already been decoded; nothing to do.");
@@ -524,7 +520,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(const EventContext& ctx, Sta
         if (state.m_decodedRobIds.insert(robid).second) robIdsToBeDecoded.push_back(robid);
     }
 
-    if (robIdsToBeDecoded.size() == 0) {
+    if (robIdsToBeDecoded.empty()) {
         ATH_MSG_DEBUG("All requested ROBs have already been decoded; nothing to do.");
         return StatusCode::SUCCESS;
     }
@@ -558,7 +554,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(const EventContext& ctx, Sta
     } 
 
     // here the RDO container is retrieved and filled -whatever input type we start with- => check the size
-    if (rdoContainerHandle->size() == 0) {
+    if (rdoContainerHandle->empty()) {
         // empty pad container - no rpc rdo in this event
         ATH_MSG_DEBUG("Empty pad container - no rpc rdo in this event ");
         return StatusCode::SUCCESS;
@@ -655,7 +651,7 @@ void Muon::RpcRdoToPrepDataToolMT::printInputRdo(const EventContext& ctx) const 
         return;
     }
 
-    if (rdoContainerHandle->size() <= 0) ATH_MSG_INFO("No RpcPad collections found");
+    if (rdoContainerHandle->empty()) ATH_MSG_INFO("No RpcPad collections found");
 
     int ncoll = 0;
     int ictphi = 0;
@@ -735,12 +731,12 @@ void Muon::RpcRdoToPrepDataToolMT::printPrepDataImpl(const Muon::RpcPrepDataCont
     ATH_MSG_INFO("********************************************************************************************************");
     ATH_MSG_INFO("***************** Listing RpcPrepData collections content **********************************************");
 
-    if (rpcPrepDataContainer.size() <= 0) ATH_MSG_INFO("No RpcPrepRawData collections found");
+    if (rpcPrepDataContainer.empty()) ATH_MSG_INFO("No RpcPrepRawData collections found");
 
     int ncoll{0}, ict{0}, ictphi{0}, icteta{0}, icttrg{0};
     ATH_MSG_INFO("--------------------------------------------------------------------------------------------");
     for (const Muon::RpcPrepDataCollection* rpcColl : rpcPrepDataContainer) {
-        if (rpcColl->size() > 0) {
+        if (!rpcColl->empty()) {
             ATH_MSG_INFO("PrepData Collection ID " << m_idHelperSvc->toString(rpcColl->identify()));
             int icc{0}, iccphi{0}, icceta{0};
             for (const RpcPrepData* rpc : *rpcColl) {
@@ -776,12 +772,12 @@ void Muon::RpcRdoToPrepDataToolMT::printCoinDataImpl(const Muon::RpcCoinDataCont
     ATH_MSG_INFO("********************************************************************************************************");
     ATH_MSG_INFO("***************** Listing RpcCoinData collections content **********************************************");
 
-    if (rpcCoinDataContainer.size() <= 0) ATH_MSG_INFO("No RpcCoinData collections found");
+    if (rpcCoinDataContainer.empty()) ATH_MSG_INFO("No RpcCoinData collections found");
 
     int ncoll{0}, ict{0}, ictphi{0}, icteta{0}, ictphilc{0}, ictphihc{0}, ictetalc{0}, ictetahc{0};
     ATH_MSG_INFO("--------------------------------------------------------------------------------------------");
     for (const Muon::RpcCoinDataCollection* rpcColl: rpcCoinDataContainer) {
-        if (rpcColl->size() > 0) {
+        if (!rpcColl->empty()) {
             ATH_MSG_INFO("CoinData Collection ID " << m_idHelperSvc->toString(rpcColl->identify()));
             int icc{0}, iccphi{0}, icceta{0}, iccphilc{0}, iccetahc{0}, iccphihc{0}, iccetalc{0};
             for (const RpcCoinData* rpc : *rpcColl) {
@@ -1261,7 +1257,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processNrpcRdo(const EventContext& ctx,
         return StatusCode::FAILURE;
     }
     
-    if (rdoNrpcContainerHandle->size() == 0) {
+    if (rdoNrpcContainerHandle->empty()) {
         // empty NRPC RDO container - no nrpc rdo in this event
         ATH_MSG_DEBUG("Empty NRPC RDO container - no nrpc rdo in this event ");
         return StatusCode::SUCCESS;
@@ -1319,7 +1315,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processNrpcRdo(const EventContext& ctx,
         const float timeoverthr = nrpcrdo->timeoverthr();
 
         RpcPrepData* newPrepData = new RpcPrepData(chanId, rpcHashId, pointLocPos, identifierList,
-                                                   std::move(mat), descriptor, time, timeoverthr, 0, ambiguityFlag);
+                                                   mat, descriptor, time, timeoverthr, 0, ambiguityFlag);
 
         newPrepData->setHashAndIndex(collection->identifyHash(), collection->size());        
         collection->push_back(newPrepData);        

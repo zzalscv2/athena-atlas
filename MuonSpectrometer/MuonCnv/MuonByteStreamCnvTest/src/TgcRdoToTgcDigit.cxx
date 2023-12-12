@@ -38,7 +38,7 @@ StatusCode TgcRdoToTgcDigit::execute(const EventContext& ctx) const {
     TgcRdoContainer::const_iterator tgcRDO = rdoContainer->begin();
 
     for (; tgcRDO != rdoContainer->end(); ++tgcRDO) {
-        if ((*tgcRDO)->size() > 0) { ATH_CHECK(this->decodeTgc(*tgcRDO, wh_tgcDigit.ptr(), oldElementId)); }
+        if (!(*tgcRDO)->empty()) { ATH_CHECK(this->decodeTgc(*tgcRDO, wh_tgcDigit.ptr(), oldElementId)); }
     }
 
     return StatusCode::SUCCESS;
@@ -195,7 +195,7 @@ StatusCode TgcRdoToTgcDigit::decodeTgc(const TgcRdo* rdoColl, TgcDigitContainer*
 
             if (elementId != oldElementId) {
                 // get collection
-                auto coll = tgcContainer->indexFindPtr(coll_hash);
+                const auto *coll = tgcContainer->indexFindPtr(coll_hash);
                 if (nullptr != coll) {
                     TgcDigitCollection* aCollection ATLAS_THREAD_SAFE = const_cast<TgcDigitCollection*>(coll);  // FIXME
                     collection = aCollection;

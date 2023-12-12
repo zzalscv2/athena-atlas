@@ -19,8 +19,7 @@ MmDigitContainerCnvBase(svcloc)
 {
 }
 
-MmDigitContainerCnv::~MmDigitContainerCnv() {
-}
+MmDigitContainerCnv::~MmDigitContainerCnv() = default;
 
 StatusCode MmDigitContainerCnv::initialize() {
    // Call base clase initialize

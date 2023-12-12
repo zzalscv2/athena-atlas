@@ -459,7 +459,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeTgc(const TgcRdo& rdoColl, TgcDigitMap_
             if ((*itD)->sswId() == 7) continue;                                     // Exclude Forward
             if ((*itD)->bitpos() < 112 || (*itD)->bitpos() > 199) continue;         // Require C, D-input
 
-            std::array<uint16_t, 5> stripId;
+            std::array<uint16_t, 5> stripId{};
             stripId[0] = (*itD)->subDetectorId();
             stripId[1] = (*itD)->rodId();
             stripId[2] = (*itD)->sswId();
@@ -506,7 +506,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeTgc(const TgcRdo& rdoColl, TgcDigitMap_
                 (*itD)->sswId() != 7 &&                                     // Exclude Forward
                 (*itD)->bitpos() >= 112 && (*itD)->bitpos() <= 199          // Require C, D-input
             ) {
-                std::array<uint16_t, 5> stripId;
+                std::array<uint16_t, 5> stripId{};
                 stripId[0] = (*itD)->subDetectorId();
                 stripId[1] = (*itD)->rodId();
                 stripId[2] = (*itD)->sswId();

@@ -22,8 +22,7 @@ CscPrepDataContainerCnvBase(svcloc)
 {
 }
 
-CscPrepDataContainerCnv::~CscPrepDataContainerCnv() {
-}
+CscPrepDataContainerCnv::~CscPrepDataContainerCnv() = default;
 
 StatusCode CscPrepDataContainerCnv::initialize() {
    // Call base clase initialize

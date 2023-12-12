@@ -214,7 +214,7 @@ StatusCode Muon::TgcRODReadOut::compare(TgcRdo* rdo, TgcRdo* newRdo) const
 } 
 
 bool Muon::TgcRODReadOut::isMatched(const TgcRawData* rdo1,
-				    const TgcRawData* rdo2) const
+				    const TgcRawData* rdo2) 
 {
   if(rdo1->subDetectorId() != rdo2->subDetectorId()) return false;
   if(rdo1->rodId() != rdo2->rodId()) return false;
@@ -226,8 +226,7 @@ bool Muon::TgcRODReadOut::isMatched(const TgcRawData* rdo1,
   switch(rdo1->type()){
   case TgcRawData::TYPE_HIT:
     if(rdo1->isAdjacent() != rdo2->isAdjacent())  return false;
-    if(rdo1->bitpos()     != rdo2->bitpos())      return false;
-    return true;
+    return rdo1->bitpos() == rdo2->bitpos();
     break;
 
   case TgcRawData::TYPE_TRACKLET:

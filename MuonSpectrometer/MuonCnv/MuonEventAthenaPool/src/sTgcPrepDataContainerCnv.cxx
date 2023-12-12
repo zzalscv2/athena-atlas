@@ -14,8 +14,7 @@ sTgcPrepDataContainerCnvBase(svcloc)
 {
 }
 
-sTgcPrepDataContainerCnv::~sTgcPrepDataContainerCnv() {
-}
+sTgcPrepDataContainerCnv::~sTgcPrepDataContainerCnv() = default;
 
 StatusCode sTgcPrepDataContainerCnv::initialize() {
    // Call base clase initialize

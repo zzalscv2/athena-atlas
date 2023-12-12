@@ -30,10 +30,10 @@ protected:
     }
 
     // Encode a 32-bits data word from fragments with size < 16 bits
-    uint32_t setBits(uint16_t nData, const uint16_t* inputData, const uint16_t* inputPos);
+    static uint32_t setBits(uint16_t nData, const uint16_t* inputData, const uint16_t* inputPos);
 
     // Encode a 32-bits data word from fragments with size < 32 bits
-    uint32_t setBits(uint16_t nData, const uint32_t* inputData, const uint16_t* inputPos);
+    static uint32_t setBits(uint16_t nData, const uint32_t* inputData, const uint16_t* inputPos);
 
     uint32_t m_word;
 };

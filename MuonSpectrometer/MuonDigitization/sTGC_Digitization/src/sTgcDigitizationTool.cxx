@@ -383,7 +383,7 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
       ATH_MSG_VERBOSE("Projecting hit to Wire Surface" );
       const Amg::Vector3D& HPOS{hit.globalPosition()};  //Global position of the hit
       const Amg::Vector3D& GLODIRE{hit.globalDirection()};
-      Amg::Vector3D global_preStepPos{hit.globalPrePosition()};
+      const Amg::Vector3D& global_preStepPos{hit.globalPrePosition()};
 
       ATH_MSG_VERBOSE("Global Direction " << Amg::toString(GLODIRE, 2) );
       ATH_MSG_VERBOSE("Global Position " << Amg::toString(HPOS, 2) );
@@ -545,7 +545,7 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
 }
 
 /*******************************************************************************/
-uint16_t sTgcDigitizationTool::bcTagging(const double digitTime) const {
+uint16_t sTgcDigitizationTool::bcTagging(const double digitTime) {
 
   uint16_t bctag = 0;
 
@@ -726,7 +726,7 @@ sTgcSimDigitVec sTgcDigitizationTool::processDigitsWithVMM(const EventContext& c
     digit1.set_charge(totalCharge);
     digit1.set_time(weightedTime);
     sTgcSimDigitData& mergedHit{*merge_me};
-    if (savedDigits.size() && 
+    if (!savedDigits.empty() && 
         savedDigits.back().identify() == digit1.identify() &&
         std::abs(savedDigits.back().time() - digit1.time()) <= vmmDeadTime) continue;
     if (digit1.charge() > threshold || passNeigbourLogic(mergedHit)){

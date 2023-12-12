@@ -16,8 +16,7 @@ CscStripPrepDataContainerCnvBase(svcloc),
 {
 }
 
-CscStripPrepDataContainerCnv::~CscStripPrepDataContainerCnv() {
-}
+CscStripPrepDataContainerCnv::~CscStripPrepDataContainerCnv() = default;
 
 StatusCode CscStripPrepDataContainerCnv::initialize() {
    // Call base clase initialize

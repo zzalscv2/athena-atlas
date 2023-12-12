@@ -78,7 +78,7 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const EventContext& ctx, const O
   Muon::nsw::NSWCommonDecoder common_decoder(robFrag);  
   const std::vector<Muon::nsw::NSWElink *>&   elinks = common_decoder.get_elinks();  
   ATH_MSG_DEBUG("Retrieved "<<elinks.size()<<" elinks");
-  if (!elinks.size()) return StatusCode::SUCCESS;
+  if (elinks.empty()) return StatusCode::SUCCESS;
 
 
   // loop on elinks. we need an RDO (collection) per quadruplet!
@@ -107,7 +107,7 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const EventContext& ctx, const O
     
     // loop on all channels of this elink to fill the collection
     const std::vector<Muon::nsw::VMMChannel *>& channels = elink->get_channels();
-    for (auto channel : channels) {
+    for (auto *channel : channels) {
        unsigned int channel_number = channel->channel_number();
        if (channel_number == 0) continue; // skip disconnected vmm channels
        Identifier channel_ID = m_MmIdHelper->channelID(module_ID, multi_layer, gas_gap, channel_number);  // not validating the IDs (too slow)

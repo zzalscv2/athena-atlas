@@ -141,7 +141,7 @@ StatusCode CscDigitToCscRDOTool::fill_CSCdata() {
         for (; it_dig != it_dig_e; ++it_dig) {
             const CscDigit* cscDigit = *it_dig;
 
-            bool IsNewEDM = (cscDigit->sampleCharges()).size() ? true : false;
+            bool IsNewEDM = (cscDigit->sampleCharges()).size() != 0;
 
             count++;
 

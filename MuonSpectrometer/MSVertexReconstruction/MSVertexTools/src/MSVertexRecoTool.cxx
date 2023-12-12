@@ -370,7 +370,7 @@ namespace Muon {
             if (trks.size() < 3) break;
         }
 
-        if (clusters.size() == 0) {
+        if (clusters.empty()) {
             TrkCluster clust;
             clusters.push_back(clust);
         }
@@ -684,7 +684,7 @@ namespace Muon {
             for (std::vector<unsigned int>::iterator vxtrk = vxtracks.begin(); vxtrk != vxtracks.end(); ++vxtrk) {
                 for (unsigned int i = 0; i < UsedTracks[k].size(); ++i) {
                     if ((*vxtrk) == UsedTracks[k].at(i).first) {
-                        Tracklet trklt = tracklets.at(UsedTracks[k].at(i).second);
+                        const Tracklet& trklt = tracklets.at(UsedTracks[k].at(i).second);
                         AmgSymMatrix(5) covariance = AmgSymMatrix(5)(trklt.errorMatrix());
                         Trk::Perigee* myPerigee = new Trk::Perigee(0., 0., trklt.momentum().phi(), trklt.momentum().theta(),
                                                                    trklt.charge() / trklt.momentum().mag(),
@@ -719,7 +719,7 @@ namespace Muon {
         }
 
         // return an empty vertex in case none were reconstructed
-        if (vertices.size() == 0) { return; }
+        if (vertices.empty()) { return; }
 
         // loop on the vertex candidates and select the best based on max n(tracks) and max chi^2 probability
         unsigned int bestVx(0);
@@ -738,9 +738,7 @@ namespace Muon {
             (*it) = 0;
         }
         vertices.clear();
-
-        return;
-    }
+   }
 
     //** ----------------------------------------------------------------------------------------------------------------- **//
 
@@ -776,7 +774,7 @@ namespace Muon {
         }
 
         // If no preliminary vertices were found from 3 tracklets, then there is no vertex and we are done.
-        if (prelim_vx.size() == 0) return;
+        if (prelim_vx.empty()) return;
 
         // The remaining algorithm is very time consuming for large numbers of tracklets.  To control this,
         // we run the old algorithm when there are too many tracklets and a vertex is found.
@@ -856,17 +854,15 @@ namespace Muon {
         }
 
         vtx = std::make_unique<MSVertex>(2, vxpos, vxTrkTracks, 1, vxTrkTracks.size(), 0, 0, 0);
-        return;
-    }
+   }
 
     //** ----------------------------------------------------------------------------------------------------------------- **//
 
-    void MSVertexRecoTool::MakeDummyVertex(MSVertex*& vtx) const {
+    void MSVertexRecoTool::MakeDummyVertex(MSVertex*& vtx) {
         const Amg::Vector3D vxpos(-9.99, -9.99, -9.99);
         MSVertex* vertex = new MSVertex(-1, vxpos, 1., 1., 0, 0, 0);
         vtx = vertex;
-        return;
-    }
+   }
 
     //** ----------------------------------------------------------------------------------------------------------------- **//
 
@@ -921,12 +917,11 @@ namespace Muon {
 
             vtx = std::make_unique<MSVertex>(2, vxpos, vxTrackParticles, 1, (float)vxTrackParticles.size(), 0, 0, 0);
         }
-        return;
-    }
+           }
 
     //** ----------------------------------------------------------------------------------------------------------------- **//
 
-    std::vector<Tracklet> MSVertexRecoTool::RemoveBadTrk(const std::vector<Tracklet>& tracks, const Amg::Vector3D& Vx) const {
+    std::vector<Tracklet> MSVertexRecoTool::RemoveBadTrk(const std::vector<Tracklet>& tracks, const Amg::Vector3D& Vx) {
         float MaxTollDist = 300;  // max distance between the vertex and tracklet [mm]
         std::vector<Tracklet> Tracks;
         if (Vx.x() == 0 && Vx.z() == 0) return tracks;
@@ -984,7 +979,7 @@ namespace Muon {
     StatusCode MSVertexRecoTool::FillOutputContainer(std::vector<MSVertex*>& vertices,
                                                      SG::WriteHandle<xAOD::VertexContainer>& xAODVxContainer,
                                                      SG::WriteDecorHandle<decortype, int>& hMDT, SG::WriteDecorHandle<decortype, int>& hRPC,
-                                                     SG::WriteDecorHandle<decortype, int>& hTGC) const {
+                                                     SG::WriteDecorHandle<decortype, int>& hTGC) {
         for (std::vector<MSVertex*>::const_iterator vxIt = vertices.begin(); vxIt != vertices.end(); ++vxIt) {
             xAOD::Vertex* xAODVx = new xAOD::Vertex();
             xAODVx->makePrivateStore();
@@ -1002,7 +997,7 @@ namespace Muon {
         }
 
         // cleanup
-        for (auto x : vertices) delete x;
+        for (auto *x : vertices) delete x;
 
         vertices.clear();
 
@@ -1012,7 +1007,7 @@ namespace Muon {
     //** ----------------------------------------------------------------------------------------------------------------- **//
 
     // core algorithm for endcap vertex reconstruction
-    Amg::Vector3D MSVertexRecoTool::VxMinQuad(const std::vector<Tracklet>& tracks) const {
+    Amg::Vector3D MSVertexRecoTool::VxMinQuad(const std::vector<Tracklet>& tracks) {
         double s(0.), sx(0.), sy(0.), sxy(0.), sxx(0.), d(0.);
         double sigma = 1.;
         for (unsigned int i = 0; i < tracks.size(); ++i) {
@@ -1146,7 +1141,7 @@ namespace Muon {
         Muon::MdtPrepDataContainer::const_iterator MDTItr = mdtTES->begin();
         Muon::MdtPrepDataContainer::const_iterator MDTItrE = mdtTES->end();
         for (; MDTItr != MDTItrE; ++MDTItr) {
-            if ((*MDTItr)->size() == 0) continue;
+            if ((*MDTItr)->empty()) continue;
             Muon::MdtPrepDataCollection::const_iterator mdt = (*MDTItr)->begin();
             Muon::MdtPrepDataCollection::const_iterator mdtE = (*MDTItr)->end();
             Amg::Vector3D ChamberCenter = (*mdt)->detectorElement()->center();
@@ -1228,8 +1223,6 @@ namespace Muon {
         MSRecoVx->setNMDT(nmdt);
         MSRecoVx->setNRPC(nrpc);
         MSRecoVx->setNTGC(ntgc);
-
-        return;
-    }
+   }
 
 }  // namespace Muon

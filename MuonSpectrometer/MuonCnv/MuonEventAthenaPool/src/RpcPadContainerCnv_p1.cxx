@@ -80,7 +80,7 @@ void  RpcPadContainerCnv_p1::persToTrans(const RpcPadContainer_p1* persCont, Rpc
         }
         
         // another check - see if already added
-        auto ptr = transCont->indexFindPtr(coll->identifyHash());
+        const auto *ptr = transCont->indexFindPtr(coll->identifyHash());
         if (ptr!=nullptr ) {
             log << MSG::WARNING<<"Collection with hash="<<coll->identifyHash()<<" already exists in container (with "<<ptr->size()<<" elements). "
                 << "Will therefore DISCARD this collection which has "<<coll->size()<<" elements)!"<<endmsg;

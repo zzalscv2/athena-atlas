@@ -19,8 +19,7 @@ CscSimDataCollectionCnv::CscSimDataCollectionCnv(ISvcLocator* svcloc) :
 {
 }
 
-CscSimDataCollectionCnv::~CscSimDataCollectionCnv() {
-}
+CscSimDataCollectionCnv::~CscSimDataCollectionCnv() = default;
 
 CscSimDataCollection_PERS*    CscSimDataCollectionCnv::createPersistent (CscSimDataCollection* transCont) {
     MsgStream log(msgSvc(), "CscSimDataCollectionCnv" );

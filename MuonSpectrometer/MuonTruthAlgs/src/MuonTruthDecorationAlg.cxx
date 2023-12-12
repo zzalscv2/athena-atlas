@@ -233,7 +233,7 @@ namespace Muon {
                 if (!isCsc) {
                     bool ok = false;
                     int index = m_idHelperSvc->technologyIndex(id);
-                    if (index < (int)sdoCollections.size() && sdoCollections[index]->size() != 0) {
+                    if (index < (int)sdoCollections.size() && !sdoCollections[index]->empty()) {
                         auto pos = sdoCollections[index]->find(id);
                         if (pos != sdoCollections[index]->end()) {
                             gpos = pos->second.globalPosition();
@@ -405,7 +405,7 @@ namespace Muon {
             const RecordPars& start_pars = parameters[i];
             const RecordPars& end_pars = parameters[i+1];
             /// If the track record is named, then we should have a volume
-            if ( (start_pars.record_name.size() && !start_pars.volume) || !end_pars.volume) continue;
+            if ( (!start_pars.record_name.empty() && !start_pars.volume) || !end_pars.volume) continue;
             Trk::CurvilinearParameters pars(start_pars.pos, start_pars.mom, truthParticle.charge(), cov);
             
             const Trk::TrackingVolume* volume = end_pars.volume;

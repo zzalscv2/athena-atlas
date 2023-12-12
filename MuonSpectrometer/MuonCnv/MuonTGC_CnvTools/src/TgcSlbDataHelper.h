@@ -65,19 +65,19 @@ namespace Muon
 				 std::vector<TgcRawData *> &vChannel) const;
 
       /** Set SLB Type based on sswId and moduleType. */ 
-      bool setType( uint16_t subDetectorId,
+      static bool setType( uint16_t subDetectorId,
 		    uint16_t rodId,
 		    TgcSlbData * slb, 
-		    int moduleType)  const; 
+		    int moduleType)  ; 
 
       /** Adjacent or not */ 
-      bool isAdjacent(int ibit) const;
+      static bool isAdjacent(int ibit) ;
 
       /** Set sector for HpT/SL based on slbId. */
-      uint16_t getSector(bool forward, 
+      static uint16_t getSector(bool forward, 
 			 uint16_t subDetectorId,
 			 uint16_t rodId,
-			 const TgcSlbData * slb ) const; 
+			 const TgcSlbData * slb ) ; 
 
     protected:
       /** Number of Trigger block in an SLB */
@@ -161,18 +161,18 @@ namespace Muon
 
       /** Check if it is valid high-pT coincidence 
        *  or not. */ 
-      bool isValid_HPT(bool     hit,
+      static bool isValid_HPT(bool     hit,
 		       bool     strip,
 		       uint16_t chip,
 		       uint16_t index,
 		       bool     hipt,
 		       uint16_t hitId,
 		       uint16_t pos,
-		       int16_t  delta) const;
+		       int16_t  delta) ;
 
     private:
       /** Get a value in a range of a bitArray */
-      uint16_t getVal(const bool* bitArray, std::size_t start, std::size_t width) const;
+      static uint16_t getVal(const bool* bitArray, std::size_t start, std::size_t width) ;
 
     };
 

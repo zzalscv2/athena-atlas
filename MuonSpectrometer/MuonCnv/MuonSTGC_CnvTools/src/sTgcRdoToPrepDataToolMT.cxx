@@ -241,14 +241,14 @@ void Muon::sTgcRdoToPrepDataToolMT::processRDOContainer(const EventContext& ctx,
   
     // run in unseeded mode
     for (STGC_RawDataContainer::const_iterator it = rdoContainer->begin(); it != rdoContainer->end(); ++it ) {
-        auto rdoColl = *it;
+        const auto *rdoColl = *it;
         if (rdoColl->empty()) continue;
         ATH_MSG_DEBUG("New RDO collection with " << rdoColl->size() << "STGC Hits");
 
         const IdentifierHash hash = rdoColl->identifyHash();
 
         // check if we actually want to decode this RDO collection
-        if(idsToDecode.size() > 0 and std::find(idsToDecode.begin(), idsToDecode.end(), hash)==idsToDecode.end()) {
+        if(!idsToDecode.empty() and std::find(idsToDecode.begin(), idsToDecode.end(), hash)==idsToDecode.end()) {
             ATH_MSG_DEBUG("Hash ID " << hash << " not in input list, ignore");
             continue;
         } else ATH_MSG_DEBUG("Going to decode " << hash);
@@ -290,8 +290,8 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::provideEmptyContainer(const EventConte
 }
 
 // printout methods
-void Muon::sTgcRdoToPrepDataToolMT::printInputRdo(const EventContext&) const { return; }
-void Muon::sTgcRdoToPrepDataToolMT::printPrepData(const EventContext&) const { return; }
+void Muon::sTgcRdoToPrepDataToolMT::printInputRdo(const EventContext&) const { }
+void Muon::sTgcRdoToPrepDataToolMT::printPrepData(const EventContext&) const { }
 
 Muon::sTgcPrepDataContainer* Muon::sTgcRdoToPrepDataToolMT::setupSTGC_PrepDataContainer(const EventContext& ctx) const {
 

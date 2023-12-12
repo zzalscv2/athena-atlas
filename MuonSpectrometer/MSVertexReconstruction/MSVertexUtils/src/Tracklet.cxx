@@ -30,15 +30,13 @@ Tracklet::Tracklet(const TrackletSegment& ML1seg, const Amg::Vector3D& p, const 
 {
 }
 
-Tracklet::~Tracklet() {}
+Tracklet::~Tracklet() = default;
 
 void Tracklet::momentum(const Amg::Vector3D& p) {
     m_momentum = p;
-    return;
 }
 void Tracklet::charge(float charge) {
     m_charge = charge;
-    return;
 }
 
 int Tracklet::mdtChamber() const { return m_ml1seg.mdtChamber(); }

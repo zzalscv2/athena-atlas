@@ -72,7 +72,7 @@ namespace Trk {
 
         SubDetHitStatistics::SubDetType findSubDetType(Identifier id);
 
-        const MuonSimData::Deposit* getDeposit(const MuonSimDataCollection& simCol, HepMC::ConstGenParticlePtr genPart,
+        const MuonSimData::Deposit* getDeposit(const MuonSimDataCollection& simCol, const HepMC::ConstGenParticlePtr& genPart,
                                                const Identifier& id);
         const MuonSimDataCollection* retrieveTruthCollection(const std::string& colName);
 

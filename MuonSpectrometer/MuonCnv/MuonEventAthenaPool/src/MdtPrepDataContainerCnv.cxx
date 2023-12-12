@@ -23,8 +23,7 @@ MdtPrepDataContainerCnvBase(svcloc)
 {
 }
 
-MdtPrepDataContainerCnv::~MdtPrepDataContainerCnv() {
-}
+MdtPrepDataContainerCnv::~MdtPrepDataContainerCnv() = default;
 
 StatusCode MdtPrepDataContainerCnv::initialize() {
    // Call base clase initialize

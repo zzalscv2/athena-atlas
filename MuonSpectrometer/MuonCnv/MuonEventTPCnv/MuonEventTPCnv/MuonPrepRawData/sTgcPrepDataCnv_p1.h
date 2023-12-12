@@ -23,7 +23,7 @@ class sTgcPrepDataCnv_p1
     public:
   sTgcPrepDataCnv_p1() {}
 
-  Muon::sTgcPrepData
+  static Muon::sTgcPrepData
   createsTgcPrepData( const Muon::sTgcPrepData_p1 *persObj,
                       const Identifier clusId,
                       const MuonGM::sTgcReadoutElement* m_detEl,

@@ -36,7 +36,7 @@ public:
     void decodeHeader(const std::vector<uint32_t>& p);
     void decodeFooter(const std::vector<uint32_t>& p);
 
-    uint32_t* encodeFooter();
+    static uint32_t* encodeFooter();
 
     // Header words
     constexpr uint32_t makeHeaderMarker() { return s_RODstart; }

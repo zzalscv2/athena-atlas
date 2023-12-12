@@ -24,7 +24,7 @@ class RpcCoinDataCnv_p1
 public:
     RpcCoinDataCnv_p1() {}
 
-    Muon::RpcCoinData
+    static Muon::RpcCoinData
     createRpcCoinData( const Muon::RpcCoinData_p1 *persObj,
                        const Identifier& id,
                        const MuonGM::RpcReadoutElement* detEl,

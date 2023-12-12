@@ -45,15 +45,15 @@ public:
 
     /** Make a ROB Source ID from a ROD source ID
      */
-    uint32_t getRobID(uint32_t rod_id) const;
+    static uint32_t getRobID(uint32_t rod_id) ;
 
     /** Make a ROS Source ID from a ROB source ID
      */
-    uint32_t getRosID(uint32_t rob_id) const;
+    static uint32_t getRosID(uint32_t rob_id) ;
 
     /** Make a SubDetector ID from ROS source ID
      */
-    uint32_t getDetID(uint32_t ros_id) const;
+    static uint32_t getDetID(uint32_t ros_id) ;
 
 private:
     const MdtIdHelper* m_mdtIdHelper;

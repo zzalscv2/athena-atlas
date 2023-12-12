@@ -22,8 +22,7 @@ Muon::TgcRdoContByteStreamTool::TgcRdoContByteStreamTool
 
 // destructor 
 Muon::TgcRdoContByteStreamTool::~TgcRdoContByteStreamTool()
-{
-}
+= default;
 
 
 // initialize 

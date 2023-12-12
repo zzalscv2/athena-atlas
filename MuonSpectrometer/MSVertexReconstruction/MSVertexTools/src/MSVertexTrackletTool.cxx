@@ -211,7 +211,7 @@ namespace Muon {
         for (int st = 0; st < 6; ++st) {
             for (int ml = 0; ml < 2; ++ml) {
                 for (int sector = 0; sector < 16; ++sector) {
-                    if (segs[st][ml][sector].size() > 0) {
+                    if (!segs[st][ml][sector].empty()) {
                         CleanSegs[st][ml][sector] = CleanSegments(segs[st][ml][sector]);
                     }
                 }
@@ -271,7 +271,7 @@ namespace Muon {
                                     std::vector<const Muon::MdtPrepData*> mdts2 = CleanSegs[st][1][sector].at(i2).mdtHitsOnTrack();
                                     for (unsigned int k = 0; k < mdts2.size(); ++k) mdts.push_back(mdts2.at(k));
                                     std::vector<TrackletSegment> CombinedSeg = TrackletSegmentFitter(mdts);
-                                    if (CombinedSeg.size() > 0) {
+                                    if (!CombinedSeg.empty()) {
                                         // calculate momentum components & uncertainty
                                         float Trk1overPErr = TrackMomentumError(CombinedSeg[0]);
                                         float pT = pTot * std::sin(CombinedSeg[0].alpha());
@@ -324,7 +324,7 @@ namespace Muon {
                                 std::vector<const Muon::MdtPrepData*> mdts2 = CleanSegs[st][1][sector].at(i2).mdtHitsOnTrack();
                                 for (unsigned int k = 0; k < mdts2.size(); ++k) mdts.push_back(mdts2.at(k));
                                 std::vector<TrackletSegment> CombinedSeg = TrackletSegmentFitter(mdts);
-                                if (CombinedSeg.size() > 0) {
+                                if (!CombinedSeg.empty()) {
                                     float charge = 0;
                                     float pT = 100000.0 * std::sin(CombinedSeg[0].alpha());
                                     float pz = 100000.0 * std::cos(CombinedSeg[0].alpha());
@@ -365,7 +365,7 @@ namespace Muon {
 
     // convert tracklets to Trk::Track and store in a TrackCollection
     void MSVertexTrackletTool::convertToTrackParticles(std::vector<Tracklet>& tracklets,
-                                                       SG::WriteHandle<xAOD::TrackParticleContainer>& container) const {
+                                                       SG::WriteHandle<xAOD::TrackParticleContainer>& container) {
         for (std::vector<Tracklet>::iterator trkItr = tracklets.begin(); trkItr != tracklets.end(); ++trkItr) {
             // create the Trk::Perigee for the tracklet
             AmgSymMatrix(5) covariance = AmgSymMatrix(5)(trkItr->errorMatrix());
@@ -391,8 +391,7 @@ namespace Muon {
             // cleanup memory
             delete myPerigee;
         }
-        return;
-    }
+           }
 
     //** ----------------------------------------------------------------------------------------------------------------- **//
 
@@ -416,7 +415,7 @@ namespace Muon {
             Muon::MdtPrepDataCollection::const_iterator mpdc = (*MDTItr)->begin();
             Muon::MdtPrepDataCollection::const_iterator mpdcE = (*MDTItr)->end();
 
-            if ((*MDTItr)->size() == 0) continue;
+            if ((*MDTItr)->empty()) continue;
 
             int stName = m_idHelperSvc->mdtIdHelper().stationName((*mpdc)->identify());
 
@@ -545,7 +544,7 @@ namespace Muon {
         float gSlope1 = (globalDir1.perp() / globalDir1.z());
         float gInter1 = gPos1.perp() - gSlope1 * gPos1.z();
         float resid = SeedResiduals(mdts, gSlope1, gInter1);
-        if (resid < m_SeedResidual) SeedParams.push_back(std::pair<float, float>(gSlope1, gInter1));
+        if (resid < m_SeedResidual) SeedParams.emplace_back(gSlope1, gInter1);
         // Second seed
         line_theta = Alpha0 - Alpha1;
         z_line = x1 - r1 * std::sin(line_theta);
@@ -555,7 +554,7 @@ namespace Muon {
         float gSlope2 = (globalDir2.perp() / globalDir2.z());
         float gInter2 = gPos2.perp() - gSlope2 * gPos2.z();
         resid = SeedResiduals(mdts, gSlope2, gInter2);
-        if (resid < m_SeedResidual) SeedParams.push_back(std::pair<float, float>(gSlope2, gInter2));
+        if (resid < m_SeedResidual) SeedParams.emplace_back(gSlope2, gInter2);
 
         float Alpha2 = std::asin(std::abs(r2 - r1) / DistanceOfCenters);
         if (r1 < r2) {
@@ -569,7 +568,7 @@ namespace Muon {
             float gSlope3 = (globalDir3.perp() / globalDir3.z());
             float gInter3 = gPos3.perp() - gSlope3 * gPos3.z();
             resid = SeedResiduals(mdts, gSlope3, gInter3);
-            if (resid < m_SeedResidual) SeedParams.push_back(std::pair<float, float>(gSlope3, gInter3));
+            if (resid < m_SeedResidual) SeedParams.emplace_back(gSlope3, gInter3);
 
             // Fourth seed
             line_theta = Alpha0 - Alpha2;
@@ -581,7 +580,7 @@ namespace Muon {
             float gSlope4 = (globalDir4.perp() / globalDir4.z());
             float gInter4 = gPos4.perp() - gSlope4 * gPos4.z();
             resid = SeedResiduals(mdts, gSlope4, gInter4);
-            if (resid < m_SeedResidual) SeedParams.push_back(std::pair<float, float>(gSlope4, gInter4));
+            if (resid < m_SeedResidual) SeedParams.emplace_back(gSlope4, gInter4);
         } else {
             // Third seed
             line_theta = Alpha0 + Alpha2;
@@ -593,7 +592,7 @@ namespace Muon {
             float gSlope3 = (globalDir3.perp() / globalDir3.z());
             float gInter3 = gPos3.perp() - gSlope3 * gPos3.z();
             resid = SeedResiduals(mdts, gSlope3, gInter3);
-            if (resid < m_SeedResidual) SeedParams.push_back(std::pair<float, float>(gSlope3, gInter3));
+            if (resid < m_SeedResidual) SeedParams.emplace_back(gSlope3, gInter3);
 
             // Fourth seed
             line_theta = Alpha0 - Alpha2;
@@ -605,7 +604,7 @@ namespace Muon {
             float gSlope4 = (globalDir4.perp() / globalDir4.z());
             float gInter4 = gPos4.perp() - gSlope4 * gPos4.z();
             resid = SeedResiduals(mdts, gSlope4, gInter4);
-            if (resid < m_SeedResidual) SeedParams.push_back(std::pair<float, float>(gSlope4, gInter4));
+            if (resid < m_SeedResidual) SeedParams.emplace_back(gSlope4, gInter4);
         }
 
         return SeedParams;
@@ -613,7 +612,7 @@ namespace Muon {
 
     //** ----------------------------------------------------------------------------------------------------------------- **//
 
-    float MSVertexTrackletTool::SeedResiduals(std::vector<const Muon::MdtPrepData*>& mdts, float slope, float inter) const {
+    float MSVertexTrackletTool::SeedResiduals(std::vector<const Muon::MdtPrepData*>& mdts, float slope, float inter) {
         // calculate the residual of the MDTs not used to create the seed
         float resid = 0;
         for (unsigned int i = 1; i < (mdts.size() - 1); ++i) {
@@ -834,11 +833,11 @@ namespace Muon {
                 }  // end sit loop
 
                 // if the segment is unique, keep it
-                if (segsToCombine.size() == 0) {
+                if (segsToCombine.empty()) {
                     CleanSegs.push_back(*it);
                 }
                 // else, combine all like segments & refit
-                else if (segsToCombine.size() >= 1) {
+                else if (!segsToCombine.empty()) {
                     // create a vector of all unique MDT hits in the segments
                     std::vector<const Muon::MdtPrepData*> mdts = it->mdtHitsOnTrack();
                     for (unsigned int i = 0; i < segsToCombine.size(); ++i) {
@@ -859,7 +858,7 @@ namespace Muon {
                     if (mdts.size() > it->mdtHitsOnTrack().size()) {
                         std::vector<TrackletSegment> refitsegs = TrackletSegmentFitter(mdts);
                         // if the refit fails, what to do?
-                        if (refitsegs.size() == 0) {
+                        if (refitsegs.empty()) {
                             if (segsToCombine.size() == 1) {
                                 segsToCombine[0].isCombined(false);
                                 CleanSegs.push_back(*it);
@@ -913,7 +912,7 @@ namespace Muon {
                                     nSeg = nrfsegs;
                                     // try to fit the new set of MDTs
                                     refitsegs = TrackletSegmentFitter(mdts);
-                                    if (refitsegs.size() > 0) {
+                                    if (!refitsegs.empty()) {
                                         for (std::vector<TrackletSegment>::iterator rfit = refitsegs.begin(); rfit != refitsegs.end();
                                              ++rfit) {
                                             CleanSegs.push_back(*rfit);
@@ -978,15 +977,12 @@ namespace Muon {
         // calculate the maximum allowed Delta b based on delta alpha uncertainties and ML spacing
         double dbmax = 5 * std::abs(ChMid - ML1seg.getChMidPoint()) * std::sqrt(sq(ML1seg.alphaError()) + sq(ML2seg.alphaError()));
         if (dbmax > m_maxDeltabCut) dbmax = m_maxDeltabCut;
-        if (std::abs(deltab) < dbmax)
-            return true;
-        else
-            return false;
+        return std::abs(deltab) < dbmax;
     }
 
     //** ----------------------------------------------------------------------------------------------------------------- **//
 
-    float MSVertexTrackletTool::TrackMomentum(int chamber, float deltaAlpha) const {
+    float MSVertexTrackletTool::TrackMomentum(int chamber, float deltaAlpha) {
         float pTot = 100000.;
         // p = k/delta_alpha
         if (chamber == 0)
@@ -1016,7 +1012,7 @@ namespace Muon {
 
     //** ----------------------------------------------------------------------------------------------------------------- **//
 
-    float MSVertexTrackletTool::TrackMomentumError(TrackletSegment& ml1, TrackletSegment& ml2) const {
+    float MSVertexTrackletTool::TrackMomentumError(TrackletSegment& ml1, TrackletSegment& ml2) {
         // uncertainty on 1/p
         int ChType = ml1.mdtChamber();
         float dalpha = std::sqrt(sq(ml1.alphaError()) + sq(ml2.alphaError()));
@@ -1047,7 +1043,7 @@ namespace Muon {
 
     //** ----------------------------------------------------------------------------------------------------------------- **//
 
-    float MSVertexTrackletTool::TrackMomentumError(TrackletSegment& ml1) const {
+    float MSVertexTrackletTool::TrackMomentumError(TrackletSegment& ml1) {
         // uncertainty in 1/p
         int ChType = ml1.mdtChamber();
         float dalpha = std::abs(ml1.alphaError());
@@ -1286,7 +1282,7 @@ namespace Muon {
                 }      // end loop on ambiguous tracks
 
                 std::vector<TrackletSegment> MyECsegs = TrackletSegmentFitter(AllMdts);
-                if (MyECsegs.size() > 0) {
+                if (!MyECsegs.empty()) {
                     TrackletSegment ECseg = MyECsegs.at(0);
                     ECseg.clearMdt();
                     float pT = 10000.0 * std::sin(ECseg.alpha());

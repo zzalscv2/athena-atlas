@@ -552,7 +552,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
 
             if (measphi != 0) continue;  // Skip phi strip . To be created after efficiency evaluation
 
-            if (stationName[0] != 'B' || (std::abs(stationEta) == 8 && stationName == "BIS") || doubletZ > m_idHelper->doubletZMax()) {
+            if (stationName[0] != 'B' || (std::abs(stationEta) == 8 && stationName == "BIS") || doubletZ > RpcIdHelper::doubletZMax()) {
                 ATH_MSG_WARNING("Found an invalid identifier "
                                 << " stationName " << stationName << " stationEta " << stationEta << " stationPhi " << stationPhi
                                 << " doubletR " << doubletR << " doubletZ " << doubletZ << " doubletPhi " << doubletPhi << " gasGap "
@@ -699,7 +699,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                     if (m_Efficiency_fromCOOL) {
                         const RpcCondDbData* readCdo{nullptr};                        
                         ATH_CHECK(retrieveCondData(ctx, m_readKey, readCdo));
-                        if (!(undefPhiStripStat && imeasphi == 1)) {
+                        if (!undefPhiStripStat || imeasphi != 1) {
                             if (readCdo->getDeadStripIntMap().find(newId) != readCdo->getDeadStripIntMap().end()) {
                                 ATH_MSG_DEBUG("After DetectionEfficiency: strip " << m_idHelper->show_to_string(newId)
                                                                                   << " in a cluster of size " << pcs[2] - pcs[1] + 1
@@ -1380,7 +1380,7 @@ long long int RpcDigitizationTool::PackMCTruth(float proptime, float bctime, flo
 }
 
 //--------------------------------------------
-void RpcDigitizationTool::UnPackMCTruth(double theWord, float& proptime, float& bctime, float& posy, float& posz) const {
+void RpcDigitizationTool::UnPackMCTruth(double theWord, float& proptime, float& bctime, float& posy, float& posz) {
     // int64_t is just a shorter way of writing long long int
     using Repacker = union
 
@@ -1989,7 +1989,7 @@ int RpcDigitizationTool::ClusterSizeEvaluation(const EventContext& ctx, const Id
     // negative CS correspond to left asymmetric cluster with respect to nstrip
     return ClusterSize;
 }
-double RpcDigitizationTool::FCPEfficiency(HepMC::ConstGenParticlePtr genParticle) {
+double RpcDigitizationTool::FCPEfficiency(const HepMC::ConstGenParticlePtr& genParticle) {
     double qcharge = 1.;
     double qbetagamma = -1.;
     const int particlePdgId = genParticle->pdg_id();
@@ -2060,7 +2060,7 @@ double RpcDigitizationTool::FCPEfficiency(HepMC::ConstGenParticlePtr genParticle
     return eff_SF;
 }
 
-double RpcDigitizationTool::extract_time_over_threshold_value(CLHEP::HepRandomEngine* rndmEngine) const {
+double RpcDigitizationTool::extract_time_over_threshold_value(CLHEP::HepRandomEngine* rndmEngine) {
     //mn Time-over-threshold modeled as a narrow and a wide gaussian
     //mn based on the fit documented in https://its.cern.ch/jira/browse/ATLASRECTS-7820
     constexpr double tot_mean_narrow = 16.;

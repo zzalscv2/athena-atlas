@@ -63,7 +63,7 @@ public:
      */
 
     uint32_t getRodID(const CscRawDataCollection* rdo) const;
-    uint32_t getRodID(uint16_t subId, uint16_t rodId) const;
+    static uint32_t getRodID(uint16_t subId, uint16_t rodId) ;
 
     /** Make a ROD Source ID for CscDigitCollection
      */
@@ -75,11 +75,11 @@ public:
 
     /** Make a ROS Source ID from a ROB source ID
      */
-    uint32_t getRosID(uint32_t rob_id) const;
+    static uint32_t getRosID(uint32_t rob_id) ;
 
     /** Make a SubDetector ID from ROS source ID
      */
-    uint32_t getDetID(uint32_t ros_id) const;
+    static uint32_t getDetID(uint32_t ros_id) ;
 
     /** return all the ROB IDs */
     const std::vector<uint32_t>& allRobIds() const { return m_robIDs; }

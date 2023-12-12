@@ -14,8 +14,7 @@ MMPrepDataContainerCnvBase(svcloc)
 {
 }
 
-MMPrepDataContainerCnv::~MMPrepDataContainerCnv() {
-}
+MMPrepDataContainerCnv::~MMPrepDataContainerCnv() = default;
 
 StatusCode MMPrepDataContainerCnv::initialize() {
    // Call base clase initialize

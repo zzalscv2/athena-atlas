@@ -84,7 +84,7 @@ namespace Muon {
             if (match.numberOfMatchedHits() == 0) continue;
 
             // create truth association
-            result.push_back(std::make_pair(*tit, match));
+            result.emplace_back(*tit, match);
         }
 
         // sort result per muon and per number of matched hits
@@ -103,7 +103,7 @@ namespace Muon {
         std::vector<const MuonSegment*>::const_iterator sit_end = segments.end();
         for (; sit != sit_end; ++sit) {
             // create truth association
-            result.push_back(std::make_pair(*sit, getTruth(truth_tree, **sit)));
+            result.emplace_back(*sit, getTruth(truth_tree, **sit));
         }
 
         // sort result per muon and per number of matched hits
@@ -392,12 +392,11 @@ namespace Muon {
 
     MuonTrackTruth MuonTrackTruthTool::getTruth(const TruthTree& truth_tree, const Trk::Track& track, bool restrictedTruth) const {
         if (track.measurementsOnTrack()) return getTruth(truth_tree, track.measurementsOnTrack()->stdcont(), restrictedTruth);
-        return MuonTrackTruth();
+        return {};
     }
 
     MuonTrackTruth MuonTrackTruthTool::getTruth(const TruthTree& truth_tree, const std::vector<const MuonSegment*>& segments,
                                                 bool restrictedTruth) const {
-        Trk::RoT_Extractor rotExtractor;
         std::set<Identifier> ids;
         std::vector<const Trk::MeasurementBase*> measurements;
         std::vector<const MuonSegment*>::const_iterator sit = segments.begin();
@@ -408,7 +407,7 @@ namespace Muon {
             for (; mit != mit_end; ++mit) {
                 const Trk::MeasurementBase* meas = *mit;
                 const Trk::RIO_OnTrack* rot = nullptr;
-                rotExtractor.extract(rot, meas);
+                Trk::RoT_Extractor::extract(rot, meas);
                 if (!rot) {
                     if (!dynamic_cast<const Trk::PseudoMeasurementOnTrack*>(meas)) ATH_MSG_WARNING(" Could not get rot from measurement ");
                     continue;
@@ -453,7 +452,6 @@ namespace Muon {
 
     MuonTrackTruth MuonTrackTruthTool::getTruth(const std::vector<const Trk::MeasurementBase*>& measurements,
                                                 const TruthTreeEntry& truthEntry, bool restrictedTruth) const {
-        Trk::RoT_Extractor rotExtractor;
         MuonTrackTruth trackTruth;
         trackTruth.truthTrack = truthEntry.truthTrack;
         trackTruth.truthTrajectory = truthEntry.truthTrajectory;
@@ -466,7 +464,7 @@ namespace Muon {
             if (!meas) { continue; }
 
             const Trk::RIO_OnTrack* rot = nullptr;
-            rotExtractor.extract(rot, meas);
+            Trk::RoT_Extractor::extract(rot, meas);
             if (!rot) {
                 if (!dynamic_cast<const Trk::PseudoMeasurementOnTrack*>(meas)) ATH_MSG_WARNING(" Could not get rot from measurement ");
                 continue;
@@ -593,7 +591,6 @@ namespace Muon {
 
     void MuonTrackTruthTool::addClusterTruth(MuonTechnologyTruth& truth, const Identifier& id, const Trk::MeasurementBase& meas,
                                              const MuonSimDataCollection& simCol) const {
-        Trk::RoT_Extractor rotExtractor;
         Identifier layid = m_idHelperSvc->layerId(id);
         Identifier chid = m_idHelperSvc->chamberId(id);
 
@@ -615,7 +612,7 @@ namespace Muon {
         } else {
             // Find SimData corresponding to identifier
             const Trk::RIO_OnTrack* rot = nullptr;
-            rotExtractor.extract(rot, &meas);
+            Trk::RoT_Extractor::extract(rot, &meas);
             const Trk::PrepRawData* prd = rot->prepRawData();
             if (prd) {
                 // check if an identifier from the list of RDOs is matched to that in the SDO collection
@@ -670,7 +667,7 @@ namespace Muon {
 
     HepMC::ConstGenParticlePtr MuonTrackTruthTool::getMother(const TruthTrajectory& traj, const int barcodeIn) const {
         ATH_MSG_DEBUG("getMother() : size = " << traj.size());
-        int pdgFinal = ((traj.size() == 0) ? -999 : traj.front().cptr()->pdg_id());
+        int pdgFinal = ((traj.empty()) ? -999 : traj.front().cptr()->pdg_id());
         bool foundBC = false;
         for (const auto& pit : traj) {
             if (!pit) continue;
@@ -728,7 +725,7 @@ namespace Muon {
                     pdgFinal = particle->pdg_id();
                 } else {
                     if (particle->pdg_id() == pdgFinal) {
-                        auto pit_p = *pit;
+                        const auto& pit_p = *pit;
                         if ((theFirst != pit_p.scptr()) && (particle->momentum().t() != ePrev))
                             ++scat;  // if the particle has not changed pdgid after the first step count as scatter. also avoid counting
                                      // pure interface changes as scatter

@@ -37,9 +37,7 @@ sTgcDigitContainer::sTgcDigitContainer(unsigned int hash_max)
 
 // Destructor.
 
-sTgcDigitContainer::~sTgcDigitContainer() {
-
-}
+sTgcDigitContainer::~sTgcDigitContainer() = default;
 
 //**********************************************************************
 

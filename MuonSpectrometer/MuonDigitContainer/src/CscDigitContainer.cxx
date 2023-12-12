@@ -33,9 +33,7 @@ CscDigitContainer::CscDigitContainer(unsigned int hash_max)
 
 // Destructor.
 
-CscDigitContainer::~CscDigitContainer() {
-
-}
+CscDigitContainer::~CscDigitContainer() = default;
 
 //**********************************************************************
 

@@ -47,27 +47,27 @@ namespace Muon {
     }
     
     // loop over MDT collections
-    for( auto col : layerPrepRawData.mdts ){
+    for( const auto *col : layerPrepRawData.mdts ){
       calibrateAndSelectMdt(intersection,*col,layerROTs);
     }
 
     // loop over RPC collections
-    for( auto col : layerPrepRawData.rpcs ){
+    for( const auto *col : layerPrepRawData.rpcs ){
       calibrateAndSelectCluster(intersection,*col,layerROTs);
     }
 
     // loop over TGC collections
-    for( auto col : layerPrepRawData.tgcs ){
+    for( const auto *col : layerPrepRawData.tgcs ){
       calibrateAndSelectCluster(intersection,*col,layerROTs);
     }
 
     // loop over STGC collections
-    for( auto col : layerPrepRawData.stgcs ){
+    for( const auto *col : layerPrepRawData.stgcs ){
       calibrateAndSelectCluster(intersection,*col,layerROTs);
     }
 
     // loop over MM collections
-    for( auto col : layerPrepRawData.mms ){
+    for( const auto *col : layerPrepRawData.mms ){
       calibrateAndSelectCluster(intersection,*col,layerROTs);
     }
 

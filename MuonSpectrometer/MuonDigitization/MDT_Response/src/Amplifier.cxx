@@ -15,8 +15,7 @@ Amplifier::Amplifier():
 }
 
 Amplifier::~Amplifier()
-{
-}
+= default;
 
 void  Amplifier::InitAmplifierParameters()
 {

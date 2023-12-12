@@ -871,7 +871,7 @@ bool MdtDigitizationTool::insideMaskWindow(double time) const {
 
 //+emulate deformations here
 MDTSimHit MdtDigitizationTool::applyDeformations(const MDTSimHit& hit, const MuonGM::MdtReadoutElement* element,
-                                                 const Identifier& DigitId) const {
+                                                 const Identifier& DigitId) {
     const int id = hit.MDTid();
 
     // make the deformation
@@ -966,5 +966,5 @@ MdtDigitizationTool::GeoCorOut MdtDigitizationTool::correctGeometricalWireSag(co
     //-1 -> hit above wire (in opposite hemisphere as gravity vector)
     double sign = lpos.dot(lgravDir) < 0 ? -1. : 1.;
 
-    return GeoCorOut(sign, trackingSign, lpos, localSag);
+    return {sign, trackingSign, lpos, localSag};
 }

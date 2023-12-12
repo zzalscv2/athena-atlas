@@ -43,7 +43,7 @@ StatusCode STGC_RdoToDigit::decodeSTGC(const Muon::STGC_RawDataCollection* rdoCo
                                        sTgcDigitCollection*& collection, Identifier& oldId) const {
     const IdContext stgcContext = m_idHelperSvc->stgcIdHelper().module_context();
 
-    if (rdoColl->size() > 0) {
+    if (!rdoColl->empty()) {
         ATH_MSG_DEBUG(" Number of RawData in this rdo " << rdoColl->size());
 
         // for each RDO, loop over RawData, converter RawData to digit

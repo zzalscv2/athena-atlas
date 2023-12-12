@@ -26,8 +26,8 @@ namespace Muon {
     clustersPhi.clear();
     channelsEta.clear();
     channelsPhi.clear();
-    channelsEta.resize(m_tgcIdHelper->channelMax()+2);
-    channelsPhi.resize(m_tgcIdHelper->channelMax()+2);
+    channelsEta.resize(TgcIdHelper::channelMax()+2);
+    channelsPhi.resize(TgcIdHelper::channelMax()+2);
     std::vector<Triplet>* channelsPtr = nullptr;
     for( ; cit!=cit_end;++cit ) {
       const Muon::TgcPrepData* prd = *cit;

@@ -36,18 +36,18 @@ namespace Muon
       ~TGC_Hid2RESrcID () {} 
 
       /** Make a ROD Source ID for TGC RDO. */ 
-      uint32_t getRodID(const TgcRdo *rdo) const;
+      static uint32_t getRodID(const TgcRdo *rdo) ;
       /** Make a ROD Source ID for SubDetector ID and ROD ID. */ 
-      uint32_t getRodID(uint16_t subDetectorId, uint16_t rodId) const;
+      static uint32_t getRodID(uint16_t subDetectorId, uint16_t rodId) ;
       /** Make a ROD Source ID for TgcDigitCollection. */ 
-      uint32_t getRodID(const Identifier & offlineId,
-                        const ITGCcablingSvc* cabling) const;
+      static uint32_t getRodID(const Identifier & offlineId,
+                        const ITGCcablingSvc* cabling) ;
       /** Make a ROB Source ID from a ROD source ID. */ 
-      uint32_t getRobID  (uint32_t rod_id) const; 
+      static uint32_t getRobID  (uint32_t rod_id) ; 
       /** Make a ROS Source ID from a ROB source ID. */ 
-      uint32_t getRosID  (uint32_t rob_id) const;
+      static uint32_t getRosID  (uint32_t rob_id) ;
       /** Make a SubDetector ID from ROS source ID. */
-      uint32_t getDetID  (uint32_t ros_id) const;
+      static uint32_t getDetID  (uint32_t ros_id) ;
 
       /** Return all the ROB IDs. */
       const std::vector<uint32_t>& allRobIds() const { return m_robIDs; } 

@@ -11,8 +11,7 @@ STGC_RawDataContainerCnv::STGC_RawDataContainerCnv(ISvcLocator* svcloc) :
 {
 }
 
-STGC_RawDataContainerCnv::~STGC_RawDataContainerCnv() {
-}
+STGC_RawDataContainerCnv::~STGC_RawDataContainerCnv() = default;
 
 StatusCode STGC_RawDataContainerCnv::initialize() {
   // Call base clase initialize

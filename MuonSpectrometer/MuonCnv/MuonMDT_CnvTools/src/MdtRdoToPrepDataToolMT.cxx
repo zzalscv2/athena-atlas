@@ -24,7 +24,7 @@ using MdtDriftCircleStatus = MdtCalibOutput::MdtDriftCircleStatus;
 
 namespace {
     // the tube number of a tube in a tubeLayer is encoded in the GeoSerialIdentifier (modulo maxNTubesPerLayer)
-    static constexpr unsigned int maxNTubesPerLayer = MdtIdHelper::maxNTubesPerLayer;
+    constexpr unsigned int maxNTubesPerLayer = MdtIdHelper::maxNTubesPerLayer;
 
     inline void updateClosestApproachTwin(MdtCalibInput & in) {
         const MuonGM::MdtReadoutElement* descriptor = in.legacyDescriptor();
@@ -35,7 +35,7 @@ namespace {
         double measuredPerp = std::sqrt(nominalTubePos.perp2() - descriptor->getStationS()* descriptor->getStationS());
         CxxUtils::sincos  tubeSC{nominalTubePos.phi()};
         Amg::Vector3D measurePos{tubeSC.cs * measuredPerp, tubeSC.sn *measuredPerp, nominalTubePos.z()};
-        in.setClosestApproach(std::move(measurePos));
+        in.setClosestApproach(measurePos);
     }
 }  // namespace
 
@@ -184,7 +184,7 @@ namespace Muon {
                                                  IdentifierHash rdoHash) const {
         const MdtCsmContainer* rdoContainer{getRdoContainer(ctx)};
 
-        if (!rdoContainer->size()) {
+        if (rdoContainer->empty()) {
             ATH_MSG_DEBUG("The container is empty");
             return true;
         }
@@ -228,7 +228,7 @@ namespace Muon {
             /// Construct the hashes from the existing RDOs
             std::vector<IdentifierHash> rdoHashes{};
             const MdtCsmContainer* rdoContainer = getRdoContainer(ctx);
-            if (!rdoContainer || !rdoContainer->size()) return StatusCode::SUCCESS;
+            if (!rdoContainer || rdoContainer->empty()) return StatusCode::SUCCESS;
             rdoHashes.reserve(rdoContainer->size());
             for (const MdtCsm* csm : *rdoContainer) rdoHashes.push_back(csm->identifyHash());
 
@@ -246,7 +246,7 @@ namespace Muon {
 
         const MdtCsmContainer* rdoContainer = getRdoContainer(ctx);
 
-        if (!rdoContainer->size()) ATH_MSG_DEBUG("MdtCsmContainer is Empty");
+        if (rdoContainer->empty()) ATH_MSG_DEBUG("MdtCsmContainer is Empty");
 
         ATH_MSG_DEBUG("-----------------------------------------------------------------------------");
 
@@ -269,16 +269,14 @@ namespace Muon {
         }
 
         ATH_MSG_DEBUG("*** Event Summary: csm collections:" << ncsm << "  amt hits: " << namt);
-
-        return;
-    }
+   }
 
     void MdtRdoToPrepDataToolMT::printPrepDataImpl(const MdtPrepDataContainer* mdtPrepDataContainer) const {
         // Dump info about PRDs
         ATH_MSG_DEBUG("******************************************************************************************");
         ATH_MSG_DEBUG("***************** Listing MdtPrepData collections content ********************************");
 
-        if (mdtPrepDataContainer->size() <= 0) ATH_MSG_DEBUG("No MdtPrepRawData collections found");
+        if (mdtPrepDataContainer->empty()) ATH_MSG_DEBUG("No MdtPrepRawData collections found");
         int ncoll{0}, nhits{0};
         ATH_MSG_DEBUG("--------------------------------------------------------------------------------------------");
         for (const MdtPrepDataCollection* mdtColl : *mdtPrepDataContainer) {

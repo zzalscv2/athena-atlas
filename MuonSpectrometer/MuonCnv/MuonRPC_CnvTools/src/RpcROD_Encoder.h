@@ -58,7 +58,7 @@ public:
 private:
     void packFragments(const std::vector<uint16_t>& v16, std::vector<uint32_t>& v, int n) const;
 
-    uint32_t set32bits(const unsigned short int* v16, const unsigned short int* pos, const unsigned short int n) const;
+    static uint32_t set32bits(const unsigned short int* v16, const unsigned short int* pos, const unsigned short int n) ;
 
 private:
     const RPC_Hid2RESrcID* m_hid2re;

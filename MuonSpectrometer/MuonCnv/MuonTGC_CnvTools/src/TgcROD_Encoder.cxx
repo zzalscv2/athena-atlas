@@ -22,7 +22,7 @@ Muon::TgcROD_Encoder::TgcROD_Encoder() : m_tgcRdo(nullptr)
 
 
 // destructor
-Muon::TgcROD_Encoder::~TgcROD_Encoder() {}
+Muon::TgcROD_Encoder::~TgcROD_Encoder() = default;
 
 
 // Set TgcRdo
@@ -68,5 +68,4 @@ void Muon::TgcROD_Encoder::fillROD(std::vector<uint32_t>& v)
     ++iWord;
   }
 
-  return;
-}
+  }

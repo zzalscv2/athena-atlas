@@ -20,27 +20,24 @@ RpcROD_Encoder::RpcROD_Encoder() : m_hid2re(nullptr) {}
 
 /** destructor
  */
-RpcROD_Encoder::~RpcROD_Encoder() {}
+RpcROD_Encoder::~RpcROD_Encoder() = default;
 
 /** add coincidence matrices
  */
 void RpcROD_Encoder::set(const RPC_Hid2RESrcID* hid2re) {
     m_hid2re = hid2re;
-    return;
 }
 
 /** add coincidence matrices
  */
 void RpcROD_Encoder::add(const RpcPad* rc) {
     m_vRpcPad.push_back(rc);
-    return;
 }
 
 /** clear vector
  */
 void RpcROD_Encoder::clear() {
     m_vRpcPad.erase(m_vRpcPad.begin(), m_vRpcPad.end());
-    return;
 }
 
 /** convert all RPC Pad in the current list to
@@ -160,12 +157,7 @@ void RpcROD_Encoder::fillROD(std::vector<uint32_t>& v) {
     // finally make the ROD footer
     v.push_back(0);  // NumberOfStatusElements
     v.push_back(0);  // NumberOfDataElements
-    v.push_back(0);  // StatusBlockPosition
-
-    // clean up
-
-    return;
-}
+    v.push_back(0);  }
 
 void RpcROD_Encoder::packFragments(const std::vector<uint16_t>& v16, std::vector<uint32_t>& v, int n) const {
     // now merge 2 consecutive 16 bit words in 32 bit words
@@ -178,10 +170,9 @@ void RpcROD_Encoder::packFragments(const std::vector<uint16_t>& v16, std::vector
         v.push_back(set32bits(v16words, position, nWords));
         i += nWords;
     }
-    return;
-}
+    }
 
-uint32_t RpcROD_Encoder::set32bits(const unsigned short int* v16, const unsigned short int* pos, const unsigned short int n) const {
+uint32_t RpcROD_Encoder::set32bits(const unsigned short int* v16, const unsigned short int* pos, const unsigned short int n) {
     uint32_t v32 = 0;
     uint32_t p = 0, v = 0;
 

@@ -135,7 +135,7 @@ void Muon::sTgcPrepDataContainerCnv_p3::transToPers(const Muon::sTgcPrepDataCont
       int multilayer  = (m_sTgcId->multilayer(chan->identify())-1); // ranges between 1-2 (1bit)
       int gasGap      = (m_sTgcId->gasGap(chan->identify())-1); // ranges between 1-4 (2bits)
       int channelType = (m_sTgcId->channelType(chan->identify())); // ranges between 0-2 (2bits)
-      int channel     = (m_sTgcId->channel(chan->identify())-m_sTgcId->channelMin()); 
+      int channel     = (m_sTgcId->channel(chan->identify())-sTgcIdHelper::channelMin()); 
 
       // created an unsigned short and store multilayer, gasGap and channel by bit-shifts   
       unsigned short diff = ( channel << 5 | channelType << 3 | gasGap << 1 | multilayer) ; 
@@ -215,12 +215,12 @@ void  Muon::sTgcPrepDataContainerCnv_p3::persToTrans(const Muon::sTgcPrepDataCon
       int gasGap = ( 3 & (diff>>1));
       int multilayer = ( 1 & diff );
       Identifier clusId = m_sTgcId->channelID(Identifier(pcoll.m_id), multilayer+1, gasGap+1, 
-					      channelType, channel+m_sTgcId->channelMin());
+					      channelType, channel+sTgcIdHelper::channelMin());
       log << MSG::DEBUG  << "Diff of " << diff << " translated into multilayer=" 
 	  << multilayer << ", gasGap=" << gasGap << ", channelType=" << channelType 
 	  << ", channel=" << channel << " -> id=" << clusId.get_compact() << endmsg;
 
-	if ( m_sTgcId->valid(clusId)!=true ) {
+	if ( !m_sTgcId->valid(clusId) ) {
 	  // have invalid PRD
 	  log << MSG::WARNING  << "Tgc PRD has invalid Identifier of "<< m_sTgcId->show_to_string(clusId)<< " - are you sure you have the correct geometry loaded, and NSW enabled?"<<endmsg;
 	} 

@@ -7,7 +7,7 @@
 RpcByteStreamEncoder::RpcByteStreamEncoder(const RpcPadContainer* padContainer) :
     m_padContainer(padContainer), m_byteStream(), m_byteStreamWord(0), m_highest(true) {}
 
-RpcByteStreamEncoder::~RpcByteStreamEncoder() {}
+RpcByteStreamEncoder::~RpcByteStreamEncoder() = default;
 
 StatusCode RpcByteStreamEncoder::encodeByteStream() {
     StatusCode sc;

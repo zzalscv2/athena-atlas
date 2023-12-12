@@ -63,11 +63,11 @@ namespace MuonAlign {
         // GET STATION EXACT NAME, FROM:
         // https://gitlab.cern.ch/Asap/AsapModules/Track/MuonAlignTrk/-/blob/master/MuonAlignTrk/MuonFixedLongId.h?ref_type=heads
         std::string hardwareName(MuonCalib::MuonFixedLongId calibId) const;
-        std::string_view side(MuonCalib::MuonFixedLongId calibId) const;
+        static std::string_view side(MuonCalib::MuonFixedLongId calibId) ;
         std::string sectorString(MuonCalib::MuonFixedLongId calibId) const;
         int sector(MuonCalib::MuonFixedLongId calibId) const;
         int hardwareEta(MuonCalib::MuonFixedLongId calibId) const;
-        bool isSmallSector(MuonCalib::MuonFixedLongId calibId) const;
+        static bool isSmallSector(MuonCalib::MuonFixedLongId calibId) ;
 
         SG::ReadCondHandleKey<MuonAlignmentErrorData> m_readKey{this, "ReadKey", "MuonAlignmentErrorData", "Key of MuonAlignmentErrorData"};
     };

@@ -165,7 +165,7 @@ StatusCode TgcDigitToTgcRDO::fill_TGCdata(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
 }
 
-TgcRdo* TgcDigitToTgcRDO::getTgcRdo(const TgcRawData* rawData, std::map<uint16_t, TgcRdo*>& tgcRdoMap) const {
+TgcRdo* TgcDigitToTgcRDO::getTgcRdo(const TgcRawData* rawData, std::map<uint16_t, TgcRdo*>& tgcRdoMap) {
     TgcRdoIdHash hashF;
 
     // Get Online collection ID

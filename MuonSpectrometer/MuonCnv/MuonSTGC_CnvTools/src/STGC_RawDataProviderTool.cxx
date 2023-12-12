@@ -24,7 +24,7 @@ Muon::STGC_RawDataProviderTool::STGC_RawDataProviderTool(
 //================ Destructor =================================================
 
 Muon::STGC_RawDataProviderTool::~STGC_RawDataProviderTool()
-{}
+= default;
 
 //================ Initialisation =================================================
 

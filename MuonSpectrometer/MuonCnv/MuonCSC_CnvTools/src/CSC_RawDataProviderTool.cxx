@@ -27,7 +27,7 @@ Muon::CSC_RawDataProviderTool::CSC_RawDataProviderTool(const std::string& t, con
 
 //================ Destructor =================================================
 
-Muon::CSC_RawDataProviderTool::~CSC_RawDataProviderTool() {}
+Muon::CSC_RawDataProviderTool::~CSC_RawDataProviderTool() = default;
 
 //================ Initialisation =================================================
 

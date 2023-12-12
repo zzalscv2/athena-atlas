@@ -67,7 +67,7 @@ void CscRODReadOut::encodeFragments(const std::vector<uint16_t>& amplitude, std:
     }
 }
 
-int CscRODReadOut::findCharge(double samplingTime, const std::vector<uint16_t>& amplitude, double& time) const {
+int CscRODReadOut::findCharge(double samplingTime, const std::vector<uint16_t>& amplitude, double& time) {
     // very crude - to be done better
 
     int charge = 0;

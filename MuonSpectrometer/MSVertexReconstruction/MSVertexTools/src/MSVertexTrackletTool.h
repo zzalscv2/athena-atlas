@@ -48,14 +48,14 @@ namespace Muon {
         std::vector<TrackletSegment> TrackletSegmentFitterCore(std::vector<const Muon::MdtPrepData*>& mdts,
                                                                std::vector<std::pair<float, float> >& SeedParams) const;
         std::vector<std::pair<float, float> > SegSeeds(std::vector<const Muon::MdtPrepData*>& mdts) const;
-        float SeedResiduals(std::vector<const Muon::MdtPrepData*>& mdts, float slope, float inter) const;
+        static float SeedResiduals(std::vector<const Muon::MdtPrepData*>& mdts, float slope, float inter) ;
         std::vector<TrackletSegment> CleanSegments(std::vector<TrackletSegment>& segs) const;
         bool DeltabCalc(TrackletSegment& ML1seg, TrackletSegment& ML2seg) const;
-        float TrackMomentum(int chamber, float deltaAlpha) const;
-        float TrackMomentumError(TrackletSegment& ml1, TrackletSegment& ml2) const;
-        float TrackMomentumError(TrackletSegment& ml1) const;
+        static float TrackMomentum(int chamber, float deltaAlpha) ;
+        static float TrackMomentumError(TrackletSegment& ml1, TrackletSegment& ml2) ;
+        static float TrackMomentumError(TrackletSegment& ml1) ;
         std::vector<Tracklet> ResolveAmbiguousTracklets(std::vector<Tracklet>& tracks) const;
-        void convertToTrackParticles(std::vector<Tracklet>& tracklets, SG::WriteHandle<xAOD::TrackParticleContainer>& container) const;
+        static void convertToTrackParticles(std::vector<Tracklet>& tracklets, SG::WriteHandle<xAOD::TrackParticleContainer>& container) ;
 
         void addMDTHits(std::vector<const Muon::MdtPrepData*>& hits, std::vector<std::vector<const Muon::MdtPrepData*> >& SortedMdt) const;
 

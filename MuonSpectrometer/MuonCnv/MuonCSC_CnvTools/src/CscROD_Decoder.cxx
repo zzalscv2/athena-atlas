@@ -72,8 +72,6 @@ void Muon::CscROD_Decoder::fillCollection(const xAOD::EventInfo& eventInfo, cons
         ATH_MSG_DEBUG("Empty ROB - doing nothing ");
     else  // ROD version for DC2 - old and obselete; for backward compatibility
         this->rodVersion0(robFrag, rdoIDC);
-
-    return;
 }
 
 ////////////////////////////////
@@ -441,7 +439,6 @@ void Muon::CscROD_Decoder::rodVersion2(const ROBFragment& robFrag, CscRawDataCon
     }
 
     ATH_MSG_DEBUG("end of CscROD_Decode::fillCollection()");
-    return;
 }
 
 void Muon::CscROD_Decoder::rodVersion1(const ROBFragment& robFrag, CscRawDataContainer& rdoIDC) const {
@@ -577,8 +574,7 @@ void Muon::CscROD_Decoder::rodVersion1(const ROBFragment& robFrag, CscRawDataCon
         }
     }
 
-    return;
-}
+    }
 
 void Muon::CscROD_Decoder::rodVersion0(const ROBFragment& robFrag, CscRawDataContainer& rdoIDC) const {
     ATH_MSG_DEBUG("in CscROD_Decode::fillCollection() - ROD version 0");
@@ -678,5 +674,4 @@ void Muon::CscROD_Decoder::rodVersion0(const ROBFragment& robFrag, CscRawDataCon
         }
     }
 
-    return;
-}
+    }

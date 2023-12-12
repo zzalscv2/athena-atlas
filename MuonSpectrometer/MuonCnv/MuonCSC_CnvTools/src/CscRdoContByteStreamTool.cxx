@@ -64,7 +64,7 @@ StatusCode Muon::CscRdoContByteStreamTool::convert(const CscRawDataContainer* co
     bool first = true;
     for (; it_col != it_col_end; ++it_col) {
         /** set the detector event type word */
-        if (first && (*it_col)->size() > 0) {
+        if (first && !(*it_col)->empty()) {
             first = false;
             uint32_t eventType = (*it_col)->eventType();
             fea->setDetEvtType(eventType);

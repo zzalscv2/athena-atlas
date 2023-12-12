@@ -10,12 +10,10 @@
 #include "GaudiKernel/MsgStream.h"
 
 Muon::TgcByteStream::TgcByteStream()
-{
-}
+= default;
 
 Muon::TgcByteStream::~TgcByteStream()
-{
-}
+= default;
 
 void Muon::TgcByteStream::rdo2ByteStream(const TgcRdo* rdo, ByteStream& bs, MsgStream& log)
 {
@@ -222,7 +220,7 @@ void Muon::TgcByteStream::byteStream2Rdo(const ByteStream& bs, TgcRdo& rdo, uint
   TGC_BYTESTREAM_FRAGMENTCOUNT counters[7] = {
     {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 8}, {0, 9}
   };
-  TGC_BYTESTREAM_FRAGMENTCOUNT counter;
+  TGC_BYTESTREAM_FRAGMENTCOUNT counter{};
   
   
   int iBs = 0;

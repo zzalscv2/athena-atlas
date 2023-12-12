@@ -83,7 +83,7 @@ MmDigit::MmDigit(const Identifier& id,
 //**********************************************************************/
  
 // Validity check.
-bool MmDigit::is_valid(const MmIdHelper * /*mmHelper*/) const {
+bool MmDigit::is_valid(const MmIdHelper * /*mmHelper*/) {
   return true; /*( (m_time>=timemin && m_time<=timemax) && (mmHelper->valid(m_muonId)));*/
 }
 

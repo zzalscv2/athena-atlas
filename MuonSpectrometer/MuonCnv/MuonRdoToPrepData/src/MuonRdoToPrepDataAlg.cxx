@@ -33,16 +33,16 @@ StatusCode MuonRdoToPrepDataAlg::execute(const EventContext& ctx)  const {
             ATH_MSG_WARNING("Cannot retrieve muonRoI " << m_roiCollectionKey.key());
             return StatusCode::SUCCESS;
         } else {
-            for (auto roi : *muonRoI) {
+            for (const auto *roi : *muonRoI) {
                 if (m_robDecoding) {
                      m_regsel->ROBIDList(*roi, robs);
                 } else {
                     m_regsel->HashIDList(*roi, toDecode);
                 }               
-                if (robs.size()) {
+                if (!robs.empty()) {
                     ATH_CHECK(m_tool->decode(ctx, robs));
                     robs.clear();
-                } else if (toDecode.size()) {
+                } else if (!toDecode.empty()) {
                     ATH_CHECK(m_tool->decode(ctx, toDecode, toDecodeWithData));
                 } else {
                    ATH_CHECK(m_tool->provideEmptyContainer(ctx));

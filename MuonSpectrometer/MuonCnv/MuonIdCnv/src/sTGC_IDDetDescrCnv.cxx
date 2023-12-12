@@ -78,7 +78,7 @@ StatusCode sTGC_IDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pOb
 
   // Get the StoreGate key of this container.
   std::string helperKey  = *( ddAddr->par() );
-  if ("" == helperKey) {
+  if (helperKey.empty()) {
     log << MSG::DEBUG << "No Helper key " << endmsg;
   } else {
     log << MSG::DEBUG << "Helper key is " << helperKey << endmsg;

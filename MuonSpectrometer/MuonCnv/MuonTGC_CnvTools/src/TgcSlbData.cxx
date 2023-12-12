@@ -37,7 +37,7 @@ Muon::TgcSlbData::TgcSlbData(uint16_t bcId, uint32_t l1Id,
 }
 
 Muon::TgcSlbData::~TgcSlbData(void) 
-{}    
+= default;    
 
 bool Muon::TgcSlbData::equal(uint16_t /* bcId */,
 			     uint32_t l1Id,
@@ -118,8 +118,7 @@ void Muon::TgcSlbData::setBitmap(const uint16_t bcTag,
       *(bitArray+indexMap+iBit)=true;
     }
   }
-  return;
-}
+  }
 
 // set a bit
 void Muon::TgcSlbData::setBit(const uint16_t bcTag,

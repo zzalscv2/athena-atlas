@@ -45,7 +45,7 @@ class Amplifier {
 
  private:
   void   InitAmplifierParameters();                       // default initialization of amplifier settings
-  double ResponseFunction(double time);
+  static double ResponseFunction(double time);
 
   void   DoAdcResponse();                    // calculate adc response
   double Integral();                         // charge integral

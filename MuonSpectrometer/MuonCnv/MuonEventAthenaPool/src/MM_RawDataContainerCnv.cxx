@@ -12,8 +12,7 @@ MM_RawDataContainerCnv::MM_RawDataContainerCnv(ISvcLocator* svcloc) :
 {
 }
 
-MM_RawDataContainerCnv::~MM_RawDataContainerCnv() {
-}
+MM_RawDataContainerCnv::~MM_RawDataContainerCnv() = default;
 
 StatusCode MM_RawDataContainerCnv::initialize() {
   // Call base clase initialize

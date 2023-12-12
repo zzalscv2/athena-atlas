@@ -21,8 +21,7 @@ MMSimHitCollectionCnv::MMSimHitCollectionCnv(ISvcLocator* svcloc) :
 {
 }
 
-MMSimHitCollectionCnv::~MMSimHitCollectionCnv() {
-}
+MMSimHitCollectionCnv::~MMSimHitCollectionCnv() = default;
 
 MMSimHitCollection_PERS*    MMSimHitCollectionCnv::createPersistent (MMSimHitCollection* transCont) {
     MsgStream log(msgSvc(), "MMSimHitCollectionCnv" );
