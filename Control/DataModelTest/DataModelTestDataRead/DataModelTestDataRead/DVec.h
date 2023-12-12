@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: DVec.h,v 1.2 2007-01-31 03:12:39 ssnyder Exp $
@@ -30,7 +30,7 @@
 
 
 // Set up the inheritance relation between the @c DataVector classes.
-DATAVECTOR_VIRTBASES1 (DMTest::D, DMTest::B);
+DATAVECTOR_BASE (DMTest::D, DMTest::B);
 
 
 namespace DMTest {
