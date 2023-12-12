@@ -24,7 +24,7 @@ namespace met {
 
   using namespace xAOD;
 
-  typedef ElementLink<xAOD::IParticleContainer> iplink_t;
+  using iplink_t = ElementLink<xAOD::IParticleContainer>;
   static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_constitObjLinks("ConstitObjectLinks");
   static const SG::AuxElement::ConstAccessor< iplink_t  > acc_originalObject("originalObjectLink");
 
@@ -133,8 +133,8 @@ namespace met {
 	return StatusCode::FAILURE;
       }
 
-    m_h_calosyst_scale->SetDirectory(0);
-    m_h_calosyst_reso ->SetDirectory(0);
+    m_h_calosyst_scale->SetDirectory(nullptr);
+    m_h_calosyst_reso ->SetDirectory(nullptr);
 
     ATH_MSG_VERBOSE( __PRETTY_FUNCTION__ << "  DONE!!" );
     return StatusCode::SUCCESS;
@@ -163,7 +163,7 @@ namespace met {
 	return StatusCode::FAILURE;
       }
 
-    m_jet_systRpt_pt_eta->SetDirectory(0);
+    m_jet_systRpt_pt_eta->SetDirectory(nullptr);
 
     ATH_MSG_VERBOSE( __PRETTY_FUNCTION__ << "  DONE!!");
     return StatusCode::SUCCESS;
@@ -197,9 +197,9 @@ namespace met {
 	return StatusCode::FAILURE;
       }
 
-    m_resoperp_pthard_njet_mu ->SetDirectory(0);
-    m_resopara_pthard_njet_mu ->SetDirectory(0);
-    m_shiftpara_pthard_njet_mu->SetDirectory(0);
+    m_resoperp_pthard_njet_mu ->SetDirectory(nullptr);
+    m_resopara_pthard_njet_mu ->SetDirectory(nullptr);
+    m_shiftpara_pthard_njet_mu->SetDirectory(nullptr);
 
     ATH_MSG_VERBOSE( __PRETTY_FUNCTION__ <<"  DONE!!");
     return StatusCode::SUCCESS;
@@ -524,7 +524,7 @@ namespace met {
       int jetCount=0;
 
       std::vector<const xAOD::Jet*> jets;
-      for(iplink_t jetlink : acc_constitObjLinks(jettrkmet)) {
+      for(const iplink_t& jetlink : acc_constitObjLinks(jettrkmet)) {
 	if((*jetlink)->type()!=xAOD::Type::Jet) {
 	  ATH_MSG_ERROR("Invalid object of type " << (*jetlink)->type() << " in jet term");
 	  return CP::CorrectionCode::Error;
@@ -680,13 +680,13 @@ namespace met {
     if (!truthCont.isValid()) {
 
       ATH_MSG_ERROR( m_TruthContKey.key() << " container empty or doesn't exist, calcPtHard returning zero.");
-      return missingEt();
+      return {};
     }
 
     xAOD::MissingETContainer::const_iterator truthiter = truthCont->find(MissingETBase::Source::truthNonInt());
     if(truthiter == truthCont->end()){
       ATH_MSG_ERROR( "NonInt is not in " << m_TruthContKey.key() << ". calcPtHard returing zero." );
-      return missingEt();
+      return {};
     }
     const xAOD::MissingET& truthmet = **truthiter;
 
@@ -709,7 +709,7 @@ namespace met {
 
     if( ptHard.sumet < 0 ) {
       ATH_MSG_ERROR("PtHard has a negative sumet, returning ptHart = 0");
-      return missingEt();
+      return {};
     }
 
     ptHard.mpx  *= 1./(double(m_units)) ;
@@ -799,7 +799,7 @@ namespace met {
       }
     }
     if(m_units == 1){
-      if( (units_string != "")  &&
+      if( (!units_string.empty())  &&
 	  (units_string != "MeV")
 	  ){
 	ATH_MSG_ERROR("initialized the different systematics using two config files that conflict on units");
@@ -808,7 +808,7 @@ namespace met {
     }
 
     //set the units again
-    if( (units_string == "")  ||
+    if( (units_string.empty())  ||
 	(units_string == "MeV")
 	){
     m_units = 1;

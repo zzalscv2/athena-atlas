@@ -26,7 +26,7 @@ using namespace xAOD;
 
 namespace met {
 
-  typedef ElementLink<xAOD::IParticleContainer> iplink_t;
+  using iplink_t = ElementLink<xAOD::IParticleContainer>;
   static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_constitObjLinks("ConstitObjectLinks");
 
   //**********************************************************************
@@ -59,7 +59,7 @@ namespace met {
 
   //**********************************************************************
 
-  ORMETMakerAlg::~ORMETMakerAlg() { }
+  ORMETMakerAlg::~ORMETMakerAlg() = default;
 
   //**********************************************************************
 
@@ -110,7 +110,7 @@ namespace met {
     }
 
     
-    MissingETAssociationHelper ORMetHelper((m_doORMet ? &(*ORMetMap) : 0));
+    MissingETAssociationHelper ORMetHelper((m_doORMet ? &(*ORMetMap) : nullptr));
 
     // Retrieve containers ***********************************************
 
@@ -170,7 +170,7 @@ namespace met {
     // Electrons
     if(!m_ElectronContainerKey.empty()) {
       ConstDataVector<ElectronContainer> metElectrons(SG::VIEW_ELEMENTS);
-      for(const auto el : *Electrons) {
+      for(const auto *const el : *Electrons) {
     	if(accept(el)) {
     	  metElectrons.push_back(el);
 
@@ -188,7 +188,7 @@ namespace met {
     // Photons
     if(!m_PhotonContainerKey.empty()) {
       ConstDataVector<PhotonContainer> metPhotons(SG::VIEW_ELEMENTS);
-      for(const auto ph : *Gamma) {
+      for(const auto *const ph : *Gamma) {
     	if(accept(ph)) {
     	  metPhotons.push_back(ph);
     	}
@@ -205,7 +205,7 @@ namespace met {
     // Taus
     if(!m_TauJetContainerKey.empty()) {
       ConstDataVector<TauJetContainer> metTaus(SG::VIEW_ELEMENTS);
-      for(const auto tau : *TauJets) {
+      for(const auto *const tau : *TauJets) {
     	if(accept(tau)) {
     	  metTaus.push_back(tau);
     	}
@@ -222,7 +222,7 @@ namespace met {
     // Muons
     ConstDataVector<MuonContainer> metMuons(SG::VIEW_ELEMENTS);
     if(!m_MuonContainerKey.empty()) {
-      for(const auto mu : *Muons) {
+      for(const auto *const mu : *Muons) {
     	if(accept(mu)) {
     	  metMuons.push_back(mu);
     	}
@@ -255,11 +255,11 @@ namespace met {
 
       ATH_MSG_DEBUG("Retrieve OR constituents");
       ConstDataVector<PFOContainer> met_PFO(SG::VIEW_ELEMENTS);
-      for(const auto pfo : *PFOs) {met_PFO.push_back(pfo);}
+      for(const auto *const pfo : *PFOs) {met_PFO.push_back(pfo);}
 
       const xAOD::PFOContainer *OR_pfos; 
    
-      if (metMuons.size()>0 && m_retainMuonConstit) {ATH_CHECK(m_metmaker->retrieveOverlapRemovedConstituents(met_PFO.asDataVector(),metHelper, &OR_pfos, true, metMuons.asDataVector()));}
+      if (!metMuons.empty() && m_retainMuonConstit) {ATH_CHECK(m_metmaker->retrieveOverlapRemovedConstituents(met_PFO.asDataVector(),metHelper, &OR_pfos, true, metMuons.asDataVector()));}
       else {ATH_CHECK(m_metmaker->retrieveOverlapRemovedConstituents(met_PFO.asDataVector(),metHelper, &OR_pfos, false));}
 
       *PFOContainerWriteHandle=*OR_pfos;
@@ -305,7 +305,7 @@ namespace met {
 
     }
 
-    m_doJVT= (m_soft=="Clus" ? false : true);
+    m_doJVT= (m_soft != "Clus");
     if (m_doORMet) {
       if( m_metmaker->rebuildJetMET("RefJet", (m_soft=="Clus" ? m_softclname : m_softtrkname), newMet,
 				  Jets.cptr(), coreMet.cptr(), ORMetHelper, m_doJVT ).isFailure() ) {

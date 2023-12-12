@@ -22,7 +22,7 @@ using namespace xAOD;
 
 namespace met {
 
-  typedef ElementLink<xAOD::IParticleContainer> iplink_t;
+  using iplink_t = ElementLink<xAOD::IParticleContainer>;
   static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_constitObjLinks("ConstitObjectLinks");
 
   //**********************************************************************
@@ -63,7 +63,7 @@ namespace met {
 
   //**********************************************************************
 
-  METMakerAlg::~METMakerAlg() { }
+  METMakerAlg::~METMakerAlg() = default;
 
   //**********************************************************************
 
@@ -185,7 +185,7 @@ namespace met {
     // Electrons
     if(!m_ElectronContainerKey.empty()) {
       ConstDataVector<ElectronContainer> metElectrons(SG::VIEW_ELEMENTS);
-      for(const auto el : *Electrons) {
+      for(const auto *const el : *Electrons) {
     	if(accept(el)) {
     	  metElectrons.push_back(el);
 
@@ -203,7 +203,7 @@ namespace met {
     // Photons
     if(!m_PhotonContainerKey.empty()) {
       ConstDataVector<PhotonContainer> metPhotons(SG::VIEW_ELEMENTS);
-      for(const auto ph : *Gamma) {
+      for(const auto *const ph : *Gamma) {
     	if(accept(ph)) {
     	  metPhotons.push_back(ph);
     	}
@@ -220,7 +220,7 @@ namespace met {
     // Taus
     if(!m_TauJetContainerKey.empty()) {
       ConstDataVector<TauJetContainer> metTaus(SG::VIEW_ELEMENTS);
-      for(const auto tau : *TauJets) {
+      for(const auto *const tau : *TauJets) {
     	if(accept(tau)) {
     	  metTaus.push_back(tau);
     	}
@@ -237,7 +237,7 @@ namespace met {
     // Muons
     if(!m_MuonContainerKey.empty()) {
       ConstDataVector<MuonContainer> metMuons(SG::VIEW_ELEMENTS);
-      for(const auto mu : *Muons) {
+      for(const auto *const mu : *Muons) {
     	if(accept(mu)) {
     	  metMuons.push_back(mu);
     	}
