@@ -119,7 +119,7 @@ void Muon::MMPrepDataContainerCnv_p1::transToPers(const Muon::MMPrepDataContaine
             // collection (module) is in contained) into 16 bits, we do it by storing multilayer, gasGap and channel
             int multilayer = (m_MMId->multilayer(chan_id) - 1);               // ranges between 1-2 (1bit)
             int gasGap = (m_MMId->gasGap(chan_id) - 1);                       // ranges between 1-4 (2bits)
-            int channel = (m_MMId->channel(chan_id) - m_MMId->channelMin());  // ranges between 1-5012 (13bits)
+            int channel = (m_MMId->channel(chan_id) - MmIdHelper::channelMin());  // ranges between 1-5012 (13bits)
 
             // created an unsigned short and store multilayer, gasGap and channel by bit-shifts
             unsigned short diff = (channel << 3 | gasGap << 1 | multilayer);
@@ -186,7 +186,7 @@ void Muon::MMPrepDataContainerCnv_p1::persToTrans(const Muon::MMPrepDataContaine
             int channel = (diff >> 3);
             int gasGap = (3 & (diff >> 1));
             int multilayer = (1 & diff);
-            Identifier clusId = m_MMId->channelID(Identifier(pcoll.m_id), multilayer + 1, gasGap + 1, channel + m_MMId->channelMin());
+            Identifier clusId = m_MMId->channelID(Identifier(pcoll.m_id), multilayer + 1, gasGap + 1, channel + MmIdHelper::channelMin());
             if (log.level() <= MSG::DEBUG) {
                 log << MSG::DEBUG << "Diff of " << diff << " translated into multilayer=" << multilayer << ", gasGap=" << gasGap
                     << ", channel=" << channel << " -> id=" << clusId.get_compact() << endmsg;

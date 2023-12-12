@@ -21,7 +21,7 @@
 #include "AthAllocators/DataPool.h"
 
 #include "boost/range/iterator_range.hpp"
-#include <assert.h>
+#include <cassert>
 
 void RpcSectorLogicContainerCnv_p1::transToPers(const RpcSectorLogicContainer* transCont,  RpcSectorLogicContainer_p1* persCont, MsgStream & log)  const
 {
@@ -38,7 +38,7 @@ void RpcSectorLogicContainerCnv_p1::transToPers(const RpcSectorLogicContainer* t
   unsigned int slVariableIndex=0;
   unsigned int triggerRateIndex=0;
 
-  if (transCont->size()==0) return; //All we can do in this case
+  if (transCont->empty()) return; //All we can do in this case
   
   //std::cout<<"persCont->m_slVariables.resize(transCont->size() * 8) = "<<transCont->size() * 8<<std::endl;
   
@@ -109,7 +109,7 @@ void  RpcSectorLogicContainerCnv_p1::persToTrans(const RpcSectorLogicContainer_p
    //std::cout<<"**** RpcSectorLogicContainerCnv_p1::persToTrans"<<std::endl;
    //std::cout<<"m_sectorList[0]: "<<transCont->m_sectorList[0]<<", m_sectorList[1]"<<transCont->m_sectorList[1]<<std::endl;
 
-   if (persCont->m_slVariables.size()==0) return; //empty container
+   if (persCont->m_slVariables.empty()) return; //empty container
 
    unsigned int index = 0; // for position within persCont->m_slVariables
    unsigned int numOfSL= persCont->m_slVariables[index++];// 1st element is number of SLs

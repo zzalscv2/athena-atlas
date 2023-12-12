@@ -92,7 +92,7 @@ Muon::TgcPrepDataReplicationToolAllBCto3BC::makeTgcPrepData(const Muon::TgcPrepD
   Identifier channelId = to_copy->identify();
   IdentifierHash tgcHashId = to_copy->collectionHash();
   const std::vector<Identifier> &identifierList = to_copy->rdoList();
-  const Amg::MatrixX newErrHitPos{to_copy->localCovariance()};
+  const Amg::MatrixX& newErrHitPos{to_copy->localCovariance()};
   const MuonGM::TgcReadoutElement* descriptor = to_copy->detectorElement();
   Muon::TgcPrepData* newPrepData = new TgcPrepData(channelId, tgcHashId, to_copy->localPosition(),
                                                    identifierList, newErrHitPos, descriptor);

@@ -22,8 +22,7 @@ RpcPrepDataContainerCnv::RpcPrepDataContainerCnv(ISvcLocator* svcloc) :
 RpcPrepDataContainerCnvBase(svcloc)
 {}
 
-RpcPrepDataContainerCnv::~RpcPrepDataContainerCnv() {
-}
+RpcPrepDataContainerCnv::~RpcPrepDataContainerCnv() = default;
 
 StatusCode RpcPrepDataContainerCnv::initialize() {
    // Call base clase initialize

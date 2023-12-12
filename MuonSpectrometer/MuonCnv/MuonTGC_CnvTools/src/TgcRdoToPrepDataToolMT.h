@@ -227,25 +227,25 @@ namespace Muon
                           std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
       
       /** Get bitpos from channel and SlbType */
-      int getbitpos(int channel, TgcRawData::SlbType slbType) const;
+      static int getbitpos(int channel, TgcRawData::SlbType slbType) ;
       /** Get channel from bitpos and SlbType */
-      int getchannel(int bitpos, TgcRawData::SlbType slbType) const;
+      static int getchannel(int bitpos, TgcRawData::SlbType slbType) ;
 
       /** Get r, phi and eta from x, y and z */
-      bool getRPhiEtafromXYZ(const double x, const double y, const double z, double& r,  double& phi, double& eta) const;
+      static bool getRPhiEtafromXYZ(const double x, const double y, const double z, double& r,  double& phi, double& eta) ;
       /** Get r from eta and z */
-      bool getRfromEtaZ(const double eta, const double z, double& r) const;
+      static bool getRfromEtaZ(const double eta, const double z, double& r) ;
       /** Get eta from r and z */
-      bool getEtafromRZ(const double r, const double z, double& eta) const;
+      static bool getEtafromRZ(const double r, const double z, double& eta) ;
       
       /** Check the rdo is already converted or not */
-      bool isAlreadyConverted(const std::vector<const TgcRdo*>& decodedRdoCollVec,
+      static bool isAlreadyConverted(const std::vector<const TgcRdo*>& decodedRdoCollVec,
                               const std::vector<const TgcRdo*>& rdoCollVec,
-                              const TgcRdo* rdoColl) const;
+                              const TgcRdo* rdoColl) ;
       
       /** Check the IdHash is already requested or not */
-      bool isRequested(const std::vector<IdentifierHash>& requestedIdHashVect,
-                       IdentifierHash tgcHashId) const;
+      static bool isRequested(const std::vector<IdentifierHash>& requestedIdHashVect,
+                       IdentifierHash tgcHashId) ;
       
       /** Check offline ID is OK for TgcReadoutElement */
       bool isOfflineIdOKForTgcReadoutElement(const MuonGM::TgcReadoutElement* descriptor, const Identifier channelId) const;
@@ -260,29 +260,29 @@ namespace Muon
       void showIdentifierHash(const State& state) const;
       
       /** Check an IdentifierHash is in any TgcPrepDataContainers */
-      bool isIdentifierHashFoundInAnyTgcPrepDataContainer(const State& state,
-                                                          const IdentifierHash Hash) const;
+      static bool isIdentifierHashFoundInAnyTgcPrepDataContainer(const State& state,
+                                                          const IdentifierHash Hash) ;
       /** Check an IdentifierHash is in any TgcCoinDataContainers */
-      bool isIdentifierHashFoundInAnyTgcCoinDataContainer(const State& state,
-                                                          const IdentifierHash Hash) const;
+      static bool isIdentifierHashFoundInAnyTgcCoinDataContainer(const State& state,
+                                                          const IdentifierHash Hash) ;
       
       /** Retrieve slbId, subMatrix and position from Tracklet RDO */
       bool getTrackletInfo(const TgcRawData& rd,
                            int& tmp_slbId, int& tmp_subMatrix, int& tmp_position) const;
       
       /** Get ROI row from RDO */
-      int getRoiRow(const TgcRawData& rd) const;
+      static int getRoiRow(const TgcRawData& rd) ;
       /** Check SL RDO is at the chamber boundary */
       bool isIncludedInChamberBoundary(const TgcRawData& rd) const;
       
       /** Get bitPos etc of TGC3 wire for HiPt */
-      void getBitPosOutWire(const TgcRawData& rd, int& slbsubMatrix, int* bitpos_o) const;
+      static void getBitPosOutWire(const TgcRawData& rd, int& slbsubMatrix, int* bitpos_o) ;
       /** Get bitPos etc of TGC1 wire for HiPt */
       void getBitPosInWire(const TgcRawData& rd, const int DeltaBeforeConvert,
                            int* bitpos_i, int* slbchannel_i, int* slbId_in, int* sbLoc_in, int& sswId_i,
                            const int* bitpos_o, int* slbchannel_o, const int slbId_o) const;
       /** Get bitPos etc of TGC3 strip for HiPt */
-      void getBitPosOutStrip(const TgcRawData& rd, int& slbsubMatrix, int* bitpos_o) const;
+      static void getBitPosOutStrip(const TgcRawData& rd, int& slbsubMatrix, int* bitpos_o) ;
       /** Get bitPos etc of TGC1 strip for HiPt */
       void getBitPosInStrip(const TgcRawData& rd, const int DeltaBeforeConvert,
                             int* bitpos_i, int* slbchannel_i, int& sbLoc_i, int& sswId_i,
@@ -291,13 +291,13 @@ namespace Muon
       void getBitPosWire(const TgcRawData& rd, const int hitId_w, const int sub_w, int& subMatrix_w, 
              int* bitpos_w) const;
       /** Get bitPos etc of strip for SL */
-      void getBitPosStrip(const int hitId_s, const int sub_s, int& subMatrix_s, int* bitpos_s) const;
+      static void getBitPosStrip(const int hitId_s, const int sub_s, int& subMatrix_s, int* bitpos_s) ;
       
       /** Get delta (sagitta) before converion for HiPt */
-      int getDeltaBeforeConvert(const TgcRawData& rd) const;
+      static int getDeltaBeforeConvert(const TgcRawData& rd) ;
       
       /** Check if a chamber in BigWheel is a backward chamber or a forward chamber */
-      bool isBackwardBW(const TgcRawData& rd) const;
+      static bool isBackwardBW(const TgcRawData& rd) ;
       
       /** Get the width of a wire channel in the r direction */
       double getWidthWire(const MuonGM::TgcReadoutElement* descriptor, const int gasGap, const int channel) const;
@@ -351,13 +351,13 @@ namespace Muon
                              const TgcRdo* rdoColl, 
                              const int index_w, const int chip_w, const int hitId_w, const int sub_w) const;
       /** Get trackletIds of three Tracklet Strip candidates in the Endcap boudary */ 
-      void getEndcapStripCandidateTrackletIds(const int roi, int &trackletIdStripFirst, 
-                          int &trackletIdStripSecond, int &trackletIdStripThird) const;
+      static void getEndcapStripCandidateTrackletIds(const int roi, int &trackletIdStripFirst, 
+                          int &trackletIdStripSecond, int &trackletIdStripThird) ;
 
       const CablingInfo*  getCabling() const;
 
       /** Get SL local position */
-      const Amg::Vector2D* getSLLocalPosition(const MuonGM::TgcReadoutElement* readout, const Identifier, const double eta, const double phi) const; 
+      static const Amg::Vector2D* getSLLocalPosition(const MuonGM::TgcReadoutElement* readout, const Identifier, const double eta, const double phi) ; 
 
       /** Utility function to get TgcCoinDataCollection from supplied map */
       TgcCoinDataCollection* getTgcCoinDataColFromMap(const IdentifierHash& tgcHashId, State& state, std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap, int locId, const Identifier& elementId) const;

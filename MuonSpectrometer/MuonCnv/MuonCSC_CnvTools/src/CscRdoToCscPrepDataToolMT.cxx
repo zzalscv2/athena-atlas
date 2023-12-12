@@ -39,7 +39,7 @@ void CscRdoToCscPrepDataToolMT::printPrepDataImpl(const Muon::CscStripPrepDataCo
     ATH_MSG_INFO("***************************************************************");
     ATH_MSG_INFO("****** Listing Csc(Strip)PrepData collections content *********");
 
-    if (outputCollection->size() <= 0)
+    if (outputCollection->empty())
         ATH_MSG_INFO("No Csc(Strip)PrepRawData collections found");
     else {
         ATH_MSG_INFO("Number of Csc(Strip)PrepRawData collections found in this event is " << outputCollection->size());
@@ -51,7 +51,7 @@ void CscRdoToCscPrepDataToolMT::printPrepDataImpl(const Muon::CscStripPrepDataCo
              icscColl != outputCollection->end(); ++icscColl) {
             const Muon::CscStripPrepDataCollection* cscColl = *icscColl;
 
-            if (cscColl->size() <= 0) continue;
+            if (cscColl->empty()) continue;
 
             ATH_MSG_INFO("PrepData Collection ID " << m_idHelperSvc->cscIdHelper().show_to_string(cscColl->identify())
                                                    << " with size = " << cscColl->size());
@@ -77,7 +77,7 @@ void CscRdoToCscPrepDataToolMT::printPrepDataImpl(const Muon::CscStripPrepDataCo
     }
 }
 
-void CscRdoToCscPrepDataToolMT::printInputRdo(const EventContext&) const { return; }
+void CscRdoToCscPrepDataToolMT::printInputRdo(const EventContext&) const { }
 StatusCode CscRdoToCscPrepDataToolMT::decode(const EventContext&, const std::vector<uint32_t>&) const { 
    ATH_MSG_FATAL("ROB based decoding is not supported....");
    return StatusCode::FAILURE;
@@ -179,7 +179,7 @@ StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer
     }
 
     // These collections can be empty for the trigger
-    if (!outputCollection || outputCollection->size() == 0) {
+    if (!outputCollection || outputCollection->empty()) {
         ATH_MSG_DEBUG("Stored empty collection.");
         return StatusCode::SUCCESS;
     }
@@ -198,7 +198,7 @@ StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer
 
     ATH_MSG_DEBUG("Retrieved " << rawCollection->size() << " CSC RDOs.");
     // return if the input raw collection is empty (can happen for seeded decoding in trigger)
-    if (rawCollection->size() == 0) return StatusCode::SUCCESS;
+    if (rawCollection->empty()) return StatusCode::SUCCESS;
 
     //************************************************
     IdentifierHash cscHashId;
@@ -357,7 +357,7 @@ StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer
 
     IdentifierHash cscHashId;
     for (; rdoColl != lastRdoColl; ++rdoColl) {
-        if ((*rdoColl)->size() > 0) {
+        if (!(*rdoColl)->empty()) {
             ATH_MSG_DEBUG(" Number of RawData in this rdo " << (*rdoColl)->size());
 
             const CscRawDataCollection* cscCollection = *rdoColl;

@@ -118,7 +118,7 @@ bool MuonIdCutTool::isCut(Identifier ID) const { //false indicates all cuts are 
       ATH_MSG_WARNING( "Station and Substation cuts lists should match in length, no cut perfomed"   );
       return false;
     }
-    else if ((m_rpcDoubletRList.size() != m_rpcStationNameList.size()) || ((m_rpcGasGapList.size() != m_rpcStationNameList.size()) && m_rpcGasGapList.size() !=0 )){
+    else if ((m_rpcDoubletRList.size() != m_rpcStationNameList.size()) || ((m_rpcGasGapList.size() != m_rpcStationNameList.size()) && !m_rpcGasGapList.empty() )){
       ATH_MSG_WARNING( "Station and Substation cuts lists should match in length, no cut perfomed"   );
       return false;
     }
@@ -218,7 +218,7 @@ bool MuonIdCutTool::isCut(Identifier ID) const { //false indicates all cuts are 
 	    ATH_MSG_DEBUG( "RPC doublet R " <<m_idHelperSvc->rpcIdHelper().doubletR(ID)
                            <<  " compared with " << m_rpcDoubletRList[i]   );
 	    if( m_rpcDoubletRList[i] == m_idHelperSvc->rpcIdHelper().doubletR(ID) ){
-	      if (m_rpcGasGapList.size() == 0){
+	      if (m_rpcGasGapList.empty()){
 		return true;
 	      }
 	      else {
@@ -270,7 +270,7 @@ bool MuonIdCutTool::isCut(Identifier ID) const { //false indicates all cuts are 
     //Is it tgc?
     if (m_idHelperSvc->isTgc(ID)){
       //If no cuts specified, don't cut anything
-      if (m_tgcEtaList.size()==0 && m_tgcEndPhiList.size()==0 && m_tgcForPhiList.size()==0)
+      if (m_tgcEtaList.empty() && m_tgcEndPhiList.empty() && m_tgcForPhiList.empty())
 	return false;
       genEtaList = m_tgcEtaList;
       phi = m_idHelperSvc->stationPhi(ID);
@@ -285,7 +285,7 @@ bool MuonIdCutTool::isCut(Identifier ID) const { //false indicates all cuts are 
     //mdt?
     else if(m_idHelperSvc->isMdt(ID)){
       //If no cuts specified, don't cut anything
-      if (m_mdtSectorList.size()==0 && m_mdtEndEtaList.size()==0 && m_mdtBarEtaList.size()==0)
+      if (m_mdtSectorList.empty() && m_mdtEndEtaList.empty() && m_mdtBarEtaList.empty())
 	return false;
       genPhiList = m_mdtSectorList;
       if (m_idHelperSvc->isEndcap(ID)) {
@@ -298,7 +298,7 @@ bool MuonIdCutTool::isCut(Identifier ID) const { //false indicates all cuts are 
     //rpc?
     else if(m_idHelperSvc->isRpc(ID)){
       //If no cuts specified, don't cut anything
-      if (m_rpcSectorList.size()==0 && m_rpcEtaList.size()==0)
+      if (m_rpcSectorList.empty() && m_rpcEtaList.empty())
 	return false;
       genPhiList = m_rpcSectorList;
       genEtaList = m_rpcEtaList;
@@ -307,7 +307,7 @@ bool MuonIdCutTool::isCut(Identifier ID) const { //false indicates all cuts are 
     //csc?
     else if(m_idHelperSvc->isCsc(ID)){
       //If no cuts specified, don't cut anything
-      if (m_cscSectorList.size()==0 && m_cscEtaList.size()==0)
+      if (m_cscSectorList.empty() && m_cscEtaList.empty())
 	return false;
       genPhiList = m_cscSectorList;
       genEtaList = m_cscEtaList;
@@ -362,7 +362,7 @@ return iscut;
 }
 
 //function to find phi sector (1-16) from phi station (1-8)
-int MuonIdCutTool::FindSector(unsigned int staName, unsigned int staPhi) const {
+int MuonIdCutTool::FindSector(unsigned int staName, unsigned int staPhi) {
 
   int sector=-1;
   

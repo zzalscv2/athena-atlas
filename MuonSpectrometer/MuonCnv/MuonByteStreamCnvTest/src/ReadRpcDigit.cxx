@@ -64,7 +64,7 @@ StatusCode ReadRpcDigit::execute() {
     for (RpcDigitContainer::const_iterator c = rpc_container->begin(); c != rpc_container->end(); ++c) {
         // Identifier moduleId = (*c)->identify();
 
-        if ((*c)->size() > 0) {
+        if (!(*c)->empty()) {
             for (RpcDigitCollection::const_iterator dig = (*c)->begin(); dig != (*c)->end(); ++dig) {
                 Identifier dig_id = (*dig)->identify();
                 if (m_idHelperSvc->rpcIdHelper().valid(dig_id)) {

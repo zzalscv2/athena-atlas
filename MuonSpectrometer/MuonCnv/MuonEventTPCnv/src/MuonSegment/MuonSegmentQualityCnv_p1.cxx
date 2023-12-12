@@ -20,7 +20,7 @@ persToTrans( const Muon::MuonSegmentQuality_p1 *persObj, Muon::MuonSegmentQualit
   std::vector<Identifier> channelsWithoutHit;
   channelsWithoutHit.reserve(persObj->m_channelsWithoutHit.size());
 for (unsigned int x : persObj->m_channelsWithoutHit)
-    channelsWithoutHit.push_back(Identifier(Identifier32(x)));
+    channelsWithoutHit.emplace_back(Identifier32(x));
 
    *transObj = Muon::MuonSegmentQuality (0, // chi2
                                          0, // ndof

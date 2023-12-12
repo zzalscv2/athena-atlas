@@ -63,7 +63,7 @@ StatusCode ReadTgcDigit::execute() {
 
     // loop over collections
     for (TgcDigitContainer::const_iterator c = tgc_container->begin(); c != tgc_container->end(); ++c) {
-        if ((*c)->size() == 0) continue;
+        if ((*c)->empty()) continue;
 
         // loop over digits
         std::vector<Identifier> vID;

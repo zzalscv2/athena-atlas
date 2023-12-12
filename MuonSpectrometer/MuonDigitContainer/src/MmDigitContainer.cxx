@@ -34,9 +34,7 @@ MmDigitContainer::MmDigitContainer(unsigned int hash_max)
 
 // Destructor.
 
-MmDigitContainer::~MmDigitContainer() {
-
-}
+MmDigitContainer::~MmDigitContainer() = default;
 
 //**********************************************************************
 

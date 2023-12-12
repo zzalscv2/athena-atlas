@@ -23,7 +23,7 @@ class CscPrepDataCnv_p2
     public:
   CscPrepDataCnv_p2() {}
 
-  Muon::CscPrepData
+  static Muon::CscPrepData
   createCscPrepData( const Muon::CscPrepData_p2 *persObj,
                      const Identifier& clusId,
                      const MuonGM::CscReadoutElement* detEl,

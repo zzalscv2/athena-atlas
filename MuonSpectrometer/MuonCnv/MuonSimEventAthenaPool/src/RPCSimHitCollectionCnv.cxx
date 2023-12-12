@@ -23,8 +23,7 @@ RPCSimHitCollectionCnv::RPCSimHitCollectionCnv(ISvcLocator* svcloc) :
 {
 }
 
-RPCSimHitCollectionCnv::~RPCSimHitCollectionCnv() {
-}
+RPCSimHitCollectionCnv::~RPCSimHitCollectionCnv() = default;
 
 RPCSimHitCollection_PERS*    RPCSimHitCollectionCnv::createPersistent (RPCSimHitCollection* transCont) {
     MsgStream log(msgSvc(), "RPCSimHitCollectionCnv" );

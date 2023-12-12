@@ -62,7 +62,7 @@ namespace Muon {
  
     ATH_CHECK(rdoContainerHandle.record(std::make_unique<xAOD::NSWMMTPRDOContainer>(), std::make_unique<xAOD::NSWMMTPRDOAuxContainer>()));
     pContainer = rdoContainerHandle.ptr();
-    for (const auto fragment : fragments) {
+    for (const auto *const fragment : fragments) {
       // NSW Common Decoder has already a try/catch inside and it's reporting errors/exceptions: wanna handle them here too?
       ATH_CHECK(m_decoder->fillCollection(*fragment, *pContainer));
     }

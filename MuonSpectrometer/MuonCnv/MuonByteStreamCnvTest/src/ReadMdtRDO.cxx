@@ -74,7 +74,7 @@ StatusCode ReadMdtRDO::execute() {
 
     for (; it1 != it2; ++it1) {
         // loop over pads
-        if ((*it1)->size() > 0) {
+        if (!(*it1)->empty()) {
             const MdtCsm* csm = (*it1);
 
             m_subId[m_nCsm] = (long)csm->SubDetId();

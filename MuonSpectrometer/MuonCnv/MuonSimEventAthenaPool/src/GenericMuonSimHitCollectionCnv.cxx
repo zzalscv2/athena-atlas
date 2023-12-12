@@ -21,8 +21,7 @@ GenericMuonSimHitCollectionCnv::GenericMuonSimHitCollectionCnv(ISvcLocator* svcl
 {
 }
 
-GenericMuonSimHitCollectionCnv::~GenericMuonSimHitCollectionCnv() {
-}
+GenericMuonSimHitCollectionCnv::~GenericMuonSimHitCollectionCnv() = default;
 
 GenericMuonSimHitCollection_PERS*    GenericMuonSimHitCollectionCnv::createPersistent (GenericMuonSimHitCollection* transCont) {
     MsgStream log(msgSvc(), "GenericMuonSimHitCollectionCnv" );

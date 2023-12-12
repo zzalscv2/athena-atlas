@@ -31,9 +31,9 @@ namespace Muon
       /** Destructor */
       ~TgcByteStream();
       /** Convert RDO to ByteStream */
-      void rdo2ByteStream(const TgcRdo* rdo, ByteStream& bs, MsgStream& log);
+      static void rdo2ByteStream(const TgcRdo* rdo, ByteStream& bs, MsgStream& log);
       /** Convert ByteStream to RDO */
-      void byteStream2Rdo(const ByteStream& bs, TgcRdo& rdo, uint32_t source_id, MsgStream& log);
+      static void byteStream2Rdo(const ByteStream& bs, TgcRdo& rdo, uint32_t source_id, MsgStream& log);
     };
 } // end of namespace
 

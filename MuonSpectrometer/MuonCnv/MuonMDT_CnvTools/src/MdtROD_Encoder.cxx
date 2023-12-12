@@ -6,7 +6,7 @@
 
 #include "MdtROD_Encoder.h"
 
-#include <math.h>
+#include <cmath>
 
 #include <algorithm>
 #include <map>

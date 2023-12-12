@@ -183,7 +183,7 @@ private:
   const double m_timeJitterElectronicsPad{2.f}; //ns
   const double m_hitTimeMergeThreshold{30.f}; //30ns = resolution of peak finding descriminator
 
-  uint16_t bcTagging(const double digittime) const;
+  static uint16_t bcTagging(const double digittime) ;
 
   double getChannelThreshold(const EventContext& ctx, 
                              const Identifier& channelID, 

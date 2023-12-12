@@ -89,7 +89,7 @@ uint32_t MDT_Hid2RESrcID::getRodID(const Identifier& offlineId) const {
 
 /** mapping SrcID from ROD to ROB
  */
-uint32_t MDT_Hid2RESrcID::getRobID(uint32_t rod_id) const {
+uint32_t MDT_Hid2RESrcID::getRobID(uint32_t rod_id) {
     SourceIdentifier id = SourceIdentifier(rod_id);
     SourceIdentifier id2 = SourceIdentifier(id.subdetector_id(), id.module_id());
     // return id2.code();
@@ -103,7 +103,7 @@ uint32_t MDT_Hid2RESrcID::getRobID(uint32_t rod_id) const {
 
 /** mapping SrcID from ROB to ROS
  */
-uint32_t MDT_Hid2RESrcID::getRosID(uint32_t rob_id) const {
+uint32_t MDT_Hid2RESrcID::getRosID(uint32_t rob_id) {
     //  Change Module Type to ROS, moduleid = 0
 
     SourceIdentifier id(rob_id);
@@ -113,7 +113,7 @@ uint32_t MDT_Hid2RESrcID::getRosID(uint32_t rob_id) const {
 
 /** mapping SrcID from ROS to Det
  */
-uint32_t MDT_Hid2RESrcID::getDetID(uint32_t ros_id) const {
+uint32_t MDT_Hid2RESrcID::getDetID(uint32_t ros_id) {
     //  ROS to DET
 
     SourceIdentifier id(ros_id);

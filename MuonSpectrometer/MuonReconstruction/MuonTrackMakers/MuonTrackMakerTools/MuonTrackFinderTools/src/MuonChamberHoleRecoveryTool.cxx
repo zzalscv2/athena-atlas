@@ -465,7 +465,7 @@ namespace Muon {
          } else if (m_idHelperSvc->isMM(detElId)) {
             const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
             for (int ml : {1 ,2}) {
-                for (int gap = idHelper.gasGapMin(); gap <= idHelper.gasGapMax(); ++gap) {
+                for (int gap = MmIdHelper::gasGapMin(); gap <= MmIdHelper::gasGapMax(); ++gap) {
                     const Identifier layerId = idHelper.channelID(detElId, ml, gap, 1);
                     if (!knownLayers.count(layerId)) holeGaps.insert(layerId);
                 }
@@ -477,8 +477,8 @@ namespace Muon {
                 for (const channelType chType : {channelType::Strip,
                                                  channelType::Pad,
                                                  channelType::Wire}){
-                    for (int gap = idHelper.gasGapMin();
-                             gap <= idHelper.gasGapMax(); ++gap) {
+                    for (int gap = sTgcIdHelper::gasGapMin();
+                             gap <= sTgcIdHelper::gasGapMax(); ++gap) {
                         const Identifier layerId = idHelper.channelID(detElId, ml, gap, chType, 1);
                         if (!knownLayers.count(layerId)) holeGaps.insert(layerId);
                     }
@@ -501,7 +501,7 @@ namespace Muon {
             const int doubZ{idHelper.doubletZ(detElId)};
             const int gapMax{idHelper.gasGapMax(detElId)};
             for (int phiGap = idHelper.doubletPhi(detElId);
-                     phiGap <= idHelper.doubletPhiMax(); ++phiGap) {
+                     phiGap <= RpcIdHelper::doubletPhiMax(); ++phiGap) {
                 for (int gap = idHelper.gasGapMin(detElId);
                          gap <= gapMax; ++gap) {
                     for (int measPhi: {0, 1}) {

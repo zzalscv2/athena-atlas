@@ -4,7 +4,7 @@
 
 #include "MSVertexUtils/MSVertex.h"
 
-#include <math.h>
+#include <cmath>
 
 #include <sstream>
 

@@ -89,7 +89,7 @@ StatusCode ReadTgcRDO::execute() {
 
         ATH_MSG_DEBUG(" Number of RawData in this rdo " << rdo->size());
 
-        if ((*itR)->size() == 0) continue;
+        if ((*itR)->empty()) continue;
 
         // m_l1Id  [m_nRdo] = (long) rdo->l1Id();
         // m_bcId  [m_nRdo] = (long) rdo->bcId();

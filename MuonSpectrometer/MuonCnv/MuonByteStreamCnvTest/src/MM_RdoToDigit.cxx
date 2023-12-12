@@ -37,7 +37,7 @@ StatusCode MM_RdoToDigit::execute(const EventContext& ctx) const {
 }
 
 StatusCode MM_RdoToDigit::decodeMM(const Muon::MM_RawDataCollection& rdoColl, DigitCollection& digitContainer) const {
-    if (rdoColl.size() == 0) {
+    if (rdoColl.empty()) {
         return StatusCode::SUCCESS;
     }
 

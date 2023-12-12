@@ -152,8 +152,7 @@ void Muon::MuonEventCnvTool::prepareRIO_OnTrackLink(const Trk::RIO_OnTrack* RoT,
         prepareRIO_OnTrackElementLink<const Muon::MMPrepDataContainer, Muon::MMClusterOnTrack>(mm, key, index);
         return;
     }
-    return;
-}
+    }
 
 void Muon::MuonEventCnvTool::recreateRIO_OnTrack(Trk::RIO_OnTrack* RoT) const {
     std::pair<const Trk::TrkDetElementBase*, const Trk::PrepRawData*> pair = getLinks(*RoT);

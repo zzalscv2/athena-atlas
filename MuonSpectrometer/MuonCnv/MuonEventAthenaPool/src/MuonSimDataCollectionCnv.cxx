@@ -19,8 +19,7 @@ MuonSimDataCollectionCnv::MuonSimDataCollectionCnv(ISvcLocator* svcloc) :
 {
 }
 
-MuonSimDataCollectionCnv::~MuonSimDataCollectionCnv() {
-}
+MuonSimDataCollectionCnv::~MuonSimDataCollectionCnv() = default;
 
 MuonSimDataCollection_PERS*    MuonSimDataCollectionCnv::createPersistent (MuonSimDataCollection* transCont) {
     MsgStream log(msgSvc(), "MuonSimDataCollectionCnv" );

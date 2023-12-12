@@ -188,7 +188,7 @@ void  Muon::STGC_DigitContainerCnv_p1::persToTrans(const Muon::STGC_DigitContain
       log << MSG::DEBUG<<"Trans id:"<<std::hex<<chan->identify().get_identifier32().get_compact()<<"\t pers Id:"<<pchan->m_muonId<<std::dec<<endmsg;
       // std::cout <<"Trans id:"<<chan->identify()<<"\t pers Id:"<<pchan->m_id<<std::endl;
       
-      if ( m_sTgcId->valid(chan->identify())!=true ) {
+      if ( !m_sTgcId->valid(chan->identify()) ) {
 	// have invalid PRD
         log << MSG::WARNING  << "sTgc PRD has invalid Identifier of "<< m_sTgcId->show_to_string(chan->identify())
 	    <<" - are you sure you have the correct geometry loaded, and NSW enabled?" << endmsg;

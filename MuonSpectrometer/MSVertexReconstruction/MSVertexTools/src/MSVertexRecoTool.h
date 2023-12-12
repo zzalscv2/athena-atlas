@@ -81,18 +81,18 @@ namespace Muon {
         // endcap vertex reco algorithm
         void MSStraightLineVx(const std::vector<Tracklet> &trks, std::unique_ptr<MSVertex> &vtx, const EventContext &ctx) const;
         void MSStraightLineVx_oldMethod(const std::vector<Tracklet> &trks, std::unique_ptr<MSVertex> &vtx, const EventContext &ctx) const;
-        void MakeDummyVertex(MSVertex *&) const;
+        static void MakeDummyVertex(MSVertex *&) ;
         float vxPhiFinder(const float theta, const float phi, const EventContext &ctx) const;  // vertex phi location reco algorithm
         void HitCounter(MSVertex *MSRecoVx, const EventContext &ctx) const;  // counts MDT, RPC & TGC around a reco'd vertex
         std::vector<TrkCluster> findTrackClusters(const std::vector<Tracklet> &tracklets)
             const;  // group tracklets into clusters -- vertex reco runs on each cluster of tracklets
         TrkCluster ClusterizeTracks(std::vector<Tracklet> &tracks) const;  // core algorithm for creating the clusters
-        StatusCode FillOutputContainer(std::vector<MSVertex *> &, SG::WriteHandle<xAOD::VertexContainer> &xAODVxContainer,
+        static StatusCode FillOutputContainer(std::vector<MSVertex *> &, SG::WriteHandle<xAOD::VertexContainer> &xAODVxContainer,
                                        SG::WriteDecorHandle<decortype, int> &, SG::WriteDecorHandle<decortype, int> &,
-                                       SG::WriteDecorHandle<decortype, int> &) const;
-        Amg::Vector3D VxMinQuad(const std::vector<Tracklet> &tracks) const;  // endcap vertex reco core
-        std::vector<Tracklet> RemoveBadTrk(const std::vector<Tracklet> &tracklets,
-                                           const Amg::Vector3D &Vx) const;  // endcap vertex algo track selector
+                                       SG::WriteDecorHandle<decortype, int> &) ;
+        static Amg::Vector3D VxMinQuad(const std::vector<Tracklet> &tracks) ;  // endcap vertex reco core
+        static std::vector<Tracklet> RemoveBadTrk(const std::vector<Tracklet> &tracklets,
+                                           const Amg::Vector3D &Vx) ;  // endcap vertex algo track selector
         bool EndcapHasBadTrack(const std::vector<Tracklet> &tracklets, const Amg::Vector3D &Vx) const;
         std::vector<Tracklet> getTracklets(const std::vector<Tracklet> &trks, const std::set<int> &tracklet_subset) const;
 

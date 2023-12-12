@@ -52,7 +52,7 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
     std::vector<deviationSummary_t> devSumVec;
     devSumVec.reserve(deviationVec.size());
     deviationSummary_t aDevSumm;
-    for (auto & i : deviationVec) {
+    for (const auto & i : deviationVec) {
         aDevSumm.translation = i.translation;
         aDevSumm.rotation = i.rotation;
         aDevSumm.stationName = i.stationName;
@@ -286,8 +286,6 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
     ATH_MSG_DEBUG("FINAL CHECKUP");
     ATH_MSG_DEBUG("Found " << deviations.size() << " nuisances after duplicates merging");
     ATH_MSG_DEBUG("******************************");
-
-    return;
 }
 
 ////////////////////////////
@@ -312,7 +310,7 @@ inline std::string AlignmentErrorTool::hardwareName(MuonCalib::MuonFixedLongId c
     return ret;
 }
 
-inline std::string_view AlignmentErrorTool::side(MuonCalib::MuonFixedLongId calibId) const {
+inline std::string_view AlignmentErrorTool::side(MuonCalib::MuonFixedLongId calibId) {
     return calibId.eta()>0 ? "A" : calibId.eta()<0 ? "C" : "B";
 }
 
@@ -336,7 +334,7 @@ inline int AlignmentErrorTool::sector(MuonCalib::MuonFixedLongId calibId) const 
     }
 }
 
-inline bool AlignmentErrorTool::isSmallSector(MuonCalib::MuonFixedLongId calibId) const {
+inline bool AlignmentErrorTool::isSmallSector(MuonCalib::MuonFixedLongId calibId) {
     using StationName = MuonCalib::MuonFixedLongId::StationName;
     switch (calibId.stationName()) {
         case StationName::BIS:

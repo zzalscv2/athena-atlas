@@ -24,8 +24,7 @@ Muon::TgcSlbDataHelper::TgcSlbDataHelper(void)
 }
 
 Muon::TgcSlbDataHelper::~TgcSlbDataHelper(void)
-{
-}
+= default;
  
 // reconstruct to Hits. subDetectorID and ROD ID are dummy
 void Muon::TgcSlbDataHelper::convertToHits(uint16_t subDetectorId,
@@ -473,7 +472,7 @@ bool Muon::TgcSlbDataHelper::setType(uint16_t ,    // subDetectorId
 				     uint16_t ,   // rodId 
 				     TgcSlbData * slb, 
 				     int          //moduleType
-				     )  const
+				     )  
 {
   bool ret = true;
   switch(slb->getSswId()) {
@@ -532,7 +531,7 @@ bool Muon::TgcSlbDataHelper::setType(uint16_t ,    // subDetectorId
 }
 
 // Adjacent or not
-bool Muon::TgcSlbDataHelper::isAdjacent(int ibit) const
+bool Muon::TgcSlbDataHelper::isAdjacent(int ibit) 
 {
   bool value=false;
   value = value || ((ibit<200) && (ibit>193)); 
@@ -548,7 +547,7 @@ bool Muon::TgcSlbDataHelper::isAdjacent(int ibit) const
 uint16_t Muon::TgcSlbDataHelper::getSector(bool forward, 
 					   uint16_t , // subDetectorId
 					   uint16_t , // rodId
-					   const TgcSlbData * slb) const
+					   const TgcSlbData * slb) 
 {
   uint16_t sector = 0;
   
@@ -702,7 +701,7 @@ void Muon::TgcSlbDataHelper::getSL_F(const bool * bitArray,
 
   // check hit or not
   // NOHIT: pT ==7 or pT==0
-  hit[0] = !((binary ==7) || (binary == 0));
+  hit[0] = (binary !=7) && (binary != 0);
 
   if(hit[0]) {  
     // Charge1 : bit 169
@@ -722,7 +721,7 @@ void Muon::TgcSlbDataHelper::getSL_F(const bool * bitArray,
 
   // check hit or not
   // NOHIT: pT ==7 or pT==0
-  hit[1] = !((binary ==7) || (binary == 0));
+  hit[1] = (binary !=7) && (binary != 0);
   if(hit[1]) {
     // Charge2 : bit 168
     muplus[1] = (*(bitArray + 168));
@@ -769,7 +768,7 @@ void Muon::TgcSlbDataHelper::getSL_E(const bool * bitArray,
 
   // check hit or not
   // NOHIT: pT ==7 or pT==0
-  hit[0] = !((binary ==7) || (binary == 0));
+  hit[0] = (binary !=7) && (binary != 0);
 
   if(hit[0]) {  
     // Charge1 : bit 169
@@ -789,7 +788,7 @@ void Muon::TgcSlbDataHelper::getSL_E(const bool * bitArray,
 
   // check hit or not
   // NOHIT: pT ==7 or pT==0
-  hit[1] = !((binary ==7) || (binary == 0));
+  hit[1] = (binary !=7) && (binary != 0);
 
   if(hit[1]) {
     // Charge2 : bit 168
@@ -1199,7 +1198,7 @@ bool Muon::TgcSlbDataHelper::isValid_HPT(bool hit,
 					 bool hipt,
 					 uint16_t hitId,
 					 uint16_t , //pos
-					 int16_t delta) const
+					 int16_t delta) 
 {
   bool isOK = true;
  
@@ -1219,7 +1218,7 @@ bool Muon::TgcSlbDataHelper::isValid_HPT(bool hit,
   return isOK; 
 }
 
-uint16_t Muon::TgcSlbDataHelper::getVal(const bool* bitArray, size_t start, size_t width) const
+uint16_t Muon::TgcSlbDataHelper::getVal(const bool* bitArray, size_t start, size_t width) 
 {
   // utility function to get a value of 
   // bitArray[ start , start + width -1]

@@ -40,7 +40,7 @@ public:
 private:
     // Methods
     double getDriftTime(double radius, Identifier DigitId, CLHEP::HepRandomEngine* rndmEngine) const;
-    double getAdcResponse(double radius, CLHEP::HepRandomEngine* rndmEngine) const;
+    static double getAdcResponse(double radius, CLHEP::HepRandomEngine* rndmEngine) ;
     bool isTubeEfficient(double radius, CLHEP::HepRandomEngine* rndmEngine) const;
 
     // Data members

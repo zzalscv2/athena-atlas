@@ -81,7 +81,7 @@ namespace Muon {
         MuonSegmentLinkMap muonSegmentLinkMap;
         unsigned int segIndex = 0;
         muonSegments.reserve(segments->size());
-        for (const auto seg : *segments) {
+        for (const auto *const seg : *segments) {
             segments(*seg) = ElementLink<xAOD::MuonSegmentContainer>();
             if (seg->muonSegment().isValid()) {
                 const Muon::MuonSegment* mseg = dynamic_cast<const Muon::MuonSegment*>(*seg->muonSegment());
@@ -123,10 +123,10 @@ namespace Muon {
         // create a map of chamber index onto the truth segments
         std::map<Muon::MuonStationIndex::ChIndex, std::vector<ElementLink<xAOD::MuonSegmentContainer> > > chamberTruthSegmentLinks;
         segIndex = 0;
-        for (const auto truthSegment : *muonTruthSegments) {
+        for (const auto *const truthSegment : *muonTruthSegments) {
             muonTruthSegments(*truthSegment) = ElementLink<xAOD::MuonSegmentContainer>();
             std::vector<ElementLink<xAOD::MuonSegmentContainer> >& linkVec = chamberTruthSegmentLinks[truthSegment->chamberIndex()];
-            linkVec.push_back(ElementLink<xAOD::MuonSegmentContainer>(truthSegmentContainerName, segIndex));
+            linkVec.emplace_back(truthSegmentContainerName, segIndex);
             ATH_MSG_DEBUG("New truth segment: index " << segIndex << " " << Muon::MuonStationIndex::chName(truthSegment->chamberIndex())
                                                       << " nlinks " << linkVec.size() << " link " << *linkVec.back());
             ++segIndex;

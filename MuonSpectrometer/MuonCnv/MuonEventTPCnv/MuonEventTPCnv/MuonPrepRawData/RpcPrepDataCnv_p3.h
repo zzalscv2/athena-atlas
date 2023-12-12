@@ -23,7 +23,7 @@ class RpcPrepDataCnv_p3
     public:
   RpcPrepDataCnv_p3() {}
 
-  Muon::RpcPrepData
+  static Muon::RpcPrepData
   createRpcPrepData( const Muon::RpcPrepData_p3 *persObj,
                      const Identifier& id,
                      const MuonGM::RpcReadoutElement* detEl,

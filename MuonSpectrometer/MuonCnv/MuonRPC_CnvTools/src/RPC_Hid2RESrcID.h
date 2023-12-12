@@ -22,15 +22,15 @@ public:
     void set(const RpcIdHelper* rpdId);
 
     uint32_t getRodID(const Identifier& offlineId, const RpcCablingCondData* readCdo) const;
-    uint32_t getRodID(const int& side, const int& slogic, const int& padId, const RpcCablingCondData* readCdo) const;
-    uint32_t getRodID(const int& sector) const;
-    uint32_t getRodID(const uint16_t& side, const uint16_t& rodIndex) const;
+    static uint32_t getRodID(const int& side, const int& slogic, const int& padId, const RpcCablingCondData* readCdo) ;
+    static uint32_t getRodID(const int& sector) ;
+    static uint32_t getRodID(const uint16_t& side, const uint16_t& rodIndex) ;
 
-    uint32_t getRobID(const uint32_t rod_id) const;
+    static uint32_t getRobID(const uint32_t rod_id) ;
 
-    uint32_t getRosID(const uint32_t rob_id) const;
+    static uint32_t getRosID(const uint32_t rob_id) ;
 
-    uint32_t getDetID(const uint32_t ros_id) const;
+    static uint32_t getDetID(const uint32_t ros_id) ;
 
 private:
     const RpcIdHelper* m_rpcIdHelper;

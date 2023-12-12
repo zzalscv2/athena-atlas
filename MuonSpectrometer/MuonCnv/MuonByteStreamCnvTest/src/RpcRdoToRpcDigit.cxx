@@ -64,7 +64,7 @@ StatusCode RpcRdoToRpcDigit::execute(const EventContext& ctx) const {
     SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, ctx};
     TempDigitContainer temp_out{wh_rpcDigit.ptr()};
     for (const RpcPad* rpcPad : *rdoContainer) {
-        if (rpcPad->size()) { ATH_CHECK(decodeRpc(rpcPad, temp_out, cablingCondData.cptr())); }
+        if (!rpcPad->empty()) { ATH_CHECK(decodeRpc(rpcPad, temp_out, cablingCondData.cptr())); }
     }
     ATH_CHECK(decodeNRpc(ctx, *wh_rpcDigit));
    

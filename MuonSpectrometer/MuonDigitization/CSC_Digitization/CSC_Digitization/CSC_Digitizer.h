@@ -74,10 +74,10 @@ public:
 private:
     // private methods need to compute the induce charge on the strip
     double qWire(const int& nElectrons, const double& gammaDist) const;
-    double qStripR(const double x) const;
+    static double qStripR(const double x) ;
     double qStripR(const double x, const Identifier& id) const;
     double qStripPhi(const double x, const Identifier& id) const;
-    double fparamPhi(const double x, const std::array<double, 9>& p) const;
+    static double fparamPhi(const double x, const std::array<double, 9>& p) ;
     double getDriftTime(const MuonGM::CscReadoutElement* descriptor, const Amg::Vector3D& pos) const;
 
     bool outsideWindow(double time) const;  // default +-50...

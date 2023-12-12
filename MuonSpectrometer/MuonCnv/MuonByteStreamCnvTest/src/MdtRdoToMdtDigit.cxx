@@ -41,7 +41,7 @@ StatusCode MdtRdoToMdtDigit::execute(const EventContext& ctx) const {
 }
 
 StatusCode MdtRdoToMdtDigit::decodeMdt(const MdtCsm& rdoColl, DigitCollection& digitMap) const {
-    if (rdoColl.size() == 0) {
+    if (rdoColl.empty()) {
         return StatusCode::SUCCESS;
     }
     ATH_MSG_DEBUG(" Number of AmtHit in this Csm " << rdoColl.size());

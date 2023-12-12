@@ -69,7 +69,7 @@ StatusCode ReadMdtDigit::execute() {
     for (MdtDigitContainer::const_iterator c = mdt_container->begin(); c != mdt_container->end(); ++c) {
         ch_id = (*c)->identifierHash();
 
-        if ((*c)->size() > 0) {
+        if (!(*c)->empty()) {
             for (MdtDigitCollection::const_iterator dig = (*c)->begin(); dig != (*c)->end(); ++dig) {
                 dig_id = (*dig)->identify();
 

@@ -33,7 +33,7 @@ StatusCode PadTrig_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE
   const Muon::nsw::NSWTriggerCommonDecoder decoder{fragment, trigger};
   for (const auto& baselink: decoder.get_elinks()) {
     const auto link = std::dynamic_pointer_cast<Muon::nsw::NSWPadTriggerL1a>(baselink);
-    const auto collection = new NSW_PadTriggerData{
+    auto *const collection = new NSW_PadTriggerData{
       fragment.rob_source_id(),
       link->getFlags(),
       link->getEc(),

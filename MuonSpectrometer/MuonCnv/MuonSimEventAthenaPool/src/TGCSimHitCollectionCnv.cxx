@@ -21,8 +21,7 @@ TGCSimHitCollectionCnv::TGCSimHitCollectionCnv(ISvcLocator* svcloc) :
 {
 }
 
-TGCSimHitCollectionCnv::~TGCSimHitCollectionCnv() {
-}
+TGCSimHitCollectionCnv::~TGCSimHitCollectionCnv() = default;
 
 TGCSimHitCollection_PERS*    TGCSimHitCollectionCnv::createPersistent (TGCSimHitCollection* transCont) {
     MsgStream log(msgSvc(), "TGCSimHitCollectionCnv" );

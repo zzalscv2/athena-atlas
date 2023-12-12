@@ -119,7 +119,7 @@ double RT_Relation_DB_DigiTool::getDriftTime(double r, Identifier DigitId, CLHEP
     return t;
 }
 
-double RT_Relation_DB_DigiTool::getAdcResponse(double radius, CLHEP::HepRandomEngine *rndmEngine) const {
+double RT_Relation_DB_DigiTool::getAdcResponse(double radius, CLHEP::HepRandomEngine *rndmEngine) {
     // parametrization of the average adc value with respect to radius
     constexpr double p0 = 57.38141;
     constexpr double p1 = 8.616943;

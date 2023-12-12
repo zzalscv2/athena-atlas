@@ -70,7 +70,7 @@ StatusCode PadTrig_RawDataProviderToolMT::convert(const ROBFragmentList& fragmen
     return StatusCode::FAILURE;
   }
 
-  for (const auto fragment : fragments) {
+  for (const auto *const fragment : fragments) {
     // TODO should an error here be a hard failure?
     ATH_CHECK(m_decoder->fillCollection(*fragment, *pContainer));
   }

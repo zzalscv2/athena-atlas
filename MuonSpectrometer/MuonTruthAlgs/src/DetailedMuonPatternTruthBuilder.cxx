@@ -277,14 +277,14 @@ namespace Trk {
         // Loop over MuonPatternChamberIntersect
         const std::vector<Muon::MuonPatternChamberIntersect>& MPCIV = (*MuPatternCombo)->chamberData();
         for (unsigned int i_MPCI = 0; i_MPCI < MPCIV.size(); i_MPCI++) {
-            if (MPCIV.size() == 0) continue;
+            if (MPCIV.empty()) continue;
 
             // get the PrepRawData from the MuonPatternChamberIntersect
             std::vector<const Trk::PrepRawData*> PRDV = MPCIV.at(i_MPCI).prepRawDataVec();
 
             // Loop over the PRDV
             for (unsigned int j_PRD = 0; j_PRD < PRDV.size(); j_PRD++) {
-                if (PRDV.size() == 0) continue;
+                if (PRDV.empty()) continue;
 
                 Identifier id = PRDV.at(j_PRD)->identify();
                 SubDetHitStatistics::SubDetType subdet = findSubDetType(id);
@@ -468,7 +468,7 @@ namespace Trk {
         double minPos = 2e8, maxPos = 0;
         Amg::Vector3D first3D(0, 0, 0), last3D(0, 0, 0);
 
-        if (genPartList.size() == 0) {
+        if (genPartList.empty()) {
             ATH_MSG_WARNING("No GenParticles associated to this PRD_TruthTrajectory. Exiting segment creation.");
             return Amg::Vector3D(0, 0, 0);
         }
@@ -736,14 +736,14 @@ namespace Trk {
         // Loop over MuonPatternChamberIntersect
         const std::vector<Muon::MuonPatternChamberIntersect>& MPCIV = pattern.chamberData();
         for (unsigned int i_MPCI = 0; i_MPCI < MPCIV.size(); i_MPCI++) {
-            if (MPCIV.size() == 0) continue;
+            if (MPCIV.empty()) continue;
 
             // get the PrepRawData from the MuonPatternChamberIntersect
             std::vector<const Trk::PrepRawData*> PRDV = MPCIV.at(i_MPCI).prepRawDataVec();
 
             // Loop over the PRDV
             for (unsigned int j_PRD = 0; j_PRD < PRDV.size(); j_PRD++) {
-                if (PRDV.size() == 0) continue;
+                if (PRDV.empty()) continue;
 
                 Identifier id = PRDV.at(j_PRD)->identify();
                 SubDetHitStatistics::SubDetType subdet = findSubDetType(id);
@@ -1111,7 +1111,7 @@ namespace Trk {
 
     // AV Note: MuonSimData::Deposit  typedef std::pair<HepMcParticleLink, MuonMCData> Deposit;
     const MuonSimData::Deposit* DetailedMuonPatternTruthBuilder::getDeposit(const MuonSimDataCollection& simCol,
-                                                                            HepMC::ConstGenParticlePtr genPart, const Identifier& id) {
+                                                                            const HepMC::ConstGenParticlePtr& genPart, const Identifier& id) {
         MuonSimDataCollection::const_iterator it = simCol.find(id);
         if (it == simCol.end()) {
             ATH_MSG_WARNING(" Truth PRD not found in simdata collection: " << m_idHelperSvc->toString(id));

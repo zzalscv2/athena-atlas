@@ -68,7 +68,7 @@ public:
     uint32_t numberOfStrips(const uint32_t fragment) const;
     Identifier decodeAddress(const uint32_t address, const Identifier& moduleId) const;
     Identifier decodeAddress(const uint32_t address, const Identifier& moduleId, int j) const;
-    int findCharge(double samplingTime, const std::vector<uint16_t>& amplitude, double& time) const;
+    static int findCharge(double samplingTime, const std::vector<uint16_t>& amplitude, double& time) ;
     double signal_amplitude(double samplingTime) const;
     uint32_t address(const Identifier& channelId, int& eta, int& phi) const;
 

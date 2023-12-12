@@ -23,7 +23,7 @@ class MMPrepDataCnv_p2
     public:
   MMPrepDataCnv_p2() {}
 
-  Muon::MMPrepData
+  static Muon::MMPrepData
   createMMPrepData ( const Muon::MMPrepData_p2 *persObj, 
 		     Identifier clusId,
                      const MuonGM::MMReadoutElement* detEl,

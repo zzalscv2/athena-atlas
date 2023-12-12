@@ -124,8 +124,8 @@ class TgcDigitMaker : public AthMessaging {
 
     uint16_t bcTagging(const double digittime, const double window,
                        const double offset) const;
-    void addDigit(const Identifier id, const uint16_t bctag,
-                  TgcDigitCollection* digits) const;
+    static void addDigit(const Identifier id, const uint16_t bctag,
+                  TgcDigitCollection* digits) ;
 
     /** Read share/TGC_Digitization_energyThreshold.dat file */
     StatusCode readFileOfEnergyThreshold();
@@ -149,16 +149,16 @@ class TgcDigitMaker : public AthMessaging {
     bool isDeadChamber(const std::string& stationName, int stationEta,
                        int stationPhi, int gasGap);
     /** Get stationName integer from stationName string */
-    int getIStationName(const std::string& staionName) const;
+    static int getIStationName(const std::string& staionName) ;
     /** Method to get position of Strip channel */
     float getStripPosition(const std::string& stationName, int stationEta,
                            int channel) const;
     /** Method to get signal propagation time delay */
-    double getSigPropTimeDelay(const float cableDistance) const;
+    static double getSigPropTimeDelay(const float cableDistance) ;
     /** Method to get time difference by cable radius of inner */
-    float timeDiffByCableRadiusOfInner(const int iStationName,
+    static float timeDiffByCableRadiusOfInner(const int iStationName,
                                        const int stationPhi,
-                                       const int channel) const;
+                                       const int channel) ;
     /** Method to get propagation time to the ASD from the sensor */
     float getDistanceToAsdFromSensor(const TgcDigitASDposData* readCdo,
                                      const int iStationName,
@@ -166,14 +166,14 @@ class TgcDigitMaker : public AthMessaging {
                                      const TgcSensor sensor, const int channel,
                                      const float position) const;
     /** Method to get time offset to absorb signal delay */
-    float getTimeOffset(const TgcDigitTimeOffsetData* readCdo,
+    static float getTimeOffset(const TgcDigitTimeOffsetData* readCdo,
                         const uint16_t station_num, const int station_eta,
-                        const TgcSensor sensor) const;
+                        const TgcSensor sensor) ;
     /** Method to get the channel crosstalk probability */
-    float getCrosstalkProbability(const TgcDigitCrosstalkData* readCdo,
+    static float getCrosstalkProbability(const TgcDigitCrosstalkData* readCdo,
                                   const uint16_t layer_id,
                                   const TgcSensor sensor,
-                                  const unsigned int index_prob) const;
+                                  const unsigned int index_prob) ;
 
    private:
     /** Energy threshold value for each chamber */

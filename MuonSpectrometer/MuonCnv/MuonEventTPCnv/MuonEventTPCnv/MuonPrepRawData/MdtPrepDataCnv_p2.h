@@ -23,7 +23,7 @@ class MdtPrepDataCnv_p2
 public:
     MdtPrepDataCnv_p2()  {}
 
-    Muon::MdtPrepData
+    static Muon::MdtPrepData
     createMdtPrepData( const Muon::MdtPrepData_p2 *persObj,
                        const Identifier& id,
                        const MuonGM::MdtReadoutElement* detEl,

@@ -20,8 +20,7 @@ sTgcDigitContainerCnvBase(svcloc)
   std::cout<<"sTgcDigitContainerCnv ctor"<<std::endl;
 }
 
-sTgcDigitContainerCnv::~sTgcDigitContainerCnv() {
-}
+sTgcDigitContainerCnv::~sTgcDigitContainerCnv() = default;
 
 StatusCode sTgcDigitContainerCnv::initialize() {
    // Call base clase initialize

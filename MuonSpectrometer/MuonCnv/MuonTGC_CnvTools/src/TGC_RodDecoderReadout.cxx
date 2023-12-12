@@ -37,7 +37,7 @@ Muon::TGC_RodDecoderReadout::TGC_RodDecoderReadout(
 //================ Destructor =================================================
 
 Muon::TGC_RodDecoderReadout::~TGC_RodDecoderReadout()
-{}
+= default;
 
 //================ Initialisation =================================================
 
@@ -170,8 +170,7 @@ void Muon::TGC_RodDecoderReadout::getCollection(const ROBFragment& robFrag, TgcR
     showStatusWords(source_id, rdoId, idHash, nstatus, status);
   }
   
-  return;
-}
+  }
 
 //================ byteStream2Rdo ===============================================
 

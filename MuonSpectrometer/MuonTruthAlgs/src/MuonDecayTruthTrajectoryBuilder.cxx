@@ -97,7 +97,7 @@ namespace Muon {
             if (mother && MC::isPhysical(mother)) {
                 unsigned int nDecayMuons = 0;
                 HepMC::ConstGenParticlePtr passed_cuts{nullptr};
-                for (auto& candidate : *vtx) {
+                for (const auto& candidate : *vtx) {
                     if (msgLvl(MSG::DEBUG)) {
                         msg(MSG::DEBUG) << " PDG ID " << candidate->pdg_id() << " particle: " << candidate
                                         << " pt: " << candidate->momentum().perp();

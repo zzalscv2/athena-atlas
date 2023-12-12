@@ -55,8 +55,8 @@ namespace Muon
       /** Compare two RDO containers */ 
       StatusCode compare(TgcRdo* rdo, TgcRdo* newRdo) const;
       /** Compare two RDOs */ 
-      bool isMatched(const TgcRawData* rdo1,
-		     const TgcRawData* rdo2) const;
+      static bool isMatched(const TgcRawData* rdo1,
+		     const TgcRawData* rdo2) ;
       /** Decode BS to RDO container */
       StatusCode decodeRodToRdo(TgcRdo& tgcRdo,
                                 const ByteStream& vData, 

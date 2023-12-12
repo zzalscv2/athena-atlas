@@ -32,7 +32,7 @@ persToTrans( const Muon::TgcCoinData_p3 *persObj, Muon::TgcCoinData *transObj,Ms
    Trk::ErrorMatrix dummy;
    fillTransFromPStore( &m_errorMxCnv, persObj->m_errMat, &dummy, log );
    auto tempMat = std::make_unique<Amg::MatrixX>();
-   if (dummy.values.size())
+   if (!dummy.values.empty())
      EigenHelpers::vectorToEigenMatrix(dummy.values, *tempMat, "TgcCoinDataCnv_p3");
 
    *transObj = Muon::TgcCoinData (Identifier(persObj->m_channelIdIn),

@@ -18,8 +18,7 @@ RpcCoinDataContainerCnv::RpcCoinDataContainerCnv(ISvcLocator* svcloc) :
 RpcCoinDataContainerCnvBase(svcloc)
 {}
 
-RpcCoinDataContainerCnv::~RpcCoinDataContainerCnv() {
-}
+RpcCoinDataContainerCnv::~RpcCoinDataContainerCnv() = default;
 
 StatusCode RpcCoinDataContainerCnv::initialize() {
    // Call base clase initialize

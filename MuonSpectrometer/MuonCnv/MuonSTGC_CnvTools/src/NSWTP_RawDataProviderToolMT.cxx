@@ -62,7 +62,7 @@ StatusCode NSWTP_RawDataProviderToolMT::convert(const ROBFragmentList& fragments
  
   ATH_CHECK(rdoContainerHandle.record(std::make_unique<xAOD::NSWTPRDOContainer>(), std::make_unique<xAOD::NSWTPRDOAuxContainer>()));
   pContainer = rdoContainerHandle.ptr();
-  for (const auto fragment : fragments) {
+  for (const auto *const fragment : fragments) {
     // TODO should an error here be a hard failure?
     ATH_CHECK(m_decoder->fillCollection(*fragment, *pContainer));
   }

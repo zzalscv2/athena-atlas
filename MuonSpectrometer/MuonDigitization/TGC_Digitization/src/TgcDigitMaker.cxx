@@ -4,6 +4,7 @@
 
 #include "TgcDigitMaker.h"
 
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -48,7 +49,7 @@ TgcDigitMaker::TgcDigitMaker(const TgcHitIdHelper* hitIdHelper,
 }
 
 //----- Destructor
-TgcDigitMaker::~TgcDigitMaker() {}
+TgcDigitMaker::~TgcDigitMaker() = default;
 
 //------------------------------------------------------
 // Initialize
@@ -678,7 +679,7 @@ uint16_t TgcDigitMaker::bcTagging(const double digitTime, const double window,
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++
 void TgcDigitMaker::addDigit(const Identifier id, const uint16_t bctag,
-                             TgcDigitCollection* digits) const {
+                             TgcDigitCollection* digits) {
     for (int bc = TgcDigit::BC_PREVIOUS; bc <= TgcDigit::BC_NEXTNEXT; bc++) {
         if ((bctag >> (bc - 1)) & 0x1) {
             bool duplicate = false;
@@ -695,8 +696,7 @@ void TgcDigitMaker::addDigit(const Identifier id, const uint16_t bctag,
             }
         }
     }
-    return;
-}
+    }
 
 StatusCode TgcDigitMaker::readFileOfEnergyThreshold() {
     // Indices to be used
@@ -884,7 +884,7 @@ StatusCode TgcDigitMaker::readFileOfStripPosition() {
     // Find path to the TGC_Digitization_StripPosition.dat file
     const std::string fileName = "TGC_Digitization_StripPosition.dat";
     std::string fileWithPath = PathResolver::find_file(fileName, "DATAPATH");
-    if (fileWithPath == "") {
+    if (fileWithPath.empty()) {
         ATH_MSG_FATAL("readFileOfStripPosition(): Could not find file "
                       << fileName);
         return StatusCode::FAILURE;
@@ -1087,7 +1087,7 @@ bool TgcDigitMaker::isDeadChamber(const std::string& stationName,
     return v_isDeadChamber;
 }
 
-int TgcDigitMaker::getIStationName(const std::string& stationName) const {
+int TgcDigitMaker::getIStationName(const std::string& stationName) {
     int iStationName = 0;
     if (stationName == "T1F")
         iStationName = 41;
@@ -1132,7 +1132,7 @@ float TgcDigitMaker::getStripPosition(const std::string& stationName,
 
 float TgcDigitMaker::timeDiffByCableRadiusOfInner(const int iStationName,
                                                   const int stationPhi,
-                                                  const int channel) const {
+                                                  const int channel) {
     float delay{0.};
     if (iStationName != 47 && iStationName != 48)
         return delay;  // Big Wheel has no delay for this.
@@ -1144,7 +1144,7 @@ float TgcDigitMaker::timeDiffByCableRadiusOfInner(const int iStationName,
     return delay;
 }
 
-double TgcDigitMaker::getSigPropTimeDelay(const float cableDistance) const {
+double TgcDigitMaker::getSigPropTimeDelay(const float cableDistance) {
     constexpr std::array<double, 2> par{0.0049 * CLHEP::ns, 0.0002 * CLHEP::ns};
     return par[0] * std::pow(cableDistance / CLHEP::m, 2) +
            par[1] * cableDistance / CLHEP::m;
@@ -1182,7 +1182,7 @@ float TgcDigitMaker::getDistanceToAsdFromSensor(
 float TgcDigitMaker::getTimeOffset(const TgcDigitTimeOffsetData* readCdo,
                                    const uint16_t station_num,
                                    const int station_eta,
-                                   const TgcSensor sensor) const {
+                                   const TgcSensor sensor) {
     uint16_t chamberId =
         (station_num << 3) + static_cast<uint16_t>(std::abs(station_eta));
     return ((sensor == TgcSensor::kSTRIP)
@@ -1192,7 +1192,7 @@ float TgcDigitMaker::getTimeOffset(const TgcDigitTimeOffsetData* readCdo,
 
 float TgcDigitMaker::getCrosstalkProbability(
     const TgcDigitCrosstalkData* readCdo, const uint16_t layer_id,
-    const TgcSensor sensor, const unsigned int index_prob) const {
+    const TgcSensor sensor, const unsigned int index_prob) {
     if (readCdo == nullptr)
         return 0.;  // no crosstalk
     return ((sensor == TgcSensor::kSTRIP)

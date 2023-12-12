@@ -21,8 +21,7 @@ MDTSimHitCollectionCnv::MDTSimHitCollectionCnv(ISvcLocator* svcloc) :
 {
 }
 
-MDTSimHitCollectionCnv::~MDTSimHitCollectionCnv() {
-}
+MDTSimHitCollectionCnv::~MDTSimHitCollectionCnv() = default;
 
 MDTSimHitCollection_PERS*    MDTSimHitCollectionCnv::createPersistent (MDTSimHitCollection* transCont) {
     MsgStream log(msgSvc(), "MDTSimHitCollectionCnv" );

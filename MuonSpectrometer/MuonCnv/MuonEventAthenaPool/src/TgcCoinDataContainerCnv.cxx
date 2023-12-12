@@ -28,8 +28,7 @@ TgcCoinDataContainerCnvBase(svcloc),
 {
 }
 
-TgcCoinDataContainerCnv::~TgcCoinDataContainerCnv() {
-}
+TgcCoinDataContainerCnv::~TgcCoinDataContainerCnv() = default;
 
 StatusCode TgcCoinDataContainerCnv::initialize() {
    // Call base clase initialize
