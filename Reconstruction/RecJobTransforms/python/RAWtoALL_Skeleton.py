@@ -96,6 +96,13 @@ def fromRunArgs(runArgs):
         flags.addFlag('Output.doWriteDAOD_PIXELVALID', True)
         log.info("---------- Configured DAOD_PIXELVALID output")
 
+    if hasattr(runArgs, 'outputDAOD_IDTRKVALIDFile'):
+        flagString = 'Output.DAOD_IDTRKVALIDFileName'
+        flags.addFlag(flagString, runArgs.outputDAOD_IDTRKVALIDFile)
+        flags.Output.doWriteDAOD = True
+        flags.addFlag('Output.doWriteDAOD_IDTRKVALID', True)
+        log.info("---------- Configured DAOD_IDTRKVALID output")
+
     if hasattr(runArgs, 'outputDESDM_MCPFile'):
         flagString = 'Output.DESDM_MCPFileName'
         flags.addFlag(flagString, runArgs.outputDESDM_MCPFile)
@@ -199,6 +206,12 @@ def fromRunArgs(runArgs):
         from DerivationFrameworkInDet.PIXELVALID import PixelVALIDCfg
         cfg.merge(PixelVALIDCfg(flags))
         log.info("---------- Configured PixelVALID perfDPD")
+
+    # IDTRKVALID
+    for flag in [key for key in flags._flagdict.keys() if ("Output.DAOD_IDTRKVALIDFileName" in key)]:
+        from DerivationFrameworkInDet.IDTRKVALID import IDTRKVALIDCfg
+        cfg.merge(IDTRKVALIDCfg(flags))
+        log.info("---------- Configured IDTRKVALID perfDPD")
 
     # DESDM_MCP
     for flag in [key for key in flags._flagdict.keys() if ("Output.DESDM_MCPFileName" in key)]:

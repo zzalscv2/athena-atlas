@@ -125,11 +125,11 @@ def TSOS_CommonKernelCfg(flags, name="TSOS_CommonKernel",
 
 def DFTrackStateOnSurfaceDecoratorCfg(
         flags, name="DFTrackStateOnSurfaceDecorator", **kwargs):
-    kwargs.setdefault("StorePixel", flags.Detector.EnablePixel)
-    kwargs.setdefault("StoreSCT", flags.Detector.EnableSCT)
-    kwargs.setdefault("StoreTRT", flags.Detector.EnableTRT)
+    kwargs.setdefault("StorePixel", flags.InDet.DAODStorePixel)
+    kwargs.setdefault("StoreSCT", flags.InDet.DAODStoreSCT)
+    kwargs.setdefault("StoreTRT", flags.InDet.DAODStoreTRT)
     # never decorate EventInfo with TRTPhase, doubt this is useful for IDTIDE
-    kwargs.setdefault("AddExtraEventInfo", False)
+    kwargs.setdefault("AddExtraEventInfo", flags.InDet.DAODStoreExtra)
     kwargs.setdefault("DecorationPrefix", "")
     kwargs.setdefault("PRDtoTrackMap", "")
     kwargs.setdefault("OutputLevel", INFO)

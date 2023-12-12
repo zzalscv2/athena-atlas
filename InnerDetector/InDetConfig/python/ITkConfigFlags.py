@@ -59,6 +59,11 @@ def createITkConfigFlags():
     itkcf.addFlag("ITk.selectStripIntimeHits", lambda prevFlags:
                   not(prevFlags.Beam.Type is BeamType.Cosmics))
 
+    # Save cluster information to Derivation
+    itkcf.addFlag("ITk.DAODStorePixel", True)
+    itkcf.addFlag("ITk.DAODStoreStrip", True)
+    itkcf.addFlag("ITk.DAODStoreExtra", True)
+
     # Save SiHitCollections to RDO
     itkcf.addFlag("ITk.savePixelSiHits", lambda prevFlags:
                   prevFlags.BTagging.Trackless or

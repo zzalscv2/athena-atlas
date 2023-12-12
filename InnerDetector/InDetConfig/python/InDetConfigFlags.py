@@ -40,8 +40,16 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.doTRTPhase", lambda prevFlags:
                 prevFlags.Beam.Type is BeamType.Cosmics and
                 prevFlags.Detector.EnableTRT)
-    icf.addFlag("InDet.PixelDumpMode", 1)
+
+    # Save cluster information to Derivation
     icf.addFlag("InDet.DRAWZSelection", False)
+    icf.addFlag("InDet.DAODStorePixel", True)
+    icf.addFlag("InDet.DAODStoreSCT", True)
+    icf.addFlag("InDet.DAODStoreTRT", True)
+    icf.addFlag("InDet.DAODStoreExtra", True)
+
+    # Specific flags for pixel study
+    icf.addFlag("InDet.PixelDumpMode", 1)
     icf.addFlag("InDet.PixelConfig.version", 'PixelConditionsAlgorithms/v1/')
     icf.addFlag("InDet.PixelConfig.UserInputFileName", '')
 
