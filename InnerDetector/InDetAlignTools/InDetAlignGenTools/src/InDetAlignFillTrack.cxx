@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 //////////////////////////////////////////////////////////////////////////
@@ -349,7 +349,7 @@ StatusCode InDetAlignFillTrack::FillTrack() {
                   msg(MSG::DEBUG) << "Trying to extrapolate directly to exclude material effects!" << endmsg;
                 }
 
-                const TrackRecordCollection* recordCollection;
+                const TrackRecordCollection* recordCollection = nullptr;
 
                 sc = evtStore()->retrieve(recordCollection, "CaloEntryLayer");
                 if (sc == StatusCode::FAILURE) {
