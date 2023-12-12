@@ -14,8 +14,13 @@
 //
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
+#include "PixelNoiseFunctions.h"
 #include <array>
 #include <algorithm>
+
+
+using namespace PixelDigitization;
+
 
 
 namespace{
@@ -36,8 +41,9 @@ FEI4SimTool::FEI4SimTool(const std::string& type, const std::string& name, const
 FEI4SimTool::~FEI4SimTool() = default;
 
 StatusCode FEI4SimTool::initialize() {
-  CHECK(FrontEndSimTool::initialize());
+  ATH_CHECK(FrontEndSimTool::initialize());
   ATH_MSG_DEBUG("FEI4SimTool::initialize()");
+  ATH_CHECK(m_moduleDataKey.initialize());
 
   return StatusCode::SUCCESS;
 }
@@ -91,7 +97,7 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     thermalNoise(m_thermalNoise, chargedDiodes, rndmEngine);
 
     // Add random noise
-    randomNoise(chargedDiodes, moduleData, calibData, rndmEngine);
+    randomNoise(chargedDiodes, moduleData, calibData, rndmEngine, m_pixelReadout.get());
   }
 
   // Add random diabled pixels

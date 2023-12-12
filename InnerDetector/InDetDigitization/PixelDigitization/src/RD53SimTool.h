@@ -14,6 +14,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "FrontEndSimTool.h"
 #include "InDetRawData/PixelRDO_Collection.h" //typedef
+#include "PixelConditionsData/PixelModuleData.h"  //ReadCondHandleKey template param
 
 class SiChargedDiodeCollection;
 
@@ -31,6 +32,11 @@ public:
   virtual void process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
                        CLHEP::HepRandomEngine* rndmEngine);
 private:
+
+   SG::ReadCondHandleKey<PixelModuleData> m_moduleDataKey{
+    this, "PixelModuleData", "PixelModuleData", "Pixel module data"
+  };
+
   RD53SimTool();
   Gaudi::Property<bool> m_doTimeWalk {
     this, "DoTimeWalk",false,"include time-walk effects"

@@ -15,6 +15,10 @@
 #include "CLHEP/Random/RandFlat.h"
 
 #include <cmath>
+#include "PixelNoiseFunctions.h"
+
+using namespace PixelDigitization;
+
 
 namespace{
   template <size_t n>
@@ -36,8 +40,9 @@ FEI3SimTool::FEI3SimTool(const std::string& type, const std::string& name, const
 FEI3SimTool::~FEI3SimTool() = default;
 
 StatusCode FEI3SimTool::initialize() {
-  CHECK(FrontEndSimTool::initialize());
+  ATH_CHECK(FrontEndSimTool::initialize());
   ATH_MSG_DEBUG("FEI3SimTool::initialize()");
+  ATH_CHECK(m_moduleDataKey.initialize());
   return StatusCode::SUCCESS;
 }
 
@@ -81,7 +86,7 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     thermalNoise(m_thermalNoise, chargedDiodes, rndmEngine);
 
     // Add random noise
-    randomNoise(chargedDiodes, moduleData, calibData, rndmEngine);
+    randomNoise(chargedDiodes, moduleData, calibData, rndmEngine, m_pixelReadout.get());
   }
 
   // Add random diabled pixels

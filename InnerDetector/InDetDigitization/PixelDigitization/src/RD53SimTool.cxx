@@ -14,6 +14,10 @@
 #include "InDetRawData/Pixel1RawData.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
+#include "PixelNoiseFunctions.h"
+#include <cmath>
+
+using namespace PixelDigitization;
 
 RD53SimTool::RD53SimTool(const std::string& type, const std::string& name, const IInterface* parent) :
   FrontEndSimTool(type, name, parent) {
@@ -22,9 +26,9 @@ RD53SimTool::RD53SimTool(const std::string& type, const std::string& name, const
 RD53SimTool::~RD53SimTool() = default;
 
 StatusCode RD53SimTool::initialize() {
-  CHECK(FrontEndSimTool::initialize());
+  ATH_CHECK(FrontEndSimTool::initialize());
   ATH_MSG_DEBUG("RD53SimTool::initialize()");
-
+  ATH_CHECK(m_moduleDataKey.initialize());
   return StatusCode::SUCCESS;
 }
 
@@ -49,7 +53,7 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
   int barrel_ec = pixelId->barrel_ec(chargedDiodes.element()->identify());
   int layerIndex = pixelId->layer_disk(chargedDiodes.element()->identify());
 
-  if (abs(barrel_ec) != m_BarrelEC) {
+  if (std::abs(barrel_ec) != m_BarrelEC) {
     return;
   }
 
@@ -73,7 +77,7 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     thermalNoise(m_thermalNoise, chargedDiodes, rndmEngine);
 
     // Add random noise
-    randomNoise(chargedDiodes, moduleData, calibData, rndmEngine);
+    randomNoise(chargedDiodes, moduleData, calibData, rndmEngine, m_pixelReadout.get());
   }
 
   // Add random diabled pixels
@@ -100,7 +104,7 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       int bunchSim = 0;
       if ((*i_chargedDiode).second.totalCharge().fromTrack()) {
         bunchSim =
-          static_cast<int>(floor((getG4Time((*i_chargedDiode).second.totalCharge()) +
+          static_cast<int>(std::floor((getG4Time((*i_chargedDiode).second.totalCharge()) +
                                   m_timeOffset) / m_bunchSpace));
 	
 	//Timewalk implementation 
@@ -108,7 +112,7 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
 	  if(charge < (threshold + m_overDrive)){
 	    const int timeWalk = 25; // Here it is assumed that the maximum value of timewalk is one bunch crossing (25ns)
 	    bunchSim =
-	      static_cast<int>(floor((getG4Time((*i_chargedDiode).second.totalCharge()) +
+	      static_cast<int>(std::floor((getG4Time((*i_chargedDiode).second.totalCharge()) +
 				      m_timeOffset+ timeWalk) / m_bunchSpace));
 	  } 
 	}
