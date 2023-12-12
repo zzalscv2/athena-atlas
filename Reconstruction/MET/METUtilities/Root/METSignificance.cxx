@@ -39,7 +39,7 @@
 
 namespace met {
 
-  typedef ElementLink<xAOD::IParticleContainer> iplink_t;
+  using iplink_t = ElementLink<xAOD::IParticleContainer>;
 
   static const SG::AuxElement::ConstAccessor<float> acc_varX("varX");
   static const SG::AuxElement::ConstAccessor<float> acc_varY("varY");
@@ -74,10 +74,10 @@ namespace met {
     m_metphi(0.0),
     m_ht(0.0),
     m_sumet(0.0),
-    m_file(0),
-    m_phi_reso_pt20(0),
-    m_phi_reso_pt50(0),
-    m_phi_reso_pt100(0)
+    m_file(nullptr),
+    m_phi_reso_pt20(nullptr),
+    m_phi_reso_pt50(nullptr),
+    m_phi_reso_pt100(nullptr)
   {
     declareProperty("SoftTermParam",        m_softTermParam = met::Random );
     declareProperty("SoftTermReso",         m_softTermReso  = 10.0        );
@@ -103,7 +103,7 @@ namespace met {
     m_file = nullptr;
   }
 
-  METSignificance::~METSignificance(){}
+  METSignificance::~METSignificance()= default;
 
   StatusCode METSignificance::initialize(){
 
@@ -442,7 +442,7 @@ namespace met {
       pt_reso=m_muonCalibrationAndSmearingTool->expectedResolution(dettype,*muon,!m_isDataMuon);
       if(m_doPhiReso) phi_reso = muon->pt()*0.001;
       // run the jet resolution for muons. for validation region extrapolation
-      if(m_EMuResoAux!=""){
+      if(!m_EMuResoAux.empty()){
         SG::AuxElement::ConstAccessor<bool>  acc_EMReso(m_EMuResoAux);
         DoEMuReso = acc_EMReso.isAvailable(*muon) ? acc_EMReso(*muon) : false;
       }
@@ -479,7 +479,7 @@ namespace met {
       ATH_MSG_VERBOSE("el: " << pt_reso << " " << ele->pt() << " " << ele->p4().Eta() << " " << ele->p4().Phi());
 
       // run the jet resolution for muons. for validation region extrapolation
-      if(m_EMuResoAux!=""){
+      if(!m_EMuResoAux.empty()){
         SG::AuxElement::ConstAccessor<bool>  acc_EMReso(m_EMuResoAux);
         DoEMuReso = acc_EMReso.isAvailable(*ele) ? acc_EMReso(*ele) : false;
       }
@@ -550,7 +550,7 @@ namespace met {
     }
 
     // Add user defined additional resolutions. For example, b-tagged jets
-    if(m_JetResoAux!=""){
+    if(!m_JetResoAux.empty()){
       SG::AuxElement::ConstAccessor<float> acc_extra(m_JetResoAux);
       if(acc_extra.isAvailable(*jet)){
         float extra_relative_pt_reso = acc_extra(*jet);
@@ -571,7 +571,7 @@ namespace met {
     }
     else{
       const xAOD::TauJet* tau(static_cast<const xAOD::TauJet*>(obj));
-      if (auto combp4 = dynamic_cast<TauCombinedTES*>(m_tauCombinedTES.get())) {
+      if (auto *combp4 = dynamic_cast<TauCombinedTES*>(m_tauCombinedTES.get())) {
         pt_reso = combp4->getMvaEnergyResolution(*tau);
       }
 

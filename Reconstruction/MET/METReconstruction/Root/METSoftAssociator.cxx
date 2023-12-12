@@ -102,15 +102,15 @@ namespace met {
               // been subtracted
               *metCoreCl  += sig;
               if(m_decorateSoftTermConst) {
-                dec_softConst(*metCoreTrk).push_back(ElementLink<IParticleContainer>(*static_cast<const IParticleContainer*>(sig->container()),sig->index()));
-                dec_softConst(*metCoreCl).push_back(ElementLink<IParticleContainer>(*static_cast<const IParticleContainer*>(sig->container()),sig->index()));
+                dec_softConst(*metCoreTrk).emplace_back(*static_cast<const IParticleContainer*>(sig->container()),sig->index());
+                dec_softConst(*metCoreCl).emplace_back(*static_cast<const IParticleContainer*>(sig->container()),sig->index());
               }
             }
           } else { // Neutral PFOs
             if (pfo->e()>FLT_MIN) {
               // This is a non-issue; just add the four-vector
               *metCoreCl += sig;
-              if(m_decorateSoftTermConst) dec_softConst(*metCoreCl).push_back(ElementLink<IParticleContainer>(*static_cast<const IParticleContainer*>(sig->container()),sig->index()));
+              if(m_decorateSoftTermConst) dec_softConst(*metCoreCl).emplace_back(*static_cast<const IParticleContainer*>(sig->container()),sig->index());
             }
           }
         }
@@ -139,15 +139,15 @@ namespace met {
               // been subtracted
               *metCoreCl  += sig;
               if(m_decorateSoftTermConst) {
-                dec_softConst(*metCoreTrk).push_back(ElementLink<IParticleContainer>(*static_cast<const IParticleContainer*>(sig->container()),sig->index()));
-                dec_softConst(*metCoreCl).push_back(ElementLink<IParticleContainer>(*static_cast<const IParticleContainer*>(sig->container()),sig->index()));
+                dec_softConst(*metCoreTrk).emplace_back(*static_cast<const IParticleContainer*>(sig->container()),sig->index());
+                dec_softConst(*metCoreCl).emplace_back(*static_cast<const IParticleContainer*>(sig->container()),sig->index());
               }
             }
           } else { // Neutral PFOs
             if (pfo->e()>FLT_MIN) {
               // This is a non-issue; just add the four-vector
               *metCoreCl += sig;
-              if(m_decorateSoftTermConst) dec_softConst(*metCoreCl).push_back(ElementLink<IParticleContainer>(*static_cast<const IParticleContainer*>(sig->container()),sig->index()));
+              if(m_decorateSoftTermConst) dec_softConst(*metCoreCl).emplace_back(*static_cast<const IParticleContainer*>(sig->container()),sig->index());
             }
           }
         }
@@ -175,7 +175,7 @@ namespace met {
               size_t cl_idx(cl->index());
               // clusters at LC scale
               *metCoreCl += (*lctc)[cl_idx];
-              if(m_decorateSoftTermConst) dec_softConst(*metCoreCl).push_back(ElementLink<IParticleContainer>(*static_cast<const IParticleContainer*>(lctc.cptr()),cl->index()));
+              if(m_decorateSoftTermConst) dec_softConst(*metCoreCl).emplace_back(*static_cast<const IParticleContainer*>(lctc.cptr()),cl->index());
               // clusters at EM scale
               *metCoreEMCl += (*emtc)[cl_idx];
             } else {
@@ -187,7 +187,7 @@ namespace met {
         CaloVertexedClusterBase stateClLC(*(static_cast<const CaloCluster*>(cl)),xAOD::CaloCluster::CALIBRATED);
               *metCoreCl += (&stateClLC);
             } else *metCoreCl += cl;
-            if(m_decorateSoftTermConst) dec_softConst(*metCoreCl).push_back(ElementLink<IParticleContainer>(*static_cast<const IParticleContainer*>(cl->container()),cl->index()));
+            if(m_decorateSoftTermConst) dec_softConst(*metCoreCl).emplace_back(*static_cast<const IParticleContainer*>(cl->container()),cl->index());
             // clusters at EM scale
             if (cl->type()==xAOD::Type::CaloCluster) {
         CaloVertexedClusterBase stateClEM( *(static_cast<const CaloCluster*>(cl)),xAOD::CaloCluster::UNCALIBRATED);
@@ -203,7 +203,7 @@ namespace met {
           if(acceptTrack(static_cast<const TrackParticle*>(trk),constits.pv) && isGoodEoverP(static_cast<const TrackParticle*>(trk))) {
             ATH_MSG_VERBOSE("Add core track with pt " << trk->pt());
             *metCoreTrk += trk;
-            if(m_decorateSoftTermConst) dec_softConst(*metCoreTrk).push_back(ElementLink<IParticleContainer>(*static_cast<const IParticleContainer*>(trk->container()),trk->index()));
+            if(m_decorateSoftTermConst) dec_softConst(*metCoreTrk).emplace_back(*static_cast<const IParticleContainer*>(trk->container()),trk->index());
 
           }
         }

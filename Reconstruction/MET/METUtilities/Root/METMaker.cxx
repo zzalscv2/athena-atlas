@@ -44,6 +44,8 @@
 #include <xAODCore/AuxContainerBase.h>
 #include <AthContainers/AuxElement.h>
 
+#include <memory>
+
 namespace met {
 
   using std::vector;
@@ -65,7 +67,7 @@ namespace met {
   // using xAOD::VertexContainer;
   // using xAOD::Vertex;
 
-  typedef ElementLink<xAOD::IParticleContainer> iplink_t;
+  using iplink_t = ElementLink<xAOD::IParticleContainer>;
   static const SG::AuxElement::ConstAccessor< iplink_t  > acc_originalObject("originalObjectLink");
   static const SG::AuxElement::ConstAccessor< iplink_t  > acc_nominalObject("nominalObjectLink");
   static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_ghostMuons("GhostMuon");
@@ -158,7 +160,7 @@ namespace met {
   // Destructor
   ///////////////
   METMaker::~METMaker()
-  {}
+  = default;
 
   // Athena algtool's Hooks
   ////////////////////////////
@@ -226,9 +228,9 @@ namespace met {
     ATH_CHECK( m_PVkey.initialize() );
 
     // configurable accessors
-    m_acc_jetJvtMoment.reset(new SG::AuxElement::ConstAccessor<float>(m_jetJvtMomentName));
+    m_acc_jetJvtMoment = std::make_unique<SG::AuxElement::ConstAccessor<float>>(m_jetJvtMomentName);
     if (!m_jetRejectionDec.empty()) {
-      m_acc_jetRejectionDec.reset(new SG::AuxElement::ConstAccessor<char>(m_jetRejectionDec));
+      m_acc_jetRejectionDec = std::make_unique<SG::AuxElement::ConstAccessor<char>>(m_jetRejectionDec);
       ATH_MSG_INFO("Applying additional jet rejection criterium in MET calculation: " << m_jetRejectionDec);
     }
 

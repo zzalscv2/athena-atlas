@@ -312,14 +312,14 @@ namespace met {
                                       const xAOD::MissingETComponent* component,
                                       bool doTracks) {
 
-    if(component->size()==0) return StatusCode::SUCCESS;
+    if(component->empty()) return StatusCode::SUCCESS;
 
     ATH_MSG_VERBOSE("Rebuilding MET term " << component->metObject()->name());
 
     const IParticleContainer* testCollection = dynamic_cast<const IParticleContainer*>(component->objects().front()->container());
     bool originalInputs = (testCollection == collection);
     bool matchCollection = true;
-    if(collection->size()>0) {
+    if(!collection->empty()) {
       // Consistency test: check that the collection supplied is the original one
       // used for MET reconstruction, or is derived from this collection
       if(!originalInputs) {
@@ -419,7 +419,7 @@ namespace met {
     ATH_CHECK( copyMET(softKey,metCont,metMap) );
     // copy constructor needs correcting.
     MissingET* metSoft = (*metCont)[softKey];
-    const MissingETComponent* comp_softtrk(0);
+    const MissingETComponent* comp_softtrk(nullptr);
     if(m_doSTVF) {
       comp_softtrk = MissingETComposition::getComponent(metMap,MissingETBase::Source::Type::SoftEvent|MissingETBase::Source::idTrack());
       if(!comp_softtrk) {
@@ -443,12 +443,12 @@ namespace met {
 					 float& stvf,
 					 const xAOD::MissingETComponent* comp_softtrk) {
 
-    if(component->size()==0) return StatusCode::SUCCESS;
+    if(component->empty()) return StatusCode::SUCCESS;
 
     // const VertexContainer* vtxCont = 0;
     SG::ReadHandle<xAOD::VertexContainer> PV(m_PVKey);
 
-    const Vertex* pv = 0;
+    const Vertex* pv = nullptr;
 
 
     if(doJvfCut || (m_trk_doPVsel && doTracks)) {
@@ -458,7 +458,7 @@ namespace met {
         return StatusCode::FAILURE;
       }
 
-      for(const auto vx : *PV) {
+      for(const auto *const vx : *PV) {
 	if(vx->vertexType()==VxType::PriVtx)
 
           {pv = vx; break;}
@@ -487,7 +487,7 @@ namespace met {
     const IParticleContainer* collcast = static_cast<const IParticleContainer*>(jets);
     bool originalInputs = (testCollection == collcast);
     bool matchCollection = true;
-    if(jets->size()>0) {
+    if(!jets->empty()) {
       // Consistency test: check that the collection supplied is the original one
       // used for MET reconstruction, or is derived from this collection
       if(!originalInputs) {
@@ -559,7 +559,7 @@ namespace met {
 		  trkjetpt += trk->pt();
 		} else {
 		  ATH_MSG_VERBOSE("  - track failed badtrack/uniqueness/PV");
-		  if(m_doSTVF && acceptTrack(trk,0)) {
+		  if(m_doSTVF && acceptTrack(trk,nullptr)) {
 		    trksumpt_allsoft += trk->pt();
 		  } // STVF
 		} // track selection

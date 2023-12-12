@@ -41,7 +41,7 @@ namespace met {
       jet_tracks.clear(); 
       if ( jet->getAssociatedObjects("GhostTrack", jet_tracks) ) {
 
-        for(const auto muon : muons) {
+        for(const auto *const muon : muons) {
           const xAOD::TrackParticle* idtrack = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
           if(!idtrack) continue;
           // check if this is ghost associated to a jet
