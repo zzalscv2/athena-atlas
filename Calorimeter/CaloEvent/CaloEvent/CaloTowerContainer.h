@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOEVENT_CALOTOWERCONTAINER_H
@@ -68,6 +68,7 @@ UPDATE:   MAY-11-01
 #include "NavFourMom/INavigable4MomentumCollection.h"
 #include "CaloEvent/CaloTowerDataVector.h"
 
+#include "boost/iterator/iterator_adaptor.hpp"
 #include <utility>
 #include <vector>
 

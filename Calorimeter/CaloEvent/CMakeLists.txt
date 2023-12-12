@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloEvent )
@@ -11,11 +11,12 @@ endif()
 
 # External dependencies:
 find_package( CLHEP )
+find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_library( CaloEvent CaloEvent/*.h CaloEvent/*.icc src/*.cxx
    PUBLIC_HEADERS CaloEvent
-   PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+   PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES CaloConditions CaloGeoHelpers CaloIdentifier AthAllocators
    AthContainers AthLinks CxxUtils Navigation GeoPrimitives
    Identifier EventKernel FourMom NavFourMom CaloDetDescrLib ${extra_libs}
@@ -50,8 +51,7 @@ atlas_add_test( CaloConstCellContainer_test
 
 atlas_add_test( CaloTowerContainer_test
    SOURCES test/CaloTowerContainer_test.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools CaloEvent  ${CLHEP_LIBRARIES}
+   LINK_LIBRARIES TestTools CaloEvent  ${CLHEP_LIBRARIES}
    LOG_IGNORE_PATTERN "${_patterns}" )
 
 atlas_add_test( CaloTopoTowerContainer_test
