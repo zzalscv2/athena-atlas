@@ -14,7 +14,6 @@
 //for ToolHandles, ServiceHandles:
 #include "InDetConditionsSummaryService/IInDetConditionsTool.h" //ToolHandle template param
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"  //SvcHandle template param
-#include "PixelConditionsData/PixelModuleData.h"  //ReadCondHandleKey template param
 #include "PixelConditionsData/PixelChargeCalibCondData.h"  //ReadCondHandleKey template param
 #include "InDetRawData/PixelRDO_Collection.h" //typedef
 
@@ -43,20 +42,6 @@ public:
   virtual void process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
                        CLHEP::HepRandomEngine* rndmEngine) = 0;
 
-  void crossTalk(double crossTalk, SiChargedDiodeCollection& chargedDiodes) const;
-  
-  void thermalNoise(double thermalNoise, SiChargedDiodeCollection& chargedDiodes,
-                    CLHEP::HepRandomEngine* rndmEngine) const;
-                    
-  void randomNoise(SiChargedDiodeCollection& chargedDiodes,
-                   const PixelModuleData *moduleData,
-                   const PixelChargeCalibCondData *chargeCalibData,
-                   CLHEP::HepRandomEngine* rndmEngine) const;
-  
-
-  void randomDisable(SiChargedDiodeCollection& chargedDiodes,
-                     const PixelModuleData *moduleData,
-                     CLHEP::HepRandomEngine* rndmEngine) const;
  
 
 private:
@@ -75,9 +60,6 @@ protected:
     this, "PixelReadoutManager", "PixelReadoutManager", "Pixel readout manager"
   };
 
-  SG::ReadCondHandleKey<PixelModuleData> m_moduleDataKey{
-    this, "PixelModuleData", "PixelModuleData", "Pixel module data"
-  };
 
   SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey{
     this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "Pixel charge calibration data"
@@ -95,7 +77,7 @@ protected:
     this, "Cosmics", false, "Is this for Cosmics simulation?"
   };
 
-  double getG4Time(const SiTotalCharge& totalCharge) const;
+  
 };
 
 #endif // PIXELDIGITIZATION_FrontEndSimTool_H

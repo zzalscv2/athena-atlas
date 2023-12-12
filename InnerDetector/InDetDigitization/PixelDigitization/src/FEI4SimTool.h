@@ -13,6 +13,7 @@
 
 #include "FrontEndSimTool.h"
 #include "InDetRawData/PixelRDO_Collection.h" //typedef
+#include "PixelConditionsData/PixelModuleData.h"  //ReadCondHandleKey template param
 
 class SiChargedDiodeCollection;
 namespace CLHEP{
@@ -29,6 +30,10 @@ public:
   virtual void process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
                        CLHEP::HepRandomEngine* rndmEngine);
 private:
+   SG::ReadCondHandleKey<PixelModuleData> m_moduleDataKey{
+    this, "PixelModuleData", "PixelModuleData", "Pixel module data"
+  };
+
   FEI4SimTool();
 };
 
