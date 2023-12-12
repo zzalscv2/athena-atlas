@@ -199,10 +199,8 @@ namespace LVL1 {
                 return StatusCode::FAILURE;
               }
 
-              if ((p_lolum)->trailingEdge() - (p_lolum)->driftTimeBin() > 4 ) {
-                if ( (p_lolum)->highLevel() ) {
-                  barrel_trigger_board[side][phi_module][board]++;
-                }
+              if ( (p_lolum)->highLevel() ) {
+                barrel_trigger_board[side][phi_module][board]++;
               }
 
             }
@@ -213,10 +211,8 @@ namespace LVL1 {
               chip = m_mat_chip_endcap[phi_module][strawNumber];
               board = EndcapChipToBoard(chip);
 
-              if ((p_lolum)->trailingEdge() - (p_lolum)->driftTimeBin() > 4 ) {
-                if ( (p_lolum)->highLevel() ) {
-                  endcap_trigger_board[side][phi_module][board]++;
-                }
+              if ( (p_lolum)->highLevel() ) {
+                endcap_trigger_board[side][phi_module][board]++;
               }
             }
           }
