@@ -6,27 +6,27 @@
 #include "SimpleSTgcClusterBuilderTool.h"
 #include "MuonPrepRawData/sTgcPrepData.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
 
 using namespace Muon;
 
 //============================================================================
 Muon::SimpleSTgcClusterBuilderTool::SimpleSTgcClusterBuilderTool(const std::string& t, const std::string& n, const IInterface* p) 
-: AthAlgTool(t,n,p) 
-{
-}
+: AthAlgTool(t,n,p) {}
 
 
 //============================================================================
 StatusCode Muon::SimpleSTgcClusterBuilderTool::initialize() {
     ATH_CHECK( m_idHelperSvc.retrieve() );
+    ATH_CHECK(m_uncertCalibKey.initialize());
     return StatusCode::SUCCESS;
 }
 
 
 //============================================================================
 // Build the clusters given a vector of single-hit PRD
-StatusCode Muon::SimpleSTgcClusterBuilderTool::getClusters(const EventContext& /*ctx*/,
+StatusCode Muon::SimpleSTgcClusterBuilderTool::getClusters(const EventContext& ctx,
                                                            std::vector<Muon::sTgcPrepData>&& stripsVect, 
                                                            std::vector<std::unique_ptr<Muon::sTgcPrepData>>& clustersVect) const {
 
@@ -44,7 +44,13 @@ StatusCode Muon::SimpleSTgcClusterBuilderTool::getClusters(const EventContext& /
     ATH_MSG_DEBUG(" channelType " << m_idHelperSvc->stgcIdHelper().channelType(chanId));
     ATH_MSG_DEBUG(" isStrip: " << isStrip << "Single channel resolution: " << resolution);
 
-    Muon::STgcClusterBuilderCommon stgcClusterCommon(m_idHelperSvc->stgcIdHelper());
+    SG::ReadCondHandle<NswErrorCalibData> errorCalibDB{m_uncertCalibKey, ctx};
+    if (!errorCalibDB.isValid()) {
+        ATH_MSG_FATAL("Failed to retrieve the parameterized errors "<<m_uncertCalibKey.fullKey());
+        return StatusCode::FAILURE;
+    }
+
+    Muon::STgcClusterBuilderCommon stgcClusterCommon(m_idHelperSvc->stgcIdHelper(), **errorCalibDB);
     std::array<std::vector<Muon::sTgcPrepData>, 8> stgcPrdsPerLayer = stgcClusterCommon.sortSTGCPrdPerLayer(std::move(stripsVect));
  
     for (std::vector<Muon::sTgcPrepData>& layPrds : stgcPrdsPerLayer) {
@@ -63,7 +69,7 @@ StatusCode Muon::SimpleSTgcClusterBuilderTool::getClusters(const EventContext& /
                 std::stringstream sstr{};
                 for (const Muon::sTgcPrepData& prd : cluster) {
                     sstr << m_idHelperSvc->toString(prd.identify())
-                         << ", local pos: ("<< prd.localPosition().x() << "," << prd.localPosition().y()
+                         << ", local pos: "<< Amg::toString(prd.localPosition(), 2)
                          << "), charge: " << prd.charge() << ", time: " << static_cast<int>(prd.time())
                          << std::endl;
                 }
@@ -76,7 +82,7 @@ StatusCode Muon::SimpleSTgcClusterBuilderTool::getClusters(const EventContext& /
             double posY = cluster[0].localPosition().y();
             Amg::Vector2D localPosition((*optClusterPos).getMeanPosition(), posY);
             auto covN = Amg::MatrixX(1,1);
-            covN(0,0) = (*optClusterPos).getErrorSquared() + m_addError*m_addError;
+            covN(0,0) = (*optClusterPos).getErrorSquared();
 
             std::vector<Identifier> rdoList;
             std::vector<int>        elementsCharge;
@@ -90,7 +96,7 @@ StatusCode Muon::SimpleSTgcClusterBuilderTool::getClusters(const EventContext& /
             }
 
             // memory allocated dynamically for the PrepRawData is managed by Event Store in the converters
-            ATH_MSG_DEBUG("error on cluster " << std::sqrt((covN)(0,0)) << " added error " <<  m_addError);
+            ATH_MSG_DEBUG("error on cluster " << std::sqrt((covN)(0,0)));
 
             std::unique_ptr<sTgcPrepData> prdN =  std::make_unique<sTgcPrepData>(
                                                       clusterId,

@@ -11,6 +11,8 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "MuonCondData/NswErrorCalibData.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
 #include <vector>
 #include <string>
@@ -45,7 +47,6 @@ namespace Muon
 
     Gaudi::Property<double> m_chargeCut{this, "ChargeCut", 0.};
     Gaudi::Property<unsigned int> m_maxHoleSize{this, "maxHoleSize", 0};
-    Gaudi::Property<double> m_addError{this,"addError", 0.};
     // The resolution parameters were obtained from tests with cosmic muons.
     // These values are also used in the Digitization.
     Gaudi::Property<double> m_positionStripResolution{this,"positionStripResolution", 0.0949};
@@ -53,6 +54,9 @@ namespace Muon
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of input MuonDetectorManager condition data"};
+    
+    SG::ReadCondHandleKey<NswErrorCalibData> m_uncertCalibKey{this, "ErrorCalibKey", "NswUncertData",
+                                                              "Key of the parametrized NSW uncertainties"};
 
     /// private functions
     void dumpStrips( std::vector<Muon::sTgcPrepData>& stripsVect,
