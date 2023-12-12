@@ -69,7 +69,7 @@ namespace MuonGMR4 {
 
         m_detVolSvc->detector();
 
-        ChamberSet chambers = m_chambTool->buildChambers();
+        const ChamberSet& chambers = m_chambTool->getAllChambers();
         std::vector<const MuonReadoutElement*> elements = m_detMgr->getAllReadoutElements();
             
         for (const MuonChamber& chamber : chambers) {

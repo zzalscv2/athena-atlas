@@ -77,8 +77,8 @@ def GeoModelsTgcTestCfg(flags, name = "GeoModelsTgcTest", **kwargs):
 
 def MuonChamberToolTestCfg(flags, name="MuonChamberToolTest", **kwargs):
     result = ComponentAccumulator()
-    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import ActsMuonChamberToolCfg
-    kwargs.setdefault("ChamberTool", result.getPrimaryAndMerge(ActsMuonChamberToolCfg(flags)))
+    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
+    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
     from ActsGeometry.DetectorVolumeSvcCfg import DetectorVolumeSvcCfg
     kwargs.setdefault("DetectorVolumeSvc", result.getPrimaryAndMerge(DetectorVolumeSvcCfg(flags)))
     the_alg = CompFactory.MuonGMR4.MuonChamberToolTest(name, **kwargs)

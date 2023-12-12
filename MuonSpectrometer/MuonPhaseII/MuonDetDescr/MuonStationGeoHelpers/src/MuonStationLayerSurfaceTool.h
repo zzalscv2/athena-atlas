@@ -39,10 +39,12 @@ namespace MuonGMR4{
           unsigned int storeAlignment(ActsTrk::RawGeomAlignStore& alignStore) const override final;
 
           const MuonChamber* getChamber(const Identifier& id) const override final;
+
+          const ChamberSet& getAllChambers() const override final;
       private:
-         PublicToolHandle<MuonGMR4::IActsMuonChamberTool> m_chambTool{this, "ChamberBuilder", ""};
-         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
-                                                             "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+          PublicToolHandle<MuonGMR4::IActsMuonChamberTool> m_chambTool{this, "ChamberBuilder", ""};
+          ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
+                                                              "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
           ChamberSet m_cenCache{};
           
