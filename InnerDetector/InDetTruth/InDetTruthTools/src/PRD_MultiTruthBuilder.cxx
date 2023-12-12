@@ -82,12 +82,12 @@ void PRD_MultiTruthBuilder::addPrepRawDatum(PRD_MultiTruthCollection *prdTruth,
 
         //  Confirm that the energy deposited in the RDO is significant
         if( isPixel  &&  nextdeposit->second < m_pixelThreshold ){  
-          ATH_MSG_VERBOSE("addPrepRawDatum() ignored PIXEL: Unique ID " << HepMC::uniqueID(particleLink) << " with charge " << nextdeposit->second );
+          ATH_MSG_VERBOSE("addPrepRawDatum() ignored PIXEL: Unique ID " << HepMC::uniqueID(particleLink.cptr()) << " with charge " << nextdeposit->second );
           continue;
         }
 
         if( isSCT  &&  nextdeposit->second < m_sctThreshold ){  
-          ATH_MSG_VERBOSE("addPrepRawDatum() ignored SCT: Unique ID " << HepMC::uniqueID(particleLink) << " with charge " << nextdeposit->second );
+          ATH_MSG_VERBOSE("addPrepRawDatum() ignored SCT: Unique ID " << HepMC::uniqueID(particleLink.cptr()) << " with charge " << nextdeposit->second );
           continue;
         }
 
