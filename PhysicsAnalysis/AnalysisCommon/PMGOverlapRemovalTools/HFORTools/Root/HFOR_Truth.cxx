@@ -661,29 +661,19 @@ int HFOR_Truth::readRunConfig(std::string runConfigFile) {
 
   m_runConfigFile = std::move(runConfigFile) ;
 
-  //std::cout <<  BOOST_CURRENT_FUNCTION << " Reading Configuration file: " << m_runConfigFile << std::endl;
   boost::property_tree::ptree runConfig ;
   boost::property_tree::read_info (m_runConfigFile, runConfig) ;
 
-  //std::cout <<  BOOST_CURRENT_FUNCTION << " Configuration Name:    " <<  runConfig.get<std::string>("configuration.name")    << std::endl ;
-  //std::cout <<  BOOST_CURRENT_FUNCTION << " Configuration Version: " <<  runConfig.get<std::string>("configuration.version") << std::endl ;
-  //std::cout <<  BOOST_CURRENT_FUNCTION << " Configuration Date:    " <<  runConfig.get<std::string>("configuration.date")    << std::endl ;
-
-
   for(boost::property_tree::ptree::value_type &v : runConfig.get_child("flavor.isLight")) {
-    //std::cout << BOOST_CURRENT_FUNCTION << " In flavor isLight: " << v.first.data() << " --> " << v.second.data() << std::endl;
     m_runConfigMap[HFORType::isLight].push_back( atoi(v.first.data()) ) ;
   }
   for(boost::property_tree::ptree::value_type &v : runConfig.get_child("flavor.isBB")) {
-    //std::cout << BOOST_CURRENT_FUNCTION << " In flavor isBB: " << v.first.data() << " --> " << v.second.data() << std::endl;
     m_runConfigMap[HFORType::isBB].push_back( atoi(v.first.data()) ) ;
   }
   for(boost::property_tree::ptree::value_type &v : runConfig.get_child("flavor.isCC")) {
-    //std::cout << BOOST_CURRENT_FUNCTION << " In flavor isCC: " << v.first.data() << " --> " << v.second.data() << std::endl;
     m_runConfigMap[HFORType::isCC].push_back( atoi(v.first.data()) ) ;
   }
   for(boost::property_tree::ptree::value_type &v : runConfig.get_child("flavor.isC")) {
-    //std::cout << BOOST_CURRENT_FUNCTION << " In flavor isC: " << v.first.data() << " --> " << v.second.data() << std::endl;
     m_runConfigMap[HFORType::isC].push_back( atoi(v.first.data()) ) ;
   }
 
@@ -742,9 +732,6 @@ void HFOR_Truth::setMatchConeSize(double deltaR) {
   //Sanity check
   if (deltaR > 0.0) {
     m_matchCone =  deltaR ;
-  }
-  else {
-    //ATH_MSG_ERROR( BOOST_CURRENT_FUNCTION << "Invalid deltaR. Must be >= 0 " ) ;
   }
 }
 //==============================================================================

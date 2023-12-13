@@ -449,27 +449,21 @@ StatusCode OldSpclMcFilterTool::reconnectParticles( const McEventCollection* in,
 	continue;
       }
       if ( rebuildLinks( evt, outEvt, itrPart ).isFailure() ) {
-	ATH_MSG_WARNING("Could not rebuild links for this particle [pdgId,bc]= "
-			<< itrPart->pdg_id()
-			<< ", " << HepMC::barcode(itrPart));
+	ATH_MSG_WARNING("Could not rebuild links for this particle = "<< itrPart;
       } else if ( msgLvl(MSG::VERBOSE) ) {
 	msg(MSG::VERBOSE)
 	  << "==========================================================="
-	  << endmsg
-	  << "Production vertex for particle " 
-	  << HepMC::barcode(itrPart) << " : ";
+	  << endmsg << "Production vertex for particle "  << itrPart << " : ";
 	if ( itrPart->production_vertex() ) {
 	  std::stringstream prodVtx("");
 	  HepMC::Print::line(prodVtx,itrPart->production_vertex());
-	  msg(MSG::VERBOSE) << std::endl
-			    << prodVtx.str()
-			    << endmsg;
+	  msg(MSG::VERBOSE) << std::endl << prodVtx.str() << endmsg;
 	} else {
 	  msg(MSG::VERBOSE) << "[No production vertex]" << endmsg;
 	}
 	
 	msg(MSG::VERBOSE) << "Decay vertex for particle " 
-			  << HepMC::barcode(itrPart) << " : ";
+			  << itrPart << " : ";
 	if ( itrPart->end_vertex() ) {
 	  std::stringstream dcyVtx("");
 	  HepMC::Print::line(dcyVtx, itrPart->end_vertex());
@@ -583,8 +577,8 @@ StatusCode OldSpclMcFilterTool::rebuildLinks( const HepMC::GenEvent * mcEvt,
 		// so we skip it
 		if ( msgLvl(MSG::VERBOSE) ) {
 		  msg(MSG::VERBOSE)
-		    << "found a particle [bc,pdgId]= "
-		    << (*itrPart)->barcode() << ", "
+		    << "found a particle = "
+		    << (*itrPart) << ", "
 		    << "but its production vertex has incoming particles !"
 		    << endmsg;
 		  continue;

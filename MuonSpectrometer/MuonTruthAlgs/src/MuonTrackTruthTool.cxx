@@ -135,7 +135,6 @@ namespace Muon {
         TrackRecordConstIterator tr_it_end = truthTrackCol->end();
         for (; tr_it != tr_it_end; ++tr_it) {
             int PDGCode((*tr_it).GetPDGCode());
-            //       int barcode( manipulateBarCode( (*tr_it).GetBarCode()) );
             int barcode = (*tr_it).GetBarCode();
             if (!m_matchAllParticles && !selectPdg(PDGCode)) {
                 ATH_MSG_VERBOSE(" discarding truth track: pdg " << PDGCode << "  barcode " << barcode);

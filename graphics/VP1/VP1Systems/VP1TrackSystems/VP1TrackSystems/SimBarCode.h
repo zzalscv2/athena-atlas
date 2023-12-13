@@ -47,7 +47,6 @@ private:
   int m_barCode;
   HepMcParticleLink::index_type m_evtIndex;
   int m_pdgCode;
-//   inline bool pdgCodesCompatible(const SimBarCode&) const;
 };
 
 
