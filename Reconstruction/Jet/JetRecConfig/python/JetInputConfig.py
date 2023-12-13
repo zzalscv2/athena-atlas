@@ -73,6 +73,7 @@ def buildPV0TrackSel(parentjetdef, spec):
     tvaTool = getTTVAToolForReco("trackjetTVAtool", 
                                  returnCompFactory = True,
                                  addDecoAlg = False ,# not needed : UsedInFit decorations are part of other prerequisites  
+                                 HardScatterLinkDeco = "",
                                  WorkingPoint = "Nonprompt_All_MaxWeight",
                                  TrackContName = trkOptions['JetTracksQualityCuts'],
                                  VertexContName = trkOptions['Vertices'],
