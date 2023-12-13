@@ -32,6 +32,8 @@ TCS::DeltaPhiIncl2::DeltaPhiIncl2(const std::string & name) : DecisionAlg(name)
    defineParameter("MaxTob1", 0); 
    defineParameter("MaxTob2", 0); 
    defineParameter("NumResultBits", 2);
+   defineParameter("Delay1", 0);
+   defineParameter("Delay2", 0);
    defineParameter("MinET1",0,0);
    defineParameter("MinET2",0,0); 
    defineParameter("MinDeltaPhi",  0, 0);
