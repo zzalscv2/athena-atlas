@@ -9,6 +9,6 @@ namespace xAOD {
     AUX_VARIABLE(translation);
     AUX_VARIABLE(rotation);
     AUX_VARIABLE(boundValues);
-    AUX_VARIABLE(SurfaceType); 
+    AUX_VARIABLE(surfaceType); 
   }
 }
