@@ -33,7 +33,7 @@ def show_tags(connection_string, args):
         tags = ddb.defects_tags
     
     for t in tags:
-        print t
+        print(t)
 
 def show_defects(connection_string, tag, get_defects, patterns, args):
     ddb = DefectsDB(connection_string, tag=tag)
@@ -42,10 +42,10 @@ def show_defects(connection_string, tag, get_defects, patterns, args):
     
     for pattern in patterns:
         if len(patterns) != 1:
-            print # Extra newline to separate the patterns
-            print "%s:" % pattern
+            print() # Extra newline to separate the patterns
+            print(f"{pattern}:")
         for defect in sorted(fnmatch.filter(all_defects, pattern)):
-            print defect
+            print(defect)
 
 def show_defects_with_desc(connection_string, tag, get_defects, patterns, args):
     ddb = DefectsDB(connection_string, tag=tag)
@@ -69,11 +69,11 @@ def show_defects_with_desc(connection_string, tag, get_defects, patterns, args):
     
     for pattern in patterns:
         if len(patterns) != 1:
-            print "%s:" % pattern
+            print(f"{pattern}:")
         for defect in sorted(fnmatch.filter(all_defects, pattern)):
             desc = descriptions.get(defect, "")
-            print "{virtuality}{0:<{width}}: {1}".format(
-                defect, desc, width=ldl, virtuality=get_virtuality(defect))
+            print("{virtuality}{0:<{width}}: {1}".format(
+                  defect, desc, width=ldl, virtuality=get_virtuality(defect)))
         print
         
 def show_defects_with_logic(connection_string, tag, patterns, args):
@@ -90,10 +90,10 @@ def show_defects_with_logic(connection_string, tag, patterns, args):
     
     for pattern in patterns:
         if len(patterns) != 1:
-            print "%s:" % pattern
+            print(f"{pattern}:")
         for defect in sorted(fnmatch.filter(defects, pattern)):
-            print "{0:<{width}}: {1}".format(
-                defect, ", ".join(logics[defect].clauses), width=ldl)
+            print("{0:<{width}}: {1}".format(
+                  defect, ", ".join(logics[defect].clauses), width=ldl))
         print
 
 def main():

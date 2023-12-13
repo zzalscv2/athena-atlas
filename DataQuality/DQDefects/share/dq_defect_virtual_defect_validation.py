@@ -3,7 +3,7 @@
 def truncate_iovs_to_runs(iovs, runends):
     for iov in iovs:
         if iov.since.run not in runends:
-            print 'Missing run', iov.since.run, 'from EOR_Params'
+            print('Missing run', iov.since.run, 'from EOR_Params')
             
     rv = filter(None, [iov.intersect(runends[iov.since.run])
                    for iov in iovs if iov.since.run in runends])
@@ -52,39 +52,39 @@ if __name__ == '__main__':
     # get virtual flag IOVs
     import VirtualFlags, DQUtils
     from DQDefects import DefectsDB
-    print 'Getting virtual flag information...',
+    print('Getting virtual flag information...', end='')
     vfdb = DQUtils.db.Databases.get_folder(opts.vfdb)
     vff = VirtualFlags.VirtualFlagFolder(vfdb)
     mapping = vff.get_flag_name_id_mapping()
-    print 'done'
+    print('done')
 
-    print 'Getting virtual defect information...',
+    print('Getting virtual defect information...', end='')
     ddb = DefectsDB(opts.defectdb, read_only=True)
     defectids, defectnames, defectdict = ddb.get_virtual_channels()
-    print 'done'
+    print('done')
 
-    print 'Retrieving run ends...',
+    print('Retrieving run ends...', end='')
     runends = get_runends()
-    print 'done'
+    print('done')
  
     for key in mapping:
-        if not isinstance(key, basestring): continue
+        if not isinstance(key, str): continue
         #if '_' in key: continue
         if key not in defectdict or key in ['IDPF', 'LCD', 'MET', 'IDBCM', 'TIGB']:
-            print 'MISSING:', key
+            print('MISSING:', key)
             continue
-        print key,
+        print(key, end='')
         vfiovs = do_compact(vff.browseObjects((152166,0), (167845,0), [key], 'DetStatus-v03-repro05-01', selection=lambda x: x.Code < 3))
         #print vfiovs
         d1 = set([((x.since.run, x.since.lumi), (x.until.run, x.until.lumi)) for x in truncate_iovs_to_runs(vfiovs, runends) if x.since.run != 152220])
         diovs = do_compact(ddb.retrieve((152166,0), (167845,0), [key]))
         d2 = set([((x.since.run, x.since.lumi), (x.until.run, x.until.lumi)) for x in truncate_iovs_to_runs(diovs, runends) if x.since.run != 152220])
-        print d1 == d2
+        print(d1 == d2)
         if d1 != d2:
             #print d1
             d1a = dict([(((x.since.run, x.since.lumi), (x.until.run, x.until.lumi)), x.Comment) for x in truncate_iovs_to_runs(vfiovs, runends)])
             d2a = dict([(((x.since.run, x.since.lumi), (x.until.run, x.until.lumi)), x.comment) for x in truncate_iovs_to_runs(diovs, runends)])
 
-            print 'In VF but not defects:', [(x, d1a[x]) for x in d1-d2]
-            print 'In defects but not VF:', [(x, d2a[x]) for x in d2-d1]
+            print('In VF but not defects:', [(x, d1a[x]) for x in d1-d2])
+            print('In defects but not VF:', [(x, d2a[x]) for x in d2-d1])
 

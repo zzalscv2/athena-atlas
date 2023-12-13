@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-#from IPython.Shell import IPShellEmbed; ip = IPShellEmbed(["-pdb"])
 from DQDefects import DefectsDB
 from DQUtils import IOVSet, process_iovs, define_iov_type
 from DQUtils.sugar import RunLumi, RANGEIOV_VAL
@@ -126,8 +125,8 @@ def main():
         range_iovs = IOVSet.from_runs(runs)
 
     # debugging
-    print 'range to process:'
-    print 'since, until =', since, until
+    print('range to process:')
+    print('since, until =', since, until)
     #print 'range_iovs:'
     #range_iovs.pprint()
 
@@ -138,14 +137,14 @@ def main():
         iovs = make_defectset_iovs(range_iovs, DefectsDB(tag=tag).retrieve(**kwargs))
         return iovs
 
-    print "Retrieving defects.."
+    print("Retrieving defects..")
     defects1, defects2 = fetch_defects(tag1), fetch_defects(tag2)
     #defects1.pprint()
     
-    print "Computing diff.."
+    print("Computing diff..")
     diff_iovs = make_defectdiff_iovs(defects1, defects2, args.by_system, args.ignore_not_considered)
     for since, until, t1, t2 in diff_iovs:
-        print since, until, "tag1:(%s)" % pretty(t1), "tag2:(%s)" % pretty(t2)
+        print(since, until, "tag1:(%s)" % pretty(t1), "tag2:(%s)" % pretty(t2))
 
 if __name__ == "__main__":
     raise SystemExit(main())

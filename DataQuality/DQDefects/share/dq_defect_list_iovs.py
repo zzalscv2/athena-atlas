@@ -35,12 +35,12 @@ def get_project_dict():
         delta = datetime.fromtimestamp(os.path.getmtime(name)) - datetime.now()
         return delta.days
     if os.path.exists(filename) and get_file_age(filename) < 5:
-        print 'using existing pickled project dict:', filename
+        print('using existing pickled project dict:', filename)
         with open(filename) as f:
             project_dict = pickle.load(f)
     else:
         # Make a new pickle file
-        print 'storing project:period:runs dictionary to', filename
+        print('storing project:period:runs dictionary to', filename)
         with open(filename, 'w') as f:
             project_dict = fetch_project_period_runs()
             pickle.dump(project_dict, f)
@@ -104,8 +104,8 @@ def main():
         range_iovs = IOVSet.from_runs(run_set)
     
     # debugging
-    print 'range to process:'
-    print 'since, until =', since, until
+    print('range to process:')
+    print('since, until =', since, until)
 
     # Instantiate the DB
     db = DefectsDB(args.connection_string, tag=args.tag)
@@ -127,7 +127,7 @@ def main():
     # Print the results
     for channel, result in result_dict.iteritems():
         result.solidify(DefectIOV)
-        print '\n' + channel + '\n'
+        print('\n' + channel + '\n')
         result.pprint()
 
 

@@ -3,41 +3,43 @@
 from os import makedirs
 from os.path import isdir
 from argparse import ArgumentParser
+from typing import Mapping, Union, TextIO
 
 from DQDefects import DefectsDB
+from DQDefects.virtual_logic import DefectLogic
 
 DEPENDSON_DIR = "dependson"
 
 class Node(object):
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = name
         self.children = set()
         self.parents = set()
 
-    def get_name(self):
+    def get_name(self) -> str:
         return self.name
 
     @property
-    def virtual(self):
+    def virtual(self) -> bool:
         return bool(self.children)
 
     @property
-    def primary(self):
+    def primary(self) -> bool:
         return not self.virtual
 
     @property
-    def has_primary_children(self):
+    def has_primary_children(self) -> bool:
         return any(c.primary for c in self.children)
 
     @property
-    def only_primary_children(self):
+    def only_primary_children(self) -> bool:
         return all(c.primary for c in self.children)
 
     def __repr__(self):
-        args = self.name, [n.name for n in self.parents], [n.name for n in self.children]
-        return '<Node %s parents="%s" children="%s">' % args
+        return (f'<Node {self.name} parents="{[n.name for n in self.parents]}" '
+                f'children="{[n.name for n in self.children]}">')
 
-    def dot(self, current_node=False, tooltip="", viewing_dependents=False):
+    def dot(self, current_node=False, tooltip: str ="", viewing_dependents: bool =False) -> str:
         color = "grey" if self.primary else "white"
         if current_node:
             color = "darkslategray2" if viewing_dependents else "gold"
@@ -49,28 +51,27 @@ class Node(object):
         if current_node:
             # Clicking on the current node toggles between views
             if viewing_dependents:
-                url = "../%s.svg" % self.name
+                url = f"../{self.name}.svg"
                 label += r"\n[Deep dependants]"
             else:
-                url = "%s/%s.svg" % (DEPENDSON_DIR, self.name)
+                url = f"{DEPENDSON_DIR}/{self.name}.svg"
                 label += r"\n[Dependencies]"
         else:
             url = "%s.svg" % self.name
 
-        args = self.name, color, url, tooltip, label
-        return '%s [fillcolor=%s, style=filled, URL="%s", tooltip="%s", label="%s"];' % args
+        return f'{self.name} [fillcolor={color}, style=filled, URL="{url}", tooltip="{tooltip}", label="{label}"];'
 
-def build_tree(all_logic):
+def build_tree(all_logic: Mapping[str, DefectLogic]) -> dict[str, Node]:
 
-    all_nodes = {}
+    all_nodes: dict[str, Node] = {}
 
-    def make_primary(current_logic):
+    def make_primary(current_logic: str) -> Node:
         if current_logic in all_nodes:
             return all_nodes[current_logic]
         all_nodes[current_logic] = node = Node(current_logic)
         return node
 
-    def explore_virtual(current_logic):
+    def explore_virtual(current_logic: str) -> Node:
         if current_logic in all_nodes:
             return all_nodes[current_logic]
 
@@ -93,67 +94,68 @@ def build_tree(all_logic):
 
     return all_nodes
 
-def walk(node, visited, visit_primary, fd):
+def walk(node: Node, visited: set[Node], visit_primary: bool, fd: TextIO):
     visited.add(node)
 
     for subnode in sorted(node.children, key=Node.get_name):
         if subnode.virtual or (subnode.primary and visit_primary):
-            print >>fd, "%s -> %s" % (node.name, subnode.name)
+            print(f"{node.name} -> {subnode.name}", file=fd)
             walk(subnode, visited, visit_primary, fd)
 
-def dump_visited(fd, current_node, nodes, descs, parents):
+def dump_visited(fd: TextIO, current_node: Node, nodes: set[Node],
+                 descs: Mapping[Union[str, int], str], parents: bool):
     for node in sorted(nodes, key=Node.get_name):
         at_current_node = node.name == current_node.name
         description = descs.get(node.name, node.name)
         # Line breaks in defect descriptions mess up the svg generation
         description = description.replace('\n', ' ')
-        print >>fd, node.dot(at_current_node, description, parents)
+        print(node.dot(at_current_node, description, parents), file=fd)
 
-def build_dependency_graph(output_dir, node, descs):
+def build_dependency_graph(output_dir: str, node: Node, descs: Mapping[Union[str, int], str]):
 
     with open("%s/%s.dot" % (output_dir, node.name), "w") as fd:
-        print >>fd, "strict digraph %s {" % (node.name)
-        print >>fd, "rankdir=LR;\n"
+        print(f"strict digraph {node.name} {{", file=fd)
+        print("rankdir=LR;\n", file=fd)
 
         visited = set()
 
         for parent in sorted(node.parents, key=Node.get_name):
-            print >>fd, "%s -> %s" % (parent.name, node.name)
+            print(f"{parent.name} -> {node.name}", file=fd)
             visited.add(parent)
 
         walk(node, visited, node.has_primary_children, fd)
 
         dump_visited(fd, node, visited, descs, parents=False)
 
-        print >>fd, "}"
+        print("}", file=fd)
 
-def build_parent_tree(output_dir, node, descs):
+def build_parent_tree(output_dir: str, node: Node, descs: Mapping[Union[str, int], str]):
 
     visited = set([node])
 
-    with open("%s/%s/%s.dot" % (output_dir, DEPENDSON_DIR, node.name), "w") as fd:
+    with open(f"{output_dir}/{DEPENDSON_DIR}/{node.name}.dot", "w") as fd:
         def walk_parents(node):
             visited.add(node)
             for parent in node.parents:
-                print >>fd, "%s -> %s" % (parent.name, node.name)
+                print(f"{parent.name} -> {node.name}", file=fd)
                 walk_parents(parent)
 
-        print >>fd, "strict digraph %s {" % (node.name)
-        print >>fd, "rankdir=LR;\n"
+        print(f"strict digraph {node.name} {{", file=fd)
+        print("rankdir=LR;\n", file=fd)
 
         walk_parents(node)
 
         dump_visited(fd, node, visited, descs, parents=True)
 
-        print >>fd, "}"
+        print("}", file=fd)
 
-def render_all_flags(output_dir, all_nodes, descs):
+def render_all_flags(output_dir: str, all_nodes: dict[str, Node], descs: Mapping[Union[str, int], str]):
 
     path = "%s/%s" % (output_dir, DEPENDSON_DIR)
     if not isdir(path):
         makedirs(path)
 
-    for name, node in sorted(all_nodes.iteritems()):
+    for _, node in sorted(all_nodes.items()):
         build_dependency_graph(output_dir, node, descs)
         build_parent_tree(output_dir, node, descs)
 
