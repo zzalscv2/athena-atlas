@@ -22,5 +22,3 @@ atlas_add_library( TrigInDetAccelerationServiceLib
 atlas_add_component( TrigInDetAccelerationService
                      src/components/*.cxx
                      LINK_LIBRARIES TrigInDetAccelerationServiceLib AthenaKernel GaudiKernel AthenaBaseComps StoreGateLib TrigAccelEvent ${TBB_LIBRARIES} rt dl)
-
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
