@@ -145,22 +145,22 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   gBlockAB(Ctwr, gBLKC, hasSeedC, gLJ_seedThrC);  
 
   // sorting by jet engine -- not done in FPGA
-  std::array<int, 32> AgBlockOutL;
-  std::array<int, 32> AgBlockEtaIndL;
-  std::array<int, 32> AgBlockOutR;
-  std::array<int, 32> AgBlockEtaIndR;
+  std::array<int, 32> AgBlockOutL{};
+  std::array<int, 32> AgBlockEtaIndL{};
+  std::array<int, 32> AgBlockOutR{};
+  std::array<int, 32> AgBlockEtaIndR{};
   blkOutAB(gBLKA, AgBlockOutL, AgBlockEtaIndL, AgBlockOutR, AgBlockEtaIndR);
 
-  std::array<int, 32> BgBlockOutL;
-  std::array<int, 32> BgBlockEtaIndL;
-  std::array<int, 32> BgBlockOutR;
-  std::array<int, 32> BgBlockEtaIndR;
+  std::array<int, 32> BgBlockOutL{};
+  std::array<int, 32> BgBlockEtaIndL{};
+  std::array<int, 32> BgBlockOutR{};
+  std::array<int, 32> BgBlockEtaIndR{};
   blkOutAB(gBLKB, BgBlockOutL, BgBlockEtaIndL, BgBlockOutR, BgBlockEtaIndR);
   
-  std::array<int, 32> CgBlockOutL;
-  std::array<int, 32> CgBlockEtaIndL;
-  std::array<int, 32> CgBlockOutR;
-  std::array<int, 32> CgBlockEtaIndR;
+  std::array<int, 32> CgBlockOutL{};
+  std::array<int, 32> CgBlockEtaIndL{};
+  std::array<int, 32> CgBlockOutR{};
+  std::array<int, 32> CgBlockEtaIndR{};
   blkOutAB(gBLKC, CgBlockOutL, CgBlockEtaIndL, CgBlockOutR, CgBlockEtaIndR) ;
 
   // sorting by 192 blocks 0 = left, 1 = right
@@ -908,14 +908,12 @@ void gFEXJetAlgo::gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTow
 
 
 
-void gFEXJetAlgo::blkOutAB(gTowersType & blocks, std::array<int, 32> jetOutL, std::array<int, 32> etaIndL, std::array<int, 32> jetOutR, std::array<int, 32> etaIndR) const{
+void gFEXJetAlgo::blkOutAB(gTowersType & blocks, std::array<int, 32>  jetOutL, std::array<int, 32>  etaIndL, std::array<int, 32>  jetOutR, std::array<int, 32>  etaIndR) const{
   
   // find maximum in each jet engine for gBlocks  (not done in hardware) 
 
   //loop over left engines 
   for(unsigned int ieng=0; ieng<FEXAlgoSpaceDefs::ABCrows; ieng++){
-    jetOutL[ieng] = 0;
-    etaIndL[ieng] = 0;
     for(unsigned int localEta = 0; localEta<6; localEta++){
       if( blocks[ieng][localEta] > jetOutL[ieng]  ){
         jetOutL[ieng] = blocks[ieng][localEta];
@@ -925,8 +923,6 @@ void gFEXJetAlgo::blkOutAB(gTowersType & blocks, std::array<int, 32> jetOutL, st
   }
   // loop over right engines 
   for(unsigned int ieng=0; ieng<FEXAlgoSpaceDefs::ABCrows; ieng++){
-    jetOutR[ieng] = 0;
-    etaIndR[ieng] = 0;
     for(unsigned int localEta = 0; localEta<6; localEta++){
       if(  blocks[ieng][localEta+6] > jetOutR[ieng] ) {
         jetOutR[ieng] = blocks[ieng][localEta+6];

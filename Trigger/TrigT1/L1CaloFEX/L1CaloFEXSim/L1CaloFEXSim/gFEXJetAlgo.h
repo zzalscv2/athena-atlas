@@ -17,6 +17,9 @@
 #include "L1CaloFEXSim/gFEXJetTOB.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
+#include <vector>
+#include <memory>
+#include <array>
 
 
 
@@ -64,7 +67,7 @@ namespace LVL1 {
 
     virtual void gBlockAB(const gTowersType& twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const;
     
-    virtual void blkOutAB(gTowersType & blocks, std::array<int, 32> jetOutL, std::array<int, 32> etaIndL, std::array<int, 32> jetOutR, std::array<int, 32> etaIndR) const;
+    virtual void blkOutAB(gTowersType & blocks, std::array<int, 32>  jetOutL, std::array<int, 32>  etaIndL, std::array<int, 32>  jetOutR, std::array<int, 32>  etaIndR) const;
 
     virtual void gBlockMax2(const gTowersType & gBlkSum, int BjetColumn, int localColumn, std::array<int, 3> & gBlockV, std::array<int, 3> & gBlockEta, std::array<int, 3> & gBlockPhi) const;
     
