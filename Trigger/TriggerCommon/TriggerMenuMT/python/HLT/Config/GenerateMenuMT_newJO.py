@@ -89,10 +89,10 @@ def generateMenuMT(flags):
     # Generate the menu, stolen from HLT_standalone
     from TriggerMenuMT.HLT.Config.GenerateMenuMT import GenerateMenuMT
     menu = GenerateMenuMT() 
-    
-    chainsToGenerate = FilterChainsToGenerate(flags)  
-    log.debug("Filtering chains ")        
-    menu.setChainFilter(chainsToGenerate)        
+
+    chainsToGenerate = FilterChainsToGenerate(flags)
+    menu.setChainFilter(chainsToGenerate)
+    log.debug("Filtering chains = %d", (menu.chainFilter is not None))
     finalListOfChainConfigs = menu.generateAllChainConfigs(flags)
     log.info("Length of FinalListOfChainConfigs %s", len(finalListOfChainConfigs))
 

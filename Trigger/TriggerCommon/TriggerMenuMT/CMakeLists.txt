@@ -114,7 +114,7 @@ function( atlas_test_ca_trigger_menu menu )
    atlas_add_test( "menu_CA_${menu}"
    SCRIPT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_menu_CA.py Trigger.triggerMenuSetup=${menu} ${extra_args}
    PRIVATE_WORKING_DIRECTORY
-   PROPERTIES TIMEOUT 2000   # TODO: reduce this again after ATR-28608 is understood
+   PROPERTIES TIMEOUT 1200   
    POST_EXEC_SCRIPT "check_log.py --errors --config checklogTriggerTest.conf ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/unitTestRun_menu_CA_${menu}/menu_CA_${menu}.log" )
 endfunction()
 

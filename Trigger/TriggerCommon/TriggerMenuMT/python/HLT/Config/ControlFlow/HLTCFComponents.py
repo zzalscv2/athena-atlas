@@ -84,8 +84,8 @@ class PassFilterNode(SequenceFilterNode):
     def getInputList(self):
         return self.inputs
 
-
-        
+def isPassSequence(alg):
+    return isinstance(alg, PassFilterNode)  
 
 #########################################################
 # CFSequence class
@@ -95,6 +95,7 @@ class CFSequence(object):
     A Filter can have more than one input/output if used in different chains, so this class stores and manages all of them (when doing the connect)
     """
     def __init__(self, ChainStep, FilterAlg):
+        self.empty= ChainStep.isEmpty
         self.filter = FilterAlg
         self.step = ChainStep
         self.combo = ChainStep.combo  #copy this instance
@@ -160,11 +161,11 @@ class CFSequence(object):
     def createHypoTools(self, flags, chain, newstep):
         """ set and create HypoTools accumulated on the self.step from an input step configuration
         """
+        if self.combo is None:
+            return
+        
         with ConfigurableCABehavior(): 
             acc = ComponentAccumulator()
-        if self.step.combo is None:
-            return
-
         assert len(newstep.sequences) == len(self.step.sequences), f'Trying to add HypoTools from new step {newstep.name}, which differ in number of sequences'
         assert len(self.step.sequences) == len(newstep.stepDicts), f'The number of sequences of step {self.step.name} ({len(self.step.sequences)}) differ from the number of dictionaries in the chain {len(newstep.stepDicts)}'
  
@@ -200,8 +201,9 @@ class CFSequenceCA(CFSequence):
     """
     def __init__(self, chainStep, filterAlg):
         log.debug(" *** Create CFSequence %s with Filter %s", chainStep.name, filterAlg.Alg.getName())
-        self.ca = ComponentAccumulator()
+        
         self.empty= chainStep.isEmpty
+        self.ca = ComponentAccumulator()
         #empty step: add the PassSequence, one instance only is appended to the tree
         seqAndWithFilter = filterAlg.Alg if self.empty else seqAND(chainStep.name)        
         self.ca.addSequence(seqAndWithFilter)

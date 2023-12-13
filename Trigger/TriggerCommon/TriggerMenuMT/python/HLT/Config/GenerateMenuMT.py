@@ -562,7 +562,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         # --------------------------------------------------------------------
         finalListOfChainConfigs = self.generateAllChainConfigs(flags)
         log.info("Length of FinalListofChainConfigs %s", len(finalListOfChainConfigs))
- 
+
         # make sure that we didn't generate any steps that are fully empty in all chains
         # if there are empty steps, remove them
         finalListOfChainConfigs = self.resolveEmptySteps(finalListOfChainConfigs)

@@ -19,7 +19,7 @@ JobProperties.jobPropertiesDisallowed = True
 # Set flags
 flags = initConfigFlags()
 runHLT.set_flags(flags)
-flags.Trigger.generateMenuDiagnostics = False
+flags.Trigger.generateMenuDiagnostics = True
 flags.Common.isOnline = True    # online environment
 flags.Input.Files = []          # menu cannot depend on input files
 
