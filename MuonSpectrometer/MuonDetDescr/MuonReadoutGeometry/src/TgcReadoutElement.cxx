@@ -329,7 +329,7 @@ namespace MuonGM {
     }
 
 #ifdef NDEBUG
-    float TgcReadoutElement::gangThickness(int /*gasGap*/, int /*gang*/) 
+    float TgcReadoutElement::gangThickness(int /*gasGap*/, int /*gang*/) const
 #else
     float TgcReadoutElement::gangThickness(int gasGap, int gang) const
 #endif

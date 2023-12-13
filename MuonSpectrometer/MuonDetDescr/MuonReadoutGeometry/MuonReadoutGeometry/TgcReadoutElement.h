@@ -193,7 +193,7 @@ namespace MuonGM {
         float gangLength(int, int) const;
         float gangShortWidth(int, int) const;
         float gangLongWidth(int, int) const;
-        static float gangThickness(int, int) ;
+        float gangThickness(int, int) const;
         int nStrips(int) const;
         float stripDeltaPhi(int) const;
         float stripDeltaPhi(int, int) const;
