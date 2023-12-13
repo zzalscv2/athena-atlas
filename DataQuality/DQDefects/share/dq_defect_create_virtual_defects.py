@@ -39,32 +39,22 @@ if __name__ == '__main__':
     primary_names = DetStatusNames()
     
     with db.storage_buffer:
-        print 'Populating old primary flags'
-        ## for defect in primary_names.allNames():
-        ##     #print defect
-        ##     try:
-        ##         print db.new_virtual_defect(0, defect, defect, ''), defect
-        ##     except DefectExistsError:
-        ##         if opts.ignoreold:
-        ##             print 'Defect', defect, 'already exists; ignoring'
-        ##         else:
-        ##             raise
+        print('Populating old primary flags')
         folder = Databases.get_folder(opts.origpridb, read_only=True)
         ids, names, cdict = get_channel_ids_names(folder)
         for defect in names:
             if defect in DEPRECATED_PRIMARY_FLAGS:
-                print 'Skipping', defect, 'as it is deprecated'
+                print('Skipping', defect, 'as it is deprecated')
                 continue
-            #print defect, folder.channelDescription(cdict[defect])
             try:
-                print db.new_virtual_defect(defect, defect, ''), defect
+                print(db.new_virtual_defect(defect, defect, ''), defect)
             except DefectExistsError:
                 if opts.ignoreold:
-                    print 'Defect', defect, 'already exists; ignoring'
+                    print('Defect', defect, 'already exists; ignoring')
                 else:
                     raise
 
-        print 'Populating old virtual flags'
+        print('Populating old virtual flags')
         folder = Databases.get_folder(opts.origvfdb, 
                                               read_only=True)
 
@@ -80,9 +70,9 @@ if __name__ == '__main__':
             clause = clause.replace(',', ' ')
             dname = cdict[defect.channel]
             try:
-                print db.new_virtual_defect(dname, defect.comment, clause), dname, ':', clause
+                print(db.new_virtual_defect(dname, defect.comment, clause), dname, ':', clause)
             except DefectExistsError:
                 if opts.ignoreold:
-                    print 'Defect', dname, 'already exists; ignoring'
+                    print('Defect', dname, 'already exists; ignoring')
                 else:
                     raise  

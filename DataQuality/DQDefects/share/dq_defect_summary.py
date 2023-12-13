@@ -39,7 +39,7 @@ class Defect(object):
 def print_virtual_tree(defect, all_defects, depth=0, max_depth=0):
 
     if defect.lumi > 0 or depth == 0:
-        print "|     "*depth + defect.lumiStr, defect.name
+        print("|     "*depth + defect.lumiStr, defect.name)
 
         if max_depth < 0 or depth < max_depth:
             parents = [ all_defects[d] for d in defect.depends ]
@@ -66,12 +66,12 @@ def get_primary_defects(defect, all_defects):
 def print_primary_defects(defect, all_defects, max_primary):
     primary_list = sorted(get_primary_defects(defect, all_defects),
                           key=lambda d: d.lumi, reverse=True)
-    print defect.lumiStr, defect.name
+    print(defect.lumiStr, defect.name)
     if max_primary >= 0:
         del primary_list[max_primary:]
     for primary in primary_list:
         if primary.lumi > 0:
-            print "      " + primary.lumiStr, primary.name
+            print("      " + primary.lumiStr, primary.name)
 
 def main():
     parser = ArgumentParser(description="Summarize DQ Defects")
@@ -207,10 +207,10 @@ def main():
     my_defects = [ all_defects[d] for d in my_defect_names ]
     my_defects.sort(key=lambda d: d.lumi, reverse=True)
 
-    print "\nTotal luminosity", unit_string, "\n"
-    print "{0:<.2f}".format(lumi_total)
+    print("\nTotal luminosity", unit_string, "\n")
+    print("{0:<.2f}".format(lumi_total))
 
-    print "\nDefect luminosity", unit_string, "\n"
+    print("\nDefect luminosity", unit_string, "\n")
 
     #for defect_name in my_defect_names:
     for defect in my_defects:
@@ -222,7 +222,7 @@ def main():
             # Primary defect dump
             print_primary_defects(defect, all_defects, max_primary=args.num_primary)
 
-    print ""
+    print()
 
 
 if __name__ == "__main__":

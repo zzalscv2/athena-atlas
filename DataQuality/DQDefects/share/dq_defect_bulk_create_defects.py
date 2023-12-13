@@ -30,28 +30,25 @@ if __name__ == '__main__':
             linep = line.partition(' ')
             comment = linep[2].strip()
             if comment == '':
-                print 'Missing comment:', line
+                print('Missing comment:', line)
                 sys.exit(1)
             defect = linep[0].strip()
             if not good_defect_regex.match(defect):
-                print 'Invalid defect name:', defect
+                print('Invalid defect name:', defect)
                 sys.exit(1)
             tocreate.append((defect, comment))
     
-    #print '\n'.join(map(str,tocreate))
     from DQDefects import DefectsDB
     from DQDefects.exceptions import DefectExistsError
-    #from DQUtils import init_logger
-    #init_logger(2)
     ddb = DefectsDB(opts.db, create=opts.create, read_only=False)
 
-    print 'Now creating defects on', opts.db
+    print('Now creating defects on', opts.db)
     for defect, comment in tocreate:
         try:
-            print 'Creating', defect, comment
+            print('Creating', defect, comment)
             ddb.create_defect(defect,comment)
         except DefectExistsError:
             if opts.ignoreold:
-                print 'Defect', defect, 'already exists; ignoring'
+                print('Defect', defect, 'already exists; ignoring')
             else:
                 raise

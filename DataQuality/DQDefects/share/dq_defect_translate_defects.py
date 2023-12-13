@@ -11,18 +11,18 @@ def copyfunc(indb, outdb, func_iov, func_output, runends):
     iovs = func_iov(indb)
     iovs = truncate_iovs_to_runs(iovs, runends)
     iovs = filter(lambda x: not(x.until.lumi-x.since.lumi == 0), iovs)
-    print 'There are %d IOVs to process' % len(iovs)
+    print('There are %d IOVs to process' % len(iovs))
     ## if len(iovs) < 10:
     ##     print iovs
     for i, iov in enumerate(iovs):
         func_output(outdb, iov)
         if i % 100 == 1:
-            print 'IOV', i
+            print('IOV', i)
 
 def truncate_iovs_to_runs(iovs, runends):
     for iov in iovs:
         if iov.since.run not in runends:
-            print 'Missing run', iov.since.run, 'from EOR_Params'
+            print('Missing run', iov.since.run, 'from EOR_Params')
             
     return filter(None,
                   [iov.intersect(runends[iov.since.run])
@@ -157,7 +157,7 @@ if __name__ == '__main__':
     outdb = DefectsDB('defectstest.db/COMP200', read_only=False)
     with outdb.storage_buffer:
         for trip in TRIPLES:
-            print trip
+            print(trip)
             copyfunc(Databases.get_instance('COOLOFL_GLOBAL/COMP200'),
                      outdb,
                      dq_code_filter('/GLOBAL/DETSTATUS/LBSUMM',

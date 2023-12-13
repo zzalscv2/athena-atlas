@@ -24,17 +24,17 @@ if __name__ == '__main__':
     for f in args:
         try:
             tmp_indict = yaml.safe_load(open(f, 'r'))
-        except yaml.scanner.ScannerError, e:
-            print 'ERROR: Problem parsing file', f
-            print str(e)
+        except yaml.scanner.ScannerError as e:
+            print('ERROR: Problem parsing file', f)
+            print(str(e))
             sys.exit(1)
         if not tmp_indict:
-            print 'NOTICE: No definitions in file', f
+            print('NOTICE: No definitions in file', f)
             continue
         interset = set(tmp_indict) & set(indict)
         if len(interset) > 0:
             for k in interset:
-                print 'WARNING: Redefinition of defect', k, 'in file', f
+                print('WARNING: Redefinition of defect', k, 'in file', f)
                 if not opts.ignore_redef:
                     sys.exit(1)
         indict.update(tmp_indict)
@@ -45,10 +45,10 @@ if __name__ == '__main__':
     ddb = DefectsDB(opts.db, create=opts.create, read_only=False,
                     tag=opts.tag)
 
-    print 'Now updating defects on', opts.db
+    print('Now updating defects on', opts.db)
     with ddb.storage_buffer:
         for defect, clause in indict.items():
-            print defect, clause
+            print(defect, clause)
             try:
                 ddb.update_virtual_defect(defect, ' '.join(clause))
             except DefectUnknownError:

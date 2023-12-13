@@ -38,29 +38,29 @@ if __name__ == '__main__':
     
     channels = parse_channels(opts.defects)
 
-    print 'Reading in definitions...'
+    print('Reading in definitions...')
     inclauses = indb.virtual_defect_logics
-    print '%d virtual defects retrieved from input database' % len(inclauses)
+    print(f'{len(inclauses)} virtual defects retrieved from input database')
     inchannels = set(channels if channels is not None else inclauses.keys())
     outchannels = set(outdb.virtual_defect_names)
     missingchannels = inchannels-outchannels
     with outdb.storage_buffer:
         if len(missingchannels) != 0:
             if not opts.createdefects:
-                print 'Missing virtual defect(s) in target database:'
-                print list(missingchannels)
-                print 'Rerun with a restricted virtual defect list (--defects) or with --createdefects'
+                print('Missing virtual defect(s) in target database:')
+                print(list(missingchannels))
+                print('Rerun with a restricted virtual defect list (--defects) or with --createdefects')
                 sys.exit(1)
             else:
-                print 'Creating missing virtual defects on output database...'
+                print('Creating missing virtual defects on output database...')
                 descriptions = indb.get_virtual_channel_descriptions(missingchannels)
                 for channel in missingchannels:
                     outdb.new_virtual_defect(channel, descriptions[channel],
                                              ' '.join(inclauses[channel].clauses))
-                print 'Done'
+                print('Done')
 
-        print 'Updating existing virtual defects...'
+        print('Updating existing virtual defects...')
         for channel in inchannels-missingchannels:
             outdb.update_virtual_defect(channel, ' '.join(inclauses[channel].clauses))
 
-        print 'Done.'
+        print('Done.')
