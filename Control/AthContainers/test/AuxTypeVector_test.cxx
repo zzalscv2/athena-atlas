@@ -136,6 +136,10 @@ void test_vector1()
 
   delete v;
   delete v2;
+
+  SG::AuxTypeVector<T> v4 (1, 0, 3);
+  assert (!v4.resize (3));
+  assert (v4.size() == 3);
 }
 
 
