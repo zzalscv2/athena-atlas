@@ -36,6 +36,7 @@
 #include "TSystem.h"
 
 #include "ROOT/RNTuple.hxx"
+using ROOT::Experimental::Detail::RFieldBase;
 
 using namespace pool;
 using namespace std;
@@ -1064,18 +1065,7 @@ DbStatus RootDatabase::fillBranchContainerTrees()
 }
 
 
-std::unique_ptr<RootAuxDynIO::IRootAuxDynReader>
-RootDatabase::getNTupleAuxDynReader(const std::string& ntuple_name, const std::string& field_name)
-{
-   auto reader_entry = m_ntupleReaderMap.find(ntuple_name);
-   if( reader_entry == m_ntupleReaderMap.end() ) {
-      return nullptr;
-   }
-   return RootAuxDynIO::getNTupleAuxDynReader(field_name, reader_entry->second.get());
-}
-
-
-RNTupleReader*
+RPageSource*
 RootDatabase::getNTupleReader(std::string ntuple_name)
 {
    auto reader_entry = m_ntupleReaderMap.find(ntuple_name);
@@ -1083,10 +1073,11 @@ RootDatabase::getNTupleReader(std::string ntuple_name)
       return reader_entry->second.get();
    }
    const std::string file_name = m_file->GetName();
-   auto native_reader = RNTupleReader::Open(string("RNT:")+ntuple_name, file_name);
-   RNTupleReader *r = native_reader.get();
+   auto native_reader = RPageSource::Create(string("RNT:")+ntuple_name, file_name);
+   RPageSource *ps = native_reader.get();
+   ps->Attach();
    m_ntupleReaderMap.emplace(ntuple_name, std::move(native_reader));
-   return r;
+   return ps;
 }
 
 
@@ -1105,31 +1096,34 @@ RootDatabase::getNTupleWriter(std::string ntuple_name, bool create)
 }
 
 
-uint64_t RootDatabase::indexLookup([[maybe_unused]]RNTupleReader *reader, uint64_t idx_val) {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
-   if( m_ntupleIndexMap.find(reader) == m_ntupleIndexMap.end() ) {
+uint64_t RootDatabase::indexLookup([[maybe_unused]] RPageSource* page_source, uint64_t idx_val) {
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 30, 0 )
+   if( m_ntupleIndexMap.find(page_source) == m_ntupleIndexMap.end() ) {
       // first access to RNTuple, read and store the index
       DbPrint log( m_file->GetName() );
       log << DbPrintLvl::Debug << "Reading index" << DbPrint::endmsg;
-      indexLookup_t &index = m_ntupleIndexMap[reader];
-      ROOT::Experimental::REntry *entry = reader->GetModel()->GetDefaultEntry();
-      auto val_i = entry->begin();
-      for(; val_i != entry->end(); ++val_i ) {
-         if( val_i->GetField()->GetName() == "index_ref" ) break;
-      }
-      if( val_i == entry->end() ) {
-         return idx_val;
-      }
-      uint64_t idx_size = reader->GetNEntries();
-      index.reserve(idx_size);
-      uint64_t idx;
-      auto rfv = val_i->GetField()->BindValue( &idx );
-      for(uint64_t row=0; row < idx_size; row++) {
-         rfv.Read(row);
-         index[idx] = row;
+      indexLookup_t &index = m_ntupleIndexMap[page_source];
+      auto descGuard = page_source->GetSharedDescriptorGuard(); 
+      auto fieldId = descGuard->FindFieldId( "index_ref" );
+      if( fieldId != ROOT::Experimental::kInvalidDescriptorId ) {
+         auto size = page_source->GetNEntries();
+         index.reserve( size );
+         uint64_t idx;
+         auto idx_field = descGuard->GetFieldDescriptor(fieldId).CreateField( descGuard.GetRef() );
+         if( idx_field->GetState() != RFieldBase::EState::kConnectedToSource ) {
+            idx_field->ConnectPageSource(*page_source);
+         }
+         auto rfv = idx_field->BindValue( &idx );
+         for(unsigned row=0; row < size; row++) {
+            rfv.Read(row);
+            index[idx] = row;
+         }
+      } else {
+         log << DbPrintLvl::Warning << "Index column not found in " << descGuard->GetName()
+             << DbPrint::endmsg;
       }
    }
-   indexLookup_t &index = m_ntupleIndexMap[reader];
+   indexLookup_t &index = m_ntupleIndexMap[page_source];
    auto it = index.find(idx_val);
    if( it != index.end() ) {
       // cout << "MN: remapped OID=" << hex << idx_val << " to " << it->second << endl;

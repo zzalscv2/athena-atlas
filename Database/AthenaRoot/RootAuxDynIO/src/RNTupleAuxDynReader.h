@@ -12,6 +12,13 @@
 #include <map>
 #include <string>
 
+namespace RootAuxDynIO { class IRNTupleWriter; }
+namespace ROOT { namespace Experimental { namespace Detail {
+   class RPageSource;
+   class RFieldBase;
+} } }
+using ROOT::Experimental::Detail::RFieldBase;
+using ROOT::Experimental::Detail::RPageSource;
 class TClass;
 
 namespace RootAuxDynIO
@@ -34,17 +41,20 @@ namespace RootAuxDynIO
 
          SG::auxid_t   auxid;
          std::string   attribName;
-         std::string   fieldName;
-         std::string   fieldType;
+         std::unique_ptr<RFieldBase>  field;
       };
 
-   
-      RNTupleAuxDynReader(const std::string& store_key, RNTupleReader* rntReader);
 
+      /// create reader for Aux attributes of the Aux container object from @c field
+      RNTupleAuxDynReader(RFieldBase* field, RPageSource* page_source);
+
+      /// initialize once the mode of the Aux store is known
       void init(bool standalone);
 
-      virtual void addReaderToObject(void* object, size_t ttree_row, std::recursive_mutex* iomtx = nullptr ) override final;
+      /// attach RNTupleAuxStore to the current Aux container @object
+      virtual void addReaderToObject(void* object, size_t row, std::recursive_mutex* iomtx = nullptr ) override final;
 
+      /// Aux IDs of all the Aux attributes belonging to the Aux container being read
       virtual const SG::auxid_set_t& auxIDs() const override final;
 
       void addBytes(size_t bytes);
@@ -53,26 +63,28 @@ namespace RootAuxDynIO
 
       virtual void resetBytesRead() override final;
 
+      /// get field informatino for @c auxid
       const FieldInfo& getFieldInfo(const SG::auxid_t& auxid, const SG::AuxStoreInternal& store);
 
       virtual ~RNTupleAuxDynReader() {}
 
    protected:
       // auxids that could be found in registry for attribute names from the file
-      SG::auxid_set_t                       m_auxids;
+      SG::auxid_set_t                   m_auxids;
   
-      std::string                           m_storeFieldName;
+      std::string                       m_storeFieldName;
       // counter for bytes read
-      size_t                                m_bytesRead = 0;
+      size_t                            m_bytesRead = 0;
       // offset of the AxuStoreHolder base class in the objects read by the Reader
-      int                                   m_storeHolderOffset = -1;
-      bool                                  m_initialized = false;
-      std::string                           m_key;
+      int                               m_storeHolderOffset = -1;
+      bool                              m_initialized = false;
+      std::string                       m_key;
 
-      // map auxid -> branch info. not sure if it can be different from m_branchMap
-      std::map<SG::auxid_t, FieldInfo>     m_fieldInfos;
+      // map auxid -> fieldInfo.
+      std::map<SG::auxid_t, FieldInfo>  m_fieldInfos;
 
-      RNTupleReader*                       m_ntupleReader;
+      // not owned
+      RPageSource*                      m_pageSource;
    };
 
 

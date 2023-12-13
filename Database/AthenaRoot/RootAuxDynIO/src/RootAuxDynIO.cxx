@@ -20,7 +20,8 @@
 
 
 #include <ROOT/RNTuple.hxx>
-using RNTupleModel = ROOT::Experimental::RNTupleModel;
+using ROOT::Experimental::RNTupleModel;
+using ROOT::Experimental::Detail::RPageSource;
 
 namespace RootAuxDynIO
 {
@@ -99,8 +100,8 @@ namespace RootAuxDynIO
    }
 
    std::unique_ptr<RootAuxDynIO::IRootAuxDynReader>
-   getNTupleAuxDynReader(const std::string& field_name, RNTupleReader* native_reader) {
-      return std::make_unique<RNTupleAuxDynReader>(field_name, native_reader);
+   getNTupleAuxDynReader(RFieldBase* field, RPageSource* source) {
+      return std::make_unique<RNTupleAuxDynReader>(field, source);
    }
 
    //  ---------------------  Dynamic Aux Attribute Writers

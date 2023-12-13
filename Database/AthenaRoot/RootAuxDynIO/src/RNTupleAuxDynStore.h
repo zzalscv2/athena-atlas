@@ -23,8 +23,6 @@ class RNTupleAuxDynStore : public RootAuxDynStore
 {
 public:
    RNTupleAuxDynStore( RootAuxDynIO::RNTupleAuxDynReader& aux_reader,
-                         RNTupleReader *reader,
-                         const std::string& base_branch, 
                          long long entry, bool standalone,
                          std::recursive_mutex* iomtx = nullptr);
   
@@ -35,8 +33,6 @@ protected:
    virtual bool readData(SG::auxid_t auxid) override final;
 
    RootAuxDynIO::RNTupleAuxDynReader& m_reader;
-   RNTupleReader*               m_ntupleReader = nullptr;
-   std::string                  m_baseBranchName;
 };
 
 #endif

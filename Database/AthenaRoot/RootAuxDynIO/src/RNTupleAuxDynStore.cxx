@@ -12,23 +12,15 @@
 #include "RNTupleAuxDynReader.h"
 
 #include <ROOT/RNTuple.hxx>
-#include <ROOT/REntry.hxx>
 #include <ROOT/RField.hxx>
-using RFieldBase    = ROOT::Experimental::Detail::RFieldBase;
-using RNTupleReader = ROOT::Experimental::RNTupleReader;
-using REntry        = ROOT::Experimental::REntry;
 
 using namespace RootAuxDynIO;
 
 RNTupleAuxDynStore::RNTupleAuxDynStore( RNTupleAuxDynReader& aux_reader,
-                                        RNTupleReader* rnt_reader,
-                                        const std::string& branchName,
                                         long long entry, bool standalone,
-                                        std::recursive_mutex* iomtx)
+                                        std::recursive_mutex* iomtx )
    : RootAuxDynStore( aux_reader, entry, standalone, iomtx ),
-     m_reader( aux_reader ),
-     m_ntupleReader( rnt_reader ),
-     m_baseBranchName( branchName ) 
+     m_reader( aux_reader )
 {
 }
 
@@ -53,23 +45,17 @@ bool RNTupleAuxDynStore::readData(SG::auxid_t auxid)
       auto io_lock = m_iomutex? std::unique_lock<std::recursive_mutex>(*m_iomutex)
          : std::unique_lock<std::recursive_mutex>();
 
-      REntry *entry = m_ntupleReader->GetModel()->GetDefaultEntry();
-      for( auto iValue = entry->begin(); iValue != entry->end(); ++iValue ) {
-         if( iValue->GetField()->GetName() == fieldInfo.fieldName ) {
 #if ROOT_VERSION_CODE > ROOT_VERSION( 6, 29, 0 )
-            auto rfv = iValue->GetField()->BindValue(data);
-            rfv.Read(m_entry);
+      auto rfv = fieldInfo.field->BindValue(data);
+      rfv.Read(m_entry);
 #else
-            auto rfv = iValue->GetField()->CaptureValue( data );
-            iValue->GetField()->Read(m_entry, &rfv);
+      auto rfv = fieldInfo.field->CaptureValue( data );
+      fieldInfo.field->Read(m_entry, &rfv);
 #endif
-            break;
-         }
-      }
 
       int  nbytes = 1;   // MN: TODO how to get this?
       if( nbytes <= 0 ) {
-         throw std::string("Error reading field ") + fieldInfo.fieldName;
+         throw std::string("Error reading field ") + fieldInfo.field->GetName();
       }
       // read OK
       m_reader.addBytes(nbytes);

@@ -26,20 +26,14 @@
 #include "RootDatabase.h"
 
 // Root include files
-#include <ROOT/REntry.hxx>
 #include <ROOT/RNTuple.hxx>
-#include <ROOT/RNTupleModel.hxx>
+#include <ROOT/RField.hxx>
 
 #include "TError.h"
-#include "TFile.h"
 // for version checks
 #include <TROOT.h>
 
 #include <algorithm>
-
-using RNTupleModel = ROOT::Experimental::RNTupleModel;
-using RNTupleReader = ROOT::Experimental::RNTupleReader;
-using REntry = ROOT::Experimental::REntry;
 
 using std::string;
 using namespace pool;
@@ -64,30 +58,12 @@ static struct ErrorHandlerInit {
 } EHI;
 ErrorHandlerFunc_t ErrorHandlerInit::m_oldHandler ATLAS_THREAD_SAFE;
 
-// Wrapper preventing invocation of the object d-tor
-// Needed to work around recent RNTuple RValue class changes
-//   - to be removed when ROOT API improves
-template <typename T_>
-struct NoDTorWrapper {
-  union {
-    T_ value_;
-  };
-
-  template <typename... Args>
-  NoDTorWrapper(Args&&... args) : value_(std::forward<Args>(args)...) {}
-
-  const T_& val() const { return value_; }
-  T_& val() { return value_; }
-  const T_* operator->() const { return &value_; }
-  T_* operator->() { return &value_; }
-
-  ~NoDTorWrapper() {}
-};
-
 }  // namespace
 
-/// Required for unique_ptr compilation
-RNTupleContainer::FieldDesc::~FieldDesc(){};
+
+/// Required here for unique_ptr compilation
+RNTupleContainer::FieldDesc::FieldDesc(const DbColumn& c) : DbColumn(c) {}
+
 
 // Get the type name
 const std::string RNTupleContainer::FieldDesc::typeName() {
@@ -126,8 +102,8 @@ DbStatus RNTupleContainer::isShapeSupported(const DbTypeInfo* typ) const {
 
 uint64_t RNTupleContainer::size() {
   auto s = DbContainerImp::size();
-  if (m_ntupleReader) s += m_ntupleReader->GetNEntries();
-  if (m_ntupleWriter) s += m_ntupleWriter->size();
+  if( m_pageSource )   s += m_pageSource->GetNEntries();
+  if( m_ntupleWriter ) s += m_ntupleWriter->size();
   return s;
 }
 
@@ -207,16 +183,26 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
          }
       }
       else if( mode & (pool::READ | pool::UPDATE) ) {
-         m_ntupleReader = m_rootDb->getNTupleReader(ntupleName);
+         // create (and keep in the descriptin object) the rntuple field for reading
+         m_pageSource = m_rootDb->getNTupleReader(ntupleName);
+         auto descGuard = m_pageSource->GetSharedDescriptorGuard();
          for( auto& dsc : m_fieldDescs ) {
+            auto fieldId = descGuard->FindFieldId(dsc.fieldname);
+            if( fieldId == ROOT::Experimental::kInvalidDescriptorId ) {
+               log << DbPrintLvl::Error << "Failed to find RNTuple column " << dsc.fieldname
+                   << " when opening container " << m_name
+                   << DbPrint::endmsg;
+               return Error;
+            }
+            dsc.field = descGuard->GetFieldDescriptor(fieldId).CreateField( descGuard.GetRef() );
             if( dsc.hasAuxStore() ) {
                // atach RNTuple Reader (owned by the DB)
-               dsc.auxdyn_reader = m_rootDb->getNTupleAuxDynReader( ntupleName, dsc.fieldname );
+               dsc.auxdyn_reader = RootAuxDynIO::getNTupleAuxDynReader( dsc.field.get(), m_pageSource );
                // If we set up a reader, then disable aging
                // for this file.  That will prevent POOL from
                // deleting the file while we still have
                // references to its branches.
-               dbH.setAge (-10);
+               dbH.setAge(-10);
             }
          }
       }
@@ -382,7 +368,7 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
 {
    int64_t evt_id = oid.second;
    if( (evt_id >> 32) > 0 ) {
-      evt_id = m_rootDb->indexLookup(m_ntupleReader, evt_id);
+      evt_id = m_rootDb->indexLookup(m_pageSource, evt_id);
    }
    // lock access to this DB for MT safety
    std::lock_guard<std::recursive_mutex>     lock( m_rootDb->ioMutex() );
@@ -408,24 +394,25 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
              p.c_str += dsc.offset();
              break;
          }
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
-         REntry *entry = m_ntupleReader->GetModel()->GetDefaultEntry();
-         for( auto val_i = entry->begin(); val_i != entry->end(); ++val_i ) {
-            if( val_i->GetField()->GetName() == dsc.fieldname ) {
-               if( p.ptr ) {
-                  // there already is an object that needs to be read into
-                  auto rfv = val_i->GetField()->BindValue( p.ptr );
-                  rfv.Read( evt_id );
-               } else {
-                  // need to ask ROOT to create a new object for us
-                  // and take over ownership by preventing deallocation in the d-tor.
-                  using RValue = ROOT::Experimental::Detail::RFieldBase::RValue;
-                  NoDTorWrapper<RValue> rfv( std::move(val_i->GetField()->GenerateValue()) );
-                  rfv->Read( evt_id );
-                  *obj_p = rfv->GetRawPtr();
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 30, 0 )
+         // connect the field (with subfields) to the pageSource
+         if( dsc.field->GetState() != RFieldBase::EState::kConnectedToSource ) {
+            dsc.field->ConnectPageSource(*m_pageSource);
+            for( auto& subfield : *dsc.field ) {
+               if( subfield.GetState() != RFieldBase::EState::kConnectedToSource ) {
+                  subfield.ConnectPageSource(*m_pageSource);
                }
-               break;
             }
+         }
+         if( p.ptr ) {
+            // read into an object given by the user
+            auto v = dsc.field->BindValue( p.ptr );
+            v.Read( evt_id );
+         } else {
+            // create the object for the user and pass ownership to them
+            auto v =  dsc.field->GenerateValue();
+            v.Read( evt_id );
+            *obj_p = v.Release<void>();
          }
 #endif
          numBytes += 1;
@@ -464,17 +451,15 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
 // Initiate reading with a selection
 DbStatus  RNTupleContainer::select(DbSelect& sel)
 {
-   if( m_ntupleReader )  {
-      if( sel.criteria().length() == 0 || sel.criteria() == "*" )  {
-         sel.link().second = -1;
-         return Success;
-      } else  {
-         DbPrint log(m_name);
-         log << DbPrintLvl::Warning << "RNTuple selection not implemented, reading everything"
-             << DbPrint::endmsg;
-         sel.link().second = -1;
-         return Success;
-      }
+   if( sel.criteria().length() == 0 || sel.criteria() == "*" )  {
+      sel.link().second = -1;
+      return Success;
+   } else  {
+      DbPrint log(m_name);
+      log << DbPrintLvl::Warning << "RNTuple selection not implemented, reading everything"
+          << DbPrint::endmsg;
+      sel.link().second = -1;
+      return Success;
    }
    return Error;
 }
@@ -508,7 +493,7 @@ DbStatus RNTupleContainer::getOption(DbOption& opt) {
     switch (::toupper(n[8])) {
       case 'E':
         if (!strcasecmp(n + 5, "ENTRIES"))
-          return opt._setValue(int(m_ntupleReader->GetNEntries()));
+          return opt._setValue(int(m_pageSource->GetNEntries()));
         break;
       case 'T':
         if (!strcasecmp(n + 5, "TOTAL_BYTES")) {

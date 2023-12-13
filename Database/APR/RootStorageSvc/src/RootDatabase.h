@@ -20,9 +20,13 @@
 #include <mutex>
 #include <unordered_map>
 
+
 // Forward declarations
-namespace ROOT { namespace Experimental { class RNTupleReader; } }
-using RNTupleReader = ROOT::Experimental::RNTupleReader;
+namespace ROOT { namespace Experimental { namespace Detail {
+   class RPageSource;
+} } }
+using ROOT::Experimental::Detail::RPageSource;
+
 
 class TFile;
 class TTree;
@@ -115,10 +119,10 @@ namespace pool  {
     std::recursive_mutex  m_iomutex;
 
     std::map<std::string, std::unique_ptr<RootAuxDynIO::IRNTupleWriter> >  m_ntupleWriterMap;
-    std::map<std::string, std::unique_ptr<RNTupleReader> >                 m_ntupleReaderMap;
+    std::map<std::string, std::unique_ptr<RPageSource> >                   m_ntupleReaderMap;
 
     using indexLookup_t = std::unordered_map<uint64_t, uint64_t>;
-    std::map<RNTupleReader*, indexLookup_t>                                m_ntupleIndexMap;
+    std::map<void*, indexLookup_t>                                         m_ntupleIndexMap;
 
   public:
     /// Standard Constuctor
@@ -205,7 +209,7 @@ namespace pool  {
       *
       * @return DbStatus code indicating success or failure.  
       */
-    virtual DbStatus reopen(DbAccessMode mode);
+    virtual DbStatus    reopen(DbAccessMode mode);
 
     /// Callback after successful open of a database object
     /** @param dbH      [IN]  Handle to valid database object
@@ -213,24 +217,22 @@ namespace pool  {
       *
       * @return DbStatus code indicating success or failure.  
       */
-    virtual DbStatus onOpen(DbDatabase& dbH, DbAccessMode      mode);
+    virtual DbStatus    onOpen(DbDatabase& dbH, DbAccessMode      mode);
 
     /// Close database access
     /** @param mode     [IN]  Desired session access mode.
       *
       * @return DbStatus code indicating success or failure.  
       */
-    virtual DbStatus close(DbAccessMode mode);
+    virtual DbStatus    close(DbAccessMode mode);
 
     /// Execute Database Transaction action
-    virtual DbStatus transAct(Transaction::Action action);
+    virtual DbStatus    transAct(Transaction::Action action);
 
-    std::unique_ptr<RootAuxDynIO::IRootAuxDynReader>
-                     getNTupleAuxDynReader(const std::string& ntuple_name, const std::string& field_name);
-    RNTupleReader*   getNTupleReader(std::string ntuple_name);
+    RPageSource*        getNTupleReader(std::string ntuple_name);
 
     // translate index value to row# for a given RNTuple  
-    uint64_t         indexLookup(RNTupleReader *r, uint64_t idx_val);
+    uint64_t            indexLookup(RPageSource *ps, uint64_t idx_val);
 
     /// return NTupleWriter for a given ntuple_name
     /// create a new one if needed when create==true
@@ -245,7 +247,7 @@ namespace pool  {
 
     void                increaseBasketsSize(TTree* tree);
 
-    DbStatus close();
+    DbStatus            close();
    };
 
 }       // End namespace pool

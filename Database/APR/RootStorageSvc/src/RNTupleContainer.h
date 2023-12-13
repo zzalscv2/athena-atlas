@@ -22,12 +22,14 @@
 // Forward declarations
 class TClass;
 class IRootAuxDynWriter;
-namespace SG {
-class IAuxStoreIO;
-}
-namespace RootAuxDynIO {
-class IRNTupleWriter;
-}
+namespace SG { class IAuxStoreIO; }
+namespace RootAuxDynIO { class IRNTupleWriter; }
+namespace ROOT { namespace Experimental { namespace Detail {
+   class RPageSource;
+   class RFieldBase;
+} } }
+using ROOT::Experimental::Detail::RFieldBase;
+using ROOT::Experimental::Detail::RPageSource;
 
 /*
  * POOL namespace declaration
@@ -44,13 +46,16 @@ class RootDatabase;
  * RNTUPLE specific implementation of Database Container.
  */
 
-class RNTupleContainer : public DbContainerImp {
+class RNTupleContainer : public DbContainerImp
+{
   /// Definiton of a field info structure
-  struct FieldDesc : public DbColumn {
+  struct FieldDesc : public DbColumn
+  {
+    std::unique_ptr<RFieldBase> field; 
     std::string fieldname;
     std::string sgkey;
-    TClass* clazz = nullptr;
-    void* object = nullptr;
+    TClass*     clazz = nullptr;
+    void*       object = nullptr;
 
     // ----  extra variables used for AuxDyn attributes
     // number of rows written to this branch so far
@@ -62,11 +67,11 @@ class RNTupleContainer : public DbContainerImp {
     // AuxDyn RNTuple reader (managed by the Database)
     std::unique_ptr<RootAuxDynIO::IRootAuxDynReader> auxdyn_reader;
 
-    FieldDesc(const DbColumn& c) : DbColumn(c) {}
-
-    virtual ~FieldDesc();
+    FieldDesc(const DbColumn& c);
     FieldDesc(FieldDesc const& other) = delete;
     FieldDesc(FieldDesc&& other) = default;
+    ~FieldDesc() = default;
+
     FieldDesc& operator=(FieldDesc const& other) = delete;
     FieldDesc& operator=(FieldDesc&& other) = default;
 
@@ -100,7 +105,8 @@ class RNTupleContainer : public DbContainerImp {
    const uint32_t     m_indexMulti;
 
    RootAuxDynIO::IRNTupleWriter*     m_ntupleWriter = nullptr;
-   RNTupleReader*                    m_ntupleReader = nullptr;
+   /// Note: the Fields need to be destroyed before the page source is gone
+   RPageSource*       m_pageSource;
 
  public:
    /// Standard constructor
