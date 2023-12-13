@@ -6,9 +6,22 @@
 
 #include <MuonReadoutGeometry/MuonReadoutElement.h>
 #include <MuonReadoutGeometry/GlobalUtilities.h>
+#include <GaudiKernel/SystemOfUnits.h>
 
-#include<fstream>
+#include <fstream>
 #include <TString.h>
+
+/// Helper struct to map all muons in the same chamber
+struct TrueHitInChamb {
+    Identifier stationId{};
+    Amg::Vector3D lDir{Amg::Vector3D::Zero()};
+    Amg::Vector3D lPos{Amg::Vector3D::Zero()};
+    const xAOD::MuonSimHit* simHit{};
+    bool operator<(const TrueHitInChamb& other) const{
+       if (stationId != other.stationId) return stationId < other.stationId;
+       return simHit->genParticleLink().barcode() < other.simHit->genParticleLink().barcode();
+    }
+};
 
 CsvMuonSimHitDumperMuonCnv::CsvMuonSimHitDumperMuonCnv(const std::string& name, ISvcLocator* pSvcLocator):
    AthAlgorithm{name, pSvcLocator} {}
@@ -26,8 +39,6 @@ StatusCode CsvMuonSimHitDumperMuonCnv::initialize() {
 StatusCode CsvMuonSimHitDumperMuonCnv::execute(){
     
    const ActsGeometryContext gctx{};
-   
-   const MdtIdHelper& mdtHelper{m_idHelperSvc->mdtIdHelper()};
 
    const EventContext & context = Gaudi::Hive::currentContext();
    
@@ -48,7 +59,7 @@ StatusCode CsvMuonSimHitDumperMuonCnv::execute(){
    file<<"LocalDirectionz"<<std::endl;
 
 
-   std::set<Identifier> usedStations{};
+   std::set<TrueHitInChamb> usedStations{};
    for (const xAOD::MuonSimHit* simHit : *readSimHits) {
 
       //The sim hit collection contains non-muon hits, while the fast digi only writes out muon 
@@ -56,8 +67,10 @@ StatusCode CsvMuonSimHitDumperMuonCnv::execute(){
 
       if (std::abs(simHit->pdgId()) != 13) continue;
       const Identifier ID = simHit->identify();
-      if (!usedStations.insert(m_idHelperSvc->chamberId(ID)).second) continue;
 
+      TrueHitInChamb newHit {};
+      newHit.stationId = m_idHelperSvc->chamberId(ID);
+      newHit.simHit = simHit;
       ATH_MSG_VERBOSE("Dump simulation hit for " <<m_idHelperSvc->toString(ID));
       const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(ID);
       
@@ -66,26 +79,42 @@ StatusCode CsvMuonSimHitDumperMuonCnv::execute(){
                                          reElement->localToGlobalTrans(gctx, reElement->measurementHash(ID));
 
       const Amg::Vector3D localPos{toChamber * xAOD::toEigen(simHit->localPosition())};
-      const Amg::Vector3D localDir{toChamber.linear() * xAOD::toEigen(simHit->localDirection())};
+      newHit.lDir = toChamber.linear() * xAOD::toEigen(simHit->localDirection());
 
-      const std::optional<double> lambda = Amg::intersect<3>(localPos, localDir, Amg::Vector3D::UnitZ(), 0.);
-      const Amg::Vector3D localPosExtr = localPos + (*lambda)*localDir;
+      const std::optional<double> lambda = Amg::intersect<3>(localPos, newHit.lDir, Amg::Vector3D::UnitZ(), 0.);
+      newHit.lPos = localPos + (*lambda)*newHit.lDir;
 
+      auto insert_itr = usedStations.insert(newHit);
+      /// No check needed that the muon is extrapolated to the same point
+      if (insert_itr.second) continue;
+      
+      const TrueHitInChamb prevMuon{*insert_itr.first};
+      constexpr double tolerance =  0.1 * Gaudi::Units::millimeter;
+      constexpr double angleTolerance = std::cos(0.1*Gaudi::Units::deg);
+      if ((prevMuon.lPos - newHit.lPos).mag() > tolerance ||
+          prevMuon.lDir.dot(newHit.lDir) < angleTolerance ) {
+               ATH_MSG_WARNING("Muon "<<newHit.simHit->genParticleLink()<<" has a different ending point when it starts from "
+                        <<m_idHelperSvc->toString(prevMuon.simHit->identify())<<" "<<Amg::toString(prevMuon.lPos)
+                        <<" pointing to "<<Amg::toString(prevMuon.lDir)
+                        <<" --  vs. "<<m_idHelperSvc->toString(newHit.simHit->identify())
+                        <<" "<<Amg::toString(newHit.lPos) <<" pointing to "<<Amg::toString(newHit.lDir)<<" difference: "
+                        <<(prevMuon.lPos - newHit.lPos).mag() <<" && "<< std::acos(std::min(1.,(std::max(-1.,prevMuon.lDir.dot(newHit.lDir))))) / Gaudi::Units::deg  ) ;
+      }
+}
 
-      file<<simHit->pdgId()<<delim;
-      file<<mdtHelper.stationName(ID)<<delim;
-      file<<mdtHelper.stationEta(ID)<<delim;
-      file<<mdtHelper.stationPhi(ID)<<delim;
-   
-      file<<localPosExtr.x()<<delim;
-      file<<localPosExtr.y()<<delim;
-      file<<localPosExtr.z()<<delim;
+for (const TrueHitInChamb& hit : usedStations) {
+   file<<hit.simHit->pdgId()<<delim;
+   file<<m_idHelperSvc->stationName(hit.stationId)<<delim;
+   file<<m_idHelperSvc->stationEta(hit.stationId)<<delim;
+   file<<m_idHelperSvc->stationPhi(hit.stationId)<<delim;
+  
+   file<<hit.lPos.x()<<delim;
+   file<<hit.lPos.y()<<delim;
+   file<<hit.lPos.z()<<delim;
 
-      file<<localDir.x()<<delim;
-      file<<localDir.y()<<delim;
-      file<<localDir.z()<<std::endl;   
-
-
+   file<<hit.lDir.x()<<delim;
+   file<<hit.lDir.y()<<delim;
+   file<<hit.lDir.z()<<std::endl;
 }
 
 return StatusCode::SUCCESS;
