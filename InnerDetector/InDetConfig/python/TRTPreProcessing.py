@@ -8,7 +8,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format, BeamType
 
 
-def TRTPreProcessingCfg(flags, **kwargs):
+def TRTPreProcessingCfg(flags):
     acc = ComponentAccumulator()
     if not flags.Detector.EnableTRT:
         return acc

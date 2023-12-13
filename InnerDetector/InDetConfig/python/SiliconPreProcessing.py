@@ -3,7 +3,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
 
 
-def InDetRecPreProcessingSiliconCfg(flags, **kwargs):
+def InDetRecPreProcessingSiliconCfg(flags):
     acc = ComponentAccumulator()
     # ------------------------------------------------------------
     #
@@ -88,7 +88,7 @@ def InDetRecPreProcessingSiliconCfg(flags, **kwargs):
     return acc
 
 
-def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
+def ITkRecPreProcessingSiliconCfg(flags):
     acc = ComponentAccumulator()
     # ------------------------------------------------------------
     #
