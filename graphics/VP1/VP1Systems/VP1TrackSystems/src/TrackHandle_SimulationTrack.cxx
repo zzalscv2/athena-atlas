@@ -160,9 +160,6 @@ QStringList TrackHandle_SimulationTrack::clicked() const
   l << TrackHandleBase::baseInfo();
   l << "Evt index = "+QString::number(m_d->simBarCode.evtIndex());
   l << "BarCode = "+QString::number(m_d->simBarCode.barCode());
-  //fixme - more info
-  //   l << "Truth track clicked [evt index = "+QString::number(m_d->simBarCode.second)
-  //     +", barcode = "+(m_d->simBarCode.barCode<0?QString("Unknown (G4 secondary)"):QString::number(m_d->simBarCode.first))+"]";//fixme - more info
   return l;
 }
 

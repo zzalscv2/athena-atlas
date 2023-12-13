@@ -510,7 +510,7 @@ StatusCode InDetSecVertexTruthMatchTool::labelTruthVertices( const xAOD::TruthVe
     if(not truthPart) continue;
     if(std::find(m_pdgIdList.begin(), m_pdgIdList.end(), std::abs(truthPart->pdgId())) == m_pdgIdList.end()) continue;
     if(truthVtx->nOutgoingParticles()<2){continue;} //Skipping vertices with only 1 outgoing particle.
-    ATH_MSG_DEBUG("Analysing Truth Vertex " << truthVtx->barcode() );
+    ATH_MSG_DEBUG("Analysing Truth Vertex " << truthVtx );
     std::vector<const xAOD::TruthParticle*> reconstructibleParticles;
     countReconstructibleDescendentParticles( *truthVtx, reconstructibleParticles );
 

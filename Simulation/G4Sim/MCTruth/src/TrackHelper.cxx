@@ -49,10 +49,4 @@ HepMcParticleLink TrackHelper::GetParticleLink()
 {
   int barcode = this->GetBarcode();
   return HepMcParticleLink(barcode);
-  //HepMcParticleLink * originalParticleLink(nullptr);
-  //if (this->GetTrackInformation() && this->GetTrackInformation()->GetBaseISFParticle())
-  //  {
-  //    originalParticleLink = this->GetTrackInformation()->GetBaseISFParticle()->getParticleLink();
-  //  }
-  //return (originalParticleLink) ? HepMcParticleLink(barcode, originalParticleLink->eventIndex(), originalParticleLink->getEventCollection()) : HepMcParticleLink(barcode);
 }

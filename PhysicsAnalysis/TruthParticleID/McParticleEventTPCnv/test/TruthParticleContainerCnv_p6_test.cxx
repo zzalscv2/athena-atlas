@@ -31,7 +31,6 @@ void compare (const TruthParticle& p1,
   assert ( p1.pz() == p2.pz() );
   assert ( p1.e()  == p2.e() );
   assert ( p1.charge()  == p2.charge() );
-  //assert ( p1.getAthenaBarCode() == p2.getAthenaBarCode() );  not preserved
   assert ( p1.genParticle() == p2.genParticle() );
   assert ( p1.genEventIndex() == p2.genEventIndex() );
 

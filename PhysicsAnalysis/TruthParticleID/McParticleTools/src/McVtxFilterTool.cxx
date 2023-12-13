@@ -379,9 +379,7 @@ void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx,
     if ( 0 == daughter ) {
       if ( !keepParticle( vtxType, *child ) ) {
 	// only include selected particles via the "ParticlesToKeep" property
-	ATH_MSG_VERBOSE("Skipping outgoing particle id|bc: ["
-			<< (*child)->pdg_id() << "|" 
-			<< (*child)->barcode() << "]");
+	ATH_MSG_VERBOSE("Skipping outgoing particle : "<< (*child));
       } else {
 	daughter = HepMC::newGenParticlePtr();
 	daughter->set_momentum( (*child)->momentum() );

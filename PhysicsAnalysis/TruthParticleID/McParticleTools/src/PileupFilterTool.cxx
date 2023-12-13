@@ -311,7 +311,7 @@ StatusCode PileupFilterTool::shapeGenEvent( McEventCollection* genAod )
 	}
 
       }//> particle has to be removed
-  }//> loop over particles (via their barcode)
+  }//> loop over particles
 
 
 #ifdef HEPMC3
@@ -557,7 +557,7 @@ StatusCode PileupFilterTool::rebuildLinks( const HepMC::GenEvent * mcEvt,
 	return StatusCode::SUCCESS;
       }//> end if incoming particles
     }//> found a child-vertex
-  }//> loop over child-vertex-barcodes
+  }
 #else
   std::list<int>::const_iterator bcVtxEnd = bcChildVert.end();
   for ( std::list<int>::const_iterator itrBcVtx = bcChildVert.begin();

@@ -576,7 +576,6 @@ bool DerivationFramework::MenuTruthThinning::isFromTau(const xAOD::TruthParticle
     
     // More complex loop catch
     std::unordered_set<int>::const_iterator foundVtx = barcode_trace.find( prod->barcode() );
-    //if ( find(barcode_trace.begin(),barcode_trace.end(),prod->barcode()) != barcode_trace.end()){
     if( foundVtx != barcode_trace.end() ) {
         ATH_MSG_DEBUG( "Found a loop (a la Sherpa sample).  Backing out." );
         return false;
