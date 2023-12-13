@@ -111,23 +111,23 @@ int main(int argc, char* argv[]){
 
   }//End: Loop over input options
 
-  if(sample==""){
+  if(sample.empty()){
     std::cout << "No input xAOD file specified, exiting" << std::endl;
     return 1;
   }
-  if(jetColl==""){
+  if(jetColl.empty()){
     std::cout << "No jet collection specified, exiting" << std::endl;
     return 1;
   }
-  if(jetCalibConfig==""){
+  if(jetCalibConfig.empty()){
     std::cout << "No JetCalibTools config specified, exiting" << std::endl;
     return 1;
   }
-  if(calibSeq==""){
+  if(calibSeq.empty()){
     std::cout << "No calibration sequence specified, exiting" << std::endl;
     return 1;
   }
-  if(isData==""){
+  if(isData.empty()){
     std::cout << "isData not specified, exiting" << std::endl;
     return 1;
   }
@@ -163,7 +163,7 @@ int main(int argc, char* argv[]){
 
   ANA_CHECK( jetCalibrationTool.setProperty("IsData",isCollision) );
 
-  if(calibArea!=""){
+  if(!calibArea.empty()){
     ANA_CHECK( jetCalibrationTool.setProperty("CalibArea",calibArea.c_str()) );
   }
 
@@ -190,7 +190,7 @@ int main(int argc, char* argv[]){
     if(ievent % 100==0) std::cout << "Event " << ievent << " of " << nevents << std::endl;
 
     // Retrieve jet container
-    const xAOD::JetContainer* jets = 0;
+    const xAOD::JetContainer* jets = nullptr;
     ANA_CHECK( event.retrieve( jets, jetColl + "Jets" ) );
 
     // Shallow copy 

@@ -2,6 +2,8 @@
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <utility>
+
 #include "JetCalibTools/CalibrationMethods/BcidOffsetCorrection.h"
 #include "JetCalibTools/JetCalibUtils.h"
 #include "PathResolver/PathResolver.h"
@@ -13,11 +15,11 @@ BcidOffsetCorrection::BcidOffsetCorrection()
 
 BcidOffsetCorrection::BcidOffsetCorrection(const std::string& name, TEnv* config, TString jetAlgo, TString calibAreaTag, bool isData)
   : JetCalibrationStep(name.c_str()),
-    m_config(config), m_jetAlgo(jetAlgo), m_calibAreaTag(calibAreaTag), m_isData(isData)
+    m_config(config), m_jetAlgo(std::move(jetAlgo)), m_calibAreaTag(std::move(calibAreaTag)), m_isData(isData)
 {}
 
 BcidOffsetCorrection::~BcidOffsetCorrection()
-{}
+= default;
 
 StatusCode BcidOffsetCorrection::initialize(){
 

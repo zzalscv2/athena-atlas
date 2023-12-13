@@ -38,8 +38,8 @@ UncertaintyComponent::UncertaintyComponent(const std::string& name)
     , m_interpolate(Interpolate::UNKNOWN)
     , m_splitNumber(0)
     , m_numExpectedHist(0)
-    , m_uncHist(NULL)
-    , m_validHist(NULL)
+    , m_uncHist(nullptr)
+    , m_validHist(nullptr)
 {
     JESUNC_NO_DEFAULT_CONSTRUCTOR;
 }
@@ -47,15 +47,15 @@ UncertaintyComponent::UncertaintyComponent(const std::string& name)
 UncertaintyComponent::UncertaintyComponent(const ComponentHelper& component, const size_t numHist)
     : asg::AsgMessaging(component.name.Data())
     , m_isInit(false)
-    , m_uncHistName(component.uncNames.size()!=0?component.uncNames.at(0):"NONE")
+    , m_uncHistName(!component.uncNames.empty()?component.uncNames.at(0):"NONE")
     , m_validHistName(component.validName)
     , m_scaleVar(component.scaleVar)
     , m_topology(component.topology)
     , m_energyScale(component.energyScale)
     , m_interpolate(component.interpolate)
     , m_splitNumber(component.splitNum)
-    , m_uncHist(NULL)
-    , m_validHist(NULL)
+    , m_uncHist(nullptr)
+    , m_validHist(nullptr)
 {
     ATH_MSG_DEBUG("Creating UncertaintyComponent named " << m_uncHistName.Data());
     if (m_uncHistName == "")
@@ -76,8 +76,8 @@ UncertaintyComponent::UncertaintyComponent(const UncertaintyComponent& toCopy)
     , m_energyScale(toCopy.m_energyScale)
     , m_interpolate(toCopy.m_interpolate)
     , m_splitNumber(toCopy.m_splitNumber)
-    , m_uncHist(NULL)
-    , m_validHist(NULL)
+    , m_uncHist(nullptr)
+    , m_validHist(nullptr)
 {
 
     if (toCopy.m_uncHist)
@@ -146,9 +146,7 @@ bool UncertaintyComponent::isAlwaysZero() const
     }
 
     const TH1* histo = m_uncHist->getHisto();
-    if (fabs(histo->GetMinimum()) > 1.e-8 || fabs(histo->GetMaximum()) > 1.e-8)
-        return false;
-    return true;
+    return !(fabs(histo->GetMinimum()) > 1.e-8 || fabs(histo->GetMaximum()) > 1.e-8);
 }
 
 

@@ -41,7 +41,7 @@ FFJetSmearingTool::FFJetSmearingTool(const std::string& name)
 
 // Destructor
 FFJetSmearingTool::~FFJetSmearingTool()
-{ }
+= default;
 
 
 
@@ -58,7 +58,7 @@ StatusCode FFJetSmearingTool::initialize()
 
     ATH_MSG_INFO(Form("Preparing to initialize the FFJetSmearingTool named %s",AsgTool::name().c_str()));
 
-    if (AsgTool::name()=="")
+    if (AsgTool::name().empty())
     {
         ATH_MSG_FATAL("No name specified.  Aborting.");
         return StatusCode::FAILURE;
@@ -293,7 +293,7 @@ StatusCode FFJetSmearingTool::readFFJetSmearingToolSimplifiedData(TEnv& settings
 	}
       
       m_CALO_ResponseMap  = std::unique_ptr<TH2>(dynamic_cast<TH2*>(data_file->Get( CaloResponseMap_path )));
-      m_CALO_ResponseMap->SetDirectory(0);
+      m_CALO_ResponseMap->SetDirectory(nullptr);
     }
 
     if(m_MassDef==JetTools::FFJetAllowedMassDefEnum::Comb || m_MassDef==JetTools::FFJetAllowedMassDefEnum::TA){
@@ -306,7 +306,7 @@ StatusCode FFJetSmearingTool::readFFJetSmearingToolSimplifiedData(TEnv& settings
         }
 
         m_TA_ResponseMap  = std::unique_ptr<TH2>(dynamic_cast<TH2*>(data_file->Get( TAResponseMap_path )));
-        m_TA_ResponseMap->SetDirectory(0);//To keep it open when we close the .root file
+        m_TA_ResponseMap->SetDirectory(nullptr);//To keep it open when we close the .root file
     }
 
 
@@ -326,12 +326,12 @@ StatusCode FFJetSmearingTool::readFFJetSmearingToolSimplifiedData(TEnv& settings
             m_Syst_Affects_JMSorJMR[Syst_Name] = "JMS";
             m_Syst_HistPath_map[Syst_Name] = settings.GetValue(prefix+"Hist","");
             m_Syst_Hist_map[Syst_Name] = std::unique_ptr<TH2>(dynamic_cast<TH2*>(data_file->Get(m_Syst_HistPath_map[Syst_Name].c_str())));
-            m_Syst_Hist_map[Syst_Name]->SetDirectory(0);
+            m_Syst_Hist_map[Syst_Name]->SetDirectory(nullptr);
 	    if(m_MassDef==JetTools::FFJetAllowedMassDefEnum::Comb){//for comb mass we need to read two histograms
 	      m_Syst_HistTAPath_map[Syst_Name] = settings.GetValue(prefix+"HistTA","");
-	      if(m_Syst_HistTAPath_map[Syst_Name]!=""){
+	      if(!m_Syst_HistTAPath_map[Syst_Name].empty()){
 	      m_Syst_HistTA_map[Syst_Name] = std::unique_ptr<TH2>(dynamic_cast<TH2*>(data_file->Get(m_Syst_HistTAPath_map[Syst_Name].c_str())));
-	      m_Syst_HistTA_map[Syst_Name]->SetDirectory(0);
+	      m_Syst_HistTA_map[Syst_Name]->SetDirectory(nullptr);
 	      }
 	    }
 	}
@@ -351,12 +351,12 @@ StatusCode FFJetSmearingTool::readFFJetSmearingToolSimplifiedData(TEnv& settings
             m_Syst_Affects_JMSorJMR[Syst_Name] = "JMR";
             m_Syst_HistPath_map[Syst_Name] = settings.GetValue(prefix+"Hist","");
             m_Syst_Hist_map[Syst_Name] = std::unique_ptr<TH2>(dynamic_cast<TH2*>(data_file->Get(m_Syst_HistPath_map[Syst_Name].c_str())));
-            m_Syst_Hist_map[Syst_Name]->SetDirectory(0);
+            m_Syst_Hist_map[Syst_Name]->SetDirectory(nullptr);
 	    if(m_MassDef==JetTools::FFJetAllowedMassDefEnum::Comb){//for comb mass we need to read two histograms
 	      m_Syst_HistTAPath_map[Syst_Name] = settings.GetValue(prefix+"HistTA","");
-	      if(m_Syst_HistTAPath_map[Syst_Name]!=""){
+	      if(!m_Syst_HistTAPath_map[Syst_Name].empty()){
 		m_Syst_HistTA_map[Syst_Name] = std::unique_ptr<TH2>(dynamic_cast<TH2*>(data_file->Get(m_Syst_HistTAPath_map[Syst_Name].c_str())));
-		m_Syst_HistTA_map[Syst_Name]->SetDirectory(0);
+		m_Syst_HistTA_map[Syst_Name]->SetDirectory(nullptr);
 	      }
 	    }      
 	}
@@ -405,8 +405,8 @@ StatusCode FFJetSmearingTool::readFFJetSmearingToolSimplifiedData(TEnv& settings
     m_caloMassWeight = std::unique_ptr<TH3F>(dynamic_cast<TH3F*>(Calo_TA_weight_file->Get(Calo_weight_hist_name)));
     m_TAMassWeight = std::unique_ptr<TH3F>(dynamic_cast<TH3F*>(Calo_TA_weight_file->Get(TA_weight_hist_name)));
 
-    m_caloMassWeight->SetDirectory(0);
-    m_TAMassWeight->SetDirectory(0);//To keep it open when we close the .root file
+    m_caloMassWeight->SetDirectory(nullptr);
+    m_TAMassWeight->SetDirectory(nullptr);//To keep it open when we close the .root file
 
 
     Calo_TA_weight_file->Close();
@@ -435,7 +435,7 @@ StatusCode FFJetSmearingTool::getMatchedTruthJet(xAOD::Jet& jet_reco, xAOD::Jet&
 
     //Loop over the truth jets in the event to match
     const xAOD::Jet* close_jet = nullptr;
-    for (const auto jet_truth : *jets_truth) {
+    for (const auto *const jet_truth : *jets_truth) {
         float dR_Test = jet_reco.p4().DeltaR(jet_truth->p4());
         if ( dR_Test < dRmax_truthJet){
             if(dR_Test < dRmin){
@@ -734,7 +734,7 @@ CP::CorrectionCode FFJetSmearingTool::applyCorrection( xAOD::Jet& jet_reco) cons
 
     }
 
-    if(is_CALO_mass_smeared==false && is_TA_mass_smeared == false){//We only smear the jet if we have to. If not, avoid doing extra calculations
+    if(!is_CALO_mass_smeared && !is_TA_mass_smeared){//We only smear the jet if we have to. If not, avoid doing extra calculations
 
         ATH_MSG_VERBOSE("This jet is not affected by the systematic. The jet won't be modified");
         ATH_MSG_VERBOSE("//---------------------------------------------------------------//");

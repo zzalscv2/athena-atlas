@@ -60,7 +60,7 @@ StatusCode PerJetFlavourUncertaintyComponent::initialize(TFile* histFile)
         return StatusCode::FAILURE;
 
     // Ensure that the labels are sane
-    if (!m_labels.size())
+    if (m_labels.empty())
     {
         ATH_MSG_ERROR("Specified a PerJetFlavourUncertaintyComponent without the associated labels to use: " << getName().Data());
         return StatusCode::FAILURE;

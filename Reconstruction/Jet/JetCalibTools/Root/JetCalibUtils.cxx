@@ -11,7 +11,7 @@
 
 namespace JetCalibUtils {
 
-  StrV Vectorize(const TString& str, TString sep)
+  StrV Vectorize(const TString& str, const TString& sep)
   {
     StrV result; 
     TObjArray* tokens = str.Tokenize(sep);
@@ -22,7 +22,7 @@ namespace JetCalibUtils {
     return result;
   }
 
-  VecD VectorizeD(const TString& str, TString sep)
+  VecD VectorizeD(const TString& str, const TString& sep)
   {
     VecD result;
     TObjArray* tokens = str.Tokenize(sep);
@@ -41,7 +41,7 @@ namespace JetCalibUtils {
                 << " in file " << file.GetName() << std::endl;
     }
     else {
-      h->SetDirectory(0);  // make histogram memory-resident
+      h->SetDirectory(nullptr);  // make histogram memory-resident
     }
     return h;
   }

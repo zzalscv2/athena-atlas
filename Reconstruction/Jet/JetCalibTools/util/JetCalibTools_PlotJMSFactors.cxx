@@ -59,7 +59,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[])
     const TString config  = argv[2];
     const TString outFile = argv[3];
     const TString massType = argv[4];
-    const bool isDevMode  = ( argc > 5 && (TString(argv[5]) == "true" || TString(argv[5]) == "dev") ) ? true : false;
+    const bool isDevMode  = argc > 5 && (TString(argv[5]) == "true" || TString(argv[5]) == "dev");
     
     // Derived information
     const bool outFileIsExtensible = outFile.EndsWith(".pdf") || outFile.EndsWith(".ps");

@@ -54,8 +54,8 @@ int main (int argc, char* argv[])
     const TString config  = argv[2];
     const TString outFile = argv[3];
     const bool isData     = (TString(argv[4]) == "true");
-    const bool isDevMode  = ( argc > 5 && (TString(argv[5]) == "true" || TString(argv[5]) == "dev") ) ? true : false;
-    const bool isTimeTest = ( argc > 6 && TString(argv[6]) == "true" ) ? true : false;
+    const bool isDevMode  = argc > 5 && (TString(argv[5]) == "true" || TString(argv[5]) == "dev");
+    const bool isTimeTest = argc > 6 && TString(argv[6]) == "true";
 
     // Derived information
     const bool outFileIsExtensible = outFile.EndsWith(".pdf") || outFile.EndsWith(".ps");

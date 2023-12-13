@@ -9,9 +9,9 @@
  *                                                                                   *
  *  #   Date    Comments                   By                                        *
  * -- -------- -------------------------- ------------------------------------------ *
- *  1 25/06/20  First Version              I. Aizenberg                              * 
- *  1 25/06/20  Updates to work with JetCalibTools   J. Roloff     * 
- *  1 21/08/23  Updates to be more configurable   J. Roloff     * 
+ *  1 25/06/20  First Version              I. Aizenberg                              *
+ *  1 25/06/20  Updates to work with JetCalibTools   J. Roloff     *
+ *  1 21/08/23  Updates to be more configurable   J. Roloff     *
 \*************************************************************************************/
 
 #include "JetCalibTools/CalibrationMethods/GlobalNNCalibration.h"
@@ -21,7 +21,9 @@
 #include "JetCalibTools/JetCalibUtils.h"
 #include "lwtnn/parse_json.hh"
 #include "PathResolver/PathResolver.h"
-#include <fstream> 
+#include <fstream>
+#include <memory>
+#include <utility>
 
 
 GlobalNNCalibration::GlobalNNCalibration()
@@ -38,9 +40,9 @@ m_config(nullptr), m_jetAlgo(""), m_calibAreaTag(""), m_dev(false), m_doSplineCo
 {
 }
 
-GlobalNNCalibration::GlobalNNCalibration(const std::string& name, TEnv * config, TString jetAlgo, TString calibAreaTag, bool dev)
+GlobalNNCalibration::GlobalNNCalibration(const std::string& name, TEnv * config, TString jetAlgo, const TString& calibAreaTag, bool dev)
   : JetCalibrationStep::JetCalibrationStep( name.c_str() ),
-    m_config(config), m_jetAlgo(jetAlgo), m_calibAreaTag(calibAreaTag), m_dev(dev), m_doSplineCorr(true)
+    m_config(config), m_jetAlgo(std::move(jetAlgo)), m_calibAreaTag(calibAreaTag), m_dev(dev), m_doSplineCorr(true)
 {
 
 }
@@ -78,7 +80,7 @@ StatusCode GlobalNNCalibration::initialize(){
   for(unsigned int i=0; i<m_nnEtaBins.size()-1; i++){
     TString fileName = PathResolverFindCalibFile(Form("%s_etabin_%d.json", MLGSCFile.Data(), i));
     std::ifstream input(fileName);
-    std::unique_ptr<lwt::LightweightGraph> lwnn = std::unique_ptr<lwt::LightweightGraph> (new lwt::LightweightGraph( lwt::parse_json_graph(input) ) );
+    std::unique_ptr<lwt::LightweightGraph> lwnn = std::make_unique<lwt::LightweightGraph> ( lwt::parse_json_graph(input) );
     m_lwnns.push_back(std::move(lwnn));
   }
 
@@ -98,7 +100,7 @@ StatusCode GlobalNNCalibration::initialize(){
     loadSplineHists(calibHistFile, "etaJes");
     m_JPtS_MinPt_Pt = JetCalibUtils::VectorizeD( m_config->GetValue("GNNC.ptCutoff","") );
     if(m_JPtS_MinPt_Pt.size() != m_closureEtaBins.size()-1){
-      ATH_MSG_FATAL("Pt cutoff vector has wrong length. There should be one value per eta bin."); return StatusCode::FAILURE; 
+      ATH_MSG_FATAL("Pt cutoff vector has wrong length. There should be one value per eta bin."); return StatusCode::FAILURE;
       return StatusCode::FAILURE;
     }
 
@@ -124,7 +126,7 @@ StatusCode GlobalNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& jetEvent
   xAOD::JetFourMom_t jetStartP4;
   jetStartP4 = jet.jetP4();
 
-  // The NN learns the jet response, so the original jet pT is divided 
+  // The NN learns the jet response, so the original jet pT is divided
   // by the NN output to get the calibrated pT
   int nnEtaBin = getEtaBin(jet, m_nnEtaBins);
   int closureEtaBin = getEtaBin(jet, m_closureEtaBins);
@@ -136,7 +138,7 @@ StatusCode GlobalNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& jetEvent
   double nnCalibFactor =  outputs["out_0"];
   if(nnCalibFactor > m_maxNNCorrection) nnCalibFactor = m_maxNNCorrection;
   if(nnCalibFactor < m_minNNCorrection) nnCalibFactor = m_minNNCorrection;
-  
+
   double response = nnCalibFactor;
   if(m_doSplineCorr){
     double jetPt = getJESPt(jet);
@@ -157,7 +159,7 @@ StatusCode GlobalNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& jetEvent
 
 
 
-/// Loads the calib constants from histograms in TFile named fileName. 
+/// Loads the calib constants from histograms in TFile named fileName.
 void GlobalNNCalibration::loadSplineHists(const TString & fileName, const std::string &ptCorr_name) {
   std::unique_ptr<TFile> tmpF(TFile::Open( fileName ));
   TList *ptCorr_l = dynamic_cast<TList*>( tmpF->Get(ptCorr_name.c_str()));
@@ -174,7 +176,7 @@ void GlobalNNCalibration::loadSplineHists(const TString & fileName, const std::s
   }
 
   for(unsigned int i=0 ; i<m_closureEtaBins.size()-1; i++){
-    auto pTH1 = dynamic_cast<TH1*>(ptCorr_l->At(i));
+    auto *pTH1 = dynamic_cast<TH1*>(ptCorr_l->At(i));
     if (not pTH1) continue;
     m_ptCorrFactors[i].reset(pTH1);
     m_ptCorrFactors[i]->SetDirectory(nullptr);
@@ -195,7 +197,7 @@ double GlobalNNCalibration::getSplineCorr(const int etaBin, double pT) const {
     double R = slope*(pT-ptCutoff)+Rcutoff;
     return R;
   }
-  
+
 
   double R = m_ptCorrFactors[ etaBin ]->Interpolate(pT);
   return R;
@@ -246,7 +248,7 @@ std::map<std::string,double> GlobalNNCalibration::getJetFeatures(const xAOD::Jet
   float FCAL2 = (samplingFrac[23])/jetE_constitscale;
 
 
-  // A map of possible NN inputs with their values for this jet. 
+  // A map of possible NN inputs with their values for this jet.
   // These may not all be included in the NN.
   std::map<std::string,double> inputValues;
 
@@ -284,7 +286,7 @@ std::map<std::string,double> GlobalNNCalibration::getJetFeatures(const xAOD::Jet
 
   // The actual NN inputs and values
   std::map<std::string,double> NNInputValues;
-  for(TString input : m_NNInputs){
+  for(const TString& input : m_NNInputs){
     NNInputValues[input.Data()] = inputValues[input.Data()];
   }
 

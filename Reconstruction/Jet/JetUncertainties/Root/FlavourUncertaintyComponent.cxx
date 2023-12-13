@@ -30,7 +30,7 @@ FlavourUncertaintyComponent::FlavourUncertaintyComponent(const std::string& name
     , m_secondUncName("")
     , m_largeRJetTruthLabelName("")
     , m_largeRJetTruthLabels()
-    , m_secondUncHist(NULL)
+    , m_secondUncHist(nullptr)
     , m_respType(FlavourResp_UNKNOWN)
     , m_secondRespType(FlavourResp_UNKNOWN)
     , m_BjetAccessor("IsBjet")
@@ -42,13 +42,13 @@ FlavourUncertaintyComponent::FlavourUncertaintyComponent(const std::string& name
 }
 
 FlavourUncertaintyComponent::FlavourUncertaintyComponent(   const ComponentHelper& component,
-                                                            const TString jetType,
-                                                            const TString analysisRootFileName,
-                                                            const TString defaultAnalysisRootFileName,
-                                                            const TString path,
-                                                            const TString calibArea,
+                                                            const TString& jetType,
+                                                            const TString& analysisRootFileName,
+                                                            const TString& defaultAnalysisRootFileName,
+                                                            const TString& path,
+                                                            const TString& calibArea,
                                                             const bool absEtaGluonFraction,
-                                                            const TString analysisHistPattern
+                                                            const TString& analysisHistPattern
                                                             )
     : UncertaintyComponent(component,component.flavourType == FlavourComp::Composition ? 2 : 1)
     , m_flavourType(component.flavourType)
@@ -63,7 +63,7 @@ FlavourUncertaintyComponent::FlavourUncertaintyComponent(   const ComponentHelpe
     , m_secondUncName(component.uncNames.size()>1 ? component.uncNames.at(1) : "")
     , m_largeRJetTruthLabelName(component.LargeRJetTruthLabelName)
     , m_largeRJetTruthLabels(component.LargeRJetTruthLabels)
-    , m_secondUncHist(NULL)
+    , m_secondUncHist(nullptr)
     , m_respType(FlavourResp_UNKNOWN)
     , m_secondRespType(FlavourResp_UNKNOWN)
     , m_BjetAccessor("IsBjet")
@@ -92,7 +92,7 @@ FlavourUncertaintyComponent::FlavourUncertaintyComponent(const FlavourUncertaint
     , m_secondUncName(toCopy.m_secondUncName)
     , m_largeRJetTruthLabelName(toCopy.m_largeRJetTruthLabelName)
     , m_largeRJetTruthLabels(toCopy.m_largeRJetTruthLabels)
-    , m_secondUncHist(NULL)
+    , m_secondUncHist(nullptr)
     , m_respType(toCopy.m_respType)
     , m_secondRespType(toCopy.m_secondRespType)
     , m_BjetAccessor(toCopy.m_BjetAccessor)
@@ -213,7 +213,7 @@ StatusCode FlavourUncertaintyComponent::initialize(TFile* histFile)
 
 
         // Ensure we found histograms...
-        if (!gluonFractionKeys.size() || !gluonFractionErrorKeys.size())
+        if (gluonFractionKeys.empty() || gluonFractionErrorKeys.empty())
         {
             ATH_MSG_ERROR(Form("Failed to find gluon fraction histogram(s), found %zu nominal and %zu error hists in file %s",gluonFractionKeys.size(),gluonFractionErrorKeys.size(),m_analysisFileName.Data()));
             return StatusCode::FAILURE;
@@ -249,8 +249,8 @@ StatusCode FlavourUncertaintyComponent::initialize(TFile* histFile)
             // Fill the actual vectors now, in proper order
             for (int nJets = 0; nJets <= nJetsMax; ++nJets)
             {
-                m_gluonFractionHists.push_back(NULL);
-                m_gluonFractionErrorHists.push_back(NULL);
+                m_gluonFractionHists.push_back(nullptr);
+                m_gluonFractionErrorHists.push_back(nullptr);
             }
             if (readNjetsHistograms(m_gluonFractionHists,gluonFractionKeys).isFailure())
                 return StatusCode::FAILURE;
@@ -289,7 +289,7 @@ StatusCode FlavourUncertaintyComponent::initialize(TFile* histFile)
 
         // If nJets treatment is specified, and a default analysis file is specified, use this to fill the zero-bin
         // The zero-bin is used whenever a multiplicity that is not explicitly specified is requested
-        if (m_defAnaFileName != "" && m_gluonFractionHists.size() > 1 && m_gluonFractionHists.at(0) == NULL)
+        if (m_defAnaFileName != "" && m_gluonFractionHists.size() > 1 && m_gluonFractionHists.at(0) == nullptr)
         {
             // Open the default file
             TFile* defAnaFile = utils::readRootFile(m_defAnaFileName,m_path,m_calibArea);
@@ -366,7 +366,7 @@ double FlavourUncertaintyComponent::getUncertaintyImpl(const xAOD::Jet& jet, con
     // First, check if we even want to apply the uncertainty (large-R specific break-out)
     // Check if we are supposed to only use given truth labels
     static const SG::AuxElement::ConstAccessor<int> accLargeRJetTruthLabel(m_largeRJetTruthLabelName);
-    if (m_largeRJetTruthLabels.size() != 0)
+    if (!m_largeRJetTruthLabels.empty())
     {
         // If we are asking to check truth labels, then retrieve the truth jet label from the jet
         if (!accLargeRJetTruthLabel.isAvailable(jet))
@@ -589,7 +589,7 @@ StatusCode FlavourUncertaintyComponent::readNjetsHistograms(std::vector<Uncertai
 {
     for (size_t iKey = 0; iKey < histKeys.size(); ++iKey)
     {
-        const TString histName = histKeys.at(iKey);
+        const TString& histName = histKeys.at(iKey);
         int nJets = -1;
         if (getNjetFromKey(histName,nJets).isFailure())
             return StatusCode::FAILURE;
@@ -637,10 +637,10 @@ StatusCode FlavourUncertaintyComponent::checkNjetsInput(int& nJets) const
     // Initialization also ensures gluonFractionHists and gluonFractionErrorHists are consistent
 
     // Check if we need to use the default histogram
-    if (nJets < 0 || nJets >= static_cast<int>(m_gluonFractionHists.size()) || m_gluonFractionHists.at(nJets) == NULL)
+    if (nJets < 0 || nJets >= static_cast<int>(m_gluonFractionHists.size()) || m_gluonFractionHists.at(nJets) == nullptr)
     {
         // Check if we can fall back on the default bin (does it exist?)
-        if (m_gluonFractionHists.at(0) == NULL)
+        if (m_gluonFractionHists.at(0) == nullptr)
         {
             ATH_MSG_ERROR("nJets of " << nJets << " is invalid, and default does not exist to fall back on, for " << getName().Data());
             return StatusCode::FAILURE;

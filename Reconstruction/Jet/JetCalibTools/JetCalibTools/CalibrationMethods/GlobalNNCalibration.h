@@ -55,7 +55,7 @@ class GlobalNNCalibration : virtual public ::JetCalibrationStep {
    @param calibAreaTag  The tag for this calibration
    @param dev           A flag for if the calibration is run in development mode
   */
-  GlobalNNCalibration(const std::string& name, TEnv * config, TString jetAlgo, TString calibAreaTag, bool dev);
+  GlobalNNCalibration(const std::string& name, TEnv * config, TString jetAlgo, const TString& calibAreaTag, bool dev);
 
   /**
    @brief  The destructor

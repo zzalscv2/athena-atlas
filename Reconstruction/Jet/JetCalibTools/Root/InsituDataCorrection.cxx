@@ -10,6 +10,8 @@
 #include <TEnv.h>
 #include <TAxis.h>
 
+#include <utility>
+
 
 InsituDataCorrection::InsituDataCorrection()
   : JetCalibrationStep::JetCalibrationStep(),
@@ -27,8 +29,8 @@ InsituDataCorrection::InsituDataCorrection()
 InsituDataCorrection::InsituDataCorrection(const std::string& name, TEnv* config, TString jetAlgo, TString calibAreaTag, bool dev, unsigned int firstRun, unsigned int lastRun)
   : JetCalibrationStep::JetCalibrationStep(name.c_str()),
     m_config(config),
-    m_jetAlgo(jetAlgo),
-    m_calibAreaTag(calibAreaTag),
+    m_jetAlgo(std::move(jetAlgo)),
+    m_calibAreaTag(std::move(calibAreaTag)),
     m_dev(dev),
     m_insituCorr(nullptr),
     m_insituCorr_JMS(nullptr),
@@ -37,9 +39,7 @@ InsituDataCorrection::InsituDataCorrection(const std::string& name, TEnv* config
     m_lastRun(lastRun)
 { }
 
-InsituDataCorrection::~InsituDataCorrection() {
-
-}
+InsituDataCorrection::~InsituDataCorrection() = default;
 
 StatusCode InsituDataCorrection::initialize() {
 
@@ -329,7 +329,7 @@ StatusCode InsituDataCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& jetEven
 }
 
 double InsituDataCorrection::getInsituCorr(double pt, double eta, const std::string& calibstep) const {
-  if (m_insituCorr==NULL && m_insituCorr_ResidualMCbased==NULL) return 1.0;
+  if (m_insituCorr==nullptr && m_insituCorr_ResidualMCbased==nullptr) return 1.0;
   double myEta = eta, myPt = pt/m_GeV;
 
   //eta and pt ranges depends on the insitu calibration

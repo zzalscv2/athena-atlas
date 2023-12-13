@@ -42,7 +42,7 @@ double relativeMetric(const double numerator, const double denominator)
     return sqrt(numerator/denominator);
 }
 
-void DrawLabels(const TH2D* histo, const double fixedValue1, const double fixedValue2, const JetUncertaintiesTool* uncTool, const JetUncertaintiesTool* uncToolDiff = NULL, const double mean = 0, const double extremum = 0, const int extremeX = -1, const int extremeY = -1)
+void DrawLabels(const TH2D* histo, const double fixedValue1, const double fixedValue2, const JetUncertaintiesTool* uncTool, const JetUncertaintiesTool* uncToolDiff = nullptr, const double mean = 0, const double extremum = 0, const int extremeX = -1, const int extremeY = -1)
 {
     // Create the tex making object
     static TLatex* tex = []()
@@ -163,7 +163,7 @@ void PlotCorrelationHistos(const TString& outFile, TCanvas* canvas, TFile* outHi
 
         // Now store
         corrMatDiffs.push_back(diff);
-        diffProviders.push_back(std::make_pair(providers.at(iHisto),providers.at(iHisto+1)));
+        diffProviders.emplace_back(providers.at(iHisto),providers.at(iHisto+1));
     }
 
     // Now make the initial plots
@@ -360,14 +360,14 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[])
     StatusCode::enableFailure();
 #endif // XAOD_STANDALONE
 
-    if (!configs.size())
+    if (configs.empty())
     {
         printf("Failed to find any configs: %s\n",argv[4]);
         return 2;
     }
 
     // Ensure we have to do something
-    if (!fixedEtaS.size() && !fixedPtS.size())
+    if (fixedEtaS.empty() && fixedPtS.empty())
     {
         printf("No fixed pT or eta values were specified, nothing to do.\n");
         return 2;
@@ -380,7 +380,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[])
     {
         for (size_t iEta1 = 0; iEta1 < fixedEtaS.size(); ++iEta1)
             for (size_t iEta2 = 0; iEta2 < fixedEtaS.size(); ++iEta2)
-                fixedEta.push_back(std::make_pair(jet::utils::getTypeObjFromString<double>(fixedEtaS.at(iEta1)),jet::utils::getTypeObjFromString<double>(fixedEtaS.at(iEta2))));
+                fixedEta.emplace_back(jet::utils::getTypeObjFromString<double>(fixedEtaS.at(iEta1)),jet::utils::getTypeObjFromString<double>(fixedEtaS.at(iEta2)));
     }
     else
     {
@@ -388,9 +388,9 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[])
         {
             std::vector<double> temp = jet::utils::vectorize<double>(fixedEtaS.at(iEta),",");
             if (temp.size() == 1 && !makeGrid)
-                fixedEta.push_back(std::make_pair(temp.at(0),temp.at(0)));
+                fixedEta.emplace_back(temp.at(0),temp.at(0));
             else if (temp.size() == 2)
-                fixedEta.push_back(std::make_pair(temp.at(0),temp.at(1)));
+                fixedEta.emplace_back(temp.at(0),temp.at(1));
             else
             {
                 printf("Specified a fixed eta term which is not 1 or 2 values: %s\n",fixedEtaS.at(iEta).Data());
@@ -404,7 +404,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[])
     {
         for (size_t iPt1 = 0; iPt1 < fixedPtS.size(); ++iPt1)
             for (size_t iPt2 = 0; iPt2 < fixedPtS.size(); ++iPt2)
-                fixedPt.push_back(std::make_pair(jet::utils::getTypeObjFromString<double>(fixedPtS.at(iPt1)),jet::utils::getTypeObjFromString<double>(fixedPtS.at(iPt2))));
+                fixedPt.emplace_back(jet::utils::getTypeObjFromString<double>(fixedPtS.at(iPt1)),jet::utils::getTypeObjFromString<double>(fixedPtS.at(iPt2)));
     }
     else
     {
@@ -412,9 +412,9 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[])
         {
             std::vector<double> temp = jet::utils::vectorize<double>(fixedPtS.at(iPt),",");
             if (temp.size() == 1)
-                fixedPt.push_back(std::make_pair(temp.at(0),temp.at(0)));
+                fixedPt.emplace_back(temp.at(0),temp.at(0));
             else if (temp.size() == 2)
-                fixedPt.push_back(std::make_pair(temp.at(0),temp.at(1)));
+                fixedPt.emplace_back(temp.at(0),temp.at(1));
             else
             {
                 printf("Specified a fixed pt term which is not 1 or 2 values: %s\n",fixedPtS.at(iPt).Data());
@@ -512,7 +512,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[])
     if (outHistFile)
     {
         outHistFile->Close();
-        outHistFile = NULL;
+        outHistFile = nullptr;
     }
 
     return 0;

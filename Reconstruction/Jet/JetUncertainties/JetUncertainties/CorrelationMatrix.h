@@ -28,7 +28,7 @@ class ATLAS_NOT_THREAD_SAFE CorrelationMatrix : public asg::AsgMessaging
 {
     public:
         // Constructor/destructor
-        CorrelationMatrix(  const TString name, 
+        CorrelationMatrix(  const TString& name, 
                             const int numBins, 
                             const double minVal, 
                             const double maxVal, 

@@ -57,7 +57,7 @@ private:
   //Set event by event info like rho, mu, NPV
   StatusCode initializeEvent(JetEventInfo& jetEventInfo) const;
   //Add an item to the vector of calibration steps
-  StatusCode getCalibClass(TString calibration);
+  StatusCode getCalibClass(const TString& calibration);
 
 //Private members
 private:

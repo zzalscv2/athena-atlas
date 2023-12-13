@@ -11,18 +11,18 @@
 
 EtaJESCorrection::EtaJESCorrection()
   : JetCalibrationStep::JetCalibrationStep(),
-    m_config(NULL), m_jetAlgo(""), m_calibAreaTag(""), m_mass(false), m_dev(false),
+    m_config(nullptr), m_jetAlgo(""), m_calibAreaTag(""), m_mass(false), m_dev(false),
     m_minPt_JES(10), m_minPt_EtaCorr(8), m_maxE_EtaCorr(2500),
     m_lowPtExtrap(0), m_lowPtMinR(0.25),
-    m_etaBinAxis(NULL)
+    m_etaBinAxis(nullptr)
 { }
 
 EtaJESCorrection::EtaJESCorrection(const std::string& name, TEnv* config, TString jetAlgo, TString calibAreaTag, bool mass, bool dev)
   : JetCalibrationStep::JetCalibrationStep(name.c_str()),
-    m_config(config), m_jetAlgo(jetAlgo), m_calibAreaTag(calibAreaTag), m_mass(mass), m_dev(dev),
+    m_config(config), m_jetAlgo(std::move(jetAlgo)), m_calibAreaTag(std::move(calibAreaTag)), m_mass(mass), m_dev(dev),
     m_minPt_JES(10), m_minPt_EtaCorr(8), m_maxE_EtaCorr(2500),
     m_lowPtExtrap(0), m_lowPtMinR(0.25),
-    m_etaBinAxis(NULL)
+    m_etaBinAxis(nullptr)
 { }
 
 EtaJESCorrection::~EtaJESCorrection() {
@@ -72,11 +72,11 @@ StatusCode EtaJESCorrection::initialize() {
 
   // From mswiatlo, help from dag: variable eta binning
   std::vector<double> etaBins = JetCalibUtils::VectorizeD(m_config->GetValue("JES.EtaBins",""));
-  if (etaBins.size()==0){ // default binning
+  if (etaBins.empty()){ // default binning
     for (int i=0;i<=90; i++) 
       etaBins.push_back(0.1*i-4.5);
   }
-  else if (etaBins.size()==0) { ATH_MSG_FATAL("JES.EtaBins incorrectly specified"); return StatusCode::FAILURE; }
+  else if (etaBins.empty()) { ATH_MSG_FATAL("JES.EtaBins incorrectly specified"); return StatusCode::FAILURE; }
   else if (etaBins.size()>s_nEtaBins+1) {
     ATH_MSG_FATAL( "JES.EtaBins has " << etaBins.size()-1 << " bins, can be maximally 90!" );
     return StatusCode::FAILURE;
@@ -212,7 +212,7 @@ void EtaJESCorrection::loadSplineHists(const TString & fileName, const std::stri
   }
 
   for(int i=0 ; i<m_etaBinAxis->GetNbins(); i++){
-    auto pTH1 = dynamic_cast<TH1*>(etajes_l->At(i));
+    auto *pTH1 = dynamic_cast<TH1*>(etajes_l->At(i));
     if (not pTH1) continue;
     m_etajesFactors[i].reset(pTH1);
     m_etajesFactors[i]->SetDirectory(nullptr);

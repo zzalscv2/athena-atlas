@@ -2,13 +2,15 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <utility>
+
 #include "JetCalibTools/CalibrationMethods/JetSmearingCorrection.h"
 #include "PathResolver/PathResolver.h"
 #include "JetCalibTools/RootHelpers.h"
 
 JetSmearingCorrection::JetSmearingCorrection()
     : JetCalibrationStep()
-    , m_config(NULL)
+    , m_config(nullptr)
     , m_jetAlgo("")
     , m_calibAreaTag("")
     , m_dev(false)
@@ -25,8 +27,8 @@ JetSmearingCorrection::JetSmearingCorrection()
 JetSmearingCorrection::JetSmearingCorrection(const std::string& name, TEnv* config, TString jetAlgo, TString calibAreaTag, bool dev)
     : JetCalibrationStep(name.c_str())
     , m_config(config)
-    , m_jetAlgo(jetAlgo)
-    , m_calibAreaTag(calibAreaTag)
+    , m_jetAlgo(std::move(jetAlgo))
+    , m_calibAreaTag(std::move(calibAreaTag))
     , m_dev(dev)
     , m_jetOutScale("")
     , m_smearType(SmearType::UNKNOWN)
@@ -39,7 +41,7 @@ JetSmearingCorrection::JetSmearingCorrection(const std::string& name, TEnv* conf
 { }
  
 JetSmearingCorrection::~JetSmearingCorrection()
-{ }
+= default;
 
 StatusCode JetSmearingCorrection::initialize()
 {
@@ -166,7 +168,7 @@ StatusCode JetSmearingCorrection::initialize()
         ATH_MSG_FATAL("Failed to get specified histogram from the file: " << smearingHistNameMC.Data());
         return StatusCode::FAILURE;
     }
-    m_smearResolutionMC->SetDirectory(0);
+    m_smearResolutionMC->SetDirectory(nullptr);
 
     m_smearResolutionData = std::unique_ptr<TH1>(dynamic_cast<TH1*>(inputFile->Get(smearingHistNameData)));
     if (!m_smearResolutionData)
@@ -174,7 +176,7 @@ StatusCode JetSmearingCorrection::initialize()
         ATH_MSG_FATAL("Failed to get specified histogram from the file: " << smearingHistNameData.Data());
         return StatusCode::FAILURE;
     }
-    m_smearResolutionData->SetDirectory(0);
+    m_smearResolutionData->SetDirectory(nullptr);
 
     // Done with the input file, close it
     inputFile->Close();

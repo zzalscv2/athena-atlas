@@ -20,7 +20,7 @@ namespace jet
 class ComponentHelper
 {
     public:
-        ComponentHelper(const TString name = "");
+        ComponentHelper(const TString& name = "");
         ComponentHelper(TEnv& settings, const TString& compPrefix, const TString& MCtype, const float energyScaleVal);
         virtual ~ComponentHelper() {}
         
@@ -79,7 +79,7 @@ class ComponentHelper
 class GroupHelper
 {
     public:
-        GroupHelper(const TString name = "");
+        GroupHelper(const TString& name = "");
         GroupHelper(TEnv& settings, const TString& groupPrefix, const TString& MCtype);
         virtual ~GroupHelper() {}
 

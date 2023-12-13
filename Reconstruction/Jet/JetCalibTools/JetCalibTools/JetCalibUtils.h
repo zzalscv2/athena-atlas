@@ -22,8 +22,8 @@ typedef std::vector<double> VecD;
 namespace JetCalibUtils {
 
   // Vectorizing functions and associated typedefs
-  StrV Vectorize (const TString& str, TString sep=" ");
-  VecD VectorizeD(const TString& str, TString sep=" ");
+  StrV Vectorize (const TString& str, const TString& sep=" ");
+  VecD VectorizeD(const TString& str, const TString& sep=" ");
 
   // Read histogram from file and transfer ownership
   std::unique_ptr<const TH1> GetHisto(TFile& file, const TString& hname);

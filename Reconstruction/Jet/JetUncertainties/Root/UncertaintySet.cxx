@@ -26,7 +26,7 @@ UncertaintySet::UncertaintySet(const std::string& name)
 { }
 
 UncertaintySet::~UncertaintySet()
-{ }
+= default;
 
 StatusCode UncertaintySet::initialize(const CP::SystematicSet& systConfig, const std::vector<UncertaintyGroup*>& groups)
 {
@@ -101,7 +101,7 @@ CompScaleVar::TypeEnum UncertaintySet::getSingleVar() const
 
 bool UncertaintySet::getValidity(const xAOD::Jet& jet, const xAOD::EventInfo& eInfo, const CompScaleVar::TypeEnum scaleVar) const
 {
-    if (!m_groups.size())
+    if (m_groups.empty())
         return true;
 
     // If the scale var wasn't specified, need to ensure all groups match
@@ -127,7 +127,7 @@ double UncertaintySet::getUncertainty(const xAOD::Jet& jet, const xAOD::EventInf
     // Each individual group uncertainty will always be positive (quad sum of subgroups)
     // But the weight may be positive or negative (+N sigma or -N sigma variations)
     
-    if (!m_groups.size())
+    if (m_groups.empty())
         return 0;
 
     // If the scale var wasn't specified, need to ensure all groups match
@@ -154,7 +154,7 @@ bool UncertaintySet::getValidUncertainty(double& unc, const xAOD::Jet& jet, cons
     // See getUncertainty for discussion
     // This is not just calling the other two methods for speed, O(n) instead of O(2n)
     
-    if (!m_groups.size())
+    if (m_groups.empty())
     {
         unc = 0;
         return true;
@@ -210,7 +210,7 @@ std::vector< std::pair<CompScaleVar::TypeEnum,bool> > UncertaintySet::getValidit
     std::vector< std::pair<CompScaleVar::TypeEnum,bool> > validity;
 
     // Simple case
-    if (!m_groups.size())
+    if (m_groups.empty())
         return validity;
 
     // Get the sets
@@ -218,7 +218,7 @@ std::vector< std::pair<CompScaleVar::TypeEnum,bool> > UncertaintySet::getValidit
 
     // Process the sets one by one
     for (size_t iVar = 0; iVar < scaleVars.size(); ++iVar)
-        validity.push_back(std::make_pair(scaleVars.at(iVar),getValidity(jet,eInfo,scaleVars.at(iVar))));
+        validity.emplace_back(scaleVars.at(iVar),getValidity(jet,eInfo,scaleVars.at(iVar)));
 
     // Done, return
     return validity;
@@ -229,7 +229,7 @@ std::vector< std::pair<CompScaleVar::TypeEnum,double> > UncertaintySet::getUncer
     std::vector< std::pair<CompScaleVar::TypeEnum,double> > unc;
 
     // Simple case
-    if (!m_groups.size())
+    if (m_groups.empty())
         return unc;
 
     // Get the sets
@@ -237,7 +237,7 @@ std::vector< std::pair<CompScaleVar::TypeEnum,double> > UncertaintySet::getUncer
 
     // Process the sets one by one
     for (size_t iVar = 0; iVar < scaleVars.size(); ++iVar)
-        unc.push_back(std::make_pair(scaleVars.at(iVar),getUncertainty(jet,eInfo,scaleVars.at(iVar))));
+        unc.emplace_back(scaleVars.at(iVar),getUncertainty(jet,eInfo,scaleVars.at(iVar)));
 
     // Done, return
     return unc;
@@ -249,7 +249,7 @@ std::vector< std::pair<CompScaleVar::TypeEnum,bool> > UncertaintySet::getValidUn
     std::vector< std::pair<CompScaleVar::TypeEnum,double> > localUnc;
 
     // Simple case
-    if (!m_groups.size())
+    if (m_groups.empty())
     {
         unc = localUnc;
         return validity;
@@ -262,8 +262,8 @@ std::vector< std::pair<CompScaleVar::TypeEnum,bool> > UncertaintySet::getValidUn
     for (size_t iVar = 0; iVar < scaleVars.size(); ++iVar)
     {
         double localUncValue = JESUNC_ERROR_CODE;
-        validity.push_back(std::make_pair(scaleVars.at(iVar),getValidUncertainty(localUncValue,jet,eInfo,scaleVars.at(iVar))));
-        localUnc.push_back(std::make_pair(scaleVars.at(iVar),localUncValue));
+        validity.emplace_back(scaleVars.at(iVar),getValidUncertainty(localUncValue,jet,eInfo,scaleVars.at(iVar)));
+        localUnc.emplace_back(scaleVars.at(iVar),localUncValue);
     }
 
     // Done, return

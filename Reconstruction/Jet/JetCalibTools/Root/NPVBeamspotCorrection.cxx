@@ -31,7 +31,7 @@
 #include "JetCalibTools/CalibrationMethods/NPVBeamspotCorrection.h"
 
 NPVBeamspotCorrection::NPVBeamspotCorrection()
-  : m_g_nvtx_nreco_bs66mm(0), m_g_nvtx_nreco_bs47mm(0), m_invGraph(0), m_NPVmin(0), m_NPVmax(0)
+  : m_g_nvtx_nreco_bs66mm(nullptr), m_g_nvtx_nreco_bs47mm(nullptr), m_invGraph(nullptr), m_NPVmin(0), m_NPVmax(0)
 {
   initNPVBeamspotCorrection();
 }
@@ -50,7 +50,7 @@ void NPVBeamspotCorrection::initNPVBeamspotCorrection() {
   m_g_nvtx_nreco_bs47mm = NVtx_NReconstructible_bs47mm();
   m_g_nvtx_nreco_bs66mm = NVtx_NReconstructible_bs66mm();
 
-  if (m_invGraph==0) {
+  if (m_invGraph==nullptr) {
     m_invGraph = new TGraph();
     for (int i=0;i<m_g_nvtx_nreco_bs66mm->GetN();++i) 
       m_invGraph->SetPoint(i,m_g_nvtx_nreco_bs66mm->GetY()[i],m_g_nvtx_nreco_bs66mm->GetX()[i]);
