@@ -13,22 +13,13 @@
 #include "RNTupleAuxDynStore.h"
 #include "AthContainersRoot/getDynamicAuxID.h"
 
-#include "TBranch.h"
 #include "TClass.h"
-#include "TClassTable.h"
 #include "TClassEdit.h"
 #include "TVirtualCollectionProxy.h"
 #include "TROOT.h"
-#include "TDictAttributeMap.h"
 
 
-#include <ROOT/RNTupleModel.hxx>
 #include <ROOT/RNTuple.hxx>
-#include <ROOT/REntry.hxx>
-using RNTupleModel = ROOT::Experimental::RNTupleModel;
-using RNTupleReader = ROOT::Experimental::RNTupleReader;
-using REntry = ROOT::Experimental::REntry;
-using RFieldBase = ROOT::Experimental::Detail::RFieldBase;
 using std::string;
 
 namespace {
@@ -56,7 +47,7 @@ getAuxElementType( bool standalone, std::string& elementTypeName, const std::str
       return RootUtils::Type(storageTypeName).getTypeInfo();
    }
 
-   // Not standalone - branch should be a vector.
+   // Not standalone - type should be a vector.
    if( storageTypeName.rfind("vector<", 0) == 0
        || storageTypeName.rfind("std::vector<", 0) == 0 ) {
       const TClass *tclass = RootUtils::Type(storageTypeName).getClass();
@@ -114,33 +105,27 @@ getAuxIdForAttribute(const std::string& attr_name, const std::string& attr_type,
 namespace RootAuxDynIO
 {
 // New RNTupleReader for attributes of an AuxContainer stored in Field 'field_name'
-   RNTupleAuxDynReader::RNTupleAuxDynReader(const std::string& field_name, RNTupleReader* rntReader) :
-              AthMessaging(std::string("RNTupleAuxDynReader[")+field_name+"]"),
-              m_storeFieldName(field_name),
-              m_ntupleReader( rntReader )
+   RNTupleAuxDynReader::RNTupleAuxDynReader(RFieldBase* field, RPageSource* page_source) :
+      AthMessaging( std::string("RNTupleAuxDynReader[")+field->GetName()+"]" ),
+      m_storeFieldName( field->GetName() ),
+      m_pageSource( page_source )
    {
-      const RFieldBase *cont_field = m_ntupleReader->GetModel()->GetField(field_name);
-      if( cont_field ) {
-         std::string field_type = cont_field->GetType();
-         std::string field_prefix = field_type + "_";
-         if( field_name.rfind( field_type, 0 ) != std::string::npos ) {
-            m_key = field_name.substr( field_type.size()+1 );
-         }
-         ATH_MSG_VERBOSE("field name=" << field_name << "  field_prefix=" << field_prefix << "  key=" << m_key);
-         TClass *tc = TClass::GetClass( cont_field->GetType().c_str() );
-         if( tc ) {
-            TClass *storeTC = tc->GetBaseClass("SG::IAuxStoreHolder");
-            if( storeTC ) {
-               m_storeHolderOffset = tc->GetBaseClassOffset( storeTC );
-            } else {
-               throw std::runtime_error(string("Class ") + tc->GetName() +" does not implement SG::IAuxStoreHolder");
-            }
+      const std::string field_type = field->GetType();
+      const std::string field_prefix = field_type + "_";
+      if( m_storeFieldName.rfind( field_type, 0 ) != std::string::npos ) {
+         m_key = m_storeFieldName.substr( field_type.size()+1 );
+      }
+      ATH_MSG_VERBOSE("field name=" << m_storeFieldName << "  field_prefix=" << field_prefix << "  key=" << m_key);
+      TClass *tc = TClass::GetClass( field->GetType().c_str() );
+      if( tc ) {
+         TClass *storeTC = tc->GetBaseClass("SG::IAuxStoreHolder");
+         if( storeTC ) {
+            m_storeHolderOffset = tc->GetBaseClassOffset( storeTC );
          } else {
-            throw std::runtime_error(string("Class ") + field_type +" could not be found");
+            throw std::runtime_error(string("Class ") + tc->GetName() +" does not implement SG::IAuxStoreHolder");
          }
       } else {
-         throw std::runtime_error( string("Field ") + field_name + " could not be found in RNTuple: "
-                                   + m_ntupleReader->GetModel()->GetDescription() );
+         throw std::runtime_error(string("Class ") + field_type +" could not be found");
       }
    }
 
@@ -153,19 +138,20 @@ namespace RootAuxDynIO
    
       const SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
       const string field_prefix = m_storeFieldName + ':';
-      REntry *entry = m_ntupleReader->GetModel()->GetDefaultEntry();
-      for( auto iValue = entry->begin(); iValue != entry->end(); ++iValue ) {
-         string field_name = iValue->GetField()->GetName();
+      auto descGuard = m_pageSource->GetSharedDescriptorGuard();
+      for( const auto &f : descGuard->GetTopLevelFields() ) {
+         const string field_name = f.GetFieldName();
          if( field_name.rfind(field_prefix,0) == 0 ) {
             const string attr_infile = field_name.substr(field_prefix.size());
             const string attr_name = reg.inputRename(m_key, attr_infile);
-            string field_type = iValue->GetField()->GetType();
+            const string field_type = f.GetTypeName();
 
             SG::auxid_t auxid = getAuxIdForAttribute(attr_name, field_type, standalone);
             // add AuxID to the list
-            // May still be null if we don't have a dictionary for the branch.
+            // May still be null if we don't have a dictionary for this field
             if( auxid != SG::null_auxid ) {
                m_auxids.insert(auxid);
+               m_fieldInfos[auxid].field = f.CreateField(descGuard.GetRef()); 
             } else {
                errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "RNTupleAuxDynReader::init");
                msg << "Could not find auxid for " << attr_infile << " type: " << field_type
@@ -196,34 +182,35 @@ namespace RootAuxDynIO
          // This field exists (renaming is only in the transient store),
          // so if we didn't have the condition here, then we'd then
          // make a `foo' attribute from that field.
-         if (reg.inputRename (m_key, fieldInfo.attribName) != fieldInfo.attribName) {
+         if( reg.inputRename(m_key, fieldInfo.attribName) != fieldInfo.attribName ) {
             fieldInfo.status = FieldInfo::NotFound;
             return fieldInfo;
          }
 
          const string field_prefix = m_storeFieldName + ':';
-         REntry *entry = m_ntupleReader->GetModel()->GetDefaultEntry();
-         for( auto iValue = entry->begin(); iValue != entry->end(); ++iValue ) {
-            auto fieldName  = iValue->GetField()->GetName();
-            if( fieldName.rfind(field_prefix,0) == 0 ) {
-               const string attr_infile = fieldName.substr(field_prefix.size());
-               const string attr_name = reg.inputRename(m_key, attr_infile);
-               if( attr_infile == fieldInfo.attribName ) {
-                  fieldInfo.fieldName = fieldName;
-                  fieldInfo.fieldType = iValue->GetField()->GetType();
-                  break;
-               }
-            }
-         }
-         if( fieldInfo.fieldName.empty() ) {
+         const string fieldName  = fieldInfo.field->GetName();
+         const string attr_infile = fieldName.substr(field_prefix.size());
+         const string attr_name = reg.inputRename(m_key, attr_infile);
+         if( attr_infile != fieldInfo.attribName ) {
             // mark initialized here so it remembers this field was not found
             fieldInfo.status = FieldInfo::NotFound;
             return fieldInfo;
          }
 
-         if( !store.standalone() and fieldInfo.fieldType.rfind("SG::PackedContainer<", 0) == 0 )
+         if( !store.standalone() and fieldInfo.field->GetType().rfind("SG::PackedContainer<", 0) == 0 )
             fieldInfo.isPackedContainer = true;
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 30, 0 )
+         // connect the field (with subfields) to the pageSource
+         if( fieldInfo.field->GetState() != RFieldBase::EState::kConnectedToSource ) {
+            fieldInfo.field->ConnectPageSource(*m_pageSource);
+         }
+         for( auto& subfield : *fieldInfo.field ) {
+            if( subfield.GetState() != RFieldBase::EState::kConnectedToSource ) {
+               subfield.ConnectPageSource(*m_pageSource);
+            }
+         }
+#endif
          /*
            string elem_tname, branch_tname;
            const type_info* ti = getAuxElementType( fieldInfo.tclass, typ, store.standalone(),
@@ -252,20 +239,19 @@ namespace RootAuxDynIO
            }
            }
          */
-      
          fieldInfo.status = FieldInfo::Initialized;
       }
       return fieldInfo;
    }
 
 
-   void RNTupleAuxDynReader::addReaderToObject(void* object, size_t ttree_row, std::recursive_mutex* iomtx)
+   void RNTupleAuxDynReader::addReaderToObject(void* object, size_t row, std::recursive_mutex* iomtx)
    {
       auto store_holder = reinterpret_cast<SG::IAuxStoreHolder*>((char*)object + m_storeHolderOffset);
       bool standalone { store_holder->getStoreType()==SG::IAuxStoreHolder::AST_ObjectStore };
       if( !m_initialized )
          init(standalone);
-      store_holder->setStore( new RNTupleAuxDynStore(*this, m_ntupleReader, m_storeFieldName, ttree_row, standalone, iomtx) );
+      store_holder->setStore( new RNTupleAuxDynStore(*this, row, standalone, iomtx) );
    }
 
 }// namespace

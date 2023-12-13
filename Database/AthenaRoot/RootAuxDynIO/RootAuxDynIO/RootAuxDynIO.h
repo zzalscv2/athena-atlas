@@ -13,9 +13,10 @@ class TTree;
 class TFile;
 class TClass;
 
-namespace ROOT { namespace Experimental { class RNTupleReader; } }
-using RNTupleReader   = ROOT::Experimental::RNTupleReader;
-
+namespace ROOT { namespace Experimental { namespace Detail {
+   class RPageSource;
+   class RFieldBase;
+} } }
 namespace SG { class IAuxStoreIO;  class auxid_set_t; }
 
 
@@ -67,9 +68,11 @@ namespace RootAuxDynIO
    std::string getKeyFromBranch(TBranch* branch);
 
    std::unique_ptr<IRootAuxDynReader> getBranchAuxDynReader(TTree*, TBranch*);
-   std::unique_ptr<IRootAuxDynWriter> getBranchAuxDynWriter(TTree*, int bufferSize, int splitLevel, int offsettab_len, bool do_branch_fill);
+   std::unique_ptr<IRootAuxDynWriter> getBranchAuxDynWriter(TTree*, int bufferSize, int splitLevel,
+                                                              int offsettab_len, bool do_branch_fill);
    
-   std::unique_ptr<IRootAuxDynReader> getNTupleAuxDynReader(const std::string&, RNTupleReader*);
+   std::unique_ptr<IRootAuxDynReader> getNTupleAuxDynReader(ROOT::Experimental::Detail::RFieldBase* field,
+                                                              ROOT::Experimental::Detail::RPageSource* source);
    std::unique_ptr<IRNTupleWriter>    getNTupleAuxDynWriter(TFile*,  const std::string& ntupleName, int compression);
 
 
