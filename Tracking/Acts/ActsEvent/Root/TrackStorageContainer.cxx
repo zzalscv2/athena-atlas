@@ -13,8 +13,8 @@ const std::set<std::string> ActsTrk::TrackStorageContainer::staticVariables = {
 
 ActsTrk::TrackStorageContainer::TrackStorageContainer(
     const DataLink<xAOD::TrackSummaryContainer>& link,
-    const DataLink<xAOD::TrackSurfaceContainer>& surfLink)
-    : m_trackBackend(link), m_surfBackend(surfLink) {}
+    const DataLink<xAOD::TrackSurfaceAuxContainer>& surfLink)
+    : m_trackBackend(link), m_surfBackendAux(surfLink) {}
 
 const Acts::Surface* ActsTrk::TrackStorageContainer::referenceSurface_impl(
     ActsTrk::IndexType itrack) const {
@@ -90,7 +90,7 @@ ActsTrk::ConstCovariance ActsTrk::TrackStorageContainer::covariance(
 std::shared_ptr<const Acts::Surface>  ActsTrk::TrackStorageContainer::surface(
     ActsTrk::IndexType itrack) const {
   const ActsGeometryContext& geoContext{};
-  return   decodeSurface( m_surfBackend->at(itrack), geoContext );
+  return decodeSurface( m_surfBackendAux.cptr(), itrack, geoContext );
 }
 
 void ActsTrk::TrackStorageContainer::fillFrom(
@@ -166,7 +166,7 @@ ActsTrk::MutableTrackStorageContainer::MutableTrackStorageContainer() {
   m_mutableSurfBackendAux = std::make_unique<xAOD::TrackSurfaceAuxContainer>();
   m_mutableSurfBackend->setStore(m_mutableSurfBackendAux.get());
 
-  TrackStorageContainer::m_surfBackend = m_mutableSurfBackend.get();  
+  TrackStorageContainer::m_surfBackendAux = m_mutableSurfBackendAux.get();  
 }
 
 ActsTrk::MutableTrackStorageContainer::MutableTrackStorageContainer(
@@ -179,7 +179,7 @@ ActsTrk::MutableTrackStorageContainer::MutableTrackStorageContainer(
   m_mutableSurfBackend = std::move(other.m_mutableSurfBackend);
   m_mutableSurfBackendAux = std::move(other.m_mutableSurfBackendAux);
   m_mutableSurfBackend->setStore(m_mutableSurfBackendAux.get());
-  TrackStorageContainer::m_surfBackend = m_mutableSurfBackend.get();
+  TrackStorageContainer::m_surfBackendAux = m_mutableSurfBackendAux.get();
 
   m_surfaces = std::move(other.m_surfaces);
   m_particleHypothesis = std::move(other.m_particleHypothesis);
@@ -204,16 +204,23 @@ void ActsTrk::MutableTrackStorageContainer::removeTrack_impl(
 
 // Add and remove surface
 ActsTrk::IndexType ActsTrk::MutableTrackStorageContainer::addSurface_impl() {
-  m_mutableSurfBackend->push_back(std::make_unique<xAOD::TrackSurface>());
-  return m_mutableSurfBackend->size() - 1;
+  m_mutableSurfBackendAux->resize(m_mutableSurfBackendAux->size()+1);
+  return m_mutableSurfBackendAux->size() - 1;
 }
 
 void ActsTrk::MutableTrackStorageContainer::removeSurface_impl(
     ActsTrk::IndexType isurf) {
-  if (isurf >= m_mutableSurfBackend->size()) {
+  if (isurf >= m_mutableSurfBackendAux->size()) {
     throw std::out_of_range("removeSurface_impl");
   }
-  m_mutableSurfBackend->erase(m_mutableSurfBackend->begin() + isurf);
+  // TODO find a more generic way to do this (possible issue may sneak ins when adding more variables to backend)  
+  for (auto i = isurf; i < m_mutableSurfBackendAux->size()-1; ++i) {
+    m_mutableSurfBackendAux->surfaceType[i] = m_mutableSurfBackendAux->surfaceType[i+1];
+    m_mutableSurfBackendAux->translation[i] = m_mutableSurfBackendAux->translation[i+1];
+    m_mutableSurfBackendAux->rotation[i] = m_mutableSurfBackendAux->rotation[i+1];
+    m_mutableSurfBackendAux->boundValues[i] = m_mutableSurfBackendAux->boundValues[i+1];
+  }  
+  m_mutableSurfBackendAux->resize(m_mutableSurfBackendAux->size()-1);
 }
 
 

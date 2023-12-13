@@ -18,7 +18,7 @@ AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackSurface_v1, std::vector<float>,
                                   boundValues, setBoundValues)
 
 
-DEFINE_API(TrackSurface_v1, xAOD::SurfaceType, SurfaceType, setSurfaceType)
+AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackSurface_v1, xAOD::SurfaceType, surfaceType, setSurfaceType)
 
 
 size_t TrackSurface_v1::size() const {

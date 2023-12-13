@@ -57,7 +57,7 @@ class TrackStorageContainer {
   using IndexType = uint32_t; // TODO find common place for it
   static constexpr auto kInvalid = Acts::MultiTrajectoryTraits::kInvalid;
   TrackStorageContainer(const DataLink<xAOD::TrackSummaryContainer>& lin = nullptr,
-                        const DataLink<xAOD::TrackSurfaceContainer>& surfLink = nullptr);
+                        const DataLink<xAOD::TrackSurfaceAuxContainer>& surfLink = nullptr);
   static const std::set<std::string> staticVariables;
   /**
   * return true if the container has specific decoration
@@ -107,16 +107,12 @@ class TrackStorageContainer {
     return m_trackBackend.cptr();
   }
 
-  const xAOD::TrackSurfaceContainer* surfBackend() const{
-    return m_surfBackend.cptr();
-  }
-
  protected:
   using DecorationAccess = ActsTrk::detail::Decoration<xAOD::TrackSummaryContainer>;
 
   std::vector<DecorationAccess> m_decorations;
   DataLink<xAOD::TrackSummaryContainer> m_trackBackend = nullptr;
-  DataLink<xAOD::TrackSurfaceContainer> m_surfBackend = nullptr;
+  DataLink<xAOD::TrackSurfaceAuxContainer> m_surfBackendAux = nullptr;
 
 
   std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces;

@@ -21,7 +21,7 @@ namespace xAOD {
         std::vector<Storage> translation;
         std::vector<Storage> rotation;
         std::vector<Storage> boundValues;
-        std::vector<xAOD::SurfaceType> SurfaceType;
+        std::vector<xAOD::SurfaceType> surfaceType;
 
         
     };

@@ -275,6 +275,6 @@ BOOST_AUTO_TEST_CASE(TrackSurface_build) {
         BOOST_CHECK_EQUAL(outpar->rotation()[p], expected);
         BOOST_CHECK_EQUAL(outpar->boundValues()[p], expected);
     }
-    BOOST_CHECK_EQUAL(int(outpar->SurfaceType()), int(type));
+    BOOST_CHECK_EQUAL(int(outpar->surfaceType()), int(type));
 
 }

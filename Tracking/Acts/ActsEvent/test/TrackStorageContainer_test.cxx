@@ -190,13 +190,13 @@ BOOST_AUTO_TEST_CASE(ConstSurfaceBackend_test){
   ActsTrk::encodeSurface(surfCurr, surf.get(), gctx);
 
   // Create constant ActsTrk::TrackStorageContainer
-  std::unique_ptr<ActsTrk::TrackStorageContainer> ms = std::make_unique<ActsTrk::TrackStorageContainer>(&backend, &surfBackend);
+  std::unique_ptr<ActsTrk::TrackStorageContainer> ms = std::make_unique<ActsTrk::TrackStorageContainer>(&backend, &aux0);
 
   // Read the ActsTrk::TrackStorageContainer and check track storage and track surfaces
   auto cc = std::make_unique<ActsTrk::TrackStorageContainer>(ms->trackBackend());
   BOOST_CHECK_EQUAL(cc->size_impl(), 2);
   
-  auto outSurf = ActsTrk::decodeSurface(ms->surfBackend()->at(0), gctx);
+  auto outSurf = ActsTrk::decodeSurface(surfBackend[0], gctx);
   testSurface(surf, outSurf, gctx);
   
 };

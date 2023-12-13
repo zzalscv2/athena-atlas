@@ -57,19 +57,12 @@ namespace xAOD
     /**
      * access SurfaceType
      **/
-    xAOD::SurfaceType SurfaceType() const;
+    const xAOD::SurfaceType& surfaceType() const;
     /**
      * access set SurfaceType
      **/
-    void setSurfaceType(xAOD::SurfaceType m);
+    void setSurfaceType(const xAOD::SurfaceType& m);
   
-    /**
-     * @brief pointers API needed by MTJ
-     */
-    const xAOD::SurfaceType* SurfaceTypePtr() const;
-    xAOD::SurfaceType* SurfaceTypePtr();
-  
-
     /**
      * @brief retrieve the size of the internal vectors for the data storage
      */
