@@ -105,6 +105,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         # Calibration tool options
         self.addOption ('calibToolConfigFile', None, type=str)
         self.addOption ('calibToolCalibArea', None, type=str)
+        self.addOption ('calibToolCalibSeq', None, type=str)
         # Uncertainties tool options
         self.addOption ('uncertToolConfigPath', None, type=str)
         self.addOption ('uncertToolCalibArea', None, type=str)
@@ -152,6 +153,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                     alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC'
                 else:
                     alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
+            if self.calibToolCalibSeq is not None:
+                alg.calibrationTool.CalibSequence = self.calibToolCalibSeq
             alg.calibrationTool.IsData = (config.dataType() is DataType.Data)
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
