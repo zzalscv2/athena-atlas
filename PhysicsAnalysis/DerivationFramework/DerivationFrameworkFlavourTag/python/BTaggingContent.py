@@ -1,66 +1,50 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+"""
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+
+Define sets of standard variables to save in output files
+"""
 
 from AthenaConfiguration.Enums import LHCPeriod
 
-def _getGN2v(n, new_flavors=[]):
-    variants = ["", "Flip","Neg", "Simple"]
-    flavors = list('cub') + new_flavors
-    return [f'GN2v{n:02d}{v}_p{f}' for v in variants for f in flavors]
+def _getVars(name, extra_flavours=None, flip_modes=None):
+    """Convenience function for getting output variable names"""
+    if extra_flavours is None:
+        extra_flavours = []
+    if flip_modes is None:
+        flip_modes = [""]
+    flavors = list("cub") + extra_flavours
+    variants = [""] + flip_modes
+    return [f'{name}{v}_p{f}' for v in variants for f in flavors]
 
-JetStandardAux = \
-    [ "pt"
-    , "eta"
-    , "btaggingLink"
-    , "HadronConeExclTruthLabelID"
-    , "HadronConeExclTruthLabelBarcode"
-    , "HadronConeExclExtendedTruthLabelID"
-    , "ConeExclBHadronsFinal"
-    , "ConeExclCHadronsFinal"
-    , "jetFoldHash"
-    ]
+# some jet variables we always want to save
+JetStandardAux = [
+    "pt",
+    "eta",
+    "btaggingLink",
+    "HadronConeExclTruthLabelID",
+    "HadronConeExclTruthLabelBarcode",
+    "HadronConeExclExtendedTruthLabelID",
+    "ConeExclBHadronsFinal",
+    "ConeExclCHadronsFinal",
+    "jetFoldHash",
+]
 
-BTaggingStandardRun3Aux = \
-    [
-      "DL1dv00_pu" #“first r22 tagger” which is DL1dLoose20210824r22 named DL1dv00
-    , "DL1dv00_pc"
-    , "DL1dv00_pb"
-    , "DL1dv01_pu" # currently (summer 2023) recommended r22 tagger named DL1dv01 which is DL1dLoose20220509
-    , "DL1dv01_pc"
-    , "DL1dv01_pb"
+# standard outputs for Run 3
+BTaggingStandardRun3Aux = [
+    "SV1_NGTinSvx",
+    "SV1_masssvx",
+]
+BTaggingStandardRun3Aux += _getVars("dipsLoose20210729")
+BTaggingStandardRun3Aux += _getVars("dipsLoose20220314v2")
+BTaggingStandardRun3Aux += _getVars("dipsLooseVR20230208")
+BTaggingStandardRun3Aux += _getVars("DL1r20210824r22Flip") # flipped version of DL1r retrained in r22
+BTaggingStandardRun3Aux += _getVars("dipsLoose20220314v2flip")
+BTaggingStandardRun3Aux += _getVars("DL1dv00", flip_modes=['Flip']) # preliminary r22 tagger which used DL1dLoose20210824r22
+BTaggingStandardRun3Aux += _getVars("DL1dv01", flip_modes=['Flip']) # summer 2023 recommended r22 tagger which uses DL1dLoose20220509
+BTaggingStandardRun3Aux += _getVars("GN2v00", flip_modes=['Simple']) # preliminary GN2 tagger
+BTaggingStandardRun3Aux += _getVars("GN2v01", extra_flavours=['tau'], flip_modes=['Simple']) # planned GN2 tagger for first 2024 recommendations
 
-    , "dipsLoose20210729_pu"
-    , "dipsLoose20210729_pc"
-    , "dipsLoose20210729_pb"
-    , "dipsLoose20220314v2_pu"
-    , "dipsLoose20220314v2_pc"
-    , "dipsLoose20220314v2_pb"
-    , "dipsLooseVR20230208_pu"
-    , "dipsLooseVR20230208_pc"
-    , "dipsLooseVR20230208_pb"
-
-    , "SV1_NGTinSvx"
-    , "SV1_masssvx"
-
-    , "DL1dv00Flip_pu"
-    , "DL1dv00Flip_pc"
-    , "DL1dv00Flip_pb"
-
-    , "DL1r20210824r22Flip_pu" # flipped version of DL1r retrained in r22
-    , "DL1r20210824r22Flip_pc"
-    , "DL1r20210824r22Flip_pb"
-
-    , "DL1dv01Flip_pu"
-    , "DL1dv01Flip_pc"
-    , "DL1dv01Flip_pb"
-
-    , "dipsLoose20220314v2flip_pu"
-    , "dipsLoose20220314v2flip_pc"
-    , "dipsLoose20220314v2flip_pb"
-    ]
-
-BTaggingStandardRun3Aux += _getGN2v(0) + _getGN2v(1, new_flavors=['tau'])
-
-
+# standard outputs for Run 4
 BTaggingStandardRun4Aux = [
     "SV1_NGTinSvx",
     "SV1_masssvx",
@@ -79,7 +63,7 @@ BTaggingStandardRun4Aux = [
 ]
 
 
-# These are the inputs to DL1rmu + SMT
+# more involved outputs we might not want to save (ExpertContent)
 BTaggingHighLevelAux = [
     "softMuon_dR",
     "softMuon_pTrel",
@@ -135,44 +119,25 @@ BTaggingHighLevelAux = [
     "softMuon_isDefaults"
 ]
 
-BTaggingHighLevelRun3Aux = BTaggingHighLevelAux \
-                           + [ "DL1r20210824r22_pu"  # r22 retraining of DL1r
-                               , "DL1r20210824r22_pc"
-                               , "DL1r20210824r22_pb"
+# ExpertContent for Run 3
+BTaggingHighLevelRun3Aux = BTaggingHighLevelAux
+BTaggingHighLevelRun3Aux += _getVars("DL1r20210824r22") # r22 retraining of DL1r
+BTaggingHighLevelRun3Aux += _getVars("dips20210729")
+BTaggingHighLevelRun3Aux += _getVars("DL1d20210824r22")
+BTaggingHighLevelRun3Aux += _getVars("GN120220509", flip_modes=['Simple'])
 
-                               , "dips20210729_pu"
-                               , "dips20210729_pc"
-                               , "dips20210729_pb"
-
-                               , "DL1d20210824r22_pu"
-                               , "DL1d20210824r22_pc"
-                               , "DL1d20210824r22_pb" 
-
-                               , "GN120220509_pb"
-                               , "GN120220509_pc"
-                               , "GN120220509_pu"
-                               , "GN120220509Flip_pb"
-                               , "GN120220509Flip_pc"
-                               , "GN120220509Flip_pu"
-                               , "GN120220509Neg_pb"
-                               , "GN120220509Neg_pc"
-                               , "GN120220509Neg_pu"
-                               , "GN120220509Simple_pb"
-                               , "GN120220509Simple_pc"
-                               , "GN120220509Simple_pu"]
-
+# ExpertContent for Run 4
 BTaggingHighLevelRun4Aux = BTaggingHighLevelAux
+
 
 JetGhostLabelAux = [
     "GhostBHadronsFinalCount",
     "GhostCHadronsFinalCount",
     "GhostTausFinalCount",
 ]
-
 BTaggingExtendedAux = [
     "BTagTrackToJetAssociator",
 ]
-
 JetExtendedAux = [
     "GhostBHadronsFinalCount",
     "GhostBHadronsFinalPt",
@@ -183,22 +148,28 @@ JetExtendedAux = [
     "GhostTrack",
 ]
 
-def BTaggingExpertContent(jetcol, ConfigFlags = None):
 
+def _getBtagging(jetcol):
+    """Convenience function for getting btagging names"""
     btaggingtmp = "BTagging_" + jetcol.split('Jets')[0]
     if 'BTagging' in jetcol:
          stamp = jetcol.split('BTagging')[1]
          btaggingtmp += '_'+stamp
-
     # deal with name mismatch between PV0TrackJets and BTagging_Track
     btagging = btaggingtmp.replace("PV0Track", "Track")
+    return btagging
 
+
+def _isRun4(ConfigFlags):
+    """Convenience function for checking if we are in Run4"""
+    return ConfigFlags is not None and ConfigFlags.GeoModel.Run >= LHCPeriod.Run4
+
+
+def BTaggingExpertContent(jetcol, ConfigFlags = None):
+    btagging = _getBtagging(jetcol)
     jetAllAux = JetStandardAux + JetExtendedAux
     jetcontent = [ ".".join( [ jetcol + "Aux" ] + jetAllAux ) ]
-
-    isRun4 = False
-    if ConfigFlags is not None:
-        isRun4 = ConfigFlags.GeoModel.Run >= LHCPeriod.Run4
+    isRun4 = _isRun4(ConfigFlags)
 
     # add aux variables
     btaggingAllAux = ( (BTaggingHighLevelRun4Aux if isRun4 else BTaggingHighLevelRun3Aux)
@@ -210,21 +181,9 @@ def BTaggingExpertContent(jetcol, ConfigFlags = None):
 
 
 def BTaggingStandardContent(jetcol, ConfigFlags = None):
-
-    btaggingtmp = "BTagging_" + jetcol.split('Jets')[0]
-    if 'BTagging' in jetcol:
-         stamp = jetcol.split('BTagging')[1]
-         btaggingtmp += '_'+stamp
-    # deal with name mismatch between PV0TrackJets and BTagging_Track
-    btagging = btaggingtmp.replace("PV0Track", "Track")
-
-    jetcontent = [ jetcol ] + [
-        ".".join( [ jetcol + "Aux" ] + JetStandardAux )
-    ]
-
-    isRun4 = False
-    if ConfigFlags is not None:
-        isRun4 = ConfigFlags.GeoModel.Run >= LHCPeriod.Run4
+    btagging = _getBtagging(jetcol)
+    jetcontent = [ jetcol ] + [".".join( [ jetcol + "Aux" ] + JetStandardAux )]
+    isRun4 = _isRun4(ConfigFlags)
 
     aux = BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux
     btagcontent = [ btagging ] + [ ".".join([ btagging + "Aux" ] + aux) ]
@@ -233,21 +192,10 @@ def BTaggingStandardContent(jetcol, ConfigFlags = None):
 
 
 def BTaggingXbbContent(jetcol, ConfigFlags = None):
-
-    btaggingtmp = "BTagging_" + jetcol.split('Jets')[0]
-    if 'BTagging' in jetcol:
-         stamp = jetcol.split('BTagging')[1]
-         btaggingtmp += '_'+stamp
-
-    # deal with name mismatch between PV0TrackJets and BTagging_Track
-    btagging = btaggingtmp.replace("PV0Track", "Track")
-
+    btagging = _getBtagging(jetcol)
     jetAllAux = JetStandardAux + JetGhostLabelAux
     jetcontent = [ ".".join( [ jetcol + "Aux" ] + jetAllAux ) ]
-
-    isRun4 = False
-    if ConfigFlags is not None:
-        isRun4 = ConfigFlags.GeoModel.Run >= LHCPeriod.Run4
+    isRun4 = _isRun4(ConfigFlags)
 
     hl_aux = BTaggingHighLevelRun4Aux if isRun4 else BTaggingHighLevelRun3Aux
     aux = BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux

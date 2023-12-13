@@ -1,4 +1,11 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+"""
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+
+Main configuration of flavour tagging algorithms.
+The low and high level tagging algorithms are scheduled here.
+"""
+
+from pathlib import Path
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -8,10 +15,8 @@ from BTagging.JetBTaggingAlgConfig import JetBTaggingAlgCfg
 from BTagging.JetSecVertexingAlgConfig import JetSecVertexingAlgCfg
 from BTagging.JetSecVtxFindingAlgConfig import JetSecVtxFindingAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
-from FlavorTagDiscriminants.BTagJetAugmenterAlgConfig import (
-    BTagJetAugmenterAlgCfg)
-from FlavorTagDiscriminants.BTagMuonAugmenterAlgConfig import (
-    BTagMuonAugmenterAlgCfg)
+from FlavorTagDiscriminants.BTagJetAugmenterAlgConfig import BTagJetAugmenterAlgCfg
+from FlavorTagDiscriminants.BTagMuonAugmenterAlgConfig import BTagMuonAugmenterAlgCfg
 from FlavorTagDiscriminants.FlavorTagNNConfig import (
     FlavorTagNNCfg,
     MultifoldGNNCfg,
@@ -185,7 +190,7 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
     if inputFlags.Output.doWriteESD:
      result.merge(addBTagToOutput(inputFlags, JetCollection, toAOD=False, toESD=True))
 
-    # Invoking the alhorithm saving hits in the vicinity of jets, with proper flags
+    # Invoking the algorithm saving hits in the vicinity of jets, with proper flags
     if inputFlags.BTagging.Trackless:
         result.merge(JetHitAssociationCfg(inputFlags))
         result.merge(TrackHitAssignementAlg(inputFlags))
@@ -212,17 +217,23 @@ def _track_measurement_list(container_name):
     ]
 
 
-def BTagAlgsCfg(inputFlags,
-                JetCollection,
-                nnList=[],
-                TaggerList=None,
-                SecVertexers=None,
-                trackCollection='InDetTrackParticles',
-                primaryVertices='PrimaryVertices',
-                muons='Muons',
-                BTagCollection=None,
-                renameTrackJets=False,
-                AddedJetSuffix=''):
+def BTagAlgsCfg(
+    inputFlags,
+    JetCollection,
+    nnList=[],
+    TaggerList=None,
+    SecVertexers=None,
+    trackCollection='InDetTrackParticles',
+    primaryVertices='PrimaryVertices',
+    muons='Muons',
+    BTagCollection=None,
+    renameTrackJets=False,
+    AddedJetSuffix='',
+):
+    """
+    This is the main function in this module and does the heavy lifting of 
+    scheduling the tagging algorithms.
+    """
 
     # If things aren't specified in the arguments, we'll read them
     # from the config flags
@@ -238,7 +249,6 @@ def BTagAlgsCfg(inputFlags,
     if renameTrackJets is True:
         jetcol_no_suffix = jet.replace("Track", "PV0Track")
         jetcol = jetcol.replace("Track", "PV0Track")
-
     if BTagCollection is None:
         BTagCollection = inputFlags.BTagging.OutputFiles.Prefix + jet
 
@@ -323,8 +333,7 @@ def BTagAlgsCfg(inputFlags,
         result.merge(NewVrtSecInclusiveAlgMediumCfg(inputFlags))
         result.merge(NewVrtSecInclusiveAlgLooseCfg(inputFlags))
 
-    # Add some high level information to the b-tagging object we
-    # created above
+    # Add some high level information to the b-tagging object we created above
     result.merge(
         BTagJetAugmenterAlgCfg(
             inputFlags,
@@ -334,7 +343,7 @@ def BTagAlgsCfg(inputFlags,
         )
     )
 
-    #add also Flip tagger information
+    # add also Flip tagger information
     if inputFlags.BTagging.RunFlipTaggers:
        result.merge(
            BTagJetAugmenterAlgCfg(
@@ -346,7 +355,7 @@ def BTagAlgsCfg(inputFlags,
            )
        )
 
-
+    # add muon info
     if muons:
         result.merge(
             BTagMuonAugmenterAlgCfg(
@@ -358,29 +367,35 @@ def BTagAlgsCfg(inputFlags,
         )
 
     # Add the final taggers based on neural networks
-    for dl2 in nnList:
+    for nn_path in nnList:
+        # add standard (unflipped) taggers
         result.merge(
             FlavorTagNNCfg(
                 inputFlags,
-                BTagCollection,
+                BTaggingCollection=BTagCollection,
                 TrackCollection=trackCollection,
-                NNFile=dl2)
+                NNFile=nn_path)
         )
-        # add flip taggers, sometimes
+        # add flip taggers if requested
         if inputFlags.BTagging.RunFlipTaggers:
-            for flip_config in _get_flip_config(dl2):
+            for flip_config in _get_flip_config(nn_path):
                 result.merge(
                     FlavorTagNNCfg(
                         inputFlags,
                         BTaggingCollection=BTagCollection,
                         TrackCollection=trackCollection,
-                        NNFile=dl2,
+                        NNFile=nn_path,
                         FlipConfig=flip_config,
                     )
                 )
 
-    # multifold models
+    # multifold models, at the moment this is only supported via inputFlags
     for networks in inputFlags.BTagging.NNs.get(jetcol, []):
+        assert len(networks['folds']) > 1
+        dirnames = [Path(path).parent for path in networks['folds']]
+        assert len(set(dirnames)) == 1, 'Different folds should be located in the same dir'
+        dirname = str(dirnames[0])
+
         args = dict(
             flags=inputFlags,
             BTaggingCollection=BTagCollection,
@@ -388,21 +403,21 @@ def BTagAlgsCfg(inputFlags,
             nnFilePaths=networks['folds'],
             remapping=networks.get('remapping', {})
         )
+        
+        # run the standard (unflipped tagger)
         result.merge(MultifoldGNNCfg(**args))
+
+        # add flip taggers
         if inputFlags.BTagging.RunFlipTaggers and networks.get('flip', True):
-            for flip_config in _get_flip_config(dl2):
+            for flip_config in _get_flip_config(dirname):
                 result.merge(MultifoldGNNCfg(**args, FlipConfig=flip_config))
-
-
 
     return result
 
 
 def _get_flip_config(nn_path):
     """
-    Schedule NN-based IP 'flip' taggers (rnnipflip and dipsflip) -
-    this should for the moment only run on the low-level taggers and
-    not on 'dl1x'.
+    Schedule NN-based IP 'flip' taggers.
 
     FlipConfig is "STANDARD" by default - for flip tagger set up with
     option "NEGATIVE_IP_ONLY" (flip sign of d0 and use only (flipped)
@@ -410,13 +425,15 @@ def _get_flip_config(nn_path):
 
     Returns a list of flip configurations, or [] for things we don't flip.
     """
+    nn_path = nn_path.lower()
+
     #flipping of DL1r with 2019 taggers does not work at the moment
     if (('dl1d' in nn_path) or ('dl1r' in nn_path and '201903' not in nn_path)):
         return ['FLIP_SIGN']
     if 'rnnip' in nn_path or 'dips' in nn_path:
         return ['NEGATIVE_IP_ONLY']
     if 'gn1' in nn_path or 'gn2' in nn_path:
-        return ['FLIP_SIGN', 'NEGATIVE_IP_ONLY','SIMPLE_FLIP']
+        return ['SIMPLE_FLIP']
     else:
         return []
 
@@ -442,7 +459,6 @@ def addBTagToOutput(inputFlags, JetCollectionList, toAOD=True, toESD=True):
 # ---------------------------------------------------------------------------
 # copied from the old BTaggingConfiguration.py
 # ---------------------------------------------------------------------------
-
 def registerContainer(JetCollection, bfg):
     Prefix = "BTagging_"
     SV = "SecVtx"
