@@ -275,7 +275,7 @@ EgammaCalibrationAndSmearingTool::EgammaCalibrationAndSmearingTool(const std::st
                            const xAOD::Egamma& egamma,
                            const xAOD::EventInfo& ei) {
 			  // avoid 0 as result, see https://root.cern.ch/root/html/TRandom3.html#TRandom3:SetSeed
-			  return 1 + static_cast<RandomNumber>(std::abs(egamma.phi()) * 1E6 + std::abs(egamma.eta()) * 1E3 + ei.eventNumber()); })
+			  return 1 + static_cast<RandomNumber>(std::abs(egamma.caloCluster()->phi()) * 1E6 + std::abs(egamma.caloCluster()->eta()) * 1E3 + ei.eventNumber()); })
 {
   declareProperty("ESModel", m_ESModel = "");
   declareProperty("decorrelationModel", m_decorrelation_model_name = "");
