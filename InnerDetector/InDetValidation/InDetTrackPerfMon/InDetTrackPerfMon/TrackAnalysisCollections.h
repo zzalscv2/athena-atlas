@@ -54,7 +54,7 @@ namespace IDTPM {
     ~TrackAnalysisCollections() = default;
 
     /// = operator
-    TrackAnalysisCollections& operator=( const TrackAnalysisCollections& ) = default;
+    TrackAnalysisCollections& operator=( const TrackAnalysisCollections& ) = delete;
 
     /// load the TrkAnalysisDefinition service
     StatusCode loadTrkAnaDefSvc();
@@ -144,14 +144,12 @@ namespace IDTPM {
     std::vector< const xAOD::TrackParticle* > trigTrackVec( Stage stage = FULL ) {
       return m_trigTrackVec[ stage ]; }
 
-    /// --- Collections class variables ---
-
-    /// Full collections
-    const xAOD::TruthParticleContainer* truthTrackContainer;
-    const xAOD::TrackParticleContainer* offlTrackContainer;
-    const xAOD::TrackParticleContainer* trigTrackContainer;
-
   private:
+    /// --- Collections class variables ---
+    /// Full collections
+    const xAOD::TruthParticleContainer* m_truthTrackContainer{nullptr};
+    const xAOD::TrackParticleContainer* m_offlTrackContainer{nullptr};
+    const xAOD::TrackParticleContainer* m_trigTrackContainer{nullptr};
 
     /// vectors of track/truth particles at different stages of the selection/workflow
     std::vector<std::vector< const xAOD::TruthParticle* >> m_truthTrackVec{};
