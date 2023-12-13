@@ -2,8 +2,10 @@
 
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
-
-    args = SetupArgParser().parse_args()
+    parser = SetupArgParser()
+    parser.set_defaults(nEvents = -1)
+    parser.set_defaults(inputFile = ["myMuonSimTestStream.pool.root"])
+    args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
     
     from xAODMuonSimHitCnv.MuonSimHitCnvCfg import xAODSimHitToMdtMeasCnvAlgCfg    
