@@ -22,7 +22,7 @@ class InfoHelper
     public:
         InfoHelper(const ValidityHistogram& validHist, const float energyScale, const CompMassDef::TypeEnum massDef)
             : m_validHist(validHist), m_energyScale(energyScale), m_massDef(massDef) {}
-        virtual ~InfoHelper() {}
+        virtual ~InfoHelper() = default;
         virtual InfoHelper* clone() const = 0;
         
         virtual bool isValid(const xAOD::Jet& jet) const = 0;
@@ -283,7 +283,7 @@ ValidityHistogram::ValidityHistogram(const std::string& histName, const CompPara
     , m_param(parametrization)
     , m_energyScale(energyScale)
     , m_massDef(massDef)
-    , m_helper(NULL)
+    , m_helper(nullptr)
 {
     ATH_MSG_DEBUG(Form("Creating ValidityHistogram named %s",getName().Data()));
 }
@@ -302,7 +302,7 @@ ValidityHistogram::ValidityHistogram(const ValidityHistogram& toCopy)
     , m_param(toCopy.m_param)
     , m_energyScale(toCopy.m_energyScale)
     , m_massDef(toCopy.m_massDef)
-    , m_helper(NULL)
+    , m_helper(nullptr)
 {
     ATH_MSG_DEBUG("Creating copy of ValidityHistogram named " << getName().Data());
     m_helper = toCopy.m_helper->clone();

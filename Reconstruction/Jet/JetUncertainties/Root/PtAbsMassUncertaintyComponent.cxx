@@ -62,7 +62,7 @@ double PtAbsMassUncertaintyComponent::getUncertaintyImpl(const xAOD::Jet& jet, c
 {
     // Check if we need to do anything at all - this uncertainty may be zero based on the jet truth label
     // Truth labels are usually not expected for this component, so check if we need to do this
-    if (m_truthLabels.size())
+    if (!m_truthLabels.empty())
     {
         // Truth labels are specified, so we need to check if this jet is labelled appropriately or not
         const SG::AuxElement::ConstAccessor<int> accTruthLabel(m_truthLabelName);

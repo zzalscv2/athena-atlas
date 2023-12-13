@@ -51,8 +51,8 @@ int main (int argc, char* argv[])
     const TString jetAlgo = argv[1];
     const TString config  = argv[2];
     const TString outFile = argv[3];
-    const bool isDevMode  = ( argc > 4 && (TString(argv[4]) == "true" || TString(argv[4]) == "dev") ) ? true : false;
-    const bool vsE        = ( argc > 5 && (TString(argv[5]) == "true") ) ? true : false;
+    const bool isDevMode  = argc > 4 && (TString(argv[4]) == "true" || TString(argv[4]) == "dev");
+    const bool vsE        = argc > 5 && (TString(argv[5]) == "true");
     
     // Derived information
     const bool outFileIsExtensible = outFile.EndsWith(".pdf") || outFile.EndsWith(".ps") || outFile.EndsWith(".root");

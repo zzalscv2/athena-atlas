@@ -148,7 +148,7 @@ StatusCode JetCalibrationTool::initialize() {
   m_timeDependentCalib = m_globalConfig->GetValue("TimeDependentInsituCalibration",false);
   if(m_timeDependentCalib && calibSeq.Contains("Insitu")){ // Read Insitu Configs
     m_timeDependentInsituConfigs = JetCalibUtils::Vectorize( m_globalConfig->GetValue("InsituTimeDependentConfigs","") );
-    if(m_timeDependentInsituConfigs.size()==0) ATH_MSG_ERROR("Please check there are at least two insitu configs");
+    if(m_timeDependentInsituConfigs.empty()) ATH_MSG_ERROR("Please check there are at least two insitu configs");
     m_runBins = JetCalibUtils::VectorizeD( m_globalConfig->GetValue("InsituRunBins","") );
     if(m_runBins.size()!=m_timeDependentInsituConfigs.size()+1) ATH_MSG_ERROR("Please check the insitu run bins");
     for(unsigned int i=0;i<m_timeDependentInsituConfigs.size();++i){
@@ -170,7 +170,7 @@ StatusCode JetCalibrationTool::initialize() {
   m_insituCombMassCalib = m_globalConfig->GetValue("InsituCombinedMassCorrection",false);
   if(m_insituCombMassCalib && calibSeq.Contains("InsituCombinedMass")){ // Read Combination Config
     m_insituCombMassConfig = JetCalibUtils::Vectorize( m_globalConfig->GetValue("InsituCombinedMassCorrectionFile","") );
-    if(m_insituCombMassConfig.size()==0) ATH_MSG_ERROR("Please check there is a combination config");
+    if(m_insituCombMassConfig.empty()) ATH_MSG_ERROR("Please check there is a combination config");
     for(unsigned int i=0;i<m_insituCombMassConfig.size();++i){
 
       std::string configPath_comb = dir+m_insituCombMassConfig.at(i).Data(); // Full path
@@ -226,7 +226,7 @@ StatusCode JetCalibrationTool::initialize() {
 }
 
 //Method for initializing the requested calibration derived classes
-StatusCode JetCalibrationTool::getCalibClass(TString calibration) {
+StatusCode JetCalibrationTool::getCalibClass(const TString& calibration) {
   TString jetAlgo = m_jetAlgo;
   const TString calibPath = "CalibArea-" + m_calibAreaTag + "/";
   if ( calibration.EqualTo("Bcid") ){
@@ -349,7 +349,7 @@ StatusCode JetCalibrationTool::applyCalibration(xAOD::JetContainer& jets) const 
 StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const {
 
   // Check if the tool was initialized
-  if( m_calibSteps.size() == 0 ){
+  if( m_calibSteps.empty() ){
     ATH_MSG_FATAL("   JetCalibrationTool::initializeEvent : The tool was not initialized.");
     return StatusCode::FAILURE;
   }
@@ -363,7 +363,7 @@ StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const
     //Determine the rho value to use for the jet area subtraction
     //Should be determined using EventShape object, use hard coded values if EventShape doesn't exist
     double rho=0;
-    const xAOD::EventShape * eventShape = 0;
+    const xAOD::EventShape * eventShape = nullptr;
 
     SG::ReadHandle<xAOD::EventShape> rhRhoKey(m_rhoKey);
 
@@ -392,7 +392,7 @@ StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const
     // Necessary retrieval and calculation for use of nJetX instead of NPV
     if(m_useNjetInResidual) {
       // retrieve the container
-      const xAOD::JetContainer * jets = 0;
+      const xAOD::JetContainer * jets = nullptr;
       if (evtStore()->contains<xAOD::JetContainer>(m_nJetContainerName) ) {
         ATH_MSG_VERBOSE("  Found jet container " << m_nJetContainerName);
         if ( evtStore()->retrieve(jets, m_nJetContainerName).isFailure() || !jets ) {
@@ -406,7 +406,7 @@ StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const
 
       // count jets above threshold
       int nJets = 0;
-      for (auto jet : *jets) {
+      for (const auto *jet : *jets) {
         if(jet->pt()/1000. > m_nJetThreshold)
           nJets += 1;
       }
@@ -416,7 +416,7 @@ StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const
 
   // Retrieve EventInfo object, which now has multiple uses
   if ( m_doResidual || m_doGSC || m_doBcid || m_timeDependentCalib) {
-    const xAOD::EventInfo * eventObj = 0;
+    const xAOD::EventInfo * eventObj = nullptr;
     static std::atomic<unsigned int> eventInfoWarnings = 0;
     SG::ReadHandle<xAOD::EventInfo> rhEvtInfo(m_evtInfoKey);
     if ( rhEvtInfo.isValid() ) {
@@ -470,7 +470,7 @@ StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const
     if ((m_doResidual && !m_useNjetInResidual) || (m_doGSC && jetEventInfo.PVIndex()))
     {
       //Retrieve VertexContainer object, use it to obtain NPV for the residual correction or check validity of GSC non-PV0 usage
-      const xAOD::VertexContainer * vertices = 0;
+      const xAOD::VertexContainer * vertices = nullptr;
 
       SG::ReadHandle<xAOD::VertexContainer> rhPV(m_pvKey);
       if (rhPV.isValid()) {
@@ -521,7 +521,7 @@ StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const
     }
 
     static std::atomic<unsigned int> eventInfoWarningsPV = 0;
-    const xAOD::VertexContainer * vertices = 0;
+    const xAOD::VertexContainer * vertices = nullptr;
     SG::ReadHandle<xAOD::VertexContainer> rhPV(m_pvKey);
     if (rhPV.isValid()) {
       vertices = rhPV.cptr();

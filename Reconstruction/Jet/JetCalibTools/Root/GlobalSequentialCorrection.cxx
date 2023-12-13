@@ -20,6 +20,8 @@
 
 #include <TKey.h>
 
+#include <utility>
+
 #include "xAODMuon/MuonSegmentContainer.h"
 
 #include "JetCalibTools/CalibrationMethods/GlobalSequentialCorrection.h"
@@ -30,7 +32,7 @@
 
 GlobalSequentialCorrection::GlobalSequentialCorrection()
   : JetCalibrationStep::JetCalibrationStep(),
-    m_config(NULL), m_jetAlgo(""), m_depthString("auto"), m_calibAreaTag(""), m_dev(false),
+    m_config(nullptr), m_jetAlgo(""), m_depthString("auto"), m_calibAreaTag(""), m_dev(false),
     m_binSize(0.1), m_depth(0), 
     m_trackWIDTHMaxEtaBin(25), m_nTrkMaxEtaBin(25), m_Tile0MaxEtaBin(17), m_EM3MaxEtaBin(35), m_chargedFractionMaxEtaBin(27), m_caloWIDTHMaxEtaBin(35), m_N90ConstituentsMaxEtaBin(35),
     m_TileGap3MaxEtaBin(16), m_punchThroughMinPt(50), m_useOriginVertex(false)
@@ -39,7 +41,7 @@ GlobalSequentialCorrection::GlobalSequentialCorrection()
 
 GlobalSequentialCorrection::GlobalSequentialCorrection(const std::string& name, TEnv* config, TString jetAlgo, const std::string& depth, TString calibAreaTag,  bool useOriginVertex, bool dev)
   : JetCalibrationStep::JetCalibrationStep(name.c_str()),
-    m_config(config), m_jetAlgo(jetAlgo), m_depthString(depth), m_calibAreaTag(calibAreaTag), m_dev(dev),
+    m_config(config), m_jetAlgo(std::move(jetAlgo)), m_depthString(depth), m_calibAreaTag(std::move(calibAreaTag)), m_dev(dev),
     m_binSize(0.1), m_depth(0),
     m_trackWIDTHMaxEtaBin(25), m_nTrkMaxEtaBin(25), m_Tile0MaxEtaBin(17), m_EM3MaxEtaBin(35), m_chargedFractionMaxEtaBin(27), m_caloWIDTHMaxEtaBin(35), m_N90ConstituentsMaxEtaBin(35), 
     m_TileGap3MaxEtaBin(16), m_punchThroughMinPt(50), m_useOriginVertex(useOriginVertex)
@@ -57,8 +59,7 @@ StatusCode GlobalSequentialCorrection::initialize() {
   }
 
   // Set m_PFlow
-  if( m_jetAlgo == "AntiKt4EMPFlow" ) m_PFlow = true;
-  else{m_PFlow=false;}
+  m_PFlow = m_jetAlgo == "AntiKt4EMPFlow";
   
   // Set m_caloBased
   if( m_jetAlgo == "AntiKt4EMTopoTrig" && !m_PFlow ) {
@@ -171,7 +172,7 @@ StatusCode GlobalSequentialCorrection::initialize() {
   std::vector<TString> histoNames;
   //fill the names of the TKeys into a vector of TStrings
   TIter ikeys(keys);
-  while ( TKey *iterobj = (TKey*)ikeys() ) { histoNames.push_back( iterobj->GetName() ); }
+  while ( TKey *iterobj = (TKey*)ikeys() ) { histoNames.emplace_back(iterobj->GetName() ); }
 
   //Grab the TH2Fs from the ROOT file and put them into a vectors of TH2Fs
   for (uint ihisto=0; ihisto<histoNames.size(); ++ihisto) {
@@ -353,7 +354,7 @@ double GlobalSequentialCorrection::getChargedFractionResponse(double pT, uint et
 double GlobalSequentialCorrection::getPunchThroughResponse(double E, double eta_det, int Nsegments) const {
   int etabin=-99;
   //Check that the punch through eta binning defined in the config appears reasonable, otherwise throw an error.
-  if (m_punchThroughEtaBins.size()==0 || m_respFactorsPunchThrough.size() != m_punchThroughEtaBins.size()-1) 
+  if (m_punchThroughEtaBins.empty() || m_respFactorsPunchThrough.size() != m_punchThroughEtaBins.size()-1) 
     ATH_MSG_WARNING("Please check that the punch through eta binning is properly set in your config file");
   if ( eta_det >= m_punchThroughEtaBins.back() || Nsegments < 20 ) return 1;
   for (uint i=0; i<m_punchThroughEtaBins.size()-1; ++i) {

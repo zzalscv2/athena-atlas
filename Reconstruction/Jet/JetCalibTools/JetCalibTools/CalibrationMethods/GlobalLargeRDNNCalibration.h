@@ -56,7 +56,7 @@ public:
     @param calibAreaTag  The tag for this calibration
     @param dev           A flag for if the calibration is run in development mode
     */
-    GlobalLargeRDNNCalibration(const std::string& name, TEnv * config, TString calibArea, bool dev);
+    GlobalLargeRDNNCalibration(const std::string& name, TEnv * config, const TString& calibArea, bool dev);
 
     /**
     @brief  The destructor

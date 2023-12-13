@@ -23,7 +23,7 @@ namespace CompCategory
         Other       // Other uncertainties that don't fit in the above (MC nonclosure, ...)
     };
     TString enumToString(const TypeEnum type);
-    TypeEnum stringToEnum(const TString type);
+    TypeEnum stringToEnum(const TString& type);
 }
 
 namespace CompCorrelation
@@ -35,7 +35,7 @@ namespace CompCorrelation
         Correlated      // Correlated systematic - add linearly
     };
     TString enumToString(const TypeEnum type);
-    TypeEnum stringToEnum(const TString type);
+    TypeEnum stringToEnum(const TString& type);
 }
 
 
@@ -60,7 +60,7 @@ namespace CompParametrization
     };
 
     TString enumToString(const TypeEnum type);
-    TypeEnum stringToEnum(const TString type);
+    TypeEnum stringToEnum(const TString& type);
     bool isAbsEta(const TypeEnum type);
     bool includesMass(const TypeEnum type);
 }
@@ -80,7 +80,7 @@ namespace CompMassDef
     };
 
     TString enumToString(const TypeEnum type);
-    TypeEnum stringToEnum(const TString type);
+    TypeEnum stringToEnum(const TString& type);
     TString getJetScaleString(const TypeEnum type);
 
 }
@@ -117,7 +117,7 @@ namespace CompScaleVar
         FourVecResAbs   // The jet energy resolution applied to the full four-vector, absolute
     };
     TString enumToString(const TypeEnum type);
-    TypeEnum stringToEnum(const TString type);
+    TypeEnum stringToEnum(const TString& type);
 
     bool isScaleType(const TypeEnum type);
     bool isResolutionType(const TypeEnum type);
@@ -140,7 +140,7 @@ namespace CompFlavorLabelVar
 	q           // background jet
     };
     TString enumToString(const TypeEnum type);
-    TypeEnum stringToEnum(const TString type);
+    TypeEnum stringToEnum(const TString& type);
 }
 
 namespace CompTaggerRegionVar
@@ -154,7 +154,7 @@ namespace CompTaggerRegionVar
 	failMfailD2_2Var // failing both mass and D2 cuts
     };
     TString enumToString(const TypeEnum type);
-    TypeEnum stringToEnum(const TString type);
+    TypeEnum stringToEnum(const TString& type);
 }
 
 namespace PileupComp
@@ -168,7 +168,7 @@ namespace PileupComp
         RhoTopology // Rho topology systematic (no NPV or mu dependence, but pileup anyway)
     };
     TString enumToString(const TypeEnum type);
-    TypeEnum stringToEnum(const TString type);
+    TypeEnum stringToEnum(const TString& type);
 }
 
 namespace FlavourComp
@@ -186,7 +186,7 @@ namespace FlavourComp
         PerJetResponse_C
     };
     TString enumToString(const TypeEnum type);
-    TypeEnum stringToEnum(const TString type);
+    TypeEnum stringToEnum(const TString& type);
 }
 
 namespace CombMassComp
@@ -199,7 +199,7 @@ namespace CombMassComp
         Both            // Coherent calo and TA uncertainties
     };
     TString enumToString(const TypeEnum type);
-    TypeEnum stringToEnum(const TString type);
+    TypeEnum stringToEnum(const TString& type);
 }
 
 namespace JetTopology
@@ -214,7 +214,7 @@ namespace JetTopology
         MIXED           // Mixed topology (multiple of the above)
     };
     TString enumToString(const TypeEnum type);
-    TypeEnum stringToEnum(const TString type);
+    TypeEnum stringToEnum(const TString& type);
 }
 
 // Unset the TRUE and FALSE macros, defined in a custom way on macOS 11.
@@ -246,7 +246,7 @@ namespace Interpolate
         OnlyY           // Interpolate only in the y-direction (hold x,z fixed)
     };
     TString enumToString(const TypeEnum type);
-    TypeEnum stringToEnum(const TString type);
+    TypeEnum stringToEnum(const TString& type);
 }
 
 } // end jet namespace

@@ -21,10 +21,10 @@ CombinedMassUncertaintyComponent::CombinedMassUncertaintyComponent(const std::st
     : UncertaintyComponent(ComponentHelper(name),0)
     , m_combMassType(CombMassComp::UNKNOWN)
     , m_setWeightMassDefs(false)
-    , m_caloMassComp(NULL)
-    , m_TAMassComp(NULL)
-    , m_caloMassWeight(NULL)
-    , m_TAMassWeight(NULL)
+    , m_caloMassComp(nullptr)
+    , m_TAMassComp(nullptr)
+    , m_caloMassWeight(nullptr)
+    , m_TAMassWeight(nullptr)
     , m_caloMassScale_weights("")
     , m_TAMassScale_weights("")
     , m_weightParam(CompParametrization::UNKNOWN)
@@ -38,10 +38,10 @@ CombinedMassUncertaintyComponent::CombinedMassUncertaintyComponent(const Compone
     : UncertaintyComponent(component,0)
     , m_combMassType(component.combMassType)
     , m_setWeightMassDefs(false)
-    , m_caloMassComp(NULL)
-    , m_TAMassComp(NULL)
-    , m_caloMassWeight(NULL)
-    , m_TAMassWeight(NULL)
+    , m_caloMassComp(nullptr)
+    , m_TAMassComp(nullptr)
+    , m_caloMassWeight(nullptr)
+    , m_TAMassWeight(nullptr)
     , m_caloMassScale_weights("")
     , m_TAMassScale_weights("")
     , m_weightParam(CompParametrization::UNKNOWN)
@@ -55,8 +55,8 @@ CombinedMassUncertaintyComponent::CombinedMassUncertaintyComponent(const Combine
     : UncertaintyComponent(toCopy)
     , m_combMassType(toCopy.m_combMassType)
     , m_setWeightMassDefs(toCopy.m_setWeightMassDefs)
-    , m_caloMassComp(NULL)
-    , m_TAMassComp(NULL)
+    , m_caloMassComp(nullptr)
+    , m_TAMassComp(nullptr)
     , m_caloMassWeight(toCopy.m_caloMassWeight)
     , m_TAMassWeight(toCopy.m_TAMassWeight)
     , m_caloMassScale_weights(toCopy.m_caloMassScale_weights)
@@ -90,7 +90,7 @@ StatusCode CombinedMassUncertaintyComponent::setCaloTerm(UncertaintyGroup* caloC
         ATH_MSG_ERROR("Can only set the calo mass term before initialization: " << getName().Data());
         return StatusCode::FAILURE;
     }
-    if (m_caloMassComp != NULL)
+    if (m_caloMassComp != nullptr)
     {
         ATH_MSG_ERROR("Calo mass term has already been set, blocking double-init: " << getName().Data());
         return StatusCode::FAILURE;
@@ -107,7 +107,7 @@ StatusCode CombinedMassUncertaintyComponent::setTATerm(UncertaintyGroup* TAComp)
         ATH_MSG_ERROR("Can only set the TA mass term before initialization: " << getName().Data());
         return StatusCode::FAILURE;
     }
-    if (m_TAMassComp != NULL)
+    if (m_TAMassComp != nullptr)
     {
         ATH_MSG_ERROR("TA mass term has already been set, blocking double-init: " << getName().Data());
         return StatusCode::FAILURE;
@@ -124,7 +124,7 @@ StatusCode CombinedMassUncertaintyComponent::setCaloWeights(const UncertaintyHis
         ATH_MSG_ERROR("Can only set the calo mass weights before initialization: " << getName().Data());
         return StatusCode::FAILURE;
     }
-    if (m_caloMassWeight != NULL)
+    if (m_caloMassWeight != nullptr)
     {
         ATH_MSG_ERROR("Calo mass weights has already been set, blocking double-init: " << getName().Data());
         return StatusCode::FAILURE;
@@ -141,7 +141,7 @@ StatusCode CombinedMassUncertaintyComponent::setTAWeights(const UncertaintyHisto
         ATH_MSG_ERROR("Can only set the TA mass weights before initialization: " << getName().Data());
         return StatusCode::FAILURE;
     }
-    if (m_TAMassWeight != NULL)
+    if (m_TAMassWeight != nullptr)
     {
         ATH_MSG_ERROR("TA mass weights has already been set, blocking double-init: " << getName().Data());
         return StatusCode::FAILURE;
@@ -362,7 +362,7 @@ double CombinedMassUncertaintyComponent::getUncertaintyImpl(const xAOD::Jet& jet
 {
     // Check if we need to do anything at all - this uncertainty may be zero based on the jet truth label
     // Truth labels are usually not expected for this component, so check if we need to do this
-    if (m_truthLabels.size())
+    if (!m_truthLabels.empty())
     {
         // Truth labels are specified, so we need to check if this jet is labelled appropriately or not
         const SG::AuxElement::ConstAccessor<int> accTruthLabel(m_truthLabelName);

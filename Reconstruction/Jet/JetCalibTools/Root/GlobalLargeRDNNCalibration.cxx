@@ -20,7 +20,7 @@ struct GlobalLargeRDNNCalibration::VarRetriever{
 
   /// the value of the variable to be retrieved from the jet and/or JetEventInfo
   virtual float value(const  xAOD::Jet& jet, JetEventInfo& jetInfo, double eScale) = 0;
-  virtual ~VarRetriever(){};
+  virtual ~VarRetriever()= default;
 };
 
 namespace {
@@ -115,7 +115,7 @@ GlobalLargeRDNNCalibration::GlobalLargeRDNNCalibration(const std::string& name)
 {
 }
 
-GlobalLargeRDNNCalibration::GlobalLargeRDNNCalibration(const std::string& name, TEnv * config, TString calibArea, bool /*dev*/)
+GlobalLargeRDNNCalibration::GlobalLargeRDNNCalibration(const std::string& name, TEnv * config, const TString& calibArea, bool /*dev*/)
   : JetCalibrationStep::JetCalibrationStep( name.c_str() ),
     m_config(config), m_calibArea(calibArea)
 {

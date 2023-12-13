@@ -15,13 +15,13 @@ class FlavourUncertaintyComponent : public UncertaintyComponent
     public:
         // Constructor/destructor
         FlavourUncertaintyComponent(const ComponentHelper& component,
-                                    const TString jetType,
-                                    const TString analysisRootFileName,
-                                    const TString defaultAnalysisRootFileName,
-                                    const TString path,
-                                    const TString calibArea,
+                                    const TString& jetType,
+                                    const TString& analysisRootFileName,
+                                    const TString& defaultAnalysisRootFileName,
+                                    const TString& path,
+                                    const TString& calibArea,
                                     const bool absEtaGluonFraction,
-                                    const TString analysisHistPattern=""
+                                    const TString& analysisHistPattern=""
                                     );
         FlavourUncertaintyComponent(const FlavourUncertaintyComponent& toCopy);
         virtual FlavourUncertaintyComponent* clone() const;

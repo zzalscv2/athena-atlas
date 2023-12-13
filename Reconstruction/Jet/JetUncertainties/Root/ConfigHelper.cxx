@@ -18,7 +18,7 @@ namespace jet
 //                                              //
 //////////////////////////////////////////////////
 
-ComponentHelper::ComponentHelper(const TString name)
+ComponentHelper::ComponentHelper(const TString& name)
     : energyScale(0)
     , name(name)
 { }
@@ -119,7 +119,7 @@ ComponentHelper::ComponentHelper(TEnv& settings, const TString& compPrefix, cons
 //                                              //
 //////////////////////////////////////////////////
 
-GroupHelper::GroupHelper(const TString name)
+GroupHelper::GroupHelper(const TString& name)
     : name(name)
 { }
 
@@ -163,8 +163,8 @@ ConfigHelper::ConfigHelper()
     , m_confPrefix("")
     , m_MCtype("")
     , m_energyScale(0)
-    , m_cInfo(NULL)
-    , m_gInfo(NULL)
+    , m_cInfo(nullptr)
+    , m_gInfo(nullptr)
 {
     JESUNC_NO_DEFAULT_CONSTRUCTOR;
 }
@@ -175,8 +175,8 @@ ConfigHelper::ConfigHelper(const TString& confPrefix, const TString& MCtype, con
     , m_confPrefix(confPrefix)
     , m_MCtype(MCtype)
     , m_energyScale(energyScaleVal)
-    , m_cInfo(NULL)
-    , m_gInfo(NULL)
+    , m_cInfo(nullptr)
+    , m_gInfo(nullptr)
 { }
 
 ConfigHelper::~ConfigHelper()
@@ -262,7 +262,7 @@ const ComponentHelper* ConfigHelper::getComponentInfo() const
     if (!m_isInit)
     {
         ATH_MSG_ERROR("ConfigHelper has not yet been initialized: " << m_confPrefix.Data());
-        return NULL;
+        return nullptr;
     }
     return m_cInfo;
 }
@@ -272,7 +272,7 @@ const GroupHelper* ConfigHelper::getGroupInfo() const
     if (!m_isInit)
     {
         ATH_MSG_ERROR("ConfigHelper has not yet been initialized: " << m_confPrefix.Data());
-        return NULL;
+        return nullptr;
     }
     return m_gInfo;
 }
@@ -308,12 +308,12 @@ void ConfigHelper::setComponentJetDefSuffix(const std::string& suffix)
 
 void ConfigHelper::setComponentJetDefSuffix(const TString& suffix)
 {
-    if (!m_cInfo->uncNames.size() && !m_cInfo->subComps.size())
+    if (m_cInfo->uncNames.empty() && m_cInfo->subComps.empty())
         m_cInfo->uncNames.push_back(m_cInfo->name+"_"+suffix);
-    else if (m_cInfo->uncNames.size())
+    else if (!m_cInfo->uncNames.empty())
         for (size_t iName = 0; iName < m_cInfo->uncNames.size(); ++iName)
             m_cInfo->uncNames[iName] = m_cInfo->uncNames[iName] + "_" + suffix;
-    else if (m_cInfo->subComps.size())
+    else if (!m_cInfo->subComps.empty())
         for (size_t iSubComp = 0; iSubComp < m_cInfo->subComps.size(); ++iSubComp)
             m_cInfo->subComps[iSubComp] = m_cInfo->subComps[iSubComp] + "_" + suffix;
     

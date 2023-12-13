@@ -32,7 +32,7 @@ namespace CompCategory
         }
     }
     
-    TypeEnum stringToEnum(const TString type)
+    TypeEnum stringToEnum(const TString& type)
     {
         if (!type.CompareTo("Statistical"))
             return Statistical;
@@ -69,7 +69,7 @@ namespace CompCorrelation
         }
     }
 
-    TypeEnum stringToEnum(const TString type)
+    TypeEnum stringToEnum(const TString& type)
     {
         if (!type.CompareTo("Uncorrelated"))
             return Uncorrelated;
@@ -109,7 +109,7 @@ namespace CompParametrization
         }
     }
 
-    TypeEnum stringToEnum(const TString type)
+    TypeEnum stringToEnum(const TString& type)
     {
         if (!type.CompareTo("Pt",TString::kIgnoreCase))
             return Pt;
@@ -200,7 +200,7 @@ namespace CompMassDef
         }
     }
 
-    TypeEnum stringToEnum(const TString type)
+    TypeEnum stringToEnum(const TString& type)
     {
         if (!type.CompareTo("FourVec",TString::kIgnoreCase) || !type.CompareTo("FourVector",TString::kIgnoreCase))
             return FourVecMass;
@@ -275,7 +275,7 @@ namespace CompScaleVar
         }
     }
 
-    TypeEnum stringToEnum(const TString type)
+    TypeEnum stringToEnum(const TString& type)
     {
         if (!type.CompareTo("FourVec",TString::kIgnoreCase) || !type.CompareTo("4Vec",TString::kIgnoreCase) || !type.CompareTo("FourVector",TString::kIgnoreCase))
             return FourVec;
@@ -416,7 +416,7 @@ namespace CompFlavorLabelVar
         }
     }
 
-    TypeEnum stringToEnum(const TString type)
+    TypeEnum stringToEnum(const TString& type)
     {
         if (type=="t_qqb")
 	  return t_qqb;
@@ -459,7 +459,7 @@ namespace CompTaggerRegionVar
         }
     }
 
-    TypeEnum stringToEnum(const TString type)
+    TypeEnum stringToEnum(const TString& type)
     {
       if (type.Contains("2Var",TString::kIgnoreCase))
       {
@@ -497,7 +497,7 @@ namespace PileupComp
         }
     }
 
-    TypeEnum stringToEnum(const TString type)
+    TypeEnum stringToEnum(const TString& type)
     {
         if (type.Contains("Pileup",TString::kIgnoreCase))
         {
@@ -539,7 +539,7 @@ namespace FlavourComp
         }
     }
 
-    TypeEnum stringToEnum(const TString type)
+    TypeEnum stringToEnum(const TString& type)
     {
         if (type.Contains("Flavour",TString::kIgnoreCase) || type.Contains("Flavor",TString::kIgnoreCase))
         {
@@ -585,7 +585,7 @@ namespace CombMassComp
         }
     }
 
-    TypeEnum stringToEnum(const TString type)
+    TypeEnum stringToEnum(const TString& type)
     {
         if (type.Contains("Calo",TString::kIgnoreCase))
             return Calo;
@@ -619,7 +619,7 @@ namespace JetTopology
         }
     }
 
-    TypeEnum stringToEnum(const TString type)
+    TypeEnum stringToEnum(const TString& type)
     {
         if (!type.CompareTo("QCD",TString::kIgnoreCase))
             return QCD;
@@ -654,7 +654,7 @@ namespace Interpolate
         }
     }
 
-    TypeEnum stringToEnum(const TString type)
+    TypeEnum stringToEnum(const TString& type)
     {
         if (!type.CompareTo("None",TString::kIgnoreCase) || !type.CompareTo("false",TString::kIgnoreCase))
             return None;

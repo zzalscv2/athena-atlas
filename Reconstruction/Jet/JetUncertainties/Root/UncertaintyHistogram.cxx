@@ -30,16 +30,16 @@ UncertaintyHistogram::UncertaintyHistogram(const std::string& histName, const In
     , m_isInit(false)
     , m_name(histName.c_str())
     , m_interpolate(interpolate)
-    , m_histo(NULL)
+    , m_histo(nullptr)
     , m_nDim(0)
     , m_cachedProj()
 {
-    if (histName == "")
+    if (histName.empty())
         JESUNC_NO_DEFAULT_CONSTRUCTOR;
     ATH_MSG_DEBUG(Form("Creating UncertaintyHistogram named %s",getName().Data()));
 }
 
-UncertaintyHistogram::UncertaintyHistogram(const TString histName, const Interpolate::TypeEnum interpolate)
+UncertaintyHistogram::UncertaintyHistogram(const TString& histName, const Interpolate::TypeEnum interpolate)
     : UncertaintyHistogram(std::string(histName.Data()),interpolate)
 { }
 
@@ -52,7 +52,7 @@ UncertaintyHistogram::UncertaintyHistogram(const UncertaintyHistogram& toCopy)
     , m_isInit(toCopy.m_isInit)
     , m_name(toCopy.m_name)
     , m_interpolate(toCopy.m_interpolate)
-    , m_histo(NULL)
+    , m_histo(nullptr)
     , m_nDim(toCopy.m_nDim)
     , m_cachedProj()
 {
@@ -68,7 +68,7 @@ UncertaintyHistogram::UncertaintyHistogram(const UncertaintyHistogram& toCopy)
         }
     }
 
-    if (toCopy.m_cachedProj.size())
+    if (!toCopy.m_cachedProj.empty())
         if (cacheProjections().isFailure())
         {
             ATH_MSG_FATAL("Failed to build the required cache for " << getName().Data());
@@ -113,7 +113,7 @@ StatusCode UncertaintyHistogram::initialize(TFile* histFile)
         ATH_MSG_ERROR(Form("Histogram file contains the expected key, but it's not a TH1* (%s)",getName().Data()));
         return StatusCode::FAILURE;
     }
-    m_histo->SetDirectory(0);
+    m_histo->SetDirectory(nullptr);
 
     // Cache dimensionality
     m_nDim = m_histo->GetDimension();
@@ -336,7 +336,7 @@ StatusCode UncertaintyHistogram::cacheProjections()
     }
 
     // Ensure the cache doesn't already exist
-    if (m_cachedProj.size())
+    if (!m_cachedProj.empty())
     {
         ATH_MSG_FATAL("Cannot cache histogram as the cache is non-empty: " << m_name.Data());
         return StatusCode::FAILURE;

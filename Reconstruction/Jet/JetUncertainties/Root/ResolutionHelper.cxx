@@ -20,40 +20,40 @@ ResolutionHelper::ResolutionHelper(const std::string& name, const std::string& j
     , m_jetDef(jetDef)
     , m_isInit(false)
     , m_smearOnlyMC(false)
-    , m_ptNomHistData(NULL)
+    , m_ptNomHistData(nullptr)
     , m_ptNomParamData(CompParametrization::UNKNOWN)
     , m_ptNomMassDefData(CompMassDef::UNKNOWN)
-    , m_ptNomHistMC(NULL)
+    , m_ptNomHistMC(nullptr)
     , m_ptNomParamMC(CompParametrization::UNKNOWN)
     , m_ptNomMassDefMC(CompMassDef::UNKNOWN)
-    , m_fvNomHistData(NULL)
+    , m_fvNomHistData(nullptr)
     , m_fvNomParamData(CompParametrization::UNKNOWN)
     , m_fvNomMassDefData(CompMassDef::UNKNOWN)
-    , m_fvNomHistMC(NULL)
+    , m_fvNomHistMC(nullptr)
     , m_fvNomParamMC(CompParametrization::UNKNOWN)
     , m_fvNomMassDefMC(CompMassDef::UNKNOWN)
-    , m_mQCDNomHistData(NULL)
+    , m_mQCDNomHistData(nullptr)
     , m_mQCDNomParamData(CompParametrization::UNKNOWN)
     , m_mQCDNomMassDefData(CompMassDef::UNKNOWN)
-    , m_mQCDNomHistMC(NULL)
+    , m_mQCDNomHistMC(nullptr)
     , m_mQCDNomParamMC(CompParametrization::UNKNOWN)
     , m_mQCDNomMassDefMC(CompMassDef::UNKNOWN)
-    , m_mWZNomHistData(NULL)
+    , m_mWZNomHistData(nullptr)
     , m_mWZNomParamData(CompParametrization::UNKNOWN)
     , m_mWZNomMassDefData(CompMassDef::UNKNOWN)
-    , m_mWZNomHistMC(NULL)
+    , m_mWZNomHistMC(nullptr)
     , m_mWZNomParamMC(CompParametrization::UNKNOWN)
     , m_mWZNomMassDefMC(CompMassDef::UNKNOWN)
-    , m_mHbbNomHistData(NULL)
+    , m_mHbbNomHistData(nullptr)
     , m_mHbbNomParamData(CompParametrization::UNKNOWN)
     , m_mHbbNomMassDefData(CompMassDef::UNKNOWN)
-    , m_mHbbNomHistMC(NULL)
+    , m_mHbbNomHistMC(nullptr)
     , m_mHbbNomParamMC(CompParametrization::UNKNOWN)
     , m_mHbbNomMassDefMC(CompMassDef::UNKNOWN)
-    , m_mTopNomHistData(NULL)
+    , m_mTopNomHistData(nullptr)
     , m_mTopNomParamData(CompParametrization::UNKNOWN)
     , m_mTopNomMassDefData(CompMassDef::UNKNOWN)
-    , m_mTopNomHistMC(NULL)
+    , m_mTopNomHistMC(nullptr)
     , m_mTopNomParamMC(CompParametrization::UNKNOWN)
     , m_mTopNomMassDefMC(CompMassDef::UNKNOWN)
 { }
@@ -64,40 +64,40 @@ ResolutionHelper::ResolutionHelper(const ResolutionHelper& toCopy)
     , m_jetDef(toCopy.m_jetDef)
     , m_isInit(toCopy.m_isInit)
     , m_smearOnlyMC(toCopy.m_smearOnlyMC)
-    , m_ptNomHistData(!toCopy.m_ptNomHistData ? NULL : new UncertaintyHistogram(*toCopy.m_ptNomHistData))
+    , m_ptNomHistData(!toCopy.m_ptNomHistData ? nullptr : new UncertaintyHistogram(*toCopy.m_ptNomHistData))
     , m_ptNomParamData(toCopy.m_ptNomParamData)
     , m_ptNomMassDefData(toCopy.m_ptNomMassDefData)
-    , m_ptNomHistMC(!toCopy.m_ptNomHistMC ? NULL : new UncertaintyHistogram(*toCopy.m_ptNomHistMC))
+    , m_ptNomHistMC(!toCopy.m_ptNomHistMC ? nullptr : new UncertaintyHistogram(*toCopy.m_ptNomHistMC))
     , m_ptNomParamMC(toCopy.m_ptNomParamMC)
     , m_ptNomMassDefMC(toCopy.m_ptNomMassDefMC)
-    , m_fvNomHistData(!toCopy.m_fvNomHistData ? NULL : new UncertaintyHistogram(*toCopy.m_fvNomHistData))
+    , m_fvNomHistData(!toCopy.m_fvNomHistData ? nullptr : new UncertaintyHistogram(*toCopy.m_fvNomHistData))
     , m_fvNomParamData(toCopy.m_fvNomParamData)
     , m_fvNomMassDefData(toCopy.m_fvNomMassDefData)
-    , m_fvNomHistMC(!toCopy.m_fvNomHistMC ? NULL : new UncertaintyHistogram(*toCopy.m_fvNomHistMC))
+    , m_fvNomHistMC(!toCopy.m_fvNomHistMC ? nullptr : new UncertaintyHistogram(*toCopy.m_fvNomHistMC))
     , m_fvNomParamMC(toCopy.m_fvNomParamMC)
     , m_fvNomMassDefMC(toCopy.m_fvNomMassDefMC)
-    , m_mQCDNomHistData(!toCopy.m_mQCDNomHistData ? NULL : new UncertaintyHistogram(*toCopy.m_mQCDNomHistData))
+    , m_mQCDNomHistData(!toCopy.m_mQCDNomHistData ? nullptr : new UncertaintyHistogram(*toCopy.m_mQCDNomHistData))
     , m_mQCDNomParamData(toCopy.m_mQCDNomParamData)
     , m_mQCDNomMassDefData(toCopy.m_mQCDNomMassDefData)
-    , m_mQCDNomHistMC(!toCopy.m_mQCDNomHistMC ? NULL : new UncertaintyHistogram(*toCopy.m_mQCDNomHistMC))
+    , m_mQCDNomHistMC(!toCopy.m_mQCDNomHistMC ? nullptr : new UncertaintyHistogram(*toCopy.m_mQCDNomHistMC))
     , m_mQCDNomParamMC(toCopy.m_mQCDNomParamMC)
     , m_mQCDNomMassDefMC(toCopy.m_mQCDNomMassDefMC)
-    , m_mWZNomHistData(!toCopy.m_mWZNomHistData ? NULL : new UncertaintyHistogram(*toCopy.m_mWZNomHistData))
+    , m_mWZNomHistData(!toCopy.m_mWZNomHistData ? nullptr : new UncertaintyHistogram(*toCopy.m_mWZNomHistData))
     , m_mWZNomParamData(toCopy.m_mWZNomParamData)
     , m_mWZNomMassDefData(toCopy.m_mWZNomMassDefData)
-    , m_mWZNomHistMC(!toCopy.m_mWZNomHistMC ? NULL : new UncertaintyHistogram(*toCopy.m_mWZNomHistMC))
+    , m_mWZNomHistMC(!toCopy.m_mWZNomHistMC ? nullptr : new UncertaintyHistogram(*toCopy.m_mWZNomHistMC))
     , m_mWZNomParamMC(toCopy.m_mWZNomParamMC)
     , m_mWZNomMassDefMC(toCopy.m_mWZNomMassDefMC)
-    , m_mHbbNomHistData(!toCopy.m_mHbbNomHistData ? NULL : new UncertaintyHistogram(*toCopy.m_mHbbNomHistData))
+    , m_mHbbNomHistData(!toCopy.m_mHbbNomHistData ? nullptr : new UncertaintyHistogram(*toCopy.m_mHbbNomHistData))
     , m_mHbbNomParamData(toCopy.m_mHbbNomParamData)
     , m_mHbbNomMassDefData(toCopy.m_mHbbNomMassDefData)
-    , m_mHbbNomHistMC(!toCopy.m_mHbbNomHistMC ? NULL : new UncertaintyHistogram(*toCopy.m_mHbbNomHistMC))
+    , m_mHbbNomHistMC(!toCopy.m_mHbbNomHistMC ? nullptr : new UncertaintyHistogram(*toCopy.m_mHbbNomHistMC))
     , m_mHbbNomParamMC(toCopy.m_mHbbNomParamMC)
     , m_mHbbNomMassDefMC(toCopy.m_mHbbNomMassDefMC)
-    , m_mTopNomHistData(!toCopy.m_mTopNomHistData ? NULL : new UncertaintyHistogram(*toCopy.m_mTopNomHistData))
+    , m_mTopNomHistData(!toCopy.m_mTopNomHistData ? nullptr : new UncertaintyHistogram(*toCopy.m_mTopNomHistData))
     , m_mTopNomParamData(toCopy.m_mTopNomParamData)
     , m_mTopNomMassDefData(toCopy.m_mTopNomMassDefData)
-    , m_mTopNomHistMC(!toCopy.m_mTopNomHistMC ? NULL : new UncertaintyHistogram(*toCopy.m_mTopNomHistMC))
+    , m_mTopNomHistMC(!toCopy.m_mTopNomHistMC ? nullptr : new UncertaintyHistogram(*toCopy.m_mTopNomHistMC))
     , m_mTopNomParamMC(toCopy.m_mTopNomParamMC)
     , m_mTopNomMassDefMC(toCopy.m_mTopNomMassDefMC)
 { }
@@ -354,7 +354,7 @@ StatusCode ResolutionHelper::initialize(TEnv& settings, TFile* histFile, const T
 std::tuple<const UncertaintyHistogram*,CompParametrization::TypeEnum,CompMassDef::TypeEnum> ResolutionHelper::getNominalResolution(const CompScaleVar::TypeEnum smearType, const JetTopology::TypeEnum topology, const bool readMC) const
 {
     // First get the resolution histogram and parametrization
-    const jet::UncertaintyHistogram* resolution = NULL;
+    const jet::UncertaintyHistogram* resolution = nullptr;
     CompParametrization::TypeEnum param         = CompParametrization::UNKNOWN;
     CompMassDef::TypeEnum massDef               = CompMassDef::UNKNOWN;
     
@@ -502,27 +502,27 @@ bool ResolutionHelper::hasRelevantInfo(const CompScaleVar::TypeEnum type, const 
     {
         case CompScaleVar::PtRes:
         case CompScaleVar::PtResAbs:
-            return m_ptNomHistMC != NULL;
+            return m_ptNomHistMC != nullptr;
 
         case CompScaleVar::FourVecRes:
         case CompScaleVar::FourVecResAbs:
-            return m_fvNomHistMC != NULL;
+            return m_fvNomHistMC != nullptr;
 
         case CompScaleVar::MassRes:
         case CompScaleVar::MassResAbs:
             switch (topology)
             {
                 case JetTopology::QCD:
-                    return m_mQCDNomHistMC != NULL;
+                    return m_mQCDNomHistMC != nullptr;
 
                 case JetTopology::WZ:
-                    return m_mWZNomHistMC  != NULL;
+                    return m_mWZNomHistMC  != nullptr;
 
                 case JetTopology::Hbb:
-                    return m_mHbbNomHistMC != NULL;
+                    return m_mHbbNomHistMC != nullptr;
 
                 case JetTopology::Top:
-                    return m_mTopNomHistMC != NULL;
+                    return m_mTopNomHistMC != nullptr;
 
                 default:
                     throw std::runtime_error(Form("Unexpected topology type, cannot determine if relevant info exists: %s",JetTopology::enumToString(topology).Data()));

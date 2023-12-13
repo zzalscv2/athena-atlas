@@ -9,11 +9,12 @@
  *
  */
 
-#include <cmath>
-#include <TKey.h>
-#include <TEnv.h>
 #include <TAxis.h>
+#include <TEnv.h>
 #include <TFile.h>
+#include <TKey.h>
+#include <cmath>
+#include <utility>
 
 #include "JetCalibTools/CalibrationMethods/JMSCorrection.h"
 #include "JetCalibTools/JetCalibUtils.h"
@@ -23,13 +24,13 @@
 
 JMSCorrection::JMSCorrection()
   : JetCalibrationStep::JetCalibrationStep(),
-    m_config(NULL), m_jetAlgo(""), m_calibAreaTag(""), m_dev(false)
+    m_config(nullptr), m_jetAlgo(""), m_calibAreaTag(""), m_dev(false)
 { }
 
 
 JMSCorrection::JMSCorrection(const std::string& name, TEnv* config, TString jetAlgo, TString calibAreaTag, bool dev)
   : JetCalibrationStep::JetCalibrationStep(name.c_str()),
-    m_config(config), m_jetAlgo(jetAlgo), m_calibAreaTag(calibAreaTag), m_dev(dev)
+    m_config(config), m_jetAlgo(std::move(jetAlgo)), m_calibAreaTag(std::move(calibAreaTag)), m_dev(dev)
 { }
 
 StatusCode JMSCorrection::initialize() {
@@ -230,11 +231,11 @@ StatusCode JMSCorrection::initialize() {
     if(!m_onlyCombination){
       if ( !m_use3Dhisto)
 	{
-	  if ( m_caloResolutionMassCombination.size() < 1 ) {
+	  if ( m_caloResolutionMassCombination.empty() ) {
 	    ATH_MSG_FATAL("Vector of mass combination histograms with calo factors may be empty. Please check your mass combination file: " << JMSFile);
 	    return StatusCode::FAILURE;
 	  }
-	  else if ( m_taResolutionMassCombination.size() < 1 ) {
+	  else if ( m_taResolutionMassCombination.empty() ) {
 	    ATH_MSG_FATAL("Vector of mass combination histograms with trk-assisted factors may be empty. Please check your mass combination file: " << JMSFile);
 	    return StatusCode::FAILURE;
 	  }
@@ -524,7 +525,7 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
   if(!m_onlyCombination){
     // Determine mass eta bin to use (if using 2D histograms)
     int etabin=-99;
-    if (!m_use3Dhisto && (m_massEtaBins.size()==0 || m_respFactorsMass.size() != m_massEtaBins.size()-1)){
+    if (!m_use3Dhisto && (m_massEtaBins.empty() || m_respFactorsMass.size() != m_massEtaBins.size()-1)){
       ATH_MSG_FATAL("Please check that the mass correction eta binning is properly set in your config file");
       return StatusCode::FAILURE;
     }
@@ -639,7 +640,7 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
       if (!m_use3Dhisto)
 	{
 	  etabin=-99;
-	  if (m_massEtaBins.size()==0 || m_respFactorsTrackAssistedMass.size() != m_massEtaBins.size()-1){
+	  if (m_massEtaBins.empty() || m_respFactorsTrackAssistedMass.size() != m_massEtaBins.size()-1){
 	    ATH_MSG_FATAL("Please check that the mass correction eta binning is properly set in your config file");
 	    if(m_combination) return StatusCode::FAILURE;
 	  }
@@ -868,11 +869,11 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
       int etabin=-99;
       if (!m_use3Dhisto)
         {
-          if (m_massCombinationEtaBins.size()==0 || m_caloResolutionMassCombination.size() != m_massCombinationEtaBins.size()-1){
+          if (m_massCombinationEtaBins.empty() || m_caloResolutionMassCombination.size() != m_massCombinationEtaBins.size()-1){
 	    ATH_MSG_FATAL("Please check that the mass combination eta binning is properly set in your config file");
 	    return StatusCode::FAILURE;
 	  }
-          if (m_massCombinationEtaBins.size()==0 || m_taResolutionMassCombination.size() != m_massCombinationEtaBins.size()-1){
+          if (m_massCombinationEtaBins.empty() || m_taResolutionMassCombination.size() != m_massCombinationEtaBins.size()-1){
 	    ATH_MSG_FATAL("Please check that the mass combination eta binning is properly set in your config file");
 	    return StatusCode::FAILURE;
 	  }

@@ -165,7 +165,7 @@ StatusCode UncertaintyGroup::initialize(TFile* histFile)
     }
     
     // Ensure the group has component(s) and/or subgroup(s)
-    if (!m_components.size() && !m_subgroups.size())
+    if (m_components.empty() && m_subgroups.empty())
     {
         ATH_MSG_ERROR("Group is empty: " << getName().Data());
         return StatusCode::FAILURE;
@@ -177,7 +177,7 @@ StatusCode UncertaintyGroup::initialize(TFile* histFile)
             return StatusCode::FAILURE;
 
     // If the group has multiple components of the same parametrization, ensure there is a correlation type specified
-    if (m_corrType == CompCorrelation::UNKNOWN && m_components.size() >= 1 && m_subgroups.size() >= 1)
+    if (m_corrType == CompCorrelation::UNKNOWN && !m_components.empty() && !m_subgroups.empty())
     {
         // First check the raw components
         std::set<CompScaleVar::TypeEnum> vars;
@@ -396,14 +396,14 @@ double UncertaintyGroup::getUncertainty(const xAOD::Jet& jet, const xAOD::EventI
             relevantGroups.push_back(m_subgroups.at(iSubgroup));
 
     // Simple if it neither affects components nor subgroups
-    if ((!relevantComponents || !relevantComponents->size()) && !relevantGroups.size()) return 0;
+    if ((!relevantComponents || relevantComponents->empty()) && relevantGroups.empty()) return 0;
 
     // Simple if it's one component and doesn't affect subgroups
-    if ((relevantComponents && relevantComponents->size() == 1) && !relevantGroups.size())
+    if ((relevantComponents && relevantComponents->size() == 1) && relevantGroups.empty())
         return relevantComponents->at(0)->getUncertainty(jet,eInfo);
 
     // Simple if it's one subgroup and doesn't affect components
-    if (relevantGroups.size() == 1 && (!relevantComponents || !relevantComponents->size()))
+    if (relevantGroups.size() == 1 && (!relevantComponents || relevantComponents->empty()))
         return relevantGroups.at(0)->getUncertainty(jet,eInfo,scaleVar);
 
 

@@ -16,7 +16,7 @@ JetCalibrationStep::JetCalibrationStep(const char* name):
 {}
 
 JetCalibrationStep::~JetCalibrationStep()
-{}
+= default;
 
 StatusCode JetCalibrationStep::setStartP4(xAOD::Jet& jet) const {
   xAOD::JetFourMom_t tmp;

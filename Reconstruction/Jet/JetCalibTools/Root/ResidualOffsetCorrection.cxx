@@ -14,14 +14,14 @@
 
 ResidualOffsetCorrection::ResidualOffsetCorrection()
   : asg::AsgMessaging("ResidualOffsetCorrection"),
-    m_config(NULL), m_jetAlgo(""), m_calibAreaTag(""), m_dev(false), m_isData(false),
-    m_npvBeamspotCorr(NULL), m_resOffsetBins(NULL)
+    m_config(nullptr), m_jetAlgo(""), m_calibAreaTag(""), m_dev(false), m_isData(false),
+    m_npvBeamspotCorr(nullptr), m_resOffsetBins(nullptr)
 { }
 
 ResidualOffsetCorrection::ResidualOffsetCorrection(const std::string& name, TEnv* config, TString jetAlgo, TString calibAreaTag, bool isData, bool dev)
   : asg::AsgMessaging(name),
-    m_config(config), m_jetAlgo(jetAlgo), m_calibAreaTag(calibAreaTag), m_dev(dev), m_isData(isData),
-    m_npvBeamspotCorr(NULL), m_resOffsetBins(NULL)
+    m_config(config), m_jetAlgo(std::move(jetAlgo)), m_calibAreaTag(std::move(calibAreaTag)), m_dev(dev), m_isData(isData),
+    m_npvBeamspotCorr(nullptr), m_resOffsetBins(nullptr)
 { }
 
 ResidualOffsetCorrection::~ResidualOffsetCorrection() {

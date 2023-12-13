@@ -93,7 +93,7 @@ bool getTypeObjFromString<bool>(const TString& str, bool& obj)
 
 bool fileExists(const TString& fileName)
 {
-    return gSystem->AccessPathName(fileName) == false;
+    return !gSystem->AccessPathName(fileName);
 }
 
 TString findFilePath(const TString& fileName, const TString& path, const TString& calibArea)
@@ -138,7 +138,7 @@ TString findFilePath(const TString& fileName, const TString& path, const TString
 
 TFile* readRootFile(const TString& fileName, const TString& path, const TString& calibArea)
 {
-    TFile* rootFile = NULL;
+    TFile* rootFile = nullptr;
     
     TString pathToGet = findFilePath(fileName,path,calibArea);
     //std::cout << "Looking for file " << fileName << " in path " << path << std::endl;

@@ -25,17 +25,17 @@ CorrelationMatrix::CorrelationMatrix(const std::string& name)
     , m_maxVal(-1e10)
     , m_fixedVal1(0)
     , m_fixedVal2(0)
-    , m_corrMat(NULL)
-    , m_jets(NULL)
-    , m_eInfos(NULL)
-    , m_jet1(NULL)
-    , m_jet2(NULL)
-    , m_eInfo(NULL)
+    , m_corrMat(nullptr)
+    , m_jets(nullptr)
+    , m_eInfos(nullptr)
+    , m_jet1(nullptr)
+    , m_jet2(nullptr)
+    , m_eInfo(nullptr)
 {
     JESUNC_NO_DEFAULT_CONSTRUCTOR;
 }
 
-CorrelationMatrix::CorrelationMatrix(const TString name, const int numBins, const double minVal, const double maxVal, const double fixedVal1, const double fixedVal2)
+CorrelationMatrix::CorrelationMatrix(const TString& name, const int numBins, const double minVal, const double maxVal, const double fixedVal1, const double fixedVal2)
     : asg::AsgMessaging(name.Data())
     , m_isInit(false)
     , m_name(name)
@@ -44,12 +44,12 @@ CorrelationMatrix::CorrelationMatrix(const TString name, const int numBins, cons
     , m_maxVal(maxVal)
     , m_fixedVal1(fixedVal1)
     , m_fixedVal2(fixedVal2)
-    , m_corrMat(NULL)
-    , m_jets(NULL)
-    , m_eInfos(NULL)
-    , m_jet1(NULL)
-    , m_jet2(NULL)
-    , m_eInfo(NULL)
+    , m_corrMat(nullptr)
+    , m_jets(nullptr)
+    , m_eInfos(nullptr)
+    , m_jet1(nullptr)
+    , m_jet2(nullptr)
+    , m_eInfo(nullptr)
 {
     ATH_MSG_DEBUG("Creating CorrelationMatrix named " << m_name.Data());
 }
@@ -242,9 +242,9 @@ StatusCode CorrelationMatrix::createStore()
 
 StatusCode CorrelationMatrix::clearStore()
 {
-    m_jet1  = NULL;
-    m_jet2  = NULL;
-    m_eInfo = NULL;
+    m_jet1  = nullptr;
+    m_jet2  = nullptr;
+    m_eInfo = nullptr;
     
     //for (size_t iJet = 0; iJet < m_jets->size(); ++iJet)
     //    JESUNC_SAFE_DELETE((*m_jets)[iJet]);

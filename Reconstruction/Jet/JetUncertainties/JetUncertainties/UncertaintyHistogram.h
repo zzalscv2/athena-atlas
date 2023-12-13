@@ -26,7 +26,7 @@ class UncertaintyHistogram : public asg::AsgMessaging
     public:
         // Constructor/destructor/initialization
         UncertaintyHistogram(const std::string& histName, const Interpolate::TypeEnum interpolate);
-        UncertaintyHistogram(const TString histName, const Interpolate::TypeEnum interpolate);
+        UncertaintyHistogram(const TString& histName, const Interpolate::TypeEnum interpolate);
         UncertaintyHistogram(const char* histName, const Interpolate::TypeEnum interpolate);
         UncertaintyHistogram(const UncertaintyHistogram& toCopy);
         virtual ~UncertaintyHistogram();
