@@ -389,14 +389,6 @@ def addMCSignatures(chains):
 
     chains['Beamspot'] += []
 
-    # check for chains that have the 'PS:Online' group, so that they are not simulated
-    # -- does not make sense in MC menu
-    for sig in chainsMC:
-        for chain in chainsMC[sig]:
-            if 'PS:Online' in chain.groups:
-                log.error("chain %s in MC menu has the group 'PS:Online', will not be simulated!", chain.name)
-                raise RuntimeError("Remove the group 'PS:Online' from the chain %s",chain.name)
-
     for sig in chainsMC:
         chains[sig] += chainsMC[sig]
 

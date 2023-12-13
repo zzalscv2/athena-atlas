@@ -255,16 +255,7 @@ def getMCSignatures():
         ## ATR-25456 - B/D to e+mu triggers
         ChainProp(name='HLT_e14_lhtight_mu6_dRAB15_invmAB10_L1LFV-eEM15L-MU5VF', l1SeedThresholds=['eEM12L','MU5VF'], groups=PrimaryPhIGroup+BphysicsGroup+Topo3Group),
         ChainProp(name='HLT_e12_lhtight_mu11_dRAB15_invmAB10_L1LFV-eEM10L-MU8VF', l1SeedThresholds=['eEM10L','MU8VF'], groups=PrimaryPhIGroup+BphysicsGroup+Topo3Group),
-
-]
-
-    # check for chains that have the 'PS:Online' group, so that they are not simulated
-    # -- does not make sense in MC menu
-    for sig,chainsInSig in chains.items():
-        for chain in chainsInSig:
-            if 'PS:Online' in chain.groups:
-                log.error("chain %s in MC menu [%s] has the group 'PS:Online', will not be simulated!", chain.name, sig)
-                raise RuntimeError("Remove the group 'PS:Online' from the chain %s",chain.name)
+    ]
 
     return chains
 
