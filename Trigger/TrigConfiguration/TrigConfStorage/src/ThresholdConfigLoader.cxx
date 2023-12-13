@@ -153,6 +153,7 @@ bool TrigConf::ThresholdConfigLoader::load( ThresholdConfig& thrConfig ) {
       theOrder += "  TT.L1TT_MAPPING ASC";
       theOrder += ", TT.L1TT_ID ASC";
       theOrder += ", TTV.L1TTV_PRIORITY ASC";
+      theOrder += ", TTV.L1TTV_ETA_MAX ASC";
       query->addToOrderList( theOrder );
 
       //query->setRowCacheSize(1000);
