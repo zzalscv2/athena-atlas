@@ -67,7 +67,7 @@ class MuonDetectorTool final : public GeoModelTool {
     Gaudi::Property<std::string> m_altCscIntAlinesFile{this, "AlternateCscIntAlignFile", ""};
     
     Gaudi::Property<bool> m_cachingFlag{this, "CachingFlag", true, "Turn on/off caching of ReadoutElement surfaces etc. (i.e. for MDTs)"};
-    
+    Gaudi::Property<bool> m_beeNoShiftInDefault{this, "BEENoShift", false, "Turn off the initial 111 mm shift in BEE station (real data)"};
     MuonGM::MuonDetectorManager* m_manager{nullptr};
 };
 

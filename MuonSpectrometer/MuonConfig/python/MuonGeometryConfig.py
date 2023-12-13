@@ -61,6 +61,8 @@ def MuonDetectorToolCfg(flags, name = "MuonDetectorTool", **kwargs):
     EnableCscInternalAlignment = False
 
     if flags.Muon.enableAlignment:
+        if not flags.Input.isMC:
+            kwargs.setdefault("BEENoShift", True)
         # here define if I-lines (CSC internal alignment) are enabled
         if flags.Muon.Align.UseILines and flags.Detector.GeometryCSC:
             if 'HLT' in flags.IOVDb.GlobalTag:

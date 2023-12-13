@@ -160,7 +160,6 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
 
       MuonDetectorFactoryLite theFactory(detStore().operator->(),sqliteReader);
       theFactory.setRDBAccess(&*accessSvc);
-
       theFactory.create(world);  
 
 
@@ -190,7 +189,8 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
     //
     
     MuonDetectorFactory001 theFactory(detStore().operator->());
-    
+    theFactory.disableBEEShift(m_beeNoShiftInDefault);
+
 
     if (MuonVersion == "CUSTOM")
         ATH_MSG_WARNING("Detector Information coming from a custom configuration !!");
