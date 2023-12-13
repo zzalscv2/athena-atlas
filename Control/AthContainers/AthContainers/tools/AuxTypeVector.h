@@ -157,7 +157,8 @@ public:
    * @brief Change the size of the vector.
    * @param sz The new vector size.
    * Returns true if it is known that iterators have not been invalidated;
-   * false otherwise.
+   * false otherwise.  (Will always return false when increasing the size
+   * of an empty container.)
    */
   virtual bool resize (size_t sz) override;
 
