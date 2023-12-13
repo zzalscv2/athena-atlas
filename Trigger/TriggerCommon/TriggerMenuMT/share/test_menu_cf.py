@@ -7,7 +7,7 @@
 
 #   - menuManual: chains are generated manually in generateCFChains, and run on input data file
 #   - emuMenuTest: chains are generated in the menu framework as HLT_TestChain**, and run on emulated data 
-#   - emuManual: chains are genrated manually and run on emulated data
+#   - emuManual: chains are generated manually and run on emulated data
 
 
 class testopt:

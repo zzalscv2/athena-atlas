@@ -4,7 +4,8 @@
  # to visualize: dot -T pdf Step1.dot > Step1.pdf
  
 from AthenaCommon.AlgSequence import AthSequencer
-from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import algColor, isPassFilterAlg
+from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import algColor
+from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFComponents import isPassSequence
 import itertools
 from AthenaCommon.CFElements import getSequenceChildren, isSequence, compName
 
@@ -15,8 +16,8 @@ def drawHypoTools(file, all_hypos):
     all_hypos=list(set(all_hypos))
     for hp in all_hypos:
         for hypotool in hp.Alg.HypoTools:
-            file.write("    %s[fillcolor=yellow,style=filled,shape= Mdiamond]\n" % hypotool.getName())
-            file.write("    %s -> %s [style=dashed, color=grey]\n"%(compName(hp.Alg), hypotool.getName()))
+            file.write("   \"%s\"[fillcolor=yellow,style=filled,shape= Mdiamond]\n" % hypotool.getName())
+            file.write("   \"%s\" -> \"%s\" [style=dashed, color=grey]\n"%(compName(hp.Alg), hypotool.getName()))
 
 
 def stepCF_ControlFlow_to_dot(stepCF):
@@ -195,7 +196,7 @@ def findConnections(alg_list):
 
     alg_set = set(alg_list) # make them unique
     for nodeA, nodeB in itertools.permutations(alg_set, 2):
-        if isPassFilterAlg(nodeA.Alg) or isPassFilterAlg(nodeB.Alg):
+        if isPassSequence(nodeA) or isPassSequence(nodeB):
             continue
         ins=nodeB.getInputList()
         outs=nodeA.getOutputList()       

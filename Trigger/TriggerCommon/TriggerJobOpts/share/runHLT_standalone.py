@@ -477,7 +477,7 @@ if not opt.createHLTMenuExternally:
 
     chainsToGenerate = ChainsToGenerate(opt)
     menu.setChainFilter(chainsToGenerate)
-
+    log.debug("Filtering chains = %d", (menu.chainFilter is not None)) 
     # generating the HLT structure requires
     # the HLTSeeding to be defined in the topSequence
     menu.generateMT(flags)

@@ -150,7 +150,7 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
     finalDecisions, acc = decisionTreeFromChains(flags, steps, hltMenuConfig.configsList(), hltMenuConfig.dictsList(), newJO)
 
     successful_scan = sequenceScanner( steps )
-    
+
     if not successful_scan:
         raise Exception("[makeHLTTree] At least one sequence is expected in more than one step. Check error messages and fix!")    
 
@@ -320,7 +320,7 @@ def sequenceScanner( HLTNode ):
     # +-- AthSequencer/HLTAllSteps
     #   +-- AthSequencer/Step1_filter
     #   +-- AthSequencer/Step1_reco
-
+    
     _seqMapInStep = defaultdict(set)
     _status = True
     def _mapSequencesInSteps(seq, stepIndex, childInView):
@@ -386,7 +386,6 @@ def decisionTreeFromChains(flags, HLTNode, chains, allDicts, newJO):
             acc.addSequence(HLTNode)
         return ([], acc)
     
-
     (dfAcc, finalDecisions, CFseq_list) = createDataFlow(flags, chains, allDicts)
     acc.merge(dfAcc)
     cfAcc = createControlFlow(flags, HLTNode, CFseq_list)
@@ -449,7 +448,7 @@ def createDataFlow(flags, chains, allDicts):
             else:
                 filterOutput = [CFNaming.filterOutName(filterName, inputName) for inputName in filterInput ]
 
-            foundCFSeq = [cfseq for cfseq in CFseqList[nstep] if filterName == cfseq.filter.Alg.getName()]            
+            foundCFSeq = [cfseq for cfseq in CFseqList[nstep] if filterName == cfseq.filter.Alg.getName()]
             log.debug("Found %d CF sequences with filter name %s", len(foundCFSeq), filterName)
             if not foundCFSeq:
                 sequenceFilter = buildFilter(filterName, filterInput, chainStep.isEmpty)
@@ -459,11 +458,10 @@ def createDataFlow(flags, chains, allDicts):
                     CFseq = CFSequence( ChainStep = chainStep, FilterAlg = sequenceFilter)
                 CFseq.connect(filterOutput)
                 CFseqList[nstep].append(CFseq)
-                lastDecisions = CFseq.decisions
                 lastCFseq = CFseq
             else:                
                 if len(foundCFSeq) > 1:
-                   log.error("Found more than one sequence containing filter %s", filterName)
+                    log.error("Found more than one sequence containing filter %s", filterName)
                 
                 lastCFseq = foundCFSeq[0]
                 if isCAMenu():
@@ -482,8 +480,8 @@ def createDataFlow(flags, chains, allDicts):
                     [ sequenceFilter.addOutput(outputName) for outputName in  filterOutput ]
                     lastCFseq.connect(filterOutput)
 
-                lastDecisions = filterOutput if chainStep.isEmpty else lastCFseq.decisions
-                                               
+            lastDecisions = lastCFseq.decisions
+                                            
             # add chains to the filter:
             chainLegs = chainStep.getChainLegs()
             if len(chainLegs) != len(filterInput): 
@@ -525,17 +523,15 @@ def createControlFlow(flags, HLTNode, CFseqList):
     """ Creates Control Flow Tree starting from the CFSequences"""
     from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
     HLTNodeName = HLTNode.getName()    
-    log.debug("[createControlFlow] on node %s",HLTNodeName)
+    log.debug("[createControlFlow] on node %s with %d CFsequences",HLTNodeName, len(CFseqList))
     with ConfigurableCABehavior():
         acc = ComponentAccumulator()
     if isCAMenu():
         acc.addSequence(HLTNode)
-    
-    for nstep, sequences in enumerate(CFseqList):    
+    for nstep, sequences in enumerate(CFseqList):
         stepSequenceName =  CFNaming.stepName(nstep)
-        log.debug("\n******** Create CF Tree %s with AthSequencers", stepSequenceName)
+        log.debug("\n******** Create CF Tree %s with %d AthSequencers", stepSequenceName, len(sequences))
 
-        
         # create filter node
         log.debug("[createControlFlow] Create filter step %s with %d filters", stepSequenceName, len(CFseqList[nstep])) 
         stepCFFilter = parOR(stepSequenceName + CFNaming.FILTER_POSTFIX)
@@ -543,30 +539,34 @@ def createControlFlow(flags, HLTNode, CFseqList):
             acc.addSequence(stepCFFilter, parentName=HLTNodeName)
         else:
             HLTNode += stepCFFilter
-        
         filter_list = []
         # add the filter to the node
-        for cseq in sequences: 
+        for cseq in sequences:
             filterAlg = cseq.filter.Alg 
             if filterAlg.getName() not in filter_list:
                 log.debug("[createControlFlow] Add  %s to filter node %s", filterAlg.getName(), stepSequenceName)
                 filter_list.append(filterAlg.getName())   
-                if isCAMenu():             
+                if isCAMenu():
                     stepCFFilter.Members += [filterAlg]
                 else:
                     stepCFFilter += filterAlg
     
-
         # create reco step node
         log.debug("[createControlFlow] Create reco step %s with %d sequences", stepSequenceName, len(CFseqList))
         stepCFReco = parOR(stepSequenceName + CFNaming.RECO_POSTFIX)  
-        if isCAMenu():            
+        if isCAMenu():
             acc.addSequence(stepCFReco, parentName = HLTNodeName)
         else:
             HLTNode += stepCFReco
-
         # add the sequences to the reco node
-        for cseq in sequences:             
+        addedEmtpy = False
+        for cseq in sequences:
+            if  cseq.empty and addedEmtpy:
+                if isCAMenu():
+                    cseq.ca.wasMerged()
+                continue
+            if  cseq.empty: # adding Empty only once to avoid merging multiple times the PassSequence
+                addedEmtpy= True
             log.debug(" *** Create CF Tree for CFSequence %s", cseq.step.name)
             if isCAMenu():
                 acc.merge(cseq.ca, sequenceName=stepCFReco.getName())
@@ -589,7 +589,6 @@ def createControlFlow(flags, HLTNode, CFseqList):
                         seqAndWithFilter += cseq.step.combo.Alg
             
                     stepCFReco += seqAndWithFilter
-
 
         # add the monitor summary
         stepDecisions = []
