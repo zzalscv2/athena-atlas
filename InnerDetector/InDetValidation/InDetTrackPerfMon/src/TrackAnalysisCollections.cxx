@@ -55,7 +55,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTruthTrackContainer(
     }
 
     /// Fill container
-    truthTrackContainer = pColl.ptr();
+    m_truthTrackContainer = pColl.ptr();
 
     /// Fill FULL vector
     m_truthTrackVec[ FULL ].clear(); 
@@ -63,7 +63,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTruthTrackContainer(
       m_truthTrackVec[ FULL ].begin(),
       pColl->begin(), pColl->end() );
   } else {
-    truthTrackContainer = nullptr;
+    m_truthTrackContainer = nullptr;
     m_truthTrackVec[ FULL ].clear();
   }
 
@@ -87,7 +87,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer(
     }
 
     /// Fill container
-    offlTrackContainer = pColl.ptr();
+    m_offlTrackContainer = pColl.ptr();
 
     /// Fill FULL vector
     m_offlTrackVec[ FULL ].clear(); 
@@ -95,7 +95,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer(
       m_offlTrackVec[ FULL ].begin(),
       pColl->begin(), pColl->end() );
   } else {
-    offlTrackContainer = nullptr;
+    m_offlTrackContainer = nullptr;
     m_offlTrackVec[ FULL ].clear();
   }
 
@@ -119,7 +119,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackContainer(
     }
 
     /// Fill container
-    trigTrackContainer = pColl.ptr();
+    m_trigTrackContainer = pColl.ptr();
 
     /// Fill FULL vector
     m_trigTrackVec[ FULL ].clear(); 
@@ -127,7 +127,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackContainer(
       m_trigTrackVec[ FULL ].begin(),
       pColl->begin(), pColl->end() );
   } else {
-    trigTrackContainer = nullptr;
+    m_trigTrackContainer = nullptr;
     m_trigTrackVec[ FULL ].clear();
   }
 
@@ -302,7 +302,7 @@ IDTPM::TrackAnalysisCollections::testTruthContainer()
   if( loadTrkAnaDefSvc().isFailure() ) return nullptr;
     
   if( m_trkAnaDefSvc->isTestTruth() ) {
-    return truthTrackContainer;
+    return m_truthTrackContainer;
   }
 
   return nullptr;
@@ -315,11 +315,11 @@ IDTPM::TrackAnalysisCollections::testTrackContainer()
   if( loadTrkAnaDefSvc().isFailure() ) return nullptr;
     
   if( m_trkAnaDefSvc->isTestOffline() ) {
-    return offlTrackContainer;
+    return m_offlTrackContainer;
   }
     
   if( m_trkAnaDefSvc->isTestTrigger() ) {
-    return trigTrackContainer;
+    return m_trigTrackContainer;
   }
 
   return nullptr;
@@ -332,7 +332,7 @@ IDTPM::TrackAnalysisCollections::refTruthContainer()
   if( loadTrkAnaDefSvc().isFailure() ) return nullptr;
     
   if( m_trkAnaDefSvc->isReferenceTruth() ) {
-    return truthTrackContainer;
+    return m_truthTrackContainer;
   }
 
   return nullptr;
@@ -345,11 +345,11 @@ IDTPM::TrackAnalysisCollections::refTrackContainer()
   if( loadTrkAnaDefSvc().isFailure() ) return nullptr;
     
   if( m_trkAnaDefSvc->isReferenceOffline() ) {
-    return offlTrackContainer;
+    return m_offlTrackContainer;
   }
     
   if( m_trkAnaDefSvc->isReferenceTrigger() ) {
-    return trigTrackContainer;
+    return m_trigTrackContainer;
   }
 
   return nullptr;
