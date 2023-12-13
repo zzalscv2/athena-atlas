@@ -23,7 +23,8 @@ namespace GlobalSim {
 
   public:
   SimpleRepositoryDumper(std::ostream& os) : m_os{os} {}
-    
+  virtual ~SimpleRepositoryDumper() = default;
+
     virtual void process(const std::vector<GSInputTOBArray>& v) override {
       m_os << "No of InputTOB Arrays " << v.size() << '\n';
       for (const auto& e : v) {

@@ -46,8 +46,8 @@ namespace GlobalSim {
     execOrderedAlgData() const override;
    
     virtual std::string toString() const override;
-    virtual bool isValid () const {return m_errMsgs.empty();}
-    virtual std::vector<std::string>  errMsgs () const {return m_errMsgs;}
+    virtual bool isValid () const override {return m_errMsgs.empty();}
+    virtual std::vector<std::string>  errMsgs () const override {return m_errMsgs;}
     
   private:
 
