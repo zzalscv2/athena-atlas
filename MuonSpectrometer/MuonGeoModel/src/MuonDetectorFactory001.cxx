@@ -497,15 +497,6 @@ namespace MuonGM {
                     }
                 }
 
-                // here define the GeoAlignableTransform associated to the chamber
-                // nominal transform first
-                GeoAlignableTransform *xf = new GeoAlignableTransform(station->getNominalTransform(*mysql, (*pit).second));
-
-                // add tag, transform and physicalvolume associated to the chamber to the mother-volume
-                p4->add(nm);
-                p4->add(xf);
-                p4->add(pv);
-
                 // alignment issues and readout geometry for station
                 MuonStation *mst = m_manager->getMuonStation(station->GetName(), zi, fi + 1);
                 if (!mst) {
@@ -514,11 +505,10 @@ namespace MuonGM {
                     continue;
                 }
 
-                mst->setTransform(xf);
                 GeoTrf::Transform3D tsz_to_szt = GeoTrf::RotateZ3D(-90 * Gaudi::Units::degree) * GeoTrf::RotateY3D(-90 * Gaudi::Units::degree);
-
-                mst->setNativeToAmdbLRS(tsz_to_szt * station->native_to_tsz_frame(*mysql, (*pit).second));
-
+		GeoTrf::Transform3D   nativeToAmdbLRS=tsz_to_szt * station->native_to_tsz_frame(*mysql, (*pit).second);
+		
+                mst->setNativeToAmdbLRS(nativeToAmdbLRS);
                 mst->setNominalAmdbLRSToGlobal(station->tsz_to_global_frame(*mysql, (*pit).second) * tsz_to_szt.inverse());
 
                 // find correct alignment information for this position
@@ -529,22 +519,32 @@ namespace MuonGM {
 
                 int nAlines = station->CountAlignPos(zi, fi);
                 // nAlines=-1;
-                if (nAlines == 0) {
-                    if (log.level() <= MSG::DEBUG) {
-                        log << MSG::DEBUG << "No A-lines(-> AlignedPositions) for this station in the static Geometry DB; setting to def." << endmsg;
-                    }
-                    ap.tras = ap.traz = ap.trat = ap.rots = ap.rotz = ap.rott = 0.;
-                    ap.jobindex = 0;
-                    mst->setDelta_fromAline(ap.tras, ap.traz, ap.trat, ap.rots, ap.rotz, ap.rott);
-                } else if (nAlines > 0) {
+		if (nAlines == 0 || BEEShiftDisabled() ) {
+
+		  // here define the GeoAlignableTransform associated to the chamber
+		  // nominal transform first
+		  GeoAlignableTransform *xf = new GeoAlignableTransform(station->getNominalTransform(*mysql, (*pit).second));
+		  
+		  // add tag, transform and physicalvolume associated to the chamber to the mother-volume
+		  p4->add(nm);
+		  p4->add(xf);
+		  p4->add(pv);
+		  
+
+		  mst->setTransform(xf);
+		  GeoTrf::Transform3D tsz_to_szt = GeoTrf::RotateZ3D(-90 * Gaudi::Units::degree) * GeoTrf::RotateY3D(-90 * Gaudi::Units::degree);
+
+		  mst->setNativeToAmdbLRS(tsz_to_szt * station->native_to_tsz_frame(*mysql, (*pit).second));
+		  mst->setNominalAmdbLRSToGlobal(station->tsz_to_global_frame(*mysql, (*pit).second) * tsz_to_szt.inverse());
+
+		  mst->setDeltaAmdbLRS(GeoTrf::Transform3D::Identity());
+
+                } else if (nAlines ==1) {
                     AlignPosIterator alast;
                     AlignPosIterator afirst = station->getFirstAlignPosInRange(zi, fi, alast);
 
                     for (AlignPosIterator acurrent = afirst; acurrent != alast; ++acurrent) {
                         ap = acurrent->second;
-                        // ap.rots = 0.001356;
-                        // ap.rotz =-0.001113;
-                        // ap.rott = 0.001067;
 
                         if (ap.phiindex != fi || ap.zindex != zi) {
                             log << MSG::ERROR << "Inconsistent AlignedPosition found in the static Geometry DB: aligPos.fi, zi = " << ap.phiindex << ", " << ap.zindex
@@ -557,18 +557,36 @@ namespace MuonGM {
                                 log << MSG::DEBUG << "Going to set delta from A-line for station" << stname << " at zi/fi " << zi << "/" << fi << endmsg;
                                 log << MSG::DEBUG << "A-line is: " << ap.tras << " " << ap.traz << " " << ap.trat << " " << ap.rots << " " << ap.rotz << " " << ap.rott << endmsg;
                             }
-                            mst->setDelta_fromAline(ap.tras, ap.traz, ap.trat, ap.rots, ap.rotz, ap.rott);
-                        } else {
-                            // station component
-                            if (log.level() <= MSG::DEBUG) {
-                                log << MSG::DEBUG << "Going to set delta from A-line for component " << ap.jobindex << " of station " << stname << " at zi/fi " << zi << "/" << fi
-                                    << endmsg;
-                                log << MSG::DEBUG << "A-line is: " << ap.tras << " " << ap.traz << " " << ap.trat << " " << ap.rots << " " << ap.rotz << " " << ap.rott << endmsg;
-                            }
-                            mst->setDelta_fromAline_forComp(ap.jobindex, ap.tras, ap.traz, ap.trat, ap.rots, ap.rotz, ap.rott);
-                        }
+			    // compute the delta transform in the local AMDB frame
+			    // here define the GeoAlignableTransform associated to the chamber
+			    // nominal transform first
+			    GeoTrf::Transform3D delta_amdb = 
+			      GeoTrf::TranslateX3D(ap.tras) * GeoTrf::TranslateY3D(ap.traz) * GeoTrf::TranslateZ3D(ap.trat) *
+			      GeoTrf::RotateX3D(ap.rots) * GeoTrf::RotateY3D(ap.rotz) * GeoTrf::RotateZ3D(ap.rott);
+
+			    GeoTrf::Transform3D tsz_to_szt = GeoTrf::RotateZ3D(-90 * Gaudi::Units::degree) * GeoTrf::RotateY3D(-90 * Gaudi::Units::degree);
+			    GeoTrf::Transform3D nominalTransform=station->getNominalTransform(*mysql, (*pit).second);
+			    GeoTrf::Transform3D native_to_amdbl=tsz_to_szt * station->native_to_tsz_frame(*mysql, (*pit).second);
+			    GeoAlignableTransform *xf = new GeoAlignableTransform(nominalTransform*native_to_amdbl.inverse()*delta_amdb*native_to_amdbl);
+			    
+			    // add tag, transform and physicalvolume associated to the chamber to the mother-volume
+			    p4->add(nm);
+			    p4->add(xf);
+			    p4->add(pv);
+			    
+
+			    
+			    mst->setTransform(xf);
+			    mst->setNativeToAmdbLRS(tsz_to_szt * station->native_to_tsz_frame(*mysql, (*pit).second));
+			    mst->setNominalAmdbLRSToGlobal(station->tsz_to_global_frame(*mysql, (*pit).second) * tsz_to_szt.inverse());
+			    mst->setDeltaAmdbLRS(GeoTrf::Transform3D::Identity());
+			    
+                            
+                        } 
                     }
                 }
+		else {
+		}
             } // end loop on positions
 
             // number of stations realised in the layout

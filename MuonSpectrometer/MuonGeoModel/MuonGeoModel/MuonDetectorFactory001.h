@@ -35,6 +35,8 @@ namespace MuonGM {
         virtual const MuonDetectorManager *getDetectorManager() const override;
         MuonDetectorManager *getDetectorManager();
 
+
+
         inline void setDBAtlasVersion(const std::string&v);
         inline void setDBMuonVersion(const std::string&v);
         inline void setDBkey(const std::string&v);
@@ -65,6 +67,10 @@ namespace MuonGM {
         inline void hasMM(bool value);
         inline void setNSWAsBuiltAsciiPath(const std::string &, const std::string &);
 
+	inline void disableBEEShift(bool flag);
+	inline bool BEEShiftDisabled() const;
+ 
+
       private:
 
     
@@ -89,6 +95,7 @@ namespace MuonGM {
         bool m_hasCSC{true};
         bool m_hasSTgc{true};
         bool m_hasMM{true};
+	bool m_disableBEEShift{false};
 
         std::vector<std::string> m_selectedStations;
         std::vector<int> m_selectedStEta;
@@ -131,6 +138,10 @@ namespace MuonGM {
     void MuonDetectorFactory001::hasCSC(bool value) { m_hasCSC = value; }
     void MuonDetectorFactory001::hasSTgc(bool value) { m_hasSTgc = value; }
     void MuonDetectorFactory001::hasMM(bool value) { m_hasMM = value; }      
+    void MuonDetectorFactory001::disableBEEShift(bool flag) { m_disableBEEShift=flag;}
+    bool MuonDetectorFactory001::BEEShiftDisabled() const { return m_disableBEEShift;}
+ 
+
         
 } // namespace MuonGM
 
