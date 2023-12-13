@@ -220,6 +220,8 @@ HLT_2j110_0eta180_emergingPTF0p09dR1p2_a10sd_cssk_pf_jes_ftf_L1jLJ140:
   eventCount: 0
 HLT_2j110_0eta200_emergingPTF0p1dR1p2_a10sd_cssk_pf_jes_ftf_L1jLJ140:
   eventCount: 0
+HLT_2j120_mb_afprec_afpdijet_L1AFP_A_AND_C:
+  eventCount: 0
 HLT_2j120_mb_afprec_afpdijet_L1AFP_A_AND_C_TOF_J50:
   eventCount: 0
 HLT_2j120_mb_afprec_afpdijet_L1AFP_A_AND_C_TOF_jJ90:
@@ -227,6 +229,8 @@ HLT_2j120_mb_afprec_afpdijet_L1AFP_A_AND_C_TOF_jJ90:
 HLT_2j120_mb_afprec_afpdijet_L1J100:
   eventCount: 0
 HLT_2j120_mb_afprec_afpdijet_L1jJ160:
+  eventCount: 0
+HLT_2j175_mb_afprec_afpdijet_L1AFP_A_AND_C:
   eventCount: 0
 HLT_2j175_mb_afprec_afpdijet_L1AFP_A_AND_C_TOF_J75:
   eventCount: 0
@@ -262,6 +266,11 @@ HLT_2j20_2j20_pf_ftf_presel2j25XX2j25b85_PhysicsTLA_L14J15p0ETA25:
   eventCount: 0
 HLT_2j20_mb_afprec_afpdijet_L1RD0_FILLED:
   eventCount: 0
+  stepCounts:
+    0: 31
+  stepFeatures:
+    0: 124
+    1: 31
 HLT_2j20c_2j20c_80bdips_roiftf_presel4c20_L1J45p0ETA21_3J15p0ETA25:
   eventCount: 0
 HLT_2j20c_2j20c_85bdips_roiftf_presel4c20_L14J15p0ETA25:
@@ -1089,8 +1098,6 @@ HLT_7j45_pf_ftf_L14J15:
 HLT_7j45_pf_ftf_presel7j30_L14J15:
   eventCount: 0
 HLT_7j45_pf_ftf_presel7j30_L14jJ40:
-  eventCount: 0
-HLT_beamspot_allTE_trkfast_BeamSpotPEB_L1J15:
   eventCount: 0
 HLT_dispvtx0_loose_L1XE50:
   eventCount: 0
@@ -4718,6 +4725,20 @@ HLT_j0_Z110XX5c70_roiftf_presel5j50_L14J15:
   eventCount: 0
 HLT_j0_Z110XX6c55_roiftf_presel6j40_L14J15:
   eventCount: 0
+HLT_j0_perf_L1RD0_FILLED:
+  eventCount: 50
+  stepCounts:
+    0: 50
+  stepFeatures:
+    0: 50
+HLT_j0_perf_pf_ftf_L1RD0_FILLED:
+  eventCount: 50
+  stepCounts:
+    0: 50
+    1: 50
+  stepFeatures:
+    0: 50
+    1: 50
 HLT_j0_perf_pf_subjesgscIS_ftf_L1RD0_FILLED:
   eventCount: 50
   stepCounts:
@@ -8202,12 +8223,92 @@ HLT_noalg_CostMonDS_L1All:
     0: 50
   stepFeatures:
     0: 50
+HLT_noalg_L110DR-MU14FCH-MU5VF_EMPTY:
+  eventCount: 0
+HLT_noalg_L110DR-MU14FCH-MU5VF_UNPAIRED_ISO:
+  eventCount: 0
+HLT_noalg_L12MU5VF:
+  eventCount: 2
+HLT_noalg_L1AFP_A_AND_C_TOF_J50:
+  eventCount: 0
+HLT_noalg_L1AFP_A_AND_C_TOF_J75:
+  eventCount: 0
+HLT_noalg_L1AFP_A_AND_C_TOF_T0T1_J50:
+  eventCount: 0
+HLT_noalg_L1AFP_A_AND_C_TOF_T0T1_J75:
+  eventCount: 0
 HLT_noalg_L1All:
   eventCount: 50
+HLT_noalg_L1BPH-2M9-0DR15-2MU3VF:
+  eventCount: 0
+HLT_noalg_L1BPH-8M15-0DR22-2MU5VF:
+  eventCount: 1
+HLT_noalg_L1CEP-CjJ100:
+  eventCount: 0
+HLT_noalg_L1CEP-CjJ90:
+  eventCount: 0
+HLT_noalg_L1EM10VH:
+  eventCount: 13
+HLT_noalg_L1EM15:
+  eventCount: 9
+HLT_noalg_L1EM3:
+  eventCount: 37
 HLT_noalg_L1J100:
   eventCount: 0
+HLT_noalg_L1J15:
+  eventCount: 14
+HLT_noalg_L1J20:
+  eventCount: 11
+HLT_noalg_L1J30:
+  eventCount: 6
+HLT_noalg_L1J40:
+  eventCount: 4
 HLT_noalg_L1J400:
   eventCount: 0
+HLT_noalg_L1J50:
+  eventCount: 4
+HLT_noalg_L1J75:
+  eventCount: 0
+HLT_noalg_L1MU10BO:
+  eventCount: 0
+HLT_noalg_L1MU10BOM:
+  eventCount: 0
+HLT_noalg_L1MU12BOM:
+  eventCount: 0
+HLT_noalg_L1MU14FCH:
+  eventCount: 0
+HLT_noalg_L1MU18VFCH:
+  eventCount: 0
+HLT_noalg_L1MU3V:
+  eventCount: 11
+HLT_noalg_L1MU3VF:
+  eventCount: 9
+HLT_noalg_L1MU4BOM:
+  eventCount: 0
+HLT_noalg_L1MU5VF:
+  eventCount: 7
+HLT_noalg_L1MU8F:
+  eventCount: 4
+HLT_noalg_L1MU8VF:
+  eventCount: 0
+HLT_noalg_L1MU8VFC:
+  eventCount: 0
+HLT_noalg_L1RD0_EMPTY:
+  eventCount: 0
+HLT_noalg_L1RD0_FILLED:
+  eventCount: 50
+HLT_noalg_L1RD1_FILLED:
+  eventCount: 50
+HLT_noalg_L1TAU12IM:
+  eventCount: 12
+HLT_noalg_L1TAU20IM:
+  eventCount: 9
+HLT_noalg_L1TAU40:
+  eventCount: 3
+HLT_noalg_L1TAU60:
+  eventCount: 2
+HLT_noalg_L1TAU8:
+  eventCount: 19
 HLT_noalg_L1XE30:
   eventCount: 1
 HLT_noalg_L1XE300:
@@ -8222,24 +8323,146 @@ HLT_noalg_L1XE50:
   eventCount: 0
 HLT_noalg_L1XE55:
   eventCount: 0
+HLT_noalg_L1XE60:
+  eventCount: 0
+HLT_noalg_L1cTAU20M:
+  eventCount: 13
+HLT_noalg_L1cTAU30M:
+  eventCount: 8
+HLT_noalg_L1cTAU35M:
+  eventCount: 7
+HLT_noalg_L1eEM12L:
+  eventCount: 7
+HLT_noalg_L1eEM18L:
+  eventCount: 3
+HLT_noalg_L1eEM18M:
+  eventCount: 2
+HLT_noalg_L1eEM24L:
+  eventCount: 3
+HLT_noalg_L1eEM26:
+  eventCount: 4
+HLT_noalg_L1eEM26L:
+  eventCount: 2
+HLT_noalg_L1eEM26M:
+  eventCount: 2
+HLT_noalg_L1eEM26T:
+  eventCount: 2
+HLT_noalg_L1eEM5:
+  eventCount: 25
+HLT_noalg_L1eEM9:
+  eventCount: 17
+HLT_noalg_L1eTAU12:
+  eventCount: 16
+HLT_noalg_L1eTAU140:
+  eventCount: 0
+HLT_noalg_L1eTAU20:
+  eventCount: 13
+HLT_noalg_L1eTAU20M:
+  eventCount: 13
+HLT_noalg_L1eTAU30:
+  eventCount: 8
+HLT_noalg_L1eTAU60:
+  eventCount: 3
+HLT_noalg_L1eTAU80:
+  eventCount: 2
+HLT_noalg_L1gJ100p0ETA25:
+  eventCount: 0
+HLT_noalg_L1gJ20p0ETA25:
+  eventCount: 14
+HLT_noalg_L1gJ20p0ETA25_EMPTY:
+  eventCount: 0
+HLT_noalg_L1gJ20p25ETA49:
+  eventCount: 13
 HLT_noalg_L1gJ400p0ETA25:
+  eventCount: 0
+HLT_noalg_L1gJ50p0ETA25:
+  eventCount: 4
+HLT_noalg_L1gLJ100p0ETA25:
+  eventCount: 0
+HLT_noalg_L1gLJ140p0ETA25:
   eventCount: 0
 HLT_noalg_L1gLJ160p0ETA25:
   eventCount: 0
+HLT_noalg_L1gLJ80p0ETA25:
+  eventCount: 0
+HLT_noalg_L1gMHT500:
+  eventCount: 0
+HLT_noalg_L1gTE200:
+  eventCount: 27
 HLT_noalg_L1gXEJWOJ100:
   eventCount: 0
+HLT_noalg_L1gXEJWOJ70:
+  eventCount: 3
+HLT_noalg_L1gXEJWOJ80:
+  eventCount: 1
 HLT_noalg_L1gXENC100:
   eventCount: 0
+HLT_noalg_L1gXENC70:
+  eventCount: 6
 HLT_noalg_L1gXERHO100:
+  eventCount: 0
+HLT_noalg_L1gXERHO70:
+  eventCount: 2
+HLT_noalg_L1jJ125:
+  eventCount: 0
+HLT_noalg_L1jJ125p30ETA49:
   eventCount: 0
 HLT_noalg_L1jJ160:
   eventCount: 0
+HLT_noalg_L1jJ30:
+  eventCount: 22
+HLT_noalg_L1jJ40:
+  eventCount: 15
+HLT_noalg_L1jJ40p30ETA49:
+  eventCount: 8
+HLT_noalg_L1jJ50:
+  eventCount: 12
 HLT_noalg_L1jJ500:
+  eventCount: 0
+HLT_noalg_L1jJ50p30ETA49:
+  eventCount: 5
+HLT_noalg_L1jJ60:
+  eventCount: 7
+HLT_noalg_L1jJ60p30ETA49:
+  eventCount: 3
+HLT_noalg_L1jJ90:
+  eventCount: 3
+HLT_noalg_L1jJ90p30ETA49:
+  eventCount: 1
+HLT_noalg_L1jLJ120:
   eventCount: 0
 HLT_noalg_L1jLJ140:
   eventCount: 0
+HLT_noalg_L1jLJ80:
+  eventCount: 0
+HLT_noalg_L1jTAU20:
+  eventCount: 14
+HLT_noalg_L1jTAU30:
+  eventCount: 10
+HLT_noalg_L1jTAU30M:
+  eventCount: 10
+HLT_noalg_L1jTE200:
+  eventCount: 18
+HLT_noalg_L1jTEC200:
+  eventCount: 1
+HLT_noalg_L1jTEFWD100:
+  eventCount: 21
+HLT_noalg_L1jTEFWDA100:
+  eventCount: 4
+HLT_noalg_L1jTEFWDC100:
+  eventCount: 7
 HLT_noalg_L1jXE100:
   eventCount: 2
+HLT_noalg_L1jXE110:
+  eventCount: 0
+HLT_noalg_L1jXE500:
+  eventCount: 0
+HLT_noalg_L1jXE70:
+  eventCount: 5
+HLT_noalg_L1jXE80:
+  eventCount: 3
+HLT_noalg_L1jXEC100:
+  eventCount: 1
 HLT_noalg_L1jXEPerf100:
   eventCount: 0
 HLT_tau0_mediumRNN_tracktwoMVA_tau0_mediumRNN_tracktwoMVA_03dRAB30_L1DR-TAU20ITAU12I-J25:

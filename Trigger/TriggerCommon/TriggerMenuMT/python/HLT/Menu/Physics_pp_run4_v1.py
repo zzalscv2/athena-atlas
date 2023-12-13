@@ -120,17 +120,6 @@ def setupMenu(menu_name):
 
     chains['Beamspot'] += []
 
-
-    # if menu is not for P1, remove all online chains
-    if 'P1' not in menu_name:
-        for sig in chains:
-           chainsToRemove = []
-           for chainIdx,chain in enumerate(chains[sig]):
-              if 'PS:Online' in chain.groups:
-                 chainsToRemove.append(chainIdx) 
-           for i in reversed(chainsToRemove):
-              del chains[sig][i]
-
     # check all chains are classified as either primary, support or T&P chains
     for sig in chains:
         for chain in chains[sig]:
