@@ -17,7 +17,7 @@ namespace GlobalSim {
   public:
     GlobalData (std::size_t sn, T data);
     
-    ~GlobalData(){};
+    virtual ~GlobalData() = default;
     
     const T& data() const;
     

@@ -77,7 +77,6 @@ namespace PixelDigitization{
       static_cast<const InDetDD::PixelModuleDesign*>(&(chargedDiodes.element())->design());
 
     const PixelID* pixelId = static_cast<const PixelID*>(chargedDiodes.element()->getIdHelper());
-    const IdentifierHash moduleHash = pixelId->wafer_hash(chargedDiodes.identify()); // wafer hash
     int barrel_ec = pixelId->barrel_ec(chargedDiodes.element()->identify());
     int layerIndex = pixelId->layer_disk(chargedDiodes.element()->identify());
     const double totalNoiseOccupancy = moduleData->getNoiseOccupancy(barrel_ec,layerIndex) * moduleData->getNumberOfBCID(barrel_ec, layerIndex);
