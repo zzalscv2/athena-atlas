@@ -9,6 +9,7 @@
 // ROOT include(s):
 #include <TFile.h>
 #include <TTree.h>
+#include <TKey.h> 
 #include <TChain.h>
 #include <TFriendElement.h>
 #include <TChainElement.h>
@@ -490,8 +491,15 @@ namespace xAOD {
             if (  (keyName != METADATA_TREE_NAME) 
                && (keyName.find("MetaData") != std::string::npos)
                && !(keyName.find("MetaDataHdr") != std::string::npos)){
-               // key is corresponds to a metadata tree 
-               lOtherMetaTreeNames.insert(keyName);
+               // Make sure key corresponds to a tree 
+               const char *className = ((::TKey*)lKeys->At(iKey))->GetClassName();
+               static constexpr Bool_t LOAD = kFALSE;
+               static constexpr Bool_t SILENT = kTRUE;
+               ::TClass* cl = ::TClass::GetClass(className, LOAD, SILENT);
+               if ((cl != nullptr) && cl->InheritsFrom(::TTree::Class())){
+                  // key is corresponding to a metadata tree 
+                  lOtherMetaTreeNames.insert(keyName);
+               }
             }
          }
       }
@@ -501,7 +509,9 @@ namespace xAOD {
          TTree *tmpMetaTree =  dynamic_cast< ::TTree* >( file->Get( metaTreeName.c_str() ) );
 
          if (!tmpMetaTree){ 
+            // Skip tree if could not read it 
             ::Warning( "xAOD::TEvent::readFrom", "Could not read metadata tree=%s",metaTreeName.c_str());
+            continue;
          }
 
          // Set metadata entry to be read 
