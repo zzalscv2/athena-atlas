@@ -25,33 +25,82 @@ Muon::nsw::NSWTriggerSTGL1AElink::NSWTriggerSTGL1AElink(const uint32_t* bs, cons
   // 2 felix header 32b words already decoded;
   constexpr static auto START_DATA = std::size_t{2 * 32};
   auto readPointer = std::size_t{START_DATA};
-  decode_header(readPointer);
+  int version = parse_version_workaround(readPointer);
+  decode_header(readPointer, version);
   decode_data(readPointer);
   decode_trailer(readPointer);
 }
 
-void Muon::nsw::NSWTriggerSTGL1AElink::decode_header(std::size_t& readPointer) {
-  m_head_fragID = decode(readPointer, STGTPL1A::size_head_sectID);
-  m_head_sectID = decode(readPointer, STGTPL1A::size_head_sectID);
-  m_head_EC = decode(readPointer, STGTPL1A::size_head_EC);
-  m_head_flags = decode(readPointer, STGTPL1A::size_head_flags);
-  m_head_BCID = decode(readPointer, STGTPL1A::size_head_BCID);
-  m_head_orbit = decode(readPointer, STGTPL1A::size_head_orbit);
-  m_head_spare = decode(readPointer, STGTPL1A::size_head_spare);
-  m_L1ID = decode(readPointer, STGTPL1A::size_L1ID);
-  m_head_wdw_open = decode(readPointer, STGTPL1A::size_head_wdw_open);
-  m_head_l1a_req = decode(readPointer, STGTPL1A::size_head_l1a_req);
-  m_head_wdw_close = decode(readPointer, STGTPL1A::size_head_wdw_close);
-  m_head_overflowCount = decode(readPointer, STGTPL1A::size_head_overflowCount);
-  m_head_wdw_matching_engines_usage = decode(readPointer, STGTPL1A::size_head_wdw_matching_engines_usage);
-  m_head_cfg_wdw_open_offset = decode(readPointer, STGTPL1A::size_head_cfg_wdw_open_offset);
-  m_head_cfg_l1a_req_offset = decode(readPointer, STGTPL1A::size_head_cfg_l1a_req_offset);
-  m_head_cfg_wdw_close_offset = decode(readPointer, STGTPL1A::size_head_cfg_wdw_close_offset);
-  m_head_cfg_timeout = decode(readPointer, STGTPL1A::size_head_cfg_timeout);
+void Muon::nsw::NSWTriggerSTGL1AElink::decode_header(std::size_t& readPointer, int version) {
 
-  // this is important! It identifies the elink! It should be ABCD1230/ABCD1231/ABCD1232
-  // not checked during decoding but must be checked at some point
-  m_head_link_const = decode(readPointer, STGTPL1A::size_head_link_const);
+  // This part is constant for all versions
+  m_head_fragID = Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_head_fragID);
+  m_head_sectID = Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_head_sectID);
+  m_head_EC =     Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_head_EC);
+  m_head_flags =  Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_head_flags);
+  m_head_BCID =   Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_head_BCID);
+  m_head_orbit =  Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_head_orbit);
+  m_head_spare =  Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_head_spare);
+  m_L1ID =        Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_L1ID);
+
+  ERS_DEBUG(2, Muon::nsw::format("\n TP header: \n"
+                                 "  fradID: {}\n"
+                                 "  sectID: {}\n"
+                                 "  EC:     {}\n"
+                                 "  flags:  {}\n"
+                                 "  BCID:   {}\n"
+                                 "  orbit:  {}\n"
+                                 "  spare:  {}\n"
+                                 "  L1ID:   {}",
+                                 m_head_fragID, m_head_sectID, m_head_EC, m_head_flags, m_head_BCID, m_head_orbit, m_head_spare, m_L1ID));
+
+  if (version == 1)
+  {
+      m_l1a_open_BCID =         Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_open_BCID);
+      m_l1a_req_BCID =          Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_req_BCID);
+      m_l1a_close_BCID =        Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_close_BCID);
+      m_l1a_timeout =           Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_timeout); // overflow count
+      m_l1a_wdw_matching_engines_usage = 
+                                Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_wdw_matching_engines_usage);
+      m_l1a_open_BCID_offset =  Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_open_BCID_offset);
+      m_l1a_req_BCID_offset =   Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_req_BCID_offset);
+      m_l1a_close_BCID_offset = Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_close_BCID_offset);
+      m_l1a_timeout_config =    Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_timeout_config);
+      
+      m_l1a_link_const =        Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_link_const); 
+  }
+  else
+  {
+      m_l1a_versionID =         Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_versionID);
+      m_l1a_local_req_BCID =    Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_local_req_BCID);
+      m_l1a_local_rel_BCID =    Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_local_rel_BCID);
+      m_l1a_open_BCID =         Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_open_BCID);
+      m_l1a_req_BCID =          Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_req_BCID);
+      m_l1a_close_BCID =        Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_close_BCID);
+      m_l1a_timeout =           Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_timeout);
+      m_l1a_open_BCID_offset =  Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_open_BCID_offset);
+      m_l1a_req_BCID_offset =   Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_req_BCID_offset);
+      m_l1a_close_BCID_offset = Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_close_BCID_offset);
+      m_l1a_timeout_config =    Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_timeout_config);
+      m_l1a_busy_thr =          Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_busy_thr);
+      m_l1a_engine_snapshot =   Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_engine_snapshot);
+      m_l1a_link_const =        Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_link_const);
+      m_l1a_padding =           Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_padding);
+  }
+
+}
+
+int Muon::nsw::NSWTriggerSTGL1AElink::parse_version_workaround(std::size_t& readPointer)
+{
+   auto anchor_value = Muon::nsw::STGTPL1A::version1_anchor_value;
+   auto anchor = Muon::nsw::decode_at_loc<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::loc_version1_anchor, Muon::nsw::STGTPL1A::size_l1a_link_const);
+   
+   if (anchor == anchor_value)
+   {
+      return 1;
+   }
+
+   return 2;
 }
 
 void Muon::nsw::NSWTriggerSTGL1AElink::decode_data(std::size_t& readPointer) {

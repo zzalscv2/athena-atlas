@@ -72,16 +72,16 @@ TEST_F(NSWTriggerSTGL1AElinkTest, L1ID) {
   EXPECT_EQ(m_decoder->L1ID(), 1508);
 }
 
-TEST_F(NSWTriggerSTGL1AElinkTest, head_wdw_open) {
-  EXPECT_EQ(m_decoder->head_wdw_open(), 336);
+TEST_F(NSWTriggerSTGL1AElinkTest, l1a_open_BCID) {
+  EXPECT_EQ(m_decoder->l1a_open_BCID(), 336);
 }
 
-TEST_F(NSWTriggerSTGL1AElinkTest, head_l1a_req) {
-  EXPECT_EQ(m_decoder->head_l1a_req(), 338);
+TEST_F(NSWTriggerSTGL1AElinkTest, l1a_req_BCID) {
+  EXPECT_EQ(m_decoder->l1a_req_BCID(), 338);
 }
 
-TEST_F(NSWTriggerSTGL1AElinkTest, head_wdw_close) {
-  EXPECT_EQ(m_decoder->head_wdw_close(), 340);
+TEST_F(NSWTriggerSTGL1AElinkTest, l1a_close_BCID) {
+  EXPECT_EQ(m_decoder->l1a_close_BCID(), 340);
 }
 
 TEST_F(NSWTriggerSTGL1AElinkTest, head_overflowCount) {
@@ -92,24 +92,24 @@ TEST_F(NSWTriggerSTGL1AElinkTest, head_wdw_matching_engines_usage) {
   EXPECT_EQ(m_decoder->head_wdw_matching_engines_usage(), 268435456);
 }
 
-TEST_F(NSWTriggerSTGL1AElinkTest, head_cfg_wdw_open_offset) {
-  EXPECT_EQ(m_decoder->head_cfg_wdw_open_offset(), 34);
+TEST_F(NSWTriggerSTGL1AElinkTest, l1a_open_BCID_offset) {
+  EXPECT_EQ(m_decoder->l1a_open_BCID_offset(), 34);
 }
 
-TEST_F(NSWTriggerSTGL1AElinkTest, head_cfg_l1a_req_offset) {
-  EXPECT_EQ(m_decoder->head_cfg_l1a_req_offset(), 32);
+TEST_F(NSWTriggerSTGL1AElinkTest, l1a_req_BCID_offset) {
+  EXPECT_EQ(m_decoder->l1a_req_BCID_offset(), 32);
 }
 
-TEST_F(NSWTriggerSTGL1AElinkTest, head_cfg_wdw_close_offset) {
-  EXPECT_EQ(m_decoder->head_cfg_wdw_close_offset(), 30);
+TEST_F(NSWTriggerSTGL1AElinkTest, l1a_close_BCID_offset) {
+  EXPECT_EQ(m_decoder->l1a_close_BCID_offset(), 30);
 }
 
-TEST_F(NSWTriggerSTGL1AElinkTest, head_cfg_timeout) {
-  EXPECT_EQ(m_decoder->head_cfg_timeout(), 256);
+TEST_F(NSWTriggerSTGL1AElinkTest, l1a_timeout_config) {
+  EXPECT_EQ(m_decoder->l1a_timeout_config(), 256);
 }
 
-TEST_F(NSWTriggerSTGL1AElinkTest, head_link_const) {
-  EXPECT_EQ(m_decoder->head_link_const(), 2881530817);
+TEST_F(NSWTriggerSTGL1AElinkTest, l1a_link_const) {
+  EXPECT_EQ(m_decoder->l1a_link_const(), 0xABC0ABC1);
 }
 
 TEST_F(NSWTriggerSTGL1AElinkTest, stream_head_nbits) {

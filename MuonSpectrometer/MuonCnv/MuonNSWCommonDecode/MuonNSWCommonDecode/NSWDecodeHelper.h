@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _MUON_NSW_DECODE_HELPER_H_
 #define _MUON_NSW_DECODE_HELPER_H_
@@ -118,6 +118,24 @@ namespace Muon
       start += size;
       return res;
     }
+
+    /**
+     * @brief Decode bits from data of words at read pointer + offset and NOT advance the read pointer
+     *
+     * @tparam Target Type of the value that is decoded
+     * @tparam Source Type of the words in the data
+     * @param words Data
+     * @param start Read pointer (start of value in bits)
+     * @param offset decoding begins at read pointer + offset
+     * @param size Number of bits to be decoded
+     * @return Target Decoded value
+     */
+    template <typename Target, typename Source>
+      constexpr Target decode_at_loc(const CxxUtils::span<const Source> words, std::size_t& start, const int offset, const std::size_t size) {
+      const auto res = bit_slice<Target, Source>(words, start + offset, start + size + offset - 1);
+      return res;
+    }
+
     /// @brief Returns the most left hand bit which is set in a number
     /// @tparam T Any built-in data type
     /// @param number value
@@ -126,7 +144,7 @@ namespace Muon
       constexpr int8_t max_bit(const T &number) {
       constexpr int8_t num_bits = sizeof(number) * 8 - 1;
       for (int8_t bit = num_bits; bit >= 0; --bit) {
-	if (number & (1u << bit))
+	if (number & (1 << bit))
 	  return bit;
       }
       return -1;
@@ -139,7 +157,7 @@ namespace Muon
       constexpr int8_t min_bit(const T &number) {
       constexpr int8_t num_bits = sizeof(number) * 8 - 1;  
       for (size_t bit = 0; bit <= num_bits; ++bit) {
-	if (number & (1u << bit))
+	if (number & (1 << bit))
 	  return bit;
       }
       return -1;
