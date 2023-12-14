@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2022, 2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPMT_PILEUPMTALG_H
@@ -31,8 +31,6 @@
 #include <string_view>
 #include <thread>
 
-using namespace std::chrono;
-
 class atomic_output {
  private:
   std::FILE* m_file{};
@@ -41,6 +39,7 @@ class atomic_output {
  public:
   atomic_output() = default;
   void init(const std::string& filename) {
+    using namespace std::chrono;
     std::lock_guard lck{m_mtx};
     if (m_file != nullptr) {
       return;
