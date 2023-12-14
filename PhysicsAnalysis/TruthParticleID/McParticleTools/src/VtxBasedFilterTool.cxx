@@ -30,19 +30,7 @@
 VtxBasedFilterTool::VtxBasedFilterTool( const std::string& type, 
 				  const std::string& name, 
 				  const IInterface* parent ) : 
-  TruthParticleFilterBaseTool( type, name, parent )
-{
-  //
-  // Property declaration
-  // 
-  //declareProperty( "Property", m_nProperty );
-
-  declareProperty( "MaxHardScatteringVtxBarcode", 
-		   m_maxHardScatteringVtxBarcode = 30,
-		   "Property to setup the maximum vertex barcode to look for "
-		   "hard-scattering vertices" );
-
-}
+  TruthParticleFilterBaseTool( type, name, parent ){}
 
 /// Destructor
 ///////////////
@@ -271,12 +259,34 @@ StatusCode VtxBasedFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx
   return StatusCode::SUCCESS;
 }
 
-bool 
-VtxBasedFilterTool::isFromHardScattering( const HepMC::ConstGenVertexPtr& vtx ) const
+bool VtxBasedFilterTool::isPartonVertex( const HepMC::ConstGenVertexPtr& vtx ) const
 {
-  return std::abs(HepMC::barcode(vtx)) <= m_maxHardScatteringVtxBarcode.value() &&
-       m_ppFilter.isAccepted(vtx) &&
-       ! m_showerFilter.isAccepted(vtx);
+ if (!vtx) return false;
+#ifdef HEPMC3
+ for (auto& p: vtx->particles_in()) {
+   if (MC::isHadron(p)&&!MC::isBeam(p)) return false;
+   auto pv = p->production_vertex();
+   if (pv && !isPartonVertex(pv)) return false;
+ }
+ for (auto& p: vtx->particles_out()) {
+   if (MC::isHadron(p)&&!MC::isBeam(p)) return false;
+ }
+#else
+ for ( auto  p = vtx->particles_in_const_begin(), parentEnd = vtx->particles_in_const_end(); p != parentEnd; ++p ) {
+   if (MC::isHadron(*p)&&!MC::isBeam(*p)) return false;
+   auto pv = (*p)->production_vertex();
+   if (pv && !isPartonVertex(pv)) return false;
+}
+for ( auto  p = vtx->particles_out_const_begin(), parentEnd = vtx->particles_out_const_end(); p != parentEnd; ++p ) {
+   if (MC::isHadron(*p)&&!MC::isBeam(*p)) return false;
+ }
+#endif 
+ return true;
+}
+
+bool VtxBasedFilterTool::isFromHardScattering( const HepMC::ConstGenVertexPtr& vtx ) const
+{
+  return isPartonVertex(vtx) && m_ppFilter.isAccepted(vtx) && ! m_showerFilter.isAccepted(vtx);
 }
 
 /////////////////////////////////////////////////////////////////// 

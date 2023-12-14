@@ -26,10 +26,6 @@
 #include "AtlasHepMC/Flow.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-/////////////////////////////////////////////////////////////////// 
-/// Public methods: 
-/////////////////////////////////////////////////////////////////// 
-
 using CLHEP::GeV;
 
 /// Constructors
@@ -77,11 +73,6 @@ EtaPtFilterTool::EtaPtFilterTool( const std::string& type,
 
   m_outerEtaRegionCuts.declareUpdateHandler( &EtaPtFilterTool::setupOuterEtaRegionCuts,
 					     this );
-
-  declareProperty( "MaxHardScatteringVtxBarcode", 
-		   m_maxHardScatteringVtxBarcode = 20,
-		   "Property to setup the maximum vertex barcode to look for "
-		   "hard-scattering vertices" );
 
   // switches
   declareProperty( "OnlyGenerator",      
@@ -316,9 +307,7 @@ StatusCode EtaPtFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx, H
 				       bool isSignalVertex) const
 {
   if ( 0 == srcVtx || 0 == evt ) {
-    ATH_MSG_ERROR("In addVertex(vtx,evt) : INVALID pointer given !!" << endmsg
-		  << " vtx: " << srcVtx << endmsg
-		  << " evt: " << evt);
+    ATH_MSG_ERROR("In addVertex(vtx,evt) : INVALID pointer given !!" << endmsg  << " vtx: " << srcVtx << endmsg << " evt: " << evt);
     return StatusCode::FAILURE;
   }
 #ifdef HEPMC3
@@ -440,16 +429,33 @@ StatusCode EtaPtFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx, H
   return StatusCode::SUCCESS;
 }
 
+bool EtaPtFilterTool::isPartonVertex( const HepMC::ConstGenVertexPtr& vtx ) const
+{
+ if (!vtx) return false;
+#ifdef HEPMC3
+ for (auto& p: vtx->particles_in()) {
+   if (MC::isHadron(p)&&!MC::isBeam(p)) return false;
+   auto pv = p->production_vertex();
+   if (pv && !isPartonVertex(pv)) return false;
+ }
+ for (auto& p: vtx->particles_out()) {
+   if (MC::isHadron(p)&&!MC::isBeam(p)) return false;
+ }
+#else
+ for ( auto  p = vtx->particles_in_const_begin(), parentEnd = vtx->particles_in_const_end(); p != parentEnd; ++p ) {
+   if (MC::isHadron(*p)&&!MC::isBeam(*p)) return false;
+   auto pv = (*p)->production_vertex();
+   if (pv && !isPartonVertex(pv)) return false;
+}
+for ( auto  p = vtx->particles_out_const_begin(), parentEnd = vtx->particles_out_const_end(); p != parentEnd; ++p ) {
+   if (MC::isHadron(*p)&&!MC::isBeam(*p)) return false;
+ }
+#endif 
+ return true;
+}
 bool EtaPtFilterTool::isFromHardScattering( const HepMC::ConstGenVertexPtr& vtx ) const
 {
-  if ( std::abs(HepMC::barcode(vtx)) <= m_maxHardScatteringVtxBarcode.value() &&
-       m_ppFilter.isAccepted(vtx) &&
-       ! m_showerFilter.isAccepted(vtx) ) {
-
-    return true;
-  } else {
-    return false;
-  }
+  return  isPartonVertex(vtx)&&m_ppFilter.isAccepted(vtx) && ! m_showerFilter.isAccepted(vtx);
 }
 
 /////////////////////////////////////////////////////////////////// 
@@ -503,12 +509,10 @@ StatusCode EtaPtFilterTool::initializeTool()
 
 void EtaPtFilterTool::setupInnerEtaRegionCuts( Gaudi::Details::PropertyBase& /*innerRegion*/ )
 {
-  // nothing to do (yet?)
   return;
 }
 
 void EtaPtFilterTool::setupOuterEtaRegionCuts( Gaudi::Details::PropertyBase& /*outerRegion*/ )
 {
-  // nothing to do (yet?)
   return;
 }

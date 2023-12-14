@@ -99,21 +99,10 @@ class VtxBasedFilterTool : public TruthParticleFilterBaseTool
 
   /** Helper method to copy a given vertex and add it to a GenEvent
    */
-  StatusCode addVertex( const HepMC::ConstGenVertexPtr& srcVtx, 
-			HepMC::GenEvent* evt ) const;
+  StatusCode addVertex( const HepMC::ConstGenVertexPtr& srcVtx, HepMC::GenEvent* evt ) const;
 
-  /** @brief Helper method to check if this @c HepMC::GenVertex looks
-   *  like the hard-scattering vertex.
-   *  As this information is not stored into the @c HepMC::GenEvent
-   *  we have to rely on some ad-hoc procedure. Moreover, it is a very
-   *  generator-dependent.
-   *  Here is the adopted "solution":
-   *   - check this vertex belongs to the ~20 first vertices. This can
-   *  be configured through @c m_maxHardScatteringVtxBarcode via the
-   *  property "MaxHardScatteringVtxBarcode". Default is 20.
-   *   - check that there are 2 incoming partons. This is done using
-   *  a @c McVtxFilter predicate.
-   */
+  bool isPartonVertex( const HepMC::ConstGenVertexPtr& vtx ) const;
+
   bool isFromHardScattering( const HepMC::ConstGenVertexPtr& vtx ) const;
   
   /////////////////////////////////////////////////////////////////// 
@@ -129,15 +118,6 @@ class VtxBasedFilterTool : public TruthParticleFilterBaseTool
   // Protected data: 
   /////////////////////////////////////////////////////////////////// 
  protected: 
-
-  /** Property to setup the maximum vertex barcode to look for hard-scattering
-   *  vertices.
-   *  Default is 20.
-   *  Note that you don't want to increase this number by a too big a number
-   *  otherwise the downstream selection of the vertex could pick-up showering
-   *  particles.
-   */
-  IntegerProperty m_maxHardScatteringVtxBarcode;
 
   /** Predicate to select pp->X vertices where p is a parton (q,g)
    *  This will select vertices:
