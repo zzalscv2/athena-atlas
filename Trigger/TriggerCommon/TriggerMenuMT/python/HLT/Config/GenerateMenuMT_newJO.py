@@ -109,6 +109,12 @@ def generateMenuMT(flags):
     log.info("Making the HLT configuration tree")
     menuAcc=makeHLTTree(flags)
 
+    # Configure ChainFilters for ROBPrefetching
+    from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
+    if ROBPrefetching.InitialRoI in flags.Trigger.ROBPrefetchingOptions:
+        from TrigGenericAlgs.TrigGenericAlgsConfig import prefetchingInitialRoIConfig
+        menuAcc.merge( prefetchingInitialRoIConfig(flags, HLTMenuConfig.configsList()), 'HLTBeginSeq')
+
     return menuAcc
     
 
