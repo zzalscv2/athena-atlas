@@ -187,11 +187,16 @@ namespace RootAuxDynIO
             return fieldInfo;
          }
 
-         const string field_prefix = m_storeFieldName + ':';
-         const string fieldName  = fieldInfo.field->GetName();
-         const string attr_infile = fieldName.substr(field_prefix.size());
-         const string attr_name = reg.inputRename(m_key, attr_infile);
-         if( attr_infile != fieldInfo.attribName ) {
+         bool isFieldFound = false;
+
+         if( fieldInfo.field ) {
+            const string field_prefix = m_storeFieldName + ':';
+            const string fieldName  = fieldInfo.field->GetName();
+            const string attr_infile = fieldName.substr(field_prefix.size());
+            isFieldFound = (attr_infile == fieldInfo.attribName);
+         }
+
+         if( !isFieldFound ) {
             // mark initialized here so it remembers this field was not found
             fieldInfo.status = FieldInfo::NotFound;
             return fieldInfo;
