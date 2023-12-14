@@ -483,8 +483,8 @@ namespace ActsTrk
 
     ActsTrk::MutableTrackContainer tracksContainerTemp;
 
-    UncalibratedMeasurementCalibrator<ActsTrk::MutableTrackStateBackend> calibrator(*m_ATLASConverterTool, tracking_surface_helper);
-    options.extensions.calibrator.connect(calibrator);
+    UncalibratedMeasurementCalibrator calibrator(*m_ATLASConverterTool, tracking_surface_helper);
+    options.extensions.calibrator.connect<&UncalibratedMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(&calibrator);
 
     double eta = 0.0;
     std::size_t category_i = 0;
