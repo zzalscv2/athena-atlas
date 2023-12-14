@@ -22,6 +22,8 @@ namespace pix{
     void 
     mapping(const std::string & geographicalID, int *hashID, int *bec, int *layer, int *phimod, int *etamod) const;
     
+    int getID(const std::string & geographicalID) const;
+    
     bool
     contains(const std::string & geographicalID) const;
     int nModules() const;

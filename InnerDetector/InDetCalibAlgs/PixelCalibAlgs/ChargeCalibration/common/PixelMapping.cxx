@@ -82,6 +82,17 @@ namespace pix{
     return;
   }
   
+  
+int PixelMapping::getID(const std::string & geographicalID) const {
+    auto pName = m_internalMap.find(geographicalID);
+    if (pName == m_internalMap.end()) {
+        std::cout<<"id "<<geographicalID<<" not found in mapping"<<std::endl;
+        return -1;
+    }
+    const auto & coordinates = pName->second;
+    return coordinates[0];
+}
+  
   bool
   PixelMapping::contains(const std::string & geographicalID) const{
     return (m_internalMap.find(geographicalID) != m_internalMap.end());

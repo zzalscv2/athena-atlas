@@ -14,9 +14,9 @@ find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 
 # Libraries in the package:
 atlas_add_library( PixelCalibAlgsLib
-   PixelCalibAlgs/*.h src/*.cxx ChargeCalibration/common/*.h ChargeCalibration/common/*.cxx
+   PixelCalibAlgs/*.h src/*.cxx ChargeCalibration/common/*.h ChargeCalibration/common/*.cxx ChargeCalibration/pixel/tools/*.h  ChargeCalibration/pixel/tools/*.cxx 
    PUBLIC_HEADERS PixelCalibAlgs
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel InDetConditionsSummaryService 
    InDetPrepRawData InDetReadoutGeometry PixelGeoModelLib PixelReadoutGeometryLib PixelConditionsData StoreGateLib
    PRIVATE_LINK_LIBRARIES AthenaPoolUtilities InDetIdentifier InDetRawData )
@@ -32,6 +32,11 @@ atlas_add_executable( makeInactiveModuleList
    
 atlas_add_executable( PixelCalib
    ChargeCalibration/pixel/PixelCalib.C
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils PixelCalibAlgsLib )
+   
+atlas_add_executable( PixelCalibration
+   ChargeCalibration/pixel/PixelCalibration.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils PixelCalibAlgsLib )
    
