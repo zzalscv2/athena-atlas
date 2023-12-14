@@ -86,21 +86,21 @@ void TRTDigSettings::defineVariables() {
   defineNewVariable("lowThresholdECArgon",   &m_lowThresholdECArgon,   "Low Threshold end-cap Argon",  "eV",CLHEP::eV,50.0,500.0);
   defineNewVariable("lowThresholdECKrypton", &m_lowThresholdECKrypton, "Low Threshold end-cap Krypton","eV",CLHEP::eV,50.0,500.0);
   // HT Short
-  defineNewVariable("highThresholdBarShort",       &m_highThresholdBarShort,       "High Threshold short barrel straws",        "keV",CLHEP::keV,1.0,10.0);
-  defineNewVariable("highThresholdBarShortArgon",  &m_highThresholdBarShortArgon,  "High Threshold short barrel straws Argon",  "keV",CLHEP::keV,1.0,10.0);
-  defineNewVariable("highThresholdBarShortKrypton",&m_highThresholdBarShortKrypton,"High Threshold short barrel straws Krypton","keV",CLHEP::keV,1.0,10.0);
+  defineNewVariable("highThresholdBarShort",       &m_highThresholdBarShort,       "High Threshold short barrel straws",        "keV",CLHEP::keV,0.3,10.0);
+  defineNewVariable("highThresholdBarShortArgon",  &m_highThresholdBarShortArgon,  "High Threshold short barrel straws Argon",  "keV",CLHEP::keV,0.3,10.0);
+  defineNewVariable("highThresholdBarShortKrypton",&m_highThresholdBarShortKrypton,"High Threshold short barrel straws Krypton","keV",CLHEP::keV,0.3,10.0);
   // HT Long
-  defineNewVariable("highThresholdBarLong",       &m_highThresholdBarLong,       "High Threshold long barrel straws",        "keV",CLHEP::keV,1.0,10.0);
-  defineNewVariable("highThresholdBarLongArgon",  &m_highThresholdBarLongArgon,  "High Threshold long barrel straws Argon",  "keV",CLHEP::keV,1.0,10.0);
-  defineNewVariable("highThresholdBarLongKrypton",&m_highThresholdBarLongKrypton,"High Threshold long barrel straws Krypton","keV",CLHEP::keV,1.0,10.0);
+  defineNewVariable("highThresholdBarLong",       &m_highThresholdBarLong,       "High Threshold long barrel straws",        "keV",CLHEP::keV,0.3,10.0);
+  defineNewVariable("highThresholdBarLongArgon",  &m_highThresholdBarLongArgon,  "High Threshold long barrel straws Argon",  "keV",CLHEP::keV,0.3,10.0);
+  defineNewVariable("highThresholdBarLongKrypton",&m_highThresholdBarLongKrypton,"High Threshold long barrel straws Krypton","keV",CLHEP::keV,0.3,10.0);
   // HT EC-A
-  defineNewVariable("highThresholdECAwheels",       &m_highThresholdECAwheels,       "High Threshold A type wheels",        "keV",CLHEP::keV,1.0,10.0);
-  defineNewVariable("highThresholdECAwheelsArgon",  &m_highThresholdECAwheelsArgon,  "High Threshold A type wheels Argon",  "keV",CLHEP::keV,1.0,10.0);
-  defineNewVariable("highThresholdECAwheelsKrypton",&m_highThresholdECAwheelsKrypton,"High Threshold A type wheels Krypton","keV",CLHEP::keV,1.0,10.0);
+  defineNewVariable("highThresholdECAwheels",       &m_highThresholdECAwheels,       "High Threshold A type wheels",        "keV",CLHEP::keV,0.3,10.0);
+  defineNewVariable("highThresholdECAwheelsArgon",  &m_highThresholdECAwheelsArgon,  "High Threshold A type wheels Argon",  "keV",CLHEP::keV,0.3,10.0);
+  defineNewVariable("highThresholdECAwheelsKrypton",&m_highThresholdECAwheelsKrypton,"High Threshold A type wheels Krypton","keV",CLHEP::keV,0.3,10.0);
   // HT EC-B
-  defineNewVariable("highThresholdECBwheels",       &m_highThresholdECBwheels,       "High Threshold B type wheels",        "keV",CLHEP::keV,1.0,10.0);
-  defineNewVariable("highThresholdECBwheelsArgon",  &m_highThresholdECBwheelsArgon,  "High Threshold B type wheels Argon",  "keV",CLHEP::keV,1.0,10.0);
-  defineNewVariable("highThresholdECBwheelsKrypton",&m_highThresholdECBwheelsKrypton,"High Threshold B type wheels Krypton","keV",CLHEP::keV,1.0,10.0);
+  defineNewVariable("highThresholdECBwheels",       &m_highThresholdECBwheels,       "High Threshold B type wheels",        "keV",CLHEP::keV,0.3,10.0);
+  defineNewVariable("highThresholdECBwheelsArgon",  &m_highThresholdECBwheelsArgon,  "High Threshold B type wheels Argon",  "keV",CLHEP::keV,0.3,10.0);
+  defineNewVariable("highThresholdECBwheelsKrypton",&m_highThresholdECBwheelsKrypton,"High Threshold B type wheels Krypton","keV",CLHEP::keV,0.3,10.0);
 
   defineNewVariable("innerRadiusOfStraw",&m_innerRadiusOfStraw,"Inner radius of straw","mm",CLHEP::mm,1.0,3.0); // 2.0 mm
   defineNewVariable("outerRadiusOfWire",&m_outerRadiusOfWire,"Outer radius of wire","micrometer",CLHEP::micrometer,5.0,40.0); // 0.0155 mm
