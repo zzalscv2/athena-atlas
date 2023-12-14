@@ -36,7 +36,6 @@
 
 #include "test_nsw_trigger_common_decoder_aux.h"
 
-
 void test_nsw_trigger_common_decoder_help (char *progname) {
   std::cout << "Usage: " << progname
 	    << " [-h] [-n events] [-p] [-v [-v [-v]]] [-d MML1A,MMMon,PadL1A,STGL1A] [-t] infile1, infile2, ..." << std::endl;
@@ -163,11 +162,10 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
   else if ((m & 0xf0) == 0x50) {is_tp = true; is_mon = true;}
   
   
-  if (params.printout_level > 1){
+  if (params.printout_level > 1 && is_nsw){
     std::cout << "ROB source ID                = 0x" << std::hex << sid << std::dec << std::endl;
     std::cout << "ROB subdet ID                = 0x" << std::hex << s   << std::dec << std::endl;
     std::cout << "ROB module ID                = 0x" << std::hex << m   << std::dec << std::endl;
-    std::cout << "is_nsw                = " << (is_nsw?"Yes":"No") << std::endl;
     std::cout << "is_mmg                = " << (is_mmg?"Yes":"No") << std::endl;
     std::cout << "is_stg                = " << (is_stg?"Yes":"No") << std::endl;
     std::cout << "is_pt                 = " << (is_pt?"Yes":"No") << std::endl;
@@ -181,9 +179,6 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
     if (params.printout_level > 0) {
       std::cout << "NSW Trigger fragment found; length: " << r.rod_ndata () << std::endl;
     }
-  } else {
-    if (params.printout_level > 1) std::cout << "Not decoding this ROBFragment since it's not even NSW" << std::endl;
-    return 0;
   }
   
   const uint32_t *bs = r.rod_data ();
@@ -199,12 +194,10 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
     
     std::cout << "Printing raw data (ignoring any structure)" << std::endl;
     std::cout << std::hex;
-    auto originalFill = std::cout.fill();
     for (unsigned int i = 0; i < r.rod_ndata (); ++i) {
       std::cout << " " << std::setfill('0') << std::setw(8) << bs[i];
       if (i % 4 == 3) std::cout << std::endl;
     }
-    std::cout<<std::setfill(originalFill);
     std::cout << std::dec;
     std::cout << std::endl;
   } else {
@@ -461,21 +454,25 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
 	data.b_STGL1A_head_orbit.push_back( link->head_orbit() );
 	data.b_STGL1A_head_spare.push_back( link->head_spare() );
 	data.b_STGL1A_L1ID.push_back( link->L1ID() );
-	data.b_STGL1A_head_wdw_open.push_back( link->head_wdw_open() );
-	data.b_STGL1A_head_l1a_req.push_back( link->head_l1a_req() );
-	data.b_STGL1A_head_wdw_close.push_back( link->head_wdw_close() );
-	data.b_STGL1A_head_overflowCount.push_back( link->head_overflowCount() );
-	data.b_STGL1A_head_wdw_matching_engines_usage.push_back( link->head_wdw_matching_engines_usage() );
-	data.b_STGL1A_head_cfg_wdw_open_offset.push_back( link->head_cfg_wdw_open_offset() );
-	data.b_STGL1A_head_cfg_l1a_req_offset.push_back( link->head_cfg_l1a_req_offset() );
-	data.b_STGL1A_head_cfg_wdw_close_offset.push_back( link->head_cfg_wdw_close_offset() );
-	data.b_STGL1A_head_cfg_timeout.push_back( link->head_cfg_timeout() );
-	data.b_STGL1A_head_link_const.push_back( link->head_link_const() );
+        data.b_STGL1A_l1a_versionID.push_back( link->l1a_versionID() );
+        data.b_STGL1A_l1a_local_req_BCID.push_back( link->l1a_local_req_BCID() );
+        data.b_STGL1A_l1a_local_rel_BCID.push_back( link->l1a_local_rel_BCID() );
+        data.b_STGL1A_l1a_open_BCID.push_back( link->l1a_open_BCID() );
+        data.b_STGL1A_l1a_req_BCID.push_back( link->l1a_req_BCID() );
+        data.b_STGL1A_l1a_close_BCID.push_back( link->l1a_close_BCID() );
+        data.b_STGL1A_l1a_timeout.push_back( link->l1a_timeout() );
+        data.b_STGL1A_l1a_open_BCID_offset.push_back( link->l1a_open_BCID_offset() );
+        data.b_STGL1A_l1a_req_BCID_offset.push_back( link->l1a_req_BCID_offset() );
+        data.b_STGL1A_l1a_close_BCID_offset.push_back( link->l1a_close_BCID_offset() );
+        data.b_STGL1A_l1a_timeout_config.push_back( link->l1a_timeout_config() );
+        data.b_STGL1A_l1a_busy_thr.push_back( link->l1a_busy_thr() );
+        data.b_STGL1A_l1a_engine_snapshot.push_back( link->l1a_engine_snapshot() );
+        data.b_STGL1A_l1a_link_const.push_back( link->l1a_link_const() );
+        data.b_STGL1A_l1a_padding.push_back( link->l1a_padding() );
 	data.b_STGL1A_stream_head_nbits.push_back( link->stream_head_nbits() );
 	data.b_STGL1A_stream_head_nwords.push_back( link->stream_head_nwords() );
 	data.b_STGL1A_stream_head_fifo_size.push_back( link->stream_head_fifo_size() );
 	data.b_STGL1A_stream_head_streamID.push_back( link->stream_head_streamID() );
-
 	// pad block
 	const auto& pad_packets = link-> pad_packets();
 
@@ -496,7 +493,6 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::ROBFragment &r, 
 	    data.b_STGL1A_pad_idleFlag[i].push_back(packet.PadIdleFlag());
 
 	  }
-
 	const auto& segment_packets = link-> segment_packet();
 
 
@@ -702,11 +698,11 @@ int test_nsw_trigger_common_decoder_loop (Params &params, Statistics &statistics
 	continue; //this way, an event without needed/wanted ROBs will not show up entirely
       }
       ++statistics.nevents;   
-      if (outtree) outtree->Fill();
+      outtree->Fill();
       if (buf) delete [] buf;
     }
-    if (outtree) outtree->Write();
-    if (outfile) outfile->Close();    
+    outtree->Write();
+    outfile->Close();    
   }
   return 0;
 }

@@ -14,6 +14,7 @@ namespace Muon
   namespace nsw
   {
     namespace STGTPL1A {
+
       constexpr int size_head_fragID =                        4;
       constexpr int size_head_sectID =                        4;
       constexpr int size_head_EC =                            1;
@@ -22,21 +23,37 @@ namespace Muon
       constexpr int size_head_orbit =                         2;
       constexpr int size_head_spare =                         2;
       constexpr int size_L1ID =                              32;
-      constexpr int size_head_wdw_open =                     12;
-      constexpr int size_head_l1a_req =                      12;
-      constexpr int size_head_wdw_close =                    12;
-      constexpr int size_head_overflowCount =                12;
-      constexpr int size_head_wdw_matching_engines_usage =   32;
-      constexpr int size_head_cfg_wdw_open_offset =          12;
-      constexpr int size_head_cfg_l1a_req_offset =           12;
-      constexpr int size_head_cfg_wdw_close_offset =         12;
-      constexpr int size_head_cfg_timeout =                  12;
-      constexpr int size_head_link_const =                   32;
+
+      constexpr int size_l1a_versionID =          8; // version 2+
+      constexpr int size_l1a_local_req_BCID =    12;
+      constexpr int size_l1a_local_rel_BCID =    12;
+      constexpr int size_l1a_open_BCID =         12;
+      constexpr int size_l1a_req_BCID =          12;
+      constexpr int size_l1a_close_BCID =        12;
+      constexpr int size_l1a_timeout =           12;
+      constexpr int size_l1a_open_BCID_offset =  12;
+      constexpr int size_l1a_req_BCID_offset =   12;
+      constexpr int size_l1a_close_BCID_offset = 12;
+      constexpr int size_l1a_timeout_config =    12;
+      constexpr int size_l1a_busy_thr =           8; // version 2+
+      constexpr int size_l1a_engine_snapshot =   16; // version 2+
+      constexpr int size_l1a_link_const =        32;
+      constexpr int size_l1a_padding =            8; // version 2+
+
+
+      constexpr int size_l1a_wdw_matching_engines_usage =   32; // this is only present in version 1
+      constexpr int loc_version1_anchor =        192;
+      constexpr uint32_t version1_anchor_value =      0xABC0ABC1;   
+
+
+ 
       constexpr int size_stream_head_nbits =                 16;
       constexpr int size_stream_head_nwords =                16;
       constexpr int size_stream_head_fifo_size =             16;
       constexpr int size_stream_head_streamID =              16;
       constexpr int size_trailer_CRC =                       16;
+
+
     };
 
     namespace STGTPPad {

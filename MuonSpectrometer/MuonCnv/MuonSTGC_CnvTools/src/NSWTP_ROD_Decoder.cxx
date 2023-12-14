@@ -62,12 +62,12 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
     rdo->set_EC(link->head_EC());
     rdo->set_BCID(link->head_BCID());
     rdo->set_L1ID(link->L1ID());
-    rdo->set_window_open_bcid(link->head_wdw_open());
-    rdo->set_l1a_request_bcid(link->head_l1a_req());
-    rdo->set_window_close_bcid(link->head_wdw_close());
-    rdo->set_config_window_open_bcid_offset(link->head_cfg_wdw_open_offset());
-    rdo->set_config_l1a_request_bcid_offset(link->head_cfg_l1a_req_offset());
-    rdo->set_config_window_close_bcid_offset(link->head_cfg_wdw_close_offset());
+    rdo->set_window_open_bcid(link->l1a_open_BCID());
+    rdo->set_l1a_request_bcid(link->l1a_req_BCID());
+    rdo->set_window_close_bcid(link->l1a_close_BCID());
+    rdo->set_config_window_open_bcid_offset(link->l1a_open_BCID_offset());
+    rdo->set_config_l1a_request_bcid_offset(link->l1a_req_BCID_offset());
+    rdo->set_config_window_close_bcid_offset(link->l1a_close_BCID_offset());
 
 
 

@@ -32,16 +32,26 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
   std::uint32_t head_orbit() const { return m_head_orbit; };
   std::uint32_t head_spare() const { return m_head_spare; };
   std::uint32_t L1ID() const { return m_L1ID; };
-  std::uint32_t head_wdw_open() const { return m_head_wdw_open; };
-  std::uint32_t head_l1a_req() const { return m_head_l1a_req; };
-  std::uint32_t head_wdw_close() const { return m_head_wdw_close; };
-  std::uint32_t head_overflowCount() const { return m_head_overflowCount; };
-  std::uint32_t head_wdw_matching_engines_usage() const { return m_head_wdw_matching_engines_usage; };
-  std::uint32_t head_cfg_wdw_open_offset() const { return m_head_cfg_wdw_open_offset; };
-  std::uint32_t head_cfg_l1a_req_offset() const { return m_head_cfg_l1a_req_offset; };
-  std::uint32_t head_cfg_wdw_close_offset() const { return m_head_cfg_wdw_close_offset; };
-  std::uint32_t head_cfg_timeout() const { return m_head_cfg_timeout; };
-  std::uint32_t head_link_const() const { return m_head_link_const; };
+  
+  std::uint32_t l1a_versionID () const {return m_l1a_versionID;};
+  std::uint32_t l1a_local_req_BCID () const {return m_l1a_local_req_BCID;};
+  std::uint32_t l1a_local_rel_BCID () const {return m_l1a_local_rel_BCID;};
+  std::uint32_t l1a_open_BCID () const {return m_l1a_open_BCID;};
+  std::uint32_t l1a_req_BCID () const {return m_l1a_req_BCID;};
+  std::uint32_t l1a_close_BCID () const {return m_l1a_close_BCID;};
+  std::uint32_t l1a_timeout () const {return m_l1a_timeout;};
+  std::uint32_t head_overflowCount () const {return m_l1a_timeout;}; // compatibility version 1
+  std::uint32_t l1a_open_BCID_offset () const {return m_l1a_open_BCID_offset;};
+  std::uint32_t l1a_req_BCID_offset () const {return m_l1a_req_BCID_offset;};
+  std::uint32_t l1a_close_BCID_offset () const {return m_l1a_close_BCID_offset;};
+  std::uint32_t l1a_timeout_config () const {return m_l1a_timeout_config;};
+  std::uint32_t l1a_busy_thr () const {return m_l1a_busy_thr;};
+  std::uint32_t l1a_engine_snapshot () const {return m_l1a_engine_snapshot;};
+  std::uint32_t l1a_link_const () const {return m_l1a_link_const;};
+  std::uint32_t l1a_padding () const {return m_l1a_padding;};
+
+  std::uint32_t head_wdw_matching_engines_usage () const {return m_l1a_wdw_matching_engines_usage; };
+  
   const std::vector<std::uint32_t>& stream_head_nbits() const { return m_stream_head_nbits; };
   const std::vector<std::uint32_t>& stream_head_nwords() const { return m_stream_head_nwords; };
   const std::vector<std::uint32_t>& stream_head_fifo_size() const { return m_stream_head_fifo_size; };
@@ -51,6 +61,8 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
 
   const std::vector<STGTPPadPacket>& pad_packets() const { return m_pad_packets; };
   const std::vector<STGTPSegmentPacket>& segment_packet() const { return m_segment_packets; };
+
+  
 
  private:
   /**
@@ -68,11 +80,19 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
   };
 
   /**
+  * @brief parse version workaround
+  * @param std::size_t& readPointer
+  * @return version
+  *
+  */
+  int parse_version_workaround(std::size_t& readPointer);
+
+  /**
    * @brief Decode the header
    *
    * @param readPointer Current read pointer position (updated by function)
    */
-  void decode_header(std::size_t& readPointer);
+  void decode_header(std::size_t& readPointer, int version = 0);
 
   /**
    * @brief Decode the pad and segment data
@@ -137,17 +157,28 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
   std::uint32_t m_head_BCID;
   std::uint32_t m_head_orbit;
   std::uint32_t m_head_spare;
+  
   std::uint32_t m_L1ID;
-  std::uint32_t m_head_wdw_open;
-  std::uint32_t m_head_l1a_req;
-  std::uint32_t m_head_wdw_close;
-  std::uint32_t m_head_overflowCount;
-  std::uint32_t m_head_wdw_matching_engines_usage;
-  std::uint32_t m_head_cfg_wdw_open_offset;
-  std::uint32_t m_head_cfg_l1a_req_offset;
-  std::uint32_t m_head_cfg_wdw_close_offset;
-  std::uint32_t m_head_cfg_timeout;
-  std::uint32_t m_head_link_const;
+
+
+  std::uint32_t m_l1a_versionID;
+  std::uint32_t m_l1a_local_req_BCID;
+  std::uint32_t m_l1a_local_rel_BCID;
+  std::uint32_t m_l1a_open_BCID;
+  std::uint32_t m_l1a_req_BCID;
+  std::uint32_t m_l1a_close_BCID;
+  std::uint32_t m_l1a_timeout;
+  std::uint32_t m_l1a_open_BCID_offset;
+  std::uint32_t m_l1a_req_BCID_offset;
+  std::uint32_t m_l1a_close_BCID_offset;
+  std::uint32_t m_l1a_timeout_config;
+  std::uint32_t m_l1a_busy_thr;
+  std::uint32_t m_l1a_engine_snapshot;
+  std::uint32_t m_l1a_link_const;
+  std::uint32_t m_l1a_padding;
+
+  std::uint32_t m_l1a_wdw_matching_engines_usage;
+
   std::vector<std::uint32_t> m_stream_head_nbits;
   std::vector<std::uint32_t> m_stream_head_nwords;
   std::vector<std::uint32_t> m_stream_head_fifo_size;
