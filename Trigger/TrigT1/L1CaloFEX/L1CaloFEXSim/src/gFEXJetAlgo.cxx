@@ -908,7 +908,7 @@ void gFEXJetAlgo::gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTow
 
 
 
-void gFEXJetAlgo::blkOutAB(gTowersType & blocks, std::array<int, 32>  jetOutL, std::array<int, 32>  etaIndL, std::array<int, 32>  jetOutR, std::array<int, 32>  etaIndR) const{
+void gFEXJetAlgo::blkOutAB(gTowersType & blocks, std::array<int, 32> & jetOutL, std::array<int, 32> & etaIndL, std::array<int, 32> & jetOutR, std::array<int, 32> & etaIndR) const{
   
   // find maximum in each jet engine for gBlocks  (not done in hardware) 
 
