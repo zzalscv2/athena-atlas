@@ -63,18 +63,18 @@ def ROBPrefetchingAlgCfg_Calo(flags, nameSuffix, **kwargs):
 def ROBPrefetchingAlgCfg_Muon(flags, nameSuffix, **kwargs):
     return ROBPrefetchingAlgCfg(flags, 'ROBPrefetchingAlg_Muon_'+nameSuffix, ['MDT', 'RPC', 'TGC', 'CSC', 'MM', 'sTGC'], **kwargs)
 
-def configurePrefetchingInitialRoI(flags, chains):
-    from AthenaCommon.AlgSequence import AthSequencer, AlgSequence
-    from AthenaCommon.CFElements import findSubSequence, findAlgorithm
+def getChainsForPrefetching(chains):
     from AthenaCommon.Configurable import Configurable
     from TrigConfHLTUtils.HLTUtils import string2hash
     from collections import defaultdict
 
     def sequenceAlgs(seq):
         algs = []
-        for alg in seq.getChildren():
+        # getChildren is only for legacy AthSequencer
+        # TODO remove in legacy cleanup
+        for alg in seq.getChildren() if hasattr(seq,'getChildren') else seq.Members:
             conf = Configurable.allConfigurables[alg] if type(alg)==str else alg
-            if type(conf)==AthSequencer:
+            if type(conf)==CompFactory.AthSequencer:
                 algs.extend(sequenceAlgs(conf))
             elif conf.getName().startswith('IMEmpty'):
                 # skip empty probe step in tag&probe chains
@@ -122,6 +122,14 @@ def configurePrefetchingInitialRoI(flags, chains):
                 continue
             _log.debug("%s initialRoI will prefetch %s", legName, det)
             chainFilterMap[det].append(string2hash(legName))
+    return chainFilterMap
+
+
+# Legacy searches for the algs through the top level sequence
+def configurePrefetchingInitialRoI(flags, chains):
+    from AthenaCommon.AlgSequence import AlgSequence
+    from AthenaCommon.CFElements import findSubSequence, findAlgorithm
+    chainFilterMap = getChainsForPrefetching(chains)
 
     hltBeginSeq = findSubSequence(AlgSequence(), 'HLTBeginSeq')
     for det,chainFilter in chainFilterMap.items():
@@ -133,3 +141,28 @@ def configurePrefetchingInitialRoI(flags, chains):
             chainFilter = [0]
 
         prefetchAlg.ChainFilter = chainFilter
+
+
+# In CA we have no access to the HLTBeginSeq in here
+# Instead generate the prefetching alg configs and append the ChainFilter,
+# to be merged into the global config.
+def prefetchingInitialRoIConfig(flags, chains):
+    chainFilterMap = getChainsForPrefetching(chains)
+    configurators = {
+        'Si':   ROBPrefetchingAlgCfg_Si,
+        'Calo': ROBPrefetchingAlgCfg_Calo,
+        'Muon': ROBPrefetchingAlgCfg_Muon,
+    }
+
+    prefetchCfg = ComponentAccumulator()
+
+    for det,chainFilter in chainFilterMap.items():
+        if not chainFilter:
+            # Empty filter means unconditional prefetching
+            # - prevent this by adding a non-existent hash to the list which effectively disables the prefetching alg
+            _log.info('No chains matched to ROBPrefetchingAlg_%s_initialRoI - forcing ChainFilter=[0] to disable this alg\'s prefetching', det)
+            chainFilter = [0]
+        prefetchAlg = configurators[det](flags, 'initialRoI', ChainFilter=chainFilter)
+        prefetchCfg.merge(prefetchAlg)
+
+    return prefetchCfg
