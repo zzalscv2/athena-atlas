@@ -14,16 +14,14 @@ logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
 parser = ArgumentParser("ItkPixelChargeCalibration.py")
 parser.add_argument("-i", "--identifiers", type=str, help="Identifiers dump", default="ITkPixelIdentifiers.dat")
-parser.add_argument("--highThresholds", action='store_true', help="Enable high thresholds")
 args = parser.parse_args()
 
 logging.info("Identifiers file: %s", args.identifiers)
-logging.info("High thresholds enabled: %s", args.highThresholds)
 
 dbName = "OFLP200"
 dbFolder = "/ITk/PixelChargeCalib"
-dbTag = "PixelChargeCalib_LUTTest-00-00" 
-dbFile = "ITkPixelChargeCalib.db"
+dbTag = "PixelChargeCalib_LUTTest-00-01" 
+dbFile = "ITkPixelChargeCalib-00-01.db"
 
 runSince = 0
 runUntil = 'inf'
@@ -70,43 +68,19 @@ iovMax = cool.ValidityKeyMax if runUntil == 'inf' else runUntil << 32 | 0
 logging.info("IoV range: %s - %s", iovMin, iovMax)
 
 
-## Format:
+# New Format based on the feedback current and threshold settings of the ITkPixV2 chip
+# L0 and L1 layers: fast feed back cureent,1000e threshold
+# L2 to L14layers: slow feed back cureent,1500e threshold
 # analog threshold value,noise for normal,long/ganged pixels
 # Q0-Q16 charge calibration constants for normal and long/ganged pixels
 
-# quad chip
-if args.highThresholds:
+calibL0andL1 = [
+    [1000, 75, 1000, 75, 2080, 2957, 4000, 5163, 6824, 8700, 11285, 14709, 19600, 27500, 40400, 69500, 166400, 3000000, 999999999., 999999999.],
+]
 
-    calibQuad = [
-        [2000, 75, 2000, 75, 2080, 2957, 4000, 5163, 6824, 8700, 11285, 14709, 19600, 27500, 40400, 69500, 166400, 3000000, 999999999., 999999999.],
-        [2000, 75, 2000, 75, 2080, 2957, 4000, 5163, 6824, 8700, 11285, 14709, 19600, 27500, 40400, 69500, 166400, 3000000, 999999999., 999999999.],
-        [2000, 75, 2000, 75, 2080, 2957, 4000, 5163, 6824, 8700, 11285, 14709, 19600, 27500, 40400, 69500, 166400, 3000000, 999999999., 999999999.],
-        [2000, 75, 2000, 75, 2080, 2957, 4000, 5163, 6824, 8700, 11285, 14709, 19600, 27500, 40400, 69500, 166400, 3000000, 999999999., 999999999.],
-    ]
-    # single chip 50x50
-    calibSingle = [
-        [2000, 75, 2000, 75, 2080, 2957, 4000, 5163, 6824, 8700, 11285, 14709, 19600, 27500, 40400, 69500, 166400, 3000000, 999999999., 999999999.],
-    ]
-    # single chip 25x150 (L0)
-    calibSingleL0 = [
-        [2000, 110, 2000, 110, 2080, 2957, 4000, 5163, 6824, 8700, 11285, 14709, 19600, 27500, 40400, 69500, 166400, 3000000, 999999999., 999999999.],
-    ]
-
-else:
-    calibQuad = [
-        [600, 75, 600, 75, 2080, 2957, 4000, 5163, 6824, 8700, 11285, 14709, 19600, 27500, 40400, 69500, 166400, 3000000, 999999999., 999999999.],
-        [600, 75, 600, 75, 2080, 2957, 4000, 5163, 6824, 8700, 11285, 14709, 19600, 27500, 40400, 69500, 166400, 3000000, 999999999., 999999999.],
-        [600, 75, 600, 75, 2080, 2957, 4000, 5163, 6824, 8700, 11285, 14709, 19600, 27500, 40400, 69500, 166400, 3000000, 999999999., 999999999.],
-        [600, 75, 600, 75, 2080, 2957, 4000, 5163, 6824, 8700, 11285, 14709, 19600, 27500, 40400, 69500, 166400, 3000000, 999999999., 999999999.],
-    ]
-    # single chip 50x50
-    calibSingle = [
-        [600, 75, 600, 75, 2080, 2957, 4000, 5163, 6824, 8700, 11285, 14709, 19600, 27500, 40400, 69500, 166400, 3000000, 999999999., 999999999.],
-    ]
-    # single chip 25x150 (L0)
-    calibSingleL0 = [
-        [900, 110, 900, 110, 2080, 2957, 4000, 5163, 6824, 8700, 11285, 14709, 19600, 27500, 40400, 69500, 166400, 3000000, 999999999., 999999999.],
-    ]
+calibL2toL4 = [
+    [1500, 75, 1500, 75, 2080, 2957, 4000, 5163, 6824, 8700, 11285, 14709, 19600, 27500, 40400, 69500, 166400, 3000000, 999999999., 999999999.],
+]
 
 # read pixel identifiers
 output = {}
@@ -117,13 +91,11 @@ with open(args.identifiers, "r") as identifiers:
             continue
         ids = line.split()
 
-        if ids[-1] == "4":
-            output[ids[0]] = calibQuad
-        elif ids[2] == "0" and ids[3] == "0":
-            output[ids[0]] = calibSingleL0
+        if ids[-1] == "4" or (ids[2] == "0" and ids[3] == "0"):
+            output[ids[0]] = calibL0andL1
         else:
-            output[ids[0]] = calibSingle
-
+            output[ids[0]] = calibL2toL4
+       
 data["data_array"] = dumps(output, separators=(',', ':'))
 folder.storeObject(iovMin, iovMax, data, 0, dbTag)
 
