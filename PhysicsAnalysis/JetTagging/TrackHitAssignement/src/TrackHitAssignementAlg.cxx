@@ -90,7 +90,7 @@ StatusCode TrackHitAssignementAlg::execute(const EventContext& context) const {
     }
     else{
       JetSCTClusterHits(*hit)=1;
-      for (MMAPIterator it = result.first; it != result.second; it++){
+      for (MMAPIterator it = result.first; it != result.second; ++it){
         vec_ElemLink_SCT.push_back(ElementLink<xAOD::TrackParticleContainer> ((it->second),*tracks, context));
       }
     }    
@@ -106,7 +106,7 @@ StatusCode TrackHitAssignementAlg::execute(const EventContext& context) const {
     }
     else{
       JetPixelClusterHits(*hit)=1;
-      for (MMAPIterator it = result.first; it != result.second; it++){
+      for (MMAPIterator it = result.first; it != result.second; ++it){
         vec_ElemLink_pix.push_back(ElementLink<xAOD::TrackParticleContainer> ((it->second),*tracks, context));
       }
     }    
