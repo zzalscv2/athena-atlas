@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileCalibBlobObjs/TileCalibDrawerInt.h"
@@ -40,8 +40,8 @@ TileCalibDrawerInt::TileCalibDrawerInt(const coral::Blob& blob)
 {
   //=== check for correct blob type
   if(getBlobSize()){
-    if(getObjType() != getType()){
-      throw TileCalib::TypeConflict("TileCalibDrawerInt::Ctor",getObjType(),getType());
+    if(getObjType() != TileCalibDrawerInt::getType()){
+      throw TileCalib::TypeConflict("TileCalibDrawerInt::Ctor",getObjType(),TileCalibDrawerInt::getType());
     }
   }
 }
@@ -53,8 +53,8 @@ TileCalibDrawerInt::TileCalibDrawerInt(coral::Blob& blob)
 {
   //=== check for correct blob type
   if(getBlobSize()){
-    if(getObjType() != getType()){
-      throw TileCalib::TypeConflict("TileCalibDrawerInt::Ctor",getObjType(),getType());
+    if(getObjType() != TileCalibDrawerInt::getType()){
+      throw TileCalib::TypeConflict("TileCalibDrawerInt::Ctor",getObjType(),TileCalibDrawerInt::getType());
     }
   }
 }
