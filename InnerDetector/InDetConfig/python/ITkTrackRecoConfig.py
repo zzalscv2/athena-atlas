@@ -326,6 +326,8 @@ def ITkExtendedPRDInfoCfg(flags):
             ITkPhysHitDecoratorAlgCfg)
         result.merge(ITkPhysHitDecoratorAlgCfg(flags))
 
+    return result
+
 
 ##############################################################################
 #####################     Main ITk tracking config       #####################
