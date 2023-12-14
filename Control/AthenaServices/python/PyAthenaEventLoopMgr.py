@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## @file PyAthenaEventLoopMgr.py
 #  @brief Python facade of PyAthenaEventLoopMgr
@@ -129,7 +129,7 @@ class PyAthenaEventLoopMgr( PyGaudi.iService ):
       ctx = cppyy.bind_object(cppcontext, "EventContext")
 
       try:
-         for name in appmgr.getProperty("TopAlg"):
+         for name in appmgr.getProperty("TopAlg").value():
             ialg=algmgr.algorithm(name).get()
             ialg.execState(ctx).reset()
             result = ialg.sysExecute(ctx)
