@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLUTILITIES_ATHENAATTRIBUTETYPE_H
@@ -76,9 +76,9 @@ AthenaAttributeType::AthenaAttributeType(std::string t,
    m_keys.insert("TYPE");
    m_keys.insert("UNIT");
    m_keys.insert("GRP");
-   m_keyedInfo.insert(std::make_pair("TYPE",t));
-   m_keyedInfo.insert(std::make_pair("UNIT",u));
-   m_keyedInfo.insert(std::make_pair("GRP",g));
+   m_keyedInfo.emplace("TYPE",t);
+   m_keyedInfo.emplace("UNIT",u);
+   m_keyedInfo.emplace("GRP",g);
 }
 
 inline
@@ -86,9 +86,7 @@ bool AthenaAttributeType::setInfoForKey(const std::string& key,
                                         const std::string& info)
 {
    if ( m_keys.find(key) != m_keys.end() ) {
-      std::map<std::string,std::string>::iterator i = m_keyedInfo.find(key);
-      if (i != m_keyedInfo.end()) i->second=info;
-      else m_keyedInfo.insert(std::make_pair(key,info));
+      m_keyedInfo[key] = info;
       return true;
    }
    else return false;
