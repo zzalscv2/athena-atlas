@@ -120,6 +120,7 @@ StatusCode PileUpMTAlg::add_subevt(
 }
 
 StatusCode PileUpMTAlg::initialize() {
+  using namespace std::chrono;
   ATH_MSG_DEBUG("Initializing " << name() << "...");
   if (m_writeTrace) {
     m_pileupTrace.init(
