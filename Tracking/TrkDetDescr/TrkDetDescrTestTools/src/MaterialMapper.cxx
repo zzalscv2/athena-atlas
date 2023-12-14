@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -483,13 +483,23 @@ Trk::LayerTreeObject* Trk::MaterialMapper::layerTreeObject(const Trk::Layer& lay
     if (!lay.layerIndex().value()) return nullptr;
 
     // try to find the histogram
-    auto endIter  = m_layerTrees.end();
-    auto findIter = m_layerTrees.end();
 
     Trk::LayerTreeObject* layTreeObj = nullptr;
 
-    findIter = full ?  m_layerFullTrees.find(&lay) : m_layerTrees.find(&lay);
-    if (findIter == endIter) {
+    if (full) {
+      auto it = m_layerFullTrees.find(&lay);
+      if (it != m_layerFullTrees.end()) {
+        return it->second;
+      }
+    }
+    else {
+      auto it = m_layerTrees.find(&lay);
+      if (it != m_layerTrees.end()) {
+        return it->second;
+      }
+    }
+
+    {
         // check if it is a boundary MaterialLayer
         const Trk::MaterialLayer* mLayer = dynamic_cast<const Trk::MaterialLayer*>(&lay);
         if (mLayer)
@@ -534,8 +544,7 @@ Trk::LayerTreeObject* Trk::MaterialMapper::layerTreeObject(const Trk::Layer& lay
             delete layTreeObj; layTreeObj = nullptr;
         }
 
-    } else  // a tree is found
-        layTreeObj = findIter->second;
+    }
 
     return layTreeObj;
 }
