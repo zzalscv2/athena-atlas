@@ -90,7 +90,7 @@ StatusCode CsvMuonSimHitDumperMuonCnv::execute(){
       
       const TrueHitInChamb prevMuon{*insert_itr.first};
       constexpr double tolerance =  0.1 * Gaudi::Units::millimeter;
-      constexpr double angleTolerance = std::cos(0.1*Gaudi::Units::deg);
+      double angleTolerance = std::cos(0.1*Gaudi::Units::deg);
       if ((prevMuon.lPos - newHit.lPos).mag() > tolerance ||
           prevMuon.lDir.dot(newHit.lDir) < angleTolerance ) {
                ATH_MSG_WARNING("Muon "<<newHit.simHit->genParticleLink()<<" has a different ending point when it starts from "
