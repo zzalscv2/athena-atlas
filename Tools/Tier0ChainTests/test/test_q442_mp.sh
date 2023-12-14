@@ -9,12 +9,14 @@
 # art-athena-mt: 8
 
 Reco_tf.py \
+--CA "True" \
 --AMI=q442 \
 --conditionsTag 'all:CONDBR2-BLKPA-RUN2-11' \
 --athenaopts='--nprocs=2' \
 --maxEvents=500 \
 --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root \
---imf False
+--imf False \
+--preExec "all:flags.DQ.Steering.doHLTMon=False" 
 
 rc1=$?
 echo "art-result: $rc1 Reco"
