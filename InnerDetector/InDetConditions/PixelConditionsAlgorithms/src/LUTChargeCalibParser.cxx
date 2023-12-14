@@ -25,12 +25,13 @@ namespace PixelChargeCalib{
     const InDetDD::SiDetectorElement *element = m_elements->getDetectorElement(wafer_hash);
     const auto & [numFE, technology] = numChipsAndTechnology(element);
     bool isLUTEnabled = (inputSource == 1);
-    bool isChargeCalibrationFromTxt = (inputSource == 2);
+    bool isChargeCalibrationFromJson = (inputSource == 2);
     //
-    ChargeCalibrationBundle b(numFE,isLUTEnabled,isChargeCalibrationFromTxt);
+    ChargeCalibrationBundle b(numFE,isLUTEnabled,isChargeCalibrationFromJson);
     //
     for (unsigned int j{}; j < numFE; j++) {
-      const auto &calibArray = data.at(j);
+      //Retrieve calibArrays in different formats for Run4 (based on ITKPixV2 chip settings) and Run3 
+      const auto &calibArray = (isLUTEnabled || isChargeCalibrationFromJson) ? data.at(0) : data.at(j);
       if (!calibArray.empty()) {
         // new charge calibration for RUN-3
         if ((technology == InDetDD::PixelReadoutTechnology::FEI4 && !(element->isDBM())) || ((b.useLUT || b.useTXT) && technology == InDetDD::PixelReadoutTechnology::RD53)) {
