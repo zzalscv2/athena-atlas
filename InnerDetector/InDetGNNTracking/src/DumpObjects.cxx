@@ -355,9 +355,6 @@ StatusCode InDet::DumpObjects::execute() {
   }
   mcCollptr = mcEventCollectionHandle.cptr();
 
-  int accepted = 0;
-  int all_truth = 0;
-
   // dump out event ID
   const xAOD::EventInfo *eventInfo = nullptr;
   SG::ReadHandle<xAOD::EventInfo> eventInfoHandle(m_eventInfoKey, ctx);
@@ -420,9 +417,6 @@ StatusCode InDet::DumpObjects::execute() {
                              vProdNin, vProdNout, vProdStatus, vProdBarcode);
       allTruthParticles.insert(std::make_pair(std::make_pair(genEvt->event_number(), HepMC::barcode(p)),
                                               std::make_pair(passed, 0))); // JB: HEPMC3 barcode() -> HepMC::barcode(p)
-      all_truth++;
-      if (passed)
-        accepted++;
       // subevent, barcode, px, py, pz, pt, eta, vx, vy, vz, radius, status, charge
       if (m_rootFile) {
         m_Part_event_number[m_nPartEVT] = genEvt->event_number();
