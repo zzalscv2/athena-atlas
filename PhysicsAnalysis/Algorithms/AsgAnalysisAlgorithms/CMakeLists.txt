@@ -32,6 +32,15 @@ atlas_install_python_modules( python/*.py )
 atlas_install_joboptions( share/*_jobOptions.py )
 atlas_install_scripts( share/*_eljob.py )
 
+find_package( GTest )
+find_package( GMock )
+
+atlas_add_test( gt_BootstrapGenerator
+   SOURCES test/gt_BootstrapGenerator.cxx
+   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+   LINK_LIBRARIES ${GTEST_LIBRARIES} AsgTestingLib AsgAnalysisAlgorithmsLib CxxUtils
+   POST_EXEC_SCRIPT nopost.sh )
+
 if( XAOD_STANDALONE )
 
    atlas_add_test( EventAlgsTestJobData
