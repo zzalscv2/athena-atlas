@@ -201,7 +201,12 @@ StatusCode GeoModelSvc::geoInit()
       return StatusCode::FAILURE;
     }
     m_sqliteReader = new GeoModelIO::ReadGeoModel(m_sqliteDbManager);
-    worldPhys = m_sqliteReader->buildGeoModel();
+    GeoVPhysVol* vWorldPhys = m_sqliteReader->buildGeoModel();
+    worldPhys = dynamic_cast<GeoPhysVol*>(vWorldPhys);
+    if(!worldPhys) {
+      ATH_MSG_FATAL("Having Full Physical Volumes as World Volumes not supported!");
+      return StatusCode::FAILURE;
+    }
     ATH_MSG_INFO("Successfully read persistent GeoModel description from the file");
 
     // Initialize SqliteReadSvc and open the file for reading plain SQLite tables with DetDescr parameters
