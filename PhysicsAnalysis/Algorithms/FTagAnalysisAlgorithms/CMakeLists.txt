@@ -57,3 +57,8 @@ elseif( NOT "${CMAKE_PROJECT_NAME}" STREQUAL "AthDerivation" )
       POST_EXEC_SCRIPT nopost.sh
       PROPERTIES TIMEOUT 600 )
 endif()
+
+# Unit test for python modules
+atlas_add_test( pymodules
+                 SCRIPT python -m unittest discover -v -s ${CMAKE_CURRENT_SOURCE_DIR}/test
+                 POST_EXEC_SCRIPT nopost.sh )
