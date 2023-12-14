@@ -94,11 +94,6 @@ private:
   int m_max_barcode = 200e3;
   float m_maxProdVertex = 260.;
 
-  // options to dump
-  bool m_dumpTruthParticles;
-  bool m_dumpClusters;
-  bool m_dumpSpacePoints;
-
   // Information related to the TTree
   //
   std::string m_ntupleFileName; //!< jobOption: Ntuple file name
