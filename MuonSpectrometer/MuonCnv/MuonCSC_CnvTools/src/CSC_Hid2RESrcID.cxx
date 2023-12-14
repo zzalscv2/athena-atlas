@@ -21,7 +21,7 @@ uint32_t CSC_Hid2RESrcID::getRodID(const CscRawDataCollection* rdo) const {
 }
 
 /** get source ID for a RDO */
-uint32_t CSC_Hid2RESrcID::getRodID(uint16_t subDetectorId, uint16_t rodId) {
+uint32_t CSC_Hid2RESrcID::getRodID(uint16_t subDetectorId, uint16_t rodId) const{
     // get Source ID
     assert(subDetectorId == eformat::MUON_CSC_ENDCAP_C_SIDE || subDetectorId == eformat::MUON_CSC_ENDCAP_A_SIDE);
 
@@ -92,7 +92,7 @@ void CSC_Hid2RESrcID::fillAllRobIds() {
 }
 
 /** mapping SrcID from ROB to ROS */
-uint32_t CSC_Hid2RESrcID::getRosID(uint32_t rob_id) {
+uint32_t CSC_Hid2RESrcID::getRosID(uint32_t rob_id) const{
     //  Change Module Type to ROS, moduleid = 0
     SourceIdentifier id(rob_id);
     SourceIdentifier id2(id.subdetector_id(), 0);
@@ -102,7 +102,7 @@ uint32_t CSC_Hid2RESrcID::getRosID(uint32_t rob_id) {
 }
 
 /** mapping SrcID from ROS to Det */
-uint32_t CSC_Hid2RESrcID::getDetID(uint32_t ros_id) {
+uint32_t CSC_Hid2RESrcID::getDetID(uint32_t ros_id) const{
     //  ROS to DET
     SourceIdentifier id(ros_id);
     SourceIdentifier id2(id.subdetector_id(), 0);
