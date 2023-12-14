@@ -5,6 +5,9 @@
 # art-include: main/Athena
 # art-athena-mt: 8
 
+# Work around for environ['USER'] call in Tools/WorkflowTestRunner/python/ScriptUtils.py
+export USER=pilot
+
 # Determine current and previous nightly
 currentrel=$AtlasBuildStamp
 releasebasedir=`echo $ATLAS_RELEASE_BASE | sed "s/${AtlasBuildStamp}//g"` 
