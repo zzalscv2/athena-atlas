@@ -1596,7 +1596,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagCalibrationRecommendationsRelease21#MC_MC_Scale_Factors_for_Analysis
     std::string MCshowerID;
     if(!m_isRun3){
-      MCshowerID= "410470";                              // Powheg+Pythia8 (default)  - PhPy8EG_A14
+      MCshowerID= "default";                             // Powheg+Pythia8 (410470)  - PhPy8EG_A14
       if (m_showerType == 1)      MCshowerID = "411233"; // PowhegHerwig7 
       else if (m_showerType == 2) MCshowerID = "600666"; // PhH7EG_H7UE - 601414
       else if (m_showerType == 3) MCshowerID = "410250"; // Sherpa_221
@@ -1607,7 +1607,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       else if (m_showerType == 8) MCshowerID = "412116"; // aMcAtNloHerwig7
     }
     else{
-      MCshowerID= "601229";                               // Powheg+Pythia8 (default) - PhPy8EG_A14
+      MCshowerID= "default";                              // Powheg+Pythia8 (601229)  - PhPy8EG_A14
       if (m_showerType == 2)      MCshowerID = "601414";  // POWHEG+Herwig721         - PhH7EG_A14
       else if (m_showerType == 7) MCshowerID = "700660";  // Sherpa 2.2.12            - Sh_2212
     }
