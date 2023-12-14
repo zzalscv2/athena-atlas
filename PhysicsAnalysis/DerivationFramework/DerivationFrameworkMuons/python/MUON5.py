@@ -37,8 +37,9 @@ def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
     ### Calo deposits 
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonCaloDepositAlgCfg
     acc.merge(MuonCaloDepositAlgCfg(ConfigFlags)) ### Decorate directly the muons
-    acc.merge(MuonCaloDepositAlgCfg(ConfigFlags, name = "IdTrkCaloDepsitDecorator", 
-                                                 DecorateMuons = False)) ### Decorate the ID tracks
+    acc.merge(MuonCaloDepositAlgCfg(ConfigFlags, 
+                                    name = "IdTrkCaloDepsitDecorator",
+                                    ContainerKey="InDetTrackParticles")) ### Decorate the ID tracks
     ### Flavour tagging impact parameter decorators
     from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
     acc.merge(BTagTrackAugmenterAlgCfg(
