@@ -76,8 +76,8 @@ StatusCode ActsGaussianSumFitter::initialize() {
               logger().cloneWithSuffix("GaussianSumFitter"));
 
   m_gsfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::MutableTrackStateBackend>>();
-  m_calibrator = std::make_unique<TrkMeasurementCalibrator<ActsTrk::MutableTrackStateBackend>>(*m_ATLASConverterTool);
-  m_gsfExtensions.calibrator.connect(*m_calibrator);
+  m_calibrator = std::make_unique<TrkMeasurementCalibrator>(*m_ATLASConverterTool);
+  m_gsfExtensions.calibrator.connect<&TrkMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(m_calibrator.get());
 
   m_surfaceAccessor.m_converterTool = &(*m_ATLASConverterTool);
   m_gsfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&m_surfaceAccessor);

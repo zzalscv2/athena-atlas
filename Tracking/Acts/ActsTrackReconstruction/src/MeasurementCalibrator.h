@@ -26,7 +26,6 @@
 #include <cassert>
 
 namespace ActsTrk {
-template <typename trajectory_t>
 class MeasurementCalibratorBase
 {
 protected:
@@ -35,7 +34,7 @@ protected:
       constexpr int rows = Eigen::MatrixBase<Derived>::RowsAtCompileTime;
       constexpr int cols = Eigen::MatrixBase<Derived>::ColsAtCompileTime;
 
-      typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy::Projector fullProjector =
+      Acts::TrackStateTraits<Acts::MultiTrajectoryTraits::MeasurementSizeMax>::Projector fullProjector =
         decltype(fullProjector)::Zero();
 
       fullProjector.template topLeftCorner<rows, cols>() = proj;
@@ -44,7 +43,7 @@ protected:
    }
 
    static Acts::ProjectorBitset makeStripProjector(bool annulus_strip) {
-      Acts::ActsMatrix<Acts::MultiTrajectory<trajectory_t>::MeasurementSizeMax, 2> proj;
+      Acts::ActsMatrix<Acts::MultiTrajectoryTraits::MeasurementSizeMax, 2> proj;
       proj.setZero();
       if (annulus_strip) {
          // transforms predicted[1] -> calibrated[0] in Acts::MeasurementSelector::calculateChi2()
@@ -61,7 +60,7 @@ protected:
 
    // create pixel projector bitsets
    static Acts::ProjectorBitset makePixelProjector() {
-      Acts::ActsMatrix<Acts::MultiTrajectory<trajectory_t>::MeasurementSizeMax, 2> proj;
+      Acts::ActsMatrix<Acts::MultiTrajectoryTraits::MeasurementSizeMax, 2> proj;
       proj.setZero();
       proj(Acts::eBoundLoc0, Acts::eBoundLoc0) = 1;
       proj(Acts::eBoundLoc1, Acts::eBoundLoc1) = 1;
@@ -80,7 +79,7 @@ public:
         m_pixelProjector( makePixelProjector() ),
         m_converterTool(&converter_tool) { assert(m_converterTool); }
 
-   template <class measurement_t>
+   template <class measurement_t, typename trajectory_t>
    inline void setStateFromMeasurement( const measurement_t &measurement,
                                         Acts::SurfaceBounds::BoundsType bound_type,
                                         typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy &trackState ) const {
@@ -115,13 +114,12 @@ public:
    }
 };
 
-template <typename trajectory_t>
-class UncalibratedMeasurementCalibrator : public MeasurementCalibratorBase<trajectory_t> {
+class UncalibratedMeasurementCalibrator : public MeasurementCalibratorBase {
 protected:
 public:
    UncalibratedMeasurementCalibrator(const ActsTrk::IActsToTrkConverterTool &converter_tool,
                                      const TrackingSurfaceHelper &surface_helper)
-      : MeasurementCalibratorBase<trajectory_t>(converter_tool),
+      : MeasurementCalibratorBase(converter_tool),
         m_surfaceHelper(&surface_helper)
    { assert( m_surfaceHelper); }
 
@@ -144,7 +142,8 @@ public:
    };
 
 
-   void operator()([[maybe_unused]] const Acts::GeometryContext &gctx,
+   template <typename trajectory_t>
+   void calibrate([[maybe_unused]] const Acts::GeometryContext &gctx,
                    [[maybe_unused]] const Acts::CalibrationContext & cctx,
                    const Acts::SourceLink& sl,
                    typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState) const {
@@ -154,7 +153,7 @@ public:
       const xAOD::UncalibratedMeasurement *measurement = *sourceLink;
       const Acts::Surface &surface = m_surfaceHelper->associatedActsSurface( *measurement );
 
-      this->setStateFromMeasurement(MeasurementAdapter(*measurement),
+      this->setStateFromMeasurement<MeasurementAdapter, trajectory_t>(MeasurementAdapter(*measurement),
                                     surface.bounds().type(),
                                     trackState);
    }
@@ -163,8 +162,7 @@ private:
    const TrackingSurfaceHelper *m_surfaceHelper;
 };
 
-template <typename trajectory_t>
-class TrkMeasurementCalibrator : public MeasurementCalibratorBase<trajectory_t> {
+class TrkMeasurementCalibrator : public MeasurementCalibratorBase {
 public:
    class MeasurementAdapter {
    public:
@@ -197,8 +195,10 @@ public:
    };
 
    TrkMeasurementCalibrator(const ActsTrk::IActsToTrkConverterTool &converter_tool)
-      : MeasurementCalibratorBase<trajectory_t>(converter_tool) {}
-   void operator()([[maybe_unused]] const Acts::GeometryContext &gctx,
+      : MeasurementCalibratorBase(converter_tool) {}
+
+   template <typename trajectory_t>
+   void calibrate([[maybe_unused]] const Acts::GeometryContext &gctx,
                    [[maybe_unused]] const Acts::CalibrationContext & cctx,
                    const Acts::SourceLink& sl,
                    typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState) const {
@@ -206,7 +206,7 @@ public:
       trackState.setUncalibratedSourceLink(sl);
       assert(sourceLink);
       const Acts::Surface &surface = this->m_converterTool->trkSurfaceToActsSurface(sourceLink->associatedSurface());
-      this->setStateFromMeasurement(MeasurementAdapter(*sourceLink),
+      this->setStateFromMeasurement<MeasurementAdapter, trajectory_t>(MeasurementAdapter(*sourceLink),
                                     surface.bounds().type(),
                                     trackState);
    }

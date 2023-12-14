@@ -210,7 +210,7 @@ StatusCode ActsKalmanFitter::initialize() {
 						  logger().cloneWithSuffix("DirectKalmanFitter"));
 
   ///
-  m_calibrator = std::make_unique<TrkMeasurementCalibrator<ActsTrk::MutableTrackStateBackend>>(*m_ATLASConverterTool);
+  m_calibrator = std::make_unique<TrkMeasurementCalibrator>(*m_ATLASConverterTool);
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
   m_reverseFilteringLogic.momentumMax = m_option_ReverseFilteringPt;
 
@@ -218,7 +218,7 @@ StatusCode ActsKalmanFitter::initialize() {
   m_kfExtensions.reverseFilteringLogic.connect<&ActsTrk::FitterHelperFunctions::ReverseFilteringLogic::operator()<ActsTrk::MutableTrackStateBackend>>(&m_reverseFilteringLogic);
   m_kfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::MutableTrackStateBackend>>();
   m_kfExtensions.smoother.connect<&ActsTrk::FitterHelperFunctions::gainMatrixSmoother<ActsTrk::MutableTrackStateBackend>>();
-  m_kfExtensions.calibrator.connect(*m_calibrator);
+  m_kfExtensions.calibrator.connect<&TrkMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(m_calibrator.get());
 
   return StatusCode::SUCCESS;
 }
@@ -831,8 +831,8 @@ ActsKalmanFitter::fit(const EventContext& /*ctx*/,
   ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor{ &(*m_ATLASConverterTool), &tracking_surface_helper };
   kfExtensions.surfaceAccessor.connect<&ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
   
-  UncalibratedMeasurementCalibrator<ActsTrk::MutableTrackStateBackend> calibrator(*m_ATLASConverterTool, tracking_surface_helper);
-  kfExtensions.calibrator.connect(calibrator);
+  UncalibratedMeasurementCalibrator calibrator(*m_ATLASConverterTool, tracking_surface_helper);
+  kfExtensions.calibrator.connect<&UncalibratedMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(&calibrator);
   
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;

@@ -147,7 +147,7 @@ private:
                                                         Acts::AtlasBetheHeitlerApprox<6, 5>,
                                                         ActsTrk::MutableTrackStateBackend>;
 
-  std::unique_ptr<TrkMeasurementCalibrator<ActsTrk::MutableTrackStateBackend>> m_calibrator;
+  std::unique_ptr<TrkMeasurementCalibrator> m_calibrator;
   std::unique_ptr<Fitter> m_fitter;
 
 
