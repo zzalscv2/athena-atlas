@@ -105,8 +105,7 @@ class EtaPtFilterTool : public TruthParticleFilterBaseTool
   bool isAccepted( const HepMC::ConstGenVertexPtr& vtx ) const;
 
   /** Check if a given vertex is the signal process vertex. */
-  bool isSignalProcessVertex( const HepMC::ConstGenVertexPtr& vtx, 
-			      const HepMC::GenEvent* evt );
+  bool isSignalProcessVertex( const HepMC::ConstGenVertexPtr& vtx, const HepMC::GenEvent* evt );
 
   /** Helper method to copy a given vertex and add it to a GenEvent
    */
@@ -115,18 +114,8 @@ class EtaPtFilterTool : public TruthParticleFilterBaseTool
                         ParticleMap_t& pmap,
 			bool isSignalVertex = false ) const;
 
-  /** @brief Helper method to check if this @c HepMC::GenVertex looks
-   *  like the hard-scattering vertex.
-   *  As this information is not stored into the @c HepMC::GenEvent
-   *  we have to rely on some ad-hoc procedure. Moreover, it is a very
-   *  generator-dependent.
-   *  Here is the adopted "solution":
-   *   - check this vertex belongs to the ~20 first vertices. This can
-   *  be configured through @c m_maxHardScatteringVtxBarcode via the
-   *  property "MaxHardScatteringVtxBarcode". Default is 20.
-   *   - check that there are 2 incoming partons. This is done using
-   *  a @c McVtxFilter predicate.
-   */
+
+  bool isPartonVertex( const HepMC::ConstGenVertexPtr& vtx ) const;
   bool isFromHardScattering( const HepMC::ConstGenVertexPtr& vtx ) const;
   
   /////////////////////////////////////////////////////////////////// 
@@ -164,15 +153,6 @@ class EtaPtFilterTool : public TruthParticleFilterBaseTool
    *   2-nd element is the minimum pt for the stable particles to be accepted
    */
   DoubleArrayProperty m_outerEtaRegionCuts;
-
-  /** Property to setup the maximum vertex barcode to look for hard-scattering
-   *  vertices.
-   *  Default is 20.
-   *  Note that you don't want to increase this number by a too big a number
-   *  otherwise the downstream selection of the vertex could pick-up showering
-   *  particles.
-   */
-  IntegerProperty m_maxHardScatteringVtxBarcode;
 
   /** Switch to only include particles from generation and reject particles 
    *  from detector simulation (Geant4)
