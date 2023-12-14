@@ -1,88 +1,15 @@
-Fri May 12 22:24:15 EDT 2023
-Py:Athena            INFO using release [?-22.0.0] [?] [?/?] -- built on [?]
-Py:Athena            INFO including file "AthenaCommon/Preparation.py"
-Py:Athena            INFO including file "AthenaCommon/Atlas.UnixStandardJob.py"
-Py:Athena            INFO executing ROOT6Setup
-Py:Athena            INFO including file "AthenaCommon/Execution.py"
-Py:Athena            INFO including file "/ssd/sss/atlas/dvtest/../share/AllocTestReadWithoutAlloc_jo.py"
-Py:ConfigurableDb    INFO Read module info for 1230 configurables from 2 genConfDb files
-Py:ConfigurableDb    INFO No duplicates have been found: that's good !
-Py:Athena            INFO including file "DataModelRunTests/loadWriteDicts.py"
-Py:Athena            INFO including file "DataModelRunTests/commonTrailer.py"
-Py:Athena            INFO including file "DataModelRunTests/setCatalog.py"
-Py:Athena            INFO including file "AthenaCommon/runbatch.py"
-# setting LC_ALL to "C"
-ApplicationMgr    SUCCESS 
-====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Fri May 12 22:24:42 2023
-====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
-AthDictLoaderSvc     INFO in initialize...
-AthDictLoaderSvc     INFO acquired Dso-registry
-ClassIDSvc           INFO getRegistryEntries: read 3178 CLIDRegistry entries for module ALL
-CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
-ClassIDSvc           INFO getRegistryEntries: read 10519 CLIDRegistry entries for module ALL
 PyComponentMgr       INFO Initializing PyComponentMgr...
 LoadWriteDicts       INFO Initializing LoadWriteDicts...
-MetaDataSvc          INFO Initializing MetaDataSvc
-PoolSvc              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
-PoolSvc              INFO Frontier compression level set to 5
-DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/dvtest/build/share/dbreplica.config
-DBReplicaSvc         INFO No specific match for domain found - use default fallback
-DBReplicaSvc         INFO Total of 1 servers found for host karma [atlas_dd ]
-PoolSvc              INFO Successfully setup replica sorting algorithm
-PoolSvc              INFO Setting up APR FileCatalog and Streams
-PoolSvc              INFO POOL WriteCatalog is file:AllocTestReadWithoutAllocalloctestWithoutAlloc_catalog.xml
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-MetaDataSvc          INFO Found MetaDataTools = PublicToolHandleArray(['IOVDbMetaDataTool'])
 EventSelector        INFO EventSelection with query 
-PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] C825D530-AD2A-DC8C-A73F-423D68AA656E
-Domain[ROOT_All]     INFO                           alloctestWithoutAlloc.root
-RootDatabase.open    INFO alloctestWithoutAlloc.root File version:62610
-alloctestWithou...   INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] C825D530-AD2A-DC8C-A73F-423D68AA656E
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
-PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] C825D530-AD2A-DC8C-A73F-423D68AA656E
-Domain[ROOT_All]     INFO                           alloctestWithoutAlloc.root
-RootDatabase.open    INFO alloctestWithoutAlloc.root File version:62610
-alloctestWithou...   INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] C825D530-AD2A-DC8C-A73F-423D68AA656E
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] CD6FB0BB-7C6B-A24A-9ED0-C09A153D3FDD
-Domain[ROOT_All]     INFO                           alloctestWithoutAlloc.root
-RootDatabase.open    INFO alloctestWithoutAlloc.root File version:62610
-ClassIDSvc           INFO getRegistryEntries: read 1595 CLIDRegistry entries for module ALL
-EventPersistenc...   INFO Added successfully Conversion service:AthenaPoolCnvSvc
-ClassIDSvc           INFO getRegistryEntries: read 23 CLIDRegistry entries for module ALL
-MetaDataSvc          INFO   AlgTool: ToolSvc.IOVDbMetaDataTool
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
-alloctestWithou...   INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] CD6FB0BB-7C6B-A24A-9ED0-C09A153D3FDD
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] CD6FB0BB-7C6B-A24A-9ED0-C09A153D3FDD
-Domain[ROOT_All]     INFO                           alloctestWithoutAlloc.root
-RootDatabase.open    INFO alloctestWithoutAlloc.root File version:62610
 ApplicationMgr       INFO Application Manager Started successfully
-AlgResourcePool      INFO TopAlg list empty. Recovering the one of Application Manager
-AthenaPoolConve...   INFO massageEventInfo: unable to get OverrideRunNumberFromInput property from EventSelector 
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
 AllocTest 0 10 20 30 1 11 21 31 2 12 22 32 3 13 23 33 4 14 24 34 5 15 25 35 6 16 26 36 7 17 27 37 8 18 28 38 9 19 29 39 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
-ClassIDSvc           INFO getRegistryEntries: read 65 CLIDRegistry entries for module ALL
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
 AllocTest 100 110 120 130 101 111 121 131 102 112 122 132 103 113 123 133 104 114 124 134 105 115 125 135 106 116 126 136 107 117 127 137 108 118 128 138 109 119 129 139 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
@@ -140,16 +67,7 @@ AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #0 19 events 
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #20, run #0 19 events processed so far  <<<===
 AllocTest 1900 1910 1920 1930 1901 1911 1921 1931 1902 1912 1922 1932 1903 1913 1923 1933 1904 1914 1924 1934 1905 1915 1925 1935 1906 1916 1926 1936 1907 1917 1927 1937 1908 1918 1928 1938 1909 1919 1929 1939 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
-alloctestWithou...   INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] CD6FB0BB-7C6B-A24A-9ED0-C09A153D3FDD
 ApplicationMgr       INFO Application Manager Stopped successfully
-LoadWriteDicts       INFO Finalizing LoadWriteDicts...
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
-XMLCatalog           INFO File 'AllocTestReadWithoutAllocalloctestWithoutAlloc_catalog.xml' does not exist. New file created.
-PyComponentMgr       INFO Finalizing PyComponentMgr...
-AthDictLoaderSvc     INFO in finalize...
-ToolSvc              INFO Removing all tools created by ToolSvc
-ChronoStatSvc.f...   INFO  Service finalized successfully 
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
-Py:Athena            INFO leaving with code 0: "successful run"
+leaving with code 0: "successful run"

@@ -1,16 +1,14 @@
-Py:Athena            INFO executing ROOT6Setup
 ApplicationMgr       INFO Application Manager Configured successfully
-AthDictLoaderSvc     INFO in initialize...
-AthDictLoaderSvc     INFO acquired Dso-registry
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 PyComponentMgr       INFO Initializing PyComponentMgr...
 LoadReadDicts        INFO Initializing LoadReadDicts...
-MetaDataSvc          INFO Initializing MetaDataSvc
+DecisionSvc          INFO Inserting stream: OutputStreamStream1 with no Algs
+AthDictLoaderSvc     INFO in initialize...
+AthDictLoaderSvc     INFO acquired Dso-registry
+Output...ream1Tool   INFO Initializing OutputStreamStream1.StreamStream1Tool
+Output...amStream1   INFO Data output: SimplePoolFile2.root
+Output...amStream1   INFO ../O reinitialization...
 EventSelector        INFO EventSelection with query 
-DecisionSvc          INFO Inserting stream: Stream1 with no Algs
-Stream1.Stream1...   INFO Initializing Stream1.Stream1Tool
-Stream1              INFO Data output: SimplePoolFile2.root
-Stream1              INFO ../O reinitialization...
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr       INFO Application Manager Started successfully
@@ -27,6 +25,7 @@ DMTestRead           INFO dder as DataVector<DMTest::D>: 301 302 303 304 305 306
 DMTestRead           INFO elvec: 1 4 7 10 102 105 108 
 DMTestRead           INFO elv_remap: 101 102 103 104 105 106 107 108 109 110 201 202 203 204 205 206 207 208 209 210 
 DMTestRead           INFO elv_remap v2: 101 102 103 104 105 106 107 108 109 110 201 202 203 204 205 206 207 208 209 210 
+MetaDataSvc          INFO Initializing MetaDataSvc
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
 DMTestRead           INFO bvec as DataVector<DMTest::B>: 2 3 4 5 6 7 8 9 10 11 
@@ -275,12 +274,10 @@ DMTestRead           INFO elvec: 20 23 26 29 121 124 127
 DMTestRead           INFO elv_remap: 120 121 122 123 124 125 126 127 128 129 220 221 222 223 224 225 226 227 228 229 
 DMTestRead           INFO elv_remap v2: 120 121 122 123 124 125 126 127 128 129 220 221 222 223 224 225 226 227 228 229 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
-Stream1              INFO Metadata records written: 21
+Output...amStream1   INFO Metadata records written: 21
 ApplicationMgr       INFO Application Manager Stopped successfully
-XMLCatalog           INFO File 'DataModelTestRead_catalog.xml' does not exist. New file created.
 AthDictLoaderSvc     INFO in finalize...
 ToolSvc              INFO Removing all tools created by ToolSvc
-ChronoStatSvc.f...   INFO  Service finalized successfully 
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
-Py:Athena            INFO leaving with code 0: "successful run"
+leaving with code 0: "successful run"
