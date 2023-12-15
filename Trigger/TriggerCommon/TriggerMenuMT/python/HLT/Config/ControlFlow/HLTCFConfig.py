@@ -41,6 +41,7 @@ from TriggerJobOpts.TriggerConfig import collectHypos, collectFilters, collectVi
 from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import getTrigNavSlimmingMTOnlineConfig
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
 
 
 from builtins import map, range, str, zip
@@ -159,7 +160,10 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
         flatDecisions.extend (step)
 
     summary = makeSummary(flags, "Final", flatDecisions)
-    hltEndSeq += summary
+    if isCAMenu():
+        acc.addEventAlgo([summary],sequenceName = hltEndSeq.getName())            
+    else:
+        hltEndSeq += summary
 
     log.debug("[makeHLTTree] created the final summary tree")
     # TODO - check we are not running things twice. Once here and once in TriggerConfig.py
@@ -374,7 +378,6 @@ def sequenceScanner( HLTNode ):
 
 def decisionTreeFromChains(flags, HLTNode, chains, allDicts, newJO):
     """ Creates the decision tree, given the starting node and the chains containing the sequences  """
-    from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
     log.info("[decisionTreeFromChains] Run decisionTreeFromChains on %s", HLTNode.getName())
     HLTNodeName = HLTNode.getName()
     with ConfigurableCABehavior():
@@ -409,7 +412,6 @@ def createDataFlow(flags, chains, allDicts):
     with ConfigurableCABehavior():
         acc = ComponentAccumulator()
 
-    from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
     # find tot nsteps
     chainWithMaxSteps = max(chains, key = lambda chain: len(chain.steps))
     NSTEPS = len(chainWithMaxSteps.steps)
@@ -521,7 +523,6 @@ def createDataFlow(flags, chains, allDicts):
 
 def createControlFlow(flags, HLTNode, CFseqList):
     """ Creates Control Flow Tree starting from the CFSequences"""
-    from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
     HLTNodeName = HLTNode.getName()    
     log.debug("[createControlFlow] on node %s with %d CFsequences",HLTNodeName, len(CFseqList))
     with ConfigurableCABehavior():
