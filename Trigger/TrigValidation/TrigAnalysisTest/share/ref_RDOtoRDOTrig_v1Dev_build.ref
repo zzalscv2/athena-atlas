@@ -11718,6 +11718,12 @@ HLT_j0_HT650XX0eta240_pf_ftf_preselcHT450_L1HT190-J15s5pETA21:
     0: 2
   stepFeatures:
     0: 2
+HLT_j0_HT650XX0eta240_pf_ftf_preselcHT450_L1HT190-jJ40s5pETA21:
+  eventCount: 0
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 2
 HLT_j0_HT650XX0eta240_pf_ftf_preselj180_L1HT190-J15s5pETA21:
   eventCount: 0
   stepCounts:

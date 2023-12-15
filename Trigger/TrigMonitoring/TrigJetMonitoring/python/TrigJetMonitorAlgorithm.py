@@ -147,6 +147,7 @@ Chain2L1JetCollDict['pp'] = { # set L1 jet collection name for L1 jet chains
   'L1_gLJ140': ['L1_gFexLRJetRoI'],
 
   'L1_SC111-CjJ40': ['L1_jFexSRJetRoI'],
+  'L1_HT190-jJ40s5pETA21': ['L1_jFexSRJetRoI'],
 }
 
 Chain2L1JetCollDict['HI'] = { 
@@ -276,7 +277,7 @@ def getChains2Monitor(inputFlags, monMode):
     if Chains2Monitor['pp'].get('HLT_4j120_L13J50'): Chains2Monitor['pp']['HLT_4j120_L13J50'].update({"RefChain": "HLT_j85_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"}) 
     if Chains2Monitor['pp'].get('HLT_5j80_pf_ftf_presel5j50_L14J15'): Chains2Monitor['pp']['HLT_5j80_pf_ftf_presel5j50_L14J15'].update({"RefChain": "HLT_j45_pf_ftf_preselj20_L1J15", "OfflineColl": "AntiKt4EMPFlowJets"})    
     if Chains2Monitor['pp'].get('HLT_j400_pf_ftf_L1J100'): Chains2Monitor['pp']['HLT_j400_pf_ftf_L1J100'].update({"RefChain": "HLT_j85_pf_ftf_preselj50_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"})    
-    if Chains2Monitor['pp'].get('HLT_j400_pf_ftf_preselj225_L1J100'): Chains2Monitor['pp']['HLT_j400_pf_ftf_preselj225_L1J100'].update({"RefChain": "HLT_j85_pf_ftf_preselj50_L1jJ50", "OfflineColl": "AntiKt4EMPFlowJets"})
+    if Chains2Monitor['pp'].get('HLT_j400_pf_ftf_preselj225_L1J100'): Chains2Monitor['pp']['HLT_j400_pf_ftf_preselj225_L1J100'].update({"RefChain": "HLT_j85_pf_ftf_preselj50_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"})
 
 
     # Phase1: duplicate all relevant chains with jFex algos
