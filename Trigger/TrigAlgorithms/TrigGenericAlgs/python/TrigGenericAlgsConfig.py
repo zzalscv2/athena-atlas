@@ -66,15 +66,13 @@ def ROBPrefetchingAlgCfg_Muon(flags, nameSuffix, **kwargs):
 def getChainsForPrefetching(chains):
     from AthenaCommon.Configurable import Configurable
     from TrigConfHLTUtils.HLTUtils import string2hash
+    from AthenaCommon.CFElements import getSequenceChildren, isSequence
     from collections import defaultdict
-
     def sequenceAlgs(seq):
-        algs = []
-        # getChildren is only for legacy AthSequencer
-        # TODO remove in legacy cleanup
-        for alg in seq.getChildren() if hasattr(seq,'getChildren') else seq.Members:
+        algs = []        
+        for alg in getSequenceChildren(seq):
             conf = Configurable.allConfigurables[alg] if type(alg)==str else alg
-            if type(conf)==CompFactory.AthSequencer:
+            if isSequence(conf):
                 algs.extend(sequenceAlgs(conf))
             elif conf.getName().startswith('IMEmpty'):
                 # skip empty probe step in tag&probe chains
