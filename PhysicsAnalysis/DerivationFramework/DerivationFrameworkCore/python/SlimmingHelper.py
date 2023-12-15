@@ -263,6 +263,8 @@ class SlimmingHelper:
                                         entry = "xAOD::ShallowAuxContainer#"+item+"."
                                 elif (theDictionary[item]=='xAOD::MissingETAuxAssociationMap'):
                                         entry = "xAOD::MissingETAuxAssociationMap#"+item+"."
+                                elif (theDictionary[item]=='xAOD::JetTrigAuxContainer'):
+                                        entry = "xAOD::JetTrigAuxContainer#"+item+"."
                                 elif ("AuxInfo" in theDictionary[item]):
                                         entry = "xAOD::AuxInfoBase!#"+item+"."
                                 # Next elif - remaining containers
