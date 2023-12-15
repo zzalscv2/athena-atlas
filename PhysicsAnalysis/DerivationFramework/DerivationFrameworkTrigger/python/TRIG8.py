@@ -105,8 +105,12 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
 
     allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
     TriggerAPI.setConfigFlags(flags)
-    trig_all = TriggerAPI.getAllHLT(allperiods)
+    trig_all = list(TriggerAPI.getAllHLT(allperiods).keys())
     
+    # Add in Run 3 triggers
+    TriggerListsHelper = kwargs['TriggerListsHelper']
+    trig_all += TriggerListsHelper.Run3TriggerNames
+
     # Pieces of trigger names to keep
     idtrig_keys = ['idperf', 'boffperf', 'ivarperf', 'idtp'] 
     # Triggers to veto
@@ -344,14 +348,6 @@ def TRIG8Cfg(flags):
                                          )
     # Run 3
     elif flags.Trigger.EDMVersion == 3:
-        from DerivationFrameworkLLP.LLPToolsConfig import LLP1TriggerMatchingToolRun2Cfg
-        acc.merge(LLP1TriggerMatchingToolRun2Cfg(flags,
-                                              name = "LRTTriggerMatchingTool",
-                                              OutputContainerPrefix = "LRTTrigMatch_",
-                                              TriggerList = TRIG8TriggerListsHelper.Run3TriggerNamesNoTau,
-                                              InputElectrons=TRIG8MergedElectronContainer,
-                                              InputMuons=TRIG8MergedMuonContainer
-                                              ))
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(TRIG8SlimmingHelper)
 

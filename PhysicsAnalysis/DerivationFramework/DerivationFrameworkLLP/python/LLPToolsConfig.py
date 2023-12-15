@@ -45,11 +45,13 @@ def RCJetSubstructureAugCfg(ConfigFlags, name, **kwargs):
     return acc
 
 
-def LLP1TriggerSkimmingToolCfg(ConfigFlags, name, **kwargs):
+def LLP1TriggerSkimmingToolCfg(ConfigFlags, name, TriggerListsHelper, **kwargs):
 
     from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
     from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod, TriggerType
+    import re
 
+    # This is not all periods! Run 2 and current triggers only
     allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
     TriggerAPI.setConfigFlags(ConfigFlags)
     trig_el  = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el,  livefraction=0.8)
@@ -58,10 +60,24 @@ def LLP1TriggerSkimmingToolCfg(ConfigFlags, name, **kwargs):
     trig_elmu = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el, additionalTriggerType=TriggerType.mu,  livefraction=0.8)
     trig_mug = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.mu, additionalTriggerType=TriggerType.g,  livefraction=0.8)
 
+    # Run 3 triggers.  Doesn't take into account prescales, so this is overly inclusive.  Needs updates to trigger api: ATR-25805
+    all_run3 = TriggerListsHelper.Run3TriggerNames
+    r_run3_nojets = re.compile("(HLT_[1-9]*(j).*)")
+    r_tau = re.compile("HLT_.*tau.*")
+    trig_run3_elmug = []
+    for chain_name in all_run3:
+        result_jets = r_run3_nojets.match(chain_name)
+        result_taus = r_tau.match(chain_name) # no taus in llp1 atm
+        # no perf chains
+        if 'perf' in chain_name.lower(): continue
+        if result_jets is None and result_taus is None: trig_run3_elmug.append(chain_name)
+
+
+
     trig_EJ_Run3 = ["HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1J100", "HLT_j460_a10r_L1J100"]
     trig_VBF_2018 =["HLT_j55_gsc80_bmv2c1070_split_j45_gsc60_bmv2c1085_split_j45_320eta490", "HLT_j45_gsc55_bmv2c1070_split_2j45_320eta490_L1J25.0ETA23_2J15.31ETA49", "HLT_j80_0eta240_j60_j45_320eta490_AND_2j35_gsc45_bmv2c1070_split", "HLT_ht300_2j40_0eta490_invm700_L1HT150-J20s5.ETA31_MJJ-400-CF_AND_2j35_gsc45_bmv2c1070_split", "HLT_j70_j50_0eta490_invm1100j70_dphi20_deta40_L1MJJ-500-NFF"]
 
-    triggers = trig_el + trig_mu + trig_g + trig_elmu + trig_mug + trig_VBF_2018 + trig_EJ_Run3
+    triggers = trig_el + trig_mu + trig_g + trig_elmu + trig_mug + trig_VBF_2018 + trig_EJ_Run3 + trig_run3_elmug
     #remove duplicates
     triggers = sorted(list(set(triggers)))
 
