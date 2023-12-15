@@ -6,6 +6,7 @@ from __future__ import print_function
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AthenaConfiguration.Enums import LHCPeriod
 import re
 
 
@@ -99,8 +100,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('runFJvtSelection', False, type=bool)
         self.addOption ('runJvtEfficiency', True, type=bool)
         self.addOption ('runFJvtEfficiency', False, type=bool)
-        self.addOption ('systematicsModelJES', "Global", type=str)
-        self.addOption ('systematicsModelJER', "Simple", type=str)
+        self.addOption ('systematicsModelJES', "Category", type=str)
+        self.addOption ('systematicsModelJER', "Full", type=str)
         self.addOption ('recalibratePhyslite', True, type=bool)
         # Calibration tool options
         self.addOption ('calibToolConfigFile', None, type=str)
@@ -160,6 +161,9 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.jetsOut = config.copyName (self.containerName)
 
         # Jet uncertainties
+        alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+postfix )
+        config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
+        alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
         # Prepare the config file
         if self.systematicsModelJES == "All" and self.systematicsModelJER == "All":
             alg.uncertaintiesTool.ConfigFile = "R4_AllNuisanceParameters_AllJERNP.config"
@@ -175,20 +179,22 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             raise ValueError(
                 "Invalid combination of systematicsModelJES and systematicsModelJER settings: "
                 "systematicsModelJES: {0}, systematicsModelJER: {1}".format(self.systematicsModelJES, self.systematicsModelJER) )
-
-        alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+postfix )
-        config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
-        alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
+        # Expert override for calibarea
         if self.uncertToolCalibArea is not None:
             alg.uncertaintiesTool.CalibArea = self.uncertToolCalibArea
+        # Expert override for configpath
         if self.uncertToolConfigPath is not None:
             alg.uncertaintiesTool.ConfigFile = self.uncertToolConfigPath
         else: # Default config
-            alg.uncertaintiesTool.ConfigFile = "rel21/Fall2018/"+configFile    # Add the correct directory on the front
+            alg.uncertaintiesTool.ConfigFile = "rel22/Summer2023_PreRec/"+configFile    # Add the correct directory on the front
+        # Expert override for mctype
         if self.uncertToolMCType is not None:
             alg.uncertaintiesTool.MCType = self.uncertToolMCType
         else: # Default config
-            alg.uncertaintiesTool.MCType = "AFII" if config.dataType() is DataType.FastSim else "MC16"
+            if config.geometry() is LHCPeriod.Run2:
+                alg.uncertaintiesTool.MCType = "MC20"
+            else:
+                alg.uncertaintiesTool.MCType = "MC21"
         alg.uncertaintiesTool.IsData = (config.dataType() is DataType.Data)
         alg.jets = config.readName (self.containerName)
         alg.jetsOut = config.copyName (self.containerName)

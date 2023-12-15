@@ -156,7 +156,7 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
                                    runJvtUpdate = False, runNNJvtUpdate = False, runFJvtUpdate = False,
                                    runJvtSelection = True, runFJvtSelection = False,
                                    runJvtEfficiency = True, runFJvtEfficiency = False,
-                                   reduction = "Global", JEROption = "Simple"):
+                                   reduction = "Category", JEROption = "Full"):
     """Add algorithms for the R=0.4 jets.
 
       Keyword arguments
@@ -244,8 +244,8 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
     addPrivateTool( alg, 'uncertaintiesTool', 'JetUncertaintiesTool' )
     alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
     # Add the correct directory on the front
-    alg.uncertaintiesTool.ConfigFile = "rel21/Fall2018/"+configFile
-    alg.uncertaintiesTool.MCType = "AFII" if dataType == "afii" else "MC16"
+    alg.uncertaintiesTool.ConfigFile = "rel22/Summer2023_PreRec/"+configFile
+    alg.uncertaintiesTool.MCType = "MC20"
     alg.uncertaintiesTool.IsData = (dataType == 'data')
     seq.append( alg, inputPropName = 'jets', outputPropName = 'jetsOut',
                 stageName = 'calibration' )
