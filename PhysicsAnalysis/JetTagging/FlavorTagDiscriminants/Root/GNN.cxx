@@ -245,7 +245,7 @@ namespace FlavorTagDiscriminants {
           }
           Tracks::const_iterator it = input_tracks.begin();
           std::vector<char>::const_iterator ival = values.begin();
-          for (; it != input_tracks.end() && ival != values.end(); it++, ival++) {
+          for (; it != input_tracks.end() && ival != values.end(); ++it, ++ival) {
             dec.second(**it) = *ival;
           }
         }
@@ -257,7 +257,7 @@ namespace FlavorTagDiscriminants {
           }
           Tracks::const_iterator it = input_tracks.begin();
           std::vector<float>::const_iterator ival = values.begin();
-          for (; it != input_tracks.end() && ival != values.end(); it++, ival++) {
+          for (; it != input_tracks.end() && ival != values.end(); ++it, ++ival) {
             dec.second(**it) = *ival;
           }
         }
