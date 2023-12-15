@@ -318,7 +318,10 @@ def main(args):
             good_leaves = set()
             for regex in args.branches_of_interest:
                 test = re.compile(regex)
-                good_leaves.update(l for l in leaves if test.match(l))
+                matches = {l for l in leaves if test.match(l)}
+                if not matches:
+                    msg.error(f'no match for branch of interest: {regex}')
+                good_leaves.update(matches)
             return good_leaves
 
         skipset = frozenset(args.ignore_leaves)
