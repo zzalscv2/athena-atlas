@@ -13,6 +13,7 @@
 #define PIXCALIBFRONTENDINFO_H
 
 
+#include <sstream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -75,7 +76,7 @@ class CalibFrontEndInfo {
         
         
         //Prints the information stored in case of need.
-        void printDBformat()    const;
+        std::stringstream printDBformat()    const;
         void printBeautyformat()const;
         void printVals()        const;
         
