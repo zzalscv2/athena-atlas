@@ -114,7 +114,7 @@ namespace MuonGM {
     unsigned int MuonDetectorManager::getNumTreeTops() const { return m_envelope.size(); }
 
     PVConstLink MuonDetectorManager::getTreeTop(unsigned int i) const { return m_envelope[i]; }
-
+    PVLink MuonDetectorManager::getTreeTop(unsigned int i) { return m_envelope[i]; }
     void MuonDetectorManager::addTreeTop(PVLink pV) {
         pV->ref();
         m_envelope.push_back(pV);

@@ -33,9 +33,6 @@ Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumes(const EventCont
   }
   whandle.addDependency(readHandle);
   const MuonGM::MuonDetectorManager* muonMgr = *readHandle;
-  /// We need to retrieve the detector manager from the detector store as this
-  /// is the only which has passive material assigned
-  detStore()->retrieve(muonMgr).ignore();
   if (!muonMgr) {
     ATH_MSG_FATAL("Somehow the Muon detector manager is missing ");
     return {};

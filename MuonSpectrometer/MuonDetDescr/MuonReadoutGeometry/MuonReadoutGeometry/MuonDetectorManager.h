@@ -62,6 +62,7 @@ namespace MuonGM {
 
         // Gets the ith tree top:  required:
         virtual PVConstLink getTreeTop(unsigned int i) const;
+        PVLink getTreeTop(unsigned int i);
 
         // Add a tree top:
         void addTreeTop(PVLink);

@@ -30,6 +30,7 @@ class MuonDetectorCondAlg : public AthReentrantAlgorithm {
     virtual bool isReEntrant() const override final { return false; }
 
   private:
+    StatusCode copyInertMaterial(MuonGM::MuonDetectorManager& detMgr) const;
     Gaudi::Property<bool> m_applyMmPassivation{this, "applyMmPassivation", false};
     
     Gaudi::Property<bool> m_applyNswAsBuilt{this, "applyNswAsBuilt", true, 
