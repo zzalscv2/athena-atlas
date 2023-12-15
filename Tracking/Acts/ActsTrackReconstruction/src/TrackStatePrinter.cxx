@@ -538,6 +538,13 @@ namespace ActsTrk
             states.push_back(state);
           });
 
+      if (track.nMeasurements() != npixel + nstrip)
+      {
+        ATH_MSG_WARNING("Track has " << track.nMeasurements() << " measurements, but "
+                                     << npixel << " pixel + "
+                                     << nstrip << " strip hits");
+      }
+
       const Acts::BoundTrackParameters per(track.referenceSurface().getSharedPtr(),
                                            track.parameters(),
                                            track.covariance(),
@@ -546,10 +553,14 @@ namespace ActsTrk
                 << std::left
                 << std::setw(4) << "parm" << ' '
                 << std::setw(21) << actsSurfaceName(per.referenceSurface()) << ' '
-                << std::setw(22) << to_string("#hit=", npixel, '/', nstrip, ", #tj=", fitResult.size()) << ' '
+                << std::setw(22) << to_string("#hit=", npixel, '/', nstrip, ", #hole=", track.nHoles()) << ' '
                 << std::right;
       printParameters(per.referenceSurface(), tgContext, per.parameters());
-      std::cout << '\n';
+      std::cout << std::setw(5) << std::left << ' '
+                << std::setw(7) << std::setprecision(1) << track.chi2() << ' '
+                << "#out=" << track.nOutliers()
+                << ", #sh=" << track.nSharedHits()
+                << std::right << '\n';
 
       for (auto i = states.size(); i > 0;)
       {

@@ -72,6 +72,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_etaBins);
     ATH_MSG_DEBUG("   " << m_chi2CutOff);
     ATH_MSG_DEBUG("   " << m_numMeasurementsCutOff);
+    ATH_MSG_DEBUG("   " << m_maxHoles);
     ATH_MSG_DEBUG("   " << m_phiMin);
     ATH_MSG_DEBUG("   " << m_phiMax);
     ATH_MSG_DEBUG("   " << m_etaMin);
@@ -81,6 +82,10 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_ptMin);
     ATH_MSG_DEBUG("   " << m_ptMax);
     ATH_MSG_DEBUG("   " << m_minMeasurements);
+    ATH_MSG_DEBUG("   " << m_maxHolesSelect);
+    ATH_MSG_DEBUG("   " << m_maxOutliers);
+    ATH_MSG_DEBUG("   " << m_maxSharedHits);
+    ATH_MSG_DEBUG("   " << m_maxChi2);
     ATH_MSG_DEBUG("   " << m_statEtaBins);
     ATH_MSG_DEBUG("   " << m_seedLabels);
     ATH_MSG_DEBUG("   " << m_dumpAllStatEtaBins);
@@ -182,10 +187,14 @@ namespace ActsTrk
       setCut(cfg.ptMin, m_ptMin, cutIndex);
       setCut(cfg.ptMax, m_ptMax, cutIndex);
       setCut(cfg.minMeasurements, m_minMeasurements, cutIndex);
+      setCut(cfg.maxHoles, m_maxHolesSelect, cutIndex);
+      setCut(cfg.maxOutliers, m_maxOutliers, cutIndex);
+      setCut(cfg.maxSharedHits, m_maxSharedHits, cutIndex);
+      setCut(cfg.maxChi2, m_maxChi2, cutIndex);
       ++cutIndex;
     }
 
-    ATH_MSG_DEBUG(trackSelectorCfg);
+    ATH_MSG_INFO(trackSelectorCfg);
 
     m_trackFinder.reset(new CKF_pimpl{CKF_config{{std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelectorCfg, {}, {}, trackSelectorCfg}});
 
@@ -419,7 +428,7 @@ namespace ActsTrk
       if (!(tipState.nHoles > variableCut<std::size_t>(eta, alg->m_etaBins, alg->m_maxHoles, std::numeric_limits<std::size_t>::max())))
         return false;
       ++event_stat[category_i][kNStoppedTracksMaxHoles];
-      ATH_MSG_DEBUG("CkfBranchStopper (seed eta " << eta << ") stopped branch with nSensitiveSurfaces="
+      ATH_MSG_INFO("CkfBranchStopper (seed eta " << eta << ") stopped branch with nSensitiveSurfaces="
                     << tipState.nSensitiveSurfaces
                     << " nStates=" << tipState.nStates
                     << " nMeasurements=" << tipState.nMeasurements
