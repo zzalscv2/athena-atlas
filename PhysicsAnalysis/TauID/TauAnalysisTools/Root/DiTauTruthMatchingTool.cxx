@@ -250,13 +250,17 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
     }
   else 
     decIsTruthHadronic(xDiTau) = (char)false;
-  
+
+ 
+  static const SG::AuxElement::Decorator<double> decTruthLeadPt("TruthVisLeadPt");
+  static const SG::AuxElement::Decorator<double> decTruthLeadEta("TruthVisLeadEta");
+  static const SG::AuxElement::Decorator<double> decTruthSubleadPt("TruthVisSubleadPt");
+  static const SG::AuxElement::Decorator<double> decTruthSubleadEta("TruthVisSubleadEta");
+  static const SG::AuxElement::Decorator<double> decTruthDeltaR("TruthVisDeltaR");
+  static const SG::AuxElement::Decorator<double> decTruthMass("TruthVisMass");   
+
   if (accIsTruthHadronic(xDiTau))
     {
-      static const SG::AuxElement::Decorator<double> decTruthLeadPt("TruthVisLeadPt");
-      static const SG::AuxElement::Decorator<double> decTruthSubleadPt("TruthVisSubleadPt");
-      static const SG::AuxElement::Decorator<double> decTruthDeltaR("TruthVisDeltaR");
-
       TLorentzVector tlvTruthTau1;
       TLorentzVector tlvTruthTau2;
       tlvTruthTau1.SetPtEtaPhiE(m_accPtVis(*(*vTruthLinks.at(0))),
@@ -269,9 +273,21 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
 				m_accMVis(*(*vTruthLinks.at(1))));
 
       decTruthLeadPt(xDiTau) = std::max(tlvTruthTau1.Pt(), tlvTruthTau2.Pt());
+      decTruthLeadEta(xDiTau) = (tlvTruthTau1.Pt() > tlvTruthTau2.Pt()) ? tlvTruthTau1.Eta() : tlvTruthTau2.Eta();
       decTruthSubleadPt(xDiTau) = std::min(tlvTruthTau1.Pt(), tlvTruthTau2.Pt());
+      decTruthSubleadEta(xDiTau) = (tlvTruthTau1.Pt() > tlvTruthTau2.Pt()) ? tlvTruthTau2.Eta() : tlvTruthTau1.Eta();
       decTruthDeltaR(xDiTau) = tlvTruthTau1.DeltaR(tlvTruthTau2);
+      decTruthMass(xDiTau) = (tlvTruthTau1 + tlvTruthTau2).M();
     }
+  else {
+      // set to a default value 	  
+      decTruthLeadPt(xDiTau) = -1234.; 
+      decTruthLeadEta(xDiTau) = -1234.;
+      decTruthSubleadPt(xDiTau) = -1234.;
+      decTruthSubleadEta(xDiTau) = -1234.; 
+      decTruthDeltaR(xDiTau) = -1234.;
+      decTruthMass(xDiTau) = -1234.; 
+    }	  
   
   return StatusCode::SUCCESS;
 }
