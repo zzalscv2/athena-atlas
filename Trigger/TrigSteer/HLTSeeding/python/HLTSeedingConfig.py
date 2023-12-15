@@ -20,6 +20,7 @@ _mapL1ThresholdToDecisionCollection = {
     # Phase-1 L1Calo
     "eEM": "HLTNav_L1eEM",
     "eTAU": "HLTNav_L1eTAU",
+    "jEM": "HLTNav_L1jEM",
     "jTAU": "HLTNav_L1jTAU",
     "cTAU": "HLTNav_L1cTAU",
     "jJ": "HLTNav_L1jJ",
@@ -27,6 +28,7 @@ _mapL1ThresholdToDecisionCollection = {
     "gJ": "HLTNav_L1gJ",
     "gLJ": "HLTNav_L1gLJ",
     "PROBEeEM" : "HLTNav_L1PROBEeEM",
+    "PROBEjEM" : "HLTNav_L1PROBEjEM",
     "PROBEeTAU" : "HLTNav_L1PROBEeTAU",
     "PROBEjTAU" : "HLTNav_L1PROBEjTAU",
     "PROBEcTAU" : "HLTNav_L1PROBEcTAU",
@@ -50,6 +52,7 @@ _mapL1ThresholdToRoICollection = {
     # Phase-1 L1Calo
     "eEM": "HLT_eEMRoIs",
     "eTAU": "HLT_eTAURoIs",
+    "jEM": "HLT_jEMRoIs",
     "jTAU": "HLT_jTAURoIs",
     "cTAU": "HLT_cTAURoIs",
     "jJ": "HLT_jJRoIs",
@@ -58,6 +61,7 @@ _mapL1ThresholdToRoICollection = {
     "gLJ": "HLT_gLJRoIs",
     "PROBEeEM" : "HLT_eEMRoIs",
     "PROBEeTAU": "HLT_eTAURoIs",
+    "PROBEjEM": "HLT_jEMRoIs",
     "PROBEjTAU": "HLT_jTAURoIs",
     "PROBEcTAU": "HLT_cTAURoIs",
     # Run-2 L1Calo
@@ -143,6 +147,13 @@ def createCaloRoIUnpackers(flags):
 
     if flags.Trigger.L1.dojFex:
         maxRoICount_jFex = 200  # used for histogram range
+        jFexEMUnpacker = CompFactory.jFexFwdElRoIsUnpackingTool(
+            Decisions = mapThresholdToL1DecisionCollection("jEM"),
+            DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEjEM"),
+            OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("jEM")),
+            RoIHalfWidthEta = 0.4,
+            RoIHalfWidthPhi = math.pi/8,
+            MonTool = RoIsUnpackingMonitoring(flags, prefix="jEM", maxCount=maxRoICount_jFex))
         jFexTauUnpacker = CompFactory.jFexTauRoIsUnpackingTool(
             Decisions = mapThresholdToL1DecisionCollection("jTAU"),
             DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEjTAU"),
@@ -162,7 +173,7 @@ def createCaloRoIUnpackers(flags):
             RoIHalfWidthEta = 0.1,
             RoIHalfWidthPhi = 0.1,
             MonTool = RoIsUnpackingMonitoring(flags, prefix="jLJ", maxCount=maxRoICount_jFex, maxEta=5))
-        tools += [jFexTauUnpacker, jFexSRJetUnpacker, jFexLRJetUnpacker]
+        tools += [jFexEMUnpacker, jFexTauUnpacker, jFexSRJetUnpacker, jFexLRJetUnpacker]
 
     if flags.Trigger.L1.dogFex:
         maxRoICount_gFex = 100  # used for histogram range
@@ -236,6 +247,7 @@ def L1TriggerResultMakerCfg(flags):
         MuRoIKey = "",
         eFexEMRoIKey = "",
         eFexTauRoIKey = "",
+        jFexFwdElRoIKey = "",
         jFexTauRoIKey = "",
         jFexSRJetRoIKey = "",
         jFexLRJetRoIKey = "",
@@ -261,10 +273,12 @@ def L1TriggerResultMakerCfg(flags):
                 CompFactory.eFexTauRoIThresholdsTool(),
             ]
         if flags.Trigger.L1.dojFex:
+            l1trMaker.jFexFwdElRoIKey = "L1_jFexFwdElRoI"
             l1trMaker.jFexTauRoIKey = "L1_jFexTauRoI"
             l1trMaker.jFexSRJetRoIKey = "L1_jFexSRJetRoI"
             l1trMaker.jFexLRJetRoIKey = "L1_jFexLRJetRoI"
             l1trMaker.ThresholdPatternTools += [
+                CompFactory.jFexFwdElRoIThresholdsTool(),
                 CompFactory.jFexTauRoIThresholdsTool(),
                 CompFactory.jFexSRJetRoIThresholdsTool(),
                 CompFactory.jFexLRJetRoIThresholdsTool(),

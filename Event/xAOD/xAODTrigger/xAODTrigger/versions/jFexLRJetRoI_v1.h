@@ -42,7 +42,10 @@ namespace xAOD {
       float     phi()           const;
       int       tobEtScale()    const;
       char      isTOB()         const;
-      
+
+       /// the eta index to use for looking up thresholds in the menu
+       int      menuEta()      const;
+
       /// Set the isTOB variable (TOB or xTOB)
       void setIsTOB( char value);
 

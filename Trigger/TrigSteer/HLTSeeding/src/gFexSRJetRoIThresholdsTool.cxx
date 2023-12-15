@@ -7,12 +7,13 @@ uint64_t gFexSRJetRoIThresholdsTool::getPattern(const xAOD::gFexJetRoI& roi,
                                                 const RoIThresholdsTool::ThrVec& menuThresholds,
                                                 const TrigConf::L1ThrExtraInfoBase& /*menuExtraInfo*/) const {
   float et = roi.et();
+  int ieta = roi.menuEta();
   uint64_t thresholdMask = 0;
 
   for (const std::shared_ptr<TrigConf::L1Threshold>& thrBase : menuThresholds) {
     std::shared_ptr<TrigConf::L1Threshold_gJ> thr = std::static_pointer_cast<TrigConf::L1Threshold_gJ>(thrBase);
     
-    if (et > thr->thrValueMeV()) {
+    if (et > thr->thrValueMeV(ieta)) {
       thresholdMask |= (1<<thr->mapping());
     }
     

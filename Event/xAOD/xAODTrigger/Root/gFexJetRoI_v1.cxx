@@ -51,6 +51,10 @@ namespace xAOD {
 
   }
 
+    int gFexJetRoI_v1::menuEta() const {
+      return static_cast<int>(eta()*40)/4;
+    }
+
 
   /// Raw data words
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexJetRoI_v1, uint32_t, word,

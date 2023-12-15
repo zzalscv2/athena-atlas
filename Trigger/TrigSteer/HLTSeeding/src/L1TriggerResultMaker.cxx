@@ -45,6 +45,7 @@ StatusCode L1TriggerResultMaker::initialize() {
   ATH_CHECK(m_muRoIKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_eFexEMRoIKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_eFexTauRoIKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_jFexFwdElRoIKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_jFexTauRoIKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_cTauRoIKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_cjTauLinkKey.initialize(!m_cjTauLinkKey.empty()));
@@ -91,6 +92,7 @@ StatusCode L1TriggerResultMaker::execute(const EventContext& eventContext) const
   ATH_CHECK(retrieveAndLink(m_muRoIKey));
   ATH_CHECK(retrieveAndLink(m_eFexEMRoIKey));
   ATH_CHECK(retrieveAndLink(m_eFexTauRoIKey));
+  ATH_CHECK(retrieveAndLink(m_jFexFwdElRoIKey));
   ATH_CHECK(retrieveAndLink(m_jFexTauRoIKey));
   ATH_CHECK(retrieveAndLink(m_jFexSRJetRoIKey));
   ATH_CHECK(retrieveAndLink(m_jFexLRJetRoIKey));

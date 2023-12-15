@@ -11,6 +11,7 @@
 // Trigger includes
 #include "xAODTrigger/eFexEMRoIContainer.h"
 #include "xAODTrigger/eFexTauRoIContainer.h"
+#include "xAODTrigger/jFexFwdElRoIContainer.h"
 #include "xAODTrigger/jFexTauRoIContainer.h"
 #include "xAODTrigger/jFexSRJetRoIContainer.h"
 #include "xAODTrigger/jFexLRJetRoIContainer.h"
@@ -55,6 +56,11 @@ private:
   SG::ReadHandleKey<xAOD::eFexTauRoIContainer> m_eFexTauRoIKey {
     this, "eFexTauRoIKey", "L1_eTauRoI",
     "Key of the eFex Tau RoI container to be linked to L1 Trigger Result"};
+
+  // jFex Fwd El RoIs
+  SG::ReadHandleKey<xAOD::jFexFwdElRoIContainer> m_jFexFwdElRoIKey {
+          this, "jFexFwdElRoIKey", "L1_jFexFwdElRoI",
+          "Key of the jFex Fwd El RoI container to be linked to L1 Trigger Result"};
 
   // jFex Tau RoIs
   SG::ReadHandleKey<xAOD::jFexTauRoIContainer> m_jFexTauRoIKey {

@@ -56,6 +56,9 @@ namespace xAOD {
       uint16_t  EtHad1()         const;
       uint16_t  EtHad2()         const;
 
+       /// the eta index to use for looking up thresholds in the menu
+       int      menuEta()      const;
+
       /// Set the isTOB variable (TOB or xTOB)
       void setIsTOB( char value);
 
