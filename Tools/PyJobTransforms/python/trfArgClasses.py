@@ -1437,7 +1437,7 @@ class argPOOLFile(argAthenaFile):
     def _getIntegrity(self, files):
         for fname in files:
             from PyJobTransforms.trfValidateRootFile import checkFile
-            rc=checkFile(fileName=fname, the_type='event', requireTree=True)
+            rc=checkFile(fileName=fname, the_type='event', requireTree=False)
             if rc==0:
                 self._fileMetadata[fname]['integrity'] = True
             else:
