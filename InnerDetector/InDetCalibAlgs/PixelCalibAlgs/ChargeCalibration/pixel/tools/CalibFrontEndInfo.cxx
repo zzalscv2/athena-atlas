@@ -11,22 +11,23 @@
 
 #include "CalibFrontEndInfo.h"
 
-void CalibFrontEndInfo::printDBformat()    const {
-
-    if(m_FEid == 0) printf("%s\n",m_MODid_str.c_str());
-    printf("I%d %d %d %d %d %d %d %d %d %d %d %d %d %.5e %.5e %.5e %.5e %.5e %.5e %.5e %.5e\n",
-
-           m_FEid,
-
-           m_NormalTheshold, m_NormalRms, m_NormalNoise, m_NormalIntime,
-           m_LongTheshold  , m_LongRms  , m_LongNoise  , m_LongIntime  ,
-           m_GangedTheshold, m_GangedRms, m_GangedNoise, m_GangedIntime,
-
-           m_NormalFitParams.at(0), m_NormalFitParams.at(1), m_NormalFitParams.at(2),
-           m_LongFitParams.at(0)  , m_LongFitParams.at(1)  , m_LongFitParams.at(2)  ,
-           m_SigFitParams.at(0)   , m_SigFitParams.at(1)
-          );
-    return;
+std::stringstream CalibFrontEndInfo::printDBformat()    const {
+    
+    std::stringstream mytext;
+    
+    if(m_FEid == 0) mytext << m_MODid << " " <<m_MODid_str << "\n";
+    
+    mytext  << "I" << m_FEid
+            << " " << m_NormalTheshold << " " << m_NormalRms << " " << m_NormalNoise << " " << m_NormalIntime 
+            << " " << m_LongTheshold   << " " << m_LongRms   << " " << m_LongNoise   << " " << m_LongIntime 
+            << " " << m_GangedTheshold << " " << m_GangedRms << " " << m_GangedNoise << " " << m_GangedIntime
+            
+            << " " << m_NormalFitParams.at(0) << " " << m_NormalFitParams.at(1) << " " << m_NormalFitParams.at(2)
+            << " " << m_LongFitParams.at(0)   << " " << m_LongFitParams.at(1)   << " " << m_LongFitParams.at(2)  
+            << " " << m_SigFitParams.at(0)    << " " << m_SigFitParams.at(1) ;          
+    
+    return mytext;
+    
 };
 
 void CalibFrontEndInfo::printBeautyformat()    const {
@@ -37,7 +38,7 @@ void CalibFrontEndInfo::printBeautyformat()    const {
            m_FEid,
 
            m_NormalTheshold, m_NormalRms, m_NormalNoise, m_NormalIntime,
-           m_LongTheshold, m_LongRms, m_LongNoise, m_LongIntime,
+           m_LongTheshold  , m_LongRms  , m_LongNoise  , m_LongIntime  ,
            m_GangedTheshold, m_GangedRms, m_GangedNoise, m_GangedIntime,
 
            m_NormalFitParams.at(0), m_NormalFitParams.at(1), m_NormalFitParams.at(2) , m_NormalFitParamsQuality.at(0) , m_NormalFitParamsQuality.at(1),
