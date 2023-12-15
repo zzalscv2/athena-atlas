@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/MuonDetectorCondAlg.h"
@@ -12,25 +12,15 @@
 #include "MuonDetDescrUtils/BuildNSWReadoutGeometry.h"
 #include "MuonGeoModel/MuonDetectorFactory001.h"
 #include "MuonGeoModel/MuonDetectorTool.h"
-
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+#include "GeoModelKernel/GeoVolumeCursor.h"
 #include <fstream>
 
-MuonDetectorCondAlg::MuonDetectorCondAlg(const std::string &name, ISvcLocator *pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator)
-{ }
+MuonDetectorCondAlg::MuonDetectorCondAlg(const std::string &name, ISvcLocator *pSvcLocator) : 
+    AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonDetectorCondAlg::initialize() {
     ATH_MSG_DEBUG("Initializing ...");
-
-    // Retrieve the MuonDetectorManager from the detector store to get
-    // the applyCscIntAlignment() and applyMdtAsBuiltParams() flags
-    std::string managerName = "Muon";    const MuonGM::MuonDetectorManager *MuonDetMgrDS;
-    if (detStore()->retrieve(MuonDetMgrDS).isFailure()) {
-        ATH_MSG_INFO("Could not find the MuonGeoModel Manager: " << managerName << " from the Detector Store! ");
-        return StatusCode::FAILURE;
-    } else {
-        ATH_MSG_DEBUG(" Found the MuonGeoModel Manager from the Detector Store");
-    }
-
     // Read Handles
     ATH_CHECK(m_iGeoModelTool.retrieve());
 
@@ -72,9 +62,8 @@ StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
         ATH_MSG_FATAL("unable to create MuonDetectorFactory001 ");
         return StatusCode::FAILURE;
     }
-
     std::unique_ptr<MuonGM::MuonDetectorManager> MuonMgrData(mgr);
-
+   
     // =======================
     // Add NSW to the MuonDetectorManager by calling BuildReadoutGeometry from MuonAGDDToolHelper
     // =======================
@@ -166,12 +155,37 @@ StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
     } else ATH_MSG_INFO("Do not apply the B Lines of the alignment");
     
     // !!!!!!!! UPDATE ANYTHING ELSE ???????
-
-    if (writeHandle.record(std::move(MuonMgrData)).isFailure()) {
-        ATH_MSG_FATAL("Could not record MuonDetectorManager " << writeHandle.key() << " with EventRange " << writeHandle.getRange() << " into Conditions Store");
-        return StatusCode::FAILURE;
-    }
+    ATH_CHECK(copyInertMaterial(*MuonMgrData));
+    ATH_CHECK(writeHandle.record(std::move(MuonMgrData)));
     ATH_MSG_INFO("recorded new " << writeHandle.key() << " with range " << writeHandle.getRange() << " into Conditions Store");
 
     return StatusCode::SUCCESS;
 }
+StatusCode MuonDetectorCondAlg::copyInertMaterial(MuonGM::MuonDetectorManager& detMgr) const {
+    const MuonGM::MuonDetectorManager *MuonDetMgrDS{nullptr};
+    ATH_CHECK(detStore()->retrieve(MuonDetMgrDS));
+
+    PVLink condMgrWorld{detMgr.getTreeTop(0)};
+       
+    GeoVolumeCursor detStoreCursor{MuonDetMgrDS->getTreeTop(0)};
+    while (!detStoreCursor.atEnd()) {
+        PVConstLink worldNode(detStoreCursor.getVolume());
+        const Amg::Transform3D transform{detStoreCursor.getTransform()};
+        const GeoLogVol* logVol = worldNode->getLogVol();
+        const std::string_view vname = logVol->getName();
+        detStoreCursor.next();
+        if (vname.find("Station") != std::string::npos) continue;
+        /// All operations are atomic. So it's safe to cast constness away
+        GeoVPhysVol* physVol ATLAS_THREAD_SAFE = const_cast<GeoVPhysVol*>(worldNode.operator->()) ;
+        ATH_MSG_DEBUG("Volume in the static world "<<vname<<" "<<typeid(*worldNode).name()
+                        <<"children: "<<worldNode->getNChildNodes()
+                        <<" getDefX(): "<<Amg::toString(worldNode->getDefX())
+                        <<" getX(): "<<Amg::toString(worldNode->getX())
+                        <<" cursor: "<<Amg::toString(transform));        
+        condMgrWorld->add(new GeoTransform(transform));
+        condMgrWorld->add(physVol);
+    }
+    return StatusCode::SUCCESS;
+}
+
+
