@@ -454,8 +454,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JVTCalibrationRel21
 
 def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = None,
-                           runGhostMuonAssociation = None,
-                           **kwargs):
+                           runGhostMuonAssociation = None):
     """Create a jet analysis algorithm sequence
       The jet collection is interpreted and selects the correct function to call,
       makeSmallRJetAnalysisConfig, makeRScanJetAnalysisConfig or
@@ -464,7 +463,6 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = None,
       Keyword arguments
         jetCollection -- The jet container to run on.
         postfix -- String to be added to the end of all public names.
-        Other keyword arguments are forwarded to the other functions.
     """
 
     # Remove b-tagging calibration from the container name
@@ -513,17 +511,17 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = None,
 
     if radius == 4:
         makeSmallRJetAnalysisConfig(seq, containerName,
-            jetCollection, jetInput=jetInput, postfix=postfix, **kwargs)
+            jetCollection, jetInput=jetInput, postfix=postfix)
     elif radius in [2, 6]:
         makeRScanJetAnalysisConfig(seq, containerName,
             jetCollection, jetInput=jetInput, radius=radius,
-            postfix=postfix, **kwargs)
+            postfix=postfix)
     else:
         trim = match.group(3)
         if trim == "":
             raise ValueError("Untrimmed large-R jets are not supported!")
         makeLargeRJetAnalysisConfig(seq, containerName,
-            jetCollection, jetInput=jetInput, postfix=postfix, **kwargs)
+            jetCollection, jetInput=jetInput, postfix=postfix)
 
 
 
