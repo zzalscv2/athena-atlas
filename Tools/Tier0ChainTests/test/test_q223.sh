@@ -22,8 +22,9 @@
 Reco_tf.py \
 --athenaopts='--threads=8' \
 --AMI=q223 \
---preExec 'all:larCondFlags.OFCShapeFolder.set_Value_and_Lock("4samples3bins17phases");from InDetRecExample.InDetJobProperties import InDetFlags;InDetFlags.useBeamConstraint.set_Value_and_Lock(False);InDetFlags.doMinBias=True;InDetFlags.useDCS.set_Value_and_Lock(False);DQMonFlags.doMonitoring=True;DQMonFlags.doNewMonitoring=True;DQMonFlags.doStreamAwareMon=False;DQMonFlags.enableLumiAccess=False;DQMonFlags.doCTPMon=False;from AtlasGeoModel.InDetGMJobProperties import InDetGeometryFlags;InDetGeometryFlags.useDynamicAlignFolders.set_Value_and_Lock(False);' \
---postExec '' \
+--CA \
+--preExec  'pass' \
+--postExec 'pass' \
 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q223_input_data18/data18_comm.00353055.physics_MinBias.daq.RAW._lb0062._SFO-2._0001.data \
 --conditionsTag='CONDBR2-BLKPA-RUN2-11' \
 --geometryVersion='ATLAS-R2-2016-01-00-01' \
