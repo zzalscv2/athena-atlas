@@ -111,3 +111,4 @@ Output:
         jet_: 'OutJets'
         met_: 'AnaMET'
         '': 'EventInfo'
+    commands: ['disable jet_select_jvt.*']

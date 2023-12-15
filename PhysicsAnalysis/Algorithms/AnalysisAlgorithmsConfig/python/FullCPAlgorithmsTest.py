@@ -186,7 +186,10 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     algSeq += jvtSequence
     vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
              'OutJets_NOSYS.phi -> jet_phi',
-             'OutJets_NOSYS.eta -> jet_eta', ]
+             'OutJets_NOSYS.eta -> jet_eta'
+            ]
+    if not forCompare:
+        vars += ['OutJets_%SYS%.jvt_selection -> jet_select_jvt_%SYS%']
     if dataType != 'data' :
         vars += [ 'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%', ]
         vars += [
@@ -844,6 +847,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.vars', vars)
     configSeq.setOptionValue ('.metVars', metVars)
     configSeq.setOptionValue ('.containers', outputContainers)
+    if forCompare:
+        configSeq.setOptionValue ('.commands', ['disable jet_select_jvt.*'])
 
     configAccumulator = ConfigAccumulator (algSeq, dataType, isPhyslite, geometry, autoconfigFromFlags=autoconfigFromFlags)
     configSeq.fullConfigure (configAccumulator)
