@@ -399,7 +399,8 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
 
     from DerivationFrameworkLLP.LLPToolsConfig import LLP1TriggerSkimmingToolCfg
     LLP1TriggerSkimmingTool = acc.getPrimaryAndMerge(LLP1TriggerSkimmingToolCfg(flags,
-                                                                                name = "LLP1TriggerSkimmingTool"))
+                                                                                name = "LLP1TriggerSkimmingTool",
+                                                                                TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     skimmingTools.append(LLP1TriggerSkimmingTool)
 
@@ -469,6 +470,7 @@ def LLP1Cfg(flags):
                                         "MuonSpectrometerTrackParticles",
                                         "UnAssocMuonSegments",
                                         "MuonSegments",
+                                        "MuonSegments_LRT",
                                         "MSonlyTracklets",
                                         "CombinedMuonTrackParticles",
                                         "ExtrapolatedMuonTrackParticles",
