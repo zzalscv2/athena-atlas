@@ -148,8 +148,8 @@ std::string SampleXsection::getShoweringString(const int dsid) const
 }
 
 int SampleXsection::getShoweringIndex(const int dsid) const {
-  // A.Knue: labelling taken from here:
-  // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagCalib2015#Pre_Recommendations_for_MC15_Bas
+  // S.Korn: labelling taken from here:
+  // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagRecommendationsRelease22
 
   showering shower = getShowering(dsid);
 
@@ -165,6 +165,8 @@ int SampleXsection::getShoweringIndex(const int dsid) const {
   else if (shower == showering::sherpa228) return 7;
   else if (shower == showering::sherpa2210) return 8;
   else if (shower == showering::herwigpp721) return 9;
+  else if (shower == showering::sherpa2212) return 10;
+  else if (shower == showering::amcatnloherwig7) return 11;
   else {
     std::cout <<
     "==========================================================================================================================================="
@@ -203,6 +205,8 @@ std::string SampleXsection::showerToString(const SampleXsection::showering showe
   else if (shower == showering::sherpa228) return "sherpa228";
   else if (shower == showering::sherpa2210) return "sherpa2210";
   else if (shower == showering::herwigpp721) return "herwigpp721";
+  else if (shower == showering::sherpa2212) return "sherpa2212";
+  else if (shower == showering::amcatnloherwig7) return "amcatnloherwig7";
 
   return "";
 }
@@ -219,6 +223,8 @@ SampleXsection::showering SampleXsection::stringToShower(const std::string& name
   else if (name == "sherpa228") return showering::sherpa228;
   else if (name == "sherpa2210") return showering::sherpa2210;
   else if (name == "herwigpp721") return showering::herwigpp721;
+  else if (name == "sherpa2212") return showering::sherpa2212;
+  else if (name == "amcatnloherwig7") return showering::amcatnloherwig7;
 
   return showering::unknown;
 }

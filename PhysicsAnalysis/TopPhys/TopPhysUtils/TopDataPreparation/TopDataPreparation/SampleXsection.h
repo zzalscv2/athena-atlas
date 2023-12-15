@@ -30,7 +30,9 @@ public:
     sherpa228=9,
     sherpa2210=10,
     herwigpp721=11,
-    unknown=12
+    sherpa2212=12,
+    amcatnloherwig7=13,
+    unknown=14
   };
 
   inline SampleXsection() : m_Xsects() {}
