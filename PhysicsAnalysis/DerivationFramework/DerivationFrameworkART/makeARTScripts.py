@@ -33,6 +33,7 @@ mc21File = com_dir+"mc21/AOD/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_S
 truthFile = com_dir+"mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1"
 data18File = com_dir+"data18/AOD/data18_13TeV.00357772.physics_Main.merge.AOD.r13286_p4910/1000events.AOD.27655096._000455.pool.root.1"
 data22File = com_dir+"data22/AOD/data22_13p6TeV.00431906.physics_Main.merge.AOD.r13928_p5279/1000events.AOD.30220215._001367.pool.root.1"
+data23CosFile = com_dir+"data23_cos/AOD/data23_cos.00459152.physics_CosmicMuons.merge.AOD.f1383_m2195/data23_cos.00459152.physics_CosmicMuons.merge.AOD.f1383_m2195._lb0124-lb0126._0001.1"
 
 # pre/postExec
 preExec = "\'from AthenaCommon.DetFlags import DetFlags; DetFlags.detdescr.all_setOff(); DetFlags.BField_setOn(); DetFlags.digitize.all_setOff(); DetFlags.detdescr.Calo_setOn(); DetFlags.simulate.all_setOff(); DetFlags.pileup.all_setOff(); DetFlags.overlay.all_setOff(); DetFlags.detdescr.Muon_setOn();\'"
@@ -161,6 +162,7 @@ if (makeDataDAODs or makeMCDAODs):
       if makeMCDAODs:
          generateText(formatName,"mc20",mc20File,False,True,"-1",useLegacy)
          generateText(formatName,"mc21",mc21File,False,True,"-1",useLegacy)
+      generateText("NCB1","data23cos",data23CosFile,False,False,"-1",useLegacy)
 if makeTruthDAODs:
    for formatName in truthFormatList:
       generateText(formatName,"mc21",truthFile,True,False,"1000",useLegacy)
