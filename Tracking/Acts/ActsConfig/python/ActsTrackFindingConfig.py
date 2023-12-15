@@ -76,6 +76,9 @@ def ActsTrackFindingCfg(flags,
                           [p / Units.GeV * UnitConstants.GeV for p in tolist(flags.Tracking.ActiveConfig.minPT)])
         kwargs.setdefault("minMeasurements",
                           tolist(flags.Tracking.ActiveConfig.minClusters))
+        if flags.Acts.doTrackFindingTrackSelector != 3:
+            kwargs.setdefault("maxHolesSelect", tolist(flags.Tracking.ActiveConfig.maxHoles))
+            kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
         if flags.Acts.doTrackFindingTrackSelector == 2:
             # use the same cut for all eta for comparison with previous behaviour
             kwargs["ptMin"] = [min(kwargs["ptMin"])]
