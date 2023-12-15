@@ -177,6 +177,7 @@ class PtEtaSelectionBlock (ConfigBlock):
         self.addOption ('maxEta', None, type=float,
                         duplicateAction='skip')
         self.addOption ('selectionDecoration', 'selectPtEta', type=str)
+        self.addOption ('useClusterEta', False, type=bool)
 
     def makeAlgs (self, config) :
 
@@ -190,6 +191,7 @@ class PtEtaSelectionBlock (ConfigBlock):
             alg.selectionTool.minPt = self.minPt
         if self.maxEta is not None :
             alg.selectionTool.maxEta = self.maxEta
+        alg.selectionTool.useClusterEta = self.useClusterEta
         alg.selectionDecoration = self.selectionDecoration
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -352,6 +354,7 @@ def makeGeneratorAnalysisConfig( seq,
 
 def makePtEtaSelectionConfig( seq, containerName,
                               *, postfix = None, minPt = None, maxEta = None,
+                              useClusterEta = None,
                               selectionDecoration = None, selectionName = ''):
     """Create a pt-eta kinematic selection config
 
@@ -363,6 +366,7 @@ def makePtEtaSelectionConfig( seq, containerName,
                  names are unique.
       minPt -- minimum pt value
       maxEta -- maximum eta value
+      useClusterEta -- use cluster eta (for electrons/photons) instead of track eta
       selectionDecoration -- the name of the decoration to set
       selectionName -- the name of the selection to append this to
     """
@@ -372,6 +376,7 @@ def makePtEtaSelectionConfig( seq, containerName,
     config.setOptionValue ('minPt',minPt, noneAction='ignore')
     config.setOptionValue ('maxEta',maxEta, noneAction='ignore')
     config.setOptionValue ('selectionDecoration',selectionDecoration, noneAction='ignore')
+    config.setOptionValue ('useClusterEta',useClusterEta, noneAction='ignore')
     seq.append (config)
 
 
