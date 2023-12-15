@@ -26,8 +26,6 @@
 // Other packages includes
 #include "AsgServices/ServiceHandle.h"
 #include "AthOnnxruntimeService/IONNXRuntimeSvc.h"
-// ONNX Runtime include(s).
-#include <core/session/onnxruntime_cxx_api.h>
 
 // Local includes
 #include "JetCalibTools/IJetCalibrationTool.h"
@@ -89,22 +87,6 @@ public:
     */
     std::vector<float> getJetFeatures( xAOD::Jet& jet_reco, JetEventInfo& jetEventInfo) const;
 
-    /**
-    @brief Create ORT sesssion from input model
-    @param modelFile  string containing the model filename
-    */
-    inline std::unique_ptr< Ort::Session > CreateORTSession(const std::string& modelFile);
-    /**
-    @brief Get NN input layer info
-    @param session  pointer to ORT session
-    */
-    inline  std::tuple<std::vector<int64_t>, std::vector<const char*> > GetInputNodeInfo(const std::unique_ptr< Ort::Session >& session);
-    /**
-    @brief Get NN output layer info
-    @param session  pointer to ORT session
-    */
-    inline  std::tuple<std::vector<int64_t>, std::vector<const char*> > GetOutputNodeInfo(const std::unique_ptr< Ort::Session >& session);
-  
     std::vector<TString> m_NNInputs;
     std::vector<double> m_eScales;
     std::vector<double> m_NormOffsets;
@@ -127,58 +109,3 @@ public:
 
 
 #endif
-
-inline std::unique_ptr< Ort::Session > GlobalLargeRDNNCalibration::CreateORTSession(const std::string& modelFile){
-   
-  // Set up the ONNX Runtime session.
-  Ort::SessionOptions sessionOptions;
-  sessionOptions.SetIntraOpNumThreads( 1 );
-  sessionOptions.SetGraphOptimizationLevel( ORT_ENABLE_BASIC );
-
-  ServiceHandle< AthONNX::IONNXRuntimeSvc > svc("AthONNX::ONNXRuntimeSvc",
-                                       "AthONNX::ONNXRuntimeSvc");
-
-  return std::make_unique<Ort::Session>( svc->env(),
-                                         modelFile.c_str(),
-                                         sessionOptions );
-}
-
-inline  std::tuple<std::vector<int64_t>, std::vector<const char*> > GlobalLargeRDNNCalibration::GetInputNodeInfo(const std::unique_ptr< Ort::Session >& session){
-    
-  std::vector<int64_t> input_node_dims;
-  size_t num_input_nodes = session->GetInputCount();
-  std::vector<const char*> input_node_names(num_input_nodes);
-  Ort::AllocatorWithDefaultOptions allocator;
-  for( std::size_t i = 0; i < num_input_nodes; i++ ) {
-    
-      char* input_name = session->GetInputNameAllocated(i, allocator).release();
-      input_node_names[i] = input_name;
-      Ort::TypeInfo type_info = session->GetInputTypeInfo(i);
-      auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
-  
-      input_node_dims = tensor_info.GetShape();
-    }
-  return std::make_tuple(input_node_dims, input_node_names); 
-}
-
-inline  std::tuple<std::vector<int64_t>, std::vector<const char*> > GlobalLargeRDNNCalibration::GetOutputNodeInfo(const std::unique_ptr< Ort::Session >& session){
-     
-  //output nodes
-  std::vector<int64_t> output_node_dims;
-  size_t num_output_nodes = session->GetOutputCount();
-  std::vector<const char*> output_node_names(num_output_nodes);
-  Ort::AllocatorWithDefaultOptions allocator;
-
-  for( std::size_t i = 0; i < num_output_nodes; i++ ) {
-    char* output_name = session->GetOutputNameAllocated(i, allocator).release();
-    output_node_names[i] = output_name;
-
-    Ort::TypeInfo type_info = session->GetOutputTypeInfo(i);
-    auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
-
-    output_node_dims = tensor_info.GetShape();
-  }
-  return std::make_tuple(output_node_dims, output_node_names);
-}
-
-

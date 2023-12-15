@@ -7,11 +7,81 @@
 #include <tuple>
 #include <cmath>
 #include <map>
-#include <core/session/onnxruntime_cxx_api.h>
+
+#ifdef XAOD_STANDALONE
+#include <AsgMessaging/MessageCheck.h>
+#endif
 
 #include "JetCalibTools/JetCalibUtils.h"
 #include "PathResolver/PathResolver.h"
 #include "JetCalibTools/CalibrationMethods/GlobalLargeRDNNCalibration.h"
+
+
+namespace{
+    // Redefine some functions from the package OnnxRuntimeUtils which is not (yet) available in AnalysisBase
+    // Set up the ONNX Runtime session
+    std::unique_ptr< Ort::Session > CreateORTSession(const std::string& modelFile){
+        Ort::SessionOptions sessionOptions;
+        sessionOptions.SetIntraOpNumThreads( 1 );
+        sessionOptions.SetGraphOptimizationLevel( ORT_ENABLE_BASIC );
+
+        std::string serviceName;
+        #ifdef XAOD_STANDALONE
+            using namespace asg::msgUserCode;
+            ANA_MSG_WARNING("If running DNN calibration in AnalysisBase: necessary to instantiate the ONNX service AthONNX::ONNXRuntimeSvc with name AthONNXSvc");
+            ATH_MSG_WARNING("Either in C++ config (see exemple in JetCalibTools_Example.cxx)");
+            ATH_MSG_WARNING("Or in python config with");
+            ATH_MSG_WARNING("   from AnaAlgorithm.DualUseConfig import createService");
+            ATH_MSG_WARNING("   onnxSvc = createService('AthONNX::ONNXRuntimeSvc', 'AthONNXSvc', myAlgSequence)");
+            serviceName = "AthONNXSvc";
+        #else
+            serviceName = "AthONNX::ONNXRuntimeSvc";
+        #endif
+
+        ServiceHandle< AthONNX::IONNXRuntimeSvc > svc(serviceName, "AthONNX::ONNXRuntimeSvc");
+
+        return std::make_unique<Ort::Session>( svc->env(),
+                                                modelFile.c_str(),
+                                                sessionOptions );
+    }
+
+    // Get dimensions and names of the input nodes
+    std::tuple<std::vector<int64_t>, std::vector<const char*> > GetInputNodeInfo(const std::unique_ptr< Ort::Session >& session){
+        std::vector<int64_t> input_node_dims;
+        size_t num_input_nodes = session->GetInputCount();
+        std::vector<const char*> input_node_names(num_input_nodes);
+        Ort::AllocatorWithDefaultOptions allocator;
+        for( std::size_t i = 0; i < num_input_nodes; i++ ) {
+            
+            char* input_name = session->GetInputNameAllocated(i, allocator).release();
+            input_node_names[i] = input_name;
+            Ort::TypeInfo type_info = session->GetInputTypeInfo(i);
+            auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
+        
+            input_node_dims = tensor_info.GetShape();
+            }
+        return std::make_tuple(input_node_dims, input_node_names);
+    }
+
+    // Get dimensions and names of the output nodes
+    std::tuple<std::vector<int64_t>, std::vector<const char*> > GetOutputNodeInfo(const std::unique_ptr< Ort::Session >& session){
+        std::vector<int64_t> output_node_dims;
+        size_t num_output_nodes = session->GetOutputCount();
+        std::vector<const char*> output_node_names(num_output_nodes);
+        Ort::AllocatorWithDefaultOptions allocator;
+
+        for( std::size_t i = 0; i < num_output_nodes; i++ ) {
+            char* output_name = session->GetOutputNameAllocated(i, allocator).release();
+            output_node_names[i] = output_name;
+
+            Ort::TypeInfo type_info = session->GetOutputTypeInfo(i);
+            auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
+
+            output_node_dims = tensor_info.GetShape();
+        }
+        return std::make_tuple(output_node_dims, output_node_names);
+    }
+}
 
 
 /// VarRetriever is a generic class to access Jet and/or JetEventInfo variables.
@@ -35,7 +105,9 @@ namespace {
     
     SG::AuxElement::ConstAccessor<float> m_acc;
   };
-
+  
+  /// RatioAccessorRetriever retrieves multiple attributes from a jet 
+  /// so that a combination of these can be computed 
   struct RatioAccessorRetriever : public GlobalLargeRDNNCalibration::VarRetriever {
     RatioAccessorRetriever(): m_accTau1("Tau1_wta"), 
                               m_accTau2("Tau2_wta"),
@@ -58,17 +130,20 @@ namespace {
 #define DEF_RETRIEVER0(cname, expr )  struct Var_##cname : public GlobalLargeRDNNCalibration::VarRetriever { float value(const xAOD::Jet& jet, JetEventInfo& , double eScale ) { return expr ; } }
 #define DEF_RETRIEVER1(cname, expr )  struct Var_##cname : public GlobalLargeRDNNCalibration::VarRetriever { float value(const xAOD::Jet& , JetEventInfo& jetInfo, double eScale ) { return expr ; } }
 #define DEF_RATIO_RETRIEVER(cname, expr )  struct Ratio_##cname : public RatioAccessorRetriever { float value(const xAOD::Jet& jet, JetEventInfo& , double eScale ) { return expr ; } }
-
+  
+  // Std jet variables
   DEF_RETRIEVER0( eta, jet.eta()*eScale ) ;
   DEF_RETRIEVER0( log_e, log(jet.e()*eScale) ) ;
   DEF_RETRIEVER0( log_m, log(jet.m()*eScale) ) ;
   DEF_RETRIEVER0( m, jet.m()*eScale ) ;
-                               
+
+  // Ratio variables            
   DEF_RATIO_RETRIEVER( Tau21_wta, m_accTau1(jet) > 1e-8 ? eScale * m_accTau2(jet) / m_accTau1(jet) : -999);
   DEF_RATIO_RETRIEVER( Tau32_wta, m_accTau2(jet) > 1e-8 ? eScale * m_accTau3(jet) / m_accTau2(jet) : -999);
   DEF_RATIO_RETRIEVER( C2, m_accECF2(jet) > 1e-8 ? eScale * m_accECF3(jet) * m_accECF1(jet) / pow(m_accECF2(jet), 2.0) : -999);
   DEF_RATIO_RETRIEVER( D2, m_accECF2(jet) > 1e-8 ? eScale * m_accECF3(jet) * pow(m_accECF1(jet), 3.0) / pow(m_accECF2(jet), 3.0) : -999);
-
+  
+  // Std pile-up info
   DEF_RETRIEVER1( mu, jetInfo.mu()*eScale );
   DEF_RETRIEVER1( NPV, jetInfo.NPV()*eScale );
 
@@ -171,13 +246,13 @@ StatusCode GlobalLargeRDNNCalibration::initialize(){
   ATH_MSG_INFO("resolved in: " << fullModelPath);
 
   // Set up the ONNX Runtime session.
-  m_session = GlobalLargeRDNNCalibration::CreateORTSession(fullModelPath);
-  ATH_MSG_DEBUG( "Created the ONNX Runtime session" );
+  m_session = CreateORTSession(fullModelPath);
+  ATH_MSG_DEBUG( "ONNX Runtime session succesfully created" );
 
 
   /************************** Input Nodes *****************************/
   /*********************************************************************/
-  std::tuple<std::vector<int64_t>, std::vector<const char*> > inputInfo = GlobalLargeRDNNCalibration::GetInputNodeInfo(m_session);
+  std::tuple<std::vector<int64_t>, std::vector<const char*> > inputInfo = GetInputNodeInfo(m_session);
   m_input_node_dims = std::get<0>(inputInfo);
   m_input_node_names = std::get<1>(inputInfo);
 
@@ -196,7 +271,7 @@ StatusCode GlobalLargeRDNNCalibration::initialize(){
 
   /************************** Output Nodes *****************************/
   /*********************************************************************/
-  std::tuple<std::vector<int64_t>, std::vector<const char*> > outputInfo = GlobalLargeRDNNCalibration::GetOutputNodeInfo(m_session);
+  std::tuple<std::vector<int64_t>, std::vector<const char*> > outputInfo = GetOutputNodeInfo(m_session);
   m_output_node_dims = std::get<0>(outputInfo);
   m_output_node_names = std::get<1>(outputInfo);
 
@@ -261,7 +336,7 @@ StatusCode GlobalLargeRDNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& j
     return StatusCode::SUCCESS;
   }
 
-  // Convert input_tensor_values array to onnx-compatiple tensor
+  // Convert input_tensor_values array to onnx-compatible tensor
   Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeCPU);
   Ort::Value input_tensor = Ort::Value::CreateTensor<float>(memory_info, 
                                                             input_tensor_values.data(), 

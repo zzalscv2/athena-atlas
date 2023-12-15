@@ -26,6 +26,8 @@
 #include "xAODRootAccess/TEvent.h"
 #include "xAODRootAccess/TStore.h"
 #include <AsgMessaging/MessageCheck.h>
+#include <AsgServices/AsgServiceConfig.h>
+#include "AthOnnxruntimeService/IONNXRuntimeSvc.h"
 #else
 #include "POOLRootAccess/TEvent.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -143,6 +145,11 @@ int main(int argc, char* argv[]){
   ANA_CHECK( xAOD::Init() );
   xAOD::TEvent event( xAOD::TEvent::kClassAccess );
   ANA_CHECK( event.readFrom( ifile.get() ) );
+  ANA_MSG_WARNING(calibSeq);
+  // Create ONNX service for LargeRDNN calibration
+  asg::AsgServiceConfig config ("AthONNX::ONNXRuntimeSvc/AthONNXSvc");
+  std::shared_ptr<AthONNX::IONNXRuntimeSvc> service;
+  ANA_CHECK(config.makeService (service));
 #else // Athena "Store" is the same StoreGate used by the TEvent
   POOL::TEvent event( POOL::TEvent::kClassAccess );
   ANA_CHECK( event.readFrom( ifile.get() ) );
