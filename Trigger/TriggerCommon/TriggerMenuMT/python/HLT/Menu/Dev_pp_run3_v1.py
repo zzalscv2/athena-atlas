@@ -711,7 +711,16 @@ def getDevSignatures():
     ]
 
     chains['Combined'] = [
-
+        # Test chains for HZy with invisible decay for ATR-28443
+        ChainProp(name='HLT_g25_medium_xe35_cell_xe40_tcpufit_L1eEM26M', l1SeedThresholds=['eEM26M','FSNOSEED','FSNOSEED'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g20_loose_icaloloose_xe35_cell_xe40_pfopufit_L1XE35', l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g25_tight_xe30_cell_xe40_pfopufit_L1XE50', l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g25_tight_xe35_cell_xe40_pfopufit_L1XE35', l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g25_medium_xe35_cell_xe40_pfopufit_L1XE35', l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g25_loose_icaloloose_xe35_cell_xe40_pfopufit_L1XE35', l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g20_tight_xe30_cell_xe40_pfopufit_L1XE50', l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g20_tight_xe35_cell_xe40_pfopufit_L1XE35', l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g20_medium_xe35_cell_xe40_pfopufit_L1XE35', l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
 
         # Test chains for muon msonly + VBF for ATR-28412
         ChainProp(name='HLT_mu6_msonly_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1MJJ-500-NFF', l1SeedThresholds=['MU14FCH','FSNOSEED','FSNOSEED','FSNOSEED'], stream=[PhysicsStream],groups=PrimaryLegGroup+MuonJetGroup+LegacyTopoGroup),
