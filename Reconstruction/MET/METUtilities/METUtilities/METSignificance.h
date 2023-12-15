@@ -19,7 +19,7 @@
 #include "TFile.h"
 
 // FrameWork includes
-#include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/ToolHandle.h"
 #include "AsgTools/AsgTool.h"
 
 // METInterface includes
@@ -85,10 +85,10 @@ namespace met {
     /// Default constructor:
     METSignificance();
 
-    asg::AnaToolHandle<IJetCalibrationTool>                   m_jetCalibTool;
-    asg::AnaToolHandle<CP::IMuonCalibrationAndSmearingTool>   m_muonCalibrationAndSmearingTool;
-    asg::AnaToolHandle<CP::IEgammaCalibrationAndSmearingTool> m_egammaCalibTool;
-    asg::AnaToolHandle<ITauToolBase>                          m_tauCombinedTES;
+    ToolHandle<IJetCalibrationTool>                   m_jetCalibTool {this, "jetCalibTool", "", "the IJetCalibrationTool we use"};
+    ToolHandle<CP::IMuonCalibrationAndSmearingTool>   m_muonCalibrationAndSmearingTool {this, "MuonCalibTool", "", "the IMuonCalibrationAndSmearingTool we use"};
+    ToolHandle<CP::IEgammaCalibrationAndSmearingTool> m_egammaCalibTool {this, "egammaCalibTool", "", "the IEgammaCalibrationAndSmearingTool we use"};
+    ToolHandle<ITauToolBase>                          m_tauCombinedTES {this, "tauCombinedTES", "", "the TauCombinedTES tool we use"};
 
     StatusCode AddMuon    (const xAOD::IParticle* obj, float &pt_reso, float &phi_reso, float avgmu);
     StatusCode AddElectron(const xAOD::IParticle* obj, float &pt_reso, float &phi_reso, float avgmu);
