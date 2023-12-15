@@ -128,6 +128,9 @@ from DerivationFrameworkMuons.MUON5 import MUON5Cfg
 from DerivationFrameworkTLA.TLA0 import TLA0Cfg
 from DerivationFrameworkTLA.TLA1 import TLA1Cfg
 
+# NCB derivation running on AODs (for cosmic and BIB studies)
+from DerivationFrameworkNCB.NCB1 import NCB1Cfg
+
 
 # Avoids compilation warnings from Flake8
 __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
@@ -152,4 +155,5 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'TRIG8Cfg','L1CALO1Cfg',
            'MUON1Cfg','MUON5Cfg',
            'TLA0Cfg', 'TLA1Cfg',
+           'NCB1Cfg'
            ]
