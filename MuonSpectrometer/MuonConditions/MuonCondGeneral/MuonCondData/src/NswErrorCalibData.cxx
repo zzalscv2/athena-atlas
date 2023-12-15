@@ -34,7 +34,7 @@ errorParametrizer NswErrorCalibData::getParametrizer(const std::string& funcName
             return evalPoly(input.locTheta, pars);
         };
     } else if (funcName == "scaleErrorAndAddSyst"){
-        return [](const Input& input, const std::vector<double> pars){
+        return [](const Input& input, const std::vector<double>& pars){
             return scaleErrorAndAddSyst(input.clusterError, pars);
         };
     }
