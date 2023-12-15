@@ -36,7 +36,7 @@
 #include "ActsGeometry/TrackingSurfaceHelper.h"
 #include "ActsInterop/Logger.h"
 
-#include "TableUtils.h"
+#include "ActsInterop/TableUtils.h"
 #include "MeasurementCalibrator.h"
 // Other
 #include <sstream>

@@ -22,7 +22,7 @@
 
 #include "SiSPSeededTrackFinderData/ITkSiSpacePointForSeed.h"
 
-#include "TableUtils.h"
+#include "ActsInterop/TableUtils.h"
 
 namespace ActsTrk {
   SeedingAlg::SeedingAlg( const std::string &name,
