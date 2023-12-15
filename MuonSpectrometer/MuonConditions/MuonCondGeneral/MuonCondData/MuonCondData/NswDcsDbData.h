@@ -94,7 +94,7 @@ std::ostream& operator<<(std::ostream& ostr, const NswDcsDbData::TDaqConstants& 
 
 
 
-CLASS_DEF( NswDcsDbData , 99551304 , 1 )
-CLASS_DEF( CondCont<NswDcsDbData> , 125092872 , 1 )
+CLASS_DEF( NswDcsDbData , 99551304 , 1 );
+CONDCONT_MIXED_DEF( NswDcsDbData , 125092872);
 
 #endif

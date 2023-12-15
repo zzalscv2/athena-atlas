@@ -52,6 +52,7 @@ NswDcsDbAlg::execute(const EventContext& ctx) const {
 		    << " if multiple concurrent events are being processed out of order.");
 		return StatusCode::SUCCESS;
 	}
+	wrHdl.addDependency(EventIDRange(IOVInfiniteRange::infiniteMixed()));
 	ATH_MSG_DEBUG("Range of time/charge output is " << wrHdl.getRange());
 	std::unique_ptr<NswDcsDbData> wrCdo{std::make_unique<NswDcsDbData>(m_idHelperSvc->mmIdHelper(), m_idHelperSvc->stgcIdHelper(), m_muDetMgrFromDetStore)};
 
