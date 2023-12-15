@@ -13,7 +13,6 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('outputLabel', 'passesOR', type=str)
         self.addOption ('selectionName', None, type=str)
         self.addOption ('linkOverlapObjects', False, type=bool)
-        self.addOption ('doEleEleOR', False, type=bool)
         self.addOption ('enableUserPriority', False, type=bool)
         self.addOption ('bJetLabel', '', type=str)
         self.addOption ('boostedLeptons', False, type=bool)
@@ -25,7 +24,6 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('muons', "", type=str)
         self.addOption ('photons', "", type=str)
         self.addOption ('taus', "", type=str)
-        self.addOption ('doTauAntiTauJetOR', False, type=bool)
         self.addOption ('antiTauIDTauLabel', '', type=str)
         self.addOption ('antiTauLabel', '', type=str)
         self.addOption ('antiTauBJetLabel', '', type=str)
@@ -39,6 +37,19 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('muonsSelectionName', None, type=str)
         self.addOption ('photonsSelectionName', None, type=str)
         self.addOption ('tausSelectionName', None, type=str)
+        self.addOption ('doEleEleOR', False, type=bool)
+        self.addOption ('doEleMuOR', True, type=bool)
+        self.addOption ('doEleJetOR', True, type=bool)
+        self.addOption ('doMuJetOR', True, type=bool)
+        self.addOption ('doTauEleOR', True, type=bool)
+        self.addOption ('doTauMuOR', True, type=bool)
+        self.addOption ('doTauJetOR', True, type=bool)
+        self.addOption ('doTauAntiTauJetOR', False, type=bool)
+        self.addOption ('doPhEleOR', True, type=bool)
+        self.addOption ('doPhMuOR', True, type=bool)
+        self.addOption ('doPhJetOR', True, type=bool)
+        self.addOption ('doEleFatJetOR', True, type=bool)
+        self.addOption ('doJetFatJetOR', True, type=bool)
 
 
     def makeAlgs (self, config) :
@@ -185,7 +196,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.EleEleORT.OutputPassValue = True
 
         # Set up the electron-muon overlap removal.
-        if electrons and muons:
+        if electrons and muons and self.doEleMuOR:
             config.addPrivateTool( 'overlapTool.EleMuORT',
                                    'ORUtils::EleMuSharedTrkOverlapTool' )
             alg.overlapTool.EleMuORT.InputLabel = self.inputLabel
@@ -194,7 +205,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.EleMuORT.OutputPassValue = True
 
         # Set up the electron-(narrow-)jet overlap removal.
-        if electrons and jets:
+        if electrons and jets and self.doEleJetOR:
             config.addPrivateTool( 'overlapTool.EleJetORT',
                                    'ORUtils::EleJetOverlapTool' )
             alg.overlapTool.EleJetORT.InputLabel = self.inputLabel
@@ -206,7 +217,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.EleJetORT.OutputPassValue = True
 
         # Set up the muon-(narrow-)jet overlap removal.
-        if muons and jets:
+        if muons and jets and self.doMuJetOR:
             config.addPrivateTool( 'overlapTool.MuJetORT',
                                    'ORUtils::MuJetOverlapTool' )
             alg.overlapTool.MuJetORT.InputLabel = self.inputLabel
@@ -218,7 +229,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.MuJetORT.OutputPassValue = True
 
         # Set up the tau-electron overlap removal.
-        if taus and electrons:
+        if taus and electrons and self.doTauEleOR:
             config.addPrivateTool( 'overlapTool.TauEleORT',
                                    'ORUtils::DeltaROverlapTool' )
             alg.overlapTool.TauEleORT.InputLabel = self.inputLabel
@@ -228,7 +239,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.TauEleORT.OutputPassValue = True
 
         # Set up the tau-muon overlap removal.
-        if taus and muons:
+        if taus and muons and self.doTauMuOR:
             config.addPrivateTool( 'overlapTool.TauMuORT',
                                    'ORUtils::DeltaROverlapTool' )
             alg.overlapTool.TauMuORT.InputLabel = self.inputLabel
@@ -238,7 +249,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.TauMuORT.OutputPassValue = True
 
         # Set up the tau-(narrow-)jet overlap removal.
-        if taus and jets:
+        if taus and jets and self.doTauJetOR:
             if self.doTauAntiTauJetOR:
                 config.addPrivateTool( 'overlapTool.TauJetORT',
                                        'ORUtils::TauAntiTauJetOverlapTool' )
@@ -257,7 +268,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.TauJetORT.OutputPassValue = True
 
         # Set up the photon-electron overlap removal.
-        if photons and electrons:
+        if photons and electrons and self.doPhEleOR:
             config.addPrivateTool( 'overlapTool.PhoEleORT',
                                    'ORUtils::DeltaROverlapTool' )
             alg.overlapTool.PhoEleORT.InputLabel = self.inputLabel
@@ -266,7 +277,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.PhoEleORT.OutputPassValue = True
 
         # Set up the photon-muon overlap removal.
-        if photons and muons:
+        if photons and muons and self.doPhMuOR:
             config.addPrivateTool( 'overlapTool.PhoMuORT',
                                    'ORUtils::DeltaROverlapTool' )
             alg.overlapTool.PhoMuORT.InputLabel = self.inputLabel
@@ -275,7 +286,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.PhoMuORT.OutputPassValue = True
 
         # Set up the photon-(narrow-)jet overlap removal.
-        if photons and jets:
+        if photons and jets and self.doPhJetOR:
             config.addPrivateTool( 'overlapTool.PhoJetORT',
                                    'ORUtils::DeltaROverlapTool' )
             alg.overlapTool.PhoJetORT.InputLabel = self.inputLabel
@@ -285,7 +296,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.PhoJetORT.OutputPassValue = True
 
         # Set up the electron-fat-jet overlap removal.
-        if electrons and fatJets:
+        if electrons and fatJets and self.doEleFatJetOR:
             config.addPrivateTool( 'overlapTool.EleFatJetORT',
                             'ORUtils::DeltaROverlapTool' )
             alg.overlapTool.EleFatJetORT.InputLabel = self.inputLabel
@@ -295,7 +306,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.EleFatJetORT.OutputPassValue = True
 
         # Set up the (narrow-)jet-fat-jet overlap removal.
-        if jets and fatJets:
+        if jets and fatJets and self.doJetFatJetOR:
             config.addPrivateTool( 'overlapTool.JetFatJetORT',
                                    'ORUtils::DeltaROverlapTool' )
             alg.overlapTool.JetFatJetORT.InputLabel = self.inputLabel
