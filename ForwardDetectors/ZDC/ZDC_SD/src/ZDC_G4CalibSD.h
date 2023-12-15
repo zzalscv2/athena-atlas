@@ -56,7 +56,7 @@ protected:
   G4bool m_doPID;
   Identifier m_id;
   CaloG4::SimulationEnergies *m_simulationEnergies;
-  ZDC_EscapedEnergyProcessing *m_zdc_eep;
+  ZDC_EscapedEnergyProcessing *m_zdc_eep = nullptr;
 };
 
 #endif
