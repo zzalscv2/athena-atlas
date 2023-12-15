@@ -33,10 +33,10 @@ class ZDCHitAnalysis : public AthAlgorithm {
  private:
 
    /** Some variables**/
-   TH1*  m_h_zdc_photons[2][5];
-   TH1*  m_h_zdc_calibTot[2][5];
-   TH1*  m_h_zdc_calibEM[2][5];
-   TH1*  m_h_zdc_calibNonEM[2][5];
+   TH1*  m_h_zdc_photons[2][5] = {{nullptr,nullptr,nullptr,nullptr,nullptr},{nullptr,nullptr,nullptr,nullptr,nullptr}};
+   TH1*  m_h_zdc_calibTot[2][5]= {{nullptr,nullptr,nullptr,nullptr,nullptr},{nullptr,nullptr,nullptr,nullptr,nullptr}};
+   TH1*  m_h_zdc_calibEM[2][5]= {{nullptr,nullptr,nullptr,nullptr,nullptr},{nullptr,nullptr,nullptr,nullptr,nullptr}};
+   TH1*  m_h_zdc_calibNonEM[2][5]= {{nullptr,nullptr,nullptr,nullptr,nullptr},{nullptr,nullptr,nullptr,nullptr,nullptr}};
    
    std::vector<int>* m_zdc_fiber_side;
    std::vector<int>* m_zdc_fiber_mod;
