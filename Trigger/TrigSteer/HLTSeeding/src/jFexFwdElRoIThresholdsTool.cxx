@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#include "jFexSRJetRoIThresholdsTool.h"
+#include "jFexFwdElRoIThresholdsTool.h"
 
-uint64_t jFexSRJetRoIThresholdsTool::getPattern(const xAOD::jFexSRJetRoI& roi,
+uint64_t jFexFwdElRoIThresholdsTool::getPattern(const xAOD::jFexFwdElRoI& roi,
                                                 const RoIThresholdsTool::ThrVec& menuThresholds,
                                                 const TrigConf::L1ThrExtraInfoBase& /*menuExtraInfo*/) const {
     
@@ -14,14 +14,14 @@ uint64_t jFexSRJetRoIThresholdsTool::getPattern(const xAOD::jFexSRJetRoI& roi,
 
     // Iterate through thresholds and see which ones are passed
     for (const std::shared_ptr<TrigConf::L1Threshold>& thrBase : menuThresholds) {
-        std::shared_ptr<TrigConf::L1Threshold_jJ>  thr = std::static_pointer_cast<TrigConf::L1Threshold_jJ>(thrBase);
+        std::shared_ptr<TrigConf::L1Threshold_jEM> thr = std::static_pointer_cast<TrigConf::L1Threshold_jEM>(thrBase);
         
         //Checking et thresholds
         if (et > thr->thrValueMeV(ieta)) {
             thresholdMask |= (1<<thr->mapping());
         }
         
-        ATH_MSG_DEBUG("jFEX SRjets HLT seeding for ("<< thr->name() <<"): et=" << et << " > "<<thr->thrValueMeV(ieta));
+        ATH_MSG_DEBUG("jFEX FwdEl HLT seeding for ("<< thr->name() <<"): et=" << et << " > "<<thr->thrValueMeV(ieta));
     }
     return thresholdMask;        
 

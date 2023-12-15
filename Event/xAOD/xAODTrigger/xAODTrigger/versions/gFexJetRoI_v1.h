@@ -45,6 +45,9 @@ namespace xAOD {
       /// Set the "raw" 32-bit words describing the object candidate
       void setWord( uint32_t value );
 
+       /// the eta index to use for looking up thresholds in the menu
+       int      menuEta()      const;
+
       int tobEtScale() const;
       /// Set the "raw" 32-bit words describing the object candidate
       void setScale( int value );

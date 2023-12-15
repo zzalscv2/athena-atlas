@@ -5,6 +5,7 @@
 #include "../CTPUnpackingEmulationTool.h"
 #include "../eFexEMRoIThresholdsTool.h"
 #include "../eFexTauRoIThresholdsTool.h"
+#include "../jFexFwdElRoIThresholdsTool.h"
 #include "../jFexTauRoIThresholdsTool.h"
 #include "../cTauRoIThresholdsTool.h"
 #include "../jFexSRJetRoIThresholdsTool.h"
@@ -50,6 +51,8 @@ DECLARE_COMPONENT( eFexEMRoIsUnpackingTool )
 DECLARE_COMPONENT( eFexEMRoIThresholdsTool )
 DECLARE_COMPONENT( eFexTauRoIsUnpackingTool )
 DECLARE_COMPONENT( eFexTauRoIThresholdsTool )
+DECLARE_COMPONENT( jFexFwdElRoIsUnpackingTool )
+DECLARE_COMPONENT( jFexFwdElRoIThresholdsTool )
 DECLARE_COMPONENT( jFexTauRoIsUnpackingTool )
 DECLARE_COMPONENT( jFexTauRoIThresholdsTool )
 DECLARE_COMPONENT( cTauRoIsUnpackingTool )

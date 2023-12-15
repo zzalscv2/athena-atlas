@@ -13,7 +13,11 @@ namespace HLTSeedingRoIToolDefs {
     const char ContainerName[] = "L1_eTauRoI";
     const char ThresholdType[] = "eTAU";
   }
-  namespace jFexTau {
+  namespace jFexFwdEl {
+    const char ContainerName[] = "L1_jFexFwdElRoI";
+    const char ThresholdType[] = "jEM";
+  }
+    namespace jFexTau {
     const char ContainerName[] = "L1_jFexTauRoI";
     const char ThresholdType[] = "jTAU";
   }

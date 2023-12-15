@@ -53,6 +53,20 @@ namespace xAOD {
     return;
    }
 
+    int jFexFwdElRoI_v1::menuEta() const {
+        // adapted from TSU::toTopoInteger
+        static const unsigned int RESOLUTION = 40;
+        float tmp = eta()*RESOLUTION;
+        int index;
+        if ( (abs(tmp)-0.5)/2. == std::round((abs(tmp)-0.5)/2.) ) {
+            if ( tmp>0 ) { index = std::floor(tmp); }
+            else { index = std::ceil(tmp); }
+        } else {
+            index = std::round(tmp);
+        }
+        return index/4; // note: unlike SR and LR jets, apparently this can be signed?
+    }
+
    //----------------
    /// Raw data words
    //----------------

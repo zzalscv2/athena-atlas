@@ -7,6 +7,7 @@
 
 #include "xAODTrigger/eFexEMRoIContainer.h"
 #include "xAODTrigger/eFexTauRoIContainer.h"
+#include "xAODTrigger/jFexFwdElRoIContainer.h"
 #include "xAODTrigger/jFexTauRoIContainer.h"
 #include "xAODTrigger/jFexSRJetRoIContainer.h"
 #include "xAODTrigger/jFexLRJetRoIContainer.h"
@@ -50,6 +51,16 @@ namespace HLTSeedingRoIToolDefs {
     using T_RoIContainer = xAOD::eFexTauRoIContainer;
     constexpr auto F_RoIWordGetter = &xAOD::eFexTauRoI::word0;
     constexpr auto F_TobEtGetter = &xAOD::eFexTauRoI::etTOB;
+    using UnpackingBaseClass = RoIsUnpackingToolPhase1<T_RoI, T_RoIContainer, F_RoIWordGetter, ContainerName, ThresholdType>;
+    using ThresholdBaseClass = RoIThresholdsTool<T_RoI, T_RoIContainer, ContainerName, ThresholdType>;
+  }
+  namespace jFexFwdEl {
+    extern const char ContainerName[];
+    extern const char ThresholdType[];
+    using T_RoI = xAOD::jFexFwdElRoI;
+    using T_RoIContainer = xAOD::jFexFwdElRoIContainer;
+    constexpr auto F_RoIWordGetter = &xAOD::jFexFwdElRoI::tobWord;
+    constexpr auto F_TobEtGetter = &xAOD::jFexFwdElRoI::tobEt;
     using UnpackingBaseClass = RoIsUnpackingToolPhase1<T_RoI, T_RoIContainer, F_RoIWordGetter, ContainerName, ThresholdType>;
     using ThresholdBaseClass = RoIThresholdsTool<T_RoI, T_RoIContainer, ContainerName, ThresholdType>;
   }
@@ -130,9 +141,9 @@ namespace HLTSeedingRoIToolDefs {
    */
 
   /// std::variant of const ptr to RoI types. Note identical types are only entered once in the template (e.g. no cTau which is same type as eFexTau)
-  using AnyRoIPointer = std::variant<const eFexEM::T_RoI*, const eFexTau::T_RoI*, const jFexTau::T_RoI*, const jFexSRJet::T_RoI*, const jFexLRJet::T_RoI*, const gFexSRJet::T_RoI*, const Muon::T_RoI*>;
+  using AnyRoIPointer = std::variant<const eFexEM::T_RoI*, const eFexTau::T_RoI*, const jFexFwdEl::T_RoI*, const jFexTau::T_RoI*, const jFexSRJet::T_RoI*, const jFexLRJet::T_RoI*, const gFexSRJet::T_RoI*, const Muon::T_RoI*>;
   /// std::variant of RoI containers. Has to correspond directly to AnyRoIPointer types.
-  using AnyRoIContainer = std::variant<eFexEM::T_RoIContainer, eFexTau::T_RoIContainer, jFexTau::T_RoIContainer, jFexSRJet::T_RoIContainer, jFexLRJet::T_RoIContainer, gFexSRJet::T_RoIContainer, Muon::T_RoIContainer>;
+  using AnyRoIContainer = std::variant<eFexEM::T_RoIContainer, eFexTau::T_RoIContainer, jFexFwdEl::T_RoIContainer, jFexTau::T_RoIContainer, jFexSRJet::T_RoIContainer, jFexLRJet::T_RoIContainer, gFexSRJet::T_RoIContainer, Muon::T_RoIContainer>;
 
   /**
    * Recursively try each type from AnyRoIPointer variant to retrieve an object from a TrigComposite link
@@ -170,6 +181,9 @@ namespace HLTSeedingRoIToolDefs {
       if constexpr (std::is_same_v<T, const eFexTau::T_RoI*>) {
         return (arg->*eFexTau::F_RoIWordGetter)();
       }
+      if constexpr (std::is_same_v<T, const jFexFwdEl::T_RoI*>) {
+        return (arg->*jFexFwdEl::F_RoIWordGetter)();
+      }
       if constexpr (std::is_same_v<T, const jFexTau::T_RoI*>) {
         return (arg->*jFexTau::F_RoIWordGetter)();
       }
@@ -197,6 +211,9 @@ namespace HLTSeedingRoIToolDefs {
       }
       if constexpr (std::is_same_v<T, const eFexTau::T_RoI*>) {
         return (arg->*eFexTau::F_TobEtGetter)();
+      }
+      if constexpr (std::is_same_v<T, const jFexFwdEl::T_RoI*>) {
+        return (arg->*jFexFwdEl::F_TobEtGetter)();
       }
       if constexpr (std::is_same_v<T, const jFexTau::T_RoI*>) {
         return (arg->*jFexTau::F_TobEtGetter)();

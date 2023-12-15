@@ -42,6 +42,11 @@ namespace xAOD {
       float     phi()           const;
       int       tobEtScale()    const;
       char      isTOB()         const;
+
+      /// the eta index to use for looking up thresholds in the menu
+      /// the current jFex fw only supports symmetric thresholds so index will always be >=0
+      /// to guarantee the symmetry (see L1TopoAlgorithms/jJetMultiplicity)
+      int      menuEta()      const;
       
       /// Set the isTOB variable (TOB or xTOB)
       void setIsTOB( char value);

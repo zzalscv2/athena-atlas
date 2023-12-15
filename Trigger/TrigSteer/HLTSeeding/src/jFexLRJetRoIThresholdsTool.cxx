@@ -9,7 +9,7 @@ uint64_t jFexLRJetRoIThresholdsTool::getPattern(const xAOD::jFexLRJetRoI& roi,
     
     // Get RoI properties (once, rather than for every threshold in the menu)
     unsigned int et     = roi.et();
-    int          ieta   = roi.globalEta();
+    int          ieta   = roi.menuEta();
     uint64_t     thresholdMask = 0;
 
     // Iterate through thresholds and see which ones are passed

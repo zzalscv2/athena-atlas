@@ -55,6 +55,20 @@ namespace xAOD {
       return;
    }
 
+    int jFexSRJetRoI_v1::menuEta() const {
+      // adapted from TSU::toTopoInteger
+      static const unsigned int RESOLUTION = 40;
+        float tmp = eta()*RESOLUTION;
+        int index;
+        if ( (abs(tmp)-0.5)/2. == std::round((abs(tmp)-0.5)/2.) ) {
+            if ( tmp>0 ) { index = std::floor(tmp); }
+            else { index = std::ceil(tmp); }
+        } else {
+            index = std::round(tmp);
+        }
+        return std::abs(index/4);
+    }
+
    //----------------
    /// Raw data words
    //----------------

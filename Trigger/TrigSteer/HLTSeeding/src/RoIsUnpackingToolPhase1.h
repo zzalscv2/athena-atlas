@@ -167,6 +167,12 @@ public:
   : HLTSeedingRoIToolDefs::eFexTau::UnpackingBaseClass(type, name, parent) {}
 };
 
+class jFexFwdElRoIsUnpackingTool : public HLTSeedingRoIToolDefs::jFexFwdEl::UnpackingBaseClass {
+  public:
+    jFexFwdElRoIsUnpackingTool(const std::string& type, const std::string& name, const IInterface* parent)
+            : HLTSeedingRoIToolDefs::jFexFwdEl::UnpackingBaseClass(type, name, parent) {}
+};
+
 class jFexTauRoIsUnpackingTool : public HLTSeedingRoIToolDefs::jFexTau::UnpackingBaseClass {
 public:
   jFexTauRoIsUnpackingTool(const std::string& type, const std::string& name, const IInterface* parent)
