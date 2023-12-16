@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAEVENT_EMTRACKMATCH_H
@@ -26,7 +26,7 @@ public:
     fromLastMeasurement,
     /** from the perigee of TrackParticle */
     fromPerigee,
-    /** from the perigee of TrackParticle recaled by Ecluster */
+    /** from the perigee of TrackParticle rescaled by Ecluster */
     fromPerigeeRescaled,
     /** from the calo to the perigee - fast extrapolation */
     fromCaloToPerigee
@@ -56,11 +56,11 @@ public:
   /** @brief Destructor*/
   virtual ~EMTrackMatch();
 
-  virtual const std::string& className() const;
+  virtual const std::string& className() const override;
   
-  virtual double        parameter(egammaParameters::ParamDef) const ;
-  virtual bool          hasParameter(egammaParameters::ParamDef) const ;
-  virtual bool          hasBoolParameter(egammaParameters::ParamDef) const ;
+  virtual double        parameter(egammaParameters::ParamDef) const override;
+  virtual bool          hasParameter(egammaParameters::ParamDef) const override;
+  virtual bool          hasBoolParameter(egammaParameters::ParamDef) const override final;
   
   void                  set_parameter(egammaParameters::ParamDef, double, bool overwrite=false) ;
   void                  set_boolParameter(egammaParameters::ParamDef, bool, bool overwrite = false);
@@ -155,8 +155,8 @@ public:
   int			trackNumber () const;
 
   /** @brief index number among TrackParticle links of the egamma object (counting starts at 0)*/
-  int			linkIndex () const;
-  void			set_linkIndex (int value);
+  virtual int		linkIndex () const override;
+  virtual void		set_linkIndex (int value) override;
   
   /** @brief number of tracks in isolation window (taken at sampling 2): 
       (# primary tracks if matched track is primary; otherwise all tracks)
@@ -179,7 +179,7 @@ public:
   std::vector < std::pair<egammaParameters::ParamDef , double > > m_parameters;
   std::vector < std::pair<egammaParameters::ParamDef, bool> > m_parametersBool;
   
-  virtual bool boolParameter(egammaParameters::ParamDef)     const;
+  virtual bool boolParameter(egammaParameters::ParamDef)     const override;
 };
 
 
