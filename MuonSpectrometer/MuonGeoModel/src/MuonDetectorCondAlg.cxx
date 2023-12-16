@@ -177,7 +177,8 @@ StatusCode MuonDetectorCondAlg::copyInertMaterial(MuonGM::MuonDetectorManager& d
         if (vname.find("Station") != std::string::npos) continue;
         /// All operations are atomic. So it's safe to cast constness away
         GeoVPhysVol* physVol ATLAS_THREAD_SAFE = const_cast<GeoVPhysVol*>(worldNode.operator->()) ;
-        ATH_MSG_DEBUG("Volume in the static world "<<vname<<" "<<typeid(*worldNode).name()
+        const GeoVPhysVol& pvConstLink = *worldNode;
+        ATH_MSG_DEBUG("Volume in the static world "<<vname<<" "<<typeid(pvConstLink).name()
                         <<"children: "<<worldNode->getNChildNodes()
                         <<" getDefX(): "<<Amg::toString(worldNode->getDefX())
                         <<" getX(): "<<Amg::toString(worldNode->getX())
