@@ -25,7 +25,7 @@
 #include "TileByteStream/TileL2ContByteStreamCnv.h"
 #include "TileByteStream/TileL2ContByteStreamTool.h"
 #include "TileByteStream/TileROD_Decoder.h"
-
+#include "TileByteStream/TileHid2RESrcID.h"
 #include "TileL2Algs/TileL2Builder.h"
 
 
@@ -65,6 +65,7 @@ TileL2ContByteStreamCnv::TileL2ContByteStreamCnv(ISvcLocator* svcloc)
   , m_storeGate("StoreGateSvc", name())
   , m_robSvc("ROBDataProviderSvc", name())
   , m_decoder("TileROD_Decoder")
+  , m_hid2re(0)
 {
 }
 
@@ -84,6 +85,7 @@ StatusCode TileL2ContByteStreamCnv::initialize() {
 
   // retrieve Tool
   ATH_CHECK( m_decoder.retrieve() );
+  m_hid2re = m_decoder->getHid2re();
 
   ATH_CHECK( m_tool.retrieve() );
 

@@ -39,12 +39,19 @@ public:
   void initialize(uint32_t runnum);
   void initializeMuRcv(uint32_t runnum);
 
+  void initialize(const std::vector<std::vector<uint32_t> > & fullmap);
+
   void setROD2ROBmap (const std::vector<std::string> & ROD2ROB,
                       MsgStream & log);
 
   void setROD2ROBmap (const eformat::FullEventFragment<const uint32_t*> * event,
                       bool& of2Default,
                       MsgStream & log);
+
+  void setBSfrag (int frag_id, uint32_t bs_frag);
+  void setDrawerType (int frag_id, uint32_t type);
+
+  void printSpecial (MsgStream & log);
 
   /** make a ROB SrcID for a fragment ID
   */ 
@@ -74,12 +81,26 @@ public:
   */
   uint32_t getRunNum  () { return m_runnum; };
 
+  /** Retrieve extra info - ByteStream frag ID and drawer typefor a given transient fragment ID
+  */
+  int getOfflineFragID(uint32_t bs_frag_id) const;
+  uint32_t getBSfragID(int frag_id) const;
+  uint32_t getDrawerType(int frag_id) const;
+  const std::vector<uint32_t> & getDrawerInfo(int frag_id) const;
+
 private: 
 
   const TileHWID* m_tileHWID;
-  typedef std::map<int, uint32_t> FRAGRODMAP; 
-  FRAGRODMAP m_frag2ROD, m_TileMuRcvFrag2ROD;
+  typedef std::map<int, uint32_t> FRAGRODMAP;
+  typedef std::map<uint32_t, int> BS2OFFLINEMAP;
+  typedef std::map<int, std::vector<uint32_t> > FRAGFULLMAP;
+  FRAGRODMAP m_TileMuRcvFrag2ROD;
+  BS2OFFLINEMAP m_bs2offline;
+  FRAGFULLMAP m_frag2ROD;
   uint32_t m_runnum, m_TileMuRcvRunnum = 0U;
+  std::vector<uint32_t> m_defaultDrawer;
+
+  void updateBSmap();
 };
 
 
