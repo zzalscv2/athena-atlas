@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/tests/span_test.cxx
@@ -12,6 +12,7 @@
 #undef NDEBUG
 #include "CxxUtils/span.h"
 #include "CxxUtils/reverse_wrapper.h"
+#include <vector>
 #include <cassert>
 #include <iostream>
 
@@ -84,6 +85,10 @@ void test1()
 
   CxxUtils::span<float> s4 (ff, ff+8);
   test1a<float> (s4);
+
+  std::vector v (std::begin(ff), std::end(ff));
+  auto s5 = CxxUtils::make_span (v);
+  test1a<float> (s5);
 }
 
 
