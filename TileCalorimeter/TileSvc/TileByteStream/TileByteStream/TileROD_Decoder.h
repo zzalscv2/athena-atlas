@@ -36,6 +36,7 @@
 #include "TileConditions/TileCondToolEmscale.h"
 #include "TileConditions/ITileBadChanTool.h"
 #include "TileL2Algs/TileL2Builder.h"
+#include "TileByteStream/TileHid2RESrcID.h"
 
 // Atlas includes
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -248,14 +249,14 @@ class TileROD_Decoder: public AthAlgTool {
      tile raw digits from the 48 read-out channels of a tilecal module. */
     void unpack_frag0(uint32_t version, uint32_t sizeOverhead,
                       DigitsMetaData_t& digitsMetaData,
-                      const uint32_t* p, pDigiVec & pDigits) const;
+                      const uint32_t* p, pDigiVec & pDigits, int fragID, int demoType) const;
 
     /** unpack_frag1 decodes tile subfragment type 0x1. This subfragment contains the
      tile raw digits ONLY from the existing channels of a tilecal module. <p>
      (not implemented yet). */
     void unpack_frag1(uint32_t version, uint32_t sizeOverhead,
                       DigitsMetaData_t& digitsMetaData,
-                      const uint32_t* p, pDigiVec & pDigits) const;
+                      const uint32_t* p, pDigiVec & pDigits, int fragID, int demoType) const;
 
     /** unpack_frag2 decodes tile subfragment type 0x2. This subfragment contains the
      reconstructed amplitude and phase from the tilecal digitized pulse and a
@@ -265,7 +266,7 @@ class TileROD_Decoder: public AthAlgTool {
      The subfragment type 0x2 contains the reconstructed parameters from the
      48 read-out channels of a tilecal module. */
     void unpack_frag2(uint32_t version, uint32_t sizeOverhead,
-                      const uint32_t* p, pRwChVec & pChannel) const;
+                      const uint32_t* p, pRwChVec & pChannel, int fragID, int demoType) const;
 
     /** unpack_frag3 decodes tile subfragment type 0x3. This subfragment contains the
      reconstructed amplitude and phase from the tilecal digitized pulse and a
@@ -275,7 +276,7 @@ class TileROD_Decoder: public AthAlgTool {
      The subfragment type 0x3 contains the reconstructed parameters ONLY
      from the existing channels of a tilecal module. */
     void unpack_frag3(uint32_t version, uint32_t sizeOverhead,
-                      const uint32_t* p, pRwChVec & pChannel) const;
+                      const uint32_t* p, pRwChVec & pChannel, int fragID, int demoType) const;
 
     /** unpack_frag4 decodes tile subfragment type 0x4. This subfragment contains the
      reconstructed amplitude and phase from the tilecal digitized pulse and a
@@ -290,7 +291,7 @@ class TileROD_Decoder: public AthAlgTool {
      48 read-out channels of a tilecal module. */
     void unpack_frag4(uint32_t version, uint32_t sizeOverhead, unsigned int unit,
                       RawChannelMetaData_t& rawchannelMetaData,
-                      const uint32_t* p, pRwChVec & pChannel) const;
+                      const uint32_t* p, pRwChVec & pChannel, int fragID, int demoType) const;
 
 
     /** unpack_frag5 decodes tile subfragment type 0x4. This subfragment contains the
@@ -306,13 +307,13 @@ class TileROD_Decoder: public AthAlgTool {
      48 read-out channels of a tilecal module. */
     void unpack_frag5(uint32_t version, uint32_t sizeOverhead, unsigned int unit,
                       DigitsMetaData_t& digitsMetaData,
-                      const uint32_t* p, pDigiVec & pDigits, pRwChVec & pChannel) const;
+                      const uint32_t* p, pDigiVec & pDigits, pRwChVec & pChannel, int fragID, int demoType) const;
 
     /** unpack_frag6 decodes tile subfragment type 0x6. This subfragment contains the
      tile raw digits with 16 samples and 2 gains from the 48 read-out channels of a tilecal module. */
     void unpack_frag6(uint32_t version, uint32_t sizeOverhead,
                       DigitsMetaData_t& digitsMetaData,
-                      const uint32_t* p, pDigiVec & pDigits) const;
+                      const uint32_t* p, pDigiVec & pDigits, int fragID, int demoType) const;
 
     /** unpack_frag3HLT decodes tile subfragment type 0x3 for the high level trigger (HLT).
      This subfragment contains the
@@ -323,7 +324,7 @@ class TileROD_Decoder: public AthAlgTool {
      The subfragment type 0x3 contains the reconstructed parameters ONLY
      from the existing channels of a tilecal module. */
     void unpack_frag3HLT(uint32_t version, uint32_t sizeOverhead,
-                         const uint32_t* p, FRwChVec & pChannel) const;
+                         const uint32_t* p, FRwChVec & pChannel, int fragID, int demoType) const;
 
     /** unpack_frag2HLT decodes tile subfragment type 0x2 for the high level trigger (HLT).
      This subfragment contains the
@@ -334,7 +335,7 @@ class TileROD_Decoder: public AthAlgTool {
      The subfragment type 0x2 contains the reconstructed parameters from the
      48 read-out channels of a tilecal module. */
     void unpack_frag2HLT(uint32_t version, uint32_t sizeOverhead,
-                         const uint32_t* p, FRwChVec & pChannel) const;
+                         const uint32_t* p, FRwChVec & pChannel, int fragID, int demoType) const;
 
     /** unpack_frag4HLT decodes tile subfragment type 0x4 for the high level trigger (HLT).
      This subfragment contains the
@@ -348,7 +349,7 @@ class TileROD_Decoder: public AthAlgTool {
      The phase is encoded in ns. <p>
      The subfragment type 0x4 contains the reconstructed parameters from the
      48 read-out channels of a tilecal module. */
-    void unpack_frag4HLT(uint32_t version, uint32_t sizeOverhead, unsigned int unit, const uint32_t* p, FRwChVec & pChannel) const;
+    void unpack_frag4HLT(uint32_t version, uint32_t sizeOverhead, unsigned int unit, const uint32_t* p, FRwChVec & pChannel, int fragID, int demoType) const;
 
     /** unpack_frag5HLT decodes tile subfragment type 0x5 for the high level trigger (HLT).
      This subfragment contains the
@@ -361,17 +362,17 @@ class TileROD_Decoder: public AthAlgTool {
      The phase is encoded in ns. <p>
      The subfragment type 0x5 contains the reconstructed parameters and residuals from the
      48 read-out channels of a tilecal module. */
-    void unpack_frag5HLT(uint32_t version, uint32_t sizeOverhead, unsigned int unit, const uint32_t* p, FRwChVec & pChannel) const;
+    void unpack_frag5HLT(uint32_t version, uint32_t sizeOverhead, unsigned int unit, const uint32_t* p, FRwChVec & pChannel, int fragID, int demoType) const;
 
     /** unpack_fragA decodes tile subfragment type 0XA. This subfragment contains
      data quality checks. */
     void unpack_fragA(uint32_t version,
                       RawChannelMetaData_t& rawchannelMetaData,
-                      const uint32_t* p, pRwChVec & pChannel) const;
+                      const uint32_t* p, pRwChVec & pChannel, int fragID, int demoType) const;
     /** unpack_fragAHLT decodes tile subfragment type 0XA. This subfragment contains
      data quality checks. */
     void unpack_fragAHLT(uint32_t version, const uint32_t* p, uint16_t rob_bcid,
-        uint16_t& mask) const;
+        uint16_t& mask, int fragID, int demoType) const;
 
     /** unpack_frag10 decodes tile subfragment type 0x10. This subfragment contains
      the result of the MTag algorithm and the transverse energy calculation for
@@ -380,7 +381,7 @@ class TileROD_Decoder: public AthAlgTool {
      pattern that traverse the tile calorimeter and calculates the energy deposited in
      the corresponding eta projective tower.<p>
      The total transverse energy is calculated for each of the two tilecal modules in the subfragment. */
-    void unpack_frag10(uint32_t version, const uint32_t* p, TileL2Container & v) const;
+    void unpack_frag10(uint32_t version, const uint32_t* p, TileL2Container & v, int fragID, int demoType) const;
 
     /** unpack_frag11 decodes tile subfragment type 0x11. This subfragment contains
      the result of the MTag algorithm and the transverse energy calculation ONLY for
@@ -389,14 +390,14 @@ class TileROD_Decoder: public AthAlgTool {
      pattern that traverse the tile calorimeter and calculates the energy deposited in
      the corresponding eta projective tower.<p>
      The total transverse energy is calculated for a tilecal module. */
-    void unpack_frag11(uint32_t version, const uint32_t* p, TileL2Container & v) const;
+    void unpack_frag11(uint32_t version, const uint32_t* p, TileL2Container & v, int fragID, int demoType) const;
 
     /** unpack_frag12 decodes tile subfragment type 0x12. This subfragment contains
      the result of the MTag algorithm for two tilecal modules. <p>
      The MTag algorithm identifies low transverse momentum muons with eta projective
      pattern that traverse the tile calorimeter and calculates the energy deposited in
      the corresponding eta projective tower. */
-    void unpack_frag12(uint32_t version, const uint32_t* p, TileL2Container & v) const;
+    void unpack_frag12(uint32_t version, const uint32_t* p, TileL2Container & v, int fragID, int demoType) const;
 
     /** unpack_frag13 decodes tile subfragment type 0x13. This subfragment contains
      the result of the MTag algorithm ONLY for
@@ -404,24 +405,24 @@ class TileROD_Decoder: public AthAlgTool {
      The MTag algorithm identifies low transverse momentum muons with eta projective
      pattern that traverse the tile calorimeter and calculates the energy deposited in
      the corresponding eta projective tower.*/
-    void unpack_frag13(uint32_t version, const uint32_t* p, TileL2Container & v) const;
+    void unpack_frag13(uint32_t version, const uint32_t* p, TileL2Container & v, int fragID, int demoType) const;
 
     /** unpack_frag14 decodes tile subfragment type 0x14. This subfragment contains
      the transverse energy calculation for tilecal module. */
-    void unpack_frag14(uint32_t version, const uint32_t* p, TileL2Container & v) const;
+    void unpack_frag14(uint32_t version, const uint32_t* p, TileL2Container & v, int fragID, int demoType) const;
 
     /** unpack_frag15 decodes tile subfragment type 0x15. This subfragment contains
      the transverse energy calculation ONLY for
      one tilecal module. */
-    void unpack_frag15(uint32_t version, const uint32_t* p, TileL2Container & v) const;
+    void unpack_frag15(uint32_t version, const uint32_t* p, TileL2Container & v, int fragID, int demoType) const;
 
     /** unpack_frag4L2 decodes tile subfragment type 0x4
      and extract transverse energy from this fragment */
-    bool unpack_frag4L2(uint32_t version, uint32_t sizeOverhead, const uint32_t* p, TileL2Container & v) const;
+    bool unpack_frag4L2(uint32_t version, uint32_t sizeOverhead, const uint32_t* p, TileL2Container & v, int fragID, int demoType) const;
 
     /** unpack_frag5L2 decodes tile subfragment type 0x5
      and extract transverse energy from this fragment */
-    bool unpack_frag5L2(uint32_t version, const uint32_t* p, TileL2Container & v) const;
+    bool unpack_frag5L2(uint32_t version, const uint32_t* p, TileL2Container & v, int fragID, int demoType) const;
 
     /** unpack_frag16 decodes tile subfragment type 0x16 or 0x20. This subfragment contains
      informations coming from the Laser box [calibration run] */
@@ -433,7 +434,7 @@ class TileROD_Decoder: public AthAlgTool {
 
     /** unpack_brod decodes all ancillary tile subfragments coming from beam ROD
      at the testbeam or LASTROD in normal ATLAS configuration */
-    void unpack_brod(uint32_t version, uint32_t sizeOverhead, const uint32_t* p, pBeamVec & pBeam) const;
+    void unpack_brod(uint32_t version, uint32_t sizeOverhead, const uint32_t* p, pBeamVec & pBeam, int fragID) const;
 
     /** unpacking methods dedicated to the TMDB ROD format sub-fragments 0x40 0x41 0x42 */
     void unpack_frag40(uint32_t collid,   uint32_t version, const uint32_t* p, int size, TileDigitsCollection &coll) const;
@@ -917,6 +918,9 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
   bool isBeamROD = false;
   // figure out which fragment we want to unpack
   TileRawChannelCollection::ID frag_id = v.identify();
+  const std::vector<uint32_t> & drawer_info = m_hid2re->getDrawerInfo(frag_id);
+  int bs_frag_id = drawer_info.size()>1 ? drawer_info[1] : frag_id;
+  int drawer_type = drawer_info.size()>2 ? drawer_info[2] : -1;
 
   uint32_t mask = 0xFFFF;
 
@@ -995,7 +999,7 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
       continue;
     }
 
-    if (type != 0x10 && frag == frag_id) pFrag.push_back(p);
+    if (type != 0x10 && frag == bs_frag_id) pFrag.push_back(p);
 
     p += count;
     wc += count;
@@ -1029,7 +1033,7 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
 
       p = (*it);
 
-      unpack_brod(version, sizeOverhead, p, pBeam);
+      unpack_brod(version, sizeOverhead, p, pBeam, frag_id);
     }
 
     make_copy(rob, pBeam, v);
@@ -1072,16 +1076,16 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
 
       switch (type) {
         case 0:
-          if (m_useFrag0) unpack_frag0(version, sizeOverhead, digitsMetaData, p, pDigits);
+          if (m_useFrag0) unpack_frag0(version, sizeOverhead, digitsMetaData, p, pDigits, frag_id, drawer_type);
           break;
         case 1:
-          if (m_useFrag1) unpack_frag1(version, sizeOverhead, digitsMetaData, p, pDigits);
+          if (m_useFrag1) unpack_frag1(version, sizeOverhead, digitsMetaData, p, pDigits, frag_id, drawer_type);
           break;
         case 2:
-          if (m_useFrag4) unpack_frag2(version, sizeOverhead, p, pChannel);
+          if (m_useFrag4) unpack_frag2(version, sizeOverhead, p, pChannel, frag_id, drawer_type);
           break;
         case 3:
-          if (m_useFrag4) unpack_frag3(version, sizeOverhead, p, pChannel);
+          if (m_useFrag4) unpack_frag3(version, sizeOverhead, p, pChannel, frag_id, drawer_type);
           break;
         case 4:
           if (m_useFrag4) {
@@ -1117,7 +1121,7 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
               }
             }
 
-            unpack_frag4(version, sizeOverhead, unit, rawchannelMetaData, p, pChannel);
+            unpack_frag4(version, sizeOverhead, unit, rawchannelMetaData, p, pChannel, frag_id, drawer_type);
           }
           break;
 
@@ -1132,7 +1136,7 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
             rChUnit = (TileRawChannelUnit::UNIT) (unit + TileRawChannelUnit::OnlineOffset);
             unpack_frag5(version, sizeOverhead, unit,
                          digitsMetaData,
-                         p, pDigits, pChannel);
+                         p, pDigits, pChannel, frag_id, drawer_type);
           }
           break;
 
@@ -1140,7 +1144,7 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
           break;
 
         case 0xA:
-          unpack_fragA(version, rawchannelMetaData, p, pChannel);
+          unpack_fragA(version, rawchannelMetaData, p, pChannel, frag_id, drawer_type);
           break;
 
         default:

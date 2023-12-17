@@ -46,6 +46,23 @@ void TileHid2RESrcID::setTileHWID(const TileHWID* tileHWID, uint32_t runnum)
   }
 }
 
+void TileHid2RESrcID::initialize(const std::vector<std::vector<uint32_t> > & allmap)
+{
+  for (auto v : allmap) {
+    if (v.size()>0) {
+      int id = v[0];
+      if (v.size()>1) {
+        std::vector<uint32_t> data(v.begin()+1,v.end());
+        m_frag2ROD[id] = data;
+      } else if ( m_frag2ROD.find(id) != m_frag2ROD.end() ) {
+        m_frag2ROD.erase(id);
+      }
+    }
+  }
+  updateBSmap();
+}
+
+
 void TileHid2RESrcID::initialize(uint32_t runnum)
 {
   m_runnum = runnum;
@@ -65,7 +82,7 @@ void TileHid2RESrcID::initialize(uint32_t runnum)
   for ( ; first!=last; ++first) {
     int ros    = m_tileHWID->ros(*first);
     int drawer = m_tileHWID->drawer(*first);
-    int frag   = m_tileHWID->frag(*first); 
+    uint32_t frag = m_tileHWID->frag(*first);
 
     uint32_t id = 0; // id is always 0 for Beam ROD (ros=0)
     if (ros > 0) {
@@ -88,19 +105,32 @@ void TileHid2RESrcID::initialize(uint32_t runnum)
     uint32_t rod_id =  sid.code();
 
     // add ROD id to the map
-    m_frag2ROD[frag] = rod_id;
+    m_frag2ROD[frag] = {rod_id,frag};
+  }
+
+  if (runnum>=400000) {
+    // LBA14 is demonstrator in RUN3 - add special flag
+    m_frag2ROD[0x10d].push_back(1);
+
+    // fragments for EBA61 and EBA63 were swapped in 2021-2023
+    if (runnum<463700) {
+      m_frag2ROD[0x33c][1] = 0x33e;
+      m_frag2ROD[0x33e][1] = 0x33c;
+    }
   }
 
   // laser fragments in specific ROB
   if (runnum>318000) {
     // new frag->ROB mapping since March 2017 
-    m_frag2ROD[0x16] = 0x520020;
-    m_frag2ROD[0xff] = 0x520020;
+    m_frag2ROD[0x16] = {0x520020,0x16};
+    m_frag2ROD[0xff] = {0x520020,0xff};
   } else {
-    m_frag2ROD[0x16] = 0x520010;
-    m_frag2ROD[0xff] = 0x520010;
+    m_frag2ROD[0x16] = {0x520010,0x16};
+    m_frag2ROD[0xff] = {0x520010,0xff};
   }
-  m_frag2ROD[0x17] = 0;
+  m_frag2ROD[0x17] = {0,0x17};
+
+  updateBSmap();
 }
 
 void TileHid2RESrcID::initializeMuRcv(uint32_t runnum)
@@ -157,7 +187,12 @@ void TileHid2RESrcID::setROD2ROBmap(const std::vector<std::string> & ROD2ROB,
     uint32_t rob = strtol(ROD2ROB[i].data(),NULL,0) & 0xFFFFFF;
     if ( frag < 0x2000 ) { 
       // this is actually remapping for fragments inside ROB, bypassing ROD ID
-      m_frag2ROD[frag] = rob;
+      int frag_id = this->getOfflineFragID(frag);
+      if (frag_id < 0) {
+        m_frag2ROD[frag] = {rob, frag%0x1000};
+      } else {
+        m_frag2ROD[frag_id][0] = rob;
+      }
       log << MSG::INFO << "TileHid2RESrcID:: mapping frag 0x"<< MSG::hex 
           << frag << " to ROB 0x" << rob << MSG::dec << endmsg;
       ++fragCount;
@@ -171,8 +206,8 @@ void TileHid2RESrcID::setROD2ROBmap(const std::vector<std::string> & ROD2ROB,
     log << MSG::INFO << "TileHid2RESrcID:: " << fragCount
         << " frag to ROD remappings set via jobOptions" << endmsg;
 
-  if (m_frag2ROD[0x17] != 0) m_frag2ROD[0x16] = m_frag2ROD[0x17];
-  else m_frag2ROD[0x17] = m_frag2ROD[0x16];
+  if (m_frag2ROD[0x17][0] != 0) m_frag2ROD[0x16] = {m_frag2ROD[0x17][0], 0x16};
+  else if (m_frag2ROD.find(0x16) != m_frag2ROD.end()) m_frag2ROD[0x17][0] = m_frag2ROD[0x16][0];
 }
 
 void TileHid2RESrcID::setROD2ROBmap (const eformat::FullEventFragment<const uint32_t*> * event,
@@ -181,8 +216,12 @@ void TileHid2RESrcID::setROD2ROBmap (const eformat::FullEventFragment<const uint
 {
 
   uint32_t runnum = event->run_no();
-  if ( (runnum>318000 && m_runnum<=318000) || (runnum<=318000 && m_runnum>318000) )
+  if ( ( (runnum>318000 && m_runnum<=318000) || (runnum<=318000 && m_runnum>318000) ) ||
+       ( (runnum>=441000 && m_runnum<400000) || (runnum<400000 && m_runnum>=400000) ) ||
+       ( (runnum>=463700 && m_runnum<463700) || (runnum<463700 && m_runnum>=463700) ) ) {
+    log << MSG::INFO << "Reinitializing TileHid2RESrcID for run " << runnum << endmsg;
     initialize(runnum);
+  }
   
   uint32_t nBeamFrag=0, nRODfrag=0, nDataFrag[10]={0,0,0,0,0,0,0,0,0,0}, flags=0xFFFF, flags5=0xFFFF;
   std::map<int,int> fragMap;
@@ -284,14 +323,14 @@ void TileHid2RESrcID::setROD2ROBmap (const eformat::FullEventFragment<const uint
                   break;
                 }
 
-                FRAGRODMAP::const_iterator it = m_frag2ROD.find(fragid); 
+                FRAGFULLMAP::const_iterator it = m_frag2ROD.find(fragid);
                 if(it == m_frag2ROD.end()){
                   log << MSG::INFO << "New frag 0x" << MSG::hex << fragid 
                       << " in ROB 0x" << ROBid << MSG::dec << endmsg;
                 } else {
-                  if ( (*it).second != ROBid ) {
+                  if ( (*it).second[0] != ROBid ) {
                     log << MSG::INFO << "Frag 0x" << MSG::hex << fragid 
-                        <<" remapping from ROB 0x" << (*it).second
+                        <<" remapping from ROB 0x" << (*it).second[0]
                         << " to 0x" << ROBid << MSG::dec << endmsg;
                   } else {
                     log << MSG::DEBUG << "Frag 0x" << MSG::hex << fragid 
@@ -302,7 +341,7 @@ void TileHid2RESrcID::setROD2ROBmap (const eformat::FullEventFragment<const uint
 
                 if (fragid < 0xff) { // all testbeam frags and laser frag
                     ++nBeamFrag;
-                    m_frag2ROD[fragid] = ROBid;
+                    m_frag2ROD[fragid] = {ROBid,fragid};
                     ++beamMap[fragtype];
                 } else if (fragid < 0x100) { // CIS par which can come from two sources
                     ++nBeamFrag;
@@ -310,12 +349,17 @@ void TileHid2RESrcID::setROD2ROBmap (const eformat::FullEventFragment<const uint
                     if (fragtype == 0x30) { // CIS par in LAST ROD
                         lascisROB = ROBid;
                     } else {
-                        m_frag2ROD[fragid] = ROBid; // separate CIS par in every partition 
+                        m_frag2ROD[fragid] = {ROBid,fragid}; // separate CIS par in every partition
                         cisparFound = true;
                     }
                 } else if (fragid < 0x500) { // normal drawers
                     ++nRODfrag;
-                    m_frag2ROD[fragid] = ROBid;
+                    int frag_id = this->getOfflineFragID(fragid);
+                    if (frag_id < 0) {
+                      m_frag2ROD[fragid] = {ROBid,fragid};
+                    } else {
+                      m_frag2ROD[frag_id][0] = ROBid;
+                    }
                     ++fragMap[fragtype];
                     if (fragtype == 4) flags = upperhalf;
                     else if (fragtype == 5) {
@@ -334,7 +378,7 @@ void TileHid2RESrcID::setROD2ROBmap (const eformat::FullEventFragment<const uint
   }
   if (!cisparFound) {
     if (lascisROB) {
-      m_frag2ROD[0xff] = lascisROB;
+      m_frag2ROD[0xff] = {lascisROB,0xff};
       log << MSG::INFO << "TileHid2RESrcID: Attention! Taking CISpar from lastROD 0x" << MSG::hex << lascisROB << MSG::dec << endmsg;
     } else {
       log << MSG::INFO << "TileHid2RESrcID: no CISpar in the data" << endmsg;
@@ -356,8 +400,8 @@ void TileHid2RESrcID::setROD2ROBmap (const eformat::FullEventFragment<const uint
   }
   log << " ) was found in the data" << endmsg;
   
-  if (m_frag2ROD[0x17] != 0) m_frag2ROD[0x16] = m_frag2ROD[0x17];
-  else m_frag2ROD[0x17] = m_frag2ROD[0x16];
+  if (m_frag2ROD[0x17][0] != 0) m_frag2ROD[0x16] = {m_frag2ROD[0x17][0], 0x16};
+  else if (m_frag2ROD.find(0x16) != m_frag2ROD.end()) m_frag2ROD[0x17][0] = m_frag2ROD[0x16][0];
 
   bool of2=true; // default for RUN1 data
   if (nDataFrag[4]!=0) {
@@ -374,6 +418,44 @@ void TileHid2RESrcID::setROD2ROBmap (const eformat::FullEventFragment<const uint
         << " instead of " << ((of2Default) ? "True" : "False") << endmsg;
     of2Default = of2;
   }
+
+  updateBSmap();
+}
+
+void TileHid2RESrcID::setBSfrag(int frag_id, uint32_t bs_frag)
+{
+  FRAGFULLMAP::iterator it = m_frag2ROD.find(frag_id);
+  if(it == m_frag2ROD.end()){
+    std::cout <<" TileHid2RESrcID invalid FRAG ID 0x"<<std::hex<<frag_id<<std::dec<<std::endl;
+    assert(0);
+    return;
+  }
+
+  if (it->second.size() < 2) {
+    it->second.resize(2);
+  }
+  it->second[1] = bs_frag;
+  m_bs2offline[bs_frag] = frag_id;
+}
+
+void TileHid2RESrcID::setDrawerType(int frag_id, uint32_t type)
+{
+  FRAGFULLMAP::iterator it = m_frag2ROD.find(frag_id);
+  if(it == m_frag2ROD.end()){
+    std::cout <<" TileHid2RESrcID invalid FRAG ID 0x"<<std::hex<<frag_id<<std::dec<<std::endl;
+    assert(0);
+    return;
+  }
+
+  size_t siz = it->second.size();
+  if (siz < 3) {
+    it->second.resize(3);
+    if (siz < 2) {
+      it->second[1] = frag_id;
+      m_bs2offline[frag_id] = frag_id;
+    }
+  }
+  it->second[2] = type;
 }
 
 uint32_t TileHid2RESrcID::getRobFromFragID(int frag_id) const
@@ -387,14 +469,80 @@ uint32_t TileHid2RESrcID::getRodID(int frag_id) const
 { 
   // this method returns a RESrcID for the ROD, for a given fragment ID
 
-  FRAGRODMAP::const_iterator it = m_frag2ROD.find(frag_id); 
+  FRAGFULLMAP::const_iterator it = m_frag2ROD.find(frag_id);
+  if(it == m_frag2ROD.end()){
+    std::cout <<" TileHid2RESrcID invalid FRAG ID 0x"<<std::hex<<frag_id<<std::dec<<std::endl;
+    assert(0);
+    return 0;
+  }
+
+  return ( (*it).second[0] ) ;
+}
+
+uint32_t TileHid2RESrcID::getBSfragID(int frag_id) const
+{
+  // this method returns fragment ID in bytestream for a given transient fragment ID
+
+  FRAGFULLMAP::const_iterator it = m_frag2ROD.find(frag_id);
   if(it == m_frag2ROD.end()){
     std::cout <<" TileHid2RESrcID invalid FRAG ID 0x"<<std::hex<<frag_id<<std::dec<<std::endl;
     assert(0);
     return 0;
   }	
 
-  return ( (*it).second ) ; 
+  return ((((*it).second.size()>1) ? (*it).second[1] : frag_id) ) ;
+}
+
+uint32_t TileHid2RESrcID::getDrawerType(int frag_id) const
+{
+  // this method returns drawer type (legacy/demonstrator/...) for a given transient fragment ID
+
+  FRAGFULLMAP::const_iterator it = m_frag2ROD.find(frag_id);
+  if(it == m_frag2ROD.end()){
+    std::cout <<" TileHid2RESrcID invalid FRAG ID 0x"<<std::hex<<frag_id<<std::dec<<std::endl;
+    assert(0);
+    return 0;
+  }
+
+  return (((*it).second.size()>2) ? (*it).second[2] : 0);
+}
+
+const std::vector<uint32_t> & TileHid2RESrcID::getDrawerInfo(int frag_id) const
+{
+  // this method returns drawer type (legacy/demonstrator/...) for a given transient fragment ID
+
+  FRAGFULLMAP::const_iterator it = m_frag2ROD.find(frag_id);
+  if(it == m_frag2ROD.end()){
+    std::cout <<" TileHid2RESrcID invalid FRAG ID 0x"<<std::hex<<frag_id<<std::dec<<std::endl;
+    assert(0);
+    return m_defaultDrawer;
+  }
+
+  return (*it).second;
+}
+
+int TileHid2RESrcID::getOfflineFragID(uint32_t bs_frag_id) const
+{
+  // this method returns offine ID for given bytestream ID
+
+  BS2OFFLINEMAP::const_iterator it = m_bs2offline.find(bs_frag_id);
+  if(it == m_bs2offline.end()){
+    return -1;
+  }
+
+  return (*it).second;
+}
+
+void TileHid2RESrcID::updateBSmap()
+{
+  m_bs2offline.clear();
+  for (auto v : m_frag2ROD) {
+    if (v.second.size()>1) {
+      m_bs2offline[v.second[1]] = v.first;
+    } else {
+      m_bs2offline[v.first] = v.first;
+    }
+  }
 }
 
 /** mapping SrcID from ROD to ROB
@@ -447,4 +595,22 @@ uint32_t TileHid2RESrcID::getRodTileMuRcvID(int frag_id) const
   }
 
   return ( (*it).second ) ;
+}
+
+void TileHid2RESrcID::printSpecial (MsgStream & log)
+{
+  const char * names[] = {"Legacy", "Demo", "DemoEB", "Unknown"};
+  for (auto it : m_frag2ROD) {
+    const std::vector<uint32_t> & v = it.second;
+    if (v.size()>1) {
+      if (it.first != static_cast<int>(v[1])) {
+        log << MSG::INFO << "Frag 0x" << std::hex << it.first << " is taken from bytestream frag 0x" << v[1] << std::dec << endmsg;
+      }
+      if (v.size()>2) {
+        log << MSG::INFO << "Frag 0x" << std::hex << it.first << " fragment type is "
+            << std::dec << v[2] << " - " << names[std::min(3U,v[2])] << endmsg;
+      }
+    }
+  }
+
 }
