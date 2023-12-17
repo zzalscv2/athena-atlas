@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/span.h
@@ -14,6 +14,7 @@
 #define CXXUTILS_SPAN_H
 
 
+#include "CxxUtils/concepts.h"
 #include <cstdlib>
 #include <type_traits>
 #include <iterator>
@@ -265,6 +266,19 @@ private:
   /// Number of elements in the span.
   size_t m_size;
 };
+
+
+/**
+ * @brief Helper to make a span from a container.
+ * @param c The container for which to make a span.
+ *          It must have contiguous iterators.
+ */
+template <class CONTAINER>
+ATH_REQUIRES( detail::IsContiguousContainer<CONTAINER> )
+auto make_span (CONTAINER& c)
+{
+  return CxxUtils::span (c.data(), c.size());
+}
 
 
 } // namespace CxxUtils

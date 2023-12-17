@@ -41,6 +41,7 @@
 
 
 #include <type_traits>
+#include <iterator>
 
 
 #ifdef __cpp_concepts
@@ -83,6 +84,14 @@ template <class PRED, class ARG1, class ARG2=ARG1>
 concept IsBinaryPredicate =
   std::copy_constructible<PRED> &&
   std::predicate<PRED, ARG1, ARG2>;
+
+
+template <class CONTAINER>
+concept IsContiguousContainer =
+  requires (CONTAINER& c)
+  {
+    requires std::contiguous_iterator<decltype(c.begin())>;
+  };
 
 
 } // namespace detail

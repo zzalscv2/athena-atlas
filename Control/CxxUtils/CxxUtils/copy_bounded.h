@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CxxUtils/copy_bounded.h
  * @author scott snyder <snyder@bnl.gov>
@@ -17,11 +14,9 @@
 #define CXXUTILS_COPY_BOUNDED_H
 
 
+#include "CxxUtils/concepts.h"
 #include <iterator>
 #include <algorithm>
-#include "boost/range/iterator.hpp"
-#include "boost/range/begin.hpp"
-#include "boost/range/end.hpp"
 
 
 namespace CxxUtils {
@@ -79,6 +74,9 @@ copy_bounded1 (InputIterator begi, InputIterator endi,
  * Returns bego + n.
  */
 template <class InputIterator, class OutputIterator>
+ATH_REQUIRES( std::input_iterator<InputIterator> &&
+              std::output_iterator<OutputIterator,
+                typename std::iterator_traits<InputIterator>::value_type> )
 inline
 OutputIterator
 copy_bounded (InputIterator begi, InputIterator endi,
@@ -100,12 +98,35 @@ copy_bounded (InputIterator begi, InputIterator endi,
  */
 template <class InputRange, class OutputRange>
 inline
-typename boost::range_iterator<OutputRange>::type
+auto
 copy_bounded (const InputRange& input, OutputRange& output)
+  -> decltype (std::begin(output))
 {
   return copy_bounded
-    (boost::begin(input),  boost::end(input),
-     boost::begin(output), boost::end(output));
+    (std::begin(input),  std::end(input),
+     std::begin(output), std::end(output));
+}
+
+
+/**
+ * @brief Copy a range with bounds restriction.
+ * @param input Input range
+ * @param output Output range
+ *
+ * copy_bounded written in terms of iterator ranges.
+ *
+ * We have this as a distinct overload in order to be able to pass
+ * a CxxUtils::span temporary as the second argument.
+ */
+template <class InputRange, class OutputRange>
+inline
+auto
+copy_bounded (const InputRange& input, OutputRange&& output)
+  -> decltype (std::begin(output))
+{
+  return copy_bounded
+    (std::begin(input),  std::end(input),
+     std::begin(output), std::end(output));
 }
 
 

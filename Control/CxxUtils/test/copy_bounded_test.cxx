@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CxxUtils/test/copy_bounded_test.cxx
  * @author sss
@@ -14,6 +12,7 @@
 #undef NDEBUG
 
 #include "CxxUtils/copy_bounded.h"
+#include "CxxUtils/span.h"
 #include "boost/range/iterator_range.hpp"
 #include "boost/range/algorithm/fill.hpp"
 #include <vector>
@@ -126,6 +125,15 @@ void test1()
   test1a<arange, std::vector<int> >::test();
   test1a<std::list<int>, arange>::test();
   test1a<std::vector<int>, arange>::test();
+
+  std::vector<int> v1 {1, 2, 3, 4};
+  std::vector<int> v2 (4);
+  const std::vector<int>& cv1 = v1;
+  CxxUtils::copy_bounded (CxxUtils::make_span (cv1), v2);
+  assert (v1 == v2);
+  v2[2] = 10;
+  CxxUtils::copy_bounded (v2, CxxUtils::make_span (v1));
+  assert (v1 == v2);
 }
 
 int main()
