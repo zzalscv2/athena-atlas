@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /* **********************************************************
 *
@@ -80,7 +80,9 @@ namespace LVL1 {
   }
       
   unsigned int RoIFormatUpdater::UpdateJetRoI(unsigned int RoIWord)  {
-    unsigned int header = (TrigT1CaloDefs::jetRoIType<<30) +  (TrigT1CaloDefs::jetRoI<<29);
+    unsigned int header =
+      (static_cast<unsigned int>(TrigT1CaloDefs::jetRoIType)<<30) +
+      (static_cast<unsigned int>(TrigT1CaloDefs::jetRoI)<<29);
     unsigned int hits  = (RoIWord&0x00000fff);
     unsigned int fwdjet(0);
     if (RoIWord&0x00000f00) fwdjet = 1<<18;
@@ -100,7 +102,9 @@ namespace LVL1 {
   }
 
   unsigned int RoIFormatUpdater::UpdateJetEtRoI(unsigned int RoIWord)  {
-    unsigned int header = (TrigT1CaloDefs::jetRoIType<<30) + (TrigT1CaloDefs::jetEtRoI<<29);
+    unsigned int header =
+      (static_cast<unsigned int>(TrigT1CaloDefs::jetRoIType)<<30) +
+      (static_cast<unsigned int>(TrigT1CaloDefs::jetEtRoI)<<29);
     unsigned int hits  = (RoIWord&0x0000000f);
     return header+hits;
   }
