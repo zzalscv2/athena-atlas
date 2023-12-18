@@ -82,10 +82,10 @@ int
 radialDirection(const Trk::MultiComponentState& pars, Trk::PropDirection dir)
 {
   // safe inbound/outbound estimation
-  double prePositionR = pars.begin()->first->position().perp();
-  return (prePositionR > (pars.begin()->first->position() +
+  double prePositionR = pars.begin()->params->position().perp();
+  return (prePositionR > (pars.begin()->params->position() +
                           static_cast<int>(dir) * 0.5 * prePositionR *
-                              pars.begin()->first->momentum().unit())
+                              pars.begin()->params->momentum().unit())
                              .perp())
              ? -1
              : 1;
@@ -104,8 +104,8 @@ radialDirectionCheck(const EventContext& ctx,
                      const Trk::PropDirection dir,
                      const Trk::ParticleHypothesis particle)
 {
-  const Amg::Vector3D& startPosition = startParm.begin()->first->position();
-  const Amg::Vector3D& onLayerPosition = parsOnLayer.begin()->first->position();
+  const Amg::Vector3D& startPosition = startParm.begin()->params->position();
+  const Amg::Vector3D& onLayerPosition = parsOnLayer.begin()->params->position();
 
   // the 3D distance to the layer intersection
   double distToLayer = (startPosition - onLayerPosition).mag();
@@ -120,7 +120,7 @@ radialDirectionCheck(const EventContext& ctx,
       (boundarySurfaces[Trk::tubeInnerCover])->surfaceRepresentation();
     auto parsOnInsideSurface =
       prop.propagateParameters(ctx,
-                               *(startParm.begin()->first),
+                               *(startParm.begin()->params),
                                insideSurface,
                                dir,
                                true,
@@ -288,7 +288,7 @@ Trk::GsfExtrapolator::extrapolateImpl(
   }
 
   const Trk::TrackParameters* combinedState =
-    multiComponentState.begin()->first.get();
+    multiComponentState.begin()->params.get();
 
   const Trk::MultiComponentState* currentState = &multiComponentState;
 
@@ -349,7 +349,7 @@ Trk::GsfExtrapolator::extrapolateImpl(
     }
     // Break the loop if the distance between the surface and the track
     // parameters has increased
-    combinedState = currentState->begin()->first.get();
+    combinedState = currentState->begin()->params.get();
 
     auto parametersAtDestination =
       m_propagator->propagateParameters(ctx,
@@ -434,7 +434,7 @@ Trk::GsfExtrapolator::extrapolateImpl(
 
   // or we failed to reach the target
   if (!destinationState.empty() &&
-      &((*(destinationState.begin())).first->associatedSurface()) != &surface) {
+      &((*(destinationState.begin())).params->associatedSurface()) != &surface) {
     destinationState.clear();
   }
 
@@ -493,7 +493,7 @@ Trk::GsfExtrapolator::extrapolateToVolumeBoundary(
   cache.m_stateAtBoundary = &multiComponentState;
 
   const Trk::TrackParameters* combinedState =
-      cache.m_stateAtBoundary->begin()->first.get();
+      cache.m_stateAtBoundary->begin()->params.get();
   const Trk::Layer* associatedLayer = layer;
 
   if (!associatedLayer) {
@@ -547,7 +547,7 @@ Trk::GsfExtrapolator::extrapolateToVolumeBoundary(
 
   Trk::NavigationCell nextNavigationCell(nullptr, nullptr);
 
-  combinedState = cache.m_stateAtBoundary->begin()->first.get();
+  combinedState = cache.m_stateAtBoundary->begin()->params.get();
 
   const Trk::TrackingVolume* nextVolume = nullptr;
   const Trk::TrackParameters* navigationParameters =
@@ -597,7 +597,7 @@ Trk::GsfExtrapolator::extrapolateToVolumeBoundary(
     if (!matUpdatedState.empty()) {
       addMultiComponentToCache(cache, std::move(matUpdatedState));
       nextNavigationParameters =
-          cache.m_stateAtBoundary->begin()->first->uniqueClone();
+          cache.m_stateAtBoundary->begin()->params->uniqueClone();
     }
   }
   // Update the rest of the boundary information in the cache
@@ -638,7 +638,7 @@ Trk::GsfExtrapolator::extrapolateInsideVolume(
   // Retrieve the current layer
   // Produce a combined state
   const Trk::TrackParameters* combinedState =
-    currentState->begin()->first.get();
+    currentState->begin()->params.get();
 
   const Trk::Layer* associatedLayer = layer;
 
@@ -746,7 +746,7 @@ Trk::GsfExtrapolator::extrapolateFromLayerToLayer(
   Trk::MultiComponentState currentState{};
 
   const Trk::TrackParameters* combinedState =
-    multiComponentState.begin()->first.get();
+    multiComponentState.begin()->params.get();
   Amg::Vector3D currentPosition = combinedState->position();
   Amg::Vector3D currentDirection = direction * combinedState->momentum().unit();
 
@@ -788,7 +788,7 @@ Trk::GsfExtrapolator::extrapolateFromLayerToLayer(
     }
 
     if (!currentState.empty()) {
-      combinedState = currentState.begin()->first.get();
+      combinedState = currentState.begin()->params.get();
       currentPosition = combinedState->position();
       currentDirection = direction * combinedState->momentum().unit();
     }
@@ -913,7 +913,7 @@ Trk::GsfExtrapolator::extrapolateToDestinationLayer(
   // surface then a fall-back solution is required
 
   if (destinationState.empty()) {
-    combinedState = initialState->begin()->first.get();
+    combinedState = initialState->begin()->params.get();
     if (surface.isOnSurface(
           combinedState->position(), true, 0.5 * layer.thickness())) {
       destinationState = m_propagator->multiStatePropagate(ctx,
@@ -969,7 +969,7 @@ Trk::GsfExtrapolator::initialiseNavigation(
   // Empty the garbage bin
   emptyRecycleBins(cache);
   const Trk::TrackParameters* combinedState =
-    multiComponentState.begin()->first.get();
+    multiComponentState.begin()->params.get();
   /* =============================================
      Look for current volume
      ============================================= */

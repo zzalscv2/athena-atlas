@@ -75,7 +75,7 @@ struct GSFTsos {
   // convert pass ownership to MTSOS
   std::unique_ptr<const Trk::MultiComponentStateOnSurface> convert(bool slim) {
     if (!trackParameters) {
-      trackParameters = multiComponentState.front().first->uniqueClone();
+      trackParameters = multiComponentState.front().params->uniqueClone();
     }
     if (slim) {
       multiComponentState.clear();

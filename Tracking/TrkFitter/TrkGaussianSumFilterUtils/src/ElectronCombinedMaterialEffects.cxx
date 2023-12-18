@@ -153,7 +153,7 @@ scattering(GsfMaterial::Scattering& cache,
   cache.reset();
 
   // Request track parameters from component parameters
-  const Trk::TrackParameters* trackParameters = componentParameters.first.get();
+  const Trk::TrackParameters* trackParameters = componentParameters.params.get();
   const AmgSymMatrix(5)* measuredTrackCov = trackParameters->covariance();
 
   if (!measuredTrackCov) {
@@ -326,7 +326,7 @@ Trk::ElectronCombinedMaterialEffects::compute(
   double pathLength,
   Trk::PropDirection direction) const
 {
-  const AmgSymMatrix(5)* measuredCov = componentParameters.first->covariance();
+  const AmgSymMatrix(5)* measuredCov = componentParameters.params->covariance();
   /*
    * 1.  Retrieve multiple scattering corrections
    */
@@ -391,7 +391,7 @@ Trk::ElectronCombinedMaterialEffects::BetheHeitler(
 {
   cache.numElements = 0;
 
-  const Trk::TrackParameters* trackParameters = componentParameters.first.get();
+  const Trk::TrackParameters* trackParameters = componentParameters.params.get();
   const Amg::Vector3D& globalMomentum = trackParameters->momentum();
 
   const double radiationLength = materialProperties.x0();

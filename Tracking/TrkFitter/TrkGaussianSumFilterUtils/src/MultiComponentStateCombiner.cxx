@@ -31,15 +31,15 @@ Trk::MultiComponentState mergeFullDistArray(
   const int32_t n = statesToMerge.size();
   componentsArray.numComponents = n;
   for (int32_t i = 0; i < n; ++i) {
-    const AmgSymMatrix(5)* measuredCov = statesToMerge[i].first->covariance();
-    const AmgVector(5)& parameters = statesToMerge[i].first->parameters();
+    const AmgSymMatrix(5)* measuredCov = statesToMerge[i].params->covariance();
+    const AmgVector(5)& parameters = statesToMerge[i].params->parameters();
     // Fill in infomation
     const double cov =
         measuredCov ? (*measuredCov)(Trk::qOverP, Trk::qOverP) : -1.;
     componentsArray.components[i].mean = parameters[Trk::qOverP];
     componentsArray.components[i].cov = cov;
     componentsArray.components[i].invCov = cov > 0 ? 1. / cov : 1e10;
-    componentsArray.components[i].weight = statesToMerge[i].second;
+    componentsArray.components[i].weight = statesToMerge[i].weight;
   }
 
   // Gather the merges
@@ -53,18 +53,18 @@ Trk::MultiComponentState mergeFullDistArray(
     const int8_t minj = KL.merges[i].From;
     Trk::MultiComponentStateCombiner::combineWithWeight(statesToMerge[mini],
                                                         statesToMerge[minj]);
-    statesToMerge[minj].first.reset();
-    statesToMerge[minj].second = 0.;
+    statesToMerge[minj].params.reset();
+    statesToMerge[minj].weight = 0.;
   }
   // Assemble the final result
   for (auto& state : statesToMerge) {
     // Avoid merge ones
-    if (!state.first) {
+    if (!state.params) {
       continue;
     }
-    cache.multiComponentState.emplace_back(std::move(state.first),
-                                           state.second);
-    cache.validWeightSum += state.second;
+    cache.multiComponentState.emplace_back(std::move(state.params),
+                                           state.weight);
+    cache.validWeightSum += state.weight;
   }
   Trk::MultiComponentState mergedState =
       Trk::MultiComponentStateAssembler::assembledState(std::move(cache));
@@ -88,7 +88,7 @@ Trk::MultiComponentState merge(
   bool componentWithoutMeasurement = false;
   Trk::MultiComponentState::const_iterator component = statesToMerge.cbegin();
   for (; component != statesToMerge.cend(); ++component) {
-    if (!component->first->covariance()) {
+    if (!component->params->covariance()) {
       componentWithoutMeasurement = true;
       break;
     }
@@ -97,11 +97,11 @@ Trk::MultiComponentState merge(
     // Sort to select the one with the largest weight
     std::sort(statesToMerge.begin(), statesToMerge.end(),
               [](const Trk::ComponentParameters& x, const Trk::ComponentParameters& y) {
-                return x.second > y.second;
+                return x.weight > y.weight;
               });
 
     Trk::ComponentParameters dummyCompParams(
-        std::move(statesToMerge.begin()->first), 1.);
+        std::move(statesToMerge.begin()->params), 1.);
     Trk::MultiComponentState returnMultiState;
     returnMultiState.push_back(std::move(dummyCompParams));
     return returnMultiState;
@@ -119,18 +119,18 @@ Trk::ComponentParameters combineToSingleImpl(
   }
 
   const Trk::TrackParameters* firstParameters =
-      uncombinedState.front().first.get();
+      uncombinedState.front().params.get();
 
   // Check to see if first track parameters are measured or not
   const AmgSymMatrix(5)* firstMeasuredCov = firstParameters->covariance();
 
   if (uncombinedState.size() == 1) {
-    Trk::ComponentParameters(uncombinedState.front().first->clone(),
-                             uncombinedState.front().second);
+    Trk::ComponentParameters(uncombinedState.front().params->uniqueClone(),
+                             uncombinedState.front().weight);
   }
 
   double sumW(0.);
-  const int dimension = (uncombinedState.front()).first->parameters().rows();
+  const int dimension = (uncombinedState.front()).params->parameters().rows();
 
   AmgVector(5) mean;
   mean.setZero();
@@ -143,7 +143,7 @@ Trk::ComponentParameters combineToSingleImpl(
   Trk::MultiComponentState::const_iterator component = uncombinedState.begin();
   double totalWeight(0.);
   for (; component != uncombinedState.end(); ++component) {
-    double weight = (*component).second;
+    double weight = (*component).weight;
     totalWeight += weight;
   }
 
@@ -151,8 +151,8 @@ Trk::ComponentParameters combineToSingleImpl(
 
   for (; component != uncombinedState.end(); ++component) {
 
-    const Trk::TrackParameters* trackParameters = (*component).first.get();
-    double weight = (*component).second;
+    const Trk::TrackParameters* trackParameters = (*component).params.get();
+    double weight = (*component).weight;
 
     AmgVector(5) parameters = trackParameters->parameters();
 
@@ -161,7 +161,7 @@ Trk::ComponentParameters combineToSingleImpl(
     // Ensure that we don't have any problems with the cyclical nature of phi
     // Use first state as reference poin
     double deltaPhi =
-        (uncombinedState.begin())->first->parameters()[2] - parameters[2];
+        (uncombinedState.begin())->params->parameters()[2] - parameters[2];
     if (deltaPhi > M_PI) {
       parameters[2] += 2 * M_PI;
     } else if (deltaPhi < -M_PI) {
@@ -193,10 +193,10 @@ Trk::ComponentParameters combineToSingleImpl(
         }
 
         AmgVector(5) parameterDifference =
-          parameters - ((*remainingComponentIterator).first)->parameters();
+          parameters - ((*remainingComponentIterator).params)->parameters();
 
         double remainingComponentIteratorWeight =
-          (*remainingComponentIterator).second;
+          (*remainingComponentIterator).weight;
 
         covariancePart2 += weight * remainingComponentIteratorWeight *
                            parameterDifference *
@@ -307,7 +307,7 @@ Trk::MultiComponentStateCombiner::combineToSingle(
 const Trk::MultiComponentState& uncombinedState, const bool useMode) {
   Trk::ComponentParameters combinedComponent =
       combineToSingleImpl(uncombinedState, useMode);
-  return std::move(combinedComponent.first);
+  return std::move(combinedComponent.params);
 }
 
 void
@@ -315,13 +315,13 @@ Trk::MultiComponentStateCombiner::combineWithWeight(
 Trk::ComponentParameters& mergeTo,
 const Trk::ComponentParameters& addThis)
 {
-  const Trk::TrackParameters* firstTrackParameters = mergeTo.first.get();
+  const Trk::TrackParameters* firstTrackParameters = mergeTo.params.get();
   const AmgVector(5)& firstParameters = firstTrackParameters->parameters();
-  double firstWeight = mergeTo.second;
+  double firstWeight = mergeTo.weight;
 
-  const Trk::TrackParameters* secondTrackParameters = addThis.first.get();
+  const Trk::TrackParameters* secondTrackParameters = addThis.params.get();
   const AmgVector(5)& secondParameters = secondTrackParameters->parameters();
-  double secondWeight = addThis.second;
+  double secondWeight = addThis.weight;
 
   // copy over the first
   AmgVector(5) finalParameters(firstParameters);
@@ -336,11 +336,11 @@ const Trk::ComponentParameters& addThis)
     AmgSymMatrix(5) finalMeasuredCov(*firstMeasuredCov);
     combineCovWithWeight(firstParameters, finalMeasuredCov, firstWeight,
                          secondParameters, *secondMeasuredCov, secondWeight);
-    mergeTo.first->updateParameters(finalParameters, finalMeasuredCov);
-    mergeTo.second = finalWeight;
+    mergeTo.params->updateParameters(finalParameters, finalMeasuredCov);
+    mergeTo.weight = finalWeight;
   } else {
-    mergeTo.first->updateParameters(finalParameters);
-    mergeTo.second = finalWeight;
+    mergeTo.params->updateParameters(finalParameters);
+    mergeTo.weight = finalWeight;
   }
 }
 /**
@@ -419,26 +419,26 @@ Trk::MultiComponentStateCombiner::combineWithSmoother(
   for (const auto& forwardsComponent : forwardsMultiState) {
     // Need to check that all components have associated weight matricies
     const AmgSymMatrix(5)* forwardMeasuredCov =
-      forwardsComponent.first->covariance();
+      forwardsComponent.params->covariance();
     // Loop over all components in the smoother multi-state
     for (const auto& smootherComponent : smootherMultiState) {
       // Need to check that all components have associated weight matricies
       const AmgSymMatrix(5)* smootherMeasuredCov =
-        smootherComponent.first->covariance();
+        smootherComponent.params->covariance();
       if (!smootherMeasuredCov && !forwardMeasuredCov) {
         return {};
       }
 
       if (!forwardMeasuredCov) {
         Trk::ComponentParameters smootherComponentOnly(
-          smootherComponent.first->clone(), smootherComponent.second);
+          smootherComponent.params->uniqueClone(), smootherComponent.weight);
         combinedMultiState->push_back(std::move(smootherComponentOnly));
         continue;
       }
 
       if (!smootherMeasuredCov) {
         Trk::ComponentParameters forwardComponentOnly(
-          forwardsComponent.first->clone(), forwardsComponent.second);
+          forwardsComponent.params->uniqueClone(), forwardsComponent.weight);
         combinedMultiState->push_back(std::move(forwardComponentOnly));
         continue;
       }
@@ -448,18 +448,18 @@ Trk::MultiComponentStateCombiner::combineWithSmoother(
       const AmgSymMatrix(5) K =
         *forwardMeasuredCov * summedCovariance.inverse();
       const AmgVector(5) newParameters =
-        forwardsComponent.first->parameters() +
-        K * (smootherComponent.first->parameters() -
-             forwardsComponent.first->parameters());
+        forwardsComponent.params->parameters() +
+        K * (smootherComponent.params->parameters() -
+             forwardsComponent.params->parameters());
       const AmgVector(5) parametersDiff =
-        forwardsComponent.first->parameters() -
-        smootherComponent.first->parameters();
+        forwardsComponent.params->parameters() -
+        smootherComponent.params->parameters();
 
       AmgSymMatrix(5) covarianceOfNewParameters =
         AmgSymMatrix(5)(K * *smootherMeasuredCov);
 
       std::unique_ptr<Trk::TrackParameters> combinedTrackParameters =
-        (forwardsComponent.first)
+        (forwardsComponent.params)
           ->associatedSurface()
           .createUniqueTrackParameters(newParameters[Trk::loc1],
                                        newParameters[Trk::loc2],
@@ -474,8 +474,8 @@ Trk::MultiComponentStateCombiner::combineWithSmoother(
       double exponent =
         parametersDiff.transpose() * invertedSummedCovariance * parametersDiff;
       double weightScalingFactor = exp(-0.5 * exponent);
-      double combinedWeight = smootherComponent.second *
-                              forwardsComponent.second * weightScalingFactor;
+      double combinedWeight = smootherComponent.weight *
+                              forwardsComponent.weight * weightScalingFactor;
       Trk::ComponentParameters combinedComponent(
         std::move(combinedTrackParameters), combinedWeight);
       combinedMultiState->push_back(std::move(combinedComponent));

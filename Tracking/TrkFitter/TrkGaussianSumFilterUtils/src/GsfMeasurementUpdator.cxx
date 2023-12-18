@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file   GsfMeasurementUpdator.cxx
@@ -590,7 +590,7 @@ weights(Trk::MultiComponentState&& predictedState,
   for (const auto& component : returnMultiComponentState) {
 
     const Trk::TrackParameters* componentTrackParameters =
-      component.first.get();
+      component.params.get();
     if (!componentTrackParameters) {
       continue;
     }
@@ -681,7 +681,7 @@ weights(Trk::MultiComponentState&& predictedState,
        ++componentItr, ++index) {
     // Extract common factor to avoid numerical problems during exponentiation
     double chi2 = determinantRandChi2.elements[index].chi2 - minimumChi2;
-    const double priorWeight = componentItr->second;
+    const double priorWeight = componentItr->weight;
     fallBackWeights[index] = priorWeight;
     double updatedWeight(0.);
     // Determinant can not be below 1e-19. Rather ugly but protect
@@ -694,20 +694,20 @@ weights(Trk::MultiComponentState&& predictedState,
     } else {
       updatedWeight = 1e-10;
     }
-    componentItr->second = updatedWeight;
+    componentItr->weight = updatedWeight;
     sumWeights += updatedWeight;
   }
   if (sumWeights > 0.) {
     double invertSumWeights = 1. / sumWeights;
     // Renormalise the state to total weight = 1
     for (auto& returnComponent : returnMultiComponentState) {
-      returnComponent.second *= invertSumWeights;
+      returnComponent.weight *= invertSumWeights;
     }
   } else {
     // If the sum weights is less than 0 revert them back
     size_t fallbackIndex(0);
     for (auto& returnComponent : returnMultiComponentState) {
-      returnComponent.second = fallBackWeights[fallbackIndex];
+      returnComponent.weight = fallBackWeights[fallbackIndex];
       ++fallbackIndex;
     }
   }
@@ -743,7 +743,7 @@ rebuildState(Trk::MultiComponentState&& stateBeforeUpdate)
   // We need to loop checking for invalid componets i.e negative covariance
   // diagonal elements and update them with a large covariance matrix
   for (auto& component : stateWithInsertedErrors) {
-    const Trk::TrackParameters* trackParameters = component.first.get();
+    const Trk::TrackParameters* trackParameters = component.params.get();
     const bool rebuildCov = invalidComponent(trackParameters);
     if (rebuildCov) {
       AmgSymMatrix(5) bigNewCovarianceMatrix = AmgSymMatrix(5)::Zero();
@@ -753,7 +753,7 @@ rebuildState(Trk::MultiComponentState&& stateBeforeUpdate)
       bigNewCovarianceMatrix(2, 2) = 0.25;
       bigNewCovarianceMatrix(3, 3) = 0.25;
       bigNewCovarianceMatrix(4, 4) = 0.001 * 0.001;
-      component.first->updateParameters(trackParameters->parameters(),
+      component.params->updateParameters(trackParameters->parameters(),
                                         bigNewCovarianceMatrix);
     }
   }
@@ -792,12 +792,12 @@ calculateFilterStep(Trk::MultiComponentState&& stateBeforeUpdate,
   int degreesOfFreedom = 0;
   for (Trk::ComponentParameters& component : stateWithNewWeights) {
     if (stateWithNewWeights.size() > 1 &&
-        std::abs(component.first->parameters()[Trk::qOverP]) > 0.033333) {
+        std::abs(component.params->parameters()[Trk::qOverP]) > 0.033333) {
       continue;
     }
     Trk::FitQualityOnSurface componentFitQuality;
     /// Update the component in place
-    bool updateSuccess = filterStep(*(component.first),
+    bool updateSuccess = filterStep(*(component.params),
                                     componentFitQuality,
                                     measurement.localParameters(),
                                     measurement.localCovariance(),
@@ -806,7 +806,7 @@ calculateFilterStep(Trk::MultiComponentState&& stateBeforeUpdate,
       continue;
     }
 
-    if (invalidComponent(component.first.get())) {
+    if (invalidComponent(component.params.get())) {
       continue;
     }
 
@@ -815,7 +815,7 @@ calculateFilterStep(Trk::MultiComponentState&& stateBeforeUpdate,
     }
 
     double componentChi2 = componentFitQuality.chiSquared();
-    chiSquared += component.second * componentChi2;
+    chiSquared += component.weight * componentChi2;
 
     // The same measurement is included in each update
     // so we can update the degree of freedom only
@@ -862,7 +862,7 @@ Trk::GsfMeasurementUpdator::update(Trk::MultiComponentState&& stateBeforeUpdate,
   // associated error matricies then no need to perform the rebuild
   for (; component != stateBeforeUpdate.end(); ++component) {
     rebuildStateWithErrors =
-      rebuildStateWithErrors || invalidComponent(component->first.get());
+      rebuildStateWithErrors || invalidComponent(component->params.get());
   }
 
   if (rebuildStateWithErrors) {
@@ -897,7 +897,7 @@ Trk::GsfMeasurementUpdator::fitQuality(const MultiComponentState& updatedState,
   Trk::MultiComponentState::const_iterator component = updatedState.begin();
 
   for (; component != updatedState.end(); ++component) {
-    const Trk::TrackParameters* trackParameters = component->first.get();
+    const Trk::TrackParameters* trackParameters = component->params.get();
     Trk::FitQualityOnSurface componentFitQuality;
     stateFitQuality(componentFitQuality,
                     *trackParameters,
@@ -906,7 +906,7 @@ Trk::GsfMeasurementUpdator::fitQuality(const MultiComponentState& updatedState,
                     1);
 
     double componentChi2 = componentFitQuality.chiSquared();
-    chi2 += component->second * componentChi2;
+    chi2 += component->weight * componentChi2;
     // The same measurement is included in each update
     if (component == updatedState.begin()) {
       degreesOfFreedom = componentFitQuality.numberDoF();
