@@ -21,12 +21,14 @@ StatusCode RpcRdoToRpcDigit::TempDigitContainer::findCollection(const Identifier
         return StatusCode::SUCCESS;
     }
     std::unique_ptr<RpcDigitCollection> new_coll = std::make_unique<RpcDigitCollection>(elementId, hash);
-    coll = m_lastColl = m_digitMap[hash] = new_coll.get();
+    coll = new_coll.get();
     RpcDigitContainer::IDC_WriteHandle lock = m_cont->getWriteHandle(hash);
     if(lock.addOrDelete(std::move(new_coll)).isFailure()){
         msg<<MSG::ERROR<<" Failed to add digit collection "<<elementId<<endmsg;
+        coll = nullptr;
         return StatusCode::FAILURE;
     }    
+    m_lastColl = m_digitMap[hash] = coll;
     return StatusCode::SUCCESS;
 }
 RpcRdoToRpcDigit::RpcRdoToRpcDigit(const std::string& name, ISvcLocator* pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator) {}
