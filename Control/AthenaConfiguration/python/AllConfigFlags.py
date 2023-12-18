@@ -385,6 +385,11 @@ def initConfigFlags():
         return createTrackingConfigFlags()
     _addFlagsCategory(acf, "Tracking", __tracking, 'TrkConfig')
 
+    def __trackoverlay():
+        from TrackOverlayConfig.TrackOverlayConfigFlags import createTrackOverlayConfigFlags
+        return createTrackOverlayConfigFlags()
+    _addFlagsCategory(acf, "TrackOverlay", __trackoverlay, 'TrackOverlayConfig')
+
     def __acts():
         from ActsConfig.ActsConfigFlags import createActsConfigFlags
         return createActsConfigFlags()

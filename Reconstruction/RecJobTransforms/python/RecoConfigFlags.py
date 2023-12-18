@@ -19,6 +19,7 @@ _all_domains = [
     "AFP",
     "HI",
     "PostProcessing",
+    "TrackOverlay",
 ]
 
 
@@ -56,6 +57,8 @@ def createRecoConfigFlags():
     flags.addFlag("Reco.EnableCombinedMuon",
                   lambda prevFlags: prevFlags.Detector.EnableMuon and
                   prevFlags.Reco.EnableTracking)
+    # Enable TrackOverlay Reconstruction
+    flags.addFlag("Reco.EnableTrackOverlay", lambda prevFlags: False)
     # Enable PFlow Reconstruction
     flags.addFlag("Reco.EnablePFlow", lambda prevFlags: (
         prevFlags.Reco.EnableTracking
@@ -122,7 +125,6 @@ def createRecoConfigFlags():
     # Enable ZDC reconstruction if ZDC data is in Bytestream or simulated
     flags.addFlag("Reco.EnableZDC",_recoZDC)
                   
-
     # Enable common thinning and other post-processing
     flags.addFlag("Reco.EnablePostProcessing", True)
     flags.addFlag("Reco.PostProcessing.ThinNegativeClusters",

@@ -9,6 +9,8 @@ def TrackCollectionMergerAlgCfg(flags, name="InDetTrackCollectionMerger",
                                 OutputCombinedTracks="",
                                 **kwargs):
     result = ComponentAccumulator()
+    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    prefix = 'Sig_' if doTrackOverlay else ''
 
     kwargs.setdefault("TracksLocation", InputCombinedTracks)
     kwargs.setdefault("OutputTracksLocation", OutputCombinedTracks)
@@ -17,9 +19,9 @@ def TrackCollectionMergerAlgCfg(flags, name="InDetTrackCollectionMerger",
         from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
         kwargs.setdefault("AssociationTool", result.popToolsAndMerge(InDetPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
-    kwargs.setdefault("DoTrackOverlay",flags.Overlay.doTrackOverlay)
+    kwargs.setdefault("DoTrackOverlay",doTrackOverlay)
 
-    result.addEventAlgo(CompFactory.Trk.TrackCollectionMerger(name, **kwargs))
+    result.addEventAlgo(CompFactory.Trk.TrackCollectionMerger(prefix+name, **kwargs))
     return result
 
 
