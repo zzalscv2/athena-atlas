@@ -19,7 +19,7 @@
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 
-
+#include "CxxUtils/inline_hints.h"
 
 namespace {
     using MuonSegmentVec = std::vector<std::unique_ptr<Muon::MuonSegment>>;
@@ -1049,8 +1049,8 @@ namespace Muon {
         return resolveAmbiguities(std::move(seeds));
     }
 
-    #if defined(FLATTEN) && defined(__GNUC__)
-    __attribute__((flatten))
+    #if defined(FLATTEN)
+    ATH_FLATTEN
     #endif
     inline std::vector<NSWSeed> MuonNSWSegmentFinderTool::segmentSeedFromMM(const LayerMeasVec& orderedClusters,
                                                                             std::array<unsigned int,4> selLayers,
