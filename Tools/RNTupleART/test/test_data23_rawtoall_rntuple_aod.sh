@@ -21,16 +21,6 @@ Reco_tf.py \
   --conditionsTag="all:CONDBR2-BLKPA-2023-01" \
   --geometryVersion="all:ATLAS-R3S-2021-03-02-00" \
   --steering="doRAWtoALL" \
-  --outputFileValidation="False" \
-  --checkEventCount="False" \
   --preExec="flags.Output.StorageTechnology.EventData=\"ROOTRNTUPLE\";";
 
 echo "art-result: $? reconstruction";
-
-files=( myAOD.pool.root )
-for i in "${files[@]}"
-do
-    python -m "PyJobTransforms.trfValidateRootFile" "${i}" "event" "false" "on" > log."${i}".validation 2>&1;
-    grep -zq "Checking ntuple of key RNT:CollectionTree.*Checking ${NEVENTS} entries.*NTuple of key RNT:CollectionTree looks ok" log."${i}".validation;
-    echo "art-result: $? ${i} validation";
-done
