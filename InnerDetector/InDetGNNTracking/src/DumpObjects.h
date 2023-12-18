@@ -52,7 +52,7 @@ public:
   virtual StatusCode finalize() override final;
 
 private:
-  bool isPassed(std::shared_ptr<const HepMC3::GenParticle> particle, float &px, float &py, float &pz, float &pt,
+  bool isPassed(HepMC::ConstGenParticlePtr particle, float &px, float &py, float &pz, float &pt,
                 float &eta, float &vx, float &vy, float &vz, float &radius, float &status, float &charge,
                 std::vector<int> &vParentID, std::vector<int> &vParentBarcode, int &vProdNin, int &vProdNout,
                 int &vProdStatus, int &vProdBarcode);

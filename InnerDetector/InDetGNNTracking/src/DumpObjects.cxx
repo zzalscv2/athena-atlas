@@ -1272,7 +1272,7 @@ StatusCode InDet::DumpObjects::finalize() {
 }
 
 //--------------------------------------------------------------------------------------------
-bool InDet::DumpObjects::isPassed(std::shared_ptr<const HepMC3::GenParticle> particle, float &px, float &py, float &pz,
+bool InDet::DumpObjects::isPassed(HepMC::ConstGenParticlePtr particle, float &px, float &py, float &pz,
                                   float &pt, float &eta, float &vx, float &vy, float &vz, float &radius, float &status,
                                   float &charge, std::vector<int> &vParentID, std::vector<int> &vParentBarcode,
                                   int &vProdNin, int &vProdNout, int &vProdStatus, int &vProdBarcode) {
@@ -1315,10 +1315,20 @@ bool InDet::DumpObjects::isPassed(std::shared_ptr<const HepMC3::GenParticle> par
     vProdNout = particle->production_vertex()->particles_out_size();
     vProdStatus = particle->production_vertex()->id();
     vProdBarcode = HepMC::barcode(particle->production_vertex()); // JB: HEPMC3 barcode() -> HepMC::barcode(p)
+#ifdef HEPMC3
     for (const auto &p : particle->production_vertex()->particles_in()) {
       vParentID.push_back(p->pdg_id());
       vParentBarcode.push_back(HepMC::barcode(p)); // JB: HEPMC3 barcode() -> HepMC::barcode(p)
     }
+#else
+    for (auto ip = particle->production_vertex()->particles_in_const_begin();
+         ip != particle->production_vertex()->particles_in_const_end();
+         ++ip)
+    {
+      vParentID.push_back((*ip)->pdg_id());
+      vParentBarcode.push_back(HepMC::barcode(*ip)); // JB: HEPMC3 barcode() -> HepMC::barcode(p)
+    }
+#endif    
   } else {
     vProdNin = 0;
     vProdNout = 0;
