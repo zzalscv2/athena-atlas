@@ -123,14 +123,12 @@ StatusCode PixelModuleConfigCondAlg::execute(const EventContext& ctx) const {
   writeCdo -> setBarrelNoiseOccupancy(m_BarrelNoiseOccupancy);
   writeCdo -> setBarrelDisableProbability(m_BarrelDisableProbability);
   writeCdo -> setBarrelLorentzAngleCorr(m_BarrelLorentzAngleCorr);
-  writeCdo -> setDefaultBarrelBiasVoltage(m_BarrelBiasVoltage);
 
   writeCdo -> setEndcapToTThreshold(m_EndcapToTThreshold);
   writeCdo -> setEndcapCrossTalk(m_EndcapCrossTalk);
   writeCdo -> setEndcapNoiseOccupancy(m_EndcapNoiseOccupancy);
   writeCdo -> setEndcapDisableProbability(m_EndcapDisableProbability);
   writeCdo -> setEndcapLorentzAngleCorr(m_EndcapLorentzAngleCorr);
-  writeCdo -> setDefaultEndcapBiasVoltage(m_EndcapBiasVoltage);
 
   writeCdo -> setBarrelNoiseShape({m_InnermostNoiseShape, m_NextInnermostNoiseShape, m_PixelNoiseShape, m_PixelNoiseShape, m_PixelNoiseShape});
   writeCdo -> setEndcapNoiseShape(std::vector<std::vector<float>>(m_EndcapToTThreshold.size(), m_PixelNoiseShape));

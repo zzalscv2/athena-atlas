@@ -167,12 +167,6 @@ BOOST_AUTO_TEST_SUITE(PixelModuleDataStreamTest )
 150
 #temperature
 -7
-#barrelBiasVoltage
-80 350 200 150 
-#endcapBiasVoltage
-150 150 150 
-#DBMBiasVoltage
-500 500 500 
 #fluenceLayer
 8e+13 1.61e+14 7.1e+13 4.8e+13 
 #radSimFluenceMapList
@@ -214,6 +208,7 @@ PixelCabling/Pixels_Atlas_IdMapping_2016.dat#distortionInputSource
     PixelModuleData pmd; 
     const std::string fname="testInput.txt";
     std::string fullName = PathResolver::find_file (fname, "DATAPATH");
+    BOOST_TEST_MESSAGE("Reading file "+fullName);
     std::ifstream iss(fullName);
     BOOST_TEST_REQUIRE(iss.good());
     iss>>pmd;
