@@ -116,12 +116,12 @@ StatusCode eFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
     }
     if (!m_eEMSliceWriteKey.empty()) {
         ATH_CHECK( StatusCode(addContainer<xAOD::eFexEMRoIContainer,xAOD::eFexEMRoIAuxContainer>(
-                eContainers,L1CaloRdoFexTob::TobSource::EfexXtob,true,m_eEMSliceWriteKey,ctx)) );
+                eContainers,L1CaloRdoFexTob::TobSource::EfexTob,true,m_eEMSliceWriteKey,ctx)) );
         multislice=true;
     }
     if (!m_eTAUSliceWriteKey.empty()) {
         ATH_CHECK( StatusCode(addContainer<xAOD::eFexTauRoIContainer,xAOD::eFexTauRoIAuxContainer>(
-                tContainers,L1CaloRdoFexTob::TobSource::EfexXtob,true,m_eTAUSliceWriteKey,ctx)) );
+                tContainers,L1CaloRdoFexTob::TobSource::EfexTob,true,m_eTAUSliceWriteKey,ctx)) );
         multislice=true;
     }
 
@@ -215,7 +215,6 @@ StatusCode eFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                         } else {
                             cont->second->back()->initialize(tob.getWord0(slice), tob.getWord1(slice));
                         }
-                        if(multislice) cont->second->back()->auxdata<int>("slice") = slice;
                     } else if (tob.getTobType() == L1CaloRdoFexTob::TobType::Tau) {
                         auto cont = tContainers.find({tob.getTobSource(), int(slice) != tob.getL1aPos()});
                         if (cont == tContainers.end()) continue; // not writing this tob collection
@@ -225,7 +224,6 @@ StatusCode eFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                         } else {
                             cont->second->back()->initialize(tob.getWord0(slice), tob.getWord1(slice));
                         }
-                        if(multislice) cont->second->back()->auxdata<int>("slice") = slice;
                     }
                 } // timeslice loop
             } // tob loop
@@ -259,3 +257,4 @@ StatusCode eFexByteStreamTool::convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPA
     // not supported yet
     return StatusCode::FAILURE;
 }
+

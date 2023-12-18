@@ -20,7 +20,7 @@ StatusCode MistimedStreamMonitorAlgorithm::initialize() {
   ATH_MSG_DEBUG("m_xAODTriggerTowerContainerName "<< m_xAODTriggerTowerContainerName); 
 
   ATH_MSG_INFO("m_eFexEMContainer: "<< m_eFexEMContainerKey); 
-  ATH_MSG_INFO("m_eFexEMOutContainer"<< m_eFexEMOutContainerKey); 
+  ATH_MSG_INFO("m_eFexEMOutContainer: "<< m_eFexEMOutContainerKey); 
   ATH_MSG_INFO("m_eFexTauContainer: "<< m_eFexTauContainerKey);
 
   // we initialise all the containers that we need
@@ -107,7 +107,7 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
   unsigned int lumiNo = GetEventInfo(ctx)->lumiBlock();
   unsigned int currentRunNo = ctx.eventID().run_number();  
   unsigned int currentEventNo =  ctx.eventID().event_number();
-
+  
   ATH_MSG_DEBUG("Lumi Block :: " << lumiNo);
   ATH_MSG_DEBUG("Run Number :: " << currentRunNo);
   ATH_MSG_DEBUG("Event Number :: " << currentEventNo);
@@ -295,10 +295,10 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
 
     for(auto tob : *emTobs) {
       if (tob->et() > 5000) { //eFex TOB energy in MeV  
-        if ( tob->auxdata<int>("slice") == 1) {
+        if (tob->bcn4() == ((ctx.eventID().bunch_crossing_id()) & 0xf )) {
           eFexintimeCounter++;
         }
-        else if ( tob->auxdata<int>("slice") == 2) {
+        else if (tob->bcn4() == (((ctx.eventID().bunch_crossing_id())+1) & 0xf )) {
           eFexoutoftimeCounter++;
         }
       }
@@ -369,9 +369,9 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
   cutFlowX=  TTEMLayer;
   fill(m_packageName,cutFlowX);
 
-  double d_eta = 0., d_phi = 0., d_phi1 = 0., dR = 0.; 
-  double eta_in = 0., phi_in = 0;
-  double eta_out = 0., phi_out = 0; 
+  double dEta = 0., dPhi = 0., dPhi1 = 0., dR = 0.; 
+  double etaIn = 0., phiIn = 0;
+  double etaOut = 0., phiOut = 0; 
   bool overlap = false; 
   
   if (trigger == "eFex") {
@@ -381,27 +381,27 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     CHECK( evtStore()->retrieve( emTobsOut, "L1_eEMxRoIOutOfTime" ) );
     
     for(auto tob : *emTobs) {
-      eta_in = tob->eta();
-      phi_in = tob->phi();
+      etaIn = tob->eta();
+      phiIn = tob->phi();
 
       for(auto tobOut : *emTobsOut) {
-        eta_out = tobOut->eta();
-        phi_out = tobOut->phi();
-        d_eta = std::abs(eta_in-eta_out);
-        d_phi = std::abs(phi_in-phi_out);
-        if ((phi_in < 0) and (phi_out > 0)){
-          d_phi1 = std::abs((phi_in+2*M_PI)-phi_out);
-          if (d_phi1 < d_phi) {
-            d_phi = d_phi1;
+        etaOut = tobOut->eta();
+        phiOut = tobOut->phi();
+        dEta = std::abs(etaIn-etaOut);
+        dPhi = std::abs(phiIn-phiOut);
+        if ((phiIn < 0) and (phiOut > 0)){
+          dPhi1 = std::abs((phiIn+2*M_PI)-phiOut);
+          if (dPhi1 < dPhi) {
+            dPhi = dPhi1;
           }
         }
-        else if ((phi_in > 0) and (phi_out < 0)){
-          d_phi1 = std::abs(phi_in-(phi_out+2*M_PI));
-          if (d_phi1 < d_phi) {
-            d_phi = d_phi1;
+        else if ((phiIn > 0) and (phiOut < 0)){
+          dPhi1 = std::abs(phiIn-(phiOut+2*M_PI));
+          if (dPhi1 < dPhi) {
+            dPhi = dPhi1;
           }
         }
-        dR = TMath::Sqrt(d_eta*d_eta+d_phi*d_phi);
+        dR = TMath::Sqrt(dEta*dEta+dPhi*dPhi);
         if ((dR < .2) ){ 
           overlap = true; 
         }
@@ -418,8 +418,8 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     const xAOD::jFexSRJetRoIContainer* jFexSRJetRoI;
     CHECK( evtStore()->retrieve( jFexSRJetRoI, "L1_jFexSRJetRoI" ) );
     for(auto tob : *jFexSRJetRoI) {
-      eta_in = tob->eta();
-      phi_in = tob->phi();
+      etaIn = tob->eta();
+      phiIn = tob->phi();
       
       for (const xAOD::TriggerTower* tt : *triggerTowerTES) {
         const std::vector<uint16_t>& ttADC =  (tt)->adc();
@@ -439,23 +439,23 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
         bool goodQual = pulseQuality(readoutCorrectedADC, adcPeakPositon);
 
         if( (adcPeakPositon == 3) and (goodQual) ) {
-          eta_out = tt->eta();
-          phi_out = tt->phi()-M_PI;
-          d_eta = std::abs(eta_in-eta_out);
-          d_phi = std::abs(phi_in-phi_out);
-          if ((phi_in < 0) and (phi_out > 0)){
-            d_phi1 = std::abs((phi_in+2*M_PI)-phi_out);
-            if (d_phi1 < d_phi) {
-              d_phi = d_phi1;
+          etaOut = tt->eta();
+          phiOut = tt->phi()-M_PI;
+          dEta = std::abs(etaIn-etaOut);
+          dPhi = std::abs(phiIn-phiOut);
+          if ((phiIn < 0) and (phiOut > 0)){
+            dPhi1 = std::abs((phiIn+2*M_PI)-phiOut);
+            if (dPhi1 < dPhi) {
+              dPhi = dPhi1;
             }
           }
-          else if ((phi_in > 0) and (phi_out < 0)){
-            d_phi1 = std::abs(phi_in-(phi_out+2*M_PI));
-            if (d_phi1 < d_phi) {
-              d_phi = d_phi1;
+          else if ((phiIn > 0) and (phiOut < 0)){
+            dPhi1 = std::abs(phiIn-(phiOut+2*M_PI));
+            if (dPhi1 < dPhi) {
+              dPhi = dPhi1;
             }
           }
-          dR = TMath::Sqrt(d_eta*d_eta+d_phi*d_phi);
+          dR = TMath::Sqrt(dEta*dEta+dPhi*dPhi);
           if (dR < .2)  {
             overlap = true; 
           }
@@ -476,8 +476,8 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
         const xAOD::gFexJetRoIContainer* gFexJetRoI;
         CHECK( evtStore()->retrieve( gFexJetRoI, key.key() ) );
         for(auto tob : *gFexJetRoI) {
-          eta_in = tob->eta();
-          phi_in = tob->phi();
+          etaIn = tob->eta();
+          phiIn = tob->phi();
           
           for (const xAOD::TriggerTower* tt : *triggerTowerTES) {
             const std::vector<uint16_t>& ttADC =  (tt)->adc();
@@ -497,23 +497,23 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
             bool goodQual = pulseQuality(readoutCorrectedADC, adcPeakPositon);
 
             if( (adcPeakPositon == 3) and (goodQual) ) {
-              eta_out = tt->eta();
-              phi_out = tt->phi()-M_PI;
-              d_eta = std::abs(eta_in-eta_out);
-              d_phi = std::abs(phi_in-phi_out);
-              if ((phi_in < 0) and (phi_out > 0)){
-                d_phi1 = std::abs((phi_in+2*M_PI)-phi_out);
-                if (d_phi1 < d_phi) {
-                  d_phi = d_phi1;
+              etaOut = tt->eta();
+              phiOut = tt->phi()-M_PI;
+              dEta = std::abs(etaIn-etaOut);
+              dPhi = std::abs(phiIn-phiOut);
+              if ((phiIn < 0) and (phiOut > 0)){
+                dPhi1 = std::abs((phiIn+2*M_PI)-phiOut);
+                if (dPhi1 < dPhi) {
+                  dPhi = dPhi1;
                 }
               }
-              else if ((phi_in > 0) and (phi_out < 0)){
-                d_phi1 = std::abs(phi_in-(phi_out+2*M_PI));
-                if (d_phi1 < d_phi) {
-                  d_phi = d_phi1;
+              else if ((phiIn > 0) and (phiOut < 0)){
+                dPhi1 = std::abs(phiIn-(phiOut+2*M_PI));
+                if (dPhi1 < dPhi) {
+                  dPhi = dPhi1;
                 }
               }
-              dR = TMath::Sqrt(d_eta*d_eta+d_phi*d_phi);
+              dR = TMath::Sqrt(dEta*dEta+dPhi*dPhi);
               if (dR < .2)  {
                 overlap = true; 
               }
@@ -619,25 +619,25 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
         philut = phi;
 
         if(cpmEMenergy.size() > 2){ // expect 3 slices to be read out
-          ATH_MSG_DEBUG("CPM :: emLUT0 :: " <<  unsigned(cpmEMenergy.at(0)) << ":: emLUT1 :: " <<  unsigned(cpmEMenergy.at(1)) << ":: emLUT2 :: "  <<  unsigned(cpmEMenergy.at(2)));
-        
-          emLUT0 = (int)cpmEMenergy.at(0);
+          ATH_MSG_DEBUG("CPM :: emLUT0 :: " <<  static_cast<unsigned>(cpmEMenergy.at(0)) << ":: emLUT1 :: " <<  static_cast<unsigned>(cpmEMenergy.at(1)) << ":: emLUT2 :: "  <<  static_cast<unsigned>(cpmEMenergy.at(2)));
+
+          emLUT0 = static_cast<int>(cpmEMenergy.at(0));
           if(cpmEMenergy.at(0) > 0) fill(groupName+"lut_EM0",etalut,philut, emLUT0);
         
-          emLUT1 =  (int) cpmEMenergy.at(1);
+          emLUT1 = static_cast<int>(cpmEMenergy.at(1));
           if(cpmEMenergy.at(1) > 0) fill(groupName+"lut_EM1",etalut,philut, emLUT1);
       
-          emLUT2 = (int) cpmEMenergy.at(2);
+          emLUT2 = static_cast<int>(cpmEMenergy.at(2));
           if(cpmEMenergy.at(2) > 0)  fill(groupName+"lut_EM2",etalut,philut, emLUT2);
         }
         if(cpmHADenergy.size() > 2){
-          ATH_MSG_DEBUG("CPM :: hadLUT0 :: " <<  unsigned(cpmHADenergy.at(0)) << ":: hadLUT1 :: " <<  unsigned(cpmHADenergy.at(1)) << ":: hadLUT2 :: "  <<  unsigned(cpmHADenergy.at(2)));
+          ATH_MSG_DEBUG("CPM :: hadLUT0 :: " <<  static_cast<unsigned>(cpmHADenergy.at(0)) << ":: hadLUT1 :: " <<  static_cast<unsigned>(cpmHADenergy.at(1)) << ":: hadLUT2 :: "  <<  static_cast<unsigned>(cpmHADenergy.at(2)));
         
-          hadLUT0 = (int) cpmHADenergy.at(0);
+          hadLUT0 = static_cast<int>(cpmHADenergy.at(0));
           if(cpmHADenergy.at(0) > 0) fill(groupName+"lut_HAD0",etalut,philut, hadLUT0);
-          hadLUT1 =  (int) cpmHADenergy.at(1);
+          hadLUT1 = static_cast<int>(cpmHADenergy.at(1));
           if(cpmHADenergy.at(1) > 0) fill(groupName+"lut_HAD1",etalut,philut, hadLUT1);
-          hadLUT2 =  (int) cpmHADenergy.at(2);
+          hadLUT2 = static_cast<int>(cpmHADenergy.at(2));
           if(cpmHADenergy.at(2) > 0)fill(groupName+"lut_HAD2",etalut,philut, hadLUT2);
         }
 	    }
@@ -662,27 +662,27 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
           for (auto phi:  jet.phiScaled) {
             philut = phi;
             if(jepEMenergy.size() > 2){
-              ATH_MSG_DEBUG("JetElement :: emLUT0 :: " <<  unsigned(jepEMenergy.at(0)) << ":: emLUT1 :: " <<  unsigned(jepEMenergy.at(1)) << ":: emLUT2 :: "  <<  unsigned(jepEMenergy.at(2)));
+              ATH_MSG_DEBUG("JetElement :: emLUT0 :: " <<  static_cast<unsigned>(jepEMenergy.at(0)) << ":: emLUT1 :: " <<  static_cast<unsigned>(jepEMenergy.at(1)) << ":: emLUT2 :: "  <<  static_cast<unsigned>(jepEMenergy.at(2)));
 
-              emLUT0 = (int)jepEMenergy.at(0);
+              emLUT0 = static_cast<int>(jepEMenergy.at(0));
                 if(jepEMenergy.at(0) > 0) fill(groupName+"lut_EM0",etalut,philut, emLUT0);
           
-              emLUT1 = (int)jepEMenergy.at(1);
+              emLUT1 = static_cast<int>(jepEMenergy.at(1));
               if(jepEMenergy.at(1) > 0) fill(groupName+"lut_EM1",etalut,philut, emLUT1);
                 
-              emLUT2 = (int)jepEMenergy.at(2);
+              emLUT2 = static_cast<int>(jepEMenergy.at(2));
               if(jepEMenergy.at(2) > 0) fill(groupName+"lut_EM2",etalut,philut, emLUT2);
             }
 	          if(jepHADenergy.size()> 2){
-              ATH_MSG_DEBUG("JetElement :: hadLUT0 :: " <<  unsigned(jepHADenergy.at(0)) << ":: hadLUT1 :: " <<  unsigned(jepHADenergy.at(1)) << ":: hadLUT2 :: "  <<  unsigned(jepHADenergy.at(2)));
+              ATH_MSG_DEBUG("JetElement :: hadLUT0 :: " <<  static_cast<unsigned>(jepHADenergy.at(0)) << ":: hadLUT1 :: " <<  static_cast<unsigned>(jepHADenergy.at(1)) << ":: hadLUT2 :: "  <<  static_cast<unsigned>(jepHADenergy.at(2)));
             
-              hadLUT0 = (int)jepHADenergy.at(0);
+              hadLUT0 = static_cast<int>(jepHADenergy.at(0));
               if(jepHADenergy.at(0) > 0) fill(groupName+"lut_HAD0",etalut,philut, hadLUT0);
               
-              hadLUT1 = (int)jepHADenergy.at(1);
+              hadLUT1 = static_cast<int>(jepHADenergy.at(1));
               if(jepHADenergy.at(1) > 0) fill(groupName+"lut_HAD1",etalut,philut, hadLUT1);
               
-              hadLUT2 = (int)jepHADenergy.at(2);
+              hadLUT2 = static_cast<int>(jepHADenergy.at(2));
               if(jepHADenergy.at(2) > 0)  fill(groupName+"lut_HAD2",etalut,philut, hadLUT2);
             }
           }
@@ -727,12 +727,12 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
         }
 
         // fill the eFex histograms in the right time slice
-        if ( tob->auxdata<int>("slice") == 0) {
+        if (tob->bcn4() == (((ctx.eventID().bunch_crossing_id())-1) & 0xf )) {
             if (TOBeT > 0.0){
               fill(groupName+"Efex0", TOBeta, TOBphi, TOBeT);
             }
         }
-        else if ( tob->auxdata<int>("slice") == 1) {
+        else if (tob->bcn4() == ((ctx.eventID().bunch_crossing_id()) & 0xf )) {
             if (TOBeT > 0.0){
               if (TOBeT_max_in < TOBeT) {
                 TOBeT_max_in = tob->et()/1000;
@@ -750,7 +750,7 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
               }
             }
         }
-        else if ( tob->auxdata<int>("slice") == 2) {
+        else if (tob->bcn4() == (((ctx.eventID().bunch_crossing_id())+1) & 0xf )) {
             if (TOBeT > 0.0){
               if (TOBeT_max < TOBeT) {
                 TOBeT_max = tob->et()/1000;

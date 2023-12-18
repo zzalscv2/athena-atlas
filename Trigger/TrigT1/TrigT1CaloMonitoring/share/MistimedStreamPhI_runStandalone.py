@@ -92,13 +92,12 @@ if __name__ == "__main__": # typically not needed in top level script
     
     import glob
     runNumber = options.runNumber
-    flags.Input.Files = glob.glob("/eos/user/a/aackerma/QT/mistimed_input/"+runNumber+"/data23_13p6TeV."+runNumber+".physics_Mistimed.merge.RAW/data23_13p6TeV."+runNumber+".physics_Mistimed.merge.RAW._lb*._SFO-ALL._0001.1")
-    #flags.Input.Files = glob.glob("/eos/atlas/atlastier0/rucio/data23_13p6TeV/physics_Mistimed/"+runNumber+"/data23_13p6TeV."+runNumber+".physics_Mistimed.merge.RAW/data23_13p6TeV."+runNumber+".physics_Mistimed.merge.RAW._lb*._SFO-ALL._0001.1")
+    flags.Input.Files = glob.glob("/eos/atlas/atlastier0/rucio/data23_13p6TeV/physics_Mistimed/"+runNumber+"/data23_13p6TeV."+runNumber+".physics_Mistimed.merge.RAW/data23_13p6TeV."+runNumber+".physics_Mistimed.merge.RAW._lb*._SFO-ALL._0001.1")
     
     flags.Trigger.DecisionMakerValidation.Execute=False
     flags.Trigger.DecisionMakerValidation.ErrorMode=False
 
-    flags.Output.HISTFileName = "MistimedPhI_L1_test_"+runNumber+".root"
+    flags.Output.HISTFileName = "MistimedPhI_"+runNumber+".root"
     flags.lock()
 
     # create basic infrastructure
