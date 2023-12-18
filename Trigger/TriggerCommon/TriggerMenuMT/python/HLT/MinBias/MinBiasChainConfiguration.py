@@ -45,7 +45,7 @@ class MinBiasChainConfig(ChainConfigurationBase):
         else:
             steps.append(self.getMinBiasEmptyMbtsStep(flags))
 
-        if "afpdz" in self.chainPart['recoAlg']:
+        if "afpdz5" in self.chainPart['recoAlg'] or "afpdz10" in self.chainPart['recoAlg']:
             # afpdz covers both the trigger hypo and afptof reconstruction
             steps.append(self.getAFPToFDeltaZStep(flags))
         elif "afptof" in self.chainPart['recoAlg']:

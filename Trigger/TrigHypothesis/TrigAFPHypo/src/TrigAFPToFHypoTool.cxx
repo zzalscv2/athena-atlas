@@ -8,12 +8,14 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 using namespace TrigCompositeUtils;
 
 TrigAFPToFHypoTool::TrigAFPToFHypoTool(const std::string &type, const std::string &name, const IInterface *parent)
-  : AthCheckedComponent<AthAlgTool>(type, name, parent),
+  : AthAlgTool(type, name, parent),
     m_decisionId(HLT::Identifier::fromToolName(name)) {}
 
 StatusCode TrigAFPToFHypoTool::initialize()
 {
   ATH_MSG_DEBUG("TrigAFPToFHypoTool::initialize()");
+  ATH_MSG_DEBUG("m_deltaZCut: " << m_deltaZCut);
+  ATH_MSG_DEBUG("m_acceptAll: " << m_acceptAll);
   return StatusCode::SUCCESS;
 }
 
@@ -30,7 +32,11 @@ StatusCode TrigAFPToFHypoTool::decide(std::vector<AFPToFHypoToolInfo>& inputs) c
 
     bool pass = true;
 
-    if( std::abs( info.afpVtx->position() - info.prmVtx->z() ) > m_deltaZCut) pass = false; 
+    ATH_MSG_DEBUG("AFP ToF vertex z position: " << info.afpVtx->position() 
+                  << " ID vertex z position: " << info.idVtx->z() 
+                  << " deltaZCut: " << m_deltaZCut);
+
+    if( std::abs( info.afpVtx->position() - info.idVtx->z() ) > m_deltaZCut) pass = false; 
 
     if(pass or m_acceptAll) {
       addDecisionID(m_decisionId.numeric(), info.outputDecision);
