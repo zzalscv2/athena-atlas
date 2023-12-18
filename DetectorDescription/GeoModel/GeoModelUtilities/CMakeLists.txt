@@ -19,7 +19,7 @@ if( BUILDVP1LIGHT )
 else()
    set( sources src/*.cxx )
    set( libraries AthenaBaseComps AthenaKernel GaudiKernel GeoModelInterfaces
-      RDBAccessSvcLib )
+       RDBAccessSvcLib CxxUtils)
 endif()
 
 # Component(s) in the package:

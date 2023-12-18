@@ -381,7 +381,7 @@ namespace MuonGM {
         return tubeToMultilayerTransf(nodeform_localTubePos(tubeLayer, tube),
                                       fromIdealToDeformed(tubeLayer, tube));
     }
-#if defined(FLATTEN) && defined(__GNUC__)
+#if defined(FLATTEN)
     // We compile this package with optimization, even in debug builds; otherwise,
     // the heavy use of Eigen makes it too slow.  However, from here we may call
     // to out-of-line Eigen code that is linked from other DSOs; in that case,

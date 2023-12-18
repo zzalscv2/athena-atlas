@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file GeoModelUtilities/src/GeoVisitVolumes.cxx
@@ -14,6 +14,8 @@
 #include "GeoModelKernel/GeoNameTag.h"
 #include "GeoModelKernel/GeoSerialDenominator.h"
 #include "GeoModelKernel/GeoSerialIdentifier.h"
+
+#include "CxxUtils/inline_hints.h"
 
 #include <string>
 
@@ -39,9 +41,9 @@ void GeoVisitVolumes::handleTransform (const GeoTransform *xform)
 
 void GeoVisitVolumes::handleVol (const GeoVPhysVol *vol)
 {
-  //      
-  // Return if we have not got to any children:     
-  //     
+  //
+  // Return if we have not got to any children:
+  //
   if(getPath()->getLength()-1 == 0)
     return;
 
@@ -65,7 +67,7 @@ void GeoVisitVolumes::handleVol (const GeoVPhysVol *vol)
   const std::string& name = m_nameTag ? m_nameTag->getName() : anon;
 
   int id = m_idTag ? m_idTag->getIdentifier() : -1;
-    
+
   m_action (id, name, vol, transform, defTransform);
 
   m_idTag   = nullptr;
@@ -98,13 +100,13 @@ void GeoVisitVolumes::handleSerialDenominator (const GeoSerialDenominator *sD)
 }
 
 
-#if defined(FLATTEN) && defined(__GNUC__)
+#if defined(FLATTEN)
 // We compile this package with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
-// to be inlined here if possible.
-__attribute__ ((flatten))
+// to be inlined here if possible
+ATH_FLATTEN
 #endif
 void GeoVisitVolumes::handleSerialTransformer (const GeoSerialTransformer  *sT)
 {
@@ -115,7 +117,7 @@ void GeoVisitVolumes::handleSerialTransformer (const GeoSerialTransformer  *sT)
     idbase = m_serialIdentifier->getBaseId();
   }
 
-  GeoTrf::Transform3D transform (GeoTrf::Transform3D::Identity());  
+  GeoTrf::Transform3D transform (GeoTrf::Transform3D::Identity());
   GeoTrf::Transform3D defTransform (GeoTrf::Transform3D::Identity());
   for (const GeoTransform* t : m_pendingTransformList) {
     transform    = transform    * t->getTransform(nullptr);
