@@ -17,7 +17,7 @@ Trk::MultiComponentStateHelpers::clone(const Trk::MultiComponentState& in)
   auto clonedState = Trk::MultiComponentState();
   clonedState.reserve(in.size());
   for (const ComponentParameters& component : in) {
-    clonedState.emplace_back(component.first->clone(), component.second);
+    clonedState.emplace_back(component.params->uniqueClone(), component.weight);
   }
   return clonedState;
 }
@@ -48,7 +48,7 @@ Trk::MultiComponentStateHelpers::WithScaledError(Trk::MultiComponentState&& in,
   coefficients.fillSymmetric(3, 4, (errorScaleTheta * errorScaleQoverP));
 
   for (ComponentParameters& component : in) {
-    Trk::TrackParameters* trackParameters = component.first.get();
+    Trk::TrackParameters* trackParameters = component.params.get();
     const AmgSymMatrix(5)* originalMatrix = trackParameters->covariance();
     // If no covariance skip
     if (!originalMatrix) {
@@ -67,7 +67,7 @@ Trk::MultiComponentStateHelpers::allHaveCovariance(const Trk::MultiComponentStat
 {
   bool allHaveCovariance = true;
   for (const ComponentParameters& component : in) {
-    const AmgSymMatrix(5)* originalMatrix = component.first->covariance();
+    const AmgSymMatrix(5)* originalMatrix = component.params->covariance();
     if (!originalMatrix) {
       allHaveCovariance = false;
       break;
@@ -83,13 +83,13 @@ Trk::MultiComponentStateHelpers::renormaliseState(Trk::MultiComponentState& in,
   // Determine total weighting of state
   double sumWeights = 0.;
   for (const ComponentParameters& component : in) {
-    sumWeights += component.second;
+    sumWeights += component.weight;
   }
   if (sumWeights == 0) {
     return;
   }
   double normalise = norm / sumWeights;
   for (ComponentParameters& component : in) {
-    component.second = component.second * normalise;
+    component.weight = component.weight * normalise;
   }
 }

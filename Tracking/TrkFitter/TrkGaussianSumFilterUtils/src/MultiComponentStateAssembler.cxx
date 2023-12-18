@@ -38,7 +38,7 @@ doStateAssembly(Cache&& cache, const double newWeight)
     if (!cache.multiComponentState.empty()) {
       const double fixedWeights = 1. / static_cast<double>(cacheSize);
       for (auto& component : cache.multiComponentState) {
-        component.second = fixedWeights;
+        component.weight = fixedWeights;
       }
     }
     Trk::MultiComponentState assembledState =
@@ -52,7 +52,7 @@ doStateAssembly(Cache&& cache, const double newWeight)
   const double scalingFactor =
     cache.validWeightSum > 0. ? newWeight / cache.validWeightSum : 1.;
   for (auto& component : assembledState) {
-    component.second *= scalingFactor;
+    component.weight *= scalingFactor;
   }
   // Reset the cache before leaving
   return assembledState;
@@ -78,7 +78,7 @@ prepareStateForAssembly(Cache& cache)
   std::sort(
       cache.multiComponentState.begin(), cache.multiComponentState.end(),
       [](const Trk::ComponentParameters& x, const Trk::ComponentParameters& y) {
-        return x.second > y.second;
+        return x.weight > y.weight;
       });
 
   double totalWeight(cache.validWeightSum + cache.invalidWeightSum);
@@ -96,7 +96,7 @@ prepareStateForAssembly(Cache& cache)
         cache.multiComponentState.begin(), cache.multiComponentState.end(),
         dummySmallestWeight,
         [](const Trk::ComponentParameters& x,
-           const Trk::ComponentParameters& y) { return x.second > y.second; });
+           const Trk::ComponentParameters& y) { return x.weight > y.weight; });
 
     // reverse iterate , so as to delete removing the last
     auto lower_than_reverse = std::make_reverse_iterator(lower_than);

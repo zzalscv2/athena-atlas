@@ -228,10 +228,10 @@ Trk::ElectronMaterialMixtureConvolution::update(
   // Full method does this for each component which i don't think this is needed
   if (updateType == Preupdate) {
     updateFactor =
-      layer.preUpdateMaterialFactor(*inputState.front().first, direction);
+      layer.preUpdateMaterialFactor(*inputState.front().params, direction);
   } else if (updateType == Postupdate) {
     updateFactor =
-      layer.postUpdateMaterialFactor(*inputState.front().first, direction);
+      layer.postUpdateMaterialFactor(*inputState.front().params, direction);
   }
 
   if (updateFactor < 0.01) {
@@ -244,26 +244,26 @@ Trk::ElectronMaterialMixtureConvolution::update(
   // Fill cache and work out how many final components there should be
   size_t n(0);
   for (size_t i(0); i < inputState.size(); ++i) {
-    const AmgSymMatrix(5)* measuredCov = inputState[i].first->covariance();
+    const AmgSymMatrix(5)* measuredCov = inputState[i].params->covariance();
     // If the momentum is too dont apply material effects
-    if (inputState[i].first->momentum().mag() <= 250. * Gaudi::Units::MeV) {
+    if (inputState[i].params->momentum().mag() <= 250. * Gaudi::Units::MeV) {
       dummyCacheElement(caches[i]);
       updateCacheElement(
-        caches[i], 0, inputState[i].first->parameters(), measuredCov);
-      caches[i].weights[0] = inputState[i].second;
+        caches[i], 0, inputState[i].params->parameters(), measuredCov);
+      caches[i].weights[0] = inputState[i].weight;
       n += caches[i].numEntries;
       continue;
     }
 
     // Get the material effects and store them in the cache
     std::pair<const Trk::MaterialProperties*, double> matPropPair =
-        getMaterialProperties(inputState[i].first.get(), layer);
+        getMaterialProperties(inputState[i].params.get(), layer);
 
     if (!matPropPair.first) {
       dummyCacheElement(caches[i]);
       updateCacheElement(
-        caches[i], 0, inputState[i].first->parameters(), measuredCov);
-      caches[i].weights[0] = inputState[i].second;
+        caches[i], 0, inputState[i].params->parameters(), measuredCov);
+      caches[i].weights[0] = inputState[i].weight;
       n += caches[i].numEntries;
       continue;
     }
@@ -279,7 +279,7 @@ Trk::ElectronMaterialMixtureConvolution::update(
     // Apply material effects to input state and store results in cache
     for (size_t j(0); j < caches[i].numEntries; ++j) {
       updateCacheElement(
-        caches[i], j, inputState[i].first->parameters(), measuredCov);
+        caches[i], j, inputState[i].params->parameters(), measuredCov);
       // Adjust q/p of the (delta) Parameters
       // make sure update is good.
       if (!updateP(caches[i].deltaParameters[j][Trk::qOverP],
@@ -288,7 +288,7 @@ Trk::ElectronMaterialMixtureConvolution::update(
         return {};
       }
       // Store component weight
-      caches[i].weights[j] *= inputState[i].second;
+      caches[i].weights[j] *= inputState[i].weight;
       // Ensure weight of component is not too small to save us from potential
       // FPE's Value. Weights are double so the min of float should
       // be small enough and should be handled
@@ -313,7 +313,7 @@ Trk::ElectronMaterialMixtureConvolution::update(
   size_t k(0);
   for (size_t i(0); i < inputState.size(); ++i) {
     for (size_t j(0); j < caches[i].numEntries; ++j) {
-      const AmgSymMatrix(5)* measuredCov = inputState[i].first->covariance();
+      const AmgSymMatrix(5)* measuredCov = inputState[i].params->covariance();
       // Fill in infomation
       const double cov =
         measuredCov ? caches[i].deltaCovariances[j](Trk::qOverP, Trk::qOverP)
@@ -347,7 +347,7 @@ Trk::ElectronMaterialMixtureConvolution::update(
     AmgVector(5)& updatedStateVector =
       caches[stateIndex].deltaParameters[materialIndex];
     const AmgSymMatrix(5)* measuredCov =
-      inputState[stateIndex].first->covariance();
+      inputState[stateIndex].params->covariance();
     std::optional<AmgSymMatrix(5)> updatedCovariance = std::nullopt;
     if (measuredCov &&
         caches[stateIndex].deltaCovariances.size() > materialIndex) {
@@ -356,7 +356,7 @@ Trk::ElectronMaterialMixtureConvolution::update(
     }
     std::unique_ptr<Trk::TrackParameters> updatedTrackParameters =
       inputState[stateIndex]
-        .first->associatedSurface()
+        .params->associatedSurface()
         .createUniqueTrackParameters(updatedStateVector[Trk::loc1],
                                      updatedStateVector[Trk::loc2],
                                      updatedStateVector[Trk::phi],
@@ -444,7 +444,7 @@ Trk::ElectronMaterialMixtureConvolution::update(
 
     std::unique_ptr<Trk::TrackParameters> updatedTrackParameters =
       inputState[stateIndex]
-        .first->associatedSurface()
+        .params->associatedSurface()
         .createUniqueTrackParameters(stateVector[Trk::loc1],
                                      stateVector[Trk::loc2],
                                      stateVector[Trk::phi],

@@ -18,8 +18,12 @@
 #include <utility>
 #include <vector>
 namespace Trk {
-using ComponentParameters =
-  std::pair<std::unique_ptr<Trk::TrackParameters>, double>;
+
+struct ComponentParameters {
+  std::unique_ptr<Trk::TrackParameters> params{nullptr};
+  double weight{0};
+};
+
 using MultiComponentState = std::vector<ComponentParameters>;
 
 namespace MultiComponentStateHelpers {

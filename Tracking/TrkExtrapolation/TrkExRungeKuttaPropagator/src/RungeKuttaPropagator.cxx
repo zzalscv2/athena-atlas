@@ -1476,15 +1476,14 @@ Trk::RungeKuttaPropagator::multiStatePropagate(
   Trk::MultiComponentState propagatedState{};
   propagatedState.reserve(multiComponentState.size());
   double sumw(0);  // sum of the weights of the propagated parameters
-
+  double J[25];
   Trk::MultiComponentState::const_iterator component =
       multiComponentState.begin();
   for (; component != multiComponentState.end(); ++component) {
-    const Trk::TrackParameters* currentParameters = component->first.get();
+    const Trk::TrackParameters* currentParameters = component->params.get();
     if (!currentParameters) {
       continue;
     }
-    double J[25];
     auto propagatedParameters =
         propagateRungeKutta(cache, true, *currentParameters, surface, direction,
                             boundaryCheck, fieldProperties, J, false);
@@ -1492,10 +1491,10 @@ Trk::RungeKuttaPropagator::multiStatePropagate(
     if (!propagatedParameters) {
       continue;
     }
-    sumw += component->second;
+    sumw += component->weight;
     // Propagation does not affect the weightings of the states
     propagatedState.emplace_back(std::move(propagatedParameters),
-                                 component->second);
+                                 component->weight);
   }
   // Protect low weight propagation
   constexpr double minPropWeight = (1./12.);

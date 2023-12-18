@@ -120,14 +120,14 @@ fillMixture(const Trk::MultiComponentState& multiComponentState,
 
     // And then for each component over each 5 parameters
     for (size_t i = 0; i < 5; ++i) {
-      const Trk::TrackParameters* componentParameters = component.first.get();
+      const Trk::TrackParameters* componentParameters = component.params.get();
       const AmgSymMatrix(5)* measuredCov = componentParameters->covariance();
       if (!measuredCov) {
         return;
       }
       // Enums for Perigee
       // d0=0, z0=1, phi0=2, theta=3, qOverP=4,
-      double weight = component.second;
+      double weight = component.weight;
       double mean = componentParameters->parameters()[parameter[i]];
       // FIXME ATLASRECTS-598 this std::abs() should not be necessary... for
       // some reason cov(qOverP,qOverP) can be negative
@@ -136,7 +136,7 @@ fillMixture(const Trk::MultiComponentState& multiComponentState,
       // phi Use first state as reference point
       if (i == 2) { // phi
         double deltaPhi =
-          multiComponentState.begin()->first->parameters()[2] - mean;
+          multiComponentState.begin()->params->parameters()[2] - mean;
         if (deltaPhi > M_PI) {
           mean += 2 * M_PI;
         } else if (deltaPhi < -M_PI) {
