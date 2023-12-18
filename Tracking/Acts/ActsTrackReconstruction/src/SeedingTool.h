@@ -250,6 +250,10 @@ namespace ActsTrk {
       "vector containing the map of z bins in the top layers"};
     Gaudi::Property< int > m_numPhiNeighbors {this, "numPhiNeighbors", 1,
       "number of phi bin neighbors at each side of the current bin that will be used to search for SPs"};
+
+  private:
+    std::shared_ptr< Acts::BinFinder< value_type > > m_bottomBinFinder{nullptr};
+    std::shared_ptr< Acts::BinFinder< value_type > > m_topBinFinder{nullptr};
   };
 
 } // namespace
