@@ -394,8 +394,8 @@ StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY22MuPi
 
 
 ## K+K-, Kpi, D0/D0bar candidates
-#StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY22DiTrkSelectAndWrite.OutputVtxContainerName]
-#StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY22DiTrkSelectAndWrite.OutputVtxContainerName]
+StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY22DiTrkSelectAndWrite.OutputVtxContainerName]
+StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY22DiTrkSelectAndWrite.OutputVtxContainerName]
 
 
 ## B+>mu D_(s)+/-, mu D*+/- and mu Lambda_c+/- candidates
