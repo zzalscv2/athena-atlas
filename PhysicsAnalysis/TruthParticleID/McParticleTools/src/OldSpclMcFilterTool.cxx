@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -449,7 +449,7 @@ StatusCode OldSpclMcFilterTool::reconnectParticles( const McEventCollection* in,
 	continue;
       }
       if ( rebuildLinks( evt, outEvt, itrPart ).isFailure() ) {
-	ATH_MSG_WARNING("Could not rebuild links for this particle = "<< itrPart;
+	ATH_MSG_WARNING("Could not rebuild links for this particle = "<< itrPart);
       } else if ( msgLvl(MSG::VERBOSE) ) {
 	msg(MSG::VERBOSE)
 	  << "==========================================================="
