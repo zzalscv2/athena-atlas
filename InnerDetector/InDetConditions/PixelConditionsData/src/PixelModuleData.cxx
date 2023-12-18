@@ -510,28 +510,6 @@ double PixelModuleData::getLorentzAngleCorr(int barrel_ec, int layer) const
 void PixelModuleData::setDefaultBiasVoltage(float biasVoltage) { m_biasVoltage = biasVoltage; }
 float PixelModuleData::getDefaultBiasVoltage() const { return m_biasVoltage; }
 
-void PixelModuleData::setDefaultBarrelBiasVoltage(const std::vector<float> &barrelBiasVoltage) { m_barrelBiasVoltage = barrelBiasVoltage; }
-void PixelModuleData::setDefaultEndcapBiasVoltage(const std::vector<float> &endcapBiasVoltage) { m_endcapBiasVoltage = endcapBiasVoltage; }
-void PixelModuleData::setDefaultDBMBiasVoltage(const std::vector<float> &DBMBiasVoltage) { m_DBMBiasVoltage = DBMBiasVoltage; }
-
-float PixelModuleData::getDefaultBiasVoltage(int barrel_ec, int layer) const
-{
-  size_t layerIndex = static_cast<size_t>(layer);
-
-  if (barrel_ec == 0 && layerIndex < m_barrelBiasVoltage.size())
-    return m_barrelBiasVoltage[layerIndex];
-
-  if (std::abs(barrel_ec) == 2 && layerIndex < m_endcapBiasVoltage.size())
-    return m_endcapBiasVoltage[layerIndex];
-
-  if (std::abs(barrel_ec) == 4 && layerIndex < m_DBMBiasVoltage.size())
-    return m_DBMBiasVoltage[layerIndex];
-
-  std::stringstream error;
-  error << "PixelModuleData::getDefaultBiasVoltage(" << barrel_ec << ", " << layer << "): array out of bounds";
-  throw std::range_error(error.str());
-}
-
 void PixelModuleData::setDefaultTemperature(float temperature) { m_temperature = temperature; }
 float PixelModuleData::getDefaultTemperature() const { return m_temperature; }
 

@@ -156,10 +156,6 @@ class PixelModuleData
     void setDefaultBiasVoltage(float biasVoltage);
     float getDefaultBiasVoltage() const;
 
-    void setDefaultBarrelBiasVoltage(const std::vector<float> &barrelBiasVoltage);
-    void setDefaultEndcapBiasVoltage(const std::vector<float> &endcapBiasVoltage);
-    void setDefaultDBMBiasVoltage(const std::vector<float> &DBMBiasVoltage);
-    float getDefaultBiasVoltage(int barrel_ec, int layer) const;
 
     void setDefaultTemperature(float temperature);
     float getDefaultTemperature() const;
@@ -328,9 +324,6 @@ class PixelModuleData
     float m_biasVoltage{150.f};
     float m_temperature{-7.f};
 
-    std::vector<float> m_barrelBiasVoltage{80.0,350.0,200.0,150.0};
-    std::vector<float> m_endcapBiasVoltage{150.0,150.0,150.0};
-    std::vector<float> m_DBMBiasVoltage{500.0,500.0,500.0};
 
     std::vector<double> m_fluenceLayer{0.80e14, 1.61e14, 0.71e14, 0.48e14};
     std::vector<std::string> m_radSimFluenceMapList{"PixelDigitization/maps_IBL_PL_80V_fl0_8e14.root",

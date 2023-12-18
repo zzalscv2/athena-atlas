@@ -77,7 +77,6 @@ namespace{
 //declared as a friend in the PixelModuleData class
 std::ostream & 
 operator << (std::ostream &out, const PixelModuleData &c){
-
   const std::string LF{"\n"};
   //NB: in the following, vector variables are not followed by a linefeed;
   // it's already in the vector stream insertion operator in anonymous namespace (above)
@@ -226,13 +225,6 @@ operator << (std::ostream &out, const PixelModuleData &c){
   out<<"#temperature"<<LF;
   out<<c.m_temperature<<LF;
   //
-  out<<"#barrelBiasVoltage"<<LF;
-  out<<c.m_barrelBiasVoltage;
-  out<<"#endcapBiasVoltage"<<LF;
-  out<<c.m_endcapBiasVoltage;
-  out<<"#DBMBiasVoltage"<<LF;
-  out<<c.m_DBMBiasVoltage;
-  //
   out<<"#fluenceLayer"<<LF;
   out<<c.m_fluenceLayer;
   out<<"#radSimFluenceMapList"<<LF;
@@ -276,6 +268,8 @@ operator << (std::ostream &out, const PixelModuleData &c){
 //declared as a friend in the PixelModuleData class (dangerously skirting the interface)
 std::istream & 
 operator >> (std::istream &in, PixelModuleData &c){
+  std::vector<float> ignore;
+
   std::istream::sentry s(in);
   if (s){
     //this is rather unforgiving, and should only be used with the format given by the ostream
@@ -426,11 +420,12 @@ operator >> (std::istream &in, PixelModuleData &c){
     in>>c.m_temperature;
     //
     in>>label;
-    in>>c.m_barrelBiasVoltage;
+    in>>ignore;
     in>>label;
-    in>>c.m_endcapBiasVoltage;
+    in>>ignore;
+
     in>>label;
-    in>>c.m_DBMBiasVoltage;
+    in>>ignore;
     //
     in>>label;
     in>>c.m_fluenceLayer;
@@ -517,7 +512,6 @@ std::istream & operator >>(SoshiFormat & f, PixelModuleData & md){
   md.setBarrelNoiseOccupancy(getParameter<double>("BarrelNoiseOccupancy", lBuffer));
   md.setBarrelDisableProbability(getParameter<double>("BarrelDisableProbability", lBuffer));
   md.setBarrelLorentzAngleCorr(getParameter<double>("BarrelLorentzAngleCorr", lBuffer));
-  md.setDefaultBarrelBiasVoltage(getParameter<float>("BarrelBiasVoltage", lBuffer));
 
   md.setEndcapToTThreshold(getParameter<int>("EndcapToTThreshold", lBuffer));
   md.setFEI3EndcapLatency(getParameter<int>("FEI3EndcapLatency", lBuffer));
@@ -528,7 +522,6 @@ std::istream & operator >>(SoshiFormat & f, PixelModuleData & md){
   md.setEndcapNoiseOccupancy(getParameter<double>("EndcapNoiseOccupancy", lBuffer));
   md.setEndcapDisableProbability(getParameter<double>("EndcapDisableProbability", lBuffer));
   md.setEndcapLorentzAngleCorr(getParameter<double>("EndcapLorentzAngleCorr", lBuffer));
-  md.setDefaultEndcapBiasVoltage(getParameter<float>("EndcapBiasVoltage", lBuffer));
 
   md.setEndcapNoiseShape({getParameter<float>("PixelNoiseShape", lBuffer),
                                    getParameter<float>("PixelNoiseShape", lBuffer),
@@ -568,7 +561,6 @@ std::istream & operator >>(SoshiFormat & f, PixelModuleData & md){
     md.setDBMCrossTalk(getParameter<double>("DBMCrossTalk", lBuffer));
     md.setDBMNoiseOccupancy(getParameter<double>("DBMNoiseOccupancy", lBuffer));
     md.setDBMDisableProbability(getParameter<double>("DBMDisableProbability", lBuffer));
-    md.setDefaultDBMBiasVoltage(getParameter<float>("DBMBiasVoltage", lBuffer));
 
     md.setBarrelNoiseShape({getParameter<float>("IBLNoiseShape", lBuffer),
                                      getParameter<float>("BLayerNoiseShape", lBuffer),
