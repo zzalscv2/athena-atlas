@@ -75,8 +75,6 @@ PrepRawData::PrepRawData()
 {
 }
 
-PrepRawData::~PrepRawData() = default;
-
 MsgStream&
 PrepRawData::dump(MsgStream& stream) const
 {

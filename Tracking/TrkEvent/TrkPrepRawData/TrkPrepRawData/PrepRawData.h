@@ -70,7 +70,7 @@ public:
   PrepRawData(PrepRawData&&) noexcept = default;
   PrepRawData& operator=(const PrepRawData&) = default;
   PrepRawData& operator=(PrepRawData&&) noexcept = default;
-  virtual ~PrepRawData(); //default in .cxx
+  virtual ~PrepRawData() = default;
 
   /** Full Constructor using lvalue references
       @param clusId Identifier of the tube, strip etc which has produced this
