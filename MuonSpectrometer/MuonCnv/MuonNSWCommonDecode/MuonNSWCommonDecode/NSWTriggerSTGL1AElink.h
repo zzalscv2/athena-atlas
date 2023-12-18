@@ -4,7 +4,7 @@
 #ifndef MUONNSWCOMMONDECODE_NSWTRIGGERSTGL1AELINK_H
 #define MUONNSWCOMMONDECODE_NSWTRIGGERSTGL1AELINK_H
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <exception>
 #include <vector>
@@ -150,34 +150,34 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
   static constexpr auto WORD_SIZE = sizeof(decltype(m_data)::element_type) * 8;
   static constexpr auto WORD_SIZE_DOUBLE = static_cast<double>(WORD_SIZE);
 
-  std::uint32_t m_head_fragID;
-  std::uint32_t m_head_sectID;
-  std::uint32_t m_head_EC;
-  std::uint32_t m_head_flags;
-  std::uint32_t m_head_BCID;
-  std::uint32_t m_head_orbit;
-  std::uint32_t m_head_spare;
+  std::uint32_t m_head_fragID{};
+  std::uint32_t m_head_sectID{};
+  std::uint32_t m_head_EC{};
+  std::uint32_t m_head_flags{};
+  std::uint32_t m_head_BCID{};
+  std::uint32_t m_head_orbit{};
+  std::uint32_t m_head_spare{};
   
-  std::uint32_t m_L1ID;
+  std::uint32_t m_L1ID{};
 
 
-  std::uint32_t m_l1a_versionID;
-  std::uint32_t m_l1a_local_req_BCID;
-  std::uint32_t m_l1a_local_rel_BCID;
-  std::uint32_t m_l1a_open_BCID;
-  std::uint32_t m_l1a_req_BCID;
-  std::uint32_t m_l1a_close_BCID;
-  std::uint32_t m_l1a_timeout;
-  std::uint32_t m_l1a_open_BCID_offset;
-  std::uint32_t m_l1a_req_BCID_offset;
-  std::uint32_t m_l1a_close_BCID_offset;
-  std::uint32_t m_l1a_timeout_config;
-  std::uint32_t m_l1a_busy_thr;
-  std::uint32_t m_l1a_engine_snapshot;
-  std::uint32_t m_l1a_link_const;
-  std::uint32_t m_l1a_padding;
+  std::uint32_t m_l1a_versionID{};
+  std::uint32_t m_l1a_local_req_BCID{};
+  std::uint32_t m_l1a_local_rel_BCID{};
+  std::uint32_t m_l1a_open_BCID{};
+  std::uint32_t m_l1a_req_BCID{};
+  std::uint32_t m_l1a_close_BCID{};
+  std::uint32_t m_l1a_timeout{};
+  std::uint32_t m_l1a_open_BCID_offset{};
+  std::uint32_t m_l1a_req_BCID_offset{};
+  std::uint32_t m_l1a_close_BCID_offset{};
+  std::uint32_t m_l1a_timeout_config{};
+  std::uint32_t m_l1a_busy_thr{};
+  std::uint32_t m_l1a_engine_snapshot{};
+  std::uint32_t m_l1a_link_const{};
+  std::uint32_t m_l1a_padding{};
 
-  std::uint32_t m_l1a_wdw_matching_engines_usage;
+  std::uint32_t m_l1a_wdw_matching_engines_usage{};
 
   std::vector<std::uint32_t> m_stream_head_nbits;
   std::vector<std::uint32_t> m_stream_head_nwords;
@@ -187,7 +187,7 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
   // first vector had stream index
   // second vector contains stream data words - length defined by m_stream_head_nwords
   // third vector used because stream data size (m_stream_head_nwords) can exceed maximum compiler size (uint64_t)
-  std::uint32_t m_trailer_CRC;
+  std::uint32_t m_trailer_CRC{};
 
   std::vector<STGTPPadPacket> m_pad_packets;
   std::vector<STGTPSegmentPacket> m_segment_packets;

@@ -5,12 +5,10 @@
 
 #include <cmath>
 #include <cstddef>
-#include <exception>
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <vector>
 
 #include "MuonNSWCommonDecode/NSWResourceId.h"
 #include "MuonNSWCommonDecode/NSWSTGTPDecodeBitmaps.h"
