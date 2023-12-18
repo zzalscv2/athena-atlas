@@ -71,8 +71,8 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   InDet::TRT_DriftCircle trans1 (Identifier (1234),
                                  locpos,
-                                 rdoList,
-                                 Amg::MatrixX(cov),
+                                 std::move(rdoList),
+                                 std::move(cov),
                                  nullptr,
                                  54321);
   testit (trans1);

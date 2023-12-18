@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetPrepRawData/PixelGangedClusterAmbiguities.h"
@@ -31,7 +31,7 @@ void PixelGangedClusterAmbiguitiesCnv_p1::transToPers
     } 
   }
   
-  if (transObj->size() == 0)  {
+  if (transObj->empty())  {
     if (log.level() <= MSG::DEBUG) log << MSG::DEBUG  << "No ganged pixels in this event. PixelAmbiMap has size 0. This happens often on single particle files." << endmsg;
   } 
   else {     
@@ -57,7 +57,7 @@ void PixelGangedClusterAmbiguitiesCnv_p1::transToPers
     
     // loop over dhs
     for ( ; dh!=dhEnd; ++dh ) 		  {
-      auto coll = dh->indexFindPtr(idHash); //matching collection
+      const auto *coll = dh->indexFindPtr(idHash); //matching collection
       // does coll exist?
       // check prd exists in collection
       // check idhaspointer value the same.
@@ -69,7 +69,7 @@ void PixelGangedClusterAmbiguitiesCnv_p1::transToPers
       }
     }
     
-    if (persObj->m_pixelClusterContainerName=="")  {
+    if (persObj->m_pixelClusterContainerName.empty())  {
       log << MSG::ERROR<<"Could not find matching PRD container for this PixelCluster! Dumping PRD: "<<*pixelCluster<<endmsg;
     }
     
@@ -107,7 +107,7 @@ void  PixelGangedClusterAmbiguitiesCnv_p1::persToTrans(const InDet::PixelGangedC
     } 
   }
   
-  if (persObj->m_pixelClusterContainerName == "")
+  if (persObj->m_pixelClusterContainerName.empty())
   {
     if (log.level() <= MSG::DEBUG) log << MSG::DEBUG  << "Name of the pixel cluster container is empty. Most likely cause: input is a single particle file and there were no pixel ambiguities." << endmsg;
   } else

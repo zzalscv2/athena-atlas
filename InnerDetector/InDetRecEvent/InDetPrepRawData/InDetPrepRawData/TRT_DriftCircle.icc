@@ -72,6 +72,13 @@ TRT_DriftCircle::driftTimeValid() const
   return m_word & 0x08000000;
 }
 
+inline double
+TRT_DriftCircle::driftTime(bool& valid) const
+{
+  valid = driftTimeValid();
+  return rawDriftTime();
+}
+
 inline void
 TRT_DriftCircle::setDriftTimeValid(bool valid)
 {
@@ -83,6 +90,7 @@ TRT_DriftCircle::setDriftTimeValid(bool valid)
     m_word &= maskfalse;
   }
 }
+
 
 inline int
 TRT_DriftCircle::numberOfHighsBetweenEdges() const

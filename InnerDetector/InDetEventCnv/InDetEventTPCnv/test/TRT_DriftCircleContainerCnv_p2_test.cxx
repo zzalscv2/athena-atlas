@@ -96,7 +96,7 @@ makeclusts (const TRT_ID& trt_id)
     for (int i=0; i < 10; i++) {
       int offs = i*10 + hash*100;
       Identifier clusId (coll->identify().get_identifier32().get_compact() + offs+1234);
-      
+
       Amg::Vector2D locpos (offs+1.5, offs+2.5);
       std::vector<Identifier> rdoList { clusId };
 
@@ -108,8 +108,8 @@ makeclusts (const TRT_ID& trt_id)
       auto cl = std::make_unique<InDet::TRT_DriftCircle>
         (clusId,
          locpos,
-         rdoList,
-         Amg::MatrixX(cov),
+         std::move(rdoList),
+         std::move(cov),
          nullptr,
          54321);
       coll->push_back (std::move (cl));
