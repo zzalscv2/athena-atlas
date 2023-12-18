@@ -6,7 +6,6 @@
 
 // ACTS
 #include "Acts/Seeding/SeedFilterConfig.hpp"
-#include "Acts/Seeding/BinFinder.hpp"
 #include "Acts/Seeding/BinnedSPGroup.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
 #include "Acts/Seeding/SeedFinder.hpp"
@@ -161,6 +160,9 @@ namespace ActsTrk {
 
     ATH_CHECK( prepareConfiguration() );
 
+    m_bottomBinFinder = std::make_shared< Acts::BinFinder< value_type > >(m_zBinNeighborsBottom, m_numPhiNeighbors);
+    m_topBinFinder = std::make_shared< Acts::BinFinder< value_type > >(m_zBinNeighborsTop, m_numPhiNeighbors);
+    
     return StatusCode::SUCCESS;
   }
   
@@ -233,16 +235,11 @@ namespace ActsTrk {
     
     
     Acts::Extent rRangeSPExtent;
-    
-    std::shared_ptr< Acts::BinFinder< value_type > > bottomBinFinder =
-      std::make_shared< Acts::BinFinder< value_type > >(m_zBinNeighborsBottom, m_numPhiNeighbors);
-    std::shared_ptr< Acts::BinFinder< value_type > > topBinFinder =
-      std::make_shared< Acts::BinFinder< value_type > >(m_zBinNeighborsTop, m_numPhiNeighbors);
-    
+        
     std::unique_ptr< Acts::SpacePointGrid< value_type > > grid =
       Acts::SpacePointGridCreator::createGrid< value_type >(m_gridCfg, gridOpts);
     Acts::BinnedSPGroup< value_type > spacePointsGrouping(spBegin, spEnd, extractCovariance,								     
-      bottomBinFinder, topBinFinder, std::move(grid), rRangeSPExtent, m_finderCfg, finderOpts);
+      m_bottomBinFinder, m_topBinFinder, std::move(grid), rRangeSPExtent, m_finderCfg, finderOpts);
     
     // variable middle SP radial region of interest
     const Acts::Range1D<float> rMiddleSPRange(std::floor(rRangeSPExtent.min(Acts::binR) / 2) * 2 +
