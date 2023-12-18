@@ -70,7 +70,8 @@ std::any ActsTrk::TrackStorageContainer::component_impl(
   }
   for (auto& d : m_decorations) {
     if (d.hash == key) {
-      return d.getter(m_trackBackend.cptr(), itrack, d.name);
+      // TODO the dynamic case will be eliminated once we switch to use Aux containers directly
+      return d.getter(m_trackBackend->getStore(), itrack, d.auxid);
     }
   }
   throw std::runtime_error("TrackStorageContainer no such component " +
@@ -102,53 +103,7 @@ void ActsTrk::TrackStorageContainer::fillFrom(
 
 
 void ActsTrk::TrackStorageContainer::restoreDecorations() {
-
-  for (auto id : m_trackBackend->getConstStore()->getAuxIDs()) {
-    const std::string name = SG::AuxTypeRegistry::instance().getName(id);
-    const std::type_info* typeInfo =
-        SG::AuxTypeRegistry::instance().getType(id);
-    if (staticVariables.count(name) == 1) {
-      continue;
-    }
-
-    // try making decoration accessor of matching type
-    // there is a fixed set of supported types (as there is a fixed set
-    // available in MutableMTJ) setters are not needed so replaced by a
-    // "nullptr"
-    if (*typeInfo == typeid(float)) {
-      m_decorations.emplace_back(
-          name,
-          ActsTrk::detail::constDecorationGetter<xAOD::TrackSummaryContainer,
-                                                 float>,
-          ActsTrk::detail::decorationCopier<xAOD::TrackSummaryContainer,
-                                            float>);
-    } else if (*typeInfo == typeid(double)) {
-      m_decorations.emplace_back(
-          name,
-          ActsTrk::detail::constDecorationGetter<xAOD::TrackSummaryContainer,
-                                                 double>,
-          ActsTrk::detail::decorationCopier<xAOD::TrackSummaryContainer,
-                                            double>);
-    } else if (*typeInfo == typeid(short)) {
-      m_decorations.emplace_back(
-          name,
-          ActsTrk::detail::constDecorationGetter<xAOD::TrackSummaryContainer,
-                                                 short>,
-          ActsTrk::detail::decorationCopier<xAOD::TrackSummaryContainer,
-                                            short>);
-    } else if (*typeInfo == typeid(uint32_t)) {
-      m_decorations.emplace_back(
-          name,
-          ActsTrk::detail::constDecorationGetter<xAOD::TrackSummaryContainer,
-                                                 uint32_t>,
-          ActsTrk::detail::decorationCopier<xAOD::TrackSummaryContainer,
-                                            uint32_t>);
-    } else {
-      throw std::runtime_error(
-          "TrackStorageContainer Can't resore decoration of  " + name +
-          " because it is of an unsupported type");
-    }
-  }
+  m_decorations = ActsTrk::detail::restoreDecorations(m_trackBackend->getConstStore(), staticVariables);
 }
 
 
@@ -232,8 +187,8 @@ void ActsTrk::MutableTrackStorageContainer::copyDynamicFrom_impl(
   std::set<std::string> usedDecorations;
   for ( const auto& other_decor: other.m_decorations) {
     if ( staticVariables.count(other_decor.name) == 1)  { continue; }
-
-    other_decor.copier(trackBackend(), itrack, other_decor.name, other.trackBackend(),
+    // TODO dynamic cast will disappear 
+    other_decor.copier(m_mutableTrackBackendAux.get(), itrack, other_decor.auxid, other.trackBackend()->getStore(),
                       other_itrack);
     }
 }
@@ -250,7 +205,7 @@ std::any ActsTrk::MutableTrackStorageContainer::component_impl(
   }
   for (auto& d : m_decorations) {
     if (d.hash == key) {
-      return d.setter(m_mutableTrackBackend.get(), itrack, d.name);
+      return d.setter(m_mutableTrackBackendAux.get(), itrack, d.auxid);
     }
   }
   throw std::runtime_error("TrackStorageContainer no such component " +

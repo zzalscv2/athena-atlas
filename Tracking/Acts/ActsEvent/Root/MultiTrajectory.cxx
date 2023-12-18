@@ -4,12 +4,19 @@
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsEvent/SurfaceEncoding.h"
 #include "xAODTracking/TrackMeasurementAuxContainer.h"
+#include "xAODCore/AuxContainerBase.h"
 #include "xAODTracking/TrackState.h"
 #include "xAODTracking/TrackParameters.h"
 #include "xAODTracking/TrackJacobian.h"
-#include "xAODTracking/TrackMeasurement.h"
+
 
 constexpr uint64_t InvalidGeoID = std::numeric_limits<uint64_t>::max();
+
+const std::set<std::string> ActsTrk::MutableMultiTrajectory::s_staticVariables = {
+  "chi2", "pathLength", "typeFlags", "previous", "next", "predicted", "filtered", "smoothed", "jacobian", "calibrated", "measDim", "uncalibratedMeasurementLink", "geometryId", "surfaceLink"
+ };
+
+
 
 template<typename T>
 const T* to_const_ptr(const std::unique_ptr<T>& ptr) {
@@ -268,8 +275,7 @@ std::any ActsTrk::MutableMultiTrajectory::component_impl(
     default: {
       for (auto& d : m_decorations) {
         if (d.hash == key) {
-          // TODO VITAL - make decorations to work with a generic Aux
-          // return d.setter(m_trackStates.get(), istate, d.name);
+          return d.setter(m_trackStatesAux.get(), istate, d.auxid);
         }
       }
       throw std::runtime_error("MutableMultiTrajectory::component_impl no such component " + std::to_string(key));
@@ -318,8 +324,7 @@ const std::any ActsTrk::MutableMultiTrajectory::component_impl(
       for (auto& d : m_decorations) {
         if (d.hash == key) {
           INSPECTCALL("getting dymaic variable " << d.name << " " << istate);
-          // TODO restore after all implementation is moved to Aux backend
-          // return d.getter(m_trackStates.get(), istate, d.name);
+          return d.getter(m_trackStatesAux.get(), istate, d.auxid);
         }
       }
       throw std::runtime_error("MutableMultiTrajectory::component_impl const no such component " + std::to_string(key));
@@ -468,40 +473,7 @@ ActsTrk::MultiTrajectory::MultiTrajectory(
       m_trackJacobiansAux(trackJacobians),
       m_trackMeasurementsAux(trackMeasurements) {
       INSPECTCALL("ctor " << this << " " << m_trackStatesAux->size());
-
-      for ( auto id : m_trackStatesAux->getAuxIDs() ) {
-
-        const std::string name = SG::AuxTypeRegistry::instance().getName(id);
-        if ( hasColumn_impl(Acts::hashString(name)) ) { // already known columns
-          continue;
-        }
-        // TODO restore in following MR
-        // const std::type_info* typeInfo = SG::AuxTypeRegistry::instance().getType(id);
-
-        // // try making decoration accessor of matching type
-        // // there is a fixed set of supported types (as there is a fixed set available in MutableMTJ)
-        // // setters are not needed so replaced by a "nullptr"
-        // if ( *typeInfo == typeid(float) ) {
-        //   m_decorations.emplace_back( name,
-        //     ActsTrk::detail::constDecorationGetter<xAOD::TrackStateContainer, float>,
-        //     ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, float>);
-        // } else if ( *typeInfo == typeid(double) ) {
-        //   m_decorations.emplace_back( name,
-        //     ActsTrk::detail::constDecorationGetter<xAOD::TrackStateContainer, double>,
-        //     ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, double>);
-
-        // } else if ( *typeInfo == typeid(short) ) {
-        //   m_decorations.emplace_back( name,
-        //     ActsTrk::detail::constDecorationGetter<xAOD::TrackStateContainer, short>,
-        //     ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, short>);
-
-        // } else if ( *typeInfo == typeid(uint32_t) ) {
-        //   m_decorations.emplace_back( name,
-        //     ActsTrk::detail::constDecorationGetter<xAOD::TrackStateContainer, uint32_t>,
-        //     ActsTrk::detail::decorationCopier<xAOD::TrackStateContainer, uint32_t>);
-        // }
-
-    }
+      m_decorations = ActsTrk::detail::restoreDecorations(m_trackStatesAux, ActsTrk::MutableMultiTrajectory::s_staticVariables);
 }
 
 bool ActsTrk::MultiTrajectory::has_impl(Acts::HashedString key,
@@ -552,8 +524,8 @@ const std::any ActsTrk::MultiTrajectory::component_impl(
     default: {
       for (auto& d : m_decorations) {
         if (d.hash == key) {
-          // TODO 
-          // return  d.getter(m_trackStates.cptr(), istate, d.name);
+          // TODO the dynamic_cast will disappear
+          return  d.getter(m_trackStatesAux.cptr(), istate, d.auxid);
         }
       }
       throw std::runtime_error("MultiTrajectory::component_impl no such component " + std::to_string(key));
@@ -564,6 +536,7 @@ const std::any ActsTrk::MultiTrajectory::component_impl(
 bool ActsTrk::MultiTrajectory::hasColumn_impl(
     Acts::HashedString key) const {
   using namespace Acts::HashedStringLiteral;
+  // TODO try using staticVariables set
   switch (key) {
     case "previous"_hash:
     case "chi2"_hash:
@@ -636,7 +609,7 @@ void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, c
 
 
 const Acts::Surface* ActsTrk::MultiTrajectory::referenceSurface_impl(IndexType istate) const {
-  INSPECTCALL( this <<  " " << istate << " " << m_trackStates->size() << " " << m_surfaces.size());
+  INSPECTCALL( this <<  " " << istate << " " << m_trackStatesAux->size() << " " << m_surfaces.size());
   if ( istate >= m_surfaces.size() ) throw std::out_of_range("MultiTrajectory index " + std::to_string(istate) + " out of range " + std::to_string(m_surfaces.size()) + " when accessing reference surface");
   return toSurfacePtr(m_surfaces[istate]);
 }

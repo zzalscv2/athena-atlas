@@ -14,6 +14,9 @@
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 #include "xAODTracking/TrackSurfaceContainer.h"
 #include "ActsEvent/SurfaceEncoding.h"
+// #include "xAODTracking/TrackStorageContainer.h"
+// #include "xAODTracking/TrackStorageAuxContainer.h"
+
 
 
 namespace ActsTrk {
@@ -108,12 +111,11 @@ class TrackStorageContainer {
   }
 
  protected:
-  using DecorationAccess = ActsTrk::detail::Decoration<xAOD::TrackSummaryContainer>;
 
-  std::vector<DecorationAccess> m_decorations;
   DataLink<xAOD::TrackSummaryContainer> m_trackBackend = nullptr;
   DataLink<xAOD::TrackSurfaceAuxContainer> m_surfBackendAux = nullptr;
 
+  std::vector<ActsTrk::detail::Decoration> m_decorations;
 
   std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces;
   std::vector<Acts::ParticleHypothesis> m_particleHypothesis; // TODO move the storage to the backend
@@ -271,11 +273,11 @@ constexpr void MutableTrackStorageContainer::addColumn_impl(
         "TrackStorageContainer::addColumn_impl: "
         "unsupported decoration type");
   }
-  m_decorations.push_back(DecorationAccess(
+  m_decorations.emplace_back(ActsTrk::detail::decoration<T>(
       name,
-      ActsTrk::detail::constDecorationGetter<xAOD::TrackSummaryContainer, T>,
-      ActsTrk::detail::decorationCopier<xAOD::TrackSummaryContainer, T>,
-      ActsTrk::detail::decorationSetter<xAOD::TrackSummaryContainer, T>
+      ActsTrk::detail::constDecorationGetter<T>, 
+      ActsTrk::detail::decorationCopier<T>,
+      ActsTrk::detail::decorationSetter<T>
       ));
 }
 
