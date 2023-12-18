@@ -11,6 +11,9 @@
 #include "xAODTracking/Vertex.h"
 #include "xAODForward/AFPVertex.h"
 
+#include "AthenaMonitoringKernel/Monitored.h"
+#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
+
 #include "TrigAFPToFHypoTool.h"
 
 /**
@@ -27,9 +30,12 @@ class TrigAFPToFHypoAlg : public::HypoBase
   virtual StatusCode execute(const EventContext &context) const override;
 
  private:
-  SG::ReadHandleKey< xAOD::VertexContainer > m_inputPrmVtxKey {this, "VertexContainer", "HLT_IDVertex_FS", "Primary vertex collection"};
+  SG::ReadHandleKey< xAOD::VertexContainer > m_inputIdVtxKey {this, "VertexContainer", "HLT_IDVertex_FS", "ID vertex collection"};
   SG::ReadHandleKey<xAOD::AFPVertexContainer> m_inputAfpVtxKey{this, "AFPVertexContainer", "HLT_AFPVertex", "AFP ToF vertex collection"};
   ToolHandleArray<TrigAFPToFHypoTool> m_hypoTools{this, "HypoTools", {}};
+
+  // Monitor tool for TrigAFPToFHypo
+  ToolHandle<GenericMonitoringTool> m_monTool { this, "MonTool", "", "Monitor tool for TrigAFPToFHypo" };
 };
 
 #endif // TRIGAFPTOFHYPOALG_H

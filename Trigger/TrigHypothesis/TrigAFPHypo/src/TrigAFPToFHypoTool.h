@@ -7,7 +7,6 @@ Copyright! (C) 2002-2012 CERN for the benefit of the ATLAS collaboration
 #define TRIGAFPHYPO_TRIGAFPTOFHYPOTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaBaseComps/AthCheckedComponent.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "xAODForward/AFPVertexContainer.h"
@@ -17,7 +16,7 @@ Copyright! (C) 2002-2012 CERN for the benefit of the ATLAS collaboration
 #include "Gaudi/Property.h"
 
 
-class TrigAFPToFHypoTool : public AthCheckedComponent<AthAlgTool>
+class TrigAFPToFHypoTool : public AthAlgTool
 {
  public:
   TrigAFPToFHypoTool(const std::string &type, const std::string &name, const IInterface *parent);
@@ -27,11 +26,11 @@ class TrigAFPToFHypoTool : public AthCheckedComponent<AthAlgTool>
   struct AFPToFHypoToolInfo // data structure to be passed to the hypo tool
   {  
    AFPToFHypoToolInfo(const TrigCompositeUtils::DecisionIDContainer a, const xAOD::AFPVertex* b, const xAOD::Vertex* c, TrigCompositeUtils::Decision *d) :
-   inputPassingChains(a), afpVtx(b), prmVtx(c), outputDecision(d)
+   inputPassingChains(a), afpVtx(b), idVtx(c), outputDecision(d)
    {}
    const TrigCompositeUtils::DecisionIDContainer inputPassingChains;    
    const xAOD::AFPVertex* afpVtx;
-   const xAOD::Vertex* prmVtx;
+   const xAOD::Vertex* idVtx;
    TrigCompositeUtils::Decision* outputDecision;
   };
 

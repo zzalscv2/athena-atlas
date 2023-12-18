@@ -134,14 +134,37 @@ def AFPGlobalSequenceCfg(flags):
 
     return MenuSequenceCA(flags, selAcc, HypoToolGen=trigStreamerAFPToFHypoTool)
 
+def AFPToFDeltaZToolGen(chainDict):
+    hypotool = CompFactory.TrigAFPToFHypoTool(chainDict['chainName'])
+    if "afpdz5" in chainDict["chainName"]:
+        hypotool.deltaZCut = 5.0
+    elif "afpdz10" in chainDict["chainName"]:
+        hypotool.deltaZCut = 10.0
+    return hypotool
+
 @AccumulatorCache
 def AFPToFDeltaZSequenceCfg(flags):
-    def AFPToFDeltaZToolGen(chainDict):
-        return CompFactory.TrigAFPToFHypoTool(chainDict['chainName'])
 
     recoAcc = AFPGlobalRecoSequenceCfg(flags)
 
     hypo = CompFactory.TrigAFPToFHypoAlg('TrigAFPToFHypoAlg', AFPVertexContainer='HLT_AFPVertexContainer', VertexContainer='HLT_IDVertex_FS')
+
+    # add monitoring
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, 'MonToolAFPToFHypo')
+    monTool.defineHistogram('afp_vtx_count', path='EXPERT', type='TH1F', title='AFP Vertex Counts',
+                     xbins=6, xmin=-0.5, xmax=5.5 )
+    monTool.defineHistogram('id_vtx_count', path='EXPERT', type='TH1F', title='ID Vertex Counts',
+                     xbins=6, xmin=-0.5, xmax=5.5 )
+    monTool.defineHistogram('skipHypoTool', path='EXPERT', type='TH1F', title='Reason of skipping the trigger',
+                     xbins=6, xmin=-0.5, xmax=5.5 )
+    monTool.defineHistogram('afp_vtx_z', path='EXPERT', type='TH1F', title='AFP Vertex X',
+                     xbins=401, xmin=-200, xmax=200 )
+    monTool.defineHistogram('id_vtx_z', path='EXPERT', type='TH1F', title='ID Vertex Z',
+                     xbins=401, xmin=-200, xmax=200 )
+    monTool.defineHistogram('delta_z', path='EXPERT', type='TH1F', title='Delta Z',
+                     xbins=201, xmin=-100, xmax=100 )
+    hypo.MonTool = monTool
 
     selAcc = SelectionCA('AFPToFDeltaZSequence')
     selAcc.mergeReco(recoAcc)
