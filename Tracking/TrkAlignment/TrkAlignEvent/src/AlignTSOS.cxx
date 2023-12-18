@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAlignEvent/AlignTSOS.h"
@@ -103,7 +103,7 @@ namespace Trk {
     , m_measType(atsos.m_measType)
     , m_measDir(atsos.m_measDir)
     , m_alphaStrip(atsos.m_alphaStrip)
-    , m_derivativesVtx(nullptr)
+    , m_derivativesVtx(atsos.m_derivativesVtx)
   {
   }
 
@@ -136,6 +136,8 @@ namespace Trk {
 
       delete m_derivatives;
       m_derivatives = atsos.m_derivatives ? new std::vector<Amg::VectorX>(*(atsos.m_derivatives)) : nullptr;
+
+      m_derivativesVtx = atsos.m_derivativesVtx;
     }
 
     return *this;
