@@ -126,8 +126,8 @@ int main(int argc, char *argv[]) {
     printf("Time taken for TOT calibration:%7.1f seconds\n",double(end - start));
     
     std::ofstream myFile("log_"+sWhichPart.at(whichPart)+".txt");
-    
-    printf("Total MODs:%4ld\n",map_values.size());
+    //cppcheck-suppress invalidPrintfArgType_uint
+    printf("Total MODs:%4lu\n",map_values.size());
     for(const auto & [key, MOD] : map_values){
         
         for(const auto& FE : MOD){

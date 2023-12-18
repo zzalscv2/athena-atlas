@@ -41,8 +41,9 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
             htot->SetDirectory(0);
             std::unique_ptr<TH1F> htotsig = std::make_unique<TH1F>(title+"_totsig", title+"_totsig", m_totsigNBins, m_totsigLo, m_totsigHi);
             htotsig->SetDirectory(0);
-            
+            //cppcheck-suppress containerOutOfBounds
             histogramsTOT.at(FE).push_back(std::move(htot));
+            //cppcheck-suppress containerOutOfBounds
             histogramsTOTsig.at(FE).push_back(std::move(htotsig));
         }
     }     
@@ -82,14 +83,12 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                 
                 // Get TH2 for a given charge
                 std::unique_ptr<TH2F> h2dTOTmean(get2DHistogramFromPath(rodDir,modName, "TOT_MEAN", c));
-                h2dTOTmean->SetDirectory(0);                
                 std::unique_ptr<TH2F> h2dTOTsig(get2DHistogramFromPath(rodDir,modName, "TOT_SIGMA", c));
-                h2dTOTsig->SetDirectory(0); 
-                
                 if(!h2dTOTmean or !h2dTOTsig)  {
                     return false;
                 }
-                
+                h2dTOTmean->SetDirectory(0);                
+                h2dTOTsig->SetDirectory(0); 
                 // loop over pixels
                 for (unsigned int ieta = 0; ieta < m_etaBins; ieta++) {
                     for (unsigned int iphi = 0; iphi < m_phiBins; iphi++) {
@@ -375,7 +374,7 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
             TString title = "FE"+std::to_string(FE)+"_pixType"+std::to_string(pixel);
             std::unique_ptr<TH1F> h = std::make_unique<TH1F>(title+"_thr", title+"_thr", m_timnbins, m_timLo, m_timHi);
             h->SetDirectory(0);
-            
+            //cppcheck-suppress containerOutOfBounds
             histogramsTIM.at(FE).push_back(std::move(h));
         }
     } 
@@ -542,8 +541,9 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
             hthr->SetDirectory(0);
             std::unique_ptr<TH1F> hsig = std::make_unique<TH1F>(title+"_sig", title+"_sig", m_thrnbins, m_sigLo, m_sigHi);
             hsig->SetDirectory(0);
-            
+            //cppcheck-suppress containerOutOfBounds
             histogramsTHR.at(FE).push_back(std::move(hthr));
+            //cppcheck-suppress containerOutOfBounds
             histogramsSIG.at(FE).push_back(std::move(hsig));
         }
     } 
