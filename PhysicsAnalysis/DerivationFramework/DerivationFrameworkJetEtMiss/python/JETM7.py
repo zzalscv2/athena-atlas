@@ -133,7 +133,7 @@ def JETM7KernelCfg(ConfigFlags, name='JETM7Kernel', **kwargs):
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, 
                                       ThinningTools = thinningTools,
-                                      SkimmingTools = [skimmingTool]))   
+                                      SkimmingTools =[skimmingTool] if not ConfigFlags.Input.isMC else []))   
 
 
     return acc
