@@ -25,6 +25,8 @@ def ITkXAODToInDetClusterConversionCfg(flags, name="ITkXAODToInDetClusterConvers
 
 def PixelClusterizationCfg(flags, name = "InDetPixelClusterization", **kwargs):
     acc = ComponentAccumulator()
+    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    prefix = 'Sig_' if doTrackOverlay else ''
 
     if "clusteringTool" not in kwargs:
         from InDetConfig.SiClusterizationToolConfig import MergedPixelsToolCfg
@@ -36,14 +38,14 @@ def PixelClusterizationCfg(flags, name = "InDetPixelClusterization", **kwargs):
         kwargs.setdefault("gangedAmbiguitiesFinder", acc.popToolsAndMerge(
             PixelGangedAmbiguitiesFinderCfg(flags)))
 
-    if not flags.Overlay.doTrackOverlay:
+    if not doTrackOverlay:
         kwargs.setdefault("DataObjectName", "PixelRDOs")
     else:
         #for track overlay, only run tracking on the HS RDOs
         kwargs.setdefault("DataObjectName", flags.Overlay.SigPrefix + "PixelRDOs")
     kwargs.setdefault("ClustersName", "PixelClusters")
 
-    acc.addEventAlgo(CompFactory.InDet.PixelClusterization(name, **kwargs))
+    acc.addEventAlgo(CompFactory.InDet.PixelClusterization(prefix+name, **kwargs))
     return acc
 
 def PixelClusterizationPUCfg(flags, name="InDetPixelClusterizationPU", **kwargs):
@@ -114,6 +116,8 @@ def ITkTrigPixelClusterizationCfg(flags, name = "ITkTrigPixelClusterization", ro
 
 def SCTClusterizationCfg(flags, name="InDetSCT_Clusterization", **kwargs):
     acc = ComponentAccumulator()
+    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    prefix = 'Sig_' if doTrackOverlay else ''
 
     if "conditionsTool" not in kwargs:
         from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
@@ -130,14 +134,14 @@ def SCTClusterizationCfg(flags, name="InDetSCT_Clusterization", **kwargs):
         kwargs.setdefault("clusteringTool", acc.popToolsAndMerge(
             SCT_ClusteringToolCfg(flags)))
 
-    if not flags.Overlay.doTrackOverlay:
+    if not doTrackOverlay:
         kwargs.setdefault("DataObjectName", 'SCT_RDOs')
     else:
         #for track overlay, only run tracking on the HS RDOs
         kwargs.setdefault("DataObjectName", flags.Overlay.SigPrefix + "SCT_RDOs")
     kwargs.setdefault("ClustersName", 'SCT_Clusters')
 
-    acc.addEventAlgo(CompFactory.InDet.SCT_Clusterization(name, **kwargs))
+    acc.addEventAlgo(CompFactory.InDet.SCT_Clusterization(prefix+name, **kwargs))
     return acc
 
 def SCTClusterizationPUCfg(flags, name="InDetSCT_ClusterizationPU", **kwargs):
@@ -211,20 +215,20 @@ def ITkTrigStripClusterizationCfg(flags, name="ITkTrigStripClusterization", rois
 
 def InDetTRT_RIO_MakerCfg(flags, name = "InDetTRT_RIO_Maker", **kwargs):
     acc = ComponentAccumulator()
-
+    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    prefix = 'Sig_' if doTrackOverlay else ''
     if "TRT_DriftCircleTool" not in kwargs:
         from InDetConfig.TRT_DriftCircleToolConfig import TRT_DriftCircleToolCfg
         kwargs.setdefault("TRT_DriftCircleTool", acc.popToolsAndMerge(
             TRT_DriftCircleToolCfg(flags)))
-
-    if not flags.Overlay.doTrackOverlay:
+    kwargs.setdefault("TRTRIOLocation", 'TRT_DriftCircles')
+    if not doTrackOverlay:
         kwargs.setdefault("TRTRDOLocation", 'TRT_RDOs')
     else:
         #for track overlay, only run tracking on the HS RDOs
         kwargs.setdefault("TRTRDOLocation", flags.Overlay.SigPrefix + 'TRT_RDOs')
-    kwargs.setdefault("TRTRIOLocation", 'TRT_DriftCircles')
 
-    acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(name, **kwargs))
+    acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(prefix+name, **kwargs))
     return acc
 
 def InDetTRT_NoTime_RIO_MakerCfg(flags, name = "InDetTRT_NoTime_RIO_Maker", **kwargs):
@@ -295,3 +299,4 @@ def AthenaTrkClusterizationCfg(flags):
         acc.merge(ITkStripClusterizationCfg(flags))
 
     return acc
+

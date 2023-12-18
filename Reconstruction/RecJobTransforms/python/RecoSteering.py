@@ -3,7 +3,6 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format, MetadataCategory, HIMode
 
-
 def RecoSteering(flags):
     """
     Generates configuration of the reconstructions
@@ -66,10 +65,15 @@ def RecoSteering(flags):
     # ID / ITk
     acc.flagPerfmonDomain('ID')
     if flags.Reco.EnableTracking:
-        from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-        acc.merge(InDetTrackRecoCfg(flags))
-        log.info("---------- Configured tracking")
-    
+       if flags.Reco.EnableTrackOverlay:
+           from TrackOverlayRec.TrackOverlayRecoConfig import TrackOverlayRecoCfg
+           acc.merge(TrackOverlayRecoCfg(flags)) 
+       else:
+           from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
+           acc.merge(InDetTrackRecoCfg(flags))
+
+       log.info("---------- Configured tracking")
+
     # HI
     acc.flagPerfmonDomain('HI')
     if flags.Reco.EnableHI:
@@ -281,7 +285,7 @@ def RecoSteering(flags):
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
         acc.merge(PerfMonMTSvcCfg(flags))
         log.info("---------- Configured PerfMon")
-
+    
     return acc
 
 

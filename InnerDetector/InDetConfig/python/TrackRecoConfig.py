@@ -287,6 +287,7 @@ def TRTStandalonePassRecoCfg(flags,
 def StoreTrackSeparateContainerCfg(flags, TrackContainer="",
                                    ClusterSplitProbContainer=""):
     result = ComponentAccumulator()
+    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
 
     # Dummy Merger to fill additional info
     # for PRD-associated pixel tracklets
@@ -295,17 +296,18 @@ def StoreTrackSeparateContainerCfg(flags, TrackContainer="",
 
     AssociationMapName = ""
     extension = flags.Tracking.ActiveConfig.extension
+    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
 
-    if extension == "Disappearing" or flags.Overlay.doTrackOverlay:
+    if extension == "Disappearing" or doTrackOverlay:
         if extension == "Disappearing":
             InputTracks = [TrackContainer]
-            if flags.Overlay.doTrackOverlay:
+            if doTrackOverlay:
                 InputTracks += [flags.Overlay.BkgPrefix +
                                 extension + "Tracks"]
             TrackContainer = extension+"Tracks"
             AssociationMapName = "PRDtoTrackMap" + TrackContainer
             MergerOutputTracks = TrackContainer
-        elif flags.Overlay.doTrackOverlay:
+        elif doTrackOverlay:
             # schedule merger to combine signal and background tracks
             InputTracks = [flags.Overlay.SigPrefix+TrackContainer,
                            flags.Overlay.BkgPrefix+TrackContainer]
@@ -316,7 +318,8 @@ def StoreTrackSeparateContainerCfg(flags, TrackContainer="",
         from TrkConfig.TrkTrackCollectionMergerConfig import (
             TrackCollectionMergerAlgCfg)
         result.merge(TrackCollectionMergerAlgCfg(
-            flags, "InDetTrackCollectionMerger"+extension,
+            flags,
+            name = "TrackCollectionMergerAlgCfg"+extension,
             InputCombinedTracks=InputTracks,
             OutputCombinedTracks=MergerOutputTracks,
             AssociationMapName=AssociationMapName))
@@ -338,7 +341,8 @@ def StoreTrackSeparateContainerCfg(flags, TrackContainer="",
     from xAODTrackingCnv.xAODTrackingCnvConfig import (
         TrackParticleCnvAlgPIDCheckCfg)
     result.merge(TrackParticleCnvAlgPIDCheckCfg(
-        flags, extension + "TrackParticleCnvAlg",
+        flags,
+        name = extension + "TrackParticleCnvAlg",
         TrackContainerName=TrackContainer,
         xAODTrackParticlesFromTracksContainerName=xAODTrackParticlesName,
         ClusterSplitProbabilityName=ClusterSplitProbContainer,
@@ -395,7 +399,7 @@ def TrackRecoPassCfg(flags, extension="",
                      StatTrackTruthCollections=None,
                      ClusterSplitProbContainer=""):
     result = ComponentAccumulator()
-
+    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
     if InputCombinedInDetTracks is None:
         InputCombinedInDetTracks = []
     if InputExtendedInDetTracks is None:
@@ -409,7 +413,7 @@ def TrackRecoPassCfg(flags, extension="",
 
     # for track overlay, save resolved track name
     # for final merged track collection
-    if (flags.Overlay.doTrackOverlay and
+    if (doTrackOverlay and
         flags.Tracking.ActiveConfig.storeSeparateContainer and
         not flags.Tracking.ActiveConfig.useTRTExtension):
         ResolvedTracks = flags.Overlay.SigPrefix + ResolvedTracks
@@ -436,7 +440,7 @@ def TrackRecoPassCfg(flags, extension="",
                                       ResolvedTracks+"TruthCollection"]
 
     TrackContainer = ResolvedTracks
-    if (flags.Overlay.doTrackOverlay and
+    if (doTrackOverlay and
         flags.Tracking.ActiveConfig.storeSeparateContainer):
         TrackContainer = "Resolved" + extension + "Tracks"
 
@@ -451,7 +455,7 @@ def TrackRecoPassCfg(flags, extension="",
             ExtendedTracks = "ExtendedTracksDisappearing"
         elif "LargeD0" in extension:
             ExtendedTracks = "ExtendedLargeD0Tracks"
-            if flags.Overlay.doTrackOverlay:
+            if doTrackOverlay:
                 ExtendedTracks = flags.Overlay.SigPrefix+"ExtendedLargeD0Tracks"
         ExtendedTracksMap = "ExtendedTracksMap" + extension
 
@@ -463,7 +467,7 @@ def TrackRecoPassCfg(flags, extension="",
             ExtendedTracksMap=ExtendedTracksMap))
 
         TrackContainer = ExtendedTracks
-        if flags.Overlay.doTrackOverlay and "LargeD0" in extension:
+        if doTrackOverlay and "LargeD0" in extension:
             TrackContainer = "ExtendedLargeD0Tracks"
         StatTrackCollections += [ExtendedTracks]
         StatTrackTruthCollections += [ExtendedTracks+"TruthCollection"]
@@ -495,6 +499,7 @@ def TrackFinalCfg(flags,
                   StatTrackCollections=None,
                   StatTrackTruthCollections=None):
     result = ComponentAccumulator()
+    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
 
     if InputCombinedInDetTracks is None:
         InputCombinedInDetTracks = []
@@ -503,7 +508,7 @@ def TrackFinalCfg(flags,
     if StatTrackTruthCollections is None:
         StatTrackTruthCollections = []
 
-    if flags.Overlay.doTrackOverlay:
+    if doTrackOverlay:
         InputCombinedInDetTracks += [flags.Overlay.BkgPrefix +
                                      "CombinedInDetTracks"]
 
@@ -987,3 +992,4 @@ if __name__ == "__main__":
         sc = top_acc.run(1)
         if sc.isFailure():
             sys.exit(-1)
+
