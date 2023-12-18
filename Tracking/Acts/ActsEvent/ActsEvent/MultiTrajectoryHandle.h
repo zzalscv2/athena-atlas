@@ -115,8 +115,8 @@ MutableMultiTrajectoryHandle<C>::MutableMultiTrajectoryHandle(
                      namePrefix + "Jacobians"),
       m_measurementsKey(algorithm, propertyNamePrefix + "MeasurementsKey",
                         namePrefix + "Measurements"),
-      m_surfacesKey(algorithm, propertyNamePrefix + "SurfacesKey",
-                    namePrefix + "Surfaces") {}
+      m_surfacesKey(algorithm, propertyNamePrefix + "StateSurfacesKey",
+                    namePrefix + "StateSurfaces") {}
 
 template <class C>
 StatusCode MutableMultiTrajectoryHandle<C>::initialize() {

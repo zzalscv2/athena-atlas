@@ -14,4 +14,5 @@ Reco_tf.py --CA \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
+  --outputESDFile ESD.pool.root \
   --maxEvents ${n_events}
