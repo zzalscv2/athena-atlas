@@ -21,7 +21,7 @@
 class CalibFrontEndInfo {
     public:
         CalibFrontEndInfo () {};
-        CalibFrontEndInfo (int MODid, int FEid, std::string MODid_str, std::string RODid_str) {m_MODid =MODid; m_FEid=FEid; m_MODid_str =MODid_str; m_RODid_str =RODid_str;};
+        CalibFrontEndInfo (int MODid, int FEid, const std::string & MODid_str, const std::string & RODid_str) {m_MODid =MODid; m_FEid=FEid; m_MODid_str =MODid_str; m_RODid_str =RODid_str;};
         ~ CalibFrontEndInfo (){};
         
         //Setters for the parameters
@@ -46,13 +46,13 @@ class CalibFrontEndInfo {
         void set_times_fitted   (int x){m_times_fitted     = x;}
         
         //Setters for the fits
-        void set_NormalParams (std::vector<float> x){m_NormalFitParams = x; }
-        void set_LongParams   (std::vector<float> x){m_LongFitParams   = x; }
-        void set_SigParams    (std::vector<float> x){m_SigFitParams    = x; }
+        void set_NormalParams (const std::vector<float> &x){m_NormalFitParams = x; }
+        void set_LongParams   (const std::vector<float> & x){m_LongFitParams   = x; }
+        void set_SigParams    (const std::vector<float> & x){m_SigFitParams    = x; }
         
-        void set_NormalParamsQuality (std::vector<float> x){m_NormalFitParamsQuality = x; }
-        void set_LongParamsQuality   (std::vector<float> x){m_LongFitParamsQuality   = x; }
-        void set_SigParamsQuality    (std::vector<float> x){m_SigFitParamsQuality    = x; }
+        void set_NormalParamsQuality (const std::vector<float> & x){m_NormalFitParamsQuality = x; }
+        void set_LongParamsQuality   (const std::vector<float> & x){m_LongFitParamsQuality   = x; }
+        void set_SigParamsQuality    (const std::vector<float> & x){m_SigFitParamsQuality    = x; }
         
         
         //Getters for the parameters - coming soon
