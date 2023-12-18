@@ -770,74 +770,59 @@ bool propagateWithJacobianSwitch(Cache& cache,
   const Amg::Transform3D& T = Su.transform();
   Trk::SurfaceType ty = Su.type();
 
-  if (ty == Trk::SurfaceType::Plane) {
-    // plane
-    double s[4];
-    const double d = T(0, 3) * T(0, 2) + T(1, 3) * T(1, 2) + T(2, 3) * T(2, 2);
-
-    if (d >= 0.) {
-      s[0] = T(0, 2);
-      s[1] = T(1, 2);
-      s[2] = T(2, 2);
-      s[3] = d;
-    } else {
-      s[0] = -T(0, 2);
-      s[1] = -T(1, 2);
-      s[2] = -T(2, 2);
-      s[3] = -d;
+  switch (ty) {
+    case Trk::SurfaceType::Line:
+    case Trk::SurfaceType::Perigee: {
+      double s[6] = {T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2)};
+      return propagateWithJacobian(cache, useJac, 0, s, P, Step);
     }
-    return propagateWithJacobian(cache, useJac, 1, s, P, Step);
-  } else if (ty == Trk::SurfaceType::Line) {
-    // Line
-    double s[6] = {T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2)};
-    return propagateWithJacobian(cache, useJac, 0, s, P, Step);
-  } else if (ty == Trk::SurfaceType::Disc) {
-    // disc
-    double s[4];
-    const double d = T(0, 3) * T(0, 2) + T(1, 3) * T(1, 2) + T(2, 3) * T(2, 2);
-    if (d >= 0.) {
-      s[0] = T(0, 2);
-      s[1] = T(1, 2);
-      s[2] = T(2, 2);
-      s[3] = d;
-    } else {
-      s[0] = -T(0, 2);
-      s[1] = -T(1, 2);
-      s[2] = -T(2, 2);
-      s[3] = -d;
-    }
-    return propagateWithJacobian(cache, useJac, 1, s, P, Step);
-  } else if (ty == Trk::SurfaceType::Cylinder) {
-    // cylinder
-    const Trk::CylinderSurface* cyl =
-        static_cast<const Trk::CylinderSurface*>(&Su);
+    case Trk::SurfaceType::Plane:
+    case Trk::SurfaceType::Disc: {
+      double s[4];
+      const double d =
+          T(0, 3) * T(0, 2) + T(1, 3) * T(1, 2) + T(2, 3) * T(2, 2);
 
-    const double r0[3] = {P[0], P[1], P[2]};
-    double s[9] = {T(0, 3),           T(1, 3),           T(2, 3),
-                   T(0, 2),           T(1, 2),           T(2, 2),
-                   cyl->bounds().r(), cache.m_direction, 0.};
-
-    bool status = propagateWithJacobian(cache, useJac, 2, s, P, Step);
-    // For cylinder we do test for next cross point
-    if (status && cyl->bounds().halfPhiSector() < 3.1 &&
-        newCrossPoint(*cyl, r0, P)) {
-      s[8] = 0.;
-      return propagateWithJacobian(cache, useJac, 2, s, P, Step);
+      if (d >= 0.) {
+        s[0] = T(0, 2);
+        s[1] = T(1, 2);
+        s[2] = T(2, 2);
+        s[3] = d;
+      } else {
+        s[0] = -T(0, 2);
+        s[1] = -T(1, 2);
+        s[2] = -T(2, 2);
+        s[3] = -d;
+      }
+      return propagateWithJacobian(cache, useJac, 1, s, P, Step);
     }
-    return status;
-  } else if (ty == Trk::SurfaceType::Perigee) {
-    // Perigee
-    double s[6] = {T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2)};
-    return propagateWithJacobian(cache, useJac, 0, s, P, Step);
-  } else if (ty == Trk::SurfaceType::Cone) {
-    // cone
-    double k = static_cast<const Trk::ConeSurface*>(&Su)->bounds().tanAlpha();
-    k = k * k + 1.;
-    double s[9] = {T(0, 3), T(1, 3), T(2, 3),           T(0, 2), T(1, 2),
-                   T(2, 2), k,       cache.m_direction, 0.};
-    return propagateWithJacobian(cache, useJac, 3, s, P, Step);
-  } else {
-    return false;
+    case Trk::SurfaceType::Cylinder: {
+      const Trk::CylinderSurface* cyl =
+          static_cast<const Trk::CylinderSurface*>(&Su);
+
+      const double r0[3] = {P[0], P[1], P[2]};
+      double s[9] = {T(0, 3),           T(1, 3),           T(2, 3),
+                     T(0, 2),           T(1, 2),           T(2, 2),
+                     cyl->bounds().r(), cache.m_direction, 0.};
+
+      bool status = propagateWithJacobian(cache, useJac, 2, s, P, Step);
+      // For cylinder we do test for next cross point
+      if (status && cyl->bounds().halfPhiSector() < 3.1 &&
+          newCrossPoint(*cyl, r0, P)) {
+        s[8] = 0.;
+        return propagateWithJacobian(cache, useJac, 2, s, P, Step);
+      }
+      return status;
+    }
+    case Trk::SurfaceType::Cone: {
+      double k = static_cast<const Trk::ConeSurface*>(&Su)->bounds().tanAlpha();
+      k = k * k + 1.;
+      double s[9] = {T(0, 3), T(1, 3), T(2, 3),           T(0, 2), T(1, 2),
+                     T(2, 2), k,       cache.m_direction, 0.};
+      return propagateWithJacobian(cache, useJac, 3, s, P, Step);
+    }
+    default: {
+      return false;
+    }
   }
 }
 
