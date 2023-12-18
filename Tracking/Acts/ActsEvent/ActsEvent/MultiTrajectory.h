@@ -277,7 +277,6 @@ class MutableMultiTrajectory final
    */
 
   inline size_t size_impl() const { 
-    //return m_trackStatesAux->size(); 
     return m_trackStatesSize;
   }
 
@@ -364,15 +363,14 @@ class MutableMultiTrajectory final
 
   std::unique_ptr<xAOD::TrackSurfaceContainer> m_surfacesBackend;
   std::unique_ptr<xAOD::TrackSurfaceAuxContainer> m_surfacesBackendAux;
-  using DecorationAccess = ActsTrk::detail::Decoration<xAOD::TrackStateAuxContainer>;
-  std::vector<DecorationAccess> m_decorations;
+  std::vector<ActsTrk::detail::Decoration> m_decorations;
 
   std::vector<std::optional<Acts::SourceLink>> m_calibratedSourceLinks;
   std::vector<std::optional<Acts::SourceLink>> m_uncalibratedSourceLinks;
 
   std::vector<StoredSurface> m_surfaces;
   ActsGeometryContext m_geoContext;
-
+  static const std::set<std::string> s_staticVariables;
   // addjust prealocated size to actualy used
   void trim();
 };
@@ -451,8 +449,8 @@ class MultiTrajectory
   const DataLink<xAOD::TrackParametersAuxContainer> m_trackParametersAux;
   const DataLink<xAOD::TrackJacobianAuxContainer> m_trackJacobiansAux;
   const DataLink<xAOD::TrackMeasurementAuxContainer> m_trackMeasurementsAux;
-  using DecorationAccess = ActsTrk::detail::Decoration<xAOD::TrackStateContainer>;
-  std::vector<DecorationAccess> m_decorations;
+  std::vector<ActsTrk::detail::Decoration> m_decorations;
+
   // TODO remove once tracking code switches to sourceLinks with EL
   std::vector<std::optional<Acts::SourceLink>> m_calibratedSourceLinks;  
   std::vector<std::optional<Acts::SourceLink>> m_uncalibratedSourceLinks;  

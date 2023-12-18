@@ -3,36 +3,30 @@
 */
 #ifndef ActsEvent_Decoration_h
 #define ActsEvent_Decoration_h
-#include "AthContainers/AuxElement.h"
+
+#include "AthContainersInterfaces/AuxTypes.h"
+#include "AthContainersInterfaces/IAuxStore.h"
+#include "AthContainersInterfaces/IConstAuxStore.h"
+#include "xAODCore/AuxContainerBase.h"
 
 namespace ActsTrk {
 using IndexType = std::uint32_t;  // TODO take from a common header
 namespace detail {
+using SetterType =
+    std::function<std::any(SG::IAuxStore*, ActsTrk::IndexType, SG::auxid_t)>;
+using GetterType = std::function<const std::any(
+    const SG::IConstAuxStore*, ActsTrk::IndexType, SG::auxid_t)>;
+using CopierType =
+    std::function<void(SG::IAuxStore*, ActsTrk::IndexType, SG::auxid_t,
+                        const SG::IConstAuxStore*, ActsTrk::IndexType)>;
 
-template <typename STORE>
 struct Decoration {
-  using SetterType =
-      std::function<std::any(STORE*, ActsTrk::IndexType, const std::string&)>;
-  using GetterType = std::function<const std::any(
-      const STORE*, ActsTrk::IndexType, const std::string&)>;
-  using CopierType =
-      std::function<void(STORE*, ActsTrk::IndexType, const std::string&,
-                         const STORE*, ActsTrk::IndexType)>;
-
-  Decoration(const std::string& n, GetterType g, CopierType c,
-             SetterType s = static_cast<SetterType>(nullptr))
-      : name(n),
-        hash(Acts::hashString(name)),
-        getter(g),
-        copier(c),
-        setter(s) {}
-
-  std::string name;  // xAOD API needs this
-  uint32_t hash;     // Acts API comes with this
-  // TODO add here the aux ID to save on lookup
-  GetterType getter;  // type aware accessors
-  CopierType copier;
-  SetterType setter;
+  std::string name;                    // for our info
+  uint32_t hash = 0;                   // Acts API comes with this
+  SG::auxid_t auxid = SG::null_auxid;  // xAOD talks with this
+  GetterType getter = nullptr;            // type aware accessors
+  CopierType copier = nullptr;
+  SetterType setter = nullptr;
 };
 
 template <typename T>
@@ -44,40 +38,64 @@ struct accepted_decoration_types {
 };
 
 // getter that is good for non-mutable containers
-template <typename STORE, typename T>
-const std::any constDecorationGetter(const STORE* container,
+template <typename T>
+const std::any constDecorationGetter(const SG::IConstAuxStore* container,
                                      ActsTrk::IndexType idx,
-                                     const std::string& name) {
-  const SG::ConstAuxElement el(container, idx);
-  return &(el.auxdataConst<T>(name));
+                                     SG::auxid_t decorationId) {
+  const void* data = container->getData(decorationId);
+  return &(static_cast<const T*>(data)[idx]);
 }
-
 // getter that is good for mutable containers (returns const ptr wrapped in
-// std::any but allow adding decorations to store)
-template <typename STORE, typename T>
-const std::any decorationGetter(const STORE* container, ActsTrk::IndexType idx,
-                                const std::string& name) {
-  const SG::AuxElement* el = (*container)[idx];
-  return const_cast<const T*>(&(el->auxdecor<T>(name)));
+template <typename T>
+const std::any decorationGetter(const SG::IAuxStore* container,
+                                ActsTrk::IndexType idx,
+                                SG::auxid_t decorationId) {
+  const void* data = container->getData(decorationId);
+  return &(static_cast<T*>(data)[idx]);
 }
 
 // setter for mutable containers (i.e. provides non const ptr wrapped in
 // std::any)
-template <typename STORE, typename T>
-std::any decorationSetter(STORE* container, ActsTrk::IndexType idx,
-                          const std::string& name) {
-  const SG::AuxElement* el = (*container)[idx];
-  return &(el->auxdecor<T>(name));
+template <typename T>
+std::any decorationSetter(SG::IAuxStore* container, ActsTrk::IndexType idx,
+                          SG::auxid_t decorationId) {
+  void* data = container->getData(decorationId, idx + 1, idx + 1);
+  return &(static_cast<T*>(data)[idx]);
 }
 
-template <typename STORE, typename T>
-void decorationCopier(STORE* dst, ActsTrk::IndexType dst_idx,
-                      const std::string& name, const STORE* src,
+template <typename T>
+void decorationCopier(SG::IAuxStore* dst, ActsTrk::IndexType dst_idx,
+                      SG::auxid_t decorationId, const SG::IConstAuxStore* src,
                       ActsTrk::IndexType src_idx) {
-  *std::any_cast<T*>(decorationSetter<STORE, T>(dst, dst_idx, name)) =
+  *std::any_cast<T*>(decorationSetter<T>(dst, dst_idx, decorationId)) =
       *std::any_cast<const T*>(
-          constDecorationGetter<STORE, T>(src, src_idx, name));
+          constDecorationGetter<T>(src, src_idx, decorationId));
 }
+
+template <typename T>
+static Decoration decoration(const std::string& n, GetterType g, CopierType c,
+                          SetterType s = static_cast<SetterType>(nullptr)) {
+  Decoration dec;
+  dec.name = n;
+  dec.hash = Acts::hashString(n);
+  dec.auxid = SG::AuxTypeRegistry::instance().getAuxID<T>(n);
+  if (dec.auxid == SG::null_auxid)
+    throw std::runtime_error("ActsTrk::Decoration Aux ID for " + n +
+                             " could not be found");
+  dec.getter = g;
+  dec.copier = c;
+  dec.setter = s;
+  return dec;
+}
+
+
+/**
+* @arg container - source container to look for decorations
+* @arg staticVaraibles - set of names of predefined variables for this container
+*/
+std::vector<Decoration> restoreDecorations(
+    const SG::IConstAuxStore* container,
+    const std::set<std::string>& staticVariables);
 
 }  // namespace detail
 }  // namespace ActsTrk
