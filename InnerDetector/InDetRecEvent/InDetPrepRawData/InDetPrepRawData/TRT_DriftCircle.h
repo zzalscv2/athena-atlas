@@ -42,43 +42,25 @@ public:
   TRT_DriftCircle(const TRT_DriftCircle&) = default;
   TRT_DriftCircle& operator=(const TRT_DriftCircle&) = default;
   TRT_DriftCircle& operator=(TRT_DriftCircle&&) = default;
+  virtual ~TRT_DriftCircle() = default;
   /** Constructor with parameters:
    *  compact id of the DriftCircle,
    *  the driftRadius and its error
    *  the RDO dataword with additional validity bit
-   *  this class owns the pointers passed (except the TRT_BaseElement),
+   *  The TRT_BaseElement ptr is not owned
    */
-  TRT_DriftCircle(const Identifier& clusId,
-                  const Amg::Vector2D& driftRadius,
-                  const std::vector<Identifier>& rdoList,
-                  const Amg::MatrixX& errDriftRadius,
-                  const InDetDD::TRT_BaseElement* detEl,
-                  const unsigned int word = 0);
-
-  TRT_DriftCircle(const Identifier& clusId,
-                  const Amg::Vector2D& driftRadius,
-                  const Amg::MatrixX& errDriftRadius,
-                  const InDetDD::TRT_BaseElement* detEl,
-                  const unsigned int word = 0);
-
   TRT_DriftCircle(const Identifier& Id,
                   const Amg::Vector2D& driftRadius,
                   std::vector<Identifier>&& rdoList,
                   Amg::MatrixX&& errDriftRadius,
                   const InDetDD::TRT_BaseElement* detEl,
-                  const unsigned int word);
+                  const unsigned int word = 0);
 
   TRT_DriftCircle(const Identifier& clusId,
                   const Amg::Vector2D& driftRadius,
                   Amg::MatrixX&& errDriftRadius,
                   const InDetDD::TRT_BaseElement* detEl,
                   const unsigned int word = 0);
-
-
-  /** Destructor*/
-  virtual ~TRT_DriftCircle() = default;
-
-  // accesors
 
   /** returns the TRT dataword */
   unsigned int getWord() const;

@@ -108,7 +108,7 @@ StatusCode TRTFastDigitizationTool::prepareEvent(const EventContext& /*ctx*/, un
   m_trtHitCollList.clear();
   m_thpctrt = new TimedHitCollection< TRTUncompressedHit >();
   m_HardScatterSplittingSkipper = false;
-  
+
   StatusCode sc = initializeNumericalConstants();
 
   return sc;
@@ -160,51 +160,51 @@ StatusCode TRTFastDigitizationTool::processBunchXing( int bunchXing,
 // initialize constants which are the same for all events
 StatusCode TRTFastDigitizationTool::initializeNumericalConstants() {
 
-  m_trtTailFraction = 4.7e-4;               // part of the fraction in Tails 
+  m_trtTailFraction = 4.7e-4;               // part of the fraction in Tails
   m_trtSigmaDriftRadiusTail = 4./sqrt(12.);   //  sigma of one TRT straw in R (Tail) [mm]
 
   return StatusCode::SUCCESS;
 }
 
-// set (pileup-dependent) numerical constants 
+// set (pileup-dependent) numerical constants
 StatusCode TRTFastDigitizationTool::setNumericalConstants() {
 
-  // Efficiency and resolution dependence on  pileup 
-  // Resolution is parametrized with a double gaussian so there are two parameters (res1 = core, res2= tail) 
+  // Efficiency and resolution dependence on  pileup
+  // Resolution is parametrized with a double gaussian so there are two parameters (res1 = core, res2= tail)
 
   static const float eff_corr_pileup_dependence = -0.0005;   // variation of efficiency with the number of Xing
   static const float res1_corr_pileup_dependence = 0.005;   // variation of core resolution (fractional) with the number of Xing
   static const float res2_corr_pileup_dependence = 0.015;   // variation of tail resolution (fractional) with the number of Xing
   // scale factors relative to the value for mu=20
-  float effcorr = 1+eff_corr_pileup_dependence*(m_NCollPerEvent-20);  
-  float res1corr =  1+res1_corr_pileup_dependence*(m_NCollPerEvent-20);  
- float res2corr =  1+res2_corr_pileup_dependence*(m_NCollPerEvent-20);  
+  float effcorr = 1+eff_corr_pileup_dependence*(m_NCollPerEvent-20);
+  float res1corr =  1+res1_corr_pileup_dependence*(m_NCollPerEvent-20);
+ float res2corr =  1+res2_corr_pileup_dependence*(m_NCollPerEvent-20);
 
-  // Now the numerical parameters for efficiency and resolution   
+  // Now the numerical parameters for efficiency and resolution
   static const float tailRes = 3.600;  // scale factor for tail resolution
-  static const float coreFracEndcap_Xe = 0.40;  // fraction of events in resolution core (Xe) 
-  static const float coreFracEndcap_Ar = 0.40;  // fraction of events in resolution core (Ar)  
-  static const float coreFracBarrel_Xe = 0.250;  // fraction of events in resolution core (Xe) 
-  static const float coreFracBarrel_Ar = 0.250;  // fraction of events in resolution core (Ar) 
+  static const float coreFracEndcap_Xe = 0.40;  // fraction of events in resolution core (Xe)
+  static const float coreFracEndcap_Ar = 0.40;  // fraction of events in resolution core (Ar)
+  static const float coreFracBarrel_Xe = 0.250;  // fraction of events in resolution core (Xe)
+  static const float coreFracBarrel_Ar = 0.250;  // fraction of events in resolution core (Ar)
 
- 
-  static const float eff_BarrelA_Xe = 0.840;     // efficiency scale factor 
-  static const float eff_EndcapA_Xe = 0.875;   
-  static const float eff_BarrelC_Xe = 0.833;      
-  static const float eff_EndcapC_Xe = 0.894;   
-  static const float eff_BarrelA_Ar = 0.933;     
-  static const float eff_EndcapA_Ar = 0.949;   
-  static const float eff_BarrelC_Ar = 0.937;      
-  static const float eff_EndcapC_Ar = 0.977;  
-  static const float err_Barrel_Xe = 0.997;     // scale factor for the error as returned by the drift function tool 
-  static const float err_Endcap_Xe = 1.065; 
-  static const float err_Barrel_Ar = 1.020;     
-  static const float err_Endcap_Ar = 1.040; 
 
-  static const float coreRes_Barrel_Xe = 0.4;  // scale factor for core resolution    
-  static const float coreRes_Endcap_Xe = 0.5;  
-  static const float coreRes_Barrel_Ar = 0.4;    
-  static const float coreRes_Endcap_Ar = 0.5; 
+  static const float eff_BarrelA_Xe = 0.840;     // efficiency scale factor
+  static const float eff_EndcapA_Xe = 0.875;
+  static const float eff_BarrelC_Xe = 0.833;
+  static const float eff_EndcapC_Xe = 0.894;
+  static const float eff_BarrelA_Ar = 0.933;
+  static const float eff_EndcapA_Ar = 0.949;
+  static const float eff_BarrelC_Ar = 0.937;
+  static const float eff_EndcapC_Ar = 0.977;
+  static const float err_Barrel_Xe = 0.997;     // scale factor for the error as returned by the drift function tool
+  static const float err_Endcap_Xe = 1.065;
+  static const float err_Barrel_Ar = 1.020;
+  static const float err_Endcap_Ar = 1.040;
+
+  static const float coreRes_Barrel_Xe = 0.4;  // scale factor for core resolution
+  static const float coreRes_Endcap_Xe = 0.5;
+  static const float coreRes_Barrel_Ar = 0.4;
+  static const float coreRes_Endcap_Ar = 0.5;
 
   m_cFit[ 0 ][ 0 ] = effcorr*eff_BarrelA_Xe;   // Barrel A-side Xenon
   m_cFit[ 0 ][ 1 ] = err_Barrel_Xe;
@@ -215,7 +215,7 @@ StatusCode TRTFastDigitizationTool::setNumericalConstants() {
  m_cFit[ 1 ][ 1 ] = err_Endcap_Xe;
   m_cFit[ 1 ][ 2 ] = coreFracEndcap_Xe;
   m_cFit[ 1 ][ 3 ] = res1corr*coreRes_Endcap_Xe;
-  m_cFit[ 1 ][ 4 ] = res2corr*tailRes; 
+  m_cFit[ 1 ][ 4 ] = res2corr*tailRes;
   m_cFit[ 2 ][ 0 ] = effcorr*eff_BarrelC_Xe;   // Barrel C-side Xenon
   m_cFit[ 2 ][ 1 ] = err_Barrel_Xe;
   m_cFit[ 2 ][ 2 ] = coreFracBarrel_Xe;
@@ -225,12 +225,12 @@ StatusCode TRTFastDigitizationTool::setNumericalConstants() {
   m_cFit[ 3 ][ 1 ] = err_Endcap_Xe;
   m_cFit[ 3 ][ 2 ] = coreFracEndcap_Xe;
   m_cFit[ 3 ][ 3 ] = res1corr*coreRes_Endcap_Xe;
-  m_cFit[ 3 ][ 4 ] = res2corr*tailRes; 
+  m_cFit[ 3 ][ 4 ] = res2corr*tailRes;
   m_cFit[ 4 ][ 0 ] = effcorr*eff_BarrelA_Ar;   // Barrel A-side Argon
   m_cFit[ 4 ][ 1 ] = err_Barrel_Ar;
   m_cFit[ 4 ][ 2 ] = coreFracBarrel_Ar;
   m_cFit[ 4 ][ 3 ] = res1corr*coreRes_Barrel_Ar;
-  m_cFit[ 4 ][ 4 ] = res2corr*tailRes; 
+  m_cFit[ 4 ][ 4 ] = res2corr*tailRes;
   m_cFit[ 5 ][ 0 ] = effcorr*eff_EndcapA_Ar;   // Endcap A-side Argon
   m_cFit[ 5 ][ 1 ] = err_Endcap_Ar;
   m_cFit[ 5 ][ 2 ] = coreFracEndcap_Ar;
@@ -240,12 +240,12 @@ StatusCode TRTFastDigitizationTool::setNumericalConstants() {
   m_cFit[ 6 ][ 1 ] = err_Barrel_Ar;
   m_cFit[ 6 ][ 2 ] = coreFracBarrel_Ar;
   m_cFit[ 6 ][ 3 ] = res1corr*coreRes_Barrel_Ar;
-  m_cFit[ 6 ][ 4 ] = res2corr*tailRes; 
+  m_cFit[ 6 ][ 4 ] = res2corr*tailRes;
   m_cFit[ 7 ][ 0 ] = effcorr*eff_EndcapC_Ar;   // Endcap C-side Argon
   m_cFit[ 7 ][ 1 ] = err_Endcap_Ar;
   m_cFit[ 7 ][ 2 ] = coreFracEndcap_Ar;
   m_cFit[ 7 ][ 3 ] = res1corr*coreRes_Endcap_Ar;
-  m_cFit[ 7 ][ 4 ] = res2corr*tailRes; 
+  m_cFit[ 7 ][ 4 ] = res2corr*tailRes;
 
    return StatusCode::SUCCESS;
 }
@@ -274,8 +274,8 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx,
      }
   }
 
-  StatusCode sc = setNumericalConstants(); 
-  if(sc != StatusCode::SUCCESS) return sc;    
+  StatusCode sc = setNumericalConstants();
+  if(sc != StatusCode::SUCCESS) return sc;
 
   m_driftCircleMap.clear();
 
@@ -306,7 +306,7 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx,
 
       const InDetDD::TRT_BaseElement *trtBaseElement = m_trt_manager->getElement( hash );
       Identifier hit_id = trtBaseElement->identify();
-      
+
       int BEC = m_trt_id->barrel_ec( hit_id );
       bool isArgon = isArgonStraw( straw_id );
       int idx = ( BEC > 0 ? BEC : 2 - BEC ) + 4 * isArgon - 1;
@@ -329,7 +329,7 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx,
         sigmaTrt = m_trtDriftFunctionTool->errorOfDriftRadius( driftTime, hit_id, m_NCollPerEvent );
       }
 
-      // driftRadiusLoc smearing procedure 
+      // driftRadiusLoc smearing procedure
       double dR = 0;
       int ii = 0;
       do {
@@ -395,8 +395,8 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx,
       InDet::TRT_DriftCircle* trtDriftCircle =
         new InDet::TRT_DriftCircle(straw_id,
                                    hitLocalPosition,
-                                   rdoList,
-                                   hitErrorMatrix,
+                                   std::move(rdoList),
+                                   std::move(hitErrorMatrix),
                                    trtBaseElement,
                                    word);
       if (!trtDriftCircle)
@@ -508,7 +508,7 @@ StatusCode TRTFastDigitizationTool::createAndStoreRIOs(const EventContext& ctx, 
   // TL - I first determined the value of highTRMergeProb which gives a good
   // agreeement with full simulation as being 0.04 for mu=10 and 0.12 for mu=60;
   // I decided to use the functional form a*pow(mu,b) to describe the mu
-  // dependence; solving the 2x2 system gives a=0.01 and b=0.61. 
+  // dependence; solving the 2x2 system gives a=0.01 and b=0.61.
   float highTRMergeProb = 0.012*pow(m_NCollPerEvent,0.61);
 
   std::multimap< IdentifierHash, InDet::TRT_DriftCircle * > idHashMap;
@@ -527,12 +527,12 @@ StatusCode TRTFastDigitizationTool::createAndStoreRIOs(const EventContext& ctx, 
       InDet::TRT_DriftCircle *trtDriftCircle2 = itr2->second;
       if(trtDriftCircle2->getWord() & maskHT) isHT = true;
       delete trtDriftCircle2;
-    } 
+    }
 
   // set the word of the first hit to high threshold with some probability, unless any of the hits is HT already
     if( !(trtDriftCircle->getWord() & maskHT) && !isHT && numberOfHitsInOneStraw > 1) {
       unsigned int newword = 0;
-      if(highTRMergeProb*(numberOfHitsInOneStraw-1) > CLHEP::RandFlat::shoot( rndmEngine )) newword += 1 << (26-9); 
+      if(highTRMergeProb*(numberOfHitsInOneStraw-1) > CLHEP::RandFlat::shoot( rndmEngine )) newword += 1 << (26-9);
       const unsigned int newword2 = newword;
       const Amg::Vector2D locpos = trtDriftCircle->localPosition();
       const std::vector<Identifier> &rdolist = trtDriftCircle->rdoList();
@@ -540,7 +540,7 @@ StatusCode TRTFastDigitizationTool::createAndStoreRIOs(const EventContext& ctx, 
       InDet::TRT_DriftCircle* trtDriftCircle2 = new InDet::TRT_DriftCircle(
         trtid,
         locpos,
-        rdolist,
+        std::vector<Identifier>(rdolist),
         Amg::MatrixX(trtDriftCircle->localCovariance()),
         detEl,
         newword2);
@@ -719,7 +719,7 @@ bool TRTFastDigitizationTool::isArgonStraw( const Identifier &straw_id ) const
   // TRTCond::StrawStatus::Good == Xenon
   // return ( m_trtStrawStatusSummarySvc->getStatusHT( straw_id ) != TRTCond::StrawStatus::Good ? true : false );
   return ( gasType( straw_id ) == 1 );
-} 
+}
 
 
 int TRTFastDigitizationTool::gasType( const Identifier &straw_id ) const
@@ -740,14 +740,14 @@ int TRTFastDigitizationTool::gasType( const Identifier &straw_id ) const
     ATH_MSG_WARNING( "TRTFastDigitizationTool::gasType() getStatusHT = " << status << ", must be in [1..5] range" );
     return -1;
   }
-  
+
 }
 
 
 double TRTFastDigitizationTool::getProbHT( int particleEncoding, float kineticEnergy, const Identifier &straw_id, double rTrkWire, double hitGlobalPosition ) const {
 
   Trk::ParticleHypothesis hypothesis = Trk::pion;
-  
+
   switch( abs( particleEncoding ) ) {
 
     case 11:
@@ -757,11 +757,11 @@ double TRTFastDigitizationTool::getProbHT( int particleEncoding, float kineticEn
     case 13:
     hypothesis = Trk::muon;
     break;
-    
+
     case 321:
     hypothesis = Trk::kaon;
     break;
-    
+
     case 211:
     default:
     hypothesis = Trk::pion;
@@ -985,7 +985,7 @@ double TRTFastDigitizationTool::strawEfficiency( double driftRadius, int BEC )
                             { 0.477001, 1.02865, 1.02910, 0.185082, 0. },      // Barrel
                             { 0.482528, 1.03601, 1.03693, 0.182581, 0. }       // EndCap
                           };
-  
+
   const double &trtFitAmplitude = p[ BEC ][ 0 ];
   const double &trtFitMu = p[ BEC ][ 1 ];
   const double &trtFitR = p[ BEC ][ 2 ];
@@ -1000,7 +1000,7 @@ double TRTFastDigitizationTool::strawEfficiency( double driftRadius, int BEC )
                       + trtFitConstant;
 
   return efficiency;
-  
+
   /*
   static const std::vector< double > bins = { 0.05, 1.43, 1.48, 1.53, 1.58, 1.63, 1.68, 1.73, 1.78, 1.83, 1.88, 1.93, 1.99 };
   static const std::vector< double > efficiency = { 0.94,        // [ 0., 0.05 ]
@@ -1020,7 +1020,7 @@ double TRTFastDigitizationTool::strawEfficiency( double driftRadius, int BEC )
                                                   };
 
   return efficiency[ std::distance( bins.begin(), std::lower_bound( bins.begin(), bins.end(), driftRadius ) ) ];
-  */ 
+  */
 }
 
 

@@ -36,7 +36,7 @@
 // Constructior
 ///////////////////////////////////////////////////////////////////
 
-InDet::TRT_DriftCircleToolCosmics::TRT_DriftCircleToolCosmics(const std::string& t, 
+InDet::TRT_DriftCircleToolCosmics::TRT_DriftCircleToolCosmics(const std::string& t,
 						const std::string& n,
 						const IInterface*  p ):
   AthAlgTool(t,n,p),
@@ -60,7 +60,7 @@ InDet::TRT_DriftCircleToolCosmics::TRT_DriftCircleToolCosmics(const std::string&
 }
 
 ///////////////////////////////////////////////////////////////////
-// Destructor  
+// Destructor
 ///////////////////////////////////////////////////////////////////
 
 InDet::TRT_DriftCircleToolCosmics::~TRT_DriftCircleToolCosmics()= default;
@@ -79,7 +79,7 @@ bool InDet::TRT_DriftCircleToolCosmics::passValidityGate(unsigned int word, floa
       if (thisTime >= lowGate && thisTime <= highGate) foundInterval = true;
     }
     mask >>= 1;
-    if (i == 7 || i == 15) 
+    if (i == 7 || i == 15)
       mask >>= 1;
     i++;
   }
@@ -94,7 +94,7 @@ bool InDet::TRT_DriftCircleToolCosmics::passValidityGate(unsigned int word, floa
 StatusCode InDet::TRT_DriftCircleToolCosmics::initialize()
 {
 
-  StatusCode sc = AthAlgTool::initialize(); 
+  StatusCode sc = AthAlgTool::initialize();
 
   // Get DriftFunction tool
   //
@@ -122,7 +122,7 @@ StatusCode InDet::TRT_DriftCircleToolCosmics::initialize()
   // Initialize Read handle key
   ATH_CHECK(m_evtPhaseKey.initialize());
 
-  // Initialize readCondHandle key                                                                                                                         
+  // Initialize readCondHandle key
   ATH_CHECK(m_trtDetEleContKey.initialize());
 
   return sc;
@@ -157,14 +157,14 @@ InDet::TRT_DriftCircleCollection* InDet::TRT_DriftCircleToolCosmics::convert(int
   }
 
   SG::ReadHandle<ComTime> theComTime(m_evtPhaseKey, ctx);
-  
+
   SG::ReadCondHandle<InDetDD::TRT_DetElementContainer> trtDetEleHandle(m_trtDetEleContKey, ctx);
   const InDetDD::TRT_DetElementCollection* elements(trtDetEleHandle->getElements());
   if (not trtDetEleHandle.isValid() or elements==nullptr) {
     ATH_MSG_FATAL(m_trtDetEleContKey.fullKey() << " is not available.");
     return rio;
   }
-  	 
+
   float timecor=0.;
   if (theComTime.isValid()) {
     timecor = theComTime->getTime() + m_global_offset;
@@ -175,8 +175,8 @@ InDet::TRT_DriftCircleCollection* InDet::TRT_DriftCircleToolCosmics::convert(int
     timecor=m_global_offset; // cannot correct drifttime
   }
 
-  DataVector<TRT_RDORawData>::const_iterator r,rb=rdo->begin(),re=rdo->end(); 
-  if(rb!=re) { 
+  DataVector<TRT_RDORawData>::const_iterator r,rb=rdo->begin(),re=rdo->end();
+  if(rb!=re) {
 
    //Get the BaseElement and the rio of the collection
     IdentifierHash IHc                 = rdo      ->identifyHash();
@@ -192,13 +192,13 @@ InDet::TRT_DriftCircleCollection* InDet::TRT_DriftCircleToolCosmics::convert(int
     for(r=rb; r!=re; ++r) {
 
       Identifier   id  = (*r)->identify();
-      int   LTbin      = (*r)->driftTimeBin(); 
+      int   LTbin      = (*r)->driftTimeBin();
       bool  isOK       =true;
       double t0         =0.;
       double rawTime    = m_driftFunctionTool->rawTime(LTbin);
       double radius     =0.;
       double driftTime  =0.;
-      unsigned int word    = (*r)->getWord(); 
+      unsigned int word    = (*r)->getWord();
 
       //
       //Get straw status
@@ -214,11 +214,11 @@ InDet::TRT_DriftCircleCollection* InDet::TRT_DriftCircleToolCosmics::convert(int
       //correct for phase
       rawTime-=timecor;
 
-      // ToT and HT Corrections            
+      // ToT and HT Corrections
 
       bool isArgonStraw=true;
       if (m_useToTCorrection) rawTime -= m_driftFunctionTool->driftTimeToTCorrection((*r)->timeOverThreshold(), id, isArgonStraw);
-      if (m_useHTCorrection && (*r)->highLevel())  rawTime += m_driftFunctionTool->driftTimeHTCorrection(id, isArgonStraw);           
+      if (m_useHTCorrection && (*r)->highLevel())  rawTime += m_driftFunctionTool->driftTimeHTCorrection(id, isArgonStraw);
 
       //make tube hit if first bin is high and no later LE appears
       if( LTbin==0 || LTbin==24 ) {
@@ -228,7 +228,7 @@ InDet::TRT_DriftCircleCollection* InDet::TRT_DriftCircleToolCosmics::convert(int
         driftTime = rawTime-t0;
       }
 
-      if(!isOK) word &= 0xF7FFFFFF; 
+      if(!isOK) word &= 0xF7FFFFFF;
       else word |= 0x08000000;
 
 
@@ -239,7 +239,7 @@ InDet::TRT_DriftCircleCollection* InDet::TRT_DriftCircleToolCosmics::convert(int
           << " time bin  " << LTbin
           << " timecor " << timecor
 	  << " corrected time " << rawTime );
-         
+
       double error=0;
       if(Mode<2) {
 	error = m_driftFunctionTool->errorOfDriftRadius(driftTime,id)         ;
@@ -264,12 +264,12 @@ InDet::TRT_DriftCircleCollection* InDet::TRT_DriftCircleToolCosmics::convert(int
       // if(Mode<1) dvi.push_back(id);  we dont need this
 
       InDet::TRT_DriftCircle* tdc =
-        new InDet::TRT_DriftCircle(id, loc, errmat, pE, word);
+        new InDet::TRT_DriftCircle(id, loc, std::move(errmat), pE, word);
 
       if (tdc) {
-	     
+
            if(!m_useConditionsStatus){
-                // setting the index (via -> size) has to be done just before the push_back! (for safety) 
+                // setting the index (via -> size) has to be done just before the push_back! (for safety)
                 tdc->setHashAndIndex(rio->identifyHash(), rio->size());
                 rio->push_back(tdc);
 
@@ -287,8 +287,8 @@ InDet::TRT_DriftCircleCollection* InDet::TRT_DriftCircleToolCosmics::convert(int
 	ATH_MSG_ERROR("Could not create InDet::TRT_DriftCircle object !");
       }
     }
-  }  
+  }
   return rio;
-}  
+}
 
 

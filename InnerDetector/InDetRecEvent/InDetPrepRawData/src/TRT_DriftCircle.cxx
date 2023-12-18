@@ -18,31 +18,6 @@
 
 namespace InDet{
 
-// Constructor with parameters:
-TRT_DriftCircle::TRT_DriftCircle(
-  const Identifier& Id,
-  const Amg::Vector2D& driftRadius,
-  const std::vector<Identifier>& rdoList,
-  const Amg::MatrixX& errDriftRadius,
-  const InDetDD::TRT_BaseElement* detEl,
-  const unsigned int word)
-  : PrepRawData(Id, driftRadius, rdoList, errDriftRadius)
-  , m_detEl(detEl)
-  , m_word(word)
-{
-}
-
-TRT_DriftCircle::TRT_DriftCircle(
-  const Identifier& Id,
-  const Amg::Vector2D& driftRadius,
-  const Amg::MatrixX& errDriftRadius,
-  const InDetDD::TRT_BaseElement* detEl,
-  const unsigned int word)
-  : PrepRawData(Id, driftRadius, errDriftRadius)
-  , m_detEl(detEl)
-  , m_word(word)
-{
-}
 
 TRT_DriftCircle::TRT_DriftCircle(
   const Identifier& Id,
@@ -76,13 +51,6 @@ TRT_DriftCircle::TRT_DriftCircle()
   , m_word(0)
 
 {
-}
-
-double TRT_DriftCircle::driftTime(bool& valid) const
-{
-  
-  valid = driftTimeValid();
-  return rawDriftTime();
 }
 
 MsgStream&
