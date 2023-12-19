@@ -946,7 +946,7 @@ AsgElectronEfficiencyCorrectionTool::get_simType_from_metadata(
                                                     simType,
                                                     inputMetaStore()));
       std::transform(simType.begin(), simType.end(), simType.begin(), ::toupper);
-      result = (simType.find("ATLFASTII") == std::string::npos)
+      result = (simType.find("ATLFAST") == std::string::npos)
                  ? PATCore::ParticleDataType::Full
                  : PATCore::ParticleDataType::Fast;
       return StatusCode::SUCCESS;
@@ -968,7 +968,7 @@ AsgElectronEfficiencyCorrectionTool::get_simType_from_metadata(
     } else {
       ATH_MSG_DEBUG("sim type = " + simType);
        std::transform(simType.begin(), simType.end(), simType.begin(), ::toupper);
-      result = (simType.find("ATLFASTII") == std::string::npos)
+      result = (simType.find("ATLFAST") == std::string::npos)
                  ? PATCore::ParticleDataType::Full
                  : PATCore::ParticleDataType::Fast;
       return StatusCode::SUCCESS;
