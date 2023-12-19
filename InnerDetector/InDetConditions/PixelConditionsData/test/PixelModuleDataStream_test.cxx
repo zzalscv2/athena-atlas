@@ -39,27 +39,7 @@ BOOST_AUTO_TEST_SUITE(PixelModuleDataStreamTest )
   BOOST_AUTO_TEST_CASE( PixelModuleDataStreamInsertionTest ){
     PixelModuleData pmd; //all default values
     //the following is a raw string literal, will (necessarily) preserve formatting "as-is"
-    const std::string expected=R"(#bunchSpace
-25
-#barrelNumberOfBCID
-1 1 1 1 
-#endcapNumberOfBCID
-1 1 1 
-#DBMNumberOfBCID
-1 1 1 
-#barrelTimeOffset
-5 5 5 5 
-#endcapTimeOffset
-5 5 5 
-#DBMTimeOffset
-5 5 5 
-#barrelTimeJitter
-0 0 0 0 
-#endcapTimeJitter
-0 0 0 
-#DBMTimeJitter
-0 0 0 
-#defaultBarrelAnalogThreshold
+    const std::string expected=R"(#defaultBarrelAnalogThreshold
 -1 -1 -1 -1 
 #defaultEndcapAnalogThreshold
 -1 -1 -1 
@@ -129,28 +109,10 @@ BOOST_AUTO_TEST_SUITE(PixelModuleDataStreamTest )
 0 151 256 256 
 #FEI3EndcapLatency
 256 256 256 
-#FEI3BarrelHitDuplication
-0 0 0 0 
-#FEI3EndcapHitDuplication
-0 0 0 
-#FEI3BarrelSmallHitToT
--1 -1 -1 -1 
-#FEI3EndcapSmallHitToT
--1 -1 -1 
 #FEI3BarrelTimingSimTune
 -1 2015 2015 2015 
 #FEI3EndcapTimingSimTune
 2015 2015 2015 
-#FEI4BarrelHitDiscConfig
-2 2 2 
-#FEI4EndcapHitDiscConfig
-2 2 2 
-#scaleFEI4
-1
-#useFEI4SpecialScalingFunction
-1
-#FEI4ToTSigma
-0 0.5 0.5 0.5 0.5 0.5 0.6 0.6 0.6 0.6 0.65 0.7 0.75 0.8 0.8 0.8 0.8 
 #paramA
 70.2
 #paramE
@@ -159,14 +121,8 @@ BOOST_AUTO_TEST_SUITE(PixelModuleDataStreamTest )
 26000
 #doLinearExtrapolation
 0
-#barrelLorentzAngleCorr
-1 1 1 1 
-#endcapLorentzAngleCorr
-1 1 1 
 #biasVoltage
 150
-#temperature
--7
 #fluenceLayer
 8e+13 1.61e+14 7.1e+13 4.8e+13 
 #radSimFluenceMapList
@@ -214,10 +170,6 @@ PixelCabling/Pixels_Atlas_IdMapping_2016.dat#distortionInputSource
     iss>>pmd;
     const int bec = 0;
     const int layer = 1;
-    BOOST_TEST(pmd.getBunchSpace() == 26.0);
-    BOOST_TEST(pmd.getNumberOfBCID(bec,layer) == 2);
-    BOOST_TEST(pmd.getTimeOffset(bec,layer) == 5.);
-    BOOST_TEST(pmd.getTimeJitter(bec,layer) == 8);
     BOOST_TEST(pmd.getDefaultAnalogThreshold(bec,layer) == 1);
     BOOST_TEST(pmd.getDefaultAnalogThresholdSigma(bec, layer) == 100);
     BOOST_TEST(pmd.getDefaultAnalogThresholdNoise(bec, layer) == 1000);
@@ -230,13 +182,7 @@ PixelCabling/Pixels_Atlas_IdMapping_2016.dat#distortionInputSource
     const std::vector<float> expected{1, 0, 0, 0, 0, 0, 0.2418, 0.4397, 0.5858, 0.6949, 0.7737, 0.8414, 0.8959, 0.9414, 0.9828, 1};
     BOOST_TEST(pmd.getNoiseShape(bec, layer) == expected, boost::test_tools::per_element());
     BOOST_TEST(pmd.getFEI3Latency(bec, layer) == 200);
-    BOOST_TEST(pmd.getFEI3HitDuplication(bec, layer) == 1);
-    BOOST_TEST(pmd.getFEI3SmallHitToT(bec, layer) == 1);
     BOOST_TEST(pmd.getFEI3TimingSimTune(bec, layer) == 2023);
-    BOOST_TEST(pmd.getFEI4HitDiscConfig(bec, layer) == 9);
-    BOOST_TEST(pmd.getFEI4ChargScaling() == 0.9);
-    BOOST_TEST(pmd.getUseFEI4SpecialScalingFunction() == false);
-    // untested:   double getFEI4ToTSigma(int tot) const;
     BOOST_TEST(pmd.getDefaultQ2TotA() == 100.);
     BOOST_TEST(pmd.getDefaultQ2TotE() == 200.);
     BOOST_TEST(pmd.getDefaultQ2TotC() == 300.);

@@ -23,25 +23,7 @@ class PixelModuleData
     // stream insertion
     friend std::ostream & operator << (std::ostream &out, const PixelModuleData &c);
     friend std::istream & operator >> (std::istream &in, PixelModuleData &c);
-    // Digitization parameters
-    void setBunchSpace(double bunchSpace);
-    double getBunchSpace() const;
-
-    void setBarrelNumberOfBCID(const std::vector<int> &barrelNumberOfBCID);
-    void setEndcapNumberOfBCID(const std::vector<int> &endcapNumberOfBCID);
-    void setDBMNumberOfBCID(const std::vector<int> &DBMNumberOfBCID);
-    int getNumberOfBCID(int barrel_ec, int layer) const;
-
-    void setBarrelTimeOffset(const std::vector<double> &barrelTimeOffset);
-    void setEndcapTimeOffset(const std::vector<double> &endcapTimeOffset);
-    void setDBMTimeOffset(const std::vector<double> &DBMTimeOffset);
-    double getTimeOffset(int barrel_ec, int layer) const;
-
-    void setBarrelTimeJitter(const std::vector<double> &barrelTimeJitter);
-    void setEndcapTimeJitter(const std::vector<double> &endcapTimeJitter);
-    void setDBMTimeJitter(const std::vector<double> &DBMTimeJitter);
-    double getTimeJitter(int barrel_ec, int layer) const;
-
+    
     void setDefaultBarrelAnalogThreshold(const std::vector<int> &barrelAnalogThreshold);
     void setDefaultEndcapAnalogThreshold(const std::vector<int> &endcapAnalogThreshold);
     void setDefaultDBMAnalogThreshold(const std::vector<int> &DBMAnalogThreshold);
@@ -91,36 +73,13 @@ class PixelModuleData
     void setEndcapNoiseShape(const std::vector<std::vector<float>> &endcapNoiseShape);
     void setDBMNoiseShape(const std::vector<std::vector<float>> &DBMNoiseShape);
     const std::vector<float> &getNoiseShape(int barrel_ec, int layer) const;
-
     void setFEI3BarrelLatency(const std::vector<int> &FEI3BarrelLatency);
     void setFEI3EndcapLatency(const std::vector<int> &FEI3EndcapLatency);
     int getFEI3Latency(int barrel_ec, int layer) const;
-
-    void setFEI3BarrelHitDuplication(const std::vector<bool> &FEI3BarrelHitDuplication);
-    void setFEI3EndcapHitDuplication(const std::vector<bool> &FEI3EndcapHitDuplication);
-    bool getFEI3HitDuplication(int barrel_ec, int layer) const;
-
-    void setFEI3BarrelSmallHitToT(const std::vector<int> &FEI3BarrelSmallHitToT);
-    void setFEI3EndcapSmallHitToT(const std::vector<int> &FEI3EndcapSmallHitToT);
-    int getFEI3SmallHitToT(int barrel_ec, int layer) const;
-
+    
     void setFEI3BarrelTimingSimTune(const std::vector<int> &FEI3BarrelTimingSimTune);
     void setFEI3EndcapTimingSimTune(const std::vector<int> &FEI3EndcapTimingSimTune);
     int getFEI3TimingSimTune(int barrel_ec, int layer) const;
-
-    void setFEI4BarrelHitDiscConfig(const std::vector<int> &FEI4BarrelHitDiscConfig);
-    void setFEI4EndcapHitDiscConfig(const std::vector<int> &FEI4EndcapHitDiscConfig);
-    int getFEI4HitDiscConfig(int barrel_ec, int layer) const;
-    int getFEI4OverflowToT(int barrel_ec, int layer) const;
-
-    void setFEI4ChargScaling(float scaleFEI4);
-    void setUseFEI4SpecialScalingFunction(bool useFEI4SpecialScalingFunction);
-    float getFEI4ChargScaling() const;
-    bool getUseFEI4SpecialScalingFunction() const;
-
-    void setFEI4ToTSigma(const std::vector<double> &FEI4ToTSigma);
-    double getFEI4ToTSigma(int tot) const;
-
     void setBLayerTimingIndex(const std::vector<float> &BLayerTimingIndex);
     void setLayer1TimingIndex(const std::vector<float> &Layer1TimingIndex);
     void setLayer2TimingIndex(const std::vector<float> &Layer2TimingIndex);
@@ -147,18 +106,9 @@ class PixelModuleData
     void setPIXLinearExtrapolation(bool doLinearExtrapolation);
     bool getPIXLinearExtrapolation() const;
 
-    // Lorentz angle correction
-    void setBarrelLorentzAngleCorr(const std::vector<double> &barrelLorentzAngleCorr);
-    void setEndcapLorentzAngleCorr(const std::vector<double> &endcapLorentzAngleCorr);
-    double getLorentzAngleCorr(int barrel_ec, int layer) const;
-
     // DCS parameters
     void setDefaultBiasVoltage(float biasVoltage);
     float getDefaultBiasVoltage() const;
-
-
-    void setDefaultTemperature(float temperature);
-    float getDefaultTemperature() const;
 
     // Radiation damage fluence maps
     void setFluenceLayer(const std::vector<double> &fluenceLayer);
@@ -216,20 +166,6 @@ class PixelModuleData
 
 
   private:
-    //default settings are from PixelConfigCondAlg.h
-    double m_bunchSpace{25.0};
-    //
-    std::vector<int> m_barrelNumberOfBCID{1,1,1,1};
-    std::vector<int> m_endcapNumberOfBCID{1,1,1};
-    std::vector<int> m_DBMNumberOfBCID{1,1,1};
-    //
-    std::vector<double> m_barrelTimeOffset{5.0,5.0,5.0,5.0};
-    std::vector<double> m_endcapTimeOffset{5.0,5.0,5.0};
-    std::vector<double> m_DBMTimeOffset{5.0,5.0,5.0};
-    //
-    std::vector<double> m_barrelTimeJitter{0.0,0.0,0.0,0.0};
-    std::vector<double> m_endcapTimeJitter{0.0,0.0,0.0};
-    std::vector<double> m_DBMTimeJitter{0.0,0.0,0.0};
     //defaults are for RUN2 2015/2016
     std::vector<int> m_defaultBarrelAnalogThreshold{-1,-1,-1,-1};
     std::vector<int> m_defaultEndcapAnalogThreshold{-1,-1,-1};
@@ -276,23 +212,9 @@ class PixelModuleData
     //
     std::vector<int>  m_FEI3BarrelLatency{0,151,256,256};
     std::vector<int>  m_FEI3EndcapLatency{256,256,256};
-    //
-    std::vector<bool> m_FEI3BarrelHitDuplication{false,false,false,false};
-    std::vector<bool> m_FEI3EndcapHitDuplication{false,false,false};
-    
-    std::vector<int>  m_FEI3BarrelSmallHitToT{-1,-1,-1,-1};
-    std::vector<int>  m_FEI3EndcapSmallHitToT{-1,-1,-1};
-    //
+
     std::vector<int>  m_FEI3BarrelTimingSimTune{-1,2015,2015,2015};
     std::vector<int>  m_FEI3EndcapTimingSimTune{2015,2015,2015};
-    //
-    std::vector<int>  m_FEI4BarrelHitDiscConfig{2,2,2};
-    std::vector<int>  m_FEI4EndcapHitDiscConfig{2,2,2};
-
-    float m_scaleFEI4{1.0};
-    bool m_useFEI4SpecialScalingFunction{true};
-
-    std::vector<double> m_FEI4ToTSigma{0.0,0.50,0.50,0.50,0.50,0.50,0.60,0.60,0.60,0.60,0.65,0.70,0.75,0.80,0.80,0.80,0.80};
 
     std::vector<float> m_BLayerTimingIndex{0.0};
     std::vector<float> m_BLayerTimingProbability{0.0};
@@ -318,11 +240,7 @@ class PixelModuleData
     //default should not matter, but for ITk algorithms might cause problems
     bool m_doLinearExtrapolation{false};
 
-    std::vector<double> m_barrelLorentzAngleCorr{1.0,1.0,1.0,1.0};
-    std::vector<double> m_endcapLorentzAngleCorr{1.0,1.0,1.0};
-
     float m_biasVoltage{150.f};
-    float m_temperature{-7.f};
 
 
     std::vector<double> m_fluenceLayer{0.80e14, 1.61e14, 0.71e14, 0.48e14};

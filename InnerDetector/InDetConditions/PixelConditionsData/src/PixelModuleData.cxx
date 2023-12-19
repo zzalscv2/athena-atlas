@@ -8,77 +8,6 @@
 #include "PixelConditionsData/PixelModuleData.h"
 
 
-// Digitization parameters
-void PixelModuleData::setBunchSpace(double bunchSpace) { m_bunchSpace = bunchSpace; }
-double PixelModuleData::getBunchSpace() const { return m_bunchSpace; }
-
-void PixelModuleData::setBarrelNumberOfBCID(const std::vector<int> &barrelNumberOfBCID) { m_barrelNumberOfBCID = barrelNumberOfBCID; }
-void PixelModuleData::setEndcapNumberOfBCID(const std::vector<int> &endcapNumberOfBCID) { m_endcapNumberOfBCID = endcapNumberOfBCID; }
-void PixelModuleData::setDBMNumberOfBCID(const std::vector<int> &DBMNumberOfBCID) { m_DBMNumberOfBCID = DBMNumberOfBCID; }
-
-int PixelModuleData::getNumberOfBCID(int barrel_ec, int layer) const
-{
-  size_t layerIndex = static_cast<size_t>(layer);
-
-  if (barrel_ec == 0 && layerIndex < m_barrelNumberOfBCID.size())
-    return m_barrelNumberOfBCID[layerIndex];
-
-  if (std::abs(barrel_ec) == 2 && layerIndex < m_endcapNumberOfBCID.size())
-    return m_endcapNumberOfBCID[layerIndex];
-
-  if (std::abs(barrel_ec) == 4 && layerIndex < m_DBMNumberOfBCID.size())
-    return m_DBMNumberOfBCID[layerIndex];
-
-  std::stringstream error;
-  error << "PixelModuleData::getNumberOfBCID(" << barrel_ec << ", " << layer << "): array out of bounds";
-  throw std::range_error(error.str());
-}
-
-void PixelModuleData::setBarrelTimeOffset(const std::vector<double> &barrelTimeOffset) { m_barrelTimeOffset = barrelTimeOffset; }
-void PixelModuleData::setEndcapTimeOffset(const std::vector<double> &endcapTimeOffset) { m_endcapTimeOffset = endcapTimeOffset; }
-void PixelModuleData::setDBMTimeOffset(const std::vector<double> &DBMTimeOffset) { m_DBMTimeOffset = DBMTimeOffset; }
-
-double PixelModuleData::getTimeOffset(int barrel_ec, int layer) const
-{
-  size_t layerIndex = static_cast<size_t>(layer);
-
-  if (barrel_ec == 0 && layerIndex < m_barrelTimeOffset.size())
-    return m_barrelTimeOffset[layerIndex];
-
-  if (std::abs(barrel_ec) == 2 && layerIndex < m_endcapTimeOffset.size())
-    return m_endcapTimeOffset[layerIndex];
-
-  if (std::abs(barrel_ec) == 4 && layerIndex < m_DBMTimeOffset.size())
-    return m_DBMTimeOffset[layerIndex];
-
-  std::stringstream error;
-  error << "PixelModuleData::getTimeOffset(" << barrel_ec << ", " << layer << "): array out of bounds";
-  throw std::range_error(error.str());
-}
-
-void PixelModuleData::setBarrelTimeJitter(const std::vector<double> &barrelTimeJitter) { m_barrelTimeJitter = barrelTimeJitter; }
-void PixelModuleData::setEndcapTimeJitter(const std::vector<double> &endcapTimeJitter) { m_endcapTimeJitter = endcapTimeJitter; }
-void PixelModuleData::setDBMTimeJitter(const std::vector<double> &DBMTimeJitter) { m_DBMTimeJitter = DBMTimeJitter; }
-
-double PixelModuleData::getTimeJitter(int barrel_ec, int layer) const
-{
-  // FEI3 only
-  size_t layerIndex = static_cast<size_t>(layer);
-
-  if (barrel_ec == 0 && layerIndex < m_barrelTimeJitter.size())
-    return m_barrelTimeJitter[layerIndex];
-
-  if (std::abs(barrel_ec) == 2 && layerIndex < m_endcapTimeJitter.size())
-    return m_endcapTimeJitter[layerIndex];
-
-  if (std::abs(barrel_ec) == 4 && layerIndex < m_DBMTimeJitter.size())
-    return m_DBMTimeJitter[layerIndex];
-
-  std::stringstream error;
-  error << "PixelModuleData::getTimeJitter(" << barrel_ec << ", " << layer << "): array out of bounds";
-  throw std::range_error(error.str());
-}
-
 void PixelModuleData::setDefaultBarrelAnalogThreshold(const std::vector<int> &barrelAnalogThreshold) { m_defaultBarrelAnalogThreshold = barrelAnalogThreshold; }
 void PixelModuleData::setDefaultEndcapAnalogThreshold(const std::vector<int> &endcapAnalogThreshold) { m_defaultEndcapAnalogThreshold = endcapAnalogThreshold; }
 void PixelModuleData::setDefaultDBMAnalogThreshold(const std::vector<int> &DBMAnalogThreshold) { m_defaultDBMAnalogThreshold = DBMAnalogThreshold; }
@@ -319,42 +248,6 @@ int PixelModuleData::getFEI3Latency(int barrel_ec, int layer) const
   throw std::range_error(msg);
 }
 
-void PixelModuleData::setFEI3BarrelHitDuplication(const std::vector<bool> &FEI3BarrelHitDuplication) { m_FEI3BarrelHitDuplication = FEI3BarrelHitDuplication; }
-void PixelModuleData::setFEI3EndcapHitDuplication(const std::vector<bool> &FEI3EndcapHitDuplication) { m_FEI3EndcapHitDuplication = FEI3EndcapHitDuplication; }
-
-bool PixelModuleData::getFEI3HitDuplication(int barrel_ec, int layer) const
-{
-  size_t layerIndex = static_cast<size_t>(layer);
-
-  if (barrel_ec == 0 && layerIndex < m_FEI3BarrelHitDuplication.size())
-    return m_FEI3BarrelHitDuplication[layerIndex];
-
-  if (std::abs(barrel_ec) == 2 && layerIndex < m_FEI3EndcapHitDuplication.size())
-    return m_FEI3EndcapHitDuplication[layerIndex];
-
-  std::stringstream error;
-  error << "PixelModuleData::getFEI3HitDuplication(" << barrel_ec << ", " << layer << "): array out of bounds";
-  throw std::range_error(error.str());
-}
-
-void PixelModuleData::setFEI3BarrelSmallHitToT(const std::vector<int> &FEI3BarrelSmallHitToT) { m_FEI3BarrelSmallHitToT = FEI3BarrelSmallHitToT; }
-void PixelModuleData::setFEI3EndcapSmallHitToT(const std::vector<int> &FEI3EndcapSmallHitToT) { m_FEI3EndcapSmallHitToT = FEI3EndcapSmallHitToT; }
-
-int PixelModuleData::getFEI3SmallHitToT(int barrel_ec, int layer) const
-{
-  size_t layerIndex = static_cast<size_t>(layer);
-
-  if (barrel_ec == 0 && layerIndex < m_FEI3BarrelSmallHitToT.size())
-    return m_FEI3BarrelSmallHitToT[layerIndex];
-
-  if (std::abs(barrel_ec) == 2 && layerIndex < m_FEI3EndcapSmallHitToT.size())
-    return m_FEI3EndcapSmallHitToT[layerIndex];
-
-  std::stringstream error;
-  error << "PixelModuleData::getFEI3SmallHitToT(" << barrel_ec << ", " << layer << "): array out of bounds";
-  throw std::range_error(error.str());
-}
-
 void PixelModuleData::setFEI3BarrelTimingSimTune(const std::vector<int> &FEI3BarrelTimingSimTune) { m_FEI3BarrelTimingSimTune = FEI3BarrelTimingSimTune; }
 void PixelModuleData::setFEI3EndcapTimingSimTune(const std::vector<int> &FEI3EndcapTimingSimTune) { m_FEI3EndcapTimingSimTune = FEI3EndcapTimingSimTune; }
 
@@ -370,52 +263,6 @@ int PixelModuleData::getFEI3TimingSimTune(int barrel_ec, int layer) const
 
   std::stringstream error;
   error << "PixelModuleData::getFEI3TimingSimTune(" << barrel_ec << ", " << layer << "): array out of bounds";
-  throw std::range_error(error.str());
-}
-
-void PixelModuleData::setFEI4BarrelHitDiscConfig(const std::vector<int> &FEI4BarrelHitDiscConfig) { m_FEI4BarrelHitDiscConfig = FEI4BarrelHitDiscConfig; }
-void PixelModuleData::setFEI4EndcapHitDiscConfig(const std::vector<int> &FEI4EndcapHitDiscConfig) { m_FEI4EndcapHitDiscConfig = FEI4EndcapHitDiscConfig; }
-
-int PixelModuleData::getFEI4HitDiscConfig(int barrel_ec, int layer) const
-{
-  size_t layerIndex = static_cast<size_t>(layer);
-
-  if (barrel_ec == 0 && layerIndex < m_FEI4BarrelHitDiscConfig.size())
-    return m_FEI4BarrelHitDiscConfig[layerIndex];
-
-  if (std::abs(barrel_ec) == 2 && layerIndex < m_FEI4EndcapHitDiscConfig.size())
-    return m_FEI4EndcapHitDiscConfig[layerIndex];
-
-  if (std::abs(barrel_ec) == 4 && layerIndex < m_FEI4EndcapHitDiscConfig.size())
-    return m_FEI4EndcapHitDiscConfig[layerIndex];
-
-  std::stringstream error;
-  error << "PixelModuleData::getFEI4HitDiscConfig(" << barrel_ec << ", " << layer << "): array out of bounds";
-  throw std::range_error(error.str());
-}
-
-int PixelModuleData::getFEI4OverflowToT(int barrel_ec, int layer) const
-{
-  // also used in reconstruction
-  static const int overflow[] = {14,15,16,14,16};
-  unsigned int idx = getFEI4HitDiscConfig(barrel_ec, layer) < 4 ? getFEI4HitDiscConfig(barrel_ec, layer) : 4;
-  return overflow[idx];
-}
-
-void PixelModuleData::setFEI4ChargScaling(float scaleFEI4) { m_scaleFEI4 = scaleFEI4; }
-void PixelModuleData::setUseFEI4SpecialScalingFunction(bool useFEI4SpecialScalingFunction) { m_useFEI4SpecialScalingFunction = useFEI4SpecialScalingFunction; }
-float PixelModuleData::getFEI4ChargScaling() const { return m_scaleFEI4; }
-bool PixelModuleData::getUseFEI4SpecialScalingFunction() const { return m_useFEI4SpecialScalingFunction; }
-
-void PixelModuleData::setFEI4ToTSigma(const std::vector<double> &FEI4ToTSigma) { m_FEI4ToTSigma = FEI4ToTSigma; }
-double PixelModuleData::getFEI4ToTSigma(int tot) const
-{
-  size_t totIndex = static_cast<size_t>(tot);
-  if (totIndex < m_FEI4ToTSigma.size())
-    return m_FEI4ToTSigma[totIndex];
-
-  std::stringstream error;
-  error << "PixelModuleData::getFEI4ToTSigma(" << tot << "): array out of bounds";
   throw std::range_error(error.str());
 }
 
@@ -484,34 +331,9 @@ float PixelModuleData::getDefaultQ2TotC() const { return m_paramC; }
 void PixelModuleData::setPIXLinearExtrapolation(bool doLinearExtrapolation) { m_doLinearExtrapolation = doLinearExtrapolation; }
 bool PixelModuleData::getPIXLinearExtrapolation() const { return m_doLinearExtrapolation; }
 
-// Lorentz angle correction
-void PixelModuleData::setBarrelLorentzAngleCorr(const std::vector<double> &barrelLorentzAngleCorr) { m_barrelLorentzAngleCorr = barrelLorentzAngleCorr; }
-void PixelModuleData::setEndcapLorentzAngleCorr(const std::vector<double> &endcapLorentzAngleCorr) { m_endcapLorentzAngleCorr = endcapLorentzAngleCorr; }
-
-double PixelModuleData::getLorentzAngleCorr(int barrel_ec, int layer) const
-{
-  size_t layerIndex = static_cast<size_t>(layer);
-
-  if (barrel_ec == 0 && layerIndex < m_barrelLorentzAngleCorr.size())
-    return m_barrelLorentzAngleCorr[layerIndex];
-
-  if (std::abs(barrel_ec) == 2 && layerIndex < m_endcapLorentzAngleCorr.size())
-    return m_endcapLorentzAngleCorr[layerIndex];
-
-  if (std::abs(barrel_ec) == 4) // DBM has no correction applied
-    return 1.0;
-
-  std::stringstream error;
-  error << "PixelModuleData::getLorentzAngleCorr(" << barrel_ec << ", " << layer << "): array out of bounds";
-  throw std::range_error(error.str());
-}
-
 // DCS parameters
 void PixelModuleData::setDefaultBiasVoltage(float biasVoltage) { m_biasVoltage = biasVoltage; }
 float PixelModuleData::getDefaultBiasVoltage() const { return m_biasVoltage; }
-
-void PixelModuleData::setDefaultTemperature(float temperature) { m_temperature = temperature; }
-float PixelModuleData::getDefaultTemperature() const { return m_temperature; }
 
 // Radiation damage fluence maps
 void PixelModuleData::setFluenceLayer(const std::vector<double> &fluenceLayer) { m_fluenceLayer = fluenceLayer; }

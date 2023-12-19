@@ -71,6 +71,7 @@ namespace PixelDigitization{
 
   void 
   randomNoise(SiChargedDiodeCollection& chargedDiodes, const PixelModuleData *moduleData,
+    int nBcid,
     const PixelChargeCalibCondData *chargeCalibData, CLHEP::HepRandomEngine* rndmEngine, 
     InDetDD::IPixelReadoutManager * pixelReadout) {
     const InDetDD::PixelModuleDesign* p_design =
@@ -79,7 +80,7 @@ namespace PixelDigitization{
     const PixelID* pixelId = static_cast<const PixelID*>(chargedDiodes.element()->getIdHelper());
     int barrel_ec = pixelId->barrel_ec(chargedDiodes.element()->identify());
     int layerIndex = pixelId->layer_disk(chargedDiodes.element()->identify());
-    const double totalNoiseOccupancy = moduleData->getNoiseOccupancy(barrel_ec,layerIndex) * moduleData->getNumberOfBCID(barrel_ec, layerIndex);
+    const double totalNoiseOccupancy = moduleData->getNoiseOccupancy(barrel_ec,layerIndex) * nBcid;
     //prepare to enter loop
     const std::vector<float> &noiseShape = moduleData->getNoiseShape(barrel_ec, layerIndex);
     const auto technology = p_design->getReadoutTechnology();
