@@ -11,23 +11,6 @@
 
 #include <utility>
 
-HGTD_Cluster::HGTD_Cluster(const Identifier& rdo_id,
-                           const Amg::Vector2D& loc_pos,
-                           const std::vector<Identifier>& rdo_list,
-                           const InDet::SiWidth& width,
-                           const InDetDD::SolidStateDetectorElementBase* det_el,
-                           const Amg::MatrixX& loc_err_matx,
-                           const float time_of_arrival,
-                           const float time_of_arrival_err,
-                           const std::vector<int>& time_over_threshold)
-    : PrepRawData(rdo_id, loc_pos, rdo_list, loc_err_matx),
-      m_width(width),
-      m_det_el(det_el),
-      m_time(time_of_arrival),
-      m_time_resolution(time_of_arrival_err),
-      m_time_over_threshold(time_over_threshold)
-{
-}
 
 // Constructor for use from tp converter
 HGTD_Cluster::HGTD_Cluster(const Identifier& rdo_id,
@@ -38,13 +21,13 @@ HGTD_Cluster::HGTD_Cluster(const Identifier& rdo_id,
                            Amg::MatrixX&& loc_err_matx,
                            const float time_of_arrival,
                            const float time_of_arrival_err,
-                           const std::vector<int>& time_over_threshold)
+                           std::vector<int>&& time_over_threshold)
     : PrepRawData(rdo_id, loc_pos, std::move(rdo_list), std::move(loc_err_matx)),
       m_width(width),
       m_det_el(det_el),
       m_time(time_of_arrival),
       m_time_resolution(time_of_arrival_err),
-      m_time_over_threshold(time_over_threshold) {}
+      m_time_over_threshold(std::move(time_over_threshold)) {}
 
 // Default constructor:
 HGTD_Cluster::HGTD_Cluster() : PrepRawData() {

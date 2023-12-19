@@ -32,7 +32,7 @@ void convertAndBack(const HGTD_Cluster& trans1) {
   std::cout << "convertAndBack\n";
   Identifier wafer_id = trans1.identify();
   std::cout << "Transient wafer ID: " << wafer_id << '\n';
-  MsgStream log(0, "test");
+  MsgStream log(nullptr, "test");
   HGTD_ClusterCnv_p1 cnv;
   HGTD_Cluster_p1 pers;
   cnv.transToPers(&trans1, &pers, log);

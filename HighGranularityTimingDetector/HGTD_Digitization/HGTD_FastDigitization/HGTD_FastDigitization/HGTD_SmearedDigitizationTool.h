@@ -73,7 +73,7 @@ private:
   StatusCode digitize(const EventContext& ctx);
 
   StatusCode fillMultiTruthCollection(PRD_MultiTruthCollection*, Cluster_t*,
-                                      TimedHitPtr<SiHit>, const EventContext&);
+                                      const TimedHitPtr<SiHit>&, const EventContext&);
 
   StatusCode fillClusterContainer();
 
@@ -109,31 +109,31 @@ private:
 
   // variables used only for writing out validation tree (not written by default)
 
-  ITHistSvc* m_hist_svc;
+  ITHistSvc* m_hist_svc{};
   std::unique_ptr<TFile> m_output_file;
   std::unique_ptr<TTree> m_tree;
 
-  float m_x_hit;
-  float m_y_hit;
-  float m_x_hit_smeared;
-  float m_y_hit_smeared;
+  float m_x_hit{};
+  float m_y_hit{};
+  float m_x_hit_smeared{};
+  float m_y_hit_smeared{};
 
-  float m_x_entry_hit;
-  float m_y_entry_hit;
-  float m_z_entry_hit;
-  float m_x_exit_hit;
-  float m_y_exit_hit;
-  float m_z_exit_hit;
+  float m_x_entry_hit{};
+  float m_y_entry_hit{};
+  float m_z_entry_hit{};
+  float m_x_exit_hit{};
+  float m_y_exit_hit{};
+  float m_z_exit_hit{};
 
-  float m_hit_time;
-  float m_hit_time_smeared;
+  float m_hit_time{};
+  float m_hit_time_smeared{};
 
-  float m_x_cluster_global;
-  float m_y_cluster_global;
-  float m_z_cluster_global;
+  float m_x_cluster_global{};
+  float m_y_cluster_global{};
+  float m_z_cluster_global{};
 
-  float m_err_x_hit;
-  float m_err_y_hit;
+  float m_err_x_hit{};
+  float m_err_y_hit{};
 
 };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_PrepRawData/HGTD_Cluster.h
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -32,7 +32,7 @@
 #include <memory>
 #include <numeric>
 
-class HGTD_Cluster : public Trk::PrepRawData {
+class HGTD_Cluster final: public Trk::PrepRawData {
 
 public:
   HGTD_Cluster();
@@ -42,21 +42,16 @@ public:
   HGTD_Cluster& operator=(HGTD_Cluster&&) = default;
   virtual ~HGTD_Cluster() = default;
 
-  HGTD_Cluster(const Identifier& rdo_id, const Amg::Vector2D& loc_pos,
-               const std::vector<Identifier>& rdo_list,
+  // Constructor
+  HGTD_Cluster(const Identifier& rdo_id,
+               const Amg::Vector2D& loc_pos,
+               std::vector<Identifier>&& rdo_list,
                const InDet::SiWidth& width,
                const InDetDD::SolidStateDetectorElementBase* det_el,
-               const Amg::MatrixX& loc_err_matx, const float time_of_arrival,
-               const float time_of_arrival_err,
-               const std::vector<int>& time_over_threshold);
-
-  // Constructor for use from tp converter.
-  HGTD_Cluster(const Identifier& rdo_id, const Amg::Vector2D& loc_pos,
-               std::vector<Identifier>&& rdo_list, const InDet::SiWidth& width,
-               const InDetDD::SolidStateDetectorElementBase* det_el,
                Amg::MatrixX&& loc_err_matx,
-               const float time_of_arrival, const float time_of_arrival_err,
-               const std::vector<int>& time_over_threshold);
+               const float time_of_arrival,
+               const float time_of_arrival_err,
+               std::vector<int>&& time_over_threshold);
 
 
   // return width class reference
@@ -86,8 +81,8 @@ private:
 
   const InDetDD::SolidStateDetectorElementBase* m_det_el;
 
-  float m_time;
-  float m_time_resolution;
+  float m_time{};
+  float m_time_resolution{};
   std::vector<int> m_time_over_threshold;
 };
 

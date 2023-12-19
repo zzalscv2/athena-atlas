@@ -62,9 +62,9 @@ HGTD_Cluster createCluster() {
     for (int j = 0; j < 2; j++)
       cov(i, j) = 100 * (i + 1) * (j + 1);
 
-  HGTD_Cluster cluster(Identifier(1234), locpos, rdoList, width, nullptr,
-                       cov, dummy_toa, dummy_toa_res,
-                       dummy_tot);
+  HGTD_Cluster cluster(Identifier(1234), locpos, std::move(rdoList), width, nullptr,
+                       std::move(cov), dummy_toa, dummy_toa_res,
+                       std::vector<int>(dummy_tot));
 
   std::cout << "createCluster done\n";
   return cluster;

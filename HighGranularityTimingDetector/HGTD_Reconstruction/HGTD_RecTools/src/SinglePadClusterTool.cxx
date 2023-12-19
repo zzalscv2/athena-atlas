@@ -101,8 +101,13 @@ SinglePadClusterTool::clusterize(const HGTD_RDO_Collection& rdo_coll,
       cluster = new HGTD_Cluster();
     }
     (*cluster) = m_cluster_maker->createCluster(
-        rdo_id, loc_pos, rdo_list, si_width, element, time_of_arrival,
-        time_over_threshold);
+        rdo_id,
+        loc_pos,
+        std::move(rdo_list),
+        si_width,
+        element,
+        time_of_arrival,
+        std::move(time_over_threshold));
 
    cluster->setHashAndIndex(cluster_collection->identifyHash(),
                              cluster_collection->size());

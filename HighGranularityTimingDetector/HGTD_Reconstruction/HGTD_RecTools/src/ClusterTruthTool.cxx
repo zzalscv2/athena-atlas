@@ -143,7 +143,7 @@ HGTD::ClusterTruthInfo HGTD::ClusterTruthTool::classifyCluster(
 
   HGTD::ClusterTruthInfo result;
 
-  if (shadowed_origins.size() == 0) {
+  if (shadowed_origins.empty()) {
     ATH_MSG_DEBUG("did not manage to understand any RDOs...");
     result.origin = HGTD::ClusterTruthOrigin::UNIDENTIFIED;
     result.is_shadowed = false;
