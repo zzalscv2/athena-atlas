@@ -364,8 +364,8 @@ Trk::ElectronMaterialMixtureConvolution::update(
                                      updatedStateVector[Trk::qOverP],
                                      std::move(updatedCovariance));
 
-    Trk::ComponentParameters dummyCompParams(std::move(updatedTrackParameters),
-                                             1.);
+    Trk::ComponentParameters dummyCompParams = {std::move(updatedTrackParameters),
+                                             1.};
     Trk::MultiComponentState returnMultiState;
     returnMultiState.push_back(std::move(dummyCompParams));
     return returnMultiState;
@@ -454,8 +454,8 @@ Trk::ElectronMaterialMixtureConvolution::update(
 
     double updatedWeight = caches[stateIndex].weights[materialIndex];
 
-    assemblerCache.multiComponentState.emplace_back(
-      std::move(updatedTrackParameters), updatedWeight);
+    assemblerCache.multiComponentState.push_back({
+      std::move(updatedTrackParameters), updatedWeight});
     assemblerCache.validWeightSum += updatedWeight;
   }
 

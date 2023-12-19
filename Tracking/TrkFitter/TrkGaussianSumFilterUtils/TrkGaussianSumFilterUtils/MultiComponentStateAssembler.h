@@ -72,8 +72,8 @@ inline void Trk::MultiComponentStateAssembler::addComponent(
     Cache& cache, ComponentParameters&& componentParameters) {
 
   cache.validWeightSum += componentParameters.weight;
-  cache.multiComponentState.emplace_back(std::move(componentParameters.params),
-                                         componentParameters.weight);
+  cache.multiComponentState.push_back({std::move(componentParameters.params),
+                                         componentParameters.weight});
 }
 
 inline void Trk::MultiComponentStateAssembler::addMultiState(
@@ -82,8 +82,8 @@ inline void Trk::MultiComponentStateAssembler::addMultiState(
   double sumW(0.);
   for (auto& component : multiComponentState) {
     sumW += component.weight;
-    cache.multiComponentState.emplace_back(std::move(component.params),
-                                           component.weight);
+    cache.multiComponentState.push_back({std::move(component.params),
+                                           component.weight});
   }
   cache.validWeightSum += sumW;
 }

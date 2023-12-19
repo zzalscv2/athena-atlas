@@ -643,7 +643,7 @@ Trk::GaussianSumFitter::forwardPRDfit(
   // For starting guess a multicompoment state
   // that has single component with weight 1
   const AmgVector(5)& par = estimatedTrackParametersNearOrigin.parameters();
-  Trk::ComponentParameters componentParametersNearOrigin(
+  Trk::ComponentParameters componentParametersNearOrigin = {
     estimatedTrackParametersNearOrigin.associatedSurface()
       .createUniqueTrackParameters(par[Trk::loc1],
                                    par[Trk::loc2],
@@ -651,7 +651,7 @@ Trk::GaussianSumFitter::forwardPRDfit(
                                    par[Trk::theta],
                                    par[Trk::qOverP],
                                    std::nullopt /*no errors*/),
-    1.);
+    1.};
 
   Trk::MultiComponentState multiComponentStateNearOrigin{};
   multiComponentStateNearOrigin.push_back(
@@ -699,7 +699,7 @@ Trk::GaussianSumFitter::forwardMeasurementFit(
   // For starting guess a multicompoment state
   // that has single component with weight 1
   const AmgVector(5)& par = estimatedTrackParametersNearOrigin.parameters();
-  Trk::ComponentParameters componentParametersNearOrigin(
+  Trk::ComponentParameters componentParametersNearOrigin = {
     estimatedTrackParametersNearOrigin.associatedSurface()
       .createUniqueTrackParameters(par[Trk::loc1],
                                    par[Trk::loc2],
@@ -707,7 +707,7 @@ Trk::GaussianSumFitter::forwardMeasurementFit(
                                    par[Trk::theta],
                                    par[Trk::qOverP],
                                    std::nullopt /*no errors*/),
-    1.);
+    1.};
   Trk::MultiComponentState multiComponentStateNearOrigin{};
   multiComponentStateNearOrigin.push_back(
     std::move(componentParametersNearOrigin));

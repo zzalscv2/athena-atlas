@@ -90,7 +90,7 @@ prepareStateForAssembly(Cache& cache)
       std::max(Trk::MultiComponentStateAssembler::Cache::minimumFractionalWeight * totalWeight,
                std::numeric_limits<double>::min());
 
-    const Trk::ComponentParameters dummySmallestWeight(nullptr, minimumWeight);
+    const Trk::ComponentParameters dummySmallestWeight = {nullptr, minimumWeight};
 
     auto lower_than = std::upper_bound(
         cache.multiComponentState.begin(), cache.multiComponentState.end(),
