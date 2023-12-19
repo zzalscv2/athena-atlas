@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGTOOLS_TRIG_VSI_KDPOINT
 #define TRIGTOOLS_TRIG_VSI_KDPOINT
@@ -38,10 +38,6 @@ class KDPoint {
       KDPoint( std::array<T,D>&&  arr ) : m_point(std::move(arr)), m_weight(1.){};
 
       KDPoint(const std::vector<T>&  v)  : m_weight(1.) {
-         for (size_t i = 0; i < D; i++) { if (i < v.size()) m_point[i] = v[i]; }
-      };
-
-      KDPoint(std::vector<T>  v)  : m_weight(1.) {
          for (size_t i = 0; i < D; i++) { if (i < v.size()) m_point[i] = v[i]; }
       };
 
