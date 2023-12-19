@@ -184,7 +184,7 @@ class Step(object):
                 if self.workdir:
                     assert '..' not in self.workdir, "Illegal path for workdir -- must be a subdirectory of CWD"
                     assert not self.workdir.startswith('/'), "Illegal path for workdir -- no absolute paths!"
-                    os.makedirs(self.workdir)
+                    os.makedirs(self.workdir,exist_ok=True)
                     os.chdir(self.workdir)
 
                 if self.prmon:
