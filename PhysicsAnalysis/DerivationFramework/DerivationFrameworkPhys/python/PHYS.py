@@ -89,6 +89,12 @@ def PHYSCfg(ConfigFlags):
     from DerivationFrameworkHiggs.HiggsPhysContent import  HiggsAugmentationAlgsCfg
     acc.merge(HiggsAugmentationAlgsCfg(ConfigFlags))
     
+    ## CloseByIsolation correction augmentation
+    ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
+    from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
+    acc.merge(IsoCloseByAlgsCfg(ConfigFlags, suff = "_PHYS", isPhysLite = False, stream_name = stream_name))
+
+
     #===================================================
     # HEAVY FLAVOR CLASSIFICATION FOR ttbar+jets EVENTS
     #===================================================
