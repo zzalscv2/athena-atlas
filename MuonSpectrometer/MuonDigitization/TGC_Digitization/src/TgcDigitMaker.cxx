@@ -1163,11 +1163,10 @@ float TgcDigitMaker::getDistanceToAsdFromSensor(
                          TgcDigitASDposData::N_CHANNELINPUT_TOASD;
 
     float asd_position = 0.;
-    auto it = (sensor == kSTRIP) ? readCdo->stripAsdPos.find(chamberId)
-                                 : readCdo->wireAsdPos.find(chamberId);
+    const auto& map = (sensor == kSTRIP) ? readCdo->stripAsdPos : readCdo->wireAsdPos;
+    auto it = map.find(chamberId);
 
-    if ((sensor == kSTRIP && it != readCdo->stripAsdPos.end()) ||
-        (sensor == kWIRE && it != readCdo->wireAsdPos.end())) {
+    if (it != map.end()) {
         asd_position = it->second[asdNo] * CLHEP::m;
     } else {
         ATH_MSG_WARNING("Undefined chamberID is provided! station="
