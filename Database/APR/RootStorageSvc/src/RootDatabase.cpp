@@ -595,37 +595,6 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
         new TFileCacheWrite(m_file, v); //TFile will take ownership and delete its TFileCacheWrite
         return Success;
       }
-      else if ( !strcasecmp(n,"FILE_FLUSH") )  {
-        m_file->Flush();
-        return Success;
-      }
-      else if ( !strncasecmp(n, "FILE_READSTREAMERINFO",15) )  {
-        m_file->ReadStreamerInfo();
-        return Success;
-      }
-      else if ( !strcasecmp(n, "FRIEND_TREE") )  {
-        DbPrint log("RootDatabase::setOption");
-        char *s = nullptr;
-        char *s2 = nullptr;
-        if( opt._getValue(s).isSuccess() and s ) {
-          for (s2 = s; *s2 != '\0'; s2++) {
-            if (*s2 == ':') {
-              *s2 = '\0';
-              s2++;
-              break;
-            }
-          }
-          TTree* tree1 = (TTree*)m_file->Get(s);
-          TTree* tree2 = (TTree*)m_file->Get(s2);
-          if (!tree1 || !tree2) {
-             return Error;
-          }
-          tree1->AddFriend(tree2);
-          log << DbPrintLvl::Debug << "FRIEND_TREE set to " << s << " and " << s2 << DbPrint::endmsg;
-          return Success;
-        }
-        return Error;
-      }
       break;
     case 'I':
        if( !strcasecmp(n, "INDEX_MASTER") ) {
@@ -657,18 +626,14 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
     case 'R':
       if ( !m_file )
         return Error;
-      else if ( !strncasecmp(n, "READSTREAMERINFO",10) )  {
-        m_file->ReadStreamerInfo();
-        return Success;
-      }
-      break;
-    case 'S':
-      if ( !m_file )
-        return Error;
-      else if ( !strcasecmp(n,"SETMODIFIED") )  {
-        m_file->SetModified();
-        return Success;
-      }
+      // This block can be used for RNTuple options...
+      // RNTuple has a conceptual separation between reading and writing.
+      // Reading goes through RNTupleReader/RPageSource, while
+      // writing goes through RNTupleWriter/RPageSink.
+      // The options for the former are controlled through RNTupleReadOptions, while
+      // the options for the latter are controlled through RNTupleWriteOptions.
+      // In the current implementation, these need to be set before calling the c-tor
+      // of the underlying class, e.g., RNTupleReader etc.
       break;
     case 'T':
        if ( !strcasecmp(n+5,"BRANCH_OFFSETTAB_LEN") )  {
@@ -696,8 +661,8 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
           }
           TTree* tree = (TTree*)m_file->Get(opt.option().c_str());
           if (!tree) {
-             log << DbPrintLvl::Error << "Could not find tree " << opt.option() << DbPrint::endmsg;
-             return Error;
+             log << DbPrintLvl::Debug << "Could not find tree " << opt.option() << ", no TREE_MAX_VIRTUAL_SIZE will be set" << DbPrint::endmsg;
+             return Success;
           }
           log << DbPrintLvl::Debug << "Got tree " << tree->GetName() << DbPrint::endmsg;
           tree->SetMaxVirtualSize(virtMaxSize);
@@ -739,8 +704,8 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
            m_treeNameWithCache = opt.option();
            TTree* tr = (TTree*)m_file->Get(m_treeNameWithCache.c_str());
            if (!tr) {
-               log << DbPrintLvl::Error << "Could not find tree " << m_treeNameWithCache << DbPrint::endmsg;
-               return Error;
+               log << DbPrintLvl::Debug << "Could not find tree " << m_treeNameWithCache << ", no TREE_CACHE will be set" << DbPrint::endmsg;
+               return Success;
            }
            else log << DbPrintLvl::Debug << "Got tree " << tr->GetName() 
                     << " read entry " << tr->GetReadEntry() << DbPrint::endmsg;
@@ -764,6 +729,29 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
                return Error;
            }
            return Success;
+       }
+       else if ( !strcasecmp(n+5, "ADD_FRIEND") )  {
+         DbPrint log("RootDatabase::setOption");
+         char *s = nullptr;
+         char *s2 = nullptr;
+         if( opt._getValue(s).isSuccess() and s ) {
+           for (s2 = s; *s2 != '\0'; s2++) {
+             if (*s2 == ':') {
+               *s2 = '\0';
+               s2++;
+               break;
+             }
+           }
+           TTree* tree1 = (TTree*)m_file->Get(s);
+           TTree* tree2 = (TTree*)m_file->Get(s2);
+           if (!tree1 || !tree2) {
+              return Error;
+           }
+           tree1->AddFriend(tree2);
+           log << DbPrintLvl::Debug << "ADD_FRIEND set to " << s << " and " << s2 << DbPrint::endmsg;
+           return Success;
+         }
+         return Error;
        }
       break;
     default:
