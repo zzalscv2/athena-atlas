@@ -259,7 +259,7 @@ bool NSWCalibSmearingTool::getIdFields(const Identifier id, int& etaSector, int&
        || etaSector < (int) (-m_etaSectors.value().size()) || etaSector> (int) m_etaSectors.value().size() || etaSector==0
        || gasGap < 1 || gasGap> (int) m_timeSmear.value().size() || gasGap>(int) m_chargeSmear.value().size() ) {
     ATH_MSG_WARNING("Wrong phi, eta sector, or gasGap number: " << phiSector << " " 
-		  << etaSector << " " << gasGap);
+		  << etaSector << " " << gasGap << "Size of m_chargeSmear " << m_chargeSmear.value().size() << " size of m_etaSectors "<< m_etaSectors.value().size());
     return false;
   }
 

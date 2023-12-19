@@ -71,7 +71,11 @@ def MM_DigitizationToolCfg(flags, name="MM_DigitizationTool", **kwargs):
 
 def MM_OverlayDigitizationToolCfg(flags, name="MM_OverlayDigitizationTool", **kwargs):
     """Return ComponentAccumulator with MM_DigitizationTool configured for Overlay"""
-    acc = AtlasFieldCacheCondAlgCfg(flags)
+    acc=ComponentAccumulator()
+    from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg, MMCalibSmearingToolCfg
+    kwargs.setdefault("CalibrationTool", acc.popToolsAndMerge(NSWCalibToolCfg(flags)))
+    kwargs.setdefault("SmearingTool", acc.popToolsAndMerge(MMCalibSmearingToolCfg(flags)))
+    acc.merge(AtlasFieldCacheCondAlgCfg(flags))
     kwargs.setdefault("MergeSvc", '')
     kwargs.setdefault("CheckSimHits", True)
     kwargs.setdefault("OnlyUseContainerName", False)
