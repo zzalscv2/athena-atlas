@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // File: $Id: vertex.cc,v 1.5 2008-07-23 20:51:23 adye Exp $
@@ -26,10 +26,13 @@ void vertex (TTree *tree, const string & plotfile= "",
 
   TCut truth_cut ("track_truth_prob>"+TString::Format("%g",(match>=0?match:0.7)));
 
+  // cppcheck-suppress incorrectStringBooleanError; TCut
   tree->Project("vertexgen",    "mctrack_z0",              "abs(1/mctrack_qoverpt)>1000" && mc_cut);
   //cppcheck-suppress incorrectStringBooleanError
   tree->Project("vertexgenrec", "track_truth_z0",          truth_cut && "abs(1/track_truth_qoverpt)>1000" && data_cut);
+  // cppcheck-suppress incorrectStringBooleanError; TCut
   tree->Project("vertexrec",    "track_z0",                "abs(1/track_qoverpt)>1000" && data_cut);
+  // cppcheck-suppress incorrectStringBooleanError; TCut
   tree->Project("vertexdiff",   "track_z0-track_truth_z0", "abs(1/track_qoverpt)>1000" && data_cut);
   
  
