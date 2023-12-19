@@ -14,7 +14,6 @@
 
 #include "LArCellBuilderFromLArRawChannelTool.h"
 #include "LArRecEvent/LArCell.h"
-#include "LArRawEvent/LArRawChannelContainer.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloCell_ID.h"
@@ -28,40 +27,11 @@
 
 #include <bitset>
 
-LArCellBuilderFromLArRawChannelTool::LArCellBuilderFromLArRawChannelTool(
-			     const std::string& type, 
-			     const std::string& name, 
-			     const IInterface* parent)
-  :base_class (type, name, parent),
-   m_rawChannelsKey("LArRawChannels"),
-   m_addDeadOTX(true),
-   m_initialDataPoolSize(-1),
-   m_nTotalCells(0),
-   m_cablingKey("LArOnOffIdMap"),
-   m_onlineID(nullptr),
-   m_caloCID(nullptr),
-   m_missingFebKey("LArBadFeb")
-{ 
-  //key of input raw channel
-  declareProperty("RawChannelsName",m_rawChannelsKey,"Name of input container");
-  // bad channel tool
-  declareProperty("MissingFebKey",m_missingFebKey,"Key of conditions data object holding bad-feb info");
-  // activate creation of cells from missing Febs
-  declareProperty("addDeadOTX",m_addDeadOTX,"Add dummy cells for missing FEBs");
-  declareProperty("InitialCellPoolSize",m_initialDataPoolSize,"Initial size of the DataPool<LArCells>");
-  declareProperty("LArCablingKey",m_cablingKey,"Key of  conditions data object holding cabling");
-}
-
-
-
-LArCellBuilderFromLArRawChannelTool::~LArCellBuilderFromLArRawChannelTool() = default;
-
 
 StatusCode LArCellBuilderFromLArRawChannelTool::initialize() {
 
   ATH_CHECK(m_rawChannelsKey.initialize());
 
-  ATH_MSG_DEBUG("Accesssing CaloCellID");
   ATH_CHECK( detStore()->retrieve (m_caloCID, "CaloCell_ID") );
 
   ATH_CHECK( m_cablingKey.initialize() );
@@ -72,7 +42,7 @@ StatusCode LArCellBuilderFromLArRawChannelTool::initialize() {
   }
   else {
     if (m_addDeadOTX) {
-      ATH_MSG_ERROR( "Configuration problem: 'addDeadOTX' set, but no bad-channel tool given."  );
+      ATH_MSG_ERROR( "Configuration problem: 'addDeadOTX' set, but no missing FEB container given."  );
       return StatusCode::FAILURE;
     }
   }
@@ -80,8 +50,6 @@ StatusCode LArCellBuilderFromLArRawChannelTool::initialize() {
   ATH_CHECK(m_caloMgrKey.initialize());
 
   //Compute total number of cells
-
-
   m_nTotalCells=0;
 
   IdentifierHash caloCellMin, caloCellMax ;
@@ -131,7 +99,7 @@ LArCellBuilderFromLArRawChannelTool::process (CaloCellContainer* theCellContaine
   std::bitset<CaloCell_ID::NSUBCALO> includedSubcalos;
   // resize calo cell container to correct size
   if (!theCellContainer->empty()) {
-    ATH_MSG_ERROR( "fillCompleteCellCont: container should be empty! Clear now."   );
+    ATH_MSG_WARNING( "Container should be empty! Clear now.");
     theCellContainer->clear();
   }
 
@@ -163,14 +131,14 @@ LArCellBuilderFromLArRawChannelTool::process (CaloCellContainer* theCellContaine
 			rawChan.gain());
 
       if ((*theCellContainer)[hashid]) {
-	ATH_MSG_WARNING( "Channel added twice! Data corruption? hash=" << hashid  
-			 << " online ID=0x" << std::hex << hwid.get_identifier32().get_compact()  
-			 << std::dec << "  " << m_onlineID->channel_name(hwid));
-      }
-      else {
-	(*theCellContainer)[hashid]=pCell;
-	++nCellsAdded;
-	includedSubcalos.set(m_caloCID->sub_calo(hashid));
+        ATH_MSG_WARNING("Channel added twice! Data corruption? hash="
+                        << hashid << " online ID=0x" << std::hex
+                        << hwid.get_identifier32().get_compact() << std::dec
+                        << "  " << m_onlineID->channel_name(hwid));
+      } else {
+        (*theCellContainer)[hashid] = pCell;
+        ++nCellsAdded;
+        includedSubcalos.set(m_caloCID->sub_calo(hashid));
       }
     }//end if connected
   }//end loop over LArRawChannelContainer
@@ -233,27 +201,13 @@ LArCellBuilderFromLArRawChannelTool::process (CaloCellContainer* theCellContaine
                      << " supposedly missing channels where present in the LArRawChannelContainer"  );
 
   if (nCellsAdded!=m_nTotalCells) {
-    ATH_MSG_DEBUG("Filled only  " << nCellsAdded << " out of " << m_nTotalCells << " cells. Now search for holes..");
-    //Clear out holes by pointer-reshuffling
-    //Note this works only because the cells are actually owned by the DataPool<LArCell>
-    size_t i=0,j=1;
-    for (i=0;i<m_nTotalCells;++i) {
-      if (theCellContainer->at(i)==nullptr) {
-	ATH_MSG_VERBOSE("Cell with hash " << i << " missing");
-	if (j<=i) j=i+1;
-	while (j<m_nTotalCells && theCellContainer->at(j)==nullptr) ++j;
-	if (j>=m_nTotalCells) break;
-	//Now j points to next filled place
-	theCellContainer->at(i)=theCellContainer->at(j);
-	theCellContainer->at(j)=nullptr;
-	ATH_MSG_VERBOSE("Replacing cell with hash " << i << " by cell from position " << j);
-      }//end if at(i)==0
-    }//end loop over cells
-    theCellContainer->resize(nCellsAdded);
-    ATH_MSG_DEBUG("Resized the cell container to " << nCellsAdded << "(" << m_nTotalCells-nCellsAdded << " cells missing)");
+    ATH_MSG_DEBUG("Filled only  " << nCellsAdded << " out of " << m_nTotalCells << " cells. Removing holes");
+    auto end1=std::remove(theCellContainer->begin(),theCellContainer->end(),nullptr);
+    theCellContainer->erase(end1,theCellContainer->end());
+    ATH_MSG_DEBUG("Shrunk the cell container to " << theCellContainer->size() << " (" << m_nTotalCells-nCellsAdded << " cells missing)");
   }//end if nCellsAdded!=m_nTotalCells
   else
-    ATH_MSG_DEBUG("All " << nCellsAdded << "cells filled (no holes)");
+    ATH_MSG_DEBUG("All " << nCellsAdded << " cells filled (no holes)");
 
   return StatusCode::SUCCESS;
 }

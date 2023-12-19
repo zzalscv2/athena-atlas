@@ -32,12 +32,11 @@
 #include "LArRecConditions/LArBadChannelCont.h"
 #include "AthAllocators/DataPool.h"
 #include "LArCabling/LArOnOffIdMapping.h"
-
+#include "LArRawEvent/LArRawChannelContainer.h"
 
 class CaloCellContainer ;
 class CaloCell_ID;
 class CaloCellContainer ;
-class LArRawChannelContainer;
 class LArCell;
 
 /**
@@ -57,14 +56,11 @@ public:
   /**
    * @brief Standard AlgTool constructor
    */
-  LArCellBuilderFromLArRawChannelTool(const std::string& type, 
-				      const std::string& name, 
-				      const IInterface* parent);
-
+  using base_class::base_class;
   /**
    * @brief Destructor, deletes the MsgService.
    */
-  virtual ~LArCellBuilderFromLArRawChannelTool();
+  virtual ~LArCellBuilderFromLArRawChannelTool() =default;
 
   /**
    * @brief Initialize method.
@@ -89,18 +85,18 @@ public:
 
 private: 
 
-  SG::ReadHandleKey<LArRawChannelContainer>   m_rawChannelsKey;        //!< rdo container name (jO)
-  bool            m_addDeadOTX;             //!< activate addition of missing cells from dead OTX
-  int             m_initialDataPoolSize;    //!< Initial size of DataPool<LArCell>
+  SG::ReadHandleKey<LArRawChannelContainer>   m_rawChannelsKey{this,"RawChannelsName","LArRawChannels","Name of input container"}; //!< rdo container name (jO)
+  Gaudi::Property<bool>            m_addDeadOTX{this,"addDeadOTX",true,"Add dummy cells for missing FEBs"};                        //!< activate addition of missing cells from dead OTX
+  Gaudi::Property<int>             m_initialDataPoolSize{this,"InitialCellPoolSize",-1,"Initial size of the DataPool<LArCells> (-1: Use nCells)"};  //!< Initial size of DataPool<LArCell>
 
   //Internally used variables
-  unsigned m_nTotalCells;                   //!< Number of cells, set in Initialize()
+  unsigned m_nTotalCells=0;                   //!< Number of cells, set in Initialize()
 
 
-  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey;
-  const LArOnlineID* m_onlineID;
-  const CaloCell_ID*  m_caloCID;
-  SG::ReadCondHandleKey<LArBadFebCont> m_missingFebKey;
+  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"LArCablingKey","LArOnOffIdMap","Key of  conditions data object holding cabling"};
+  const LArOnlineID* m_onlineID=nullptr;
+  const CaloCell_ID*  m_caloCID=nullptr;
+  SG::ReadCondHandleKey<LArBadFebCont> m_missingFebKey{this,"MissingFebKey","LArBadFeb","Key of conditions data object holding bad-feb info"};
 
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};      
 
