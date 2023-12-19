@@ -207,6 +207,19 @@ void* AuxTypeVectorHolder<T, CONT>::toPtr ()
 
 
 /**
+ * @brief Return a pointer to the start of the vector's data.
+ */
+template <class T, class CONT>
+inline
+const void* AuxTypeVectorHolder<T, CONT>::toPtr () const
+{
+  if (m_vecPtr->empty())
+    return nullptr;
+  return std::as_const (*m_vecPtr).data();
+}
+
+
+/**
  * @brief Return a pointer to the STL vector itself.
  */
 template <class T, class CONT>

@@ -49,6 +49,9 @@ namespace xAOD {
       virtual void* toPtr() override {
          return &m_info;
       }
+      virtual const void* toPtr() const override {
+         return &m_info;
+      }
       virtual void* toVector() override {
          return &m_info;
       }

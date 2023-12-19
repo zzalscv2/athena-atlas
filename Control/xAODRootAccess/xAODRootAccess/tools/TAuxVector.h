@@ -54,7 +54,7 @@ namespace xAOD {
       virtual SG::auxid_t auxid() const override;
       /// Return a pointer to the start of the vector's data
       virtual void* toPtr() override;
-      const void* toPtr() const;
+      virtual const void* toPtr() const override;
       /// Return a pointer to the STL vector itself
       virtual void* toVector() override;
 
