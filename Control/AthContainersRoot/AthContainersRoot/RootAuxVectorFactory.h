@@ -122,7 +122,7 @@ public:
   /**
    * @brief Return a pointer to the start of the vector's data.
    */
-  const void* toPtr() const;
+  virtual const void* toPtr() const override;
 
 
   /**

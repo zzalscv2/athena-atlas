@@ -21,6 +21,7 @@
 #include <typeinfo>
 #include <vector>
 #include <algorithm>
+#include <utility>
 #include <stdint.h>
 #include <type_traits>
 
@@ -130,6 +131,12 @@ public:
    * @brief Return a pointer to the start of the vector's data.
    */
   virtual void* toPtr() override;
+
+
+  /**
+   * @brief Return a pointer to the start of the vector's data.
+   */
+  virtual const void* toPtr() const override;
 
 
   /**

@@ -61,6 +61,12 @@ public:
 
 
   /**
+   * @brief Return a pointer to the start of the vector's data.
+   */
+  virtual const void* toPtr() const = 0;
+
+
+  /**
    * @brief Return a pointer to the STL vector itself.
    */
   virtual void* toVector() = 0;

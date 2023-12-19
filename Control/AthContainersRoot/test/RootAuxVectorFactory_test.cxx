@@ -35,6 +35,7 @@ void test1()
   assert (vec->size() == 10);
   assert (vec->auxid() == 1);
   int* ptr = reinterpret_cast<int*> (vec->toPtr());
+  assert (std::as_const (*vec).toPtr() == ptr);
   for (int i=0; i < 10; i++)
     ptr[i] = i+1;
   assert (vec->resize (100) == false);

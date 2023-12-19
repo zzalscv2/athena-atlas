@@ -68,6 +68,7 @@ void test_vector1()
   SG::IAuxTypeVector* v = vconcrete;
   assert (v->auxid() == 1);
   T* ptr = reinterpret_cast<T*> (v->toPtr());
+  assert (std::as_const(*v).toPtr() == ptr);
   ptr[0] = makeT<T>(1);
   ptr[1] = makeT<T>(2);
   assert (v->size() == 10);
