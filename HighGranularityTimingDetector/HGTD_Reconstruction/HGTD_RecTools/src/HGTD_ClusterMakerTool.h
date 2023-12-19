@@ -43,12 +43,13 @@ public:
    * @return Pointer to a HGTD_Cluster, owned by caller.
    */
   HGTD_Cluster
-  createCluster(const Identifier& rdo_id, const Amg::Vector2D& loc_pos,
-                const std::vector<Identifier>& rdo_list,
+  createCluster(const Identifier& rdo_id,
+                const Amg::Vector2D& loc_pos,
+                std::vector<Identifier>&& rdo_list,
                 const InDet::SiWidth& width,
                 const InDetDD::SolidStateDetectorElementBase* det_el,
                 const float time_of_arrival,
-                const std::vector<int>& time_over_threshold) const;
+                std::vector<int>&& time_over_threshold) const;
 };
 
 #endif // HGTD_CLUSTERMAKERTOOL_H

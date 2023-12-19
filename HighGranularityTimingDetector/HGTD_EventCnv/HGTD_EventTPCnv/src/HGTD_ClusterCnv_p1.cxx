@@ -50,10 +50,12 @@ HGTD_Cluster HGTD_ClusterCnv_p1::createHGTDCluster(
   (cmat)(1, 1) = static_cast<double>(pers_obj->m_mat_11);
 
   HGTD_Cluster cluster(cluster_id, local_pos, std::move(rdo_list),
-                       std::move(width), del_el, std::move(cmat),
+                       width,
+                       del_el,
+                       std::move(cmat),
                        pers_obj->m_time,
                        pers_obj->m_time_resolution,
-                       std::move(pers_obj->m_time_over_threshold));
+                       std::vector<int>(pers_obj->m_time_over_threshold));
 
   return cluster;
 }

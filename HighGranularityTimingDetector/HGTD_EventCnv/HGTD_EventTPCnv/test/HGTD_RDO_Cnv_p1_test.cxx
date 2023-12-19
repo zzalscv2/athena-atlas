@@ -38,9 +38,9 @@ void convertAndBack(const HGTD_RDO& trans1) {
 
   std::cout << "convertAndBack\n";
 
-  MsgStream log(0, "test");
+  MsgStream log(nullptr, "test");
   HGTD_RDO_Cnv_p1 cnv;
-  HGTD_RDO_p1 pers;
+  HGTD_RDO_p1 pers{};
 
   cnv.transToPers(&trans1, &pers, log);
 

@@ -155,9 +155,9 @@ BOOST_AUTO_TEST_CASE(HGTD_RDO_ContainerCnv_p1_test) {
       makeRDOContainer(hgtd_idhelper);
   std::cout << "HGTD_RDO_Container created\n";
   // otherwise there is nothing to test
-  BOOST_REQUIRE(trans_container->size() > 0);
+  BOOST_REQUIRE(!trans_container->empty());
 
-  MsgStream log(0, "test");
+  MsgStream log(nullptr, "test");
   HGTD_RDO_ContainerCnv_p1 cnv;
 
   HGTD_RDO_Container_p1 pers;

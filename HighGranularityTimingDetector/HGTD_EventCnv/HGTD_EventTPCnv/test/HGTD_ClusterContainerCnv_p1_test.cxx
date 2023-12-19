@@ -52,7 +52,7 @@ void compare(const HGTD_ClusterContainer& p1,
 std::unique_ptr<HGTD_Cluster>
 createCluster(int endcap, int layer, int phi_module, int eta_module, float locx,
               float locy, float colx, float coly, float phi, float rz,
-              float toa, const std::vector<int>& tot,
+              float toa, std::vector<int>&& tot,
               const HGTD_ID* hgtd_idhelper) {
 
   Identifier id =
@@ -70,7 +70,7 @@ createCluster(int endcap, int layer, int phi_module, int eta_module, float locx,
 
   return std::make_unique<HGTD_Cluster>(
       Identifier(id), locpos, std::move(rdoList), width, nullptr, std::move(cov),
-      toa, 0.035, tot);
+      toa, 0.035, std::move(tot));
 }
 
 std::unique_ptr<const HGTD_ClusterContainer> makeClusters(HGTD_ID* hgtd_idhelper) {
@@ -112,7 +112,7 @@ std::unique_ptr<const HGTD_ClusterContainer> makeClusters(HGTD_ID* hgtd_idhelper
         std::cout << "toa " << toa << '\n';
         std::cout << "tot " << tot.at(0) << '\n';
         auto cluster = createCluster(endcap, layer, phi_module, eta_module,
-                                     locx, locy, colx, coly, phi, rz, toa, tot,
+                                     locx, locy, colx, coly, phi, rz, toa, std::move(tot),
                                      hgtd_idhelper);
         coll->push_back(std::move(cluster));
       }
@@ -202,9 +202,9 @@ BOOST_AUTO_TEST_CASE(HGTD_ClusterContainerCnv_p1_test) {
   std::cout << "id2 " << hgtd_idhelper->wafer_hash(id2) << '\n';
 
   std::unique_ptr<const HGTD_ClusterContainer> trans1 = makeClusters(hgtd_idhelper);
-  BOOST_REQUIRE(trans1->size() > 0); // otherwise there is nothing to test
+  BOOST_REQUIRE(!trans1->empty()); // otherwise there is nothing to test
   //
-  MsgStream log(0, "test");
+  MsgStream log(nullptr, "test");
   HGTD_ClusterContainerCnv_p1 cnv;
 
   HGTD_ClusterContainer_p1 pers;

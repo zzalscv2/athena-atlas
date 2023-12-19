@@ -68,7 +68,7 @@ HGTD_Cluster createCluster() {
 
   HGTD_Cluster cluster(Identifier(1234), locpos, std::move(rdoList), width, nullptr,
                        std::move(cov), dummy_toa, dummy_toa_res,
-                       dummy_tot);
+                       std::vector<int>(dummy_tot));
 
   std::cout << "createCluster done\n";
   return cluster;

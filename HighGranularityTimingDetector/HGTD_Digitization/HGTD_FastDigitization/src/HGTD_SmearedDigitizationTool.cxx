@@ -29,7 +29,7 @@ HGTD_SmearedDigitizationTool::HGTD_SmearedDigitizationTool(
   PileUpToolBase(type, name, parent) {
 }
 
-HGTD_SmearedDigitizationTool::~HGTD_SmearedDigitizationTool(){}
+HGTD_SmearedDigitizationTool::~HGTD_SmearedDigitizationTool()= default;
 
 StatusCode HGTD_SmearedDigitizationTool::initialize() {
 
@@ -139,7 +139,7 @@ HGTD_SmearedDigitizationTool::setupTimedHitCollection() {
             ->retrieveSubEvtsData(m_si_hit_collection_name.value(), hit_coll_list,
                                   num_si_hits)
             .isSuccess()) and
-      hit_coll_list.size() == 0) {
+      hit_coll_list.empty()) {
     ATH_MSG_ERROR("Could not fill TimedHitCollList_t");
     return timed_hit_coll;
   }
@@ -312,7 +312,7 @@ StatusCode HGTD_SmearedDigitizationTool::digitize(const EventContext& ctx) {
 
     Cluster_t* cluster = new Cluster_t(intersection_id, intersection, std::move(rdo_list),
                                        si_width, curr_det_element, std::move(cluster_err),
-                                       hit_time, m_time_res, tot_vec);
+                                       hit_time, m_time_res, std::move(tot_vec));
 
     m_x_cluster_global = (cluster->globalPosition()).x();
     m_y_cluster_global = (cluster->globalPosition()).y();
@@ -353,7 +353,7 @@ float HGTD_SmearedDigitizationTool::smearMeanTime(float time, float time_res, CL
   return time + CLHEP::RandGauss::shoot(rndmEngine, 0., time_res);
 }
 
-StatusCode HGTD_SmearedDigitizationTool::fillMultiTruthCollection(PRD_MultiTruthCollection* map, Cluster_t* cluster, TimedHitPtr<SiHit> hit, const EventContext& ctx) {
+StatusCode HGTD_SmearedDigitizationTool::fillMultiTruthCollection(PRD_MultiTruthCollection* map, Cluster_t* cluster, const TimedHitPtr<SiHit>& hit, const EventContext& ctx) {
 
   // FIXME is this a dummy or does this actually mean something>
   EBC_EVCOLL ev_coll = EBC_MAINEVCOLL; // enum from HepMcParticleLink.h, usually

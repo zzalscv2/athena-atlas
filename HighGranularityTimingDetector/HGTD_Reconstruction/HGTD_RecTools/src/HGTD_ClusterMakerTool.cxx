@@ -25,11 +25,13 @@ HGTD_ClusterMakerTool::HGTD_ClusterMakerTool(const std::string& t,
     : AthAlgTool(t, n, p) {}
 
 HGTD_Cluster HGTD_ClusterMakerTool::createCluster(
-    const Identifier& rdo_id, const Amg::Vector2D& loc_pos,
-    const std::vector<Identifier>& rdo_list, const InDet::SiWidth& width,
+    const Identifier& rdo_id,
+    const Amg::Vector2D& loc_pos,
+    std::vector<Identifier>&& rdo_list,
+    const InDet::SiWidth& width,
     const InDetDD::SolidStateDetectorElementBase* det_el,
     const float time_of_arrival,
-    const std::vector<int>& time_over_threshold) const {
+    std::vector<int>&& time_over_threshold) const {
 
   Amg::MatrixX loc_err_matx = Amg::MatrixX(2, 2);
   loc_err_matx.setIdentity();
@@ -48,11 +50,11 @@ HGTD_Cluster HGTD_ClusterMakerTool::createCluster(
 
   return {rdo_id,
           loc_pos,
-          rdo_list,
+          std::move(rdo_list),
           width,
           det_el,
-          loc_err_matx,
+          std::move(loc_err_matx),
           time_of_arrival,
           time_of_arrival_err,
-          time_over_threshold};
+          std::move(time_over_threshold)};
 }
