@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -63,8 +63,8 @@ struct egammaBaseHist {
   TH1 *m_hLB_N {}; // Histogram for number of egamma vs LB
 
   egammaBaseHist(std::string name)
+    : m_nameOfEgammaType (std::move(name))
   {
-    m_nameOfEgammaType = std::move(name);
   }
 };
 
