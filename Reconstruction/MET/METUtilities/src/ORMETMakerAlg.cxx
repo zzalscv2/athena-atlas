@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ORMETMakerAlg.h"
@@ -50,8 +50,8 @@ namespace met {
     declareProperty("PhotonETA", m_photonETA = 2.47, "eta for photons");
     declareProperty("TauETA", m_tauETA = 2.47, "eta for photons");
 
-    declareProperty("UseUnmatched", m_useUnmatched = "True", "Include or reject egamma with unmatched clusters");
-    declareProperty("DoJVT", m_doJVT = "False");
+    declareProperty("UseUnmatched", m_useUnmatched = true, "Include or reject egamma with unmatched clusters");
+    declareProperty("DoJVT", m_doJVT = false);
     declareProperty("Soft", m_soft = "Clus");
 
 
