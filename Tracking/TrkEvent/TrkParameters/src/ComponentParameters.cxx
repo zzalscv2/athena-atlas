@@ -17,7 +17,7 @@ Trk::MultiComponentStateHelpers::clone(const Trk::MultiComponentState& in)
   auto clonedState = Trk::MultiComponentState();
   clonedState.reserve(in.size());
   for (const ComponentParameters& component : in) {
-    clonedState.emplace_back(component.params->uniqueClone(), component.weight);
+    clonedState.push_back({component.params->uniqueClone(), component.weight});
   }
   return clonedState;
 }

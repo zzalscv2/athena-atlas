@@ -1478,8 +1478,8 @@ Trk::RungeKuttaPropagator::multiStatePropagate(
     }
     sumw += component->weight;
     // Propagation does not affect the weightings of the states
-    propagatedState.emplace_back(std::move(propagatedParameters),
-                                 component->weight);
+    propagatedState.push_back({std::move(propagatedParameters),
+                                 component->weight});
   }
   // Protect low weight propagation
   constexpr double minPropWeight = (1./12.);

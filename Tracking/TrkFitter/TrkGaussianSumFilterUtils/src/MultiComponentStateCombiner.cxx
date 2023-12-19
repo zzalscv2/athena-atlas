@@ -62,8 +62,8 @@ Trk::MultiComponentState mergeFullDistArray(
     if (!state.params) {
       continue;
     }
-    cache.multiComponentState.emplace_back(std::move(state.params),
-                                           state.weight);
+    cache.multiComponentState.push_back({std::move(state.params),
+                                           state.weight});
     cache.validWeightSum += state.weight;
   }
   Trk::MultiComponentState mergedState =
@@ -100,8 +100,7 @@ Trk::MultiComponentState merge(
                 return x.weight > y.weight;
               });
 
-    Trk::ComponentParameters dummyCompParams(
-        std::move(statesToMerge.begin()->params), 1.);
+    Trk::ComponentParameters dummyCompParams = {std::move(statesToMerge.begin()->params), 1.};
     Trk::MultiComponentState returnMultiState;
     returnMultiState.push_back(std::move(dummyCompParams));
     return returnMultiState;
@@ -125,8 +124,8 @@ Trk::ComponentParameters combineToSingleImpl(
   const AmgSymMatrix(5)* firstMeasuredCov = firstParameters->covariance();
 
   if (uncombinedState.size() == 1) {
-    Trk::ComponentParameters(uncombinedState.front().params->uniqueClone(),
-                             uncombinedState.front().weight);
+    return {uncombinedState.front().params->uniqueClone(),
+            uncombinedState.front().weight};
   }
 
   double sumW(0.);
@@ -430,15 +429,15 @@ Trk::MultiComponentStateCombiner::combineWithSmoother(
       }
 
       if (!forwardMeasuredCov) {
-        Trk::ComponentParameters smootherComponentOnly(
-          smootherComponent.params->uniqueClone(), smootherComponent.weight);
+        Trk::ComponentParameters smootherComponentOnly = {
+          smootherComponent.params->uniqueClone(), smootherComponent.weight};
         combinedMultiState->push_back(std::move(smootherComponentOnly));
         continue;
       }
 
       if (!smootherMeasuredCov) {
-        Trk::ComponentParameters forwardComponentOnly(
-          forwardsComponent.params->uniqueClone(), forwardsComponent.weight);
+        Trk::ComponentParameters forwardComponentOnly = {
+          forwardsComponent.params->uniqueClone(), forwardsComponent.weight};
         combinedMultiState->push_back(std::move(forwardComponentOnly));
         continue;
       }
@@ -476,8 +475,8 @@ Trk::MultiComponentStateCombiner::combineWithSmoother(
       double weightScalingFactor = exp(-0.5 * exponent);
       double combinedWeight = smootherComponent.weight *
                               forwardsComponent.weight * weightScalingFactor;
-      Trk::ComponentParameters combinedComponent(
-        std::move(combinedTrackParameters), combinedWeight);
+      Trk::ComponentParameters combinedComponent = {
+        std::move(combinedTrackParameters), combinedWeight};
       combinedMultiState->push_back(std::move(combinedComponent));
     }
   }
