@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -24,8 +24,7 @@ def ZDC_RangeCfg(flags, name="ZdcRange" , **kwargs):
     kwargs.setdefault('FirstXing', ZDC_FirstXing() )
     kwargs.setdefault('LastXing',  ZDC_LastXing() )
     kwargs.setdefault('CacheRefreshFrequency', 1.0 ) #default 0 no dataproxy reset
-    kwargs.setdefault('ItemList', ["ZDC_SimStripHit_Collection#ZDC_SimStripHit_Collection",
-                                   "ZDC_SimPixelHit_Collection#ZDC_SimPixelHit_Collection"] )
+    kwargs.setdefault('ItemList', ["ZDC_SimFiberHit_Collection#ZDC_SimFiberHit_Collection" ] )
     return PileUpXingFolderCfg(flags, name, **kwargs)
 
 ######################################################################################
@@ -51,7 +50,12 @@ def ZDC_PileUpToolCfg(flags, name="ZDC_PileUpTool",**kwargs):
     from RngComps.RandomServices import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
-    acc.setPrivateTools(CompFactory.ZDC_PileUpTool(name, **kwargs))
+    config = "PbPb2023"
+    from AthenaConfiguration.Enums import LHCPeriod
+    if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
+        config = "PbPb2015"
+
+    acc.setPrivateTools(CompFactory.ZDC_PileUpTool(name, configuration = config, **kwargs))
     return acc
 
 
@@ -69,7 +73,7 @@ def ZDC_DigitizationOutputCfg(flags):
     """Return ComponentAccumulator with Output for ZDC. Not standalone."""
     acc = ComponentAccumulator()
     if flags.Output.doWriteRDO:
-        ItemList = ["ZdcDigitsCollection#ZdcDigitsCollection"]
+        ItemList = ["xAOD::ZdcModuleContainer#*", "xAOD::ZdcModuleAuxContainer#*.", "CaloCalibrationHitContainer#*"]
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         acc.merge(OutputStreamCfg(flags,"RDO", ItemList))
     return acc
@@ -83,6 +87,10 @@ def ZDC_DigitizationBasicCfg(flags, **kwargs):
         kwargs["PileUpTools"] = PileUpTools
     from Digitization.PileUpToolsConfig import PileUpToolsCfg
     acc.merge(PileUpToolsCfg(flags, **kwargs))
+    from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
+    acc.merge(DetDescrCnvSvcCfg(flags))
+    from ZDC_GeoM.ZdcGeoModelConfig import ZDC_DetToolCfg
+    acc.merge(ZDC_DetToolCfg(flags))
     return acc
 
 
@@ -92,9 +100,7 @@ def ZDC_OverlayDigitizationBasicCfg(flags, **kwargs):
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags,Load=[
-            ('ZDC_SimStripHit_Collection','ZDC_SimStripHit_Collection'),
-            ('ZDC_SimPixelHit_Collection','ZDC_SimPixelHit_Collection')
-        ] ) )
+            ('ZDC_SimFiberHit_Collection','ZDC_SimFiberHit_Collection')] ) )
     if "DigitizationTool" not in kwargs:
         kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(ZDC_OverlayPileUpToolCfg(flags)))
 

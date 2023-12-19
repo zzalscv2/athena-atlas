@@ -24,6 +24,7 @@ class StoreGateSvc;
 class IROBDataProviderSvc; 
 class TileL2ContByteStreamTool ; 
 class ByteStreamCnvSvc;
+class TileHid2RESrcID;
 class TileROD_Decoder;
 
 // Abstract factory to create the converter
@@ -95,6 +96,9 @@ class TileL2ContByteStreamCnv
     
     /** Pointer to TileROD_Decoder */
     ToolHandle<TileROD_Decoder> m_decoder;
+
+    /** Pointer to TileHid2RESrcID */
+    const TileHid2RESrcID* m_hid2re;
 
     /** Queue of data objects to recycle. */
     mutable Athena::RecyclableDataQueue<TileRecyclableL2Container> m_queue ATLAS_THREAD_SAFE;
