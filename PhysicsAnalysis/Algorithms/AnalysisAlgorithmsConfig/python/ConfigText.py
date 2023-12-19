@@ -404,6 +404,11 @@ def addDefaultAlgs(config, dataType, isPhyslite, noPhysliteBroken, noSystematics
     config.addAlgConfigBlock(algName="WorkingPoint", alg=TauWorkingPointConfig,
         superBlocks="TauJets")
 
+    # IFF truth classification
+    from AsgAnalysisAlgorithms.AsgAnalysisConfig import IFFLeptonDecorationBlock
+    config.addAlgConfigBlock(algName="IFFClassification", alg=IFFLeptonDecorationBlock,
+        superBlocks=["Electrons","Muons"])
+
     # generator level analysis
     from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeGeneratorAnalysisConfig 
     config.addAlgConfigBlock(algName="GeneratorLevelAnalysis", alg=makeGeneratorAnalysisConfig)

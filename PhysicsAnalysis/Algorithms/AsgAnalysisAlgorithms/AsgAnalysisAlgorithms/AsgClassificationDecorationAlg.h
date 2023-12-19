@@ -12,6 +12,7 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <xAODBase/IParticle.h>
 #include <xAODBase/IParticleContainer.h>
+#include <SystematicsHandles/SysWriteDecorHandle.h>
 
 #include <AsgAnalysisInterfaces/IClassificationTool.h>
 
@@ -51,11 +52,9 @@ private:
 
   /// \brief the decoration for the truth classification
 private:
-  std::string m_classificationDecoration {};
+  CP::SysWriteDecorHandle<int> m_classificationDecorator {
+    this, "decoration", "IFFClass_%SYS%", "decoration for per-object IFF truth class"};
 
-  /// \brief the accessor for \ref m_truthClassificationDecoration
-private:
-  std::unique_ptr<const SG::AuxElement::Decorator<unsigned int> > m_classificationDecorator {};
 };
 
 } // namespace CP

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak <tadej@cern.ch>
@@ -15,7 +15,6 @@ AsgClassificationDecorationAlg::AsgClassificationDecorationAlg(const std::string
                                                ISvcLocator *pSvcLocator)
     : AnaAlgorithm(name, pSvcLocator)
 {
-  declareProperty ("decoration", m_classificationDecoration, "the decoration for classification");
   declareProperty ("tool", m_tool, "classification tool");
 }
 
@@ -23,16 +22,10 @@ AsgClassificationDecorationAlg::AsgClassificationDecorationAlg(const std::string
 
 StatusCode AsgClassificationDecorationAlg::initialize()
 {
-  if (m_classificationDecoration.empty())
-  {
-    ANA_MSG_ERROR ("Classification decoration name should not be empty.");
-    return StatusCode::FAILURE;
-  }
-
-  m_classificationDecorator = std::make_unique<SG::AuxElement::Decorator<unsigned int> > (m_classificationDecoration);
 
   ANA_CHECK (m_particlesHandle.initialize (m_systematicsList));
-  ANA_CHECK(m_systematicsList.initialize());
+  ANA_CHECK (m_classificationDecorator.initialize (m_systematicsList, m_particlesHandle));
+  ANA_CHECK (m_systematicsList.initialize());
 
   ANA_CHECK(m_tool->initialize());
 
@@ -43,18 +36,35 @@ StatusCode AsgClassificationDecorationAlg::initialize()
 
 StatusCode AsgClassificationDecorationAlg::execute()
 {
+
+  std::vector<unsigned int> classifications;
+
   for (const auto& sys : m_systematicsList.systematicsVector())
   {
-    const xAOD::IParticleContainer *particles{};
+    const xAOD::IParticleContainer *particles = nullptr;
     ANA_CHECK(m_particlesHandle.retrieve(particles, sys));
 
-    for (const xAOD::IParticle *particle : *particles)
-    {
-      unsigned int classification{};
-      ANA_CHECK(m_tool->classify(*particle, classification));
-      (*m_classificationDecorator)(*particle) = classification;
+    if (sys.empty()) {
+      // we only run the IFF tool on the nominal calibration
+      for (const xAOD::IParticle *particle : *particles)
+	{
+	  unsigned int classification(0);
+	  ANA_CHECK(m_tool->classify(*particle, classification));
+	  m_classificationDecorator.set(*particle, classification, sys);
+	  classifications.push_back(classification);
+	}
+    }
+    else {
+      // and for all other systematics, just propagate the decoration
+      unsigned int index = 0;
+      for (const xAOD::IParticle *particle : *particles)
+	{
+	  m_classificationDecorator.set(*particle, classifications.at(index), sys);
+	  index ++;
+	}
     }
   }
+
   return StatusCode::SUCCESS;
 }
 

@@ -305,6 +305,27 @@ class OutputThinningBlock (ConfigBlock):
         alg.deepCopy = self.deepCopy
 
 
+class IFFLeptonDecorationBlock (ConfigBlock):
+    """the ConfigBlock for the IFF classification of leptons"""
+
+    def __init__ (self, containerName='') :
+        super (IFFLeptonDecorationBlock, self).__init__( 'IFFLeptonDecoration' )
+        self.containerName = containerName
+
+    def makeAlgs (self, config) :
+        particles = config.readName(self.containerName)
+
+        alg = config.createAlgorithm( 'CP::AsgClassificationDecorationAlg', 'IFFClassifierAlg' + self.containerName )
+        # the IFF classification tool
+        config.addPrivateTool( 'tool', 'TruthClassificationTool')
+        # label charge-flipped electrons as such
+        alg.tool.separateChargeFlipElectrons = True
+        alg.decoration = 'IFFClass_%SYS%'
+        alg.particles = particles
+
+        # write the decoration only once to the output
+        config.addOutputVar(self.containerName, alg.decoration, 'IFFClass', noSys=True)
+
 
 def makeCommonServicesConfig( seq ):
     """Create the common services config"""
