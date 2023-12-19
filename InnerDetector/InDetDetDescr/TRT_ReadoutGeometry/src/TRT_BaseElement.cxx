@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_ReadoutGeometry/TRT_BaseElement.h"
@@ -37,18 +37,6 @@ TRT_BaseElement::TRT_BaseElement(const TRT_BaseElement& right)
   , m_conditions(right.m_conditions)
 {}
 
-Identifier
-TRT_BaseElement::identify() const
-{
-  return m_id;
-}
-
-IdentifierHash
-TRT_BaseElement::identifyHash() const
-{
-  return m_idHash;
-}
-
 // [0] GeoModel / CLHEP Access
 const HepGeom::Transform3D
 TRT_BaseElement::getAbsoluteTransform(int straw) const
@@ -56,51 +44,6 @@ TRT_BaseElement::getAbsoluteTransform(int straw) const
   return Amg::EigenTransformToCLHEP(strawTransform(straw));
 }
 
-// [A] description of the current detector element : Amg first, then CLHEP
-// converted methods
-const Trk::Surface&
-TRT_BaseElement::surface() const
-{
-  return elementSurface();
-}
-
-const Trk::SurfaceBounds&
-TRT_BaseElement::bounds() const
-{
-  if (!m_surfaceCache.isValid()) {
-    createSurfaceCache();
-  }
-  return *(m_surfaceCache.ptr()->bounds());
-}
-
-const Amg::Transform3D&
-TRT_BaseElement::transform() const
-{
-  if (!m_surfaceCache.isValid()) {
-    createSurfaceCache();
-  }
-  return m_surfaceCache.ptr()->transform();
-}
-
-const Amg::Vector3D&
-TRT_BaseElement::center() const
-{
-  if (!m_surfaceCache.isValid()) {
-    createSurfaceCache();
-  }
-  return m_surfaceCache.ptr()->center();
-}
-
-const Amg::Vector3D&
-TRT_BaseElement::normal() const
-{
-  if (!m_surfaceCache.isValid()) {
-    createSurfaceCache();
-  }
-  return m_surfaceCache.ptr()->normal();
-}
-
-// [B] Description of the individual straws
 const Trk::Surface&
 TRT_BaseElement::surface(const Identifier& id) const
 {
@@ -276,12 +219,6 @@ TRT_BaseElement::updateAllCaches()
     Identifier strawId = m_idHelper->straw_id(identify(), iStraw);
     createSurfaceCache(strawId);
   }
-}
-
-const TRT_Conditions*
-TRT_BaseElement::conditions() const
-{
-  return m_conditions;
 }
 
 }

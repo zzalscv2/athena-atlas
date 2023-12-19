@@ -37,42 +37,13 @@ using Trk::distDepth;
   }
 
   // Destructor:
-  SolidStateDetectorElementBase::~SolidStateDetectorElementBase()
-  = default;
+  SolidStateDetectorElementBase::~SolidStateDetectorElementBase() = default;
 
-
-  
-  Trk::Surface&
-  SolidStateDetectorElementBase::surface()
-  {
-    return *m_surface;
-  }
-
-  const Trk::Surface&
-  SolidStateDetectorElementBase::surface() const
-  {
-    return *m_surface;
-  }
-
-  const GeoTrf::Transform3D&
-  SolidStateDetectorElementBase::transformHit() const
-  {
-    if (!m_cache.isValid()) updateCache();
-    return m_cache.ptr()->m_transformHit;
-  }
-
-  const HepGeom::Transform3D&
+ const HepGeom::Transform3D&
   SolidStateDetectorElementBase::transformCLHEP() const
   {
     if (!m_cache.isValid()) updateCache();
     return m_cache.ptr()->m_transformCLHEP;
-  }
-
-  const Amg::Transform3D&
-  SolidStateDetectorElementBase::transform() const
-  {
-    if (!m_cache.isValid()) updateCache();
-    return m_cache.ptr()->m_transform;
   }
 
   const HepGeom::Transform3D
@@ -83,8 +54,8 @@ using Trk::distDepth;
       if (ptrXf) return Amg::EigenTransformToCLHEP(*ptrXf) * recoToHitTransform();
     }
     return Amg::EigenTransformToCLHEP(getMaterialGeom()->getDefAbsoluteTransform()) * recoToHitTransform();
-  }  
-   
+  }
+
   const Amg::Transform3D
   SolidStateDetectorElementBase::defTransform() const
   {
@@ -118,20 +89,6 @@ using Trk::distDepth;
   {
     if (!m_cache.isValid()) updateCache();
     return m_cache.ptr()->m_etaAxis;
-  }
-
-  const Amg::Vector3D&
-  SolidStateDetectorElementBase::normal() const
-  {
-    if (!m_cache.isValid()) updateCache();
-    return m_cache.ptr()->m_normal;
-  }
-
-  const Amg::Vector3D&
-  SolidStateDetectorElementBase::center() const
-  {
-    if (!m_cache.isValid()) updateCache();
-    return m_cache.ptr()->m_center;
   }
 
   Amg::Vector2D
@@ -171,7 +128,7 @@ using Trk::distDepth;
     if (!dir.m_etaDirection) xEta = -xEta;
     return {xPhi, xEta, xDepth};
   }
-  
+
   // Get eta/phi extent. Returns min/max eta and phi and r (for barrel)
   // or z (for endcap) Takes as input the vertex spread in z (+-deltaZ).
   // Gets 4 corners of the sensor and calculates eta phi for each corner
@@ -201,7 +158,7 @@ using Trk::distDepth;
       if (first) { // Use the first point to initialize the min/max values.
 
         // Put phi in a range so that we are not near -180/+180 division.
-        // Do this by adding an offset if phi > 90 CLHEP::deg or < -90 CLHEP::deg. 
+        // Do this by adding an offset if phi > 90 CLHEP::deg or < -90 CLHEP::deg.
         // This offset is later removed.
         if (phiPoint < -0.5 * M_PI) {
           phiOffset = -0.5 * M_PI;
@@ -321,7 +278,7 @@ using Trk::distDepth;
     const GeoTrf::Transform3D* ptrXf;
     GeoTrf::Transform3D geotrf;
 
-    if (m_geoAlignStore){ 
+    if (m_geoAlignStore){
       ptrXf = m_geoAlignStore->getAbsPosition(getMaterialGeom());
       if (ptrXf) {
          cache.m_transformHit = (*ptrXf);
@@ -341,17 +298,17 @@ using Trk::distDepth;
       //(At the moment, only used for ITkStrip barrel when creating a DetElement per row)
       geotrf = getMaterialGeom()->getAbsoluteTransform() * m_design->moduleShift();
     }
-    
+
     const GeoTrf::Transform3D& geoTransform = geotrf;
-    
+
     cache.m_center = geoTransform * m_design->sensorCenter();
-    
+
     //Is this needed outside e.g. ReadSiDetElements? Maybe candidate for future removal?
     cache.m_centerCLHEP = HepGeom::Point3D<double>(cache.m_center[0],cache.m_center[1],cache.m_center[2]);
 
     Amg::Vector3D centerGeoModel(0., 0., 0.);
     cache.m_origin = geoTransform * centerGeoModel;
-   
+
     //
     // Determine directions depth, eta and phi axis in reconstruction local frame
     // ie depth away from interaction point
@@ -379,11 +336,11 @@ using Trk::distDepth;
     if (!m_axisDir.isValid()) {
         AxisDir dir{};
         // Determine the unit vectors in global frame
-   
+
         const Amg::Vector3D &geoModelPhiAxis = localAxes[m_hitPhi];
         const Amg::Vector3D &geoModelEtaAxis = localAxes[m_hitEta];
         const Amg::Vector3D &geoModelDepthAxis = localAxes[m_hitDepth];
- 
+
         Amg::Vector3D globalDepthAxis(geoTransform.linear() * geoModelDepthAxis);
         Amg::Vector3D globalPhiAxis(geoTransform.linear() * geoModelPhiAxis);
         Amg::Vector3D globalEtaAxis(geoTransform.linear() * geoModelEtaAxis);
@@ -398,7 +355,7 @@ using Trk::distDepth;
 
         // In Barrel like geometry, the etaAxis is along increasing z, and normal is in increasing radial direction.
         // In Endcap like geometry, the etaAxis is along increasing r, and normal is in decreasing z direction,
-        // We base whether it is barrel like or endcap like by the orientation of the local z axis of the 
+        // We base whether it is barrel like or endcap like by the orientation of the local z axis of the
         // the element. This allows the use of endcap identifiers in a TB setup.
 
 
@@ -435,14 +392,14 @@ using Trk::distDepth;
             ATH_MSG_ERROR( "Orientation of local depth axis does not follow correct convention.");
             dir.m_depthDirection = true; // Don't swap.
         }
-        
+
         // for HGTD modules, the check on phi and eta directions don't make sense
         // as the modules do not respect the conventional position for endcap discs:
         // - the local eta axis is never parallel to the radial direction
         // - the local phi axis is never perpendicular to the radial direction
         // hence, removing errors and allowing swap of the axis when needed
         bool isHGTD = this->getIdHelper()->is_hgtd(m_id);
-    
+
         //
         // Phi axis
         //
@@ -459,7 +416,7 @@ using Trk::distDepth;
 	  ATH_MSG_ERROR( "Orientation of local xPhi axis does not follow correct convention.");
           dir.m_phiDirection = true; // Don't swap.
         }
-    
+
         //
         // Eta axis
         //
@@ -482,7 +439,7 @@ using Trk::distDepth;
         setAxisDir = true;
 #endif
     } // end if (!m_axisDir.isValid())
-    
+
     cache.m_transformCLHEP = Amg::EigenTransformToCLHEP(geoTransform) * recoToHitTransform();
     cache.m_transform = Amg::CLHEPTransformToEigen(cache.m_transformCLHEP);
 
@@ -507,10 +464,10 @@ using Trk::distDepth;
     // Initialize various cached members, needs to be done here otherwise the necessary transforms are not yet initialized
     // The unit vectors
     cache.m_normal = cache.m_transform.linear() * localRecoDepthAxis;
-  
+
     cache.m_phiAxis = cache.m_transform.linear() * localRecoPhiAxis;
     cache.m_etaAxis = cache.m_transform.linear() * localRecoEtaAxis;
-    
+
     //Check where these are actually needed - candidates for removal?
     cache.m_phiAxisCLHEP = HepGeom::Vector3D<double>(cache.m_phiAxis[0],cache.m_phiAxis[1],cache.m_phiAxis[2]);
     cache.m_etaAxisCLHEP = HepGeom::Vector3D<double>(cache.m_etaAxis[0],cache.m_etaAxis[1],cache.m_etaAxis[2]);
@@ -535,7 +492,7 @@ using Trk::distDepth;
 
     double phiOffset = 0.;
 
-   
+
     const HepGeom::Transform3D rShift = HepGeom::TranslateY3D(radialShift);//in local frame, radius is y=distEta
 
     for (auto & corner : corners) {
@@ -554,7 +511,7 @@ using Trk::distDepth;
       if (first) {
 
         // Put phi in a range so that we are not near -180/+180 division.
-        // Do this by adding an offset if phi > 90 CLHEP::deg or < -90 CLHEP::deg. 
+        // Do this by adding an offset if phi > 90 CLHEP::deg or < -90 CLHEP::deg.
         // This offset is later removed.
         if (phiPoint < -0.5 * M_PI) {
           phiOffset = -0.5 * M_PI;
@@ -593,16 +550,16 @@ using Trk::distDepth;
   void
   SolidStateDetectorElementBase::getCorners(HepGeom::Point3D<double>* corners) const
   {
-    // This makes the assumption that the forward SCT detectors are orientated such that 
+    // This makes the assumption that the forward SCT detectors are orientated such that
     // the positive etaAxis corresponds to the top of the detector where the width is largest.
     // This is currently always the case.
-    // For the SCT barrel and pixel detectors minWidth and maxWidth are the same and so should 
+    // For the SCT barrel and pixel detectors minWidth and maxWidth are the same and so should
     // work for all orientations.
 
     double tmpMinWidth = minWidth();
     double tmpMaxWidth = maxWidth();
     double tmpLength   = length();
-  
+
     // Lower left
     corners[0][distPhi] = -0.5 * tmpMinWidth;
     corners[0][distEta] = -0.5 * tmpLength;
@@ -637,7 +594,7 @@ using Trk::distDepth;
 
     double r = globalPoint.perp();
     double z = globalPoint.z();
-  
+
     double thetaMin = std::atan2(r,(z + deltaZ));
     etaMax = -std::log(tan(0.5 * thetaMin));
     double thetaMax = std::atan2(r,(z - deltaZ));

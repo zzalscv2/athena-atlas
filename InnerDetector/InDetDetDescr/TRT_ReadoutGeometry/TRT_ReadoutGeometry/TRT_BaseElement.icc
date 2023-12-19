@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 namespace InDetDD {
@@ -17,10 +17,70 @@ TRT_BaseElement::defTransform() const
   return getMaterialGeom()->getDefAbsoluteTransform();
 }
 
+inline const Trk::Surface&
+TRT_BaseElement::surface() const
+{
+  return elementSurface();
+}
+
+inline const Trk::SurfaceBounds&
+TRT_BaseElement::bounds() const
+{
+  if (!m_surfaceCache.isValid()) {
+    createSurfaceCache();
+  }
+  return *(m_surfaceCache.ptr()->bounds());
+}
+
+inline const Amg::Transform3D&
+TRT_BaseElement::transform() const
+{
+  if (!m_surfaceCache.isValid()) {
+    createSurfaceCache();
+  }
+  return m_surfaceCache.ptr()->transform();
+}
+
+inline const Amg::Vector3D&
+TRT_BaseElement::center() const
+{
+  if (!m_surfaceCache.isValid()) {
+    createSurfaceCache();
+  }
+  return m_surfaceCache.ptr()->center();
+}
+
+inline const Amg::Vector3D&
+TRT_BaseElement::normal() const
+{
+  if (!m_surfaceCache.isValid()) {
+    createSurfaceCache();
+  }
+  return m_surfaceCache.ptr()->normal();
+}
+
 inline Trk::DetectorElemType
 TRT_BaseElement::detectorType() const
 {
   return Trk::DetectorElemType::TRT;
+}
+
+inline Identifier
+TRT_BaseElement::identify() const
+{
+  return m_id;
+}
+
+inline IdentifierHash
+TRT_BaseElement::identifyHash() const
+{
+  return m_idHash;
+}
+
+inline const TRT_Conditions*
+TRT_BaseElement::conditions() const
+{
+  return m_conditions;
 }
 
 }

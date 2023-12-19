@@ -30,10 +30,8 @@
 
 #include "CLHEP/Geometry/Point3D.h"
 
-#include <atomic>
 #include <limits>
 #include <memory>
-#include <mutex>
 
 class AtlasDetectorID;
 class GeoAlignmentStore;
@@ -112,7 +110,7 @@ namespace InDetDD {
    * The method updateCache of is of particular interest as
    * it set all cache values.
    *
-   * The const methods call updateCache() 
+   * The const methods call updateCache()
    * when they need to perform lazy initialization
    * \code{.cpp}
    * if (!m_cache.isValid()) updateCache();
@@ -667,7 +665,7 @@ namespace InDetDD {
       bool m_depthDirection;
       bool m_phiDirection;
       bool m_etaDirection;
-   
+
       double m_depthAngle;
       double m_phiAngle;
       double m_etaAngle;

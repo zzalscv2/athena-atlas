@@ -46,9 +46,27 @@ namespace InDetDD {
     return m_commonItems->getIdHelper();
   }
 
+  inline Trk::Surface& SolidStateDetectorElementBase::surface()
+  {
+    return *m_surface;
+  }
+
+  inline const Trk::Surface& SolidStateDetectorElementBase::surface() const
+  {
+    return *m_surface;
+  }
+
   inline const Trk::Surface& SolidStateDetectorElementBase::surface(const Identifier&) const
   {
     return surface();
+  }
+
+  inline const Amg::Transform3D& SolidStateDetectorElementBase::transform() const
+  {
+    if (!m_cache.isValid()) {
+      updateCache();
+    }
+    return m_cache.ptr()->m_transform;
   }
 
   inline const Amg::Transform3D& SolidStateDetectorElementBase::transform(const Identifier&) const
@@ -71,6 +89,22 @@ namespace InDetDD {
     return etaDirection() ? 1 : -1;
   }
 
+  inline const Amg::Vector3D& SolidStateDetectorElementBase::normal() const
+  {
+    if (!m_cache.isValid()) {
+      updateCache();
+    }
+    return m_cache.ptr()->m_normal;
+  }
+
+  inline const Amg::Vector3D& SolidStateDetectorElementBase::center() const
+  {
+    if (!m_cache.isValid()) {
+      updateCache();
+    }
+    return m_cache.ptr()->m_center;
+  }
+
   inline const Amg::Vector3D& SolidStateDetectorElementBase::normal(const Identifier&) const
   {
     return normal();
@@ -79,6 +113,14 @@ namespace InDetDD {
   inline const Amg::Vector3D& SolidStateDetectorElementBase::center(const Identifier&) const
   {
     return center();
+  }
+
+  inline const GeoTrf::Transform3D& SolidStateDetectorElementBase::transformHit() const
+  {
+    if (!m_cache.isValid()) {
+      updateCache();
+    }
+    return m_cache.ptr()->m_transformHit;
   }
 
   inline HepGeom::Point3D<double> SolidStateDetectorElementBase::globalPositionHit(const HepGeom::Point3D<double>& simulationLocalPos) const
