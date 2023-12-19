@@ -27,6 +27,7 @@
 #include "xAODTau/TauJetContainer.h"
 
 #include "tauRecTools/TauCombinedTES.h"
+#include "AsgTools/AsgToolConfig.h"
 #include "PathResolver/PathResolver.h"
 
 // Needed for xAOD::get_eta_calo() function
@@ -53,10 +54,6 @@ namespace met {
 
   METSignificance::METSignificance(const std::string& name) :
     AsgTool(name),
-    m_jetCalibTool(""),
-    m_muonCalibrationAndSmearingTool(""),
-    m_egammaCalibTool(""),
-    m_tauCombinedTES(""),
     m_GeV(1.0e3),
     m_softTermParam(met::Random),
     m_jerForEMu(false),
@@ -98,7 +95,6 @@ namespace met {
     declareProperty("IsDataJet",   m_isDataJet     = false   );
     declareProperty("IsDataMuon",  m_isDataMuon    = false   );
     declareProperty("IsAFII",      m_isAFII        = false   );
-    m_muonCalibrationAndSmearingTool.declarePropertyFor(this, "MuonCalibTool", "");
 
     m_file = nullptr;
   }
@@ -129,9 +125,9 @@ namespace met {
     std::string jetcoll = "AntiKt4EMTopoJets";
     toolName = "JetCalibrationTool/jetCalibTool_"+m_JetCollection;
     ATH_MSG_INFO("Set up jet resolution tool");
-    m_jetCalibTool.setTypeAndName(toolName);
+    if (m_jetCalibTool.empty()){
 
-    if( !m_jetCalibTool.isUserConfigured() ){
+      asg::AsgToolConfig toolConfig (toolName);
 
       std::string config = "JES_data2017_2016_2015_Recommendation_Aug2018_rel21.config";
       std::string calibSeq = "JetArea_Residual_EtaJES_GSC_Smear";
@@ -142,37 +138,44 @@ namespace met {
         calibArea = "00-04-81";
       }
 
-      ANA_CHECK( ASG_MAKE_ANA_TOOL(m_jetCalibTool, JetCalibrationTool) );
-      ANA_CHECK( m_jetCalibTool.setProperty("JetCollection",m_JetCollection) );
-      ANA_CHECK( m_jetCalibTool.setProperty("ConfigFile",config) );
-      ANA_CHECK( m_jetCalibTool.setProperty("CalibSequence",calibSeq) );
-      ANA_CHECK( m_jetCalibTool.setProperty("CalibArea",calibArea) );
-      ANA_CHECK( m_jetCalibTool.setProperty("IsData",false) ); // configure for MC due to technical reasons. Both data and MC smearing are available with this setting.
-      ANA_CHECK( m_jetCalibTool.retrieve() );
+      ANA_CHECK( toolConfig.setProperty("JetCollection",m_JetCollection) );
+      ANA_CHECK( toolConfig.setProperty("ConfigFile",config) );
+      ANA_CHECK( toolConfig.setProperty("CalibSequence",calibSeq) );
+      ANA_CHECK( toolConfig.setProperty("CalibArea",calibArea) );
+      ANA_CHECK( toolConfig.setProperty("IsData",false) ); // configure for MC due to technical reasons. Both data and MC smearing are available with this setting.
+      ANA_CHECK( toolConfig.makePrivateTool (m_jetCalibTool) );
     }
+    ANA_CHECK( m_jetCalibTool.retrieve() );
 
     ATH_MSG_INFO("Set up MuonCalibrationAndSmearing tools");
     toolName = "MuonCalibrationAndSmearingTool";
     if (m_muonCalibrationAndSmearingTool.empty()) {
         ATH_MSG_WARNING("Setup the muon calibration tool with calib mode 1. Please consider to configure the tool via the 'MuonCalibTool' property.");
-        m_muonCalibrationAndSmearingTool.setTypeAndName("CP::MuonCalibTool/METSigAutoConf_"+toolName);
-        ATH_CHECK(m_muonCalibrationAndSmearingTool.setProperty("calibMode", 1));
+        asg::AsgToolConfig toolConfig ("CP::MuonCalibTool/METSigAutoConf_"+toolName);
+        ATH_CHECK(toolConfig.setProperty("calibMode", 1));
+        ATH_CHECK(toolConfig.makePrivateTool(m_muonCalibrationAndSmearingTool));
     }
     ATH_CHECK(m_muonCalibrationAndSmearingTool.retrieve());
 
     ATH_MSG_DEBUG( "Initialising EgcalibTool " );
     toolName = "EgammaCalibrationAndSmearingTool";
-    m_egammaCalibTool.setTypeAndName("CP::EgammaCalibrationAndSmearingTool/METSigAutoConf_" + toolName);
-    ATH_CHECK(m_egammaCalibTool.setProperty("ESModel", "es2017_R21_v0"));
-    ATH_CHECK(m_egammaCalibTool.setProperty("decorrelationModel", "1NP_v1"));
-    if(m_isAFII) ATH_CHECK(m_egammaCalibTool.setProperty("useAFII", 1));
-    else ATH_CHECK(m_egammaCalibTool.setProperty("useAFII", 0));
+    if (m_egammaCalibTool.empty()){
+      asg::AsgToolConfig toolConfig ("CP::EgammaCalibrationAndSmearingTool/METSigAutoConf_" + toolName);
+      ATH_CHECK(toolConfig.setProperty("ESModel", "es2017_R21_v0"));
+      ATH_CHECK(toolConfig.setProperty("decorrelationModel", "1NP_v1"));
+      if(m_isAFII) ATH_CHECK(toolConfig.setProperty("useAFII", 1));
+      else ATH_CHECK(toolConfig.setProperty("useAFII", 0));
+      ATH_CHECK (toolConfig.makePrivateTool (m_egammaCalibTool));
+    }
     ATH_CHECK( m_egammaCalibTool.retrieve() );
 
     toolName = "TauPerfTool";
-    m_tauCombinedTES.setTypeAndName("TauCombinedTES/METSigAutoConf_" + toolName);
-    ATH_CHECK( m_tauCombinedTES.setProperty("WeightFileName", "CombinedTES_R22_Round2.5_v2.root") );
-    ATH_CHECK( m_tauCombinedTES.setProperty("useMvaResolution", true) );
+    if (m_tauCombinedTES.empty()){
+      asg::AsgToolConfig toolConfig ("TauCombinedTES/METSigAutoConf_" + toolName);
+      ATH_CHECK( toolConfig.setProperty("WeightFileName", "CombinedTES_R22_Round2.5_v2.root") );
+      ATH_CHECK( toolConfig.setProperty("useMvaResolution", true) );
+      ATH_CHECK( toolConfig.makePrivateTool(m_tauCombinedTES) );
+    }
     ATH_CHECK( m_tauCombinedTES.retrieve() );
 
     return StatusCode::SUCCESS;
@@ -571,7 +574,7 @@ namespace met {
     }
     else{
       const xAOD::TauJet* tau(static_cast<const xAOD::TauJet*>(obj));
-      if (auto *combp4 = dynamic_cast<TauCombinedTES*>(m_tauCombinedTES.get())) {
+      if (auto *combp4 = dynamic_cast<TauCombinedTES*>(&*m_tauCombinedTES)) {
         pt_reso = combp4->getMvaEnergyResolution(*tau);
       }
 
