@@ -694,11 +694,11 @@ Root::TElectronEfficiencyCorrectionTool::setupHistogramsInFolder(
     obj = key->ReadObj();
     if (obj->IsA()->InheritsFrom("TH1")) {
       // The histogram containing the scale factors need to end with _sf and
-      // need to contain either the string "FullSim" or "AtlFast2"!
+      // need to contain either the string "FullSim" or "AtlFast"!
       if (std::strstr(obj->GetName(), "FullSim") != nullptr) {
         setupTempMapsHelper(
           static_cast<TH1*>(obj), objsFull, sysObjsFull, seenSystematics);
-      } else if (std::strstr(obj->GetName(), "AtlFast2") != nullptr) {
+      } else if (std::strstr(obj->GetName(), "AtlFast") != nullptr) {
         setupTempMapsHelper(
           static_cast<TH1*>(obj), objsFast, sysObjsFast, seenSystematics);
       } else {
