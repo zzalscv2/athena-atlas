@@ -12,6 +12,7 @@
 
 #undef NDEBUG
 #include "TileByteStream/TileROD_Decoder.h"
+#include "TileByteStream/TileHid2RESrcID.h"
 #include "TileByteStream/TileCellCont.h"
 #include "TileEvent/TileDigitsCollection.h"
 #include "CaloDetDescr/CaloDetectorElements.h"
@@ -294,6 +295,7 @@ void test5 (const TileROD_Decoder* decoder)
 {
   std::cout << "test5 (fillTileLaserObj)\n";
 
+
   MyROBData data05 (findFile ("TileData-05.dump"));
   {
     TileLaserObject laser;
@@ -317,12 +319,17 @@ int main ATLAS_NOT_THREAD_SAFE ()
 
   ToolHandle<TileROD_Decoder> decoder ("TileROD_Decoder");
   assert( decoder.retrieve().isSuccess() );
+  const TileHid2RESrcID * hid = decoder->getHid2re();
+  const TileHid2RESrcID * hidHLT = decoder->getHid2reHLT();
 
-  test1 (decoder.get());
-  test2 (decoder.get());
-  test3 (decoder.get());
-  test4 (decoder.get());
-  test5 (decoder.get());
+  if (hid && hidHLT) {
+    test1 (decoder.get());
+    test2 (decoder.get());
+    test3 (decoder.get());
+    test4 (decoder.get());
+    test5 (decoder.get());
+  }
+
   return 0;
 }
 

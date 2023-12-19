@@ -4,15 +4,14 @@
 
 
 #include "ZDC_SimuDigitization/ZDC_PileUpTool.h"
+#include "xAODForward/ZdcModuleToString.h"
 #include <algorithm>
-#include "ZDC_SimEvent/ZDC_SimStripHit_Collection.h"
-#include "ZDC_SimEvent/ZDC_SimPixelHit_Collection.h"
-#include "ZDC_SimEvent/ZDC_SimStripHit.h"
-#include "ZDC_SimEvent/ZDC_SimPixelHit.h"
-#include "ZdcEvent/ZdcDigitsCollection.h"
-#include "Identifier/Identifier.h"
+#include "ZDC_SimEvent/ZDC_SimFiberHit_Collection.h"
+#include "ZDC_SimEvent/ZDC_SimFiberHit.h"
+#include "ZdcUtils/ZDCWaveformFermiExp.h"
+#include "ZdcUtils/ZDCWaveformLTLinStep.h"
+#include "PileUpTools/PileUpMergeSvc.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
-#include <map>
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandFlat.h"
@@ -20,439 +19,401 @@
 #include "CLHEP/Random/RandPoissonQ.h"
 
 ZDC_PileUpTool::ZDC_PileUpTool(const std::string& type,
-			       const std::string& name,
-			       const IInterface* parent) :
+             const std::string& name,
+             const IInterface* parent) :
   PileUpToolBase(type, name, parent)
 {
-  // NOTE: The following variables are actually re-initialized by ZDC_DigiTop::initialize() or ZDC_PileUpTool::initialize()
-  m_GainRatio_Strip[0] = 10.0; m_GainRatioError_Strip[0] = 0.5;
-  m_GainRatio_Strip[1] = 10.0; m_GainRatioError_Strip[1] = 0.5;
-  m_GainRatio_Strip[2] = 10.0; m_GainRatioError_Strip[2] = 0.5;
-  m_GainRatio_Strip[3] = 10.0; m_GainRatioError_Strip[3] = 0.5;
-  m_GainRatio_Strip[4] = 10.0; m_GainRatioError_Strip[4] = 0.5;
-  m_GainRatio_Strip[5] = 10.0; m_GainRatioError_Strip[5] = 0.5;
-  m_GainRatio_Strip[6] = 10.0; m_GainRatioError_Strip[6] = 0.5;
-  m_GainRatio_Strip[7] = 10.0; m_GainRatioError_Strip[7] = 0.5;
-  m_GainRatio_Pixel      = 10.0;
-  m_GainRatioError_Pixel = 0.5;
-  // end of ToolBox variables
 }
 
 StatusCode ZDC_PileUpTool::initialize() {
 
   ATH_MSG_DEBUG ( "ZDC_PileUpTool::initialize() called" );
-  
-  ATH_MSG_INFO ( " ScaleStrip: " << m_ScaleStrip << endmsg
-		 << " ScalePixel: " << m_ScalePixel << endmsg
-		 << " MaxTimeBin: " << m_MaxTimeBin << endmsg
-		 << " Pedestal  : " << m_Pedestal   );
-  
+
+  const ZdcID* zdcId = nullptr;
+  if (detStore()->retrieve( zdcId ).isFailure() ) {
+    ATH_MSG_ERROR("execute: Could not retrieve ZdcID object from the detector store");
+    return StatusCode::FAILURE;
+  }
+  else {
+    ATH_MSG_DEBUG("execute: retrieved ZdcID");
+  }
+  m_ZdcID = zdcId;
+
   ATH_CHECK(m_randomSvc.retrieve());
   ATH_MSG_DEBUG ( "Retrieved RandomNumber Service" );
 
-  ATH_CHECK(m_mergeSvc.retrieve());
+  ATH_CHECK(m_SimFiberHitCollectionKey.initialize());
+  ATH_CHECK(m_ZdcModuleContainerName.initialize());
+  ATH_CHECK(m_ZdcSumsContainerName.initialize());
 
-  m_mergedStripHitList = new ZDC_SimStripHit_Collection("mergedStripHitList");
-  m_mergedPixelHitList = new ZDC_SimPixelHit_Collection("mergedPixelHitList");
-  
+  ATH_MSG_INFO("ZDC_PileUpTool configuration = " << m_configuration);
+
+  if(m_configuration == "PbPb2015"){
+    initializePbPb2015();
+  }else if(m_configuration == "LHCf2022"){
+    initializeLHCf2022();
+  }else if(m_configuration == "PbPb2023"){
+    initializePbPb2023();
+  }
+
+  m_mergedFiberHitList = new ZDC_SimFiberHit_Collection("mergedFiberHitList");
+
   return StatusCode::SUCCESS;
 }
 
-StatusCode ZDC_PileUpTool::processAllSubEvents(const EventContext& ctx) {
+void ZDC_PileUpTool::initializePbPb2015(){
+
+  m_Pedestal = 100;
+  m_numTimeBins = 7;
+  m_freqMHz = 80;
+  m_delayChannels = true;
+  m_LTQuadStepFilt = true;
+  m_doRPD = false;
+  m_zdct0 = 28;
+  m_qsfRiseTime =  0.5;
+  m_qsfFallTime =  11;
+  m_qsfFilter =  15;
+}
+
+void ZDC_PileUpTool::initializeLHCf2022(){
+
+  m_Pedestal = 100;
+  m_numTimeBins = 24;
+  m_freqMHz = 320;
+  m_delayChannels = false;
+  m_LTQuadStepFilt = false;
+  m_doRPD = false;
+  m_zdct0 = 28;
+  m_rpdt0 = 28;
+  m_zdcRiseTime =  1;
+  m_zdcFallTime =  5.5;
+  m_zdcAdcPerPhoton = 0.000498;
+}
+
+void ZDC_PileUpTool::initializePbPb2023(){
+
+  m_Pedestal = 100;
+  m_numTimeBins = 24;
+  m_freqMHz = 320;
+  m_delayChannels = false;
+  m_LTQuadStepFilt = false;
+  m_doRPD = true;
+  m_zdct0 = 28;
+  m_rpdt0 = 28;
+  m_zdcRiseTime =  1;
+  m_zdcFallTime =  5.5;
+  m_rpdRiseTime =  0.9;
+  m_rpdFallTime =  20;
+  m_zdcAdcPerPhoton = 0.000498;
+  m_rpdAdcPerPhoton = 1.0;
+}
+
+StatusCode ZDC_PileUpTool::processAllSubEvents(const EventContext& ctx){
 
   ATH_MSG_DEBUG ( "ZDC_PileUpTool::processAllSubEvents()" );
 
-  typedef PileUpMergeSvc::TimedList<ZDC_SimStripHit_Collection>::type TimedStripHitCollList;
-  using TimedPixelHitCollList = PileUpMergeSvc::TimedList<ZDC_SimPixelHit_Collection>::type;
-  
-  TimedStripHitCollList StripHitCollList;
-  TimedPixelHitCollList PixelHitCollList;
-  
-  if (m_mergeSvc->retrieveSubEvtsData(m_SimStripHitCollectionName.value(), StripHitCollList).isFailure()) { 
-
-    ATH_MSG_FATAL ( "Could not fill TimedStripHitCollList" ); return StatusCode::FAILURE; 
-  }
-  else { ATH_MSG_DEBUG ( "Retrieved TimedStripHitCollList" ); }
-  
-  ATH_MSG_DEBUG ( " PileUp: Merge " << StripHitCollList.size() << " ZDC_SimStripHit_Collection with key " << m_SimStripHitCollectionName );
-  
-  if (m_mergeSvc->retrieveSubEvtsData(m_SimPixelHitCollectionName.value(), PixelHitCollList).isFailure()) { 
-
-    ATH_MSG_FATAL ( "Could not fill TimedPixelHitCollList" ); return StatusCode::FAILURE; 
-  }
-  else { ATH_MSG_DEBUG ( "Retrieved TimedPixelHitCollList" ); }
-  
-  ATH_MSG_DEBUG ( " PileUp: Merge " << PixelHitCollList.size() << " ZDC_SimPixelHit_Collection with key " << m_SimPixelHitCollectionName );
-  
-  TimedHitCollection<ZDC_SimStripHit> thpczdcstrip;
-
-  TimedStripHitCollList::iterator iStripColl  (StripHitCollList.begin());
-  TimedStripHitCollList::iterator endStripColl(StripHitCollList.end());
-  
-  while (iStripColl != endStripColl) {
-    
-    const ZDC_SimStripHit_Collection* tmpColl(iStripColl->second);
-    
-    thpczdcstrip.insert(iStripColl->first, tmpColl);
-    
-    ATH_MSG_DEBUG ( " ZDC_SimStripHit_Collection found with " << tmpColl->size() << " hits " << iStripColl->first );
-    
-    ++iStripColl;
-  }
-  
-  TimedHitCollection<ZDC_SimPixelHit> thpczdcpixel;
-
-  TimedPixelHitCollList::iterator iPixelColl  (PixelHitCollList.begin());
-  TimedPixelHitCollList::iterator endPixelColl(PixelHitCollList.end());
-  
-  while (iPixelColl != endPixelColl) {
-    
-    const ZDC_SimPixelHit_Collection* tmpColl(iPixelColl->second);
-    
-    thpczdcpixel.insert(iPixelColl->first, tmpColl);
-    
-    ATH_MSG_DEBUG ( " ZDC_SimPixelHit_Collection found with " << tmpColl->size() << " hits " << iPixelColl->first );
-    
-    ++iPixelColl;
-  }
-
-  if (recordContainers(this->evtStore(), m_ZdcDigitsContainerName).isFailure()) { 
-    
-    ATH_MSG_FATAL ( " ZDC DigiTop :: Could not record the empty digit container in StoreGate " ); return StatusCode::FAILURE; 
-  }
-  else { ATH_MSG_DEBUG ( " ZDC DigiTop :: Digit container is recorded in StoreGate " ); }
-  
   ATHRNG::RNGWrapper* rngWrapper = m_randomSvc->getEngine(this, m_randomStreamName);
   rngWrapper->setSeed( m_randomStreamName, ctx );
   CLHEP::HepRandomEngine* rngEngine = rngWrapper->getEngine(ctx);
-  fillStripDigitContainer(thpczdcstrip, rngEngine);
-  fillPixelDigitContainer(thpczdcpixel, rngEngine);
-  
+
+  /******************************************
+   * retrieve the hit collection list (input)
+  ******************************************/
+
+  SG::ReadHandle<ZDC_SimFiberHit_Collection> hitCollection(m_SimFiberHitCollectionKey, ctx);
+  if (!hitCollection.isValid()) {
+    ATH_MSG_ERROR("Could not get ZDC_SimFiberHit_Collection container " << hitCollection.name() << " from store " << hitCollection.store());
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG("ZDC_SimFiberHitHitCollection found with " << hitCollection->size() << " hits");
+
+  /******************************************
+   * Do light guide efficiency cuts on the ZDCs
+  ******************************************/
+  TimedHitCollection<ZDC_SimFiberHit> thpcZDC_Fiber = doZDClightGuideCuts(hitCollection.cptr());
+
+  /******************************************
+   * Create the output container
+  ******************************************/
+  std::unique_ptr<xAOD::ZdcModuleContainer> moduleContainer( new xAOD::ZdcModuleContainer());
+  std::unique_ptr<xAOD::ZdcModuleAuxContainer> moduleAuxContainer( new xAOD::ZdcModuleAuxContainer() );
+  moduleContainer->setStore( moduleAuxContainer.get() );
+
+  SG::AuxElement::Accessor<std::vector<uint16_t>> g0acc("g0data");
+  SG::AuxElement::Accessor<std::vector<uint16_t>> g1acc("g1data");
+  if(m_delayChannels){
+    SG::AuxElement::Accessor<std::vector<uint16_t>> g0d1acc("g0d1data");
+    SG::AuxElement::Accessor<std::vector<uint16_t>> g1d1acc("g1d1data");
+  }
+
+  /******************************************
+   * Create the waveforms
+  ******************************************/
+  fillContainer(thpcZDC_Fiber, rngEngine, moduleContainer.get());
+
+
+  /******************************************
+   * Create the zdcSums container
+  ******************************************/
+  std::unique_ptr<xAOD::ZdcModuleContainer> sumsContainer( new xAOD::ZdcModuleContainer());
+  std::unique_ptr<xAOD::ZdcModuleAuxContainer> sumsAuxContainer( new xAOD::ZdcModuleAuxContainer() );
+  sumsContainer->setStore( sumsAuxContainer.get() );
+
+  for (int iside : {-1, 1}){
+    xAOD::ZdcModule* new_sum = new xAOD::ZdcModule();
+    sumsContainer->push_back(xAOD::ZdcModuleContainer::unique_type(new_sum));
+    new_sum->setZdcSide((iside==0) ? -1 : 1);
+    new_sum->auxdata<uint16_t>("LucrodTriggerSideAmp") = 42;
+  }
+
+  /******************************************
+   * Write the output
+  ******************************************/
+
+  //Print the module contents
+  ATH_MSG_DEBUG( ZdcModuleToString(*moduleContainer) );
+
+  auto moduleContainerH = SG::makeHandle( m_ZdcModuleContainerName, ctx );
+  ATH_CHECK( moduleContainerH.record (std::move(moduleContainer), std::move(moduleAuxContainer)) );
+
+  auto sumsContainerH = SG::makeHandle( m_ZdcSumsContainerName, ctx );
+  ATH_CHECK( sumsContainerH.record (std::move(sumsContainer), std::move(sumsAuxContainer)) );
+
   return StatusCode::SUCCESS;
 }
-StatusCode ZDC_PileUpTool::prepareEvent(const EventContext& /*ctx*/, const unsigned int nInputEvents){
+
+StatusCode ZDC_PileUpTool::prepareEvent(const EventContext& /*ctx*/,const unsigned int nInputEvents){
 
   ATH_MSG_DEBUG ( "ZDC_PileUpTool::prepareEvent() called for " << nInputEvents << " input events" );
- 
-  StatusCode sc = recordContainers(this->evtStore(), m_ZdcDigitsContainerName);
- 
-  if (sc.isFailure()) { ATH_MSG_FATAL ( " Could not record the empty digit container in StoreGate " ); return sc; }
-  else                { ATH_MSG_DEBUG ( " Digit container is recorded in StoreGate " ); }
-  
-  m_mergedStripHitList->clear();
-  m_mergedPixelHitList->clear();
-  
+
+  m_ZdcModuleContainer = std::make_unique<xAOD::ZdcModuleContainer>();
+  m_ZdcModuleAuxContainer = std::make_unique<xAOD::ZdcModuleAuxContainer>();
+  m_ZdcModuleContainer->setStore( m_ZdcModuleAuxContainer.get() );
+
+  SG::AuxElement::Accessor<std::vector<uint16_t>> g0acc("g0data");
+  SG::AuxElement::Accessor<std::vector<uint16_t>> g1acc("g1data");
+  SG::AuxElement::Accessor<std::vector<uint16_t>> g0d1acc("g0d1data");
+  SG::AuxElement::Accessor<std::vector<uint16_t>> g1d1acc("g1d1data");
+
+  m_mergedFiberHitList->clear();
+
   return StatusCode::SUCCESS;
 }
 
+
 StatusCode ZDC_PileUpTool::processBunchXing(int bunchXing,
-                                                 SubEventIterator bSubEvents,
-                                                 SubEventIterator eSubEvents) {
+                                            SubEventIterator bSubEvents,
+                                            SubEventIterator eSubEvents){
   ATH_MSG_DEBUG ( "ZDC_PileUpTool::processBunchXing() " << bunchXing );
   SubEventIterator iEvt = bSubEvents;
-  for (; iEvt!=eSubEvents; ++iEvt) {
+  for (; iEvt!=eSubEvents; iEvt++) {
     StoreGateSvc& seStore = *iEvt->ptr()->evtStore();
-    //PileUpTimeEventIndex thisEventIndex = PileUpTimeEventIndex(static_cast<int>(iEvt->time()),iEvt->index());
     ATH_MSG_VERBOSE("SubEvt StoreGate " << seStore.name() << " :"
                     << " bunch crossing : " << bunchXing
                     << " time offset : " << iEvt->time()
                     << " event number : " << iEvt->ptr()->eventNumber()
-                    << " run number : " << iEvt->ptr()->runNumber()
-                    );
+                    << " run number : " << iEvt->ptr()->runNumber());
 
-    const ZDC_SimStripHit_Collection* tmpCollStrip = nullptr;
-   
-    if (!seStore.retrieve(tmpCollStrip, m_SimStripHitCollectionName).isSuccess()) {
-      
-      ATH_MSG_ERROR ( "SubEvent ZDC_SimStripHit_Collection not found in StoreGate " << seStore.name() );
-      
+    const ZDC_SimFiberHit_Collection* tmpColl = 0;
+
+    if (!seStore.retrieve(tmpColl, m_HitCollectionName).isSuccess()) {
+      ATH_MSG_ERROR ( "SubEvent ZDC_SimFiberHit_Collection not found in StoreGate " << seStore.name() );
       return StatusCode::FAILURE;
     }
-    
-    ATH_MSG_DEBUG ( "ZDC_SimStripHit_Collection found with " << tmpCollStrip->size() << " hits" );
-    
-    ZDC_SimStripHit_Collection::const_iterator iStrip = tmpCollStrip->begin();
-    ZDC_SimStripHit_Collection::const_iterator eStrip = tmpCollStrip->end();
-   
-    for (; iStrip!=eStrip; ++iStrip) m_mergedStripHitList->push_back((*iStrip));
-    
-    const ZDC_SimPixelHit_Collection* tmpCollPixel = nullptr;
-   
-    if (!seStore.retrieve(tmpCollPixel, m_SimPixelHitCollectionName).isSuccess()) {
-      
-      ATH_MSG_ERROR ( "SubEvent ZDC_SimPixelHit_Collection not found in StoreGate " << seStore.name() );
-      
-      return StatusCode::FAILURE;
-    }
-    
-    ATH_MSG_DEBUG ( "ZDC_SimPixelHit_Collection found with " << tmpCollPixel->size() << " hits" );
-    
-    ZDC_SimPixelHit_Collection::const_iterator iPixel = tmpCollPixel->begin();
-    ZDC_SimPixelHit_Collection::const_iterator ePixel = tmpCollPixel->end();
-   
-    for (; iPixel!=ePixel; ++iPixel) m_mergedPixelHitList->push_back((*iPixel));
+    ATH_MSG_DEBUG ( "ZDC_SimFiberHit_Collection found with " << tmpColl->size() << " hits" );
+
+    ZDC_SimFiberHit_Collection::const_iterator it = tmpColl->begin();
+    ZDC_SimFiberHit_Collection::const_iterator end = tmpColl->end();
+
+    for (; it!=end; ++it) m_mergedFiberHitList->push_back(*it);
   }
-  
+
   return StatusCode::SUCCESS;
 }
 
+
 StatusCode ZDC_PileUpTool::mergeEvent(const EventContext& ctx){
- 
+
   ATHRNG::RNGWrapper* rngWrapper = m_randomSvc->getEngine(this, m_randomStreamName);
   rngWrapper->setSeed( m_randomStreamName, ctx );
   CLHEP::HepRandomEngine* rngEngine = rngWrapper->getEngine(ctx);
-  fillStripDigitContainer(m_mergedStripHitList, rngEngine);
-  fillPixelDigitContainer(m_mergedPixelHitList, rngEngine);
-  
+  fillContainer(m_mergedFiberHitList, rngEngine, m_ZdcModuleContainer.get());
+
+  SG::WriteHandle<xAOD::ZdcModuleContainer> moduleContainerH (m_ZdcModuleContainerName, ctx);
+  ATH_CHECK( moduleContainerH.record (std::move(m_ZdcModuleContainer), std::move(m_ZdcModuleAuxContainer)) );
+
   return StatusCode::SUCCESS;
 }
 
-StatusCode ZDC_PileUpTool::finalize() { return StatusCode::SUCCESS; }
- 
-void ZDC_PileUpTool::fillStripDigitContainer(TimedHitCollection<ZDC_SimStripHit>& thpczdc, CLHEP::HepRandomEngine* rndEngine) 
-{
-  TimedHitCollection<ZDC_SimStripHit>                 thpc = thpczdc;
-  TimedHitCollection<ZDC_SimStripHit>::const_iterator i, e, it;
-  
-  while (thpc.nextDetectorElement(i, e)) for (it = i; it != e; ++it) {
-    
-    int Side     = (*it)->GetSide();
-    int ModuleNo = (*it)->GetMod();
-    int NPhotons = (*it)->GetNPhotons();
-    
-    createAndStoreStripDigit(Side, ModuleNo, NPhotons, rndEngine);
+void ZDC_PileUpTool::fillContainer(TimedHitCollection<ZDC_SimFiberHit>& thpczdc, CLHEP::HepRandomEngine* rndEngine, xAOD::ZdcModuleContainer *zdcModuleContainer){
+  TimedHitCollection<ZDC_SimFiberHit> thpc = thpczdc;
+  TimedHitCollection<ZDC_SimFiberHit>::const_iterator i, e, it;
+  while (thpc.nextDetectorElement(i, e)) for (it = i; it != e; it++) {
+    createAndStoreWaveform(*(*it), rndEngine, zdcModuleContainer);
+  }
+  addEmptyWaveforms(zdcModuleContainer, rndEngine);
+}
+
+
+void ZDC_PileUpTool::fillContainer(const ZDC_SimFiberHit_Collection* ZDC_SimFiberHit_Collection, CLHEP::HepRandomEngine* rndEngine, xAOD::ZdcModuleContainer *zdcModuleContainer){
+  ZDC_SimFiberHit_ConstIterator it    = ZDC_SimFiberHit_Collection->begin();
+  ZDC_SimFiberHit_ConstIterator itend = ZDC_SimFiberHit_Collection->end();
+
+  for (; it != itend; it++) {
+    createAndStoreWaveform(*it, rndEngine, zdcModuleContainer);
+  }
+  addEmptyWaveforms(zdcModuleContainer, rndEngine);
+}
+
+void ZDC_PileUpTool::addEmptyWaveforms(xAOD::ZdcModuleContainer *zdcModuleContainer, CLHEP::HepRandomEngine* rndEngine){
+  bool zdcFound[2][4] = {false};
+  bool rpdFound[2][16] = {false};
+  for(auto module : *zdcModuleContainer){
+    int side = (module->zdcSide() == -1) ? 0 : 1;
+    int mod = module->zdcModule();
+    if(mod < 4){ //ZDC
+      zdcFound[side][mod] = true;
+      ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Found ZDC side " << side << " module " << mod);
+    }else{ //RPD
+      rpdFound[side][module->zdcChannel()] = true;
+      ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Found RPD side " << side << " channel " << module->zdcChannel());
+    }
+  }
+
+  for(int side : {0,1}){
+    for(int mod = 0; mod < 4; mod++){
+      if(!zdcFound[side][mod]){
+        ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Creating empty waveform for ZDC side " << side << " module " << mod);
+        createAndStoreWaveform(new ZDC_SimFiberHit( m_ZdcID->channel_id(side, mod, ZdcIDType::SINGLECHANNEL, 0), 0, 0), rndEngine, zdcModuleContainer);
+      }
+    }
+    for(int channel = 0; channel < 16; channel++){
+      if(!rpdFound[side][channel] && m_doRPD){
+        ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Creating empty waveform for RPD side " << side << " channel " << channel);
+        createAndStoreWaveform(new ZDC_SimFiberHit( m_ZdcID->channel_id(side, 4, ZdcIDType::MULTICHANNEL, channel), 0, 0), rndEngine, zdcModuleContainer);
+      }
+    }
   }
 }
 
-void ZDC_PileUpTool::fillStripDigitContainer(const ZDC_SimStripHit_Collection* ZDC_SimStripHit_Collection, CLHEP::HepRandomEngine* rndEngine)
-{
-  ZDC_SimStripHit_ConstIterator it    = ZDC_SimStripHit_Collection->begin();
-  ZDC_SimStripHit_ConstIterator itend = ZDC_SimStripHit_Collection->end();
-  
-  for (; it != itend; ++it) {
+TimedHitCollection<ZDC_SimFiberHit> ZDC_PileUpTool::doZDClightGuideCuts(const ZDC_SimFiberHit_Collection* hitCollection){
 
-    int Side     = it->GetSide();
-    int ModuleNo = it->GetMod();
-    int NPhotons = it->GetNPhotons();
+  ZDC_SimFiberHit* newHits[2][4] = {nullptr};
+  ZDC_SimFiberHit_Collection* newCollection = new ZDC_SimFiberHit_Collection("ZDC_SimFiberHit_Collection_Temp");
 
-    createAndStoreStripDigit(Side, ModuleNo, NPhotons, rndEngine);
+  int count =0;
+  for(ZDC_SimFiberHit hit : *hitCollection){
+    count++;
+    Identifier id = hit.getID();
+    //Translate side from -1,1 to 0,1 to index ZDC hits
+    int side = (m_ZdcID->side( id ) < 0 ) ? 0 : 1;
+    int module = m_ZdcID->module( id );
+    
+    //ZDCs are module 0-3, just insert this hit unmodified and move on
+    if(module > 3){ 
+      newCollection->Insert(hit);
+      continue;
+    }
+
+    //TODO: Implement a method to get the efficiency of this location to multiply hit.getNphotons() and hit.getEdep()
+    //based on the channel retrieved by m_ZdcID->channel( id ) and some efficiency map
+    float efficiency = 1.0; //For now we will just use 100% efficiency
+
+    if(!newHits[side][module]){
+      //The module hasn't been seen yet, create a new hit with values modified by the efficiency factor
+      //The ID is modified because we initially used channel to denote the position of the rods for these efficiency cuts
+      //Now that that's done, we make sure the type is SINGLECHANNEL and the channel is 0
+      newHits[side][module] = new ZDC_SimFiberHit( m_ZdcID->channel_id(side, module, ZdcIDType::SINGLECHANNEL, 0), efficiency*hit.getNPhotons(), efficiency*hit.getEdep());
+    }else{
+      //The module has been seen, add the photons and energy from this new hit to it
+      newHits[side][module]->Add( efficiency*hit.getNPhotons(), efficiency*hit.getEdep());
+    }
+  }//end loop over hits
+
+  for(int side : {0,1}){
+    for(int module = 0; module < 4; module++){
+      //Make sure the hit exists before attempting to insert it
+      //If it doesn't we will take care of this module in addEmptyWaveforms
+      if(newHits[side][module]){
+        newCollection->Insert(newHits[side][module]);
+      }
+    }
   }
+
+  //Now insert one hit per detector in the new collection
+  TimedHitCollection<ZDC_SimFiberHit> newTimedCollection;
+  newTimedCollection.insert(0.0, newCollection);
+
+  return newTimedCollection;
 }
 
-void ZDC_PileUpTool::createAndStoreStripDigit(int Side, int ModuleNo, int NPhotons, CLHEP::HepRandomEngine* rndEngine)
-{
-  ATH_MSG_DEBUG ( " iterating Strips " << Side << "  " << ModuleNo << "  " << NPhotons ); 
-  
-  int StripNum = Side*4 + ModuleNo; // In my convention side=0 is C-side and side=1 is A-Side
-  
-  Identifier::value_type X=0;
-  
-  if      (StripNum == 0) X=0xec000000;
-  else if (StripNum == 1) X=0xec200000;
-  else if (StripNum == 2) X=0xec400000;
-  else if (StripNum == 3) X=0xec600000;
-  else if (StripNum == 4) X=0xed000000;
-  else if (StripNum == 5) X=0xed200000;
-  else if (StripNum == 6) X=0xed400000;
-  else if (StripNum == 7) X=0xed600000;
-  else { ATH_MSG_DEBUG ( " Unknown Side or Module " <<Side << " " << ModuleNo ); return; }
-  
-  Identifier Id(X);
-  
-  std::vector<int>    gain0_delay0, gain1_delay0, gain0_delay1, gain1_delay1;
-  std::vector<double> V_Temp1, V_Temp2;
-  
-  gain0_delay0.resize(m_MaxTimeBin);
-  gain1_delay0.resize(m_MaxTimeBin);
-  gain0_delay1.resize(m_MaxTimeBin);
-  gain1_delay1.resize(m_MaxTimeBin);
 
-  V_Temp1.resize(m_MaxTimeBin);
-  V_Temp2.resize(m_MaxTimeBin);
+void ZDC_PileUpTool::createAndStoreWaveform(const ZDC_SimFiberHit &hit, CLHEP::HepRandomEngine* rndEngine, xAOD::ZdcModuleContainer *zdcModuleContainer){
+  Identifier id = hit.getID( );
+  int side = m_ZdcID->side(id);
+  int module = m_ZdcID->module(id);
+  int channel = m_ZdcID->channel(id);
+
+  //Here we have to switch the type of the RPD from ACTIVE to MULTICHANNEL
+  //TODO: Either change the channel numbering in the geometry, or the analysis
+  if(module == 4) id = m_ZdcID->channel_id(side,module,ZdcIDType::MULTICHANNEL,channel);
+
+  //Create a new ZdcModule to store the waveforms
+  xAOD::ZdcModule* zdc = new xAOD::ZdcModule();
+  zdcModuleContainer->push_back(xAOD::ZdcModuleContainer::unique_type(zdc));
+  zdcModuleContainer->back()->setZdcId(id.get_identifier32().get_compact());
+  zdcModuleContainer->back()->setZdcSide(side);
+  zdcModuleContainer->back()->setZdcModule(module);
+  zdcModuleContainer->back()->setZdcType(m_ZdcID->type(id));
+  zdcModuleContainer->back()->setZdcChannel(channel);
+
+  ATH_MSG_DEBUG( "Digitizing Side " <<  side << 
+                " Module " << module << 
+                                " Channel " << channel << 
+                ", whith " << hit.getNPhotons() << " photons" );
+
+  float amplitude = 0, t0 = 0;
+  bool doHighGain = true;
+  std::shared_ptr<ZDCWaveformBase> waveformPtr;
+  std::shared_ptr<ZDCWaveformSampler> wfSampler;
   
-  int TimeFinal = m_MaxTimeBin*25;
-  
-  for (int Time=21; Time<TimeFinal; Time++) {
-    
-    int TimeBin = Time/25;    
-    
-    float Signal1 = NPhotons*0.47*pow((Time-21)/10.0, 3.4)*exp(-(Time-21)/10.0);
-    float Signal2 = NPhotons*0.47*pow((Time-20)/10.0, 3.4)*exp(-(Time-20)/10.0);
-    
-    float Signal  = (Signal1+Signal2)/2.0;  
-    
-    V_Temp1[TimeBin] += Signal; // the step is 1ns so I don't have to multiply by dT 
-    
-    Signal1 = NPhotons*0.47*pow((Time + 12.5 - 21)/10.0, 3.4)*exp(-(Time+12.5-21)/10.0); //delayed by 12.5 ns
-    Signal2 = NPhotons*0.47*pow((Time + 12.5 - 20)/10.0, 3.4)*exp(-(Time+12.5-20)/10.0); //delayed by 12.5 ns
-    
-    Signal  = (Signal1+Signal2)/2.0;  
-    
-    V_Temp2[TimeBin] += Signal;
+  if(module < 4){//It's a ZDC channel
+    amplitude = CLHEP::RandPoissonQ::shoot(rndEngine, hit.getNPhotons()*m_zdcAdcPerPhoton);
+
+    if(m_LTQuadStepFilt){ 
+      waveformPtr = std::make_shared<ZDCWaveformLTLinStep>("zdc",m_qsfRiseTime,m_qsfFallTime,m_qsfFilter);
+    }else{
+      waveformPtr = std::make_shared<ZDCWaveformFermiExp>("zdc",m_zdcRiseTime,m_zdcFallTime);
+    }
+    wfSampler = std::make_shared<ZDCWaveformSampler>(m_freqMHz, 0, m_numTimeBins, 12, m_Pedestal, waveformPtr);
+    t0 = m_zdct0;
+
+  }else{ //It's an RPD channel
+    amplitude = CLHEP::RandPoissonQ::shoot(rndEngine, hit.getNPhotons()*m_rpdAdcPerPhoton);
+    waveformPtr = std::make_shared<ZDCWaveformFermiExp>("rpd",m_rpdRiseTime,m_rpdFallTime);
+    wfSampler = std::make_shared<ZDCWaveformSampler>(m_freqMHz, 0, m_numTimeBins, 12, m_Pedestal, waveformPtr);
+    t0 = m_rpdt0;
+    doHighGain = false;
   }
-  
-  for (int I=0; I<m_MaxTimeBin; I++) {
-    
-    V_Temp1[I] = V_Temp1[I]*m_ScaleStrip;
-    V_Temp2[I] = V_Temp2[I]*m_ScaleStrip;
-    
-    gain1_delay0[I] = CLHEP::RandGaussQ::shoot(rndEngine, V_Temp1[I] + m_Pedestal, m_SigmaNoiseHG_Strip);
-    gain1_delay1[I] = CLHEP::RandGaussQ::shoot(rndEngine, V_Temp2[I] + m_Pedestal, m_SigmaNoiseHG_Strip);
-    
-    V_Temp1[I] = HighToLow(V_Temp1[I], m_GainRatio_Strip[StripNum], m_GainRatioError_Strip[StripNum], rndEngine);
-    V_Temp2[I] = HighToLow(V_Temp2[I], m_GainRatio_Strip[StripNum], m_GainRatioError_Strip[StripNum], rndEngine);
-    
-    gain0_delay0[I] = CLHEP::RandGaussQ::shoot(rndEngine, V_Temp1[I] + m_Pedestal, m_SigmaNoiseLG_Strip);
-    gain0_delay1[I] = CLHEP::RandGaussQ::shoot(rndEngine, V_Temp2[I] + m_Pedestal, m_SigmaNoiseLG_Strip);
-    
-    if (gain0_delay0[I] > 1023) gain0_delay0[I] = 1023; 
-    if (gain0_delay1[I] > 1023) gain0_delay1[I] = 1023; 
-    if (gain1_delay0[I] > 1023) gain1_delay0[I] = 1023; 
-    if (gain1_delay1[I] > 1023) gain1_delay1[I] = 1023; 
-  } 
-  
-  ZdcDigits* ZDC_Strip_Digit = new ZdcDigits(Id);
-  
-  ZDC_Strip_Digit->set_digits_gain1_delay0(gain1_delay0);
-  ZDC_Strip_Digit->set_digits_gain1_delay1(gain1_delay1);
-  ZDC_Strip_Digit->set_digits_gain0_delay0(gain0_delay0);
-  ZDC_Strip_Digit->set_digits_gain0_delay1(gain0_delay1);
-  
-  m_digitContainer->push_back(ZDC_Strip_Digit);
-  
-  if (m_DumpStrip == 1) {
-    
-    m_MyFile << Side << "  " << ModuleNo << "  " << NPhotons;
-    
-    for (int I=0; I<m_MaxTimeBin; I++) { m_MyFile << "  " << gain1_delay0[I]; }
-    
-    m_MyFile << std::endl;  
+
+  //Generate in time waveforms
+  zdc->setWaveform("g0data", generateWaveform(wfSampler, amplitude, t0));
+  if(doHighGain) zdc->setWaveform("g1data", generateWaveform(wfSampler, 10*amplitude, t0));
+
+  //Generate delayed waveforms
+  if(m_delayChannels){
+    float timeBinWidth = 1000.0/m_freqMHz;
+    zdc->setWaveform("g0d1data", generateWaveform(wfSampler, 10*amplitude, t0+timeBinWidth/2));
+    if(doHighGain) zdc->setWaveform("g1d1data", generateWaveform(wfSampler, 10*amplitude, t0+timeBinWidth/2));
   }
+
 }
 
-double ZDC_PileUpTool::HighToLow(double signal, double gain_ratio ,double gain_error, CLHEP::HepRandomEngine* rndEngine)
-{
-  gain_ratio = CLHEP::RandGaussQ::shoot(rndEngine, gain_ratio, gain_error);
-  
-  if (gain_ratio <= 0) { ATH_MSG_WARNING ( ":: ?? gain=0 !!!!!" ); return 10.0; }
-  
-  ATH_MSG_DEBUG ( "RANDOM CHECK ::" << gain_ratio ) ;
-  
-  return signal/gain_ratio;
-}
-
-void ZDC_PileUpTool::fillPixelDigitContainer(TimedHitCollection<ZDC_SimPixelHit>& thpczdc, CLHEP::HepRandomEngine* rndEngine) 
-{
-  TimedHitCollection<ZDC_SimPixelHit>                 thpc = thpczdc;
-  TimedHitCollection<ZDC_SimPixelHit>::const_iterator i, e, it;
-  
-  while (thpc.nextDetectorElement(i, e)) for (it = i; it != e; ++it) {
-    
-    int Side     = (*it)->GetSide();
-    int ModuleNo = (*it)->GetMod() ;
-    int PixNum   = (*it)->GetPix() ;
-    int NPhotons = (*it)->GetNPhotons();
-    
-    createAndStorePixelDigit(Side, ModuleNo, PixNum, NPhotons, rndEngine);
+std::vector<short unsigned int> ZDC_PileUpTool::generateWaveform(std::shared_ptr<ZDCWaveformSampler> wfSampler, float amplitude, float t0){
+  std::vector<unsigned int> wf = wfSampler->Generate(amplitude, t0);
+  std::vector<short unsigned int> retVal;
+  for(uint sample = 0; sample < wf.size(); sample++){
+    retVal.push_back(wf[sample]);
   }
-}
-
-void ZDC_PileUpTool::fillPixelDigitContainer(const ZDC_SimPixelHit_Collection* ZDC_SimPixelHit_Collection, CLHEP::HepRandomEngine* rndEngine)
-{
-  ZDC_SimPixelHit_ConstIterator it    = ZDC_SimPixelHit_Collection->begin();
-  ZDC_SimPixelHit_ConstIterator itend = ZDC_SimPixelHit_Collection->end();
-
-  for (; it != itend; ++it) {
-
-    int Side     = it->GetSide();
-    int ModuleNo = it->GetMod() ;
-    int PixNum   = it->GetPix() ;
-    int NPhotons = it->GetNPhotons();
-
-    createAndStorePixelDigit(Side, ModuleNo, PixNum, NPhotons, rndEngine);
-  }
-}
-
-void ZDC_PileUpTool::createAndStorePixelDigit(int Side, int ModuleNo, int PixNum, int NPhotons, CLHEP::HepRandomEngine* rndEngine)
-{
-  ATH_MSG_DEBUG ( " iterating Pixel " << Side << "  " << ModuleNo << "  " << PixNum << "   " << NPhotons ); 
-  
-  Identifier::value_type X = PixelID(Side, ModuleNo, PixNum);
-  
-  Identifier Id(X);
-  
-  std::vector<int>    gain0_delay0, gain1_delay0;
-  std::vector<double> V_Temp1;
-  
-  gain0_delay0.resize(m_MaxTimeBin);
-  gain1_delay0.resize(m_MaxTimeBin);
-  
-  V_Temp1.resize(m_MaxTimeBin);
-  
-  int TimeFinal = m_MaxTimeBin*25;
-  
-  for(int Time=21; Time<TimeFinal; Time++) {
-    
-    int TimeBin = Time/25;    
-    
-    float Signal1 = NPhotons*0.47*pow((Time - 21)/10.0, 3.4)*exp(-(Time-21)/10.0);
-    float Signal2 = NPhotons*0.47*pow((Time - 20)/10.0, 3.4)*exp(-(Time-20)/10.0);
-    
-    float Signal  = (Signal1+Signal2)/2.0;  
-    
-    V_Temp1[TimeBin] += Signal; // the step is 1ns so I don't have to multiply by dT 
-  }
-  
-  for (int I=0; I<m_MaxTimeBin; I++) {
-    
-    V_Temp1[I] = V_Temp1[I]*m_ScalePixel;
-    
-    gain1_delay0[I] = CLHEP::RandGaussQ::shoot(rndEngine, V_Temp1[I] + m_Pedestal, m_SigmaNoiseHG_Pixel);
-    
-    V_Temp1[I] = HighToLow(V_Temp1[I], m_GainRatio_Pixel, m_GainRatioError_Pixel, rndEngine);
-    
-    gain0_delay0[I] = CLHEP::RandGaussQ::shoot(rndEngine, V_Temp1[I] + m_Pedestal, m_SigmaNoiseLG_Pixel);
-    
-    if (gain0_delay0[I] > 1023) gain0_delay0[I] = 1023; 
-    if (gain1_delay0[I] > 1023) gain1_delay0[I] = 1023; 
-  } 
-  
-  ZdcDigits* ZDC_Pixel_Digit = new ZdcDigits(Id);
-  
-  ZDC_Pixel_Digit->set_digits_gain1_delay0(gain1_delay0);
-  ZDC_Pixel_Digit->set_digits_gain0_delay0(gain0_delay0);
-  
-  m_digitContainer->push_back(ZDC_Pixel_Digit);
-  
-  if (m_DumpPixel == 1) {
-    
-    m_MyFile << Side << "  " << ModuleNo << "  " << PixNum << "   " << NPhotons;
-    
-    for (int I=0; I<m_MaxTimeBin; I++) { m_MyFile << "  " << gain1_delay0[I]; }
-    
-    m_MyFile << std::endl;  
-  }
-}
-
-unsigned int ZDC_PileUpTool::PixelID(int Side, int Module, int PixNo)
-{
-  if( Module==1) return (0Xed240000 + PixNo*0X800 + (Side-1)*0X1000000); //HM-XY Modules (Side=0=>C-side , Side=1=>A-Side) 
-  else           return (0Xec040000 + PixNo*0X800                 ); //EM-XY Module  (Only C-Side)
-}
-
-void ZDC_PileUpTool::SetDumps(bool Flag1, bool Flag2)
-{
-  m_DumpStrip = Flag1;
-  m_DumpPixel = Flag2;
-  
-  if (m_DumpStrip || m_DumpPixel) { m_MyFile.open("DumpAll.txt"); }
-}
-
-StatusCode ZDC_PileUpTool::recordContainers(ServiceHandle<StoreGateSvc>& evtStore, const std::string& key_digitCnt) 
-{
-  m_digitContainer = new ZdcDigitsCollection();
-
-  StatusCode sc = evtStore->record(m_digitContainer, key_digitCnt);
-
-  return sc;
+  return retVal;
 }
