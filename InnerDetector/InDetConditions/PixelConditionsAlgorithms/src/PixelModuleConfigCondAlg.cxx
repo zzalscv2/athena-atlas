@@ -39,14 +39,6 @@ StatusCode PixelModuleConfigCondAlg::execute(const EventContext& ctx) const {
   const EventIDBase stop {EventIDBase::UNDEFNUM,   EventIDBase::UNDEFEVT, EventIDBase::UNDEFNUM-1,
                           EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
 
-  // Digitization parameters
-  writeCdo -> setBunchSpace(m_bunchSpace);
-  writeCdo -> setBarrelNumberOfBCID(m_BarrelNumberOfBCID);
-  writeCdo -> setEndcapNumberOfBCID(m_EndcapNumberOfBCID);
-  writeCdo -> setBarrelTimeOffset(m_BarrelTimeOffset);
-  writeCdo -> setEndcapTimeOffset(m_EndcapTimeOffset);
-  writeCdo -> setBarrelTimeJitter(m_BarrelTimeJitter);
-  writeCdo -> setEndcapTimeJitter(m_EndcapTimeJitter);
   writeCdo -> setDefaultBarrelAnalogThreshold(m_BarrelAnalogThreshold);
   writeCdo -> setDefaultEndcapAnalogThreshold(m_EndcapAnalogThreshold);
   writeCdo -> setDefaultBarrelAnalogThresholdSigma(m_BarrelAnalogThresholdSigma);
@@ -57,30 +49,18 @@ StatusCode PixelModuleConfigCondAlg::execute(const EventContext& ctx) const {
   writeCdo -> setDefaultEndcapInTimeThreshold(m_EndcapInTimeThreshold);
   writeCdo -> setBarrelThermalNoise(m_BarrelThermalNoise);
   writeCdo -> setEndcapThermalNoise(m_EndcapThermalNoise);
-  writeCdo -> setFEI4BarrelHitDiscConfig(m_FEI4BarrelHitDiscConfig);
-  writeCdo -> setFEI4EndcapHitDiscConfig(m_FEI4EndcapHitDiscConfig);
-  writeCdo -> setFEI4ChargScaling(m_chargeScaleFEI4);
-  writeCdo -> setUseFEI4SpecialScalingFunction(m_UseFEI4SpecialScalingFunction);
-
+  
   // FEI3-specific parameters... only write if they are set
   if (!m_FEI3BarrelLatency.empty()) {
     // Use the above as the check... worth adding checks to see that all FEI3 vectors are non-zero?
     writeCdo -> setFEI3BarrelLatency(m_FEI3BarrelLatency);
-    writeCdo -> setFEI3BarrelHitDuplication(m_FEI3BarrelHitDuplication);
-    writeCdo -> setFEI3BarrelSmallHitToT(m_FEI3BarrelSmallHitToT);
     writeCdo -> setFEI3BarrelTimingSimTune(m_FEI3BarrelTimingSimTune);
-
     writeCdo -> setFEI3EndcapLatency(m_FEI3EndcapLatency);
-    writeCdo -> setFEI3EndcapHitDuplication(m_FEI3EndcapHitDuplication);
-    writeCdo -> setFEI3EndcapSmallHitToT(m_FEI3EndcapSmallHitToT);
     writeCdo -> setFEI3EndcapTimingSimTune(m_FEI3EndcapTimingSimTune);
   }
 
   // DBM-specific parameters... only write if they are set
   if (!m_DBMToTThreshold.empty()) {
-    writeCdo -> setDBMNumberOfBCID(m_DBMNumberOfBCID);
-    writeCdo -> setDBMTimeOffset(m_DBMTimeOffset);
-    writeCdo -> setDBMTimeJitter(m_DBMTimeJitter);
     writeCdo -> setDefaultDBMAnalogThreshold(m_DBMAnalogThreshold);
     writeCdo -> setDefaultDBMAnalogThresholdSigma(m_DBMAnalogThresholdSigma);
     writeCdo -> setDefaultDBMAnalogThresholdNoise(m_DBMAnalogThresholdNoise);
@@ -95,7 +75,6 @@ StatusCode PixelModuleConfigCondAlg::execute(const EventContext& ctx) const {
 
   // DCS parameters
   writeCdo -> setDefaultBiasVoltage(m_biasVoltage);
-  writeCdo -> setDefaultTemperature(m_temperature);
 
   // Distortion parameters
   writeCdo -> setDistortionInputSource(m_distortionInputSource);
@@ -122,13 +101,11 @@ StatusCode PixelModuleConfigCondAlg::execute(const EventContext& ctx) const {
   writeCdo -> setBarrelCrossTalk(m_BarrelCrossTalk);
   writeCdo -> setBarrelNoiseOccupancy(m_BarrelNoiseOccupancy);
   writeCdo -> setBarrelDisableProbability(m_BarrelDisableProbability);
-  writeCdo -> setBarrelLorentzAngleCorr(m_BarrelLorentzAngleCorr);
 
   writeCdo -> setEndcapToTThreshold(m_EndcapToTThreshold);
   writeCdo -> setEndcapCrossTalk(m_EndcapCrossTalk);
   writeCdo -> setEndcapNoiseOccupancy(m_EndcapNoiseOccupancy);
   writeCdo -> setEndcapDisableProbability(m_EndcapDisableProbability);
-  writeCdo -> setEndcapLorentzAngleCorr(m_EndcapLorentzAngleCorr);
 
   writeCdo -> setBarrelNoiseShape({m_InnermostNoiseShape, m_NextInnermostNoiseShape, m_PixelNoiseShape, m_PixelNoiseShape, m_PixelNoiseShape});
   writeCdo -> setEndcapNoiseShape(std::vector<std::vector<float>>(m_EndcapToTThreshold.size(), m_PixelNoiseShape));

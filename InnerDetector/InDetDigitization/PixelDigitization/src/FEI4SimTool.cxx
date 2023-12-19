@@ -97,7 +97,7 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     thermalNoise(m_thermalNoise, chargedDiodes, rndmEngine);
 
     // Add random noise
-    randomNoise(chargedDiodes, moduleData, calibData, rndmEngine, m_pixelReadout.get());
+    randomNoise(chargedDiodes, moduleData, m_numberOfBcid, calibData, rndmEngine, m_pixelReadout.get());
   }
 
   // Add random diabled pixels

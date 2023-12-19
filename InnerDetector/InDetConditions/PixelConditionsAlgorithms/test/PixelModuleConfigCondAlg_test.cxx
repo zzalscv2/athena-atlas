@@ -80,14 +80,10 @@ BOOST_AUTO_TEST_SUITE(PixelModuleConfigCondAlgTest )
     BOOST_TEST( conditionStore->retrieve (cc, "PixelModuleData").isSuccess() );
     //and can extract the actual "PixelModuleData"..
     BOOST_TEST (cc->find (eid, data, &range2p));
-    //to query its properties (btw: it's a monster)
-    BOOST_TEST (data->getBunchSpace() == 25.0);
+   
     
     constexpr int barrel_ec=0;
     constexpr int layer=1;
-    BOOST_TEST(data->getNumberOfBCID(barrel_ec, layer) == 1);//they are all 1 by default
-    BOOST_TEST(data->getTimeOffset(barrel_ec, layer) == 5.0); //all 5.0 by default
-    BOOST_TEST(data->getTimeJitter(barrel_ec, layer) == 0.0); //all 0.0 by default
     BOOST_TEST(data->getDefaultAnalogThreshold(barrel_ec, layer) == -1); //all -1 by default
     BOOST_TEST(data->getDefaultAnalogThresholdSigma(barrel_ec, layer) == 35); //these vary
     BOOST_TEST(data->getDefaultAnalogThresholdNoise(barrel_ec, layer) == 150); //these vary
@@ -99,20 +95,11 @@ BOOST_AUTO_TEST_SUITE(PixelModuleConfigCondAlgTest )
     //
     //The following methods would similarly throw, and are not tested here:
     //getNoiseOccupancy, getDisableProbability, getNoiseShape, getFEI3Latency
-    //getFEI3HitDuplication, getFEI3SmallHitToT, getFEI3TimingSimTune, getFEI4OverflowToT
-    BOOST_TEST(data->getFEI4HitDiscConfig(barrel_ec, layer) == 2); //empty by default
-    BOOST_TEST(data->getFEI4ChargScaling() == 1.0); //single float, = 1.0 (note typo)
-    BOOST_TEST(data->getUseFEI4SpecialScalingFunction() == true); 
-    //constexpr totValue = 16; for use later
-    //BOOST_TEST(data->getFEI4ToTSigma(totValue)); <- never set
     BOOST_TEST(data->getDefaultQ2TotA() == 70.2f);
     BOOST_TEST(data->getDefaultQ2TotE() == -3561.25f);
     BOOST_TEST(data->getDefaultQ2TotC() == 26000.0f);
     BOOST_TEST(data->getPIXLinearExtrapolation() == false);//in c'tor of PixelModuleData
-    //These methods would throw, and are not tested here:
-    // getLorentzAngleCorr, getDefaultBiasVoltage(int barrel_ec, int layer)
     BOOST_TEST(data->getDefaultBiasVoltage() == 150.f);
-    BOOST_TEST(data->getDefaultTemperature() == -7.f);
     //These methods would throw, and are not tested here:
     //getFluenceLayer() , getRadSimFluenceMapList(), getRadSimFluenceMapList3D()
     BOOST_TEST(data->getCablingMapToFile() == false);

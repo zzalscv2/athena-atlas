@@ -25,6 +25,7 @@ namespace PixelDigitization{
     CLHEP::HepRandomEngine* rndmEngine);
                     
   void randomNoise(SiChargedDiodeCollection& chargedDiodes, const PixelModuleData *moduleData,
+    int nBcid,
     const PixelChargeCalibCondData *chargeCalibData, CLHEP::HepRandomEngine* rndmEngine, 
     InDetDD::IPixelReadoutManager * pixelReadout);
     

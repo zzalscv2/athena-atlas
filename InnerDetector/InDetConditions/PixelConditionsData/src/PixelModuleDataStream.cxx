@@ -80,30 +80,6 @@ operator << (std::ostream &out, const PixelModuleData &c){
   const std::string LF{"\n"};
   //NB: in the following, vector variables are not followed by a linefeed;
   // it's already in the vector stream insertion operator in anonymous namespace (above)
-  out<<"#bunchSpace"<<LF;
-  out<<c.m_bunchSpace<<LF;
-  //
-  out<<"#barrelNumberOfBCID"<<LF;
-  out<<c.m_barrelNumberOfBCID;
-  out<<"#endcapNumberOfBCID"<<LF;
-  out<<c.m_endcapNumberOfBCID;
-  out<<"#DBMNumberOfBCID"<<LF;
-  out<<c.m_DBMNumberOfBCID;
-  //
-  out<<"#barrelTimeOffset"<<LF;
-  out<<c.m_barrelTimeOffset;
-  out<<"#endcapTimeOffset"<<LF;
-  out<<c.m_endcapTimeOffset;
-  out<<"#DBMTimeOffset"<<LF;
-  out<<c.m_DBMTimeOffset;
-  //
-  out<<"#barrelTimeJitter"<<LF;
-  out<<c.m_barrelTimeJitter;
-  out<<"#endcapTimeJitter"<<LF;
-  out<<c.m_endcapTimeJitter;
-  out<<"#DBMTimeJitter"<<LF;
-  out<<c.m_DBMTimeJitter;
-  //
   out<<"#defaultBarrelAnalogThreshold"<<LF;
   out<<c.m_defaultBarrelAnalogThreshold;
   out<<"#defaultEndcapAnalogThreshold"<<LF;
@@ -179,32 +155,11 @@ operator << (std::ostream &out, const PixelModuleData &c){
   out<<"#FEI3EndcapLatency"<<LF;
   out<<c.m_FEI3EndcapLatency;
   //
-  out<<"#FEI3BarrelHitDuplication"<<LF;
-  out<<c.m_FEI3BarrelHitDuplication;
-  out<<"#FEI3EndcapHitDuplication"<<LF;
-  out<<c.m_FEI3EndcapHitDuplication;
-  //
-  out<<"#FEI3BarrelSmallHitToT"<<LF;
-  out<<c.m_FEI3BarrelSmallHitToT;
-  out<<"#FEI3EndcapSmallHitToT"<<LF;
-  out<<c.m_FEI3EndcapSmallHitToT;
-  //
   out<<"#FEI3BarrelTimingSimTune"<<LF;
   out<<c.m_FEI3BarrelTimingSimTune;
   out<<"#FEI3EndcapTimingSimTune"<<LF;
   out<<c.m_FEI3EndcapTimingSimTune;
-  //
-  out<<"#FEI4BarrelHitDiscConfig"<<LF;
-  out<<c.m_FEI4BarrelHitDiscConfig;
-  out<<"#FEI4EndcapHitDiscConfig"<<LF;
-  out<<c.m_FEI4EndcapHitDiscConfig;
-  //
-  out<<"#scaleFEI4"<<LF;
-  out<<c.m_scaleFEI4<<LF;
-  out<<"#useFEI4SpecialScalingFunction"<<LF;
-  out<<c.m_useFEI4SpecialScalingFunction<<LF;
-  out<<"#FEI4ToTSigma"<<LF;
-  out<<c.m_FEI4ToTSigma;
+
   //
   out<<"#paramA"<<LF;
   out<<c.m_paramA<<LF;
@@ -215,15 +170,8 @@ operator << (std::ostream &out, const PixelModuleData &c){
   out<<"#doLinearExtrapolation"<<LF;
   out<<c.m_doLinearExtrapolation<<LF;
   //
-  out<<"#barrelLorentzAngleCorr"<<LF;
-  out<<c.m_barrelLorentzAngleCorr;
-  out<<"#endcapLorentzAngleCorr"<<LF;
-  out<<c.m_endcapLorentzAngleCorr;
-  //
   out<<"#biasVoltage"<<LF;
   out<<c.m_biasVoltage<<LF;
-  out<<"#temperature"<<LF;
-  out<<c.m_temperature<<LF;
   //
   out<<"#fluenceLayer"<<LF;
   out<<c.m_fluenceLayer;
@@ -268,34 +216,39 @@ operator << (std::ostream &out, const PixelModuleData &c){
 //declared as a friend in the PixelModuleData class (dangerously skirting the interface)
 std::istream & 
 operator >> (std::istream &in, PixelModuleData &c){
-  std::vector<float> ignore;
-
+  [[maybe_unused]] std::vector<float> ignoreFloatVec;
+  [[maybe_unused]] std::vector<double> ignoreDoubleVec;
+  [[maybe_unused]] std::vector<double> ignoreIntVec;
+  [[maybe_unused]] std::vector<bool> ignoreBoolVec;
+  [[maybe_unused]] float ignoreFloat{};
+  [[maybe_unused]] bool ignoreBool{};
+  [[maybe_unused]] double ignoreDouble{};
   std::istream::sentry s(in);
   if (s){
     //this is rather unforgiving, and should only be used with the format given by the ostream
     //insertion operator
     std::string label;
     in.ignore(100, '\n');
-    in>>c.m_bunchSpace;
+    in>>ignoreDouble;
     in.ignore(100,'\n');
-    in>>c.m_barrelNumberOfBCID;
+    in>>ignoreIntVec;
     in.ignore(100,'\n');
-    in>>c.m_endcapNumberOfBCID;
+    in>>ignoreIntVec;
     in.ignore(100,'\n');
-    in>>c.m_DBMNumberOfBCID;
+    in>>ignoreIntVec;
     in.ignore(100,'\n');
-    in>>c.m_barrelTimeOffset;
+    in>>ignoreDoubleVec;
     in.ignore(100,'\n');
-    in>>c.m_endcapTimeOffset;
+    in>>ignoreDoubleVec;
     in.ignore(100,'\n');
-    in>>c.m_DBMTimeOffset;
+    in>>ignoreDoubleVec;
     //
     in.ignore(100,'\n');
-    in>>c.m_barrelTimeJitter;
+    in>>ignoreDoubleVec;
     in.ignore(100,'\n');
-    in>>c.m_endcapTimeJitter;
+    in>>ignoreDoubleVec;
     in.ignore(100,'\n');
-    in>>c.m_DBMTimeJitter;
+    in>>ignoreDoubleVec;
     //
     in.ignore(100,'\n');
     in>>c.m_defaultBarrelAnalogThreshold;
@@ -373,14 +326,14 @@ operator >> (std::istream &in, PixelModuleData &c){
     in>>c.m_FEI3EndcapLatency;
     //
     in.ignore(100,'\n');
-    in>>c.m_FEI3BarrelHitDuplication;
+    in>>ignoreBoolVec;
     in.ignore(100,'\n');
-    in>>c.m_FEI3EndcapHitDuplication;
+    in>>ignoreBoolVec;
     //
     in.ignore(100,'\n');
-    in>>c.m_FEI3BarrelSmallHitToT;
+    in>>ignoreIntVec;
     in.ignore(100,'\n');
-    in>>c.m_FEI3EndcapSmallHitToT;
+    in>>ignoreIntVec;
     //
     in.ignore(100,'\n');
     in>>c.m_FEI3BarrelTimingSimTune;
@@ -388,17 +341,18 @@ operator >> (std::istream &in, PixelModuleData &c){
     in>>c.m_FEI3EndcapTimingSimTune;
     //
     in.ignore(100,'\n');
-    in>>c.m_FEI4BarrelHitDiscConfig;
+    in>>ignoreIntVec;
     in.ignore(100,'\n');
-    in>>c.m_FEI4EndcapHitDiscConfig;
+    in>>ignoreIntVec;
     //something magic about having to stream to a string at this point, 
     //instead of using 'ignore'
     in>>label;
-    in>>c.m_scaleFEI4;
+    in>>ignoreFloat;
     in>>label;
-    in>>c.m_useFEI4SpecialScalingFunction;
+    in>>ignoreBool;
+   
     in>>label;
-    in>>c.m_FEI4ToTSigma;
+    in>>ignoreDoubleVec;
     //
     in>>label;
     in>>c.m_paramA;
@@ -410,22 +364,23 @@ operator >> (std::istream &in, PixelModuleData &c){
     in>>c.m_doLinearExtrapolation;
     //
     in>>label;
-    in>>c.m_barrelLorentzAngleCorr;
+   
+    in>>ignoreDoubleVec;
     in>>label;
-    in>>c.m_endcapLorentzAngleCorr;
+    in>>ignoreDoubleVec;
     //
     in>>label;
     in>>c.m_biasVoltage;
     in>>label;
-    in>>c.m_temperature;
+    in>>ignoreFloat;
     //
     in>>label;
-    in>>ignore;
+    in>>ignoreFloatVec;
     in>>label;
-    in>>ignore;
+    in>>ignoreFloatVec;
 
     in>>label;
-    in>>ignore;
+    in>>ignoreFloatVec;
     //
     in>>label;
     in>>c.m_fluenceLayer;
@@ -505,23 +460,28 @@ std::istream & operator >>(SoshiFormat & f, PixelModuleData & md){
 
   md.setBarrelToTThreshold(getParameter<int>("BarrelToTThreshold", lBuffer));
   md.setFEI3BarrelLatency(getParameter<int>("FEI3BarrelLatency", lBuffer));
-  md.setFEI3BarrelHitDuplication(getParameter<bool>("FEI3BarrelHitDuplication", lBuffer));
-  md.setFEI3BarrelSmallHitToT(getParameter<int>("FEI3BarrelSmallHitToT", lBuffer));
+  std::vector<bool> ignoreBoolVec;
+  ignoreBoolVec = getParameter<bool>("FEI3BarrelHitDuplication", lBuffer);
+  auto ignoreIntVec = getParameter<int>("FEI3BarrelSmallHitToT", lBuffer);
   md.setFEI3BarrelTimingSimTune(getParameter<int>("FEI3BarrelTimingSimTune", lBuffer));
   md.setBarrelCrossTalk(getParameter<double>("BarrelCrossTalk", lBuffer));
   md.setBarrelNoiseOccupancy(getParameter<double>("BarrelNoiseOccupancy", lBuffer));
+ 
   md.setBarrelDisableProbability(getParameter<double>("BarrelDisableProbability", lBuffer));
-  md.setBarrelLorentzAngleCorr(getParameter<double>("BarrelLorentzAngleCorr", lBuffer));
-
+  std::vector<double> ignoreDoubleVec{};
+  ignoreDoubleVec = getParameter<double>("BarrelLorentzAngleCorr", lBuffer);
+  
   md.setEndcapToTThreshold(getParameter<int>("EndcapToTThreshold", lBuffer));
   md.setFEI3EndcapLatency(getParameter<int>("FEI3EndcapLatency", lBuffer));
-  md.setFEI3EndcapHitDuplication(getParameter<bool>("FEI3EndcapHitDuplication", lBuffer));
-  md.setFEI3EndcapSmallHitToT(getParameter<int>("FEI3EndcapSmallHitToT", lBuffer));
+  
+  ignoreBoolVec = getParameter<bool>("FEI3EndcapHitDuplication", lBuffer);
+  ignoreIntVec = getParameter<int>("FEI3EndcapSmallHitToT", lBuffer);
+  
   md.setFEI3EndcapTimingSimTune(getParameter<int>("FEI3EndcapTimingSimTune", lBuffer));
   md.setEndcapCrossTalk(getParameter<double>("EndcapCrossTalk", lBuffer));
   md.setEndcapNoiseOccupancy(getParameter<double>("EndcapNoiseOccupancy", lBuffer));
   md.setEndcapDisableProbability(getParameter<double>("EndcapDisableProbability", lBuffer));
-  md.setEndcapLorentzAngleCorr(getParameter<double>("EndcapLorentzAngleCorr", lBuffer));
+  ignoreDoubleVec = getParameter<double>("EndcapLorentzAngleCorr", lBuffer);
 
   md.setEndcapNoiseShape({getParameter<float>("PixelNoiseShape", lBuffer),
                                    getParameter<float>("PixelNoiseShape", lBuffer),

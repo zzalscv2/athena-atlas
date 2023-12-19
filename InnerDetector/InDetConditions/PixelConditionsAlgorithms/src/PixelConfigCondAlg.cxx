@@ -42,18 +42,6 @@ StatusCode PixelConfigCondAlg::execute(const EventContext& ctx) const {
   const EventIDBase stop {EventIDBase::UNDEFNUM,   EventIDBase::UNDEFEVT, EventIDBase::UNDEFNUM-1, 
                           EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
 
-  // Digitization parameters
-  writeCdo -> setBunchSpace(m_bunchSpace);
-  writeCdo -> setBarrelNumberOfBCID(m_BarrelNumberOfBCID);
-  writeCdo -> setEndcapNumberOfBCID(m_EndcapNumberOfBCID);
-  writeCdo -> setDBMNumberOfBCID(m_DBMNumberOfBCID);
-  writeCdo -> setBarrelTimeOffset(m_BarrelTimeOffset);
-  writeCdo -> setEndcapTimeOffset(m_EndcapTimeOffset);
-  writeCdo -> setDBMTimeOffset(m_DBMTimeOffset);
-  writeCdo -> setBarrelTimeJitter(m_BarrelTimeJitter);
-  writeCdo -> setEndcapTimeJitter(m_EndcapTimeJitter);
-  writeCdo -> setDBMTimeJitter(m_DBMTimeJitter);
-
   writeCdo -> setDefaultBarrelAnalogThreshold(m_BarrelAnalogThreshold);
   writeCdo -> setDefaultEndcapAnalogThreshold(m_EndcapAnalogThreshold);
   writeCdo -> setDefaultDBMAnalogThreshold(m_DBMAnalogThreshold);
@@ -69,12 +57,7 @@ StatusCode PixelConfigCondAlg::execute(const EventContext& ctx) const {
   writeCdo -> setBarrelThermalNoise(m_BarrelThermalNoise);
   writeCdo -> setEndcapThermalNoise(m_EndcapThermalNoise);
   writeCdo -> setDBMThermalNoise(m_DBMThermalNoise);
-  writeCdo -> setFEI4BarrelHitDiscConfig(m_FEI4BarrelHitDiscConfig);
-  writeCdo -> setFEI4EndcapHitDiscConfig(m_FEI4EndcapHitDiscConfig);
-  writeCdo -> setFEI4ChargScaling(m_chargeScaleFEI4);
-  writeCdo -> setUseFEI4SpecialScalingFunction(m_UseFEI4SpecialScalingFunction);
-  writeCdo -> setFEI4ToTSigma(m_FEI4ToTSigma);
-
+  
   // Charge calibration parameters
   writeCdo -> setDefaultQ2TotA(m_CalibrationParameterA);
   writeCdo -> setDefaultQ2TotE(m_CalibrationParameterE);
@@ -83,7 +66,6 @@ StatusCode PixelConfigCondAlg::execute(const EventContext& ctx) const {
 
   // DCS parameters
   writeCdo -> setDefaultBiasVoltage(m_biasVoltage);
-  writeCdo -> setDefaultTemperature(m_temperature);
 
   // Distortion parameters
   writeCdo -> setDistortionInputSource(m_distortionInputSource);
