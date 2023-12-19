@@ -24,10 +24,11 @@ def setDefaultOnlineFlagsNewStyle(flags):
     flags.Trigger.Online.isPartition = True  # athenaHLT and partition at P1
     flags.Trigger.EDMVersion = 3
     flags.Trigger.writeBS = True
-    flags.Scheduler.ShowDataDeps = False
-    flags.Scheduler.ShowControlFlow = False
-    flags.Scheduler.ShowDataFlow = False
-    flags.Scheduler.EnableVerboseViews = False
+    flags.Scheduler.CheckDependencies = True
+    flags.Scheduler.ShowDataDeps = True
+    flags.Scheduler.ShowControlFlow = True
+    flags.Scheduler.ShowDataFlow = True
+    flags.Scheduler.EnableVerboseViews = True
     flags.Scheduler.AutoLoadUnmetDependencies = False
     flags.Input.FailOnUnknownCollections = True
 

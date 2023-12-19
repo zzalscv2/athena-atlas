@@ -1,3 +1,9 @@
+BeamSpotCondAlg
+InDet::InDetBeamSpotReader
+InDet::InDetBeamSpotReader [Alg]  [n= 0]
+BeamSpotCondAlg
+BeamSpotCondAlg
+InDet::InDetBeamSpotReader
 BeamSpotCondAlg                              1   0   DEBUG Executing BeamSpotCondAlg...
 BeamSpotCondAlg                              1   0    INFO Read from condDB status 4 pos (0.06,1.06,-4.6) sigma (0.015,0.015,53) tilt (0,0) sigmaXY 0
 BeamSpotCondAlg                              1   0    INFO Recorded new InDet::BeamSpotData to BeamSpotData with range {[1,l:0] - [440499,l:2]} into conditions store.
