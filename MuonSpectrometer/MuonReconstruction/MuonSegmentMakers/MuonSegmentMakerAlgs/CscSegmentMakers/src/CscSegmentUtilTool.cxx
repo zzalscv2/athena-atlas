@@ -1530,7 +1530,7 @@ void CscSegmentUtilTool::find_2dseg2hit(bool measphi, int station, int eta, int 
     const int maxhits = 2;
 
     // iterator over clusters
-    ICscSegmentFinder::TrkClusters::const_iterator icl[maxhits];
+    ICscSegmentFinder::TrkClusters::const_iterator icl[maxhits] {};
 
     // Select appropriate layer for first layer
     const ICscSegmentFinder::TrkClusters& clus1 = chclus[lay0];
