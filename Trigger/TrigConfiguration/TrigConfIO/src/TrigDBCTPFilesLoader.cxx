@@ -387,6 +387,10 @@ TrigConf::TrigDBCTPFilesLoader::loadTMC(L1CTPFiles & ctpfiles, std::unique_ptr<c
          {
             inpEnum = TrigConf::L1CTPFiles::CTPCoreInput::DIR;
          }
+         else if (inputType == "CTPX")
+            continue;
+         else
+            continue;
          ctpcoreInputs.push_back(
             TrigConf::L1CTPFiles::CTPCoreInput(
                inp.getAttribute<size_t>("number"), inp.getAttribute<std::string>("name"),
@@ -395,6 +399,33 @@ TrigConf::TrigDBCTPFilesLoader::loadTMC(L1CTPFiles & ctpfiles, std::unique_ptr<c
       }
       TRG_MSG_INFO("Loading ctpcore inputs " << ctpcoreInputs.size());
       ctpfiles.set_Tmc_CtpcoreInputs(std::move(ctpcoreInputs));
+   }
+
+   // read the ctpcore CTPX inputs
+   if (auto dv = ds.getObject_optional("CTPCORE.TriggerInputs"))
+   {
+      std::vector<TrigConf::L1CTPFiles::CTPCoreCTPXInput> ctpcoreCTPXInputs;
+      for (const std::string &k : dv->getKeys())
+      {
+         const TrigConf::DataStructure &inp = dv->getObject(k);
+         const std::string &inputType = inp["type"];
+         TrigConf::L1CTPFiles::CTPCoreCTPXInput::InputType inpEnum = TrigConf::L1CTPFiles::CTPCoreCTPXInput::NONE;
+         if (inputType == "CTPX")
+         {
+            inpEnum = TrigConf::L1CTPFiles::CTPCoreCTPXInput::CTPX;
+         }
+         else if (inputType == "PIT" || inputType == "DIR")
+            continue;
+         else
+            continue;
+         ctpcoreCTPXInputs.push_back(
+            TrigConf::L1CTPFiles::CTPCoreCTPXInput(
+               inp.getAttribute<size_t>("number"), inp.getAttribute<std::string>("name"),
+               inp.getAttribute<size_t>("bit"),
+               inpEnum));
+      }
+      TRG_MSG_INFO("Loading ctpcore CTPX inputs " << ctpcoreCTPXInputs.size());
+      ctpfiles.set_Tmc_CtpcoreCTPXInputs(std::move(ctpcoreCTPXInputs));
    }
 
    // read the ctpin map
