@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include <charconv>
+#include <algorithm>
 
 namespace CxxUtils {
     std::vector<std::string> tokenize(const std::string& str,
