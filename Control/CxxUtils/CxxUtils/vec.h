@@ -5,7 +5,7 @@
 /**
  * @file CxxUtils/vec.h
  * @author scott snyder <snyder@bnl.gov>
- * @author Christos Anastopoulos (additional helper methods)
+ * @author Christos Anastopoulos (helper methods)
  * @date Mar, 2020
  * @brief Vectorization helpers.
  *
@@ -55,6 +55,8 @@
  *  - @c CxxUtils::vstore (vec_type_t<VEC>* dst, const VEC& src)
  *                                          stores elements from @c src
  *                                          to @c dst
+ *  - @c CxxUtils::vany(const VEC& mask) check if any of the elements
+ *                                       of a mask is true (not 0)
  *  - @c CxxUtils::vselect (VEC& dst, const VEC& a, const VEC& b, const
  *                          vec_mask_type_t<VEC>& mask) copies elements
  *                          from @c a or @c b, depending
@@ -70,7 +72,7 @@
  *                          to the element type of dst.
  *                          dst[i] = static_cast<vec_type_t<VEC1>>(src[i])
  *
-*  Functions that construct a permutation of elements from one or two vectors
+ *  Functions that construct a permutation of elements from one or two vectors
  *  and return a vector of the same type as the input vector(s).
  *  The mask has the same element count  as the vectors.
  *  Intentionally kept compatible with gcc's _builtin_shuffle.
@@ -167,9 +169,6 @@ using vec = typename vec_typedef<T,N>::type;
 template <class VEC>
 struct vec_type
 {
-  // Requires c++20.
-  //typedef typename std::invoke_result< decltype([](const VEC& v){return v[0];}), VEC& >::type type;
-
   // Works in c++17.
   static auto elt (const VEC& v) -> decltype( v[0] );
   typedef typename std::invoke_result< decltype(elt), const VEC& >::type type1;
@@ -268,6 +267,20 @@ void
 vstore(vec_type_t<VEC>* dst, const VEC& src)
 {
   std::memcpy(dst, &src, sizeof(VEC));
+}
+
+/*
+ * @brief return if any of the
+ * elements of a mask is true (not 0)
+ */
+template<typename VEC>
+ATH_ALWAYS_INLINE
+bool vany(const VEC& mask){
+  static_assert(std::is_integral<vec_type_t<VEC>>::value,
+  "vec must be integral (aka a mask)");
+  VEC zero;
+  vbroadcast(zero,vec_type_t<VEC>{0});
+  return std::memcmp(&mask, &zero, sizeof(VEC)) != 0;
 }
 
 /*

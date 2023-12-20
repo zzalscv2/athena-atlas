@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/vec_test_common.h
@@ -428,6 +428,23 @@ test_convert_to_int(const VEC& v1)
   }
 }
 
+template<class VEC>
+void
+test_any(const VEC& v1, const VEC& v2)
+{
+  CxxUtils::vec_mask_type_t<VEC> lt = v1<v2;
+  constexpr size_t N = CxxUtils::vec_size<VEC>();
+  bool result = CxxUtils::vany(lt);
+  bool loopResult = false;
+  for (size_t i = 0; i < N; ++i) {
+    if (lt[i] != 0) {
+      loopResult = true;
+      break;
+    }
+  }
+  assert(result == loopResult);
+}
+
 /**
  * Helper to fill a vector with N
  * elements. Where N the size of the vec
@@ -511,6 +528,7 @@ testInt1()
     test_permute(testVec1);                                                 \
     test_blend(testVec1);                                                   \
     test_convert_to_double(testVec1);                                       \
+    test_any(testVec2, testVec3);                                           \
     test_int(testVec1);                                                     \
     test_logops(testVec3);                                                  \
   } while (0)
