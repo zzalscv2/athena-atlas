@@ -1119,6 +1119,7 @@ int main(int argc, char** argv)
 
 
   /// clean up
+  //cppcheck-suppress autovarInvalidDeallocation
   if ( binningConfig!=&inputdata ) delete binningConfig;
 
 
