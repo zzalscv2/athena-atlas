@@ -47,8 +47,8 @@ AmgVector(DIM) & ParametersCommon<DIM, T>::parameters() {
 
 template <int DIM, class T>
 const AmgSymMatrix(DIM) *ParametersCommon<DIM, T>::covariance() const {
-  if (m_covariance) {
-    return &(*m_covariance);
+  if (m_covariance != std::nullopt) {
+    return m_covariance.operator->();
   } else {
     return nullptr;
   }
@@ -56,8 +56,8 @@ const AmgSymMatrix(DIM) *ParametersCommon<DIM, T>::covariance() const {
 
 template <int DIM, class T>
 AmgSymMatrix(DIM) * ParametersCommon<DIM, T>::covariance() {
-  if (m_covariance) {
-    return &(*m_covariance);
+  if (m_covariance != std::nullopt) {
+    return m_covariance.operator->();
   } else {
     return nullptr;
   }
