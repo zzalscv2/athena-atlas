@@ -347,6 +347,10 @@ class EmptyMenuSequence(object):
         return self._sequence
 
     @property
+    def maker(self):
+        return self._maker
+
+    @property
     def seed(self):
         return self._seed
 
@@ -355,11 +359,11 @@ class EmptyMenuSequence(object):
         return self._name
 
     def getOutputList(self):
-        return self._maker.readOutputList() # Only one since it's merged
+        return self.maker.readOutputList() # Only one since it's merged
 
     def connectToFilter(self, outfilter):
         """ Connect filter to the InputMaker"""
-        self._maker.addInput(outfilter)
+        self.maker.addInput(outfilter)
 
     def createHypoTools(self, chainDict):
         log.debug("This sequence is empty. No Hypo to configure")
@@ -371,9 +375,9 @@ class EmptyMenuSequence(object):
         recoSeq_list.add(self.sequence.Alg)                    
         
     def buildDFDot(self, cfseq_algs, all_hypos, last_step_hypo_nodes, file):
-        cfseq_algs.append(self._maker)
+        cfseq_algs.append(self.maker)
         cfseq_algs.append(self.sequence )
-        file.write("    %s[fillcolor=%s]\n"%(self._maker.Alg.getName(), algColor(self._maker.Alg)))
+        file.write("    %s[fillcolor=%s]\n"%(self.maker.Alg.getName(), algColor(self.maker.Alg)))
         file.write("    %s[fillcolor=%s]\n"%(self.sequence.Alg.getName(), algColor(self.sequence.Alg)))
         return cfseq_algs, all_hypos, last_step_hypo_nodes
 
@@ -382,7 +386,7 @@ class EmptyMenuSequence(object):
 
     def __repr__(self):
         return "MenuSequence::%s \n Hypo::%s \n Maker::%s \n Sequence::%s \n HypoTool::%s\n"\
-            %(self.name, "Empty", self._maker.Alg.getName(), self.sequence.Alg.getName(), "None")
+            %(self.name, "Empty", self.maker.Alg.getName(), self.sequence.Alg.getName(), "None")
 
 class MenuSequence(object):
     """ Class to group reco sequences with the Hypo"""
@@ -539,8 +543,8 @@ class MenuSequence(object):
     
     def connectToFilter(self, outfilter):
         """ Connect filter to the InputMaker"""
-        log.debug("connecting %s to inputs of %s", outfilter,compName(self._maker.Alg))        
-        self._maker.addInput(outfilter)        
+        log.debug("connecting %s to inputs of %s", outfilter,compName(self.maker.Alg))
+        self.maker.addInput(outfilter)
     
   
     def createHypoTools(self, flags, chainDict):
@@ -565,9 +569,9 @@ class MenuSequence(object):
         hypo_list.add(self._hypo.Alg)
             
     def buildDFDot(self, cfseq_algs, all_hypos, last_step_hypo_nodes, file):
-        cfseq_algs.append(self._maker)
+        cfseq_algs.append(self.maker)
         cfseq_algs.append(self.sequence )
-        file.write("    %s[fillcolor=%s]\n"%(self._maker.Alg.getName(), algColor(self._maker.Alg)))
+        file.write("    %s[fillcolor=%s]\n"%(self.maker.Alg.getName(), algColor(self.maker.Alg)))
         file.write("    %s[fillcolor=%s]\n"%(self.sequence.Alg.getName(), algColor(self.sequence.Alg)))    
         cfseq_algs.append(self._hypo)
         file.write("    %s[color=%s]\n"%(self._hypo.Alg.getName(), algColor(self._hypo.Alg)))
@@ -581,7 +585,7 @@ class MenuSequence(object):
         hyponame = self._hypo.Alg.getName()
         hypotool = self._hypoToolConf.name
         return "MenuSequence::%s \n Hypo::%s \n Maker::%s \n Sequence::%s \n HypoTool::%s\n"\
-          %(self.name, hyponame, self._maker.Alg.getName(), self.sequence.Alg.getName(), hypotool)
+          %(self.name, hyponame, self.maker.Alg.getName(), self.sequence.Alg.getName(), hypotool)
 
 
 class MenuSequenceCA(MenuSequence):
@@ -608,8 +612,6 @@ class MenuSequenceCA(MenuSequence):
 
     @property
     def sequence(self):
-        makerAlg = self.ca.getEventAlgo(self._maker.Alg.getName())
-        self._maker.Alg = makerAlg
         return self._sequence
 
     @property

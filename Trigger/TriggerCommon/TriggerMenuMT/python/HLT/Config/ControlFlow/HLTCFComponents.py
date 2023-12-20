@@ -119,12 +119,14 @@ class CFSequence(object):
         if a ChainStep contains the same sequence multiple times (for multi-object chains),
         the filter is connected only once (to avoid multiple DH links)
         """
-        log.debug("CFSequence: connect Filter %s with %d menuSequences of step %s, using %d connections", compName(self.filter.Alg), len(self.step.sequences), self.step.name, len(connections))
-        log.debug("   --- sequences: ")
-        for seq in self.step.sequences:
-            log.debug(seq)
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug("CFSequence: connect Filter %s with %d menuSequences of step %s, using %d connections", compName(self.filter.Alg), len(self.step.sequences), self.step.name, len(connections))
+            log.debug("   --- sequences: ")
+            for seq in self.step.sequences:
+                log.debug(seq)
+
         if len(connections) == 0:
-            log.error("ERROR, no filter outputs are set!")
+            log.error("No filter outputs are set!")
 
         if len(self.step.sequences):
             # check whether the number of filter outputs are the same as the number of sequences in the step
