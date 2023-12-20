@@ -605,7 +605,11 @@ def MuonSegmentCnvAlgCfg(flags, name="MuonSegmentCnvAlg", **kwargs):
     return result
 
 
-def MuonSegmentFindingCfg(flags, cardinality=1):
+def MuonSegmentFindingCfg(flags, setup_bytestream = True, cardinality=1):
+    """
+    Returns a CA setting up Muon Segment Finding
+    @param setup_bytestream if True and if Format.BS, sets up reading from bytestream. If False, disables setting up BS, even if Format.BS is True 
+    """
     # Set up some general stuff needed by muon reconstruction
 
     result = ComponentAccumulator()
@@ -615,13 +619,16 @@ def MuonSegmentFindingCfg(flags, cardinality=1):
     from MuonConfig.MuonRecToolsConfig import MuonEDMHelperSvcCfg
     result.merge(MuonEDMHelperSvcCfg(flags))    
 
-    if flags.Input.Format is Format.BS:
-        from MuonConfig.MuonBytestreamDecodeConfig import MuonByteStreamDecodersCfg
-        result.merge( MuonByteStreamDecodersCfg(flags) )
+    if (setup_bytestream):
+        # We need to be able to disable this when using MuonCalibStream, 
+        # as the normal BS convertors clash with the special MCS converters.
+        if flags.Input.Format is Format.BS:
+            from MuonConfig.MuonBytestreamDecodeConfig import MuonByteStreamDecodersCfg
+            result.merge( MuonByteStreamDecodersCfg(flags) )
 
-    if flags.Input.Format is Format.BS or 'StreamRDO' in flags.Input.ProcessingTags:
-        from MuonConfig.MuonRdoDecodeConfig import MuonRDOtoPRDConvertorsCfg
-        result.merge( MuonRDOtoPRDConvertorsCfg(flags) )
+        if flags.Input.Format is Format.BS or 'StreamRDO' in flags.Input.ProcessingTags:
+            from MuonConfig.MuonRdoDecodeConfig import MuonRDOtoPRDConvertorsCfg
+            result.merge( MuonRDOtoPRDConvertorsCfg(flags) )
   
     # We need to add two algorithms - one for normal collisions, one for NCB
     ### For the moment to not use the run 3 segment maker algorithm as we need
