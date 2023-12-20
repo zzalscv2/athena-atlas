@@ -1,4 +1,4 @@
-#Copyright(C) 2002 - 2021 CERN for the benefit of the ATLAS collaboration
+#Copyright(C) 2002 - 2023 CERN for the benefit of the ATLAS collaboration
 
 #Declare the package name:
 atlas_subdir( TrkGaussianSumFilterUtils )
@@ -29,4 +29,9 @@ atlas_add_test(ut_GSF_testFindMode
 atlas_add_test(ut_GSF_testHorner
     SOURCES test/testHorner.cxx
 	LINK_LIBRARIES CxxUtils TrkGaussianSumFilterUtilsLib PathResolver TrkExUtils)
+
+atlas_add_test(ut_GSF_findIndexOfMinimum
+    SOURCES test/testFindIndexOfMinimum.cxx
+	LINK_LIBRARIES CxxUtils TrkGaussianSumFilterUtilsLib
+  POST_EXEC_SCRIPT nopost.sh )
 
