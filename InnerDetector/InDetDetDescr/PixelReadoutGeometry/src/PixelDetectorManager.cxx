@@ -591,7 +591,7 @@ namespace InDetDD {
 
     Identifier ident=Identifier();
     const CondAttrListCollection* atrlistcol=obj;
-
+    //cppcheck-suppress nullPointerRedundantCheck
     if (!atrlistcol) {
        ATH_MSG_INFO("Read alignment from detector store with key " << key);
        if (StatusCode::SUCCESS!=m_detStore->retrieve(atrlistcol,key)) {
@@ -602,6 +602,7 @@ namespace InDetDD {
     }
     {
       // loop over objects in collection
+      //cppcheck-suppress nullPointerRedundantCheck
       for (CondAttrListCollection::const_iterator citr=atrlistcol->begin(); citr!=atrlistcol->end();++citr) {
         const coral::AttributeList& atrlist=citr->second;
         // We are in the Pixel manager, therefore ignore all that is not Pixel Identifier
