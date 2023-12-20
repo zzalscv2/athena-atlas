@@ -362,6 +362,7 @@ Trk::MultiComponentStateCombiner::combineParametersWithWeight(
   const double secondWeight)
 {
   double totalWeight = firstWeight + secondWeight;
+  double invTotalWeight = 1.0/totalWeight;
   double deltaPhi = firstParameters[2] - secondParameters[2];
   if (deltaPhi > M_PI) {
     firstParameters[2] -= 2 * M_PI;
@@ -369,8 +370,8 @@ Trk::MultiComponentStateCombiner::combineParametersWithWeight(
     firstParameters[2] += 2 * M_PI;
   }
   firstParameters =
-      (firstWeight * firstParameters + secondWeight * secondParameters) /
-      totalWeight;
+      (firstWeight * firstParameters + secondWeight * secondParameters) *
+      invTotalWeight;
   // Ensure that phi is between -pi and pi
   firstParameters[2] = CxxUtils::wrapToPi(firstParameters[2]);
   firstWeight = totalWeight;
@@ -389,13 +390,13 @@ Trk::MultiComponentStateCombiner::combineCovWithWeight(
   const AmgSymMatrix(5) & secondMeasuredCov,
   const double secondWeight)
 {
-  double totalWeight = firstWeight + secondWeight;
+  double invTotalWeight = 1.0/(firstWeight + secondWeight);
   AmgVector(5) parameterDifference = firstParameters - secondParameters;
   parameterDifference[2] = CxxUtils::wrapToPi(parameterDifference[2]);
-  parameterDifference /= totalWeight;
+  parameterDifference *= invTotalWeight;
   firstMeasuredCov =
-      (firstWeight * firstMeasuredCov + secondWeight * secondMeasuredCov) /
-      totalWeight;
+      (firstWeight * firstMeasuredCov + secondWeight * secondMeasuredCov) *
+      invTotalWeight;
   firstMeasuredCov += firstWeight * secondWeight * parameterDifference *
                       parameterDifference.transpose();
 }
