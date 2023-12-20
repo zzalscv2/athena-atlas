@@ -61,7 +61,7 @@ private:
   const SG::AuxElement::ConstAccessor<int> m_fallbackTruthType{"TruthClassifierFallback_truthType"};
   const SG::AuxElement::ConstAccessor<int> m_fallbackTruthOrigin{"TruthClassifierFallback_truthOrigin"};
   const SG::AuxElement::ConstAccessor<float> m_fallbackDR{"TruthClassifierFallback_dR"};
-
+  
   /// \brief a helper to check if an electron is prompt
   bool isPromptElectron(const xAOD::IParticle &electron,
                         bool isTruthParticle,

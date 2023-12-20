@@ -29,6 +29,11 @@ enum class Type {
   CHadronDecay,
   LightFlavorDecay,
   ChargeFlipMuon,
+  NonMuonlike,
+  PromptMuonLike = 40,
+  TauDecayLike = 70,
+  BHadronDecayLike = 80,
+  CHadronDecayLike = 90,
 };
 
 } // namespace Truth
