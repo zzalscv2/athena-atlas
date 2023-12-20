@@ -175,18 +175,18 @@ namespace EL
       RCU_ASSERT (file != nullptr);
       for (std::unique_ptr<TObject>& object : m_output)
       {
-        std::string name = object->GetName();
+        auto barePtr = object.release();
+        std::string name = barePtr->GetName();
         TDirectory *dir = makeDirectoryFor (name);
         if (dir != file)
         {
-          TNamed *named = dynamic_cast<TNamed*>(object.get());
+          TNamed *named = dynamic_cast<TNamed*>(barePtr);
           if (named)
             named->SetName (name.c_str());
         }
 
-        if (!RCU::SetDirectory (object.get(), dir))
-          dir->WriteObject (object.get(), name.c_str());
-        object.release();
+        if (!RCU::SetDirectory (barePtr, dir))
+          dir->WriteObject (barePtr, name.c_str());
       }
       m_outputHistMap.clear ();
       m_outputTreeMap.clear ();
