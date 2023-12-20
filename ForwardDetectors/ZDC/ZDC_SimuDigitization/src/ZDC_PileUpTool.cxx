@@ -266,8 +266,8 @@ void ZDC_PileUpTool::fillContainer(const ZDC_SimFiberHit_Collection* ZDC_SimFibe
 }
 
 void ZDC_PileUpTool::addEmptyWaveforms(xAOD::ZdcModuleContainer *zdcModuleContainer, CLHEP::HepRandomEngine* rndEngine){
-  bool zdcFound[2][4] = {false};
-  bool rpdFound[2][16] = {false};
+  bool zdcFound[2][4] = {{false}};
+  bool rpdFound[2][16] = {{false}};
   for(auto module : *zdcModuleContainer){
     int side = (module->zdcSide() == -1) ? 0 : 1;
     int mod = module->zdcModule();
@@ -298,12 +298,10 @@ void ZDC_PileUpTool::addEmptyWaveforms(xAOD::ZdcModuleContainer *zdcModuleContai
 
 TimedHitCollection<ZDC_SimFiberHit> ZDC_PileUpTool::doZDClightGuideCuts(const ZDC_SimFiberHit_Collection* hitCollection){
 
-  ZDC_SimFiberHit* newHits[2][4] = {nullptr};
+  ZDC_SimFiberHit* newHits[2][4] = {{nullptr}};
   ZDC_SimFiberHit_Collection* newCollection = new ZDC_SimFiberHit_Collection("ZDC_SimFiberHit_Collection_Temp");
 
-  int count =0;
   for(ZDC_SimFiberHit hit : *hitCollection){
-    count++;
     Identifier id = hit.getID();
     //Translate side from -1,1 to 0,1 to index ZDC hits
     int side = (m_ZdcID->side( id ) < 0 ) ? 0 : 1;
