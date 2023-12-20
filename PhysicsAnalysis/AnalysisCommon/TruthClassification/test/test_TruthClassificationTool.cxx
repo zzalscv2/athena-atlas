@@ -70,7 +70,12 @@ int main(int argc, char* argv[])
     {8, "BHadronDecay"},
     {9, "CHadronDecay"},
     {10, "LightFlavorDecay"},
-    {11, "ChargeFlipMuon"}
+    {11, "ChargeFlipMuon"}, 
+    {12, "NonMuonlike"},
+    {40, "PromptMuonLike"},
+    {70, "TauDecayLike"},
+    {80, "BHadronDecayLike"},
+    {90, "CHadronDecayLike"},
   };
 
   // Initialise TEvent reading
@@ -135,8 +140,8 @@ int main(int argc, char* argv[])
 
   std::map<int, int> el_counter;
   std::map<int, int> mu_counter;
-  std::map<int, std::map<int, int>> unknown_el_type_origin_counter;
-  std::map<int, int> unknown_mu_origin_counter;
+  std::map<std::pair<int, int>, int> unknown_el_type_origin_counter;
+  std::map<std::pair<int, int>, int> unknown_mu_type_origin_counter;
 
   std::map<int, std::map<int, std::map<int, std::map<int, int>>>> ambiguity_map;
 
@@ -207,7 +212,7 @@ int main(int argc, char* argv[])
             << ", ambiguity = " << ambiguity
             << ", pt = " << el->pt());
 
-          unknown_el_type_origin_counter[type][origin]++;
+          unknown_el_type_origin_counter[std::pair<int, int> (type, origin)]++;
 
           if (truthParticle == nullptr) {
             ANA_MSG_WARNING("Unknown electron is NOT truth matched!");
@@ -256,7 +261,7 @@ int main(int argc, char* argv[])
         ANA_CHECK(tool->classify(*mu, classification));
 
         mu_counter[classification]++;
-
+        
         if (classification == 0)
         {
           int type = truthTypeAcc(*mu);
@@ -281,7 +286,7 @@ int main(int argc, char* argv[])
             << ", fallback DR= " << fallbackDR
             << ", pt = " << mu->pt());
           
-          unknown_mu_origin_counter[origin]++;
+          unknown_mu_type_origin_counter[std::pair<int, int> (type, origin)]++; 
 
           if (truthParticle == nullptr) {
             ANA_MSG_WARNING("Unknown muon is NOT truth matched!");
@@ -309,19 +314,16 @@ int main(int argc, char* argv[])
   std::cout << std::endl;
 
   std::cout << "Unknown electron origin:" << std::endl;
-  for (const auto&[type, map] : unknown_el_type_origin_counter)
+  for (const auto&[type_origin, count] : unknown_el_type_origin_counter)
   {
-    for (const auto&[origin, count] : map)
-    {
-      std::cout << "  " << std::setw(2) << type << ", " << std::setw(2) << origin << ": " << std::setw(6) << count << std::endl;
-    }
+    std::cout << "  " << std::setw(2) << "("<< type_origin.first << ", " << std::setw(2) << type_origin.second << ") : " << std::setw(6) << count << std::endl;
   }
   std::cout << std::endl;
 
-  std::cout << "Unknown muon origin:" << std::endl;
-  for (const auto&[origin, count] : unknown_mu_origin_counter)
+  std::cout << "Unknown muon (type, origin) :" << std::endl;
+  for (const auto&[type_origin, count] : unknown_mu_type_origin_counter)
   {
-    std::cout << "  " << std::setw(2) << origin << ": " << std::setw(6) << count << std::endl;
+    std::cout << "  " << std::setw(2) << "("<< type_origin.first << ", " << std::setw(2) << type_origin.second << ") : " << std::setw(6) << count << std::endl;
   }
   std::cout << std::endl;
 

@@ -521,8 +521,9 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
     return StatusCode::SUCCESS;
   }
 
+
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // Unknown & known Unknown
+  // Known Unknown
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   if (type == MCTruthPartClassifier::UnknownMuon && origin == MCTruthPartClassifier::NonDefined)
@@ -530,7 +531,7 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
     classification = Truth::Type::KnownUnknown;
     return StatusCode::SUCCESS;
   }
-
+  
   bool stable = (truthParticle != nullptr && truthParticle->isAvailable<int>("status")) ? MC::isStable(truthParticle) : false;
 
   if (!stable) {
@@ -545,13 +546,63 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
       return StatusCode::SUCCESS;
     }
   }
+  
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // NonMuonlike
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // Check if the type of muon is related to electrons, ie IsoElectron (2) or NonIsoElectron (3) or BkgElectron (4)
+  if (type == MCTruthPartClassifier::IsoElectron || type == MCTruthPartClassifier::BkgElectron || type == MCTruthPartClassifier::NonIsoElectron)
+  {
+    classification = Truth::Type::NonMuonlike;
+    return StatusCode::SUCCESS;
+  }
 
-  ATH_MSG_WARNING("Muon type unknown: type = " << type << ", origin = " << origin);
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // Promptlike, TauLike, BHadLike, CHadLike
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // Check if the matched parent of truth muon fall into these 4 xxxLike
+  // Only truth muon with one matched parent is considered
+  // If parent is top, W, Z or Higgs, the muons is promptlike
+  // If parent is tau, the muons is taulike
+  // If parent is bhadron, the muons is bHadlike
+  if (type == MCTruthPartClassifier::Unknown && origin == MCTruthPartClassifier::NonDefined){
+    if( truthParticle != nullptr && truthParticle->nParents() == 1 ){
+      const xAOD::TruthParticle *parent = truthParticle->parent(0);
+      int parent_pdgid = parent->pdgId(); 
+      if(parent->isTop() || parent->isW() || parent->isZ() || parent->isHiggs()){
+        classification = Truth::Type::PromptMuonLike;
+        ATH_MSG_WARNING("Muon type promptmuonlike: type = " << type << ", origin = " << origin << ", parent = " << parent_pdgid) ;
+        return StatusCode::SUCCESS;
+      }
+      if(parent->isTau()){
+        classification = Truth::Type::TauDecayLike;
+        ATH_MSG_WARNING("Muon type taudecaylike: type = " << type << ", origin = " << origin << ", parent = " << parent_pdgid) ; 
+        return StatusCode::SUCCESS;
+      }
+      if(parent->isBottomHadron()){
+        classification = Truth::Type::BHadronDecayLike;
+        ATH_MSG_WARNING("Muon type bhadrondecaylike: type = " << type << ", origin = " << origin << ", parent = " << parent_pdgid) ; 
+        return StatusCode::SUCCESS;
+      }
+      if(parent->isCharmHadron()){ 
+        if( (parent_pdgid / 1000) % 10 != 0 || (parent_pdgid / 100) % 10 != 4 || (parent_pdgid / 10) % 10 != 4){ // to exclude ccbarmeson 
+          classification = Truth::Type::CHadronDecayLike;
+          ATH_MSG_WARNING("Muon type chadrondecaylike: type = " << type << ", origin = " << origin << ", parent = " << parent_pdgid) ; 
+          return StatusCode::SUCCESS;
+        } 
+      }
+    }
+  }
 
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // Unknown
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   classification = Truth::Type::Unknown;
-  return StatusCode::SUCCESS;
-}
+  ATH_MSG_WARNING("Muon type unknown: type = " << type << ", origin = " << origin) ; 
 
+  return StatusCode::SUCCESS;
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+}
 
 bool TruthClassificationTool::isPromptElectron(const xAOD::IParticle &electron,
                                                bool isTruthParticle,

@@ -52,7 +52,11 @@ Based on this input, the function `StatusCode TruthClassificationTool::classify(
 + CHadronDecay
 + LightFlavorDecay
 + ChargeFlipMuon
-
++ NonMuonLike
++ PromptMuonLike
++ TauDecayLike
++ BHadronDecayLike
++ CHadronDecayLike
 
 More details about the lepton categories can be found [here](#3-details-about-the-lepton-categories).
 
@@ -118,7 +122,7 @@ An electron is classified as prompt (or isolated) electron (**IFF class 2**), if
 
 ### Prompt muons
 
-An muon is classified as prompt (**IFF class 4**), if its truth-type is corresponding to an isolated muon (`== 6`), and it originates from a prompt source (e.g. W/Z, top, Higgs). More information can be found in the muon CP recommendations [here](https://twiki.cern.ch/twiki/bin/view/AtlasProtected/MuonTruthRun2). As for electrons, muons from prompt quarkonuim decays are considered as prompt.
+A muon is classified as prompt (**IFF class 4**), if its truth-type is corresponding to an isolated muon (`== 6`), and it originates from a prompt source (e.g. W/Z, top, Higgs). More information can be found in the muon CP recommendations [here](https://twiki.cern.ch/twiki/bin/view/AtlasProtected/MuonTruthRun2). As for electrons, muons from prompt quarkonuim decays are considered as prompt.
 
 ### Charge-flip electrons
 
@@ -155,6 +159,22 @@ Leptons produced by light-flavor jets (**IFF class 10**) are identified by check
 ### Charge-flip muons
 
 Muons with mis-identified charge can be selected. Similarly to electrons, it works via an extra option of the tool: `separateChargeFlipMuons` (`false` by default). If enabled, the tool will put (prompt) muons, where the reconstruction-level charge and the charge of the associated truth-particle are different, to a separate category (**IFF class 11**). This effect is expected to be extremely small compared to electrons and is not expected to have a sizable impact on physics analyses. It can, however, be used for specific studies on the underlying processes leading the charge-flip muons.
+
+### Non-muons like muons
+
+A muon is classified as Non-muon-Like (**IFF class 12**), if its truth-type is corresponding to electrons, e.g. isolated electron (`== 2`), non-isolated electron (`== 3`) or background electron (`== 4`) for any truth-origin. 
+
+### The 4-like muons
+
+Muons with Unknown truth-type (`== 0`) and NonDefined truth-origin (`== 0`) could associate to a truth matched muon. Exploiting the properties of a truth muon could offer the information of its truth parent and thus the interaction behind. Muons with one truth matched parent is considered in this case. 
+If the parent is W/Z, top or higgs, the muon is classified as PromptMuonLike (**IFF class 40**). 
+
+If the parent is tau, the muon is classified as TauDecayLike (**IFF class 70**). 
+
+If the parent is BHadron, the muon is classified as BHadronDecayLike (**IFF class 80**). 
+
+If the parent is CHadron, the muon is classified as CHadronDecauLike (**IFF class 90**). However, since a ccbar meson could undergoes either prompt and non-prompt decay leading to prompt and non-prompt muons. 
+We exclude the consideration of ccbarmeson in this category. 
 
 ### KnownUnknown leptons
 
