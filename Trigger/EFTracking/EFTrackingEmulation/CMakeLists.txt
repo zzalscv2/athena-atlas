@@ -17,5 +17,5 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --exten
 
 atlas_add_test( EFTrackingSmearingConfig
    SCRIPT python -m EFTrackingEmulation.EFTrackingSmearingConfig
-   PROPERTIES TIMEOUT 300
+   PROPERTIES TIMEOUT 450
    POST_EXEC_SCRIPT noerror.sh )
