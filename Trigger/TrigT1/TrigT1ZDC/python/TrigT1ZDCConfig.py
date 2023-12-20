@@ -6,11 +6,24 @@
 def L1ZDCSimCfg(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
-    from ZdcRec.ZdcRecConfig import ZdcRecCfg
-    acc.merge(ZdcRecCfg(flags))
+
+    from ZdcRec.ZdcRecConfig import ZdcRecRun2Cfg, ZdcRecRun3Cfg,ZdcRecOutputCfg
     from AthenaConfiguration.ComponentFactory import CompFactory
-    acc.addEventAlgo(CompFactory.LVL1.TrigT1ZDC(filepath_LUT = flags.Trigger.ZdcLUT,
+
+    pn = flags.Input.ProjectName
+    year = int(pn.split('_')[0].split('data')[1])
+    if (year < 20):
+        acc.merge(ZdcRecRun2Cfg(flags))
+        acc.addEventAlgo(CompFactory.LVL1.TrigT1ZDC(filepath_LUT = flags.Trigger.ZdcLUT,
                                                 EnergyADCScale = 0.4))
+    else:
+        acc.merge(ZdcRecRun3Cfg(flags))
+        acc.addEventAlgo(CompFactory.LVL1.TrigT1ZDC(filepath_LUT = 'TrigT1ZDC/zdc_json_PbPb5.36TeV_2023.json',
+                                                EnergyADCScale = 0)) #all EB runs > 462494 --> all use this LUT
+    
+    if flags.Output.doWriteESD or flags.Output.doWriteAOD:
+        acc.merge(ZdcRecOutputCfg(flags))
+
     return acc
 
 if __name__ == '__main__':
@@ -31,7 +44,10 @@ if __name__ == '__main__':
     flags.Trigger.EDMVersion=3
     flags.Trigger.doZDC=True
     flags.Trigger.enableL1CaloPhase1 = False # FIXME: ATR-27095
+    flags.fillFromArgs()
     flags.lock()
+    
+
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)

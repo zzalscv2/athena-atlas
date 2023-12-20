@@ -210,9 +210,7 @@ void TileHid2RESrcID::setROD2ROBmap (const eformat::FullEventFragment<const uint
 {
 
   uint32_t runnum = event->run_no();
-  if ( ( (runnum>318000 && m_runnum<=318000) || (runnum<=318000 && m_runnum>318000) ) ||
-       ( (runnum>=441000 && m_runnum<400000) || (runnum<400000 && m_runnum>=400000) ) ||
-       ( (runnum>=463700 && m_runnum<463700) || (runnum<463700 && m_runnum>=463700) ) ) {
+  if ( ( (runnum>318000 && m_runnum<=318000) || (runnum<=318000 && m_runnum>318000) ) ) {
     log << MSG::INFO << "Reinitializing TileHid2RESrcID for run " << runnum << endmsg;
     initialize(runnum);
   }
