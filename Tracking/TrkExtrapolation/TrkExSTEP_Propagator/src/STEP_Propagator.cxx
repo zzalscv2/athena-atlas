@@ -451,7 +451,7 @@ covarianceContribution(Cache& cache,
                        const Trk::TrackParameters* trackParameters,
                        double path,
                        const Trk::TrackParameters* targetParms,
-                       AmgSymMatrix(5) * measurementCovariance)
+                       AmgSymMatrix(5)& measurementCovariance)
 {
   // kinematics
   double finalMomentum = targetParms->momentum().mag();
@@ -466,7 +466,7 @@ covarianceContribution(Cache& cache,
   AmgSymMatrix(5) localMSCov =
     Trk::RungeKuttaUtils::newCovarianceMatrix(Jac, cache.m_combinedCovariance + cache.m_covariance);
 
-  *measurementCovariance += localMSCov;
+  measurementCovariance += localMSCov;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -478,13 +478,13 @@ covarianceContribution(Cache& cache,
                        const Trk::TrackParameters* trackParameters,
                        double path,
                        double finalMomentum,
-                       AmgSymMatrix(5) * measurementCovariance)
+                       AmgSymMatrix(5)& measurementCovariance)
 {
   // first update to make sure all material counted
   updateMaterialEffects(cache, finalMomentum, sin(trackParameters->momentum().theta()), path);
 
   // Add measurement errors and multiple scattering + straggling covariance
-  *measurementCovariance += cache.m_combinedCovariance + cache.m_covariance;
+  measurementCovariance += cache.m_combinedCovariance + cache.m_covariance;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1134,7 +1134,7 @@ propagateRungeKuttaImpl(Cache& cache,
       Trk::RungeKuttaUtils::newCovarianceMatrix(Jacobian, *trackParameters->covariance());
 
     if (cache.m_matPropOK && (cache.m_multipleScattering || cache.m_straggling) && std::abs(path) > 0.)
-      covarianceContribution(cache, trackParameters.get(), path, std::abs(1. / cache.m_P[6]), &measurementCovariance);
+      covarianceContribution(cache, trackParameters.get(), path, std::abs(1. / cache.m_P[6]), measurementCovariance);
 
     return std::make_unique<Trk::CurvilinearParameters>(
       gp, localp[2], localp[3], localp[4], std::move(measurementCovariance));
@@ -1163,7 +1163,7 @@ propagateRungeKuttaImpl(Cache& cache,
 
   // Calculate multiple scattering and straggling covariance contribution.
   if (cache.m_matPropOK && (cache.m_multipleScattering || cache.m_straggling) && std::abs(path) > 0.)
-    covarianceContribution(cache, trackParameters.get(), path, onTargetSurf.get(), &measurementCovariance);
+    covarianceContribution(cache, trackParameters.get(), path, onTargetSurf.get(), measurementCovariance);
 
   return targetSurface.createUniqueTrackParameters(
     localp[0], localp[1], localp[2], localp[3], localp[4], std::move(measurementCovariance));
@@ -2025,7 +2025,7 @@ std::unique_ptr<Trk::TrackParameters> Trk::STEP_Propagator::propagateRungeKutta(
         if (cache.m_matPropOK && (cache.m_multipleScattering || cache.m_straggling) &&
             std::abs(totalPath) > 0.) {
           covarianceContribution(cache, trackParameters.get(), totalPath, std::abs(1. / cache.m_P[6]),
-                                 &measurementCovariance);
+                                 measurementCovariance);
         }
         cPar = std::make_unique<Trk::CurvilinearParameters>(
             Amg::Vector3D(cache.m_P[0], cache.m_P[1], cache.m_P[2]), localp[2], localp[3], localp[4],
@@ -2110,10 +2110,10 @@ std::unique_ptr<Trk::TrackParameters> Trk::STEP_Propagator::propagateRungeKutta(
   if (cache.m_matPropOK && (cache.m_multipleScattering || cache.m_straggling) && std::abs(totalPath) > 0.) {
     if (returnCurv || targetSurfaces[solutions[0]].first->type() == Trk::SurfaceType::Cone) {
       covarianceContribution(cache, trackParameters.get(), totalPath, std::abs(1. / cache.m_P[6]),
-                             &measurementCovariance);
+                             measurementCovariance);
     } else {
       covarianceContribution(cache, trackParameters.get(), totalPath, onTargetSurf.get(),
-                             &measurementCovariance);
+                             measurementCovariance);
     }
   }
 
