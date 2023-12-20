@@ -263,11 +263,11 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
     {
       TLorentzVector tlvTruthTau1;
       TLorentzVector tlvTruthTau2;
-      tlvTruthTau1.SetPtEtaPhiE(m_accPtVis(*(*vTruthLinks.at(0))),
+      tlvTruthTau1.SetPtEtaPhiM(m_accPtVis(*(*vTruthLinks.at(0))),
 				m_accEtaVis(*(*vTruthLinks.at(0))),
 				m_accPhiVis(*(*vTruthLinks.at(0))),
 				m_accMVis(*(*vTruthLinks.at(0))));
-      tlvTruthTau2.SetPtEtaPhiE(m_accPtVis(*(*vTruthLinks.at(1))),
+      tlvTruthTau2.SetPtEtaPhiM(m_accPtVis(*(*vTruthLinks.at(1))),
 				m_accEtaVis(*(*vTruthLinks.at(1))),
 				m_accPhiVis(*(*vTruthLinks.at(1))),
 				m_accMVis(*(*vTruthLinks.at(1))));
