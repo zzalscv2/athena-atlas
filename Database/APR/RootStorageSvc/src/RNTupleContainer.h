@@ -10,14 +10,14 @@
 #define POOL_RNTUPLECONTAINER_H 1
 
 // Framework include files
-#include <functional>
-#include <map>
-#include <set>
-#include <vector>
+
 
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbContainerImp.h"
 #include "StorageSvc/DbDatabase.h"
+#include <vector>
+#include <memory>
+#include <string>
 
 // Forward declarations
 class TClass;
@@ -87,7 +87,7 @@ class RNTupleContainer : public DbContainerImp
 
  protected:
    /// reference to exact type description
-   const DbTypeInfo*  m_type;
+   const DbTypeInfo*  m_type{};
    /// List of field descriptors
    std::vector<FieldDesc>  m_fieldDescs;
    /// Parent Database handle
@@ -106,7 +106,7 @@ class RNTupleContainer : public DbContainerImp
 
    RootAuxDynIO::IRNTupleWriter*     m_ntupleWriter = nullptr;
    /// Note: the Fields need to be destroyed before the page source is gone
-   RPageSource*       m_pageSource;
+   RPageSource*       m_pageSource{};
 
  public:
    /// Standard constructor
