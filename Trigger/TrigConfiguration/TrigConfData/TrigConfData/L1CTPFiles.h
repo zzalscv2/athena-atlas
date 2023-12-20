@@ -47,6 +47,7 @@ namespace TrigConf {
       enum MuctpiAccess { RoiMaskA, RoiMaskC, PtLutBarrel, PtLutEndcap };
       static const std::map<MuctpiAccess, std::string> s_keyMap;
 
+      // Register the multiplexed inputs (phase) to the CTPCORE (direct electrical and from CTPIN)
       class CTPCoreInput {
       public:
          enum InputType { PIT, DIR, NONE };
@@ -58,11 +59,28 @@ namespace TrigConf {
          size_t      phase() const { return m_phase; }
          InputType   inputType() const { return m_inputType; }
       private:
-         size_t      m_inputNumber;
-         std::string m_name;
-         size_t      m_bit;
-         size_t      m_phase;
-         InputType   m_inputType;
+         size_t      m_inputNumber;  // internal Trigger Menu Compiler index
+         std::string m_name;         // trigger threshold name, a label for input to the CTP
+         size_t      m_bit;          // number of multiplicity bits of the threshold (it can typically have multiplicity up to 7, so up to 3 bits)
+         size_t      m_phase;        // double data rate flag, a parameter saying if the input comes on the rising or falling edge
+         InputType   m_inputType;    // input tag, clarifying the origin or a group of the inputs
+      };
+
+      // Register the CTPCORE inputs to the CTPCORE switch matrix
+      class CTPCoreCTPXInput {
+      public:
+         enum InputType { CTPX, NONE };
+         CTPCoreCTPXInput(size_t inputNumber, const std::string& name, size_t bit, InputType inputType) :
+            m_inputNumber(inputNumber), m_name(name), m_bit(bit), m_inputType(inputType) {}
+         size_t      inputNumber() const { return m_inputNumber; }
+         std::string name() const { return m_name; }
+         size_t      bit() const { return m_bit; }
+         InputType   inputType() const { return m_inputType; }
+      private:
+         size_t      m_inputNumber; // internal Trigger Menu Compiler index
+         std::string m_name;        // trigger threshold name, a label for input to the CTP
+         size_t      m_bit;         // number of multiplicity bits of the threshold (it can typically have multiplicity up to 7, so up to 3 bits)
+         InputType   m_inputType;   // input tag, clarifying the origin or a group of the inputs
       };
 
      class CTPInCounter {
@@ -170,6 +188,7 @@ namespace TrigConf {
       void set_Muctpi_Nbits(std::vector<uint32_t> data);
 
       void set_Tmc_CtpcoreInputs(std::vector<TrigConf::L1CTPFiles::CTPCoreInput> data);
+      void set_Tmc_CtpcoreCTPXInputs(std::vector<TrigConf::L1CTPFiles::CTPCoreCTPXInput> data);
       void set_Tmc_CtpinCounters(std::vector<TrigConf::L1CTPFiles::CTPInCounter> data);
       void set_Tmc_CtpmonCounters(std::vector<TrigConf::L1CTPFiles::CTPMonCounter> data);
 
@@ -226,6 +245,7 @@ namespace TrigConf {
        * L1 TMC output informaion
        */
       std::vector<TrigConf::L1CTPFiles::CTPCoreInput> m_Tmc_CtpcoreInputs;
+      std::vector<TrigConf::L1CTPFiles::CTPCoreCTPXInput> m_Tmc_CtpcoreCTPXInputs;
       std::vector<TrigConf::L1CTPFiles::CTPInCounter> m_Tmc_CtpinCounters;
       std::vector<TrigConf::L1CTPFiles::CTPMonCounter> m_Tmc_CtpmonCounters;
       DataStructure m_Tmc;

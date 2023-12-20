@@ -351,6 +351,11 @@ TrigConf::L1CTPFiles::set_Tmc_CtpcoreInputs(std::vector<TrigConf::L1CTPFiles::CT
 }
 
 void
+TrigConf::L1CTPFiles::set_Tmc_CtpcoreCTPXInputs(std::vector<TrigConf::L1CTPFiles::CTPCoreCTPXInput> data) {
+   m_Tmc_CtpcoreCTPXInputs = std::move(data);
+}
+
+void
 TrigConf::L1CTPFiles::set_Tmc_CtpinCounters(std::vector<TrigConf::L1CTPFiles::CTPInCounter> data) {
    m_Tmc_CtpinCounters = std::move(data);
 }
