@@ -27,18 +27,17 @@
 #include "StoreGate/WriteHandleKey.h"
 
 // Calo includes
+#include "CaloEvent/CaloCellContainer.h"
 //#include "CaloInterface/ICaloCellMakerTool.h"
 
 class IChronoStatSvc;
 class ICaloCellMakerTool;
-class CaloCellContainer;
 
 class CaloCellMaker: public AthReentrantAlgorithm {
 
   public:
-
-    CaloCellMaker(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~CaloCellMaker();
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
+    virtual ~CaloCellMaker() = default;
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute (const EventContext& ctx) const override;
@@ -46,26 +45,19 @@ class CaloCellMaker: public AthReentrantAlgorithm {
 
   private:
 
-    // ChronoStatSvc
-    ServiceHandle<IChronoStatSvc> m_chrono;
-    bool m_doChronoStat;
+    /// ChronoStatSvc
+    ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
+    Gaudi::Property<bool> m_doChronoStat{this,"EnableChronoStat",true};
 
-    /** whether CellContainer to be created will own (default) its cells or not */
-    int m_ownPolicy;
+    //Decide if the container owns the cells or views it (default false=view)
+    Gaudi::Property<bool> m_ownPolicyProp{this,"OwnPolicy",false};
+    SG::OwnershipPolicy m_ownPolicy{SG::VIEW_ELEMENTS};
 
-    // Output cell continer to be used 
-    //std::string m_caloCellsOutputName;
-    SG::WriteHandleKey<CaloCellContainer> m_caloCellsOutputKey;
+    /// Output cell continer to be used 
+    SG::WriteHandleKey<CaloCellContainer> m_caloCellsOutputKey{this,"CaloCellsOutputName","AllCalo","SG Key of the output container"};
 
-    // Authorize input to be the same as output (to be done with care)
-    //bool m_caloCellHack;
-
-    // list of tools to be used
-    //std::vector< std::string > m_caloCellMakerToolNames ;
-    //std::vector < ICaloCellMakerTool *> m_caloCellMakerTools ;
-    ToolHandleArray<ICaloCellMakerTool> m_caloCellMakerTools;
-
-    //unsigned m_evCounter;
+    /// Array of CellMaker (and corrector) AlgTools
+    ToolHandleArray<ICaloCellMakerTool> m_caloCellMakerTools{this,"CaloCellMakerToolNames",{}};
 
 };
 #endif

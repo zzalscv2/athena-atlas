@@ -34,37 +34,6 @@
 using CLHEP::microsecond;
 using CLHEP::second;
 
-/////////////////////////////////////////////////////////////////////
-// CONSTRUCTOR:
-/////////////////////////////////////////////////////////////////////
-
-CaloCellMaker::CaloCellMaker(const std::string& name, ISvcLocator* pSvcLocator)
-    : AthReentrantAlgorithm(name, pSvcLocator)
-  , m_chrono("ChronoStatSvc", name)
-  , m_doChronoStat(true)
-  , m_ownPolicy(static_cast<int>(SG::VIEW_ELEMENTS))
-  , m_caloCellsOutputKey("")
-      //, m_caloCellHack(false)
-  , m_caloCellMakerTools(this)
-      //, m_evCounter(0)
-{
-  declareProperty("EnableChronoStat", m_doChronoStat);
-  declareProperty("OwnPolicy", m_ownPolicy);
-  declareProperty("CaloCellMakerToolNames", m_caloCellMakerTools);
-  declareProperty("CaloCellsOutputName", m_caloCellsOutputKey);
-  //declareProperty("CaloCellHack", m_caloCellHack);
-}
-
-/////////////////////////////////////////////////////////////////////
-// DESTRUCTOR:
-/////////////////////////////////////////////////////////////////////
-
-CaloCellMaker::~CaloCellMaker() = default;
-
-/////////////////////////////////////////////////////////////////////
-// INITIALIZE:
-// The initialize method will create all the required algorithm objects
-/////////////////////////////////////////////////////////////////////
 
 StatusCode CaloCellMaker::initialize() {
 
@@ -73,31 +42,20 @@ StatusCode CaloCellMaker::initialize() {
     ATH_CHECK( m_chrono.retrieve() );
   }
 
-  // // Add ":PUBLIC" to the tool names to force ToolSvc into creating
-  // // public tools.
-  // std::vector< std::string > typesAndNames;
-  // for( const std::string& typeName : m_caloCellMakerTools.typesAndNames() ) {
-  //    typesAndNames.push_back( typeName + ":PUBLIC" );
-  // }
-  // m_caloCellMakerTools.setTypesAndNames( typesAndNames );
-
   // access tools and store them
   CHECK( m_caloCellMakerTools.retrieve() );
   ATH_MSG_DEBUG( "Successfully retrieve CaloCellMakerTools: " << m_caloCellMakerTools );
-
+  
   ATH_CHECK(m_caloCellsOutputKey.initialize());
+
+  m_ownPolicy =  m_ownPolicyProp.value() ? SG::OWN_ELEMENTS : SG::VIEW_ELEMENTS;
+
   ATH_MSG_INFO( " Output CaloCellContainer Name " << m_caloCellsOutputKey.key() );
   if (m_ownPolicy == SG::OWN_ELEMENTS) {
     ATH_MSG_INFO( "...will OWN its cells." );
   } else {
     ATH_MSG_INFO( "...will VIEW its cells." );
   }
-
-  // if (m_caloCellHack) {
-  //   ATH_MSG_WARNING( " CaloCellContainer: " << m_caloCellsOutputName
-  //                   << "will be read in and modified !. To be used with care. " );
-  // }
-
   return StatusCode::SUCCESS;
 
 }
