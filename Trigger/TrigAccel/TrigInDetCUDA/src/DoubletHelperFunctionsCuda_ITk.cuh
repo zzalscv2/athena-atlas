@@ -30,4 +30,18 @@ __device__ static float getMaxDeltaLEta (float eta) {
   else return eta*eta*eta*eta*1.7582417 + eta*eta*-129.67033 + 3324.61538;
 }
 
+
+__device__ static float canBeMiddleSpacePoint (float r, float z) {
+  float z_abs = std::abs(z);
+
+  // Barrel
+  if ((r < 90.)  && (z_abs < 245.)) return false; // volume 80
+  if ((r > 200.) && (z_abs < 245.)) return false; // volume 83
+  if ((r > 250.) && (z_abs < 350.)) return false; // volume 84
+  if (r > 290.) return false; // volume 84
+  // End Cap
+  if (z_abs > 2600.) return false;
+  return true;
+}
+
 #endif

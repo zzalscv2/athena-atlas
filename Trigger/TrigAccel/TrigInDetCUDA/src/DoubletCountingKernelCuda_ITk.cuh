@@ -46,8 +46,10 @@ __global__ static void doubletCountingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 	const float zPlus  = dSettings->m_zedPlus  + zTolerance; 
 	const float maxTheta = 2*atan(exp(-maxEta));
 	const float maxCtg = cos(maxTheta)/sin(maxTheta);
-	const float minOuterZ = dSettings->m_zedMinus - maxOuterRadius*maxCtg - zTolerance; 
-	const float maxOuterZ = dSettings->m_zedPlus + maxOuterRadius*maxCtg + zTolerance; 
+	const float minZ0     = dSettings->m_zedMinus;
+	const float maxZ0     = dSettings->m_zedPlus;
+	const float minOuterZ = minZ0 - maxOuterRadius*maxCtg - zTolerance; 
+	const float maxOuterZ = maxZ0 + maxOuterRadius*maxCtg + zTolerance;
 
 	const double ptCoeff = 0.29997*dSettings->m_magFieldZ/2.0;// ~0.3*B/2 - assumes nominal field of 2*T
 	const float tripletPtMin = dSettings->m_tripletPtMin; // Retrieve from settings
@@ -61,6 +63,8 @@ __global__ static void doubletCountingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
  
 		float zm = dSpacepoints->m_z[spmIdx];
 		float rm = dSpacepoints->m_r[spmIdx];
+
+		if (!canBeMiddleSpacePoint(rm, zm)) continue;
 
 		if(threadIdx.y ==0) {
 			nInner[threadIdx.x] = 0;
@@ -88,11 +92,10 @@ __global__ static void doubletCountingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 				if(next_spEnd == next_spBegin) continue;//no spacepoints in this layer
 
 				const TrigAccel::ITk::SILICON_LAYER& layerGeo =  dDetModel->m_layers[nextLayerIdx];
+
 				bool isBarrel = (layerGeo.m_type == 0);
 
-				
 				float refCoord = layerGeo.m_refCoord;
-				
 				if(isBarrel && std::abs(refCoord-rm)>maxDoubletLength) continue;
 
 				//boundaries for nextLayer
@@ -139,6 +142,9 @@ __global__ static void doubletCountingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 					if(std::abs(tau)>maxCtg) continue;
 
 					// Cut on Z
+					float z0 = zsp - rsp*tau;
+					if(z0 < minZ0 || z0 > maxZ0) continue;
+
 					float outZ = zsp + (maxOuterRadius-rsp)*tau; 
 					if(outZ < minOuterZ || outZ > maxOuterZ) continue;
 

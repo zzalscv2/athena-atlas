@@ -151,7 +151,6 @@ bool SeedMakingWorkCudaITk::run() {
   pOutput->m_nSeeds = 0;		
   pOutput->m_nI = 0;
   pOutput->m_nO = 0;
-  pOutput->m_nCandidates = 0;
 
   cudaMemcpyAsync(p.h_outputseeds, p.d_outputseeds, sizeof(TrigAccel::ITk::OUTPUT_SEED_STORAGE), cudaMemcpyDeviceToHost, p.m_stream);
 
@@ -297,7 +296,6 @@ bool SeedMakingWorkCudaManagedITk::run() {
   pOutput->m_nSeeds = 0;		
   pOutput->m_nI = 0;
   pOutput->m_nO = 0;
-  pOutput->m_nCandidates = 0;
 
 
   checkError();

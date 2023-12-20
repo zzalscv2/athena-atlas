@@ -8,6 +8,7 @@
 
 #include <cuda_runtime.h>
 #include "SeedMakingDataStructures_ITk.h"
+#include "DoubletHelperFunctionsCuda_ITk.cuh"
 
 
 __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTINGS* dSettings, 
@@ -25,6 +26,7 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 
 	__shared__ int spmIdx;
 	__shared__ float rm;
+	__shared__ float zm;
 
 	__shared__ float covZ;
 	__shared__ float covR;
@@ -91,6 +93,7 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 			outerStart = d_Storage->m_outerStart[itemIdx];
 
 			rm = dSpacepoints->m_r[spmIdx];
+			zm = dSpacepoints->m_z[spmIdx];
 			covZ = dSpacepoints->m_covZ[spmIdx];
 			covR = dSpacepoints->m_covR[spmIdx];
 		
@@ -100,7 +103,9 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 			cosA = x0/rm;
 			sinA = y0/rm;
 		}
-		__syncthreads();    
+		__syncthreads();
+
+		if (!canBeMiddleSpacePoint(rm, zm)) continue;    
 
 		
 		for(int innerIdx = threadIdx.x; innerIdx<nInner;innerIdx+=blockDim.x) {
