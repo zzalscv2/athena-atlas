@@ -233,7 +233,7 @@ namespace IOVDbNamespace{
 	case StorageType::String64k:
 	case StorageType::String16M:
 	  {
-	    att.setValue<std::string>(strVal);
+	    att.setValue<std::string>(thisVal.get<std::string>());
 	    break;
 	  }
 	case StorageType::Blob128M:
