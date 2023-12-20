@@ -68,12 +68,16 @@ void JetConstituentFrac::fillConstituentFrac(const xAOD::Jet& jet) const {
     }
   }
 
-  SG::WriteDecorHandle<xAOD::JetContainer, float> neutralEFracFracHandle(m_neutralEFracKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, float> chargePTFracFracHandle(m_chargePTFracKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, float> chargeMFracFracHandle(m_chargeMFracKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> neutralEFracHandle(m_neutralEFracKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> chargePTFracHandle(m_chargePTFracKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> chargeMFracHandle(m_chargeMFracKey);
+
+  // Get jet p4 at constituent scale to compute ratios
+  xAOD::JetFourMom_t uncalP4;
+  jet.getAttribute<xAOD::JetFourMom_t>("JetConstitScaleMomentum",uncalP4);
   
-  neutralEFracFracHandle(jet)  = neutE/jet.e();
-  chargePTFracFracHandle(jet)  = chargPt/jet.pt();
-  chargeMFracFracHandle(jet)   = jet.m() != 0. ? chargM.M()/jet.m() : 0.;
+  neutralEFracHandle(jet)  = neutE/uncalP4.e();
+  chargePTFracHandle(jet)  = chargPt/uncalP4.pt();
+  chargeMFracHandle(jet)   = uncalP4.M() != 0. ? chargM.M()/uncalP4.M() : 0.;
 
 }

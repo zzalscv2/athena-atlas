@@ -44,7 +44,12 @@ StatusCode JetGroomMRatio::decorate(const xAOD::JetContainer& jets) const {
     }
 
     SG::WriteDecorHandle<xAOD::JetContainer, float> groomMRatioHandle(m_groomMRatioKey);
-    groomMRatioHandle(*jet) = jet->m()/parent->m();
+
+    // Get jet p4 at constituent scale to compute ratio
+    xAOD::JetFourMom_t uncalP4;
+    jet->getAttribute<xAOD::JetFourMom_t>("JetConstitScaleMomentum",uncalP4);
+
+    groomMRatioHandle(*jet) = uncalP4.M()/parent->m();
 
   }
   
