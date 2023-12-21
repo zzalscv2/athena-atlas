@@ -151,6 +151,12 @@ def MicroMegaCablingCfg(flags, name = "MuonMM_CablingAlg", **kwargs):
     #### Only setup the MM Cabling algorithm for data
     if flags.Input.isMC or not flags.Detector.GeometryMM: 
         return result
+
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    cablingFolder = "/MDT/MM/CABLING" if not flags.Common.isOnline else  "/MDT/Onl/MM/CABLING"
+    kwargs.setdefault("CablingFolder",cablingFolder)
+    result.merge(addFolders(flags,[kwargs["CablingFolder"]], detDb=("MDT_OFL" if not  flags.Common.isOnline else "MDT_ONL"), className="CondAttrListCollection", tag="MmCabling-FrontEndShifts-v1"))
+
     the_alg = CompFactory.MuonMM_CablingAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result

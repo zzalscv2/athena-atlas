@@ -30,7 +30,7 @@ class MuonMM_CablingAlg : public AthReentrantAlgorithm {
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     SG::ReadCondHandleKey<CondAttrListCollection> m_readCablingKey{
-        this, "CablingFolder", /* "/MDT/MM/CABLING" */ "", "Key of input conditions folder for MM cabling map"};
+        this, "CablingFolder", "/MDT/MM/CABLING", "Key of input conditions folder for MM cabling map"};
     SG::WriteCondHandleKey<MicroMega_CablingMap> m_writeKey{
         this, "WriteKey", "MicroMegaCabling", "Key of output MM cabling map"};
 
