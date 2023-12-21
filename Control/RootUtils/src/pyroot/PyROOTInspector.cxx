@@ -372,8 +372,8 @@ recurse_pyinspect(PyObject *pyobj,
                 << (*(int*)ptr) << "]["
                 << mbr->GetName() << "] is an enum !!\n";
 #endif
-      py_mbr_name = PyUnicode_FromString(mbr->GetTypeName());
-      py_mbr = PyUnicode_FromString(mbr->GetName());
+      py_mbr_name = PyUnicode_FromString(mbr->GetName());
+      py_mbr = to_pyobj(ptr, kInt_t);
     } else {
       py_mbr_name = PyUnicode_FromString(mbr->GetName());
       py_mbr = TPython::CPPInstance_FromVoidPtr((void*)ptr,
@@ -521,7 +521,7 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
                 << (*(int*)ptr) << "]["
                 << mbr->GetName() << "] is an enum !!\n";
 #endif
-      py_mbr = PyUnicode_FromString(mbr->GetTypeName());
+      py_mbr = to_pyobj(ptr, kInt_t);
     } else {
       PyObject *pyroot_obj = TPython::CPPInstance_FromVoidPtr
         ((void*)ptr,
