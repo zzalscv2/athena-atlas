@@ -177,3 +177,51 @@ bool DiTauSelectionCutAbsEta::accept(const xAOD::DiTauJet& xDiTau,
   return false;
 }
 
+//_______________________________SelectionCutNSubjets_________________________________
+//______________________________________________________________________________
+DiTauSelectionCutNSubjets::DiTauSelectionCutNSubjets(DiTauSelectionTool* tDTST)
+  : DiTauSelectionCut("CutNSubjets", tDTST)
+{
+  m_hHistCutPre = CreateControlPlot("hNSubjets_pre","NSubjets_pre;di-#tau NSubjets; events",30,0,30);
+  m_hHistCut = CreateControlPlot("hNSubjets_cut","NSubjets_cut;di-#tau NSubjets; events",30,0,30);
+}
+
+//______________________________________________________________________________
+void DiTauSelectionCutNSubjets::fillHistogram(const xAOD::DiTauJet& xDiTau, TH1F& hHist) const
+{
+  hHist.Fill(xDiTau.nSubjets());
+}
+
+//______________________________________________________________________________
+void DiTauSelectionCutNSubjets::setAcceptInfo(asg::AcceptInfo& info) const
+{
+  info.addCut( "NSubjets",
+               "Selection of ditaus according to their number of subjets" );
+}
+//______________________________________________________________________________
+bool DiTauSelectionCutNSubjets::accept(const xAOD::DiTauJet& xDiTau,
+                            asg::AcceptData& acceptData)
+{
+  float nsubjets = xDiTau.nSubjets();
+  // in case of only one entry in vector, run for lower limits
+  if (m_tDTST->m_vNSubjetsRegion.size() == 1)
+  {
+    if ( nsubjets >= m_tDTST->m_vNSubjetsRegion.at(0) )
+    {
+      acceptData.setCutResult( "NSubjets", true );
+      return true;
+    }
+  }
+  unsigned int iNumNSubjetsRegion = m_tDTST->m_vNSubjetsRegion.size()/2;
+  for( unsigned int iNSubjetsRegion = 0; iNSubjetsRegion < iNumNSubjetsRegion; iNSubjetsRegion++ )
+  {
+    if ( nsubjets >= m_tDTST->m_vNSubjetsRegion.at(iNSubjetsRegion*2) and nsubjets <= m_tDTST->m_vNSubjetsRegion.at(iNSubjetsRegion*2+1))
+    {
+      acceptData.setCutResult( "NSubjets", true );
+      return true;
+    }
+  }
+  m_tDTST->msg() << MSG::VERBOSE << "DiTau failed NSubjets requirement, ditau number of subjets: " << nsubjets << endmsg;
+  return false;
+}
+

@@ -33,14 +33,18 @@ DiTauSelectionTool::DiTauSelectionTool( const std::string& name )
     other properties named in plural are a list of exact values to cut on
     other properties are single cuts
   */
-  declareProperty( "ConfigPath",    m_sConfigPath    = "");
-  declareProperty( "SelectionCuts", m_iSelectionCuts = NoDiTauCut); // initialize with 'no' cuts
-  declareProperty( "PtRegion",      m_vPtRegion      = {});  // in GeV
-  declareProperty( "PtMin",         m_dPtMin         = NAN); // in GeV
-  declareProperty( "PtMax",         m_dPtMax         = NAN); // in GeV
-  declareProperty( "AbsEtaRegion",  m_vAbsEtaRegion  = {});
-  declareProperty( "AbsEtaMin",     m_dAbsEtaMin     = NAN);
-  declareProperty( "AbsEtaMax",     m_dAbsEtaMax     = NAN);
+  declareProperty( "ConfigPath",     m_sConfigPath     = "");
+  declareProperty( "SelectionCuts",  m_iSelectionCuts  = NoDiTauCut); // initialize with 'no' cuts
+  declareProperty( "PtRegion",       m_vPtRegion       = {});  // in GeV
+  declareProperty( "PtMin",          m_dPtMin          = NAN); // in GeV
+  declareProperty( "PtMax",          m_dPtMax          = NAN); // in GeV
+  declareProperty( "AbsEtaRegion",   m_vAbsEtaRegion   = {});
+  declareProperty( "AbsEtaMin",      m_dAbsEtaMin      = NAN);
+  declareProperty( "AbsEtaMax",      m_dAbsEtaMax      = NAN);
+  declareProperty( "NSubjetsRegion", m_vNSubjetsRegion = {});
+  declareProperty( "NSubjetsMin",    m_dNSubjetsMin    = NAN);
+  declareProperty( "NSubjetsMax",    m_dNSubjetsMax    = NAN);
+
 }
 
 //______________________________________________________________________________
@@ -54,12 +58,15 @@ StatusCode DiTauSelectionTool::initialize()
 {
   bool bConfigViaConfigFile = !m_sConfigPath.empty();
   bool bConfigViaProperties = false;
-  if (!bConfigViaProperties and !m_vPtRegion.empty())         bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dPtMin == m_dPtMin)         bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dPtMax == m_dPtMax)         bConfigViaProperties = true;
-  if (!bConfigViaProperties and !m_vAbsEtaRegion.empty())     bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dAbsEtaMin == m_dAbsEtaMin) bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dAbsEtaMax == m_dAbsEtaMax) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !m_vPtRegion.empty())             bConfigViaProperties = true;
+  if (!bConfigViaProperties and m_dPtMin == m_dPtMin)             bConfigViaProperties = true;
+  if (!bConfigViaProperties and m_dPtMax == m_dPtMax)             bConfigViaProperties = true;
+  if (!bConfigViaProperties and !m_vAbsEtaRegion.empty())         bConfigViaProperties = true;
+  if (!bConfigViaProperties and m_dAbsEtaMin == m_dAbsEtaMin)     bConfigViaProperties = true;
+  if (!bConfigViaProperties and m_dAbsEtaMax == m_dAbsEtaMax)     bConfigViaProperties = true;
+  if (!bConfigViaProperties and !m_vNSubjetsRegion.empty())       bConfigViaProperties = true;
+  if (!bConfigViaProperties and m_dNSubjetsMin == m_dNSubjetsMin) bConfigViaProperties = true;
+  if (!bConfigViaProperties and m_dNSubjetsMax == m_dNSubjetsMax) bConfigViaProperties = true;
 
   if (bConfigViaConfigFile and bConfigViaProperties)
   {
@@ -139,6 +146,24 @@ StatusCode DiTauSelectionTool::initialize()
         if (m_dAbsEtaMax != m_dAbsEtaMax)
           m_dAbsEtaMax = rEnv.GetValue("AbsEtaMax",NAN);
       }
+      else if (sCut == "NSubjetsRegion")
+      {
+        iSelectionCuts = iSelectionCuts | DiTauCutNSubjets;
+        if (m_vNSubjetsRegion.empty())
+          TauAnalysisTools::split(rEnv,"NSubjetsRegion", ';', m_vNSubjetsRegion);
+      }
+      else if (sCut == "NSubjetsMin")
+      {
+        iSelectionCuts = iSelectionCuts | DiTauCutNSubjets;
+        if (m_dNSubjetsMin != m_dNSubjetsMin)
+          m_dNSubjetsMin = rEnv.GetValue("NSubjetsMin",NAN);
+      }
+      else if (sCut == "NSubjetsMax")
+      {
+        iSelectionCuts = iSelectionCuts | DiTauCutNSubjets;
+        if (m_dNSubjetsMax != m_dNSubjetsMax)
+          m_dNSubjetsMax = rEnv.GetValue("NSubjetsMax",NAN);
+      }
       else ATH_MSG_WARNING("Cut " << sCut << " is not available");
     }
 
@@ -154,6 +179,7 @@ StatusCode DiTauSelectionTool::initialize()
   {
    {DiTauCutPt, std::make_unique<TauAnalysisTools::DiTauSelectionCutPt>(this)},
    {DiTauCutAbsEta, std::make_unique<TauAnalysisTools::DiTauSelectionCutAbsEta>(this)},
+   {DiTauCutNSubjets, std::make_unique<TauAnalysisTools::DiTauSelectionCutNSubjets>(this)},
   };
   
   m_cMap = { std::make_move_iterator( begin(elements) ), std::make_move_iterator( end(elements) ) };
@@ -161,13 +187,16 @@ StatusCode DiTauSelectionTool::initialize()
   ATH_MSG_INFO( "Initializing TauSelectionTool" );
   FillRegionVector(m_vPtRegion, m_dPtMin, m_dPtMax);
   FillRegionVector(m_vAbsEtaRegion, m_dAbsEtaMin, m_dAbsEtaMax);
+  FillRegionVector(m_vNSubjetsRegion, m_dNSubjetsMin, m_dNSubjetsMax);
 
   PrintConfigRegion ("Pt",          m_vPtRegion);
   PrintConfigRegion ("AbsEta",      m_vAbsEtaRegion);
+  PrintConfigRegion ("NSubjets",    m_vNSubjetsRegion);
 
   std::string sCuts = "";
-  if (m_iSelectionCuts & CutPt) sCuts += "Pt ";
-  if (m_iSelectionCuts & CutAbsEta) sCuts += "AbsEta ";
+  if (m_iSelectionCuts & DiTauCutPt) sCuts += "Pt ";
+  if (m_iSelectionCuts & DiTauCutAbsEta) sCuts += "AbsEta ";
+  if (m_iSelectionCuts & DiTauCutNSubjets) sCuts += "NSubjets ";
 
   ATH_MSG_DEBUG( "cuts: " << sCuts);
 

@@ -95,6 +95,24 @@ setup:
      - accepting taus with an absolute eta below an upper bound
      - if ``AbsEtaMax`` is configured, ``AbsEtaRegion`` configuration wont be considered
 
+   * - ``CutNSubjets``
+     - ``NSubjetsRegion``
+     - ``std::vector<float>``
+     - accepting taus within number of subjets regions, each `odd` in the vector is a lower bound, each `even` is an upper bound
+     -
+     
+   * -
+     - ``NSubjetsMin``
+     - ``float``
+     - accepting taus with a number of subjets above a lower bound
+     - if ``NSubjetsMin`` is configured, ``NSubjetsRegion`` configuration wont be considered
+
+   * -
+     - ``NSubjetsMax``
+     - ``float``
+     - accepting taus with a number of subjets below an upper bound
+     - if ``NSubjetsMax`` is configured, ``NSubjetsRegion`` configuration wont be considered
+
 If one wants to use a different setup one has three options:
 
 1. Using an own config file
