@@ -22,35 +22,38 @@ def CPAlgorithmsCfg(flags):
     logPLCPAlgCfg.info('****************** STARTING PHYSLITE CPAlgorithmsCfg *****************')
 
 
-    from AnalysisAlgorithmsConfig.ConfigFactory import makeConfig
+    from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
     from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
     configSeq = ConfigSequence ()
 
+    # create factory object to build block configurations
+    config = ConfigFactory()
+    # get function to make configs
+    makeConfig = config.makeConfig
+
     # Set up the systematics loader/handler algorithm:
-    subConfig = makeConfig ('CommonServices', None)
+    subConfig = makeConfig ('CommonServices')
     subConfig.setOptionValue ('.runSystematics', False)
     configSeq += subConfig
 
     # Create a pile-up analysis config
     if flags.Input.isMC:
         # setup config and lumicalc files for pile-up tool
-        configSeq += makeConfig ('Event.PileupReweighting', None)
-        configSeq.setOptionValue ('.campaign', flags.Input.MCCampaign)
-        configSeq.setOptionValue ('.files', flags.Input.Files)
-        configSeq.setOptionValue ('.useDefaultConfig', True)
+        configSeq += makeConfig ('PileupReweighting')
 
     # set up the muon analysis algorithm config (must come before electrons and photons to allow FSR collection):
 
     logPLCPAlgCfg.info('Do Muons')
 
-    subConfig = makeConfig ('Muons', 'AnalysisMuons')
+    subConfig = makeConfig ('Muons', containerName='AnalysisMuons')
     subConfig.setOptionValue ('.trackSelection', False)
     configSeq += subConfig
-    subConfig = makeConfig ('Muons.Selection', 'AnalysisMuons.loose')
+    subConfig = makeConfig ('Muons.WorkingPoint', containerName='AnalysisMuons',
+        selectionName='loose')
     subConfig.setOptionValue ('.quality', 'Loose')
     subConfig.setOptionValue ('.isolation', 'NonIso')
     configSeq += subConfig
-    subConfig = makeConfig ('Output.Thinning', 'AnalysisMuons.loose')
+    subConfig = makeConfig ('Thinning', containerName='AnalysisMuons')
     subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
@@ -60,18 +63,19 @@ def CPAlgorithmsCfg(flags):
 
     logPLCPAlgCfg.info('Do Electrons')
 
-    subConfig = makeConfig ('Electrons', 'AnalysisElectrons')
+    subConfig = makeConfig ('Electrons', containerName='AnalysisElectrons')
     subConfig.setOptionValue ('.trackSelection', False)
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
     configSeq += subConfig
-    subConfig = makeConfig ('Electrons.Selection', 'AnalysisElectrons.loose')
+    subConfig = makeConfig ('Electrons.WorkingPoint', containerName='AnalysisElectrons',
+        selectionName='loose')
     subConfig.setOptionValue ('.likelihoodWP', 'LooseLHElectron')
     subConfig.setOptionValue ('.isolationWP', 'NonIso')
     subConfig.setOptionValue ('.doFSRSelection', True)
     subConfig.setOptionValue ('.noEffSF', True)
     configSeq += subConfig
-    subConfig = makeConfig ('Output.Thinning', 'AnalysisElectrons.loose')
+    subConfig = makeConfig ('Thinning', containerName='AnalysisElectrons')
     subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
@@ -81,33 +85,35 @@ def CPAlgorithmsCfg(flags):
 
     logPLCPAlgCfg.info('Do Photons')
 
-    subConfig = makeConfig ('Photons', 'AnalysisPhotons')
+    subConfig = makeConfig ('Photons', containerName='AnalysisPhotons')
     subConfig.setOptionValue ('.recomputeIsEM', False)
     subConfig.setOptionValue ('.minPt', 0.)
     configSeq += subConfig
-    subConfig = makeConfig ('Photons.Selection', 'AnalysisPhotons.loose')
+    subConfig = makeConfig ('Photons.WorkingPoint', containerName='AnalysisPhotons',
+        selectionName='loose')
     subConfig.setOptionValue ('.qualityWP', 'Loose')
     subConfig.setOptionValue ('.isolationWP', 'Undefined')
     subConfig.setOptionValue ('.doFSRSelection', True)
     subConfig.setOptionValue ('.recomputeIsEM', False)
     subConfig.setOptionValue ('.noEffSF', True)
     configSeq += subConfig
-    subConfig = makeConfig ('Output.Thinning', 'AnalysisPhotons.loose')
+    subConfig = makeConfig ('Thinning', containerName='AnalysisPhotons')
     subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
     configSeq += subConfig
 
-    
 
-    # set up the tau analysis algorithm config:                                                    
+
+    # set up the tau analysis algorithm config:
     # Commented for now due to use of public tools
-    subConfig = makeConfig ('TauJets', 'AnalysisTauJets')
+    subConfig = makeConfig ('TauJets', containerName='AnalysisTauJets')
     configSeq += subConfig
-    subConfig = makeConfig ('TauJets.Selection', 'AnalysisTauJets.baseline')
+    subConfig = makeConfig ('TauJets.WorkingPoint', containerName='AnalysisTauJets',
+        selectionName='baseline')
     subConfig.setOptionValue ('.quality', 'Baseline')
     configSeq += subConfig
-    subConfig = makeConfig ('Output.Thinning', 'AnalysisTauJets.baseline')
+    subConfig = makeConfig ('Thinning', containerName='AnalysisTauJets')
     subConfig.setOptionValue ('.selectionName', 'baseline')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
@@ -115,29 +121,31 @@ def CPAlgorithmsCfg(flags):
 
     # set up the jet analysis algorithm config:
     jetContainer = 'AntiKt4EMPFlowJets'
-    subConfig = makeConfig ('Jets', 'AnalysisJets', jetCollection=jetContainer)
+    subConfig = makeConfig ('Jets', containerName='AnalysisJets',
+        jetCollection=jetContainer)
     subConfig.setOptionValue ('.runFJvtUpdate', False)
     subConfig.setOptionValue ('.runFJvtSelection', False)
     subConfig.setOptionValue ('.runJvtSelection', False)
     configSeq += subConfig
-    subConfig = makeConfig ('Output.Thinning', 'AnalysisJets.')
+    subConfig = makeConfig ('Thinning', containerName='AnalysisJets')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
     configSeq += subConfig
 
     largeRjetContainer='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
-    subConfig = makeConfig ('Jets', 'AnalysisLargeRJets', jetCollection=largeRjetContainer)
+    subConfig = makeConfig ('Jets', containerName='AnalysisLargeRJets',
+        jetCollection=largeRjetContainer)
     subConfig.setOptionValue ('.runGhostMuonAssociation', False)
     subConfig.setOptionValue ('.postfix', 'largeR_jets' )
     configSeq += subConfig
-    subConfig = makeConfig ('Output.Thinning', 'AnalysisLargeRJets.')
+    subConfig = makeConfig ('Thinning', containerName='AnalysisLargeRJets')
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
     configSeq += subConfig
 
     from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
-    configAccumulator = ConfigAccumulator (dataType=None, algSeq=None, autoconfigFromFlags=flags,
-                                           noSysSuffix=True)
+    configAccumulator = ConfigAccumulator (dataType=None, algSeq=None,
+        autoconfigFromFlags=flags, noSysSuffix=True)
     configSeq.fullConfigure (configAccumulator)
     return configAccumulator.CA
 

@@ -86,6 +86,58 @@ class ConfigSequence:
             raise KeyError ('unknown option: ' + name)
 
 
+    def printOptions(self):
+        """
+        Prints options and their values for each config block in a config sequence
+        """
+        for config in self:
+            print(config)
+            try:
+                options = [(opt, getattr(config, opt)) for opt in config._options]
+                for k, v in options:
+                    print(f"    {k}: {v}")
+            except Exception as e:
+                print(e)
+
+
+    def getOptions(self):
+        """get information on options for last block in sequence"""
+        options = []
+        for name, o in self._blocks[-1].getOptions().items():
+            val = getattr(self._blocks[-1], name)
+            valType = o.type
+            valRequired = o.required 
+            options.append({'name':name, 'defaultValue':val, 'type': valType, 
+                'required': valRequired})
+        return options
+
+    
+    def setOptions(self, options):
+        """Set options for a ConfigBlock"""
+        algOptions = self.getOptions()
+        for opt in algOptions:
+            name = opt['name']
+            valType = opt['type']
+            valDefault = opt['defaultValue']
+            valRequired = opt['required']
+
+            if valRequired and name not in options:
+                raise ValueError(f'{name} is required but not included in config')
+
+            if name in options:
+                opt_type = type(options[name])
+                # does not check type if expected type is None
+                if valType is not None and opt_type != valType:
+                    raise ValueError(f'{name} should be of type {valType} not {opt_type}')
+                self.setOptionValue (f'.{name}', options[name])
+                print(f"    {name}: {options[name]}")
+            else:
+                # add default used to config
+                options[name] = valDefault
+                print(f"    {name}: {valDefault}")
+        return algOptions
+
+
     def __iadd__( self, sequence, index = None ):
         """Add another sequence to this one
 
