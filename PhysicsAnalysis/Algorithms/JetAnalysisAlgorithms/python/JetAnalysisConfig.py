@@ -112,6 +112,89 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('uncertToolCalibArea', None, type=str)
         self.addOption ('uncertToolMCType', None, type=str)
 
+
+    def getUncertaintyToolSettings(self, config):
+
+        # Retrieve appropriate JES/JER recommendations for the JetUncertaintiesTool.
+        # We do this separately from the tool declaration, as we may need to set uo
+        # two such tools, but they have to be private.
+
+        # Config file:
+        config_file = None
+        if self.systematicsModelJES == "All" and self.systematicsModelJER == "All":
+            config_file = "R4_AllNuisanceParameters_AllJERNP.config"
+        elif "Scenario" in self.systematicsModelJES:
+            if self.systematicsModelJER != "Simple":
+                raise ValueError(
+                    "Invalid uncertainty configuration - Scenario* systematicsModelJESs can "
+                    "only be used together with the Simple systematicsModelJER")
+            config_file = "R4_{0}_SimpleJER.config".format(self.systematicsModelJES)
+        elif self.systematicsModelJES in ["Global", "Category"] and self.systematicsModelJER in ["Simple", "Full"]:
+            config_file = "R4_{0}Reduction_{1}JER.config".format(self.systematicsModelJES, self.systematicsModelJER)
+        else:
+            raise ValueError(
+                "Invalid combination of systematicsModelJES and systematicsModelJER settings: "
+                "systematicsModelJES: {0}, systematicsModelJER: {1}".format(self.systematicsModelJES, self.systematicsModelJER) )
+
+        # Calibration area:
+        calib_area = None
+        if self.uncertToolCalibArea is not None:
+            calib_area = self.uncertToolCalibArea
+
+        # Expert override for config path:
+        if self.uncertToolConfigPath is not None:
+            config_file = self.uncertToolConfigPath
+        else:
+            config_file = "rel22/Summer2023_PreRec/" + config_file
+
+        # MC type:
+        mc_type = None
+        if self.uncertToolMCType is not None:
+            mc_type = self.uncertToolMCType
+        else:
+            if config.geometry() is LHCPeriod.Run2:
+                mc_type = "MC20"
+            else:
+                mc_type = "MC21"
+
+        return config_file, calib_area, mc_type
+
+
+    def createUncertaintyTool(self, jetUncertaintiesAlg, config, jetCollectionName, doPseudoData=False):
+
+        # Create an instance of JetUncertaintiesTool, following JetETmiss recommendations.
+        # To run Jet Energy Resolution (JER) uncertainties in the "Full" or "All" schemes,
+        # we need two sets of tools: one configured as normal (MC), the other with the
+        # exact same settings but pretending to run on data (pseudo-data).
+        # This is achieved by passing "isPseudoData=True" to the arguments.
+
+        # Retrieve the common configuration settings
+        configFile, calibArea, mcType = self.getUncertaintyToolSettings(config)
+
+        # The main tool for all JES+JER combinations
+        config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
+        jetUncertaintiesAlg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
+        jetUncertaintiesAlg.uncertaintiesTool.ConfigFile = configFile
+        if calibArea is not None:
+            jetUncertaintiesAlg.uncertaintiesTool.CalibArea = calibArea
+        jetUncertaintiesAlg.uncertaintiesTool.MCType = mcType
+        jetUncertaintiesAlg.uncertaintiesTool.IsData = (config.dataType() is DataType.Data)
+        jetUncertaintiesAlg.uncertaintiesTool.PseudoDataJERsmearingMode = False
+
+        if doPseudoData:
+            # The secondary tool for pseudo-data JER smearing
+            config.addPrivateTool( 'uncertaintiesToolPD', 'JetUncertaintiesTool' )
+            jetUncertaintiesAlg.uncertaintiesToolPD.JetDefinition = jetCollectionName[:-4]
+            jetUncertaintiesAlg.uncertaintiesToolPD.ConfigFile = configFile
+            if calibArea is not None:
+                jetUncertaintiesAlg.uncertaintiesToolPD.CalibArea = calibArea
+            jetUncertaintiesAlg.uncertaintiesToolPD.MCType = mcType
+
+            # This is the part that is different!
+            jetUncertaintiesAlg.uncertaintiesToolPD.IsData = True
+            jetUncertaintiesAlg.uncertaintiesToolPD.PseudoDataJERsmearingMode = True
+
+
     def makeAlgs (self, config) :
 
         postfix = self.postfix
@@ -162,40 +245,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
         # Jet uncertainties
         alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+postfix )
-        config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
-        alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
-        # Prepare the config file
-        if self.systematicsModelJES == "All" and self.systematicsModelJER == "All":
-            alg.uncertaintiesTool.ConfigFile = "R4_AllNuisanceParameters_AllJERNP.config"
-        elif "Scenario" in self.systematicsModelJES:
-            if self.systematicsModelJER != "Simple":
-                raise ValueError(
-                    "Invalid uncertainty configuration - Scenario* systematicsModelJESs can "
-                    "only be used together with the Simple systematicsModelJER")
-            configFile = "R4_{0}_SimpleJER.config".format(self.systematicsModelJES)
-        elif self.systematicsModelJES in ["Global", "Category"] and self.systematicsModelJER in ["Simple", "Full"]:
-            configFile = "R4_{0}Reduction_{1}JER.config".format(self.systematicsModelJES, self.systematicsModelJER)
-        else:
-            raise ValueError(
-                "Invalid combination of systematicsModelJES and systematicsModelJER settings: "
-                "systematicsModelJES: {0}, systematicsModelJER: {1}".format(self.systematicsModelJES, self.systematicsModelJER) )
-        # Expert override for calibarea
-        if self.uncertToolCalibArea is not None:
-            alg.uncertaintiesTool.CalibArea = self.uncertToolCalibArea
-        # Expert override for configpath
-        if self.uncertToolConfigPath is not None:
-            alg.uncertaintiesTool.ConfigFile = self.uncertToolConfigPath
-        else: # Default config
-            alg.uncertaintiesTool.ConfigFile = "rel22/Summer2023_PreRec/"+configFile    # Add the correct directory on the front
-        # Expert override for mctype
-        if self.uncertToolMCType is not None:
-            alg.uncertaintiesTool.MCType = self.uncertToolMCType
-        else: # Default config
-            if config.geometry() is LHCPeriod.Run2:
-                alg.uncertaintiesTool.MCType = "MC20"
-            else:
-                alg.uncertaintiesTool.MCType = "MC21"
-        alg.uncertaintiesTool.IsData = (config.dataType() is DataType.Data)
+        self.createUncertaintyTool(alg, config, jetCollectionName, doPseudoData=( self.systematicsModelJER in ["Full","All"] ))
         alg.jets = config.readName (self.containerName)
         alg.jetsOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -35,9 +35,13 @@ namespace CP
     
 
 
-    /// \brief the uncertainties tool
+    /// \brief the main jet uncertainties tool
   private:
     ToolHandle<ICPJetUncertaintiesTool> m_uncertaintiesTool;
+
+    /// \brief the secondary jet uncertainties tool, for pseudo-data JER smearing
+  private:
+    ToolHandle<ICPJetUncertaintiesTool> m_uncertaintiesToolPD;
 
     /// \brief the systematics list we run
   private:
@@ -56,6 +60,15 @@ namespace CP
     /// \brief the helper for OutOfValidity results
   private:
     OutOfValidityHelper m_outOfValidity {this};
+
+    /// \brief the vector of systematics (for CPU-optimisation)
+  private:
+    std::vector<CP::SystematicSet> m_systematicsVector;
+
+    /// \brief the vector of pseudo-data JER systematics (for CPU-optimisation)
+  private:
+    std::vector<CP::SystematicSet> m_systematicsVectorOnlyJERPseudoData;
+
   };
 }
 

@@ -105,6 +105,7 @@ JetUncertaintiesTool::JetUncertaintiesTool(const std::string& name)
     , m_accEfficiency("temp_efficiency")
     , m_accTagResult("temp_accept")
     , m_absEtaGluonFraction(true)
+    , m_pseudoDataJERsmearingMode(false)
 {
     declareProperty("JetDefinition",m_jetDef);
     declareProperty("MCType",m_mcType);
@@ -116,6 +117,7 @@ JetUncertaintiesTool::JetUncertaintiesTool(const std::string& name)
     declareProperty("VariablesToShift",m_systFilters);
     declareProperty("IsData",m_isData);
     declareProperty("AbsEtaGluonFraction",m_absEtaGluonFraction);
+    declareProperty("PseudoDataJERsmearingMode",m_pseudoDataJERsmearingMode);
 
     ATH_MSG_DEBUG("Creating JetUncertaintiesTool named "<<m_name);
 
@@ -168,6 +170,7 @@ JetUncertaintiesTool::JetUncertaintiesTool(const JetUncertaintiesTool& toCopy)
     , m_accEfficiency(toCopy.m_accEfficiency)
     , m_accTagResult(toCopy.m_accTagResult)
     , m_absEtaGluonFraction(toCopy.m_absEtaGluonFraction)
+    , m_pseudoDataJERsmearingMode(toCopy.m_pseudoDataJERsmearingMode)
 {
     ATH_MSG_DEBUG("Creating copy of JetUncertaintiesTool named "<<m_name);
 
@@ -708,6 +711,13 @@ StatusCode JetUncertaintiesTool::initialize()
         CP::SystematicVariation systVar(m_groups.at(iGroup)->getName().Data(),CP::SystematicVariation::CONTINUOUS);
         if (addAffectingSystematic(systVar,isRecommended) != StatusCode::SUCCESS)
             return StatusCode::FAILURE;
+	if (m_pseudoDataJERsmearingMode) {
+	  if (systVar.basename().find("JER") != std::string::npos) {
+	    CP::SystematicVariation systVarPD(systVar.basename()+"_PseudoData",CP::SystematicVariation::CONTINUOUS);
+	    if (addAffectingSystematic(systVarPD,isRecommended) != StatusCode::SUCCESS)
+	      return StatusCode::FAILURE;
+	  }
+	}
     }
 
     // Ensure that we have nominal resolutions for any requested resolution uncertainties
@@ -1306,11 +1316,24 @@ StatusCode JetUncertaintiesTool::applySystematicVariation(const CP::SystematicSe
     //    ATH_MSG_FATAL("Tool must be initialized before calling applySystematicVariation");
     //    return StatusCode::FAILURE;
     //}
+  CP::SystematicSet filteredSet;
+  if (m_pseudoDataJERsmearingMode) {
+    std::string remappedName = systConfig.name();
+    size_t found = remappedName.find("_PseudoData");
+    if (found != std::string::npos) {
+      remappedName.erase(found, std::string("_PseudoData").length());
+    }
 
+    CP::SystematicSet altConfig(remappedName);
     // Filter the full set of systematics to the set we care about
-    CP::SystematicSet filteredSet;
+    if (getFilteredSystematicSet(altConfig,filteredSet) != StatusCode::SUCCESS)
+        return StatusCode::FAILURE;
+  }
+  else {
+    // Filter the full set of systematics to the set we care about
     if (getFilteredSystematicSet(systConfig,filteredSet) != StatusCode::SUCCESS)
         return StatusCode::FAILURE;
+  }
 
     // Get the uncertainty set associated to the filtered systematics set
     jet::UncertaintySet* uncSet = nullptr;
