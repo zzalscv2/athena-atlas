@@ -313,20 +313,25 @@ class IFFLeptonDecorationBlock (ConfigBlock):
     def __init__ (self, containerName='') :
         super (IFFLeptonDecorationBlock, self).__init__( 'IFFLeptonDecoration' )
         self.containerName = containerName
+        self.addOption ('separateChargeFlipElectrons', True, type=bool)
+        self.addOption ('decoration', 'IFFClass_%SYS%', type=str)
 
     def makeAlgs (self, config) :
+        # the classification is only for MC
+        if config.dataType() is DataType.Data: return
+
         particles = config.readName(self.containerName)
 
         alg = config.createAlgorithm( 'CP::AsgClassificationDecorationAlg', 'IFFClassifierAlg' + self.containerName )
         # the IFF classification tool
         config.addPrivateTool( 'tool', 'TruthClassificationTool')
         # label charge-flipped electrons as such
-        alg.tool.separateChargeFlipElectrons = True
-        alg.decoration = 'IFFClass_%SYS%'
+        alg.tool.separateChargeFlipElectrons = self.separateChargeFlipElectrons
+        alg.decoration = self.decoration
         alg.particles = particles
 
         # write the decoration only once to the output
-        config.addOutputVar(self.containerName, alg.decoration, 'IFFClass', noSys=True)
+        config.addOutputVar(self.containerName, alg.decoration, alg.decoration.split("_%SYS%")[0], noSys=True)
 
 
 def makeCommonServicesConfig( seq ):
