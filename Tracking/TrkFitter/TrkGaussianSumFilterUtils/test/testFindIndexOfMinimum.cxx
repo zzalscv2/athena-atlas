@@ -10,7 +10,6 @@
 #include <iostream>
 #include <random>
 
-constexpr int alignment = 32;
 // create global data for the test
 constexpr size_t N = 4096;
 struct InitArray {
