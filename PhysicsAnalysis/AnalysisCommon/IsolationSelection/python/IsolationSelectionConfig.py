@@ -152,18 +152,19 @@ def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "
     # information on PhysLite.
     acc = ComponentAccumulator()
 
-    ## Temporarily comment out for parent/child augmentation tests
-    # Add additional information to derivation output to be able to run IsoCloseByCorrectionTool on it 
-    if not isPhysLite:
-        from IsolationSelection.IsolationSelectionConfig import IsoCloseByCorrSkimmingAlgCfg, IsoCloseByCaloDecorCfg
-        ### Add the tracks that potentially polute the isolation cones of others to the collection. 
-        ### Question: Is the list of recommended TTVA working points used for isolation available somewhere?
-        acc.merge(IsoCloseByCorrSkimmingAlgCfg(flags, suff = suff, ttva_wp = "Nonprompt_All_MaxWeight",
-                                                            OutputStream = stream_name))
+    # REMOVING THE FOLLOWING UNTIL THE CLASH BETWEEN THESE ALGS AND THE CLOSEBY CORRECTION IS FIXED
+    # ## Temporarily comment out for parent/child augmentation tests
+    # # Add additional information to derivation output to be able to run IsoCloseByCorrectionTool on it 
+    # if not isPhysLite:
+    #     from IsolationSelection.IsolationSelectionConfig import IsoCloseByCorrSkimmingAlgCfg, IsoCloseByCaloDecorCfg
+    #     ### Add the tracks that potentially polute the isolation cones of others to the collection. 
+    #     ### Question: Is the list of recommended TTVA working points used for isolation available somewhere?
+    #     acc.merge(IsoCloseByCorrSkimmingAlgCfg(flags, suff = suff, ttva_wp = "Nonprompt_All_MaxWeight",
+    #                                                         OutputStream = stream_name))
         
-        ### Associate the close-by pflow objects and the calorimeter clusters
-        acc.merge(IsoCloseByCaloDecorCfg(flags, suff = suff,
-                                         containers = containerNames ))
+    #     ### Associate the close-by pflow objects and the calorimeter clusters
+    #     acc.merge(IsoCloseByCaloDecorCfg(flags, suff = suff,
+    #                                      containers = containerNames ))
 
     # Setup the isolation close-by correction algorithm sequence to correct the isolation of near-by el, mu, ph
     from IsolationSelection.IsolationSelectionConfig import IsoCloseByCorrAlgCfg
