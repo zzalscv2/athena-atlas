@@ -243,13 +243,29 @@ StatusCode LArHVCondAlg::makeHVScaleCorr (const EventContext& ctx,
   vScale.resize(MAX_LAR_CELLS,(float)1.0);
   for (unsigned i=0;i<MAX_LAR_CELLS;++i) {
     IdentifierHash hash(i);
-    const CaloDetDescrElement* dde = calodetdescrmgr->get_element(hash); 
+    const CaloDetDescrElement* dde = calodetdescrmgr->get_element(hash);
+    const HWIdentifier hwid=cabling->createSignalChannelIDFromHash(hash);
     vScale[i]=m_scaleTool->getHVScale(dde,voltageVec[i],msg());
     if(onlHVCorr) { // undo the online one
-      const float hvonline = onlHVCorr->HVScaleCorr(cabling->createSignalChannelIDFromHash(hash));
+      const float hvonline = onlHVCorr->HVScaleCorr(hwid);
       if (hvonline>0. && hvonline<100.) vScale[i]=vScale[i]/hvonline;
     }
-  }
+    //Final sanity check:
+    if (vScale[i]<0.01) {
+      ATH_MSG_WARNING("Ignoring suspicously small correction factor of " << vScale[i]  << " for channel " << m_onlineID->channel_name(hwid));
+      vScale[i]=1.0;
+    }
+
+    if (vScale[i] < 0.9) {
+      if (vScale[i] < 0.4) {
+        ATH_MSG_WARNING("HV corr for channel " << m_onlineID->channel_name(hwid)
+                                               << " = " << vScale[i]);
+      } else {
+        ATH_MSG_DEBUG("HV corr for channel " << m_onlineID->channel_name(hwid)
+                                             << " = " << vScale[i]);
+      }
+    } //end of vScale < 0.9
+  } //end loop over all cells
 
   auto hvCorr = std::make_unique<LArHVCorr>(std::move(vScale), cabling, m_calocellID);
 

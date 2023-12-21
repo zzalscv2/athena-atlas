@@ -36,6 +36,8 @@ class LArHVCorr : public ILArHVScaleCorr {
        return m_noCorr;
    }
 
+  const std::vector<float>& HVCorrVec() const {return m_hvCorr;}
+
 
  private:
    const LArOnOffIdMapping* m_larCablingSvc;
