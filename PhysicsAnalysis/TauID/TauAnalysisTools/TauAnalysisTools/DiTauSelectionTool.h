@@ -33,6 +33,7 @@ namespace TauAnalysisTools
 class DiTauSelectionCut;
 class DiTauSelectionCutPt;
 class DiTauSelectionCutAbsEta;
+class DiTauSelectionCutNSubjets;
 
 class DiTauSelectionTool : public virtual IAsgSelectionTool,
   public virtual IDiTauSelectionTool,
@@ -43,6 +44,7 @@ class DiTauSelectionTool : public virtual IAsgSelectionTool,
   friend class DiTauSelectionCut;
   friend class DiTauSelectionCutPt;
   friend class DiTauSelectionCutAbsEta;
+  friend class DiTauSelectionCutNSubjets;
 
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS2( DiTauSelectionTool,
@@ -95,11 +97,15 @@ private:
   std::vector<float> m_vPtRegion;
   // vector of absolute eta cut regions
   std::vector<float> m_vAbsEtaRegion;
+  // vector of number of subjets cut regions
+  std::vector<float> m_vNSubjetsRegion;
 
   float m_dPtMin;
   float m_dPtMax;
   float m_dAbsEtaMin;
   float m_dAbsEtaMax;
+  float m_dNSubjetsMax;
+  float m_dNSubjetsMin;
 
 protected:
   TFile* m_fOutFile;//!

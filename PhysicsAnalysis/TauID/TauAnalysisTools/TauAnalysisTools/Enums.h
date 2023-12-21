@@ -56,6 +56,7 @@ namespace TauAnalysisTools
     NoDiTauCut           = 0,    // 000000000000
     DiTauCutPt           = 1,    // 000000000001
     DiTauCutAbsEta       = 1<<1, // 000000000010
+    DiTauCutNSubjets     = 1<<2, // 000000000100
   };
 
   enum EfficiencyCorrectionType
