@@ -1,6 +1,6 @@
 CommonServices: {}
 
-PileupReweightingTest: {}
+PileupReweighting: {}
 
 EventCleaning:
     runEventCleaning: True

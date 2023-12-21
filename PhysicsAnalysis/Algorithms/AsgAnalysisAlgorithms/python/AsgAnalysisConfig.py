@@ -26,6 +26,11 @@ class CommonServicesConfig (ConfigBlock) :
         if config.dataType() is not DataType.Data:
             if self.runSystematics is not None :
                 runSystematics = self.runSystematics
+            elif config.noSystematics() is not None :
+                # if option not set:
+                # check to see if set in config accumulator
+                self.runSystematics = not config.noSystematics()
+                runSystematics = self.runSystematics
             else :
                 runSystematics = True
         else:
@@ -61,6 +66,24 @@ class PileupReweightingBlock (ConfigBlock):
         log = logging.getLogger('makePileupAnalysisSequence')
 
         # TODO: support per-campaign config
+
+        if config.isPhyslite():
+            log.info(f'Physlite does not need pileup reweighting. {config.isPhyslite}')
+            return
+
+        if config.autoconfigFlags() is not None:
+            autoconfigFlags = config.autoconfigFlags()
+            
+            self.files = autoconfigFlags.Input.Files
+            log.info(f'Autoconfiguring files from flags: {self.files}')
+            self.campaign = autoconfigFlags.Input.MCCampaign
+            if self.campaign is None or self.campaign is Campaign.Unknown:
+                from Campaigns.Utils import getMCCampaign
+                self.campaign = getMCCampaign(self.files)
+            log.info(f'Autoconfiguring campaign from flags: {self.campaign}')
+            self.useDefaultConfig = True
+            log.info(f'Autoconfiguring useDefaultConfig from flags: {self.useDefaultConfig}')
+
 
         toolConfigFiles = []
         toolLumicalcFiles = []

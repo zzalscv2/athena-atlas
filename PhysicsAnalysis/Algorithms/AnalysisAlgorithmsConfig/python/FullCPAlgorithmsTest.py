@@ -545,8 +545,6 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     vars = []
     metVars = []
 
-    from AnalysisAlgorithmsConfig.ConfigFactory import makeConfig
-
     # it seems the right containers are in the test input files so far
     largeRJets = False
     # there are no track jets in PHYSLITE, or in the sequence configuration
@@ -566,30 +564,19 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
                         'met_': 'AnaMET',
                         ''    : 'EventInfo'}
 
-    configSeq += makeConfig ('CommonServices', None)
-    if noSystematics is not None :
-        configSeq.setOptionValue ('.runSystematics', not noSystematics)
+    # create factory object to build block configurations
+    from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
+    config = ConfigFactory()
+    # get function to make configs
+    makeConfig = config.makeConfig
+
+    # noSystematics is passed in block from config accumulator
+    configSeq += makeConfig('CommonServices')
 
     # FIXME: this should probably be run on PHYSLITE, but the test fails with:
     #   overran integrated luminosity for RunNumber=363262 (0.000000 vs 0.000000)
     if not isPhyslite :
-        campaign, files, prwfiles, lumicalcfiles = None, None, None, None
-        useDefaultConfig = False
-        if autoconfigFromFlags is not None:
-            campaign = autoconfigFromFlags.Input.MCCampaign
-            files = autoconfigFromFlags.Input.Files
-            useDefaultConfig = True
-        else:
-            # need to allow for conversion of dataType from string to enum for the call to pileupConfigFiles
-            prwfiles, lumicalcfiles = pileupConfigFiles( {'data': DataType.Data, 'mc': DataType.FullSim, 'afii': DataType.FastSim}.get(dataType, dataType) )
-
-        configSeq += makeConfig ('Event.PileupReweighting', None)
-        configSeq.setOptionValue ('.campaign', campaign, noneAction='ignore')
-        configSeq.setOptionValue ('.files', files, noneAction='ignore')
-        configSeq.setOptionValue ('.useDefaultConfig', useDefaultConfig)
-        configSeq.setOptionValue ('.userPileupConfigs', prwfiles, noneAction='ignore')
-        configSeq.setOptionValue ('.userLumicalcFiles', lumicalcfiles, noneAction='ignore')
-
+        configSeq += makeConfig('PileupReweighting')
     else :
         # ideally the above block would work both for PHYS and PHYSLITE, but
         # since we disabled it we need to add these variables manually.
@@ -600,41 +587,50 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
 
     # Skip events with no primary vertex,
     # and perform loose jet cleaning
-    configSeq += makeConfig ('Event.Cleaning', None)
+    configSeq += makeConfig ('EventCleaning')
     configSeq.setOptionValue ('.runEventCleaning', True)
 
     # Include, and then set up the jet analysis algorithm sequence:
-    configSeq += makeConfig( 'Jets', 'AnaJets', jetCollection='AntiKt4EMPFlowJets')
+    configSeq += makeConfig( 'Jets',
+        containerName='AnaJets',
+        jetCollection='AntiKt4EMPFlowJets')
     configSeq.setOptionValue ('.runJvtUpdate', False )
     configSeq.setOptionValue ('.runNNJvtUpdate', True )
     if not forCompare :
         configSeq.setOptionValue ('.recalibratePhyslite', False)
 
     # Add systematic object links
-    configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaJets')
+    configSeq += makeConfig('SystObjectLink', containerName='AnaJets')
 
     btagger = "DL1dv01"
     btagWP = "FixedCutBEff_60"
-    configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag' )
+    configSeq += makeConfig( 'Jets.FlavourTagging',
+        containerName='AnaJets',
+        selectionName='ftag' )
     configSeq.setOptionValue ('.noEffSF', forCompare)
     configSeq.setOptionValue ('.btagger', btagger)
     configSeq.setOptionValue ('.btagWP', btagWP)
     configSeq.setOptionValue ('.kinematicSelection', True )
 
-    configSeq += makeConfig( 'Jets.Jvt', 'AnaJets' )
+    configSeq += makeConfig( 'Jets.JVT',
+        containerName='AnaJets' )
 
     if largeRJets :
-        configSeq += makeConfig( 'Jets', 'AnaLargeRJets', jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets')
+        configSeq += makeConfig( 'Jets',
+            containerName='AnaLargeRJets',
+            jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets' )
         configSeq.setOptionValue ('.postfix', 'largeR_jets' )
         outputContainers['larger_jet_'] = 'OutLargeRJets'
 
         # Add systematic object links
-        configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaLargeRJets')
+        configSeq += makeConfig('SystObjectLink', containerName='AnaLargeRJets')
         if not forCompare :
             configSeq.setOptionValue ('.recalibratePhyslite', False)
 
     if trackJets :
-        configSeq += makeConfig( 'Jets', 'AnaTrackJets', jetCollection='AntiKtVR30Rmax4Rmin02PV0TrackJets')
+        configSeq += makeConfig( 'Jets',
+            containerName='AnaTrackJets',
+            jetCollection='AntiKtVR30Rmax4Rmin02PV0TrackJets' )
         configSeq.setOptionValue ('.postfix', 'track_jets' )
         outputContainers['track_jet_'] = 'OutTrackJets'
 
@@ -643,10 +639,13 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
 
     likelihood = True
     recomputeLikelihood=False
-    configSeq += makeConfig ('Electrons', 'AnaElectrons')
+    configSeq += makeConfig ('Electrons',
+        containerName='AnaElectrons' )
     if not forCompare :
         configSeq.setOptionValue ('.recalibratePhyslite', False)
-    configSeq += makeConfig ('Electrons.Selection', 'AnaElectrons.loose')
+    configSeq += makeConfig ('Electrons.WorkingPoint',
+        containerName='AnaElectrons',
+        selectionName='loose')
     if forCompare :
         configSeq.setOptionValue ('.noEffSF', True)
     if likelihood:
@@ -662,14 +661,17 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.recomputeLikelihood', recomputeLikelihood)
 
     # Add systematic object links
-    configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaElectrons')
+    configSeq += makeConfig('SystObjectLink', containerName='AnaElectrons')
 
     # Include, and then set up the photon analysis algorithm sequence:
-    configSeq += makeConfig ('Photons', 'AnaPhotons')
+    configSeq += makeConfig ('Photons',
+        containerName='AnaPhotons' )
     configSeq.setOptionValue ('.recomputeIsEM', False)
     if not forCompare :
         configSeq.setOptionValue ('.recalibratePhyslite', False)
-    configSeq += makeConfig ('Photons.Selection', 'AnaPhotons.tight')
+    configSeq += makeConfig ('Photons.WorkingPoint',
+        containerName='AnaPhotons',
+        selectionName='tight')
     if forCompare :
         configSeq.setOptionValue ('.noEffSF', True)
     configSeq.setOptionValue ('.qualityWP', 'Tight')
@@ -677,14 +679,17 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.recomputeIsEM', False)
 
     # Add systematic object links
-    configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaPhotons')
+    configSeq += makeConfig('SystObjectLink', containerName='AnaPhotons')
 
 
     # set up the muon analysis algorithm sequence:
-    configSeq += makeConfig ('Muons', 'AnaMuons')
+    configSeq += makeConfig ('Muons',
+        containerName='AnaMuons')
     if not forCompare :
         configSeq.setOptionValue ('.recalibratePhyslite', False)
-    configSeq += makeConfig ('Muons.Selection', 'AnaMuons.medium')
+    configSeq += makeConfig ('Muons.WorkingPoint',
+        containerName='AnaMuons',
+        selectionName='medium')
     configSeq.setOptionValue ('.quality', 'Medium')
     configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
     if forCompare :
@@ -695,65 +700,86 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     # configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
 
     # Add systematic object links
-    configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaMuons')
+    configSeq += makeConfig('SystObjectLink', containerName='AnaMuons')
 
 
     # Include, and then set up the tau analysis algorithm sequence:
-    configSeq += makeConfig ('TauJets', 'AnaTauJets')
-    configSeq += makeConfig ('TauJets.Selection', 'AnaTauJets.tight')
+    configSeq += makeConfig ('TauJets',
+        containerName='AnaTauJets')
+    configSeq += makeConfig ('TauJets.WorkingPoint',
+        containerName='AnaTauJets',
+        selectionName='tight')
     configSeq.setOptionValue ('.quality', 'Tight')
 
     # Add systematic object links
-    configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaTauJets')
+    configSeq += makeConfig('SystObjectLink', containerName='AnaTauJets')
 
 
     if dataType is not DataType.Data :
         # Include, and then set up the generator analysis sequence:
-        configSeq += makeConfig( 'Event.Generator', None)
+        configSeq += makeConfig( 'GeneratorLevelAnalysis')
         configSeq.setOptionValue ('.saveCutBookkeepers', True)
         configSeq.setOptionValue ('.runNumber', 284500)
         configSeq.setOptionValue ('.cutBookkeepersSystematics', True)
 
 
-    configSeq += makeConfig ('Selection.PtEta', 'AnaElectrons')
+    configSeq += makeConfig ('Electrons.PtEtaSelection',
+        containerName='AnaElectrons')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', electronMinPt, noneAction='ignore')
     configSeq.setOptionValue ('.maxEta', electronMaxEta, noneAction='ignore')
-    configSeq += makeConfig ('Selection.PtEta', 'AnaPhotons')
+    configSeq += makeConfig ('Photons.PtEtaSelection',
+        containerName='AnaPhotons')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', photonMinPt, noneAction='ignore')
     configSeq.setOptionValue ('.maxEta', photonMaxEta, noneAction='ignore')
-    configSeq += makeConfig ('Selection.PtEta', 'AnaMuons')
+    configSeq += makeConfig ('Muons.PtEtaSelection',
+        containerName='AnaMuons')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', muonMinPt, noneAction='ignore')
     configSeq.setOptionValue ('.maxEta', muonMaxEta, noneAction='ignore')
-    configSeq += makeConfig ('Selection.PtEta', 'AnaTauJets')
+    configSeq += makeConfig ('TauJets.PtEtaSelection',
+        containerName='AnaTauJets')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', tauMinPt, noneAction='ignore')
     configSeq.setOptionValue ('.maxEta', tauMaxEta, noneAction='ignore')
-    configSeq += makeConfig ('Selection.PtEta', 'AnaJets')
+    configSeq += makeConfig ('Jets.PtEtaSelection',
+        containerName='AnaJets')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
     configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
     if largeRJets :
-        configSeq += makeConfig ('Selection.PtEta', 'AnaLargeRJets')
+        configSeq += makeConfig ('Jets.PtEtaSelection',
+            containerName='AnaLargeRJets')
         configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
         configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
         configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
     if trackJets :
-        configSeq += makeConfig ('Selection.PtEta', 'AnaTrackJets')
+        configSeq += makeConfig ('Jets.PtEtaSelection',
+            containerName='AnaTrackJets')
         configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
         configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
         configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
 
-    configSeq += makeConfig ('Selection.ObjectCutFlow', 'AnaElectrons.loose')
-    configSeq += makeConfig ('Selection.ObjectCutFlow', 'AnaPhotons.tight')
-    configSeq += makeConfig ('Selection.ObjectCutFlow', 'AnaMuons.medium')
-    configSeq += makeConfig ('Selection.ObjectCutFlow', 'AnaTauJets.tight')
-    configSeq += makeConfig ('Selection.ObjectCutFlow', 'AnaJets.jvt')
+    configSeq += makeConfig ('ObjectCutFlow',
+        containerName='AnaElectrons',
+        selectionName='loose')
+    configSeq += makeConfig ('ObjectCutFlow',
+        containerName='AnaPhotons',
+        selectionName='tight')
+    configSeq += makeConfig ('ObjectCutFlow',
+        containerName='AnaMuons',
+        selectionName='medium')
+    configSeq += makeConfig ('ObjectCutFlow',
+        containerName='AnaTauJets',
+        selectionName='tight')
+    configSeq += makeConfig ('ObjectCutFlow',
+        containerName='AnaJets',
+        selectionName='jvt')
 
     # Include, and then set up the met analysis algorithm config:
-    configSeq += makeConfig ('MissingET', 'AnaMET')
+    configSeq += makeConfig ('MissingET',
+        containerName='AnaMET')
     configSeq.setOptionValue ('.jets', 'AnaJets')
     configSeq.setOptionValue ('.taus', 'AnaTauJets.tight')
     configSeq.setOptionValue ('.electrons', 'AnaElectrons.loose')
@@ -770,7 +796,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
 
 
     # Include, and then set up the overlap analysis algorithm config:
-    configSeq += makeConfig( 'OverlapRemoval', None )
+    configSeq += makeConfig( 'OverlapRemoval' )
     configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
     configSeq.setOptionValue ('.photons',     'AnaPhotons.tight')
     # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
@@ -801,32 +827,39 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
                                           selectionCutsDict = exampleSelectionCuts, noFilter = True)
 
 
-    configSeq += makeConfig ('Output.Thinning', 'AnaElectrons.Thinning')
+    configSeq += makeConfig ('Thinning',
+        containerName='AnaElectrons')
     configSeq.setOptionValue ('.selectionName', 'loose')
     configSeq.setOptionValue ('.outputName', 'OutElectrons')
-    configSeq += makeConfig ('Output.Thinning', 'AnaPhotons.Thinning')
+    configSeq += makeConfig ('Thinning',
+        containerName='AnaPhotons')
     configSeq.setOptionValue ('.selectionName', 'tight')
     configSeq.setOptionValue ('.outputName', 'OutPhotons')
-    configSeq += makeConfig ('Output.Thinning', 'AnaMuons.Thinning')
+    configSeq += makeConfig ('Thinning',
+        containerName='AnaMuons')
     configSeq.setOptionValue ('.selectionName', 'medium')
     configSeq.setOptionValue ('.outputName', 'OutMuons')
-    configSeq += makeConfig ('Output.Thinning', 'AnaTauJets.Thinning')
+    configSeq += makeConfig ('Thinning',
+        containerName='AnaTauJets')
     configSeq.setOptionValue ('.selectionName', 'tight')
     configSeq.setOptionValue ('.outputName', 'OutTauJets')
-    configSeq += makeConfig ('Output.Thinning', 'AnaJets.Thinning')
+    configSeq += makeConfig ('Thinning',
+        containerName='AnaJets')
     configSeq.setOptionValue ('.outputName', 'OutJets')
     if largeRJets :
-        configSeq += makeConfig ('Output.Thinning', 'AnaLargeRJets.Thinning')
+        configSeq += makeConfig ('Thinning',
+            containerName='AnaLargeRJets')
         configSeq.setOptionValue ('.outputName', 'OutLargeRJets')
     if trackJets :
-        configSeq += makeConfig ('Output.Thinning', 'AnaTrackJets.Thinning')
+        configSeq += makeConfig ('Thinning',
+            containerName='AnaTrackJets')
         configSeq.setOptionValue ('.outputName', 'OutTrackJets')
 
     # disabling comparisons for triggers, because the config blocks do a lot
     # more than the sequences
     if not forCompare :
         # Include, and then set up the trigger analysis sequence:
-        configSeq += makeConfig( 'Trigger.Chains', None )
+        configSeq += makeConfig( 'Trigger' )
         configSeq.setOptionValue ('.triggerChainsPerYear', triggerChainsPerYear )
         configSeq.setOptionValue ('.noFilter', True )
         configSeq.setOptionValue ('.electronID', 'Tight' )
@@ -838,11 +871,11 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         configSeq.setOptionValue ('.muons', 'AnaMuons' )
 
     if not forCompare:
-        configSeq += makeConfig ('Bootstraps', None )
+        configSeq += makeConfig ('Bootstraps')
         configSeq.setOptionValue ('.nReplicas', 2000 )
         configSeq.setOptionValue ('.runOnMC', True )
 
-    configSeq += makeConfig ('Output.Simple', 'Output')
+    configSeq += makeConfig ('Output')
     configSeq.setOptionValue ('.treeName', 'analysis')
     configSeq.setOptionValue ('.vars', vars)
     configSeq.setOptionValue ('.metVars', metVars)
@@ -850,7 +883,9 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     if forCompare:
         configSeq.setOptionValue ('.commands', ['disable jet_select_jvt.*'])
 
-    configAccumulator = ConfigAccumulator (algSeq, dataType, isPhyslite, geometry, autoconfigFromFlags=autoconfigFromFlags)
+    configSeq.printOptions()
+
+    configAccumulator = ConfigAccumulator (algSeq, dataType, isPhyslite, geometry, autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
     configSeq.fullConfigure (configAccumulator)
 
     from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator

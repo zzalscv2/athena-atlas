@@ -14,194 +14,305 @@
 # lacks all extensibility, gathers all information in a single place,
 # etc.  Still for now (08 Dec 22) this ought to be good enough.
 
+
+import inspect
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 
-def makeConfig (factoryName, groupName,
-                *, jetCollection = None) :
 
-    if jetCollection is not None and factoryName != 'Jets' :
-        raise ValueError ('specifying jetCollection only allowed for Jets factory, not: ' + factoryName)
-
-    configSeq = ConfigSequence ()
-
-    if factoryName == 'Muons' :
-        from MuonAnalysisAlgorithms.MuonAnalysisConfig import makeMuonCalibrationConfig
-        makeMuonCalibrationConfig (configSeq, groupName)
-
-    elif factoryName == 'Muons.Selection' :
-        from MuonAnalysisAlgorithms.MuonAnalysisConfig import makeMuonWorkingPointConfig
-        groupSplit = groupName.split ('.')
-        if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
-            raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
-        makeMuonWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, selectionName=groupSplit[1])
+def getDefaultArgs(func):
+    """return dict(par, val) with all func parameters with defualt values"""
+    signature = inspect.signature(func)
+    return {
+        k: v.default
+        for k, v in signature.parameters.items()
+        if v.default is not inspect.Parameter.empty
+    }   
 
 
-    elif factoryName == 'Electrons' :
-        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import makeElectronCalibrationConfig
-        makeElectronCalibrationConfig (configSeq, groupName)
-
-    elif factoryName == 'Electrons.Selection' :
-        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import makeElectronWorkingPointConfig
-        groupSplit = groupName.split ('.')
-        if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
-            raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
-        makeElectronWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, selectionName=groupSplit[1])
+def getFuncArgs(func):
+    """return list of input parameters"""
+    signature = inspect.signature(func)
+    return list(signature.parameters.keys())
 
 
-    elif factoryName == 'Photons' :
-        from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import makePhotonCalibrationConfig
-        makePhotonCalibrationConfig (configSeq, groupName)
-
-    elif factoryName == 'Photons.Selection' :
-        from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import makePhotonWorkingPointConfig
-        groupSplit = groupName.split ('.')
-        if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
-            raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
-        makePhotonWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, selectionName=groupSplit[1])
+def getClassArgs(func):
+    """return list of args used i=ton initialize class"""
+    args = list(inspect.signature(func.__init__).parameters.keys())
+    args.remove('self')
+    return args
 
 
-    elif factoryName == 'TauJets' :
-        from TauAnalysisAlgorithms.TauAnalysisConfig import makeTauCalibrationConfig
-        makeTauCalibrationConfig (configSeq, groupName)
-
-    elif factoryName == 'TauJets.Selection' :
-        from TauAnalysisAlgorithms.TauAnalysisConfig import makeTauWorkingPointConfig
-        groupSplit = groupName.split ('.')
-        if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
-            raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
-        makeTauWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, selectionName=groupSplit[1])
-
-
-    elif factoryName == 'Jets' :
-        if jetCollection is None :
-            raise ValueError ('need to specify jetCollection for Jets configuration')
-        from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig
-        makeJetAnalysisConfig( configSeq, groupName, jetCollection)
-
-    elif factoryName == 'Jets.Jvt' :
-        from JetAnalysisAlgorithms.JetJvtAnalysisConfig import makeJetJvtAnalysisConfig
-        makeJetJvtAnalysisConfig( configSeq, groupName )
+# class for config block information
+class FactoryBlock():
+    """
+    """
+    def __init__(self, alg, algName, options, defaults, subAlgs=None):
+        self.alg = alg
+        self.algName = algName
+        self.options = options
+        self.defaults = defaults
+        if subAlgs is None:
+            self.subAlgs = []
+        else:
+            self.subAlgs = subAlgs
 
 
-    elif factoryName.startswith ('FlavorTagging') :
-        raise ValueError ('You requested a FlavorTagging factory, but the name was changed to FlavourTagging')
-    elif factoryName == 'FlavourTagging' :
-        from FTagAnalysisAlgorithms.FTagAnalysisConfig import makeFTagAnalysisConfig
-        groupSplit = groupName.split ('.')
-        if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
-            raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
-        makeFTagAnalysisConfig( configSeq, groupSplit[0], selectionName = groupSplit[1])
+    def makeConfig(self, funcOptions):
+            """ 
+            Parameters
+            ----------
+            funcName: str
+                name associated with the algorithm. This name must have been added to the 
+                list of available algorithms
+            funcOptions: dict
+                dictionary containing options for the algorithm read from the YAML file
+
+            Returns
+            -------
+                configSequence
+            """
+            configSeq = ConfigSequence()
+
+            func = self.alg
+            funcName = self.algName
+            funcDefaults = getDefaultArgs(func)
+            defaults = self.defaults
+
+            args = {}
+            # loop over all options for the function
+            for arg in getFuncArgs(func):
+                # supplied from config file
+                if arg in funcOptions:
+                    args[arg] = funcOptions[arg]
+                # defaults set in function def
+                elif arg in funcDefaults:
+                    args[arg] = funcDefaults[arg]
+                # defaults provided when func was added
+                elif defaults is not None and arg in defaults:
+                    args[arg] = defaults[arg]
+                elif arg == 'seq':
+                    # 'seq' should be first arg of func (not needed for class)
+                    args[arg] = configSeq
+                elif arg == 'kwargs':
+                    # cannot handle arbitrary parameters
+                    continue
+                else:
+                    raise ValueError(f"{arg} is requried for {funcName}")
+            if type(func) == type(dict):
+                configSeq.append(func(**args))
+            else:
+                func(**args)
+            return configSeq, args.keys()
 
 
-    elif factoryName == 'MissingET' :
-        from MetAnalysisAlgorithms.MetAnalysisConfig import makeMetAnalysisConfig
-
-        makeMetAnalysisConfig (configSeq, containerName = groupName)
-
-
-    elif factoryName == 'OverlapRemoval' :
-        from AsgAnalysisAlgorithms.OverlapAnalysisConfig import \
-            makeOverlapAnalysisConfig
-        makeOverlapAnalysisConfig( configSeq )
-
-
-    elif factoryName == 'Event.PileupReweighting' :
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
-            makePileupReweightingConfig
-        makePileupReweightingConfig (configSeq)
-
-    elif factoryName == 'Event.Cleaning' :
-        # Skip events with no primary vertex:
-        from AsgAnalysisAlgorithms.EventCleaningConfig import \
-            makeEventCleaningConfig
-        makeEventCleaningConfig (configSeq)
-
-    elif factoryName == 'Event.Generator' :
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
-            makeGeneratorAnalysisConfig
-        makeGeneratorAnalysisConfig( configSeq )
+class ConfigFactory():
+    """This class provides a configuration manager that is intended to allow the user to:
+        - define and configure functions that return an algSequence(?) object
+    """
+    def __init__(self):
+        self.ROOTNAME = 'root' # constant
+        self._algs = {}
+        self._order = {self.ROOTNAME: []}
+        self.addDefaultAlgs()
 
 
-    elif factoryName == 'Trigger.Chains' :
-        from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import \
-            makeTriggerAnalysisConfig
-        makeTriggerAnalysisConfig( configSeq )
+    def addAlgConfigBlock(self, algName, alg, defaults=None, pos=None, superBlocks=None):
+        """Add class to list of available algorithms"""
+        if not callable(alg):
+            raise ValueError(f"{algName} is not a callable.")
+        if type(alg) == type(dict):
+            opts = getClassArgs(alg)
+        else:
+            opts = getFuncArgs(alg)    
 
+        if superBlocks is None:
+            superBlocks = [self.ROOTNAME]
+        elif type(superBlocks) != list:
+            superBlocks = [superBlocks]
 
-    elif factoryName == 'Selection.PtEta' :
-        groupSplit = groupName.split ('.')
-        if len (groupSplit) == 0 or len (groupSplit) > 2 or groupSplit[0] == '' :
-            raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
-
-        if len (groupSplit) == 2 :
-            selection = groupSplit[1]
-        else :
-            selection = ''
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import makePtEtaSelectionConfig
-        makePtEtaSelectionConfig (configSeq, groupSplit[0],
-                                  selectionName=selection)
-
-
-    elif factoryName == 'Selection.ObjectCutFlow' :
-        groupSplit = groupName.split ('.')
-        if len (groupSplit) == 0 or len (groupSplit) > 2 or groupSplit[0] == '' :
-            raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
-
-        if len (groupSplit) == 2 :
-            selection = groupSplit[1]
-        else :
-            selection = ''
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeObjectCutFlowConfig
-        makeObjectCutFlowConfig (configSeq, groupSplit[0],
-                                  selectionName=selection)
-
-
-    elif factoryName == 'Output.Thinning' :
-        groupSplit = groupName.split ('.')
-        if len (groupSplit) == 0 or len (groupSplit) > 2 or groupSplit[0] == '' :
-            raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
-        if len (groupSplit) == 2 :
-            configName = groupSplit[1]
-        else :
-            configName = ''
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeOutputThinningConfig
-        makeOutputThinningConfig (configSeq, groupSplit[0], configName = configName)
-
-
-    elif factoryName == 'Output.Simple' :
-        if groupName == '' :
-            groupName = 'Output'
-        from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
-        config = OutputAnalysisConfig (groupName)
-        configSeq.append (config)
-
-    elif factoryName == 'CommonServices' :
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeCommonServicesConfig
-        makeCommonServicesConfig (configSeq)
-
-    elif factoryName == 'SystObjectLink':
-        try:
-            groupSplit = groupName.split('.')
-            assert len(groupSplit) == 2
-            assert groupSplit[0] != ''
-            containerName = groupSplit[1]
-        except AssertionError:
-            raise ValueError(f'invalid groupName for {factoryName}: {groupName}')
+        # add new alg block to subAlgs dict of super block
+        for block in superBlocks:
+            if block not in self._order:
+                self._order[block] = []
+            order = self._order[block]
             
+            if block == self.ROOTNAME:
+                algs = self._algs
+            else:
+                if block not in self._algs:
+                    raise ValueError(f"{block} not added")
+                algs = self._algs[block].subAlgs
+
+            if alg in algs:
+                raise ValueError(f"{algName} has already been added.")
+
+            # create FactoryBlock with alg information
+            algs[algName] = FactoryBlock(
+                alg=alg,
+                algName=algName,
+                options=opts,
+                defaults=defaults,
+                subAlgs={}
+            )
+            # insert into order (list)
+            if pos is None:
+                order.append(algName)
+            elif pos in order:
+                order.insert(order.index(pos), algName)
+            else:
+                raise ValueError(f"{pos} does not exit in already added config blocks")
+
+        return
+
+
+    def printAlgs(self, printOpts=False):
+        """Prints algorithms exposed to configuration"""
+        algs = self._algs
+        for alg, algInfo in algs.items():
+            algName = algInfo.alg.__name__
+            algOptions = algInfo.options
+            algDefaults = algInfo.defaults
+            print(f"{alg} -> {algName}")
+            if printOpts and algOptions:
+                for opt in algOptions:
+                    if algDefaults and opt in algDefaults:
+                        print(f"    {opt}: {algDefaults[opt]}")
+                    else:
+                        print(f"    {opt}")
+        return
+
+
+    def makeConfig(self, name, **kwargs):
+        """
+        Returns:
+            configSeq: configSequence object
+        """
+        try: 
+            if '.' in name:
+                algContext, algName = name.split('.')
+                block = self._algs[algContext].subAlgs[algName]
+            else:
+                block = self._algs[name]
+        except KeyError:
+            raise ValueError(f"{name} config block not found. Make sure context is correct.")
+        configSeq, _ = block.makeConfig(kwargs)
+        return configSeq
+
+
+    def addDefaultAlgs(config):
+        """add algorithms and options"""
+
+        # CommonServices
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeCommonServicesConfig
+        config.addAlgConfigBlock(algName="CommonServices", alg=makeCommonServicesConfig)
+
+        # pileup reweighting
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import PileupReweightingBlock
+        config.addAlgConfigBlock(algName="PileupReweighting", alg=PileupReweightingBlock)
+
+        # event cleaning
+        from AsgAnalysisAlgorithms.EventCleaningConfig import EventCleaningBlock
+        config.addAlgConfigBlock(algName="EventCleaning", alg=EventCleaningBlock)
+
+        # jets
+        from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig
+        config.addAlgConfigBlock(algName="Jets", alg=makeJetAnalysisConfig)
+        from JetAnalysisAlgorithms.JetJvtAnalysisConfig import JetJvtAnalysisConfig
+        config.addAlgConfigBlock(algName="JVT", alg=JetJvtAnalysisConfig,
+            superBlocks="Jets")
+        from FTagAnalysisAlgorithms.FTagAnalysisConfig import makeFTagAnalysisConfig
+        config.addAlgConfigBlock(algName="FlavourTagging", alg=makeFTagAnalysisConfig,
+            defaults={'selectionName': ''},
+            superBlocks="Jets")
+
+        # electrons
+        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronCalibrationConfig 
+        config.addAlgConfigBlock(algName="Electrons", alg=ElectronCalibrationConfig)
+        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronWorkingPointConfig
+        config.addAlgConfigBlock(algName="WorkingPoint", alg=ElectronWorkingPointConfig,
+            superBlocks="Electrons")
+
+        # photons
+        from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import PhotonCalibrationConfig
+        config.addAlgConfigBlock(algName="Photons", alg=PhotonCalibrationConfig)
+        from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import PhotonWorkingPointConfig
+        config.addAlgConfigBlock(algName="WorkingPoint", alg=PhotonWorkingPointConfig,
+            superBlocks="Photons")
+
+        # muons
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonCalibrationConfig
+        config.addAlgConfigBlock(algName="Muons", alg=MuonCalibrationConfig)
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonWorkingPointConfig
+        config.addAlgConfigBlock(algName="WorkingPoint", alg=MuonWorkingPointConfig,
+            superBlocks="Muons")
+
+        # tauJets
+        from TauAnalysisAlgorithms.TauAnalysisConfig import TauCalibrationConfig
+        config.addAlgConfigBlock(algName="TauJets", alg=TauCalibrationConfig)
+        from TauAnalysisAlgorithms.TauAnalysisConfig import TauWorkingPointConfig
+        config.addAlgConfigBlock(algName="WorkingPoint", alg=TauWorkingPointConfig,
+            superBlocks="TauJets")
+
+        # SystObjectLink
         from AsgAnalysisAlgorithms.SystObjectLinkConfig import makeSystObjectLinkConfig
-        makeSystObjectLinkConfig(configSeq, containerName)
+        config.addAlgConfigBlock(algName="SystObjectLink", alg=makeSystObjectLinkConfig,
+            superBlocks=[config.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
 
-    elif factoryName == 'Bootstraps':
-        from AsgAnalysisAlgorithms.BootstrapGeneratorConfig import makeBootstrapGeneratorConfig
-        makeBootstrapGeneratorConfig(configSeq)
+        # IFF truth classification
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import IFFLeptonDecorationBlock
+        config.addAlgConfigBlock(algName="IFFClassification", alg=IFFLeptonDecorationBlock,
+            superBlocks=["Electrons","Muons"])
 
-    else :
-        raise ValueError ('unknown factory: ' + factoryName)
+        # generator level analysis
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeGeneratorAnalysisConfig 
+        config.addAlgConfigBlock(algName="GeneratorLevelAnalysis", alg=makeGeneratorAnalysisConfig)
 
+        # pT/Eta Selection
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import makePtEtaSelectionConfig
+        config.addAlgConfigBlock(algName="PtEtaSelection", alg=makePtEtaSelectionConfig,
+            defaults={'selectionName': ''},
+            superBlocks=[config.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
 
-    if groupName is not None :
-        for config in configSeq :
-            if config.groupName() != groupName :
-                raise Exception ("inconsistent group names: " + config.groupName() + " " + groupName)
+        # met
+        from MetAnalysisAlgorithms.MetAnalysisConfig import MetAnalysisConfig
+        config.addAlgConfigBlock(algName="MissingET", alg=MetAnalysisConfig)
 
-    return configSeq
+        # overlap removal
+        from AsgAnalysisAlgorithms.OverlapAnalysisConfig import OverlapAnalysisConfig
+        config.addAlgConfigBlock(algName="OverlapRemoval", alg=OverlapAnalysisConfig,
+            defaults={'configName': 'OverlapRemoval'})
+
+        # object-based cutflow
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import ObjectCutFlowBlock
+        config.addAlgConfigBlock(algName='ObjectCutFlow', alg=ObjectCutFlowBlock)
+
+        # thinning
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import OutputThinningBlock
+        config.addAlgConfigBlock(algName="Thinning", alg=OutputThinningBlock,
+            defaults={'configName': 'Thinning'},
+            superBlocks=[config.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
+
+        # trigger
+        from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
+        config.addAlgConfigBlock(algName="Trigger", alg=TriggerAnalysisBlock,
+            defaults={'configName': 'Trigger'})
+
+        # event selection
+        from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
+        config.addAlgConfigBlock(algName='EventSelection', alg=makeMultipleEventSelectionConfigs)
+
+        # event-based cutflow
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import EventCutFlowBlock
+        config.addAlgConfigBlock(algName='EventCutFlow', alg=EventCutFlowBlock,
+            defaults={'containerName': 'EventInfo', 'selectionName': ''})
+
+        # bootstraps
+        from AsgAnalysisAlgorithms.BootstrapGeneratorConfig import BootstrapGeneratorConfig
+        config.addAlgConfigBlock(algName='Bootstraps', alg=BootstrapGeneratorConfig)
+
+        # output
+        from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
+        config.addAlgConfigBlock(algName="Output", alg=OutputAnalysisConfig,
+            defaults={'configName': 'Output'})
+
+        return

@@ -105,8 +105,10 @@ class ConfigAccumulator :
     used.
     """
 
-    def __init__ (self, algSeq, dataType=None, isPhyslite=False, geometry=None, dsid=0, campaign=None, runNumber=None,
-                  autoconfigFromFlags=None, noSysSuffix=False):
+    def __init__ (self, algSeq, dataType=None, isPhyslite=False, geometry=None, dsid=0,
+            campaign=None, runNumber=None, autoconfigFromFlags=None, noSysSuffix=False,
+            noSystematics=None):
+        self._autoconfigFlags = autoconfigFromFlags
         if autoconfigFromFlags is not None:
             if autoconfigFromFlags.Input.isMC:
                 if autoconfigFromFlags.Sim.ISF.Simulator.usesFastCaloSim():
@@ -149,6 +151,7 @@ class ConfigAccumulator :
         self._runNumber = runNumber
         self._generatorInfo = generatorInfo
         self._algSeq = algSeq
+        self._noSystematics = noSystematics
         self._noSysSuffix = noSysSuffix
         self._containerConfig = {}
         self._outputContainers = {}
@@ -171,6 +174,14 @@ class ConfigAccumulator :
             if algSeq :
                 self.CA.addSequence(algSeq)
 
+
+    def noSystematics (self) :
+        """noSystematics flag used by CommonServices block"""
+        return self._noSystematics
+
+    def autoconfigFlags (self) :
+        """auto configuration flags"""
+        return self._autoconfigFlags
 
     def dataType (self) :
         """the data type we run on (data, fullsim, fastsim)"""
