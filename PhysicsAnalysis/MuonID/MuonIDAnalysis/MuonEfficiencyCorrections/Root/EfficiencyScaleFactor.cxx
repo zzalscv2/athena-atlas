@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <MuonEfficiencyCorrections/EfficiencyScaleFactor.h>
@@ -156,7 +156,8 @@ namespace CP {
                 Error("EfficiencyScaleFactor()", "TTVA non closure systematic could not be loaded.");
                 m_sf_KineDepsys.reset();
             }
-            m_sf_KineDepsys->SetSystematicWeight( IsUpVariation() ? 1 : -1);
+            else
+              m_sf_KineDepsys->SetSystematicWeight( IsUpVariation() ? 1 : -1);
             return;
         
         }
