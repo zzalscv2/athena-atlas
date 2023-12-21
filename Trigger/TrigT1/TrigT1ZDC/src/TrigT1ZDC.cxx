@@ -39,7 +39,9 @@ namespace LVL1 {
 
    // Conversion factor from Run2 Energies (GeV) to dynamic range of LUT (4096 entries)
    std::vector<float> convfact;
-   convfact.push_back(m_energyToADCScaleFactor);
+   // if EnergyToADCScaleFactor is 0, using Run3 Data 
+   // this means we make trigger decisions based on real trigger amplitudes
+   convfact.push_back((m_energyToADCScaleFactor) ? static_cast<float>(m_energyToADCScaleFactor) : static_cast<float>(1.0));
 
    // Will eventually obtain LUTs from COOL, for now obtain them from calibration area
    // A data member to hold the side A LUT values
@@ -77,17 +79,18 @@ namespace LVL1 {
      {
        if (zdcModule->zdcType() == 0)
        { // type = 0 are big modules, type = 1 the pixels
+       
        ATH_MSG_DEBUG("ZDC Side " << zdcModule->zdcSide() << ", Module: " << zdcModule->zdcModule() << " and Energy: " << zdcModuleCalibEnergyHandle(*zdcModule));
        // Side A
        if (zdcModule->zdcSide() > 0)
         {
-         moduleEnergy.at(zdcModule->zdcModule()) = zdcModuleCalibEnergyHandle(*zdcModule);
+          moduleEnergy.at(zdcModule->zdcModule()) = (!m_energyToADCScaleFactor && zdcModule->isAvailable<uint16_t>("LucrodTriggerAmp")) ? static_cast<float>(zdcModule->auxdataConst<uint16_t>("LucrodTriggerAmp")) : zdcModuleCalibEnergyHandle(*zdcModule);
         }
 
        // Side C
        if (zdcModule->zdcSide() < 0)
         {
-         moduleEnergy.at(zdcModule->zdcModule() + 4) = zdcModuleCalibEnergyHandle(*zdcModule);
+          moduleEnergy.at(zdcModule->zdcModule() + 4) = (!m_energyToADCScaleFactor && zdcModule->isAvailable<uint16_t>("LucrodTriggerAmp")) ? static_cast<float>(zdcModule->auxdataConst<uint16_t>("LucrodTriggerAmp")) : zdcModuleCalibEnergyHandle(*zdcModule);
         }
        }
      }
