@@ -33,22 +33,7 @@ StatusCode LArCellContHVCorrTool::process(CaloCellContainer* cellCollection, con
     
    
    for (CaloCell* theCell : *cellCollection) {
-     float hvcorr = oflHVCorr->HVScaleCorr(theCell->ID());
-     
-     //Report large correction values
-     if (hvcorr<0.9 ) {
-       if (hvcorr<0.4) {
-         ATH_MSG_WARNING( "HV corr for cell with id " << theCell->ID().get_identifier32().get_compact() 
-			  << " = " << hvcorr  );
-       } else 
-	 ATH_MSG_DEBUG( "HV corr for cell with id " << theCell->ID().get_identifier32().get_compact() 
-			<< " = " << hvcorr  );
-     }
-   
-     //hvcorr might be zero in case of problems with the DCS database
-     //we are not interested in corrections less the 1%
-     if (hvcorr<0.01) hvcorr=1.0;
-
+     const float hvcorr = oflHVCorr->HVScaleCorr(theCell->ID());
      theCell->setEnergy(theCell->energy()*hvcorr);
    }// End loop over cell-container
    return StatusCode::SUCCESS;
