@@ -106,9 +106,9 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
                                         const std::array<int, gPos::MAX_FIBERS> &XMSK,
                                         gtFPGA &Xsatur) const;
 
-        virtual int crc9d32(const std::array<int, 6> &inWords,int numWords,int reverse) const;
+        virtual int crc9d32(const std::array<uint32_t, 6> &inWords,int numWords,int reverse) const;
 
-        virtual int crc9d23(int inword, int in_crc, int  reverse ) const;
+        uint32_t crc9d23(uint32_t inword, uint32_t in_crc, int  reverse ) const;
 
         virtual void undoMLE(int &datumPtr ) const;
         
