@@ -32,6 +32,5 @@ atlas_add_test(ut_GSF_testHorner
 
 atlas_add_test(ut_GSF_findIndexOfMinimum
     SOURCES test/testFindIndexOfMinimum.cxx
-	LINK_LIBRARIES CxxUtils TrkGaussianSumFilterUtilsLib
-  POST_EXEC_SCRIPT nopost.sh )
+	LINK_LIBRARIES CxxUtils TrkGaussianSumFilterUtilsLib)
 

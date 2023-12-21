@@ -32,10 +32,9 @@
  *
  * - A "C" implementation
  * - A "STL" implementation
- * - A "Vec"  implementation using blend
- * - A "Vec" implementation that is faster
- *   than the above when the inputs are not
- *   ordered.
+ * - A "Vec"  implementation always tracking the index
+ * - A "Vec" implementation that updates the index when an new minimum is
+ * foiund. This can be faster than the above when the inputs are not ordered.
  *
  *  We provide a convenient entry method
  *  to select in compile time an implementation
@@ -83,7 +82,7 @@ int32_t scalarSTL(const float* distancesIn, int n) {
 
 // index of minimum vec with blend
 ATH_ALWAYS_INLINE
-int32_t vecBlend(const float* distancesIn, int n) {
+int32_t vecAlwaysTrackIdx(const float* distancesIn, int n) {
   using namespace CxxUtils;
   const float* array =
       CxxUtils::assume_aligned<GSFConstants::alignment>(distancesIn);
@@ -94,19 +93,19 @@ int32_t vecBlend(const float* distancesIn, int n) {
   vec<int, 4> indices3 = {8, 9, 10, 11};
   vec<int, 4> indices4 = {12, 13, 14, 15};
 
-  vec<int, 4> minindices1 = indices1;
-  vec<int, 4> minindices2 = indices2;
-  vec<int, 4> minindices3 = indices3;
-  vec<int, 4> minindices4 = indices4;
+  vec<int, 4> minIndices1 = indices1;
+  vec<int, 4> minIndices2 = indices2;
+  vec<int, 4> minIndices3 = indices3;
+  vec<int, 4> minIndices4 = indices4;
 
-  vec<float, 4> minvalues1;
-  vec<float, 4> minvalues2;
-  vec<float, 4> minvalues3;
-  vec<float, 4> minvalues4;
-  vload(minvalues1, array);
-  vload(minvalues2, array + 4);
-  vload(minvalues3, array + 8);
-  vload(minvalues4, array + 12);
+  vec<float, 4> minValues1;
+  vec<float, 4> minValues2;
+  vec<float, 4> minValues3;
+  vec<float, 4> minValues4;
+  vload(minValues1, array);
+  vload(minValues2, array + 4);
+  vload(minValues3, array + 8);
+  vload(minValues4, array + 12);
 
   vec<float, 4> values1;
   vec<float, 4> values2;
@@ -116,61 +115,60 @@ int32_t vecBlend(const float* distancesIn, int n) {
     // 1
     vload(values1, array + i);  // 0-3
     indices1 = indices1 + increment;
-    vec<int, 4> lt1 = values1 < minvalues1;
-    vselect(minindices1, indices1, minindices1, lt1);
-    vmin(minvalues1, values1, minvalues1);
+    vec<int, 4> lt1 = values1 < minValues1;
+    vselect(minIndices1, indices1, minIndices1, lt1);
+    vmin(minValues1, values1, minValues1);
     // 2
     vload(values2, array + i + 4);  // 4-7
     indices2 = indices2 + increment;
-    vec<int, 4> lt2 = values2 < minvalues2;
-    vselect(minindices2, indices2, minindices2, lt2);
-    vmin(minvalues2, values2, minvalues2);
+    vec<int, 4> lt2 = values2 < minValues2;
+    vselect(minIndices2, indices2, minIndices2, lt2);
+    vmin(minValues2, values2, minValues2);
     // 3
     vload(values3, array + i + 8);  // 8-11
     indices3 = indices3 + increment;
-    vec<int, 4> lt3 = values3 < minvalues3;
-    vselect(minindices3, indices3, minindices3, lt3);
-    vmin(minvalues3, values3, minvalues3);
+    vec<int, 4> lt3 = values3 < minValues3;
+    vselect(minIndices3, indices3, minIndices3, lt3);
+    vmin(minValues3, values3, minValues3);
     // 4
     vload(values4, array + i + 12);  // 12-15
     indices4 = indices4 + increment;
-    vec<int, 4> lt4 = values4 < minvalues4;
-    vselect(minindices4, indices4, minindices4, lt4);
-    vmin(minvalues4, values4, minvalues4);
+    vec<int, 4> lt4 = values4 < minValues4;
+    vselect(minIndices4, indices4, minIndices4, lt4);
+    vmin(minValues4, values4, minValues4);
   }
-  // Compare //1 with //2 minimum becomes 1
-  vec<int, 4> lt12 = minvalues1 < minvalues2;
-  vselect(minindices1, minindices1, minindices2, lt12);
-  vmin(minvalues1, minvalues1, minvalues2);
-  // compare //3 with //4 minimum becomes 3
-  vec<int, 4> lt34 = minvalues3 < minvalues4;
-  vselect(minindices3, minindices3, minindices4, lt34);
-  vmin(minvalues3, minvalues3, minvalues4);
-  // Compare //1 with //3 minimum becomes 1
-  vec<int, 4> lt13 = minvalues1 < minvalues3;
-  vselect(minindices1, minindices1, minindices3, lt13);
-  vmin(minvalues1, minvalues1, minvalues3);
 
-  // Do the final calculation scalar way
-  int minindices[4];
-  float minvalues[4];
-  vstore(minvalues, minvalues1);
-  vstore(minindices, minindices1);
-  size_t minIndex = minindices[0];
-  float minvalue = minvalues[0];
+  float minValues[16];
+  int minIndices[16];
+  vstore(minValues, minValues1);
+  vstore(minValues + 4, minValues2);
+  vstore(minValues + 8, minValues3);
+  vstore(minValues + 12, minValues4);
+  vstore(minIndices, minIndices1);
+  vstore(minIndices + 4, minIndices2);
+  vstore(minIndices + 8, minIndices3);
+  vstore(minIndices + 12, minIndices4);
 
-  for (size_t i = 1; i < 4; ++i) {
-    const float value = minvalues[i];
-    if (value < minvalue) {
-      minvalue = value;
-      minIndex = minindices[i];
+  float minValue = minValues[0];
+  int32_t minIndex = minIndices[0];
+  for (size_t i = 1; i < 16; ++i) {
+    const float value = minValues[i];
+    const int32_t index = minIndices[i];
+    if (value < minValue) {
+      minValue = value;
+      minIndex = index;
+    } else if (value == minValue && index < minIndex) {
+      // we want to return the smallest index
+      // in case of 2 same values
+      minIndex = index;
     }
   }
   return minIndex;
 }
+
 // index of minimum vec quite fast for the "unordered"/"random" case
 ATH_ALWAYS_INLINE
-int32_t vecUnordered(const float* distancesIn, int n) {
+int32_t vecUpdateIdxOnNewMin(const float* distancesIn, int n) {
   using namespace CxxUtils;
   const float* array =
       CxxUtils::assume_aligned<GSFConstants::alignment>(distancesIn);
@@ -248,17 +246,18 @@ int32_t vecUnordered(const float* distancesIn, int n) {
 }  // namespace findMinimumIndexDetail
 
 namespace findMinimumIndex {
-enum Impl { VecUnordered = 0, VecBlend = 1, C = 2, STL = 3 };
+enum Impl { VecUpdateIdxOnNewMin = 0, VecAlwaysTrackIdx = 1, C = 2, STL = 3 };
 
 template <enum Impl I>
 ATH_ALWAYS_INLINE int32_t impl(const float* distancesIn, int n) {
 
-  static_assert(I == VecUnordered || I == VecBlend || I == C || I == STL,
-                "Not a valid implementation chosen");
-  if constexpr (I == VecUnordered) {
-    return findMinimumIndexDetail::vecUnordered(distancesIn, n);
-  } else if constexpr (I == VecBlend) {
-    return findMinimumIndexDetail::vecBlend(distancesIn, n);
+  static_assert(
+      I == VecUpdateIdxOnNewMin || I == VecAlwaysTrackIdx || I == C || I == STL,
+      "Not a valid implementation chosen");
+  if constexpr (I == VecUpdateIdxOnNewMin) {
+    return findMinimumIndexDetail::vecUpdateIdxOnNewMin(distancesIn, n);
+  } else if constexpr (I == VecAlwaysTrackIdx) {
+    return findMinimumIndexDetail::vecAlwaysTrackIdx(distancesIn, n);
   } else if constexpr (I == C) {
     return findMinimumIndexDetail::scalarC(distancesIn, n);
   } else if constexpr (I == STL) {
