@@ -1840,7 +1840,7 @@ Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int ind
                *itcmp < *it) ++itcmp;
         // Nothing needs to be done if the values are "nearly identical"
         // (or if we don't find such an element).
-        if (itcmp == mergedBoundaries[vars[t]].end() && CalibrationDataContainer::isNearlyEqual(*itcmp, *it)) continue;
+        if (itcmp == mergedBoundaries[vars[t]].end() || CalibrationDataContainer::isNearlyEqual(*itcmp, *it)) continue;
         // Otherwise insert the given element (this can mean adding to the end)
         mergedBoundaries[vars[t]].insert(itcmp, *it);
       }
