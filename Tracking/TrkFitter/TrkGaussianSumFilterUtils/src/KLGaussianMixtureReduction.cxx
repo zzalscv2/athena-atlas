@@ -343,7 +343,7 @@ findMergesImpl(const Component1DArray& componentsIn,
   while (numberOfComponentsLeft > reducedSize) {
     // find pair with minimum distance
     const int32_t minIndex =
-        findMinimumIndex::impl<findMinimumIndex::VecBlend>(
+        findMinimumIndex::impl<findMinimumIndex::VecAlwaysTrackIdx>(
             distances.buffer(), nnpadded);
     const triangularToIJ conversion = convert(minIndex);
     int8_t minTo = conversion.I;
