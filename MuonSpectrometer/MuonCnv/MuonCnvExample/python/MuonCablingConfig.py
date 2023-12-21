@@ -21,7 +21,7 @@ if DetFlags.MDT_on():
     from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags
     condSequence.MuonMDT_CablingAlg.isRun3 = CommonGeometryFlags.Run not in ["RUN1","RUN2"]
 
-if DetFlags.MM_on():
+if DetFlags.MM_on() and globalflags.DataSource() == 'data': # the MM cabling correction is only needed for data
     from MuonMM_Cabling.MuonMM_CablingConf import MuonMM_CablingAlg
     condSequence += MuonMM_CablingAlg("MuonMM_CablingAlg")
 
@@ -150,7 +150,12 @@ if DetFlags.readRDOBS.MM_on() or DetFlags.readRDOPool.MM_on()  or DetFlags.readR
       from IOVDbSvc.CondDB import conddb 
       IOVDbSvc = ServiceMgr.IOVDbSvc
       if globalflags.DataSource()=='data':
-          # here we should add the cool folders containing the cabling map of the NSW
-          pass
+          from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
+          if athenaCommonFlags.isOnline():
+            conddb.addFolder("MDT_ONL","/MDT/Onl/MM/CABLING",className="CondAttrListCollection", tag="MmCabling-FrontEndShifts-v1")
+            condSequence.MuonMM_CablingAlg.CablingFolder="/MDT/MM/CABLING"  
+          else:
+            conddb.addFolder("MDT_OFL","/MDT/MM/CABLING",className="CondAttrListCollection", tag="MmCabling-FrontEndShifts-v1")
+            condSequence.MuonMM_CablingAlg.CablingFolder="/MDT/MM/CABLING"
 
     

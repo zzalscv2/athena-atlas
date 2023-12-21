@@ -73,7 +73,7 @@ bool MicroMega_CablingMap::addConnector(const Identifier& gapID,
             << " is already partially covered " << connector << endmsg;
         return false;
     }
-    msg << MSG::ALWAYS << "Add new zebra connector " << connector << " to "
+    msg << MSG::DEBUG << "Add new zebra connector " << connector << " to "
         << m_idHelperSvc->toString(gapID) << "." << endmsg;
     correctionSet.insert(connector);
     return true;
