@@ -115,8 +115,8 @@ inline
 std::string to_str(PyObject *obj)
 {
   PyObject *py_str = PyObject_Str(obj);
-  std::string s = py_str && PyString_Check(py_str) 
-    ? PyString_AS_STRING(py_str)
+  std::string s = py_str && PyUnicode_Check(py_str)
+    ? PyUnicode_AsUTF8(py_str)
     : "";
   Py_XDECREF(py_str);
   return s;
@@ -364,7 +364,6 @@ recurse_pyinspect(PyObject *pyobj,
       EDataType mbr_dtype = (EDataType)mbr_type->GetType();
       py_mbr_name = PyUnicode_FromString(mbr->GetName());
       py_mbr = to_pyobj(ptr, mbr_dtype);
-
     } else if (mbr->IsEnum()) {
 #if PYROOT_INSPECTOR_DBG
       std::cerr << "==[" << mbr->GetTypeName() << "]["
