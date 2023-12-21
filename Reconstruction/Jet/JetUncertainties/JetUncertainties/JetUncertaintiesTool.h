@@ -274,6 +274,9 @@ class ATLAS_NOT_THREAD_SAFE JetUncertaintiesTool : virtual public ICPJetUncertai
 
 	// Properties for the flavour configuration
 	bool m_absEtaGluonFraction;
+
+	// toggle only the JER uncertainties for pseudo-data smearing
+	bool m_pseudoDataJERsmearingMode;
 };
     
 
