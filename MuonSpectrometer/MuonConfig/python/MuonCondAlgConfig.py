@@ -368,8 +368,8 @@ def NswDcsDbAlgCfg(flags, **kwargs):
     if(kwargs["LoadTdaq"]):
         kwargs.setdefault("ReadKey_MMG_TDAQ","/MDT/MM/ELinks")
         kwargs.setdefault("ReadKey_STG_TDAQ","/TGC/NSW/ELinks")
-        acc.merge(addFolders(flags, "/MDT/MM/ELinks", detDb="MDT_OFL", className="CondAttrListCollection", tag="MmElinks2023-TEST"))
-        acc.merge(addFolders(flags, "/TGC/NSW/ELinks", detDb="TGC_OFL", className="CondAttrListCollection", tag="sTgcElinks2023-TEST"))
+        acc.merge(addFolders(flags, "/MDT/MM/ELinks", detDb="MDT_OFL", className="CondAttrListCollection", tag="MmElinks2023-TEST-01"))
+        acc.merge(addFolders(flags, "/TGC/NSW/ELinks", detDb="TGC_OFL", className="CondAttrListCollection", tag="sTgcElinks2023-TEST-01"))
     kwargs.setdefault("ReadKey_MMG_TDAQ","/MDT/MM/ELinks")
     kwargs.setdefault("ReadKey_STG_TDAQ","/TGC/NSW/Elinks")
     
