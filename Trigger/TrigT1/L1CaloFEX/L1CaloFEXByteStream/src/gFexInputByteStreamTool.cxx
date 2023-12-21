@@ -490,13 +490,13 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
     //Loop over fibers
     for(int iFiber = 0; iFiber < Xin; iFiber++) { 
         // first do CRC check
-        std::array<int, 6> tmp; 
+        std::array<uint32_t, 6> tmp; 
         for(int i = 0; i < 6; i++){ tmp[i] = Xfiber[iFiber][i];  };
         // coverity[uninit_use_in_cal : FALSE] 
-        int CRC  = crc9d32(tmp, 6, 1);
+        uint32_t CRC  = crc9d32(tmp, 6, 1);
         int withoutComma = Xfiber[iFiber][6] & 0xFFFFFF00 ; 
         CRC = crc9d23(withoutComma, CRC,  1 );
-        int StoredCRC = ( (Xfiber[iFiber][6]>>23) & 0x000001FF);
+        uint32_t StoredCRC = ( (Xfiber[iFiber][6]>>23) & 0x000001FF);
         if( (CRC != StoredCRC) && (StoredCRC != 0 ) )   {
             
             std::stringstream sdetail;
@@ -1122,12 +1122,12 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
 
 
 
-int gFexInputByteStreamTool::crc9d32(const std::array<int, 6> &inWords,int numWords,int reverse) const{
+int gFexInputByteStreamTool::crc9d32(const std::array<uint32_t, 6> &inWords,int numWords,int reverse) const{
   // calculate this for reversed bits
 
-    std::array<int, 32> dIn; 
-    std::array<int, 9> crc_s;
-    std::array<int, 9> crc_r;
+    std::array<uint32_t, 32> dIn; 
+    std::array<uint32_t, 9> crc_s;
+    std::array<uint32_t, 9> crc_r;
 
     crc_s.fill(1);
     crc_r.fill(1);
@@ -1186,14 +1186,14 @@ int gFexInputByteStreamTool::crc9d32(const std::array<int, 6> &inWords,int numWo
 }
 
 
-int gFexInputByteStreamTool::crc9d23(int inword, int in_crc, int  reverse ) const{
+uint32_t gFexInputByteStreamTool::crc9d23(uint32_t inword, uint32_t in_crc, int  reverse ) const{
 
     int mask  = 0x00000001; 
     //#dIn is a '23-bit input word'
-    std::array<int, 23> dIn;
+    std::array<uint32_t, 23> dIn;
 
-    std::array<int, 9> crc_r;
-    std::array<int, 9> crc_in_s;
+    std::array<uint32_t, 9> crc_r;
+    std::array<uint32_t, 9> crc_in_s;
  
     crc_r.fill(1);
     crc_in_s.fill(1);
