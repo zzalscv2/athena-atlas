@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -17,6 +17,7 @@
 #include <RootCoreUtils/RootUtils.h>
 #include <TH1.h>
 #include <TTree.h>
+#include <tuple>//for std::ignore
 
 //
 // method implementations
@@ -175,18 +176,22 @@ namespace EL
       RCU_ASSERT (file != nullptr);
       for (std::unique_ptr<TObject>& object : m_output)
       {
-        auto barePtr = object.release();
-        std::string name = barePtr->GetName();
+        std::string name = object->GetName();
         TDirectory *dir = makeDirectoryFor (name);
         if (dir != file)
         {
-          TNamed *named = dynamic_cast<TNamed*>(barePtr);
+          TNamed *named = dynamic_cast<TNamed*>(object.get());
           if (named)
             named->SetName (name.c_str());
         }
 
-        if (!RCU::SetDirectory (barePtr, dir))
-          dir->WriteObject (barePtr, name.c_str());
+        if (!RCU::SetDirectory (object.get(), dir))
+        {
+          dir->WriteObject (object.get(), name.c_str());
+        }
+        //release object which was consumed by SetDirectory or WriteObject
+        //placate cppcheck using std::ignore
+        std::ignore = object.release();
       }
       m_outputHistMap.clear ();
       m_outputTreeMap.clear ();
