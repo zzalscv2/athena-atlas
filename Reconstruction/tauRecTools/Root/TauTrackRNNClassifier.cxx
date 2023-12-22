@@ -186,7 +186,7 @@ StatusCode TrackRNN::classifyTracks(std::vector<xAOD::TauTrack*>& vTracks,
   std::sort(vTracks.begin(), vTracks.end(), [](const xAOD::TauTrack * a, const xAOD::TauTrack * b) {return a->pt() > b->pt();});
 
   VectorMap valueMap;
-  ATH_CHECK(calulateVars(vTracks, xTau, vertexContainer, valueMap));
+  ATH_CHECK(calculateVars(vTracks, xTau, vertexContainer, valueMap));
 
   SeqNodeMap seqInput;
   NodeMap nodeInput;
@@ -243,10 +243,10 @@ StatusCode TrackRNN::classifyTracks(std::vector<xAOD::TauTrack*>& vTracks,
 
 
 //______________________________________________________________________________
-StatusCode TrackRNN::calulateVars(const std::vector<xAOD::TauTrack*>& vTracks,
-				  const xAOD::TauJet& xTau,
-				  const xAOD::VertexContainer* vertexContainer,
-				  tauRecTools::VectorMap& valueMap) const
+StatusCode TrackRNN::calculateVars(const std::vector<xAOD::TauTrack*>& vTracks,
+				   const xAOD::TauJet& xTau,
+				   const xAOD::VertexContainer* vertexContainer,
+				   tauRecTools::VectorMap& valueMap) const
 {
   // initialize map with values
   valueMap.clear();
