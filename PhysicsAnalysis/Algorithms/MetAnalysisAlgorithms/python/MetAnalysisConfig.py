@@ -77,6 +77,9 @@ class MetAnalysisConfig (ConfigBlock):
         # Set up the met significance algorithm:
         alg = config.createAlgorithm( 'CP::MetSignificanceAlg', 'MetSignificanceAlg' + postfix )
         config.addPrivateTool( 'significanceTool', 'met::METSignificance' )
+        config.addPrivateTool( 'significanceTool.MuonCalibTool', 'CP::MuonCalibTool' )
+        alg.significanceTool.MuonCalibTool.calibMode = 1
+
         alg.significanceTool.SoftTermParam = 0
         alg.significanceTool.TreatPUJets = self.treatPUJets
         alg.significanceTool.IsAFII = config.dataType() is DataType.FastSim
