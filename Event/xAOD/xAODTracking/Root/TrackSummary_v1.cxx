@@ -31,6 +31,9 @@ DEFINE_API(TrackSummary_v1, unsigned int, tipIndex, setTipIndex)
 
 DEFINE_API(TrackSummary_v1, unsigned int, stemIndex, setStemIndex)
 
+AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackSummary_v1, uint8_t, particleHypothesis, setParticleHypothesis)
+
+
 const SG::AuxElement::Accessor<std::vector<double> >
     xAOD::TrackSummary_v1::s_paramsAcc{"params"};
 const SG::AuxElement::Accessor<std::vector<double> >

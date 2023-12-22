@@ -6,6 +6,7 @@
 
 
 #include "xAODCore/AuxContainerBase.h"
+#include "xAODTracking/TrackingPrimitives.h"
 #include <vector>
 namespace xAOD {
  class TrackSummaryAuxContainer_v1 : public AuxContainerBase {
@@ -27,6 +28,7 @@ namespace xAOD {
         std::vector<unsigned int> nSharedHits;
         std::vector<unsigned int> tipIndex;
         std::vector<unsigned int> stemIndex;
+        std::vector<uint8_t> particleHypothesis;
     };
 }
 

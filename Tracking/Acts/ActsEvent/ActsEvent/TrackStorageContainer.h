@@ -73,6 +73,11 @@ class TrackStorageContainer {
   const Acts::Surface* referenceSurface_impl(ActsTrk::IndexType itrack) const;
 
   /**
+  * return pointer to reference surface
+  */
+  Acts::ParticleHypothesis particleHypothesis_impl(IndexType itrack) const;
+
+  /**
   * returns number of stored tracks
   */
   std::size_t size_impl() const;
@@ -128,7 +133,6 @@ class MutableTrackStorageContainer : public TrackStorageContainer {
   MutableTrackStorageContainer operator=(const MutableTrackStorageContainer&) = delete;
   MutableTrackStorageContainer(MutableTrackStorageContainer&&) noexcept;
 
-// Add and remove surface
   /**
   * adds new surface to the tail of the container
   */
@@ -138,9 +142,6 @@ class MutableTrackStorageContainer : public TrackStorageContainer {
   * clears surface data under index
   */
   void removeSurface_impl(ActsTrk::IndexType isurf);
-
-  //TODO: function(s) needed to fill the surface in the way analog to tracks
-
 
   /**
   * adds new track to the tail of the container
@@ -207,13 +208,13 @@ class MutableTrackStorageContainer : public TrackStorageContainer {
   */
   void setReferenceSurface_impl(ActsTrk::IndexType itrack,
                                 std::shared_ptr<const Acts::Surface> surface);
-
-
- void setParticleHypothesis_impl(
-    ActsTrk::IndexType itrack, const Acts::ParticleHypothesis& particleHypothesis) {
-    m_particleHypothesis.resize(itrack+1, Acts::ParticleHypothesis::pion());
-    m_particleHypothesis[itrack] = particleHypothesis;
-  }
+  /**
+  * sets particle hypothesis
+  * @warning it will fail for an arbitrary particles as it converts to 
+  * a predefined set (@see xAOD::ParticleHypothesis in TrackingPrimitives.h) of values
+  */
+  void setParticleHypothesis_impl(ActsTrk::IndexType itrack, 
+                                  const Acts::ParticleHypothesis& particleHypothesis);
 
   template<typename T>
   friend class MutableTrackContainerHandle;

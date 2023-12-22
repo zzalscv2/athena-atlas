@@ -16,5 +16,7 @@ namespace xAOD {
     AUX_VARIABLE(nSharedHits);
     AUX_VARIABLE(tipIndex);
     AUX_VARIABLE(stemIndex);
+    AUX_VARIABLE(particleHypothesis);
+
   }
 }
