@@ -3,7 +3,7 @@ from AthenaConfiguration.Enums import HIMode
 from TrkConfig.TrkConfigFlags import PrimaryPassConfig
 
 
-def beamSpotRecoPre(flags):
+def beamSpotRecoPreInc(flags):
     """beamSpotReco pre exec flags for Reco_tf with CA"""
     flags.Detector.EnableAFP = False
     flags.Detector.EnableLucid = False
@@ -35,7 +35,7 @@ def beamSpotRecoPre(flags):
     flags.DQ.enableLumiAccess = False
 
 
-def beamSpotRecoPost(flags, cfg):
+def beamSpotRecoPostInc(flags, cfg):
     from IOVDbSvc.IOVDbSvcConfig import addOverride
 
     cfg.merge(addOverride(flags, "/Indet/AlignL1/ID", "InDetAlignL1-RUN3-BLK-UPD4-01"))
@@ -51,3 +51,8 @@ def beamSpotRecoPost(flags, cfg):
         addOverride(flags, "/Indet/IBLDist", "InDetAlignIBLDIST-RUN3-BLK-UPD4-01")
     )
     cfg.merge(addOverride(flags, "/TRT/AlignL2", "TRTAlignL2-RUN3-BLK-UPD4-04"))
+
+
+def beamSpotRecoPostExecCfg(flags):
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    return OutputStreamCfg(flags, "AOD",["EventInfo#*"])
