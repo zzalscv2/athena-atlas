@@ -88,6 +88,8 @@ void InDet::InDetUsedInFitTrackDecoratorTool::decorate(const xAOD::TrackParticle
   // Decor handles for the AMVF vertices and weights
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<ElementLink<xAOD::VertexContainer>>> vtxDeco(m_vtxDecoKey, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> wgtDeco(m_wgtDecoKey, ctx);
+  bool isVtxDeco_available = vtxDeco.isAvailable();
+  if(isVtxDeco_available) return;
 
   //vector to collect results
   std::vector<std::pair<const xAOD::Vertex*,float> > vxWithWeight;

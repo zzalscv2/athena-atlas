@@ -56,7 +56,7 @@ def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
     from DerivationFrameworkInDet.InDetToolsConfig import (
         TrackParametersAtPVCfg)
     DFCommonZ0AtPV = acc.getPrimaryAndMerge(TrackParametersAtPVCfg(
-        flags, name="DFCommonZ0AtPV",
+        flags, name="IDTIDE_DFCommonZ0AtPV",
         Z0SGEntryName="IDTIDEInDetTrackZ0AtPV")
     )
     augmentationTools.append(DFCommonZ0AtPV)
@@ -179,46 +179,6 @@ def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
 
     return acc
 
-def DFInDetTSOSKernelCfg(flags, name='DFInDetTSOSKernel'):
-    acc = ComponentAccumulator()
-
-    # ====================================================================
-    # AUGMENTATION TOOLS
-    # ====================================================================
-    tsos_augmentationTools = []
-
-    from DerivationFrameworkInDet.InDetToolsConfig import (
-        DFTrackStateOnSurfaceDecoratorCfg)
-    DFTSOS = acc.getPrimaryAndMerge(DFTrackStateOnSurfaceDecoratorCfg(flags))
-    tsos_augmentationTools.append(DFTSOS)
-
-    # shared between IDTIDE and IDTRKVALID
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
-        name,
-        AugmentationTools=tsos_augmentationTools,
-        ThinningTools=[],
-        OutputLevel=INFO))
-    return acc
-
-def DFITkTSOSKernelCfg(flags, name='DFITkTSOSKernel'):
-    acc = ComponentAccumulator()
-
-    # ====================================================================
-    # AUGMENTATION TOOLS
-    # ====================================================================
-    tsos_augmentationTools = []
-
-    from DerivationFrameworkInDet.InDetToolsConfig import DFITkTrackStateOnSurfaceDecoratorCfg
-    DFTSOS = acc.getPrimaryAndMerge(DFITkTrackStateOnSurfaceDecoratorCfg(flags))
-    tsos_augmentationTools.append(DFTSOS)
-
-    # shared between IDTIDE and IDTRKVALID
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
-        name,
-        AugmentationTools=tsos_augmentationTools,
-        ThinningTools=[],
-        OutputLevel=INFO))
-    return acc
 
 def IDTIDEThinningKernelCfg(flags, name="IDTIDEThinningKernel", StreamName=""):
     acc = ComponentAccumulator()
@@ -248,7 +208,7 @@ def IDTIDEThinningKernelCfg(flags, name="IDTIDEThinningKernel", StreamName=""):
             IDTIDETruthThinningToolCfg(flags, StreamName=StreamName)))
 
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
-        name="IDTIDEThinningKernel",
+        name,
         AugmentationTools=[],
         ThinningTools=thinningTools,
         OutputLevel=INFO))
@@ -295,6 +255,8 @@ def IDTIDEKernelCfg(flags, StreamName=""):
     acc.addSequence(parSeq(IDTIDEPostProcSequenceName),
                     parentName=IDTIDEPreselSequenceName)
 
+    from DerivationFrameworkInDet.InDetToolsConfig import (
+        DFInDetTSOSKernelCfg)
     acc.merge(DFInDetTSOSKernelCfg(flags),
               sequenceName=IDTIDEPostProcSequenceName)
     acc.merge(IDTIDEThinningKernelCfg(flags, StreamName=StreamName),
@@ -322,6 +284,7 @@ def ITkTIDEKernelCfg(flags, StreamName=""):
     acc.addSequence(parSeq(IDTIDEPostProcSequenceName),
                     parentName=IDTIDEPreselSequenceName)
 
+    from DerivationFrameworkInDet.InDetToolsConfig import DFITkTSOSKernelCfg
     acc.merge(DFITkTSOSKernelCfg(flags),
               sequenceName=IDTIDEPostProcSequenceName)
     acc.merge(IDTIDEThinningKernelCfg(flags, StreamName=StreamName),

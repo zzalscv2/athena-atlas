@@ -135,6 +135,25 @@ def DFTrackStateOnSurfaceDecoratorCfg(
     kwargs.setdefault("OutputLevel", INFO)
     return TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
 
+def DFInDetTSOSKernelCfg(flags, name='DFInDetTSOSKernel'):
+    acc = ComponentAccumulator()
+
+    # ====================================================================
+    # AUGMENTATION TOOLS
+    # ====================================================================
+    tsos_augmentationTools = []
+
+    DFTSOS = acc.getPrimaryAndMerge(DFTrackStateOnSurfaceDecoratorCfg(flags))
+    tsos_augmentationTools.append(DFTSOS)
+
+    # shared between IDTIDE and IDTRKVALID
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+        name,
+        AugmentationTools=tsos_augmentationTools,
+        ThinningTools=[],
+        OutputLevel=INFO))
+    return acc
+
 def ObserverTrackStateOnSurfaceDecoratorCfg(
         flags, name="ObserverTrackStateOnSurfaceDecorator", **kwargs):
     kwargs.setdefault("ContainerName", "InDetObservedTrackParticles")
@@ -265,12 +284,31 @@ def ITkTSOS_CommonKernelCfg(flags, name="ITkTSOS_CommonKernel"):
 
 def DFITkTrackStateOnSurfaceDecoratorCfg(
         flags, name="DFITkTrackStateOnSurfaceDecorator", **kwargs):
-    kwargs.setdefault("StorePixel", flags.Detector.EnableITkPixel)
-    kwargs.setdefault("StoreSCT", flags.Detector.EnableITkStrip)
+    kwargs.setdefault("StorePixel", flags.ITk.DAODStorePixel)
+    kwargs.setdefault("StoreSCT", flags.ITk.DAODStoreStrip)
     kwargs.setdefault("DecorationPrefix", "")
     kwargs.setdefault("PRDtoTrackMap", "")
     kwargs.setdefault("OutputLevel", INFO)
     return ITkTrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
+
+def DFITkTSOSKernelCfg(flags, name='DFITkTSOSKernel'):
+    acc = ComponentAccumulator()
+
+    # ====================================================================
+    # AUGMENTATION TOOLS
+    # ====================================================================
+    tsos_augmentationTools = []
+
+    DFTSOS = acc.getPrimaryAndMerge(DFITkTrackStateOnSurfaceDecoratorCfg(flags))
+    tsos_augmentationTools.append(DFTSOS)
+
+    # shared between IDTIDE and IDTRKVALID
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+        name,
+        AugmentationTools=tsos_augmentationTools,
+        ThinningTools=[],
+        OutputLevel=INFO))
+    return acc
 
 def ITkSiSPTrackStateOnSurfaceDecoratorCfg(
         flags, name="SiSPTrackStateOnSurfaceDecorator", **kwargs):
@@ -507,6 +545,18 @@ def IDTIDETruthThinningToolCfg(flags, name="IDTIDETruthThinningTool", **kwargs):
     kwargs.setdefault("WriteAllLeptons", True)
     kwargs.setdefault("WriteLeptonsNotFromHadrons", True)
     kwargs.setdefault("WriteStatus3", True)
+    kwargs.setdefault("WriteFirstN", -1)
+    kwargs.setdefault("PreserveAncestors", True)
+    kwargs.setdefault("PreserveGeneratorDescendants", True)
+
+    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import (
+        MenuTruthThinningCfg)
+    return MenuTruthThinningCfg(flags, name, **kwargs)
+
+def IDTRKVALIDTruthThinningToolCfg(
+        flags, name="IDTRKVALIDTruthThinningTool", **kwargs):
+
+    kwargs.setdefault("WriteEverything", True)
     kwargs.setdefault("WriteFirstN", -1)
     kwargs.setdefault("PreserveAncestors", True)
     kwargs.setdefault("PreserveGeneratorDescendants", True)

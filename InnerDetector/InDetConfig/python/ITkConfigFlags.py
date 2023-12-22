@@ -60,8 +60,10 @@ def createITkConfigFlags():
                   not(prevFlags.Beam.Type is BeamType.Cosmics))
 
     # Save cluster information to Derivation
-    itkcf.addFlag("ITk.DAODStorePixel", True)
-    itkcf.addFlag("ITk.DAODStoreStrip", True)
+    itkcf.addFlag("ITk.DAODStorePixel", lambda prevFlags:
+                  prevFlags.Detector.EnableITkPixel)
+    itkcf.addFlag("ITk.DAODStoreStrip", lambda prevFlags:
+                  prevFlags.Detector.EnableITkStrip)
     itkcf.addFlag("ITk.DAODStoreExtra", True)
 
     # Save SiHitCollections to RDO
