@@ -37,7 +37,7 @@ namespace {
 
     };
     constexpr float dummy_val = -1.;
-    
+
      struct RecordPars {
         RecordPars() = default;
         RecordPars(Amg::Vector3D&& _pos, Amg::Vector3D&&_mom):
@@ -46,11 +46,11 @@ namespace {
         RecordPars(const CLHEP::Hep3Vector& _pos, const CLHEP::Hep3Vector& _mom):
             pos{_pos.x(), _pos.y(), _pos.z()},
             mom{_mom.x(), _mom.y(), _mom.z()}{
-            
+
         }
         const Amg::Vector3D pos{Amg::Vector3D::Zero()};
         const Amg::Vector3D mom{Amg::Vector3D::Zero()};
-        
+
         std::string record_name;
         const Trk::TrackingVolume* volume{nullptr};
     };
@@ -151,8 +151,8 @@ namespace Muon {
             ATH_MSG_DEBUG("good muon with type " << iType << " and origin" << iOrigin);
 
             // create segments
-            if (m_createTruthSegment && goodMuon) { 
-                ATH_CHECK(createSegments(ctx, truthLink, segmentContainer, ids)); 
+            if (m_createTruthSegment && goodMuon) {
+                ATH_CHECK(createSegments(ctx, truthLink, segmentContainer, ids));
             }
         }
 
@@ -162,12 +162,12 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonTruthDecorationAlg::createSegments(const EventContext& ctx, 
+    StatusCode MuonTruthDecorationAlg::createSegments(const EventContext& ctx,
                                                      const ElementLink<xAOD::TruthParticleContainer>& truthLink,
                                                      SG::WriteHandle<xAOD::MuonSegmentContainer>& segmentContainer,
                                                      const ChamberIdMap& ids) const {
         SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_detMgrKey, ctx};
-        
+
         std::vector<SG::ReadHandle<MuonSimDataCollection> > sdoCollections(6);
         for (const SG::ReadHandleKey<MuonSimDataCollection>& k : m_SDO_TruthNames) {
             SG::ReadHandle<MuonSimDataCollection> col(k, ctx);
@@ -185,7 +185,7 @@ namespace Muon {
             } else {
                 sdoCollections[index] = std::move(col);
             }
-            
+
         }
 
         bool useSDO = (!sdoCollections.empty() || !m_CSC_SDO_TruthNames.empty());
@@ -242,7 +242,7 @@ namespace Muon {
                     }
                     // look up successful, calculate
                     if (!ok) continue;
-                    
+
                     // small comparison function
                     auto isSmaller = [isEndcap](const Amg::Vector3D& p1, const Amg::Vector3D& p2) {
                         if (isEndcap)
@@ -263,7 +263,7 @@ namespace Muon {
                             firstPos = gpos;
                         else if (isSmaller(secondPos, gpos))
                             secondPos = gpos;
-                    }                    
+                    }
                 } else {
                     SG::ReadHandle<CscSimDataCollection> cscCollection(m_CSC_SDO_TruthNames, ctx);
                     auto pos = cscCollection->find(id);
@@ -287,8 +287,8 @@ namespace Muon {
                             firstPos = gpos;
                         else if (secondPos.perp() < gpos.perp())
                             secondPos = gpos;
-                    }                    
-                }                
+                    }
+                }
             }
             if (precLayers.size() > 2) {
                 matchMap[lay.first] = index;
@@ -320,14 +320,14 @@ namespace Muon {
                 }
             }
         }
-        return StatusCode::SUCCESS; 
+        return StatusCode::SUCCESS;
     }
 
     StatusCode MuonTruthDecorationAlg::addTrackRecords(const EventContext& ctx, xAOD::TruthParticle& truthParticle) const {
         // first loop over track records, store parameters at the different positions
-        const xAOD::TruthVertex* vertex = truthParticle.prodVtx();        
+        const xAOD::TruthVertex* vertex = truthParticle.prodVtx();
         const Trk::TrackingGeometry* trackingGeometry = !m_extrapolator.empty()? m_extrapolator->trackingGeometry() : nullptr;
-      
+
         std::vector<RecordPars> parameters;
         if (vertex) {
             parameters.emplace_back(Amg::Vector3D{vertex->x(), vertex->y(), vertex->z()},
@@ -339,7 +339,7 @@ namespace Muon {
                 return StatusCode::FAILURE;
             }
             const std::string r_name = col.key();
-            
+
             float& x = truthParticle.auxdata<float>(r_name + "_x");
             float& y = truthParticle.auxdata<float>(r_name + "_y");
             float& z = truthParticle.auxdata<float>(r_name + "_z");
@@ -359,7 +359,7 @@ namespace Muon {
             truthParticle.auxdata<std::vector<float> >(r_name + "_cov_extr") = emptyVec;
             truthParticle.auxdata<bool>(r_name+"_is_extr") = false;
             ex = ey = ez = epx = epy = epz = dummy_val;
-            
+
             // loop over collection and find particle with the same bar code
             for (const auto& particle : *col) {
                 if (!HepMC::is_sim_descendant(&particle,&truthParticle)) continue;
@@ -368,13 +368,13 @@ namespace Muon {
                 ATH_MSG_VERBOSE("Found associated  " << r_name << " pt " << mom.perp() << " position: r " << pos.perp() << " z " << pos.z());
                 x = pos.x(); y = pos.y(); z = pos.z();
                 px = mom.x(); py = mom.y(); pz = mom.z();
-                parameters.emplace_back(pos, mom);                
+                parameters.emplace_back(pos, mom);
                 found_truth = true;
                 break;
             }
-            
+
             if (!trackingGeometry) continue;
-            
+
             /// Make sure that the parameter vector has the same size
             if (!found_truth) parameters.emplace_back();
             RecordPars& r_pars = parameters.back();
@@ -392,11 +392,11 @@ namespace Muon {
             r_pars.volume = found_truth ? volume : nullptr;
         }
         /// Second loop, extrapolate between the points
-        
+
         /// extrapolation needs to be setup correctly
         if (!trackingGeometry) return StatusCode::SUCCESS;
-       
-        
+
+
         AmgSymMatrix(5) cov{AmgSymMatrix(5)::Identity()};
         cov(0, 0) = cov(1, 1) = 1e-3;
         cov(2, 2) = cov(3, 3) = 1e-6;
@@ -407,7 +407,7 @@ namespace Muon {
             /// If the track record is named, then we should have a volume
             if ( (!start_pars.record_name.empty() && !start_pars.volume) || !end_pars.volume) continue;
             Trk::CurvilinearParameters pars(start_pars.pos, start_pars.mom, truthParticle.charge(), cov);
-            
+
             const Trk::TrackingVolume* volume = end_pars.volume;
             const std::string& r_name = end_pars.record_name;
             float& ex = truthParticle.auxdata<float>(r_name + "_x_extr");
@@ -417,14 +417,14 @@ namespace Muon {
             float& epy = truthParticle.auxdata<float>(r_name + "_py_extr");
             float& epz = truthParticle.auxdata<float>(r_name + "_pz_extr");
             std::vector<float>& covMat = truthParticle.auxdata<std::vector<float> >(r_name + "_cov_extr");
-           
+
             std::unique_ptr<Trk::TrackParameters> exPars{
                 m_extrapolator->extrapolateToVolume(ctx, pars, *volume, Trk::alongMomentum, Trk::muon)};
-            if (! exPars || !exPars->covariance() || !Amg::saneCovarianceDiagonal(*exPars->covariance())) {
+            if (! exPars || !exPars->covariance() || !Amg::hasPositiveDiagElems(*exPars->covariance())) {
                 ATH_MSG_VERBOSE("Extrapolation to "<<r_name<<" failed. ");
-                continue;                    
+                continue;
             }
-            truthParticle.auxdata<bool>(r_name+"_is_extr") = true;            
+            truthParticle.auxdata<bool>(r_name+"_is_extr") = true;
             ex = exPars->position().x();
             ey = exPars->position().y();
             ez = exPars->position().z();
@@ -432,7 +432,7 @@ namespace Muon {
             epy = exPars->momentum().y();
             epz = exPars->momentum().z();
             Amg::compress(*exPars->covariance(), covMat);
-            
+
             const double errorp = Amg::error(*exPars->covariance(), Trk::qOverP);
             ATH_MSG_VERBOSE( " Extrapolated to " << r_name << std::endl
                 << " truth: r " << end_pars.pos.perp() << " z "
@@ -448,12 +448,12 @@ namespace Muon {
                 << " pull p "
                 << (end_pars.mom.mag() -
                     exPars->momentum().mag()) /
-                     errorp);                
+                     errorp);
         }
-        return StatusCode::SUCCESS;            
+        return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonTruthDecorationAlg::addHitCounts(const EventContext& ctx, 
+    StatusCode MuonTruthDecorationAlg::addHitCounts(const EventContext& ctx,
                                                     xAOD::TruthParticle& truthParticle,
                                                     ChamberIdMap& ids) const {
         int barcode = truthParticle.barcode();
@@ -495,13 +495,13 @@ namespace Muon {
                     ids[chIndex].push_back(id);
                 }
 
-                if (m_idHelperSvc->issTgc(id)) {                    
+                if (m_idHelperSvc->issTgc(id)) {
                     if (measPhi) {
                         int index = m_idHelperSvc->phiIndex(id);
                         ++nphiHitsPerChamberLayer.at(index);
                     }  else {
                         ++nprecHitsPerChamberLayer.at(chIndex);
-                    }                    
+                    }
                 } else if (m_idHelperSvc->isMM(id)) {
                     ++nprecHitsPerChamberLayer.at(chIndex);
                 } else if (m_idHelperSvc->isTrigger(id)) {
@@ -516,7 +516,7 @@ namespace Muon {
                     if (measPhi) {
                         Muon::MuonStationIndex::PhiIndex index = m_idHelperSvc->phiIndex(id);
                         ++nphiHitsPerChamberLayer.at(index);
- 
+
                     } else {
                         ++nprecHitsPerChamberLayer.at(chIndex);
                     }
@@ -532,51 +532,51 @@ namespace Muon {
                                  nprecHitsPerChamberLayer[Muon::MuonStationIndex::EIL] +
                                  nprecHitsPerChamberLayer[Muon::MuonStationIndex::CSL];
 
-        uint8_t middleSmallHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BMS] + 
+        uint8_t middleSmallHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BMS] +
                                   nprecHitsPerChamberLayer[Muon::MuonStationIndex::EMS];
 
-        uint8_t middleLargeHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BML] + 
+        uint8_t middleLargeHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BML] +
                                   nprecHitsPerChamberLayer[Muon::MuonStationIndex::EML];
 
-        uint8_t outerSmallHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BOS] + 
+        uint8_t outerSmallHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BOS] +
                                  nprecHitsPerChamberLayer[Muon::MuonStationIndex::EOS];
 
-        uint8_t outerLargeHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BML] + 
+        uint8_t outerLargeHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BML] +
                                  nprecHitsPerChamberLayer[Muon::MuonStationIndex::EOL];
 
-        uint8_t extendedSmallHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::EES] + 
+        uint8_t extendedSmallHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::EES] +
                                     nprecHitsPerChamberLayer[Muon::MuonStationIndex::BEE];
 
         uint8_t extendedLargeHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::EEL];
 
-        uint8_t phiLayer1Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BM1] + 
+        uint8_t phiLayer1Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BM1] +
                                 nphiHitsPerChamberLayer[Muon::MuonStationIndex::T4] +
                                 nphiHitsPerChamberLayer[Muon::MuonStationIndex::CSC] +
                                 nphiHitsPerChamberLayer[Muon::MuonStationIndex::STGC1] +
                                 nphiHitsPerChamberLayer[Muon::MuonStationIndex::STGC2];
 
-        uint8_t phiLayer2Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BM2] + 
+        uint8_t phiLayer2Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BM2] +
                                 nphiHitsPerChamberLayer[Muon::MuonStationIndex::T1];
 
-        uint8_t phiLayer3Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BO1] + 
+        uint8_t phiLayer3Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BO1] +
                                 nphiHitsPerChamberLayer[Muon::MuonStationIndex::T2];
 
-        uint8_t phiLayer4Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BO2] + 
+        uint8_t phiLayer4Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BO2] +
                                 nphiHitsPerChamberLayer[Muon::MuonStationIndex::T3];
 
-        uint8_t etaLayer1Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BM1] + 
+        uint8_t etaLayer1Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BM1] +
                                 ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T4] +
-                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::CSC] + 
+                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::CSC] +
                                 ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::STGC1] +
                                 ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::STGC2];
 
-        uint8_t etaLayer2Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BM2] + 
+        uint8_t etaLayer2Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BM2] +
                                 ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T1];
 
-        uint8_t etaLayer3Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BO1] + 
+        uint8_t etaLayer3Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BO1] +
                                 ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T2];
 
-        uint8_t etaLayer4Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BO2] + 
+        uint8_t etaLayer4Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BO2] +
                                 ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T3];
 
         uint8_t nprecLayers = 0;
@@ -684,11 +684,11 @@ namespace Muon {
 
     void MuonTruthDecorationAlg::addHitIDVectors(xAOD::TruthParticle& truthParticle,
                                                  const ChamberIdMap& ids) const {
-        
+
         std::vector<unsigned long long>& mdtTruthHits = truthParticle.auxdata<std::vector<unsigned long long> >("truthMdtHits");
         std::vector<unsigned long long>& tgcTruthHits = truthParticle.auxdata<std::vector<unsigned long long> >("truthTgcHits");
         std::vector<unsigned long long>& rpcTruthHits = truthParticle.auxdata<std::vector<unsigned long long> >("truthRpcHits");
-        
+
         std::vector<unsigned long long> stgcTruthHits;
         std::vector<unsigned long long> cscTruthHits;
         std::vector<unsigned long long> mmTruthHits;

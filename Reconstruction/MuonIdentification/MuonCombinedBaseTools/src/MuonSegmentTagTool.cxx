@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -342,10 +342,10 @@ namespace MuonCombined {
                             atSegSurface = m_MuTagMatchingTool->ExtrapolateTrktoSegmentSurface(ctx, *seg_ptr, *atSurface, seg_dir);
                             seg_extps.emplace_back(atSegSurface, seg_ptr->associatedSurface());
                         }
-                        if (!atSegSurface || !atSegSurface->covariance() || !Amg::saneCovarianceDiagonal(*atSegSurface->covariance()))
+                        if (!atSegSurface || !atSegSurface->covariance() || !Amg::hasPositiveDiagElems(*atSegSurface->covariance()))
                             continue;
                         const AmgSymMatrix(5) invCov = atSegSurface->covariance()->inverse();
-                        if (!Amg::saneCovarianceDiagonal(invCov)) continue;
+                        if (!Amg::hasPositiveDiagElems(invCov)) continue;
 
                         MuonCombined::MuonSegmentInfo info =
                             m_MuTagMatchingTool->muTagSegmentInfo(ctx, track.track(), *seg_ptr, atSegSurface);

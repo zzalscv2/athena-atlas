@@ -70,7 +70,7 @@ namespace Muon {
             return false;
         }
         if (m_requireSanePerigee) {
-            if (!track.perigeeParameters() || !Amg::saneCovarianceDiagonal(*track.perigeeParameters()->covariance())) return false;
+            if (!track.perigeeParameters() || !Amg::hasPositiveDiagElems(*track.perigeeParameters()->covariance())) return false;
         }
 
         ++m_ntotalTracks;

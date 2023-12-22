@@ -818,7 +818,7 @@ for (; p_trk != trackCollection.end(); ++p_trk) {
                 const AmgSymMatrix(5)* b_err = aTrackParam->covariance();
 
                 if (b_err) {
-                    if (!Amg::saneCovarianceDiagonal(*b_err)) {
+                    if (!Amg::hasPositiveDiagElems(*b_err)) {
                         ATH_MSG_WARNING("Some diagonal element(s) of the covariance matrix is (are) infinite or smaller than / too close to zero or above the covariance cutoff");
                     }
                     else {

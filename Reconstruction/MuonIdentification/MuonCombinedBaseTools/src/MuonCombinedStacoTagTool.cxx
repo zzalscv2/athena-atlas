@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ namespace MuonCombined {
             }
             double chi2 = 0;
             std::unique_ptr<const Trk::Perigee> perigee = theCombIdMu(*idPer, *msPer, chi2);
-            if (!perigee || !perigee->covariance() || !Amg::saneCovarianceDiagonal(*perigee->covariance())) {
+            if (!perigee || !perigee->covariance() || !Amg::hasPositiveDiagElems(*perigee->covariance())) {
                 ATH_MSG_DEBUG("Combination failed");
                 continue;
             }

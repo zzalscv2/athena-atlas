@@ -112,7 +112,7 @@ const Amg::MatrixX* FitMatrices::fullCovariance(void) {
   weight.selfadjointView<0x2>();
 
   // check if m_weights makes sense before inverting
-  if (!Amg::saneCovarianceDiagonal(m_weight)) {
+  if (!Amg::hasPositiveDiagElems(m_weight)) {
     m_covariance.resize(0, 0);
     return nullptr;
   }

@@ -79,7 +79,7 @@ namespace Muon {
         ATH_CHECK(m_regsel_rpc.retrieve());
         ATH_CHECK(m_regsel_tgc.retrieve());
         m_recoverSTGC =  m_recoverSTGC && !m_regsel_stgc.empty();
-        m_recoverMM =  m_recoverMM && !m_regsel_mm.empty(); 
+        m_recoverMM =  m_recoverMM && !m_regsel_mm.empty();
         ATH_CHECK(m_regsel_csc.retrieve(DisableTool{m_regsel_csc.empty()}));
         ATH_CHECK(m_regsel_stgc.retrieve(DisableTool{!m_recoverSTGC}));
         ATH_CHECK(m_regsel_mm.retrieve(DisableTool{!m_recoverMM}));
@@ -434,7 +434,7 @@ namespace Muon {
 
             // calculate crossed tubes
             const MuonStationIntersect intersect = InterSectSvc->tubesCrossedByTrack(chId, exPars->position(), exPars->momentum().unit());
-           
+
             // clear hole vector
             for (unsigned int ii = 0; ii < intersect.tubeIntersects().size(); ++ii) {
                 const MuonTubeIntersect& tint = intersect.tubeIntersects()[ii];
@@ -458,7 +458,7 @@ namespace Muon {
                 int tube = m_idHelperSvc->mdtIdHelper().tube(id);
                 double tubeLen = detElLoc->getActiveTubeLength(lay, tube);
                 double distEdge = std::abs(tubePars->parameters()[Trk::locZ]) - 0.5 * tubeLen;
-                double pullEdge = tubePars->covariance() && Amg::saneCovarianceDiagonal(*tubePars->covariance())
+                double pullEdge = tubePars->covariance() && Amg::hasPositiveDiagElems(*tubePars->covariance())
                                       ? distEdge / Amg::error(*tubePars->covariance(), Trk::locZ)
                                       : distEdge / 20.;
                 std::optional<Amg::Vector2D> locPos = surf.Trk::Surface::globalToLocal(tubePars->position());
@@ -836,7 +836,7 @@ namespace Muon {
                 }
                 data.tgcCols = std::move(newtcols);
             }
-            
+
             m_seededSegmentFinder->extractCscPrdCols(data.csc, data.cscCols);
             std::vector<const CscPrepDataCollection*> newccols;
             for (const CscPrepDataCollection* cit : data.cscCols) {
@@ -852,7 +852,7 @@ namespace Muon {
                     }
                 }
             }
-            data.cscCols = std::move(newccols);  
+            data.cscCols = std::move(newccols);
 
             nstates = states.size();
             if (m_recoverSTGC) {
