@@ -18,7 +18,7 @@ from RecExConfig.RecFlags import rec
 #
 
 # load the beamspot flags
-from InDetBeamSpotFinder.BeamSpotJobProperties import BeamSpotFlags
+from InDetBeamSpotExample.BeamSpotJobProperties import BeamSpotFlags
 
 if BeamSpotFlags.turnOnIDOnly(): # For testing
     from AthenaCommon.DetFlags import DetFlags

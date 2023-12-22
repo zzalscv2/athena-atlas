@@ -10,6 +10,7 @@ Reco_tf.py \
 --geometryVersion "ATLAS-R3S-2021-03-02-00" \
 --autoConfiguration 'everything' \
 --outputAODFile myAOD.pool.root \
---preInclude "all:InDetBeamSpotExample.BeamSpotRecoConfig.beamSpotRecoPre" \
---postInclude "all:InDetBeamSpotExample.BeamSpotRecoConfig.beamSpotRecoPost" \
+--preInclude "all:InDetBeamSpotExample.BeamSpotRecoConfig.beamSpotRecoPreInc" \
+--postInclude "all:InDetBeamSpotExample.BeamSpotRecoConfig.beamSpotRecoPostInc" \
+--postExec "all:from InDetBeamSpotExample.BeamSpotRecoConfig import beamSpotRecoPostExecCfg; cfg.merge(beamSpotRecoPostExecCfg(flags))" \
 
