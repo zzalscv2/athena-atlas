@@ -3,12 +3,14 @@
 */
 #include "ActsEvent/TrackStorageContainer.h"
 #include "xAODTracking/TrackSummary.h"
+#include "ActsEvent/ParticleHypothesisEncoding.h"
 
 // this is list of xAOD container varaible names that are "hardcoded" in TrackStorage_v1
 // their compatibility is maintained by the unit tests: AllStaticxAODVaraiblesAreKnown
 const std::set<std::string> ActsTrk::TrackStorageContainer::staticVariables = {
     "params", "covParams", "nMeasurements", "nHoles",   "chi2f",
-    "ndf",    "nOutliers", "nSharedHits",   "tipIndex", "stemIndex"};
+    "ndf",    "nOutliers", "nSharedHits",   "tipIndex", "stemIndex",
+    "particleHypothesis"};
 
 
 ActsTrk::TrackStorageContainer::TrackStorageContainer(
@@ -23,6 +25,10 @@ const Acts::Surface* ActsTrk::TrackStorageContainer::referenceSurface_impl(
         "TrackStorageContainer index out of range when accessing reference "
         "surface");
   return m_surfaces[itrack].get();
+}
+
+Acts::ParticleHypothesis ActsTrk::TrackStorageContainer::particleHypothesis_impl(IndexType itrack) const{
+  return ActsTrk::ParticleHypothesis::convert( static_cast<xAOD::ParticleHypothesis>(m_trackBackend->at(itrack)->particleHypothesis()));
 }
 
 std::size_t ActsTrk::TrackStorageContainer::size_impl() const {
@@ -249,4 +255,8 @@ void ActsTrk::MutableTrackStorageContainer::setReferenceSurface_impl(
     ActsTrk::IndexType itrack, std::shared_ptr<const Acts::Surface> surface) {
   m_surfaces.resize(itrack + 1, nullptr);
   m_surfaces[itrack] = std::move(surface);
+}
+
+void ActsTrk::MutableTrackStorageContainer::setParticleHypothesis_impl(ActsTrk::IndexType itrack, const Acts::ParticleHypothesis& particleHypothesis) {
+  m_mutableTrackBackend->at(itrack)->setParticleHypothesis(ActsTrk::ParticleHypothesis::convert(particleHypothesis));
 }

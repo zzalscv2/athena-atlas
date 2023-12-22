@@ -8,6 +8,7 @@
 #include "AthLinks/ElementLink.h"
 #include "AthContainers/AuxElement.h"
 #include "EventPrimitives/EventPrimitives.h"
+#include "xAODTracking/TrackingPrimitives.h"
 
 
 namespace xAOD
@@ -198,6 +199,12 @@ namespace xAOD
       */
     const unsigned int* stemIndexPtr() const;
     unsigned int* stemIndexPtr();
+
+    /**
+    * particle hypothesis access
+    */
+    const uint8_t& particleHypothesis() const;
+    void setParticleHypothesis(const uint8_t& ); 
 
     /**
      * @brief resize internal arrays to store params (to capacity sz) & convariances (to capacity sz x sz)
