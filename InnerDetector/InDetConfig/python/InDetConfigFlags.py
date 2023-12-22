@@ -43,9 +43,12 @@ def createInDetConfigFlags():
 
     # Save cluster information to Derivation
     icf.addFlag("InDet.DRAWZSelection", False)
-    icf.addFlag("InDet.DAODStorePixel", True)
-    icf.addFlag("InDet.DAODStoreSCT", True)
-    icf.addFlag("InDet.DAODStoreTRT", True)
+    icf.addFlag("InDet.DAODStorePixel", lambda prevFlags:
+                prevFlags.Detector.EnablePixel)
+    icf.addFlag("InDet.DAODStoreSCT", lambda prevFlags:
+                prevFlags.Detector.EnableSCT)
+    icf.addFlag("InDet.DAODStoreTRT", lambda prevFlags:
+                prevFlags.Detector.EnableTRT)
     icf.addFlag("InDet.DAODStoreExtra", True)
 
     # Specific flags for pixel study

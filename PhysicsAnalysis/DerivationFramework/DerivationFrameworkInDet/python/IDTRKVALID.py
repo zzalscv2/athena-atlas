@@ -16,135 +16,215 @@ from AthenaCommon.Constants import INFO
 
 # Main algorithm config
 
-
-def IDTRKVALIDKernelCfg(flags, name='IDTRKVALIDKernel', **kwargs):
-    """Configure the derivation framework driving algorithm (kernel) for IDTRKVALID"""
+def IDTRKVALID_ANDToolCfg(flags, name='IDTRKVALID_ANDTool'):
     acc = ComponentAccumulator()
-    DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
 
-    acc.addSequence(seqAND('IDTRKVALIDSequence'))
+    sel_muon1  = 'Muons.pt > 25*GeV && Muons.ptcone40/Muons.pt < 0.3 && Muons.passesIDCuts'
+    sel_muon2  = 'Muons.pt > 20*GeV && Muons.ptcone40/Muons.pt < 0.3 && Muons.passesIDCuts'
+    draw_zmumu = '( count (  DRZmumuMass > 70*GeV   &&  DRZmumuMass < 110*GeV ) >= 1 )'
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        InvariantMassToolCfg, xAODStringSkimmingToolCfg,
+        FilterCombinationANDCfg)
+    IDTRKVALID_ZmumuMass = acc.getPrimaryAndMerge(InvariantMassToolCfg(
+        flags, name="IDTRKVALID_ZmumuMass",
+        ContainerName            = "Muon",
+        ObjectRequirements       = sel_muon1,
+        SecondObjectRequirements = sel_muon2,
+        MassHypothesis           = 105.66,
+        SecondMassHypothesis     = 105.66,
+        StoreGateEntryName       = "ZmumuMass"))
+
+    IDTRKVALID_SkimmingTool = acc.getPrimaryAndMerge(
+        xAODStringSkimmingToolCfg(flags, name="IDTRKVALID_SkimmingTool",
+                                  expression=draw_zmumu))
+
+    IDTRKVALID_ANDTool = acc.getPrimaryAndMerge(
+        FilterCombinationANDCfg(flags, name,
+                                FilterList=[IDTRKVALID_ZmumuMass,
+                                            IDTRKVALID_SkimmingTool]))
+
+    acc.addPublicTool(IDTRKVALID_ANDTool, primary=True)
+    return acc
+
+
+def IDTRKVALIDKernelCommonCfg(flags, name='IDTRKVALIDKernel'):
+    acc = ComponentAccumulator()
 
     # ====================================================================
     # AUGMENTATION TOOLS
     # ====================================================================
     augmentationTools = []
-    tsos_augmentationTools = []
 
     # Add unbiased track parameters to track particles
     from DerivationFrameworkInDet.InDetToolsConfig import (
         TrackToVertexWrapperCfg)
     IDTRKVALIDTrackToVertexWrapper = acc.getPrimaryAndMerge(
-        TrackToVertexWrapperCfg(flags,
-                                name="IDTRKVALIDTrackToVertexWrapper",
-                                DecorationPrefix="IDTRKVALID"))
+        TrackToVertexWrapperCfg(
+            flags, name="IDTRKVALIDTrackToVertexWrapper",
+            DecorationPrefix="IDTRKVALID"))
     augmentationTools.append(IDTRKVALIDTrackToVertexWrapper)
 
-    from DerivationFrameworkInDet.InDetToolsConfig import (UsedInVertexFitTrackDecoratorCfg)
-    IDTRKVALIDUsedInFitDecorator = acc.getPrimaryAndMerge(UsedInVertexFitTrackDecoratorCfg(flags,
-                                                                                           name="IDTRKVALIDUsedInFitDecorator"))
+    from DerivationFrameworkInDet.InDetToolsConfig import (
+        UsedInVertexFitTrackDecoratorCfg)
+    IDTRKVALIDUsedInFitDecorator = acc.getPrimaryAndMerge(
+        UsedInVertexFitTrackDecoratorCfg(flags))
     augmentationTools.append(IDTRKVALIDUsedInFitDecorator)
 
     # @TODO eventually computed for other extra outputs. Possible to come  up with a solution to use a common Z0AtPV if there is more than one client ?
-    from DerivationFrameworkInDet.InDetToolsConfig import (TrackParametersAtPVCfg)
-    DFCommonZ0AtPV = acc.getPrimaryAndMerge(TrackParametersAtPVCfg(flags,
-                                                                   name="DFCommonZ0AtPV",
-                                                                   Z0SGEntryName="IDTRKVALIDInDetTrackZ0AtPV"))
+    from DerivationFrameworkInDet.InDetToolsConfig import TrackParametersAtPVCfg
+    DFCommonZ0AtPV = acc.getPrimaryAndMerge(TrackParametersAtPVCfg(
+        flags, name="IDTRKVALID_DFCommonZ0AtPV",
+        Z0SGEntryName="IDTRKVALIDInDetTrackZ0AtPV"))
     augmentationTools.append(DFCommonZ0AtPV)
-
-    if flags.Detector.GeometryID:
-        from DerivationFrameworkInDet.InDetToolsConfig import (DFTrackStateOnSurfaceDecoratorCfg)
-        DFTSOS = acc.getPrimaryAndMerge(DFTrackStateOnSurfaceDecoratorCfg(flags))
-        tsos_augmentationTools.append(DFTSOS)
-
-    if flags.Detector.GeometryITk:
-        from DerivationFrameworkInDet.InDetToolsConfig import (ITkTrackStateOnSurfaceDecoratorCfg)
-        DFTSOS = acc.getPrimaryAndMerge(ITkTrackStateOnSurfaceDecoratorCfg(flags))
-        tsos_augmentationTools.append(DFTSOS)
-
-    from DerivationFrameworkInDet.PixelNtupleMakerConfig import (EventInfoPixelModuleStatusMonitoringCfg)
-    DFEI = acc.getPrimaryAndMerge(EventInfoPixelModuleStatusMonitoringCfg(flags,
-                                                                          name = "EventInfoPixelModuleStatusMonitoring",
-                                                                          OutputLevel =INFO))
-    augmentationTools.append(DFEI)
 
     # ====================================================================
     # SKIMMING TOOLS
     # ====================================================================
     skimmingTools = []
     if flags.InDet.DRAWZSelection:
-        sel_muon1  = 'Muons.pt > 25*GeV && Muons.ptcone40/Muons.pt < 0.3 && Muons.passesIDCuts'
-        sel_muon2  = 'Muons.pt > 20*GeV && Muons.ptcone40/Muons.pt < 0.3 && Muons.passesIDCuts'
-        draw_zmumu = '( count (  DRZmumuMass > 70*GeV   &&  DRZmumuMass < 110*GeV ) >= 1 )'
-        from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (InvariantMassToolCfg,xAODStringSkimmingToolCfg,FilterCombinationANDCfg)
-        IDTRKVALID_ZmumuMass = acc.getPrimaryAndMerge(InvariantMassToolCfg(flags, 
-                                                                           name="IDTRKVALID_ZmumuMass",
-                                                                           ContainerName            = "Muon",
-                                                                           ObjectRequirements       = sel_muon1,
-                                                                           SecondObjectRequirements = sel_muon2,
-                                                                           MassHypothesis           = 105.66,
-                                                                           SecondMassHypothesis     = 105.66, 
-                                                                           StoreGateEntryName       = "ZmumuMass"))
-        IDTRKVALID_SkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(flags, 
-                                                                                   name="IDTRKVALID_SkimmingTool",
-                                                                                   expression=draw_zmumu))
-        IDTRKVALID_ANDTool = acc.getPrimaryAndMerge(FilterCombinationANDCfg(flags, 
-                                                                            name="IDTRKVALID_ANDTool",
-                                                                            FilterList=[IDTRKVALID_ZmumuMass,IDTRKVALID_SkimmingTool]))
+        IDTRKVALID_ANDTool = acc.getPrimaryAndMerge(IDTRKVALID_ANDToolCfg(flags))
         skimmingTools.append(IDTRKVALID_ANDTool)
 
-
-
-    IDTRKVALIDKernelPresel = DerivationKernel("IDTRKVALIDKernelPresel",
-                                              SkimmingTools=skimmingTools)
-    acc.addEventAlgo(IDTRKVALIDKernelPresel, sequenceName="IDTRKVALIDSequence")
-
-    if flags.Detector.GeometryID:
-        from InDetConfig.InDetPrepRawDataToxAODConfig import InDetPrepDataToxAODCfg
-        acc.merge(InDetPrepDataToxAODCfg(flags))
-
-    if flags.Detector.GeometryITk:
-        from InDetConfig.InDetPrepRawDataToxAODConfig import ITkPrepDataToxAODCfg
-        acc.merge(ITkPrepDataToxAODCfg(flags))
-
-    # ====================================================================
-    # THINNING TOOLS
-    # ====================================================================
-    thinningTools = [] 
-
-    # MC truth thinning
-    if flags.Input.isMC:
-        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import (MenuTruthThinningCfg)
-        IDTRKVALIDTruthThinningTool = acc.getPrimaryAndMerge(MenuTruthThinningCfg(flags,
-                                                                                  name                = "IDTRKVALIDTruthThinningTool",
-                                                                                  StreamName          = kwargs['StreamName'],
-                                                                                  WriteEverything     = True,
-                                                                                  WriteFirstN         = -1,
-                                                                                  PreserveAncestors   = True,
-                                                                                  PreserveGeneratorDescendants=True))
-        thinningTools.append(IDTRKVALIDTruthThinningTool)
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+        "IDTRKVALIDKernelPresel", SkimmingTools=skimmingTools))
 
     # ====================================================================
     # CREATE THE DERIVATION KERNEL ALGORITHM AND PASS THE ABOVE TOOLS
     # ====================================================================
-    acc.addEventAlgo(DerivationKernel(name              = "DFTSOSKernel",
-                                      AugmentationTools = tsos_augmentationTools,
-                                      ThinningTools     = [],
-                                      OutputLevel       =INFO), 
-                                      sequenceName="IDTRKVALIDSequence")
 
-    acc.addEventAlgo(DerivationKernel(name,
-                                      AugmentationTools = augmentationTools,
-                                      SkimmingTools     = skimmingTools,
-                                      ThinningTools     = [],
-                                      RunSkimmingFirst  = True,
-                                      OutputLevel=INFO), 
-                                      sequenceName="IDTRKVALIDSequence")
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+        name,
+        AugmentationTools = augmentationTools,
+        SkimmingTools     = skimmingTools,
+        ThinningTools     = [],
+        RunSkimmingFirst  = True))
 
-    acc.addEventAlgo(DerivationKernel(name="IDTRKVALIDThinningKernel",
-                                      AugmentationTools = [],
-                                      ThinningTools     = thinningTools,
-                                      OutputLevel       = INFO), 
-                                      sequenceName="IDTRKVALIDSequence")
+    return acc
+
+def IDTRKVALID_PixelModuleStatus_KernelCfg(
+        flags, name='IDTRKVALID_PixelModuleStatus_Kernel'):
+
+    acc = ComponentAccumulator()
+
+    augmentationTools = []
+    from DerivationFrameworkInDet.PixelNtupleMakerConfig import (
+        EventInfoPixelModuleStatusMonitoringCfg)
+    DFEI = acc.getPrimaryAndMerge(EventInfoPixelModuleStatusMonitoringCfg(flags))
+    augmentationTools.append(DFEI)
+
+    skimmingTools = []
+    if flags.InDet.DRAWZSelection:
+        IDTRKVALID_ANDTool = acc.getPrimaryAndMerge(IDTRKVALID_ANDToolCfg(flags))
+        skimmingTools.append(IDTRKVALID_ANDTool)
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+        name,
+        AugmentationTools = augmentationTools,
+        SkimmingTools     = skimmingTools,
+        ThinningTools     = [],
+        RunSkimmingFirst  = True))
+
+    return acc
+
+def IDTRKVALID_ITkPixelModuleStatus_KernelCfg(
+        flags, name='IDTRKVALID_ITkPixelModuleStatus_Kernel'):
+
+    acc = ComponentAccumulator()
+
+    augmentationTools = []
+    from DerivationFrameworkInDet.PixelNtupleMakerConfig import (
+        ITkEventInfoPixelModuleStatusMonitoringCfg)
+    DFEI = acc.getPrimaryAndMerge(
+        ITkEventInfoPixelModuleStatusMonitoringCfg(flags))
+    augmentationTools.append(DFEI)
+
+    skimmingTools = []
+    if flags.InDet.DRAWZSelection:
+        IDTRKVALID_ANDTool = acc.getPrimaryAndMerge(IDTRKVALID_ANDToolCfg(flags))
+        skimmingTools.append(IDTRKVALID_ANDTool)
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+        name,
+        AugmentationTools = augmentationTools,
+        SkimmingTools     = skimmingTools,
+        ThinningTools     = [],
+        RunSkimmingFirst  = True))
+
+    return acc
+
+def IDTRKVALIDThinningKernelCfg(
+        flags, name="IDTRKVALIDThinningKernel", StreamName=""):
+    acc = ComponentAccumulator()
+
+    # ====================================================================
+    # THINNING TOOLS
+    # ====================================================================
+    thinningTools = []
+
+    # MC truth thinning
+    if flags.Input.isMC:
+        from DerivationFrameworkInDet.InDetToolsConfig import (
+            IDTRKVALIDTruthThinningToolCfg)
+        thinningTools.append(acc.getPrimaryAndMerge(
+            IDTRKVALIDTruthThinningToolCfg(flags, StreamName=StreamName)))
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+        name,
+        AugmentationTools=[],
+        ThinningTools=thinningTools,
+        OutputLevel=INFO))
+    return acc
+
+
+def IDTRKVALIDKernelCfg(flags, StreamName=""):
+    """Configure the derivation framework driving algorithm (kernel) for IDTRKVALID"""
+    acc = ComponentAccumulator()
+
+    IDTRKVALIDSequenceName='IDTRKVALIDSequence'
+    acc.addSequence(seqAND(IDTRKVALIDSequenceName))
+
+    acc.merge(IDTRKVALIDKernelCommonCfg(flags),
+              sequenceName=IDTRKVALIDSequenceName)
+
+    acc.merge(IDTRKVALID_PixelModuleStatus_KernelCfg(flags),
+              sequenceName=IDTRKVALIDSequenceName)
+
+    from InDetConfig.InDetPrepRawDataToxAODConfig import InDetPrepDataToxAODCfg
+    acc.merge(InDetPrepDataToxAODCfg(flags),
+              sequenceName=IDTRKVALIDSequenceName)
+
+    from DerivationFrameworkInDet.InDetToolsConfig import DFInDetTSOSKernelCfg
+    acc.merge(DFInDetTSOSKernelCfg(flags),
+              sequenceName=IDTRKVALIDSequenceName)
+
+    acc.merge(IDTRKVALIDThinningKernelCfg(flags, StreamName=StreamName),
+              sequenceName=IDTRKVALIDSequenceName)
+
+    return acc
+
+def ITkTRKVALIDKernelCfg(flags, StreamName=""):
+    """Configure the derivation framework driving algorithm (kernel) for IDTRKVALID"""
+    acc = ComponentAccumulator()
+
+    IDTRKVALIDSequenceName='IDTRKVALIDSequence'
+    acc.addSequence(seqAND(IDTRKVALIDSequenceName))
+
+    acc.merge(IDTRKVALIDKernelCommonCfg(flags),
+              sequenceName=IDTRKVALIDSequenceName)
+
+    acc.merge(IDTRKVALID_ITkPixelModuleStatus_KernelCfg(flags),
+              sequenceName=IDTRKVALIDSequenceName)
+
+    from InDetConfig.InDetPrepRawDataToxAODConfig import ITkPrepDataToxAODCfg
+    acc.merge(ITkPrepDataToxAODCfg(flags),
+              sequenceName=IDTRKVALIDSequenceName)
+
+    from DerivationFrameworkInDet.InDetToolsConfig import DFITkTSOSKernelCfg
+    acc.merge(DFITkTSOSKernelCfg(flags),
+              sequenceName=IDTRKVALIDSequenceName)
+
+    acc.merge(IDTRKVALIDThinningKernelCfg(flags, StreamName=StreamName),
+              sequenceName=IDTRKVALIDSequenceName)
 
     return acc
 
@@ -154,9 +234,10 @@ def IDTRKVALIDCfg(flags):
     acc = ComponentAccumulator()
 
     # Main algorithm (kernel)
-    acc.merge(IDTRKVALIDKernelCfg(flags, 
-                                  name       = "IDTRKVALIDKernel",
-                                  StreamName = 'StreamDAOD_IDTRKVALID'))
+    if flags.Detector.GeometryID:
+        acc.merge(IDTRKVALIDKernelCfg(flags, StreamName = 'StreamDAOD_IDTRKVALID'))
+    if flags.Detector.GeometryITk:
+        acc.merge(ITkTRKVALIDKernelCfg(flags, StreamName = 'StreamDAOD_IDTRKVALID'))
 
     # =============================
     # Define contents of the format
@@ -164,9 +245,10 @@ def IDTRKVALIDCfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    IDTRKVALIDSlimmingHelper = SlimmingHelper("IDTRKVALIDSlimmingHelper",
-                                              NamesAndTypes = flags.Input.TypedCollections,
-                                              ConfigFlags   = flags)
+    IDTRKVALIDSlimmingHelper = SlimmingHelper(
+        "IDTRKVALIDSlimmingHelper",
+        NamesAndTypes = flags.Input.TypedCollections,
+        ConfigFlags   = flags)
 
     AllVariables = []
     StaticContent = []
@@ -226,6 +308,7 @@ def IDTRKVALIDCfg(flags):
                 "SCT_Clusters": "xAOD::TrackMeasurementValidationContainer",
                 "SCT_ClustersAux": "xAOD::TrackMeasurementValidationAuxContainer"
             })
+
     if flags.Detector.GeometryITk:
         if flags.ITk.DAODStorePixel:
             IDTRKVALIDSlimmingHelper.AppendToDictionary.update({
