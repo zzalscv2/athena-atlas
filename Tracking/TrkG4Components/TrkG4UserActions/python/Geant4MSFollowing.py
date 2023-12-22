@@ -7,7 +7,7 @@
 #
 #==============================================================
 
-from AthenaCommon.Constants import DEBUG, INFO
+from AthenaCommon.Constants import INFO
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -38,7 +38,7 @@ def setupArgParser():
                         type=int,
                         help="PDG for particle gun sim. 998 = Charged Geantino 999 = neutral Geantino, 13 = Muon")
     parser.add_argument("--maxEvents",
-                        default=100,
+                        default=10000,
                         type = int,
                         help="Maximum number of events to run on.")
     return parser
@@ -48,12 +48,10 @@ def MSCfg(flags):
     # Setup main services
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)
+    acc.getService("MessageSvc").debugLimit = 1000000
     
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     acc.merge(PoolReadCfg(flags))
-    
-    #from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-    #acc.merge(PoolWriteCfg(flags))
     
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     acc.merge(BeamSpotCondAlgCfg(flags))
@@ -159,12 +157,10 @@ def ExtrapolationToolCfg(flags, args):
     TestSubUpdators    += [ TestMaterialEffectsUpdator.name ]
     # ----------------------------------------------------------------------------------------------------------
 
-    # AtlasELossUpdater = acc.popToolsAndMerge(TC.AtlasEnergyLossUpdatorCfg(flags))
-    # AtlasEnergyLossUpdater = AtlasELossUpdater
-
     AtlasEnergyLossUpdator = CompFactory.Trk.EnergyLossUpdator("AtlasEnergyLossUpdator",
                                                                 DetailedEloss=True)
     acc.addPublicTool(AtlasEnergyLossUpdator)
+    
     # AtlasELossUpdater = acc.popToolsAndMerge(TC.AtlasEnergyLossUpdatorCfg(flags))
     # AtlasEnergyLossUpdater = AtlasELossUpdater
    
@@ -200,7 +196,8 @@ def GeantFollowerMSCfg(flags, name="GeantFollowerMSSvc", **kwargs):
                                                           ExtrapolateDirectly=False,
                                                           ExtrapolateIncrementally=False,
                                                           SpeedUp=True,
-                                                          OutputLevel=DEBUG)
+                                                          UseCovMatrix=True,
+                                                          OutputLevel=INFO)
     result.addPublicTool(followingHelper, primary = True)
 
     #Setting up the CA for the GeantFollowerMS
@@ -228,7 +225,6 @@ if __name__ =="__main__":
     flags.Common.ProductionStep = ProductionStep.FastChain 
     flags.LAr.doAlign = True
 
-
     # Setup detector   
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
     detectors = ["Muon","ID","Bpipe", "Calo"]  
@@ -236,7 +232,6 @@ if __name__ =="__main__":
 
     flags.lock()
     flags.dump(evaluate = True)
-
 
     # Construct component accumulator
     acc = MSCfg(flags)    
@@ -247,7 +242,6 @@ if __name__ =="__main__":
     from TrkG4UserActions.TrkG4UserActionsConfig import GeantFollowerMSToolCfg
     GeantFollowerMSTool = acc.getPrimaryAndMerge(GeantFollowerMSToolCfg(flags))
     #DEV#
-
 
     from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
     acc.merge(G4AtlasAlgCfg(flags,UserActionTools=[GeantFollowerMSTool],

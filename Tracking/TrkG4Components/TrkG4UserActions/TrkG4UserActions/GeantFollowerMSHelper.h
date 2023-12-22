@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -70,6 +70,7 @@ namespace Trk
       bool                           m_extrapolateDirectly;
       bool                           m_extrapolateIncrementally;
       bool                           m_speedup;
+      bool                           m_useCovMatrix;
 
       const TrackParameters* m_parameterCache;
       const TrackParameters* m_parameterCacheCov;
@@ -79,7 +80,7 @@ namespace Trk
 
       bool                   m_crossedMuonEntry;
       bool                   m_exitLayer;
-      const PlaneSurface*    m_destinationSurface;
+      PlaneSurface           m_destinationSurface;
 
       // put some validation code is
       std::string                    m_validationTreeName;        //!< validation tree name - to be acessed by this from root
