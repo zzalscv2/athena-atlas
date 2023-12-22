@@ -95,10 +95,10 @@ class TrackRNN
   
 private:
   // set RNN input variables in the corresponding map entries
-  StatusCode calulateVars(const std::vector<xAOD::TauTrack*>& vTracks,
-			  const xAOD::TauJet& xTau,
-			  const xAOD::VertexContainer* vertexContainer,
-			  VectorMap& valueMap) const;
+  StatusCode calculateVars(const std::vector<xAOD::TauTrack*>& vTracks,
+			   const xAOD::TauJet& xTau,
+			   const xAOD::VertexContainer* vertexContainer,
+			   VectorMap& valueMap) const;
 
   // configurable variables
   std::string m_inputWeightsPath; 
