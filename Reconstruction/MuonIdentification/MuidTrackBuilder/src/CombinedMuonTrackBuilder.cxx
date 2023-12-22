@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -704,7 +704,7 @@ namespace Rec {
         // set measured momentum error and starting parameters
         bool badlyDeterminedCurvature = false;
 
-        if (!Amg::saneCovarianceDiagonal(*measuredPerigee->covariance())) {
+        if (!Amg::hasPositiveDiagElems(*measuredPerigee->covariance())) {
             ATH_MSG_WARNING("standaloneFit: measuredPerigee has non-positive-definite covariance ");
             ATH_MSG_VERBOSE(" SA::failed (5.5)");
             /// Delete manually until we switch to unique_ptrs
@@ -2273,7 +2273,7 @@ namespace Rec {
         const Trk::Perigee* measuredPerigee = spectrometerTrack.perigeeParameters();
         std::vector<std::unique_ptr<const Trk::TrackStateOnSurface>> spectrometerTSOS;
 
-        if (!measuredPerigee || !measuredPerigee->covariance() || !Amg::saneCovarianceDiagonal(*measuredPerigee->covariance())) {
+        if (!measuredPerigee || !measuredPerigee->covariance() || !Amg::hasPositiveDiagElems(*measuredPerigee->covariance())) {
             // missing MeasuredPerigee for spectrometer track
             if (!measuredPerigee)
                 m_messageHelper->printWarning(38);

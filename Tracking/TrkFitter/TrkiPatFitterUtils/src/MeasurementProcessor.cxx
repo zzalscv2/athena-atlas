@@ -416,7 +416,7 @@ void MeasurementProcessor::fieldIntegralUncertainty(MsgStream& log,
   // check field integral stability if there is a large error on the start
   // position/direction but only meaningful when material taken into account
   if (!m_parameters->numberScatterers() ||
-      !Amg::saneCovarianceDiagonal(covariance))
+      !Amg::hasPositiveOrZeroDiagElems(covariance))
     return;
 
   if (covariance(0, 0) + covariance(1, 1) < m_largeDeltaD0 * m_largeDeltaD0 &&

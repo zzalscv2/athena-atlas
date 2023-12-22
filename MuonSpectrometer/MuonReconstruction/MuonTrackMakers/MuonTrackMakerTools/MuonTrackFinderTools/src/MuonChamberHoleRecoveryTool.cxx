@@ -541,7 +541,7 @@ namespace Muon {
                 ATH_MSG_VERBOSE("Surface layer "<<m_idHelperSvc->toStringGasGap(holeId)<<" cannot be reached");
                 continue;
             }
-            if (!Amg::saneCovarianceDiagonal(*pars->covariance())) {
+            if (!Amg::hasPositiveDiagElems(*pars->covariance())) {
                 ATH_MSG_DEBUG("Uncertainties of extraploation to "<<m_idHelperSvc->toStringGasGap(holeId)<<" blew up");
                 continue;
             }

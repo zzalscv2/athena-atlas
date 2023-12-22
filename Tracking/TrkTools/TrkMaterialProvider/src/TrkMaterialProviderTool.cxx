@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkMaterialProviderTool.h"
@@ -150,7 +150,7 @@ Trk::TrkMaterialProviderTool::finalize()
 void Trk::TrkMaterialProviderTool::updateCaloTSOS(Trk::Track& track, const Trk::TrackParameters* startParameters) const
 {
   ATH_MSG_VERBOSE("updateCaloTSOS(Trk::Track& track, const Trk::TrackParameters* startParameters)");
- 
+
   // back extrapolate to perigee, get pAtCaloEntry from list of TSOSs
   // and update/add calo+ID material to mstrack to be refitted.
   const Trk::TrackStates* inputTSOS_orig = track.trackStateOnSurfaces();
@@ -713,9 +713,9 @@ Trk::TrkMaterialProviderTool::getCaloTSOS(const Trk::TrackParameters& parm,
 
   // Get TSOS from extrapolateM (from TG)
   std::vector<const Trk::TrackStateOnSurface*>* caloTSOS = m_muonExtrapolator->extrapolateM(ctx,
-                                                                                            parm, 
+                                                                                            parm,
                                                                                             surf, dir,
-                                                                                            boundaryCheck, 
+                                                                                            boundaryCheck,
                                                                                             mateffects);
 
   ATH_MSG_DEBUG("Retrieved " << caloTSOS->size() << " Calorimeter TSOS from extrapolateM, no-removal");
@@ -847,7 +847,7 @@ Trk::TrkMaterialProviderTool::getCaloTSOS(const Trk::TrackParameters& parm,
     if( std::abs(parms->parameters()[Trk::qOverP]) > 0.0 ) {
       double pAtMuonEntry = std::abs(1./parms->parameters()[Trk::qOverP]);
       if (!parms->covariance() ||
-          !Amg::saneCovarianceDiagonal(*parms->covariance())) {
+          !Amg::hasPositiveDiagElems(*parms->covariance())) {
         ATH_MSG_DEBUG(
           "MS track parameters without covariance, using 10% relative error!");
         pAtMuonEntryError = pAtMuonEntry*0.1;
@@ -1102,7 +1102,7 @@ void Trk::TrkMaterialProviderTool::removeMS(std::vector<const Trk::TrackStateOnS
 void Trk::TrkMaterialProviderTool::updateVector(Trk::TrackStates* inputTSOS,
 						Trk::TrackStates::iterator firstCALO,
 						Trk::TrackStates::iterator firstMS,
-						Trk::TrackStates* caloTSOS) 
+						Trk::TrackStates* caloTSOS)
 {
   //printTSOS(*firstCALO, "UPD->FIRST CALO");
   //printTSOS(*firstMS, "UPD->FIRST MS");
@@ -1275,14 +1275,14 @@ unsigned int Trk::TrkMaterialProviderTool::getVolumeByGeo(const Trk::TrackStateO
 
 
 //** Helper to delete TSOS vectors*/
-void Trk::TrkMaterialProviderTool::deleteTSOS(const std::vector<const Trk::TrackStateOnSurface*>* vecTSOS) 
+void Trk::TrkMaterialProviderTool::deleteTSOS(const std::vector<const Trk::TrackStateOnSurface*>* vecTSOS)
 {
   std::vector<const Trk::TrackStateOnSurface*>::const_iterator it = vecTSOS->begin();
   std::vector<const Trk::TrackStateOnSurface*>::const_iterator itEnd = vecTSOS->end();
   for (; it != itEnd; ++it) delete *it;
   delete vecTSOS;
 }
-void Trk::TrkMaterialProviderTool::deleteTSOS(Trk::TrackStates* vecTSOS) 
+void Trk::TrkMaterialProviderTool::deleteTSOS(Trk::TrackStates* vecTSOS)
 {
   if(vecTSOS->ownPolicy()==SG::VIEW_ELEMENTS) {
     Trk::TrackStates::const_iterator it = vecTSOS->begin();
@@ -1382,7 +1382,7 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
 
   //
   Trk::TrackStates* newTSOSvector = new Trk::TrackStates(SG::VIEW_ELEMENTS);
-  
+
   // initialize total sum variables
   //
   //

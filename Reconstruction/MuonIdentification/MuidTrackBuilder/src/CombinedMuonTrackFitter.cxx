@@ -616,7 +616,7 @@ namespace Rec {
 
         for (const Trk::TrackParameters* par : *pars) {
             if (!par->covariance()) { continue; }
-            if (!Amg::saneCovarianceDiagonal(*par->covariance())) {
+            if (!Amg::hasPositiveDiagElems(*par->covariance())) {
                 ATH_MSG_DEBUG(txt<<" "<<__FILE__<<":"<<__LINE__<< "covariance matrix has negative diagonal element, killing track "
                               <<std::endl<<Amg::toString(*par->covariance()));
                 return false;

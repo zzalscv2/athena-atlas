@@ -2103,7 +2103,7 @@ std::unique_ptr<Trk::TrackParameters> Trk::STEP_Propagator::propagateRungeKutta(
 
   AmgSymMatrix(5) measurementCovariance =
       Trk::RungeKuttaUtils::newCovarianceMatrix(Jacobian, *trackParameters->covariance());
-  if (!Amg::saneCovarianceDiagonal(measurementCovariance))
+  if (!Amg::hasPositiveOrZeroDiagElems(measurementCovariance))
     return nullptr;
 
   // Calculate multiple scattering and straggling covariance contribution.

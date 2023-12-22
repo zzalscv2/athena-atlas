@@ -602,7 +602,7 @@ void iPatFitter::addMeasurements(const EventContext& ctx,
       // FIXME
       // no intersection to MeasurementSet
       m_messageHelper->printWarning(15);
-      continue;      
+      continue;
     }
     auto measurement = std::make_unique<FitMeasurement>(hit, nullptr, *m);
     measurement->intersection(type, intersection);
@@ -719,7 +719,7 @@ bool iPatFitter::addMeasurements(
     }
     const Trk::MeasurementBase* measurementBase = s.measurementOnTrack();
     if (measurementBase) {
-      if (!Amg::saneCovarianceDiagonal(measurementBase->localCovariance())) {
+      if (!Amg::hasPositiveDiagElems(measurementBase->localCovariance())) {
         continue;
       }
       // option to skip vertex measurement (i.e. when not at front of list)
