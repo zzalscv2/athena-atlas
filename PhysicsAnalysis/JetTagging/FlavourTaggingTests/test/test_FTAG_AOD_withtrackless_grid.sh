@@ -3,7 +3,6 @@
 #
 # art-description: RDO to AOD step with trackless b-tagging for Run 3 MC 
 # art-type: grid
-# art-memory: 4096
 # art-include: main/Athena
 # art-output: *.pool.root
 # art-output: *.log
