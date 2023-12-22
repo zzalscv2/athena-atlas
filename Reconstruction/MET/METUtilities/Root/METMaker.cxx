@@ -155,6 +155,7 @@ namespace met {
     declareProperty("MissingObjWarnThreshold", m_missObjWarningPtThreshold = 7.0e3   );
 
     declareProperty("TrackSelectorTool",  m_trkseltool                               );
+    declareProperty("JvtSelTool",         m_JvtTool                                  );
   }
 
   // Destructor
