@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -43,6 +43,8 @@ class MetAnalysisConfig (ConfigBlock):
         # Set up the met maker algorithm:
         alg = config.createAlgorithm( 'CP::MetMakerAlg', 'MetMakerAlg' + postfix)
         config.addPrivateTool( 'makerTool', 'met::METMaker' )
+        config.addPrivateTool( 'makerTool.JvtSelTool', 'CP::NNJvtSelectionTool' )
+        alg.makerTool.JvtSelTool.JetContainer = config.readName (self.jets)
 
         alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"
         alg.makerTool.DoSetMuonJetEMScale = self.setMuonJetEMScale
