@@ -39,6 +39,7 @@ const std::map<std::string, cool::StorageType::TypeId> typeCorrespondance={
       {"String4k", StorageType::String4k},
       {"String64k", StorageType::String64k},
       {"String16M", StorageType::String16M},
+      {"String128M", StorageType::String128M},
       {"Blob64k", StorageType::Blob64k},
       {"Blob16M", StorageType::Blob16M},
       {"Blob128M", StorageType::Blob128M}
@@ -232,6 +233,7 @@ namespace IOVDbNamespace{
 	case StorageType::String4k:
 	case StorageType::String64k:
 	case StorageType::String16M:
+	case StorageType::String128M:
 	  {
 	    att.setValue<std::string>(thisVal.get<std::string>());
 	    break;
