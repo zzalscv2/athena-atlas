@@ -6,7 +6,7 @@
 #include "TrkGaussianSumFilterUtils/AlignedDynArray.h"
 #include "TrkGaussianSumFilterUtils/GsfConstants.h"
 //
-#include "TrkGaussianSumFilterUtils/GSFFindIndexOfMimimum.h"
+#include "TrkGaussianSumFilterUtils/GSFFindIndexOfMinimum.h"
 //
 #include "CxxUtils/assume_aligned.h"
 #include "CxxUtils/restrict.h"
@@ -90,7 +90,7 @@ combine(GSFUtils::Component1D& ATH_RESTRICT updated,
 /**
  * Given a number of components n
  * we need padding to use the
- * simd findMinimumIndex
+ * simd findIdxOfMinimum
  */
 constexpr inline int32_t
 numPadded(const int32_t n)
@@ -343,7 +343,7 @@ findMergesImpl(const Component1DArray& componentsIn,
   while (numberOfComponentsLeft > reducedSize) {
     // find pair with minimum distance
     const int32_t minIndex =
-        findMinimumIndex::impl<findMinimumIndex::VecAlwaysTrackIdx>(
+        findIdxOfMinimum::impl<findIdxOfMinimum::VecAlwaysTrackIdx>(
             distances.buffer(), nnpadded);
     const triangularToIJ conversion = convert(minIndex);
     int8_t minTo = conversion.I;
