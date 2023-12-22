@@ -85,11 +85,11 @@ namespace DerivationFramework {
     }
 
     SG::WriteHandle<xAOD::MissingETAssociationMap> outputMapHandle = SG::makeHandle(m_outputMapKey, ctx);
-    ATH_CHECK( outputMapHandle.isValid() );
     ATH_CHECK( outputMapHandle.record(
                  std::make_unique<xAOD::MissingETAssociationMap>(),
                  std::make_unique<xAOD::MissingETAuxAssociationMap>()
                                       ));
+    ATH_CHECK( outputMapHandle.isValid() );
 
     const ElementLink<xAOD::IParticleContainer> invalidLink;
     for( const xAOD::MissingETAssociation *el : *inputMapHandle ) {
@@ -155,11 +155,11 @@ namespace DerivationFramework {
     }
 
     SG::WriteHandle<xAOD::MissingETContainer> outputCoreHandle = SG::makeHandle(m_outputCoreKey, ctx);
-    ATH_CHECK( outputCoreHandle.isValid() );
     ATH_CHECK( outputCoreHandle.record(
                  std::make_unique<xAOD::MissingETContainer>(),
                  std::make_unique<xAOD::MissingETAuxContainer>()
                                        ));
+    ATH_CHECK( outputCoreHandle.isValid() );
 
     for( const xAOD::MissingET *el : *inputCoreHandle ) {
       outputCoreHandle->push_back(new xAOD::MissingET(*el));
