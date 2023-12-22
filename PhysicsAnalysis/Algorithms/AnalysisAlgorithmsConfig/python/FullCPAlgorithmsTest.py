@@ -572,6 +572,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
 
     # noSystematics is passed in block from config accumulator
     configSeq += makeConfig('CommonServices')
+    if forCompare:
+        configSeq.setOptionValue('.filterSystematics', "^(?:(?!PseudoData).)*$")
 
     # FIXME: this should probably be run on PHYSLITE, but the test fails with:
     #   overran integrated luminosity for RunNumber=363262 (0.000000 vs 0.000000)
