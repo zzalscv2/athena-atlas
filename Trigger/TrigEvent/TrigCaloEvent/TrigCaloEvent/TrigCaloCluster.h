@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCALOCLUSTER_H
@@ -46,8 +46,6 @@ public:
 	~TrigCaloCluster ();
 	/**  Copy Pointer Constructor   */
 	TrigCaloCluster ( const TrigCaloCluster* trigcalocluster );
-	/**  Copy Reference Constructor   */
-	TrigCaloCluster ( const TrigCaloCluster& trigcalocluster );
 
 	/**  Prints out cluster variables to std::cout   */
 	void print ( void ) const;

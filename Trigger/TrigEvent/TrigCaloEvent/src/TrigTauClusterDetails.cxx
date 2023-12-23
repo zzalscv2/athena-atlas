@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*******************************************************
@@ -60,27 +60,6 @@ TrigTauClusterDetails::TrigTauClusterDetails( const TrigTauClusterDetails* ttc )
    }
 
 }
-TrigTauClusterDetails::TrigTauClusterDetails( const TrigTauClusterDetails& ttc ) 
-{	
-   for (int i = 0; i< NUMEMSAMP ; i++) {
-     m_EMRadius[i] = ttc.EMRadius(i);
-     m_EMenergyWidth[i] = ttc.EMenergyWidth(i);
-     m_EMenergyWide[i] = ttc.EMenergyWide(i);
-     m_EMenergyMedium[i] = ttc.EMenergyMedium(i);
-     m_EMenergyNarrow[i] = ttc.EMenergyNarrow(i);
-
-   }
-   for (int i = 0; i< NUMHADSAMP ; i++) {
-     m_HADRadius[i] = ttc.HADRadius(i);
-     m_HADenergyWidth[i] = ttc.HADenergyWidth(i);
-     m_HADenergyWide[i] = ttc.HADenergyWide(i);
-     m_HADenergyMedium[i] = ttc.HADenergyMedium(i);
-     m_HADenergyNarrow[i] = ttc.HADenergyNarrow(i);
-
-   }
-
-}
-
 // Simple debug method using MsgStream
 void
 TrigTauClusterDetails::print ( void ) const {

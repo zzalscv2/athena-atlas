@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -50,17 +50,6 @@ TrigCaloCluster::TrigCaloCluster( const TrigCaloCluster* tcc ) :
 	for ( int i = 0 ; i < MAXSIZE ; i++ )
 		setRawEnergy((CaloSampling::CaloSample)i
 			,tcc->rawEnergy((CaloSampling::CaloSample)i) );
-}
-TrigCaloCluster::TrigCaloCluster( const TrigCaloCluster& tcc ) :
-		m_rawEnergy ( tcc.rawEnergy() ), m_rawEt ( tcc.rawEt() ),
-		m_rawEta ( tcc.rawEta() ), m_rawPhi ( tcc.rawPhi() ), 
-		m_roiWord ( tcc.RoIword() ),
-		m_numberUsedCells ( tcc.nCells() ),
-		m_quality   ( tcc.quality() )
-{
-	for ( int i = 0 ; i < MAXSIZE ; i++ )
-		setRawEnergy((CaloSampling::CaloSample)i
-			,tcc.rawEnergy((CaloSampling::CaloSample)i) );
 }
 
 // Simple debug method

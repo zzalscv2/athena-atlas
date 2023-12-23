@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGEMCLUSTER_H
@@ -40,6 +40,8 @@ public:
 	TrigEMCluster ( const TrigEMCluster* trigemcluster ) ;
 	/**  Copy Reference Constructor   */
 	TrigEMCluster ( const TrigEMCluster& trigemcluster ) ;
+
+        TrigEMCluster& operator= ( const TrigEMCluster& trigemcluster ) = delete;
 
 	/**  Prints out cluster variables to std::cout   */
         void print ( void ) const;
