@@ -49,7 +49,7 @@
   <class name="std::vector<LArAutoCorrP>"/>
   <class name="std::vector<std::pair<unsigned int, LArAutoCorrP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArAutoCorrP> > >"/>
-  <class pattern="*iterator<const*LArAutoCorrP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArAutoCorrP*"/>
 
   <!-- LArCaliPulseParamsP -->
   <class name="LArCaliPulseParamsComplete" />
@@ -74,7 +74,7 @@
   <class name="std::vector<LArCaliPulseParamsP>"/>
   <class name="std::vector<std::pair<unsigned int, LArCaliPulseParamsP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArCaliPulseParamsP> > >"/>
-  <class pattern="*iterator<const*LArCaliPulseParamsP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArCaliPulseParamsP*"/>
 
   <!-- LArDAC2uAP -->
   <class name="LArDAC2uAComplete" />
@@ -99,7 +99,7 @@
   <class name="std::vector<LArDAC2uAP>"/>
   <class name="std::vector<std::pair<unsigned int,LArDAC2uAP> >"/>
   <class name="std::vector<std::pair<unsigned int,std::vector<LArDAC2uAP> > >"/>
-  <class pattern="*iterator<const*LArDAC2uAP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArDAC2uAP*"/>
 
 
   <!-- LArDetCellParamsP -->
@@ -124,7 +124,7 @@
   <class name="std::vector<LArDetCellParamsP>"/>
   <class name="std::vector<std::pair<unsigned int, LArDetCellParamsP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArDetCellParamsP> > >"/>
-  <class pattern="*iterator<const*LArDetCellParamsP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArDetCellParamsP*"/>
 
   <!-- LArfSamplP -->
   <class name="LArfSamplComplete" />
@@ -149,7 +149,7 @@
   <class name="std::vector<LArfSamplP>"/>
   <class name="std::vector<std::pair<unsigned int, LArfSamplP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArfSamplP> > >"/>
-  <class pattern="*iterator<const*LArfSamplP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArfSamplP*"/>
 
   <!-- LArH6OscillationP -->
   <class name="LArH6OscillationComplete" />
@@ -173,7 +173,7 @@
   <class name="std::vector<LArH6OscillationP>"/>
   <class name="std::vector<std::pair<unsigned int, LArH6OscillationP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArH6OscillationP> > >"/>
-  <class pattern="*iterator<const*LArH6OscillationP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArH6OscillationP*"/>
 
   <!-- LArHVScaleCorrComplete -->
   <class name="LArHVScaleCorrComplete" />
@@ -198,7 +198,7 @@
   <class name="std::vector<LArSingleFloatP>"/>
   <class name="std::vector<std::pair<unsigned int, LArSingleFloatP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArSingleFloatP> > >"/>
-  <class pattern="*iterator<const*LArSingleFloatP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArSingleFloatP*"/>
 
 
   <!-- LArMinBiasP -->
@@ -224,7 +224,7 @@
   <class name="std::vector<LArMinBiasP>"/>
   <class name="std::vector<std::pair<unsigned int, LArMinBiasP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArMinBiasP> > >"/>
-  <class pattern="*iterator<const*LArMinBiasP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArMinBiasP*"/>
 
   <!-- LArMinBiasAverageP -->
   <class name="LArMinBiasAverageComplete" />
@@ -251,7 +251,7 @@
   <class name="std::vector<LArMinBiasAverageP>"/>
   <class name="std::vector<std::pair<unsigned int, LArMinBiasAverageP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArMinBiasAverageP> > >"/>
-  <class pattern="*iterator<const*LArMinBiasAverageP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArMinBiasAverageP*"/>
 
   <!-- LArMphysOverMcalP -->
   <class name="LArMphysOverMcalComplete" />
@@ -277,7 +277,7 @@
   <class name="std::vector<LArMphysOverMcalP>"/>
   <class name="std::vector<std::pair<unsigned int, LArMphysOverMcalP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArMphysOverMcalP> > >"/>
-  <class pattern="*iterator<const*LArMphysOverMcalP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArMphysOverMcalP*"/>
 
   <!-- LArNoiseP -->
   <class name="LArNoiseComplete" />
@@ -302,7 +302,7 @@
   <class name="std::vector<LArNoiseP>"/>
   <class name="std::vector<std::pair<unsigned int, LArNoiseP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArNoiseP> > >"/>
-  <class pattern="*iterator<const*LArNoiseP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArNoiseP*"/>
 
 
   <!-- LAr2DWaveBase -->
@@ -332,7 +332,7 @@
   <class name="std::vector<LArOFCP>"/>
   <class name="std::vector<std::pair<unsigned int, LArOFCP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArOFCP> > >"/>
-  <class pattern="*iterator<const*LArOFCP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArOFCP*"/>
   
 
   <!-- LArPedestalP -->
@@ -360,7 +360,7 @@
   <class name="std::vector<LArPedestalP>"/>
   <class name="std::vector<std::pair<unsigned int, LArPedestalP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArPedestalP> > >"/>
-  <class pattern="*iterator<const*LArPedestalP*"/> 
+  <class pattern="__gnu_cxx::__normal_iterator<const LArPedestalP*"/>
 
 
 
@@ -386,7 +386,7 @@
   <class name="std::vector<LArPhysCaliTdiffP>"/>
   <class name="std::vector<std::pair<unsigned int, LArPhysCaliTdiffP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArPhysCaliTdiffP> > >"/>
-  <class pattern="*iterator<const*LArPhysCaliTdiffP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArPhysCaliTdiffP*"/>
 
   <!-- LArRampP -->
   <class name="LArRampCompleteBase" />
@@ -413,7 +413,7 @@
   <class name="std::vector<LArRampP>"/>
   <class name="std::vector<std::pair<unsigned int, LArRampP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArRampP> > >"/>
-  <class pattern="*iterator<const*LArRampP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArRampP*"/>
 
 
   <!-- LAruA2MeVP -->
@@ -439,7 +439,7 @@
   <class name="std::vector<LAruA2MeVP>"/>
   <class name="std::vector<std::pair<unsigned int, LAruA2MeVP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LAruA2MeVP> > >"/>
-  <class pattern="*iterator<const*LAruA2MeVP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LAruA2MeVP*"/>
 
 
   <!-- LArDPSThresholds -->
@@ -491,6 +491,7 @@
     <class pattern="*_Iter_base*"/>
     <class pattern="std::allocator*"/>
     <class pattern="*initializer_list*"/>
+    <class pattern="*iterator_traits*"/>
 
   </exclusion>
 </lcgdict>
