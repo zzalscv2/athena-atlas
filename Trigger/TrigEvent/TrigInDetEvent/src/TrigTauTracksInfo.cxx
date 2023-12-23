@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -37,31 +37,6 @@ TrigTauTracksInfo::TrigTauTracksInfo() :
   
 } 
 
-TrigTauTracksInfo::TrigTauTracksInfo(const TrigTauTracksInfo & te) : 
-      I4Momentum(te), 
-      P4PtEtaPhiMBase(te),
-      INavigable(te),
-      IAthenaBarCode(te),
-      INavigable4Momentum(te),
-      P4PtEtaPhiM(te),
-      NavigableTerminalNode(te) 
-{
-  m_roiID           = te.m_roiID;
-  m_nCoreTracks     = te.m_nCoreTracks     ;
-  m_nSlowTracks     = te.m_nSlowTracks     ;
-  m_nIsoTracks      = te.m_nIsoTracks      ;
-  m_charge          = te.m_charge          ;
-  m_leadingTrackPt  = te.m_leadingTrackPt ;
-  m_scalarPtSumCore = te.m_scalarPtSumCore ;
-  m_scalarPtSumIso  = te.m_scalarPtSumIso  ;
-  m_ptBalance       = te.m_ptBalance       ;
-
-  
-  m_3fastest.setPt( te.threeFastestTracks().pt());
-  m_3fastest.setEta( te.threeFastestTracks().eta());
-  m_3fastest.setPhi( te.threeFastestTracks().phi());
-  m_3fastest.setM( te.threeFastestTracks().m());
-}
 TrigTauTracksInfo::~TrigTauTracksInfo(){}
 
 
