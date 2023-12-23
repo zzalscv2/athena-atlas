@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -45,19 +45,6 @@ ElectronMuonTopoInfo::ElectronMuonTopoInfo(int roiWord, float deltaPhi, float de
 											     m_vertexState(vertexState)
   
 {}
-
-ElectronMuonTopoInfo::ElectronMuonTopoInfo(const ElectronMuonTopoInfo& emuTopoInfo)
-{
-  if(this != &emuTopoInfo){
-    m_roiWord   = emuTopoInfo.m_roiWord;
-    m_DeltaPhi 	= emuTopoInfo.m_DeltaPhi;
-    m_DeltaR	= emuTopoInfo.m_DeltaR;
-    m_InvMass	= emuTopoInfo.m_InvMass;
-    m_electronValid = emuTopoInfo.m_electronValid;
-    m_oppositeCharge = emuTopoInfo.m_oppositeCharge;
-    m_vertexState = emuTopoInfo.m_vertexState;
-  }
-}
 
 // destructor    
     ElectronMuonTopoInfo::~ElectronMuonTopoInfo() {}
