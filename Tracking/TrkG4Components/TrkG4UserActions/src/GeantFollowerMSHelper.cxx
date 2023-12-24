@@ -488,14 +488,14 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
   m_treeData->m_trk_status[m_treeData->m_g4_steps] = trkParameters ? 1 : 0;
   ATH_MSG_DEBUG("m_treeData->m_g4_steps: "
                 << m_treeData->m_g4_steps << " exit Layer: " << crossedExitLayer
-                << " track parameters: " << trkParameters);
+                << " track parameters: " << trkParameters.get());
   ATH_MSG_DEBUG("m_parameterCache: " << m_parameterCache);
   if (!trkParameters) {
     return;
   }
 
   ATH_MSG_DEBUG(" exit Layer: " << crossedExitLayer
-                                << "track parameters: " << trkParameters);
+                                << "track parameters: " << trkParameters.get());
   if (crossedExitLayer) {
     ATH_MSG_DEBUG(" exit layer found ");
     // PK 2023
