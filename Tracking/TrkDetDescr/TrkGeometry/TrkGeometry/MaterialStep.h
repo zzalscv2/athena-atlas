@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -51,8 +51,8 @@ class MaterialStep {
   MaterialStep(MaterialStep&& mstep) = default;
 
   /** Assignment operators */
-  MaterialStep& operator=(const MaterialStep& mstep);
-  MaterialStep& operator=(MaterialStep&& mstep);
+  MaterialStep& operator=(const MaterialStep& mstep) = default;
+  MaterialStep& operator=(MaterialStep&& mstep) = default;
 
   /** Destructor */
   ~MaterialStep() = default;
