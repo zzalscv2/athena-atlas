@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef ActsEvent_TrackStorageContainer_h
-#define ActsEvent_TrackStorageContainer_h
+#ifndef ACTSEVENT_TRACKSUMMARYCONTAINER_H
+#define ACTSEVENT_TRACKSUMMARYCONTAINER_H
 #include <type_traits>
 
 #include "Acts/EventData/TrackContainer.hpp"
@@ -14,14 +14,14 @@
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 #include "xAODTracking/TrackSurfaceContainer.h"
 #include "ActsEvent/SurfaceEncoding.h"
-// #include "xAODTracking/TrackStorageContainer.h"
+// #include "xAODTracking/TrackSummaryContainer.h"
 // #include "xAODTracking/TrackStorageAuxContainer.h"
 
 
 
 namespace ActsTrk {
-class MutableTrackStorageContainer;
-class TrackStorageContainer;
+class MutableTrackSummaryContainer;
+class TrackSummaryContainer;
 }  // namespace ActsTrk
 
 namespace Acts {
@@ -36,11 +36,11 @@ template <typename T>
 struct IsReadOnlyTrackContainer<T&&> : IsReadOnlyTrackContainer<T> {};
 
 template <>
-struct IsReadOnlyTrackContainer<ActsTrk::TrackStorageContainer>
+struct IsReadOnlyTrackContainer<ActsTrk::TrackSummaryContainer>
     : std::true_type {};
 
 template <>
-struct IsReadOnlyTrackContainer<ActsTrk::MutableTrackStorageContainer>
+struct IsReadOnlyTrackContainer<ActsTrk::MutableTrackSummaryContainer>
     : std::false_type {};
 
     
@@ -53,13 +53,13 @@ using ConstCovariance = Acts::TrackStateTraits<3>::Covariance;
 using Parameters = Acts::TrackStateTraits<3, false>::Parameters;
 using Covariance = Acts::TrackStateTraits<3, false>::Covariance;
 
-class MutableTrackStorageContainer;
+class MutableTrackSummaryContainer;
 
-class TrackStorageContainer {
+class TrackSummaryContainer {
  public:
   using IndexType = uint32_t; // TODO find common place for it
   static constexpr auto kInvalid = Acts::MultiTrajectoryTraits::kInvalid;
-  TrackStorageContainer(const DataLink<xAOD::TrackSummaryContainer>& lin = nullptr,
+  TrackSummaryContainer(const DataLink<xAOD::TrackSummaryContainer>& lin = nullptr,
                         const DataLink<xAOD::TrackSurfaceAuxContainer>& surfLink = nullptr);
   static const std::set<std::string> staticVariables;
   /**
@@ -103,11 +103,11 @@ class TrackStorageContainer {
   */
   std::shared_ptr<const Acts::Surface> surface(ActsTrk::IndexType itrack) const;
 
-  void fillFrom(ActsTrk::MutableTrackStorageContainer& mtb);
+  void fillFrom(ActsTrk::MutableTrackSummaryContainer& mtb);
 
   template<typename T>
   friend class MutableTrackContainerHandle;
-  friend class MutableTrackStorageContainer;
+  friend class MutableTrackSummaryContainer;
 
   void restoreDecorations();
 
@@ -126,12 +126,12 @@ class TrackStorageContainer {
   std::vector<Acts::ParticleHypothesis> m_particleHypothesis; // TODO move the storage to the backend
 };
 
-class MutableTrackStorageContainer : public TrackStorageContainer {
+class MutableTrackSummaryContainer : public TrackSummaryContainer {
  public:
-  MutableTrackStorageContainer();
-  MutableTrackStorageContainer(const MutableTrackStorageContainer&) = delete;
-  MutableTrackStorageContainer operator=(const MutableTrackStorageContainer&) = delete;
-  MutableTrackStorageContainer(MutableTrackStorageContainer&&) noexcept;
+  MutableTrackSummaryContainer();
+  MutableTrackSummaryContainer(const MutableTrackSummaryContainer&) = delete;
+  MutableTrackSummaryContainer operator=(const MutableTrackSummaryContainer&) = delete;
+  MutableTrackSummaryContainer(MutableTrackSummaryContainer&&) noexcept;
 
   /**
   * adds new surface to the tail of the container
@@ -163,7 +163,7 @@ class MutableTrackStorageContainer : public TrackStorageContainer {
   * copies decorations from other container
   */
   void copyDynamicFrom_impl (ActsTrk::IndexType itrack,
-                             const ActsTrk::TrackStorageContainer& other,
+                             const ActsTrk::TrackSummaryContainer& other,
                              ActsTrk::IndexType other_itrack);
 
 
@@ -172,25 +172,25 @@ class MutableTrackStorageContainer : public TrackStorageContainer {
   */
   std::any component_impl(Acts::HashedString key,
                           ActsTrk::IndexType itrack);
-  using TrackStorageContainer::component_impl;
+  using TrackSummaryContainer::component_impl;
 
   /**
   * write access to parameters
   */
   ActsTrk::Parameters parameters(ActsTrk::IndexType itrack);
-  using TrackStorageContainer::parameters;
+  using TrackSummaryContainer::parameters;
 
   /**
   * write access to covariance
   */
   ActsTrk::Covariance covariance(ActsTrk::IndexType itrack);
-  using TrackStorageContainer::covariance;
+  using TrackSummaryContainer::covariance;
 
   /**
   * synchronizes decorations
   */
-  void ensureDynamicColumns_impl(const MutableTrackStorageContainer& other);
-  void ensureDynamicColumns_impl(const TrackStorageContainer& other);
+  void ensureDynamicColumns_impl(const MutableTrackSummaryContainer& other);
+  void ensureDynamicColumns_impl(const TrackSummaryContainer& other);
 
   /**
   * preallocate number of track objects 
@@ -237,7 +237,7 @@ class MutableTrackStorageContainer : public TrackStorageContainer {
 };
 
 
-constexpr bool ActsTrk::TrackStorageContainer::hasColumn_impl(
+constexpr bool ActsTrk::TrackSummaryContainer::hasColumn_impl(
     Acts::HashedString key) const {
   using namespace Acts::HashedStringLiteral;
   switch (key) {
@@ -267,11 +267,11 @@ namespace details{
 } // EOF detail
 
 template <typename T>
-constexpr void MutableTrackStorageContainer::addColumn_impl(
+constexpr void MutableTrackSummaryContainer::addColumn_impl(
     const std::string& name) {
   if (not ActsTrk::detail::accepted_decoration_types<T>::value) {
     throw std::runtime_error(
-        "TrackStorageContainer::addColumn_impl: "
+        "TrackSummaryContainer::addColumn_impl: "
         "unsupported decoration type");
   }
   m_decorations.emplace_back(ActsTrk::detail::decoration<T>(
@@ -285,6 +285,5 @@ constexpr void MutableTrackStorageContainer::addColumn_impl(
 }  // namespace ActsTrk
 
 #include "AthenaKernel/CLASS_DEF.h"
-CLASS_DEF( ActsTrk::TrackStorageContainer , 1333051576 , 1 )
-
+CLASS_DEF( ActsTrk::TrackSummaryContainer, 1185802350, 1 )
 #endif
