@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -18,23 +18,21 @@ TauAxisSetter::TauAxisSetter(const std::string& name) :
 TauRecToolBase(name) {
 }
 
-
-
 StatusCode TauAxisSetter::execute(xAOD::TauJet& tau) const {
 
-  const xAOD::Jet* jetSeed = tau.jet();
-  if (jetSeed == nullptr) {
+  if (tau.jet() == nullptr) {
     ATH_MSG_ERROR("Tau jet link is invalid.");
     return StatusCode::FAILURE;
   }
+
+  const xAOD::Jet* jetSeed = tau.jet();
 
   // Barycenter is the sum of cluster p4 in the seed jet
   TLorentzVector baryCenter;  
   
   xAOD::JetConstituentVector constituents = jetSeed->getConstituents();
   for (const xAOD::JetConstituent* constituent : constituents) {
-    TLorentzVector constituentP4 = tauRecTools::GetConstituentP4(*constituent);
-    baryCenter += constituentP4;
+    baryCenter += tauRecTools::GetConstituentP4(*constituent);
   }
   
   ATH_MSG_DEBUG("barycenter (eta, phi): "  << baryCenter.Eta() << " " << baryCenter.Phi());
@@ -45,8 +43,7 @@ StatusCode TauAxisSetter::execute(xAOD::TauJet& tau) const {
   for (const xAOD::JetConstituent* constituent : constituents) {
     TLorentzVector constituentP4 = tauRecTools::GetConstituentP4(*constituent);
     
-    double dR = baryCenter.DeltaR(constituentP4);
-    if (dR > m_clusterCone) continue;
+    if (baryCenter.DeltaR(constituentP4) > m_clusterCone) continue;
 
     tauDetectorAxis += constituentP4;
   }
@@ -71,16 +68,17 @@ StatusCode TauAxisSetter::execute(xAOD::TauJet& tau) const {
       jetVertex = tauRecTools::getJetVertex(*jetSeed);
     }
 
-    const xAOD::Vertex* tauVertex = tau.vertex();
-
     // Redo the vertex correction when tau vertex is different from jet vertex
-    if (jetVertex != tauVertex) {
+    if (jetVertex != tau.vertex()) {
+
       // If seed jet has a vertex, then tau must have one
-      if (tauVertex == nullptr) {
+      if (tau.vertex() == nullptr) {
         ATH_MSG_WARNING("The seed jet has a vertex, while the tau candidate does not. It should not happen.");
         return StatusCode::FAILURE;
       }
     
+      const xAOD::Vertex* tauVertex = tau.vertex();
+
       // Relative position of the tau vertex and jet vertex
       Amg::Vector3D position = tauVertex->position();
       if (jetVertex != nullptr) {
@@ -93,8 +91,7 @@ StatusCode TauAxisSetter::execute(xAOD::TauJet& tau) const {
       // Loop over the jet constituents, and calculate the barycenter using the four momentum 
       // corrected to point at tau vertex 
       for (const xAOD::JetConstituent* constituent : constituents) {
-        TLorentzVector constituentP4 = getVertexCorrectedP4(*constituent, position);
-        baryCenterTauVertex += constituentP4;
+        baryCenterTauVertex += getVertexCorrectedP4(*constituent, position);
       }
       ATH_MSG_DEBUG("barycenter (eta, phi) at tau vertex: "  << baryCenterTauVertex.Eta() << " " << baryCenterTauVertex.Phi());
 
@@ -102,8 +99,7 @@ StatusCode TauAxisSetter::execute(xAOD::TauJet& tau) const {
       // within m_clusterCone of the barycenter
       for (const xAOD::JetConstituent* constituent : constituents) {
         TLorentzVector constituentP4 = getVertexCorrectedP4(*constituent, position);
-        double dR = baryCenterTauVertex.DeltaR(constituentP4);
-        if (dR > m_clusterCone) continue;
+        if (baryCenterTauVertex.DeltaR(constituentP4) > m_clusterCone) continue;
         
         tauInterAxis += constituentP4;
       }

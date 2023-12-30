@@ -246,33 +246,40 @@ StatusCode TauElectronVetoVariables::execute(xAOD::TauJet& pTau) const {
     } else {
         max = max2;
     }
-    float TRTratio = -9999.0;
-    uint8_t TRTHTHits{0};
-    uint8_t TRTHTOutliers{0};
-    uint8_t TRTHits{0};
-    uint8_t TRTOutliers{0};
+
     const xAOD::TrackParticle* leadTrack = pTau.track(0)->track();
+
+    uint8_t TRTHits{0};
     if ( !leadTrack->summaryValue( TRTHits, xAOD::SummaryType::numberOfTRTHits ) ){
       ATH_MSG_DEBUG("retrieval of track summary value failed. Not filling electron veto variables for this one prong candidate");
       return StatusCode::SUCCESS;
     }
+
+    uint8_t TRTHTHits{0};
     if ( !leadTrack->summaryValue( TRTHTHits, xAOD::SummaryType::numberOfTRTHighThresholdHits ) ){
       ATH_MSG_DEBUG("retrieval of track summary value failed. Not filling electron veto variables for this one prong candidate");
       return StatusCode::SUCCESS;
     }
+
+    uint8_t TRTOutliers{0};
     if ( !leadTrack->summaryValue( TRTOutliers, xAOD::SummaryType::numberOfTRTOutliers ) ){
       ATH_MSG_DEBUG("retrieval of track summary value failed. Not filling electron veto variables for this one prong candidate");
       return StatusCode::SUCCESS;
     }
+
+    uint8_t TRTHTOutliers{0};
     if ( !leadTrack->summaryValue( TRTHTOutliers, xAOD::SummaryType::numberOfTRTHighThresholdOutliers ) ) {
       ATH_MSG_DEBUG("retrieval of track summary value failed. Not filling electron veto variables for this one prong candidate");
       return StatusCode::SUCCESS;
     }
+
+    float TRTratio = -9999.0;
     if (TRTHits + TRTOutliers != 0) {
 	  TRTratio = float( TRTHTHits + TRTHTOutliers) / float( TRTHits + TRTOutliers );
     } else {
       TRTratio = 0.0;
     }
+
     pTau.setDetail(xAOD::TauJetParameters::TRT_NHT_OVER_NLT , TRTratio );
     pTau.setDetail(xAOD::TauJetParameters::secMaxStripEt , energy_3phi[max] );
     pTau.setDetail(xAOD::TauJetParameters::hadLeakEt , static_cast<float>( sumETCellsHad1 / ( pTau.track(0)->pt() ) ) );
