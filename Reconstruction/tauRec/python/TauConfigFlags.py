@@ -144,10 +144,8 @@ def createTauEleRMConfigFlags():
     flags.TauPi0Clusters_tmp         = "TauPi0Clusters_tmp_EleRM"
     
     # Input containers
-    flags.VertexCollection           = "PrimaryVertices"
     flags.TrackCollection            = "InDetTrackParticles_EleRM"
     flags.SeedJetCollection          = "AntiKt4LCTopoJets_EleRM"
-    flags.LargeD0TrackCollection     = "InDetLargeD0TrackParticles"
     flags.EventShapeCollection       = "EleRM_Kt4LCTopoOriginEventShape"
 
     # Electron-subtracted tau flags appearing in standard tau reconstruction
