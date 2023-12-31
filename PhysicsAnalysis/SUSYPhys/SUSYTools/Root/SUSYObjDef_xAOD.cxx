@@ -161,6 +161,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_commonPRWFileMC21a(""),
     m_commonPRWFileMC23a(""),
     m_commonPRWFileMC23c(""),
+    m_commonPRWFileMC23d(""),
     m_prwDataSF(-99.),
     m_prwDataSF_UP(-99.),
     m_prwDataSF_DW(-99.),
@@ -634,6 +635,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "PRWCommonFileMC21a", m_commonPRWFileMC21a);
   declareProperty( "PRWCommonFileMC23a", m_commonPRWFileMC23a);
   declareProperty( "PRWCommonFileMC23c", m_commonPRWFileMC23c);
+  declareProperty( "PRWCommonFileMC23d", m_commonPRWFileMC23d);
   //LargeR uncertainties config, as from https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/JetUncertainties2016PrerecLargeR#Understanding_which_configuratio
   declareProperty( "JetLargeRuncConfig",  m_fatJetUncConfig );
   declareProperty( "JetLargeRuncVars",  m_fatJetUncVars );
@@ -987,9 +989,9 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
     const xAOD::FileMetaData* fmd = nullptr;
 
     // configure PRW rtag options from m_autoconfigPRWRtags string
-    // e.g. "mc20a:r13167_r14859,mc20d:r13144_r14860,mc20e:r13145_r14861,mc21a:r13752_r13829,mc23a:r14622_r14932,mc23c:r14799_r14908"
+    // e.g. "mc20a:r13167_r14859,mc20d:r13144_r14860,mc20e:r13145_r14861,mc21a:r13752_r13829,mc23a:r14622_r14932,mc23c:r14799_r14908,mc23d:r15224"
     std::map<std::string,std::vector<std::string>> PRWRtags = {};
-    std::string allcampaigns = "mc20a.mc20d.mc20e.mc21a.mc23a.mc23c";
+    std::string allcampaigns = "mc20a.mc20d.mc20e.mc21a.mc23a.mc23c.mc23d";
     bool standard_like = true;
     for ( const auto& campaign_rtags : split( m_autoconfigPRWRtags, "," ) ) {                                          // split string by ","
        std::string icampaign = campaign_rtags.substr(0, campaign_rtags.find(":"));                              // first field = campaign, split by ":"
@@ -1085,6 +1087,7 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
       else if (mcCampaignMD == "mc21a") {prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC21a);}
       else if (mcCampaignMD == "mc23a") {prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC23a);}
       else if (mcCampaignMD == "mc23c") {prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC23c);}
+      else if (mcCampaignMD == "mc23d") {prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC23d);}
       else {
         ATH_MSG_ERROR( "autoconfigurePileupRWTool(): no common PRW file known for MC campaign: " << mcCampaignMD);
         return StatusCode::FAILURE;
@@ -1136,7 +1139,7 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
         m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2018File) );
       } else if (mcCampaignMD == "mc21a" || mcCampaignMD == "mc23a") {
         m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2022File) );
-      } else if (mcCampaignMD == "mc23c") {
+      } else if (mcCampaignMD == "mc23c" || mcCampaignMD == "mc23d") {
         m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2023File) );
       }
 
@@ -1635,13 +1638,14 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_autoconfigPRWFile, "PRW.autoconfigPRWFile", rEnv, "None");
   configFromFile(m_autoconfigPRWCombinedmode, "PRW.autoconfigPRWCombinedmode", rEnv, false);
   configFromFile(m_autoconfigPRWRPVmode, "PRW.autoconfigPRWRPVmode", rEnv, false);
-  configFromFile(m_autoconfigPRWRtags, "PRW.autoconfigPRWRtags", rEnv, "mc20a:r13167_r14859,mc20d:r13144_r14860,mc20e:r13145_r14861,mc21a:r13752_r13829,mc23a:r14622_r14932,mc23c:r14799_r14908"); // Tag details here: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/AtlasProductionGroup
+  configFromFile(m_autoconfigPRWRtags, "PRW.autoconfigPRWRtags", rEnv, "mc20a:r13167_r14859,mc20d:r13144_r14860,mc20e:r13145_r14861,mc21a:r13752_r13829,mc23a:r14622_r14932,mc23c:r14799_r14908,mc23d:r15224"); // Tag details here: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/AtlasProductionGroup
   configFromFile(m_commonPRWFileMC20a, "PRW.commonPRWFileMC20a", rEnv, "PileupReweighting/mc20_common/mc20a.284500.physlite.prw.v1.root");
   configFromFile(m_commonPRWFileMC20d, "PRW.commonPRWFileMC20d", rEnv, "PileupReweighting/mc20_common/mc20d.300000.physlite.prw.v1.root");
   configFromFile(m_commonPRWFileMC20e, "PRW.commonPRWFileMC20e", rEnv, "PileupReweighting/mc20_common/mc20e.310000.physlite.prw.v1.root");
   configFromFile(m_commonPRWFileMC21a, "PRW.commonPRWFileMC21a", rEnv, "PileupReweighting/mc21_common/mc21a.410000.physlite.prw.v1.root");
   configFromFile(m_commonPRWFileMC23a, "PRW.commonPRWFileMC23a", rEnv, "PileupReweighting/mc23_common/mc23a.410000.physlite.prw.v2.root");
   configFromFile(m_commonPRWFileMC23c, "PRW.commonPRWFileMC23c", rEnv, "PileupReweighting/mc23_common/mc23c.450000.physlite.prw.v1.root");
+  configFromFile(m_commonPRWFileMC23d, "PRW.commonPRWFileMC23d", rEnv, "PileupReweighting/mc23_common/mc23d.450000.physlite.prw.v1.root");
   //
   configFromFile(m_strictConfigCheck, "StrictConfigCheck", rEnv, false);
 
