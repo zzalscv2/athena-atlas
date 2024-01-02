@@ -394,7 +394,9 @@ namespace MuonGM {
     bool MuonStation::endcap() const { return !barrel(); }
 
     const MdtAsBuiltPar* MuonStation::getMdtAsBuiltParams() const {
-        ATH_MSG_WARNING("No Mdt AsBuilt parameters for chamber " << getStationName());
+        if (!m_XTomoData) {
+          ATH_MSG_WARNING("No Mdt AsBuilt parameters for chamber " << getStationName());
+        }
         return m_XTomoData;
     }
 
