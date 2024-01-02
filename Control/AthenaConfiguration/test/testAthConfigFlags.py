@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.Enums import Format
@@ -169,6 +169,8 @@ class BasicTests(FlagsSetup):
         self.assertEqual(self.flags.A.B.C, adict['B']['C'])
         full_dict = self.flags.asdict()
         self.assertEqual(self.flags.A.B.C, full_dict['A']['B']['C'])
+        bdict = self.flags.A.B.asdict()
+        self.assertEqual(self.flags.A.B.C, bdict['C'])
 
     def test_iterator(self):
         self.assertTrue('A' in self.flags)
