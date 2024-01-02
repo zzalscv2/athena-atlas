@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file D3PDMakerUtils/src/SGGetterImpl.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -87,6 +85,7 @@ const void* SGGetterImpl::getUntyped (bool allowMissing /*= false*/)
       REPORT_MESSAGE (MSG::FATAL)
         << "Null object retrieved for " << m_typename << "(" << m_clid << ")/" 
         << key;
+      REPORT_MESSAGE (MSG::INFO) << m_sg->dump();
     }
     return 0;
   }
