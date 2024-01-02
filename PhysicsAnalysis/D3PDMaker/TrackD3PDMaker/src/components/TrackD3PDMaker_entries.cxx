@@ -4,7 +4,6 @@
 #include "../PerigeeCovarianceAssociationTool.cxx"
 #include "../PerigeeFillerTool.cxx"
 #include "../PerigeePairOldPerigeeAssociationTool.cxx"
-#include "../TrackIsolationFillerTool.cxx"
 #include "../TrackParticleChargeFillerTool.cxx"
 #include "../TrackParticlePerigeeAtBSAssociationTool.cxx"
 #include "../TrackParticlePerigeeAtOOAssociationTool.cxx"
@@ -24,7 +23,6 @@ DECLARE_COMPONENT( D3PD::PerigeeBLPredictionFillerTool )
 DECLARE_COMPONENT( D3PD::PerigeeCovarianceAssociationTool )
 DECLARE_COMPONENT( D3PD::PerigeeFillerTool )
 DECLARE_COMPONENT( D3PD::PerigeePairOldPerigeeAssociationTool )
-DECLARE_COMPONENT( D3PD::TrackIsolationFillerTool )
 DECLARE_COMPONENT( D3PD::TrackParticleChargeFillerTool )
 DECLARE_COMPONENT( D3PD::TrackParticlePerigeeAtBSAssociationTool )
 DECLARE_COMPONENT( D3PD::TrackParticlePerigeeAtOOAssociationTool )
