@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file egammaD3PDAnalysis/src/egammaDeltaEmax2.h
  * @author scott snyder <snyder@bnl.gov>
@@ -17,15 +14,13 @@
 #define EGAMMAD3PDANALYSIS_EGAMMADELTAEMAX2_H
 
 
+#include "D3PDMakerInterfaces/ICollectionGetterTool.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "xAODEgamma/Egamma.h"
 #include "GaudiKernel/ToolHandle.h"
 
 
 namespace D3PD {
-
-
-class ICollectionGetterTool;
 
 
 /**
