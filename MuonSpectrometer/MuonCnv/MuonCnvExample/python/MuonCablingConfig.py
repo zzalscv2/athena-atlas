@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger()
@@ -152,10 +152,10 @@ if DetFlags.readRDOBS.MM_on() or DetFlags.readRDOPool.MM_on()  or DetFlags.readR
       if globalflags.DataSource()=='data':
           from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
           if athenaCommonFlags.isOnline():
-            conddb.addFolder("MDT_ONL","/MDT/Onl/MM/CABLING",className="CondAttrListCollection", tag="MmCabling-FrontEndShifts-v1")
+            conddb.addFolderWithTag("MDT_ONL","/MDT/Onl/MM/CABLING","MmCabling-FrontEndShifts-v1",className="CondAttrListCollection")
             condSequence.MuonMM_CablingAlg.CablingFolder="/MDT/MM/CABLING"  
           else:
-            conddb.addFolder("MDT_OFL","/MDT/MM/CABLING",className="CondAttrListCollection", tag="MmCabling-FrontEndShifts-v1")
+            conddb.addFolderWithTag("MDT_OFL","/MDT/MM/CABLING","MmCabling-FrontEndShifts-v1",className="CondAttrListCollection")
             condSequence.MuonMM_CablingAlg.CablingFolder="/MDT/MM/CABLING"
 
     
