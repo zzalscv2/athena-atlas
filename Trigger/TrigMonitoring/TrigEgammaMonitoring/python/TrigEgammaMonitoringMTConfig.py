@@ -795,14 +795,16 @@ class TrigEgammaMonAlgBuilder:
     # Efficiency
     self.addHistogram(monGroup, TProfile("pt,pt_passed", "#epsilon(p_T); p_{T} ; Efficiency", self._nEtbins, self._etbins))
     self.addHistogram(monGroup, TProfile("et,et_passed", "#epsilon(E_T); E_{T} [GeV] ; Efficiency", self._nEtbins, self._etbins))
-    self.addHistogram(monGroup, TProfile("et_failed", "#epsilon(E_T); E_{T} [GeV] ; Inefficiency", self._nEtbins, self._etbins))
     self.addHistogram(monGroup, TProfile("highet,highet_passed", "#epsilon(E_T); E_{T} [GeV] ; Efficiency", 40, 0., 500.))
-    self.addHistogram(monGroup, TProfile("highet_failed", "#epsilon(E_T); E_{T} [GeV] ; Inefficiency", 40, 0., 500.))
     self.addHistogram(monGroup, TProfile("eta,eta_passed", "#epsilon(#eta); #eta ; Efficiency", self._nEtabins, self._etabins))
-    self.addHistogram(monGroup, TProfile("eta_failed", "#epsilon(#eta); #eta ; Inefficiency", self._nEtabins, self._etabins))
     self.addHistogram(monGroup, TProfile("phi,phi_passed", "#epsilon(#phi); #phi ; Efficiency", 20, -3.2, 3.2))
     self.addHistogram(monGroup, TProfile("avgmu,avgmu_passed", "#epsilon(<#mu>); <#mu> ; Efficiency", 16, 0, 80))
     self.addHistogram(monGroup, TProfile("npvtx,npvtx_passed", "#epsilon(npvtx); npvtx ; Efficiency", 16, 0, 80))
+
+    # Inefficiency
+    self.addHistogram(monGroup, TProfile("et,et_failed", "#epsilon(E_T); E_{T} [GeV] ; Inefficiency", self._nEtbins, self._etbins))
+    self.addHistogram(monGroup, TProfile("highet,highet_failed", "#epsilon(E_T); E_{T} [GeV] ; Inefficiency", 40, 0., 500.))
+    self.addHistogram(monGroup, TProfile("eta,eta_failed", "#epsilon(#eta); #eta ; Inefficiency", self._nEtabins, self._etabins))
 
     # Efficiency ET in eta slices
     
