@@ -57,9 +57,6 @@ NTuple::Item<float> nt_alpha;
 NTuple::Item<float> nt_beta;
 NTuple::Item<float> nt_gamma;
 
-// name of the folder for ID alignment information
-#define IND_ALIGN "/Indet/Align"
-
 InDetAlignDBTool::InDetAlignDBTool(const std::string& type,
            const std::string& name, const IInterface* parent)
   : AthAlgTool(type,name,parent),
@@ -72,8 +69,8 @@ InDetAlignDBTool::InDetAlignDBTool(const std::string& type,
     m_par_scttwoside(false),
     m_par_fake(0),
     m_par_condstream("AthenaOutputStreamTool/AthenaOutputStreamTool", this),
-    m_par_dbroot( IND_ALIGN ),
-    m_par_dbkey( IND_ALIGN ),
+    m_par_dbroot( "/Indet/Align" ),
+    m_par_dbkey( "/Indet/Align" ),
     m_par_oldTextFile(false),
     m_dynamicDB(false),
     m_forceUserDBConfig(false)
@@ -205,6 +202,7 @@ StatusCode InDetAlignDBTool::initialize()
     if (m_par_newdb)
       ATH_MSG_DEBUG("Assuming new COOL alignment DB model based on AlignableTransformContainer");
     else
+      //Do we still use this anywhere? Candidate for removal?
       ATH_MSG_DEBUG("Assuming old (Lisbon) alignment DB model based on separate AlignableTransforms");
   }
 
@@ -259,7 +257,7 @@ void InDetAlignDBTool::createDB() const
   if (m_par_newdb) {
     // check object does not already exist
     if (detStore()->contains<AlignableTransformContainer>(m_par_dbroot)) {
-      ATH_MSG_WARNING("createDB: AlignableTransformContainer already exists");
+      ATH_MSG_ERROR("createDB: AlignableTransformContainer already exists");
       return;
     }
     // put them in a collection /Indet/Align
@@ -369,26 +367,6 @@ void InDetAlignDBTool::createDB() const
   ATH_MSG_DEBUG( "Dumping size of created AlignableTransform objects");
   for (unsigned int i=0;i<m_alignobjs.size();++i)
     if ((pat=getTransPtr(m_alignobjs[i]))) pat->print();
-
-  /*  Not needed at the moment
-  {
-
-    ATH_MSG_DEBUG("createDB method called for IBLDist");
-    const CondAttrListCollection* atrlistcol=0;
-    std::string ibl_folderName = "/Indet/IBLDist";
-    if (detStore()->contains<CondAttrListCollection>(ibl_folderName)) {
-      ATH_MSG_WARNING("createDB: CondAttrListCollection already exists");
-      //return; 
-    }
-    
-    if (m_par_newdb) {
-      atrlistcol = m_attrListCollection;
-      if (StatusCode::SUCCESS!=detStore()->record(atrlistcol,ibl_folderName))
-	ATH_MSG_ERROR( "Could not record IBLDist "<< ibl_folderName );
-    
-    }
-  }  
-  */
 }
 
 bool InDetAlignDBTool::idToDetSet(const Identifier ident, int& det, int& bec,
@@ -494,7 +472,10 @@ std::string InDetAlignDBTool::DBMkey(const int det,const int bec,
   return result.str();
 }
 
-
+//What is the meaning of the different values of "syst" here? From documentation:
+// InDetAlignWrt.Dispsyst(1)     shift randomly (1) or systematic (2)
+//                               if 3/4 interpret (Rphi,R,Z) as (x,y,z)
+//                               if (5) randomise the systematic shift (x,y)
 void InDetAlignDBTool::dispGroup(const int dettype, const int bec, 
                                  const int layer,const int ring, const int sector,
                                  const float rphidisp, const float rdisp, const float zdisp, 
@@ -742,9 +723,6 @@ void InDetAlignDBTool::writeFile(const bool ntuple, const std::string& file)
       ATH_MSG_ERROR("Cannot find AlignableTransform for key "
             << *iobj );
     }
-    //if (!ntuple)
-    // end of transform marked by line of zeros
-    // *outfile << "0 0 0 0 0 0 0 0 0 0 0 0" << std::endl;
   }
   if (ntuple) {
   } else {
@@ -958,78 +936,6 @@ void InDetAlignDBTool::readTextFile(const std::string& file) const {
   ATH_MSG_DEBUG( "Read " << nobj << " objects from file with " << ntrans << " transforms" ); 
 }
   
-// Old text format:
-// No subsystem number (always 2 for indet and not really needed, but for completeness its in the new format).
-// ring and sector number swapped.
-// 0 0 0 ... lines to terminate
-// No comments lines. 
-/*
-void InDetAlignDBTool::readOldTextFile(const std::string file) const {
-  ATH_MSG_DEBUG( "readTextFile - set alignment constants from text file: " << file );
-  std::ifstream infile;
-  infile.open(file.c_str());
-  // loop over lines in file
-  int nobj=0;
-  int ntrans=0;
-  std::string atname;
-  while (infile >> atname) {
-    ++nobj;
-
-    ATH_MSG_DEBUG("Read in AlignableTransform data, key " << atname );
-    ATH_MSG_DEBUG( "(You are using the the old format)" << file );
-
-    // find the AlignableTransform with this key
-    const AlignableTransform* pat;
-    if (!(pat=cgetTransPtr(atname))) 
-      ATH_MSG_ERROR("Cannot find AlignableTransform object for key" 
-            << atname );
-    int dettype,bec,layer,ring,sector,side;
-    float dx,dy,dz,phi,theta,psi;
-    while ((infile >> dettype >> bec >> layer >> ring >> sector >> side >> dx
-      >> dy >> dz >> phi >> theta >> psi) && (dettype!=0)) {
-      // construct identifier
-      if (pat!=0) {
-        Identifier ident=Identifier();
-        if (dettype==1) {
-          ident=m_pixid->wafer_id(bec,layer,sector,ring);
-        } else if (dettype==2) {
-          ident=m_sctid->wafer_id(bec,layer,sector,ring,side);
-        } else {
-          ATH_MSG_ERROR("Cannot construct identifier for dettype "
-              << dettype );
-        }
-        // construct new transform
-        Amg::Translation3D  newtranslation(dx,dy,dz);   
-        Amg::Transform3D newtrans = newtranslation * Amg::RotationMatrix3D::Identity();
-        newtrans *= Amg::AngleAxis3D(psi, Amg::Vector3D(0.,0.,1.));
-        newtrans *= Amg::AngleAxis3D(theta, Amg::Vector3D(0.,1.,0.));
-        newtrans *= Amg::AngleAxis3D(phi, Amg::Vector3D(1.,0.,0.));
-
-
-        // find pointer to existing transform, currently missing write access
-        // via findIdent, so have to search manually
-        AlignableTransform* pat2;
-        pat2=const_cast<AlignableTransform*>(pat);
-        AlignableTransform::AlignTransMem_itr itr=pat2->mbegin();
-        while ((itr->identify()!=ident) && (itr!=pat2->mend())) ++itr;
-        if (itr!=pat2->mend()) {
-          ++ntrans;
-          itr->setTransform( Amg::EigenTransformToCLHEP(newtrans) );
-          ATH_MSG_VERBOSE ("Set transform done");
-        } else {
-          ATH_MSG_WARNING("Cannot find existing transform for");
-        }
-        ATH_MSG_DEBUG( " [" << dettype << "," << bec << "," << layer << "," << 
-                      ring << "," << sector << "," << side << "] key " << atname << 
-                      " shift [" << dx << "," << dy << "," << dz << "]" );
-      }
-    } //end tranform loop
-  } // end input loop
-  infile.close();
-  ATH_MSG_DEBUG("Read " << nobj << " objects from file with " << ntrans << " transforms" ); 
-}
-*/
-
 
 void InDetAlignDBTool::readNtuple(const std::string& file) const {
   ATH_MSG_DEBUG("readNtuple - set alignment constants from ntuple path: " << file );
@@ -1053,9 +959,7 @@ void InDetAlignDBTool::readNtuple(const std::string& file) const {
     sc=nt->item("MODPROP/Phi",nt_phi);
     sc=nt->item("MODPROP/Theta",nt_theta);
     sc=nt->item("MODPROP/Psi",nt_psi);
-    //sc=nt->item("MODPROP/Alpha",nt_alpha);
-    //sc=nt->item("MODPROP/Beta",nt_beta);
-    //sc=nt->item("MODPROP/Gamma",nt_gamma);
+
     if (sc!=StatusCode::SUCCESS) ATH_MSG_ERROR(
            "Error booking ntuple 9002 contents" );
     int ntrans=0;
@@ -1152,7 +1056,7 @@ bool InDetAlignDBTool::tweakTrans(const Identifier& ident, const int level,
       if (pat2!=nullptr) {
 	result=pat2->tweak(ident,Amg::EigenTransformToCLHEP(trans));
       if (!result) ATH_MSG_ERROR(
-				 "Attempt to tweak non-existant transform" );
+				 "Attempt to tweak non-existent transform for element "<<m_pixid->show_to_string(ident));
       } else {
 	ATH_MSG_ERROR("tweakTrans: cast fails for key " << key );
       }
