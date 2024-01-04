@@ -188,6 +188,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
@@ -214,6 +215,7 @@ if __name__ == "__main__":
 
     # included to stop segmentation error - TODO see why it's failing
     flags.Input.isMC = True
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-14"  # conditions tag for conddb (which one to use - old one for simulation)
     flags.Input.RunNumber = [284500]  # run test job with and without run number and 222510
 
