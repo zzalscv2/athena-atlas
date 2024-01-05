@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AmdcDb/AmdcDbSvcMakerFromRDB.h"
@@ -11,6 +11,7 @@
 #include "AmdcDb/AmdcDbRecord.h"
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 namespace AmdcDb_detail {
 
