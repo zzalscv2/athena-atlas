@@ -199,18 +199,28 @@ def BPHY12Cfg(ConfigFlags):
     BPHY12Thin_vtxTrk = CompFactory.DerivationFramework.Thin_vtxTrk(
             name                       = "BPHY12Thin_vtxTrk",
             TrackParticleContainerName = "InDetTrackParticles",
+            StreamName = streamName,
             VertexContainerNames       = ["BPHY12_BdKstarKpiMuMu_Candidates"],
             PassFlags                  = ["passed_Bd", "passed_Bdbar"] )
+            
     BPHY12MuonTPThinningTool = CompFactory.DerivationFramework.MuonTrackParticleThinning(name    = "BPHY12MuonTPThinningTool",
+                                                                         StreamName = streamName,
                                                                          MuonKey                 = "Muons",
                                                                          InDetTrackParticlesKey  = "InDetTrackParticles")
-
+    
+    BPHY12_thinningTool_PV = CompFactory.DerivationFramework.BPhysPVThinningTool(
+                                name                 = "BPHY12_thinningTool_PV",
+                                StreamName = streamName,
+                                CandidateCollections = ["BPHY12_BdKstarKpiMuMu_Candidates"],
+                                KeepPVTracks         = True
+                                )
+    
     BPHY12TruthThinTool = CompFactory.DerivationFramework.GenericTruthThinning(name = "BPHY12TruthThinTool",
                                                         ParticleSelectionString = "TruthParticles.pdgId == 511 || TruthParticles.pdgId == -511 || TruthParticles.pdgId == 531 || TruthParticles.pdgId == -531",
                                                         PreserveDescendants     = True,
                                                         PreserveAncestors      = True)
 
-    BPHY12ThinningTools = [BPHY12Thin_vtxTrk, BPHY12MuonTPThinningTool]
+    BPHY12ThinningTools = [BPHY12Thin_vtxTrk, BPHY12_thinningTool_PV, BPHY12MuonTPThinningTool]
     if isSimulation:
        BPHY12ThinningTools.append(BPHY12TruthThinTool)
 
