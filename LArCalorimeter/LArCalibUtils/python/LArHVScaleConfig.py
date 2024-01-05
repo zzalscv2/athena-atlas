@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -7,6 +7,8 @@ from AthenaConfiguration.Enums import LHCPeriod
 
 def LArHVScaleCfg(configFlags):
     result=ComponentAccumulator()
+
+    from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg, LArBadFebCfg
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     result.merge(LArGMCfg(configFlags))
@@ -21,6 +23,8 @@ def LArHVScaleCfg(configFlags):
         hvmapalg = LArHVIdMappingAlg(ReadKey="/LAR/Identifier/HVLineToElectrodeMap",WriteKey="LArHVIdMap")
         result.addCondAlgo(hvmapalg)
 
+        result.merge(LArBadFebCfg(configFlags))
+
         result.addCondAlgo(LArHVCondAlg(doHV=False, doAffectedHV=False))
 
     elif not configFlags.Common.isOnline:
@@ -32,7 +36,6 @@ def LArHVScaleCfg(configFlags):
         if configFlags.GeoModel.Run is not LHCPeriod.Run1:
             result.merge(addFolders(configFlags,["/LAR/HVPathologiesOfl/Rvalues"], "LAR_OFL", className="AthenaAttributeList"))
 
-        from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg, LArBadFebCfg
         result.merge(LArBadChannelCfg(configFlags))
         result.merge(LArBadFebCfg(configFlags))
 
