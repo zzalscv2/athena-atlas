@@ -52,7 +52,7 @@ def buildListOfModifiers(flags):
             Modifiers += add_modifier(run_nbr=el["run"], evt_nbr=evt_nbr, time_stamp=el["starttstamp"], lbk_nbr=el["lb"], nevts=el["evts"])
     elif DataRunNumber>0:
         assert DataRunNumber >= 0, (
-            "ConfigFlags.Input.ConditionsRunNumber %d is negative. "
+            "flags.Input.ConditionsRunNumber %d is negative. "
             "Use a real run number from data." % DataRunNumber)
 
         # Using event numbers to avoid "some very large number" setting
@@ -66,15 +66,15 @@ def buildListOfModifiers(flags):
 
         FirstLB = 1
         Modifiers += add_modifier(run_nbr=DataRunNumber, lbk_nbr=FirstLB, time_stamp=InitialTimeStamp, nevts=totalNumber)
-    elif flags.Input.RunNumber:
+    elif flags.Input.RunNumbers:
         # Behaviour for Simulation jobs. For standard Simulation we
         # override the run number once per job. TODO Still need to deal with the specific case of DataOverlay
-        myRunNumber = flags.Input.RunNumber[0]
+        myRunNumber = flags.Input.RunNumbers[0]
         assert myRunNumber >= 0, (
-            "ConfigFlags.Input.RunNumber[0] %d is negative. "
+            "flags.Input.RunNumbers[0] %d is negative. "
             "Use a real run number from data." % myRunNumber)
-        myFirstLB = flags.Input.LumiBlockNumber[0]
-        myInitialTimeStamp = flags.Input.TimeStamp[0]
+        myFirstLB = flags.Input.LumiBlockNumbers[0]
+        myInitialTimeStamp = flags.Input.TimeStamps[0]
 
         # Using event numbers to avoid "some very large number" setting
         totalNumber = 1000000
@@ -95,7 +95,7 @@ def getFirstLumiBlock(flags, run):
                 allLBs += [el["lb"]]
         return min(allLBs) + 0
     else:
-        return flags.Input.LumiBlockNumber[0]
+        return flags.Input.LumiBlockNumbers[0]
 
 
 def getMinMaxRunNumbers(flags):
@@ -112,15 +112,15 @@ def getMinMaxRunNumbers(flags):
         # Behaviour for Digitization jobs using DataRunNumber
         DataRunNumber = flags.Input.ConditionsRunNumber
         assert DataRunNumber >= 0, (
-            "ConfigFlags.Input.ConditionsRunNumber %d is negative. "
+            "flags.Input.ConditionsRunNumber %d is negative. "
             "Use a real run number from data." % DataRunNumber)
         mini = DataRunNumber
         maxi = DataRunNumber+1
-    elif flags.Input.RunNumber:
+    elif flags.Input.RunNumbers:
         # Behaviour for Simulation jobs
-        myRunNumber = flags.Input.RunNumber[0]
+        myRunNumber = flags.Input.RunNumbers[0]
         assert myRunNumber >= 0, (
-            "ConfigFlags.Input.RunNumber[0] %d is negative. "
+            "flags.Input.RunNumbers[0] %d is negative. "
             "Use a real run number from data." % myRunNumber)
         mini = myRunNumber
         maxi = 2147483647

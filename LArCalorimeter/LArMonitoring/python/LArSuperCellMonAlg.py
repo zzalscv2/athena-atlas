@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 def LArSuperCellMonConfigOld(inputFlags):
@@ -96,7 +96,7 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
     larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg")
     from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
     try:
-        runinfo=getLArDTInfoForRun(inputFlags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
+        runinfo=getLArDTInfoForRun(inputFlags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
         streamTypes=runinfo.streamTypes()
     except Exception as e:
         mlog.warning("Could not get DT run info, using defaults !")

@@ -1,6 +1,6 @@
 """Define method to configure and test SCT_ConditionsParameterTestAlg
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -23,8 +23,8 @@ if __name__=="__main__":
     flags.Input.Files = []
     flags.Input.isMC = False
     flags.Input.ProjectName = "data12_8TeV"
-    flags.Input.RunNumber = 215643
-    flags.Input.TimeStamp = 1354748400 # LB 469 of run 215643, 2012-12-05 @ 11:00pm (UTC)
+    flags.Input.RunNumbers = [215643]
+    flags.Input.TimeStamps = [1354748400] # LB 469 of run 215643, 2012-12-05 @ 11:00pm (UTC)
     flags.IOVDb.GlobalTag = "COMCOND-BLKPA-RUN1-09"
     flags.IOVDb.DatabaseInstance = "COMP200"
     from AthenaConfiguration.TestDefaults import defaultGeometryTags

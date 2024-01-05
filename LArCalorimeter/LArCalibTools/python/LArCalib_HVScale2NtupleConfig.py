@@ -63,8 +63,8 @@ if __name__=="__main__":
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
     addLArCalibFlags(ConfigFlags)
 
-    ConfigFlags.Input.RunNumber=rlb[0]
-    ConfigFlags.Input.TimeStamp=TimeStamp
+    ConfigFlags.Input.RunNumbers=[rlb[0]]
+    ConfigFlags.Input.TimeStamps=[TimeStamp]
     ConfigFlags.Input.Files=[]
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
 

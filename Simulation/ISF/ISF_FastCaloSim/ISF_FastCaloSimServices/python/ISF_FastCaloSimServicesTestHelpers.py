@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """FastCaloSimServices test helpers
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 
 from argparse import ArgumentParser
@@ -48,9 +48,9 @@ def defaultTestFlags(configFlags, args):
     """Fill default FCSServices flags for testing"""
 
     from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
-    configFlags.Input.RunNumber = [284500]
+    configFlags.Input.RunNumbers = [284500]
     configFlags.Input.OverrideRunNumber = True
-    configFlags.Input.LumiBlockNumber = [1]
+    configFlags.Input.LumiBlockNumbers = [1]
     configFlags.Input.Files = defaultTestFiles.EVNT # ["root://eosuser.cern.ch///eos/atlas/atlascerngroupdisk/proj-simul/OutputSamples/rel21/mc16_13TeV.photon.E65536.eta20_25.EVNT.merged.pool.root"]
     configFlags.Output.HITSFileName = "myHITSnew.pool.root"
     configFlags.Common.ProductionStep = ProductionStep.Simulation

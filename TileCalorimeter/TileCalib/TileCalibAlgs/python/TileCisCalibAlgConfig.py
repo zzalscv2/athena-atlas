@@ -43,7 +43,7 @@ def TileCisCalibAlgCfg(flags, **kwargs):
 
     kwargs.setdefault('name', 'TileCisCalibAlg')
     kwargs.setdefault('RunType', 8)
-    kwargs.setdefault('RunNumber', flags.Input.RunNumber[0])
+    kwargs.setdefault('RunNumber', flags.Input.RunNumbers[0])
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
@@ -89,7 +89,7 @@ if __name__=='__main__':
     cfg.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
     cfg.getService('ByteStreamCnvSvc').ROD2ROBmap = [ "-1" ]
 
-    runNumber = flags.Input.RunNumber[0]
+    runNumber = flags.Input.RunNumbers[0]
     from AthenaConfiguration.ComponentFactory import CompFactory
     cfg.addPublicTool( CompFactory.TileROD_Decoder(fullTileMode = runNumber) )
 

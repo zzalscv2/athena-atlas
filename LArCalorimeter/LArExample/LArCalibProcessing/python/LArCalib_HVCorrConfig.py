@@ -98,9 +98,9 @@ if __name__=="__main__":
     if args.globaltag:
         ConfigFlags.IOVDb.GlobalTag=args.globaltag
 
-    ConfigFlags.Input.RunNumber=rlb[0]
-    ConfigFlags.Input.LumiBlockNumber=rlb[1]
-    ConfigFlags.Input.TimeStamp=TimeStamp
+    ConfigFlags.Input.RunNumbers=[rlb[0]]
+    ConfigFlags.Input.LumiBlockNumbers=[rlb[1]]
+    ConfigFlags.Input.TimeStamps=[TimeStamp]
     ConfigFlags.Input.Files=[]
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema="+outputName+".sqlite;dbname=CONDBR2"
@@ -108,7 +108,7 @@ if __name__=="__main__":
     ConfigFlags.lock()
     cfg=MainEvgenServicesCfg(ConfigFlags)
     #First LB not set by McEventSelectorCfg, set it here:
-    cfg.getService("EventSelector").FirstLB=ConfigFlags.Input.LumiBlockNumber 
+    cfg.getService("EventSelector").FirstLB=ConfigFlags.Input.LumiBlockNumbers[0]
     cfg.merge(HVCorrConfig(ConfigFlags,outputName,args.Run,args.LB))
     
     

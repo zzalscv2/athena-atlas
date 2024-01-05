@@ -267,9 +267,9 @@ def createSimConfigFlags():
 def simulationRunArgsToFlags(runArgs, flags):
     """Fill simulation configuration flags from run arguments."""
     if hasattr(runArgs, "DataRunNumber"):
-        flags.Input.RunNumber = [runArgs.DataRunNumber]
+        flags.Input.RunNumbers = [runArgs.DataRunNumber]
         flags.Input.OverrideRunNumber = True
-        flags.Input.LumiBlockNumber = [1] # dummy value
+        flags.Input.LumiBlockNumbers = [1] # dummy value
 
     if hasattr(runArgs, "jobNumber"):
         flags.Input.JobNumber = runArgs.jobNumber

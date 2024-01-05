@@ -51,7 +51,7 @@ def _doOpt2ByDefault(prevFlags):
           else:
                return True
 
-     runNumber = prevFlags.Input.RunNumber[0]
+     runNumber = prevFlags.Input.RunNumbers[0]
      # Run Optimal Filter with iterations (Opt2) by default,
      # both for cosmics and collisions data before 2011
      if not prevFlags.Input.isMC and runNumber > 0 and runNumber < 171194:
@@ -105,7 +105,7 @@ def _doOptATLAS(prevFlags):
 
 def _zeroAmplitudeWithoutDigits(prevFlags):
      if not prevFlags.Input.isMC:
-          runNumber = prevFlags.Input.RunNumber[0]
+          runNumber = prevFlags.Input.RunNumbers[0]
           # Use OF1 corrections only for years 2015 - 2016
           return runNumber > 269101 and runNumber < 324320
      else:
@@ -137,7 +137,7 @@ def _getRunType(prevFlags):
 
 def _useDCS(prevFlags):
      if not (prevFlags.Common.isOnline or prevFlags.Input.isMC):
-          runNumber = prevFlags.Input.RunNumber[0]
+          runNumber = prevFlags.Input.RunNumbers[0]
           # Use Tile DCS only for 2011 data and later, excluding shutdown period
           return (runNumber > 171194 and runNumber < 222222) or runNumber > 232498
      else:

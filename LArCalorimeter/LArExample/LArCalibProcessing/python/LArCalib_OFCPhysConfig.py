@@ -215,7 +215,7 @@ if __name__ == "__main__":
     ConfigFlags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
     ConfigFlags.LAr.doAlign=False
-    ConfigFlags.Input.RunNumber=ConfigFlags.LArCalib.Input.RunNumbers[0]
+    ConfigFlags.Input.RunNumbers=ConfigFlags.LArCalib.Input.RunNumbers
     #ConfigFlags.Exec.OutputLevel=1
     ConfigFlags.fillFromArgs()
     ConfigFlags.lock()

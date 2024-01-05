@@ -38,8 +38,8 @@ if __name__=="__main__":
     flags = initConfigFlags()
     flags.Input.Files = []
     flags.Input.isMC = True
-    flags.Input.RunNumber = [300000]
-    flags.Input.TimeStamp = 1500000000
+    flags.Input.RunNumbers = [300000]
+    flags.Input.TimeStamps = [1500000000]
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/ConditionsRun1RunNumbers
     flags.IOVDb.GlobalTag = "OFLCOND-RUN12-SDR-25"
     from AthenaConfiguration.TestDefaults import defaultGeometryTags

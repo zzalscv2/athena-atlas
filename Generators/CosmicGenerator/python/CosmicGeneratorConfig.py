@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -199,7 +199,7 @@ def CosmicGeneratorCfg(flags, name="CosmicGenerator", **kwargs):
         kwargs.setdefault('rvert_max', 300000.)            # - radius in mm for generating primary vertex
 
     # Random seeding
-    kwargs.setdefault("Dsid", flags.Input.RunNumber[0]) # Could (should?) set this as Input.MCChannelNumber currently trying to match legacy config
+    kwargs.setdefault("Dsid", flags.Input.RunNumbers[0]) # Could (should?) set this as Input.MCChannelNumber currently trying to match legacy config
     #kwargs.setdefault("RandomSeed", flags.Sim.RandomSeedOffset) # No such flag in ConfigFlags. TODO Add?
 
     result.addEventAlgo(CompFactory.CosmicGenerator('CosmicGenerator', **kwargs))

@@ -81,8 +81,8 @@ if __name__=='__main__':
     if partitionName != 'ATLAS' and partitionName != 'ATLAS_MP1': 
         flags.Input.ProjectName = 'data21_900GeV' 
         flags.Exec.MaxEvents = 20
-        flags.Input.RunNumber = [431894]
-        flags.Input.LumiBlockNumber = [1] 
+        flags.Input.RunNumbers = [431894]
+        flags.Input.LumiBlockNumbers = [1] 
 
     flags.Common.isOnline = True
 

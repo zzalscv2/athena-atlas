@@ -211,9 +211,9 @@ def MC23SimulationLowMuRun(flags):
     """MC23 flags for low mu run simulation"""
     MC23SimulationNoIoV(flags)
 
-    flags.Input.RunNumber = [420000]
+    flags.Input.RunNumbers = [420000]
     flags.Input.OverrideRunNumber = True
-    flags.Input.LumiBlockNumber = [1] # dummy value
+    flags.Input.LumiBlockNumbers = [1] # dummy value
 
 
 def MC23cSimulationNoIoV(flags):
@@ -226,18 +226,18 @@ def MC23SimulationSingleIoV(flags):
     """MC23 flags for simulation"""
     MC23SimulationNoIoV(flags)
 
-    flags.Input.RunNumber = [410000]
+    flags.Input.RunNumbers = [410000]
     flags.Input.OverrideRunNumber = True
-    flags.Input.LumiBlockNumber = [1] # dummy value
+    flags.Input.LumiBlockNumbers = [1] # dummy value
 
 
 def MC23cSimulationSingleIoV(flags):
     """MC23 flags for simulation"""
     MC23SimulationNoIoV(flags)
 
-    flags.Input.RunNumber = [450000]
+    flags.Input.RunNumbers = [450000]
     flags.Input.OverrideRunNumber = True
-    flags.Input.LumiBlockNumber = [1] # dummy value
+    flags.Input.LumiBlockNumbers = [1] # dummy value
 
 
 def MC23aSimulationMultipleIoV(flags):

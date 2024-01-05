@@ -14,8 +14,8 @@ if __name__=="__main__":
 
   from AthenaConfiguration.AllConfigFlags import initConfigFlags
   flags = initConfigFlags()
-  flags.Input.RunNumber = 284500 # dummay value
-  flags.Input.TimeStamp = 1 # dummy value
+  flags.Input.RunNumbers = [284500] # dummay value
+  flags.Input.TimeStamps = [1] # dummy value
   flags.Exec.FPE=FPEFlag
   cfg = MainEvgenServicesCfg(flags)
   

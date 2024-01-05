@@ -1,6 +1,6 @@
 """Define method to configure and test SCT_MonitorConditionsTestAlg
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -23,8 +23,8 @@ if __name__=="__main__":
     flags.Input.Files = []
     flags.Input.isMC = True
     flags.Input.ProjectName = "mc16_13TeV"
-    flags.Input.RunNumber = 310000 # MC16e 2018 run number
-    flags.Input.TimeStamp = 1550000000 # MC16e 2018 time stamp
+    flags.Input.RunNumbers = [310000] # MC16e 2018 run number
+    flags.Input.TimeStamps = [1550000000] # MC16e 2018 time stamp
     flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-RUN2-01"
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2

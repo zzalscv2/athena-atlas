@@ -65,7 +65,7 @@ def LArRawChannelBuilderAlgCfg(configFlags, **kwargs):
        kwargs.setdefault('defaultPhase',12)
        nominalPeakSample=2
        from LArConditionsCommon.LArRunFormat import getLArFormatForRun
-       larformat=getLArFormatForRun(configFlags.Input.RunNumber[0],connstring="COOLONL_LAR/"+configFlags.IOVDb.DatabaseInstance)
+       larformat=getLArFormatForRun(configFlags.Input.RunNumbers[0],connstring="COOLONL_LAR/"+configFlags.IOVDb.DatabaseInstance)
        if larformat is not None:
           nominalPeakSample = larformat.firstSample()
        else:

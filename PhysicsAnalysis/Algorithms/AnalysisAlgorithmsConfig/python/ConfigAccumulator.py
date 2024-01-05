@@ -125,7 +125,7 @@ class ConfigAccumulator :
             if campaign is None:
                 campaign = autoconfigFromFlags.Input.MCCampaign
             if runNumber is None:
-                runNumber = int(autoconfigFromFlags.Input.RunNumber[0])
+                runNumber = int(autoconfigFromFlags.Input.RunNumbers[0])
             generatorInfo = autoconfigFromFlags.Input.GeneratorsInfo
         else:
             # legacy mappings of string arguments

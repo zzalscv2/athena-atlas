@@ -42,7 +42,7 @@ def TileRawChannelTimeMonitoringConfig(flags, **kwargs):
     kwargs.setdefault('PartitionTimeDiffferncePairs', partitionPairs)
 
     partitionTimeCorrections = [0, 0, 0, 0]
-    if flags.Input.RunNumber[0] > 400000: # Update partition time corrections for Run 3
+    if flags.Input.RunNumbers[0] > 400000: # Update partition time corrections for Run 3
         if 'LAS' in flags.Tile.RunType:
             partitionTimeCorrections = [-28.65, -45.2, 25.24, 24.94]
         elif 'CIS' in flags.Tile.RunType:
@@ -65,7 +65,7 @@ def TileRawChannelTimeMonitoringConfig(flags, **kwargs):
     for k, v in kwargs.items():
         setattr(tileRawChanTimeMonAlg, k, v)
 
-    run = str(flags.Input.RunNumber[0])
+    run = str(flags.Input.RunNumbers[0])
     eventsType = 'CIS' if 'CIS' in flags.Tile.RunType else 'Laser'
 
     # 1) Configure histogram with TileRawChannelTimeMonAlg algorithm execution time

@@ -3,7 +3,7 @@
 
 This test inherits from Simulation/G4Atlas/G4AtlasAlg/test/G4AtlasAlgConfig_Test.py
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 if __name__ == '__main__':
 
@@ -25,12 +25,11 @@ if __name__ == '__main__':
     flags.Exec.SkipEvents = 0
     from AthenaConfiguration.Enums import ProductionStep
     flags.Common.ProductionStep = ProductionStep.Simulation
-    flags.Input.RunNumber = [284500] #Isn't updating - todo: investigate
+    flags.Input.RunNumbers = [284500] #Isn't updating - todo: investigate
     flags.Input.OverrideRunNumber = True
-    flags.Input.LumiBlockNumber = [1] # dummy value
+    flags.Input.LumiBlockNumbers = [1] # dummy value
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    inputDir = defaultTestFiles.d
     flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1'] #defaultTestFiles.EVNT
     flags.Output.HITSFileName = "myHITSnew.pool.root"
 

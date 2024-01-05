@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -82,7 +82,7 @@ if __name__=='__main__':
     fEff = amiTool.filterEfficiency
 
   ebw = CompFactory.EnhancedBiasWeighter('EnhancedBiasRatesTool')
-  ebw.RunNumber = ConfigFlags.Input.RunNumber[0]
+  ebw.RunNumber = ConfigFlags.Input.RunNumbers[0]
   ebw.UseBunchCrossingData = useBunchCrossingData
   ebw.IsMC = ConfigFlags.Input.isMC
   # The following three are only needed if isMC == true

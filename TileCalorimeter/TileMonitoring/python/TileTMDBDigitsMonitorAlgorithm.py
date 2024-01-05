@@ -25,7 +25,7 @@ def TileTMDBDigitsMonitoringConfig(flags):
     tileTMDBDigitsMonAlg.TriggerChain = ''
 
 
-    run = str(flags.Input.RunNumber[0])
+    run = str(flags.Input.RunNumbers[0])
     from TileMonitoring.TileMonitoringCfgHelper import addTileTMDB_1DHistogramsArray, addTileTMDB_2DHistogramsArray
 
 

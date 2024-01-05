@@ -141,7 +141,7 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
 flags = initConfigFlags()
 flags.Input.Files = defaultTestFiles.RDO_RUN2
-flags.Input.TimeStamp = 1000
+flags.Input.TimeStamps = [1000]
 flags.Detector.GeometryLAr = True
 flags.Detector.GeometryTile = True
 flags.needFlagsCategory('Tile')

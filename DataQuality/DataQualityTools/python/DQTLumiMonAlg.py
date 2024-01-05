@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 def DQTLumiMonAlgConfig(flags, isOld=False):
@@ -51,8 +51,8 @@ def DQTLumiMonAlgConfigByTriggerChain(helper, algConfObj, flags, isOld, triggerC
         lbdict = { 'xmin': lbnum-0.5 if lbnum>0 else 0.5,
                    'xmax': lbnum+0.5 if lbnum>0 else 1.5 }
     else:
-        lbdict = { 'xmin': min(flags.Input.LumiBlockNumber)-0.5 if flags.Input.LumiBlockNumber else 0.5,
-                   'xmax': max(flags.Input.LumiBlockNumber)+0.5 if flags.Input.LumiBlockNumber else 1.5 }
+        lbdict = { 'xmin': min(flags.Input.LumiBlockNumbers)-0.5 if flags.Input.LumiBlockNumbers else 0.5,
+                   'xmax': max(flags.Input.LumiBlockNumbers)+0.5 if flags.Input.LumiBlockNumbers else 1.5 }
     lbdict['xbins'] = int(lbdict['xmax']-lbdict['xmin'])
 
     # Raw plots of lumi variables

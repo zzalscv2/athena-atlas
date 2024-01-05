@@ -72,7 +72,7 @@ def TileAANtupleCfg(flags, outputFile='', saveTMDB=True, **kwargs):
     acc.merge( TileDQstatusAlgCfg(flags) )
 
     if not outputFile:
-        run = str(flags.Input.RunNumber[0])
+        run = str(flags.Input.RunNumbers[0])
         outputFile = 'tile_{}.aan.root'.format(run)
     histsvc = CompFactory.THistSvc()
     histsvc.Output += ["%s DATAFILE='%s' OPT='RECREATE'" % ('AANT', outputFile)]
@@ -118,7 +118,7 @@ if __name__=='__main__':
 
     if flags.Input.Format is Format.BS:
 
-        cfg.addPublicTool(CompFactory.TileROD_Decoder(fullTileMode=flags.Input.RunNumber[0]))
+        cfg.addPublicTool(CompFactory.TileROD_Decoder(fullTileMode=flags.Input.RunNumbers[0]))
 
         from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
         tileTypeNames = ['TileDigitsContainer/TileDigitsCnt',

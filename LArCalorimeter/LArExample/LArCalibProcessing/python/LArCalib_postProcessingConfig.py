@@ -75,7 +75,7 @@ if __name__=="__main__":
 
 
     flags.LAr.doAlign=False
-    flags.Input.RunNumber=flags.LArCalib.Input.RunNumbers[0]
+    flags.Input.RunNumbers=flags.LArCalib.Input.RunNumbers
 
 
     flags.lock()

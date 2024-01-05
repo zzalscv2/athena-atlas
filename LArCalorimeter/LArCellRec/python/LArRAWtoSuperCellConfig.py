@@ -5,35 +5,35 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
 from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg, LArMaskedSCCfg
 
-def LArRAWtoSuperCellCfg(configFlags,name="LArRAWtoSuperCell",mask=True,SCellContainerOut="",SCIn="",doReco=False, bcidShift=0):
+def LArRAWtoSuperCellCfg(flags,name="LArRAWtoSuperCell",mask=True,SCellContainerOut="",SCIn="",doReco=False, bcidShift=0):
     result=ComponentAccumulator()
     from AthenaCommon.Logging import logging
     mlog = logging.getLogger( 'LArRAWtoSuperCellCfg:' )
-    result.merge(LArOnOffIdMappingSCCfg(configFlags))
+    result.merge(LArOnOffIdMappingSCCfg(flags))
     SCInput=""
     if (SCIn != ""):
        SCInput = SCIn
-    elif ( len(configFlags.Input.RunNumber) > 0 ):
+    elif flags.Input.RunNumbers:
        from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
-       runinfo=getLArDTInfoForRun(configFlags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
+       runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
        for i in range(0,len(runinfo.streamTypes())):
          if runinfo.streamTypes()[i] ==  "SelectedEnergy":
            SCInput="SC_ET_ID"
     else :
-       SCInput=configFlags.LAr.LATOME.DTInfoForL1
+       SCInput=flags.LAr.LATOME.DTInfoForL1
     if mask :
        LArBadChannelKey="LArBadChannelSC"
     else :
        LArBadChannelKey=""
-    result.merge(LArBadChannelCfg(configFlags,isSC=True) )
+    result.merge(LArBadChannelCfg(flags,isSC=True) )
 
-    if SCellContainerOut=="": SCellContainerOut=configFlags.LAr.DT.ET_IDKey 
+    if SCellContainerOut=="": SCellContainerOut=flags.LAr.DT.ET_IDKey 
 
     algo = CompFactory.LArRAWtoSuperCell(name,SCellContainerOut=SCellContainerOut,LArBadChannelKey=LArBadChannelKey,BCIDOffset=bcidShift)
 
-    if mask and not configFlags.Input.isMC:
+    if mask and not flags.Input.isMC:
         # also setup to read OTF masked supercells if running on data
-        result.merge(LArMaskedSCCfg(configFlags))
+        result.merge(LArMaskedSCCfg(flags))
         algo.LArMaskedChannelKey="LArMaskedSC"
 
     algo = CompFactory.LArRAWtoSuperCell(name,isReco=doReco,SCellContainerOut=SCellContainerOut,LArBadChannelKey=LArBadChannelKey)

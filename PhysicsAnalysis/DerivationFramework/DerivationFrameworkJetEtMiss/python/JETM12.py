@@ -37,7 +37,7 @@ def JETM12SkimmingToolCfg(ConfigFlags):
     if not ConfigFlags.Input.isMC:
         # Check if the solenoid was turned on to define skimming
         from CoolConvUtilities.MagFieldUtils import getFieldForRun
-        magfield=getFieldForRun(ConfigFlags.Input.RunNumber[0],lumiblock=ConfigFlags.Input.LumiBlockNumber[0])
+        magfield=getFieldForRun(ConfigFlags.Input.RunNumbers[0],lumiblock=ConfigFlags.Input.LumiBlockNumbers[0])
         addTtbarEvents = magfield.solenoidCurrent() > 0
 
 

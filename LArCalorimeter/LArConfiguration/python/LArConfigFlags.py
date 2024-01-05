@@ -1,6 +1,5 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import FlagEnum
 from AthenaCommon.Logging import logging
@@ -98,7 +97,7 @@ def _getLArRunInfo(prevFlags):
     global _lArRunInfo #Cache of lar run info
     if _lArRunInfo is None:
         from LArConditionsCommon.LArRunFormat import getLArFormatForRun
-        runnbr=prevFlags.Input.RunNumber[0] #If more than one run, assume config for first run is valid for all runs
+        runnbr=prevFlags.Input.RunNumbers[0] #If more than one run, assume config for first run is valid for all runs
         dbStr="COOLONL_LAR/"+prevFlags.IOVDb.DatabaseInstance
         _lArRunInfo=getLArFormatForRun(run=runnbr,connstring=dbStr)
         log.info("Got LArRunInfo for run %d",runnbr)

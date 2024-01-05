@@ -1,6 +1,6 @@
 """Define method to configure and test SCT_SensorsTestAlg
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -23,8 +23,8 @@ if __name__=="__main__":
     flags.Input.Files = []
     flags.Input.isMC = False
     flags.Input.ProjectName = "data12_8TeV"
-    flags.Input.RunNumber = 142913
-    flags.Input.TimeStamp = 1260630000 # During run 142913, 12/12/2009 @ 3:00pm (UTC)
+    flags.Input.RunNumbers = [142913]
+    flags.Input.TimeStamps = [1260630000] # During run 142913, 12/12/2009 @ 3:00pm (UTC)
     flags.IOVDb.GlobalTag = "COMCOND-BLKPA-RUN1-09"
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN1_2012

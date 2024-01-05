@@ -39,7 +39,7 @@ def TileRawChannelFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
                                      title = 'Time for execute TileRawChannelFlxMonAlg algorithm;time [#mus]',
                                      xbins = 300, xmin = 0, xmax = 300000)
 
-    runNumber = flags.Input.RunNumber[0]
+    runNumber = flags.Input.RunNumbers[0]
     from TileCalibBlobObjs.Classes import TileCalibUtils as Tile
 
     modules = []
@@ -126,7 +126,7 @@ if __name__=='__main__':
     cfg.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
     cfg.getService('ByteStreamCnvSvc').ROD2ROBmap = [ "-1" ]
 
-    runNumber = flags.Input.RunNumber[0]
+    runNumber = flags.Input.RunNumbers[0]
     from AthenaConfiguration.ComponentFactory import CompFactory
     cfg.addPublicTool( CompFactory.TileROD_Decoder(fullTileMode = runNumber) )
 

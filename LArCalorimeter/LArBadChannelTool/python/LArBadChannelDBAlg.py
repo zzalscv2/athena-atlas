@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 
@@ -91,7 +91,7 @@ if __name__=="__main__":
     flags.Input.isMC = False
     flags.IOVDb.DatabaseInstance="CONDBR2"
     flags.LAr.doAlign=False
-    flags.Input.RunNumber=args.runnumber if args.runnumber>0 else 300000
+    flags.Input.RunNumbers=[args.runnumber if args.runnumber>0 else 300000]
     flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2022-06"
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
@@ -113,7 +113,6 @@ if __name__=="__main__":
     #MC Event selector since we have no input data file
     from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
     cfg.merge(McEventSelectorCfg(flags,
-                                 RunNumber=flags.Input.RunNumber,
                                  FirstLB=args.lbnumber,
                                  EventsPerRun      = 1,
                                  FirstEvent        = 1,

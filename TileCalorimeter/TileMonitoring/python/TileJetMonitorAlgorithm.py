@@ -116,7 +116,7 @@ def TileJetMonitoringConfig(flags, **kwargs):
 
 
     from TileMonitoring.TileMonitoringCfgHelper import addValueVsModuleAndChannelMaps, getPartitionName
-    runNumber = flags.Input.RunNumber[0]
+    runNumber = flags.Input.RunNumbers[0]
 
 
     # 2) Configure 2D histograms (profiles/maps) with Tile channel time vs module and channel per partion (DQ summary)

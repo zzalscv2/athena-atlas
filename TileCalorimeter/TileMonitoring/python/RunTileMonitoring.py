@@ -58,7 +58,7 @@ def _configFlagsFromPartition(flags, partition, log):
 
     flags.Beam.Type = BeamType(beamType)
     flags.Input.ProjectName = projectName
-    flags.Input.RunNumber = [runNumber]
+    flags.Input.RunNumbers = [runNumber]
 
 
 if __name__=='__main__':
@@ -208,12 +208,12 @@ if __name__=='__main__':
             inputDirectory = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TileByteStream/TileByteStream-02-00-00"
             inputFile = "data18_tilecomm.00363899.calibration_tile.daq.RAW._lb0000._TileREB-ROS._0005-200ev.data"
             flags.Input.Files = [os.path.join(inputDirectory, inputFile)]
-            flags.Input.RunNumber = [363899]
+            flags.Input.RunNumbers = [363899]
         elif args.cis:
             inputDirectory = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TileByteStream/TileByteStream-02-00-00"
             inputFile = "data18_tilecomm.00363899.calibration_tile.daq.RAW._lb0000._TileREB-ROS._0005-200ev.data"
             flags.Input.Files = [os.path.join(inputDirectory, inputFile)]
-            flags.Input.RunNumber = [363899]
+            flags.Input.RunNumbers = [363899]
         elif args.noise:
             inputDirectory = 'root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/det-tile/test'
             inputFile = 'data12_8TeV.00201555.physics_ZeroBiasOverlay.merge.RAW._lb0150._SFO-ALL._0001.1'
@@ -222,7 +222,7 @@ if __name__=='__main__':
             from AthenaConfiguration.TestDefaults import defaultTestFiles
             flags.Input.Files = defaultTestFiles.RAW_RUN2
 
-    runNumber = flags.Input.RunNumber[0]
+    runNumber = flags.Input.RunNumbers[0]
     flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00' if not flags.Input.isMC and runNumber >= 411938 else 'ATLAS-R2-2016-01-00-01'
 
     if not flags.Output.HISTFileName:

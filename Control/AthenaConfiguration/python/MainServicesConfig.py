@@ -320,8 +320,8 @@ def MainEvgenServicesCfg(flags, LoopMgr='AthenaEventLoopMgr',seqName="AthAlgSeq"
     """ComponentAccumulator-based equivalent of:
     import AthenaCommon.AtlasUnixGeneratorJob
 
-    NB Must have set ConfigFlags.Input.RunNumber and
-    ConfigFlags.Input.TimeStamp before calling to avoid
+    NB Must have set flags.Input.RunNumbers and
+    flags.Input.TimeStamps before calling to avoid
     attempted auto-configuration from an input file.
     """
     cfg = MainServicesCfg(flags, LoopMgr)
@@ -337,8 +337,8 @@ if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     try:
-        flags.Input.RunNumber = 284500 # Set to either MC DSID or MC Run Number
-        flags.Input.TimeStamp = 1 # dummy value
+        flags.Input.RunNumbers = [284500] # Set to either MC DSID or MC Run Number
+        flags.Input.TimeStamps = [1] # dummy value
         cfg = MainEvgenServicesCfg(flags)
     except ModuleNotFoundError:
         #  The McEventSelector package required by MainEvgenServicesCfg is not part of the AthAnalysis project

@@ -47,7 +47,7 @@ def TileOFCCondAlgCfg(flags, **kwargs):
 
         ofcType = ofcType + '/' + runType
         
-        runNumber = flags.Input.RunNumber[0]
+        runNumber = flags.Input.RunNumbers[0]
         runSplitOnline = 314449 #Use OFC stored in online folder for all runs before 2017
         if flags.IOVDb.DatabaseInstance  == 'CONDBR2' and runType == 'PHY' and runNumber > runSplitOnline:
             ofcFolder = folders.addSplitOnline('/TILE/ONL01/FILTER/' + ofcType, '/TILE/OFL02/FILTER/' + ofcType)

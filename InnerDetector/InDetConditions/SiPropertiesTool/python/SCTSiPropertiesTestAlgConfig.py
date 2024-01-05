@@ -23,8 +23,8 @@ if __name__=="__main__":
     flags.Input.Files = []
     flags.Input.isMC = True
     flags.Input.ProjectName = "mc16_13TeV"
-    flags.Input.RunNumber = 300000 # MC16c 2017 run number
-    flags.Input.TimeStamp = 1500000000 # MC16c 2017 time stamp
+    flags.Input.RunNumbers = [300000] # MC16c 2017 run number
+    flags.Input.TimeStamps = [1500000000] # MC16c 2017 time stamp
     flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-18"
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2

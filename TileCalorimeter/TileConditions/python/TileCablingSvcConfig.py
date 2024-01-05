@@ -29,7 +29,7 @@ def TileCablingSvcCfg(flags):
     geometry = flags.GeoModel.AtlasVersion
 
     if not flags.Common.isOnline:
-      runNumber = flags.Input.RunNumber[0]
+      runNumber = flags.Input.RunNumbers[0]
       if flags.Input.OverrideRunNumber > 0:
           from AthenaKernel.EventIdOverrideConfig import getMinMaxRunNumbers
           runNumber = getMinMaxRunNumbers(flags)[0]

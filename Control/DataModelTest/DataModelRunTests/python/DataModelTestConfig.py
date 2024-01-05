@@ -39,8 +39,8 @@ def DataModelTestFlags (infile = None, evtMax = 20, **kw):
 
     # Block input file peeking.
     from Campaigns.Utils import Campaign
-    flags.Input.RunNumber = 0
-    flags.Input.TimeStamp = 0
+    flags.Input.RunNumbers = [0]
+    flags.Input.TimeStamps = [0]
     flags.Input.ProcessingTags = []
     flags.Input.TypedCollections = []
     flags.Input.isMC = True

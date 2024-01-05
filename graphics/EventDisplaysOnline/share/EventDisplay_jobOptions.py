@@ -177,7 +177,7 @@ elif beamType == 'collisions':
      jobproperties.Beam.bunchSpacing.set_Value_and_Lock(25) # Needed for collisions
 
 if (partitionName != 'ATLAS'): # Can't get some information from the test partition
-     ConfigFlags.Input.RunNumber = [412343]
+     ConfigFlags.Input.RunNumbers = [412343]
      ConfigFlags.Input.ProjectName = 'data23_13p6TeV'
      ## ERROR Missing ROBFragment with ID 0x760001 requested ATR-24151 13 Oct 2021 lshi
      ConfigFlags.Trigger.L1.doMuon=False;

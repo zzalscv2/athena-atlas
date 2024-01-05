@@ -194,8 +194,8 @@ def printRecoFlags(flags):
 
 
 def recoRunArgsToFlags(runArgs, flags):
-    if hasattr(runArgs, "RunNumber"):
-        flags.Input.RunNumber = runArgs.RunNumber
+    if hasattr(runArgs, "runNumber") and not flags.Input.isMC and runArgs.runNumber not in flags.Input.RunNumbers:
+        flags.Input.RunNumbers = [runArgs.runNumber]
         flags.Input.OverrideRunNumber = True
 
     if hasattr(runArgs, "projectName"):

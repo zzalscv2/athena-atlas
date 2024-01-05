@@ -64,7 +64,7 @@ def TileTMDBMonitoringConfig(flags, **kwargs):
     for k, v in kwargs.items():
         setattr(tileTMDBMonAlg, k, v)
 
-    run = str(flags.Input.RunNumber[0])
+    run = str(flags.Input.RunNumbers[0])
 
     # Configure histogram with TileTMDBMonAlg algorithm execution time
     executeTimeGroup = helper.addGroup(tileTMDBMonAlg, 'TileTMDBMonExecuteTime', 'Tile/')
