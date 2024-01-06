@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // =================================================================================
@@ -45,7 +45,6 @@ CaloRingsBuilder::CaloRingsBuilder(const std::string& type,
     m_nRingSets(0)
 {
   declareInterface<ICaloRingsBuilder>(this);
-  declareProperty("doTransverseEnergy", m_doTransverseEnergy, "True for build features with cell ET. False for to use raw energy.");
 }
 
 // =====================================================================================
