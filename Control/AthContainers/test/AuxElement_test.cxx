@@ -12,6 +12,7 @@
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/exceptions.h"
+#include "CxxUtils/copy_bounded.h"
 #include "TestTools/expect_exception.h"
 #include <iostream>
 #include <cassert>
@@ -175,6 +176,17 @@ void test1()
   assert (ftyp1.isAvailable(b));
   assert (ityp1.isAvailableWritable(b));
   assert (ftyp1.isAvailableWritable(b));
+
+  {
+    // Copying between aux var span and vector.
+    std::vector<int> ityp1_vec;
+    ityp1_vec.resize (v.size_v());
+    CxxUtils::copy_bounded (ityp1.getDataSpan(v), ityp1_vec);
+    assert (ityp1_vec[5] == 1);
+    ityp1_vec[3] = 10;
+    CxxUtils::copy_bounded (ityp1_vec, ityp1.getDataSpan(v));
+    assert (ityp1(v, 3) == 10);
+  }
 
   const SG::AuxElement& cb = b;
   assert (ityp1(cb) == 1);
