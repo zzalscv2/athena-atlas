@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Compatibility layer allowing to convert between new (as of 2020) Gaudi Configurable2
 # and old Configurable classes
@@ -50,7 +50,8 @@ def _setProperties( dest, src, indent="" ):
         if "PrivateToolHandleArray" in propType:
             setattr( dest, pname,
                      [conf2toConfigurable( tool, indent=_indent( indent ),
-                                           parent = f"{src.getName()}.{pname}" ) for tool in pvalue] )
+                                           parent = f"{src.getName()}.{pname}",
+                                           propType = propType ) for tool in pvalue] )
             _log.debug( "%sSetting private tool array property %s of %s",
                         indent, pname, dest.name() )
 
@@ -67,7 +68,8 @@ def _setProperties( dest, src, indent="" ):
             if pvalue is not None:
                 setattr( dest, pname,
                          conf2toConfigurable( pvalue, indent=_indent( indent ),
-                                              parent = f"{src.getName()}.{pname}" ) )
+                                              parent = f"{src.getName()}.{pname}",
+                                              propType = propType ) )
             else:
                 setattr( dest, pname, pvalue )
 
@@ -114,7 +116,7 @@ def _mergeSequences( currentConfigurableSeq, conf2Sequence, _log, indent="" ):
                             _indent( indent ),  el.getFullJobOptName(), sequence.name() )
 
 
-def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppressDupes=False ):
+def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppressDupes=False, propType="" ):
     """
     Method converts from Conf2 ( comp argument ) to old Configurable
     If the Configurable of the same name exists, the properties merging process is invoked
@@ -127,7 +129,7 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
         return comp
 
     if isinstance(comp, str):
-        if comp:  # warning for non-empty string
+        if comp and 'ServiceHandle' not in propType:  # warning for non-empty string
             _log.warning( "%sComponent '%s' in '%s' is of type string, no conversion, "
                           "some properties possibly not set?", indent, comp, parent)
         return comp
@@ -239,10 +241,12 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
                 oldCset = set(toolDict); newCset = set(newCdict)
                 _log.debug('Private tool property names? %s %s', oldCset, newCset)
                 if ( not (oldCset == newCset) ):
-                    _log.warning('%s PrivateToolHandleArray %s of %s does not have the same named components',indent, pname, conf1.getFullJobOptName() )
-                    _log.warning('%s Old (conf1) %s for %s',indent, sorted(oldCset), conf1.getFullJobOptName())
-                    _log.warning('%s New (conf2) %s for %s',indent, sorted(newCset), conf2.getFullJobOptName())
-                    _log.warning('%s Will try to merge them, but this might go wrong!',indent)
+                    # This is allowed, and happens normally in a number of
+                    # cases.  Don't warn by default here.
+                    _log.debug('%s PrivateToolHandleArray %s of %s does not have the same named components',indent, pname, conf1.getFullJobOptName() )
+                    _log.debug('%s Old (conf1) %s for %s',indent, sorted(oldCset), conf1.getFullJobOptName())
+                    _log.debug('%s New (conf2) %s for %s',indent, sorted(newCset), conf2.getFullJobOptName())
+                    _log.debug('%s Will try to merge them, but this might go wrong!',indent)
                 for oldC in oldCset & newCset:
                     _areSettingsSame( toolDict[oldC], newCdict[oldC], _indent(indent),servicesOfThisCA)
 
