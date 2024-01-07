@@ -2337,6 +2337,224 @@ void testCheckCrestVersion2() {
   }
 }
 
+void testConstructor() {
+  std::cout << std::endl << "test: testConstructor" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+}
+
+
+void testRemoveTagFromGlobalTagMap(const std::string& global_tag){
+  std::cout << std::endl << "test: removeTagFromGlobalTagMap" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  try{
+    nlohmann::json tagMap = myCrestClient.findGlobalTagMap(global_tag);
+    std::cout << std::endl << "test: GlobalTagMap (initial) = "
+              << tagMap.dump(4) << std::endl;
+
+    int n = tagMap.size();
+    std::cout << n << " tags will be deleted:\n";   
+
+
+    for (int i = 0; i < n; i++){
+      nlohmann::json j = tagMap[i];
+
+      std::string tag = "";
+      std::string label = "";
+
+      auto subjectIdIter1 = j.find("tagName");
+      if (subjectIdIter1 != j.end()){
+	std::string tag = j["tagName"];
+	std::cout << "tag name = " << tag << std::endl;
+     }
+
+      auto subjectIdIter2 = j.find("label");
+      if (subjectIdIter2 != j.end()){
+	label = j["label"];
+	std::cout << "label = " << label << std::endl;
+     }
+
+     try{
+	myCrestClient.removeTagFromGlobalTagMap(global_tag,tag,label);
+	std::cout << tag << " removed.\n"; 
+     }
+     catch (const std::exception& e) {
+        std::cout << std::endl << "Cannot remove tag " << tag << std::endl;
+        std::cout << e.what() << std::endl;
+     } // try
+    } // for
+
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: findGlobalTagMap (failed)" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
+
+  // Result:
+  try{
+    nlohmann::json tagMap = myCrestClient.findGlobalTagMap(global_tag);
+    std::cout << std::endl << "test: GlobalTagMap (result) = "
+              << tagMap.dump(4) << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: tRemoveTagFromGlobalTagMap (failed)" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
+
+}
+
+void testStoreBatchPayloadsFiles(const std::string& tagname) {
+  std::cout << std::endl << "test: storeBatchPayloadsFiles" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  uint64_t endtime = 200;
+  std::string d1 = "\"" + myCrestClient.getDateAndTime() + "_A\"";
+  std::string d2 = "\"" + myCrestClient.getDateAndTime() + "_B\"";
+
+  std::string file1 = "/tmp/mvg01.txt";
+  std::string file2 = "/tmp/mvg02.txt";
+
+  std::ofstream out1;
+  out1.open(file1);
+  if (out1.is_open()){
+        out1 << d1;
+  }
+  out1.close(); 
+
+  std::ofstream out2;
+  out2.open(file2); 
+  if (out2.is_open()){
+        out2 << d2;
+  }
+  out2.close(); 
+
+  d1 = "file://" + file1;
+  d2 = "file://" + file2;
+
+  std::string str = "[{\"data\":\"" + d1 + "\",\"since\":100},{\"data\":\"" + d2 + "\",\"since\":150}]";
+  nlohmann::json js = myCrestClient.getJson(str);
+
+  std::cout << "json = " << js.dump(4) << std::endl;
+
+  try {
+    myCrestClient.storeBatchPayloadsFiles(tagname, endtime, js);
+    std::cout << std::endl << "test: storeBatchPayloadsFiles (success) " << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: storeBatchPayloadsFiles (failed)" << std::endl;
+    std::cerr << e.what() << std::endl;
+  }
+}
+
+
+void testStoreData(const std::string& tagname) {
+  std::cout << std::endl << "test: storeData" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  uint64_t endtime = 200;
+  uint64_t since = 100;
+  std::string d1 = "\"" + myCrestClient.getDateAndTime() + "_A\"";
+
+  std::string file = "/tmp/mvg01.txt";
+
+  std::ofstream out1;
+  out1.open(file);
+  if (out1.is_open()){
+        out1 << d1;
+  }
+  out1.close(); 
+
+  try {
+    myCrestClient.storeData(tagname, endtime, since, file);
+    std::cout << std::endl << "test: storeData (success) " << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: storeData (failed)" << std::endl;
+    std::cerr << e.what() << std::endl;
+  }
+}
+
+void testStoreDataArray(const std::string& tagname) {
+  std::cout << std::endl << "test: storeDataArray" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  uint64_t endtime = 200;
+  uint64_t since1 = 100;
+  uint64_t since2 = 150;
+  std::string d1 = "\"" + myCrestClient.getDateAndTime() + "_A\"";
+  std::string d2 = "\"" + myCrestClient.getDateAndTime() + "_B\"";
+
+  std::string file1 = "/tmp/mvg01.txt";
+  std::string file2 = "/tmp/mvg02.txt";
+
+  std::map<uint64_t, std::string> data;
+
+  std::ofstream out1;
+  out1.open(file1);
+  if (out1.is_open()){
+        out1 << d1;
+  }
+  out1.close(); 
+
+  std::ofstream out2;
+  out2.open(file2); 
+  if (out2.is_open()){
+        out2 << d2;
+  }
+  out2.close(); 
+
+  data[since1] = file1;
+  data[since2] = file2;
+
+  try {
+    myCrestClient.storeDataArray(tagname, endtime, data);
+    std::cout << std::endl << "test: storeDataArray (success) " << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: storeDataArray (failed)" << std::endl;
+    std::cerr << e.what() << std::endl;
+  }
+}
+
+
+void testCreateGlobalTagMap2(const std::string& globaltag, const std::string& tagname) {
+  std::cout << std::endl << "test: createGlobalTagMap" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  nlohmann::json js =
+  {
+    {"globalTagName", globaltag},
+    {"record", "testing3"},
+    {"label", "test3"},
+    {"tagName", tagname}
+  };
+
+  try{
+    myCrestClient.createGlobalTagMap(js);
+    std::cout << std::endl << "test: createGlobalTagMap (success) " << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: createGlobalTagMap (failed)" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
+}
+
+void testSelectGroups2(const std::string& tagname, int groupsize) {
+  std::cout << std::endl << "test: selectGroups2" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  try{
+    nlohmann::json tag_info = myCrestClient.selectGroups(tagname, groupsize);
+    std::cout << std::endl << "test: selectGroups2 (result) =" << std::endl;
+    std::cout << tag_info.dump(4) << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: selectGroups2 (failed)" << std::endl;
+    std::cerr << e.what() << std::endl;
+  }
+}
+
 
 int main(int argc, char* argv[]) {
   if (argc == 2) {
@@ -2400,7 +2618,7 @@ int main(int argc, char* argv[]) {
   } else {
     std::cout << "CREST Server path not found" << std::endl;
     std::cout << "Please, run this program with a server path:" << std::endl;
-    std::cout << "crest_example http://crest-01.cern.ch:8090" << std::endl;
+    std::cout << "crest_example http://crest-undertow-api.web.cern.ch" << std::endl;
   }
   std::cout << "Test ended" << std::endl;
   return 0;
