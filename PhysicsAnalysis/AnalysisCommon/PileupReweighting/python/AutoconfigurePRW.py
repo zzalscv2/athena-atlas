@@ -27,13 +27,16 @@ def getLumicalcFiles(campaign):
             'GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root'
         ],
         Campaign.MC21a: [
-            'GoodRunsLists/data22_13p6TeV/20220902/ilumicalc_histograms_None_430536-430648_OflLumi-Run3-001.root'
+            'GoodRunsLists/data22_13p6TeV/20230207/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-003.root'
         ],
         Campaign.MC23a: [
-            'GoodRunsLists/data22_13p6TeV/20220902/ilumicalc_histograms_None_430536-430648_OflLumi-Run3-001.root'
+            'GoodRunsLists/data22_13p6TeV/20230207/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-003.root'
         ],
         Campaign.MC23c: [
-            'GoodRunsLists/data23_13p6TeV/20230712/ilumicalc_histograms_None_451587-454322_OflLumi-Run3-003.root'
+            'GoodRunsLists/data23_13p6TeV/20230828/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-003.root'
+        ],
+        Campaign.MC23d: [
+            'GoodRunsLists/data23_13p6TeV/20230828/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-003.root'
         ]
     }
 
@@ -54,8 +57,16 @@ def actualMuFiles(campaign):
         list.append(
             'GoodRunsLists/data18_13TeV/20190318/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root'
         )
+    elif campaign in [Campaign.MC21a, Campaign.MC23a]:
+        list.append(
+            'GoodRunsLists/data22_13p6TeV/20230207/purw.actualMu.2022.root'
+        )
+    elif campaign in [Campaign.MC23c, Campaign.MC23d]:
+        list.append(
+            'GoodRunsLists/data23_13p6TeV/20230828/purw.actualMu.2023.root'
+        )
 
-    if campaign in [Campaign.MC16d, Campaign.MC20d, Campaign.MC16e, Campaign.MC20e]:
+    if campaign in [Campaign.MC16d, Campaign.MC20d, Campaign.MC16e, Campaign.MC20e, Campaign.MC21a, Campaign.MC23a, Campaign.MC23c, Campaign.MC23d]:
         assert(len(list) == 1)
     else:
         assert(len(list) == 0)
@@ -89,6 +100,10 @@ def defaultConfigFiles(campaign):
     elif campaign in [Campaign.MC23c]:
         list.append(
             'PileupReweighting/mc23_common/mc23c.450000.physlite.prw.v1.root'
+        )
+    elif campaign in [Campaign.MC23d]:
+        list.append(
+            'PileupReweighting/mc23_common/mc23d.450000.physlite.prw.v1.root'
         )
     else:
         raise ValueError(f'Unsupported campaign {campaign}')
