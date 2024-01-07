@@ -7,8 +7,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
 from AthenaConfiguration.Enums import LHCPeriod
 
-from GeoModelSvc.GeoModelSvcConf import GeoModelSvc
-
 from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
 from OutputStreamAthenaPool.OutputStreamConfig import addToESD
 
@@ -302,10 +300,11 @@ if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
-    # This appears to be needed for calibration data (standalone), but is not working at present
-    GeoModelSvc.AtlasVersion = "ATLAS-R3S-2021-03-00-00"
-
     flags = initConfigFlags()
+
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
+
     flags.Scheduler.CheckDependencies = True
     flags.Scheduler.ShowDataDeps = True
     flags.Scheduler.ShowDataFlow = True
