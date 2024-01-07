@@ -35,9 +35,10 @@
   <class name="std::vector<LArShapeP>"/>
   <class name="std::vector<std::pair<unsigned int, LArShapeP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArShapeP> > >"/>
-  <class pattern="*iterator<const*LArShapeP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArShapeP*"/>
 
   <!-- LArTdriftP -->
+
   <class name="LArTdriftComplete" />
   <!-- picked up through iterator pattern below. -->
   <!-- <class name="LArTdriftP" /> -->
@@ -59,7 +60,7 @@
   <class name="std::vector<LArTdriftP>"/>
   <class name="std::vector<std::pair<unsigned int, LArTdriftP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArTdriftP> > >"/>
-  <class pattern="*iterator<const*LArTdriftP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArTdriftP*"/>
 
 
   <!-- LArRinjP -->
@@ -84,7 +85,7 @@
   <class name="std::vector<LArRinjP>"/>
   <class name="std::vector<std::pair<unsigned int, LArRinjP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArRinjP> > >"/>
-  <class pattern="*iterator<const*LArRinjP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArRinjP*"/>
 
   <!-- LArCableLengthP -->
   <class name="LArCableLengthComplete" />
@@ -108,7 +109,7 @@
   <class name="std::vector<LArCableLengthP>"/>
   <class name="std::vector<std::pair<unsigned int, LArCableLengthP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArCableLengthP> > >"/>
-  <class pattern="*iterator<const*LArCableLengthP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArCableLengthP*"/>
 
   <!-- LArCableAttenuationP -->
   <class name="LArCableAttenuationComplete" />
@@ -132,7 +133,7 @@
   <class name="std::vector<LArCableAttenuationP>"/>
   <class name="std::vector<std::pair<unsigned int, LArCableAttenuationP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArCableAttenuationP> > >"/>
-  <class pattern="*iterator<const*LArCableAttenuationP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArCableAttenuationP*"/>
 
   <!-- LArTshaperP -->
   <class name="LArTshaperComplete" />
@@ -156,7 +157,7 @@
   <class name="std::vector<LArTshaperP>"/>
   <class name="std::vector<std::pair<unsigned int, LArTshaperP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArTshaperP> > >"/>
-  <class pattern="*iterator<const*LArTshaperP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArTshaperP*"/>
 
   <!-- LArOFCBinP -->
   <class name="LArOFCBinComplete" />
@@ -180,7 +181,7 @@
   <class name="std::vector<LArOFCBinP>"/>
   <class name="std::vector<std::pair<unsigned int, LArOFCBinP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArOFCBinP> > >"/>
-  <class pattern="*iterator<const*LArOFCBinP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArOFCBinP*"/>
   
   <!-- LArEMEC_CphiP -->
   <class name="LArEMEC_CphiComplete" />
@@ -204,7 +205,7 @@
   <class name="std::vector<LArEMEC_CphiP>"/>
   <class name="std::vector<std::pair<unsigned int, LArEMEC_CphiP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArEMEC_CphiP> > >"/>
-  <class pattern="*iterator<const*LArEMEC_CphiP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArEMEC_CphiP*"/>
   
   <!-- LArEMEC_HValphaP -->
   <class name="LArEMEC_HValphaComplete" />
@@ -228,7 +229,7 @@
   <class name="std::vector<LArEMEC_HValphaP>"/>
   <class name="std::vector<std::pair<unsigned int, LArEMEC_HValphaP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArEMEC_HValphaP> > >"/>
-  <class pattern="*iterator<const*LArEMEC_HValphaP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArEMEC_HValphaP*"/>
 
   <!-- LArEMEC_HVbetaP -->
   <class name="LArEMEC_HVbetaComplete" />
@@ -252,7 +253,7 @@
   <class name="std::vector<LArEMEC_HVbetaP>"/>
   <class name="std::vector<std::pair<unsigned int, LArEMEC_HVbetaP> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArEMEC_HVbetaP> > >"/>
-  <class pattern="*iterator<const*LArEMEC_HVbetaP*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArEMEC_HVbetaP*"/>
 
 
   <!-- LArCaliWave -->
@@ -280,7 +281,7 @@
   <class name="std::vector<LArCaliWaveVec>"/>
   <class name="std::vector<std::pair<unsigned int, LArCaliWaveVec> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArCaliWaveVec> > >"/>
-  <class pattern="*iterator<const*LArCaliWaveVec*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArCaliWaveVec*"/>
 
   <!-- LArPhysWave -->
   <!-- picked up through iterator pattern below. -->
@@ -305,7 +306,7 @@
   <class name="std::vector<LArPhysWave>"/>
   <class name="std::vector<std::pair<unsigned int, LArPhysWave> >"/>
   <class name="std::vector<std::pair<unsigned int, std::vector<LArPhysWave> > >"/>
-  <class pattern="*iterator<const*LArPhysWave*"/>
+  <class pattern="__gnu_cxx::__normal_iterator<const LArPhysWave*"/>
 
 
   <!-- Other 'old' waves -->
@@ -398,6 +399,7 @@
     <class pattern="*_Iter_base*"/>
     <class pattern="std::allocator*"/>
     <class pattern="*initializer_list*"/>
+    <class pattern="*iterator_traits*"/>
 
   </exclusion>
 
