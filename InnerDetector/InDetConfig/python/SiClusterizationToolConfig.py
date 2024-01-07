@@ -14,7 +14,11 @@ def ClusterMakerToolCfg(flags, name="InDetClusterMakerTool", **kwargs):
     # PixelChargeCalibCondData & PixelOfflineCalibData
     from PixelConditionsAlgorithms.PixelConditionsConfig import (
         PixelChargeCalibCondCfg, PixelOfflineCalibCondAlgCfg)
-    acc.merge(PixelChargeCalibCondCfg(flags))
+    if ('SCT' in flags.Digitization.DoFastDigi and
+        'Pixel' not in flags.Digitization.DoFastDigi):
+        acc.merge(PixelChargeCalibCondCfg(flags, ReadKey=""))
+    else:
+        acc.merge(PixelChargeCalibCondCfg(flags))
     acc.merge(PixelOfflineCalibCondAlgCfg(flags))
 
     from PixelReadoutGeometry.PixelReadoutGeometryConfig import (
