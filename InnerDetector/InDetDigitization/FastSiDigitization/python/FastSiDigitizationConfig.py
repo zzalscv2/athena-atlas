@@ -29,40 +29,10 @@ def FastSCT_LastXing():
     return 0
 
 
-# TODO This is very similar to ClusterMakerToolCfg in InDetConfig.SiClusterizationToolConfig - consider merging?
-def FastClusterMakerToolCfg(flags, name="FastClusterMakerTool", **kwargs) :
-    acc = ComponentAccumulator()
-    
-    # This directly needs the following Conditions data:
-    # PixelChargeCalibCondData & PixelOfflineCalibData
-    from PixelConditionsAlgorithms.PixelConditionsConfig import (
-        PixelChargeCalibCondCfg, PixelOfflineCalibCondAlgCfg)
-    if ('SCT' in flags.Digitization.DoFastDigi and
-        'Pixel' not in flags.Digitization.DoFastDigi):
-        acc.merge(PixelChargeCalibCondCfg(flags, ReadKey=""))
-    else:
-        acc.merge(PixelChargeCalibCondCfg(flags))
-    acc.merge(PixelOfflineCalibCondAlgCfg(flags))
-
-    from PixelReadoutGeometry.PixelReadoutGeometryConfig import PixelReadoutManagerCfg
-    acc.merge(PixelReadoutManagerCfg(flags))
-
-    from SiLorentzAngleTool.PixelLorentzAngleConfig import PixelLorentzAngleToolCfg
-    PixelLorentzAngleTool = acc.popToolsAndMerge(PixelLorentzAngleToolCfg(flags))
-    from SiLorentzAngleTool.SCT_LorentzAngleConfig import SCT_LorentzAngleToolCfg
-    SCTLorentzAngleTool = acc.popToolsAndMerge( SCT_LorentzAngleToolCfg(flags) )
-
-    kwargs.setdefault("PixelLorentzAngleTool", PixelLorentzAngleTool)
-    kwargs.setdefault("SCTLorentzAngleTool", SCTLorentzAngleTool)
-
-    InDetClusterMakerTool = CompFactory.InDet.ClusterMakerTool(name, **kwargs)
-    acc.setPrivateTools(InDetClusterMakerTool)
-    return acc
-
-
 def commonPixelFastDigitizationCfg(flags, name,**kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("ClusterMaker", acc.popToolsAndMerge(FastClusterMakerToolCfg(flags)))
+    from InDetConfig.SiClusterizationToolConfig import ClusterMakerToolCfg
+    kwargs.setdefault("ClusterMaker", acc.popToolsAndMerge(ClusterMakerToolCfg(flags)))
 
     from RngComps.RandomServices import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
@@ -84,7 +54,8 @@ def commonPixelFastDigitizationCfg(flags, name,**kwargs):
 
 def commonSCT_FastDigitizationCfg(flags, name,**kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("ClusterMaker", acc.popToolsAndMerge(FastClusterMakerToolCfg(flags)))
+    from InDetConfig.SiClusterizationToolConfig import ClusterMakerToolCfg
+    kwargs.setdefault("ClusterMaker", acc.popToolsAndMerge(ClusterMakerToolCfg(flags)))
 
     from RngComps.RandomServices import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
