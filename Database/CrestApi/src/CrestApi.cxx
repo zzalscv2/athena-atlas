@@ -22,6 +22,8 @@
 #include <cstdio>
 #include <ctime>
 
+#include <regex>
+
 namespace Crest {
   CrestClient::CrestClient(bool rewriteIfExists, const std::string& root_folder) : m_mode(FILESYSTEM_MODE),
     m_root_folder(root_folder), m_isRewrite(rewriteIfExists) {
@@ -39,6 +41,7 @@ namespace Crest {
     if (check_version == true) {
       checkCrestVersion2();
     }
+    getProxyPath();
   }
 
   CrestClient::CrestClient(std::string_view url, bool check_version) : m_mode(SERVER_MODE) {
@@ -77,6 +80,7 @@ namespace Crest {
     if (check_version == true) {
       checkCrestVersion2();
     }
+    getProxyPath();
   }
 
   CrestClient::~CrestClient() {
@@ -165,12 +169,19 @@ namespace Crest {
 
     checkFsException(method_name);
 
+    std::string tagname = name;
+
+    if (tagname.find("%25") == std::string::npos) {
+      replaceSymbols(tagname, "%", "%25");
+      replaceSymbols(tagname, "*", "%25");
+    }
+
     std::string current_path = m_PATH;
     current_path += s_TAG_PATH;
 
     if (!name.empty()) {
       std::string nameString = "?name=";
-      nameString += name;
+      nameString += tagname;
       current_path += nameString;
       current_path += "&size=";
       current_path += std::to_string(size);
@@ -796,11 +807,18 @@ namespace Crest {
 
     checkFsException(method_name);
 
+    std::string tagname = name;
+
+    if (tagname.find("%25") == std::string::npos) {
+      replaceSymbols(tagname, "%", "%25");
+      replaceSymbols(tagname, "*", "%25");
+    }
+
     std::string current_path = m_PATH;
     current_path += s_GLOBALTAG_PATH;
     if (!name.empty()) {
       std::string nameString = "?name=";
-      nameString += name;
+      nameString += tagname;
       current_path += nameString;
       current_path += "&size=";
       current_path += std::to_string(size);
@@ -1240,7 +1258,7 @@ namespace Crest {
     nlohmann::json data = nlohmann::json::array();
     nlohmann::json itemD =
     {
-      {"payloadHash", js},
+      {"data", js},
       {"since", since}
     };
 
@@ -1287,6 +1305,16 @@ namespace Crest {
       std::string url = make_url(sanitisedPath);
       std::string s;
       std::cout << "cURL request to " << url << std::endl;
+
+     if (m_CREST_PROXY) {
+       // The environment variable exists, and 'socksProxy' now contains its value
+       std::cout << "SOCKS proxy: " << m_CREST_PROXY << std::endl;
+       // Set the proxy type (replace with your proxy type details)
+       curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+
+       // Set the proxy address and port (replace with your SOCKS proxy details)
+       curl_easy_setopt(curl, CURLOPT_PROXY, m_CREST_PROXY);
+      }
 
       curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
       if (js.is_null()) {
@@ -1491,6 +1519,15 @@ namespace Crest {
       std::string url = make_url(current_path);
       std::string s;
 
+      if (m_CREST_PROXY) {
+       // The environment variable exists, and 'socksProxy' now contains its value
+       std::cout << "SOCKS proxy: " << m_CREST_PROXY << std::endl;
+       // Set the proxy type (replace with your proxy type details)
+       curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+
+       // Set the proxy address and port (replace with your SOCKS proxy details)
+       curl_easy_setopt(curl, CURLOPT_PROXY, m_CREST_PROXY);
+      }
 
       // First set the URL that is about to receive our POST. This URL can
       // just as well be a https:
@@ -1537,7 +1574,6 @@ namespace Crest {
 #if LIBCURL_VERSION_MAJOR < 8
       curl_formadd(&formpost,
                    &lastptr,
-                   // CURLFORM_COPYNAME, "iovsetupload",
                    CURLFORM_COPYNAME, "storeset",
                    CURLFORM_COPYCONTENTS, js.c_str(),
                    CURLFORM_CONTENTTYPE, "application/json",
@@ -2859,6 +2895,270 @@ namespace Crest {
 
     if (clientVersion != serverVersion) {
        throw std::runtime_error("ERROR in CrestClient::checkCrestVersion: CrestApi version \"" + client + "\" does not correspond to the server version \"" + server + "\".");
+    }
+  }
+
+
+   void CrestClient::removeTagFromGlobalTagMap(const std::string& global_tag,const std::string& tag,const std::string& label){
+
+    const char* method_name = "CrestClient::removeTagFromGlobalTagMap";
+
+    checkFsException(method_name);
+
+    std::string current_path = m_PATH;
+    current_path += s_GLOBALTAG_MAP_PATH;
+    current_path += '/';
+    current_path += global_tag;
+    current_path += '?';
+    current_path += "tagname=";
+    current_path += tag;
+    current_path += "&label=";
+    current_path += label;
+
+    std::string retv;
+
+    nlohmann::json js = nullptr;
+
+    retv = performRequest(current_path, DELETE, js, method_name);
+  }
+
+  void CrestClient::storeBatchPayloadsFiles(const std::string& tag_name, uint64_t endtime, nlohmann::json& js) {
+    const char* method_name = "CrestClient::storeBatchPayloads";
+
+    if (m_mode == FILESYSTEM_MODE) {
+      storeBatchPayloadsFs(tag_name, js);
+      return;
+    }
+    if (!js.is_array()) {
+      throw std::runtime_error("ERROR in " + std::string(method_name) + " JSON has wrong type (must be array)");
+    }
+
+    nlohmann::json jsObj = {};
+    jsObj["datatype"] = "iovs";
+    jsObj["format"] = "StoreSetDto";
+    jsObj["size"] = js.size();
+    jsObj["resources"] = js;
+    std::string str = jsObj.dump();
+    std::string retv = storeBatchPayloadFilesRequest(tag_name, endtime, str);
+
+    nlohmann::json respond = getJson(retv, method_name);
+  }
+
+
+  std::string CrestClient::storeBatchPayloadFilesRequest(const std::string& tag, uint64_t endtime, const std::string& js) {
+    std::string current_path = m_PATH;
+    current_path += s_PAYLOAD_PATH;
+
+    nlohmann::json json0 = getJson(js);
+    nlohmann::json resources = nullptr;
+    
+    auto subjectIdIter1 = json0.find("resources");
+    if (subjectIdIter1 != json0.end()){
+     resources = json0["resources"];
+    }
+
+    int partN = resources.size();
+
+    CURL* curl;
+    CURLcode res;
+
+    // get a curl handle
+
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    curl = curl_easy_init();
+
+    struct curl_slist* headers = NULL;
+    if (curl) {
+      std::string url = make_url(current_path);
+      std::string s;
+
+     if (m_CREST_PROXY) {
+       // The environment variable exists, and 'socksProxy' now contains its value
+       std::cout << "SOCKS proxy: " << m_CREST_PROXY << std::endl;
+       // Set the proxy type (replace with your proxy type details)
+       curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+
+       // Set the proxy address and port (replace with your SOCKS proxy details)
+       curl_easy_setopt(curl, CURLOPT_PROXY, m_CREST_PROXY);
+      }
+
+      // First set the URL that is about to receive our POST. This URL can
+      // just as well be a https:
+      // URL if that is what should receive the data.
+
+      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+      headers = curl_slist_append(headers, "X-Crest-PayloadFormat: FILE"); // MvG
+      headers = curl_slist_append(headers, "Accept: */*");
+      headers = curl_slist_append(headers, "Content-Type:  multipart/form-data");
+
+      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+      // Create the form  for new version
+#if LIBCURL_VERSION_MAJOR < 8
+      struct curl_httppost* formpost = NULL;
+      struct curl_httppost* lastptr = NULL;
+      curl_formadd(&formpost,
+                   &lastptr,
+                   CURLFORM_COPYNAME, "tag",
+                   CURLFORM_COPYCONTENTS, tag.c_str(),
+                   CURLFORM_END);
+#else
+      curl_mime* mime = curl_mime_init(curl);
+      {
+        curl_mimepart* part = curl_mime_addpart(mime);
+        curl_mime_name(part, "tag");
+        curl_mime_data(part, tag.c_str(), tag.size());
+      }
+#endif
+      if (endtime != 0) {
+#if LIBCURL_VERSION_MAJOR < 8
+        curl_formadd(&formpost,
+                     &lastptr,
+                     CURLFORM_COPYNAME, "endtime",
+                     CURLFORM_COPYCONTENTS, std::to_string(endtime).c_str(),
+                     CURLFORM_END);
+#else
+        std::string endtime_s = std::to_string(endtime);
+        curl_mimepart* part = curl_mime_addpart(mime);
+        curl_mime_name(part, "endtime");
+        curl_mime_data(part, endtime_s.c_str(), endtime_s.size());
+#endif
+      }
+#if LIBCURL_VERSION_MAJOR < 8
+      curl_formadd(&formpost,
+                   &lastptr,
+                   CURLFORM_COPYNAME, "storeset",
+                   CURLFORM_COPYCONTENTS, js.c_str(),
+                   CURLFORM_END);
+
+      for (int i = 0; i < partN; i++){
+        nlohmann::json element = resources[i];
+        std::string file_param;
+    
+        auto subjectIdIter1 = element.find("data");
+        if (subjectIdIter1 != element.end()){
+          file_param  = element["data"];
+        }
+
+        int found_dots = file_param.find_first_of(':');
+        int word_size = file_param.size();
+        std::string data_file = file_param.substr(found_dots + 3, word_size);
+
+       curl_formadd(&formpost, &lastptr,
+	 CURLFORM_COPYNAME, "files",
+	 CURLFORM_FILE, data_file.c_str(),
+         CURLFORM_END);
+
+      } // i
+
+      curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+#else
+      {
+        curl_mimepart* part = curl_mime_addpart(mime);
+        curl_mime_name(part, "storeset");
+        curl_mime_data(part, js.c_str(), js.size());
+      }
+
+      for (int i = 0; i < partN; i++){
+        nlohmann::json element = resources[i];
+        std::string file_param;
+    
+        auto subjectIdIter1 = element.find("data");
+        if (subjectIdIter1 != element.end()){
+          file_param  = element["data"];
+        }
+
+        int found_dots = file_param.find_first_of(':');
+        int word_size = file_param.size();
+        std::string data_file = file_param.substr(found_dots + 3, word_size);
+ 
+	{ 
+        curl_mimepart* part = curl_mime_addpart(mime);
+        curl_mime_name(part, "files");
+        curl_mime_filedata(part, data_file.c_str());
+        }
+
+      } // i
+      
+      curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+#endif
+
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_StdString);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
+
+      // Perform the request, res will get the return code
+      res = curl_easy_perform(curl);
+
+      // data to check the errors in the server response:
+      long response_code;
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+      const char* method_name = "CrestClient::storeBatchPayloads";
+
+      /* always cleanup */
+      curl_easy_cleanup(curl);
+#if LIBCURL_VERSION_MAJOR < 8
+      curl_formfree(formpost);
+      curl_slist_free_all(headers);
+#else
+      curl_slist_free_all(headers);
+      curl_mime_free(mime);
+#endif
+
+      curl_global_cleanup();
+
+      // error checking in the server response:
+      checkResult(res, response_code, s, method_name);
+
+      return s;
+    }
+    std::string mes = "ERROR in CrestClient::storeBatchPayloads";
+    throw std::runtime_error(mes + " | CURL not init");
+  }
+
+  void CrestClient::storeData(const std::string& tag, uint64_t endtime, uint64_t since, const std::string& file){
+    const char* method_name = "CrestClient::storePayloadAsFile";
+    checkFsException(method_name);
+    std::string d = "file://" + file;
+
+    std::string str = "[{\"data\":\"" + d + "\",\"since\":" +  std::to_string(since) + "}]";
+    nlohmann::json js = getJson(str);
+
+    storeBatchPayloadsFiles(tag, endtime, js); 
+  }
+
+  void CrestClient::storeDataArray(const std::string& tag, uint64_t endtime, std::map<uint64_t, std::string> m){
+    nlohmann::json payload_data = nlohmann::json::array();
+
+    std::map<uint64_t, std::string> :: iterator it;
+    for(it=m.begin();it !=m.end();++it){
+      std::string file_name = "file://" + it->second;
+
+      nlohmann::json js_element =
+      {
+        {"since", it->first},
+        {"data", file_name}
+      };
+ 
+      payload_data.push_back(js_element);
+    }
+
+    storeBatchPayloadsFiles(tag, endtime, payload_data);
+  }
+
+  void CrestClient::getProxyPath(){
+    char * val = getenv( m_CREST_PROXY_VAR );
+    if (val != NULL){
+      m_CREST_PROXY = val;
+    }
+  }
+
+  void CrestClient::replaceSymbols(std::string& subject, const std::string& search,
+                          const std::string& replace) {
+    size_t pos = 0;
+    while((pos = subject.find(search, pos)) != std::string::npos) {
+         subject.replace(pos, search.length(), replace);
+         pos += replace.length();
     }
   }
 
