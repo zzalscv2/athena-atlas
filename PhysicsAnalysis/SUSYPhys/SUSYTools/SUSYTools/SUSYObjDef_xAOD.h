@@ -595,6 +595,7 @@ namespace ST {
     std::string m_commonPRWFileMC21a;
     std::string m_commonPRWFileMC23a;
     std::string m_commonPRWFileMC23c;
+    std::string m_commonPRWFileMC23d;
 
     std::vector<std::string> m_prwConfFiles;
     std::vector<std::string> m_prwLcalcFiles;
