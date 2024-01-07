@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NDEBUG
@@ -32,8 +32,9 @@ inline Flex1DProfileHisto * Flex1DProfileHisto::create(unsigned nbins, const TFl
 inline void Flex1DProfileHisto::destroy(Flex1DProfileHisto * h)
 {
   if (h) {
+    unsigned nx = h->getNBins();
     h->~Flex1DProfileHisto();
-    LWPools::release(reinterpret_cast<char*>(h),allocSize(h->getNBins()));
+    LWPools::release(reinterpret_cast<char*>(h),allocSize(nx));
   }
 }
 
