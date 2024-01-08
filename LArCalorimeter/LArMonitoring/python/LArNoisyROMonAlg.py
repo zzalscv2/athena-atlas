@@ -1,26 +1,26 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArNoisyROMonConfig(inputFlags, inKey="", 
+def LArNoisyROMonConfig(flags, inKey="", 
                               NoisyFEBDefStr="(>30 chan with Q>4000)", 
                               MNBTightFEBDefStr="",
                               MNBTight_PsVetoFEBDefStr="",
                               MNBLooseFEBDefStr=""):
 
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'LArNoisyROMonAlgCfg')
+    helper = AthMonitorCfgHelper(flags,'LArNoisyROMonAlgCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    NoisyFEBDefStr="(>"+str(inputFlags.LAr.NoisyRO.BadChanPerFEB)+" chan with Q>"+str(inputFlags.LAr.NoisyRO.CellQuality)+")"
-    MNBTightFEBDefStr="(>"+str(inputFlags.LAr.NoisyRO.MNBTightCut)+" chan with Q>"+str(inputFlags.LAr.NoisyRO.CellQuality)+")"
-    MNBTight_PsVetoFEBDefStr="(>"+str(inputFlags.LAr.NoisyRO.MNBTight_PsVetoCut[0])+" chan with Q>"+str(inputFlags.LAr.NoisyRO.CellQuality)+") + PS veto (<"+str(inputFlags.LAr.NoisyRO.MNBTight_PsVetoCut[1])+" channels)"
-    MNBLooseFEBDefStr="(>"+str(inputFlags.LAr.NoisyRO.MNBLooseCut)+" chan with Q>"+str(inputFlags.LAr.NoisyRO.CellQuality)+")"
+    NoisyFEBDefStr="(>"+str(flags.LAr.NoisyRO.BadChanPerFEB)+" chan with Q>"+str(flags.LAr.NoisyRO.CellQuality)+")"
+    MNBTightFEBDefStr="(>"+str(flags.LAr.NoisyRO.MNBTightCut)+" chan with Q>"+str(flags.LAr.NoisyRO.CellQuality)+")"
+    MNBTight_PsVetoFEBDefStr="(>"+str(flags.LAr.NoisyRO.MNBTight_PsVetoCut[0])+" chan with Q>"+str(flags.LAr.NoisyRO.CellQuality)+") + PS veto (<"+str(flags.LAr.NoisyRO.MNBTight_PsVetoCut[1])+" channels)"
+    MNBLooseFEBDefStr="(>"+str(flags.LAr.NoisyRO.MNBLooseCut)+" chan with Q>"+str(flags.LAr.NoisyRO.CellQuality)+")"
 
-    return LArNoisyROMonConfigCore(helper,CompFactory.LArNoisyROMonAlg, inputFlags, inKey, NoisyFEBDefStr, MNBTightFEBDefStr, MNBTight_PsVetoFEBDefStr, MNBLooseFEBDefStr)
+    return LArNoisyROMonConfigCore(helper,CompFactory.LArNoisyROMonAlg, flags, inKey, NoisyFEBDefStr, MNBTightFEBDefStr, MNBTight_PsVetoFEBDefStr, MNBLooseFEBDefStr)
 
 
-def LArNoisyROMonConfigOld(inputFlags, inKey="", 
+def LArNoisyROMonConfigOld(flags, inKey="", 
                               NoisyFEBDefStr="", 
                               MNBTightFEBDefStr="",
                               MNBTight_PsVetoFEBDefStr="",
@@ -33,15 +33,15 @@ def LArNoisyROMonConfigOld(inputFlags, inKey="",
     MNBLooseFEBDefStr =  '(>'+str(larNoisyROFlags.MNBLooseCut())+' chan with Q>'+str(larNoisyROFlags.CellQualityCut())+')'
     from AthenaMonitoring import AthMonitorCfgHelperOld
     from LArMonitoring.LArMonitoringConf import LArNoisyROMonAlg
-    helper = AthMonitorCfgHelperOld(inputFlags,'LArNoisyROMonAlgOldCfg')
+    helper = AthMonitorCfgHelperOld(flags,'LArNoisyROMonAlgOldCfg')
 
-    LArNoisyROMonConfigCore(helper,LArNoisyROMonAlg, inputFlags, inKey, NoisyFEBDefStr, MNBTightFEBDefStr, MNBTight_PsVetoFEBDefStr, MNBLooseFEBDefStr)
+    LArNoisyROMonConfigCore(helper,LArNoisyROMonAlg, flags, inKey, NoisyFEBDefStr, MNBTightFEBDefStr, MNBTight_PsVetoFEBDefStr, MNBLooseFEBDefStr)
 
     return helper.result()
 
 
 
-def LArNoisyROMonConfigCore(helper,algoinstance,inputFlags, 
+def LArNoisyROMonConfigCore(helper,algoinstance,flags, 
                               inKey="", 
                               NoisyFEBDefStr="(>30 chan with Q>4000)", 
                               MNBTightFEBDefStr="",
@@ -54,8 +54,8 @@ def LArNoisyROMonConfigCore(helper,algoinstance,inputFlags,
        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
        cfg=ComponentAccumulator()
        from LArBadChannelTool.LArBadFebsConfig import LArKnownBadFebCfg, LArKnownMNBFebCfg
-       cfg.merge(LArKnownBadFebCfg(inputFlags))
-       cfg.merge(LArKnownMNBFebCfg(inputFlags))
+       cfg.merge(LArKnownBadFebCfg(flags))
+       cfg.merge(LArKnownMNBFebCfg(flags))
 
     larNoisyROMonAlg = helper.addAlgorithm(algoinstance,'larNoisyROMonAlg')
 
@@ -105,10 +105,10 @@ def LArNoisyROMonConfigCore(helper,algoinstance,inputFlags,
     ]
     doTrigger=False
     if isComponentAccumulatorCfg():
-      if inputFlags.DQ.useTrigger or LArNoisyROMonForceTrigger:
+      if flags.DQ.useTrigger or LArNoisyROMonForceTrigger:
         doTrigger=True
     else:    
-      if inputFlags.doHLTMon or LArNoisyROMonForceTrigger:
+      if flags.doHLTMon or LArNoisyROMonForceTrigger:
         doTrigger=True
 
     if doTrigger:
@@ -277,47 +277,47 @@ if __name__=='__main__':
     from AthenaCommon.Logging import log
     log.setLevel(DEBUG)
 
-
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
     createLArMonConfigFlags()
 
     nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q431/21.0/v1/'
     file = 'myESD.pool.root'
-    ConfigFlags.Input.Files = [nightly+file]
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.DQ.useTrigger = True
+    flags = initConfigFlags()
+    flags.Input.Files = [nightly+file]
+    flags.Input.isMC = False
+    flags.DQ.useTrigger = True
     
-    ConfigFlags.Output.HISTFileName = 'LArNoisyROMonitoringOutput.root'
+    flags.Output.HISTFileName = 'LArNoisyROMonitoringOutput.root'
 
-    ConfigFlags.Exec.OutputLevel=DEBUG
-    ConfigFlags.lock()
+    flags.Exec.OutputLevel=DEBUG
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
     
     # try NoisyRO algo 
     #first geometry
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from TileGeoModel.TileGMConfig import TileGMCfg
-    cfg.merge(LArGMCfg(ConfigFlags))
-    cfg.merge(TileGMCfg(ConfigFlags))
+    cfg.merge(LArGMCfg(flags))
+    cfg.merge(TileGMCfg(flags))
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-    cfg.merge(LArOnOffIdMappingCfg(ConfigFlags))
+    cfg.merge(LArOnOffIdMappingCfg(flags))
     # then NoisyROSummary creator
     from LArCellRec.LArNoisyROSummaryConfig import LArNoisyROSummaryCfg
-    noisyROSumm = LArNoisyROSummaryCfg(ConfigFlags)
+    noisyROSumm = LArNoisyROSummaryCfg(flags)
     noisyROSumm.getEventAlgo("LArNoisyROAlg").OutputKey="LArNoisyROSummary_recomputed"
     cfg.merge(noisyROSumm)
     # then monitoring algo
-    noisemon=LArNoisyROMonConfig(ConfigFlags, inKey="LArNoisyROSummary_recomputed")
+    noisemon=LArNoisyROMonConfig(flags, inKey="LArNoisyROSummary_recomputed")
     cfg.merge(noisemon) 
 
-    ConfigFlags.dump()
+    flags.dump()
     f=open("NoisyROMonMaker.pkl","wb")
     cfg.store(f)
     f.close()
