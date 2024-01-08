@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -28,7 +28,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include "EventPrimitives/EventPrimitivesHelpers.h"
+#include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "TrkExUtils/TrackSurfaceIntersection.h"
 #include "TrkiPatFitterUtils/FitMeasurement.h"

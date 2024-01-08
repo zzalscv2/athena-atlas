@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSystemExtensionTool.h"
 
 #include "EventPrimitives/EventPrimitivesHelpers.h"
+#include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
 #include "MuonCombinedEvent/InDetCandidate.h"
 #include "MuonCombinedEvent/TagBase.h"
 #include "MuonDetDescrUtils/MuonChamberLayerDescription.h"

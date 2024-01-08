@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "AthLinks/ElementLink.h"
-#include "EventPrimitives/EventPrimitivesHelpers.h"
+#include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
 #include "MuonCombinedEvent/InDetCandidate.h"
 #include "MuonCombinedEvent/MuonCandidate.h"
 #include "MuonCombinedEvent/MuonSegmentInfo.h"
