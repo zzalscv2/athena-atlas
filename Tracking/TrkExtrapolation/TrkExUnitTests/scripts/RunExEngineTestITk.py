@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg    
@@ -15,27 +17,30 @@ else:
   MisalignMode = -1
 
 flags = initConfigFlags()
-## Just enable ID for the moment.
+
 flags.Input.isMC             = True
 
 flags.Input.Files = []
 
+#Toggle this to use a local geometry input
 flags.ITk.Geometry.AllLocal = False
+
 if flags.ITk.Geometry.AllLocal:
+  ## Just enable ID for the moment.
   detectors = [
     "ITkPixel",
     "ITkStrip",
     "Bpipe"
   ]
-from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-setupDetectorFlags(flags, detectors, toggle_geometry=True)
-flags.TrackingGeometry.MaterialSource = "Input"
+  from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+  setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
-flags.Detector.GeometryHGTD = False
+  flags.TrackingGeometry.MaterialSource = "Input"
+  flags.Detector.GeometryHGTD = False
 
 from AthenaConfiguration.TestDefaults import defaultGeometryTags
-flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
-flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
+flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
+flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN4-01"
 flags.GeoModel.Align.Dynamic = False
 if(MisalignMode!=-1):
   tag=""

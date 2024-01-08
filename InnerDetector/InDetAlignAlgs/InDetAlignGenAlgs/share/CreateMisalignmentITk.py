@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #####################################################################
 # JobOptions for CreateMisalignAlg which creates a misaligned copy
@@ -78,7 +80,7 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
     acc=MainServicesCfg(flags)
     print ("\n CreateMisalignAlg: Creation of misalignment mode %s: %s \n" % (int(MisalignMode),misalignModeMap.get(int(MisalignMode),'unknown')))
     kwargs.setdefault("ASCIIFilenameBase",outFiles)
-    kwargs.setdefault("SQLiteTag",'MisalignMode_'+str(misalignModeMap.get(int(MisalignMode),'unknown')))
+    kwargs.setdefault("SQLiteTag",'MisalignmentMode_'+str(misalignModeMap.get(int(MisalignMode),'unknown')))
     kwargs.setdefault("MisalignMode",int(MisalignMode))
     kwargs.setdefault("MaxShift",shiftInMicrons)
     kwargs.setdefault("CreateFreshDB",createFreshDB)
