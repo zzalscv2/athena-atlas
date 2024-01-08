@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -104,34 +104,6 @@ TrigTauCluster::TrigTauCluster(const TrigTauCluster* ttc) : TrigCaloCluster((Tri
 	if(m_clusterDetails.isValid())
 	{
 		m_clusterDetails.toIndexedElement(ttc->m_clusterDetails.getStorableObjectRef(), ttc->m_clusterDetails.index());
-	}
-	else
-	{
-		m_clusterDetails.reset();
-	}
-}
-
-TrigTauCluster::TrigTauCluster(const TrigTauCluster& ttc) : TrigCaloCluster((TrigCaloCluster&)ttc),
-	m_EMenergy(ttc.EMenergy()),
-	m_HADenergy(ttc.HADenergy()),
-	m_eCalib(ttc.eCalib()),
-	m_EMRadius2(ttc.EMRadius2()),
-	m_CaloRadius(ttc.CaloRadius()),
-	m_IsoFrac(ttc.IsoFrac()),
-	m_numStripCells(ttc.numStripCells()),
-	m_numTotCells(ttc.numTotCells()),
-	m_stripWidth(ttc.stripWidth()),
-	m_stripWidthOffline(ttc.stripWidthOffline()),
-	m_EMRadius3S(ttc.EMRadius3S()),
-	m_CoreFrac(ttc.CoreFrac()),
-	m_EMFrac(ttc.EMFrac()),
-	m_HadRadius(ttc.HadRadius()),
-	m_valid(false)
-{	
-	//set ElementLink to cluster
-	if(m_clusterDetails.isValid())
-	{
-		m_clusterDetails.toIndexedElement(ttc.m_clusterDetails.getStorableObjectRef(), ttc.m_clusterDetails.index());
 	}
 	else
 	{

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -53,7 +53,6 @@ class ElectronMuonTopoInfo  {
   public:
     ElectronMuonTopoInfo();
     ElectronMuonTopoInfo(int roiWord, float deltaPhi=-1., float deltaR = -1., float invMass = -1., bool el_valid = false, bool oppositeCharge = 0, unsigned short vertexState =0);
-    ElectronMuonTopoInfo(const ElectronMuonTopoInfo& emuTopoInfo);
     
     ~ElectronMuonTopoInfo();
     

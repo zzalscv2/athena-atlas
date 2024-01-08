@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUCLUSTER_H
@@ -43,8 +43,6 @@ public:
 	~TrigTauCluster();
 	/**  Copy Pointer Constructor   */
 	TrigTauCluster(const TrigTauCluster* trigemcluster) ;
-	/**  Copy Reference Constructor   */
-	TrigTauCluster(const TrigTauCluster& trigemcluster) ;
 
 	// Print out variables for Debug
 	/**  Prints out cluster variables to std::cout   */
