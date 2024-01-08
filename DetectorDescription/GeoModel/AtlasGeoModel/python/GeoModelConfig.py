@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -25,6 +25,7 @@ def GeoModelCfg(flags):
 
     gms=CompFactory.GeoModelSvc(AtlasVersion=flags.GeoModel.AtlasVersion,
                                 SQLiteDB=flags.GeoModel.SQLiteDB,
+                                IgnoreTagDifference=flags.GeoModel.IgnoreTagDifference,
                                 SupportedGeometry=int(relversion[0]))
     if flags.Common.ProductionStep == ProductionStep.Simulation:
         ## Protects GeoModelSvc in the simulation from the AlignCallbacks

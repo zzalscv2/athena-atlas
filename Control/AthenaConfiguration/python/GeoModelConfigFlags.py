@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.AutoConfigFlags import GetFileMD, DetDescrInfo
@@ -64,5 +64,7 @@ def createGeoModelConfigFlags(analysis=False):
 
     gcf.addFlag('GeoModel.SQLiteDB','')
                 # Path to persistent GeoModel description file in SQLite format
+
+    gcf.addFlag('GeoModel.IgnoreTagDifference',False)
 
     return gcf
