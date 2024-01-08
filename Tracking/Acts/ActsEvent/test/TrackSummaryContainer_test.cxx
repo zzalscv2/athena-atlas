@@ -9,7 +9,7 @@
 #include <Acts/EventData/TrackContainer.hpp>
 
 #include "ActsEvent/MultiTrajectory.h"
-#include "ActsEvent/TrackStorageContainer.h"
+#include "ActsEvent/TrackSummaryContainer.h"
 #include "xAODTracking/TrackSummaryContainer.h"
 #include "xAODTracking/TrackSummaryAuxContainer.h"
 
@@ -23,29 +23,29 @@ BOOST_AUTO_TEST_SUITE(EventDataTrackStorage)
 
 BOOST_AUTO_TEST_CASE(ConstCompilesWithInterface) {
   ACTS_STATIC_CHECK_CONCEPT(Acts::ConstTrackContainerBackend,
-                            ActsTrk::TrackStorageContainer);
+                            ActsTrk::TrackSummaryContainer);
 }
 
 BOOST_AUTO_TEST_CASE(MutableCompilesWithInterface) {
   ACTS_STATIC_CHECK_CONCEPT(Acts::TrackContainerBackend,
-                            ActsTrk::MutableTrackStorageContainer);
+                            ActsTrk::MutableTrackSummaryContainer);
 
-  using MutableTrackContainer = Acts::TrackContainer<ActsTrk::MutableTrackStorageContainer, ActsTrk::MutableMultiTrajectory>;
+  using MutableTrackContainer = Acts::TrackContainer<ActsTrk::MutableTrackSummaryContainer, ActsTrk::MutableMultiTrajectory>;
 }
 
 struct EmptyBackend {
   EmptyBackend() {
-    m = std::make_unique<ActsTrk::MutableTrackStorageContainer>();
+    m = std::make_unique<ActsTrk::MutableTrackSummaryContainer>();
   }
-  std::unique_ptr<ActsTrk::MutableTrackStorageContainer> m;
+  std::unique_ptr<ActsTrk::MutableTrackSummaryContainer> m;
 };
 
 BOOST_FIXTURE_TEST_CASE(AllStaticxAODVaraiblesAreKnown, EmptyBackend) {
   for (auto id : m->trackBackend()->getConstStore()->getAuxIDs()) {
     const std::string name = SG::AuxTypeRegistry::instance().getName(id);
-    BOOST_CHECK( ActsTrk::TrackStorageContainer::staticVariables.count(name) == 1);
+    BOOST_CHECK( ActsTrk::TrackSummaryContainer::staticVariables.count(name) == 1);
   }
-  BOOST_CHECK( m->trackBackend()->getConstStore()->getAuxIDs().size() == ActsTrk::TrackStorageContainer::staticVariables.size());
+  BOOST_CHECK( m->trackBackend()->getConstStore()->getAuxIDs().size() == ActsTrk::TrackSummaryContainer::staticVariables.size());
 }
 
 
@@ -91,7 +91,7 @@ BOOST_FIXTURE_TEST_CASE(BareContainerFill, FilledBackend) {
 BOOST_FIXTURE_TEST_CASE(ImmutableAccess, FilledBackend) {
   using namespace Acts::HashedStringLiteral;
 
-  auto c = std::make_unique<ActsTrk::TrackStorageContainer>(m->trackBackend());
+  auto c = std::make_unique<ActsTrk::TrackSummaryContainer>(m->trackBackend());
   c->restoreDecorations();
   BOOST_CHECK_EQUAL(c->size_impl(), 2);
   BOOST_CHECK(c->hasColumn_impl("author"_hash));
@@ -111,7 +111,7 @@ BOOST_FIXTURE_TEST_CASE(ImmutableAccess, FilledBackend) {
 
 
 /////////////////////////////////////////////////////////////////////
-// Test of TrackSurfaceContainer in mutable TrackStorageContainer  
+// Test of TrackSurfaceContainer in mutable TrackSummaryContainer  
 
 BOOST_FIXTURE_TEST_CASE(MutableSurfaceBackend_test, FilledBackend){
 
@@ -142,7 +142,7 @@ void testSurface(surfType surf, std::shared_ptr<const Acts::Surface> outSurf, co
 } 
 
 
-// Test of const TrackStorageContainer with TrackSurfaceContainer
+// Test of const TrackSummaryContainer with TrackSurfaceContainer
 BOOST_AUTO_TEST_CASE(ConstSurfaceBackend_test){
 
     // Create filled xAOD::TrackSummaryContainer
@@ -189,11 +189,11 @@ BOOST_AUTO_TEST_CASE(ConstSurfaceBackend_test){
               transform, alpha, minZ, maxZ, halfPhi);                   
   ActsTrk::encodeSurface(surfCurr, surf.get(), gctx);
 
-  // Create constant ActsTrk::TrackStorageContainer
-  std::unique_ptr<ActsTrk::TrackStorageContainer> ms = std::make_unique<ActsTrk::TrackStorageContainer>(&backend, &aux0);
+  // Create constant ActsTrk::TrackSummaryContainer
+  std::unique_ptr<ActsTrk::TrackSummaryContainer> ms = std::make_unique<ActsTrk::TrackSummaryContainer>(&backend, &aux0);
 
-  // Read the ActsTrk::TrackStorageContainer and check track storage and track surfaces
-  auto cc = std::make_unique<ActsTrk::TrackStorageContainer>(ms->trackBackend());
+  // Read the ActsTrk::TrackSummaryContainer and check track storage and track surfaces
+  auto cc = std::make_unique<ActsTrk::TrackSummaryContainer>(ms->trackBackend());
   BOOST_CHECK_EQUAL(cc->size_impl(), 2);
   
   auto outSurf = ActsTrk::decodeSurface(surfBackend[0], gctx);
