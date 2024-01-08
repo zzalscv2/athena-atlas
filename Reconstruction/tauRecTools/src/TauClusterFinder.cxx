@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ATHLYSIS
@@ -18,16 +18,16 @@ TauClusterFinder::TauClusterFinder(const std::string& name) :
 }
 
 
-
 StatusCode TauClusterFinder::execute(xAOD::TauJet& tau) const {
   tau.clearClusterLinks();
     
-  const xAOD::Jet* jetSeed = tau.jet();
-  if (jetSeed == nullptr) {
+  if (tau.jet() == nullptr) {
     ATH_MSG_ERROR("Tau jet link is invalid.");
     return StatusCode::FAILURE;
   }
-  
+
+  const xAOD::Jet* jetSeed = tau.jet();
+
   // Find all the clusters in the JetConstituent
   std::vector<const xAOD::CaloCluster*> clusterList = getClusterList(*jetSeed);
 
@@ -79,8 +79,7 @@ std::vector<const xAOD::CaloCluster*> TauClusterFinder::getClusterList(const xAO
       // To fix this issue, we now retrieve the clusters in the original CaloCalTopoCluster. 
       const xAOD::IParticle* originalParticle = xAOD::getOriginalObject(*cluster);
       if (m_useOrigCluster and originalParticle != nullptr) {
-        const xAOD::CaloCluster* originalCluster = static_cast<const xAOD::CaloCluster*>(originalParticle);
-        clusterList.push_back(originalCluster);
+        clusterList.push_back( static_cast<const xAOD::CaloCluster*>(originalParticle) );
       }
       else {
         clusterList.push_back(cluster);
@@ -95,8 +94,7 @@ std::vector<const xAOD::CaloCluster*> TauClusterFinder::getClusterList(const xAO
         continue;
       }
 
-      const xAOD::CaloCluster* cluster = dynamic_cast<const xAOD::CaloCluster*>(fe->otherObject(0));
-      clusterList.push_back(cluster);
+      clusterList.push_back( dynamic_cast<const xAOD::CaloCluster*>(fe->otherObject(0)) );
     }
     else {
       ATH_MSG_WARNING("Seed jet constituent type not supported ! Skip");

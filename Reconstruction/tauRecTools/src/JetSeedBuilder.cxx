@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -24,11 +24,12 @@ JetSeedBuilder::~JetSeedBuilder() {
 //______________________________________________________________________________
 StatusCode JetSeedBuilder::execute(xAOD::TauJet& pTau) const {
 
-  const xAOD::Jet* jetSeed = pTau.jet();
-  if (jetSeed == nullptr) {
+  if ( pTau.jet() == nullptr) {
     ATH_MSG_ERROR("Tau jet link is invalid.");
     return StatusCode::FAILURE;
   }
+
+  const xAOD::Jet* jetSeed = pTau.jet();
 
   ATH_MSG_DEBUG("seed is Jet with"
 		<< " pt=" << jetSeed->pt()
@@ -42,11 +43,11 @@ StatusCode JetSeedBuilder::execute(xAOD::TauJet& pTau) const {
     pTau.setP4(jetSeed->pt(),pTau.eta(),pTau.phi(),0.0);
   } 
   else {
-	if ( jetSeed->pt() > 1e-7) {
-	  pTau.setP4(jetSeed->pt(), jetSeed->eta(), jetSeed->phi(), 0.0);
+    if ( jetSeed->pt() > 1e-7) {
+      pTau.setP4(jetSeed->pt(), jetSeed->eta(), jetSeed->phi(), 0.0);
     }
-	else {
-	  pTau.setP4(static_cast<float>(1e-7), jetSeed->eta(), jetSeed->phi(), 0.0);
+    else {
+      pTau.setP4(static_cast<float>(1e-7), jetSeed->eta(), jetSeed->phi(), 0.0);
     }
   
     pTau.setP4(xAOD::TauJetParameters::JetSeed, jetSeed->pt(), jetSeed->eta(), jetSeed->phi(), jetSeed->m());
