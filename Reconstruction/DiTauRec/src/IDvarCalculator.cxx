@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRec/IDVarCalculator.h"
@@ -79,22 +79,25 @@ StatusCode IDVarCalculator::execute(DiTauCandidateData * data,
     return StatusCode::SUCCESS;
   }
 
-  float Rcore = data->Rcore;
-  float Rsubjet = data->Rsubjet;
   float f_core;
-  float dR;
   for (unsigned int i = 0; i < vSubjets.size(); i++) {
     const fastjet::PseudoJet& subjet = vSubjets.at(i);
     float ptAll = 0.;
     float ptCore = 0.;
 
-    for (const auto& cc : vSubjetCells) {
-      dR = Tau1P3PKineUtils::deltaR(subjet.eta(), subjet.phi_std(), cc->eta(), cc->phi());
+    TLorentzVector temp_sub_p4;
+    temp_sub_p4.SetPtEtaPhiM(subjet.pt(), subjet.eta(), subjet.phi_std(), subjet.m());
 
-      if (dR < Rsubjet) {
+    for (const auto& cc : vSubjetCells) {
+     
+      TLorentzVector temp_cc_p4;
+      temp_cc_p4.SetPtEtaPhiM(cc->pt(), cc->eta(), cc->phi(), cc->m()); 
+
+      if (temp_cc_p4.DeltaR(temp_sub_p4) < data->Rsubjet) {
 	ptAll += cc->pt();
       }
-      if (dR < Rcore) {
+
+      if (temp_cc_p4.DeltaR(temp_sub_p4) < data->Rcore) {
 	ptCore += cc->pt();
       }
     }
@@ -104,6 +107,7 @@ StatusCode IDVarCalculator::execute(DiTauCandidateData * data,
       f_core = ptCore/ptAll;
     else 
       f_core = -999.;
+
     ATH_MSG_DEBUG("subjet "<< i << ": f_core=" << f_core);
     pDiTau->setfCore(i, f_core);
   }
