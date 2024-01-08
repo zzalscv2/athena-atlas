@@ -260,7 +260,11 @@ namespace InDetDD
             } 
             else {
                 // Should not be any other keys specified in raw alignment object.
-                ATH_MSG_ERROR("Unrecognized folder name.");
+                ATH_MSG_ERROR("Unrecognized folder name "<<key<<". Expected names are:");
+                for (auto out:m_globalFolders) ATH_MSG_ERROR("--"<<out);
+                for (auto out:m_folders) ATH_MSG_ERROR("--"<<out);
+                for (auto out:m_specialFolders) ATH_MSG_ERROR("--"<<out);
+
                 return StatusCode::RECOVERABLE;
             }
         }
