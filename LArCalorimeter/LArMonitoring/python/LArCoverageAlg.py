@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file LArCoverageAlg
@@ -513,25 +513,24 @@ def LArCoverageConfigCore(helper, algoinstance,flags):
 if __name__=='__main__':
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
-    createLArMonConfigFlags()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
-    ConfigFlags.DQ.useTrigger = False
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.DQ.useTrigger = False
 
-    ConfigFlags.Output.HISTFileName = 'LArCoverageOutput.root'
-    ConfigFlags.lock()
+    flags.Output.HISTFileName = 'LArCoverageOutput.root'
+    flags.lock()
 
     # Cell building
     from CaloRec.CaloRecoConfig import CaloRecoCfg
-    cfg=CaloRecoCfg(ConfigFlags)
+    cfg=CaloRecoCfg(flags)
 
-    larCoverageAcc = LArCoverageConfig(ConfigFlags)    
+    larCoverageAcc = LArCoverageConfig(flags)    
     cfg.merge(larCoverageAcc)
 
-    ConfigFlags.dump()
+    flags.dump()
     f=open("CoverageMaker.pkl","wb")
     cfg.store(f)
     f.close()

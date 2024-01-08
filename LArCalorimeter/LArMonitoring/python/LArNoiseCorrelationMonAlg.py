@@ -1,30 +1,30 @@
 
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 
-def LArNoiseCorrelationMonConfigOld(inputFlags):
+def LArNoiseCorrelationMonConfigOld(flags):
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
     from LArMonitoring.LArMonitoringConf import LArNoiseCorrelationMonAlg
 
-    helper = AthMonitorCfgHelperOld(inputFlags, 'LArNoiseCorrelationMonAlgCfg')
-    LArNoiseCorrelationMonConfigCore(helper, LArNoiseCorrelationMonAlg,inputFlags)
+    helper = AthMonitorCfgHelperOld(flags, 'LArNoiseCorrelationMonAlgCfg')
+    LArNoiseCorrelationMonConfigCore(helper, LArNoiseCorrelationMonAlg,flags)
     return helper.result()
 
-def LArNoiseCorrelationMonConfig(inputFlags):
+def LArNoiseCorrelationMonConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
 
     # The following class will make a sequence, configure algorithms, and link                                                                   
     # them to GenericMonitoringTools                                                                                                                                 
     
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'LArNoiseCorrelationMonAlgCfg')
+    helper = AthMonitorCfgHelper(flags,'LArNoiseCorrelationMonAlgCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    return LArNoiseCorrelationMonConfigCore(helper, CompFactory.LArNoiseCorrelationMonAlg,inputFlags)
+    return LArNoiseCorrelationMonConfigCore(helper, CompFactory.LArNoiseCorrelationMonAlg,flags)
 
-def LArNoiseCorrelationMonConfigCore(helper, algoinstance,inputFlags):
+def LArNoiseCorrelationMonConfigCore(helper, algoinstance,flags):
 
 
     from LArMonitoring.GlobalVariables import lArDQGlobals
@@ -48,7 +48,7 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,inputFlags):
 
 
     if isComponentAccumulatorCfg():
-       if inputFlags.DQ.Environment == 'online':
+       if flags.DQ.Environment == 'online':
           isOnline=True
     else:
        from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
@@ -57,7 +57,7 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,inputFlags):
 
     isOnline=False #needed later
     if isComponentAccumulatorCfg() :
-        if inputFlags.DQ.Environment == 'online':
+        if flags.DQ.Environment == 'online':
             isOnline=True
     else :
         from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
@@ -194,36 +194,33 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,inputFlags):
 
 if __name__=='__main__':
 
-   from AthenaConfiguration.AllConfigFlags import ConfigFlags
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
 
-
-   from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
-   createLArMonConfigFlags()
-
    from AthenaConfiguration.TestDefaults import defaultTestFiles
-   ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
+   flags = initConfigFlags()
+   flags.Input.Files = defaultTestFiles.RAW_RUN2
 
-   ConfigFlags.Output.HISTFileName = 'LArNoiseCorrMonOutput.root'
-   ConfigFlags.DQ.enableLumiAccess = False
-   ConfigFlags.DQ.useTrigger = False
-   ConfigFlags.lock()
+   flags.Output.HISTFileName = 'LArNoiseCorrMonOutput.root'
+   flags.DQ.enableLumiAccess = False
+   flags.DQ.useTrigger = False
+   flags.lock()
 
    from CaloRec.CaloRecoConfig import CaloRecoCfg
-   cfg=CaloRecoCfg(ConfigFlags)
+   cfg=CaloRecoCfg(flags)
 
    from LArCellRec.LArNoisyROSummaryConfig import LArNoisyROSummaryCfg
-   cfg.merge(LArNoisyROSummaryCfg(ConfigFlags))
+   cfg.merge(LArNoisyROSummaryCfg(flags))
 
   # from LArMonitoring.LArNoiseCorrelationMonAlg import LArNoiseCorrelationMonConfig
-   aff_acc = LArNoiseCorrelationMonConfig(ConfigFlags)
+   aff_acc = LArNoiseCorrelationMonConfig(flags)
 
    cfg.merge(aff_acc)
 
    log.setLevel(DEBUG)
-   ConfigFlags.dump()
+   flags.dump()
    f=open("LArNoiseCorrelationMon.pkl","wb")
    cfg.store(f)
    f.close()

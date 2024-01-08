@@ -1,12 +1,12 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArSuperCellMonConfigOld(inputFlags):
+def LArSuperCellMonConfigOld(flags):
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
     from LArMonitoring.LArMonitoringConf import  LArSuperCellMonAlg
 
-    helper = AthMonitorCfgHelperOld(inputFlags, 'LArSuperCellMonAlgOldCfg')
+    helper = AthMonitorCfgHelperOld(flags, 'LArSuperCellMonAlgOldCfg')
     from AthenaCommon.BeamFlags import jobproperties
     if jobproperties.Beam.beamType() == 'cosmics':
        isCosmics=True
@@ -31,7 +31,7 @@ def LArSuperCellMonConfigOld(inputFlags):
     from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
     CaloNoiseCondAlg()
 
-    algo = LArSuperCellMonConfigCore(helper, LArSuperCellMonAlg,inputFlags,isCosmics, isMC, RemoveMasked=True)
+    algo = LArSuperCellMonConfigCore(helper, LArSuperCellMonAlg,flags,isCosmics, isMC, RemoveMasked=True)
 
     from AthenaMonitoring.AtlasReadyFilterTool import GetAtlasReadyFilterTool
     algo.ReadyFilterTool = [GetAtlasReadyFilterTool()]
@@ -40,7 +40,7 @@ def LArSuperCellMonConfigOld(inputFlags):
 
     return helper.result()
 
-def LArSuperCellMonConfig(inputFlags, **kwargs):
+def LArSuperCellMonConfig(flags, **kwargs):
     from AthenaCommon.Logging import logging
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -48,47 +48,47 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
     mask=True
 
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'LArSuperCellMonAlgCfg')
+    helper = AthMonitorCfgHelper(flags,'LArSuperCellMonAlgCfg')
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     cfg=ComponentAccumulator()
 
-    if not inputFlags.DQ.enableLumiAccess and not inputFlags.DQ.Environment == 'online':
+    if not flags.DQ.enableLumiAccess and not flags.DQ.Environment == 'online':
        mlog.warning('This algo needs Lumi access, returning empty config')
        return cfg
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    cfg.merge(LArGMCfg(inputFlags))
+    cfg.merge(LArGMCfg(flags))
     from TileGeoModel.TileGMConfig import TileGMCfg
-    cfg.merge(TileGMCfg(inputFlags))
+    cfg.merge(TileGMCfg(flags))
 
     from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
-    cfg.merge(DetDescrCnvSvcCfg(inputFlags))
+    cfg.merge(DetDescrCnvSvcCfg(flags))
 
-    if inputFlags.Common.isOnline:
+    if flags.Common.isOnline:
        cfg.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg('CaloSuperCellAlignCondAlg'))       
 
     from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
-    cfg.merge(BunchCrossingCondAlgCfg(inputFlags))
+    cfg.merge(BunchCrossingCondAlgCfg(flags))
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
-    cfg.merge(CaloNoiseCondAlgCfg(inputFlags))
-    cfg.merge(CaloNoiseCondAlgCfg(inputFlags,noisetype="electronicNoise"))
+    cfg.merge(CaloNoiseCondAlgCfg(flags))
+    cfg.merge(CaloNoiseCondAlgCfg(flags,noisetype="electronicNoise"))
 
-    cfg.merge(ByteStreamReadCfg(inputFlags))
+    cfg.merge(ByteStreamReadCfg(flags))
     from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
-    cfg.merge(LArRawSCDataReadingCfg(inputFlags))
+    cfg.merge(LArRawSCDataReadingCfg(flags))
 
     from TrigT1CaloFexPerf.EmulationConfig import emulateSC_Cfg
-    cfg.merge(emulateSC_Cfg(inputFlags))
+    cfg.merge(emulateSC_Cfg(flags))
 
     from LArCellRec.LArRAWtoSuperCellConfig import LArRAWtoSuperCellCfg
-    cfg.merge(LArRAWtoSuperCellCfg(inputFlags,mask=mask) )
+    cfg.merge(LArRAWtoSuperCellCfg(flags,mask=mask) )
 
     # Reco SC:
     #get SC onl-offl mapping from DB    
     from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
-    cfg.merge(LArOnOffIdMappingSCCfg(inputFlags))
+    cfg.merge(LArOnOffIdMappingSCCfg(flags))
     
     # and elec. calib. coeffs
     from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
@@ -96,7 +96,7 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
     larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg")
     from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
     try:
-        runinfo=getLArDTInfoForRun(inputFlags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+        runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
         streamTypes=runinfo.streamTypes()
     except Exception as e:
         mlog.warning("Could not get DT run info, using defaults !")
@@ -113,10 +113,10 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
             larLATOMEBuilderAlg.LArDigitKey = "SC_ADC_BAS"
 
     cfg.addEventAlgo(larLATOMEBuilderAlg)
-    cfg.merge(LArRAWtoSuperCellCfg(inputFlags,name="LArRAWRecotoSuperCell",mask=mask,doReco=True,SCIn="SC_ET_RECO",SCellContainerOut="SCell_ET_RECO") )
+    cfg.merge(LArRAWtoSuperCellCfg(flags,name="LArRAWRecotoSuperCell",mask=mask,doReco=True,SCIn="SC_ET_RECO",SCellContainerOut="SCell_ET_RECO") )
 
 
-    cfg.merge(LArElecCalibDBSCCfg(inputFlags, condObjs=["Ramp","DAC2uA", "Pedestal", "uA2MeV", "MphysOverMcal", "OFC", "Shape", "HVScaleCorr"]))
+    cfg.merge(LArElecCalibDBSCCfg(flags, condObjs=["Ramp","DAC2uA", "Pedestal", "uA2MeV", "MphysOverMcal", "OFC", "Shape", "HVScaleCorr"]))
 
     
     #return cfg
@@ -124,27 +124,27 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
     lArCellMonAlg=CompFactory.LArSuperCellMonAlg(algname,CaloCellContainerReco="SCell_ET_RECO",doSCReco=True)
 
 
-    if inputFlags.Input.isMC is False and not inputFlags.Common.isOnline:
+    if flags.Input.isMC is False and not flags.Common.isOnline:
        from LumiBlockComps.LuminosityCondAlgConfig import  LuminosityCondAlgCfg
-       cfg.merge(LuminosityCondAlgCfg(inputFlags))
+       cfg.merge(LuminosityCondAlgCfg(flags))
        from LumiBlockComps.LBDurationCondAlgConfig import  LBDurationCondAlgCfg
-       cfg.merge(LBDurationCondAlgCfg(inputFlags))
+       cfg.merge(LBDurationCondAlgCfg(flags))
 
 
     from AthenaConfiguration.Enums import BeamType
-    if inputFlags.Beam.Type is BeamType.Cosmics:
+    if flags.Beam.Type is BeamType.Cosmics:
         algname=algname+'Cosmics'
 
-    LArSuperCellMonConfigCore(helper, lArCellMonAlg, inputFlags,
-                                     inputFlags.Beam.Type is BeamType.Cosmics,
-                                     inputFlags.Input.isMC, algname, RemoveMasked=mask)
+    LArSuperCellMonConfigCore(helper, lArCellMonAlg, flags,
+                                     flags.Beam.Type is BeamType.Cosmics,
+                                     flags.Input.isMC, algname, RemoveMasked=mask)
 
     cfg.merge(helper.result())
 
     return cfg
 
 
-def LArSuperCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, isMC=False, algname='LArSuperCellMonAlg', RemoveMasked=True):
+def LArSuperCellMonConfigCore(helper, algclass, flags, isCosmics=False, isMC=False, algname='LArSuperCellMonAlg', RemoveMasked=True):
 
 
     LArSuperCellMonAlg = helper.addAlgorithm(algclass, algname)
@@ -154,8 +154,8 @@ def LArSuperCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, isM
     LArSuperCellMonAlg.MonGroupName = GroupName
 
     LArSuperCellMonAlg.EnableLumi = False
-    LArSuperCellMonAlg.CaloCellContainer = inputFlags.LAr.DT.ET_IDKey
-    LArSuperCellMonAlg.CaloCellContainerRef = inputFlags.Trigger.L1.L1CaloSuperCellContainerName
+    LArSuperCellMonAlg.CaloCellContainer = flags.LAr.DT.ET_IDKey
+    LArSuperCellMonAlg.CaloCellContainerRef = flags.Trigger.L1.L1CaloSuperCellContainerName
     LArSuperCellMonAlg.RemoveMasked = RemoveMasked
     
 
