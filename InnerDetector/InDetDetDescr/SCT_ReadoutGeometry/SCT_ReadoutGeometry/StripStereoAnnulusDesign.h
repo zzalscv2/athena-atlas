@@ -61,7 +61,8 @@ public:
                    const std::vector<double> &stripEnd,
                    const double &stereoAngle,
                    const double &centreR,
-                   const bool &usePC);
+                   const bool &usePC,
+                   InDetDD::DetectorType detectorType = InDetDD::Undefined);
 
 StripStereoAnnulusDesign(const SiDetectorDesign::Axis &stripDirection,
                    const SiDetectorDesign::Axis &thicknessDirection,
@@ -76,7 +77,8 @@ StripStereoAnnulusDesign(const SiDetectorDesign::Axis &stripDirection,
                    const double &stereoAngle,
                    const double &centreR,//this is the centre radius for e.g. the local/global position
                    const double &waferCentreR,//this is the centre radius needed for calculating the bounds, It is common to all elements on the same wafer/module/sensor (i.e. with a common MotherDesign)
-                   const bool &usePC);
+                   const bool &usePC,
+                   InDetDD::DetectorType detectorType = InDetDD::Undefined);
 
     ~StripStereoAnnulusDesign() = default;
 
@@ -173,6 +175,8 @@ StripStereoAnnulusDesign(const SiDetectorDesign::Axis &stripDirection,
     //representing a full wafer with multiple rows,
     //different for elements where each row is its own element
     double centreR() const;
+
+    InDetDD::DetectorType type() const override final;
 
     // ---------------------------------------------------------------------------------------
     // DEPRECATED at least for Strips
@@ -361,6 +365,10 @@ inline double StripStereoAnnulusDesign::waferCentreR() const {
 
 inline double StripStereoAnnulusDesign::centreR() const {
     return m_R;
+}
+
+inline InDetDD::DetectorType StripStereoAnnulusDesign::type() const{
+    return m_detectorType;
 }
 
 /// DEPRECATED for StripStereoAnnulusDesign; no dead area

@@ -41,7 +41,8 @@ public:
                    const int nStrips,
                    const double pitch,
                    const double length,
-		   const double zShift=0.0);
+                   InDetDD::DetectorType detectorType = InDetDD::Undefined,
+                   const double zShift=0.0);
 
     ~StripBoxDesign() = default;
 
@@ -113,6 +114,8 @@ public:
     SiReadoutCellId readoutIdOfCell(const SiCellId &cellId) const;
     
     const Amg::Transform3D moduleShift() const final;
+
+    InDetDD::DetectorType type() const override final;
 
     // ---------------------------------------------------------------------------------------
     // DEPRECATED at least for Strips
@@ -216,6 +219,10 @@ inline int StripBoxDesign::row(int stripId1Dim) const {
 
 inline int StripBoxDesign::strip(int stripId1Dim) const {
     return stripId1Dim % m_nStrips; 
+}
+
+inline InDetDD::DetectorType StripBoxDesign::type() const{
+    return m_detectorType;
 }
 
 /// DEPRECATED for StripBoxDesign; no dead area
