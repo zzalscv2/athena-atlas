@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -19,6 +19,7 @@
 #include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
 #include "AthenaKernel/Units.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
+#include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "MuonRIO_OnTrack/MdtDriftCircleOnTrack.h"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,16 +11,14 @@
 
 #include "EventPrimitives/EventPrimitives.h"
 //
-#include <vector>
 #include <cmath>
+#include <vector>
 
 /** Event primitives helper functions
  @author  Niels van Eldik
  @author  Robert Johannes Langenberg
  @author  Andreas Salzburger
  @author  Johannes Junggeburth
- @author  Christos Anastopoulos
-
  */
 
 namespace Amg {
@@ -34,68 +32,6 @@ inline bool saneVector(const AmgVector(N) & vec) {
   }
   constexpr double max_length2 = 1.e16;
   return vec.dot(vec) < max_length2;
-}
-
-/* Sometimes the extrapolation to the next surface succeeds but has
-   termendoulsy large errors leading to uncertainties larger than the radius of
-   the Geneva metropole. These ones themself are clearly unphysical, but if
-   extrapolation continues to the next surface the numerical values blow up
-   giving rise to floating point exception. The covariance_cutoff defines a
-   maximum value for the diagonal elements of the covariance matrix
-*/
-inline bool saneCovarianceElement(double ele) {
-  // Elements > 3.4028234663852886e+38
-  // make no-sense remember Gaudi units are in mm
-  constexpr double upper_covariance_cutoff = std::numeric_limits<float>::max();
-  return !(std::isnan(ele) || std::isinf(ele) ||
-           std::abs(ele) > upper_covariance_cutoff);
-}
-/// Returns true if all diagonal elements of the covariance matrix
-/// are finite aka sane in the above definition.
-/// And equal or greater than 0.
-template <int N>
-inline bool hasPositiveOrZeroDiagElems(const AmgSymMatrix(N) & mat) {
-  constexpr int dim = N;
-  for (int i = 0; i < dim; ++i) {
-    if (mat(i, i) < 0.0 || !saneCovarianceElement(mat(i, i)))
-      return false;
-  }
-  return true;
-}
-
-inline bool hasPositiveOrZeroDiagElems(const Amg::MatrixX& mat) {
-  int dim = mat.rows();
-  for (int i = 0; i < dim; ++i) {
-    if (mat(i, i) < 0.0 || !saneCovarianceElement(mat(i, i)))
-      return false;
-  }
-  return true;
-}
-
-/// Returns true if all diagonal elements of the covariance matrix
-/// are finite aka sane in the above definition.
-/// And positive
-/// Instead of just positive we check that we are above
-/// the float epsilon
-template <int N>
-inline bool hasPositiveDiagElems(const AmgSymMatrix(N) & mat) {
-  constexpr double MIN_COV_EPSILON = std::numeric_limits<float>::min();
-  constexpr int dim = N;
-  for (int i = 0; i < dim; ++i) {
-    if (mat(i, i) < MIN_COV_EPSILON || !saneCovarianceElement(mat(i, i)))
-      return false;
-  }
-  return true;
-}
-
-inline bool hasPositiveDiagElems(const Amg::MatrixX& mat) {
-  constexpr double MIN_COV_EPSILON = std::numeric_limits<float>::min();
-  int dim = mat.rows();
-  for (int i = 0; i < dim; ++i) {
-    if (mat(i, i) < MIN_COV_EPSILON || !saneCovarianceElement(mat(i, i)))
-      return false;
-  }
-  return true;
 }
 
 /** return diagonal error of the matrix

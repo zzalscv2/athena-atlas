@@ -1,0 +1,66 @@
+Test Covariance Helpers 
+
+Testing Matrix A 
+  50977.5   -3154.7     191.7  -3.12793   3.7e-05
+  -3154.7   50043.8  -10.4838   -29.006 -0.001595
+    191.7  -10.4838  0.724398 -0.012684         0
+ -3.12793   -29.006 -0.012684  0.021047     3e-06
+  3.7e-05 -0.001595         0     3e-06     1e-12
+isPositiveSemiDefinite 0
+isPositiveDefinite 0
+Cholesky isPositiveSemiDefinite 0
+Cholesky isPositiveDefinite 0
+All diagonal Elements are >=0 1
+All diagonal Elements are >0 1
+
+Testing dynamic Matrix A
+  50977.5   -3154.7     191.7  -3.12793   3.7e-05
+  -3154.7   50043.8  -10.4838   -29.006 -0.001595
+    191.7  -10.4838  0.724398 -0.012684         0
+ -3.12793   -29.006 -0.012684  0.021047     3e-06
+  3.7e-05 -0.001595         0     3e-06     1e-12
+isPositiveSemiDefinite 0
+isPositiveDefinite 0
+Cholesky isPositiveSemiDefinite 0
+Cholesky isPositiveDefinite 0
+All diagonal Elements are >=0 1
+All diagonal Elements are >0 1
+
+Testing Matrix B
+          36            0      -0.0222      -0.0001            0
+           0         3600      -1.5939      -0.0164            0
+     -0.0184      -1.2931 -6.23075e+06      -290278      -0.5211
+      0.0001      -0.0023      -290278     -13523.4      -0.0243
+           0            0      -0.5211      -0.0243            0
+isPositiveSemiDefinite 0
+isPositiveDefinite 0
+Cholesky isPositiveSemiDefinite 0
+Cholesky isPositiveDefinite 0
+All diagonal Elements are >=0 0
+All diagonal Elements are >0 0
+
+Testing Zero Matrix
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+isPositiveSemiDefinite 1
+isPositiveDefinite 0
+Cholesky isPositiveSemiDefinite 1
+Cholesky isPositiveDefinite 0
+All diagonal Elements are >=0 1
+All diagonal Elements are >0 0
+
+Testing Dynamic Zero Matrix
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+isPositiveSemiDefinite 1
+isPositiveDefinite 0
+Cholesky isPositiveSemiDefinite 1
+Cholesky isPositiveDefinite 0
+All diagonal Elements are >=0 1
+All diagonal Elements are >0 0

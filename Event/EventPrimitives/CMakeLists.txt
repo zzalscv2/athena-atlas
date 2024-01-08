@@ -29,8 +29,8 @@ atlas_add_test( test_AmgDefs
    SOURCES test/test_AmgDefs.cxx
    LINK_LIBRARIES EventPrimitives )
 
-atlas_add_test( test_Helpers
-   SOURCES test/test_Helpers.cxx
+atlas_add_test( test_CovarianceHelpers
+   SOURCES test/test_CovarianceHelpers.cxx
    LINK_LIBRARIES EventPrimitives )
 
 

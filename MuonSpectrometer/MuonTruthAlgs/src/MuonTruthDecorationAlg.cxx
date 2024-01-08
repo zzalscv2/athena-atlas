@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTruthDecorationAlg.h"
 
 #include "EventPrimitives/EventPrimitivesHelpers.h"
+#include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "MuonReadoutGeometry/CscReadoutElement.h"
