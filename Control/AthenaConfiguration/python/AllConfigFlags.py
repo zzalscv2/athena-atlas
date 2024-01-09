@@ -258,7 +258,7 @@ def initConfigFlags():
 
     acf.addFlag('Output.TreeAutoFlush', {})  # {} = automatic for all streams, otherwise {'STREAM': 123}
     acf.addFlag('Output.StorageTechnology.EventData', 'ROOTTREEINDEX')  # Set the underlying POOL storage technology for event data
-    acf.addFlag('Output.StorageTechnology.MetaData', 'ROOTTREEINDEX')  # Set the underlying POOL storage technology for metadata
+    acf.addFlag('Output.StorageTechnology.MetaData', 'ROOTTREE')  # Set the underlying POOL storage technology for metadata
 
     # Might move this elsewhere in the future.
     # Some flags from https://gitlab.cern.ch/atlas/athena/blob/master/Tracking/TrkDetDescr/TrkDetDescrSvc/python/TrkDetDescrJobProperties.py
