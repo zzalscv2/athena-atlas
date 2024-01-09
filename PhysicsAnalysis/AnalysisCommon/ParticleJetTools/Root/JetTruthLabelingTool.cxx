@@ -7,65 +7,63 @@
 JetTruthLabelingTool::JetTruthLabelingTool(const std::string& name) :
   asg::AsgTool(name)
 {
-
     declareProperty( "TruthLabelName",                m_truthLabelName = "R10TruthLabel_R21Consolidated" );
     declareProperty( "IsTruthJetCollection",          m_isTruthJetCol = false );
     declareProperty( "UseTRUTH3",                     m_useTRUTH3 = false );
     declareProperty( "TruthParticleContainerName",    m_truthParticleContainerName = "TruthParticles" );
     declareProperty( "TruthBosonContainerName",       m_truthBosonContainerName = "TruthBosonsWithDecayParticles" );
     declareProperty( "TruthTopQuarkContainerName",    m_truthTopQuarkContainerName = "TruthTopQuarkWithDecayParticles" );
-    
-    /// Hard-code some values for R10TruthLabel_R21Consolidated
-    /// Functionality to customize labeling will be added later
-    if( m_truthLabelName == "R10TruthLabel_R21Consolidated" ) {
-      m_truthJetCollectionName="AntiKt10TruthTrimmedPtFrac5SmallR20Jets";
-      m_matchUngroomedParent = false;
-      m_dRTruthJet = 0.75;
-      m_useDRMatch = true;
-      m_dRTruthPart = 0.75;
-      m_useWZMassHigh = true;
-      m_mLowTop = 140.0;
-      m_mLowW = 50.0;
-      m_mHighW = 100.0;
-      m_mLowZ = 60.0;
-      m_mHighZ = 110.0;
-    }
-
-    /// Hard-code some values for R10TruthLabel_R21Precision
-    if( m_truthLabelName == "R10TruthLabel_R21Precision" ) {
-      m_truthJetCollectionName="AntiKt10TruthJets";
-      m_matchUngroomedParent = true;
-      m_dRTruthJet = 0.75;
-      m_useDRMatch = false;
-      m_useWZMassHigh = true;
-      m_mLowTop = 140.0;
-      m_mLowW = 50.0;
-      m_mHighW = 100.0;
-      m_mLowZ = 60.0;
-      m_mHighZ = 110.0;
-    }
-
-    /// Hard-code some values for R10TruthLabel_R21Precision_2022v1
-    if( m_truthLabelName == "R10TruthLabel_R21Precision_2022v1" ) {
-      m_truthJetCollectionName="AntiKt10TruthJets";
-      m_matchUngroomedParent = true;
-      m_dRTruthJet = 0.75;
-      m_useDRMatch = false;
-      m_useWZMassHigh = false;
-      m_mLowTop = 140.0;
-      m_mLowW = 50.0;
-      m_mLowZ = 50.0;
-    }
-
 }
 
 StatusCode JetTruthLabelingTool::initialize(){
 
   ATH_MSG_INFO("Initializing " << name());
+
+  /// Hard-code some values for R10TruthLabel_R21Consolidated
+  /// Functionality to customize labeling will be added later
+  if( m_truthLabelName == "R10TruthLabel_R21Consolidated" ) {
+    m_truthJetCollectionName="AntiKt10TruthTrimmedPtFrac5SmallR20Jets";
+    m_matchUngroomedParent = false;
+    m_dRTruthJet = 0.75;
+    m_useDRMatch = true;
+    m_dRTruthPart = 0.75;
+    m_useWZMassHigh = true;
+    m_mLowTop = 140.0;
+    m_mLowW = 50.0;
+    m_mHighW = 100.0;
+    m_mLowZ = 60.0;
+    m_mHighZ = 110.0;
+  }
+
+  /// Hard-code some values for R10TruthLabel_R21Precision
+  if( m_truthLabelName == "R10TruthLabel_R21Precision" ) {
+    m_truthJetCollectionName="AntiKt10TruthJets";
+    m_matchUngroomedParent = true;
+    m_dRTruthJet = 0.75;
+    m_useDRMatch = false;
+    m_useWZMassHigh = true;
+    m_mLowTop = 140.0;
+    m_mLowW = 50.0;
+    m_mHighW = 100.0;
+    m_mLowZ = 60.0;
+    m_mHighZ = 110.0;
+  }
+
+  /// Hard-code some values for R10TruthLabel_R21Precision_2022v1
+  if( m_truthLabelName == "R10TruthLabel_R21Precision_2022v1" ) {
+    m_truthJetCollectionName="AntiKt10TruthJets";
+    m_matchUngroomedParent = true;
+    m_dRTruthJet = 0.75;
+    m_useDRMatch = false;
+    m_useWZMassHigh = false;
+    m_mLowTop = 140.0;
+    m_mLowW = 50.0;
+    m_mLowZ = 50.0;
+  }
+
   print();
 
   /// Check if TruthLabelName is supported. If not, give an error and return FAILURE
-  
   bool isSupportedLabel = false;
   isSupportedLabel = isSupportedLabel || (m_truthLabelName=="R10TruthLabel_R21Consolidated");
   isSupportedLabel = isSupportedLabel || (m_truthLabelName=="R10TruthLabel_R21Precision");
