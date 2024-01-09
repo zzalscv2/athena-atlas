@@ -9,6 +9,7 @@
   <class name="CP::SaveFilterAlg" />
   <class name="CP::SignEnums" />
   <class name="CP::NObjectPtSelectorAlg" />
+  <class name="CP::SumNElNMuPtSelectorAlg" />
 
 </lcgdict>
 
