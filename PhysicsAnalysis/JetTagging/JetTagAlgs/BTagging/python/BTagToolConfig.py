@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -73,11 +73,6 @@ def BTagToolCfg(flags, TaggerList, PrimaryVertexCollectionName="", scheme = '', 
           from JetTagTools.MultiSVTagConfig import MultiSVTagCfg
           multisvbb2tool = acc.popToolsAndMerge(MultiSVTagCfg(flags, 'MultiSVbb2Tag','MultiSVbb2', scheme))
           tagToolList.append(multisvbb2tool)
-
-      if 'JetVertexCharge' in TaggerList:
-          from JetTagTools.JetVertexChargeConfig import JetVertexChargeCfg
-          jvc = acc.popToolsAndMerge(JetVertexChargeCfg(flags, 'JetVertexCharge', scheme))
-          tagToolList.append(jvc)
 
       # list of taggers that use MultivariateTagManager
       mvtm_taggers = ['MV2c00','MV2c10','MV2c20','MV2c10mu','MV2m','DL1','DL1mu']
