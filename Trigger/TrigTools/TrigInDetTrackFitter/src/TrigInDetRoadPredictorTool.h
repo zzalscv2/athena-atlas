@@ -25,7 +25,7 @@ class TrigInDetRoadPredictorTool: public AthAlgTool, virtual public ITrigInDetRo
   TrigInDetRoadPredictorTool( const std::string&, const std::string&, const IInterface* );
   virtual StatusCode initialize() override;
 
-  virtual int getRoad(const std::vector<const Trk::SpacePoint*>&, std::vector<const InDetDD::SiDetectorElement*>&, const EventContext&) const;
+  virtual int getRoad(const std::vector<const Trk::SpacePoint*>&, std::vector<const InDetDD::SiDetectorElement*>&, const EventContext&) const override;
 
 private:
   
