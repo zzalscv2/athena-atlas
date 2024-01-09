@@ -4,16 +4,15 @@
 
 /// @author Baptiste Ravina
 
-#include "EventSelectionAlgorithms/TransverseMassSelectorAlg.h"
+#include "EventSelectionAlgorithms/SumNElNMuPtSelectorAlg.h"
 
 namespace CP {
 
-  TransverseMassSelectorAlg::TransverseMassSelectorAlg(const std::string &name, ISvcLocator *pSvcLocator)
-  : EL::AnaAlgorithm(name, pSvcLocator)
+  SumNElNMuPtSelectorAlg::SumNElNMuPtSelectorAlg(const std::string &name, ISvcLocator *pSvcLocator)
+    : EL::AnaAlgorithm(name, pSvcLocator)
   {}
 
-  StatusCode TransverseMassSelectorAlg::initialize() {
-    ANA_CHECK(m_metHandle.initialize(m_systematicsList));
+  StatusCode SumNElNMuPtSelectorAlg::initialize() {
     ANA_CHECK(m_electronsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_electronSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
     ANA_CHECK(m_muonsHandle.initialize(m_systematicsList, SG::AllowEmpty));
@@ -29,7 +28,7 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TransverseMassSelectorAlg::execute() {
+  StatusCode SumNElNMuPtSelectorAlg::execute() {
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
@@ -41,10 +40,7 @@ namespace CP {
       // check the preselection
       if (m_preselection && !m_preselection.getBool(*evtInfo, sys))
         continue;
-      
-      // retrieve the MET container
-      const xAOD::MissingETContainer *met = nullptr;
-      ANA_CHECK(m_metHandle.retrieve(met, sys));
+
       // retrieve the electron container
       const xAOD::ElectronContainer *electrons = nullptr;
       if (m_electronsHandle)
@@ -54,47 +50,29 @@ namespace CP {
       if (m_muonsHandle)
 	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
 
-      // apply the requested selection, compute the W boson transverse mass
-      float etmiss_pt = (*met)["Final"]->met();
-      float etmiss_phi = (*met)["Final"]->phi();
-      float lep_pt, lep_phi;
-      int lep_count = 0;
-
+      // apply the requested selection
+      int count = 0;
       if (m_electronsHandle) {
-	for (const xAOD::Electron *el : *electrons) {
-	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)){
-	    lep_pt = el->pt();
-	    lep_phi = el->phi();
-	    lep_count++;
-	    break;
+	for (const xAOD::Electron *el : *electrons){
+	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)) {
+	    if (el->pt() > m_ptmin){
+	      count++; 
+	    }
 	  }
 	}
       }
       if (m_muonsHandle) {
 	for (const xAOD::Muon *mu : *muons) {
 	  if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
-	    lep_pt = mu->pt();
-	    lep_phi = mu->phi();
-	    lep_count++;
-	    break;
+	    if (mu->pt() > m_ptmin){
+	      count++;
+	    }
 	  }
 	}
       }
 
-      // exit 1 if there were no leptons or 2 or more leptons in the event 
-      if (lep_count == 0){
-        ATH_MSG_ERROR("No charged lepton in the event, cannot compute MWT!");
-        return StatusCode::FAILURE;
-      }
-      if (lep_count > 1){
-        ATH_MSG_ERROR("More than one lepton is associated with this event - cannot determine which is the W decay lepton.");
-        return StatusCode::FAILURE;
-      }
-
-      float mwt = sqrt(2. * lep_pt * etmiss_pt * (1. - std::cos(lep_phi - etmiss_phi)));
-
       // calculate decision
-      bool decision = SignEnum::checkValue(m_mwtref.value(), m_signEnum, mwt);
+      bool decision = SignEnum::checkValue(m_count.value(), m_signEnum, count);
       m_decoration.setBool(*evtInfo, decision, sys);
     }
     return StatusCode::SUCCESS;

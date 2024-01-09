@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeEventCutFlowConfig
@@ -67,6 +67,8 @@ class EventSelectionConfig(ConfigBlock):
             self.add_NEL_selector(text, cfg)
         elif "MU_N" in text.split():
             self.add_NMU_selector(text, cfg)
+        elif "SUM_EL_N_MU_N" in text.split():
+            self.add_SUMNELNMU_selector(text, cfg)
         elif "JET_N" in text.split():
             self.add_NJET_selector(text, cfg)
         elif "JET_N_BTAG" in text.split():
@@ -233,6 +235,25 @@ class EventSelectionConfig(ConfigBlock):
             alg.minPt = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+
+    def add_SUMNELNMU_selector(self, text, config):
+        items = text.split()
+        if items[0] != "SUM_EL_N_MU_N":
+            self.raise_misconfig(text, "SUM_EL_N_MU_N")
+        if len(items) != 4:
+            self.raise_misconfig(text, "number of arguments")
+        if not self.electrons and not self.muons:
+            self.raise_missinginput("electrons or muons")
+        thisalg = f'{self.name}_SUMNELNMU_{self.step}'
+        alg = config.createAlgorithm('CP::SumNElNMuPtSelectorAlg', thisalg)
+        alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
+        alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        alg.eventPreselection = f'{self.currentDecoration}'
+        alg.minPt = self.check_float(items[1])
+        alg.sign  = self.check_sign(items[2])
+        alg.count = self.check_int(items[3])
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
