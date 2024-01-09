@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CLHEP/Random/RandFlat.h"
@@ -116,9 +116,10 @@ FCSReturnCode TFCS2DFunctionLateralShapeParametrization::simulate_hit(
   // with positive eta after transformation: delta_eta --> -delta_eta
   if (center_eta < 0.)
     delta_eta_mm = -delta_eta_mm;
-  // Particle with negative charge are expected to have the same shape as
-  // positively charged particles after transformation: delta_phi --> -delta_phi
-  if (charge < 0.)
+  // We derive the shower shapes for electrons and positively charged hadrons.
+  // Particle with the opposite charge are expected to have the same shower shape
+  // after the transformation: delta_phi --> -delta_phi
+  if ((charge < 0. && pdgId!=11) || pdgId==-11)
     delta_phi_mm = -delta_phi_mm;
 
   const float dist000 = TMath::Sqrt(center_r * center_r + center_z * center_z);
