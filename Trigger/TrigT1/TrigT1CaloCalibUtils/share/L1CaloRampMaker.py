@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import glob, sys
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -30,6 +30,8 @@ def main():
     
     flags = initConfigFlags()
     flags.Input.Files = glob.glob(options.InputFiles)
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.autoconfigure(flags)
     
     flags.Exec.MaxEvents = -1
     flags.Detector.EnableCalo = True
@@ -44,7 +46,6 @@ def main():
     flags.Tile.doOptATLAS=True
     flags.Tile.RunType='PHY'
     flags.Tile.BestPhaseFromCOOL=True
-    flags.GeoModel.AtlasVersion="ATLAS-R2-2015-03-01-00"
     flags.IOVDb.DBConnection = "sqlite://;schema=energyscanresults.sqlite;dbname=L1CALO"
     flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2022-02'
 
@@ -73,10 +74,8 @@ def main():
 
     from CaloConditions.CaloConditionsConfig import CaloTriggerTowerCfg
     acc.merge(CaloTriggerTowerCfg(flags))
-    
-    
-    from LArRecUtils.LArRecUtilsConf import LArADC2MeVCondAlg 
-    LArADC2MeVCondAlg= CompFactory.LArADC2MeVCondAlg()
+
+    LArADC2MeVCondAlg = CompFactory.LArADC2MeVCondAlg()
     LArADC2MeVCondAlg.LArHVScaleCorrKey=""
     acc.addCondAlgo(LArADC2MeVCondAlg, 'AthAlgSeq')
 
