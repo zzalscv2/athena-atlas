@@ -20,16 +20,19 @@ class CfgFlag(object):
     the value based on other flags.
     """
 
-    __slots__ = ['_value', '_setDef', '_enum', '_help']
+    __slots__ = ['_value', '_setDef', '_enum', '_type', '_help']
 
-    def __init__(self, default, enum=None, help=None):
+    def __init__(self, default, enum=None, type=None, help=None):
         """Initialise the flag with the default value.
 
-        Optionally set an enum of allowed values.
+        Optionally set an enum of allowed values or the type of the flag value.
         """
         if default is None:
-            raise RuntimeError("Default value of a flag must not be None")
+            raise ValueError("Default value of a flag must not be None")
+        if enum is not None and type is not None:
+            raise ValueError("Flags can not have both enum and type set")
         self._enum = enum
+        self._type = type
         self._help = help
         self.set(default)
         return
@@ -47,7 +50,9 @@ class CfgFlag(object):
             self._setDef=None
 
             if not self._validateEnum(self._value):
-                raise RuntimeError("Flag is of type '{}', but '{}' set.".format( self._enum, type(self._value) ))
+                raise TypeError("Flag is of type '{}', but '{}' set.".format(self._enum, type(self._value)))
+            if not self._validateType(self._value):
+                raise TypeError("Flag is of type '{}', but '{}' set.".format(self._type, type(self._value)))
         return
 
     def get(self, flagdict=None):
@@ -68,20 +73,23 @@ class CfgFlag(object):
         if not flagdict:
             raise RuntimeError("Flag is using a callable but all flags are not available.")
 
-        #Have to call the method to obtain the default value, and then reuse it in all next accesses
+        # Have to call the method to obtain the default value, and then reuse it in all next accesses
         if flagdict.locked():
             # optimise future reads, drop possibility to update this flag ever
-            self._value=self._setDef(flagdict)
-            self._setDef=None
-            if not self._validateEnum(self._value):
-                raise RuntimeError("Flag is of type '{}', but '{}' set.".format( self._enum, type(self._value) ))
-            return deepcopy(self._value)
+            self._value = self._setDef(flagdict)
+            self._setDef = None
+            value = self._value
         else:
-            #use function for as long as the flags are not locked
-            val=self._setDef(flagdict)
-            if not self._validateEnum(val):
-                raise RuntimeError("Flag is of type '{}', but '{}' set.".format( self._enum, type(val)))
-            return deepcopy(val)
+            # use function for as long as the flags are not locked
+            value = self._setDef(flagdict)
+
+        if not self._validateEnum(value):
+            raise TypeError("Flag is of type '{}', but '{}' set.".format(self._enum, type(value)))
+
+        if not self._validateType(value):
+            raise TypeError("Flag is of type '{}', but '{}' set.".format(self._type, type(value)))
+
+        return deepcopy(value)
 
     def __repr__(self):
         if self._value is not None:
@@ -98,6 +106,13 @@ class CfgFlag(object):
                 return value in self._enum
             except TypeError:
                 return False
+
+    def _validateType(self, value):
+        if self._type is None:
+            return True
+
+        if value is not None:
+            return isinstance(value, self._type)
 
 
 def _asdict(iterator):
@@ -318,11 +333,11 @@ class AthConfigFlags(object):
                 _msg.debug(f'missing module: {err}')
                 pass
 
-    def addFlag(self, name, setDef, enum=None, help=None):
+    def addFlag(self, name, setDef, enum=None, type=None, help=None):
         self._tryModify()
         if name in self._flagdict:
             raise KeyError("Duplicated flag name: {}".format( name ))
-        self._flagdict[name]=CfgFlag(setDef, enum, help)
+        self._flagdict[name]=CfgFlag(setDef, enum, type, help)
         return
 
     def addFlagsCategory(self, path, generator, prefix=False):
@@ -629,7 +644,7 @@ class AthConfigFlags(object):
         if enum is None:
             try:
                 exec(f"type({value})")
-            except (NameError, SyntaxError): #Can't determine type, assume we got an un-quoted string
+            except (NameError, SyntaxError): # Can't determine type, assume we got an un-quoted string
                 value=f"\"{value}\""
         # FlagEnum
         else:
