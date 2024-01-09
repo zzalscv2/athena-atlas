@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "ISF_FastCaloSimEvent/TFCSNetworkFactory.h"
 #include "ISF_FastCaloSimEvent/TFCSGANLWTNNHandler.h"
 #include "ISF_FastCaloSimEvent/TFCSONNXHandler.h"
