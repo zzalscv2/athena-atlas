@@ -10,8 +10,6 @@
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODMuon/MuonContainer.h"
 
-#include "tauRecTools/KineUtils.h"
-
 #include "StoreGate/ReadHandle.h"
 
 
