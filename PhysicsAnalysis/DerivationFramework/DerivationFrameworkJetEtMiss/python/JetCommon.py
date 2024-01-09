@@ -148,6 +148,8 @@ def reCreatePseudoJets(jetalg, rsize, inputtype, variableRMassScale=-1.0, variab
             finderArgs['ptmin'] = 2000
             finderArgs['ptminFilter'] = 40000
             finderArgs['calibOpt'] = "none"
+        elif inputtype=="Truth" and rsize == 1.0:
+            finderArgs['modifiersin'] = 'truth_ungroomed_larger'
         #if not "PFlow" in inputtype: finderArgs.pop('modifiersin') # leave the default modifiers.
 
     if (variableRMassScale>0):  
