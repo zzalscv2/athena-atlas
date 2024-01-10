@@ -91,6 +91,8 @@ class EventSelectionConfig(ConfigBlock):
             self.add_OS_selector(text, cfg)
         elif "SS" in text.split():
             self.add_SS_selector(text, cfg)
+        elif "MLL_OSSF" in text.split():
+            self.add_MLL_OSSF_selector(text, cfg)
         elif "SAVE" in text.split():
             self.add_SAVE(text, cfg)
         elif "IMPORT" in text.split():
@@ -497,6 +499,27 @@ class EventSelectionConfig(ConfigBlock):
         if self.muons:
             alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.OS = False
+        alg.eventPreselection = f'{self.currentDecoration}'
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+
+    def add_MLL_OSSF_selector(self, text, config):
+        items = text.split()
+        if items[0] != "MLL_OSSF":
+            self.raise_misconfig(text, "MLL_OSSF")
+        if len(items) != 3 and len(items) != 4:
+            self.raise_misconfig(text, "number of arguments")
+        if not self.electrons and not self.muons:
+            self.raise_missinginput("electrons or muons")
+        thisalg = f'{self.name}_MLL_OSSF_{self.step}'
+        alg = config.createAlgorithm('CP::DileptonOSSFInvariantMassWindowSelectorAlg', thisalg)
+        if self.electrons:
+            alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
+        if self.muons:
+            alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        alg.lowMll = self.check_float(items[1])
+        alg.highMll = self.check_float(items[2])
+        alg.vetoMode = (len(items) == 4 and self.check_string(items[3]) == "veto")
         alg.eventPreselection = f'{self.currentDecoration}'
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
