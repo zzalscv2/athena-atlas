@@ -169,6 +169,8 @@ InDetPhysValMonitoringTool::initialize() {
     IDPVM::addReadDecoratorHandleKeys(*this, m_jetContainerName, empty_prefix, required_int_jet_decorations, m_intJetDecor);
   }
 
+  ATH_CHECK(m_weight_pileup_key.initialize(m_doPRW));
+
   m_usingSpecialPileupSwitch = (m_pileupSwitch != "All");
   return StatusCode::SUCCESS;
 }
@@ -350,6 +352,13 @@ InDetPhysValMonitoringTool::fillHistograms() {
     nVertices = not vertices->empty() ? vertices->size() : 0;
     beamSpotWeight = pie->beamSpotWeight();
     ATH_MSG_DEBUG("beamSpotWeight is equal to " <<  beamSpotWeight);
+    if(m_doPRW){
+      float prwWeight = 1;
+      SG::ReadDecorHandle<xAOD::EventInfo,float> readDecorHandle (m_weight_pileup_key);
+      if(readDecorHandle.isAvailable()) prwWeight = readDecorHandle(*pie);
+      ATH_MSG_DEBUG("Applying pileup weight equal to " << prwWeight);
+      beamSpotWeight *= prwWeight;
+    } 
 
     if (vertices.isValid() and not vertices->empty()) {
       ATH_MSG_DEBUG("Number of vertices retrieved for this event " << vertices->size());

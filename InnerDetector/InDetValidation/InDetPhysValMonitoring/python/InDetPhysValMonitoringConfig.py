@@ -234,6 +234,8 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         kwargs.setdefault("FillTrackInJetPlots", True)
         kwargs.setdefault("FillTrackInJetPlots", True)
 
+    kwargs.setdefault("doPRW", flags.PhysVal.IDPVM.doPRW)
+
     acc.setPrivateTools(CompFactory.InDetPhysValMonitoringTool(**kwargs))
     return acc
 
