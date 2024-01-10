@@ -52,17 +52,16 @@ MCTruthClassifier). In this case it is necessary to have a sufficiently complete
 TruthParticle container available, i.e. one should not have slimmed the tau
 decay products from the container. Information on how to change the default container names can be found in the section `Tool configuration`_.
   
-The truth matching is done for a single xAOD tau object with one of these
-functions::
+The truth matching is done for a single xAOD tau object with one of this
+function::
 
-  xAOD::TruthParticle* TauTruthMatchingTool::applyTruthMatch(const xAOD::TauJet& xTau)
   xAOD::TruthParticle* TauTruthMatchingTool::getTruth(const xAOD::TauJet& xTau)
 
 which returns a pointer to the truth lepton particle the xAOD tau object was
 matched to. If there was no match found, the return value is ``NULL``. Similarly
 for a vector of xAOD tau objects one can use this function::
 
-  std::vector<xAOD::TruthParticle*> TauTruthMatchingTool::applyTruthMatch(const std::vector<const xAOD::TauJet*>& vTaus)
+  std::vector<xAOD::TruthParticle*> TauTruthMatchingTool::getTruth(const std::vector<const xAOD::TauJet*>& vTaus)
 
 which returns a vector of pointer to the matched truth lepton particle in the
 same order. Note, that again, if there is no truth particle found, the entry in
@@ -118,7 +117,7 @@ Tool configuration
 Output
 ------
 
-Calling applyTruthMatch(xTau) or getTruth(xTau) adds a link to the truth lepton
+Calling getTruth(xTau) adds a link to the truth lepton
 particle as decoration: ``truthParticleLink``. A link to the matched truth jet
 is decorated as well with name ``truthJetLink``. Please check the validity of
 this link before trying to access the linked truth jet or make use of the
@@ -257,12 +256,6 @@ following::
   {
     ...
   }
-
-**Question:** Is there any difference between applyTruthMatch and getTruth?
----------------------------------------------------------------------------
-
-**Answer:** No, it is basically the same function, applyTruthMatch is for
-backwards compatibility, so better call getTruth to reduce overhead.
 
 **Question:** How do I check if the truth matched particle is an electron, muon, tau?
 -------------------------------------------------------------------------------------

@@ -42,12 +42,7 @@ public:                         // Interface functions
   virtual const xAOD::TruthParticle* getTruth(const xAOD::TauJet& xTau) override final;
   virtual const xAOD::TruthParticle* getTruth(const xAOD::TauJet& xTau,
                                               ITruthTausEvent& truthTausEVent) const override final;
-
-  // apply match to a single tau
-  virtual const xAOD::TruthParticle* applyTruthMatch(const xAOD::TauJet& xTau) override final;
-
-  // apply match to all taus in a vector
-  virtual std::vector<const xAOD::TruthParticle*> applyTruthMatch(const std::vector<const xAOD::TauJet*>& vTaus) override final;
+  virtual std::vector<const xAOD::TruthParticle*> getTruth(const std::vector<const xAOD::TauJet*>& vTaus) override final;
 
 public:                         // Wrapper functions
   
