@@ -106,15 +106,7 @@ const xAOD::TruthParticle* TauTruthMatchingTool::getTruth(const xAOD::TauJet& xT
 }
 
 //______________________________________________________________________________
-// FIXME: remove this method at the next occasion
-const xAOD::TruthParticle* TauTruthMatchingTool::applyTruthMatch(const xAOD::TauJet& xTau)
-{
-  // this function only exists for historical reasons
-  return getTruth(xTau);
-}
-
-//______________________________________________________________________________
-std::vector<const xAOD::TruthParticle*> TauTruthMatchingTool::applyTruthMatch(const std::vector<const xAOD::TauJet*>& vTaus)
+std::vector<const xAOD::TruthParticle*> TauTruthMatchingTool::getTruth(const std::vector<const xAOD::TauJet*>& vTaus)
 {
   std::vector<const xAOD::TruthParticle*> vTruths;
   for (auto xTau : vTaus)
