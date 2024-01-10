@@ -42,10 +42,10 @@ class DetailedTrackGradeFactory : public AthAlgTool, virtual public ITrackGradeF
   /** AlgTool initialize method */
   virtual StatusCode initialize() override;
 
-  TrackGrade* getGrade(const xAOD::TrackParticle & track,
-		       const xAOD::IParticle::FourMom_t & jetMomentum) const;
+  virtual TrackGrade* getGrade(const xAOD::TrackParticle & track,
+	        	       const xAOD::IParticle::FourMom_t & jetMomentum) const override;
 
-  virtual const TrackGradesDefinition & getTrackGradesDefinition() const;
+  virtual const TrackGradesDefinition & getTrackGradesDefinition() const override;
 
 private:
 
