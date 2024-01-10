@@ -117,15 +117,15 @@ class BasicTests(FlagsSetup):
 
     def test_enums(self):
         """Test that enums are properly validated"""
-        self.flags.addFlag("Format", Format.BS, enum=Format)
-        self.flags.addFlag("FormatFun", lambda flags : Format.POOL if flags.Atest else Format.BS, enum=Format)
-        self.flags.addFlag("FormatPOOL", Format.BS, enum=Format)
+        self.flags.addFlag("Format", Format.BS, type=Format)
+        self.flags.addFlag("FormatFun", lambda flags : Format.POOL if flags.Atest else Format.BS, type=Format)
+        self.flags.addFlag("FormatPOOL", Format.BS, type=Format)
         self.flags.FormatPOOL = Format.POOL
         self.flags.lock()
 
     def test_enums_incorrect_assign(self):
         """Test that enums are properly validated (incorrect flags)"""
-        self.flags.addFlag("FormatWrong", Format.BS, enum=Format)
+        self.flags.addFlag("FormatWrong", Format.BS, type=Format)
         with self.assertRaises(TypeError) as _:
             self.flags.FormatWrong = "BS"
 
@@ -134,7 +134,7 @@ class BasicTests(FlagsSetup):
 
     def test_enums_incorrect_lambda(self):
         """Test that enums are properly validated (incorrect flags)"""
-        self.flags.addFlag("FormatWrong", lambda flags : "ABC", enum=Format)
+        self.flags.addFlag("FormatWrong", lambda flags : "ABC", type=Format)
         with self.assertRaises(TypeError) as _:
             x = self.flags.FormatWrong  # noqa: F841
 
@@ -320,11 +320,13 @@ class FlagsFromArgsTest(unittest.TestCase):
         self.flags.addFlag('Input.Files',[])
         self.flags.addFlag('detA.flagB',0)
         self.flags.addFlag("detA.flagC","")
-        self.flags.addFlag("detA.flagD",[])
-        self.flags.addFlag("Format", Format.BS, enum=Format)
+        self.flags.addFlag("detA.flagD", [], type=list)
+        self.flags.addFlag("intE", 123, type=int)
+        self.flags.addFlag("floatF", 123.45, type=float)
+        self.flags.addFlag("Format", Format.BS, type=Format)
 
     def test(self):
-        argline="-l VERBOSE --evtMax=10 --skipEvents=3 --filesInput=bla1.data,bla2.data detA.flagB=7 Format=Format.BS detA.flagC=a.2 detA.flagD+=['val']"
+        argline="-l VERBOSE --evtMax=10 --skipEvents=3 --filesInput=bla1.data,bla2.data detA.flagB=7 Format=Format.BS detA.flagC=a.2 detA.flagD+=['val'] intE=42 floatF=42.42"
         if isGaudiEnv():
             argline += " --debug exec"
         print (f"Interpreting arguments: '{argline}'")
@@ -337,6 +339,8 @@ class FlagsFromArgsTest(unittest.TestCase):
         self.assertEqual(self.flags.detA.flagB,7,"Failed to set arbitrary from args")
         self.assertEqual(self.flags.detA.flagC,"a.2","Failed to set arbitrary unquoted string from args")
         self.assertEqual(self.flags.detA.flagD,["val"],"Failed to append to list flag")
+        self.assertEqual(self.flags.intE, 42, "Failed to set integer flag")
+        self.assertEqual(self.flags.floatF, 42.42, "Failed to set floating point value flag")
         self.assertEqual(self.flags.Format, Format.BS,"Failed to set FlagEnum")
 
 
