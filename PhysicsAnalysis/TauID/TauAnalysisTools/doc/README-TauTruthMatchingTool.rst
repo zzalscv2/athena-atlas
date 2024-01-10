@@ -171,10 +171,6 @@ MCTruthClassifier (i.e. branches particleType and particleOrigin).
      - double
      - The truth invisible 4 momentum components
 
-   * - pt_prompt, eta_prompt, phi_prompt, m_prompt
-     - double
-     - The 4 momentum components of the first occurrence of the tau
-
    * - DecayModeVector
      - std::vector<int>
      - pdg ID's of stable decay products of the tau decay stored as a vector
@@ -226,7 +222,7 @@ functions are available
   ``TauAnalysisTools::TruthMatchedParticleType`` can be found in `Enums.h
   <https://svnweb.cern.ch/trac/atlasoff/browser/PhysicsAnalysis/TauID/TauAnalysisTools/trunk/TauAnalysisTools/Enums.h>`_
   
-* functions returning the TLorentzVector of the visible, invisible and prompt
+* functions returning the TLorentzVector of the visible and invisible
   components::
 
     virtual TLorentzVector getTruthTauP4Vis(const xAOD::TauJet& xTau) const;
@@ -234,9 +230,6 @@ functions are available
 
     virtual TLorentzVector getTruthTauP4Invis(const xAOD::TauJet& xTau) const;
     virtual TLorentzVector getTruthTauP4Invis(const xAOD::TruthParticle& xTruthTau) const;
-
-    virtual TLorentzVector getTruthTauP4Prompt(const xAOD::TauJet& xTau) const;
-    virtual TLorentzVector getTruthTauP4Prompt(const xAOD::TruthParticle& xTruthTau) const;
 
 ---
 FAQ

@@ -56,10 +56,6 @@ public:
   virtual TLorentzVector getTruthTauP4Vis(const xAOD::TauJet& xTau) = 0;
   virtual TLorentzVector getTruthTauP4Vis(const xAOD::TruthParticle& xTruthTau) const = 0;
 
-  // wrapper function to get truth tau prompt TLorentzvector
-  virtual TLorentzVector getTruthTauP4Prompt(const xAOD::TauJet& xTau) = 0;
-  virtual TLorentzVector getTruthTauP4Prompt(const xAOD::TruthParticle& xTruthTau) const = 0;
-
   // wrapper function to get truth tau invisible TLorentzvector
   virtual TLorentzVector getTruthTauP4Invis(const xAOD::TauJet& xTau) = 0;
   virtual TLorentzVector getTruthTauP4Invis(const xAOD::TruthParticle& xTruthTau) const = 0;
