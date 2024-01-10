@@ -78,10 +78,10 @@ def initConfigFlags():
 
     acf.addFlag('Input.ProjectName', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("project_name", "")) # former global.ProjectName
     acf.addFlag('Input.DataYear', _dataYearFromFlags)
-    acf.addFlag('Input.MCCampaign', lambda prevFlags : Campaign(GetFileMD(prevFlags.Input.Files).get("mc_campaign", "")), enum=Campaign)
+    acf.addFlag('Input.MCCampaign', lambda prevFlags : Campaign(GetFileMD(prevFlags.Input.Files).get("mc_campaign", "")), type=Campaign)
     acf.addFlag('Input.TriggerStream', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("stream", "") if prevFlags.Input.Format == Format.BS
                                                           else GetFileMD(prevFlags.Input.Files).get("triggerStreamOfFile", "")) # former global.TriggerStream
-    acf.addFlag('Input.Format', lambda prevFlags : Format.BS if GetFileMD(prevFlags.Input.Files).get("file_type", "BS") == "BS" else Format.POOL, enum=Format) # former global.InputFormat
+    acf.addFlag('Input.Format', lambda prevFlags : Format.BS if GetFileMD(prevFlags.Input.Files).get("file_type", "BS") == "BS" else Format.POOL, type=Format) # former global.InputFormat
     acf.addFlag('Input.ProcessingTags', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("processingTags", []) ) # list of names of streams written to this file
     from GeneratorConfig.Versioning import generatorsGetFromMetadata
     acf.addFlag('Input.GeneratorsInfo', lambda prevFlags : generatorsGetFromMetadata( GetFileMD(prevFlags.Input.Files).get("generators", "") ))
@@ -153,12 +153,12 @@ def initConfigFlags():
                                                        (prevFlags.Common.ProductionStep == ProductionStep.FastChain and
                                                         prevFlags.Overlay.FastChain)))  # Enable Overlay
     acf.addFlag('Common.doExpressProcessing', False)
-    acf.addFlag('Common.ProductionStep', ProductionStep.Default, enum=ProductionStep)
-    acf.addFlag('Common.Project', Project.determine(), enum=Project)
+    acf.addFlag('Common.ProductionStep', ProductionStep.Default, type=ProductionStep)
+    acf.addFlag('Common.Project', Project.determine(), type=Project)
 
     # replace global.Beam*
     acf.addFlag('Beam.BunchSpacing', 25) # former global.BunchSpacing
-    acf.addFlag('Beam.Type', lambda prevFlags : BeamType(GetFileMD(prevFlags.Input.Files).get('beam_type', 'collisions')), enum=BeamType)# former global.BeamType
+    acf.addFlag('Beam.Type', lambda prevFlags : BeamType(GetFileMD(prevFlags.Input.Files).get('beam_type', 'collisions')), type=BeamType)# former global.BeamType
     acf.addFlag("Beam.NumberOfCollisions", lambda prevFlags : 2. if prevFlags.Beam.Type is BeamType.Collisions else 0.) # former global.NumberOfCollisions
 
     def _configureBeamEnergy(prevFlags):

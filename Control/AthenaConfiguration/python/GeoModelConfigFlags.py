@@ -36,12 +36,12 @@ def createGeoModelConfigFlags(analysis=False):
             return period
 
         gcf.addFlag("GeoModel.Run",  # Run deducted from other metadata
-                    _deduct_LHCPeriod, enum=LHCPeriod)
+                    _deduct_LHCPeriod, type=LHCPeriod)
         return gcf
 
     gcf.addFlag("GeoModel.Run",  # Run from the geometry database
                 lambda prevFlags : LHCPeriod(DetDescrInfo(prevFlags.GeoModel.AtlasVersion)['Common']['Run']),
-                enum=LHCPeriod)
+                type=LHCPeriod)
 
     gcf.addFlag('GeoModel.Layout', 'atlas') # replaces global.GeoLayout
 
