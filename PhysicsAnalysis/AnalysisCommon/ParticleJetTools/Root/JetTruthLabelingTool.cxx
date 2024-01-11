@@ -132,8 +132,8 @@ StatusCode JetTruthLabelingTool::initialize(){
   ATH_CHECK(m_truthJetMass_recoKey.initialize(!m_isTruthJetCol));
   ATH_CHECK(m_truthJetPt_recoKey.initialize(!m_isTruthJetCol));
 
-  ATH_CHECK(m_truthGroomedJetMass_recoKey.initialize(m_getTruthGroomedJetValues));
-  ATH_CHECK(m_truthGroomedJetPt_recoKey.initialize(m_getTruthGroomedJetValues));
+  ATH_CHECK(m_truthGroomedJetMass_recoKey.initialize((!m_isTruthJetCol) && (m_getTruthGroomedJetValues)));
+  ATH_CHECK(m_truthGroomedJetPt_recoKey.initialize((!m_isTruthJetCol) && (m_getTruthGroomedJetValues)));
 
   return StatusCode::SUCCESS;
 }
