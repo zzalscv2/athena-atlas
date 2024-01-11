@@ -259,6 +259,9 @@ atlas_add_citest( ACTS_ValidateAmbiguityResolution
 atlas_add_citest( ACTS_ActsKfRefitting
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsKfRefitting.sh )
 
+atlas_add_citest( ACTS_ActsEFTrackFit
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsEFTrackFit.sh )
+
 atlas_add_citest( ACTS_ActsGSFRefitting
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsGSFRefitting.sh )
 

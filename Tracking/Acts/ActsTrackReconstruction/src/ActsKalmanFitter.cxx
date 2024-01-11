@@ -441,6 +441,69 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     return track; 
 }
 
+// fit a set of PrepRawData objects
+// --------------------------------
+std::unique_ptr< ActsTrk::MutableTrackContainer >
+ActsKalmanFitter::fit(const EventContext& ,
+      const std::vector< ActsTrk::ATLASUncalibSourceLink> & clusterList,
+      const Acts::BoundTrackParameters& initialParams,
+      const Acts::GeometryContext& tgContext,
+      const Acts::MagneticFieldContext& mfContext,
+      const Acts::CalibrationContext& calContext,
+      const TrackingSurfaceHelper &tracking_surface_helper) const{
+  ATH_MSG_DEBUG("--> entering ActsKalmanFitter::fit(xAODMeasure...things,TP,)");
+    
+   
+   
+  std::vector<Acts::SourceLink> sourceLinks;
+  sourceLinks.reserve(clusterList.size()); 
+
+  std::vector<const Acts::Surface*> surfaces;
+  surfaces.reserve(clusterList.size());
+   
+  for (const ActsTrk::ATLASUncalibSourceLink& el : clusterList) {
+    sourceLinks.emplace_back( el );
+    surfaces.push_back(&tracking_surface_helper.associatedActsSurface(**el));
+  }
+ 
+  Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
+  
+  ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor{ &(*m_ATLASConverterTool), &tracking_surface_helper };
+  kfExtensions.surfaceAccessor.connect<&ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
+   
+  UncalibratedMeasurementCalibrator calibrator(*m_ATLASConverterTool, tracking_surface_helper);
+  kfExtensions.calibrator.connect<&UncalibratedMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(&calibrator);
+   
+  Acts::PropagatorPlainOptions propagationOption;
+  propagationOption.maxSteps = m_option_maxPropagationStep;
+ 
+  // Construct a perigee surface as the target surface
+  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3{0., 0., 0.});
+
+  // Set the KalmanFitter options
+  Acts::KalmanFitterOptions<ActsTrk::MutableTrackStateBackend>
+    kfOptions(tgContext, mfContext, calContext,
+	      kfExtensions,
+	      propagationOption,
+  	      &(*pSurface)); 
+  
+  std::unique_ptr< ActsTrk::MutableTrackContainer > tracks = std::make_unique< ActsTrk::MutableTrackContainer >();
+ 
+  
+  auto result = m_directFitter->fit(sourceLinks.begin(),
+				    sourceLinks.end(),
+				    initialParams,
+				    kfOptions,
+				    surfaces,
+				    *tracks.get());
+   
+  if (not result.ok()) {
+    ATH_MSG_VERBOSE("Kalman Fitter on Seed has failed");
+    return nullptr;
+  } 
+  return tracks; 
+}
+
 // extend a track fit to include an additional set of MeasurementBase objects
 // re-implements the TrkFitterUtils/TrackFitter.cxx general code in a more
 // mem efficient and stable way

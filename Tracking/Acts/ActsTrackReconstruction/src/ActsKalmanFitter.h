@@ -122,6 +122,17 @@ public:
     const Trk::PrepRawDataSet&,
     const Trk::RunOutlierRemoval runOutlier = false,
     const Trk::ParticleHypothesis matEffects = Trk::nonInteracting) const override;
+  
+  //! fit a set of xAOD uncalibrated measurements
+  virtual  
+      std::unique_ptr< ActsTrk::MutableTrackContainer >
+      fit(const EventContext& ctx,
+	    const std::vector<ActsTrk::ATLASUncalibSourceLink> & clusterList,
+      const Acts::BoundTrackParameters& initialParams,
+      const Acts::GeometryContext& tgContext,
+      const Acts::MagneticFieldContext& mfContext,
+      const Acts::CalibrationContext& calContext,
+      const TrackingSurfaceHelper &tracking_surface_helper) const override;
 
   //! extend a track fit including a new set of MeasurementBase objects
   virtual std::unique_ptr<Trk::Track> fit(
