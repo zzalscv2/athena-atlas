@@ -50,10 +50,6 @@ public:                         // Wrapper functions
   virtual TLorentzVector getTruthTauP4Vis(const xAOD::TauJet& xTau) override final;
   virtual TLorentzVector getTruthTauP4Vis(const xAOD::TruthParticle& xTruthTau) const override final;
 
-  // wrapper function to get truth tau prompt TLorentzvector
-  virtual TLorentzVector getTruthTauP4Prompt(const xAOD::TauJet& xTau) override final;
-  virtual TLorentzVector getTruthTauP4Prompt(const xAOD::TruthParticle& xTruthTau) const override final;
-
   // wrapper function to get truth tau invisible TLorentzvector
   virtual TLorentzVector getTruthTauP4Invis(const xAOD::TauJet& xTau) override final;
   virtual TLorentzVector getTruthTauP4Invis(const xAOD::TruthParticle& xTruthTau) const override final;
