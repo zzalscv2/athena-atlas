@@ -32,14 +32,13 @@ namespace LVL1 {
     virtual StatusCode initialize() override;
 
 
-    virtual void setAlgoConstant(float aFPGA_A, float bFPGA_A,
-                                 float aFPGA_B, float bFPGA_B,
-                                 float aFPGA_C, float bFPGA_C,
+    virtual void setAlgoConstant(int aFPGA_A, int bFPGA_A,
+                                 int aFPGA_B, int bFPGA_B,
+                                 int aFPGA_C, int bFPGA_C,
                                  int gXE_seedThrA, int gXE_seedThrB, int gXE_seedThrC) override;
 
-    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersCentral& Atwr, const gTowersCentral& Btwr,
-                                                               const gTowersForward& CNtwr, const gTowersForward& CPtwr,
-                                                               std::array<uint32_t, 4> & outJwojTOB) const override;
+    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersType& Atwr,const gTowersType& Btwr, const gTowersType& Ctwr,
+                                                                 std::array<uint32_t, 4> & outTOB) const override;
 
 
 
@@ -55,25 +54,25 @@ namespace LVL1 {
     float m_gBlockthresholdB;
     float m_gBlockthresholdC;
  
-    void makeFPGAC(const gTowersForward& twrsCN, const gTowersForward& twrsCP, gTowersCentral & twrsC) const;
 
-    void gBlockAB(const gTowersCentral& twrs, gTowersCentral & gBlkSum) const;
+    void gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const;
 
-    void metFPGA(const gTowersCentral& twrs, const gTowersCentral& gBlkSum, int gBlockthreshold,
-                           float aFPGA, float bFPGA,
-                           int & MHT_x, int & MHT_y,
-                           int & MST_x, int & MST_y,
-                           int & MET_x, int & MET_y) const;
+    void metFPGA(int FPGAnum,const gTowersType& twrs, 
+                 const gTowersType & gBlkSum, int gBlockthreshold,
+                 int aFPGA, int bFPGA,
+                 int & MHT_x, int & MHT_y,
+                 int & MST_x, int & MST_y,
+                 int & MET_x, int & MET_y) const;
+
+    void etFPGA(const gTowersType& twrs, gTowersType &gBlkSum,
+                int gBlockthreshold, int A, int B, int &eth, int &ets, int &etw) const;
 
     void metTotal(int A_MET_x, int A_MET_y,
-                          int B_MET_x, int B_MET_y,
-                          int C_MET_x, int C_MET_y,
-                          int & MET_x, int & MET_y, int & MET) const;
+                  int B_MET_x, int B_MET_y,
+                  int C_MET_x, int C_MET_y,
+                  int & MET_x, int & MET_y) const;
 
-    void sumEtFPGA(const gTowersCentral& twrs, int & partial_sumEt) const;
-
-    void sumEt(int  A_sumEt, int  B_sumEt, int  C_sumEt, int & total_sumEt) const;
-
+   
     float sinLUT(unsigned int phiIDX, unsigned int aw) const;
 
     float cosLUT(unsigned int phiIDX, unsigned int aw) const;

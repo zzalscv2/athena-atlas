@@ -238,7 +238,16 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
             ATH_MSG_DEBUG("Raw word  0x" << std::hex << dataArray[iWord]  << "    " << std::bitset<32> (dataArray[iWord]));
         }
         
-
+        // Vectors to temporarily store global tob before their are summed together
+        int global_counter = 0;
+        std::vector<uint32_t> JWOJ_MHT(3, 0);
+        std::vector<uint32_t> JWOJ_MST(3, 0);
+        std::vector<uint32_t> JWOJ_MET(3, 0);
+        std::vector<uint32_t> JWOJ_SCALAR(3, 0);
+        std::vector<uint32_t> NC_MET(3, 0);
+        std::vector<uint32_t> NC_SCALAR(3, 0);
+        std::vector<uint32_t> RMS_MET(3, 0);
+        std::vector<uint32_t> RMS_SCALAR(3, 0);
 
         size_t index = 0;
         while ( index < n_words ) {
@@ -255,7 +264,6 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
             ATH_MSG_DEBUG( "headerSize   "<< std::bitset<2> (headerSize) );
             ATH_MSG_DEBUG( "errorFlags   "<< std::bitset<1> (errorFlags) );
             ATH_MSG_DEBUG( "dataSize     "<< std::bitset<12> (dataSize) );
-
             
             const uint32_t blockSize  = headerSize + dataSize;
             if ( (index + blockSize) > n_words ) {
@@ -295,6 +303,7 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
             // and 0x1,2,3 for global (MET) TOBs.
             bool isMet = (blockType >= 0x1 && blockType <= 0x3);
             bool isJet = (blockType >= 0xA && blockType <= 0xC);
+
             
             for (uint32_t sliceNumber = 0; sliceNumber < numSlices; sliceNumber++) {
                 if (sliceNumber == 0){
@@ -353,51 +362,52 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                             }
                             //Saving jwoj MHT TOBs into the EDM container
                             if (iWord == gPos::JWOJ_MHT_POSITION){
-                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                                gMHTComponentsJwojContainer->push_back(std::move(myEDM));
-                                gMHTComponentsJwojContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
+                                global_counter ++;
+                                if (blockType == 0x1) {JWOJ_MHT[0] = dataArray[index+iWord];}
+                                if (blockType == 0x2) {JWOJ_MHT[1] = dataArray[index+iWord];}
+                                if (blockType == 0x3) {JWOJ_MHT[2] = dataArray[index+iWord];}
                             }
                             //Saving jwoj MST TOBs into the EDM container
                             if (iWord == gPos::JWOJ_MST_POSITION){
-                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                                gMSTComponentsJwojContainer->push_back(std::move(myEDM));
-                                gMSTComponentsJwojContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
+                                if (blockType == 0x1) {JWOJ_MST[0] = dataArray[index+iWord];}
+                                if (blockType == 0x2) {JWOJ_MST[1] = dataArray[index+iWord];}
+                                if (blockType == 0x3) {JWOJ_MST[2] = dataArray[index+iWord];}
                             }
                             //Saving jwoj MET TOBs into the EDM container
                             if (iWord == gPos::JWOJ_MET_POSITION){
-                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                                gMETComponentsJwojContainer->push_back(std::move(myEDM));
-                                gMETComponentsJwojContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
+                                if (blockType == 0x1) {JWOJ_MET[0] = dataArray[index+iWord];}
+                                if (blockType == 0x2) {JWOJ_MET[1] = dataArray[index+iWord];}
+                                if (blockType == 0x3) {JWOJ_MET[2] = dataArray[index+iWord];}
                             }
                             //Saving jwoj Scalar TOBs into the EDM container
                             if (iWord == gPos::JWOJ_SCALAR_POSITION){
-                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                                gScalarEJwojContainer->push_back(std::move(myEDM));
-                                gScalarEJwojContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
+                                if (blockType == 0x1) {JWOJ_SCALAR[0] = dataArray[index+iWord];}
+                                if (blockType == 0x2) {JWOJ_SCALAR[1] = dataArray[index+iWord];}
+                                if (blockType == 0x3) {JWOJ_SCALAR[2] = dataArray[index+iWord];}
                             }
                             //Saving Noise Cut MET TOBs into the EDM container
                             if (iWord == gPos::NC_MET_POSITION){
-                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                                gMETComponentsNoiseCutContainer->push_back(std::move(myEDM));
-                                gMETComponentsNoiseCutContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
+                                if (blockType == 0x1) {NC_MET[0] = dataArray[index+iWord];}
+                                if (blockType == 0x2) {NC_MET[1] = dataArray[index+iWord];}
+                                if (blockType == 0x3) {NC_MET[2] = dataArray[index+iWord];}
                             }
                             //Saving Noise Cut Scalar TOBs into the EDM container
                             if (iWord == gPos::NC_SCALAR_POSITION){
-                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                                gScalarENoiseCutContainer->push_back(std::move(myEDM));
-                                gScalarENoiseCutContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
+                                if (blockType == 0x1) {NC_SCALAR[0] = dataArray[index+iWord];}
+                                if (blockType == 0x2) {NC_SCALAR[1] = dataArray[index+iWord];}
+                                if (blockType == 0x3) {NC_SCALAR[2] = dataArray[index+iWord];}
                             }
                             //Saving Rho+RMS MET TOBs into the EDM container
                             if (iWord == gPos::RMS_MET_POSITION){
-                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                                gMETComponentsRmsContainer->push_back(std::move(myEDM));
-                                gMETComponentsRmsContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
+                                if (blockType == 0x1) {RMS_MET[0] = dataArray[index+iWord];}
+                                if (blockType == 0x2) {RMS_MET[1] = dataArray[index+iWord];}
+                                if (blockType == 0x3) {RMS_MET[2] = dataArray[index+iWord];}
                             }
                             //Saving Rho+RMS Scalar TOBs into the EDM container
                             if (iWord == gPos::RMS_SCALAR_POSITION){
-                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                                gScalarERmsContainer->push_back(std::move(myEDM));
-                                gScalarERmsContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
+                                if (blockType == 0x1) {RMS_SCALAR[0] = dataArray[index+iWord];}
+                                if (blockType == 0x2) {RMS_SCALAR[1] = dataArray[index+iWord];}
+                                if (blockType == 0x3) {RMS_SCALAR[2] = dataArray[index+iWord];}
                             }
 
                         }
@@ -407,9 +417,67 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                 }
                 index += gPos::WORDS_PER_SLICE;
             }
+
+            ATH_MSG_DEBUG("global_counter is " << global_counter);
+            if (global_counter == 3) {
+
+                fillGlobal(JWOJ_MHT, 3, gMHTComponentsJwojContainer);
+                fillGlobal(JWOJ_MST, 4, gMSTComponentsJwojContainer);
+                fillGlobal(JWOJ_MET, 2, gMETComponentsJwojContainer);
+                fillGlobal(JWOJ_SCALAR, 1, gScalarEJwojContainer);
+                                
+                fillGlobal(NC_MET, 2, gMETComponentsNoiseCutContainer);
+                fillGlobal(NC_SCALAR, 1, gScalarENoiseCutContainer);
+
+                fillGlobal(RMS_MET, 2, gMETComponentsRmsContainer);
+                fillGlobal(RMS_SCALAR, 1, gScalarERmsContainer);
+
+                global_counter = 0;
+            }
+            
         }
     }
     return StatusCode::SUCCESS;
+}
+
+void gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const int type, SG::WriteHandle<xAOD::gFexGlobalRoIContainer> &container) const {
+    
+    ATH_MSG_DEBUG("fillGlobal with type " << type);
+
+    int16_t sum_x = 0;
+    int16_t sum_y = 0;
+    
+    if (type == 1) {
+        sum_x = sum_y = 0;
+
+    } else{
+
+        // Extract the x and y components and sum them for the three FPGAs
+        for (size_t fpga = 0; fpga < 3; fpga++) {
+            int16_t x = tob[fpga] >> gPos::GLOBAL_X_BIT & gPos::GLOBAL_X_MASK;
+            int16_t y = tob[fpga] >> gPos::GLOBAL_Y_BIT & gPos::GLOBAL_Y_MASK;
+            sum_x += x;
+            sum_y += y;
+            ATH_MSG_DEBUG("fillGlobal at fpga " << fpga << " sum_x " << sum_x << " sum_y " << sum_y);
+        }
+        // Apply truncation
+        sum_x = sum_x >> gPos::GLOBAL_BIT_TRUNCATION;
+        sum_y = sum_y >> gPos::GLOBAL_BIT_TRUNCATION;
+    }
+
+
+    // Save to the EDM
+    std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
+    container->push_back(std::move(myEDM));
+    container->back()->setQuantityOne(sum_x);
+    container->back()->setQuantityTwo(sum_y);
+    container->back()->setScaleOne(m_gXE_scale);
+    container->back()->setScaleTwo(m_gTE_scale);
+    container->back()->setStatusOne(1);
+    container->back()->setStatusTwo(1);
+    container->back()->setSaturated(0);
+    container->back()->setGlobalType(type);
+
 }
 
 
