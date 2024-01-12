@@ -6,7 +6,7 @@
 #include <sstream>
 #include <array>
 #include <algorithm>
-#include "../src/TableUtils.h"
+#include "ActsInterop/TableUtils.h"
 
 enum EStat : std::size_t {
    k1,

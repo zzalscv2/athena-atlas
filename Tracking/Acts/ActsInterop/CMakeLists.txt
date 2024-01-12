@@ -34,4 +34,8 @@ atlas_add_test( ActsLogger
    LINK_LIBRARIES ActsInteropLib AthenaBaseComps TestTools 
    POST_EXEC_SCRIPT nopost.sh )
 
-
+atlas_add_test( TableUtils_test
+   SOURCES test/TableUtils_test.cxx
+   LINK_LIBRARIES ActsInteropLib
+   POST_EXEC_SCRIPT nopost.sh
+)
