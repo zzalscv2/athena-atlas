@@ -34,7 +34,7 @@ def precisionTracks_GSFRefitted(flags, RoIs, ion=False, variant=''):
                    ( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+%s' % TrigPixelKeys.PixelClusterAmbiguitiesMap ),
                    ( 'InDet::TRT_DriftCircleContainer' , 'StoreGateSvc+%s' % TrigTRTKeys.DriftCircles ),
                    ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.AveIntPerXDecor' ),
-                   ( 'PixeldEdxData' , 'ConditionStore+PixeldEdxData' )]
+                   ]
 
     # These objects must be loaded from SGIL if not from CondInputLoader
 
