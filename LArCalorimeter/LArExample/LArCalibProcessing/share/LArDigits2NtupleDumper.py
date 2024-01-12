@@ -41,6 +41,7 @@ if __name__=='__main__':
   #Import the flag-container that is the arguemnt to the configuration methods
   from AthenaConfiguration.AllConfigFlags import initConfigFlags
   flags = initConfigFlags()
+
   # add SCDump flags, here re-used for digitsdump
   from LArCafJobs.LArSCDumperFlags import addSCDumpFlags
   addSCDumpFlags(flags)

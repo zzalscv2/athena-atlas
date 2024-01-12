@@ -3,11 +3,14 @@
 if __name__=="__main__":
 
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+   flags = initConfigFlags()
+
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
 
-   flags = initConfigFlags()
+   from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+   flags.addFlagsCategory("LArMon", addLArMonFlags)
 
    from AthenaConfiguration.TestDefaults import defaultTestFiles
    flags.Input.Files = defaultTestFiles.RAW_RUN2

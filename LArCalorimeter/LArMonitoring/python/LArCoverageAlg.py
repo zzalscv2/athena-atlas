@@ -7,14 +7,6 @@
 @date 2019-07-24
 @brief Adapted from ExampleLArMonitorAlgorithm.py by C. D. Burton and P. Onyisi 
 '''
-def LArCoverageConfigOld(flags):
-    from AthenaMonitoring import AthMonitorCfgHelperOld
-    from LArMonitoring.LArMonitoringConf import LArCoverageAlg
-
-    helper = AthMonitorCfgHelperOld(flags, 'LArCoverageAlgOldCfg')
-    LArCoverageConfigCore(helper,LArCoverageAlg,flags)
-
-    return helper.result()
 
 def LArCoverageConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
@@ -514,9 +506,11 @@ if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+    flags.addFlagsCategory("LArMon", addLArMonFlags)
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.DQ.useTrigger = False
 

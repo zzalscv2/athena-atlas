@@ -2,24 +2,6 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArCollisionTimeMonConfigOld(dqFlags):
-    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
-    from LArMonitoring.LArMonitoringConf import LArCollisionTimeMonAlg
-    
-    larColTime_hist_path='LArCollisionTime'
-
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-    helper = AthMonitorCfgHelperOld(dqFlags, 'LArCollisionTimeMonAlgOldCfg')
-    LArCollisionTimeMonConfigCore(ConfigFlags, helper, LArCollisionTimeMonAlg, larColTime_hist_path)
-
-    larColTime_hist_path='LArClusterCollisionTime'
-    LArCollisionTimeMonConfigCore(ConfigFlags, helper, LArCollisionTimeMonAlg, larColTime_hist_path)
-    helper.monSeq.LArClusterCollisionTimeMonAlg.Key = "ClusterCollTime"
-    helper.monSeq.LArClusterCollisionTimeMonAlg.nCells = 0
-
-    return helper.result()
-
 
 def LArCollisionTimeMonConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
@@ -252,11 +234,10 @@ if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
-    createLArMonConfigFlags()
-
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()
+    from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+    flags.addFlagsCategory("LArMon", addLArMonFlags)
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.DQ.enableLumiAccess = False #copied from LArRecoFromRaw
     flags.DQ.useTrigger = False #copied from LArRecoFromRaw 

@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
-def LArRawCalibDataReadingCfg(configFlags,gain="HIGH",doAccDigit=False,doAccCalibDigit=False,doCalibDigit=False):
+def LArRawCalibDataReadingCfg(configFlags,gain="HIGH",doAccDigit=False,doAccCalibDigit=False,doCalibDigit=False,doDigit=False):
     acc=ComponentAccumulator()
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     acc.merge(LArGMCfg(configFlags))
@@ -13,14 +13,31 @@ def LArRawCalibDataReadingCfg(configFlags,gain="HIGH",doAccDigit=False,doAccCali
     accKey=""
     accCalibKey=""
     calibKey=""
+    digKey=""
     if doAccDigit:
        accKey=gain
-    if doAccCalibDigit:
+    elif doAccCalibDigit:
        accCalibKey=gain
-    if doCalibDigit:
+    elif doCalibDigit:
        calibKey=gain
+    elif doDigit:
+       digKey=gain
+    else:   
+       from AthenaCommon.Logging import logging 
+       mlog = logging.getLogger( 'LArRawCalibDataReadingCfg' ) 
+       mlog.error("No digits type choosen for LArRawCalibDataReadingAlg, no reading algo added !!!!")
+       return acc
 
-    acc.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccDigitKey=accKey, 
+    if configFlags.hasCategory("LArCalib"):
+       acc.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArDigitKey=digKey, LArAccDigitKey=accKey, 
+                                      LArAccCalibDigitKey=accCalibKey,
+                                      LArCalibDigitKey=calibKey, LArFebHeaderKey="LArFebHeader",
+                                      SubCaloPreselection=configFlags.LArCalib.Input.SubDet,
+                                      PosNegPreselection=configFlags.LArCalib.Preselection.Side,
+                                      BEPreselection=configFlags.LArCalib.Preselection.BEC,
+                                      FTNumPreselection=configFlags.LArCalib.Preselection.FT))
+    else:    
+       acc.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArDigitKey=digKey, LArAccDigitKey=accKey, 
                                       LArAccCalibDigitKey=accCalibKey,
                                       LArCalibDigitKey=calibKey, LArFebHeaderKey="LArFebHeader"))
     return acc

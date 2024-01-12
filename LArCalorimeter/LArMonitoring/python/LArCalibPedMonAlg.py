@@ -130,14 +130,20 @@ def LArCalibPedMonConfigCore(helper,algoinstance,flags,gain="",doAccDigit=False,
 if __name__=='__main__':
 
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+
+   flags = initConfigFlags()
+
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
 
    from AthenaMonitoring.DQConfigFlags import DQDataType
+   from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+
+   flags.addFlagsCategory("LArMon", addLArMonFlags)
 
    run="00404637"
-   flags = initConfigFlags()
+
    flags.Input.Files = [
        "/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Pedestal-32s-High-All/00404637/data21_calib.00404637.calibration_LArElec-Pedestal-32s-High-All.daq.RAW/data21_calib.00404637.calibration_LArElec-Pedestal-32s-High-All.daq.RAW._lb0000._SFO-1._0001.data",
        "/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Pedestal-32s-High-All/00404637/data21_calib.00404637.calibration_LArElec-Pedestal-32s-High-All.daq.RAW/data21_calib.00404637.calibration_LArElec-Pedestal-32s-High-All.daq.RAW._lb0000._SFO-2._0001.data",

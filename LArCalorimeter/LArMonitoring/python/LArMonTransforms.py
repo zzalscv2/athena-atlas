@@ -402,17 +402,19 @@ def computeCorrelations(inputs):
     #check that the inputs are ok    
     assert len(inputs)==2 , len(inputs)
     
-    assert ((inputs[0][0]['name']=='av' and inputs[1][0]['name']=='sum') or (inputs[1][0]['name']=='av' and inputs[0][0]['name']=='sum')) , "Wrong inputs"
+    assert ((inputs[0][0]['name']=='average' and inputs[1][0]['name']=='partialSum') or (inputs[1][0]['name']=='average' and inputs[0][0]['name']=='partialSum')) , "Wrong inputs"
 
-    if inputs[1][0]['name']=='sum':
+    if inputs[1][0]['name']=='partialSum':
         i_parSum=1
         i_av=0
     else:
         i_parSum=0
         i_av=1
 
-    cl = inputs[i_parSum][1][0].Clone()
-    cl.Clear()
+    inh=inputs[i_parSum][1][0]
+    cl=TH2F(inh.GetName()[3:],inh.GetTitle()[2:12],inh.GetXaxis().GetNbins(),inh.GetXaxis().GetBinLowEdge(1),inh.GetXaxis().GetBinUpEdge(inh.GetXaxis().GetNbins()), inh.GetYaxis().GetNbins(),inh.GetYaxis().GetBinLowEdge(1),inh.GetYaxis().GetBinUpEdge(inh.GetYaxis().GetNbins()))
+    cl.GetXaxis().SetTitle(inh.GetXaxis().GetTitle())
+    cl.GetYaxis().SetTitle(inh.GetYaxis().GetTitle())
 
     for i in range(1,cl.GetNbinsX()+1):
         mean1 = inputs[i_av][1][0].GetBinContent(i)
