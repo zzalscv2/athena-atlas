@@ -15,31 +15,6 @@ from GaudiKernel.SystemOfUnits import MeV, GeV
 _USE_LEGACY_BINNING_IN_ENDCAPS = True
 
 
-def LArRawChannelMonConfigOld(flags):
-    from AthenaMonitoring import AthMonitorCfgHelperOld
-    from AthenaMonitoring.DQMonFlags import DQMonFlags
-    from AthenaCommon.BeamFlags import jobproperties
-    from LArMonitoring.LArMonitoringConf import LArRawChannelMonAlg
-    cosmics = jobproperties.Beam.beamType() == 'cosmics'
-    stream = _get_stream(DQMonFlags)
-    from LArMonTools.LArMonFlags import LArMonFlags
-    signal = LArMonFlags.doLArRawMonitorSignal()
-    helper = AthMonitorCfgHelperOld(flags, 'LArRawChannelMonAlgOldCfg')
-    alg = LArRawChannelMonConfigCore(
-        helper, instance=LArRawChannelMonAlg, flags=flags,
-        cosmics=cosmics, stream=stream, doSignal=signal)
-    from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-    if not athenaCommonFlags.isOnline():
-       from AthenaCommon.AlgSequence import AthSequencer
-       #if not hasattr (condSeq,"Calo_"+alg.NoiseKey+"Alg"):
-       if len([_ for _ in AthSequencer("AthCondSeq") if _.getName()=="Calo_"+str(alg.NoiseKey)+"Alg"]) == 0:
-          from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-          CaloNoiseCondAlg(noisetype=alg.NoiseKey.Path)
-       from AthenaMonitoring.AtlasReadyFilterTool import GetAtlasReadyFilterTool
-       alg.AtlasReadyFilterTool = [GetAtlasReadyFilterTool()]
-    return helper.result()
-
-
 def LArRawChannelMonConfig(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -49,7 +24,10 @@ def LArRawChannelMonConfig(flags):
     from AthenaConfiguration.Enums import BeamType
     cosmics = (flags.Beam.Type is BeamType.Cosmics)
     stream = _get_stream(flags.DQ)
-    signal = flags.LArMon.doLArRawMonitorSignal
+    try:
+       signal = flags.LArMon.doLArRawMonitorSignal
+    except AttributeError:
+       signal = False
     helper = AthMonitorCfgHelper(flags, 'LArRawChannelMonAlgCfg')
     alg = LArRawChannelMonConfigCore(
         helper, instance=CompFactory.LArRawChannelMonAlg,
@@ -329,13 +307,17 @@ def _superslot_channel_axis_ranges(partition):
 
 if __name__=='__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import WARNING
     log.setLevel(WARNING)
 
+    from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+    flags.addFlagsCategory("LArMon", addLArMonFlags)
+
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.Enums import BeamType
-    flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.Output.HISTFileName = 'LArRawChannelMonOutput.root'
     flags.DQ.enableLumiAccess = False

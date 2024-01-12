@@ -136,16 +136,21 @@ def LArCalibDelayMonConfigCore(helper,algoinstance,flags,gain="",doAccDigit=Fals
 if __name__=='__main__':
 
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+   flags = initConfigFlags()
+
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
 
    from AthenaMonitoring.DQConfigFlags import DQDataType
+
+   from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+   flags.addFlagsCategory("LArMon", addLArMonFlags)
    
    type_run="Delay"
    run="00404654"
    part="HecFcal"
-   flags = initConfigFlags()
+
    flags.Input.Files = [
        "/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Delay-32s-High-HecFcal/00404654/data21_calib.00404654.calibration_LArElec-Delay-32s-High-HecFcal.daq.RAW/data21_calib.00404654.calibration_LArElec-Delay-32s-High-HecFcal.daq.RAW._lb0000._SFO-1._0001.data",
        

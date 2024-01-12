@@ -2,16 +2,6 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArAffectedRegionsConfigOld(flags):
-    
-    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
-    from LArMonitoring.LArMonitoringConf import LArAffectedRegionsAlg
-
-    helper = AthMonitorCfgHelperOld(flags,'LArAffectedRegionsAlgOldCfg')
-    LArAffectedRegionsConfigCore(helper, LArAffectedRegionsAlg, flags)
-
-    return helper.result() 
-
 def LArAffectedRegionsConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
 
@@ -381,6 +371,9 @@ if __name__=='__main__':
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+
+    from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+    flags.addFlagsCategory("LArMon", addLArMonFlags)
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags.Input.Files = defaultTestFiles.RAW_RUN2

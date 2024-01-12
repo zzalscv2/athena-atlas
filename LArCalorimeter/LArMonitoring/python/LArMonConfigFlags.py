@@ -20,6 +20,7 @@ def createLArMonConfigFlags():
     acf=AthConfigFlags()
     acf.addFlag('LArMon.LArDigitKey', 'FREE')
     acf.addFlag('LArMon.EventBlockSize', 0)
+    acf.addFlag('LArMon.calibRun', False)
     # individual algos
     acf.addFlag('LArMon.doLArRawChannelMon', False)
     acf.addFlag('LArMon.doLArCollisionTimeMon', True)
@@ -34,4 +35,10 @@ def createLArMonConfigFlags():
     acf.addFlag('LArMon.doLArNoiseCorrelationMon', False)
     # and individual parameters
     acf.addFlag('LArMon.doLArRawMonitorSignal', False)
+    # parameters for individual algos
+    acf.addFlag('LArMon.customFEBsToMonitor','endcapAft19slot12,endcapAft19slot09,endcapAft20slot09')
     return acf
+
+def addLArMonFlags():
+    from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
+    return createLArMonConfigFlags()

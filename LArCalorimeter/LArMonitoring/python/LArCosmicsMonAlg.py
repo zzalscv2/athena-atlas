@@ -3,15 +3,6 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-
-def LArCosmicsMonConfigOld(flags):
-    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
-    from LArMonitoring.LArMonitoringConf import LArCosmicsMonAlg
-
-    helper = AthMonitorCfgHelperOld(flags, 'LArCosmicsMonAlgOldCfg')
-    LArCosmicsMonConfigCore(helper, LArCosmicsMonAlg,flags)
-    return helper.result()
-
 def LArCosmicsMonConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
 
@@ -82,12 +73,16 @@ def LArCosmicsMonConfigCore(helper, algoinstance,flags):
 if __name__=='__main__':
 
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+   flags = initConfigFlags()
+
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import WARNING
    log.setLevel(WARNING)
 
+   from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+   flags.addFlagsCategory("LArMon", addLArMonFlags)
+
    from AthenaConfiguration.TestDefaults import defaultTestFiles
-   flags = initConfigFlags()
    flags.Input.Files = defaultTestFiles.RAW_RUN2
 
    flags.Output.HISTFileName = 'LArCosmicsMonOutput.root'

@@ -2,20 +2,7 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArHVCorrMonConfigOld(flags):
-
-    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
-    from LArMonitoring.LArMonitoringConf import  LArHVCorrectionMonAlg
-
-    helper = AthMonitorCfgHelperOld(flags, 'LArHVCorrMonAlgOldCfg')
-    LArHVCorrMonConfigCore(helper, LArHVCorrectionMonAlg, flags)
-
-    from LArConditionsCommon import LArHVDB # noqa: F401
-
-    return helper.result()
-    
 def LArHVCorrMonConfig(flags):
-
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(flags,'LArHVCorrMonAlgCfg')
 
@@ -205,9 +192,10 @@ if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
     nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
     file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
-    flags = initConfigFlags()
     flags.Input.Files = [nightly+file]
     flags.Input.isMC = False
     flags.Output.HISTFileName = 'LArHVCorrMonOutput.root'

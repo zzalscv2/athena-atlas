@@ -2,44 +2,6 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArSuperCellMonConfigOld(flags):
-    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
-    from LArMonitoring.LArMonitoringConf import  LArSuperCellMonAlg
-
-    helper = AthMonitorCfgHelperOld(flags, 'LArSuperCellMonAlgOldCfg')
-    from AthenaCommon.BeamFlags import jobproperties
-    if jobproperties.Beam.beamType() == 'cosmics':
-       isCosmics=True
-    else:
-       isCosmics=False
-
-    from AthenaCommon.GlobalFlags  import globalflags
-    if globalflags.DataSource() == 'data':
-       isMC=False
-    else:
-       isMC=True
-
-    from AthenaCommon.AthenaCommonFlags import athenaCommonFlags   
-    if not isMC and not athenaCommonFlags.isOnline:
-        from LumiBlockComps.LBDurationCondAlgDefault import LBDurationCondAlgDefault
-        LBDurationCondAlgDefault()
-        from LumiBlockComps.TrigLiveFractionCondAlgDefault import TrigLiveFractionCondAlgDefault
-        TrigLiveFractionCondAlgDefault()
-        from LumiBlockComps.LuminosityCondAlgDefault import LuminosityCondAlgDefault
-        LuminosityCondAlgDefault()
-
-    from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-    CaloNoiseCondAlg()
-
-    algo = LArSuperCellMonConfigCore(helper, LArSuperCellMonAlg,flags,isCosmics, isMC, RemoveMasked=True)
-
-    from AthenaMonitoring.AtlasReadyFilterTool import GetAtlasReadyFilterTool
-    algo.ReadyFilterTool = [GetAtlasReadyFilterTool()]
-    from AthenaMonitoring.BadLBFilterTool import GetLArBadLBFilterTool
-    algo.BadLBTool = GetLArBadLBFilterTool()
-
-    return helper.result()
-
 def LArSuperCellMonConfig(flags, **kwargs):
     from AthenaCommon.Logging import logging
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
@@ -373,50 +335,50 @@ if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    ConfigFlags = initConfigFlags()
+    flags = initConfigFlags()
     #from AthenaConfiguration.TestDefaults import defaultTestFiles
-    #ConfigFlags.Input.Files = defaultTestFiles.ESD
+    #flags.Input.Files = defaultTestFiles.ESD
     # to test tier0 workflow:
-    #ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/data15_13TeV.00278748.physics_ZeroBias.merge.RAW._lb0384._SFO-ALL._0001.1']
-    #ConfigFlags.Input.Files = ['../data22_13p6TeV/data22_13p6TeV.00432180.physics_Main.daq.RAW._lb0335._SFO-16._0001.data']
-    #ConfigFlags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00432180/data22_13p6TeV.00432180.express_express.daq.RAW/data22_13p6TeV.00432180.express_express.daq.RAW._lb0374._SFO-12._0001.data']
-    ConfigFlags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00439798/data22_13p6TeV.00439798.express_express.daq.RAW/data22_13p6TeV.00439798.express_express.daq.RAW._lb1085._SFO-16._0001.data']
+    #flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/data15_13TeV.00278748.physics_ZeroBias.merge.RAW._lb0384._SFO-ALL._0001.1']
+    #flags.Input.Files = ['../data22_13p6TeV/data22_13p6TeV.00432180.physics_Main.daq.RAW._lb0335._SFO-16._0001.data']
+    #flags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00432180/data22_13p6TeV.00432180.express_express.daq.RAW/data22_13p6TeV.00432180.express_express.daq.RAW._lb0374._SFO-12._0001.data']
+    flags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00439798/data22_13p6TeV.00439798.express_express.daq.RAW/data22_13p6TeV.00439798.express_express.daq.RAW._lb1085._SFO-16._0001.data']
 
-    #ConfigFlags.Calo.Cell.doPileupOffsetBCIDCorr=True
-    ConfigFlags.Output.HISTFileName = 'LArSuperCellMonOutput.root'
-    ConfigFlags.DQ.enableLumiAccess = True
-    ConfigFlags.DQ.useTrigger = False
-    ConfigFlags.DQ.Environment = 'tier0'
-    #ConfigFlags.DQ.Environment = 'online'
-    ConfigFlags.IOVDb.GlobalTag = "CONDBR2-ES1PA-2022-07"
-    ConfigFlags.Common.isOnline = True
-    ConfigFlags.GeoModel.Run=LHCPeriod.Run3
-    ConfigFlags.Exec.OutputLevel=WARNING
-    ConfigFlags.Beam.BunchStructureSource=BunchStructureSource.FILLPARAMS
-    #ConfigFlags.Beam.BunchStructureSource=BunchStructureSource.Lumi
+    #flags.Calo.Cell.doPileupOffsetBCIDCorr=True
+    flags.Output.HISTFileName = 'LArSuperCellMonOutput.root'
+    flags.DQ.enableLumiAccess = True
+    flags.DQ.useTrigger = False
+    flags.DQ.Environment = 'tier0'
+    #flags.DQ.Environment = 'online'
+    flags.IOVDb.GlobalTag = "CONDBR2-ES1PA-2022-07"
+    flags.Common.isOnline = True
+    flags.GeoModel.Run=LHCPeriod.Run3
+    flags.Exec.OutputLevel=WARNING
+    flags.Beam.BunchStructureSource=BunchStructureSource.FILLPARAMS
+    #flags.Beam.BunchStructureSource=BunchStructureSource.Lumi
     import sys
-    ConfigFlags.fillFromArgs(sys.argv[1:])
-    ConfigFlags.lock()
+    flags.fillFromArgs(sys.argv[1:])
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
     storeGateSvc = cfg.getService("StoreGateSvc")
     storeGateSvc.Dump=True
 
     # in case of tier0 workflow:
     #from CaloRec.CaloRecoConfig import CaloRecoCfg
-    #cfg.merge(CaloRecoCfg(ConfigFlags))
+    #cfg.merge(CaloRecoCfg(flags))
 
     #from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    #cfg.merge(PoolReadCfg(ConfigFlags))
+    #cfg.merge(PoolReadCfg(flags))
 
-    if not ConfigFlags.DQ.Environment == 'online':
+    if not flags.DQ.Environment == 'online':
        from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
        # FillParamsFolderKey = /TDAQ/OLC/LHC/FILLPARAMS
-       cfg.merge(BunchCrossingCondAlgCfg(ConfigFlags))
+       cfg.merge(BunchCrossingCondAlgCfg(flags))
 
-    cfg.merge(LArSuperCellMonConfig(ConfigFlags)) 
+    cfg.merge(LArSuperCellMonConfig(flags)) 
 
     f=open("LArSuperCellMon.pkl","wb")
     cfg.store(f)

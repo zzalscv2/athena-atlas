@@ -2,17 +2,7 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArRODMonConfigOld(flags,cellDebug=False, dspDebug=False):
-    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
-    from LArMonitoring.LArMonitoringConf import  LArRODMonAlg
-
-    helper = AthMonitorCfgHelperOld(flags, 'LArRODMonALgOldCfg')
-    LArRODMonConfigCore(helper, LArRODMonAlg,flags,cellDebug, dspDebug)
-
-    return helper.result()
-
 def LArRODMonConfig(flags,cellDebug=False, dspDebug=False):
-
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(flags,'LArRODMonAlgCfg')
 
@@ -217,12 +207,16 @@ def LArRODMonConfigCore(helper, algoinstance,flags, cellDebug=False, dspDebug=Fa
 if __name__=='__main__':
 
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+   flags = initConfigFlags()
+
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
 
+   from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+   flags.addFlagsCategory("LArMon", addLArMonFlags)
+
    from AthenaConfiguration.TestDefaults import defaultTestFiles
-   flags = initConfigFlags()
    flags.Input.Files = defaultTestFiles.RAW_RUN2
 
    flags.Output.HISTFileName = 'LArRODMonOutput.root'

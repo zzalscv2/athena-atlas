@@ -1,17 +1,6 @@
-
 #
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-
-
-def LArNoiseCorrelationMonConfigOld(flags):
-    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
-    from LArMonitoring.LArMonitoringConf import LArNoiseCorrelationMonAlg
-
-    helper = AthMonitorCfgHelperOld(flags, 'LArNoiseCorrelationMonAlgCfg')
-    LArNoiseCorrelationMonConfigCore(helper, LArNoiseCorrelationMonAlg,flags)
-    return helper.result()
-
 def LArNoiseCorrelationMonConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
 
@@ -32,9 +21,11 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,flags):
     larNoiseCorrelMonAlg = helper.addAlgorithm(algoinstance,'larNoiseCorrelMonAlg')
 
     #set custom list of FEBs to be monitored (if you want one): each FEB should be passed as a string of the form "BarrelAft01slot10"
-    FEBs_from_DQ_run_350440 = ["endcapAft19slot12","endcapAft19slot09","endcapAft20slot09"]
 
-    customFEBStoMonitor=FEBs_from_DQ_run_350440
+    try:
+       customFEBStoMonitor = flags.LArMon.customFEBsToMonitor
+    except AttributeError:
+       customFEBStoMonitor = ["endcapAft19slot12","endcapAft19slot09","endcapAft20slot09"]
 
 
     #correct custom FEBs for upper-lower cases or single-digit ft and slot numbers (e.g. 3 instead of 03)
@@ -67,7 +58,14 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,flags):
     larNoiseCorrelMonAlg.ProblemsToMask=["deadReadout","deadPhys","short","almostDead","highNoiseHG","highNoiseMG","highNoiseLG","sporadicBurstNoise"]
     larNoiseCorrelMonAlg.IgnoreBadChannels=True
     larNoiseCorrelMonAlg.TriggerChain = "HLT_noalg_zb_L1ZB, HLT_noalg_cosmiccalo_L1RD1_EMPTY" #turn off for calibration run 
-    larNoiseCorrelMonAlg.IsCalibrationRun = False
+    try:
+       larNoiseCorrelMonAlg.IsCalibrationRun = flags.LArMon.calibRun
+    except AttributeError:
+       larNoiseCorrelMonAlg.IsCalibrationRun = False
+    try:   
+       larNoiseCorrelMonAlg.LArDigitContainerKey = flags.LArMon.LArDigitKey
+    except AttributeError:   
+       larNoiseCorrelMonAlg.LArDigitContainerKey = 'FREE'
 
     #deal with custom febs to monitor (if any)
     if len(customFEBStoMonitor)==0: 
@@ -195,12 +193,16 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,flags):
 if __name__=='__main__':
 
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+   flags = initConfigFlags()
+
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
 
+   from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+   flags.addFlagsCategory("LArMon", addLArMonFlags)
+
    from AthenaConfiguration.TestDefaults import defaultTestFiles
-   flags = initConfigFlags()
    flags.Input.Files = defaultTestFiles.RAW_RUN2
 
    flags.Output.HISTFileName = 'LArNoiseCorrMonOutput.root'

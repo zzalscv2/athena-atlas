@@ -20,27 +20,6 @@ def LArNoisyROMonConfig(flags, inKey="",
     return LArNoisyROMonConfigCore(helper,CompFactory.LArNoisyROMonAlg, flags, inKey, NoisyFEBDefStr, MNBTightFEBDefStr, MNBTight_PsVetoFEBDefStr, MNBLooseFEBDefStr)
 
 
-def LArNoisyROMonConfigOld(flags, inKey="", 
-                              NoisyFEBDefStr="", 
-                              MNBTightFEBDefStr="",
-                              MNBTight_PsVetoFEBDefStr="",
-                              MNBLooseFEBDefStr=""):
-
-    from LArCellRec.LArNoisyROFlags import larNoisyROFlags
-    NoisyFEBDefStr =  '(>'+str(larNoisyROFlags.BadChanPerFEB())+' chan with Q>'+str(larNoisyROFlags.CellQualityCut())+')'
-    MNBTightFEBDefStr =  '(>'+str(larNoisyROFlags.MNBTightCut())+' chan with Q>'+str(larNoisyROFlags.CellQualityCut())+')'      
-    MNBTight_PsVetoFEBDefStr =  '(>'+str(larNoisyROFlags.MNBTight_PsVetoCut()[0])+' chan with Q>'+str(larNoisyROFlags.CellQualityCut())+') + PS veto (<'+str(larNoisyROFlags.MNBTight_PsVetoCut()[1])+' channels)'
-    MNBLooseFEBDefStr =  '(>'+str(larNoisyROFlags.MNBLooseCut())+' chan with Q>'+str(larNoisyROFlags.CellQualityCut())+')'
-    from AthenaMonitoring import AthMonitorCfgHelperOld
-    from LArMonitoring.LArMonitoringConf import LArNoisyROMonAlg
-    helper = AthMonitorCfgHelperOld(flags,'LArNoisyROMonAlgOldCfg')
-
-    LArNoisyROMonConfigCore(helper,LArNoisyROMonAlg, flags, inKey, NoisyFEBDefStr, MNBTightFEBDefStr, MNBTight_PsVetoFEBDefStr, MNBLooseFEBDefStr)
-
-    return helper.result()
-
-
-
 def LArNoisyROMonConfigCore(helper,algoinstance,flags, 
                               inKey="", 
                               NoisyFEBDefStr="(>30 chan with Q>4000)", 
@@ -67,8 +46,7 @@ def LArNoisyROMonConfigCore(helper,algoinstance,flags,
     larNoisyROMonAlg.SubDetNames=lArDQGlobals.SubDet[0:2]
     larNoisyROMonAlg.PartitionNames=lArDQGlobals.Partitions[0:4]
 
-    #FIXME: True only for testing
-    larNoisyROMonAlg.storeLooseMNBFEBs=False
+    larNoisyROMonAlg.storeLooseMNBFEBs=True
     if inKey != "":
        larNoisyROMonAlg.inputKey=inKey 
 
@@ -279,12 +257,13 @@ if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
-    createLArMonConfigFlags()
+    flags = initConfigFlags()
+    from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+    flags.addFlagsCategory("LArMon", addLArMonFlags)
 
     nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q431/21.0/v1/'
     file = 'myESD.pool.root'
-    flags = initConfigFlags()
+
     flags.Input.Files = [nightly+file]
     flags.Input.isMC = False
     flags.DQ.useTrigger = True
