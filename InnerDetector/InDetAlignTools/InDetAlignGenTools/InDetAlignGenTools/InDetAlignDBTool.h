@@ -47,6 +47,7 @@ class AlignableTransform;
 namespace InDetDD {
   class PixelDetectorManager;
   class SCT_DetectorManager;
+  class SiDetectorManager;
 }
 
 class ATLAS_NOT_THREAD_SAFE InDetAlignDBTool: // Global variables and const_cast are used.
@@ -181,6 +182,7 @@ virtual public IInDetAlignDBTool, public AthAlgTool {
   const SCT_ID* m_sctid;
   const InDetDD::PixelDetectorManager* m_pixman;
   const InDetDD::SCT_DetectorManager* m_sctman;
+  std::vector<const InDetDD::SiDetectorManager *> m_managers;
 
   std::vector<std::string> m_alignobjs;
   std::vector<int> m_alignchans;

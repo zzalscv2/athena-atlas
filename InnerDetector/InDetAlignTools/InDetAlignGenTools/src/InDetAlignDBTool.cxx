@@ -113,43 +113,53 @@ StatusCode InDetAlignDBTool::initialize()
   ndet[0]=0;
   ndet[1]=0;
 
+  //We use the presence of the DetManagers as proxies for whether we run with the detector enabled everywhere
   if (StatusCode::SUCCESS!=detStore()->retrieve(m_pixman,m_pixmanName) || m_pixman==nullptr) {
-    ATH_MSG_WARNING( "Could not find pixel manager "<<m_pixmanName);
-    return StatusCode::FAILURE;
+    ATH_MSG_INFO( "Could not find pixel manager "<<m_pixmanName<<" running without pixel");
   }
+  else m_managers.push_back(m_pixman);
 
   if (StatusCode::SUCCESS!=detStore()->retrieve(m_sctman,m_sctmanName) || m_sctman==nullptr) {
-    ATH_MSG_FATAL("Could not find SCT manager "<<m_sctmanName);
+    ATH_MSG_INFO("Could not find SCT manager "<<m_sctmanName<<" running without SCT/Strip");
+  }
+  else m_managers.push_back(m_sctman);
+
+  if(m_pixman){  
+      if (m_pixman->m_alignfoldertype == InDetDD::static_run1 && !m_forceUserDBConfig){
+        m_dynamicDB = false;
+      }
+      if (m_pixman->m_alignfoldertype == InDetDD::timedependent_run2 && !m_forceUserDBConfig){
+        m_par_dbroot = "/Indet/AlignL3";
+        m_dynamicDB = true;
+      }  
+  }
+
+  if (m_pixman && m_sctman){
+      if (m_pixman->m_alignfoldertype!=m_sctman->m_alignfoldertype) {
+          ATH_MSG_FATAL("Pixel and SCT Managers have different alignfolder type registered --> Check ");
+          return StatusCode::FAILURE;
+      }
+  }
+  
+  m_par_dbkey = m_par_dbroot;
+
+  if(m_pixman && (detStore()->retrieve(m_pixid).isFailure())) {
+    ATH_MSG_FATAL("No Pixel ID Found!");
     return StatusCode::FAILURE;
   }
 
-  // Retrieve AlignFolderType so we can decide whether to update old or new scheme
-  // Needs additional work as it currently only overwrites user settings!!! MD
-  if (m_pixman->m_alignfoldertype!=m_sctman->m_alignfoldertype)
-    ATH_MSG_FATAL("Pixel and SCT Managers have different alignfolder type registered --> Check ");
-  
-  if (m_pixman->m_alignfoldertype == InDetDD::static_run1 && !m_forceUserDBConfig){
-    m_dynamicDB = false;
+  if(m_sctman && (detStore()->retrieve(m_sctid).isFailure())) {
+    ATH_MSG_FATAL("No SCT ID Found!");
+    return StatusCode::FAILURE;
   }
-  if (m_pixman->m_alignfoldertype == InDetDD::timedependent_run2 && !m_forceUserDBConfig){
-    m_par_dbroot = "/Indet/AlignL3";
-    m_dynamicDB = true;
-  }  
-  m_par_dbkey = m_par_dbroot;
 
-  if ((StatusCode::SUCCESS!=detStore()->retrieve(m_pixid)) ||
-      (StatusCode::SUCCESS!=detStore()->retrieve(m_sctid))) {
-    // attempt failed - optionally fake up the geometry
-    if (m_par_fake==1) {
-      ATH_MSG_DEBUG("Initialising fake full ATLAS geometry");
-      fakeGeom(3,3,4,9);
-    } else if (m_par_fake==2) {
-      ATH_MSG_DEBUG("Initialising fake CTB geometry");
-      fakeGeom(3,0,4,0);
-    } else {
-      ATH_MSG_FATAL( "Problem retrieving ID helpers");
-      return StatusCode::FAILURE;
-    }
+  //optionally fake up the geometry
+  if (m_par_fake==1) {
+    ATH_MSG_INFO("Initialising fake full ATLAS geometry");
+    fakeGeom(3,3,4,9);
+  } else if (m_par_fake==2) {
+    ATH_MSG_INFO("Initialising fake CTB geometry");
+    fakeGeom(3,0,4,0);
   } else {
     // setup list of alignable transforms from geometry
     int chan[3];
@@ -158,13 +168,13 @@ StatusCode InDetAlignDBTool::initialize()
 
     for (int i=0;i<3;++i) chan[i]=100*i;
     std::string man_name;
-    for (int idet=1;idet<3;++idet) {
-      for (const InDetDD::SiDetectorElement* element: *(idet==1 ? m_pixman->getDetectorElementCollection() : m_sctman->getDetectorElementCollection())) {
+    int idet = 0;
+    for (auto manager:m_managers) {
+      for (const InDetDD::SiDetectorElement* element : * manager->getDetectorElementCollection()) {
         if (element!=nullptr) {
           const Identifier ident=element->identify();
           int det,bec,layer,ring,sector,side;
           if (idToDetSet(ident,det,bec,layer,ring,sector,side)) {
-            if (det==idet) {
               std::string level[3];
               for (int i=TransfLevel_low;i<3;++i) {  
                 level[i]=dirkey(det,bec,layer,1+i,sector);
@@ -176,18 +186,18 @@ StatusCode InDetAlignDBTool::initialize()
                   m_alignchans.push_back(chan[i]++);
                 }
               }
-              ++ndet[idet-1];
-            } else {
-              ATH_MSG_ERROR("Detector of wrong type in list " << idet );
-            }
+              ++ndet[idet];
           } else {
               ATH_MSG_ERROR("Si detector element type " << idet << " has no detset conversion" );
           }
         }
       }
+      idet++;
     }
   }
-
+    ATH_MSG_INFO( "Geometry initialisation sees " << ndet[0] << 
+      " pixel and " <<  ndet[1] << " SCT modules giving " << m_alignobjs.size() 
+    << " alignment keys" );
 
   if (msgLvl(MSG::DEBUG)) {
     ATH_MSG_DEBUG( "Database root folder " << m_par_dbroot );
@@ -301,44 +311,47 @@ void InDetAlignDBTool::createDB() const
 
   // now loop over all detector modules and add null level 3 transforms
   std::vector<std::string> level2;
-  for (int idet=1;idet<3;++idet) {
-    for (const InDetDD::SiDetectorElement* element: *(idet==1 ? m_pixman->getDetectorElementCollection() : m_sctman->getDetectorElementCollection())) {
-      if (element!=nullptr) {
-        const Identifier ident=element->identify();
-        std::string key=dirkey(ident,3);
-        // do not produce AlignableTrasnforms for SCT side 1 if option set
-        if (!(m_sctid->is_sct(ident) && m_sctid->side(ident)==1) || 
-            m_par_scttwoside) {
-            if ((pat=getTransPtr(key))) {
-            pat->add(ident,Amg::EigenTransformToCLHEP( Amg::Transform3D::Identity() ) );
-            } else {
-            ATH_MSG_ERROR( "Cannot retrieve AlignableTransform for key " << key );
-          }
-          // add level 2 transform if needed - do this the first time a module
-          // for this level 3 key is seen
-          std::vector<std::string>::const_iterator ix=
-            find(level2.begin(),level2.end(),key);
-            if (ix==level2.end()) {
-            level2.push_back(key);
-            // construct identifier of level 2 transform
-            Identifier ident2;
-            if (m_pixid->is_pixel(ident)) {
-              ident2=m_pixid->wafer_id(m_pixid->barrel_ec(ident),
-                                       m_pixid->layer_disk(ident),m_pixid->phi_module(ident),0); // needed to be extended to phi-module due to DBM
-            } else if (m_sctid->is_sct(ident)) {
-              ident2=m_sctid->wafer_id(m_sctid->barrel_ec(ident),
-                     m_sctid->layer_disk(ident),0,0,0);
+  for (const InDetDD::SiDetectorManager * manager: m_managers) {
+      const InDetDD::SCT_DetectorManager * testSCT = nullptr;
+      const InDetDD::PixelDetectorManager * testPixel = nullptr;
+      testPixel = dynamic_cast<const InDetDD::PixelDetectorManager *>(manager);
+      if(!testPixel) testSCT = dynamic_cast<const InDetDD::SCT_DetectorManager *>(manager);
+      for (const InDetDD::SiDetectorElement* element: *manager->getDetectorElementCollection()) {
+            if (element!=nullptr) {
+                const Identifier ident=element->identify();
+                std::string key=dirkey(ident,3);
+                // do not produce AlignableTrasnforms for SCT side 1 if option set
+                if (!(m_sctid && m_sctid->is_sct(ident) && m_sctid->side(ident)==1) || m_par_scttwoside) {
+                    if ((pat=getTransPtr(key))) {
+                        pat->add(ident,Amg::EigenTransformToCLHEP( Amg::Transform3D::Identity() ) );
+                    } 
+                else ATH_MSG_ERROR( "Cannot retrieve AlignableTransform for key " << key );
+                }
+                // add level 2 transform if needed - do this the first time a module
+                // for this level 3 key is seen
+                std::vector<std::string>::const_iterator ix = find(level2.begin(),level2.end(),key);
+                if (ix==level2.end()) {
+                    level2.push_back(key);
+                    // construct identifier of level 2 transform
+                    Identifier ident2;
+                    if(testPixel){
+                        if (m_pixid->is_pixel(ident)) {
+                            ident2=m_pixid->wafer_id(m_pixid->barrel_ec(ident), m_pixid->layer_disk(ident),
+                            m_pixid->phi_module(ident),0); // needed to be extended to phi-module due to DBM
+                        }
+                    } 
+                    if(testSCT){
+                        if (m_sctid->is_sct(ident)) {
+                            ident2=m_sctid->wafer_id(m_sctid->barrel_ec(ident), m_sctid->layer_disk(ident),0,0,0);
+                        }
+                    }
+                    std::string key2=dirkey(ident,2);
+                    if ((pat=getTransPtr(key2))) {
+                        pat->add(ident2,Amg::EigenTransformToCLHEP( Amg::Transform3D::Identity() ) );
+                    } else ATH_MSG_ERROR( "Cannot retrieve AlignableTransform for key " << key2 );
+                }
             }
-              std::string key2=dirkey(ident,2);
-            if ((pat=getTransPtr(key2))) {
-              pat->add(ident2,Amg::EigenTransformToCLHEP( Amg::Transform3D::Identity() ) );
-            } else {
-              ATH_MSG_ERROR( "Cannot retrieve AlignableTransform for key " << key2 );
-            }
-          }
-        }
       }
-    }
   }
   // create the global ID object with positions for the pixels (one unit)
   // and SCT barrel/endcap
@@ -347,17 +360,21 @@ void InDetAlignDBTool::createDB() const
   if ((pat=getTransPtr(key1))) {
     Amg::Transform3D globshift;
     globshift.setIdentity();
-    // pixel - barrel and endcap as one, treated as barrel layer 0 module 0
-    ident1=m_pixid->wafer_id(0,0,0,0);
-    pat->add(ident1,Amg::EigenTransformToCLHEP(globshift));
-    // SCT barrel - barrel 0 module 0
-    ident1=m_sctid->wafer_id(0,0,0,0,0);
-    pat->add(ident1,Amg::EigenTransformToCLHEP(globshift));
-    // SCT endcaps A and C
-    ident1=m_sctid->wafer_id(-2,0,0,0,0);
-    pat->add(ident1,Amg::EigenTransformToCLHEP(globshift));
-    ident1=m_sctid->wafer_id(2,0,0,0,0);
-    pat->add(ident1,Amg::EigenTransformToCLHEP(globshift));
+    if(m_pixid){
+        // pixel - barrel and endcap as one, treated as barrel layer 0 module 0
+        ident1=m_pixid->wafer_id(0,0,0,0);
+        pat->add(ident1,Amg::EigenTransformToCLHEP(globshift));
+    }
+    if(m_sctid){
+        // SCT barrel - barrel 0 module 0
+        ident1=m_sctid->wafer_id(0,0,0,0,0);
+        pat->add(ident1,Amg::EigenTransformToCLHEP(globshift));
+        // SCT endcaps A and C
+        ident1=m_sctid->wafer_id(-2,0,0,0,0);
+        pat->add(ident1,Amg::EigenTransformToCLHEP(globshift));
+        ident1=m_sctid->wafer_id(2,0,0,0,0);
+        pat->add(ident1,Amg::EigenTransformToCLHEP(globshift));
+    }
   } else {
     ATH_MSG_ERROR( "Cannot retrieve AlignableTransform for key " << key1 );
   }
@@ -376,7 +393,7 @@ bool InDetAlignDBTool::idToDetSet(const Identifier ident, int& det, int& bec,
   // note bec is +-1 or 0, not +-2 as returned by idenfitiers
 
   bool resok=false;
-  if (m_pixid->is_pixel(ident)) {
+  if (m_pixman && m_pixid->is_pixel(ident)) {
     det=1;
     bec=m_pixid->barrel_ec(ident)/2;
     layer=m_pixid->layer_disk(ident);
@@ -384,7 +401,7 @@ bool InDetAlignDBTool::idToDetSet(const Identifier ident, int& det, int& bec,
     sector=m_pixid->phi_module(ident);
     side=0;
     resok=true;
-  } else if (m_sctid->is_sct(ident)) {
+  } else if (m_sctman && m_sctid->is_sct(ident)) {
     det=2;
     bec=m_sctid->barrel_ec(ident)/2;
     layer=m_sctid->layer_disk(ident);
