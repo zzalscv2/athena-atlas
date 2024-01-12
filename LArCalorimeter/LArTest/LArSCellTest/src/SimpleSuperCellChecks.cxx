@@ -17,6 +17,7 @@
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "CaloIdentifier/CaloIdManager.h"
 #include "xAODTracking/VertexContainer.h"
+#include "LArElecCalib/LArProvenance.h"
 #include "TFile.h"
 #include "TH1F.h"
 #include "TH2F.h"
@@ -438,7 +439,7 @@ StatusCode SimpleSuperCellChecks::execute(){
 		float SCell_et=scell->et();
 		int idx = scell->caloDDE()->calo_hash();
 		float resol = -999.;
-		if ( scell->provenance() & 0x40 ) ccQual++;
+		if ( LArProv::test(scell->provenance(),LArProv::SCPASSBCIDMAX) ) ccQual++;
 		if ( sc_ets[idx] > 100 ) {
 			// calculate resolution
 			resol = sc_ets[idx] - SCell_et;
@@ -551,7 +552,7 @@ StatusCode SimpleSuperCellChecks::execute(){
 		if ( sc_ets[idx] > 1000 ){
 			m_TimeSCellsAT->Fill ( scell->time() );
 			m_QualitySCellsAT->Fill ( scell->provenance() );
-			if ( scell->provenance() & 0x40 ) m_resolutionBCID_perLayer[index+index2]->Fill(resol);
+			if (LArProv::test(scell->provenance(),LArProv::SCPASSBCIDMAX)  ) m_resolutionBCID_perLayer[index+index2]->Fill(resol);
 			m_resolutionMEt_perLayer[index+index2]->Fill(resol);
 			m_resol_vs_eta_perLayer[index+index2]->Fill( scell->eta(), resol);
 			m_resol_vs_nvtx_perLayer[index+index2]->Fill( nvtxs, resol);

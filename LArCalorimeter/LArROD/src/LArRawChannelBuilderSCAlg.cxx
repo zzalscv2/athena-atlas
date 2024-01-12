@@ -9,6 +9,7 @@
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArIdentifier/LArOnline_SuperCellID.h"
 #include "AthAllocators/DataPool.h"
+#include "LArElecCalib/LArProvenance.h"
 #include <cmath>
 
   
@@ -208,10 +209,10 @@ StatusCode LArRawChannelBuilderSCAlg::execute(const EventContext& ctx) const {
     ss->setGain((CaloGain::CaloGain)0);
     float et = ss->et()*1e-3; // et in GeV
     // for super-cells provenance and time are slightly different
-    uint16_t prov = 0x2000;
-    if(et>10e3 && tau>-8 && tau<16) prov |= 0x200;
-    else if(et<=10e3 && fabs(tau)<8) prov |= 0x200; 
-    if ( passBCIDmax ) prov |=0x40;
+    uint16_t prov = LArProv::QTPRESENT;//0x2000;
+    if(et>10e3 && tau>-8 && tau<16) prov |= LArProv::SCTIMEPASS; //0x200;
+    else if(et<=10e3 && std::fabs(tau)<8) prov |= LArProv::SCTIMEPASS; //0x200; 
+    if ( passBCIDmax ) prov |= LArProv::SCPASSBCIDMAX; //0x40;
     ss->setProvenance(prov);
     
     ss->setQuality(iquaShort);

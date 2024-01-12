@@ -20,8 +20,6 @@
 #include <set>
 #include <array>
 
-class CaloDetDescrManager;
-class CaloIdManager;
 class LArOnlineID;
 class CaloNoise;
 
@@ -107,7 +105,6 @@ class LArRawChannelMonAlg : public AthMonitorAlgorithm {
 
   // --- tools ---
   const LArOnlineID* m_lar_online_id_ptr{nullptr};
-  const CaloIdManager* m_calo_id_mgr_ptr{nullptr};
 
   // Handle to bad-channel mask
   LArBadChannelMask m_bcMask;
@@ -118,9 +115,6 @@ class LArRawChannelMonAlg : public AthMonitorAlgorithm {
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{
       this,"CablingKey", "LArOnOffIdMap",
       "SG Key of LArOnOffIdMapping object"};
-  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{
-      this, "CaloDetDescrManager", "CaloDetDescrManager",
-      "SG Key for CaloDetDescrManager in the Condition Store"};
   //To get the data-dependency right ... 
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_larFlagKey{this, "LArStatusFlag", "EventInfo.larFlags", "Key for EventInfo object"};
 
