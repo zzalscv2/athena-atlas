@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTOOLINTERFACES_IFITTERTOOL_H
@@ -44,7 +44,8 @@ namespace ActsTrk {
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
       const Acts::CalibrationContext& calContext,
-      const TrackingSurfaceHelper &tracking_surface_helper) const = 0;
+      const TrackingSurfaceHelper &tracking_surface_helper,
+      const Acts::Surface* targetSurface = nullptr) const = 0;
   };
 
 }

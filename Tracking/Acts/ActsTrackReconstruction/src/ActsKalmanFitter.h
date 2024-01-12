@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSKALMANFITTER_H
@@ -123,7 +123,7 @@ public:
     const Trk::RunOutlierRemoval runOutlier = false,
     const Trk::ParticleHypothesis matEffects = Trk::nonInteracting) const override;
   
-  //! fit a set of xAOD uncalibrated measurements
+  //! fit a set of xAOD uncalibrated Measurements
   virtual  
       std::unique_ptr< ActsTrk::MutableTrackContainer >
       fit(const EventContext& ctx,
@@ -132,7 +132,9 @@ public:
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
       const Acts::CalibrationContext& calContext,
-      const TrackingSurfaceHelper &tracking_surface_helper) const override;
+      const TrackingSurfaceHelper &tracking_surface_helper,
+      const Acts::Surface* targetSurface = nullptr  // optional target surface - defaults to perigee in global origin
+      ) const override;
 
   //! extend a track fit including a new set of MeasurementBase objects
   virtual std::unique_ptr<Trk::Track> fit(
