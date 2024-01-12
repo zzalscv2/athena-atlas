@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 
@@ -117,24 +117,12 @@ if __name__=='__main__':
     rawChannelContainer = 'TileRawChannelCnt'
 
     if flags.Input.Format is Format.BS:
+        from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+        cfg.merge( TileRawDataReadingCfg(flags,
+                                         readMuRcv=args.tmdb,
+                                         readMuRcvDigits=args.tmdb,
+                                         readMuRcvRawCh=args.tmdb) )
 
-        cfg.addPublicTool(CompFactory.TileROD_Decoder(fullTileMode=flags.Input.RunNumbers[0]))
-
-        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-        tileTypeNames = ['TileDigitsContainer/TileDigitsCnt',
-                         'TileRawChannelContainer/TileRawChannelCnt',]
-        if args.tmdb:
-            tileTypeNames += ['TileRawChannelContainer/MuRcvRawChCnt',
-                              'TileDigitsContainer/MuRcvDigitsCnt',
-                              'TileMuonReceiverContainer/TileMuRcvCnt',]
-
-        if flags.Tile.RunType == 'LAS':
-            tileTypeNames += ['TileLaserObject/TileLaserObj']
-        if flags.Tile.RunType != 'PHY':
-            tileTypeNames += ['TileBeamElemContainer/TileBeamElemCnt']
-
-        cfg.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
-        cfg.getEventAlgo('SGInputLoader').FailIfNoProxy=False
     else:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         cfg.merge(PoolReadCfg(flags))

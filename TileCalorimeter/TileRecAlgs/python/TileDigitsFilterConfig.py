@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile digits filter algorithm"""
 
@@ -78,9 +78,8 @@ if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)
 
-    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    tileTypeNames = ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']
-    acc.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
+    from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+    acc.merge( TileRawDataReadingCfg(flags, readMuRcv=False) )
 
     acc.merge( TileDigitsFilterOutputCfg(flags) )
 

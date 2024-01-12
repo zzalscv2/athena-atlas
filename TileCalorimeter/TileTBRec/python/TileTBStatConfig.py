@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 
@@ -60,13 +60,8 @@ if __name__=='__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
 
-    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    tileTypeNames = ['TileDigitsContainer/TileDigitsCnt',
-                     'TileRawChannelContainer/TileRawChannelCnt',
-                     'TileLaserObject/TileLaserObj',
-                     'TileBeamElemContainer/TileBeamElemCnt']
-    cfg.merge( ByteStreamReadCfg(flags, type_names=tileTypeNames) )
-    cfg.getService('ByteStreamCnvSvc').ROD2ROBmap = ["-1"]
+    from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+    cfg.merge( TileRawDataReadingCfg(flags, readMuRcv=False, readBeamElem=True) )
 
     cfg.merge( TileTBStatCfg(flags) )
 

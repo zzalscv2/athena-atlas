@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 '''@file RunTileCalibRec.py
 @brief Script to run Tile Reconstrcution/Monitoring for calibration runs
 '''
 
 from TileRecEx import TileInputFiles
-from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 
 
@@ -262,23 +261,10 @@ if __name__=='__main__':
     # =======>>> Set up the File (BS | POOL) reading
     if flags.Input.Format is Format.BS:
         # Configure reading the Tile BS files
-        typeNames = ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']
-
-        if any([args.tmdb_digits_mon, args.tmdb_mon, args.ntuple]):
-            typeNames += ['TileDigitsContainer/MuRcvDigitsCnt']
-        if any([args.tmdb_channel_mon, args.tmdb_mon, args.ntuple]):
-            typeNames += ['TileRawChannelContainer/MuRcvRawChCnt']
-        if any([args.ntuple]):
-            typeNames += ['TileMuonReceiverContainer/TileMuRcvCnt', 'SG::AuxVectorBase/TileMuRcvCnt']
-        if flags.Tile.RunType == 'LAS':
-            typeNames += ['TileLaserObject/TileLaserObj']
-        if flags.Tile.RunType != 'PHY':
-            typeNames += ['TileBeamElemContainer/TileBeamElemCnt']
-
-        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-        cfg.merge( ByteStreamReadCfg(flags, type_names=typeNames) )
-        cfg.getService("ByteStreamCnvSvc").ROD2ROBmap=["-1"]
-        cfg.addPublicTool( CompFactory.TileROD_Decoder(fullTileMode=runNumber) )
+        from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+        cfg.merge( TileRawDataReadingCfg(flags, readMuRcv=args.ntuple,
+                                         readMuRcvDigits=any([args.tmdb_digits_mon, args.tmdb_mon, args.ntuple]),
+                                         readMuRcvRawCh=any([args.tmdb_channel_mon, args.tmdb_mon, args.ntuple])) )
 
     else:
         # Configure reading POOL files

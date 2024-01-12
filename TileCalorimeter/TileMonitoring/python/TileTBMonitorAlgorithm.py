@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 '''
 @file TileTBMonitorAlgorithm.py
@@ -7,7 +7,6 @@
 '''
 
 from AthenaConfiguration.Enums import Format
-from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import GeV
 
 def TileTBMonitoringConfig(flags, fragIDs=[0x100, 0x101, 0x200, 0x201, 0x402], **kwargs):
@@ -265,14 +264,12 @@ if __name__ == '__main__':
     rawChannels = args.channels
     cells = args.cells
     if flags.Input.Format is Format.BS:
-        cfg.addPublicTool(CompFactory.TileROD_Decoder(fullTileMode=flags.Input.RunNumbers[0]))
+        readDigitsFlx = 'Flx' in args.digits
+        from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+        cfg.merge( TileRawDataReadingCfg(flags, readMuRcv=False,
+                                         readDigits=(not readDigitsFlx),
+                                         readDigitsFlx=readDigitsFlx) )
 
-        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-        tileTypeNames = [f'TileDigitsContainer/{args.digits}', 'TileRawChannelContainer/TileRawChannelCnt']
-        if flags.Tile.RunType != 'PHY':
-            tileTypeNames += ['TileBeamElemContainer/TileBeamElemCnt']
-        cfg.merge(ByteStreamReadCfg(flags, type_names=tileTypeNames))
-        cfg.getService('ByteStreamCnvSvc').ROD2ROBmap = ['-1']
     else:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         cfg.merge(PoolReadCfg(flags))

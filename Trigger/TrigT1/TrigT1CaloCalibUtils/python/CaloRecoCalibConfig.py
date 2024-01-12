@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 def CaloRecoCalibCfg(configFlags):
   
@@ -10,14 +10,10 @@ def CaloRecoCalibCfg(configFlags):
         from LArByteStream.LArRawCalibDataReadingConfig import LArRawCalibDataReadingCfg 
         result.merge(LArRawCalibDataReadingCfg(configFlags))
         result.getEventAlgo("LArRawCalibDataReadingAlg").LArDigitKey="FREE" 
-        
-                
-        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-        
-        result.merge(ByteStreamReadCfg(configFlags,type_names=['TileDigitsContainer/TileDigitsCnt',
-                                                                       'TileRawChannelContainer/TileRawChannelCnt',
-                                                                       'TileMuonReceiverContainer/TileMuRcvCnt']))
-        result.getService("ByteStreamCnvSvc").ROD2ROBmap=["-1"]
+
+        from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+        result.merge( TileRawDataReadingCfg(configFlags) )
+
         if configFlags.Output.doWriteESD:
             from TileRecAlgs.TileDigitsFilterConfig import TileDigitsFilterOutputCfg
             result.merge(TileDigitsFilterOutputCfg(configFlags))

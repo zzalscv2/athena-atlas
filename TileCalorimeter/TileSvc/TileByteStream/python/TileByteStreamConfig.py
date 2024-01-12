@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def _createTileContByteStreamToolsConfig (name, TileContByteStreamTool, InitializeForWriting=False, stream=None, **kwargs):
 
@@ -32,7 +33,6 @@ def TileL2ContByteStreamToolConfig(name='TileL2ContByteStreamTool', InitializeFo
 
 def _createTileContByteStreamToolCfg (flags, name, InitializeForWriting=False, **kwargs):
 
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
     TileContByteStreamTool = CompFactory.getComp(name)
     tool = TileContByteStreamTool(name, **kwargs)
@@ -78,3 +78,63 @@ def TileLaserObjByteStreamToolCfg (flags,
                                    InitializeForWriting=False,
                                    **kwargs):
     return _createTileContByteStreamToolCfg(flags, name, InitializeForWriting, **kwargs)
+
+
+def TileRawDataReadingCfg(flags, readDigits=True, readRawChannel=True,
+                          readMuRcv=None, readMuRcvDigits=False, readMuRcvRawCh=False,
+                          readBeamElem=None, readLaserObj=None, readDigitsFlx=False,
+                          stateless=False, **kwargs):
+    """
+    Configure reading the Tile BS files
+
+    Arguments:
+      read[...] -- flag to read the corresponding Tile data from BS.
+                   Possible values: None (default), True, False.
+                   In the case of None it will be autoconfigured.
+      stateless -- read online Tile data using emon BS service.
+    """
+
+    isPhysicsRun = flags.Tile.RunType == 'PHY'
+    isLaserRun = flags.Tile.RunType == 'LAS'
+    isCalibRun = not isPhysicsRun
+
+    # Set up default data
+    readMuRcv = isPhysicsRun if readMuRcv is None else readMuRcv
+    readBeamElem = isCalibRun if readBeamElem is None else readBeamElem
+    readLaserObj = isLaserRun if readLaserObj is None else readLaserObj
+
+    typeNames = kwargs.get('type_names', [])
+
+    prefix = flags.Overlay.BkgPrefix if flags.Overlay.DataOverlay else ''
+
+    if readDigits:
+        typeNames += [f'TileDigitsContainer/{prefix}TileDigitsCnt']
+    if readRawChannel:
+        typeNames += [f'TileRawChannelContainer/{prefix}TileRawChannelCnt']
+    if readMuRcv:
+        typeNames += ['TileMuonReceiverContainer/TileMuRcvCnt']
+        typeNames += ['SG::AuxVectorBase/TileMuRcvCnt']
+    if readMuRcvDigits:
+        typeNames += [f'TileDigitsContainer/{prefix}MuRcvDigitsCnt']
+    if readMuRcvRawCh:
+        typeNames += ['TileRawChannelContainer/MuRcvRawChCnt']
+    if readLaserObj:
+        typeNames += ['TileLaserObject/TileLaserObj']
+    if readBeamElem:
+        typeNames += ['TileBeamElemContainer/TileBeamElemCnt']
+    if readDigitsFlx:
+        typeNames += ['TileDigitsContainer/TileDigitsFlxCnt']
+
+    cfg = ComponentAccumulator()
+    if stateless:
+        from ByteStreamEmonSvc.EmonByteStreamConfig import EmonByteStreamCfg
+        cfg.merge( EmonByteStreamCfg(flags, type_names=typeNames) )
+    else:
+        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+        cfg.merge( ByteStreamReadCfg(flags, type_names=typeNames) )
+        cfg.getService("ByteStreamCnvSvc").ROD2ROBmap = ["-1"]
+
+    if not flags.Common.isOnline:
+        cfg.addPublicTool(CompFactory.TileROD_Decoder())
+
+    return cfg
