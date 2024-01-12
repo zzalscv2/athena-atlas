@@ -73,7 +73,7 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
     for (const physVolWithTrans& pVolTrans : allGasGaps) {
         std::stringstream key{};
         key<<define.chambDesign<<"_"<<(gasGap+1)
-           <<(m_idHelperSvc->stationEta(define.detElId) ? "A" : "C");
+           <<(m_idHelperSvc->stationEta(define.detElId) > 0 ? "A" : "C");
 
         StripLayerPtr& stripLayout{factoryCache.stripDesigns[key.str()]};
         StripLayerPtr& wireLayout{factoryCache.wireDesigns[key.str()]};

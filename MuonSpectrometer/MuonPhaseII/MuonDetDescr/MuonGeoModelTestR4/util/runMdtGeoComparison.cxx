@@ -312,7 +312,8 @@ int main( int argc, char** argv ) {
                 /// deviations in the z-axis due to different cutouts
                 if (!stagFailure && tubeDistortion.translation().perp() > tolerance) {
                     std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": Misplaced staggering found in chamber "<<reference<<" the tube ("<<layer<<", "<<tube<<") "
-                             << Amg::toString(tubeDistortion.translation(), 2)<<std::endl;                    
+                             << Amg::toString(refTube.localToGlobal.translation() - 
+                                              testTube.localToGlobal.translation(), 3)<<std::endl;                    
                     stagFailure = true;
                 }
                 
@@ -338,7 +339,7 @@ int main( int argc, char** argv ) {
             }
         }
         if (!chamberOkay) return_code = EXIT_FAILURE;
-        else std::cout<<"Found perfect agreement between new & old geometry for "<<reference<<std::endl;       
+        else std::cout<<"runMdtGeoComparision() "<<__LINE__<<": Found perfect agreement between new & old geometry for "<<reference<<std::endl;       
     }
     return return_code;
 

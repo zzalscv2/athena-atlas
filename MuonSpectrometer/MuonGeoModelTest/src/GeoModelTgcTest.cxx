@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "EventPrimitives/EventPrimitivesToStringConverter.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
 #include "MuonReadoutGeometry/MuonStation.h"
 #include "StoreGate/ReadCondHandle.h"
@@ -182,6 +182,7 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
     m_longWidth = readoutEle->longWidth();
     m_height = readoutEle->length();
     m_thickness = readoutEle->thickness();
+    m_stLayout = readoutEle->getTechnologyName();
 
    const MuonGM::MuonStation* station = readoutEle->parentMuonStation();
    if (station->hasALines()){ 
@@ -288,26 +289,21 @@ void GeoModelTgcTest::dumpReadoutXML(const MuonGM::MuonDetectorManager& detMgr) 
                 TgcChamberLayout& chambLayout = allLayouts[m_idHelperSvc->gasGapId(layerId)];
                 chambLayout.gasGap = m_idHelperSvc->gasGapId(layerId);
                 chambLayout.techType = reEle->getTechnologyName();
-                if (isStrip) {
-                   for (int strip = 1; nStrips(*reEle, layer) && strip <= 33; ++strip) {
+                if (isStrip && nStrips(*reEle, layer)) {
+                   const double halfHeight = 0.5 * (reEle->getRsize() - 2. * reEle->getPhysicalDistanceFromBase());
+                   const Amg::Transform3D globToLoc{reEle->surface(layerId).transform().inverse() * reEle->absTransform()};
+                   const double sign = (reEle->getStationEta()> 0. ? -1. : 1.) *( (globToLoc*Amg::Vector3D::UnitY()).x() > 0 ? 1. : -1);
+
+                   for (int strip = 1; strip < 33; ++strip) {
                         /// Note the slight shift in the coordinate system given that the positions in the legacy
                         /// are given w.r.t. strip center while for the new geometry we need them w.r.t. strip edge
-                        const double botPos = reEle->getStripPositionOnShortBase(strip);
-                        const double topPos = reEle->getStripPositionOnLargeBase(strip);
-                        std::vector<double>& botStrip{chambLayout.botStripPos};
-                        std::vector<double>& topStrip{chambLayout.topStripPos};
-                        
-                        if ( (reEle->getStationEta() > 0 && layer == 1) || 
-                             (reEle->getStationEta() < 0 && layer != 1) ) {
-                            botStrip.push_back(-botPos);
-                            topStrip.push_back(-topPos);
-                        } else {
-                            botStrip.push_back(botPos);
-                            topStrip.push_back(topPos);
-
-                        }
+                        chambLayout.botStripPos.push_back(sign *reEle->stripMinX(layer,strip, -halfHeight));
+                        chambLayout.topStripPos.push_back(sign *reEle->stripMinX(layer,strip, +halfHeight));
+                        if (strip != 32) continue;
+                        chambLayout.botStripPos.push_back(sign *reEle->stripMaxX(layer,strip, -halfHeight));
+                        chambLayout.topStripPos.push_back(sign *reEle->stripMaxX(layer,strip, +halfHeight));
                    }
-                } else {
+                } else if (!isStrip) {
                     unsigned int accumlWires{0};
                     chambLayout.wirePitch = reEle->WirePitch(layer);
                     /// Another reason to love AMDB. Summing up the number of wires in a gang does not match the
@@ -351,7 +347,7 @@ void GeoModelTgcTest::dumpReadoutXML(const MuonGM::MuonDetectorManager& detMgr) 
     xmlStream<<"<Table name=\"TgcSensorLayout\">"<<std::endl;
     unsigned int counter{1};
     for (const ChamberGrp& grp : groupedLayouts) {
-        for (const auto& [tech_type, gapIds]: grp.allGaps() ){
+        for (const auto& [tech_type, gapIds]: grp.allGaps()) {
             std::set<int> gaps{};
             std::set<char> sides{};         
             for (const Identifier gapId : gapIds) {

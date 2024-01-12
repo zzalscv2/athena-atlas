@@ -98,8 +98,6 @@ if __name__=="__main__":
     
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
     if not args.noMdt:
-        from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
-        cfg.merge(MdtCondDbAlgCfg(flags))
         cfg.merge(GeoModelMdtTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"], 
                                             dumpSurfaces = False ))
     if not args.noRpc:
@@ -117,8 +115,7 @@ if __name__=="__main__":
     cfg.merge(GeoModelCscTestCfg(flags))
     
     cfg.printConfig(withDetails=True, summariseProps=True)
-    flags.dump()
-   
+    flags.dump(evaluate = True)
     if not cfg.run(1).isSuccess():
         print("Execution failed")
         exit(1)  

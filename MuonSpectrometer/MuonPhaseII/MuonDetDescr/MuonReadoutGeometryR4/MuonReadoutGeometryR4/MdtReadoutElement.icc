@@ -13,7 +13,11 @@ inline double MdtReadoutElement::tubeRadius() const {return innerTubeRadius() + 
 inline double MdtReadoutElement::tubePitch() const { return m_pars.tubePitch;}
 inline double MdtReadoutElement::thickness() const {return 2.* m_pars.halfHeight;}
     
-
+inline bool MdtReadoutElement::isValid(const IdentifierHash& measHash) const {
+    return  layerNumber(measHash) < numLayers() && 
+            tubeNumber(measHash) < numTubesInLay() && 
+            !m_pars.removedTubes.count(measHash);
+}
 inline IdentifierHash MdtReadoutElement::measurementHash(const Identifier& measId) const {
     if (idHelperSvc()->detElId(measId) != identify()) {
         ATH_MSG_WARNING("The measurement "

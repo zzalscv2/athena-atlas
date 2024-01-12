@@ -314,7 +314,7 @@ namespace MuonGM {
 
                 // BIS78 only (the BIS7 of Run1/2 has no cutouts, thus, this block won't be reached)
                 if ((getStationIndex() == m_stIdx_BIS && std::abs(getStationEta()) == 7)) --ii;
-                if (manager()->mdtIdHelper()->isBMG(identify())) {
+                if (m_idHelper.isBMG(identify())) {
                     // usually the tube number corresponds to the child number, however for
                     // BMG chambers full tubes are skipped during the building process
                     // therefore the matching needs to be done via the volume ID
@@ -858,7 +858,6 @@ namespace MuonGM {
                     << " DEid = " << idHelperSvc()->toStringDetEl(identify()) << " called with: tubeL, tube " << tubeLayer << " " << tube
                     << "; step " << istep << " out of range 0-" << m_nsteps - 1 << " m_ntubesinastep " << m_ntubesinastep );
                 ATH_MSG_WARNING( "Please run in DEBUG mode to get extra diagnostic; setting istep = 0" );
-                istep = 0;
             }
         }
         if ((unsigned int)istep >= m_tubeBounds.size()) {

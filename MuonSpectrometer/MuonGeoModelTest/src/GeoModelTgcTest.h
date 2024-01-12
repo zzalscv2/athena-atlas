@@ -58,6 +58,8 @@ class GeoModelTgcTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<unsigned short>& m_stIndex{m_tree.newScalar<unsigned short>("stationIndex")};
     MuonVal::ScalarBranch<short>& m_stEta{m_tree.newScalar<short>("stationEta")};
     MuonVal::ScalarBranch<short>& m_stPhi{m_tree.newScalar<short>("stationPhi")};
+    MuonVal::ScalarBranch<std::string>& m_stLayout{m_tree.newScalar<std::string>("stationDesign")};
+
   
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
     MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};

@@ -39,6 +39,7 @@ struct TgcChamber{
     int eta{0};
     unsigned phi{0};
     unsigned nGasGaps{0};
+    std::string techName{};
     ///
     float shortWidth{0.f};
     float longWidth{0.f};
@@ -132,9 +133,10 @@ std::ostream& operator<<(std::ostream& ostr, const TgcChamber& chamb) {
         {45, "T3F"}, {46, "T3E"},
         {47, "T4F"}, {48, "T4E"},
     };
-    ostr<<"eta: "<<std::setfill(' ')<<std::setw(2)<<chamb.eta<<" ";
-    ostr<<"phi: "<<std::setfill('0')<<std::setw(2)<<chamb.phi<<" ";
-    ostr<<"stName: "<<stationDict.at(chamb.stIdx)<<" ";
+    ostr<<"tech: "<<chamb.techName<<", ";
+    ostr<<"eta: "<<std::setfill(' ')<<std::setw(2)<<chamb.eta<<", ";
+    ostr<<"phi: "<<std::setfill('0')<<std::setw(2)<<chamb.phi<<", ";
+    ostr<<"stName: "<<stationDict.at(chamb.stIdx);
     ostr<<std::setw(-1);
     return ostr;    
 }
@@ -157,6 +159,7 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<unsigned short> stationIndex{treeReader, "stationIndex"};
     TTreeReaderValue<short> stationEta{treeReader, "stationEta"};
     TTreeReaderValue<short> stationPhi{treeReader, "stationPhi"};
+    TTreeReaderValue<std::string> stationDesign{treeReader, "stationDesign"};
     TTreeReaderValue<uint8_t> nGasGaps{treeReader, "nGasGaps"};
 
     TTreeReaderValue<float> shortWidth{treeReader, "ChamberWidthS"};
@@ -235,6 +238,7 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
         newchamber.stIdx = (*stationIndex);
         newchamber.eta = (*stationEta);
         newchamber.phi = (*stationPhi);
+        newchamber.techName = (*stationDesign);
         newchamber.shortWidth = (*shortWidth);
         newchamber.longWidth= (*longWidth);
         newchamber.height = (*height);
@@ -364,7 +368,16 @@ int main( int argc, char** argv ) {
     if (testFile.find("root://") != 0) testFile = PathResolver::FindCalibFile(testFile);
 
     const std::set<TgcChamber> refChambers = readTreeDump(refFile);
+    if (refChambers.empty()) {
+        std::cerr<<"runTgcComparison() "<<__LINE__<<": No chambers in reference file."<<std::endl;
+        return EXIT_FAILURE;
+    }
     const std::set<TgcChamber> testChambers = readTreeDump(testFile);
+    if (testChambers.empty()) {
+        std::cerr<<"runTgcComparison() "<<__LINE__<<": No chambers in test file."<<std::endl;
+        return EXIT_FAILURE;
+    }
+    
     int retCode{EXIT_SUCCESS};
     for (const TgcChamber& ref : refChambers) {
         std::set<TgcChamber>::const_iterator test_itr = testChambers.find(ref);
@@ -380,7 +393,8 @@ int main( int argc, char** argv ) {
         TEST_BASICPROP(thickness, "chamber thickness");
         TEST_BASICPROP(shortWidth, "chamber short width");
         TEST_BASICPROP(longWidth, "chamber long width");
-        TEST_BASICPROP(height, "chamber height");        
+        TEST_BASICPROP(height, "chamber height");   
+        chambOk = true;     
         /// Check the orientation of the layers
         for (const TgcChamber::LayerTrans& refTrans : ref.transforms) {
             std::set<TgcChamber::LayerTrans>::const_iterator l_test_itr = test.transforms.find(refTrans);
@@ -405,7 +419,7 @@ int main( int argc, char** argv ) {
                 chambOk = false;
                 break;
             }
-            TEST_LAYPROP(numWires , "number of wires");
+            TEST_LAYPROP(numWires, "number of wires");
             TEST_LAYPROP(shortWidth, "short width");
             TEST_LAYPROP(longWidth, "long width"); 
             TEST_LAYPROP(height, "height");
