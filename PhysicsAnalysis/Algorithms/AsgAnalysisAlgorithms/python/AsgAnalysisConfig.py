@@ -357,6 +357,30 @@ class IFFLeptonDecorationBlock (ConfigBlock):
         config.addOutputVar(self.containerName, alg.decoration, alg.decoration.split("_%SYS%")[0], noSys=True)
 
 
+class PerEventSFBlock (ConfigBlock):
+    """the ConfigBlock for the AsgEventScaleFactorAlg"""
+
+    def __init__ (self, name):
+        super(PerEventSFBlock, self).__init__()
+        self.algName = name
+        self.addOption('particles', '', type=str)
+        self.addOption('objectSF', '', type=str)
+        self.addOption('eventSF', '', type=str)
+
+    def makeAlgs(self, config):
+        if config.dataType() is DataType.Data:
+            return
+        particles, selection = config.readNameAndSelection(self.particles)
+        alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg', self.algName)
+        alg.particles = particles
+        alg.preselection = selection
+        alg.scaleFactorInputDecoration = self.objectSF
+        alg.scaleFactorOutputDecoration = self.eventSF
+
+        config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration,
+                            alg.scaleFactorOutputDecoration.split("_%SYS%")[0])
+
+
 def makeCommonServicesConfig( seq ):
     """Create the common services config"""
 

@@ -310,6 +310,10 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.BootstrapGeneratorConfig import BootstrapGeneratorConfig
         config.addAlgConfigBlock(algName='Bootstraps', alg=BootstrapGeneratorConfig)
 
+        # per-event scale factor calculation
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import PerEventSFBlock
+        config.addAlgConfigBlock(algName='PerEventSF', alg=PerEventSFBlock)
+
         # output
         from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
         config.addAlgConfigBlock(algName="Output", alg=OutputAnalysisConfig,
