@@ -144,6 +144,9 @@ private:
                                            true,
                                            "Slim the GSF Trk::Tracks" };
 
+  /** @brief Option to copy HGTD time to new gsf tracks*/
+  Gaudi::Property<bool> m_doHGTD{ this, "useHGTD", false, "do HGTD" };
+
   /** @Cut on minimum silicon hits*/
   Gaudi::Property<int> m_MinNoSiHits{ this,
                                       "minNoSiHits",
