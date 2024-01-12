@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsKalmanFitter.h"
@@ -450,11 +450,10 @@ ActsKalmanFitter::fit(const EventContext& ,
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
       const Acts::CalibrationContext& calContext,
-      const TrackingSurfaceHelper &tracking_surface_helper) const{
+      const TrackingSurfaceHelper &tracking_surface_helper,
+      const Acts::Surface* targetSurface) const{
   ATH_MSG_DEBUG("--> entering ActsKalmanFitter::fit(xAODMeasure...things,TP,)");
-    
-   
-   
+       
   std::vector<Acts::SourceLink> sourceLinks;
   sourceLinks.reserve(clusterList.size()); 
 
@@ -477,15 +476,19 @@ ActsKalmanFitter::fit(const EventContext& ,
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
  
-  // Construct a perigee surface as the target surface
-  auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3{0., 0., 0.});
+  // Construct a perigee surface as the target surface if none is provided
+  std::shared_ptr<Acts::Surface> pSurface{nullptr};
+  if (!targetSurface){
+    pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3{0., 0., 0.});
+    targetSurface = pSurface.get();
+  }
 
   // Set the KalmanFitter options
   Acts::KalmanFitterOptions<ActsTrk::MutableTrackStateBackend>
     kfOptions(tgContext, mfContext, calContext,
 	      kfExtensions,
 	      propagationOption,
-  	      &(*pSurface)); 
+  	    targetSurface); 
   
   std::unique_ptr< ActsTrk::MutableTrackContainer > tracks = std::make_unique< ActsTrk::MutableTrackContainer >();
  
@@ -866,7 +869,7 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
 }
 
 std::unique_ptr< ActsTrk::MutableTrackContainer >
-ActsKalmanFitter::fit(const EventContext& /*ctx*/,
+ActsKalmanFitter::fit(const EventContext& ctx,
 		      const ActsTrk::Seed &seed,
 		      const Acts::BoundTrackParameters& initialParams,
 		      const Acts::GeometryContext& tgContext,
@@ -874,7 +877,7 @@ ActsKalmanFitter::fit(const EventContext& /*ctx*/,
 		      const Acts::CalibrationContext& calContext,
 		      const TrackingSurfaceHelper &tracking_surface_helper) const 
 {
-  std::vector<Acts::SourceLink> sourceLinks;
+  std::vector<ActsTrk::ATLASUncalibSourceLink> sourceLinks;
   sourceLinks.reserve(6);
 
   std::vector<const Acts::Surface*> surfaces;
@@ -888,40 +891,7 @@ ActsKalmanFitter::fit(const EventContext& /*ctx*/,
       surfaces.push_back(&tracking_surface_helper.associatedActsSurface(**el));
     }
   }
-
-  Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
-  
-  ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor{ &(*m_ATLASConverterTool), &tracking_surface_helper };
-  kfExtensions.surfaceAccessor.connect<&ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
-  
-  UncalibratedMeasurementCalibrator calibrator(*m_ATLASConverterTool, tracking_surface_helper);
-  kfExtensions.calibrator.connect<&UncalibratedMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(&calibrator);
-  
-  Acts::PropagatorPlainOptions propagationOption;
-  propagationOption.maxSteps = m_option_maxPropagationStep;
-
-  // Set the KalmanFitter options
-  Acts::KalmanFitterOptions<ActsTrk::MutableTrackStateBackend>
-    kfOptions(tgContext, mfContext, calContext,
-	      kfExtensions,
-	      propagationOption,
-  	      surfaces.front());
-  
-  std::unique_ptr< ActsTrk::MutableTrackContainer > tracks = std::make_unique<ActsTrk::MutableTrackContainer>();
-  
-  auto result = m_directFitter->fit(sourceLinks.begin(),
-				    sourceLinks.end(),
-				    initialParams,
-				    kfOptions,
-				    surfaces,
-				    *tracks.get());
-  
-  if (not result.ok()) {
-    ATH_MSG_VERBOSE("Kalman Fitter on Seed has failed");
-    return nullptr;
-  }
-
-  return tracks;
+  return fit(ctx, sourceLinks, initialParams, tgContext, mfContext, calContext, tracking_surface_helper, surfaces.front()); 
 }
   
 }
