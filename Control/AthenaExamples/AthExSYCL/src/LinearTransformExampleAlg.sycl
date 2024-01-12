@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -26,14 +26,12 @@ namespace AthSYCL {
       }
 
       // Set up a SYCL buffer on top of this STL object.
-      cl::sycl::buffer< cl::sycl::cl_float > buffer( dummyArray.begin(),
-                                                     dummyArray.end() );
+      cl::sycl::buffer< float > buffer( dummyArray.begin(), dummyArray.end() );
 
       // Set up the SYCL queue.
-      cl::sycl::queue queue( m_deviceSelector );
-      cl::sycl::range< 1 > workItems( buffer.get_count() );
+      cl::sycl::queue queue;
+      cl::sycl::range< 1 > workItems( buffer.size() );
 
-#ifndef TRISYCL_CL_SYCL_HPP
       // Let the user know what device the calculation is running on.
       const cl::sycl::device& device = queue.get_device();
       ATH_MSG_DEBUG( "Using device "
@@ -41,7 +39,6 @@ namespace AthSYCL {
                      << " ("
                      << device.get_info< cl::sycl::info::device::version >()
                      << ")" );
-#endif // not TRISYCL_CL_SYCL_HPP
 
       // Multiply these values using SYCL.
       static const float MULTIPLIER = 1.23f;
@@ -59,9 +56,8 @@ namespace AthSYCL {
       // reader accessor into a scope, to make sure it is deleted after it is
       // not needed anymore.
       {
-         auto bReader =
-            buffer.get_access< cl::sycl::access::mode::read >();
-         for( std::size_t i = 0; i < buffer.get_count(); ++i ) {
+         auto bReader = buffer.get_host_access();
+         for( std::size_t i = 0; i < buffer.size(); ++i ) {
             dummyArray[ i ] = bReader[ i ];
          }
       }

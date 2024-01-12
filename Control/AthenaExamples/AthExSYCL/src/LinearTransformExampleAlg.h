@@ -1,12 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ATHEXSYCL_LINEARTRANSFORMEXAMPLEALG_H
 #define ATHEXSYCL_LINEARTRANSFORMEXAMPLEALG_H
-
-// Local include(s).
-#include "DeviceSelector.h"
 
 // Framework include(s).
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -28,10 +25,6 @@ namespace AthSYCL {
 
       /// The function executing this algorithm
       StatusCode execute( const EventContext& ctx ) const;
-
-   private:
-      /// SYCL device selector
-      DeviceSelector m_deviceSelector;
 
    }; // class LinearTransformExampleAlg
 
