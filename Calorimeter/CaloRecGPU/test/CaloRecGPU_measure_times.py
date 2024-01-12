@@ -4,25 +4,19 @@
 #without synchronization on the GPU side
 #(thus only the total GPU time is accurate).
 
-from CaloRecGPU.CaloRecGPUConfigurator import CaloRecGPUConfigurator
-import CaloRecGPUTesting
+import CaloRecGPUTestingConfig
     
 if __name__=="__main__":
 
-    Configurator = CaloRecGPUConfigurator()
-    
-    cfg, numevents = CaloRecGPUTesting.PrepareTest(Configurator)
+    flags, perfmon, numevents = CaloRecGPUTestingConfig.PrepareTest()
+    flags.CaloRecGPU.MeasureTimes = True
+    flags.CaloRecGPU.ClustersOutputName="CaloCalTopoClustersNew"
+    flags.lock()
 
-    Configurator.MeasureTimes = True
-    
-    theKey="CaloCalTopoClustersNew"
-    
-    topoAcc = CaloRecGPUTesting.FullTestConfiguration(Configurator, TestGrow=True, TestSplit=True, SkipSyncs=True)
+    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flags,perfmon)
 
-    topoAlg = topoAcc.getPrimary()
-    topoAlg.ClustersOutputName=theKey
-    
-    cfg.merge(topoAcc)
-    
-    cfg.run(numevents)
+    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flags,TestGrow=True, TestSplit=True, SkipSyncs=True))
 
+    topoAcc.run(numevents)
+
+    

@@ -3,30 +3,20 @@
 #Outputs plots and textual information
 #to compare CPU with GPU moments calculation.
 
-from CaloRecGPU.CaloRecGPUConfigurator import CaloRecGPUConfigurator
-import CaloRecGPUTesting
-
+import CaloRecGPUTestingConfig
+from PlotterConfigurator import PlotterConfigurator
     
 if __name__=="__main__":
 
-    Configurator = CaloRecGPUConfigurator()
-        
-    PlotterConfig = CaloRecGPUTesting.PlotterConfigurator(["CPU_moments", "GPU_moments"], ["moments"], DoMoments = True)
+    PlotterConfig = PlotterConfigurator(["CPU_moments", "GPU_moments"], ["moments"], DoMoments = True)
     
-    Configurator.DoMonitoring = True
-    
-    Configurator.UseAbsEnergyMoments = True
-    
-    cfg, numevents = CaloRecGPUTesting.PrepareTest(Configurator)
+    flags, perfmon, numevents = CaloRecGPUTestingConfig.PrepareTest()
+    flags.CaloRecGPU.UseAbsEnergyMoments = True
+    flags.CaloRecGPU.ClustersOutputName="CaloCalTopoClustersNew"
+    flags.lock()
 
-    theKey="CaloCalTopoClustersNew"
-    
-    topoAcc = CaloRecGPUTesting.FullTestConfiguration(Configurator, TestMoments = True, PlotterConfigurator = PlotterConfig)
+    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flags,perfmon)
 
-    topoAlg = topoAcc.getPrimary()
-    topoAlg.ClustersOutputName=theKey
-    
-    cfg.merge(topoAcc)
-    
-    cfg.run(numevents)
+    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flags, TestMoments = True, PlotterConfigurator = PlotterConfig))
 
+    topoAcc.run(numevents)

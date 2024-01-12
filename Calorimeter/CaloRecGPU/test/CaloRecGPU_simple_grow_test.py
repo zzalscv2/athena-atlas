@@ -2,27 +2,23 @@
 
 #Outputs plots for comparing CPU and GPU growing.
 
-from CaloRecGPU.CaloRecGPUConfigurator import CaloRecGPUConfigurator
-import CaloRecGPUTesting
+import CaloRecGPUTestingConfig
+from PlotterConfigurator import PlotterConfigurator
 
 if __name__=="__main__":
 
-    Configurator = CaloRecGPUConfigurator()
     
-    PlotterConfig = CaloRecGPUTesting.PlotterConfigurator(["CPU_growing", "GPU_growing"], ["growing"])
+    PlotterConfig = PlotterConfigurator(["CPU_growing", "GPU_growing"], ["growing"])
     
-    Configurator.DoMonitoring = True
-    
-    cfg, numevents = CaloRecGPUTesting.PrepareTest(Configurator)
+    flags, perfmon, numevents = CaloRecGPUTestingConfig.PrepareTest()
+    flags.CaloRecGPU.DoMonitoring = True
+    flags.CaloRecGPU.ClustersOutputName="CaloCalTopoClustersNew"
+    flags.lock()
 
-    theKey="CaloCalTopoClustersNew"
-    
-    topoAcc = CaloRecGPUTesting.FullTestConfiguration(Configurator, TestGrow = True, PlotterConfigurator = PlotterConfig)
+    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flags,perfmon)
 
-    topoAlg = topoAcc.getPrimary()
-    topoAlg.ClustersOutputName=theKey
-    
-    cfg.merge(topoAcc)
-    
-    cfg.run(numevents)
+    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flags, TestGrow = True, PlotterConfigurator = PlotterConfig))
+
+
+    topoAcc.run(numevents)
 

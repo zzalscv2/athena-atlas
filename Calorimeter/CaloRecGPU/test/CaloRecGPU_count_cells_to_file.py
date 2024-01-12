@@ -5,25 +5,18 @@
 #and also for the cross-check versions (CPU growing with GPU splitting
 #and GPU growing with CPU splitting).
 
-from CaloRecGPU.CaloRecGPUConfigurator import CaloRecGPUConfigurator
-import CaloRecGPUTesting
+import CaloRecGPUTestingConfig
     
 if __name__=="__main__":
 
-    Configurator = CaloRecGPUConfigurator()
-        
-    cfg, numevents = CaloRecGPUTesting.PrepareTest(Configurator)
+    flags, perfmon, numevents = CaloRecGPUTestingConfig.PrepareTest()
 
-    Configurator.OutputCountsToFile = True
+    flags.CaloRecGPU.OutputCountsToFile = True
+    flags.CaloRecGPU.ClustersOutputName="CaloCalTopoClustersNew"
+    flags.lock()
     
-    theKey="CaloCalTopoClustersNew"
-    
-    topoAcc = CaloRecGPUTesting.FullTestConfiguration(Configurator, TestGrow = True, TestSplit = True, DoCrossTests = True)
+    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flags,perfmon)
+    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flags, TestGrow = True, TestSplit = True, DoCrossTests = True))
 
-    topoAlg = topoAcc.getPrimary()
-    topoAlg.ClustersOutputName=theKey
-    
-    cfg.merge(topoAcc)
-    
-    cfg.run(numevents)
+    topoAcc.run(numevents)
 
