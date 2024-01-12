@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 '''@file RunTileMonitoring.py
 @brief Script to run Tile Reconstrcution/Monitoring with new-style configuration
@@ -274,19 +274,17 @@ if __name__=='__main__':
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
         cfg.merge(PerfMonMTSvcCfg(flags))
 
-    typeNames = ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']
-    if any([args.tmdbDigits, args.tmdb]):
-        typeNames += ['TileDigitsContainer/MuRcvDigitsCnt']
-    if any([args.tmdbRawChannels, args.tmdb]):
-        typeNames += ['TileRawChannelContainer/MuRcvRawChCnt']
-    if args.mbts and args.useMbtsTrigger:
-        typeNames += ['CTP_RDO/CTP_RDO']
-    if flags.Tile.RunType != 'PHY':
-        typeNames += ['TileBeamElemContainer/TileBeamElemCnt']
+    typeNames = ['CTP_RDO/CTP_RDO'] if args.mbts and args.useMbtsTrigger else []
+
+    from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+    cfg.merge( TileRawDataReadingCfg(flags, readMuRcv=False,
+                                     readMuRcvDigits=any([args.tmdbDigits, args.tmdb]),
+                                     readMuRcvRawCh=any([args.tmdbRawChannels, args.tmdb]),
+                                     readLaserObj=False,
+                                     stateless=args.stateless,
+                                     type_names=typeNames) )
 
     if args.stateless:
-        from ByteStreamEmonSvc.EmonByteStreamConfig import EmonByteStreamCfg
-        cfg.merge( EmonByteStreamCfg(flags, type_names=typeNames) )
         bsEmonInputSvc = cfg.getService( "ByteStreamInputSvc" )
         bsEmonInputSvc.Partition = args.partition
         bsEmonInputSvc.Key = args.key
@@ -306,9 +304,6 @@ if __name__=='__main__':
         bsEmonInputSvc.StreamLogic = args.streamLogic
         bsEmonInputSvc.GroupName = args.groupName
         bsEmonInputSvc.ProcessCorruptedEvents = True
-    else:
-        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-        cfg.merge( ByteStreamReadCfg(flags, type_names = typeNames) )
 
     cfg.addPublicTool( CompFactory.TileROD_Decoder(fullTileMode = runNumber) )
 

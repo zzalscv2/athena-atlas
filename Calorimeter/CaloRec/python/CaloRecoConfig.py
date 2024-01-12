@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -13,12 +13,9 @@ def CaloRecoCfg(flags, clustersname=None):
         from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
         result.merge(LArRawDataReadingCfg(flags))
 
-        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+        from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+        result.merge( TileRawDataReadingCfg(flags) )
 
-        result.merge(ByteStreamReadCfg(flags,type_names=['TileDigitsContainer/TileDigitsCnt',
-                                                         'TileRawChannelContainer/TileRawChannelCnt',
-                                                         'TileMuonReceiverContainer/TileMuRcvCnt']))
-        result.getService("ByteStreamCnvSvc").ROD2ROBmap=["-1"]
         if flags.Output.doWriteESD:
             from TileRecAlgs.TileDigitsFilterConfig import TileDigitsFilterOutputCfg
             result.merge(TileDigitsFilterOutputCfg(flags))

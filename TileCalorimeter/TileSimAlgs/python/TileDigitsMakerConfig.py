@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile digits maker algorithm"""
 
@@ -61,11 +61,8 @@ def TileDigitsMakerCfg(flags, **kwargs):
         tileCoherNoise = False
 
         if flags.Overlay.DataOverlay:
-            from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-            acc.merge(ByteStreamReadCfg(flags, type_names=[
-                f'TileDigitsContainer/{flags.Overlay.BkgPrefix}TileDigitsCnt',
-                f'TileRawChannelContainer/{flags.Overlay.BkgPrefix}TileRawChannelCnt']
-            ))
+            from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+            acc.merge( TileRawDataReadingCfg(flags, readMuRcv=False) )
 
         from TileRecUtils.TileDQstatusConfig import TileDQstatusAlgCfg
         acc.merge(TileDQstatusAlgCfg(flags))

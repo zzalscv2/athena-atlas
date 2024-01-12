@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile L2 builder tool and algorithm"""
 
@@ -113,8 +113,8 @@ if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)
 
-    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    acc.merge( ByteStreamReadCfg(flags, ["TileRawChannelContainer/TileRawChannelCnt"]) )
+    from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+    acc.merge( TileRawDataReadingCfg(flags, readDigits=False, readMuRcv=False) )
 
     acc.merge( TileRawChannelToL2OutputCfg(flags, streamName = 'ESD') )
     acc.getService('StoreGateSvc').Dump = True

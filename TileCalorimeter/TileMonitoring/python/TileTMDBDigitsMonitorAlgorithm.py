@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 '''@file TileTMDBDigitsMonitorAlgorithm.py
 @author
@@ -89,12 +89,9 @@ if __name__=='__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
 
-
-    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    tileTypeNames = ['TileDigitsContainer/MuRcvDigitsCnt']
-    cfg.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
-
-
+    from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+    cfg.merge( TileRawDataReadingCfg(flags, readDigits=False, readRawChannel=False,
+                                     readMuRcv=False, readMuRcvDigits=True) )
 
     tileTMDBDigitsMonitorAccumulator  = TileTMDBDigitsMonitoringConfig(flags)
 

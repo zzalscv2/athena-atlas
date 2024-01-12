@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 '''
 @file TileDigiNoiseCalibAlgConfig.py
@@ -54,16 +54,8 @@ if __name__=='__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
 
-    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    tileTypeNames = ['TileRawChannelContainer/TileRawChannelCnt',
-                     'TileBeamElemContainer/TileBeamElemCnt',
-                     'TileDigitsContainer/TileDigitsCnt']
-    cfg.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
-    cfg.getService('ByteStreamCnvSvc').ROD2ROBmap = [ "-1" ]
-
-    runNumber = flags.Input.RunNumbers[0]
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    cfg.addPublicTool( CompFactory.TileROD_Decoder(fullTileMode = runNumber) )
+    from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+    cfg.merge( TileRawDataReadingCfg(flags, readMuRcv=False, readBeamElem=True) )
 
     cfg.merge( TileDigiNoiseCalibAlgCfg(flags) )
 

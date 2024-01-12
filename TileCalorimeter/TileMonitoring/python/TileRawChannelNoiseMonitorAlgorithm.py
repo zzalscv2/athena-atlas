@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 '''
 @file TileRawChannelNoiseMonitorAlgorithm.py
@@ -114,9 +114,8 @@ if __name__=='__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
 
-    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    tileTypeNames = ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']
-    cfg.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
+    from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+    cfg.merge( TileRawDataReadingCfg(flags, readMuRcv=False) )
 
     from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
     cfg.merge( TileRawChannelMakerCfg(flags) )

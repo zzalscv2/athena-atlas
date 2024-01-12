@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 '''@file RunTileTBDump.py
 @brief Script to run Tile Reconstrcution/Monitoring for calibration runs
 '''
 
 from TileRecEx import TileInputFiles
-from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 
 
@@ -117,17 +116,11 @@ if __name__=='__main__':
     # =======>>> Set up the File (BS | POOL) reading
     if flags.Input.Format is Format.BS:
         # Configure reading the Tile BS files
-        typeNames = ['TileDigitsContainer/TileDigitsCnt',
-                     'TileRawChannelContainer/TileRawChannelCnt',
-                     'TileLaserObject/TileLaserObj',
-                     'TileBeamElemContainer/TileBeamElemCnt']
+        from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+        cfg.merge( TileRawDataReadingCfg(flags, readMuRcv=False, readBeamElem=args.stat) )
 
-        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-        cfg.merge( ByteStreamReadCfg(flags, type_names=typeNames) )
-        cfg.getService("ByteStreamCnvSvc").ROD2ROBmap = ["-1"]
         from AthenaCommon.Constants import VERBOSE
-        cfg.addPublicTool( CompFactory.TileROD_Decoder(fullTileMode=runNumber,
-                                                       VerboseOutput=(flags.Exec.OutputLevel is VERBOSE)) )
+        cfg.getPublicTool('TileROD_Decoder').VerboseOutput = flags.Exec.OutputLevel is VERBOSE
 
         if args.dump_bs_fragments:
             cfg.getService('ByteStreamInputSvc').DumpFlag = True
