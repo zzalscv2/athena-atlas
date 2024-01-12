@@ -36,8 +36,11 @@ namespace CP {
 
   private:
 
-    /// \brief the pT threshold on which to select
-    Gaudi::Property<float> m_ptmin {this, "minPt", 0., "minimum pT (in MeV)"};
+    /// \brief the pT threshold on which to select electrons
+    Gaudi::Property<float> m_elptmin {this, "minPtEl", 0., "minimum electron pT (in MeV)"};
+
+    /// \brief the pT threshold on which to select electrons
+    Gaudi::Property<float> m_muptmin {this, "minPtMu", 0., "minimum muon pT (in MeV)"};
 
     /// \brief the sign against which to compare pT (GT, LT, etc)
     Gaudi::Property<std::string> m_sign {this, "sign", "SetMe", "comparison sign to use"};

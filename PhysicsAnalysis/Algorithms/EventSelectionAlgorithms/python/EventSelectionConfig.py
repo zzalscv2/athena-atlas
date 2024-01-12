@@ -244,7 +244,7 @@ class EventSelectionConfig(ConfigBlock):
         items = text.split()
         if items[0] != "SUM_EL_N_MU_N":
             self.raise_misconfig(text, "SUM_EL_N_MU_N")
-        if len(items) != 4:
+        if len(items) != 4 and len(items) != 5:
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons:
             self.raise_missinginput("electrons or muons")
@@ -253,9 +253,16 @@ class EventSelectionConfig(ConfigBlock):
         alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
         alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.eventPreselection = f'{self.currentDecoration}'
-        alg.minPt = self.check_float(items[1])
-        alg.sign  = self.check_sign(items[2])
-        alg.count = self.check_int(items[3])
+        if len(items) == 4:
+            alg.minPtEl = self.check_float(items[1])
+            alg.minPtMu = self.check_float(items[1])
+            alg.sign  = self.check_sign(items[2])
+            alg.count = self.check_int(items[3])
+        elif len(items) == 5:
+            alg.minPtEl = self.check_float(items[1])
+            alg.minPtMu = self.check_float(items[2])
+            alg.sign  = self.check_sign(items[3])
+            alg.count = self.check_int(items[4])
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
@@ -451,7 +458,7 @@ class EventSelectionConfig(ConfigBlock):
         items = text.split()
         if items[0] != "MLLWINDOW":
             self.raise_misconfig(text, "MLLWINDOW")
-        if len(items) != 3:
+        if len(items) != 3 and len(items) != 4:
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons:
             self.raise_missinginput("electrons or muons")
@@ -463,8 +470,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.lowMLL = self.check_float(items[1])
         alg.highMLL = self.check_float(items[2])
-        # if high<low we are trying to veto events in that window; otherwise we select them
-        alg.vetoMode = alg.highMLL < alg.lowMLL
+        alg.vetoMode = (len(items) == 4 and self.check_string(items[3]) == "veto")
         alg.eventPreselection = f'{self.currentDecoration}'
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
