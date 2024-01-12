@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.Enums import BeamType
 
@@ -56,7 +56,7 @@ def getStreamHITS_ItemList(flags):
     if flags.Detector.EnableCalo:
         ItemList += ["TrackRecordCollection#MuonEntryLayer"]
         from SimulationConfig.SimEnums import CalibrationRun
-        if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile]:
+        if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
             ItemList += ["CaloCalibrationHitContainer#LArCalibrationHitActive",
                          "CaloCalibrationHitContainer#LArCalibrationHitDeadMaterial",
                          "CaloCalibrationHitContainer#LArCalibrationHitInactive",

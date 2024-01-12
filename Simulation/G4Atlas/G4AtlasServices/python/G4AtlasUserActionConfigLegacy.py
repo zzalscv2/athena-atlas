@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import CfgMgr
 
@@ -45,7 +45,7 @@ def getDefaultActions():
     if simFlags.PhysicsList == 'QGSP_BERT_HP':
         actions += ['G4UA::PhotonKillerTool']
     # Calo calibration default processing
-    if simFlags.CalibrationRun == 'LAr+Tile':
+    if simFlags.CalibrationRun in ['LAr+Tile','LAr+Tile+ZDC']:
         actions+=['G4UA::CaloG4::CalibrationDefaultProcessingTool']
 
     return actions

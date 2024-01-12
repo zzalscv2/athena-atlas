@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import MeV
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -136,7 +136,7 @@ def getDefaultActions(flags):
     if flags.Sim.PhysicsList == "QGSP_BERT_HP":
         actions += [CompFactory.G4UA.PhotonKillerTool()]
     # Calo calibration default processing
-    if flags.Sim.CalibrationRun is CalibrationRun.LArTile:
+    if flags.Sim.CalibrationRun in [CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
         actions += [result.popToolsAndMerge(CalibrationDefaultProcessingToolCfg(flags))]
 
     actions += [result.popToolsAndMerge(LooperKillerToolCfg(flags))]
