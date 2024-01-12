@@ -139,7 +139,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackContainer(
 /// -------------------------
 /// TEST = truth
 StatusCode IDTPM::TrackAnalysisCollections::fillTestTruthVec(
-  std::vector< const xAOD::TruthParticle* >& vec,
+  const std::vector< const xAOD::TruthParticle* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
   ATH_CHECK( loadTrkAnaDefSvc() );
@@ -158,7 +158,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTestTruthVec(
 
 /// TEST = tracks
 StatusCode IDTPM::TrackAnalysisCollections::fillTestTrackVec(
-  std::vector< const xAOD::TrackParticle* >& vec,
+  const std::vector< const xAOD::TrackParticle* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
   ATH_CHECK( loadTrkAnaDefSvc() );
@@ -185,7 +185,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTestTrackVec(
 
 /// REFERENCE = truth
 StatusCode IDTPM::TrackAnalysisCollections::fillRefTruthVec(
-  std::vector< const xAOD::TruthParticle* >& vec,
+  const std::vector< const xAOD::TruthParticle* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
   ATH_CHECK( loadTrkAnaDefSvc() );
@@ -204,7 +204,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillRefTruthVec(
 
 /// REFERENCE = tracks
 StatusCode IDTPM::TrackAnalysisCollections::fillRefTrackVec(
-  std::vector< const xAOD::TrackParticle* >& vec,
+  const std::vector< const xAOD::TrackParticle* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
   ATH_CHECK( loadTrkAnaDefSvc() );
@@ -227,6 +227,63 @@ StatusCode IDTPM::TrackAnalysisCollections::fillRefTrackVec(
 
   ATH_MSG_DEBUG( "No REFERENCE TrackParticle vector" );
   return StatusCode::SUCCESS; 
+}
+
+/// Truth tracks
+StatusCode IDTPM::TrackAnalysisCollections::fillTruthTrackVec(
+  const std::vector< const xAOD::TruthParticle* >& vec,
+  IDTPM::TrackAnalysisCollections::Stage stage )
+{
+  ATH_CHECK( loadTrkAnaDefSvc() );
+
+  if( m_trkAnaDefSvc->useTruth() ) {
+    m_truthTrackVec[ stage ].clear();
+    m_truthTrackVec[ stage ].insert(
+      m_truthTrackVec[ stage ].begin(),
+      vec.begin(), vec.end() );
+    return StatusCode::SUCCESS;
+  }
+
+  ATH_MSG_DEBUG( "No TruthParticle vector" );
+  return StatusCode::SUCCESS;
+}
+
+/// Offline tracks
+StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackVec(
+  const std::vector< const xAOD::TrackParticle* >& vec,
+  IDTPM::TrackAnalysisCollections::Stage stage )
+{
+  ATH_CHECK( loadTrkAnaDefSvc() );
+
+  if( m_trkAnaDefSvc->useOffline() ) {
+    m_offlTrackVec[ stage ].clear();
+    m_offlTrackVec[ stage ].insert(
+      m_offlTrackVec[ stage ].begin(),
+      vec.begin(), vec.end() );
+    return StatusCode::SUCCESS;
+  }
+
+  ATH_MSG_DEBUG( "No Offline TrackParticle vector" );
+  return StatusCode::SUCCESS;
+}
+
+/// Trigger tracks
+StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackVec(
+  const std::vector< const xAOD::TrackParticle* >& vec,
+  IDTPM::TrackAnalysisCollections::Stage stage )
+{
+  ATH_CHECK( loadTrkAnaDefSvc() );
+
+  if( m_trkAnaDefSvc->useTrigger() ) {
+    m_trigTrackVec[ stage ].clear();
+    m_trigTrackVec[ stage ].insert(
+      m_trigTrackVec[ stage ].begin(),
+      vec.begin(), vec.end() );
+    return StatusCode::SUCCESS;
+  }
+
+  ATH_MSG_DEBUG( "No Trigger TrackParticle vector" );
+  return StatusCode::SUCCESS;
 }
 
 /// -----------------------

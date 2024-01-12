@@ -45,7 +45,10 @@
 ///----------------------------------------
 ///------- Parametrized constructor -------
 ///----------------------------------------
-InDetTrackPerfMonTool::InDetTrackPerfMonTool( const std::string& type, const std::string& name, const IInterface* parent ) :
+InDetTrackPerfMonTool::InDetTrackPerfMonTool(
+    const std::string& type, 
+    const std::string& name, 
+    const IInterface* parent ) :
   ManagedMonitorToolBase( type, name, parent ), 
   m_trkAnaDefSvc( nullptr ) { }
 
@@ -73,9 +76,9 @@ StatusCode InDetTrackPerfMonTool::initialize() {
   ATH_MSG_DEBUG( "Initializing sub-tools" );
 
   ATH_CHECK( m_trigDecTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() } ) );
+  ATH_CHECK( m_roiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() } ) );
+  ATH_CHECK( m_trackRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() } ) );
   /// TODO - To be included in later MRs
-  //ATH_CHECK( m_trackRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() } ) );
-  //ATH_CHECK( m_roiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() } ) );
   //ATH_CHECK( m_generalSelectionTool.retrieve() );
   //ATH_CHECK( m_trackMatchingTool.retrieve() );
 
@@ -198,12 +201,17 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
 
   //ATH_CHECK( m_trackMatchingTool->fillDummyDecorations(dh, thisTrkAnaCollections) );
 
-  /// TODO - To be included in later MRs
-  /// --------------------------
-  /// ----- Track selector -----
-  /// --------------------------
-  /// Track-quality-based selection for offline and truth only
-  //ATH_CHECK( m_generalSelectionTool->selectTracks(thisTrkAnaCollections) );
+  /// ------------------------------
+  /// --- Track quality selector ---
+  /// ------------------------------
+  /// Track-quality-based selection
+  ATH_CHECK( m_trackQualitySelectionTool->selectTracks( thisTrkAnaCollections ) );
+
+  /// skip event if overall test/reference track vectors are empty
+  if( thisTrkAnaCollections.empty( IDTPM::TrackAnalysisCollections::FS ) ) {
+    ATH_MSG_DEBUG( "Some collections are empty after quality selection. Skipping event." );
+    return StatusCode::SUCCESS;
+  }
 
   /// -------------------------------------------
   /// -- Main loop over configured TrkAnalyses --
@@ -236,11 +244,10 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
     std::vector< TrigCompositeUtils::LinkInfo< TrigRoiDescriptorCollection > > selectedRois;
     size_t selectedRoisSize(1); // by default only one "dummy" RoI, i.e. for offline analysis
 
-    /// TODO - To be included in later MRs
-    //if( m_trkAnaDefSvc->useTrigger() ) {
-    //  selectedRois = m_roiSelectionTool->getRois( thisChain ); 
-    //  selectedRoisSize = selectedRois.size();
-    //}
+    if( m_trkAnaDefSvc->useTrigger() ) {
+      selectedRois = m_roiSelectionTool->getRois( thisChain ); 
+      selectedRoisSize = selectedRois.size();
+    }
 
     /// ----------------------------------
     /// -- Main loop over selected RoIs --
@@ -251,27 +258,25 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// clear collections in this RoI from previous iteration
       thisTrkAnaCollections.clear( IDTPM::TrackAnalysisCollections::InRoI );
 
-      /// TODO - To be included in later MRs
-      //ElementLink< TrigRoiDescriptorCollection > thisRoiLink;
-      //if( m_trkAnaDefSvc->useTrigger() ) thisRoiLink = selectedRois.at(ir).link;
-      //const TrigRoiDescriptor* const* thisRoi = m_trkAnaDefSvc->useTrigger() ? 
-      //                                          thisRoiLink.cptr() : nullptr;
+      ElementLink< TrigRoiDescriptorCollection > thisRoiLink;
+      if( m_trkAnaDefSvc->useTrigger() ) thisRoiLink = selectedRois.at(ir).link;
+      const TrigRoiDescriptor* const* thisRoi = m_trkAnaDefSvc->useTrigger() ? 
+                                                thisRoiLink.cptr() : nullptr;
 
 
       /// ----------------------------------
       /// --- Track selection within RoI ---
       /// ----------------------------------
-      /// TODO - To be included in later MRs
-      /*if( m_trkAnaDefSvc->useTrigger() ) {
+      if( m_trkAnaDefSvc->useTrigger() ) {
         ATH_MSG_DEBUG( "Processing selected RoI : " << **thisRoi );
 
         /// Tracks in RoI selection
-        ATH_CHECK( m_trackRoiSelectionTool->selectTracks( thisTrkAnaCollections, thisRoiLink ) );
+        ATH_CHECK( m_trackRoiSelectionTool->selectTracksInRoI(
+                                thisTrkAnaCollections, thisRoiLink ) );
       } else {
         /// No RoI selection required. Copying FullScan vectors
         thisTrkAnaCollections.copyFS();
-      }*/
-      thisTrkAnaCollections.copyFS(); // TODO - remove in later MRs
+      }
 
       /// checking if track collections are empty
       if ( thisTrkAnaCollections.empty( IDTPM::TrackAnalysisCollections::InRoI ) ) {

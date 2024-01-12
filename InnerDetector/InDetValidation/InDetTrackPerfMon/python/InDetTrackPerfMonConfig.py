@@ -81,14 +81,13 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
     acc.merge( TrackAnalysisDefinitionSvcCfg( flags,
                    name="TrkAnaDefSvc"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) )
 
-    ## TODO - to be uncommented in future MRs
-    #if "GeneralSelectionTool" not in kwargs:
-    #    from InDetTrackPerfMon.InDetSelectionConfig import GeneralSelectionToolCfg
-    #    kwargs.setdefault("GeneralSelectionTool", acc.popToolsAndMerge(
-    #        GeneralSelectionToolCfg(flags, name="GeneralSelectionTool"+
-    #                                flags.PhysVal.IDTPM.currentTrkAna.anaTag)))
+    if "TrackQualitySelectionTool" not in kwargs:
+        from InDetTrackPerfMon.InDetSelectionConfig import TrackQualitySelectionToolCfg
+        kwargs.setdefault( "TrackQualitySelectionTool", acc.popToolsAndMerge(
+            TrackQualitySelectionToolCfg( flags,
+                name="TrackQualitySelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
-    if flags.PhysVal.IDTPM.currentTrkAna.TestType == "Trigger":
+    if "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType :
 
         kwargs.setdefault( "TriggerTrkParticleContainerName",
                            flags.PhysVal.IDTPM.currentTrkAna.TrigTrkKey )
@@ -98,19 +97,17 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
             kwargs.setdefault( "TrigDecisionTool", 
                                acc.getPrimaryAndMerge( TrigDecisionToolCfg(flags) ) )
 
-        ## TODO - to be uncommented in future MRs
-        #if "RoiSelectionTool" not in kwargs:
-        #    from InDetTrackPerfMon.InDetSelectionConfig import RoiSelectionToolCfg
-        #    kwargs.setdefault("RoiSelectionTool", acc.popToolsAndMerge(
-        #        RoiSelectionToolCfg(flags, name="RoiSelectionTool"+
-        #                            flags.PhysVal.IDTPM.currentTrkAna.anaTag)))
+        if "RoiSelectionTool" not in kwargs:
+            from InDetTrackPerfMon.InDetSelectionConfig import RoiSelectionToolCfg
+            kwargs.setdefault( "RoiSelectionTool", acc.popToolsAndMerge(
+                RoiSelectionToolCfg( flags,
+                    name="RoiSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
-        ## TODO - to be uncommented in future MRs
-        #if "TrackRoiSelectionTool" not in kwargs:
-        #    from InDetTrackPerfMon.InDetSelectionConfig import TrackRoiSelectionToolCfg
-        #    kwargs.setdefault("TrackRoiSelectionTool", acc.popToolsAndMerge(
-        #        TrackRoiSelectionToolCfg(flags, name="TrackRoiSelectionTool"+
-        #                                 flags.PhysVal.IDTPM.currentTrkAna.anaTag)))
+        if "TrackRoiSelectionTool" not in kwargs:
+            from InDetTrackPerfMon.InDetSelectionConfig import TrackRoiSelectionToolCfg
+            kwargs.setdefault( "TrackRoiSelectionTool", acc.popToolsAndMerge(
+                TrackRoiSelectionToolCfg( flags,
+                    name="TrackRoiSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
     ## TODO - to be uncommented in future MRs
     #if "TrackMatchingTool" not in kwargs:

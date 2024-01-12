@@ -73,20 +73,33 @@ namespace IDTPM {
 
     /// fill TEST vectors
     StatusCode fillTestTruthVec(
-        std::vector< const xAOD::TruthParticle* >& vec,
+        const std::vector< const xAOD::TruthParticle* >& vec,
         Stage stage = FULL );
 
     StatusCode fillTestTrackVec(
-        std::vector< const xAOD::TrackParticle* >& vec,
+        const std::vector< const xAOD::TrackParticle* >& vec,
         Stage stage = FULL );
 
     /// fill REFERENCE vectors
     StatusCode fillRefTruthVec(
-        std::vector< const xAOD::TruthParticle* >& vec,
-        IDTPM::TrackAnalysisCollections::Stage stage = IDTPM::TrackAnalysisCollections::FULL );
+        const std::vector< const xAOD::TruthParticle* >& vec,
+        Stage stage = FULL );
 
     StatusCode fillRefTrackVec(
-        std::vector< const xAOD::TrackParticle* >& vec,
+        const std::vector< const xAOD::TrackParticle* >& vec,
+        Stage stage = FULL );
+
+    /// get truth/offline/trigger track vector (TEST or REFERENCE)
+    StatusCode fillTruthTrackVec(
+        const std::vector< const xAOD::TruthParticle* >& vec,
+        Stage stage = FULL );
+
+    StatusCode fillOfflTrackVec(
+        const std::vector< const xAOD::TrackParticle* >& vec,
+        Stage stage = FULL );
+
+    StatusCode fillTrigTrackVec(
+        const std::vector< const xAOD::TrackParticle* >& vec,
         Stage stage = FULL );
 
     /// set the chainRoiName
@@ -128,6 +141,14 @@ namespace IDTPM {
     const xAOD::TruthParticleContainer* refTruthContainer();
     const xAOD::TrackParticleContainer* refTrackContainer();
 
+    /// get truth/offline/trigger track containers (TEST or REFERENCE)
+    const xAOD::TruthParticleContainer* truthTrackContainer() {
+      return m_truthTrackContainer; }
+    const xAOD::TrackParticleContainer* offlTrackContainer() {
+      return m_offlTrackContainer; }
+    const xAOD::TrackParticleContainer* trigTrackContainer() {
+      return m_trigTrackContainer; }
+
     /// get TEST track vectors
     std::vector< const xAOD::TruthParticle* > testTruthVec( Stage stage = FULL );
     std::vector< const xAOD::TrackParticle* > testTrackVec( Stage stage = FULL );
@@ -145,6 +166,7 @@ namespace IDTPM {
       return m_trigTrackVec[ stage ]; }
 
   private:
+
     /// --- Collections class variables ---
     /// Full collections
     const xAOD::TruthParticleContainer* m_truthTrackContainer{nullptr};
