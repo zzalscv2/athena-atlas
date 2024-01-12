@@ -23,6 +23,10 @@ class MdtReadoutElement : public MuonReadoutElement {
         /// multi layer. The number of tubes of the readout element is taken from
         // the number of tubes of the first layer
         std::vector<MdtTubeLayer> tubeLayers{};
+        
+        /// List of tube places without tubes
+        std::set<IdentifierHash> removedTubes{};
+
         /// Thickness of the tube walls
         double tubeWall{0.};
         /// Inner radius of the tubes
@@ -102,6 +106,8 @@ class MdtReadoutElement : public MuonReadoutElement {
     static IdentifierHash layerHash(const IdentifierHash& measHash);
     /// Converts the measurement hash back to the full Identifier
     Identifier measurementId(const IdentifierHash& measHash) const override final;
+
+    bool isValid(const IdentifierHash& measHash) const;
 
     /// States whether the chamber is built into the barrel or not
     bool isBarrel() const;

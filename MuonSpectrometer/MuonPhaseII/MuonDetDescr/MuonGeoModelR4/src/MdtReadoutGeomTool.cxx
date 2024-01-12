@@ -33,7 +33,8 @@ StatusCode MdtReadoutGeomTool::initialize() {
     ATH_CHECK(m_geoUtilTool.retrieve());
     return StatusCode::SUCCESS;
 }
-StatusCode MdtReadoutGeomTool::loadDimensions(const FactoryCache& facCache, MdtReadoutElement::defineArgs& define) const {    
+StatusCode MdtReadoutGeomTool::loadDimensions(const FactoryCache& facCache, 
+                                              MdtReadoutElement::defineArgs& define) const {
     
     ATH_MSG_VERBOSE("Load dimensions of "<<m_idHelperSvc->toString(define.detElId)
                      <<std::endl<<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
@@ -65,6 +66,15 @@ StatusCode MdtReadoutGeomTool::loadDimensions(const FactoryCache& facCache, MdtR
         ATH_MSG_VERBOSE("Add new tube layer "<<m_idHelperSvc->toStringDetEl(define.detElId)<<
                        std::endl<<std::endl<<m_geoUtilTool->dumpVolume(layerVol));
         define.tubeLayers.emplace_back(layerVol);
+        const MdtTubeLayer& lay{define.tubeLayers.back()};
+        /// Next check all tubes whether they're made up out of air or not. If yes, then there's no tube at this place 
+        /// and add the corresponding has hto the list.
+        for (unsigned int tube = 0 ; tube < lay.nTubes(); ++tube) {
+            constexpr std::string_view airTubeName{"airTube"};
+            if (lay.getTubeNode(tube)->getLogVol()->getName() == airTubeName) {
+                define.removedTubes.insert(MdtReadoutElement::measurementHash(define.tubeLayers.size(), tube+1));
+            }
+        }
     }
     define.readoutSide = facCache.readoutOnLeftSide.count(m_idHelperSvc->chamberId(define.detElId)) ? -1. : 1.;
     return StatusCode::SUCCESS;

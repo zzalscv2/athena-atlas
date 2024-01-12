@@ -13,14 +13,16 @@ using namespace ActsTrk;
 namespace MuonGMR4 {
 std::ostream& operator<<(std::ostream& ostr, const MuonGMR4::MdtReadoutElement::parameterBook& pars) {
     ostr << std::endl;
-    ostr << " //  tube half-length (min/max): "<<pars.shortHalfX<<"/"<<pars.longHalfX
-         <<", chamber width "<<pars.halfY<<", multilayer height: "<<pars.halfHeight;
+    ostr << " // Chamber half- length (min/max): "<<pars.shortHalfX<<"/"<<pars.longHalfX
+         <<",  half-width "<<pars.halfY<<", height: "<<pars.halfHeight;
     ostr << " // Number of tube layers " << pars.tubeLayers.size()<< std::endl;
     ostr << " // Tube pitch: " << pars.tubePitch
          << " wall thickness: " << pars.tubeWall
-         << " inner radius: " << pars.tubeInnerRad << std::endl;
+         << " inner radius: " << pars.tubeInnerRad 
+         << " endplug: "<<pars.endPlugLength
+         << " deadlength: "<<pars.deadLength<< std::endl;
     for (const MdtTubeLayer& layer : pars.tubeLayers) {
-         ostr << "//   **** "<< Amg::toString(layer.tubeTransform(0).translation(), 2)<<std::endl;
+         ostr << " //   **** "<< Amg::toString(layer.tubeTransform(0).translation(), 2)<<std::endl;
     }
     return ostr;
 }
@@ -35,7 +37,6 @@ Identifier MdtReadoutElement::measurementId(const IdentifierHash& measHash) cons
                                 tubeNumber(measHash) + 1);
 }
 StatusCode MdtReadoutElement::initElement() {
-  if (m_init) return StatusCode::SUCCESS;
   /// First check whether we're having tubes
   if (!numLayers() || !numTubesInLay()) {
      ATH_MSG_FATAL("The readout element "<< idHelperSvc()->toStringDetEl(identify())<<" has no tubes. Please check "<<std::endl<<m_pars);
@@ -72,6 +73,11 @@ StatusCode MdtReadoutElement::initElement() {
     std::optional<Amg::Vector3D> prevTubePos{std::nullopt};
     for (unsigned int tube = 1; tube <= numTubesInLay(); ++ tube) {
       const IdentifierHash idHash = measurementHash(lay,tube);
+      if (m_pars.removedTubes.count(idHash)) {
+         prevTubePos = std::nullopt;
+         continue;
+      }
+
       ATH_CHECK(insertTransform(idHash,
                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
                     return toStation(store) * toTubeFrame(hash); 
@@ -93,10 +99,7 @@ StatusCode MdtReadoutElement::initElement() {
       constexpr double pitchTolerance = 20. * Gaudi::Units::micrometer;
       if (prevTubePos) {
          const double dR = std::abs((tubePos - (*prevTubePos)).z());
-         /// BOG & few BMS chambers have a cut tube. Therefore, accept the tube staggering if
-         /// the tubes are 2 tube pitches apart
-         if (std::abs(dR - tubePitch()) > pitchTolerance &&
-             std::abs(dR - 2.* tubePitch()) > pitchTolerance) {
+         if (std::abs(dR - tubePitch()) > pitchTolerance) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Detected irregular tube in "<<
                           idHelperSvc()->toStringDetEl(identify())<<" in layer: "<<lay<<", tube: "<<tube
                           <<". Expected tube pitch: "<<tubePitch()<<" measured tube pitch: "
@@ -104,7 +107,8 @@ StatusCode MdtReadoutElement::initElement() {
                           <<" previous: "<<Amg::toString((*prevTubePos), 2));
             return StatusCode::FAILURE;
          }
-      } else if (prevLayPos) {
+      }  
+      if (prevLayPos && tube == 1) {
          const double dR = (tubePos - (*prevLayPos)).mag();       
          if (std::abs(dR - tubePitch()) > pitchTolerance) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Detected irregular layer pitch in "<<
@@ -112,13 +116,12 @@ StatusCode MdtReadoutElement::initElement() {
                           <<". Expected tube pitch: "<<tubePitch()<<" measured tube pitch: "
                           <<dR<<" tube position: "<<Amg::toString(tubePos,2)
                           <<" previous:"<<Amg::toString((*prevLayPos), 2));
-         }        
-      } 
-      if (!prevTubePos) prevLayPos = std::make_optional<Amg::Vector3D>(tubePos);
+         }
+         prevLayPos = std::make_optional<Amg::Vector3D>(tubePos);
+      }
       prevTubePos = std::make_optional<Amg::Vector3D>(tubePos);
     }
- }
-  m_init = true;
+  }
 #ifndef SIMULATIONBASE
   m_pars.tubeBounds.reset();
   m_pars.layerBounds.reset();

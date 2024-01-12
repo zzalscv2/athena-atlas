@@ -8,7 +8,6 @@
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <set>
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "MuonCondData/MdtCondDbData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "MuonTesterTree/MuonTesterTree.h"
 #include "MuonTesterTree/IdentifierBranch.h"
@@ -27,18 +26,12 @@ class GeoModelMdtTest : public AthHistogramAlgorithm {
     unsigned int cardinality() const override final { return 1; }
 
    private:
-    const MdtCondDbData* retrieveDeadChannels(const EventContext& ctx ) const;
     StatusCode dumpToTree(const EventContext& ctx, const MdtReadoutElement* readoutEle);
   
     // MuonDetectorManager from the conditions store
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{
         this, "DetectorManagerKey", "MuonDetectorManager",
         "Key of input MuonDetectorManager condition data"};
-
-
-    /// Conditions object to exclude all tubes that are not
-    SG::ReadCondHandleKey<MdtCondDbData> m_deadChanKey{this, "ReadKey", "MdtCondDbData", "Key of MdtCondDbData"};
-
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

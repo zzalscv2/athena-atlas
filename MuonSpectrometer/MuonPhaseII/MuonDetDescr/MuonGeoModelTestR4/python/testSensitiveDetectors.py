@@ -11,7 +11,7 @@ def setupTestOutputCfg(flags,**kwargs):
     # =============================
     # Define contents of the format
     # =============================
-    sim_containers = ["xMdtSimHits", "xRpcSimHits", "xTgcSimHits"]
+    sim_containers = ["xMdtSimHits", "xRpcSimHits", "xTgcSimHits", "xStgcSimHits", "xMmSimHits"]
     container_items = ["xAOD::TruthParticleContainer#",
                        "xAOD::TruthParticleAuxContainer#",
                        "McEventCollection#"]

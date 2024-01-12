@@ -22,7 +22,7 @@ namespace MuonGMR4{
     public:
         MdtTubeLayer(const PVConstLink layer);
         ///@brief Returns the number of tubes in the layer
-        unsigned int nTubes() const ;
+        unsigned int nTubes() const;
         ///@brief: Returns the transformation from the layer to the muon station
         const Amg::Transform3D layerTransform() const;
         ///@brief Returns the transformation of the tube to the muon station
@@ -32,9 +32,10 @@ namespace MuonGMR4{
         const Amg::Vector3D tubePosInLayer(const unsigned int tube) const;
         ///@brief Returns the half-length of the given tube 
         double tubeHalfLength(const unsigned int tube) const;
+        ///@brief returns the PVConst link to the n-th tube [0 - nTubes() -1]
+        PVConstLink getTubeNode(unsigned int tube) const;
     private:
         PVConstLink m_layerNode{nullptr};       
-        PVConstLink getTubeNode(unsigned int tube) const;
     };
 }
 #endif

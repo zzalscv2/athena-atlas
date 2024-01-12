@@ -50,7 +50,7 @@ StatusCode GeoModelMdtTest::initialize() {
     if (m_testStations.empty()){
         for(auto itr = id_helper.detectorElement_begin();
                  itr!= id_helper.detectorElement_end();++itr){
-           if (!id_helper.isBMG(*itr)) m_testStations.insert(*itr);
+           m_testStations.insert(*itr);
         }
     }
     ATH_CHECK(detStore()->retrieve(m_detMgr));
@@ -162,6 +162,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
    for (unsigned int lay = 1; lay <= readoutEle->numLayers(); ++lay) {
       for (unsigned int tube = 1; tube <= readoutEle->numTubesInLay(); ++tube) {
          const IdentifierHash measHash{readoutEle->measurementHash(lay,tube)};
+         if (!readoutEle->isValid(measHash)) continue;
          const Amg::Transform3D& tubeTransform{readoutEle->localToGlobalTrans(gctx,measHash)};
          m_tubeLay.push_back(lay);
          m_tubeNum.push_back(tube);         

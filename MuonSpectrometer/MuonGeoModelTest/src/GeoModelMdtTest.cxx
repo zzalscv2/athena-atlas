@@ -6,16 +6,13 @@
 #include <fstream>
 #include <iostream>
 
-#include "EventPrimitives/EventPrimitivesToStringConverter.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonReadoutGeometry/MuonStation.h"
 namespace MuonGM {
 
 std::ostream& operator<<(std::ostream& ostr, const Amg::Transform3D& trans){
-    ostr<<"translation: "<<Amg::toString(trans.translation(),2);
-    ostr<<", rotation: {"<<Amg::toString(trans.linear()*Amg::Vector3D::UnitX(),3)<<",";
-    ostr<<Amg::toString(trans.linear()*Amg::Vector3D::UnitY(),3)<<",";
-    ostr<<Amg::toString(trans.linear()*Amg::Vector3D::UnitZ(),3)<<"}";
+    ostr<<Amg::toString(trans, 3);
     return ostr;
 }  
 
@@ -25,7 +22,6 @@ GeoModelMdtTest::GeoModelMdtTest(const std::string& name,
 
 StatusCode GeoModelMdtTest::initialize() {
     ATH_CHECK(m_detMgrKey.initialize());
-    ATH_CHECK(m_deadChanKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_tree.init(this));
 
@@ -56,19 +52,10 @@ StatusCode GeoModelMdtTest::initialize() {
     if (m_testStations.empty()){
         for(auto itr = id_helper.detectorElement_begin();
                  itr!= id_helper.detectorElement_end();++itr){
-           if (!id_helper.isBMG(*itr)) m_testStations.insert(*itr);
+           m_testStations.insert(*itr);
         }
     }
     return StatusCode::SUCCESS;
-}
-const MdtCondDbData* GeoModelMdtTest::retrieveDeadChannels(const EventContext& ctx ) const {
-    if (m_deadChanKey.empty()) return nullptr;
-    SG::ReadCondHandle<MdtCondDbData> deadChanHandle{m_deadChanKey,ctx};
-    if (!deadChanHandle.isValid()) {
-        ATH_MSG_FATAL("Failed to retrieve Mdt conditions "<<m_deadChanKey.fullKey());
-        throw std::runtime_error("No dead channels found");
-    }
-    return deadChanHandle.cptr();    
 }
 StatusCode GeoModelMdtTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
@@ -78,15 +65,10 @@ StatusCode GeoModelMdtTest::execute() {
                       << m_detMgrKey.fullKey());
         return StatusCode::FAILURE;
     }
-    const MdtCondDbData* deadChan{retrieveDeadChannels(ctx)};
     
     for (const Identifier& test_me : m_testStations) {
         const std::string detStr = m_idHelperSvc->toStringDetEl(test_me);
         ATH_MSG_VERBOSE("Test retrieval of Mdt detector element " << detStr);
-        if (deadChan && !deadChan->isGoodChamber(test_me)) {
-            ATH_MSG_VERBOSE("Dead station found " << detStr);
-            continue;
-        }
         const MdtReadoutElement* reElement = detMgr->getMdtReadoutElement(test_me);
         if (!reElement) {
             ATH_MSG_VERBOSE("Detector element is invalid");
@@ -169,8 +151,6 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
     m_readoutTransform = readoutEle->getMaterialGeom()->getAbsoluteTransform();
     
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
-
-    const MdtCondDbData* deadChan{retrieveDeadChannels(ctx)};
     
     for (int lay = 1; lay <= readoutEle->getNLayers(); ++lay) {
         for (int tube = 1; tube <= readoutEle->getNtubesperlayer(); ++tube) {
@@ -179,9 +159,13 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
                                                           readoutEle->getMultilayer(), 
                                                           lay, tube, is_valid);
             if (!is_valid) continue;
-            if (deadChan && !deadChan->isGood(tube_id)) {
-                ATH_MSG_ALWAYS("Dead dube detected "<<m_idHelperSvc->toString(tube_id));
-                continue;
+            if (m_idHelperSvc->stationNameString(tube_id) == "BMG") {
+                try{
+                    readoutEle->transform(tube_id);
+                } catch (const std::runtime_error& err ){
+                    ATH_MSG_VERBOSE("Tube does not exist "<<err.what());
+                    continue;
+                }
             }            
             const Amg::Transform3D layTransf{readoutEle->transform(tube_id)};
             m_tubeLay.push_back(lay);
