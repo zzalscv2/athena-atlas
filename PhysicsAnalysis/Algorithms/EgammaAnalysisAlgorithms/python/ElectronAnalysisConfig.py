@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -28,7 +28,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
 
     def makeAlgs (self, config) :
-
+        
         if config.isPhyslite() :
             config.setSourceName (self.containerName, "AnalysisElectrons")
         else :
@@ -81,7 +81,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
                                'CP::EgammaCalibrationAndSmearingTool' )
         alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
         alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
-        alg.calibrationAndSmearingTool.useAFII = int( config.dataType() is DataType.FastSim )
+        alg.calibrationAndSmearingTool.useFastSim = int( config.dataType() is DataType.FastSim )
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -142,7 +142,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         if selectionPostfix != '' and selectionPostfix[0] != '_' :
             selectionPostfix = '_' + selectionPostfix
 
-        # The setup below is inappropriate for Run 1 and we don't have a use case for Run 4 (yet)
+        # The setup below is inappropriate for Run 1
         if config.geometry() is LHCPeriod.Run1:
             raise ValueError ("Can't set up the ElectronWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
 

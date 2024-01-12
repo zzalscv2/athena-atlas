@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import unittest
 import ROOT
@@ -46,6 +46,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool = ROOT.CP.EgammaCalibrationAndSmearingTool("tool_initialization")
         self.assertTrue(tool.setProperty(
             "decorrelationModel", "1NP_v1"). isSuccess())
+        self.assertTrue(tool.setProperty("useFastSim", False).isSuccess())
         tool.msg().setLevel(ROOT.MSG.FATAL)
         self.assertFalse(tool.initialize().isSuccess())
 
@@ -132,6 +133,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         self.assertTrue(tool.setProperty["int"](
             "randomRunNumber", RUN2015).isSuccess())
         self.assertTrue(tool.setProperty['bool']("doSmearing", 0).isSuccess())
+        self.assertTrue(tool.setProperty("useFastSim", False).isSuccess())
         tool.msg().setLevel(ROOT.MSG.WARNING)
 
         self.assertTrue(tool.initialize().isSuccess())
@@ -162,6 +164,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
             "decorrelationModel", "1NP_v1"). isSuccess())
         self.assertTrue(tool.setProperty["int"](
             "randomRunNumber", RUN2022).isSuccess())
+        self.assertTrue(tool.setProperty("useFastSim", False).isSuccess())
         tool.msg().setLevel(ROOT.MSG.INFO)
         self.assertTrue(tool.initialize().isSuccess())
         ei = self.factory.create_eventinfo(True, 100000)   # simulation
@@ -186,6 +189,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         self.assertTrue(tool.setProperty["bool"]("doSmearing", 0).isSuccess())
         self.assertTrue(tool.setProperty["int"](
             "randomRunNumber", RUN2015).isSuccess())
+        self.assertTrue(tool.setProperty("useFastSim", False).isSuccess())
 
         tool.msg().setLevel(ROOT.MSG.WARNING)
         self.assertTrue(tool.initialize().isSuccess())
@@ -210,6 +214,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool2.setProperty("ESModel", "es2012XX").ignore()
         tool2.setProperty['bool']("doSmearing", 0).ignore()
         tool2.setProperty["int"]("randomRunNumber", RUN2015).ignore()
+        tool2.setProperty("useFastSim", False).ignore()
         tool2.msg().setLevel(ROOT.MSG.WARNING)
         self.assertTrue(tool2.initialize().isSuccess())
 
@@ -218,6 +223,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool3.setProperty['bool']("doSmearing", 0).ignore()
         tool3.setProperty("MVAfolder", "egammaMVACalib/offline/v3").ignore()
         tool3.setProperty["int"]("randomRunNumber", RUN2015).ignore()
+        tool3.setProperty("useFastSim", False).ignore()
         tool3.msg().setLevel(ROOT.MSG.WARNING)
         self.assertTrue(tool3.initialize().isSuccess())
 
@@ -225,6 +231,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool4.setProperty("ESModel", "es2015PRE").ignore()
         tool4.setProperty['bool']("doSmearing", 0).ignore()
         tool4.setProperty["int"]("randomRunNumber", RUN2015).ignore()
+        tool4.setProperty("useFastSim", False).ignore()
         tool4.msg().setLevel(ROOT.MSG.WARNING)
         self.assertTrue(tool4.initialize().isSuccess())
 
@@ -245,6 +252,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool1.setProperty("ESModel", "es2022_R22_PRE").ignore()
         tool1.setProperty['bool']("doSmearing", 0).ignore()
         tool1.setProperty["int"]("randomRunNumber", RUN2015).ignore()
+        tool1.setProperty("useFastSim", False).ignore()
         tool1.msg().setLevel(ROOT.MSG.WARNING)
         self.assertTrue(tool1.initialize().isSuccess())
 
@@ -253,6 +261,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool2.setProperty['bool']("doSmearing", 0).ignore()
         tool2.setProperty("MVAfolder", "egammaMVACalib/offline/v7").ignore()
         tool2.setProperty["int"]("randomRunNumber", RUN2015).ignore()
+        tool2.setProperty("useFastSim", False).ignore()
         tool2.msg().setLevel(ROOT.MSG.WARNING)
         self.assertTrue(tool2.initialize().isSuccess())
 
@@ -261,6 +270,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool3.setProperty['bool']("doSmearing", 0).ignore()
         tool3.setProperty("MVAfolder", "egammaMVACalib/offline/v6").ignore()
         tool3.setProperty["int"]("randomRunNumber", RUN2015).ignore()
+        tool3.setProperty("useFastSim", False).ignore()
         tool3.msg().setLevel(ROOT.MSG.WARNING)
         self.assertTrue(tool3.initialize().isSuccess())
 
@@ -278,6 +288,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool = ROOT.CP.EgammaCalibrationAndSmearingTool("tool")
         self.assertTrue(tool.setProperty("ESModel", esmodel).isSuccess())
         self.assertTrue(tool.setProperty['bool']("doSmearing", 0).isSuccess())
+        self.assertTrue(tool.setProperty("useFastSim", False).isSuccess())
         tool.msg().setLevel(ROOT.MSG.WARNING)
         self.assertTrue(tool.initialize().isSuccess())
         ei = self.factory.create_eventinfo(not isdata, 100000)
@@ -345,6 +356,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         self.assertTrue(tool.setProperty['bool']("doSmearing", 0).isSuccess())
         self.assertTrue(tool.setProperty["int"](
             "randomRunNumber", RUN2016).isSuccess())
+        self.assertTrue(tool.setProperty("useFastSim", False).isSuccess())
         tool.msg().setLevel(ROOT.MSG.WARNING)
         self.assertTrue(tool.initialize().isSuccess())
         ei = self.factory.create_eventinfo(not isdata, 100000)   # simulation
@@ -394,6 +406,8 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
             self.assertTrue(tool.setProperty["int"](
                 "useMVACalibration", 0).isSuccess())
             self.assertTrue(tool.setProperty("ESModel", model).isSuccess())
+            self.assertTrue(tool.setProperty("useFastSim", False).isSuccess())
+
             if decorrelation is not None:
                 self.assertTrue(tool.setProperty(
                     "decorrelationModel", decorrelation).isSuccess())
@@ -488,6 +502,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
             "ESModel", "es2018_R21_v0").isSuccess())
         self.assertTrue(tool.setProperty(
             "randomRunNumber", RUN2015).isSuccess())
+        self.assertTrue(tool.setProperty("useFastSim", False).isSuccess())
         tool.msg().setLevel(ROOT.MSG.WARNING)
         self.assertTrue(tool.initialize().isSuccess())
 
@@ -505,12 +520,14 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool1 = ROOT.CP.EgammaCalibrationAndSmearingTool("tool")
         self.assertTrue(tool1.setProperty(
             "ESModel", "es2022_R22_PRE").isSuccess())
+        self.assertTrue(tool1.setProperty("useFastSim", False).isSuccess())
         tool1.msg().setLevel(ROOT.MSG.WARNING)
         self.assertTrue(tool1.initialize().isSuccess())
 
         tool2 = ROOT.CP.EgammaCalibrationAndSmearingTool("tool")
         tool2.setProperty("ESModel", "es2018_R21_v0").ignore()
         tool2.setProperty["int"]("doScaleCorrection", 0).ignore()
+        tool2.setProperty("useFastSim", False).ignore()
         tool2.msg().setLevel(ROOT.MSG.WARNING)
         self.assertTrue(tool2.initialize().isSuccess())
 
@@ -534,6 +551,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         self.assertTrue(tool.setProperty['bool']("doSmearing", 0).isSuccess())
         self.assertTrue(tool.setProperty(
             "randomRunNumber", RUN2015).isSuccess())
+        self.assertTrue(tool.setProperty("useFastSim", False).isSuccess())
         tool.msg().setLevel(ROOT.MSG.WARNING)
         self.assertTrue(tool.initialize().isSuccess())
 
@@ -563,10 +581,13 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
 
     def test_intermodule_correction_working(self):
         tool = ROOT.CP.EgammaCalibrationAndSmearingTool("tool")
+        tool.setProperty("useFastSim", False).ignore()
+
         tool_no_correction = ROOT.CP.EgammaCalibrationAndSmearingTool(
             "tool_no_correction")
         tool_no_correction.setProperty["int"](
             "useIntermoduleCorrection", 0).ignore()
+        tool_no_correction.setProperty("useFastSim", False).ignore()
 
         for t in tool, tool_no_correction:
             self.assertTrue(t.setProperty(
@@ -588,6 +609,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
     def test_idempotence(self):
         tool = ROOT.CP.EgammaCalibrationAndSmearingTool("tool_es2015PRE")
         self.assertTrue(tool.setProperty("ESModel", "es2015PRE").isSuccess())
+        self.assertTrue(tool.setProperty("useFastSim", False).isSuccess())
         tool.initialize().ignore()
         ei = self.factory.create_eventinfo(False, 100000)  # data
         for generator in self.generator_photon, self.generator_electron:
@@ -611,6 +633,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool_1NP.setProperty("ESModel", "es2022_R22_PRE").ignore()
         tool_1NP.setProperty("decorrelationModel", "1NP_v1").ignore()
         tool_1NP.setProperty["int"]("randomRunNumber", RUN2022).ignore()
+        tool_1NP.setProperty("useFastSim", False).isSuccess()
         tool_1NP.msg().setLevel(ROOT.MSG.WARNING)
 
         tool_1NP.initialize().ignore()
@@ -623,6 +646,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         # FULL_v1 divide the ZEESTAT by the sqrt(#bins)
         tool_FULL.setProperty("decorrelationModel",
                               "FULL_ETACORRELATED_v1").ignore()
+        tool_FULL.setProperty("useFastSim", False).isSuccess()
         tool_FULL.msg().setLevel(ROOT.MSG.WARNING)
         tool_FULL.initialize().ignore()
 
@@ -692,6 +716,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
             "decorrelationModel", "1NP_v1").isSuccess())
         self.assertTrue(tool.setProperty["int"](
             "randomRunNumber", RUN2015).isSuccess())
+        self.assertTrue(tool.setProperty("useFastSim", False).isSuccess())
         tool.msg().setLevel(ROOT.MSG.WARNING)
         tool.initialize().ignore()
         ei = self.factory.create_eventinfo(False, 100000)  # data
@@ -733,6 +758,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool_es2015PRE.setProperty("ESModel", "es2015PRE").ignore()
         tool_es2015PRE.setProperty("decorrelationModel", "1NP_v1").ignore()
         tool_es2015PRE.setProperty["int"]("doSmearing", 0).ignore()
+        tool_es2015PRE.setProperty("useFastSim", False).ignore()
         tool_es2015PRE.msg().setLevel(ROOT.MSG.WARNING)
         self.assertTrue(tool_es2015PRE.setProperty["int"](
             "randomRunNumber", RUN2015).isSuccess())
@@ -744,6 +770,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool_es2015cPRE.setProperty("ESModel", "es2015cPRE").ignore()
         tool_es2015cPRE.setProperty("decorrelationModel", "1NP_v1").ignore()
         tool_es2015cPRE.setProperty["int"]("doSmearing", 0).ignore()
+        tool_es2015cPRE.setProperty("useFastSim", False).ignore()
         self.assertTrue(tool_es2015cPRE.setProperty["int"](
             "randomRunNumber", RUN2015).isSuccess())
         tool_es2015cPRE.msg().setLevel(ROOT.MSG.WARNING)
@@ -784,6 +811,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool_es2015c_summer.setProperty['bool']("doSmearing", 0).ignore()
         self.assertTrue(tool_es2015c_summer.setProperty(
             "randomRunNumber", RUN2015).isSuccess())
+        tool_es2015c_summer.setProperty("useFastSim", False).ignore()
 
         tool_es2015c_summer.msg().setLevel(ROOT.MSG.WARNING)
         tool_es2015c_summer.initialize().ignore()
@@ -796,6 +824,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool_es2015cPRE.setProperty['bool']("doSmearing", 0).ignore()
         self.assertTrue(tool_es2015cPRE.setProperty(
             "randomRunNumber", RUN2015).isSuccess())
+        tool_es2015cPRE.setProperty("useFastSim", False).ignore()
         tool_es2015cPRE.msg().setLevel(ROOT.MSG.WARNING)
         tool_es2015cPRE.initialize().ignore()
 
@@ -828,6 +857,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         tool_es2015c_summer.setProperty("ESModel", "es2015c_summer").ignore()
         tool_es2015c_summer.setProperty(
             "decorrelationModel", "1NPCOR_PLUS_UNCOR").ignore()
+        tool_es2015c_summer.setProperty("useFastSim", False).ignore()
 
         tool_es2015c_summer.msg().setLevel(ROOT.MSG.WARNING)
         tool_es2015c_summer.initialize().ignore()

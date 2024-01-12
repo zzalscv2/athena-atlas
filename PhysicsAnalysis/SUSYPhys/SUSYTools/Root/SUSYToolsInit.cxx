@@ -1353,7 +1353,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_MSG_DEBUG( "Initialising EgcalibTool " );
       ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", "es2018_R21_v0") ); //used for analysis using data processed with 21.0
       ATH_CHECK( m_egammaCalibTool.setProperty("decorrelationModel", "1NP_v1") );
-      ATH_CHECK( m_egammaCalibTool.setProperty("useAFII", isAtlfast()?1:0) );
+      ATH_CHECK( m_egammaCalibTool.setProperty("useFastSim", isAtlfast()?1:0) );
       ATH_CHECK( m_egammaCalibTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_egammaCalibTool.retrieve() );
     } else ATH_CHECK( m_egammaCalibTool.retrieve() );

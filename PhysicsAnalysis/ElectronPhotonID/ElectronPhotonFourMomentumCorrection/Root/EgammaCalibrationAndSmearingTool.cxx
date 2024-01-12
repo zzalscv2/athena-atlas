@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
@@ -21,7 +21,6 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PathResolver/PathResolver.h"
-#include "xAODMetaData/FileMetaData.h"
 #include <algorithm>
 
 #ifndef ROOTCORE
@@ -302,8 +301,9 @@ EgammaCalibrationAndSmearingTool::EgammaCalibrationAndSmearingTool(const std::st
   declareProperty("use_uA2MeV_2015_first2weeks_correction", m_use_uA2MeV_2015_first2weeks_correction=AUTO);
   declareProperty("randomRunNumber", m_user_random_run_number=0);
   // this is the user input, it is never changed by the tool. The tool uses m_simulation.
-  declareProperty("useAFII", m_use_AFII = AUTO, "This will be set automatically for you if using athena, (int)0=full sim, (int)1=fast sim");
-  
+  declareProperty("useFastSim", m_useFastSim = -1, "This should be explicitly set by the user depending on the data type (int)0=full sim, (int)1=fast sim");
+  declareProperty("useAFII", m_use_AFII = -1, "This is now deprecated. Kept for explicit error message for now");
+
 }
 
 EgammaCalibrationAndSmearingTool::~EgammaCalibrationAndSmearingTool() {
@@ -358,11 +358,24 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
     return StatusCode::FAILURE;
   }
 
-  if (m_use_AFII == 1) { m_simulation = PATCore::ParticleDataType::Fast; }
-  else if (m_use_AFII == 0) { m_simulation = PATCore::ParticleDataType::Full; }
-  // this is needed for tests where only applyCorrection is called without beginInputFile or beginEvent
-  else if (m_use_AFII == AUTO) { m_simulation = PATCore::ParticleDataType::Full; }
+  if (m_use_AFII!=-1) {
+    ATH_MSG_ERROR("Property useAFII is deprecated. It is now replaced with useFastSim, which should be explicitly configured");
+    return StatusCode::FAILURE;
+  }
+  
+  if (m_useFastSim == 1) { m_simulation = PATCore::ParticleDataType::Fast; }
+  else if (m_useFastSim == 0) { m_simulation = PATCore::ParticleDataType::Full; }
+  else {
+    ATH_MSG_ERROR("Property useFastSim should be explicitly configured");
+    return StatusCode::FAILURE;
+  }
 
+  if(m_TESModel == egEnergyCorr::es2022_R22_PRE
+     && m_simulation == PATCore::ParticleDataType::Fast){
+    ATH_MSG_ERROR("Sample is FastSim but no AF3 calibration is available yet with es2022_R22_PRE recommendations. Please get in touch with the EGamma CP group in case you are using this");
+    return StatusCode::FAILURE;
+  }
+  
   // configure decorrelation model, translate string property to internal class enum
   /*    S R SR
     0.  0 0 0     WARNING Full, Full (this is the default without configuration)
@@ -564,7 +577,6 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
   ATH_MSG_INFO("use MVA calibration = " << m_use_mva_calibration);
   ATH_MSG_INFO("use temperature correction 2015 = " << m_use_temp_correction201215);
   ATH_MSG_INFO("use uA2MeV correction 2015 1/2 week = " << m_use_uA2MeV_2015_first2weeks_correction);
-  //ATH_MSG_INFO("use AFII = " << m_use_AFII); ... print in beginInputFile now, since that's where we check it's value
 
   setupSystematics();
 
@@ -574,141 +586,6 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
 
   return StatusCode::SUCCESS;
 }
-/*
- * Metadata methods.
- * The tool operates in MC .
- * The default type is Full sim.
- *
- * The user can  override  the MC type .
- *
- * The typical scenario is :
- * For every IncidentType::BeginInputFile we can check for metadata
- * and try to employ them in determining the simulation Flavor.
- * If we found metadata
- * set m_metadata_retrieved= True else set it to False
- *
- * EndInputFile should not do something. As in any case we try for
- * each new IncidentType::BeginInputFile to do a retrieval
- *
- * The beginEvent should kick in only if the beginInputFile has
- * failed to find metadata . In which case we try to employ the event info
- *
- * Asg/base class has our back in cases where the 1st beginEvent
- * happens before the 1st beginInputFile.
- *
- * For this tool the apply correction is also using the EventInfo
- * to figure out data vs MC.
- */
-
-StatusCode EgammaCalibrationAndSmearingTool::get_simflavour_from_metadata(PATCore::ParticleDataType::DataType& result) const
-{
-// adapted from https://svnweb.cern.ch/trac/atlasoff/browser/PhysicsAnalysis/AnalysisCommon/CPAnalysisExamples/trunk/Root/MetadataToolExample.cxx
-#ifndef XAOD_STANDALONE
-  //Try the Athena/POOL machinery
-  std::string dataType("");
-  if(AthAnalysisHelper::retrieveMetadata("/TagInfo", "project_name", dataType, inputMetaStore()).isSuccess()){
-      //see if the dataType was set to something meaningfull
-      if (!(dataType == "IS_SIMULATION")) {
-          result = PATCore::ParticleDataType::Data;
-          return StatusCode::SUCCESS;
-      }
-      // Determine Fast/FullSim
-      if (dataType == "IS_SIMULATION") {
-          std::string simType("");
-          ATH_CHECK(AthAnalysisHelper::retrieveMetadata("/Simulation/Parameters", "SimulationFlavour", simType, inputMetaStore()));
-           std::transform(simType.begin(), simType.end(), simType.begin(), ::toupper);
-          result = (simType.find("ATLFASTII")==std::string::npos) ?  PATCore::ParticleDataType::Full : PATCore::ParticleDataType::Fast;
-          return StatusCode::SUCCESS;
-      }
-  }
-  //Done with Athena/Pool  should have returned success by now if possible
-#endif
-  //here's how things will work dual use.
-  if (inputMetaStore()->contains<xAOD::FileMetaData>("FileMetaData")) {
-      const xAOD::FileMetaData* fmd = nullptr;
-      ATH_CHECK(inputMetaStore()->retrieve(fmd, "FileMetaData"));
-
-      std::string simType("");
-      const bool s = fmd->value(xAOD::FileMetaData::simFlavour, simType);
-      if (!s) {
-          ATH_MSG_DEBUG("no sim flavour from metadata: must be data");
-          result = PATCore::ParticleDataType::Data;
-          return StatusCode::SUCCESS;
-      }
-      else {
-          ATH_MSG_DEBUG("sim type = " + simType);
-          std::transform(simType.begin(), simType.end(), simType.begin(), ::toupper);
-          result = (simType.find("ATLFASTII")==std::string::npos) ?  PATCore::ParticleDataType::Full : PATCore::ParticleDataType::Fast;
-          return StatusCode::SUCCESS;
-      }
-  }
-  else {  // no metadata in the file
-      ATH_MSG_DEBUG("no metadata found in the file");
-      return StatusCode::FAILURE;
-  }
-}
-
-StatusCode EgammaCalibrationAndSmearingTool::beginInputFile()
-{
-  // if the user has set a preference (m_use_AFII != AUTO) set it
-  if (m_use_AFII == 0) { m_simulation = PATCore::ParticleDataType::Full; }
-  else if (m_use_AFII == 1) { m_simulation = PATCore::ParticleDataType::Fast; }
-
-  PATCore::ParticleDataType::DataType data_flavour_metadata;
-  const StatusCode status_metadata = get_simflavour_from_metadata(data_flavour_metadata);
-  if (status_metadata == StatusCode::SUCCESS) {
-    m_metadata_retrieved = true;
-    ATH_MSG_DEBUG("metadata from new file: " <<
-            (data_flavour_metadata == PATCore::ParticleDataType::Data ? "data" :
-             (data_flavour_metadata == PATCore::ParticleDataType::Full ? "full simulation" : "fast simulation")));
-
-    if (data_flavour_metadata != PATCore::ParticleDataType::Data) {
-        if (m_use_AFII == AUTO) {
-            m_simulation = data_flavour_metadata;
-        }
-        else { // user has set a preference
-          // check if the preference is consistent and warn
-          if (m_use_AFII == 1 && data_flavour_metadata == PATCore::ParticleDataType::Full) {
-              ATH_MSG_WARNING("data is full sim, but you asked for AFII");
-          }
-          else if (m_use_AFII == 0 && data_flavour_metadata == PATCore::ParticleDataType::Fast) {
-              ATH_MSG_WARNING("data is fast sim, but you asked for full sim");
-          }
-        }
-    }
-  }
-  else { // not able to retrieve metadata
-    m_metadata_retrieved = false;
-    if (m_use_AFII == AUTO) {
-      ATH_MSG_WARNING("not able to retrieve metadata and use_AFII not specified -> set simulation flavour to full simulation");
-    }
-  }
-  return StatusCode::SUCCESS;
-}
-
-StatusCode EgammaCalibrationAndSmearingTool::endInputFile() {
-    //Do nothing
-    return StatusCode::SUCCESS;
-}
-
-StatusCode EgammaCalibrationAndSmearingTool::beginEvent() {
-
-    if (m_metadata_retrieved) return StatusCode::SUCCESS;
-
-    //determine MC/Data from evtInfo ... this will work for both athena and eventloop
-    const xAOD::EventInfo* evtInfo = nullptr;
-    ATH_CHECK(evtStore()->retrieve(evtInfo, "EventInfo"));
-    if (evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) {
-        if (m_use_AFII == 1) { m_simulation = PATCore::ParticleDataType::Fast; }
-        else if (m_use_AFII == 0) { m_simulation = PATCore::ParticleDataType::Full; }
-        else { //AUTO
-            m_simulation = PATCore::ParticleDataType::Full;
-        }
-    }
-    m_metadata_retrieved=true;
-    return StatusCode::SUCCESS;
-}
-
 
 void EgammaCalibrationAndSmearingTool::setRandomSeed(unsigned seed) {
   m_rootTool->setRandomSeed(seed);
@@ -803,7 +680,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamm
 {
   /*
    * Here we check for each event the kind of data DATA vs FullSim
-   * The m_simulation flavour has already be determined from metadata
+   * The m_simulation flavour has already been configured
    */
   PATCore::ParticleDataType::DataType dataType = (event_info.eventType(xAOD::EventInfo::IS_SIMULATION)) ? m_simulation : PATCore::ParticleDataType::Data;
 
