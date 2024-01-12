@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Possible cases:
 # 1) inputEVNTFile (normal)
@@ -121,7 +121,7 @@ def CommonSimulationCfg(flags, log):
         cfg.merge(G4AtlasAlgCfg(flags))
 
     from SimulationConfig.SimEnums import CalibrationRun
-    if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile]:
+    if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
         from LArG4SD.LArG4SDToolConfig import DeadMaterialCalibrationHitMergerCfg
         cfg.merge(DeadMaterialCalibrationHitMergerCfg(flags))
 

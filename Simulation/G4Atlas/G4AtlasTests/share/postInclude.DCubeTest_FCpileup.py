@@ -43,7 +43,7 @@ if DetFlags.LAr_on():
         job.G4TestAlg.SimTestTools += [CfgGetter.getPrivateTool("CaloEntryLayerTestTool", checkType=True)]
 if DetFlags.Tile_on():
     job.G4TestAlg.SimTestTools += [CfgGetter.getPrivateTool("TileHitsTestTool", checkType=True)]
-if simFlags.CalibrationRun.get_Value()=='LAr+Tile':
+if simFlags.CalibrationRun.get_Value() in ['LAr+Tile','LAr+Tile+ZDC']:
     job.G4TestAlg.SimTestTools += [CfgGetter.getPrivateTool("LArActiveCaloCalibHitsTestTool", checkType=True)]
     job.G4TestAlg.SimTestTools += [CfgGetter.getPrivateTool("LArInactiveCaloCalibHitsTestTool", checkType=True)]
     ##job.G4TestAlg.SimTestTools += [CfgGetter.getPrivateTool("LArDeadMaterialCaloCalibHitsTestTool", checkType=True)]

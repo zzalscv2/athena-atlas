@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
@@ -164,7 +164,7 @@ def CaloSensitiveDetectorListCfg(flags):
             from MinBiasScintillator.MinBiasScintillatorToolConfig import MinBiasScintillatorSDCfg
             tools += [ result.popToolsAndMerge(MinBiasScintillatorSDCfg(flags)) ]
 
-        if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile]:
+        if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
             from LArG4SD.LArG4SDToolConfig import LArDeadSensitiveDetectorToolCfg, LArActiveSensitiveDetectorToolCfg, LArInactiveSensitiveDetectorToolCfg
             tools += [ result.popToolsAndMerge(LArDeadSensitiveDetectorToolCfg(flags)) ]
             tools += [ result.popToolsAndMerge(LArInactiveSensitiveDetectorToolCfg(flags)) ]
@@ -174,7 +174,7 @@ def CaloSensitiveDetectorListCfg(flags):
             tools += [ result.popToolsAndMerge(LArDeadSensitiveDetectorToolCfg(flags)) ]
 
     if flags.Detector.EnableTile:
-        if flags.Sim.CalibrationRun in [CalibrationRun.Tile, CalibrationRun.LArTile]:
+        if flags.Sim.CalibrationRun in [CalibrationRun.Tile, CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
             from TileGeoG4Calib.TileGeoG4CalibConfig import TileGeoG4CalibSDCfg
             tools += [ result.popToolsAndMerge(TileGeoG4CalibSDCfg(flags)) ]  # mode 1 : With CaloCalibrationHits
         else:
@@ -262,7 +262,7 @@ def TileTestBeamSensitiveDetectorListCfg(flags):
     tools = []
 
     if flags.Detector.EnableTile:
-        if flags.Sim.CalibrationRun in [CalibrationRun.Tile, CalibrationRun.LArTile]:
+        if flags.Sim.CalibrationRun in [CalibrationRun.Tile, CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
             from TileGeoG4Calib.TileGeoG4CalibConfig import TileCTBGeoG4CalibSDCfg
             tools += [ result.popToolsAndMerge(TileCTBGeoG4CalibSDCfg(flags)) ] # mode 1 : With CaloCalibrationHits
         else:
@@ -289,10 +289,10 @@ def CombinedTestBeamSensitiveDetectorListCfg(flags):
     if flags.Detector.EnableLAr:
         from LArG4SD.LArG4SDToolConfig import LArEMBSensitiveDetectorCfg
         tools += [ result.popToolsAndMerge(LArEMBSensitiveDetectorCfg(flags)) ]
-        if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile, CalibrationRun.DeadLAr]:
+        if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile, CalibrationRun.LArTileZDC, CalibrationRun.DeadLAr]:
             tools += [ 'LArH8CalibSensitiveDetector' ] # mode 1 : With CaloCalibrationHits
     if flags.Detector.EnableTile:
-        if flags.Sim.CalibrationRun in [CalibrationRun.Tile, CalibrationRun.LArTile]:
+        if flags.Sim.CalibrationRun in [CalibrationRun.Tile, CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
             from TileGeoG4Calib.TileGeoG4CalibConfig import TileCTBGeoG4CalibSDCfg
             tools += [ result.popToolsAndMerge(TileCTBGeoG4CalibSDCfg(flags)) ] # mode 1 : With CaloCalibrationHits
         else:

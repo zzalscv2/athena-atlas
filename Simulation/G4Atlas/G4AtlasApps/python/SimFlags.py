@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Simulation-specific flags.
@@ -593,7 +593,7 @@ class CalibrationRun(JobProperty):
     """
     statusOn = True
     allowedTypes = ['str']
-    allowedValues = ['LAr', 'Tile', 'LAr+Tile', 'DeadLAr']
+    allowedValues = ['LAr', 'Tile', 'ZDC', 'LAr+Tile', 'LAr+Tile+ZDC', 'DeadLAr']
     StoredValue = 'DeadLAr'
 
 

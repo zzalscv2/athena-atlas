@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.Enums import FlagEnum
 
 
@@ -12,7 +12,9 @@ class BeamPipeSimMode(FlagEnum):
 class CalibrationRun(FlagEnum):
     LAr = 'LAr'
     Tile = 'Tile'
+    ZDC = 'ZDC'
     LArTile = 'LAr+Tile'
+    LArTileZDC = 'LAr+Tile+ZDC'
     DeadLAr = 'DeadLAr'
     Off = 'Off'
 
