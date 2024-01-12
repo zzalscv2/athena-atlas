@@ -7,44 +7,40 @@
 
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from CaloRecGPU.CaloRecGPUConfigurator import CaloRecGPUConfigurator
-import CaloRecGPUTesting
+import CaloRecGPUTestingConfig
+from PlotterConfigurator import PlotterConfigurator
 from CaloRecGPUTestingChecker import check
 import sys
 
 def do_test(files):
-    Configurator = CaloRecGPUConfigurator()
     
-    PlotterConfig = CaloRecGPUTesting.PlotterConfigurator(["CPU_growing", "GPU_growing", "CPU_splitting", "GPU_splitting"], ["growing", "splitting"])
+    PlotterConfig = PlotterConfigurator(["CPU_growing", "GPU_growing", "CPU_splitting", "GPU_splitting"], ["growing", "splitting"])
     
-    Configurator.DoMonitoring = True
-    
-    cfg, numevents = CaloRecGPUTesting.PrepareTest(Configurator, files, parse_command_arguments = False)
 
-    Configurator.TopoClusterSeedCutsInAbsE = False
-    Configurator.TopoClusterCellCutsInAbsE = False
-    Configurator.TopoClusterNeighborCutsInAbsE = False
-    Configurator.SplitterUseNegativeClusters = False
-    
-    Configurator.TwoGaussianNoise = False
-    
-            
-    Configurator.TopoClusterSNRSeedThreshold = 4.0
-    Configurator.TopoClusterSNRGrowThreshold = 2.0
-    Configurator.TopoClusterSNRCellThreshold = 0.0
-    
-    Configurator.ClusterSize = "Topo_420"
-    
-    theKey="CaloCalTopoClustersNew"
-    
-    topoAcc = CaloRecGPUTesting.FullTestConfiguration(Configurator, TestGrow = True, TestSplit = True, PlotterConfigurator = PlotterConfig)
+    flags, perfmon, numevents = CaloRecGPUTestingConfig.PrepareTest()
+    flags.CaloRecGPU.DoMonitoring = True
+    flags.CaloRecGPU.TopoClusterSeedCutsInAbsE = False
+    flags.CaloRecGPU.TopoClusterCellCutsInAbsE = False
+    flags.CaloRecGPU.TopoClusterNeighborCutsInAbsE = False
+    flags.CaloRecGPU.SplitterUseNegativeClusters = False
 
-    topoAlg = topoAcc.getPrimary()
-    topoAlg.ClustersOutputName=theKey
+    flags.CaloRecGPU.TwoGaussianNoise = False
+
+    flags.CaloRecGPU.TopoClusterSNRSeedThreshold = 4.0
+    flags.CaloRecGPU.TopoClusterSNRGrowThreshold = 2.0
+    flags.CaloRecGPU.TopoClusterSNRCellThreshold = 0.0
+
+    flags.CaloRecGPU.ClusterSize = "Topo_420"
     
-    cfg.merge(topoAcc)
-    
-    cfg.run(100)
+    flags.CaloRecGPU.ClustersOutputName="CaloCalTopoClustersNew"
+    flags.lock()
+
+    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flags,perfmon)
+
+    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flags, TestGrow = True, TestSplit = True, PlotterConfigurator = PlotterConfig))
+
+
+    topoAcc.run(100)
     
 
 if __name__=="__main__":

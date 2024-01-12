@@ -7,45 +7,41 @@
 
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from CaloRecGPU.CaloRecGPUConfigurator import CaloRecGPUConfigurator
-import CaloRecGPUTesting
+import CaloRecGPUTestingConfig
 from CaloRecGPUTestingChecker import check
+from PlotterConfigurator import PlotterConfigurator
 import sys
 
 def do_test(files):
-    Configurator = CaloRecGPUConfigurator()
     
-    PlotterConfig = CaloRecGPUTesting.PlotterConfigurator(["CPU_growing", "GPU_growing", "CPU_splitting", "GPU_splitting"], ["growing", "splitting"])
-    
-    Configurator.DoMonitoring = True
-    
-    cfg, numevents = CaloRecGPUTesting.PrepareTest(Configurator, files, parse_command_arguments = False)
-
-    Configurator.TopoClusterSeedCutsInAbsE = False
-    Configurator.TopoClusterCellCutsInAbsE = False
-    Configurator.TopoClusterNeighborCutsInAbsE = False
-    Configurator.SplitterUseNegativeClusters = False
-    
-    Configurator.TwoGaussianNoise = False
-            
-    Configurator.TopoClusterSNRSeedThreshold = 6.0
-    Configurator.TopoClusterSNRGrowThreshold = 3.0
-    Configurator.TopoClusterSNRCellThreshold = 3.0
-    
-    Configurator.ClusterSize = "Topo_633"
-    
-    theKey="CaloCalTopoClustersNew"
-    
-    topoAcc = CaloRecGPUTesting.FullTestConfiguration(Configurator, TestGrow = True, TestSplit = True, PlotterConfigurator = PlotterConfig)
-
-    topoAlg = topoAcc.getPrimary()
-    topoAlg.ClustersOutputName=theKey
-    
-    cfg.merge(topoAcc)
-    
-    cfg.run(100)
+    PlotterConfig = PlotterConfigurator(["CPU_growing", "GPU_growing", "CPU_splitting", "GPU_splitting"], ["growing", "splitting"])
     
 
+    flags, perfmon, numevents = CaloRecGPUTestingConfig.PrepareTest()
+    flags.CaloRecGPU.DoMonitoring = True
+    flags.CaloRecGPU.TopoClusterSeedCutsInAbsE = False
+    flags.CaloRecGPU.TopoClusterCellCutsInAbsE = False
+    flags.CaloRecGPU.TopoClusterNeighborCutsInAbsE = False
+    flags.CaloRecGPU.SplitterUseNegativeClusters = False
+
+    flags.CaloRecGPU.TwoGaussianNoise = False
+
+    flags.CaloRecGPU.TopoClusterSNRSeedThreshold = 6.0
+    flags.CaloRecGPU.TopoClusterSNRGrowThreshold = 3.0
+    flags.CaloRecGPU.TopoClusterSNRCellThreshold = 3.0
+
+    flags.CaloRecGPU.ClusterSize = "Topo_633"
+
+    flags.CaloRecGPU.ClustersOutputName="CaloCalTopoClustersNew"
+    flags.lock()
+
+    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flags,perfmon)
+
+    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flags, TestGrow = True, TestSplit = True, PlotterConfigurator = PlotterConfig))
+
+
+    topoAcc.run(100)
+    
 if __name__=="__main__":
     do_test(["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000001.pool.root.1",
              "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000002.pool.root.1",

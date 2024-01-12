@@ -2,25 +2,20 @@
 
 #Just runs the GPU algorithms, with basic monitoring enabled.
 
-from CaloRecGPU.CaloRecGPUConfigurator import CaloRecGPUConfigurator
-import CaloRecGPUTesting
+import CaloRecGPUTestingConfig
     
 if __name__=="__main__":
 
-    Configurator = CaloRecGPUConfigurator()
     
-    Configurator.DoMonitoring = True
-    
-    cfg, numevents = CaloRecGPUTesting.PrepareTest(Configurator)
+    flags, perfmon, numevents = CaloRecGPUTestingConfig.PrepareTest()
+    flags.CaloRecGPU.DoMonitoring = True
+    flags.CaloRecGPU.ClustersOutputName="CaloCalTopoClustersNew"
+    flags.lock()
 
-    theKey="CaloCalTopoClustersNew"
-    
-    topoAcc = Configurator.HybridClusterProcessorConf()
+    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flags,perfmon)
 
-    topoAlg = topoAcc.getPrimary()
-    topoAlg.ClustersOutputName=theKey
-    
-    cfg.merge(topoAcc)
-    
-    cfg.run(numevents)
+    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flags))
+
+
+    topoAcc.run(numevents)
 

@@ -4,12 +4,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import MeV, ns, cm, deg
 
-def SingleToolToPlot(tool_name, prefix):
-    return (tool_name, prefix)
-
-def ComparedToolsToPlot(tool_ref, tool_test, prefix, match_in_energy = False, match_without_shared = False, match_perfectly = False):
-    return (tool_ref, tool_test, prefix, match_in_energy, match_without_shared, match_perfectly)
-
 def MatchingOptions(min_similarity = 0.50, terminal_weight = 250., grow_weight = 500., seed_weight = 1000.):
     return (min_similarity, terminal_weight, grow_weight, seed_weight)
 

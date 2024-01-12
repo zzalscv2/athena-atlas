@@ -2,27 +2,21 @@
 
 #Outputs plots for comparing CPU and GPU splitting.
 
-from CaloRecGPU.CaloRecGPUConfigurator import CaloRecGPUConfigurator
-import CaloRecGPUTesting
+import CaloRecGPUTestingConfig
+from PlotterConfigurator import PlotterConfigurator
     
 if __name__=="__main__":
 
-    Configurator = CaloRecGPUConfigurator()
-    
-    PlotterConfig = CaloRecGPUTesting.PlotterConfigurator(["CPU_splitting", "GPU_splitting"], ["splitting"])
-    
-    Configurator.DoMonitoring = True
-    
-    cfg, numevents = CaloRecGPUTesting.PrepareTest(Configurator)
+    PlotterConfig = PlotterConfigurator(["CPU_splitting", "GPU_splitting"], ["splitting"])
 
-    theKey="CaloCalTopoClustersNew"
-    
-    topoAcc = CaloRecGPUTesting.FullTestConfiguration(Configurator, TestSplit = True, PlotterConfigurator = PlotterConfig)
+    flags, perfmon, numevents = CaloRecGPUTestingConfig.PrepareTest()
+    flags.CaloRecGPU.DoMonitoring = True
 
-    topoAlg = topoAcc.getPrimary()
-    topoAlg.ClustersOutputName=theKey
-    
-    cfg.merge(topoAcc)
-    
-    cfg.run(numevents)
+    flags.CaloRecGPU.ClustersOutputName="CaloCalTopoClustersNew"
+    flags.lock()
 
+    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flags,perfmon)
+
+    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flags, TestSplit = True, PlotterConfigurator = PlotterConfig))
+
+    topoAcc.run(numevents)
