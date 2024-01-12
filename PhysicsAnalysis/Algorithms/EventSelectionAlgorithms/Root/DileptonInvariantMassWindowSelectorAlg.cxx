@@ -94,7 +94,8 @@ namespace CP {
       float mll = (lepton0 + lepton1).M();
 
       // calculate decision
-      bool decision = m_veto ? (mll < m_mllupper || mll > m_mlllower) : (mll < m_mllupper && mll > m_mlllower);
+      bool in_range = ( mll > m_mlllower && mll < m_mllupper );
+      bool decision = m_veto ? (!in_range) : in_range;
       m_decoration.setBool(*evtInfo, decision, sys);
     }
     return StatusCode::SUCCESS;

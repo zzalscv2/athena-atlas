@@ -55,8 +55,8 @@ namespace CP {
       if (m_electronsHandle) {
 	for (const xAOD::Electron *el : *electrons){
 	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)) {
-	    if (el->pt() > m_ptmin){
-	      count++; 
+	    if (el->pt() > m_elptmin){
+	      count++;
 	    }
 	  }
 	}
@@ -64,7 +64,7 @@ namespace CP {
       if (m_muonsHandle) {
 	for (const xAOD::Muon *mu : *muons) {
 	  if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
-	    if (mu->pt() > m_ptmin){
+	    if (mu->pt() > m_muptmin){
 	      count++;
 	    }
 	  }
