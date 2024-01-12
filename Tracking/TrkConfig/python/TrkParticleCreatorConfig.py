@@ -253,8 +253,9 @@ def GSFBuildInDetParticleCreatorToolCfg(flags,
         kwargs.setdefault("TrackSummaryTool", TrackSummaryTool)
 
     if flags.GeoModel.Run < LHCPeriod.Run4 and "PixelToTPIDTool" not in kwargs:
-        kwargs.setdefault("PixelToTPIDTool", CompFactory.InDet.PixelToTPIDTool(
-            name="GSFBuildPixelToTPIDTool"))
+        from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
+        kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
+            PixelToTPIDToolCfg(flags)))
 
     if flags.Detector.EnableTRT and "TRT_ElectronPidTool" not in kwargs:
         from InDetConfig.TRT_ElectronPidToolsConfig import (
