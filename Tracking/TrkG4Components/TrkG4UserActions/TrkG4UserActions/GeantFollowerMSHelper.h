@@ -71,14 +71,15 @@ namespace Trk
       bool                           m_extrapolateIncrementally;
       bool                           m_speedup;
       bool                           m_useCovMatrix;
+      bool                           m_useIDExit;  // used for validating the ID and Calo tracking
 
       const TrackParameters* m_parameterCache;
       const TrackParameters* m_parameterCacheCov;
-      const TrackParameters* m_parameterCacheMS;
-      const TrackParameters* m_parameterCacheMSCov;
+      const TrackParameters* m_parameterCacheEntry;
+      const TrackParameters* m_parameterCacheEntryCov;
       float                  m_tX0Cache;
 
-      bool                   m_crossedMuonEntry;
+      bool                   m_crossedEntry;
       bool                   m_exitLayer;
       PlaneSurface           m_destinationSurface;
 
@@ -168,7 +169,7 @@ namespace Trk
           float                  m_trk_ssigRad[500] {0};
           float                  m_trk_ssigTheta[500] {0};
           float                  m_trk_ssigPhi[500] {0};
-          int                    m_g4_stepsMS {0};
+          int                    m_g4_stepsEntry {0};
       };
       std::unique_ptr<TreeData> m_treeData;
   };

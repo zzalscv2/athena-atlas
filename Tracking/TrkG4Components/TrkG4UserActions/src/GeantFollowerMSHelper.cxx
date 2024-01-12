@@ -33,12 +33,13 @@ Trk::GeantFollowerMSHelper::GeantFollowerMSHelper(const std::string& t,
       m_extrapolateIncrementally(false),
       m_speedup(false),
       m_useCovMatrix(true),
+      m_useIDExit(false),
       m_parameterCache(nullptr),
       m_parameterCacheCov(nullptr),
-      m_parameterCacheMS(nullptr),
-      m_parameterCacheMSCov(nullptr),
+      m_parameterCacheEntry(nullptr),
+      m_parameterCacheEntryCov(nullptr),
       m_tX0Cache(0.),
-      m_crossedMuonEntry(false),
+      m_crossedEntry(false),
       m_exitLayer(false),
       m_destinationSurface(),
       m_validationTreeName("G4Follower"),
@@ -50,9 +51,11 @@ Trk::GeantFollowerMSHelper::GeantFollowerMSHelper(const std::string& t,
   declareProperty("ExtrapolateIncrementally", m_extrapolateIncrementally);
 
   // SpeedUp False takes more CPU because it will stop at each G4 Step in the
-  // Muon Spectrometer
   declareProperty("SpeedUp", m_speedup);
   declareProperty("UseCovMatrix", m_useCovMatrix);
+  declareProperty("UseIDExit",m_useIDExit);  // used for validating the ID and Calo tracking
+
+      
 }
 
 // destructor
@@ -62,6 +65,10 @@ Trk::GeantFollowerMSHelper::~GeantFollowerMSHelper() = default;
 // initialize
 StatusCode Trk::GeantFollowerMSHelper::initialize() {
   m_treeData = std::make_unique<TreeData>();
+
+
+
+
 
   if (m_extrapolator.retrieve().isFailure()) {
     ATH_MSG_ERROR("Could not retrieve Extrapolator " << m_extrapolator
@@ -74,6 +81,7 @@ StatusCode Trk::GeantFollowerMSHelper::initialize() {
                                                      << " . Abort.");
     return StatusCode::FAILURE;
   }
+
 
   if (m_speedup) {
     ATH_MSG_INFO(" SpeedUp GeantFollowerMS ");
@@ -208,7 +216,7 @@ StatusCode Trk::GeantFollowerMSHelper::initialize() {
   m_validationTree->Branch("TrkStepScatSigPhi", m_treeData->m_trk_ssigPhi,
                            "trkscatSigPhi[trkscats]/F");
 
-  m_crossedMuonEntry = false;
+  m_crossedEntry = false;
   m_exitLayer = false;
   // now register the Tree
   ITHistSvc* tHistSvc = nullptr;
@@ -265,11 +273,11 @@ void Trk::GeantFollowerMSHelper::beginEvent() {
   m_treeData->m_b_Eloss = 0.;
 
   m_treeData->m_g4_steps = -1;
-  m_treeData->m_g4_stepsMS = -1;
+  m_treeData->m_g4_stepsEntry = -1;
   m_treeData->m_trk_scats = 0;
   m_tX0Cache = 0.;
 
-  m_crossedMuonEntry = false;
+  m_crossedEntry = false;
   m_exitLayer = false;
 }
 
@@ -281,8 +289,24 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
   // as the MS starts at 6736 in R.07 the cut is just before
 
   double zMuonEntry = 6735.;
-  //    zMuonEntry = 6000.;
+  double rMuonEntry = 4254;
+  double zMuonExit = 21800.;
+  double rMuonExit = 12500.;
+  double zIDExit = 2720.;
+  double rIDExit = 1080.;
 
+  double zEntry = zMuonEntry;
+  double rEntry = rMuonEntry;
+  double zExit = zMuonExit;
+  double rExit = rMuonExit;
+ 
+  if(m_useIDExit) {
+     zEntry = zIDExit;
+     rEntry = rIDExit;
+     zExit = zMuonEntry;
+     rExit = rMuonEntry;
+  } 
+ 
   double scale = 1.;
 
   Amg::Vector3D npos(scale * pos.x(), scale * pos.y(), scale * pos.z());
@@ -325,11 +349,11 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
                                << X0 << " t " << t << " m_tX0Cache "
                                << m_tX0Cache);
 
-  bool useMuonEntry = true;
+  bool useEntry = true;
 
-  // Muon Entry
-  if (useMuonEntry && !m_crossedMuonEntry &&
-      (std::fabs(npos.z()) > zMuonEntry || npos.perp() > 4254)) {
+  // Muon Entry or ID exit
+  if (useEntry && !m_crossedEntry &&
+      (std::fabs(npos.z()) > zEntry || npos.perp() > rEntry)) {
     m_treeData->m_m_x = npos.x();
     m_treeData->m_m_y = npos.y();
     m_treeData->m_m_z = npos.z();
@@ -338,19 +362,19 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
     m_treeData->m_m_phi = nmom.phi();
     m_treeData->m_m_p = nmom.mag();
     // overwrite everything before ME layer
-    m_treeData->m_g4_stepsMS = 0;
+    m_treeData->m_g4_stepsEntry = 0;
     // construct the intial parameters
-    m_parameterCacheMS = new Trk::CurvilinearParameters(npos, nmom, charge);
-    m_parameterCache = new Trk::CurvilinearParameters(npos, nmom, charge);
+    m_parameterCacheEntry = new Trk::CurvilinearParameters(npos, nmom, charge);
+    //m_parameterCache = new Trk::CurvilinearParameters(npos, nmom, charge);
     AmgSymMatrix(5) covMatrix;
     covMatrix.setZero();
-    m_parameterCacheMSCov = new Trk::CurvilinearParameters(
+    m_parameterCacheEntryCov = new Trk::CurvilinearParameters(
         npos, nmom, charge, std::move(covMatrix));
-    ATH_MSG_DEBUG("m_crossedMuonEntry x "
-                  << m_parameterCacheMS->position().x() << " y "
-                  << m_parameterCacheMS->position().y() << " z "
-                  << m_parameterCacheMS->position().z());
-    m_crossedMuonEntry = true;
+    ATH_MSG_DEBUG("m_crossedEntry x "
+                  << m_parameterCacheEntry->position().x() << " y "
+                  << m_parameterCacheEntry->position().y() << " z "
+                  << m_parameterCacheEntry->position().z());
+    m_crossedEntry = true;
     Trk::CurvilinearParameters g4Parameters =
         Trk::CurvilinearParameters(npos, nmom, m_treeData->m_t_charge);
     // Muon Entry
@@ -372,12 +396,12 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
     return;
   }
 
-  // DO NOT store before MuonEntry (gain CPU)
-  if (!m_crossedMuonEntry) return;
+  // DO NOT store before Entry is crossed (gain CPU)
+  if (!m_crossedEntry) return;
   if (m_exitLayer) return;
 
   // PK 2023
-  // store G4 steps if m_crossedMuonEntry
+  // store G4 steps if m_crossedEntry
   m_treeData->m_g4_p[m_treeData->m_g4_steps] = nmom.mag();
   m_treeData->m_g4_eta[m_treeData->m_g4_steps] = nmom.eta();
   m_treeData->m_g4_theta[m_treeData->m_g4_steps] = nmom.theta();
@@ -418,7 +442,7 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
 
   bool crossedExitLayer = false;
   // ID envelope
-  if (std::fabs(npos.z()) > 21800 || npos.perp() > 12500)
+  if (std::fabs(npos.z()) > zExit || npos.perp() > rExit)
     crossedExitLayer = true;
 
   ATH_MSG_DEBUG("npos Z: " << npos.z() << "npos prep: " << npos.perp()
@@ -426,10 +450,10 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
 
   if (m_speedup) {
     ATH_MSG_DEBUG("Starting speed up:"
-                  << "m_crossedMuonEntry: " << m_crossedMuonEntry
+                  << "m_crossedEntry: " << m_crossedEntry
                   << "m_treeData->m_g4_steps: " << m_treeData->m_g4_steps
-                  << "m_treeData->m_g4_stepsMS: " << m_treeData->m_g4_stepsMS);
-    if (m_crossedMuonEntry && m_treeData->m_g4_steps >= 2 && !crossedExitLayer)
+                  << "m_treeData->m_g4_stepsEntry: " << m_treeData->m_g4_stepsEntry);
+    if (m_crossedEntry && m_treeData->m_g4_steps >= 2 && !crossedExitLayer)
       return;
   }
 
@@ -446,7 +470,7 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
       g4Parameters.associatedSurface();
   // extrapolate to the destination surface
   std::unique_ptr<Trk::TrackParameters> trkParameters =
-      m_extrapolateDirectly && m_crossedMuonEntry
+      m_extrapolateDirectly && m_crossedEntry
           ? m_extrapolator->extrapolateDirectly(
                 ctx, *m_parameterCache, destinationSurface, Trk::alongMomentum,
                 false, Trk::muon)
@@ -457,10 +481,10 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
     ATH_MSG_DEBUG(
         " G4 extrapolate failed without covariance to destination surface ");
   }
-  if (m_treeData->m_g4_stepsMS == 0 && m_useCovMatrix) {
+  if (m_treeData->m_g4_stepsEntry == 0 && m_useCovMatrix) {
     ATH_MSG_DEBUG(" Extrapolate m_parameterCacheCov with covMatrix ");
     extrapolationCache.reset();
-    trkParameters = m_extrapolateDirectly && m_crossedMuonEntry
+    trkParameters = m_extrapolateDirectly && m_crossedEntry
                         ? m_extrapolator->extrapolateDirectly(
                               ctx, *m_parameterCacheCov, destinationSurface,
                               Trk::alongMomentum, false, Trk::muon)
@@ -469,10 +493,21 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
                               Trk::alongMomentum, false, Trk::muon,
                               Trk::addNoise, &extrapolationCache);
     if (!trkParameters) {
-      ATH_MSG_DEBUG(" G4 extrapolate failed with covariance to Muon Entry");
+      ATH_MSG_DEBUG(" G4 extrapolate failed with covariance to Muon Entry or ID Exit");
+      ATH_MSG_DEBUG(" Redo G4 extrapolateM without covariance matrix to Muon Entry or ID Exit ");
+      extrapolationCache.reset();
+      trkParameters = m_extrapolateDirectly && m_crossedEntry
+                         ? m_extrapolator->extrapolateDirectly(
+                               ctx, *m_parameterCache, destinationSurface,
+                               Trk::alongMomentum, false, Trk::muon)
+                         : m_extrapolator->extrapolate(
+                               ctx, *m_parameterCache, destinationSurface,
+                               Trk::alongMomentum, false, Trk::muon,
+                               Trk::addNoise, &extrapolationCache);
+
     } else {
       ATH_MSG_DEBUG(
-          " G4 extrapolate succesfull with covariance to Muon Entry system "
+          " G4 extrapolate succesfull with covariance to Muon Entry or ID exit "
           << " X0 " << extrapolationCache.x0tot() << " Eloss deltaE "
           << extrapolationCache.eloss()->deltaE() << " Eloss sigma "
           << extrapolationCache.eloss()->sigmaDeltaE() << " meanIoni "
@@ -504,50 +539,50 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
     // Get extrapolatio with errors
     if (m_useCovMatrix) {
       extrapolationCache.reset();
-      ATH_MSG_DEBUG(" Extrapolate m_parameterCacheMSCov with covMatrix "
-                    << " x " << m_parameterCacheMSCov->position().x() << " y "
-                    << m_parameterCacheMSCov->position().y() << " z "
-                    << m_parameterCacheMSCov->position().z());
-      ATH_MSG_DEBUG(" m_parameterCacheMSCov "
+      ATH_MSG_DEBUG(" Extrapolate m_parameterCacheEntryCov with covMatrix "
+                    << " x " << m_parameterCacheEntryCov->position().x() << " y "
+                    << m_parameterCacheEntryCov->position().y() << " z "
+                    << m_parameterCacheEntryCov->position().z());
+      ATH_MSG_DEBUG(" m_parameterCacheEntryCov "
                     << "m_extrapolateDirectly: " << m_extrapolateDirectly
-                    << "m_crossedMuonEntry: " << m_crossedMuonEntry);
+                    << "m_crossedEntry: " << m_crossedEntry);
 
-      trkParameters = m_extrapolateDirectly && m_crossedMuonEntry
+      trkParameters = m_extrapolateDirectly && m_crossedEntry
                           ? m_extrapolator->extrapolateDirectly(
-                                ctx, *m_parameterCacheMSCov, destinationSurface,
+                                ctx, *m_parameterCacheEntryCov, destinationSurface,
                                 Trk::alongMomentum, false, Trk::muon)
                           : m_extrapolator->extrapolate(
-                                ctx, *m_parameterCacheMSCov, destinationSurface,
+                                ctx, *m_parameterCacheEntryCov, destinationSurface,
                                 Trk::alongMomentum, false, Trk::muon,
                                 Trk::addNoise, &extrapolationCache);
       if (trkParameters) {
-        ATH_MSG_DEBUG("extrapolation with m_parameterCacheMSCov succeeded ");
+        ATH_MSG_DEBUG("extrapolation with m_parameterCacheEntryCov succeeded ");
       } else {
-        ATH_MSG_DEBUG(" extrapolation failed with m_parameterCacheMSCov ");
-        if (!m_parameterCacheMSCov) {
-          ATH_MSG_DEBUG(" failed due to m_parameterCacheMSCov is zero");
+        ATH_MSG_DEBUG(" extrapolation failed with m_parameterCacheEntryCov ");
+        if (!m_parameterCacheEntryCov) {
+          ATH_MSG_DEBUG(" failed due to m_parameterCacheEntryCov is zero");
         }
         extrapolationCache.reset();
         trkParameters = m_extrapolateDirectly
                             ? m_extrapolator->extrapolateDirectly(
-                                  ctx, *m_parameterCacheMS, destinationSurface,
+                                  ctx, *m_parameterCacheEntry, destinationSurface,
                                   Trk::alongMomentum, false, Trk::muon)
                             : m_extrapolator->extrapolate(
-                                  ctx, *m_parameterCacheMS, destinationSurface,
+                                  ctx, *m_parameterCacheEntry, destinationSurface,
                                   Trk::alongMomentum, false, Trk::muon,
                                   Trk::addNoise, &extrapolationCache);
       }
       if (trkParameters)
-        ATH_MSG_DEBUG("extrapolation with m_parameterCacheMS succeeded");
+        ATH_MSG_DEBUG("extrapolation with m_parameterCacheEntry succeeded");
     } else {
       // no covariance matrix
       extrapolationCache.reset();
       trkParameters = m_extrapolateDirectly
                           ? m_extrapolator->extrapolateDirectly(
-                                ctx, *m_parameterCacheMS, destinationSurface,
+                                ctx, *m_parameterCacheEntry, destinationSurface,
                                 Trk::alongMomentum, false, Trk::muon)
                           : m_extrapolator->extrapolate(
-                                ctx, *m_parameterCacheMS, destinationSurface,
+                                ctx, *m_parameterCacheEntry, destinationSurface,
                                 Trk::alongMomentum, false, Trk::muon,
                                 Trk::addNoise, &extrapolationCache);
     }
@@ -577,7 +612,7 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
           m_treeData->m_b_z = trkParameters_BACK->position().z();
           if (std::fabs(m_treeData->m_m_p - m_treeData->m_b_p) > 10.)
             ATH_MSG_DEBUG(
-                " Back extrapolation to Muon Entry finds different "
+                " Back extrapolation to Muon Entry or ID Exit finds different "
                 "momentum  difference MeV "
                 << m_treeData->m_m_p - m_treeData->m_b_p);
           // delete  trkParameters_BACK;
@@ -687,27 +722,26 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
 
   if (m_useCovMatrix) {
     ATH_MSG_DEBUG(
-        "m_treeData->m_g4_stepsMS (debug): " << m_treeData->m_g4_stepsMS);
-    if (m_treeData->m_g4_stepsMS <= 0) {
+        "m_treeData->m_g4_stepsEntry (debug): " << m_treeData->m_g4_stepsEntry);
+    if (m_treeData->m_g4_stepsEntry <= 0) {
       extrapolationCache.reset();
       matvec = m_extrapolator->extrapolateM(
           ctx, *m_parameterCacheCov, destinationSurface, Trk::alongMomentum,
           false, Trk::muon, &extrapolationCache);
       if (!matvec || matvec->empty()) {
         ATH_MSG_DEBUG(
-            " G4 extrapolateM failed with covariance matrix to Muon Entry ");
+            " G4 extrapolateM failed with covariance matrix to Muon Entry or ID Exit ");
         ATH_MSG_DEBUG(
-            " Redo G4 extrapolateM without covariance matrix to Muon Entry ");
+            " Redo G4 extrapolateM without covariance matrix to Muon Entry or ID Exit ");
         extrapolationCache.reset();
         matvec = m_extrapolator->extrapolateM(
             ctx, *m_parameterCache, destinationSurface, Trk::alongMomentum,
             false, Trk::muon, &extrapolationCache);
       } else {
         ATH_MSG_DEBUG(
-            " G4 extrapolateM succesfull with covariance matrix to Muon "
-            "Entry ");
+            " G4 extrapolateM succesfull with covariance matrix to Muon Entry or ID Exit ");
       }
-      ATH_MSG_DEBUG("From Muon Entry Cache X0 "
+      ATH_MSG_DEBUG("From Entry Cache X0 "
                     << extrapolationCache.x0tot() << " Eloss deltaE "
                     << extrapolationCache.eloss()->deltaE() << " Eloss sigma "
                     << extrapolationCache.eloss()->sigmaDeltaE() << " meanIoni "
@@ -716,25 +750,25 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
                     << extrapolationCache.eloss()->meanRad() << " sigmaRad "
                     << extrapolationCache.eloss()->sigmaRad());
     }
-    if (m_treeData->m_g4_stepsMS == 1) {
+    if (m_treeData->m_g4_stepsEntry == 1) {
       extrapolationCache.reset();
       matvec = m_extrapolator->extrapolateM(
-          ctx, *m_parameterCacheMSCov, destinationSurface, Trk::alongMomentum,
+          ctx, *m_parameterCacheEntryCov, destinationSurface, Trk::alongMomentum,
           false, Trk::muon, &extrapolationCache);
       if (!matvec || matvec->empty()) {
         ATH_MSG_DEBUG(
-            " G4 extrapolateM failed with covariance matrix to Muon Exit ");
+            " G4 extrapolateM failed with covariance matrix to Muon or Calo Exit ");
         ATH_MSG_DEBUG(
-            " Redo G4 extrapolateM without covariance matrix to Muon Exit ");
+            " Redo G4 extrapolateM without covariance matrix to Muon or Calo Exit ");
         extrapolationCache.reset();
         matvec = m_extrapolator->extrapolateM(
-            ctx, *m_parameterCacheMS, destinationSurface, Trk::alongMomentum,
+            ctx, *m_parameterCacheEntry, destinationSurface, Trk::alongMomentum,
             false, Trk::muon, &extrapolationCache);
       } else {
         ATH_MSG_DEBUG(
-            " G4 extrapolateM succesfull with covariance matrix to Muon Exit ");
+            " G4 extrapolateM succesfull with covariance matrix to Muon or Calo Exit ");
       }
-      ATH_MSG_DEBUG("From Muon Exit Cache X0 "
+      ATH_MSG_DEBUG("From Muon or Calo Exit Cache X0 "
                     << extrapolationCache.x0tot() << " Eloss deltaE "
                     << extrapolationCache.eloss()->deltaE() << " Eloss sigma "
                     << extrapolationCache.eloss()->sigmaDeltaE() << " meanIoni "
@@ -744,12 +778,12 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
                     << extrapolationCache.eloss()->sigmaRad());
     }
   } else {
-    if (m_treeData->m_g4_stepsMS == 1) {
+    if (m_treeData->m_g4_stepsEntry == 1) {
       extrapolationCache.reset();
       matvec = m_extrapolator->extrapolateM(
-          ctx, *m_parameterCacheMS, destinationSurface, Trk::alongMomentum,
+          ctx, *m_parameterCacheEntry, destinationSurface, Trk::alongMomentum,
           false, Trk::muon, &extrapolationCache);
-      ATH_MSG_DEBUG(" G4 extrapolateM without covariance matrix to Muon Entry "
+      ATH_MSG_DEBUG(" G4 extrapolateM without covariance matrix to Muon Entry or ID Exit "
                     << " X0 " << extrapolationCache.x0tot() << " Eloss deltaE "
                     << extrapolationCache.eloss()->deltaE() << " Eloss sigma "
                     << extrapolationCache.eloss()->sigmaDeltaE() << " meanIoni "
@@ -772,22 +806,22 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
   double Eloss1 = 0.;
   double Eloss5 = 0.;
   double Eloss10 = 0.;
-  bool muonSystem = false;
-  bool calorimeter = false;
+  bool system1 = false; // ID or Calorimeter
+  bool system2 = false; // Calorimeter or Muon system 
 
   if (!matvec->empty()) {
-    if (m_crossedMuonEntry && !m_exitLayer) calorimeter = true;
-    if (m_crossedMuonEntry && m_exitLayer) muonSystem = true;
+    if (m_crossedEntry && !m_exitLayer) system1 = true;
+    if (m_crossedEntry && m_exitLayer) system2 = true;
   }
 
-  ATH_MSG_DEBUG(" muonSystem " << muonSystem << " calorimeter " << calorimeter);
-  if (muonSystem) {
+  ATH_MSG_DEBUG(" ID or Calorimeter system  " << system1 << " Calorimeter or Muon system " << system2);
+  if (system2) {
     //
-    // Muon sytem
+    // Calorimeter or Muon system
     //
     m_elossupdator->getX0ElossScales(0, m_treeData->m_m_eta,
                                      m_treeData->m_m_phi, X0Scale, ElossScale);
-    ATH_MSG_DEBUG(" muonSystem scales X0 " << X0Scale << " ElossScale "
+    ATH_MSG_DEBUG(" system2 scales X0 " << X0Scale << " ElossScale "
                                            << ElossScale);
 
     const std::vector<const Trk::TrackStateOnSurface*> matvecNew1 =
@@ -805,9 +839,9 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
         modifyTSOSvector(*matvec, X0Scale, ElossScale, true, true, true, 0., 0.,
                          m_treeData->m_m_p, 0.10 * m_treeData->m_m_p, Eloss10);
   }
-  if (calorimeter) {
+  if (system1) {
     //
-    // Calorimeter  sytem
+    // ID or Calorimeter system
     //
     double phiCaloExit = atan2(m_treeData->m_m_y, m_treeData->m_m_x);
     m_elossupdator->getX0ElossScales(1, m_treeData->m_t_eta, phiCaloExit,
@@ -843,8 +877,8 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
   double x0 = 0.;
 
   int mmat = 0;
-  // PK 2023 only add scatterers for the calorimeter
-  if (!(matvec->empty()) && m_treeData->m_g4_stepsMS <= 1) {
+  // PK 2023 only add scatterers for the ID or Calorimeter
+  if (!(matvec->empty()) && m_treeData->m_g4_stepsEntry <= 1) {
     std::vector<const Trk::TrackStateOnSurface*>::const_iterator it =
         matvec->begin();
     std::vector<const Trk::TrackStateOnSurface*>::const_iterator it_end =
@@ -875,8 +909,8 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
             sigmaIoni = eLoss->sigmaIoni();
             meanRad = eLoss->meanRad();
             sigmaRad = eLoss->sigmaRad();
-            ATH_MSG_DEBUG("m_treeData->m_g4_stepsMS "
-                          << m_treeData->m_g4_stepsMS << " mmat " << mmat
+            ATH_MSG_DEBUG("m_treeData->m_g4_stepsEntry "
+                          << m_treeData->m_g4_stepsEntry << " mmat " << mmat
                           << " X0 " << matEf->thicknessInX0()
                           << " eLoss->deltaE() " << eLoss->deltaE()
                           << " meanIoni " << meanIoni << " Total Eloss "
@@ -890,17 +924,17 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
         if (scatAng) {
           sigmaTheta = scatAng->sigmaDeltaTheta();
           sigmaPhi = scatAng->sigmaDeltaPhi();
-          ATH_MSG_DEBUG("m_treeData->m_g4_stepsMS "
-                        << m_treeData->m_g4_stepsMS << " mmat " << mmat
+          ATH_MSG_DEBUG("m_treeData->m_g4_stepsEntry "
+                        << m_treeData->m_g4_stepsEntry << " mmat " << mmat
                         << " sigmaTheta " << sigmaTheta << " sigmaPhi "
                         << sigmaPhi);
         }
 
         if (m_treeData->m_trk_scats < 500) {
-          if (m_treeData->m_g4_stepsMS == 0 ||
+          if (m_treeData->m_g4_stepsEntry == 0 ||
               m_treeData->m_trk_status[m_treeData->m_g4_steps] == 1000) {
             // forwards
-            if (m_treeData->m_g4_stepsMS == 0)
+            if (m_treeData->m_g4_stepsEntry == 0)
               m_treeData->m_trk_sstatus[m_treeData->m_trk_scats] = 10;
             if (m_treeData->m_trk_status[m_treeData->m_g4_steps] == 1000)
               m_treeData->m_trk_sstatus[m_treeData->m_trk_scats] = 1000;
@@ -975,7 +1009,7 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
   m_treeData->m_trk_scaleeloss[m_treeData->m_g4_steps] = ElossScale;
   m_treeData->m_trk_scalex0[m_treeData->m_g4_steps] = X0Scale;
   m_treeData->m_trk_x0[m_treeData->m_g4_steps] = x0;
-  if (m_treeData->m_g4_stepsMS == 0)
+  if (m_treeData->m_g4_stepsEntry == 0)
     m_treeData->m_trk_status[m_treeData->m_g4_steps] = 10;
   else
     m_treeData->m_trk_status[m_treeData->m_g4_steps] = 1000;
@@ -1001,8 +1035,8 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
   m_treeData->m_trk_ertheta[m_treeData->m_g4_steps] = sqrt(errortheta);
   m_treeData->m_trk_erqoverp[m_treeData->m_g4_steps] = sqrt(errorqoverp);
 
-  // reset X0 at Muon Entry
-  if (m_treeData->m_g4_stepsMS == 0) m_tX0Cache = 0.;
+  // reset X0 at Muon Entry or ID Exit
+  if (m_treeData->m_g4_stepsEntry == 0) m_tX0Cache = 0.;
   // update the parameters if needed/configured
   if (m_extrapolateIncrementally && trkParameters) {
     delete m_parameterCache;
@@ -1011,7 +1045,7 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
   }
 
   ++m_treeData->m_g4_steps;
-  if (m_treeData->m_g4_stepsMS != -1) ++m_treeData->m_g4_stepsMS;
+  if (m_treeData->m_g4_stepsEntry != -1) ++m_treeData->m_g4_stepsEntry;
 }
 
 std::vector<const Trk::TrackStateOnSurface*>
@@ -1516,8 +1550,8 @@ void Trk::GeantFollowerMSHelper::endEvent() {
   delete m_parameterCache;
   delete m_parameterCacheCov;
 
-  if (m_crossedMuonEntry) {
-    if (m_parameterCacheMS) delete m_parameterCacheMS;
-    if (m_parameterCacheMSCov) delete m_parameterCacheMSCov;
+  if (m_crossedEntry) {
+    if (m_parameterCacheEntry) delete m_parameterCacheEntry;
+    if (m_parameterCacheEntryCov) delete m_parameterCacheEntryCov;
   }
 }

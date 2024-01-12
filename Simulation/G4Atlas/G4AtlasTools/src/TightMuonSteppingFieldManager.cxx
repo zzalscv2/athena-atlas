@@ -7,6 +7,8 @@
 #include "G4ChordFinder.hh"
 #include "G4MuonPlus.hh"
 #include "G4MuonMinus.hh"
+#include "G4ChargedGeantino.hh"
+
 
 /// Normal constructor
 TightMuonSteppingFieldManager::TightMuonSteppingFieldManager(G4Field *detectorField, G4ChordFinder *pChordFinder, G4bool b)
@@ -42,7 +44,8 @@ void TightMuonSteppingFieldManager::ConfigureForTrack(const G4Track * track)
 
   // If this is a muon, set tight parameters; otherwise go back to the defaults
   if (track->GetDefinition()==G4MuonPlus::Definition() ||
-      track->GetDefinition()==G4MuonMinus::Definition() ){
+      track->GetDefinition()==G4MuonMinus::Definition() ||
+      track->GetDefinition()==G4ChargedGeantino::ChargedGeantinoDefinition()) {
     GetChordFinder()->SetDeltaChord(0.00000002);
     SetDeltaOneStep(0.000001);
     SetDeltaIntersection(0.00000002);

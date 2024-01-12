@@ -11,6 +11,9 @@
 #include "G4Track.hh"
 #include "G4MuonPlus.hh"
 #include "G4MuonMinus.hh"
+#include "G4ChargedGeantino.hh"
+
+
 
 SwitchingFieldManager::SwitchingFieldManager( G4Field* detectorField )
    :  G4FieldManager( detectorField ),
@@ -31,7 +34,8 @@ void SwitchingFieldManager::ConfigureForTrack(const G4Track * track)
    //   ... it would invalidate our assumptions !
 
    const bool isMuonTrack = (track->GetDefinition()==G4MuonPlus::Definition() ||
-                             track->GetDefinition()==G4MuonMinus::Definition() );
+                             track->GetDefinition()==G4MuonMinus::Definition() ||
+                             track->GetDefinition()==G4ChargedGeantino::ChargedGeantinoDefinition());
 
    const G4ThreeVector position = track->GetPosition();
    const G4double r2XY = position.x()*position.x() + position.y()*position.y();
