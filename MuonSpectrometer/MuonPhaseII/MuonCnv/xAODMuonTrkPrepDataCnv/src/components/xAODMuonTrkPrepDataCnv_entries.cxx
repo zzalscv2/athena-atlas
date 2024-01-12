@@ -2,6 +2,6 @@
 /*
    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#include "../MdtPrepDataToxAODCnvAlg.h"
+#include "../PRDxAODConvertorAlg.h"
 
-DECLARE_COMPONENT(MdtPrepDataToxAODCnvAlg)
+DECLARE_COMPONENT( Muon::PRDxAODConvertorAlg )
