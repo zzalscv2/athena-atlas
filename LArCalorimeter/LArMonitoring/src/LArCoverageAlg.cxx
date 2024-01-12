@@ -16,11 +16,8 @@
 // ********************************************************************
 
 #include "LArCoverageAlg.h"
-
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/IToolSvc.h"
-
 #include "Identifier/IdentifierHash.h"
+#include "LArElecCalib/LArProvenance.h"
 
 #include "TMath.h"
 
@@ -224,7 +221,7 @@ LArCoverageAlg::fillHistograms( const EventContext& ctx ) const
   ATH_MSG_DEBUG( "now loop on channels" );
   /** Loop over LArRawChannels */
   for (const LArRawChannel& pRawChannel : *pRawChannelsContainer) {
-    int provenanceChan  = pRawChannel.provenance();
+    uint16_t provenanceChan  = pRawChannel.provenance();
     float energyChan  = pRawChannel.energy();
     HWIdentifier id  = pRawChannel.hardwareID();
     Identifier offlineID = larCabling->cnvToIdentifier(id);
@@ -302,8 +299,8 @@ LArCoverageAlg::fillHistograms( const EventContext& ctx ) const
      * provenance&0x00ff == 0x00a5 : raw channels from OFC iteration, all calib constants found in DB
      * provenance&0x1000 == 0x1000 : raw channels from DSP. If no constant loaded in DSP, energy==0
      */
-    if ( (provenanceChan&0x00ff) == 0x00a5 || (provenanceChan&0x1000) == 0x1000 ){
-
+    constexpr LArProv::LArProvenance provPattern=static_cast< LArProv::LArProvenance>(LArProv::DEFAULTRECO | LArProv::DSPCALC);
+    if (LArProv::test(provenanceChan,provPattern)) {
       if(m_bcMask.cellShouldBeMasked(bcCont,id)) cellContent=2;
       else if(energyChan != 0) cellContent=3;
     }

@@ -22,6 +22,8 @@
 #include "CaloEvent/CaloCellContainer.h"
 #include "AthenaKernel/Units.h"
 
+#include "LArElecCalib/LArProvenance.h"
+
 #include <cassert>
 #include <algorithm>
 
@@ -139,8 +141,8 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     getHistoCoordinates(SCcaloDDE, SCeta, SCphi, iLyr, iLyrNS);
     
  
-    bool SCpassTime = SCprov & 0x200;
-    bool SCpassPF =   SCprov & 0x40;
+    bool SCpassTime = LArProv::test(SCprov,LArProv::SCTIMEPASS);//SCprov & 0x200;
+    bool SCpassPF =   LArProv::test(SCprov,LArProv::SCPASSBCIDMAX);// SCprov & 0x40;
 
     const CaloCell* superCellRef = superCellRefCont->findCell( SCcaloDDE->identifyHash() );
     float SCetRef = superCellRef->et();

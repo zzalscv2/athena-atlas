@@ -19,6 +19,7 @@
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "StoreGate/StoreGateSvc.h"
+#include "LArElecCalib/LArProvenance.h"
 #include <cmath>
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include <random>
@@ -212,9 +213,9 @@ StatusCode LArSCSimpleMaker::execute(const EventContext& context) const
         float time = enTime[i] / enForTime[i]; // if timeDef is true, enForTime is > 10
         float et = ss->et();
 	ss->setTime( time ); 
-        prov = 0x2000;
-        if(et>10e3 && time>-8 && time<16) prov |= 0x200;
-        else if(et<=10e3 && fabs(time)<8) prov |= 0x200; 
+        prov = LArProv::QTPRESENT;// 0x2000;
+        if(et>10e3 && time>-8 && time<16) prov |= LArProv::SCTIMEPASS;//0x200;
+        else if(et<=10e3 && std::abs(time)<8) prov |= LArProv::SCTIMEPASS;//0x200; 
     } else ss->setTime(  999.0  ); // makes sure it will fail some BCID
 
     ss->setQuality( qualities[i] );

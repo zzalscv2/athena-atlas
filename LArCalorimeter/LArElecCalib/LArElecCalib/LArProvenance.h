@@ -21,10 +21,12 @@ namespace LArProv {
     RAMPCONST     = 0x10, //use hard-coded constant Ramp value (only early commissioning)
     RAMPDB        = 0x20, //Ramp from DB (default)
     PEDSAMPLEZERO = 0x40, //use ADC[0] as pedestal value (only early commissioning)
+    SCPASSBCIDMAX = 0x40, //Supercell peak finder (overlap with PEDSAMPLEZERO should not matter)
     PEDDB         = 0x80, //Pedestal from DB (default)
     
     DEFAULTRECO   = PEAKOFC | RAMPDB | PEDDB, //0x00A5;
     ITERCONVERGED = 0x0100, //Iteration convered (in case of OF-Iteration)
+    SCTIMEPASS    = 0x0200, //Supercell inside time-window
     SATURATED     = 0x0400, //ADC 0 or 4096 
     MASKED        = 0x0800, //Known noisy cell, E set to zero
     DSPCALC       = 0x1000, //Energy from online calculation

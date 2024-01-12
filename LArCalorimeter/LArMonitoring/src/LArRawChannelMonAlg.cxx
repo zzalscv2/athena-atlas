@@ -4,10 +4,8 @@
 
 #include "LArRawChannelMonAlg.h"
 
-#include "CaloIdentifier/CaloIdManager.h"
 #include "LArRecConditions/LArBadChannelCont.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
-#include "CaloDetDescr/CaloDetDescrElement.h"
 #include "CaloIdentifier/LArID_Exception.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "Identifier/HWIdentifier.h"
@@ -18,6 +16,7 @@
 #include "LArIdentifier/LArOnlID_Exception.h"
 #include "LArRawEvent/LArRawChannel.h"
 #include "LArRecEvent/LArEventBitInfo.h"
+#include "LArElecCalib/LArProvenance.h"
 #include "AthenaKernel/Units.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "CaloConditions/CaloNoise.h"
@@ -78,13 +77,11 @@ StatusCode LArRawChannelMonAlg::initialize()
   ATH_CHECK(m_larFlagKey.initialize());
   ATH_CHECK(m_LArRawChannel_container_key.initialize());
   ATH_CHECK(detStore()->retrieve(m_lar_online_id_ptr, "LArOnlineID"));
-  ATH_CHECK(detStore()->retrieve(m_calo_id_mgr_ptr));
   ATH_CHECK(m_bcContKey.initialize());
   ATH_CHECK(m_bcMask.buildBitMask(m_problemsToMask, msg()));
   ATH_CHECK(m_atlasReady_tools.retrieve());
   ATH_CHECK(m_noiseKey.initialize());
   ATH_CHECK(m_cablingKey.initialize());
-  ATH_CHECK(m_caloMgrKey.initialize());
 
   auto get_detector = [&](auto hwid) {
     const bool sideA = m_lar_online_id_ptr->pos_neg(hwid);
@@ -212,11 +209,9 @@ StatusCode LArRawChannelMonAlg::fillHistograms(const EventContext &ctx) const
   std::array<double, ::NDETECTORS> per_detector_total_energy{};
   int8_t lastdet{::UNDEF};
   ToolHandle<GenericMonitoringTool> monitoring{nullptr};
-  SG::ReadCondHandle<CaloDetDescrManager> caloMgrH{m_caloMgrKey, ctx};
   SG::ReadCondHandle<CaloNoise> noiseH{m_noiseKey, ctx};
   SG::ReadCondHandle<LArBadChannelCont> bcContH{m_bcContKey, ctx};
   SG::ReadCondHandle<LArOnOffIdMapping> cablingH{m_cablingKey, ctx};
-  ATH_CHECK(caloMgrH.isValid());
   ATH_CHECK(noiseH.isValid());
   ATH_CHECK(bcContH.isValid());
   ATH_CHECK(cablingH.isValid());
@@ -243,23 +238,21 @@ StatusCode LArRawChannelMonAlg::fillHistograms(const EventContext &ctx) const
     int gain{-1};
     bool bad_quality;
 
+    // Skip unconnected channels
+    if  (!cablingH->isOnlineConnected(hardware_id)) continue;
+    // Skip masked channels
+    if (m_bcMask.cellShouldBeMasked(*bcContH, hardware_id)) continue;
+   
+    // Monitor properly reconstructed channels only:
+    // - provenance&0x00ff == 0x00a5:
+    //   raw channels from OFC iteration, all calib constants found in DB
+    // - provenance&0x1000 == 0x1000:
+    //   raw channels from DSP. If no constant loaded in DSP, energy==0
+    if (!m_db_and_ofc_only
+	&& !LArProv::test(chan.provenance(), LArProv::DEFAULTRECO)
+	&& !LArProv::test(chan.provenance(), LArProv::DSPCALC)) continue;
+	
     try {
-      offline_id = cablingH->cnvToIdentifier(hardware_id);
-      const CaloDetDescrElement *dde = caloMgrH->get_element(offline_id);
-      // Skip unconnected or masked channels ---
-      if (!dde) continue;
-      if (m_bcMask.cellShouldBeMasked(*bcContH, hardware_id)) continue;
-      // Monitor properly reconstructed channels only:
-      // - provenance&0x00ff == 0x00a5:
-      //   raw channels from OFC iteration, all calib constants found in DB
-      // - provenance&0x1000 == 0x1000:
-      //   raw channels from DSP. If no constant loaded in DSP, energy==0
-      if (!m_db_and_ofc_only
-          && (chan.provenance() & 0x00ff) != 0x00A5
-          && (chan.provenance() & 0x1000) != 0x1000) {
-        continue;
-      }
-
       feb_id = m_lar_online_id_ptr->feb_Id(hardware_id);
       feb_hash = m_lar_online_id_ptr->feb_Hash(feb_id);
       det = m_feb_hash_to_detector.at(feb_hash);
