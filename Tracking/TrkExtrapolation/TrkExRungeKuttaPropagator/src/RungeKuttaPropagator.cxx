@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -20,6 +20,8 @@
 #include "TrkSurfaces/StraightLineSurface.h"
 //
 #include "TrkGeometry/MagneticFieldProperties.h"
+//
+#include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
 //
 #include "TrkEventPrimitives/TransportJacobian.h"
 //
@@ -590,16 +592,16 @@ crossPoint(const Trk::TrackParameters& Tp,
   double Jac[25];
   Trk::RungeKuttaUtils::transformGlobalToLocal(SU[N].first, useJac, P, p, Jac);
 
-  if (!useJac)
+  if (!useJac){
     return SU[N].first->createUniqueTrackParameters(p[0], p[1], p[2], p[3], p[4], std::nullopt);
+  }
 
   AmgSymMatrix(5) e = Trk::RungeKuttaUtils::newCovarianceMatrix(Jac, *Tp.covariance());
-  AmgSymMatrix(5)& cv = e;
-
-  if (cv(0, 0) <= 0. || cv(1, 1) <= 0. || cv(2, 2) <= 0. || cv(3, 3) <= 0. || cv(4, 4) <= 0.) {
+  if (!Amg::hasPositiveOrZeroDiagElems(e)) {
     return nullptr;
   }
-  return SU[N].first->createUniqueTrackParameters(p[0], p[1], p[2], p[3], p[4], std::move(e));
+  return SU[N].first->createUniqueTrackParameters(p[0], p[1], p[2], p[3], p[4],
+                                                  std::move(e));
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1702,15 +1704,19 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
           St = SN.first;
       } else {
         Path = W + SN.first;
-        if (auto To{ crossPoint(Tp, DS, Sol, Pn, SN) }; To)
+        if (auto To{ crossPoint(Tp, DS, Sol, Pn, SN) }; To){
           return To;
+        }
         Nveto = SN.second;
         St = Sl;
       }
-    } else if (std::abs(S) < DBL_EPSILON)
+    } else if (std::abs(S) < DBL_EPSILON){
       return nullptr;
+    }
 
-    if (flips > max_back_forth_flips) return nullptr;
+    if (flips > max_back_forth_flips) {
+      return nullptr;
+    }
   }
   return nullptr;
 }
