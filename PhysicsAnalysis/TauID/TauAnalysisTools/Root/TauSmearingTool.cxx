@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -43,10 +43,7 @@ StatusCode TauSmearingTool::initialize()
 
   if (m_sInputFilePath.empty()) {
     std::string sDirectory = "TauAnalysisTools/" + std::string(sSharedFilesVersion) + "/Smearing/";
-    if (m_sRecommendationTag == "2019-summer") {
-      if (m_sAFII) m_sInputFilePath = sDirectory+"TES_TrueHadTau_2019-summer_AFII.root";
-      else m_sInputFilePath = sDirectory+"TES_TrueHadTau_2019-summer.root";
-    } else if (m_sRecommendationTag == "2022-prerec") {
+    if (m_sRecommendationTag == "2022-prerec") {
 
       if (m_sCampaign!="mc21" && m_sCampaign!="mc20"){
         ATH_MSG_ERROR("unknown campaign (mc20|mc21):" << m_sCampaign);

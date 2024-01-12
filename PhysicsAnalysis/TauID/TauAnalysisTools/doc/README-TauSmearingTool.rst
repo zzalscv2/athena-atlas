@@ -85,8 +85,8 @@ The tool can be used to apply tau pt smearing for a specific
 
    * - ``RecommendationTag``
      - ``std::string``
-     - ``"2019-summer"``
      - ``"2022-prerec"``
+     - ``"-"``
 
 The following table lists other properties for further configurations:
 
@@ -125,12 +125,6 @@ Release Specific Configuration
      - ``Campaign``
      - ``Generator``
      - ``ApplyMVATESQualityCheck``
-   * - 21.2
-     - 2
-     - ``"2019-summer"`` (default)
-     - Not used
-     - Not used
-     - ``true``
    * - ``>=22``
      - 2
      - ``"2022-prerec"``
