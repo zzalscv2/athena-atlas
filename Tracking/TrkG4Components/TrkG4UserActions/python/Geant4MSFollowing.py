@@ -135,24 +135,28 @@ def ExtrapolationToolCfg(flags, args):
     TestSubUpdators = []
 
     # -------------------- set it depending on the geometry ----------------------------------------------------
+    # default for Global is (Rk,Mat)
+    TestSubPropagators += [ TestPropagator.name ]
+    TestSubUpdators    += [ TestMaterialEffectsUpdator.name ]
+
     # default for ID is (Rk,Mat)
     TestSubPropagators += [ TestPropagator.name ]
     TestSubUpdators    += [ TestMaterialEffectsUpdator.name ]
 
-    # default for Calo is (Rk,MatLandau)
+    # default for Beam pipe is (Rk,Mat) // sometimes the STEP is used
     TestSubPropagators += [ TestPropagator.name ]
     TestSubUpdators    += [ TestMaterialEffectsUpdator.name ]
 
-    TestSubPropagators += [ TestPropagator.name ]
+    # default for Calo is (STEP,Mat)  // sometimes MatLandau is used
+    TestSubPropagators += [ TestSTEP_Propagator.name ]
+    #TestSubPropagators += [ TestPropagator.name ] #Switch to RK
     TestSubUpdators    += [ TestMaterialEffectsUpdator.name ]
 
     # default for MS is (STEP,Mat)
     TestSubPropagators += [ TestSTEP_Propagator.name ]
     TestSubUpdators    += [ TestMaterialEffectsUpdator.name ]
 
-    TestSubPropagators += [ TestSTEP_Propagator.name ]
-    TestSubUpdators    += [ TestMaterialEffectsUpdator.name ]
-
+    # default for Cavern is (Rk,Mat)
     TestSubPropagators += [ TestPropagator.name ]
     TestSubUpdators    += [ TestMaterialEffectsUpdator.name ]
     # ----------------------------------------------------------------------------------------------------------
@@ -177,17 +181,18 @@ def ExtrapolationToolCfg(flags, args):
                                                     SubMEUpdators = TestSubUpdators,
                                                     EnergyLossUpdater = AtlasEnergyLossUpdator
                                                     )
-    acc.addPublicTool(TestExtrapolator)
+    acc.addPublicTool(TestExtrapolator, primary=True)
     # acc.setPrivateTools(TestExtrapolator)
 
     return acc
 
 
-def GeantFollowerMSCfg(flags, name="GeantFollowerMSSvc", **kwargs):
+def GeantFollowerMSCfg(flags, args, name="GeantFollowerMSSvc", **kwargs):
 
     result = ComponentAccumulator()
-    from TrkConfig.AtlasExtrapolatorConfig import MuonExtrapolatorCfg    
-    extrapolator = result.getPrimaryAndMerge(MuonExtrapolatorCfg(flags))    
+#    from TrkConfig.AtlasExtrapolatorConfig import MuonExtrapolatorCfg    
+#    extrapolator = result.getPrimaryAndMerge(MuonExtrapolatorCfg(flags))    
+    extrapolator = result.getPrimaryAndMerge(ExtrapolationToolCfg(flags,args))
     result.addPublicTool(extrapolator)    
    
     #Setup Helper
@@ -224,6 +229,7 @@ if __name__ =="__main__":
     from AthenaConfiguration.Enums import  ProductionStep
     flags.Common.ProductionStep = ProductionStep.FastChain 
     flags.LAr.doAlign = True
+    flags.Sim.TightMuonStepping = True
 
     # Setup detector   
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
@@ -235,7 +241,7 @@ if __name__ =="__main__":
 
     # Construct component accumulator
     acc = MSCfg(flags)    
-    acc.merge(GeantFollowerMSCfg(flags))
+    acc.merge(GeantFollowerMSCfg(flags,args))
     
     #DEV#
     #Setting up the CA for the GeantFollowerMS
