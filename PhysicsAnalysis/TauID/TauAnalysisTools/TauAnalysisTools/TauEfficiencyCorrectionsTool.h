@@ -87,8 +87,6 @@ private:
 
   StatusCode initializeWithTauSelectionTool(TauSelectionTool* tauSelectionTool);
 
-  StatusCode initializeTools_2019_summer();
-
   StatusCode initializeTools_2022_prerec();
   
   StatusCode readRandomRunNumber();

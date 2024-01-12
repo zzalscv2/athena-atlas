@@ -107,9 +107,9 @@ The tool can be used to retrieve scale factors for a specific
 
    * - ``RecommendationTag``
      - ``std::string``
-     - ``"2019-summer"``
+     - ``"2022-prerec"``
      
-For the default ``RecommendationTag`` "2019-summer" the following properties
+For the default ``RecommendationTag`` "2022-prerec" the following properties
 are available for tool steering:
 
 .. list-table::
@@ -140,11 +140,6 @@ are available for tool steering:
      - ``int``
      - ``ELEIDNONE``
      - ``ELEIDRNNLOOSE``, ``ELEIDRNNMEDIUM``, ``ELEIDRNNTIGHT``
-
-   * - ``UseTauSubstructure``
-     - ``bool``
-     - ``false``
-     - ``true``
 
    * - ``TriggerName``
      - ``std::string``
@@ -282,18 +277,6 @@ These can be accessed, for example via::
   TauEffTool.setProperty("EleIDLevel", (int)ELEIDRNNLOOSE);
 
 Recommendations for RNN based Electron identification are currently not available in release 22.
-
-SFDecayModeHadTau
-----------------
-
-Only available since recommendations tag ``"2019-summer"``. ``UseTauSubstructure`` must be set to true. 
-
---------------------------------------
-Special notes on decay mode recommendations
---------------------------------------
-
-Set the ``"UseTauSubstructure"`` property to true in order to get the decay mode classification recommendations. This will provide alternative ID scale factors (SFJetIDHadTau), and also additional decay mode scale factors (SFDecayModeHadTau).
-
 
 ---
 FAQ
