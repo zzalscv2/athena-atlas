@@ -119,7 +119,7 @@ IDPerfMonZmumu::IDPerfMonZmumu(const std::string& name,
   declareProperty("ValidationMode",    m_validationMode);
   declareProperty("xAODTruthLinkVector",      m_truthLinkVecName="xAODTruthLinks");
   declareProperty("Z0Gap",                    m_Z0GapCut = 5.0, "maximum gap between the z0 of both muons (in mm)");
-  declareProperty( "TrackSelectionTool",      m_selTool );
+  declareProperty("TrackSelectionTool",       m_selTool );
   declareProperty("UseTrackSelectionTool",    m_useTrackSelectionTool = false);
   declareProperty("TrackToVertexIPEstimator", m_trackToVertexIPEstimator);
 
@@ -281,23 +281,25 @@ StatusCode IDPerfMonZmumu::initialize()
     return StatusCode::FAILURE;
   }
 
-  ATH_CHECK( this->bookTrees() );
-  
-  if(m_triggerDecision.retrieve().isFailure()) {                                                                                                                                   
-    ATH_MSG_FATAL("Unable to retrieve " << m_triggerDecision << " turn it off");                                                                                             
-    return StatusCode::FAILURE;                                                                                                                                               
-  }                                                                                                                                                                           
-  else {                                                                                                                                                                        
-    ATH_MSG_DEBUG("retrieved tool: " << m_triggerDecision );                                                                                                                  
-  }  
+  ATH_CHECK ( this->bookTrees() );
 
-  if(m_triggerMatching.retrieve().isFailure()) {       
-    ATH_MSG_FATAL("Unable to retrieve " << m_triggerMatching << " turn it off");                                                                                                
-    return StatusCode::FAILURE;                                                                                                                                                 
-  }                                                                                                                                                                             
-  else {                                                                                                                                                                         
-    ATH_MSG_INFO("retrieved tool: " << m_triggerDecision );                                                                                                                    
-  }  
+  if (m_UseTrigger) { // load trigger decission and matching under user request
+    if (m_triggerDecision.retrieve().isFailure()) {                                                                                                                                   
+      ATH_MSG_FATAL("Unable to retrieve " << m_triggerDecision << " turn it off");                                                                                             
+      return StatusCode::FAILURE;                                                                                                                                               
+    }                                                                                                                                                                           
+    else {                                                                                                                                                                        
+      ATH_MSG_DEBUG("retrieved tool: " << m_triggerDecision );                                                                                                                  
+    }
+
+    if(m_triggerMatching.retrieve().isFailure()) {       
+      ATH_MSG_FATAL("Unable to retrieve " << m_triggerMatching << " turn it off");                                                                                                
+      return StatusCode::FAILURE;                                                                                                                                                 
+    }                                                                                                                                                                             
+    else {                                                                                                                                                                         
+      ATH_MSG_INFO("retrieved tool: " << m_triggerDecision );                                                                                                                    
+    }
+  }
 
   ATH_MSG_DEBUG("** IDPerfMonZmumu::Initialize ** Completed **");
   return StatusCode::SUCCESS;
@@ -1000,13 +1002,15 @@ StatusCode IDPerfMonZmumu::execute()
   // If this point is reached -> there is a good mu+mu- pair that stisfies all selection cuts
   //
 
-  StatusCode isTriggerPassed = CheckTriggerStatusAndPrescale ();
-  if (isTriggerPassed == StatusCode::SUCCESS) {
-    ATH_MSG_DEBUG("Trigger passed -> accept event");
-  }
-  else{
-    ATH_MSG_DEBUG("Trigger Failed -> reject event --> leave event");
-    return StatusCode::SUCCESS;
+  if (m_UseTrigger) {
+    StatusCode isTriggerPassed = CheckTriggerStatusAndPrescale ();
+    if (isTriggerPassed == StatusCode::SUCCESS) {
+      ATH_MSG_DEBUG("Trigger passed -> accept event");
+    }
+    else{
+      ATH_MSG_DEBUG("Trigger Failed -> reject event --> leave event");
+      return StatusCode::SUCCESS;
+    }
   }
 
   // std::cout << " ** IDPerfMonZmumu ** extracting muon_pos and muon_neg... " << std::endl;
