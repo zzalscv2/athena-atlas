@@ -17,22 +17,20 @@ Interface definition for gFEXJwoJAlgo
 */
 
   static const InterfaceID IID_IgFEXJwoJAlgo("LVL1::IgFEXJwoJAlgo", 1, 0);
-  typedef  std::array<std::array<int, 12>, 32> gTowersCentral;
-  typedef  std::array<std::array<int, 8>, 32> gTowersForward;
+  typedef  std::array<std::array<int, 12>, 32> gTowersType;
 
   class IgFEXJwoJAlgo : virtual public IAlgTool {
   public:
     static const InterfaceID& interfaceID( ) ;
 
 
-    virtual void setAlgoConstant(float aFPGA_A, float bFPGA_A,
-                                 float aFPGA_B, float bFPGA_B,
-                                 float aFPGA_C, float bFPGA_C,
+    virtual void setAlgoConstant(int aFPGA_A, int bFPGA_A,
+                                 int aFPGA_B, int bFPGA_B,
+                                 int aFPGA_C, int bFPGA_C,
                                  int gXE_seedThrA, int gXE_seedThrB, int gXE_seedThrC) = 0;
 
-    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersCentral& Atwr, const gTowersCentral& Btwr,
-                                                              const gTowersForward& CNtwr, const gTowersForward& CPtwr,
-                                                              std::array<uint32_t, 4> & outTOB) const = 0;
+    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersType& Atwr,const gTowersType& Btwr, const gTowersType& Ctwr,
+                                                                 std::array<uint32_t, 4> & outTOB) const = 0;
 
 
 

@@ -8450,13 +8450,13 @@ HLT_noalg_L1gLJ80p0ETA25:
 HLT_noalg_L1gMHT500:
   eventCount: 0
 HLT_noalg_L1gTE200:
-  eventCount: 27
+  eventCount: 0
 HLT_noalg_L1gXEJWOJ100:
   eventCount: 0
 HLT_noalg_L1gXEJWOJ70:
-  eventCount: 3
+  eventCount: 0
 HLT_noalg_L1gXEJWOJ80:
-  eventCount: 1
+  eventCount: 0
 HLT_noalg_L1gXENC100:
   eventCount: 0
 HLT_noalg_L1gXENC70:

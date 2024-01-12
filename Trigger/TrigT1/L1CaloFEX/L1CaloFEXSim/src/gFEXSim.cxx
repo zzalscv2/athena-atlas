@@ -71,8 +71,6 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    gTowersType Atwr = {{{0}}};
    gTowersType Btwr = {{{0}}};
    gTowersType Ctwr = {{{0}}};
-   gTowersForward CPtwr = {{{0}}};
-   gTowersForward CNtwr = {{{0}}};
 
    gTowersType Atwr50 = {{{0}}};
    gTowersType Btwr50 = {{{0}}};
@@ -271,19 +269,12 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    gXE_seedThrC = thr_gXE.seedThrCounts('C'); //defined in GeV by default
 
 
-   float aFPGA_A = 0;
-   float bFPGA_A = 0;
-   float aFPGA_B = 0;
-   float bFPGA_B = 0;
-   float aFPGA_C = 0;
-   float bFPGA_C = 0;
-   aFPGA_A = thr_gXE.JWOJ_param('A','a') / (pow(2, 10)-1);
-   bFPGA_A = thr_gXE.JWOJ_param('A','b') / (pow(2, 10)-1);
-   aFPGA_B = thr_gXE.JWOJ_param('B','a') / (pow(2, 10)-1);
-   bFPGA_B = thr_gXE.JWOJ_param('B','b') / (pow(2, 10)-1);
-   aFPGA_C = thr_gXE.JWOJ_param('C','a') / (pow(2, 10)-1);
-   bFPGA_C = thr_gXE.JWOJ_param('C','b') / (pow(2, 10)-1);
-
+   int aFPGA_A = thr_gXE.JWOJ_param('A','a');
+   int bFPGA_A = thr_gXE.JWOJ_param('A','b');
+   int aFPGA_B = thr_gXE.JWOJ_param('B','a');
+   int bFPGA_B = thr_gXE.JWOJ_param('B','b');
+   int aFPGA_C = thr_gXE.JWOJ_param('C','a');
+   int bFPGA_C = thr_gXE.JWOJ_param('C','b');
 
    //Set constants for JwoJ and run the algorithm
    m_gFEXJwoJAlgoTool->setAlgoConstant(aFPGA_A, bFPGA_A,
@@ -291,7 +282,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
                                        aFPGA_C, bFPGA_C,
                                        gXE_seedThrA, gXE_seedThrB, gXE_seedThrC);
 
-   auto global_tobs = m_gFEXJwoJAlgoTool->jwojAlgo(Atwr, Btwr, CNtwr, CPtwr, outJwojTOB);
+   auto global_tobs = m_gFEXJwoJAlgoTool->jwojAlgo(Atwr, Btwr, Ctwr, outJwojTOB);
 
    m_gScalarEJwojTobWords.resize(1);
    m_gMETComponentsJwojTobWords.resize(1);

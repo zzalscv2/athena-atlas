@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJwoJAlg - Jets without jets algorithm for gFEX
 //                              -------------------
-//     begin                : 10 08 2021
+//     begin                : 21 12 2023
 //     email                : cecilia.tosciri@cern.ch
 //***************************************************************************
 
@@ -33,9 +33,9 @@ StatusCode gFEXJwoJAlgo::initialize(){
 }
 
 
-void gFEXJwoJAlgo::setAlgoConstant(float aFPGA_A, float bFPGA_A,
-                                   float aFPGA_B, float bFPGA_B,
-                                   float aFPGA_C, float bFPGA_C,
+void gFEXJwoJAlgo::setAlgoConstant(int aFPGA_A, int bFPGA_A,
+                                   int aFPGA_B, int bFPGA_B,
+                                   int aFPGA_C, int bFPGA_C,
                                    int gXE_seedThrA, int gXE_seedThrB, int gXE_seedThrC) {
   m_aFPGA_A = aFPGA_A;
   m_bFPGA_A = bFPGA_A;
@@ -51,28 +51,48 @@ void gFEXJwoJAlgo::setAlgoConstant(float aFPGA_A, float bFPGA_A,
 
 
 
-std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersCentral& Atwr, const gTowersCentral& Btwr,
-                                                                 const gTowersForward& CNtwr, const gTowersForward& CPtwr,
+std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersType& Atwr,const gTowersType& Btwr, const gTowersType& Ctwr,
                                                                  std::array<uint32_t, 4> & outTOB) const {
 
 
-  gTowersCentral Ctwr = {{{0}}};
-  makeFPGAC(CNtwr, CPtwr, Ctwr);
-
+  // input towers have 200 MeV LSB
 
   // find gBlocks
-  gTowersCentral gBLKA;
-  gBlockAB(Atwr, gBLKA);
+  gTowersType AgBlk;
+  gTowersType Ascaled;
+
+  gTowersType BgBlk;
+  gTowersType Bscaled;
+
+  gTowersType CgBlk;
+  gTowersType Cscaled;
+
+  gTowersType hasSeed;
+
+  gBlockAB(Atwr, AgBlk, hasSeed, m_gBlockthresholdA);
+  gBlockAB(Btwr, BgBlk, hasSeed, m_gBlockthresholdB);
+  gBlockAB(Ctwr, CgBlk, hasSeed, m_gBlockthresholdC);
 
 
-  gTowersCentral gBLKB;
-  gBlockAB(Btwr, gBLKB);
+  // switch to 10 bit number
+  // DMS -- do we eventaully need to check for overflows here? 
+  
+  for(int irow = 0; irow<FEXAlgoSpaceDefs::ABCrows; irow++){
+    for(int jcolumn = 0; jcolumn<FEXAlgoSpaceDefs::ABcolumns; jcolumn++){
+      Ascaled[irow][jcolumn] = Atwr[irow][jcolumn] >> 2;
+      AgBlk[irow][jcolumn] = AgBlk[irow][jcolumn] >> 2;
+
+      Bscaled[irow][jcolumn] = Btwr[irow][jcolumn] >> 2;
+      BgBlk[irow][jcolumn] = BgBlk[irow][jcolumn] >> 2;
+      
+      Cscaled[irow][jcolumn] = Ctwr[irow][jcolumn] >> 2;
+      CgBlk[irow][jcolumn] = CgBlk[irow][jcolumn] >> 2;
+
+    }
+  }
 
 
-  gTowersCentral gBLKC;
-  gBlockAB(Ctwr, gBLKC);
-
-  //FPGA A observables
+ //FPGA A observables
   int A_MHT_x = 0x0;
   int A_MHT_y = 0x0;
   int A_MST_x = 0x0;
@@ -80,7 +100,9 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersCe
   int A_MET_x = 0x0;
   int A_MET_y = 0x0;
 
-  int A_sumEt = 0x0;
+  int A_eth = 0x0;
+  int A_ets = 0x0;
+  int A_etw = 0x0;
 
   //FPGA B observables
   int B_MHT_x = 0x0;
@@ -90,7 +112,9 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersCe
   int B_MET_x = 0x0;
   int B_MET_y = 0x0;
 
-  int B_sumEt = 0x0;
+  int B_eth = 0x0;
+  int B_ets = 0x0;
+  int B_etw = 0x0;
 
 
   //FPGA C observables
@@ -101,39 +125,35 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersCe
   int C_MET_x = 0x0;
   int C_MET_y = 0x0;
 
-  int C_sumEt = 0x0;
+  int C_eth = 0x0;
+  int C_ets = 0x0;
+  int C_etw = 0x0;
 
 
   //Global observables
-  int MET_x = 0x0;
-  int MET_y = 0x0;
-  int MET = 0x0;
-
-  int total_sumEt = 0x0;
   int MHT_x = 0x0;
   int MHT_y = 0x0;
   int MST_x = 0x0;
   int MST_y = 0x0;
+  int MET_x = 0x0;
+  int MET_y = 0x0;
 
+  int total_sumEt = 0x0; //currently only placeholder
+  int MET = 0x0; //currently only placeholder
 
-  metFPGA(Atwr, gBLKA, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_MHT_x, A_MHT_y, A_MST_x, A_MST_y, A_MET_x, A_MET_y);
-  metFPGA(Btwr, gBLKB, m_gBlockthresholdB, m_aFPGA_B, m_bFPGA_B, B_MHT_x, B_MHT_y, B_MST_x, B_MST_y, B_MET_x, B_MET_y);
-  metFPGA(Ctwr, gBLKC, m_gBlockthresholdC, m_aFPGA_C, m_bFPGA_C, C_MHT_x, C_MHT_y, C_MST_x, C_MST_y, C_MET_x, C_MET_y);
+  metFPGA(0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_MHT_x, A_MHT_y, A_MST_x, A_MST_y, A_MET_x, A_MET_y);
+  etFPGA (Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_eth, A_ets, A_etw); 
 
-  metTotal(A_MET_x, A_MET_y, B_MET_x, B_MET_y, C_MET_x, C_MET_y, MET_x, MET_y, MET);
+  metFPGA(1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, m_bFPGA_B, B_MHT_x, B_MHT_y, B_MST_x, B_MST_y, B_MET_x, B_MET_y);
+  etFPGA (Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, m_bFPGA_B, B_eth, B_ets, B_etw); 
+
+  metFPGA(2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, m_bFPGA_C, C_MHT_x, C_MHT_y, C_MST_x, C_MST_y, C_MET_x, C_MET_y);
+  etFPGA (Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, m_bFPGA_C, C_eth, C_ets, C_etw); 
+
+  metTotal(A_MHT_x, A_MHT_y, B_MHT_x, B_MHT_y, C_MHT_x, C_MHT_y, MHT_x, MHT_y);
+  metTotal(A_MST_x, A_MST_y, B_MST_x, B_MST_y, C_MST_x, C_MST_y, MST_x, MST_y);
+  metTotal(A_MET_x, A_MET_y, B_MET_x, B_MET_y, C_MET_x, C_MET_y, MET_x, MET_y);
       
-  sumEtFPGA(Atwr, A_sumEt);
-  sumEtFPGA(Btwr, B_sumEt);
-  sumEtFPGA(Ctwr, C_sumEt);
-
-  sumEt(A_sumEt, B_sumEt, C_sumEt, total_sumEt);
-  // Truncate two bits of SumEt to allow for a larger energy range with 800 MeV resolution
-  total_sumEt = total_sumEt/4; 
-   
-  sumEt(A_MHT_x, B_MHT_x, C_MHT_x, MHT_x);
-  sumEt(A_MHT_y, B_MHT_y, C_MHT_y, MHT_y);
-  sumEt(A_MST_x, B_MST_x, C_MST_x, MST_x);
-  sumEt(A_MST_y, B_MST_y, C_MST_y, MST_y);
 
   //Define a vector to be filled with all the TOBs of one event
   std::vector<std::unique_ptr<gFEXJwoJTOB>> tobs_v;
@@ -221,41 +241,9 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersCe
 
 }
 
-void gFEXJwoJAlgo::makeFPGAC(const gTowersForward& twrsCN, const gTowersForward& twrsCP, gTowersCentral & twrsC) const {
-
-  int rows = twrsC.size();
-  int cols = twrsC[0].size();
-  for( int irow = 0; irow < rows; irow++ ){ 
-    for(int jcolumn = 0; jcolumn<2; jcolumn++){
-      if (irow%2 == 0) {
-        twrsC[irow][jcolumn] = twrsCN[irow/2][2*jcolumn];
-      }
-      else {
-        twrsC[irow][jcolumn] = twrsCN[irow/2][2*jcolumn+1];
-      }
-    }
-    for(int jcolumn = 2; jcolumn<6; jcolumn++){
-      twrsC[irow][jcolumn] = twrsCN[irow][jcolumn+2];
-
-    }
-    for(int jcolumn = 6; jcolumn<10; jcolumn++){
-      twrsC[irow][jcolumn] = twrsCP[irow][jcolumn-6];
-
-    }
-    for(int jcolumn = 10; jcolumn<cols; jcolumn++){
-      if(irow%2 == 0) {
-        twrsC[irow][jcolumn] = twrsCP[irow/2][2*jcolumn-16];
-      }
-      else {
-        twrsC[irow][jcolumn] = twrsCP[irow/2][(2*jcolumn-15)];
-      }
-    }
-  }
-}
 
 
-
-void gFEXJwoJAlgo::gBlockAB(const gTowersCentral& twrs, gTowersCentral & gBlkSum) const {
+void gFEXJwoJAlgo::gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const {
 
   int rows = twrs.size();
   int cols = twrs[0].size();
@@ -268,96 +256,171 @@ void gFEXJwoJAlgo::gBlockAB(const gTowersCentral& twrs, gTowersCentral & gBlkSum
       if( (jcolumn == 0) || (jcolumn == 6) ) {
         //left edge case
         gBlkSum[irow][jcolumn] =
-          twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn]   +
-          twrs[irow][jcolumn+1] + twrs[krowUp][jcolumn+1] + twrs[krowDn][jcolumn+1];
-            } else if( (jcolumn == 5) || (jcolumn == 11)) {
+        twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn] +
+        twrs[irow][jcolumn+1] + twrs[krowUp][jcolumn+1] + twrs[krowDn][jcolumn+1];
+      } else if( (jcolumn == 5) || (jcolumn == 11)) {
         //  right edge case
         gBlkSum[irow][jcolumn] =
-          twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn]   +
-          twrs[irow][jcolumn-1] + twrs[krowUp][jcolumn-1] + twrs[krowDn][jcolumn-1];
-            } else{
+        twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn] +
+        twrs[irow][jcolumn-1] + twrs[krowUp][jcolumn-1] + twrs[krowDn][jcolumn-1];
+      } else{
         // normal case
         gBlkSum[irow][jcolumn] =
-          twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn]   +
-          twrs[irow][jcolumn-1] + twrs[krowUp][jcolumn-1] + twrs[krowDn][jcolumn-1] +
-          twrs[irow][jcolumn+1] + twrs[krowUp][jcolumn+1] + twrs[krowDn][jcolumn+1];
-        }
-        // limit result to an unsigned integer of 12 bits ( 2376 GeV) 
-        if ( gBlkSum[irow][jcolumn] < 0 ){
-          gBlkSum[irow][jcolumn] = 0;
-        }
-        if ( gBlkSum[irow][jcolumn] > 4091 ){
-          gBlkSum[irow][jcolumn] = 4091;
-        }  
+        twrs[irow][jcolumn]   + twrs[krowUp][jcolumn]   + twrs[krowDn][jcolumn]   +
+        twrs[irow][jcolumn-1] + twrs[krowUp][jcolumn-1] + twrs[krowDn][jcolumn-1] +
+        twrs[irow][jcolumn+1] + twrs[krowUp][jcolumn+1] + twrs[krowDn][jcolumn+1];
+      }
 
+      if( gBlkSum[irow][jcolumn]  > seedThreshold) {
+        hasSeed[irow][jcolumn] = 1;
+      } else {
+        hasSeed[irow][jcolumn] = 0;
+      }
+    
+      if ( gBlkSum[irow][jcolumn] < 0 )       
+        gBlkSum[irow][jcolumn] = 0;
+
+      // was bits 11+3 downto 3, now is 11 downto 0 
+      if ( gBlkSum[irow][jcolumn] > FEXAlgoSpaceDefs::gBlockMax )   {
+        gBlkSum[irow][jcolumn] =  FEXAlgoSpaceDefs::gBlockMax;
+      }
     }
   }
-
 }
 
 
-void gFEXJwoJAlgo::metFPGA(const gTowersCentral& twrs, const gTowersCentral & gBlkSum, int gBlockthreshold,
-                           float aFPGA, float bFPGA,
+void gFEXJwoJAlgo::metFPGA(int FPGAnum, const gTowersType& twrs, 
+                           const gTowersType & gBlkSum, int gBlockthreshold,
+                           int aFPGA, int bFPGA,
                            int & MHT_x, int & MHT_y,
                            int & MST_x, int & MST_y,
                            int & MET_x, int & MET_y) const {
 
-  int rows = twrs.size();
-  int cols = twrs[0].size();
-  for( int irow = 0; irow < rows; irow++ ){
-    for(int jcolumn = 0; jcolumn<cols; jcolumn++){
-      if(gBlkSum[irow][jcolumn] > gBlockthreshold){
-        MHT_x += (twrs[irow][jcolumn])*(cosLUT(irow, 5));
-        MHT_y += (twrs[irow][jcolumn])*(sinLUT(irow, 5));
+  // in the RTL  code these are 19+ 5 = 24 bits 
+  int64_t h_tx_hi = 0;
+  int64_t h_ty_hi = 0;
+  int64_t h_tx_lw = 0;
+  int64_t h_ty_lw = 0;
+  
+  int64_t e_tx_hi = 0;
+  int64_t e_ty_hi = 0;
+  int64_t e_tx_lw = 0;
+  int64_t e_ty_lw = 0;   
+  
+  for( int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+    for(int jcolumn = 6; jcolumn<12; jcolumn++){
+      if( FPGAnum == 2){
+        int frow = 2*(irow/2)  + 1; 
+        
+        if(gBlkSum[irow][jcolumn] > gBlockthreshold){
+          h_tx_hi += (twrs[irow][jcolumn])*(cosLUT(frow, 5));
+          h_ty_hi += (twrs[irow][jcolumn])*(sinLUT(frow, 5));
+        } else {
+          e_tx_hi += (twrs[irow][jcolumn])*(cosLUT(frow, 5));
+          e_ty_hi += (twrs[irow][jcolumn])*(sinLUT(frow, 5));
+        }
 
+      } else {
+  
+        if(gBlkSum[irow][jcolumn] > gBlockthreshold){
+          h_tx_hi += (twrs[irow][jcolumn])*(cosLUT(irow, 5));
+          h_ty_hi += (twrs[irow][jcolumn])*(sinLUT(irow, 5));
+        } else {
+          e_tx_hi += (twrs[irow][jcolumn])*(cosLUT(irow, 5));
+          e_ty_hi += (twrs[irow][jcolumn])*(sinLUT(irow, 5));
+        }
       }
-      else{
-       MST_x += (twrs[irow][jcolumn])*(cosLUT(irow, 5));
-       MST_y += (twrs[irow][jcolumn])*(sinLUT(irow, 5));
+    }
+     
+    for(int jcolumn = 0; jcolumn<6; jcolumn++){
+      if( FPGAnum == 2){
+        int frow = 2*(irow/2)  + 1;
+        
+        if(gBlkSum[irow][jcolumn] > gBlockthreshold){
+          h_tx_lw += (twrs[irow][jcolumn])*(cosLUT(frow, 5));
+          h_ty_lw += (twrs[irow][jcolumn])*(sinLUT(frow, 5));
+        } else{
+          e_tx_lw += (twrs[irow][jcolumn])*(cosLUT(frow, 5));
+          e_ty_lw += (twrs[irow][jcolumn])*(sinLUT(frow, 5));
+        }
+      } else {
+  
+        if(gBlkSum[irow][jcolumn] > gBlockthreshold){
+          h_tx_lw += (twrs[irow][jcolumn])*(cosLUT(irow, 5));
+          h_ty_lw += (twrs[irow][jcolumn])*(sinLUT(irow, 5));
+        } else {
+          e_tx_lw += (twrs[irow][jcolumn])*(cosLUT(irow, 5));
+          e_ty_lw += (twrs[irow][jcolumn])*(sinLUT(irow, 5));
+        }
       }
     }
   }
-  MET_x = aFPGA * MHT_x + bFPGA * MST_x;
-  MET_y = aFPGA * MHT_y + bFPGA * MST_y;
+
+  // According to https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/issues/406#note_5662344
+  // there is no division -- so LSB is indeed 25 MeV
+
+  //but later changed to 200 MeV so divide by 8
+
+  long int fMHT_x =  (h_tx_hi + h_tx_lw) ;
+  long int fMHT_y =  (h_ty_hi + h_ty_lw) ;
+  long int fMST_x =  (e_tx_hi + e_tx_lw) ;
+  long int fMST_y =  (e_ty_hi + e_ty_lw) ;
+    
+  MHT_x =  (h_tx_hi + h_tx_lw) >> 3;
+  MHT_y =  (h_ty_hi + h_ty_lw) >> 3;
+  MST_x =  (e_tx_hi + e_tx_lw) >> 3;
+  MST_y =  (e_ty_hi + e_ty_lw) >> 3;
+ 
+  //  a and b coffecients are 10 bits
+  // multiplication has an addtional 2^10
+  // constant JWJ_OW        : integer := 35;--Out width
+  // values are 35 bits long and top 16 bits are taken -- so divide by 2^19
+  //  2^10/2^19 = 1/2^9 = 1/512
+   
+  long int fMET_x = ( aFPGA * (fMHT_x) + bFPGA * (fMST_x) ) >> 13 ;
+  long int fMET_y = ( aFPGA * (fMHT_y) + bFPGA * (fMST_y) ) >> 13 ;
+
+  MET_x  = fMET_x;
+  MET_y  = fMET_y;
+    
 }
+
+void gFEXJwoJAlgo::etFPGA(const gTowersType& twrs, gTowersType &gBlkSum,
+                          int gBlockthreshold, int A, int B, int &eth, int &ets, int &etw) const {
+
+
+  int ethard = 0.0;
+  int etsoft = 0.0; 
+  for( int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+    for(int jcolumn = 0; jcolumn<12; jcolumn++){
+        if(gBlkSum[irow][jcolumn] > gBlockthreshold){
+          ethard = ethard + twrs[irow][jcolumn]*0x1F; 
+        } else {
+          etsoft = etsoft + twrs[irow][jcolumn]*0x1F; 
+      }
+    }
+  } 
+ eth  = ethard;
+ ets  = etsoft;
+ etw  = ethard*A + etsoft*B;
+  if( etw < 0 )  etw  = 0; 
+}
+
 
 void gFEXJwoJAlgo::metTotal(int A_MET_x, int A_MET_y,
                             int B_MET_x, int B_MET_y,
                             int C_MET_x, int C_MET_y,
-                            int & MET_x, int & MET_y, int & MET) const {
+                            int & MET_x, int & MET_y) const {
 
-  MET_x = A_MET_x + B_MET_x;
-  MET_y = A_MET_y + B_MET_y;
+  MET_x = A_MET_x + B_MET_x + C_MET_x;
+  MET_y = A_MET_y + B_MET_y+ C_MET_y;
 
-  if (FEXAlgoSpaceDefs::ENABLE_JWOJ_C){
-    MET_x = MET_x + C_MET_x;
-    MET_y = MET_y + C_MET_y;
-  }
-
-  MET = std::sqrt((MET_x * MET_x) + (MET_y * MET_y));
+  // Truncation of the result, as the individual quantities are 16 bits, while the TOB field is 12 bits
+  MET_x = MET_x >> 4;
+  MET_y = MET_y >> 4;
 }
 
 
-void gFEXJwoJAlgo::sumEtFPGA(const gTowersCentral& twrs, int & partial_sumEt ) const {
-
-  int rows = twrs.size();
-  int cols = twrs[0].size();
-
-  for( int irow = 0; irow < rows; irow++ ){
-    for(int jcolumn = 0; jcolumn<cols; jcolumn++){
-      partial_sumEt += (twrs[irow][jcolumn] > 0 ? twrs[irow][jcolumn]: 0);
-    }
-  }
-}
-
-void gFEXJwoJAlgo::sumEt(int  A_sumEt, int  B_sumEt, int  C_sumEt, int & total_sumEt ) const {
-
-  total_sumEt = A_sumEt + B_sumEt;
-  if (FEXAlgoSpaceDefs::ENABLE_JWOJ_C){
-    total_sumEt = total_sumEt + C_sumEt;
-  }
-
-}
 
 //----------------------------------------------------------------------------------
 // bitwise simulation of sine LUT in firmware
@@ -367,7 +430,9 @@ float gFEXJwoJAlgo::sinLUT(unsigned int phiIDX, unsigned int aw) const
   float c = static_cast<float>(phiIDX)/std::pow(2,aw);
   float rad = (2*M_PI) *c;
   float rsin = std::sin(rad);
-  return rsin;
+  int isin = std::round(rsin*(std::pow(2,aw) - 1));
+  return isin;
+
 }
 
 //----------------------------------------------------------------------------------
@@ -378,7 +443,8 @@ float gFEXJwoJAlgo::cosLUT(unsigned int phiIDX, unsigned int aw) const
   float c = static_cast<float>(phiIDX)/std::pow(2,aw);
   float rad = (2*M_PI) *c;
   float rcos = std::cos(rad);
-  return rcos;
+  int icos = std::round(rcos*(std::pow(2,aw) - 1));
+  return icos;
 }
 
 } // namespace LVL1
