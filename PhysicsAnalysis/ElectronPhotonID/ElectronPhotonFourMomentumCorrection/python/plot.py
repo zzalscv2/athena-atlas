@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """ Produce plots about egamma calibration systematics and corrections """
 
@@ -1377,7 +1377,7 @@ def check_fast(basedir, esmodel):
     tool_fast.setProperty("ESModel", esmodel)
     tool_fast.setProperty("decorrelationModel", "FULL_ETACORRELATED_v1")
     tool_fast.setProperty[bool]("doSmearing", 0)
-    tool_fast.setProperty[bool]("useAFII", True)
+    tool_fast.setProperty[bool]("useFastSim", True)
     tool_fast.initialize()
 
     for ptype in "electron", "converted", "unconverted":
@@ -1902,7 +1902,7 @@ to list the systematics:
         log.info("plotting full / fast scale")
         check_fast(basedir, "es2015PRE")
         plot_all_scales(
-            esmodels=("es2015PRE", ("es2015PRE", ("useAFII",), (True,), (bool,))),
+            esmodels=("es2015PRE", ("es2015PRE", ("useFastSim",), (True,), (bool,))),
             labels=("2015PRE", "2015PRE FAST"),
             basedir=basedir,
             etas=np.arange(-2.5, 2.5, 0.01),

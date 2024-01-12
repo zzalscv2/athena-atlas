@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -77,7 +77,7 @@ namespace xAOD {
 
 namespace CP {
 
-class EgammaCalibrationAndSmearingTool : virtual public IEgammaCalibrationAndSmearingTool, public asg::AsgMetadataTool {
+  class EgammaCalibrationAndSmearingTool : virtual public IEgammaCalibrationAndSmearingTool, public asg::AsgMetadataTool {
   // Create a proper constructor for Athena
   ASG_TOOL_CLASS3( EgammaCalibrationAndSmearingTool, IEgammaCalibrationAndSmearingTool, CP::ISystematicsTool, CP::IReentrantSystematicsTool)
 
@@ -85,7 +85,7 @@ public:
 
 	enum class ScaleDecorrelation {FULL, ONENP, FULL_ETA_CORRELATED, ONENP_PLUS_UNCONR};
 	enum class ResolutionDecorrelation {FULL, ONENP};
-  static const int AUTO = 2;  // this is used as a third state for boolean propertis (true/false/automatic)
+  static const int AUTO = 2;  // this is used as a third state for boolean properties (true/false/automatic)
   typedef unsigned int RandomNumber;
   typedef std::function<int(const EgammaCalibrationAndSmearingTool&, const xAOD::Egamma&, const xAOD::EventInfo&)> IdFunction;
   typedef std::function<bool(const xAOD::Egamma&)> EgammaPredicate;
@@ -94,10 +94,6 @@ public:
   ~EgammaCalibrationAndSmearingTool();
 
   StatusCode initialize() override;
-
-  virtual StatusCode beginInputFile() override;
-  virtual StatusCode beginEvent() override;
-  virtual StatusCode endInputFile() override;
 
   // Apply the correction on a modifyable egamma object
   virtual CP::CorrectionCode applyCorrection(xAOD::Egamma&) override;
@@ -128,7 +124,6 @@ public:
 
 private:
 
-  bool m_metadata_retrieved = false;
   std::string m_ESModel;
   std::string m_decorrelation_model_name;
   std::string m_decorrelation_model_scale_name;
@@ -142,6 +137,7 @@ private:
   double m_varSF;
   std::string m_ResolutionType;
   egEnergyCorr::Resolution::resolutionType m_TResolutionType;
+  int m_useFastSim;
   int m_use_AFII;
   PATCore::ParticleDataType::DataType m_simulation = PATCore::ParticleDataType::Full;
   //flags duplicated from the underlying ROOT tool
@@ -168,12 +164,10 @@ private:
 
   void setupSystematics();
 
-  StatusCode get_simflavour_from_metadata(PATCore::ParticleDataType::DataType& result) const;
-
-	// this is needed (instead of a simpler lambda since a clang bug, see https://its.cern.ch/jira/browse/ATLASG-688)
-	struct AbsEtaCaloPredicate
+  // this is needed (instead of a simpler lambda since a clang bug, see https://its.cern.ch/jira/browse/ATLASG-688)
+  struct AbsEtaCaloPredicate
   {
-		AbsEtaCaloPredicate(double eta_min, double eta_max) : m_eta_min(eta_min), m_eta_max(eta_max) {}
+    AbsEtaCaloPredicate(double eta_min, double eta_max) : m_eta_min(eta_min), m_eta_max(eta_max) {}
     bool operator()(const xAOD::Egamma& p) {
       const double aeta = std::abs(xAOD::get_eta_calo(*p.caloCluster(),p.author()));
       return (aeta >= m_eta_min and aeta < m_eta_max);

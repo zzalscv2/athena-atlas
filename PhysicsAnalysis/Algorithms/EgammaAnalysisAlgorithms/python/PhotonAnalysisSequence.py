@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Framework import(s):
 import ROOT
@@ -193,11 +193,7 @@ def makePhotonCalibrationSequence( seq, dataType,
                     'CP::EgammaCalibrationAndSmearingTool' )
     alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
     alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
-    if dataType == 'afii':
-        alg.calibrationAndSmearingTool.useAFII = 1
-    else :
-        alg.calibrationAndSmearingTool.useAFII = 0
-        pass
+    alg.calibrationAndSmearingTool.useFastSim = int(dataType == 'afii')
     seq.append( alg, inputPropName = 'egammas', outputPropName = 'egammasOut',
                 stageName = 'calibration',
                 dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )

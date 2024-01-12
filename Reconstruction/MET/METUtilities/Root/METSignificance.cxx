@@ -163,8 +163,8 @@ namespace met {
       asg::AsgToolConfig toolConfig ("CP::EgammaCalibrationAndSmearingTool/METSigAutoConf_" + toolName);
       ATH_CHECK(toolConfig.setProperty("ESModel", "es2017_R21_v0"));
       ATH_CHECK(toolConfig.setProperty("decorrelationModel", "1NP_v1"));
-      if(m_isAFII) ATH_CHECK(toolConfig.setProperty("useAFII", 1));
-      else ATH_CHECK(toolConfig.setProperty("useAFII", 0));
+      if(m_isAFII) ATH_CHECK(toolConfig.setProperty("useFastSim", 1));
+      else ATH_CHECK(toolConfig.setProperty("useFastSim", 0));
       ATH_CHECK (toolConfig.makePrivateTool (m_egammaCalibTool));
     }
     ATH_CHECK( m_egammaCalibTool.retrieve() );

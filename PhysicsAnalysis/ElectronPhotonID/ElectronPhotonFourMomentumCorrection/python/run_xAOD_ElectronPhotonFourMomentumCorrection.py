@@ -104,7 +104,7 @@ def main(filename, **args):
     if args['debug']:
         tool.msg().setLevel(0)
     if args['use_afii'] is not None:
-        tool.setProperty("bool")("useAFII", bool(args['use_afii'])).ignore()
+        tool.setProperty("bool")("useFastSim", bool(args['use_afii'])).ignore()
 
     tool.initialize()
 

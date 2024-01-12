@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopCPTools/TopEgammaCPTools.h"
@@ -155,11 +155,9 @@ namespace top {
         top::check(asg::setProperty(egammaCalibrationAndSmearingTool, "randomRunNumber", m_config->forceRandomRunNumber()), "Cannot set randomRunNumber for the egamma tools");
       }
 
-      if (m_config->isAFII()) {
-        top::check(asg::setProperty(egammaCalibrationAndSmearingTool,
-                                    "useAFII", 1),
-                   "Failed to useAFII to true for" + egamma_calib_name);
-      }
+      top::check(asg::setProperty(egammaCalibrationAndSmearingTool,
+				  "useFastSim", m_config->isAFII() ? 1 : 0),
+		 "Failed to set useFastSim to true for" + egamma_calib_name);
       top::check(egammaCalibrationAndSmearingTool->initialize(),
                  "Failed to initialize " + egamma_calib_name);
       m_egammaCalibrationAndSmearingTool = egammaCalibrationAndSmearingTool;
