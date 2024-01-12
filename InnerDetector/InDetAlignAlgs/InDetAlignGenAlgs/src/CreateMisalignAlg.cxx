@@ -130,9 +130,9 @@ namespace InDetAlignment
 	StatusCode CreateMisalignAlg::initialize()
 	{
 		ATH_MSG_DEBUG("CreateMisalignAlg initialize()");
-		if(m_pixelDetEleCollKey.empty()) {m_doPix=false;ATH_MSG_DEBUG("Not creating misalignment for Pixel");}
-		if(m_SCTDetEleCollKey.empty()) {m_doStrip=false;ATH_MSG_DEBUG("Not creating misalignment for Strip/SCT");}
-		if(m_trtDetEleCollKey.empty()) {m_doTRT=false;ATH_MSG_DEBUG("Not creating misalignment for TRT");}
+		if(m_pixelDetEleCollKey.empty()) {m_doPix=false;ATH_MSG_INFO("Not creating misalignment for Pixel");}
+		if(m_SCTDetEleCollKey.empty()) {m_doStrip=false;ATH_MSG_INFO("Not creating misalignment for Strip/SCT");}
+		if(m_trtDetEleCollKey.empty()) {m_doTRT=false;ATH_MSG_INFO("Not creating misalignment for TRT");}
 
         ATH_CHECK(m_pixelDetEleCollKey.initialize(SG::AllowEmpty));
         ATH_CHECK(m_SCTDetEleCollKey.initialize(SG::AllowEmpty));

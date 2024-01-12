@@ -15,14 +15,34 @@ from InDetAlignGenTools.InDetAlignGenToolsConfig import ITkAlignDBTool
 import sys
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def blockFolder(ca,folder):
+        "Block use of specified conditions DB folder so data can be read from elsewhere"
+        from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
+        ca.merge(IOVDbSvcCfg(flags))
+        iovdbsvc=ca.getService("IOVDbSvc")
+        # check existing list of folders and remove it if found
+        for i in range(0,len(iovdbsvc.Folders)):
+            if (iovdbsvc.Folders[i].find(folder)>=0):
+                del iovdbsvc.Folders[i]
+                break
+        condInputLoader=ca.getCondAlgo("CondInputLoader")        
+        for i in range(0, len(condInputLoader.Load)):
+            if (folder in condInputLoader.Load[i][-1] ):
+                del condInputLoader.Load[i]
+                break
+
+
 def getFlags(**kwargs):
     flags=initConfigFlags()
-    flags.Input.RunNumbers = [2222222] # Set to either MC DSID or MC Run Number
-
     ## Just enable ID for the moment.
     flags.Input.isMC             = True
 
     flags.Input.Files = []
+    
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
+    flags.GeoModel.Align.Dynamic = False
+    
     flags.ITk.Geometry.AllLocal = False
     detectors = [
     "ITkPixel",
@@ -31,9 +51,7 @@ def getFlags(**kwargs):
     ]
     setupDetectorFlags(flags, custom_list=detectors, toggle_geometry=True)
     flags.TrackingGeometry.MaterialSource = "Input"
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
-    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
-    flags.GeoModel.Align.Dynamic = False
+
 
     #Define the output database file name and add it to the flags
     if 'MisalignMode' not in kwargs.keys():
@@ -85,30 +103,32 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
     kwargs.setdefault("MaxShift",shiftInMicrons)
     kwargs.setdefault("CreateFreshDB",createFreshDB)
     #Create and configure the AlignDB tool
-    itkAlignFolder="/Indet/AlignITk"
-    AlignFolder="/Indet/Align"
+    outputAlignFolder="/Indet/AlignITk" #The folder name to which the created misaligments should be written
+    inputAlignFolder="/Indet/Align" #The folder name from which initial misalignments should be read
+
     writeDBPoolFile=True   #Activate or deactivate writing to outFiles + '.pool.root'
     kargsTool={}
     kargsTool.setdefault("SCTTwoSide",True)
-    kargsTool.setdefault("DBRoot",itkAlignFolder)
-    kargsTool.setdefault("DBKey",itkAlignFolder)
+    kargsTool.setdefault("DBRoot",outputAlignFolder)
+    kargsTool.setdefault("DBKey",outputAlignFolder)
     kargsTool.setdefault("forceUserDBConfig",True)
     if writeDBPoolFile:
-        InDetCondStream=CompFactory.AthenaOutputStreamTool(OutputFile = outFiles+'.pool.root')
+        print("Writing DB Pool File")
+        InDetCondStream=CompFactory.AthenaOutputStreamTool("CondStream_write",OutputFile = outFiles+'.pool.root')
         InDetCondStream.PoolContainerPrefix="<type>"
         InDetCondStream.TopLevelContainerName=""
         InDetCondStream.SubLevelBranchName="<key>"
         kargsTool.setdefault("CondStream",InDetCondStream)
-        kargsTool.setdefault("DBRoot",AlignFolder)
-        kargsTool.setdefault("DBKey",AlignFolder)
     dbTool = acc.popToolsAndMerge(ITkAlignDBTool(flags,**kargsTool))
 
     kwargs.setdefault("IDAlignDBTool",dbTool)
 
-    cfg=CreateITkMisalignAlgCfg(flags,name=name,SetITkPixelAlignable=True,SetITkStripAlignable=True,setAlignmentFolderName=AlignFolder,**kwargs)
+    cfg=CreateITkMisalignAlgCfg(flags,name=name,SetITkPixelAlignable=True,SetITkStripAlignable=True,setAlignmentFolderName=inputAlignFolder,**kwargs)
+
     acc.merge(cfg)
     if writeDBPoolFile:
         print("To be writen DB pool File")
+
     return acc
 
 if __name__ == "__main__":
@@ -124,6 +144,7 @@ if __name__ == "__main__":
     #Add the tools and the algorithm to the accumulator
     acc=CreateMis(flags,**kwargs)
     acc.printConfig()
+
     #run
     sc=acc.run(10)
     if sc.isFailure():
