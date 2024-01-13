@@ -19,7 +19,7 @@
 using namespace TauAnalysisTools;
 
 //______________________________________________________________________________
-CommonDiTauSmearingTool::CommonDiTauSmearingTool(std::string sName)
+CommonDiTauSmearingTool::CommonDiTauSmearingTool(const std::string& sName)
   : CommonSmearingTool( sName )
   , m_fX(&TruthLeadPt)
   , m_fY(&TruthSubleadPt)

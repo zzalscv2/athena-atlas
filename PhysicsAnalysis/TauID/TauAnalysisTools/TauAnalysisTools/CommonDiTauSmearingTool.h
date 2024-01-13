@@ -40,7 +40,7 @@ class CommonDiTauSmearingTool
 
 public:
 
-  CommonDiTauSmearingTool(std::string sName);
+  CommonDiTauSmearingTool(const std::string& sName);
 
   virtual StatusCode initialize() override;
 
