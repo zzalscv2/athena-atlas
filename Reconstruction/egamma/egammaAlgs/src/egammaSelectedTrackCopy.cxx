@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021  CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024  CERN for the benefit of the ATLAS collaboration
  */
 
 /*
@@ -54,6 +54,10 @@ egammaSelectedTrackCopy::initialize()
   ATH_CHECK(m_clusterContainerKey.initialize());
   ATH_CHECK(m_fwdClusterContainerKey.initialize(m_doForwardTracks));
   ATH_CHECK(m_trackParticleContainerKey.initialize());
+  // Needed to declare proper input dependency with scheduler
+  ATH_CHECK(m_trackParticleTimeDecorKey.initialize
+	    (!m_trackParticleTimeDecorKey.empty()));
+
   ATH_CHECK(m_OutputTrkPartContainerKey.initialize());
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_egammaCaloClusterSelector.retrieve());

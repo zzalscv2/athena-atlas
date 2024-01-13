@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EGAMMAALGS_EGAMMASELECTEDTRACKCOPY_H
@@ -11,6 +11,7 @@
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
@@ -105,6 +106,12 @@ private:
     "InDetTrackParticles",
     "Input TrackParticles to select from"
   };
+
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_trackParticleTimeDecorKey{
+    this,
+    "TrackParticleTimeDecoration",
+    "",
+    "Time assigned to this track"};
 
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey {
     this,
