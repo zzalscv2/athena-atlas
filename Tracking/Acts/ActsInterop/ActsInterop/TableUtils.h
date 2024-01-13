@@ -74,7 +74,7 @@ namespace TableUtils {
       const_iterator end() const {
          return const_iterator{ m_ptr+m_rows * m_columnOffset, m_columns, m_columnOffset };
       }
-      const Range<T> &operator[](std::size_t index) const {
+      Range<T> operator[](std::size_t index) const {
          assert(index<m_rows && m_ptr);
          return Range<T>{m_ptr + m_columnOffset * index, m_columns};
       }
