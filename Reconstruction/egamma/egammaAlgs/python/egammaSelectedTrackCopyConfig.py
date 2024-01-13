@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = "Instantiate egammaSelectedTrackCopy with default configuration"
 
@@ -34,6 +34,10 @@ def egammaSelectedTrackCopyCfg(flags, name="egammaSelectedTrackCopy", **kwargs):
                       flags.Egamma.Keys.Input.TrackParticles)
     kwargs.setdefault("OutputTrkPartContainerName",
                       flags.Egamma.Keys.Output.TrkPartContainerName)
+
+    if flags.Reco.EnableHGTDExtension:
+        kwargs.setdefault("TrackParticleTimeDecoration",
+                          flags.Egamma.Keys.Input.TrackParticles+".time")
 
     doFwd = flags.Detector.GeometryITk and flags.Egamma.doForward
     kwargs.setdefault("doFwdTracks", doFwd)
