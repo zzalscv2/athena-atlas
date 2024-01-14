@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 #
@@ -526,12 +526,22 @@ def TauCaloTopoClusterMakerCfg(flags):
     TopoClusterForTaus.SeedCutsInAbsE                    = True
     TopoClusterForTaus.ClusterEtorAbsEtCut               = 0.5*GeV # 0.0*MeV in standard CaloCalTopoCluster JobOptions!
     TopoClusterForTaus.TwoGaussianNoise                  = flags.Calo.TopoCluster.doTwoGaussianNoise
-    # timing cut on seed cell
+    # timing cut on seed cell to suppress out-of-time pileup
     TopoClusterForTaus.SeedCutsInT = flags.Calo.TopoCluster.doTimeCut
     TopoClusterForTaus.CutOOTseed = flags.Calo.TopoCluster.extendTimeCut and flags.Calo.TopoCluster.doTimeCut
     TopoClusterForTaus.UseTimeCutUpperLimit = flags.Calo.TopoCluster.useUpperLimitForTimeCut
-    # may have to be tuned for EM clusters and/or LLP->tau reconstruction
     TopoClusterForTaus.TimeCutUpperLimit = flags.Calo.TopoCluster.timeCutUpperLimit
+    TopoClusterForTaus.XTalkEM2 = flags.Calo.TopoCluster.xtalkEM2
+    TopoClusterForTaus.XTalkEM2D = flags.Calo.TopoCluster.xtalkEM2D
+    TopoClusterForTaus.XTalkEM2n = flags.Calo.TopoCluster.xtalkEM2n
+    TopoClusterForTaus.XTalkEM3 = flags.Calo.TopoCluster.xtalkEM3
+    TopoClusterForTaus.XTalkEMEta = flags.Calo.TopoCluster.xtalkEMEta
+    TopoClusterForTaus.XTalkDeltaT = flags.Calo.TopoCluster.xtalkDeltaT
+    TopoClusterForTaus.XTalk2Eratio1 = flags.Calo.TopoCluster.xtalk2Eratio1
+    TopoClusterForTaus.XTalk2Eratio2 = flags.Calo.TopoCluster.xtalk2Eratio2
+    TopoClusterForTaus.XTalk3Eratio = flags.Calo.TopoCluster.xtalk3Eratio
+    TopoClusterForTaus.XTalkEtaEratio = flags.Calo.TopoCluster.xtalkEtaEratio
+    TopoClusterForTaus.XTalk2DEratio = flags.Calo.TopoCluster.xtalk2DEratio
 
     result.setPrivateTools(TopoClusterForTaus)
     return result
