@@ -68,4 +68,4 @@ Amg::Transform3D MmReadoutElement::fromGapToChamOrigin(const IdentifierHash& lay
       return m_pars.layers[layIdx].toOrigin();
 }
 
-}
+} // namespace MuonGMR4

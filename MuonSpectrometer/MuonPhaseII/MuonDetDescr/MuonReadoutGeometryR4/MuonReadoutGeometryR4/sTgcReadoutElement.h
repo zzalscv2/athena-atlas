@@ -142,6 +142,11 @@ class sTgcReadoutElement : public MuonReadoutElement {
     /// Converts the measurement hash back to the full Identifier
     Identifier measurementId(const IdentifierHash& measHash) const override final;
 
+    const StripLayer& stripLayer(const Identifier& measId) const;
+    const StripLayer& stripLayer(const IdentifierHash& measId) const;
+
+    
+
 
    private:
         IdentifierHash createHash(const int gasGap, const int channelType, const int channel) const;
