@@ -34,8 +34,8 @@ struct TestData
 
       varianceZ.push_back(rand() % 1000);
 
-      std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer > > measurementIndex;
-      measurementIndex.push_back(ElementLink<xAOD::UncalibratedMeasurementContainer >("testString", rand() % 1000));
+      std::vector< const xAOD::UncalibratedMeasurement* > measurementIndex;
+      measurementIndex.push_back(nullptr);
       measurementIndexes.push_back(measurementIndex);
     }
   }
@@ -44,7 +44,7 @@ struct TestData
   std::vector < Eigen::Matrix<float,3,1> > globalPosition;
   std::vector < float > varianceR;
   std::vector < float > varianceZ;
-  std::vector < std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer > > > measurementIndexes;
+  std::vector < std::vector< const xAOD::UncalibratedMeasurement* > > measurementIndexes;
 };
 
 void clearCache()
@@ -69,7 +69,7 @@ void testCopyMechanism(const xAOD::SpacePointContainer& container, const TestDat
     checkResult &= (structure.globalPosition[i] == container[i]->globalPosition());
     checkResult &= (structure.varianceR[i] == container[i]->varianceR());
     checkResult &= (structure.varianceZ[i] == container[i]->varianceZ());
-    checkResult &= (structure.measurementIndexes[i][0].index() == container[i]->measurements()[0].index());
+    checkResult &= (structure.measurementIndexes[i][0] == container[i]->measurements()[0]);
   }
   if (not checkResult)
   {

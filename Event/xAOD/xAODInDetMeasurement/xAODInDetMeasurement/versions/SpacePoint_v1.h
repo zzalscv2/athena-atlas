@@ -9,7 +9,6 @@
 #include "Identifier/Identifier.h"
 #include "EventPrimitives/EventPrimitives.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
-#include "AthLinks/ElementLink.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
 
 #include <array>
@@ -50,7 +49,7 @@ namespace xAOD {
     float varianceZ() const;
 
     /// Returns the index of the measurements
-    const std::vector< ElementLink< xAOD::UncalibratedMeasurementContainer > >& measurements() const;
+    const std::vector< const xAOD::UncalibratedMeasurement* >& measurements() const;
 
     /// Return details
     float topHalfStripLength() const;
@@ -86,7 +85,7 @@ namespace xAOD {
     void setVarianceZ(float);
 
     /// Sets the index of the measurements
-    void setMeasurements(const std::vector< ElementLink< xAOD::UncalibratedMeasurementContainer > >&);
+    void setMeasurements(const std::vector< const xAOD::UncalibratedMeasurement* >&);
 
     void setTopHalfStripLength(float);
     void setBottomHalfStripLength(float);
@@ -96,12 +95,12 @@ namespace xAOD {
     void setSpacePoint(DetectorIDHashType idHash,
 		       const Eigen::Matrix<float,3,1>& globPos,
 		       float cov_r, float cov_z,
-		       const std::vector< ElementLink< xAOD::UncalibratedMeasurementContainer > >& measurementIndexes);
+		       const std::vector< const xAOD::UncalibratedMeasurement* >& measurementIndexes);
 
     void setSpacePoint(const std::vector<DetectorIDHashType>& idHashes,
 		       const Eigen::Matrix<float,3,1>& globPos,
 		       float cov_r, float cov_z,
-		       const std::vector< ElementLink< xAOD::UncalibratedMeasurementContainer > >& measurementIndexes,
+		       const std::vector< const xAOD::UncalibratedMeasurement* >& measurementIndexes,
 		       float topHalfStripLength,
 		       float bottomHalfStripLength,
 		       const Eigen::Matrix<float,3,1>& topStripDirection,

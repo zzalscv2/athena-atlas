@@ -58,8 +58,7 @@ void fill(xAOD::SpacePoint& pixel, xAOD::SpacePoint& strip,
 
   Eigen::Matrix<float,3,1> globalPosition(1, 0, 32);
   Eigen::Matrix<float,2,1> globalVariance(0.21, 0.34);
-  std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer > > pixel_meas;
-  pixel_meas.push_back(ElementLink<xAOD::UncalibratedMeasurementContainer>(pixelClusters, pclus->index()));    
+  std::vector< const xAOD::UncalibratedMeasurement* > pixel_meas({pclus});
 
   pixel.setSpacePoint( idHash,
 		       globalPosition,
@@ -67,9 +66,7 @@ void fill(xAOD::SpacePoint& pixel, xAOD::SpacePoint& strip,
 		       globalVariance(1,0),
 		       pixel_meas);
 
-  std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > strip_meas;
-  strip_meas.push_back(ElementLink<xAOD::UncalibratedMeasurementContainer>(stripClusters, sclus0->index()));
-  strip_meas.push_back(ElementLink<xAOD::UncalibratedMeasurementContainer>(stripClusters, sclus1->index()));
+  std::vector< const xAOD::UncalibratedMeasurement* > strip_meas({sclus0, sclus1});
   
   float topHalfStripLength = 1.20;
   float bottomHalfStripLength = 0.32;
@@ -104,7 +101,7 @@ void print(xAOD::SpacePoint& pixel, xAOD::SpacePoint& strip) {
   std::cout << "Global Radius = " << pixel.radius() << std::endl;
   std::cout << "varianceR = " << pixel.varianceR() << std::endl;
   std::cout << "varianceZ = " << pixel.varianceZ() << std::endl;
-  std::cout << "measurementIndices = " << pixel.measurements().at(0).index() << std::endl;
+  std::cout << "measurementIndices = " << pixel.measurements().at(0)->index() << std::endl;
 
   std::cout << " --------- STRIP SPACE POINT  ------------ " << std::endl;
   std::cout << "Identifier Hash = " << strip.elementIdList()[0] << " " << strip.elementIdList()[1] << std::endl;
@@ -115,7 +112,7 @@ void print(xAOD::SpacePoint& pixel, xAOD::SpacePoint& strip) {
   std::cout << "Global Radius = " << strip.radius() << std::endl;
   std::cout << "varianceR = " << strip.varianceR() << std::endl;
   std::cout << "varianceZ = " << strip.varianceZ() << std::endl;
-  std::cout << "measurementIndices = " << strip.measurements().at(0).index() << ", " << strip.measurements().at(1).index() <<std::endl;
+  std::cout << "measurementIndices = " << strip.measurements().at(0)->index() << ", " << strip.measurements().at(1)->index() <<std::endl;
   std::cout << "topHalfStripLength = " << strip.topHalfStripLength() << std::endl;
   std::cout << "bottomHalfStripLength = " << strip.bottomHalfStripLength() << std::endl;
   std::cout << "topStripDirection = " << strip.topStripDirection() << std::endl;

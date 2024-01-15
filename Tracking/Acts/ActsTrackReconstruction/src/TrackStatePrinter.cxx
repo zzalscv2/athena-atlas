@@ -487,9 +487,9 @@ namespace ActsTrk
     for (const auto *sp : seed.sp())
     {
       size_t nom = 0;
-      for (const auto &el : sp->measurements())
+      for (const auto *el : sp->measurements())
       {
-        std::size_t index = (*el)->index();
+        std::size_t index = el->index();
         if (nom > 0)
           os << '+';
         else if (nos > 0)
@@ -617,11 +617,8 @@ namespace ActsTrk
       ATH_MSG_DEBUG("    \\__ " << handle->size() << " elements!");
       for (const auto *sp : *handle)
       {
-        for (const auto &el : sp->measurements())
+        for (const xAOD::UncalibratedMeasurement *meas : sp->measurements())
         {
-          if (!el.isValid())
-            continue;
-          const xAOD::UncalibratedMeasurement *meas = *el;
           if (!meas)
             continue;
           for (std::size_t icontainer = 0; icontainer < clusterContainers.size(); ++icontainer)
