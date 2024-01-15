@@ -245,6 +245,11 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
               string algo_klass = algo.klass();
               if(algo_klass=="eEmVarMultiplicity") algo_klass="eEmMultiplicity"; // in sim, use the same multiplicity algo for fixed and variable thresholds
 
+	      //Zero Bias events can't be simulated.
+	      //The following line is set to simply ignore it in the simulation
+	      //ZeroBias Multiplicity algorithms are not added to confMultAlgorithms
+	      if ( algo_klass == "ZeroBias" ) continue;
+
               auto it = find(storedConn.begin(), storedConn.end(), algo.name());
 	      if (it == storedConn.end()) { // Algorithm/Connector does not exist: create and store it
 
@@ -375,6 +380,10 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
 
       auto & l1algo = l1menu.algorithm(multAlgo, "MULTTOPO");
  
+      //Zero Bias events can't be simulated.
+      //The following line is set to simply ignore it in the simulation
+      if ( l1algo.klass() == "ZeroBias" ) continue;
+
       ConfigurableAlg * alg = AlgFactory::mutable_instance().algorithm(l1algo.name());
 
       // Get L1Threshold object and pass it to CountingAlg, from where it will be propagated to and decoded in each algorithm
