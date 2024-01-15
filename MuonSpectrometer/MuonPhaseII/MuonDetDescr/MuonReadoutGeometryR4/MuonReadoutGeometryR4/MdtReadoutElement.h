@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_H
 #define MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_H
@@ -168,7 +168,6 @@ class MdtReadoutElement : public MuonReadoutElement {
         /// z-axis: Pointing along the wire
         Amg::Transform3D toTubeFrame(const IdentifierHash& hash) const;
 
-        bool m_init{false};
         parameterBook m_pars{};
         const MdtIdHelper& m_idHelper{idHelperSvc()->mdtIdHelper()};
         /// Identifier index of the multilayer (1-2)
