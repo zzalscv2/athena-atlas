@@ -131,7 +131,7 @@ class MutableTrackSummaryContainer : public TrackSummaryContainer {
   MutableTrackSummaryContainer();
   MutableTrackSummaryContainer(const MutableTrackSummaryContainer&) = delete;
   MutableTrackSummaryContainer operator=(const MutableTrackSummaryContainer&) = delete;
-  MutableTrackSummaryContainer(MutableTrackSummaryContainer&&) noexcept;
+  MutableTrackSummaryContainer(MutableTrackSummaryContainer&&);
 
   /**
   * adds new surface to the tail of the container

@@ -131,7 +131,7 @@ ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer() {
 }
 
 ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer(
-    MutableTrackSummaryContainer&& other) noexcept {
+    MutableTrackSummaryContainer&& other) {
   m_mutableTrackBackend = std::move(other.m_mutableTrackBackend);
   m_mutableTrackBackendAux = std::move(other.m_mutableTrackBackendAux);
   m_mutableTrackBackend->setStore(m_mutableTrackBackendAux.get());
