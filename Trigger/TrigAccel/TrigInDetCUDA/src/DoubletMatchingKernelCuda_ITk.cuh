@@ -72,6 +72,10 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 	const float ptCoeff2 = ptCoeff*ptCoeff;
 	const float maxD0 = dSettings->m_tripletD0Max;
 
+	const float phiPlus = dSettings->m_phiPlus;
+  const float phiMinus = dSettings->m_phiMinus;
+  const bool isFullscan = (dSettings->m_isFullScan == 1);
+
 
 	for(int itemIdx = blockIdx.x;itemIdx<maxItem;itemIdx += gridDim.x) {
 
@@ -231,6 +235,22 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 		float fd0 = std::abs(d0);
 
 		if(fd0 > maxD0) continue;
+
+		if(!isFullscan){
+			//calculate phi
+			float uc = 2*B*rm - A;
+			float phi0 = atan2(sinA - uc*cosA, cosA + uc*sinA);
+
+			if(phiPlus > phiMinus){
+				if(phi0 < phiPlus && phi0 > phiMinus){
+				  continue;
+				}
+			}else{
+				if(phi0 < phiPlus || phi0 > phiMinus){
+				  continue;
+				}
+			}
+		}
 
 		//Calculate Quality    
 

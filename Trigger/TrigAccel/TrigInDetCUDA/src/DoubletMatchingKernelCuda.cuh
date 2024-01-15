@@ -74,6 +74,10 @@ __global__ static void doubletMatchingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
   const float maxD0 = dSettings->m_tripletD0Max;
   const float maxD0_PPS = dSettings->m_tripletD0_PPS_Max;
 
+  const float phiPlus = dSettings->m_phiPlus;
+  const float phiMinus = dSettings->m_phiMinus;
+  const bool isFullscan = (dSettings->m_isFullScan == 1);
+
 
   for(int itemIdx = blockIdx.x;itemIdx<maxItem;itemIdx += gridDim.x) {
 
@@ -241,7 +245,23 @@ __global__ static void doubletMatchingKernel(TrigAccel::SEED_FINDER_SETTINGS* dS
     bool isSCT_1 = isSCT_array[doublet_i];
     bool isSCT_3 = isSCT_array[doublet_j];
 
-    if (isSCT_3 && isPixel && fd0 > maxD0_PPS) continue; 
+    if (isSCT_3 && isPixel && fd0 > maxD0_PPS) continue;
+
+    if(!isFullscan){
+      //calculate phi
+      float uc = 2*B*rm - A;
+      float phi0 = atan2(sinA - uc*cosA, cosA + uc*sinA);
+
+      if(phiPlus > phiMinus){
+        if(phi0 < phiPlus && phi0 > phiMinus){
+          continue;
+        }
+      }else{
+        if(phi0 < phiPlus || phi0 > phiMinus){
+          continue;
+        }
+      }
+    }
 
     //Calculate Quality    
 

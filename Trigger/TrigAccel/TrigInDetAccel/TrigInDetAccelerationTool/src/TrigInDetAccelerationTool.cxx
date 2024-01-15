@@ -87,6 +87,15 @@ size_t TrigInDetAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSet
   sfs.m_zedMinus = roi->zedMinus();
   sfs.m_zedPlus =  roi->zedPlus();
 
+  if(!(roi->isFullscan() || roi->composite() )){
+    //roi suitable for gpu
+    //composite rois are not supported at this point
+    sfs.m_isFullScan = 0;
+
+    sfs.m_phiMinus = roi->phiMinus();
+    sfs.m_phiPlus = roi->phiPlus();
+  }
+
   TrigAccel::SPACEPOINT_STORAGE& sps = pJ->m_data;
 
   unsigned int nSP = vsp.size();
