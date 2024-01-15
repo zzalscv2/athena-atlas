@@ -56,6 +56,16 @@ inline unsigned int MmReadoutElement::stripNumber(const IdentifierHash& measHash
     return (measHash >> 4);
 }
 
+inline const StripLayer& MmReadoutElement::stripLayer(const IdentifierHash& measHash) const {
+    unsigned int gasGap = gasGapNumber(measHash);
+    return m_pars.layers.at(gasGap-1);
+}
+
+inline const StripLayer& MmReadoutElement::stripLayer(const Identifier& measId) const {
+   return stripLayer(measurementHash(measId));
+}
+
+
 
 }  // namespace MuonGMR4
 #endif

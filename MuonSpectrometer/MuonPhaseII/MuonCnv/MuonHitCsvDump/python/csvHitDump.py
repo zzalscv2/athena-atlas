@@ -10,6 +10,12 @@ if __name__=="__main__":
     
     from xAODMuonSimHitCnv.MuonSimHitCnvCfg import xAODSimHitToMdtMeasCnvAlgCfg    
     cfg.merge(xAODSimHitToMdtMeasCnvAlgCfg(flags))
+
+    from xAODMuonSimHitCnv.MuonSimHitCnvCfg import xAODSimHitTosTGCMeasCnvAlgCfg
+    cfg.merge(xAODSimHitTosTGCMeasCnvAlgCfg(flags))
+    
+    from xAODMuonSimHitCnv.MuonSimHitCnvCfg import xAODSimHitToMmMeasCnvAlgCfg
+    cfg.merge(xAODSimHitToMmMeasCnvAlgCfg(flags))
     
     from MuonHitCsvDump.MuonHitCsvDumpConfig import CsvMuonSimHitDumpCfg
     from MuonHitCsvDump.MuonHitCsvDumpConfig import CsvMdtDriftCircleDumpCfg

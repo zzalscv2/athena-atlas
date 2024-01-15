@@ -82,6 +82,8 @@ class MmReadoutElement : public MuonReadoutElement {
     Identifier measurementId(const IdentifierHash& measHash) const override final;
 
     static IdentifierHash createHash(const int strip, const int gasGap);
+    const StripLayer& stripLayer(const Identifier& measId) const;    
+    const StripLayer& stripLayer(const IdentifierHash& measHash) const;    
    private:
        
     
@@ -96,7 +98,7 @@ class MmReadoutElement : public MuonReadoutElement {
     const int m_multilayer{m_idHelper.multilayer(identify())};
 
     Amg::Transform3D fromGapToChamOrigin(const IdentifierHash& layerHash) const;
-       
+
 };
 std::ostream& operator<<(std::ostream& ostr, const MmReadoutElement::parameterBook& pars);
 }  // namespace MuonGMR4

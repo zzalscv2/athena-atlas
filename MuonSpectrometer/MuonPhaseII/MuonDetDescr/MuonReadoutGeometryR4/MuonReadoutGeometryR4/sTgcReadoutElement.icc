@@ -70,7 +70,15 @@ inline Identifier sTgcReadoutElement::measurementId(const IdentifierHash& measHa
  }
  inline Amg::Vector3D sTgcReadoutElement::stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const {
         return stripPosition(ctx, measurementHash(measId));
- }  
+ }
+ inline const StripLayer& sTgcReadoutElement::stripLayer(const IdentifierHash& measHash) const {
+    unsigned int gasGap = gasGapNumber(measHash);
+    return m_pars.stripLayers[gasGap];
+ }
+ inline const StripLayer& sTgcReadoutElement::stripLayer(const Identifier& measId) const {
+    return stripLayer(measurementHash(measId));
+    //return m_pars.stripLayers[m_idHelper.gasGap(measId)-1];
+ }
 
 }  // namespace MuonGMR4
 #endif

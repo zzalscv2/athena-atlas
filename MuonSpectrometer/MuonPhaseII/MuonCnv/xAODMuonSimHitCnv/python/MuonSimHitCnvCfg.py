@@ -30,3 +30,30 @@ def xAODSimHitToMdtMeasCnvAlgCfg(flags,name = "SimHitToMdtMeasurementCnvAlg", **
     the_alg = CompFactory.xAODSimHitToMdtMeasCnvAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
+
+def xAODSimHitTosTGCMeasCnvAlgCfg(flags, name = "SimHitTosTGCMeasurementCnvAlg",**kwargs):
+    result = ComponentAccumulator()
+    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
+    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
+    from RngComps.RandomServices import AthRNGSvcCfg
+    kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
+    from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
+    result.merge(NswErrorCalibDbAlgCfg(flags))
+
+    the_alg = CompFactory.xAODSimHitTosTGCMeasCnvAlg(name,**kwargs)
+    result.addEventAlgo(the_alg,primary=True)
+    return result
+
+def xAODSimHitToMmMeasCnvAlgCfg(flags, name = "SimHitToMmMeasurementCnvAlg",**kwargs):
+    result = ComponentAccumulator()
+    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
+    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
+    from RngComps.RandomServices import AthRNGSvcCfg
+    kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
+    from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
+    result.merge(NswErrorCalibDbAlgCfg(flags))
+
+    the_alg = CompFactory.xAODSimHitToMmMeasCnvAlg(name,**kwargs)
+    result.addEventAlgo(the_alg,primary=True)
+    return result
+
