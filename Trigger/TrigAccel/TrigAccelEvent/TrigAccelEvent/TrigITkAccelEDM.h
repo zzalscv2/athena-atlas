@@ -78,6 +78,7 @@ namespace ITk {
     int m_isFullScan;
     float m_zedMinus, m_zedPlus;
     float m_maxEta, m_minDoubletLength, m_maxDoubletLength;
+    float m_phiMinus, m_phiPlus;
     
   } SEED_FINDER_SETTINGS;
 

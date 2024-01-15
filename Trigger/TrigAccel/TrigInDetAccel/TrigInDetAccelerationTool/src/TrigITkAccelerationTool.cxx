@@ -82,6 +82,15 @@ size_t TrigITkAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSetti
   sfs.m_nMaxPhiSlice = tcs.m_nMaxPhiSlice;
   sfs.m_maxTripletBufferLength = tcs.m_maxTripletBufferLength;
   sfs.m_isFullScan = 1;
+
+  if(!(roi->isFullscan() || roi->composite() )){
+    //roi suitable for gpu
+    //composite rois are not supported at this point
+    sfs.m_isFullScan = 0;
+
+    sfs.m_phiMinus = roi->phiMinus();
+    sfs.m_phiPlus = roi->phiPlus();
+  }
   
   sfs.m_zedMinus = roi->zedMinus();
   sfs.m_zedPlus =  roi->zedPlus();
