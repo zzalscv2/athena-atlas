@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: MakerAlg.h 487245 2012-03-08 09:00:36Z krasznaa $
 /**
  * @file D3PDMakerCoreComps/src/MakerAlg.h
  * @author scott snyder <snyder@bnl.gov>

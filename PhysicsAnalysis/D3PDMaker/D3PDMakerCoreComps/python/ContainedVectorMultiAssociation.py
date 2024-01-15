@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file D3PDMakerCoreComps/python/ContainedVectorMultiAssociation.py
@@ -9,8 +9,10 @@
 #
 
 
-import D3PDMakerCoreComps
 from .D3PDObject import D3PDObject
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+D3PD = CompFactory.D3PD
 
 
 def ContainedVectorMultiAssociation (parent,
@@ -38,7 +40,7 @@ represented as vectors.
 
     def maker (name, prefix, object_name, **kw2):
         assoc = assoctool (name + 'Assoc', **kw2)
-        return D3PDMakerCoreComps.ContainedVectorMultiAssociationFillerTool \
+        return D3PD.ContainedVectorMultiAssociationFillerTool \
                (name,
                 NrowName = nrowName,
                 Prefix = prefix,

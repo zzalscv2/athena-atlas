@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file D3PDMakerCoreComps/python/IndexMultiAssociation.py
@@ -9,8 +9,10 @@
 #
 
 
-import D3PDMakerCoreComps
 from .D3PDObject import D3PDObject
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+D3PD = CompFactory.D3PD
 
 
 def IndexMultiAssociation (parent,
@@ -56,18 +58,17 @@ def IndexMultiAssociation (parent,
             this_target = [ this_target ]
 
         assoc = assoctool (name + 'Assoc', **kw2)
-        filler = D3PDMakerCoreComps.ContainedVectorMultiAssociationFillerTool \
+        filler = D3PD.ContainedVectorMultiAssociationFillerTool \
                  (name,
                   Prefix = prefix,
                   Associator = assoc,
                   NrowName = nrowName)
-        indexer = D3PDMakerCoreComps.IndexFillerTool \
+        indexer = D3PD.IndexFillerTool \
                   (name + 'Index', 
                    Targets = this_target,
                    ContainerIndexName = containerIndexName,
                    AllowMissing = allowMissing)
         filler.BlockFillers += [indexer]
-        filler += [indexer]
         return filler
 
     obj = D3PDObject (maker, prefix)

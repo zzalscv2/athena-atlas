@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( D3PDMakerTest )
@@ -34,10 +34,10 @@ set( D3PDMAKERTEST_REFERENCE_TAG D3PDMakerTest/D3PDMakerTest-01-00-00 )
 string( CONCAT ignore
    "^ *[^ ]+ +INFO |^Py:.* ::? +INFO"  # ignore INFO messages
    "|^.Entries :"
-   "|no dictionary for class AttributeListLayout" )
+   "|no dictionary for class AttributeListLayout|leaving with code 0" )
 
 atlas_add_test( D3PDTest1
-  SCRIPT test/D3PDTest1.sh
+  SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/D3PDTest1.py
   PROPERTIES TIMEOUT 600
   ENVIRONMENT "ATLAS_REFERENCE_TAG=${D3PDMAKERTEST_REFERENCE_TAG}"
   LOG_IGNORE_PATTERN ${ignore} )

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file D3PDMakerCoreComps/python/Block.py
@@ -50,6 +50,11 @@ class Block:
         self.lod = lod
         self.func = func
         self.kw = kw
+        self._hooks = []
         return
 
 
+    # Allow attaching hooks to a Block.
+    def defineHook (self, hook):
+        self._hooks.append (hook)
+        return

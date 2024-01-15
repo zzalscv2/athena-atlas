@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file D3PDMakerCoreComps/python/__init__.py
@@ -19,7 +19,3 @@ from . import D3PDMakerCoreCompsConf
 for k, v in D3PDMakerCoreCompsConf.__dict__.items():
     if k.startswith ('D3PD__'):
         globals()[k[6:]] = v
-
-# Bring these into this scope as well.
-from .MakerAlg                import MakerAlg                 # noqa: F401
-from .ContainerFlagFillerTool import ContainerFlagFillerTool  # noqa: F401

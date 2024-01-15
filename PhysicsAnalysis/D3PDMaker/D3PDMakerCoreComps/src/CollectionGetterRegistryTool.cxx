@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,6 +15,7 @@
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/IToolSvc.h"
 #include "CxxUtils/starts_with.h"
+#include <sstream>
 
 
 namespace D3PD {
@@ -96,6 +97,14 @@ CollectionGetterRegistryTool::get (const std::string& label,
     REPORT_MESSAGE_WITH_CONTEXT (MSG::WARNING,
                                  "D3PD::CollectionGetterRegistryTool")
       << "Can't find collection label " << label;
+    std::ostringstream os;
+    os << "  Known collections:";
+    for (const auto& p : m_collection_map) {
+      os << " " << p.first;
+    }
+    REPORT_MESSAGE_WITH_CONTEXT (MSG::WARNING,
+                                 "D3PD::CollectionGetterRegistryTool")
+      << os.str();
     return StatusCode::SUCCESS;
   }
 

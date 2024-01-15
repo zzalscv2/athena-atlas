@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file EventCommonD3PDMaker/python/DRMultiAssociation.py
@@ -10,9 +10,10 @@
 #
 
 
-import D3PDMakerCoreComps
-import EventCommonD3PDMaker
 from D3PDMakerCoreComps.D3PDObject import D3PDObject
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+D3PD = CompFactory.D3PD
 
 
 def DRMultiAssociation (parent,
@@ -36,16 +37,16 @@ def DRMultiAssociation (parent,
                drcut = default_drcut):
 
         if not getter:
-            getter = D3PDMakerCoreComps.SGDataVectorGetterTool \
+            getter = D3PD.SGDataVectorGetterTool \
                      (name + '_Getter',
                       TypeName = type_name,
                       SGKey = sgkey)
         if not assoc:
-            assoc = EventCommonD3PDMaker.DRConeAssociationTool (name + 'Assoc',
-                                                            Getter = getter,
-                                                            DRCut = drcut)
+            assoc = D3PD.DRConeAssociationTool (name + 'Assoc',
+                                                Getter = getter,
+                                                DRCut = drcut)
 
-        return D3PDMakerCoreComps.ContainedMultiAssociationFillerTool (name,
+        return D3PD.ContainedMultiAssociationFillerTool (name,
                                                          Prefix = prefix,
                                                          Associator = assoc)
 

@@ -1,38 +1,22 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file D3PDMakerConfig/python/D3PDMakerFlags.py
 # @author scott snyder <snyder@bnl.gov>
 # @date Aug, 2009
-# @brief Common flags for D3PD making.
+# @brief Configuration flags for D3PD making.
 #
 
-
-"""Common flags for D3PD making.
-"""
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
 
-from AthenaCommon.JobProperties import JobProperty, JobPropertyContainer
-from AthenaCommon.JobProperties import jobproperties
-from AthenaCommon.SystemOfUnits import GeV
+configFlags = initConfigFlags()
+configFlags.addFlag ('D3PD.DoTruth', lambda f: f.Input.isMC)
+D3PDMakerFlags = configFlags.D3PD
 
 
-class D3PDMakerFlags (JobPropertyContainer):
-    """Common flags for D3PD making.
-"""
-    pass
-
-
-jobproperties.add_Container (D3PDMakerFlags)
-
-
-# Helper to add a simple string property.
-def _string_prop (name, val):
-    prop = type (name, (JobProperty,), {})
-    prop.statusOn = True
-    prop.allowedTypes = ['str']
-    prop.StoredValue = val
-    jobproperties.D3PDMakerFlags.add_JobProperty(prop)
+def _string_prop (p, v):
+    configFlags.addFlag ('D3PD.' + p, v)
     return
 
 
@@ -46,7 +30,8 @@ _string_prop ('GSFTrackAssocSGKey',          'GSFTrackAssociation')
 _string_prop ('PhotonSGKey',                 'Photons,PhotonCollection')
 _string_prop ('MuonSGKey',                   'StacoMuonCollection,Muons')
 _string_prop ('MuonSegmentSGKey',            'ConvertedMBoySegments')
-_string_prop ('JetSGKey',                    'AntiKt4TopoEMJets,' +
+_string_prop ('JetSGKey',                    'AntiKt4EMTopoJets,' +
+                                             'AntiKt4TopoEMJets,' +
                                              'AntiKt4LCTopoJets,' +
                                              'AntiKt4TopoAODJets,' +
                                              'AntiKt4H1TopoJets,' +
@@ -89,252 +74,257 @@ _string_prop ('MuonEFTrigPattern',     'EF_2?mu.*|EF_L1ItemStreamer_L1_2?MU.*')
 
 
 ##############################################################################
+# Muons.
+#
+
+configFlags.addFlag ('D3PD.Muons.doSingleMuons', False)
+configFlags.addFlag ('D3PD.Muons.doNewChainOnly', True)
+configFlags.addFlag ('D3PD.Muons.doSegmentTruth', False)
 
 
-class AutoFlush (JobProperty):
-    """Value to set for ROOT's AutoFlush parameter.
+##############################################################################
+# Tracking.
+#
+
+# General flags
+
+configFlags.addFlag ('D3PD.Track.doTruth', True,
+                     help = """Turn on filling of truth branches.""")
+
+configFlags.addFlag ('D3PD.Track.storeDiagonalCovarianceAsErrors', False,
+                     help = """store diagonal covariance matrix elements as errors ( err[i] = sqrt(cov[i][i]) )""")
+
+# TrackD3PDObject flags
+
+configFlags.addFlag ('D3PD.Track.storeHitTruthMatching', True,
+                     help = """Turn on filling of hit truth matching branches""")
+
+configFlags.addFlag ('D3PD.Track.storeDetailedTruth', False, 
+    help = """Turn on filling of detailed truth branches""")
+
+configFlags.addFlag ('D3PD.Track.trackParametersAtGlobalPerigeeLevelOfDetails', 0,
+    help = """ Set level of details for track parameter at global perigee branches
+        0: Don't store
+        1: Store parameters only
+        2: Store diagonal elements of the covariance matrix
+        3: Store off diagonal elements of the covariance matrix
+    """)
+
+configFlags.addFlag ('D3PD.Track.trackParametersAtPrimaryVertexLevelOfDetails', 2,
+    help = """ Set level of details for track parameter at primary vertex branches
+        0: Don't store
+        1: Store parameters only
+        2: Store diagonal elements of the covariance matrix
+        3: Store off diagonal elements of the covariance matrix
+    """)
+
+configFlags.addFlag ('D3PD.Track.trackParametersAtBeamSpotLevelOfDetails', 3,
+    help = """ Set level of details for track parameter at beam spot branches
+        0: Don't store
+        1: Store parameters only
+        2: Store diagonal elements of the covariance matrix
+        3: Store off diagonal elements of the covariance matrix
+    """)
+    
+configFlags.addFlag ('D3PD.Track.trackParametersAtBeamLineLevelOfDetails', 3,
+    help = """ Set level of details for track parameter at beam spot branches
+        0: Don't store
+        1: Store parameters only
+        2: Store diagonal elements of the covariance matrix
+        3: Store off diagonal elements of the covariance matrix
+    """)
+
+configFlags.addFlag ('D3PD.Track.storeTrackParametersAtCalo', False, 
+    help = """ Turn on filling of track parameters at Calo """)
+
+configFlags.addFlag ('D3PD.Track.storeTrackParametersAtCalo2ndLayer', False, 
+    help = """ Turn on filling of track parameters at Calo 2ndLayer """)
+
+configFlags.addFlag ('D3PD.Track.storeTrackUnbiasedIPAtPV', False, 
+    help = """ Turn on filling of track unbiased impact parameters at primary vertex branches """)
+
+configFlags.addFlag ('D3PD.Track.storeTrackMomentum', True,
+    help = """ Turn on filling of track momentum branches """)
+
+configFlags.addFlag ('D3PD.Track.storeTrackInfo', True,
+    help = """ Turn on filling of track info (fitter and pattern reco info) branches """)
+
+configFlags.addFlag ('D3PD.Track.storeTrackFitQuality', True,
+    help = """ Turn on filling of track fit quality (chi2 and ndof) branches """)
+
+configFlags.addFlag ('D3PD.Track.storeTrackSummary', True,
+    help = """ Turn on filling of track summary branches """)
+
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.FullInfo', False)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.IDHits', True)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.IDHoles', True)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.IDSharedHits', True)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.IDOutliers', False)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.PixelInfoPlus', False)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.SCTInfoPlus', False)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.TRTInfoPlus', False)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.InfoPlus', False)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.MuonHits', True)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.DBMHits', False)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.ExpectBLayer', True)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.HitSum', True)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.HoleSum', True)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.PixeldEdx', False)
+configFlags.addFlag ('D3PD.Track.storeTrackSummaryFlags.ElectronPID', False)
+
+configFlags.addFlag ('D3PD.Track.storePullsAndResiduals', False,
+    help = """ Turn on filling of pulls and residuals of hits and outliers on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeBLayerHitsOnTrack', False, 
+    help = """ Turn on filling of Pixel hits on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storePixelHitsOnTrack', False, 
+    help = """ Turn on filling of Pixel hits on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeSCTHitsOnTrack', False, 
+    help = """ Turn on filling of SCT hits on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeTRTHitsOnTrack', False, 
+    help = """ Turn on filling of TRT hits on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeMDTHitsOnTrack', False, 
+    help = """ Turn on filling of MDT hits on track branches """)
+    
+configFlags.addFlag ('D3PD.Track.storeCSCHitsOnTrack', False, 
+    help = """ Turn on filling of CSC hits on track branches """)
+    
+configFlags.addFlag ('D3PD.Track.storeRPCHitsOnTrack', False, 
+    help = """ Turn on filling of TRT hits on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeTGCHitsOnTrack', False, 
+    help = """ Turn on filling of TGC hits on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeBLayerOutliersOnTrack', False, 
+    help = """ Turn on filling of Pixel outliers on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storePixelOutliersOnTrack', False, 
+    help = """ Turn on filling of Pixel outliers on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeSCTOutliersOnTrack', False, 
+    help = """ Turn on filling of SCT outliers on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeTRTOutliersOnTrack', False, 
+    help = """ Turn on filling of TRT outliers on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeMDTOutliersOnTrack', False, 
+    help = """ Turn on filling of MDT outliers on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeCSCOutliersOnTrack', False, 
+    help = """ Turn on filling of CSC outliers on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeRPCOutliersOnTrack', False, 
+    help = """ Turn on filling of RPC outliers on track branches """)
+            
+configFlags.addFlag ('D3PD.Track.storeTGCOutliersOnTrack', False, 
+    help = """ Turn on filling of TGC outliers on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeBLayerHolesOnTrack', False, 
+    help = """ Turn on filling of Pixel holes on track branches """)
+    
+configFlags.addFlag ('D3PD.Track.storePixelHolesOnTrack', False, 
+    help = """ Turn on filling of Pixel holes on track branches """)
+    
+configFlags.addFlag ('D3PD.Track.storeSCTHolesOnTrack', False, 
+    help = """ Turn on filling of SCT holes on track branches """)
+    
+configFlags.addFlag ('D3PD.Track.storeTRTHolesOnTrack', False, 
+    help = """ Turn on filling of TRT holes on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeMDTHolesOnTrack', False, 
+    help = """ Turn on filling of MDT holes on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeCSCHolesOnTrack', False, 
+    help = """ Turn on filling of CSC holes on track branches """)
+        
+configFlags.addFlag ('D3PD.Track.storeRPCHolesOnTrack', False, 
+    help = """ Turn on filling of RPC holes on track branches """)
+            
+configFlags.addFlag ('D3PD.Track.storeTGCHolesOnTrack', False, 
+    help = """ Turn on filling of TGC holes on track branches """)
+
+configFlags.addFlag ('D3PD.Track.storeVertexAssociation', False, 
+    help = """ Turn on filling of track to vertex association """)
+    
+configFlags.addFlag ('D3PD.Track.storeTrackPredictionAtBLayer', True,
+    help = """ Turn on filling of track prediction at the B-Layer branches """)
+
+configFlags.addFlag ('D3PD.Track.storeTruthInfo', False, 
+    help = """ Turn on filling truth perigee and classification information. """)
+
+# VertexD3PDObject flags
+
+configFlags.addFlag ('D3PD.Track.vertexPositionLevelOfDetails', 3,
+    help = """ Set level of details for vertex vertex position branches
+        0: Don't store
+        1: Store position only
+        2: Store diagonal elements of the covariance matrix
+        3: Store off diagonal elements of the covariance matrix
+    """)
+
+configFlags.addFlag ('D3PD.Track.storeVertexType', True,
+    help = """ Turn on filling of vertex type as defined here
+    https://svnweb.cern.ch/trac/atlasoff/browser/Tracking/TrkEvent/TrkEventPrimitives/trunk/TrkEventPrimitives/VertexType.h
+    """)
+
+configFlags.addFlag ('D3PD.Track.storeVertexFitQuality', True,
+    help = """ Turn on filling of vertex fit quality (chi2 and ndof) branches """)
+
+configFlags.addFlag ('D3PD.Track.storeVertexKinematics', True,
+    help = """ Turn on filling of vertex kinematics (sumPT, ...) branches """)
+
+configFlags.addFlag ('D3PD.Track.storeVertexPurity', False, 
+    help = """ Turn on filling of vertex purity (truth matching) branches """)
+
+configFlags.addFlag ('D3PD.Track.storeVertexTrackAssociation', False, 
+    help = """ Turn on filling of vertex track association branches """)
+
+configFlags.addFlag ('D3PD.Track.storeVertexTrackIndexAssociation', True,
+    help = """ Turn on filling of vertex track index association branches """)
+
+
+
+##############################################################################
+
+
+configFlags.addFlag ('D3PD.AutoFlush', -30000000, None,
+                     """Value to set for ROOT's AutoFlush parameter.
 (For ROOT trees only; tells how often the tree baskets will be flushed.)
 0 disables flushing.
--1 (default) makes no changes to what THistSvc did.
+-1 makes no changes to what THistSvc did.
 Any other negative number gives the number of bytes after which to flush.
-A positive number gives the number of entries after which to flush."""
-    statusOn     = True
-    allowedTypes = ['int', 'long']
-    StoredValue  = -30000000
-jobproperties.D3PDMakerFlags.add_JobProperty(AutoFlush)
+A positive number gives the number of entries after which to flush.""")
 
 
-class AllowTrigExtend (JobProperty):
-    """If true, we can extend the lists of trigger bits if the menu changes."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = True
-jobproperties.D3PDMakerFlags.add_JobProperty(AllowTrigExtend)
+configFlags.addFlag ('D3PD.HaveEgammaUserData', False, None,
+                     'If true, access results of egamma analysis stored in UserData.')
 
 
-class IsEMVersion (JobProperty):
-    """Control which IsEM version is used by the data being analyzed.
-
-    1 : < 15.2.0
-    2 : >= 15.2.0
-    None: try to determine automatically from the version in the file metadata.
-"""
-    statusOn     = True
-    allowedTypes = ['int', None]
-    StoredValue  = None
-jobproperties.D3PDMakerFlags.add_JobProperty(IsEMVersion)
+configFlags.addFlag ('D3PD.MakeEgammaUserData', True, None,
+                     'If true, run egamma analysis to make UserData if not already done.')
 
 
-class HaveEgammaUserData (JobProperty):
-    """If true, access results of egamma analysis stored in UserData."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(HaveEgammaUserData)
+configFlags.addFlag ('D3PD.EgammaUserDataPrefix', 'egammaD3PDAnalysis_', None,
+                     'Prefix to use for UserData labels for egamma.')
 
 
-class MakeEgammaUserData (JobProperty):
-    """If true, run egamma analysis to make UserData if not already done."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = True
-jobproperties.D3PDMakerFlags.add_JobProperty(MakeEgammaUserData)
+configFlags.addFlag ('D3PD.TruthDoPileup', False, None,
+                     'Set to true to include pileup in truth information.')
 
 
-class EgammaUserDataPrefix (JobProperty):
-    """Prefix to use for UserData labels for egamma."""
-    statusOn     = True
-    allowedTypes = ['str']
-    StoredValue  = 'egammaD3PDAnalysis_'
-jobproperties.D3PDMakerFlags.add_JobProperty(EgammaUserDataPrefix)
+configFlags.addFlag ('D3PD.TruthWriteExtraJets', False, None,
+                     'Set to true to include additional truth jet collections.')
 
 
-class HaveJetUserData (JobProperty):
-    """If true, access results of jet analysis stored in UserData."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(HaveJetUserData)
+configFlags.addFlag ('D3PD.PreD3PDAlgSeqName', 'PreD3PDAlgorithms', None,
+                     'Sequence of algorithms to run before the D3PD maker.')
 
 
-class MakeJetUserData (JobProperty):
-    """If true, run jet analysis to make UserData if not already done."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = True
-jobproperties.D3PDMakerFlags.add_JobProperty(MakeJetUserData)
-
-
-class JetUserDataPrefix (JobProperty):
-    """Prefix to use for UserData labels for jet."""
-    statusOn     = True
-    allowedTypes = ['str']
-    StoredValue  = 'JetD3PDAnalysis_'
-jobproperties.D3PDMakerFlags.add_JobProperty(JetUserDataPrefix)
-
-
-class EgammaShowerDepthTag (JobProperty):
-    """If not None, this overrides the setting used for the COOL tag
-to get the weights for the calibHitsShowerDepth variable."""
-    statusOn = True
-    allowedTypes = ['str', None]
-    StoredValue = None
-jobproperties.D3PDMakerFlags.add_JobProperty(EgammaShowerDepthTag)
-
-
-class TruthDoPileup (JobProperty):
-    """Set to true to include pileup in truth information."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthDoPileup)
-
-
-class TruthWritePartons (JobProperty):
-    """Set to true to include partons in truth information."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = True
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWritePartons)
-
-
-class TruthPartonPtThresh (JobProperty):
-    """Only write partons with Pt above this threshold."""
-    statusOn     = True
-    allowedTypes = ['float']
-    StoredValue  = -1.*GeV
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthPartonPtThresh)
-
-
-class TruthWriteHadrons (JobProperty):
-    """Set to true to include hadrons in truth information."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWriteHadrons)
-
-
-class TruthWriteGeant (JobProperty):
-    """Set to true to include Geant particles in truth information."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWriteGeant)
-
-
-class TruthGeantPhotonPtThresh (JobProperty):
-    """Write Geant photons with Pt above this threshold
-Set to < 0 to not write any."""
-    statusOn     = True
-    allowedTypes = ['float']
-    StoredValue  = 0.5*GeV
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthGeantPhotonPtThresh)
-
-
-class TruthWriteBHadrons (JobProperty):
-    """Set to true to include heavy flavor hadrons in truth information."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = True
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWriteBHadrons)
-
-
-class TruthWriteBosons (JobProperty):
-    """Set to true to include bosons in truth information."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = True
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWriteBosons)
-
-
-class TruthWriteBSM (JobProperty):
-    """Set to true to include BSM particles in truth information."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWriteBSM)
-
-
-class TruthWriteBosonProducts (JobProperty):
-    """Set to true to include bosons in truth information."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWriteBosonProducts)
-
-
-class TruthWriteBSMProducts (JobProperty):
-    """Set to true to include BSM particles in truth information."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWriteBSMProducts)
-
-
-class TruthWriteTauHad (JobProperty):
-    """Set to true to include hadronic tau decays in truth information."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWriteTauHad)
-
-
-class TruthWriteTopAndDecays (JobProperty):
-    """Set to true to include hadronic tau decays in truth information."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWriteTopAndDecays)
-
-
-class TruthWriteEverything (JobProperty):
-    """Set to true to include *everything* in truth information."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWriteEverything)
-
-
-class TruthWriteAllLeptons (JobProperty):
-    """Set to true to include all leptons in truth information."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWriteAllLeptons)
-
-
-class TruthWriteFirstN (JobProperty):
-    """Set to true to include first N particles in truth information."""
-    statusOn     = True
-    allowedTypes = ['int']
-    StoredValue  = -1
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWriteFirstN)
-
-
-class TruthWriteStatus3 (JobProperty):
-    """Set to true to write status code 3 particles into the truth record."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWriteStatus3)
-
-
-class TruthWriteExtraJets (JobProperty):
-    """Set to true to include additional truth jet collections."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(TruthWriteExtraJets)
-
-class PreD3PDAlgSeqName (JobProperty):
-    """Sequence of algorithms to run before the D3PD maker."""
-    statusOn     = True
-    allowedTypes = ['str']
-    StoredValue  = 'PreD3PDAlgorithms'
-jobproperties.D3PDMakerFlags.add_JobProperty(PreD3PDAlgSeqName)
-
-
-class FilterAlgSeqSuffix (JobProperty):
+configFlags.addFlag ('D3PD.FilterAlgSeqSuffix', '_FilterAlgorithms', None,
     """Suffix for a sequence of algorithms to filter D3PD making.
 
 The sequence name is formed by adding this string to the name of the
@@ -343,86 +333,12 @@ their filter decision, then no D3PD entry will be made for this event.
 
 The filter sequence may also be referenced by the filterSeq property
 of the D3PD algorithm.
-"""
-    statusOn     = True
-    allowedTypes = ['str']
-    StoredValue  = '_FilterAlgorithms'
-jobproperties.D3PDMakerFlags.add_JobProperty(FilterAlgSeqSuffix)
+""")
 
 
-class FilterCollCand (JobProperty):
-    """If true, filter D3PDs on the collision candidate flag.."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(FilterCollCand)
-
-class DoEventSkimming (JobProperty):
-    """Turn ON/OFF event selection (skimming) during D3PD making.
-
-Exactly what this does depends on the particular D3PD flavor being made."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = True
-jobproperties.D3PDMakerFlags.add_JobProperty(DoEventSkimming)
+configFlags.addFlag ('D3PD.SaveObjectMetadata', True, None,
+                     'Control whether metadata about the D3PDObjects should be saved.')
 
 
-class DoPAU (JobProperty):
-    """Control whether to run PhotonAnalysisUtils and fill the variables
-it calculates."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = True
-jobproperties.D3PDMakerFlags.add_JobProperty(DoPAU)
-
-
-class RedoEgammaOQFlags (JobProperty):
-    """If true, recalculate Object Quality flags for egamma objects."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(RedoEgammaOQFlags)
-
-
-class RerunTauID (JobProperty):
-    """Control whether tau ID should be rerun."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = True
-jobproperties.D3PDMakerFlags.add_JobProperty(RerunTauID)
-
-class RerunTauRec (JobProperty):
-        """Controls the upstream algorithms in tauRec."""
-        statusOn     = True
-        allowedTypes = ['bool']
-        StoredValue  = False
-jobproperties.D3PDMakerFlags.add_JobProperty(RerunTauRec)
-
-
-class DoTJVA (JobProperty):
-    """Controls doing the TJVA tracks for taus"""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = True
-jobproperties.D3PDMakerFlags.add_JobProperty(DoTJVA)
-
-
-class SaveObjectMetadata (JobProperty):
-    """Control whether metadata about the D3PDObjects should be saved."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = True
-jobproperties.D3PDMakerFlags.add_JobProperty(SaveObjectMetadata)
-
-
-class CompressionLevel (JobProperty):
-    """Controls the compression level of the ROOT file produced."""
-    statusOn     = True
-    allowedTypes = ['int', 'long']
-    StoredValue  = 6
-jobproperties.D3PDMakerFlags.add_JobProperty(CompressionLevel)
-
-
-D3PDMakerFlags = jobproperties.D3PDMakerFlags
-
-                 
+configFlags.addFlag ('D3PD.CompressionLevel', 6, None,
+                     'Controls the compression level of the ROOT file produced.')
