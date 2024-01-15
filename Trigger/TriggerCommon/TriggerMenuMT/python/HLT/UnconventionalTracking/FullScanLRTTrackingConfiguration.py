@@ -15,7 +15,7 @@ def FullScanLRTMenuSequence(flags):
     # Construct the full reco sequence
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanLRTCfg
     from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import getTrackingInputMaker
-    reco = InEventRecoCA("UncFSVSIreco",inputMaker=getTrackingInputMaker("ftf"))
+    reco = InEventRecoCA("UncFSLRTreco",inputMaker=getTrackingInputMaker("ftf"))
     reco.mergeReco( getCommonInDetFullScanLRTCfg(flags) )
 
     from ..CommonSequences.FullScanDefs import trkFSRoI
