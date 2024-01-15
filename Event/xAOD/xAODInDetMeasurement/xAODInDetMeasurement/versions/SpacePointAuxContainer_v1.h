@@ -12,8 +12,6 @@
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/Identifier.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
-#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
-#include "AthLinks/ElementLink.h"
 
 namespace xAOD {
   /// Auxiliary store for space point

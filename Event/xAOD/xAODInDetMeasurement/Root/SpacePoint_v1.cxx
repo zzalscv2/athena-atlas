@@ -46,7 +46,7 @@ AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( xAOD::SpacePoint_v1, float,
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( xAOD::SpacePoint_v1, float,
 				      varianceZ, setVarianceZ )
 
-AUXSTORE_OBJECT_SETTER_AND_GETTER( xAOD::SpacePoint_v1, std::vector< ElementLink< xAOD::UncalibratedMeasurementContainer > >,
+AUXSTORE_OBJECT_SETTER_AND_GETTER( xAOD::SpacePoint_v1, std::vector< const xAOD::UncalibratedMeasurement* >,
 				   measurements, setMeasurements )
 
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( xAOD::SpacePoint_v1, float,
@@ -103,7 +103,7 @@ xAOD::SpacePoint_v1::VectorMap xAOD::SpacePoint_v1::topStripCenter() {
 void xAOD::SpacePoint_v1::setSpacePoint(DetectorIDHashType idHash,
 					const Eigen::Matrix<float,3,1>& globPos,
 					float cov_r, float cov_z,
-					const std::vector< ElementLink< xAOD::UncalibratedMeasurementContainer > >& measurements) 
+					const std::vector< const xAOD::UncalibratedMeasurement* >& measurements)
 {
   this->setElementIdList({idHash});
   this->globalPosition() = globPos;
@@ -116,7 +116,7 @@ void xAOD::SpacePoint_v1::setSpacePoint(DetectorIDHashType idHash,
 void xAOD::SpacePoint_v1::setSpacePoint(const std::vector<DetectorIDHashType>& idHashes,
 					const Eigen::Matrix<float,3,1>& globPos,
 					float cov_r, float cov_z,
-					const std::vector< ElementLink< xAOD::UncalibratedMeasurementContainer > >& measurements,
+					const std::vector< const xAOD::UncalibratedMeasurement* >& measurements,
 					float topHalfStripLength, 
 					float bottomHalfStripLength,
 					const Eigen::Matrix<float,3,1>& topStripDirection,

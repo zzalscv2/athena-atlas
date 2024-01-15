@@ -886,7 +886,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   const auto& sps = seed.sp();
   for (const xAOD::SpacePoint* sp : sps) {
     const auto& measurements = sp->measurements();
-    for (const ActsTrk::ATLASUncalibSourceLink& el : measurements) {
+    for (const xAOD::UncalibratedMeasurement *umeas : measurements) {
+      ActsTrk::ATLASUncalibSourceLink el(*dynamic_cast<const xAOD::UncalibratedMeasurementContainer*>(umeas->container()), umeas->index());
       sourceLinks.emplace_back( el );
       surfaces.push_back(&tracking_surface_helper.associatedActsSurface(**el));
     }

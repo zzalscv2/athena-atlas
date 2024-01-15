@@ -707,12 +707,12 @@ namespace ActsTrk {
 	const auto& top_idx    = seed->sp()[2]->measurements();
 
 	std::array<const xAOD::StripCluster*, 6> strip_cluster { 
-	  reinterpret_cast<const xAOD::StripCluster*>(*bottom_idx[0]),
-	  reinterpret_cast<const xAOD::StripCluster*>(*bottom_idx[1]),
-	  reinterpret_cast<const xAOD::StripCluster*>(*medium_idx[0]),
-	  reinterpret_cast<const xAOD::StripCluster*>(*medium_idx[1]),
-	  reinterpret_cast<const xAOD::StripCluster*>(*top_idx[0]),
-	  reinterpret_cast<const xAOD::StripCluster*>(*top_idx[1])
+	  reinterpret_cast<const xAOD::StripCluster*>(bottom_idx[0]),
+	  reinterpret_cast<const xAOD::StripCluster*>(bottom_idx[1]),
+	  reinterpret_cast<const xAOD::StripCluster*>(medium_idx[0]),
+	  reinterpret_cast<const xAOD::StripCluster*>(medium_idx[1]),
+	  reinterpret_cast<const xAOD::StripCluster*>(top_idx[0]),
+	  reinterpret_cast<const xAOD::StripCluster*>(top_idx[1])
 	    };
 	
 	if (not stripLinkAcc.isAvailable(*strip_cluster[0]) or 
@@ -835,9 +835,9 @@ namespace ActsTrk {
       }
       else {
 	// Get the clusters from the xAOD::Clusters and then make the space points
-	const xAOD::PixelCluster* bottom_cluster = reinterpret_cast<const xAOD::PixelCluster*>(*(seed->sp()[0]->measurements()[0]));
-	const xAOD::PixelCluster* medium_cluster = reinterpret_cast<const xAOD::PixelCluster*>(*(seed->sp()[1]->measurements()[0]));
-	const xAOD::PixelCluster* top_cluster = reinterpret_cast<const xAOD::PixelCluster*>(*(seed->sp()[2]->measurements()[0]));
+	const xAOD::PixelCluster* bottom_cluster = reinterpret_cast<const xAOD::PixelCluster*>(seed->sp()[0]->measurements()[0]);
+	const xAOD::PixelCluster* medium_cluster = reinterpret_cast<const xAOD::PixelCluster*>(seed->sp()[1]->measurements()[0]);
+	const xAOD::PixelCluster* top_cluster = reinterpret_cast<const xAOD::PixelCluster*>(seed->sp()[2]->measurements()[0]);
 
 	if (not pixelLinkAcc.isAvailable(*bottom_cluster)) {
 	  ATH_MSG_FATAL("no pixelClusterLink for cluster associated to bottom sp!");

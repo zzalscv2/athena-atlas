@@ -234,7 +234,7 @@ namespace ActsTrk {
       [this, &detEle] (const Acts::Seed<xAOD::SpacePoint>& seed) -> const Acts::Surface& 
       { 
 	const auto& els = seed.sp().front()->measurements();
-	const auto* cluster = *els[0];
+	const auto* cluster = els[0];
 	const InDetDD::SiDetectorElement* Element = detEle->getDetectorElement(cluster->identifierHash());	
 	const Trk::Surface& atlas_surface = Element->surface();
 	return this->m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
@@ -271,7 +271,7 @@ namespace ActsTrk {
 	int number_of_clusters = m_usePixel ? 1 : 2;
 	for (int cluster_number(0); cluster_number < number_of_clusters; cluster_number++) {
 	  const auto& els = sp->measurements();
-	  const auto* cluster = (*els[cluster_number]);
+	  const auto* cluster = els[cluster_number];
 	  const xAOD::UncalibMeasType cluster_type = cluster->type();
 	  const Identifier id = cluster_type == xAOD::UncalibMeasType::PixelClusterType
 	    ? identify(*reinterpret_cast<const xAOD::PixelCluster*>(cluster))

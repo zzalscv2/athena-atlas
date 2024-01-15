@@ -284,9 +284,9 @@ namespace
         for (const auto *sp : seed->sp())
         {
           const auto &els = sp->measurements();
-          for (const ElementLink<xAOD::UncalibratedMeasurementContainer> &el : els)
+          for (const xAOD::UncalibratedMeasurement* meas : els)
           {
-            m_seedIndex.insert({*el, m_numSeed});
+            m_seedIndex.insert({meas, m_numSeed});
             ++m_nSeedMeasurements[m_numSeed];
           }
         }

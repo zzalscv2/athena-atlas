@@ -109,11 +109,11 @@ namespace ActsTrk {
     for (std::size_t i(0); i<sps.size(); ++i) {
       auto& toAdd = sps.at(i);
 
-      // make ELs
-      std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > els;
-      els.push_back( ElementLink<xAOD::UncalibratedMeasurementContainer>(*inputClusters, toAdd.measurementIndexes[0]));
-      els.push_back( ElementLink<xAOD::UncalibratedMeasurementContainer>(*inputClusters, toAdd.measurementIndexes[1]));
-
+      // make link to Clusters
+      std::vector< const xAOD::UncalibratedMeasurement* > els(
+							      {inputClusters->at(toAdd.measurementIndexes[0]),
+							       inputClusters->at(toAdd.measurementIndexes[1])}
+							      );
       spacePoints->at(i)->setSpacePoint(toAdd.idHashes, 
 					toAdd.globPos,
 					toAdd.cov_r,
@@ -147,10 +147,10 @@ namespace ActsTrk {
       
       for (std::size_t i(0); i<osps.size(); ++i) {
 	auto& toAdd = osps.at(i);
-	std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > oels;
-	oels.push_back( ElementLink<xAOD::UncalibratedMeasurementContainer>(*inputClusters, toAdd.measurementIndexes[0]));
-	oels.push_back( ElementLink<xAOD::UncalibratedMeasurementContainer>(*inputClusters, toAdd.measurementIndexes[1]));
-
+	std::vector< const xAOD::UncalibratedMeasurement* > oels(
+								 {inputClusters->at(toAdd.measurementIndexes[0]),
+								  inputClusters->at(toAdd.measurementIndexes[1])}
+								 );
 	overlapSpacePoints->at(i)->setSpacePoint(toAdd.idHashes, 
 						 toAdd.globPos,
 						 toAdd.cov_r,

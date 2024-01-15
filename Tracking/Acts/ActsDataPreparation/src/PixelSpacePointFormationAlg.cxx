@@ -86,8 +86,7 @@ namespace ActsTrk {
         return StatusCode::FAILURE;
       }
 
-      ATH_CHECK( m_spacePointMakerTool->producePixelSpacePoint(*inputPixelClusterContainer,
-							       *cluster,
+      ATH_CHECK( m_spacePointMakerTool->producePixelSpacePoint(*cluster,
       							       *pixelSpacePoints->at(idx),
       							       *pixelElement ) );
     }

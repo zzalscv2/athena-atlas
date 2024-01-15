@@ -48,10 +48,17 @@ namespace ActsTrk {
     const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
     // Check we can have access to clusters
     for (const xAOD::SpacePoint* sp : *inputSpacePointCollection) {
-      const auto& els = sp->measurements();
-      for (const auto& el : els) {
-	const auto idHash = (*el)->identifierHash();
-	(void)idHash;
+      if (sp->isAvailable< std::vector< const xAOD::UncalibratedMeasurement* > >("measurements")) {
+	const auto& els = sp->measurements();
+	for (const auto* el : els) {
+	  [[maybe_unused]] const auto idHash = el->identifierHash();
+	}
+      } else if (sp->isAvailable< std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > >("measurementLink")) {
+	static const SG::AuxElement::Accessor< std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > > accCluster("measurementLink");
+	const auto& els = accCluster(*sp);
+	for (const auto& el : els) {
+          [[maybe_unused]] const auto idHash = (*el)->identifierHash();
+        }
       }
     }
 

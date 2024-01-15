@@ -1,6 +1,18 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+def decorateSpacePoints(flags,
+                        name: str,
+                        spacePointName: str,
+                        clusterLinkName: str,
+                        **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault('InputSpacePointsName', spacePointName)
+    kwargs.setdefault('ClusterLinkName', clusterLinkName)
+    acc.addEventAlgo(CompFactory.InDet.SpacePointPersistification(name, **kwargs))
+    return acc
 
 def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
@@ -20,14 +32,23 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
                   'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
 
     if flags.Acts.EDM.PersistifySpacePoints:
-        pixel_spacepoint_shortlist = ['measurements']
+        acc.merge(decorateSpacePoints(flags,
+                                      name='PixelSpacePointDecoration',
+                                      spacePointName='ITkPixelSpacePoints',
+                                      clusterLinkName='measurementLink'))
+        acc.merge(decorateSpacePoints(flags,
+                                      name='StripSpacePointDecoration',
+                                      spacePointName='ITkStripSpacePoints',
+                                      clusterLinkName='measurementLink'))
+
+        pixel_spacepoint_shortlist = ['-measurements']
         strip_spacepoint_shortlist = ['topHalfStripLength', 
                                       'bottomHalfStripLength', 
                                       'topStripDirection',
                                       'bottomStripDirection',
                                       'stripCenterDistance',
                                       'topStripCenter',
-                                      'measurements']
+                                      'measurementLink']
 
         pixel_spacepoint_variables = '.'.join(pixel_spacepoint_shortlist)
         strip_spacepoint_variables = '.'.join(strip_spacepoint_shortlist)
