@@ -45,7 +45,7 @@ class L1MenuAccess(TriggerConfigAccess):
         thrTypes = list(self._config["thresholds"].keys())
         if "legacyCalo" in thrTypes:
             thrTypes.remove("legacyCalo")
-            thrTypes += self._config["thresholds"]["legacyCalo"].keys()
+            thrTypes += list(self._config["thresholds"]["legacyCalo"].keys())
         return thrTypes
 
     def thresholds(self, thresholdType = None):
@@ -67,9 +67,9 @@ class L1MenuAccess(TriggerConfigAccess):
         if thresholdType == "internal":
             return self["thresholds"]["internal"]["names"]
         elif thresholdType is None:
-            return self.thresholds().keys() + self.thresholdNames("internal")
+            return list(self.thresholds().keys()) + self.thresholdNames("internal")
         else:
-            return self.thresholds(thresholdType).keys()
+            return list(self.thresholds(thresholdType).keys())
 
     def thresholdExtraInfo(self, thresholdType):
         if thresholdType in self["thresholds"]:
