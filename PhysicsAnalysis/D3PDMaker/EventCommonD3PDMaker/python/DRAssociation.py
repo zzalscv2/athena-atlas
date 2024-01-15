@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file EventCommonD3PDMaker/python/DRAssociation.py
@@ -8,9 +8,10 @@
 #
 
 
-import D3PDMakerCoreComps
-import EventCommonD3PDMaker
 from D3PDMakerCoreComps.D3PDObject import D3PDObject
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+D3PD = CompFactory.D3PD
 
 
 def DRAssociation (parent,
@@ -56,7 +57,7 @@ def DRAssociation (parent,
                                    level = 2,
                                    blockname = 'JetMatch')
        EleJetAssoc.defineBlock (2, 'JetKinematics',
-                                EventCommonD3PDMaker.FourMomFillerTool)
+                                D3PD.FourMomFillerTool)
 
     The DRAssociation call makes the association.  We'll look in SG
     for a JetCollection called `Cone4H1TowerJets' and find the jet from
@@ -76,19 +77,19 @@ def DRAssociation (parent,
                drcut = default_drcut):
 
         if not getter:
-            getter = D3PDMakerCoreComps.SGDataVectorGetterTool \
+            getter = D3PD.SGDataVectorGetterTool \
                      (name + '_Getter',
                       TypeName = type_name,
                       SGKey = sgkey)
         if not assoc:
-            assoc = EventCommonD3PDMaker.DRAssociationTool (name + 'Assoc',
-                                                            Getter = getter,
-                                                            DRCut = drcut)
+            assoc = D3PD.DRAssociationTool (name + 'Assoc',
+                                            Getter = getter,
+                                            DRCut = drcut)
 
-        return D3PDMakerCoreComps.ContainedAssociationFillerTool (name,
-                                                         Prefix = prefix,
-                                                         Associator = assoc,
-                                                         Matched = matched)
+        return D3PD.ContainedAssociationFillerTool (name,
+                                                    Prefix = prefix,
+                                                    Associator = assoc,
+                                                    Matched = matched)
 
     obj = D3PDObject (maker, prefix)
     parent.defineBlock (level, blockname, obj)

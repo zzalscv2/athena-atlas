@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file D3PDMakerCoreComps/python/D3PDObject.py
@@ -9,10 +9,11 @@
 
 
 from .Block import Block
-from .reset_props import reset_props
-import D3PDMakerCoreComps
 from AthenaCommon.Logging import logging
 from .StackedDict import StackedDict
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+D3PD = CompFactory.D3PD
 
 
 def _make_name (name, prefix, name_prefix, parent_prefix, default_prefix):
@@ -116,14 +117,14 @@ class D3PDObject:
                                   getter = None,
                                   sgkey = 'ElectronAODCollection')
           if not getter:
-              getter = D3PDMakerCoreComps.SGDataVectorGetterTool \
+              getter = CompFactory.D3PD.SGDataVectorGetterTool \
                        (name + '_Getter',
                         TypeName = 'ElectronContainer',
                         SGKey = sgkey)
 
-          return D3PDMakerCoreComps.VectorFillerTool (name,
-                                                      Prefix = prefix,
-                                                      Getter = getter)
+          return CompFactory.D3PD.VectorFillerTool (name,
+                                                    Prefix = prefix,
+                                                    Getter = getter)
 
       ElectronD3PDObject = D3PDObject (makeElectronD3PDObject, 'el_')
 
@@ -231,7 +232,7 @@ class D3PDObject:
             func._allow_args = self._allow_args
 
         self._blocks.append (Block (name, lod, func, kw))
-        return
+        return self._blocks[-1]
 
 
     def removeBlock (self, name, allowMissing = False):
@@ -391,16 +392,8 @@ class D3PDObject:
         for k in self._allow_args:
             if k in kw2: del kw2[k]
 
-        # Call the maker function.  We actually do this twice.
-        # This is going to be a private tool, so the name need not
-        # be unique.  But if the name isn't unique, then we'll
-        # get any property settings which were specified before.
-        # So, we call the maker once to get the (singleton) instance,
-        # reset its properties, then call the maker function again.
+        # Call the maker function.
         try:
-            c = self._maker (name=name, prefix=prefix, object_name=object_name,
-                             *args, **kw2)
-            reset_props (c)
             c = self._maker (name=name, prefix=prefix, object_name=object_name,
                              *args, **kw2)
         except TypeError as exc:
@@ -408,8 +401,6 @@ class D3PDObject:
                 exc.args[0].find ("unexpected keyword argument 'object_name'") >= 0):
                 log = logging.getLogger ('D3PDObject')
                 log.warn ("Maker function missing `object_name' formal arg: %s", self._maker)
-                c = self._maker (name=name, prefix=prefix, *args, **kw2)
-                reset_props (c)
                 c = self._maker (name=name, prefix=prefix, *args, **kw2)
             else:
                 raise
@@ -430,6 +421,7 @@ class D3PDObject:
         local_hookargs['include'] = include
         local_hookargs['exclude'] = exclude
         local_hookargs['blockargs'] = blockargs
+        local_hookargs['d3pdo'] = self
 
         # Create block filler tools.
         self._makeBlockFillers (c, level, parent_prefix + prefix,
@@ -450,19 +442,21 @@ class D3PDObject:
 
 
     @staticmethod
-    def runHooks (c):
+    def runHooks (c, flags, acc):
         """Run creation hooks for configurable C.
 
 Should be run by the D3PD maker algorithm; not for general use.
 """
         info = D3PDObject._hookArgsStore.get (c.getName())
-        if not info: return
-        (hooks, args, hookargs) = info
-        for h in hooks:
-            h (c,
-               *args,
-               **hookargs
-               )
+        if info:
+            (hooks, args, hookargs) = info
+            for h in hooks:
+                h (c,
+                   flags,
+                   acc,
+                   *args,
+                   **dict(hookargs)
+                   )
         return
 
 
@@ -536,6 +530,9 @@ Should be run by the D3PD maker algorithm; not for general use.
                     bf = b.func (fillername, **args)
 
                 out += [bf]
+                if b._hooks:
+                    D3PDObject._hookArgsStore[bf.getName()] = (b._hooks, args, hookargs)
+
         return out
 
 
@@ -569,7 +566,6 @@ Should be run by the D3PD maker algorithm; not for general use.
                                      include, exclude, blockargs,
                                      hookargs):
             c.BlockFillers += [bf]
-            c += [bf]
         return
 
 
@@ -635,11 +631,11 @@ input object is being used.
 """
     def make_obj (name, prefix, object_name):
         from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
-        return D3PDMakerCoreComps.VoidObjFillerTool (name,
-                                                     Prefix = prefix,
-                                                     ObjectName = object_name,
-                                                     SaveMetadata = \
-                                                     D3PDMakerFlags.SaveObjectMetadata())
+        return D3PD.VoidObjFillerTool (name,
+                                       Prefix = prefix,
+                                       ObjectName = object_name,
+                                       SaveMetadata = \
+                                       D3PDMakerFlags.SaveObjectMetadata)
     return D3PDObject (make_obj, default_prefix, default_object_name,
                        default_name = default_name,
                        allow_args = allow_args)
@@ -651,8 +647,7 @@ def make_SG_D3PDObject (default_typeName,
                         default_prefix,
                         default_object_name = None,
                         default_allowMissing = False,
-                        default_getterClass = \
-                          D3PDMakerCoreComps.SGObjGetterTool,
+                        default_getterClass = D3PD.SGObjGetterTool,
                         allow_args = []):
     """Helper to make a D3PDObject for the common case where the default
 input source is a single object from StoreGate.
@@ -678,7 +673,7 @@ input source is a single object from StoreGate.
 
            METD3PDObject = \
               make_SG_D3PDObject ('MissingET',
-                                  D3PDMakerFlags.MissingETSGKey(),
+                                  D3PDMakerFlags.MissingETSGKey,
                                   'met_', 'METD3PDObject')
         
 """
@@ -694,13 +689,13 @@ input source is a single object from StoreGate.
                                   TypeName = typeName,
                                   SGKey = sgkey)
         from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
-        return D3PDMakerCoreComps.ObjFillerTool (name,
-                                                 Prefix = prefix,
-                                                 Getter = getter,
-                                                 ObjectName = object_name,
-                                                 AllowMissing=allowMissing,
-                                                 SaveMetadata = \
-                                                 D3PDMakerFlags.SaveObjectMetadata())
+        return D3PD.ObjFillerTool (name,
+                                   Prefix = prefix,
+                                   Getter = getter,
+                                   ObjectName = object_name,
+                                   AllowMissing=allowMissing,
+                                   SaveMetadata = \
+                                     D3PDMakerFlags.SaveObjectMetadata)
 
     if default_object_name is None:
         default_object_name = default_typeName
@@ -721,7 +716,7 @@ def make_SGDataVector_D3PDObject (default_typeName,
                                   default_getterFilter = None,
                                   default_label = None,
                                   default_getterClass = \
-                                    D3PDMakerCoreComps.SGDataVectorGetterTool,
+                                    D3PD.SGDataVectorGetterTool,
                                   allow_args = [],
                                   **other_defaults):
     """Helper to make a D3PDObject for the common case where the default
@@ -756,7 +751,7 @@ input source is a DataVector container from StoreGate.
 
            JetD3PDObject = \
               make_SGDataVector_D3PDObject ('JetCollection',
-                                            D3PDMakerFlags.JetSGKey(),
+                                            D3PDMakerFlags.JetSGKey,
                                             'jet_', 'JetD3PDObject')
 
         In addition, each object has automatically defined a
@@ -787,11 +782,11 @@ input source is a DataVector container from StoreGate.
                                   Label = label)
         if getterFilter:
             if isinstance(getterFilter, str):
-                selgetter = D3PDMakerCoreComps.SGObjGetterTool \
+                selgetter = D3PD.SGObjGetterTool \
                             (name + '_SelectionGetter',
                              TypeName = 'SelectedParticles',
                              SGKey = getterFilter)
-                getter = D3PDMakerCoreComps.SelectedParticlesFilterTool \
+                getter = D3PD.SelectedParticlesFilterTool \
                          (name + '_GetterFilter',
                           Getter = getter,
                           SelectionGetter = selgetter)
@@ -801,14 +796,14 @@ input source is a DataVector container from StoreGate.
         defs = other_defaults.copy()
         defs.update (kw)
         from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
-        return D3PDMakerCoreComps.VectorFillerTool (name,
-                                                    Prefix = prefix,
-                                                    Getter = getter,
-                                                    ObjectName = object_name,
-                                                    AllowMissing=allowMissing,
-                                                    SaveMetadata = \
-                                                    D3PDMakerFlags.SaveObjectMetadata(),
-                                                    **defs)
+        return D3PD.VectorFillerTool (name,
+                                      Prefix = prefix,
+                                      Getter = getter,
+                                      ObjectName = object_name,
+                                      AllowMissing=allowMissing,
+                                      SaveMetadata = \
+                                      D3PDMakerFlags.SaveObjectMetadata,
+                                      **defs)
 
     if default_object_name is None:
         default_object_name = default_typeName
@@ -826,7 +821,7 @@ input source is a DataVector container from StoreGate.
     # Automatically add SelectionFlags to each object.
     # It won't actually create any variables unless the Flags property is set.
     ret.defineBlock (0, 'SelectionFlags',
-                     D3PDMakerCoreComps.ContainerFlagFillerTool)
+                     D3PD.ContainerFlagFillerTool)
 
     return ret
 

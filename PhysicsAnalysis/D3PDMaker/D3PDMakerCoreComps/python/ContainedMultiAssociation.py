@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file D3PDMakerCoreComps/python/ContainedMultiAssociation.py
@@ -8,8 +8,10 @@
 #
 
 
-import D3PDMakerCoreComps
 from .D3PDObject import D3PDObject
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+D3PD = CompFactory.D3PD
 
 
 def ContainedMultiAssociation (parent,
@@ -33,7 +35,7 @@ def ContainedMultiAssociation (parent,
 
     def maker (name, prefix, object_name, **kw2):
         assoc = assoctool (name + 'Assoc', **kw2)
-        return D3PDMakerCoreComps.ContainedMultiAssociationFillerTool \
+        return D3PD.ContainedMultiAssociationFillerTool \
                (name, Prefix = prefix, Associator = assoc)
 
     obj = D3PDObject (maker, prefix)

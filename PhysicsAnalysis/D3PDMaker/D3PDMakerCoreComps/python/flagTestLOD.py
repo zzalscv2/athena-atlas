@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file D3PDMakerCoreComps/python/flagTestLOD.py
@@ -9,10 +9,13 @@
 
 
 from AthenaCommon.JobProperties import JobProperty
+from AthenaConfiguration.AthConfigFlags import FlagAddress
 from .D3PDObject                import DeferArg
 
 
 def _make_fdict (flags):
+    if isinstance (flags, FlagAddress):
+        return flags.asdict()
     fdict = {}
     if not isinstance(flags, list):
         flags = [flags]
