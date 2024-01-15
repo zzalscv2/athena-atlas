@@ -112,30 +112,38 @@ def __flatten_list(l):
     return [item for elem in l for item in elem] if l else []
 
 
-def types_in_properties(value, dict_to_update):
-    """Updates updates the dictionary with (potentially) component name -> component type"""
+def types_in_properties(comp_name, value, dict_to_update):
+    """Updates the dictionary with (potentially) component name -> component type"""
     parsable = False
     try:
         s = ast.literal_eval(str(value))
         parsable = True
         if isinstance(s, list):
             for el in s:
-                types_in_properties(el, dict_to_update)
+                types_in_properties(comp_name, el, dict_to_update)
     except Exception:
         pass
-    if isinstance(value,str) and "/" in value and not parsable:
-        comp = value.split("/")
-        if len(comp) == 2:
-            dict_to_update[comp[1]] = comp[0]
-            logger.debug("Found type of %s to be %s", comp[1], comp[0])
+    # Exclude non-strings, or strings that look like paths rather than type/name pairs
+    if isinstance(value,str):
+        slash_startend = value.startswith("/") or value.endswith("/")
+        json_dict = value.startswith("{") and value.endswith("}")
+        if value.count("/")==1 and not parsable and not slash_startend and not json_dict:
+            comp = value.split("/")
+            if len(comp) == 2:
+                # Record with and without parent
+                dict_to_update[f'{comp_name}.{comp[1]}'] = comp[0]
+                dict_to_update[f'{comp[1]}'] = comp[0]
+                logger.debug("Parsing %s, found type of %s.%s to be %s", value, comp_name, comp[1], comp[0])
+            else:
+                logger.debug("What is typeless comp? %s", value)
     if isinstance(value, dict):
-        [ types_in_properties(v, dict_to_update) for v in value.values() ]
+        [ types_in_properties(comp_name, v, dict_to_update) for v in value.values() ]
 
 
 def collect_types(conf):
     name_to_type = {}
     for (comp_name, comp_settings) in conf.items():
-        types_in_properties(comp_settings, name_to_type)
+        types_in_properties(comp_name, comp_settings, name_to_type)
     return name_to_type
 
 
@@ -252,13 +260,16 @@ def ignoreDefaults(allconf, args, known) -> Dict:
         c = {}
 
         for k,v in val_dict.items():
+            if not hasattr(comp_cls,'_descriptors'):
+                logger.debug('No \'_descriptors\' attibute for %s', comp_cls)
+                continue
             if k not in comp_cls._descriptors: # property not in descriptors (for instance, removed from component now)
                 c[k] = v
             else:    
                 default = str(comp_cls._descriptors[k].default)
                 sv = str(v)
                 if default == sv or default.replace("StoreGateSvc+", "") == sv.replace("StoreGateSvc+", ""): 
-                    logger.debug("Dropped default value %s of property %s in %s because the default is %s", sv, k, component_name, str(default))
+                    logger.debug("Dropped default value \'%s\' of property %s in %s because the default is \'%s\'", sv, k, component_name, str(default))
                 elif args.ignoreDefaultNamedComps and isinstance(v, str) and sv.endswith(f"/{default}"):
                     logger.debug("Dropped speculatively value %s of property %s in %s because the default it ends with %s", sv, k, component_name, str(default))
                 else:
