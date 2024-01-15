@@ -451,6 +451,7 @@ def createDataFlow(flags, chains, allDicts):
                 filterOutput = [CFNaming.filterOutName(filterName, inputName) for inputName in filterInput ]
 
             foundCFSeq = [cfseq for cfseq in CFseqList[nstep] if filterName == cfseq.filter.Alg.getName()]
+            # TODO: Check sequence consistency if skipping, to avoid issues like https://its.cern.ch/jira/browse/ATR-28617
             log.debug("Found %d CF sequences with filter name %s", len(foundCFSeq), filterName)
             if not foundCFSeq:
                 sequenceFilter = buildFilter(filterName, filterInput, chainStep.isEmpty)
