@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "Pythia8_i/UserHooksFactory.h"
 #include "UserHooksUtils.h"
@@ -72,8 +72,8 @@ public:
   }
 
   // Parton level vetoing
-  bool canVetoPartonLevel() { return true; }
-  bool doVetoPartonLevel(const Event &event);
+  virtual bool canVetoPartonLevel() override { return true; }
+  virtual bool doVetoPartonLevel(const Event &event) override;
 
   // Function to compute the DJRs
   virtual void getDJR(const Event &event);
