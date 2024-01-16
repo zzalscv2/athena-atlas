@@ -104,8 +104,6 @@ def FTAG2Cfg(ConfigFlags):
             "InDetTrackParticles",
             "AntiKt4EMPFlowJets",
             "BTagging_AntiKt4EMPFlow",
-            "AntiKtVR30Rmax4Rmin02PV0TrackJets",
-            "BTagging_AntiKtVR30Rmax4Rmin02Track",
             "MET_Baseline_AntiKt4EMPFlow",
             ]
 
@@ -114,7 +112,6 @@ def FTAG2Cfg(ConfigFlags):
             "PrimaryVertices",
             "InDetTrackParticles",
             "BTagging_AntiKt4EMPFlow",
-            "BTagging_AntiKtVR30Rmax4Rmin02Track",
             "BTagging_AntiKt4EMPFlowJFVtx",
             "BTagging_AntiKt4EMPFlowSecVtx",
             "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",

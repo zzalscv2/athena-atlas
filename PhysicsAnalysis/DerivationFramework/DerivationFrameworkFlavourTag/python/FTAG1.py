@@ -33,7 +33,11 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
 
     # Finally the kernel itself
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name, AugmentationTools = augmentationTools, ThinningTools = thinningTools))       
+    acc.addEventAlgo(DerivationKernel(name, AugmentationTools = augmentationTools, ThinningTools = thinningTools))      
+
+    # Extra jet content:
+    acc.merge(FTAG1ExtraContentCfg(flags))
+
     return acc
 
 
@@ -65,10 +69,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
                                            "InDetTrackParticles",
                                            "AntiKt4EMPFlowJets",
                                            "BTagging_AntiKt4EMPFlow",
-                                           "AntiKtVR30Rmax4Rmin02PV0TrackJets",
-                                           "BTagging_AntiKtVR30Rmax4Rmin02Track",
                                            "MET_Baseline_AntiKt4EMPFlow",
-                                           "AntiKt10UFOCSSKJets",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                           ]
 
@@ -91,9 +92,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "InDetTrackParticles",
             "InDetLargeD0TrackParticles",
             "AntiKt4EMPFlowJets",
-            "AntiKtVR30Rmax4Rmin02PV0TrackJets",
             "BTagging_AntiKt4EMPFlow",
-            "BTagging_AntiKtVR30Rmax4Rmin02Track",
             "BTagging_AntiKt4EMPFlowJFVtx",
             "BTagging_AntiKt4EMPFlowSecVtx",
             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
@@ -112,7 +111,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "AntiKt4EMTopoJets",
             "BTagging_AntiKt4EMTopo",
             "BTagging_AntiKt4EMTopoJFVtx",
-            "BTagging_AntiKt4EMPTopoSecVtx",
+            "BTagging_AntiKt4EMTopoSecVtx",
             "AntiKt4TruthJets",
             ]
 
@@ -185,6 +184,10 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
    
     # Trigger content
     FtagBaseContent.trigger_setup(FTAG1SlimmingHelper, trigger_option)
+
+    jetOutputList = ["AntiKt4UFOCSSKJets"]
+    from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
+    addJetsToSlimmingTool(FTAG1SlimmingHelper, jetOutputList, FTAG1SlimmingHelper.SmartCollections)
 
 
     # Output stream    
@@ -366,3 +369,24 @@ def V0ToolCfg(flags, augmentationTools=None, tool_name_prefix="FTAG1", container
     for t in  _augmentationTools : acc.addPublicTool(t)
     augmentationTools += _augmentationTools
     return acc
+
+def FTAG1ExtraContentCfg(flags):
+    acc = ComponentAccumulator()
+
+    from JetRecConfig.JetRecConfig import JetRecCfg
+    from JetRecConfig.JetConfigFlags import jetInternalFlags
+    jetList = []
+    #=======================================
+    # CSSK R = 0.4 UFO jets
+    #=======================================
+    from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSK
+    jetList += [AntiKt4UFOCSSK]
+
+    jetInternalFlags.isRecoJob = True
+
+    for jd in jetList:
+        acc.merge(JetRecCfg(flags,jd))
+
+    return acc
+
+
