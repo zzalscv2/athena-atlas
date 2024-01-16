@@ -114,6 +114,14 @@ TFCSEnergyAndHitGANV2::get_variable_text(TFCSSimulationState &simulstate,
 bool TFCSEnergyAndHitGANV2::fillEnergy(
     TFCSSimulationState &simulstate, const TFCSTruthState *truth,
     const TFCSExtrapolationState *extrapol) const {
+  if (!truth) {
+    ATH_MSG_ERROR("Invalid truth pointer");
+  }
+
+  if (!extrapol) {
+    ATH_MSG_ERROR("Invalid extrapolation pointer");
+  }
+
   const int pdgId = truth->pdgid();
   const float charge = HepPDT::ParticleID(pdgId).charge();
 
