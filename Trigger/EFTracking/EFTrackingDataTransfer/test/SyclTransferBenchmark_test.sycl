@@ -1,0 +1,84 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+#undef NDEBUG
+
+#include <chrono>
+#include <iostream>
+#include <CL/sycl.hpp>
+
+using namespace cl::sycl;
+
+void testCopyMechanism(const std::vector<float>& orig, const std::vector<float>& copy)
+{
+    for (uint64_t i{0}; i < orig.size(); ++i)
+    {
+	if (orig[i] != copy[i])
+	{
+	    std::cout << "Copy check failed! Values in vectors are diverged." << std::endl;
+	}
+    }
+}
+
+void fillVectorWithRandomValues(std::vector<float>& vec, const uint64_t vectorLength)
+{
+    for (uint64_t i{0}; i < vectorLength; ++i)
+    {
+        vec.push_back(rand() % 1000);
+    }
+}
+
+void testBufferWriteViaSycl(const uint64_t dataLength)
+{
+    constexpr uint8_t numberOfRepetitions{5};
+    std::chrono::microseconds totalCopyTime{0};
+
+    std::vector<float> xOrig, xCopy;
+    xCopy.resize(dataLength);
+    fillVectorWithRandomValues(xOrig, dataLength);
+    
+
+    for (uint8_t i{0}; i < numberOfRepetitions; ++i)
+    {
+        const auto startTime = std::chrono::high_resolution_clock::now();
+        // this needs to be inside scope due to how buffer works as it updates original vectors values in deconstructor
+        {
+            buffer<float, 1> xBufferOrig(xOrig.data(), dataLength);
+            buffer<float, 1> xBufferCopy(xCopy.data(), dataLength);
+	    queue q{default_selector{}};
+
+            q.submit([&](handler& handler)
+            {
+	        auto xBufferOrigReadAccessor = xBufferOrig.get_access<access::mode::read>(handler);
+	        auto xBufferCopyWriteAccessor = xBufferCopy.get_access<access::mode::write>(handler);
+	    
+	        handler.parallel_for(range<1>(dataLength), [=](id<1> i)
+	        {
+		    xBufferCopyWriteAccessor[i] = xBufferOrigReadAccessor[i];	
+	        });
+            });
+    	}
+    	const auto stopTime = std::chrono::high_resolution_clock::now();
+    	totalCopyTime += std::chrono::duration_cast<std::chrono::microseconds>(stopTime - startTime);
+    }
+    std::cout << "Average copy time for " << dataLength  << " element vector: " << ( totalCopyTime.count() / numberOfRepetitions ) << std::endl;
+    
+    testCopyMechanism(xOrig, xCopy);
+}
+
+int main()
+{
+    // seed generation
+    srand((unsigned) time(NULL));
+
+    // test samples sizes
+    std::vector<uint64_t> vectorLengths = {10, 100, 1000, 10000, 100000};
+
+    for (uint64_t vectorLength : vectorLengths)
+    {
+	testBufferWriteViaSycl(vectorLength);
+    }
+
+    return 0;
+}
+
