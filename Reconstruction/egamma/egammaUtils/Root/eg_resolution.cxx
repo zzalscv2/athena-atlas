@@ -155,26 +155,28 @@ eg_resolution::getResolution(int particle_type,
     throw std::runtime_error("resolution type must be 0, 1, 2");
   }
 
-  const float aeta = fabs(eta);
-  int ibinEta = m_etaBins->GetSize() - 2;
+  const float aeta = std::abs(eta);
+  //For eta outside parameterisation range, uses last bin
+  int ibinEta = m_etaBins->GetSize() - 1;
   for (int i = 1; i < m_etaBins->GetSize(); ++i) {
     if (aeta < m_etaBins->GetAt(i)) {
-      ibinEta = i - 1;
+      ibinEta = i;
       break;
     }
   }
 
+  // This can never happen ! To remove
   if (ibinEta < 0 || ibinEta >= m_etaBins->GetSize()) {
     throw std::runtime_error("eta outside range");
   }
 
   const double energyGeV = energy * 1E-3;
   const double rsampling =
-    m_hSampling[particle_type][resolution_type]->GetBinContent(ibinEta + 1);
+    m_hSampling[particle_type][resolution_type]->GetBinContent(ibinEta);
   const double rnoise =
-    m_hNoise[particle_type][resolution_type]->GetBinContent(ibinEta + 1);
+    m_hNoise[particle_type][resolution_type]->GetBinContent(ibinEta);
   const double rconst =
-    m_hConst[particle_type][resolution_type]->GetBinContent(ibinEta + 1);
+    m_hConst[particle_type][resolution_type]->GetBinContent(ibinEta);
 
   const double sigma2 = rsampling * rsampling / energyGeV +
                         rnoise * rnoise / energyGeV / energyGeV +
