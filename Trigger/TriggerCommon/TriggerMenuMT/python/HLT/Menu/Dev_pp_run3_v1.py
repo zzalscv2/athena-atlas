@@ -736,6 +736,10 @@ def getDevSignatures():
         ChainProp(name='HLT_g20_tight_xe30_cell_xe40_pfopufit_L1XE50', l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
         ChainProp(name='HLT_g20_tight_xe35_cell_xe40_pfopufit_L1XE35', l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
         ChainProp(name='HLT_g20_medium_xe35_cell_xe40_pfopufit_L1XE35', l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g20_tight_2j35a_j0_pf_ftf_L1eEM22M_jMJJ-300', l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED'],stream=[PhysicsStream],groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='HLT_g20_tight_2j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300', l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED'],stream=[PhysicsStream],groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='HLT_g20_tight_icaloloose_2j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300', l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED'],stream=[PhysicsStream],groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='HLT_g20_tight_j30a_j25a_pf_ftf_xe35_cell_xe40_pfopufit_L1eEM22M_jMJJ-300', l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream],groups=PrimaryPhIGroup+EgammaJetGroup+EgammaMETGroup),
 
         # Test chains for muon msonly + VBF for ATR-28412
         ChainProp(name='HLT_mu6_msonly_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1MJJ-500-NFF', l1SeedThresholds=['MU14FCH','FSNOSEED','FSNOSEED','FSNOSEED'], stream=[PhysicsStream],groups=PrimaryLegGroup+MuonJetGroup+LegacyTopoGroup),
