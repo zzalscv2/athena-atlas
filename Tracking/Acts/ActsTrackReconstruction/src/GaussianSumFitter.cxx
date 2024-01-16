@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsGaussianSumFitter.h"
+#include "GaussianSumFitter.h"
 
 // ATHENA
 #include "TrkMeasurementBase/MeasurementBase.h"
@@ -43,13 +43,13 @@
 
 namespace ActsTrk {
 
-ActsGaussianSumFitter::ActsGaussianSumFitter(const std::string& t,
-					     const std::string& n,
-					     const IInterface* p) :
+GaussianSumFitter::GaussianSumFitter(const std::string& t,
+				     const std::string& n,
+				     const IInterface* p) :
   base_class(t,n,p)
 {}
 
-StatusCode ActsGaussianSumFitter::initialize() {
+StatusCode GaussianSumFitter::initialize() {
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
   ATH_CHECK(m_trackingGeometryTool.retrieve());
@@ -92,7 +92,7 @@ StatusCode ActsGaussianSumFitter::initialize() {
 // refit a track
 // -------------------------------------------------------
 std::unique_ptr<Trk::Track>
-ActsGaussianSumFitter::fit(const EventContext& ctx,
+GaussianSumFitter::fit(const EventContext& ctx,
                        const Trk::Track& inputTrack,
                        const Trk::RunOutlierRemoval /*runOutlier*/,
                        const Trk::ParticleHypothesis /*prtHypothesis*/) const
@@ -142,7 +142,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
 // fit a set of MeasurementBase objects
 // --------------------------------
 std::unique_ptr<Trk::Track>
-ActsGaussianSumFitter::fit(const EventContext& ctx,
+GaussianSumFitter::fit(const EventContext& ctx,
                        const Trk::MeasurementSet& inputMeasSet,
                        const Trk::TrackParameters& estimatedStartParameters,
                        const Trk::RunOutlierRemoval /*runOutlier*/,
@@ -193,7 +193,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
 // fit a set of PrepRawData objects
 // --------------------------------
 std::unique_ptr<Trk::Track>
-ActsGaussianSumFitter::fit(const EventContext& /*ctx*/,
+GaussianSumFitter::fit(const EventContext& /*ctx*/,
                        const Trk::PrepRawDataSet& /*inputPRDColl*/,
                        const Trk::TrackParameters& /*estimatedStartParameters*/,
                        const Trk::RunOutlierRemoval /*runOutlier*/,
@@ -208,7 +208,7 @@ ActsGaussianSumFitter::fit(const EventContext& /*ctx*/,
 // mem efficient and stable way
 // --------------------------------
 std::unique_ptr<Trk::Track>
-ActsGaussianSumFitter::fit(const EventContext& ctx,
+GaussianSumFitter::fit(const EventContext& ctx,
                        const Trk::Track& inputTrack,
                        const Trk::MeasurementSet& addMeasColl,
                        const Trk::RunOutlierRemoval /*runOutlier*/,
@@ -269,7 +269,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
 // extend a track fit to include an additional set of PrepRawData objects
 // --------------------------------
 std::unique_ptr<Trk::Track>
-ActsGaussianSumFitter::fit(const EventContext& /*ctx*/,
+GaussianSumFitter::fit(const EventContext& /*ctx*/,
                        const Trk::Track& /*inputTrack*/,
                        const Trk::PrepRawDataSet& /*addPrdColl*/,
                        const Trk::RunOutlierRemoval /*runOutlier*/,
@@ -283,7 +283,7 @@ ActsGaussianSumFitter::fit(const EventContext& /*ctx*/,
 // combined fit of two tracks
 // --------------------------------
 std::unique_ptr<Trk::Track>
-ActsGaussianSumFitter::fit(const EventContext& ctx,
+GaussianSumFitter::fit(const EventContext& ctx,
                        const Trk::Track& intrk1,
                        const Trk::Track& intrk2,
                        const Trk::RunOutlierRemoval /*runOutlier*/,
@@ -342,7 +342,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
 }
 
 std::unique_ptr<Trk::Track> 
-ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
+GaussianSumFitter::makeTrack(const EventContext& ctx,
           const Acts::GeometryContext& tgContext,
           ActsTrk::MutableTrackContainer& tracks,
           Acts::Result<typename ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>& fitResult) const {
@@ -494,23 +494,23 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
 }
 
 const Acts::GsfExtensions<typename ActsTrk::MutableTrackStateBackend>& 
-ActsGaussianSumFitter::getExtensions() const 
+GaussianSumFitter::getExtensions() const 
 { 
   return m_gsfExtensions; 
 }
 
 /// Private access to the logger
 const Acts::Logger& 
-ActsGaussianSumFitter::logger() const 
+GaussianSumFitter::logger() const 
 { 
   return *m_logger; 
 }
 
 Acts::GsfOptions<typename ActsTrk::MutableTrackStateBackend> 
-ActsGaussianSumFitter::prepareOptions(const Acts::GeometryContext& tgContext,
-				      const Acts::MagneticFieldContext& mfContext,
-				      const Acts::CalibrationContext& calContext,
-				      const Acts::PerigeeSurface& surface) const
+GaussianSumFitter::prepareOptions(const Acts::GeometryContext& tgContext,
+				  const Acts::MagneticFieldContext& mfContext,
+				  const Acts::CalibrationContext& calContext,
+				  const Acts::PerigeeSurface& surface) const
 {
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
@@ -525,11 +525,11 @@ ActsGaussianSumFitter::prepareOptions(const Acts::GeometryContext& tgContext,
 }
 
 std::unique_ptr<Trk::Track> 
-ActsGaussianSumFitter::performFit(const EventContext& ctx,
-				  const Acts::GeometryContext& tgContext,
-				  const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
-				  const std::vector<Acts::SourceLink>& trackSourceLinks,
-				  const Acts::BoundTrackParameters& initialParams) const
+GaussianSumFitter::performFit(const EventContext& ctx,
+			      const Acts::GeometryContext& tgContext,
+			      const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
+			      const std::vector<Acts::SourceLink>& trackSourceLinks,
+			      const Acts::BoundTrackParameters& initialParams) const
 {
   if (trackSourceLinks.empty()) {
     ATH_MSG_DEBUG("input contain measurement but no source link created, probable issue with the converter, reject fit ");

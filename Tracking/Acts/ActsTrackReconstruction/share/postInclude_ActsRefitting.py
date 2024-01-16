@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 ## postInclude to add acts refitting algorithm
  
 print ("entering configurations...")
@@ -51,23 +51,23 @@ ToolSvc+=actsAtlasConverter
 
 import InDetRecExample.TrackingCommon as TrackingCommon
 
-from ActsTrackReconstruction.ActsTrackReconstructionConf import ActsReFitterAlg
-from ActsTrackReconstruction.ActsTrackReconstructionConf import ActsKalmanFitter
+from ActsTrackReconstruction.ActsTrackReconstructionConf import ReFitterAlg
+from ActsTrackReconstruction.ActsTrackReconstructionConf import KalmanFitter
 
 summary = TrackingCommon.getInDetTrackSummaryToolNoHoleSearch()
 
-actsKF = ActsKalmanFitter(name = "ActsKalmanFitter",
-                           ExtrapolationTool    = actsExtrapolationTool,
-                           TrackingGeometryTool = actsReFittingTrackingGeometry,
-                           ATLASConverterTool   = actsAtlasConverter,
-                           SummaryTool=summary,
-                           ReverseFilteringPt=1.0
+actsKF = KalmanFitter(name = "ActsKalmanFitter",
+                      ExtrapolationTool    = actsExtrapolationTool,
+                      TrackingGeometryTool = actsReFittingTrackingGeometry,
+                      ATLASConverterTool   = actsAtlasConverter,
+                      SummaryTool=summary,
+                      ReverseFilteringPt=1.0
 )
 ToolSvc+=actsKF
 
-actsfitter = ActsReFitterAlg(name = "fitter",
-                           ActsKalmanFitter    = actsKF,
-                           TrackName           = "ResolvedTracks"
+actsfitter = ReFitterAlg(name = "fitter",
+                         ActsKalmanFitter    = actsKF,
+                         TrackName           = "ResolvedTracks"
 )
 
 from AthenaCommon.AlgSequence import AlgSequence

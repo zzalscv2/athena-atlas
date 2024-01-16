@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsCompareTrackAlg.h"
+#include "CompareTrackAlg.h"
 
 #include "Gaudi/Property.h"  /*no forward decl: typedef*/
 
@@ -27,8 +27,8 @@
 
 namespace ActsTrk {
 
-ActsCompareTrackAlg::ActsCompareTrackAlg(const std::string &name,
-                                         ISvcLocator *pSvcLocator)
+CompareTrackAlg::CompareTrackAlg(const std::string &name,
+				 ISvcLocator *pSvcLocator)
     : AthAlgorithm(name, pSvcLocator),
       m_atlasTrackName("ResolvedTracks_TrackParticle"),
       m_actsTrackName("ReFitted_Tracks_TrackParticle"),
@@ -42,7 +42,7 @@ ActsCompareTrackAlg::ActsCompareTrackAlg(const std::string &name,
   declareProperty("ActsTrackName", m_actsTrackName, "collection name for refitted acts tracks");
 }
 
-StatusCode ActsCompareTrackAlg::initialize() {
+StatusCode CompareTrackAlg::initialize() {
 
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
   m_treeData = std::make_unique<TreeData>();
@@ -171,8 +171,8 @@ StatusCode ActsCompareTrackAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ActsCompareTrackAlg::execute() {
-  ATH_MSG_DEBUG ("ActsCompareTrackAlg::execute()");
+StatusCode CompareTrackAlg::execute() {
+  ATH_MSG_DEBUG ("CompareTrackAlg::execute()");
   const xAOD::TrackParticleContainer*  atlasTracks = evtStore()->tryConstRetrieve<xAOD::TrackParticleContainer>(m_atlasTrackName );
   const xAOD::TrackParticleContainer*  actsTracks = evtStore()->tryConstRetrieve<xAOD::TrackParticleContainer>(m_actsTrackName );
 
@@ -320,9 +320,9 @@ StatusCode ActsCompareTrackAlg::execute() {
 }
 
 // Finalize method:
-StatusCode ActsCompareTrackAlg::finalize()
+StatusCode CompareTrackAlg::finalize()
 {
-  msg(MSG::INFO) << "ActsCompareTrackAlg::finalize()" << endmsg;
+  msg(MSG::INFO) << "CompareTrackAlg::finalize()" << endmsg;
   return StatusCode::SUCCESS;
 }
 

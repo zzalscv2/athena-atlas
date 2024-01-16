@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsReFitterAlg.h"
+#include "ReFitterAlg.h"
 
 // ATHENA
 #include "GaudiKernel/ListItem.h"
@@ -29,11 +29,11 @@ using namespace Acts::UnitLiterals;
 
 namespace ActsTrk {
 
-ActsReFitterAlg::ActsReFitterAlg(const std::string &name,
-                                   ISvcLocator *pSvcLocator)
+ReFitterAlg::ReFitterAlg(const std::string &name,
+			 ISvcLocator *pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator){}
 
-StatusCode ActsReFitterAlg::initialize() {
+StatusCode ReFitterAlg::initialize() {
 
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
   ATH_CHECK(m_actsFitter.retrieve());
@@ -43,9 +43,9 @@ StatusCode ActsReFitterAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ActsReFitterAlg::execute(const EventContext &ctx) const {
+StatusCode ReFitterAlg::execute(const EventContext &ctx) const {
 
-  ATH_MSG_DEBUG ("ActsReFitterAlg::execute()");
+  ATH_MSG_DEBUG ("ReFitterAlg::execute()");
   SG::ReadHandle<TrackCollection> tracks (m_trackName, ctx);
 
   if (!tracks.isValid()){
