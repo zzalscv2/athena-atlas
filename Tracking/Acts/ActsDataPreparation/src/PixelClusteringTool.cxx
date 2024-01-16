@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsPixelClusteringTool.h"
+#include "PixelClusteringTool.h"
 using ActsTrk::getCellRow;
 using ActsTrk::getCellColumn;
 using ActsTrk::getCellLabel;
@@ -45,7 +45,6 @@ PixelClusteringTool::PixelClusteringTool(
 }
 
 StatusCode
-
 PixelClusteringTool::makeCluster(const PixelClusteringTool::Cluster &cluster,
 				 const PixelID& pixelID,
 				 const InDetDD::SiDetectorElement* element,

@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRK_DATAPREPARATION_ACTSTRKSTRIPSPACEPOINTFORMATIONTOOL_H
-#define ACTSTRK_DATAPREPARATION_ACTSTRKSTRIPSPACEPOINTFORMATIONTOOL_H
+#ifndef ACTSTRK_DATAPREPARATION_STRIPSPACEPOINTFORMATIONTOOL_H
+#define ACTSTRK_DATAPREPARATION_STRIPSPACEPOINTFORMATIONTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ActsToolInterfaces/IStripSpacePointFormationTool.h"
@@ -31,14 +31,14 @@ namespace ActsTrk {
     ///
     /// Space points are then recorded to storegate as StripSP
 
-    class ActsTrkStripSpacePointFormationTool: public extends<AthAlgTool, ActsTrk::IStripSpacePointFormationTool> {
+    class StripSpacePointFormationTool: public extends<AthAlgTool, ActsTrk::IStripSpacePointFormationTool> {
     public:
         /// @name AthAlgTool methods
         //@{
-        ActsTrkStripSpacePointFormationTool(const std::string& type,
+        StripSpacePointFormationTool(const std::string& type,
                                      const std::string& name,
                                      const IInterface* parent);
-        virtual ~ActsTrkStripSpacePointFormationTool() = default;
+        virtual ~StripSpacePointFormationTool() = default;
         virtual StatusCode initialize() override;
         //@}
 
@@ -125,4 +125,4 @@ namespace ActsTrk {
 
 }
 
-#endif // ACTSTRKSPACEPOINTFORMATIONTOOL_ACTSTRKSTRIPSPACEPOINTFORMATIONTOOL_H
+#endif

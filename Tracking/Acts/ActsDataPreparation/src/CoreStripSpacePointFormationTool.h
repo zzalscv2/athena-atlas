@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRK_DATAPREPARATION_ACTSCORESTRIPSPACEPOINTFORMATIONTOOL_H
-#define ACTSTRK_DATAPREPARATION_ACTSCORESTRIPSPACEPOINTFORMATIONTOOL_H
+#ifndef ACTSTRK_DATAPREPARATION_CORESTRIPSPACEPOINTFORMATIONTOOL_H
+#define ACTSTRK_DATAPREPARATION_CORESTRIPSPACEPOINTFORMATIONTOOL_H
 
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
@@ -24,7 +24,7 @@
 #include <string>
 
 namespace ActsTrk {
-    /// @class ActsCoreStripSpacePointFormationTool
+    /// @class CoreStripSpacePointFormationTool
     /// Tool to produce strip space points using ACTS SP builder.
     /// Strip space points are made by combining clusters (obtained from SourceLinks)
     /// from pairs of overlapping detectors. The access to overlapping detector elements is
@@ -36,13 +36,13 @@ namespace ActsTrk {
     /// Space points are then recorded to storege as StripSP, and then
     /// stored as xAOD::SpacePoint in StripSpacePointFormationAlg
 
-  class ActsCoreStripSpacePointFormationTool: public extends<AthAlgTool, ActsTrk::IStripSpacePointFormationTool> {
+  class CoreStripSpacePointFormationTool: public extends<AthAlgTool, ActsTrk::IStripSpacePointFormationTool> {
   public:
-    ActsCoreStripSpacePointFormationTool(const std::string& type,
-                                     const std::string& name,
-                                     const IInterface* parent);
+    CoreStripSpacePointFormationTool(const std::string& type,
+				     const std::string& name,
+				     const IInterface* parent);
 
-    virtual ~ActsCoreStripSpacePointFormationTool() = default;
+    virtual ~CoreStripSpacePointFormationTool() = default;
 
     virtual StatusCode initialize() override;
 
@@ -112,4 +112,4 @@ namespace ActsTrk {
 
 }
 
-#endif // ACTSTRKSPACEPOINTFORMATIONTOOL_ACTSCORESTRIPSPACEPOINTFORMATIONTOOL_H
+#endif

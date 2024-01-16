@@ -15,7 +15,7 @@ def ActsStripSpacePointToolCfg(flags, name = "ActsStripSpacePointTool", **kwargs
     kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
     kwargs.setdefault("AllClusters", False)
 
-    acc.setPrivateTools(CompFactory.ActsTrk.ActsTrkStripSpacePointFormationTool(name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.StripSpacePointFormationTool(name, **kwargs))
     return acc
 
 def ActsCoreStripSpacePointToolCfg(flags, name = "ActsCoreStripSpacePointTool", **kwargs):
@@ -27,7 +27,7 @@ def ActsCoreStripSpacePointToolCfg(flags, name = "ActsCoreStripSpacePointTool", 
     from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
     kwargs.setdefault("ConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
 
-    acc.setPrivateTools(CompFactory.ActsTrk.ActsCoreStripSpacePointFormationTool(name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.CoreStripSpacePointFormationTool(name, **kwargs))
     return acc
 
 def ActsPixelSpacePointFormationCfg(flags,
