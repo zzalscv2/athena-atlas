@@ -231,22 +231,24 @@ JetChainParts = {
        #beamspot preselction option
        'presel2c20b85',
        #DIPZ preselection
-       'preselZ110XX4c20',
-       'preselZ102XX4c20',
-       'preselZ98XX4c20',
-       'preselZ119XX4c20',
-       'preselZ98MAXMULT5XX4c20',
-       'preselZ98MAXMULT20XX4c20',
-       'preselZ119MAXMULT5XX4c20',
-       'preselZ71XX3c20',
-       'preselZ71MAXMULT20XX3c20',
-       'preselZ71XX1c20XX2c20b85',
-       'preselZ110XX2c20XX2c20b85',
-       'preselZ110MAXMULT20XX4c85',
-       'preselZ110XX4c20XX1j20',
-       'preselZ110XX3c20XX1c20bg85',
-       'preselZ98XX3c20XX1c20bg85',
-       'preselZ110XX4c85'
+       'preselZ128XX4c20',
+       'preselZ120XX4c20',
+       'preselZ120MAXMULT20XX4c85',
+       'preselZ120XX4c85',
+       'preselZ116XX4c20',
+       'preselZ138XX4c20',
+       'preselZ116MAXMULT5XX4c20',
+       'preselZ116MAXMULT20XX4c20',
+       'preselZ138MAXMULT5XX4c20',
+       'preselZ84XX3c20',
+       'preselZ84MAXMULT20XX3c20',
+       'preselZ84XX1c20XX2c20b85',
+       'preselZ128XX2c20XX2c20b85',
+       'preselZ128MAXMULT20XX4c85',
+       'preselZ128XX4c20XX1j20',
+       'preselZ128XX3c20XX1c20bg85',
+       'preselZ116XX3c20XX1c20bg85',
+       'preselZ128XX4c85'
      ],
     # Hypo information
     #   If hypoScenario is 'simple', then hypo configuration is handled based on the
@@ -309,10 +311,12 @@ JetChainParts = {
                       'HT1000XX0eta240XX020jvt',
                       'HT50XX10etXX0eta320',  # needed for hypoToolTests.py
                       # DIPZ for testing only
-                      'Z110XX4c120',
-                      'Z110XX5c70',
-                      'Z110XX6c55',
-                      'Z110XX10c40',
+                      'Z120XX4c20',
+                      'Z120XX4c120',
+                      'Z128XX4c20',
+                      'Z120XX5c70',
+                      'Z120XX6c55',
+                      'Z120XX10c40',
                       ],
 
     'exotHypo' : ['emergingPTF0p2dR1p2', 'emergingPTF0p1dR1p2', 'emergingPTF0p09dR1p2', 'emergingPTF0p08dR1p2', 'emergingPTF0p075dR1p2', 'emergingPTF0p07dR1p2', 'emergingPTF0p0dR1p2',

@@ -86,6 +86,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
         hasBjetSel = bool(re.match(r'.*b\w?\d+', p))
         hasDIPZsel = bool(re.match(r'.*Z', p))
         if hasDIPZsel and not doBJetSel: continue # Skipping calopresel step when DIPZ is run
+        if usingDIPZ and not hasDIPZsel and not hasBjetSel and doBJetSel: continue # Skipping roiftf step only when running the calo selection leg (and if in the DIPZ scenario)
 
         assert not ( (hasBjetSel or hasDIPZsel) and not doBJetSel), "Your jet preselection has a b-jet or DIPZ part but a calo-only preselection was requested instead. This should not be possible. Please investigate."        
 
