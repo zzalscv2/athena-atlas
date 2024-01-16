@@ -36,7 +36,7 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
       f"Stream{streamName}Tool",
       DataHeaderKey=outputStreamName,
       MetaDataPoolContainerPrefix=f"{flags.Output.StorageTechnology.MetaData}:MetaData",
-      MetaDataOutputCollection="MetaDataHdr",
+      MetaDataOutputCollection=f"{flags.Output.StorageTechnology.MetaData}:MetaDataHdr",
    )
 
    # If we're running in augmentation mode, configure the writing tool accordingly
