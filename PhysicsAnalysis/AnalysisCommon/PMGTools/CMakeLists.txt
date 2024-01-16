@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PMGTools )
@@ -71,13 +71,12 @@ if( XAOD_STANDALONE )
       POST_EXEC_SCRIPT nopost.sh )
 endif()
 # ... AthAnalysis/AnalysisBase
-if( XAOD_STANDALONE ) # temporarily disabled in Athena (ATEAM-681)
+# Athena tests only with POOL access (ATEAM-681), AnalysisBase tests with xAOD access
 atlas_add_test( ut_PMGTruthWeightTool_test
    SOURCES test/ut_PMGTruthWeightTool_test.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AsgTools PMGAnalysisInterfacesLib PMGToolsLib xAODTruth ${xaod_access_lib}
    POST_EXEC_SCRIPT nopost.sh )
-endif()
 
 # Run tests:
 #atlas_add_test( WeightHelpersTest
