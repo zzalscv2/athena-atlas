@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, LHCPeriod
@@ -542,7 +542,7 @@ def ATLAS_RegionCreatorListCfg(flags):
         if flags.Detector.GeometryLAr:
             # Shower parameterization overrides the calibration hit flag
             if flags.Sim.LArParameterization is not LArParameterization.NoFrozenShowers \
-               and flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile, CalibrationRun.DeadLAr]:
+               and flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile, CalibrationRun.LArTileZDC, CalibrationRun.DeadLAr]:
                 Logging.log.info('You requested both calibration hits and frozen showers / parameterization in the LAr.')
                 Logging.log.info('  Such a configuration is not allowed, and would give junk calibration hits where the showers are modified.')
                 Logging.log.info('  Please try again with a different value of either flags.Sim.LArParameterization (' + str(flags.Sim.LArParameterization.value) + ') or flags.Sim.CalibrationRun ('+str(flags.Sim.CalibrationRun.value)+')')

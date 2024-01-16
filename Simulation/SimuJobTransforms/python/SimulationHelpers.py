@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, LArParameterization
 
 
@@ -58,6 +58,28 @@ def enableG4SignalCavern(flags):
 def enableCalHits(flags):
     """Turns on calibration hits for LAr and Tile"""
     flags.Sim.CalibrationRun = CalibrationRun.LArTile
+    # deactivate incompatible optimizations
+    flags.Sim.LArParameterization = LArParameterization.NoFrozenShowers
+    flags.Sim.NRRThreshold = False
+    flags.Sim.NRRWeight = False
+    flags.Sim.PRRThreshold = False
+    flags.Sim.PRRWeight = False
+
+
+def enableCalHitsZDC(flags):
+    """Turns on calibration hits for ZDC only"""
+    flags.Sim.CalibrationRun = CalibrationRun.ZDC
+    # deactivate incompatible optimizations
+    flags.Sim.LArParameterization = LArParameterization.NoFrozenShowers
+    flags.Sim.NRRThreshold = False
+    flags.Sim.NRRWeight = False
+    flags.Sim.PRRThreshold = False
+    flags.Sim.PRRWeight = False
+
+
+def enableCalHitsAll(flags):
+    """Turns on calibration hits for LAr, Tile and ZDC"""
+    flags.Sim.CalibrationRun = CalibrationRun.LArTileZDC
     # deactivate incompatible optimizations
     flags.Sim.LArParameterization = LArParameterization.NoFrozenShowers
     flags.Sim.NRRThreshold = False
