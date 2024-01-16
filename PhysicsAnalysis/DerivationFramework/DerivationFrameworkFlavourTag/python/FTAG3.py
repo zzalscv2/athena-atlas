@@ -84,7 +84,7 @@ def FTAG3Cfg(flags, skimmingTools=None):
 
     from DerivationFrameworkFlavourTag.FTAG1 import FTAG1CoreCfg
 
-    extra_SmartCollections = []
+    extra_SmartCollections = [ "AntiKtVR30Rmax4Rmin02PV0TrackJets" ]
     extra_AllVariables = [ "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets" ]
     trigger_option = 'FTAG3'
     acc.merge(FTAG1CoreCfg(flags, FTAG3_name_tag, extra_SmartCollections, extra_AllVariables, trigger_option))
