@@ -289,7 +289,9 @@ AsgForwardElectronIsEMSelector::execute(const EventContext& ctx,
 
   float nvtx =
     static_cast<int>(m_usePVCont ? this->getNPrimVertices(ctx) : m_nPVdefault);
-  float eta = fabs(cluster->etaBE(2));
+  // This default value is only useful for candidates in EMEC inner wheel
+  // but is useless anyway
+  float eta = std::abs(cluster->etaBE(2));
 
   // see if we have an electron, with track, for eta
   const xAOD::Electron* el = nullptr;
@@ -297,8 +299,12 @@ AsgForwardElectronIsEMSelector::execute(const EventContext& ctx,
     el = static_cast<const xAOD::Electron*>(eg);
   }
 
+  // el should always be there. So this is always OK
+  // but in Run4, this can be track eta if there is a match.
+  // So for the time being, use cluster eta since fwd isEM (very very old from 2015)
+  // is determined from cluster eta and |eta| > 2.5
   if (el) {
-    eta = fabs(el->eta());
+    eta = std::max(2.5,std::abs(cluster->eta()));
   }
   // Call the calocuts using the egamma object
   isEM = calocuts_electrons(eg, eta, nvtx, 0);

@@ -183,6 +183,30 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     el->setAuthor(xAOD::EgammaParameters::AuthorFwdElectron);
     el->setCaloClusterLinks(egRec->caloClusterElementLinks());
 
+    // from here one, we need both track matching and
+    // having tracks .
+    if (m_doTrackMatching && egRec->getNumberOfTrackParticles() != 0) {
+
+      ++buff_MatchedClusters;
+      el->setTrackParticleLinks(egRec->trackParticleElementLinks());
+
+      const xAOD::TrackParticle* trackParticle = el->trackParticle();
+      if (trackParticle) {
+	el->setCharge(trackParticle->charge());
+      } else {
+	ATH_MSG_WARNING("Forward electron without track particle, whereas"
+			" corresponding egammaRec has at least one");
+      }
+
+      // Set DeltaEta, DeltaPhi, DeltaPhiRescaled.
+      el->setTrackCaloMatchValues(
+	egRec->deltaEta(),
+	egRec->deltaPhi(),
+	egRec->deltaPhiRescaled(),
+	egRec->deltaPhiLast()
+      );
+    }
+
     ATH_CHECK(m_fourMomBuilder->execute(ctx, el));
     ATH_CHECK(ExecObjectQualityTool(ctx, el));
 
@@ -198,28 +222,6 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
       // Save the isem.
       el->setSelectionisEM(accept.getCutResultInverted(), "isEM" + name);
     }
-
-    // from here one, we need both track matching and
-    // having tracks .
-    if (!m_doTrackMatching || (egRec->getNumberOfTrackParticles() == 0)) {
-      continue;
-    }
-
-    ++buff_MatchedClusters;
-    el->setTrackParticleLinks(egRec->trackParticleElementLinks());
-
-    const xAOD::TrackParticle* trackParticle = el->trackParticle();
-    if (trackParticle) {
-      el->setCharge(trackParticle->charge());
-    }
-
-    // Set DeltaEta, DeltaPhi, DeltaPhiRescaled.
-    el->setTrackCaloMatchValues(
-      egRec->deltaEta(), 
-      egRec->deltaPhi(), 
-      egRec->deltaPhiRescaled(),
-      egRec->deltaPhiLast()
-    );
 
   }//end of loop over egammaRecs
 
