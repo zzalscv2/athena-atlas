@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSGEOMETRY_ACTSFITTERHELPER_H
-#define ACTSGEOMETRY_ACTSFITTERHELPER_H
+#ifndef ACTSGEOMETRY_FITTERHELPER_H
+#define ACTSGEOMETRY_FITTERHELPER_H
 
 // ATHENA   
 #include "TRT_ReadoutGeometry/TRT_BaseElement.h"

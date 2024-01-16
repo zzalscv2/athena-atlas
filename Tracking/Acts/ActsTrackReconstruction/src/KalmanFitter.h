@@ -2,10 +2,10 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSGEOMETRY_ACTSKALMANFITTER_H
-#define ACTSGEOMETRY_ACTSKALMANFITTER_H
+#ifndef ACTSGEOMETRY_KALMANFITTER_H
+#define ACTSGEOMETRY_KALMANFITTER_H
 
-#include "ActsFitterHelperFunctions.h"
+#include "FitterHelperFunctions.h"
 
 #include "GaudiKernel/ToolHandle.h"
 
@@ -83,11 +83,11 @@ struct PRDSourceLinkSurfaceAccessor {
   const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;
 };
 
-class ActsKalmanFitter : public extends2<AthAlgTool, Trk::ITrackFitter, ActsTrk::IFitterTool> { 
+class KalmanFitter : public extends2<AthAlgTool, Trk::ITrackFitter, ActsTrk::IFitterTool> { 
 public:
 
-  ActsKalmanFitter(const std::string&,const std::string&,const IInterface*);
-  virtual ~ActsKalmanFitter() = default;
+  KalmanFitter(const std::string&,const std::string&,const IInterface*);
+  virtual ~KalmanFitter() = default;
 
   // standard Athena methods
   virtual StatusCode initialize() override;

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSGEOMETRY_ACTSCOMPARETRACKALG_H
-#define ACTSGEOMETRY_ACTSCOMPARETRACKALG_H
+#ifndef ACTSGEOMETRY_COMPARETRACKALG_H
+#define ACTSGEOMETRY_COMPARETRACKALG_H
 
 // ATHENA
 #include "AthenaBaseComps/AthAlgorithm.h"
@@ -25,12 +25,14 @@ class TH1F;
 
 namespace ActsTrk {
 
-class ActsCompareTrackAlg : public AthAlgorithm {
+class CompareTrackAlg : public AthAlgorithm {
 public:
-  ActsCompareTrackAlg (const std::string& name, ISvcLocator* pSvcLocator);
-  StatusCode initialize() override;
-  StatusCode execute() override;
-  StatusCode finalize() override;
+  CompareTrackAlg (const std::string& name, ISvcLocator* pSvcLocator);
+  virtual ~CompareTrackAlg() override = default;
+  
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
+  virtual StatusCode finalize() override;
 
 private:
 

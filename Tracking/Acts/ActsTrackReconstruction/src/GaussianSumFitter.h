@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSGEOMETRY_ACTSGAUSSIANSUMFITTER_H
-#define ACTSGEOMETRY_ACTSGAUSSIANSUMFITTER_H
+#ifndef ACTSGEOMETRY_GAUSSIANSUMFITTER_H
+#define ACTSGEOMETRY_GAUSSIANSUMFITTER_H
 
 
 
@@ -31,7 +31,7 @@
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
-#include "ActsFitterHelperFunctions.h"
+#include "FitterHelperFunctions.h"
 #include "MeasurementCalibrator.h"
 #include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
 
@@ -41,11 +41,11 @@
 
 namespace ActsTrk {
 
-class ActsGaussianSumFitter : public extends<AthAlgTool, Trk::ITrackFitter> {
+class GaussianSumFitter : public extends<AthAlgTool, Trk::ITrackFitter> {
 public:
   
-  ActsGaussianSumFitter(const std::string&, const std::string&, const IInterface*);
-  virtual ~ActsGaussianSumFitter() = default;
+  GaussianSumFitter(const std::string&, const std::string&, const IInterface*);
+  virtual ~GaussianSumFitter() = default;
 
   // standard Athena methods
   virtual StatusCode initialize() override;

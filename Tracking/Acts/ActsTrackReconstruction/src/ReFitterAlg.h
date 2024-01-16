@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSGEOMETRY_ACTSREFITTERALG_H
-#define ACTSGEOMETRY_ACTSREFITTERALG_H
+#ifndef ACTSGEOMETRY_REFITTERALG_H
+#define ACTSGEOMETRY_REFITTERALG_H
 
 // ATHENA
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -29,9 +29,11 @@ class EventContext;
 
 namespace ActsTrk {
 
-class ActsReFitterAlg : public AthReentrantAlgorithm {
+class ReFitterAlg : public AthReentrantAlgorithm {
 public:
-  ActsReFitterAlg (const std::string& name, ISvcLocator* pSvcLocator);
+  ReFitterAlg (const std::string& name, ISvcLocator* pSvcLocator);
+  virtual ~ReFitterAlg() override = default;
+  
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
 

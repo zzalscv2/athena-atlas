@@ -36,7 +36,7 @@ def ActsGaussianSumFitterCfg(flags, name: str = "ActsGaussianSumFitter", **kwarg
             result.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags)),
         )
 
-    result.setPrivateTools(CompFactory.ActsTrk.ActsGaussianSumFitter(name, **kwargs))
+    result.setPrivateTools(CompFactory.ActsTrk.GaussianSumFitter(name, **kwargs))
 
     return result
 
