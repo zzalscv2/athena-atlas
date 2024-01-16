@@ -101,7 +101,7 @@ namespace ActsTrk
           [this, &tgContext, &finalTrajectory, &actsSmoothedParam, &numberOfDeadPixel, &numberOfDeadSCT, &hypothesis](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             // First only consider states with an associated detector element
-            if (!state.referenceSurface().associatedDetectorElement())
+            if (!state.hasReferenceSurface() || !state.referenceSurface().associatedDetectorElement())
             {
               return;
             }
@@ -172,10 +172,20 @@ namespace ActsTrk
             std::unique_ptr<Trk::MeasurementBase> measState;
             if (state.hasUncalibratedSourceLink())
             {
-              auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-              assert( sl.isValid() && *sl);
-              const xAOD::UncalibratedMeasurement &uncalibMeas = **sl;
-              measState = makeRIO_OnTrack(uncalibMeas, *parm);
+              try {
+                auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+                assert( sl.isValid() && *sl != nullptr);
+                const xAOD::UncalibratedMeasurement &uncalibMeas = **sl;
+                measState = makeRIO_OnTrack(uncalibMeas, *parm);
+                ATH_MSG_DEBUG("Successfully used ATLASUncalibratedSourceLink");
+              } catch ( const std::bad_any_cast& ){
+                ATH_MSG_DEBUG("Not an ATLASUncalibSourceLink, trying ATLASSourceLink");
+                auto sl = state.getUncalibratedSourceLink().template get<ATLASSourceLink>();
+                assert( sl != nullptr );
+                measState.reset(sl->clone());
+                ATH_MSG_DEBUG("Successfully used ATLASSourceLink");
+
+              }
             }
 
             double nDoF = state.calibratedSize();
