@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// Example standalone executable using TEvent (from POOL or xAODRootAccess) to read an xAOD
@@ -19,6 +19,8 @@
 #else
 #include "POOLRootAccess/TEvent.h"
 #endif
+
+#include "CxxUtils/checker_macros.h"
 
 // Local include(s):
 #include "PMGTools/PMGTruthWeightTool.h"
@@ -54,7 +56,7 @@ using namespace asg::msgUserCode;  // messaging
 }
 
 
-int main(int argc, char *argv[])
+int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 {
   ANA_CHECK_SET_TYPE (int); // makes ANA_CHECK return ints if exiting function
 
@@ -114,7 +116,7 @@ int main(int argc, char *argv[])
 
     // Print out the first weight for every event
     if (weightNames.size() > 1) {
-      static std::string weight_name_to_test = weightNames.at(1);
+      static const std::string weight_name_to_test = weightNames.at(1);
       ANA_MSG_INFO("Event #" << entry << ": weight called '" << weight_name_to_test << "' = " << weightTool->getWeight(evtInfo,weight_name_to_test));
     }
 
