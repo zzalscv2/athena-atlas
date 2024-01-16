@@ -1,6 +1,6 @@
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCELLREC_LARCELLMERGER_H
@@ -34,12 +34,9 @@ class LArCellMerger
   : public extends<AthAlgTool, ICaloCellMakerTool>
 {
 public:    
+
+  using base_class::base_class;
   
-  LArCellMerger(const std::string& type, 
-		const std::string& name, 
-				 const IInterface* parent) ;
-
-
   /** initialize the tool
   */
   virtual StatusCode initialize() override; 
@@ -58,14 +55,15 @@ public:
 
   /** handle to LAr cabling
   */
-  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey;
+  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of Cabling obj"};
 
 
   /** key for raw channel container to merge to cells
   */  
-  SG::ReadHandleKey<LArRawChannelContainer>  m_rawChannelContainerName; 
+  SG::ReadHandleKey<LArRawChannelContainer>  m_rawChannelContainerName{this,"RawChannelsName","LArRawChannels_digits",
+									     "SG key of rebuilt LArRawChannelContainer"};
 
-  const CaloCell_ID* m_calo_id;
+  const CaloCell_ID* m_calo_id=nullptr;
 };
 
 #endif

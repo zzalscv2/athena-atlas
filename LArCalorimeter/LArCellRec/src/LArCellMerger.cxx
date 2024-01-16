@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -22,22 +22,6 @@ PURPOSE:
 #include "Identifier/IdentifierHash.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "LArCabling/LArOnOffIdMapping.h"
-
-/////////////////////////////////////////////////////////////////////
-// CONSTRUCTOR:
-/////////////////////////////////////////////////////////////////////
-
-LArCellMerger::LArCellMerger(
-			     const std::string& type, 
-			     const std::string& name, 
-			     const IInterface* parent)
-  :base_class (type, name, parent),
-   m_cablingKey("LArOnOffIdMap"),
-   m_rawChannelContainerName("LArRawChannels_digits"),
-   m_calo_id(nullptr)
-{ 
-  declareProperty("RawChannelsName",m_rawChannelContainerName,"Name of raw channel container");
-}
 
 
 /////////////////////////////////////////////////////////////////////
@@ -79,13 +63,7 @@ StatusCode LArCellMerger::process (CaloCellContainer* theCont,
   // loop over raw channel container
   //   as this new container is supposed to contain only few cells, we do a simple loop and the basics onlineId to offlineId conversion
   //   this could be a little slow if by mistake this container contains all cells (not what this tool is supposed to be used for)
-
-  LArRawChannelContainer::const_iterator itrRawChannel=rawColl->begin();
-  LArRawChannelContainer::const_iterator lastRawChannel=rawColl->end();
-  for ( ; itrRawChannel!=lastRawChannel; ++itrRawChannel) 
-  {
-      const LArRawChannel& theRawChannel = (*itrRawChannel);
-
+  for ( const LArRawChannel& theRawChannel : *rawColl ) {
       const HWIdentifier hwid=theRawChannel.channelID();
       if (cabling->isOnlineConnected(hwid)) {
           Identifier id = cabling->cnvToIdentifier( hwid);
@@ -108,8 +86,8 @@ StatusCode LArCellMerger::process (CaloCellContainer* theCont,
 	    aCell->setProvenance(theRawChannel.provenance());
           }
 
-      }  // isConnected
-  }       // loop over raw channel container
+      }// isConnected
+  }// loop over raw channel container
 
   if (nReplaced*5>theCont->size()) {
     ATH_MSG_WARNING("Replaced more than 20% of channels reco'ed online by channels reco'ed offline");
