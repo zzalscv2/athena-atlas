@@ -1816,6 +1816,11 @@ class ItemDef:
             MenuItem('L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU12').setLogic ( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_4DPHI99_eTAU30ab_eTAU12ab  & physcond)
             MenuItem('L1_4jJ30p0ETA24_0DETA24_10DPHI99-eTAU30eTAU12').setLogic( d.jJ300ETA25.x(4) & d.TOPO_0DETA24_10DPHI99_eTAU30ab_eTAU12ab & physcond)
             MenuItem('L1_jJ85p0ETA21_3jJ40p0ETA25_cTAU20M_2cTAU12M').setLogic   ( d.jJ850ETA21 & d.jJ400ETA25.x(3) & d.cTAU20M & d.cTAU12M.x(2)   & physcond)
+            #ATR-27132
+            MenuItem('L1_cTAU20M_cTAU12M_4jJ30p0ETA24_0DETA24-eTAU30eTAU12').setLogic         ( d.cTAU20M & d.cTAU12M & d.jJ300ETA25.x(4) & d.TOPO_0DETA24_eTAU30s2_eTAU12s2          & physcond)
+            MenuItem('L1_cTAU20M_cTAU12M_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU20').setLogic ( d.cTAU20M & d.cTAU12M & d.jJ300ETA25.x(4) & d.TOPO_0DETA24_4DPHI99_eTAU30ab_eTAU20ab  & physcond)
+            MenuItem('L1_cTAU20M_cTAU12M_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU12').setLogic ( d.cTAU20M & d.cTAU12M & d.jJ300ETA25.x(4) & d.TOPO_0DETA24_4DPHI99_eTAU30ab_eTAU12ab  & physcond)
+            MenuItem('L1_cTAU20M_cTAU12M_4jJ30p0ETA24_0DETA24_10DPHI99-eTAU30eTAU12').setLogic( d.cTAU20M & d.cTAU12M & d.jJ300ETA25.x(4) & d.TOPO_0DETA24_10DPHI99_eTAU30ab_eTAU12ab & physcond)
             # ATR-27252
             MenuItem('L1_eTAU60_2cTAU20M_jXE80').setLogic( d.eTAU60 & d.cTAU20M.x(2) & d.jXE80 & physcond)
 

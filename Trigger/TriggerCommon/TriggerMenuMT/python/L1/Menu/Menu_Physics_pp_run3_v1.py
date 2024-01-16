@@ -55,7 +55,7 @@ def defineMenu():
         'L1_TAU8', 'L1_TAU12IM',   'L1_TAU20IM', 'L1_TAU40', 'L1_TAU60', 'L1_TAU100',
         'L1_TAU8_EMPTY', 'L1_TAU8_FIRSTEMPTY', 'L1_TAU8_UNPAIRED_ISO', 'L1_TAU40_EMPTY', 'L1_TAU40_UNPAIRED_ISO',
         # new calo
-        'L1_eTAU12', 
+        'L1_eTAU12', 'L1_cTAU12M',
         'L1_eTAU20', 'L1_jTAU20', 'L1_jTAU30', 'L1_jTAU30M', 'L1_cTAU20M',
         'L1_eTAU20L', 'L1_eTAU20M', 
         'L1_eTAU30', 'L1_cTAU30M', 
@@ -290,7 +290,6 @@ def defineMenu():
         #ATR-26902
         'L1_4jJ30p0ETA24_0DETA24-eTAU30eTAU12',
         'L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30eTAU12',
-        
         
         'L1_DY-BOX-2MU5VF', 'L1_DY-BOX-MU5VFMU3V', 'L1_DY-BOX-2MU3VF',
 
