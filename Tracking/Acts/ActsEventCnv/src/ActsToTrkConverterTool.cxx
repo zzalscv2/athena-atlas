@@ -37,6 +37,7 @@
 #include "ActsEvent/MultiTrajectory.h"
 #include "Acts/EventData/TrackStatePropMask.hpp"
 #include "Acts/EventData/SourceLink.hpp"
+#include "ActsGeometry/ATLASSourceLink.h"
 
 // STL
 #include <cmath>
@@ -394,15 +395,19 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
       continue;
     }
 
-    auto track = tc.getTrack(tc.addTrack());
+    auto actsTrack = tc.getTrack(tc.addTrack());
     auto& trackStateContainer = tc.trackStateContainer();
 
     ATH_MSG_VERBOSE("Track "<<trkCount++<<" has " << trackStates->size()
                                  << " track states on surfaces.");
+    // basic quantities copy
+    actsTrack.chi2() = trk->fitQuality()->chiSquared();
+    actsTrack.nDoF() = trk->fitQuality()->numberDoF();
 
     // loop over track states on surfaces, convert and add them to the ACTS
     // container
     bool first_tsos = true;  // We need to handle the first one differently
+    int measurementsCount = 0;
     for (auto tsos : *trackStates) {
 
       // Setup the mask
@@ -417,14 +422,15 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
       // Setup the index of the trackstate
       auto index = Acts::MultiTrajectoryTraits::kInvalid;
       if (!first_tsos) {
-        index = track.tipIndex();
+        index = actsTrack.tipIndex();
       }
       auto actsTSOS = trackStateContainer.getTrackState(
           trackStateContainer.addTrackState(mask, index));
-      ATH_MSG_VERBOSE("TipIndex: " << track.tipIndex()
+      ATH_MSG_VERBOSE("TipIndex: " << actsTrack.tipIndex()
                                    << " TSOS index within trajectory: "
                                    << actsTSOS.index());
-      track.tipIndex() = actsTSOS.index();
+      actsTrack.tipIndex() = actsTSOS.index();
+
 
       if (tsos->trackParameters()) {
         ATH_MSG_VERBOSE("Converting track parameters.");
@@ -438,9 +444,9 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
         if (first_tsos) {
           // This is the first track state, so we need to set the track
           // parameters
-          track.parameters() = parameters.parameters();
-          track.covariance() = *parameters.covariance();
-          track.setReferenceSurface(
+          actsTrack.parameters() = parameters.parameters();
+          actsTrack.covariance() = *parameters.covariance();
+          actsTrack.setReferenceSurface(
               parameters.referenceSurface().getSharedPtr());
           first_tsos = false;
         } else {
@@ -461,6 +467,7 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
       if (tsos->measurementOnTrack()) {
         ATH_MSG_VERBOSE("Converting measurement.");
         auto &measurement = *(tsos->measurementOnTrack());
+        measurementsCount++;
         // const Acts::Surface &surface =
         //     trkSurfaceToActsSurface(measurement.associatedSurface());
         //  Commented for the moment because Surfaces not yet implemented in
@@ -477,10 +484,12 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
         } else {
           throw std::domain_error("Cannot handle measurement dim>2");
         }
+        actsTSOS.setUncalibratedSourceLink(Acts::SourceLink(static_cast<ActsTrk::ATLASSourceLink>(tsos->measurementOnTrack())));
+
       }  // end if measurement
     }    // end loop over track states
-
-    ATH_MSG_VERBOSE("TrackProxy has " << track.nTrackStates()
+    actsTrack.nMeasurements() = measurementsCount;
+    ATH_MSG_VERBOSE("TrackProxy has " << actsTrack.nTrackStates()
                                  << " track states on surfaces.");
   }
   ATH_MSG_VERBOSE("Finished converting " << trackColl.size() << " tracks.");
