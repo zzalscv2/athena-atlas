@@ -2,7 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsTrkStripSpacePointFormationTool.h"
+#include "StripSpacePointFormationTool.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "ReadoutGeometryBase/SiCellId.h"
 #include "InDetCondTools/ISiLorentzAngleTool.h"
@@ -13,13 +13,13 @@
 
 namespace ActsTrk {
 
-    ActsTrkStripSpacePointFormationTool::ActsTrkStripSpacePointFormationTool(const std::string& type,
-                                                               const std::string& name,
-                                                               const IInterface* parent)
+    StripSpacePointFormationTool::StripSpacePointFormationTool(const std::string& type,
+							       const std::string& name,
+							       const IInterface* parent)
     : base_class(type, name, parent)
     {}
 
-    StatusCode ActsTrkStripSpacePointFormationTool::initialize() {
+    StatusCode StripSpacePointFormationTool::initialize() {
 
         ATH_CHECK(detStore()->retrieve(m_stripId,"SCT_ID"));
 
@@ -28,14 +28,14 @@ namespace ActsTrk {
         return StatusCode::SUCCESS;
     }
 
-  StatusCode ActsTrkStripSpacePointFormationTool::produceSpacePoints(const EventContext& ,
-								   const xAOD::StripClusterContainer& clusterContainer,
-								   const InDet::SiElementPropertiesTable& properties,
-								   const InDetDD::SiDetectorElementCollection& elements,
-								   const Amg::Vector3D& beamSpotVertex,
-								   std::vector<StripSP>& spacePoints,
-								   std::vector<StripSP>& overlapSpacePoints,
-								   bool processOverlaps) const
+  StatusCode StripSpacePointFormationTool::produceSpacePoints(const EventContext& ,
+							      const xAOD::StripClusterContainer& clusterContainer,
+							      const InDet::SiElementPropertiesTable& properties,
+							      const InDetDD::SiDetectorElementCollection& elements,
+							      const Amg::Vector3D& beamSpotVertex,
+							      std::vector<StripSP>& spacePoints,
+							      std::vector<StripSP>& overlapSpacePoints,
+							      bool processOverlaps) const
     {
         /// Production of StripSP from strip clusters
         /// Strip space points involves a more complex logic since
@@ -213,7 +213,7 @@ namespace ActsTrk {
     }
 
     StatusCode
-      ActsTrkStripSpacePointFormationTool::fillStripSpacePoints(
+      StripSpacePointFormationTool::fillStripSpacePoints(
         const std::array<const InDetDD::SiDetectorElement*, nNeighbours>& elements,
         const std::array<std::vector<std::pair<const xAOD::StripCluster*, size_t>>, nNeighbours>& clusters,
         const std::array<double, 14>& overlapExtents,
@@ -425,7 +425,7 @@ namespace ActsTrk {
 	return StatusCode::SUCCESS;
     }
 
-    StatusCode  ActsTrkStripSpacePointFormationTool::makeStripSpacePoint(
+    StatusCode StripSpacePointFormationTool::makeStripSpacePoint(
        std::vector<StripSP>& collection,
        const StripInformationHelper& firstInfo,
        const StripInformationHelper& secondInfo,
@@ -517,7 +517,7 @@ namespace ActsTrk {
         return StatusCode::SUCCESS;
     }
 
-    double ActsTrkStripSpacePointFormationTool::offset(const InDetDD::SiDetectorElement* element1,
+    double StripSpacePointFormationTool::offset(const InDetDD::SiDetectorElement* element1,
                                                 const InDetDD::SiDetectorElement* element2,
                                                 double& stripLengthGapTolerance) const
     {
@@ -540,17 +540,17 @@ namespace ActsTrk {
         return dm;
     }
 
-    void ActsTrkStripSpacePointFormationTool::updateRange(const InDetDD::SiDetectorElement* element1,
-                                                    const InDetDD::SiDetectorElement* element2,
-                                                    double& stripLengthGapTolerance,
-                                                    double& min, double& max) const
+    void StripSpacePointFormationTool::updateRange(const InDetDD::SiDetectorElement* element1,
+						   const InDetDD::SiDetectorElement* element2,
+						   double& stripLengthGapTolerance,
+						   double& min, double& max) const
     {
         double dm = offset(element1, element2, stripLengthGapTolerance);
         min -= dm;
         max += dm;
     }
 
-    void ActsTrkStripSpacePointFormationTool::correctPolarRange(const InDetDD::SiDetectorElement* element,
+    void StripSpacePointFormationTool::correctPolarRange(const InDetDD::SiDetectorElement* element,
                                                          double& min,
                                                          double& max,
                                                          size_t& minStrip,
@@ -593,7 +593,7 @@ namespace ActsTrk {
     }
 
     std::pair<Amg::Vector3D, Amg::Vector3D >
-        ActsTrkStripSpacePointFormationTool::getStripEnds(const xAOD::StripCluster* cluster,
+        StripSpacePointFormationTool::getStripEnds(const xAOD::StripCluster* cluster,
                                                    const InDetDD::SiDetectorElement* element,
                                                    size_t& stripIndex) const
     {

@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsCoreStripSpacePointFormationTool.h"
+#include "CoreStripSpacePointFormationTool.h"
 #include "Acts/Utilities/SpacePointUtility.hpp"
 #include "InDetIdentifier/SCT_ID.h"
 #include "ReadoutGeometryBase/SiCellId.h"
@@ -31,13 +31,13 @@ namespace {
 namespace ActsTrk
 {
 
-  ActsCoreStripSpacePointFormationTool::ActsCoreStripSpacePointFormationTool(const std::string &type,
+  CoreStripSpacePointFormationTool::CoreStripSpacePointFormationTool(const std::string &type,
                                                                      const std::string &name,
                                                                      const IInterface *parent)
       : base_class(type, name, parent)
   {}
 
-  StatusCode ActsCoreStripSpacePointFormationTool::initialize(){
+  StatusCode CoreStripSpacePointFormationTool::initialize(){
 
     ATH_CHECK(detStore()->retrieve(m_stripId, "SCT_ID"));
     ATH_CHECK(m_lorentzAngleTool.retrieve());
@@ -46,7 +46,7 @@ namespace ActsTrk
     return StatusCode::SUCCESS;
   }
 
-  StatusCode ActsCoreStripSpacePointFormationTool::produceSpacePoints(const EventContext &ctx,
+  StatusCode CoreStripSpacePointFormationTool::produceSpacePoints(const EventContext &ctx,
 								  const xAOD::StripClusterContainer &clusterContainer,
 								  const InDet::SiElementPropertiesTable &properties,
 								  const InDetDD::SiDetectorElementCollection &elements,
@@ -317,7 +317,7 @@ namespace ActsTrk
     return StatusCode::SUCCESS;
   }
 
-  StatusCode ActsCoreStripSpacePointFormationTool::fillSpacePoints(const EventContext &ctx,
+  StatusCode CoreStripSpacePointFormationTool::fillSpacePoints(const EventContext &ctx,
 							       std::shared_ptr<Acts::SpacePointBuilder<StripSP>> spBuilder,
 							       std::array<const InDetDD::SiDetectorElement *,nNeighbours> elements,
 							       std::array<std::vector<std::pair<ATLASUncalibSourceLink, size_t>>,nNeighbours> sourceLinks,
@@ -519,7 +519,7 @@ namespace ActsTrk
   }
 
 
-  StatusCode ActsCoreStripSpacePointFormationTool::makeSpacePoint(const EventContext &ctx,
+  StatusCode CoreStripSpacePointFormationTool::makeSpacePoint(const EventContext &ctx,
 							      std::vector<StripSP>& collection,
 							      std::shared_ptr<Acts::SpacePointBuilder<StripSP>> spBuilder,
 							      const ATLASUncalibSourceLink& currentSlink,
@@ -582,7 +582,7 @@ namespace ActsTrk
     return StatusCode::SUCCESS;
   }
 
-double ActsCoreStripSpacePointFormationTool::computeOffset(const InDetDD::SiDetectorElement& element1,
+double CoreStripSpacePointFormationTool::computeOffset(const InDetDD::SiDetectorElement& element1,
 						       const InDetDD::SiDetectorElement& element2,
 						       double& stripLengthGapTolerance) const
 {
@@ -616,7 +616,7 @@ double ActsCoreStripSpacePointFormationTool::computeOffset(const InDetDD::SiDete
     return dm;
 }
 
-  void ActsCoreStripSpacePointFormationTool::updateRange(const InDetDD::SiDetectorElement &element1,
+  void CoreStripSpacePointFormationTool::updateRange(const InDetDD::SiDetectorElement &element1,
                                                      const InDetDD::SiDetectorElement &element2,
                                                      double &stripLengthGapTolerance,
                                                      double &min, double &max) const
@@ -626,7 +626,7 @@ double ActsCoreStripSpacePointFormationTool::computeOffset(const InDetDD::SiDete
     max += dm;
   }
 
-  void ActsCoreStripSpacePointFormationTool::correctPolarRange(const InDetDD::SiDetectorElement *element,
+  void CoreStripSpacePointFormationTool::correctPolarRange(const InDetDD::SiDetectorElement *element,
                                                            double &min,
                                                            double &max,
                                                            size_t &minStrip,
@@ -667,9 +667,9 @@ double ActsCoreStripSpacePointFormationTool::computeOffset(const InDetDD::SiDete
   }
 
   std::pair<Amg::Vector3D, Amg::Vector3D>
-  ActsCoreStripSpacePointFormationTool::getStripEnds(const ATLASUncalibSourceLink &sourceLink,
-                                                     const InDetDD::SiDetectorElement *element,
-                                                     size_t &stripIndex) const
+  CoreStripSpacePointFormationTool::getStripEnds(const ATLASUncalibSourceLink &sourceLink,
+						 const InDetDD::SiDetectorElement *element,
+						 size_t &stripIndex) const
   {
     assert( sourceLink.isValid());
     const xAOD::UncalibratedMeasurement *measurement = *sourceLink;
