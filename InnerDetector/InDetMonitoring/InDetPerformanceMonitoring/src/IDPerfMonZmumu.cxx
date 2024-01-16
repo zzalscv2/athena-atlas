@@ -91,7 +91,7 @@ IDPerfMonZmumu::IDPerfMonZmumu(const std::string& name,
   m_MSTree(nullptr),
   m_FourMuTree(nullptr),
   m_doRemoval(true),
-  m_doDebug(true),
+  m_doDebug(false),
   m_Trk2VtxAssociationTool("CP::TrackVertexAssociationTool", this)
 {
   // Properties that are set from the python scripts.
@@ -147,7 +147,7 @@ IDPerfMonZmumu::IDPerfMonZmumu(const std::string& name,
   declareProperty("FourMuTreeFolder", m_FourMuTreeFolder);
 
   declareProperty("StoreZmumuNtuple", m_storeZmumuNtuple = true);
-  declareProperty("doZmumuEventDebug",m_doDebug);
+  declareProperty("doZmumuEventDebug", m_doDebug);
   declareProperty("MuonQuality", m_MuonQualityName = "Medium");
   declareProperty("skipMS", m_skipMS = false);
   declareProperty("useCustomMuonSelector", m_useCustomMuonSelector = false );
@@ -259,7 +259,7 @@ StatusCode IDPerfMonZmumu::initialize()
   m_xZmm.SetSkipMSCheck     (m_skipMS);
   m_xZmm.SetMinLumiBlock    (m_minGoodLumiBlock);
   m_xZmm.SetMaxLumiBlock    (m_maxGoodLumiBlock);
-
+  
   if (m_useCustomMuonSelector) {
     m_xZmm.SetMuonSelectionTool (m_muonSelector);    
   }
