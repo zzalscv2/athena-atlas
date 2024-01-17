@@ -6,7 +6,8 @@ EXOT15SmartContent = [
     "Electrons",
     "Photons",
     "AntiKt4EMTopoJets",
-    'AntiKt4EMTopoJets_BTagging201810',
+    "AntiKt4EMTopoJets_BTagging201810",
+    "BTagging_AntiKt4EMTopo_201810",
     "AntiKt4EMPFlowJets",
     "AntiKt10LCTopoJets",
     "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
@@ -18,6 +19,8 @@ EXOT15SmartContent = [
 
 EXOT15AllVariablesContent = [
     "AntiKt4EMTopoJets",
+    "AntiKt4EMTopoJets_BTagging201810",
+    "BTagging_AntiKt4EMTopo_201810",
     "AntiKt10LCTopoJets",
     "LCOriginTopoClusters",
     "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
