@@ -208,7 +208,7 @@ namespace xAOD {
       static const int s_bcn4Mask        = 0xf;
       static const int s_eFexMask        = 0xf;
       static const int s_shelfMask       = 0xf;
-      static const int s_bdtScoreMask    = 0x7ff;
+      static const int s_bdtScoreMask    = 0xfff;
 
       // For decoding coordinates
       // 
