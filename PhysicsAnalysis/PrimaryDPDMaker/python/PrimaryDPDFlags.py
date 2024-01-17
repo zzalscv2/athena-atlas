@@ -323,6 +323,19 @@ class WriteDRAW_TAULH(JobProperty):
 jobproperties.PrimaryDPDFlags.add_JobProperty(WriteDRAW_TAULH)
 listRAWtoDPD.append(WriteDRAW_TAULH.StreamName)
 
+class WriteDRAW_JET(JobProperty):
+    """ Produce the DRAW for jet selection."""
+    statusOn       = True
+    allowedTypes   = ['bool']
+    StoredValue    = False
+    StreamName     = "StreamDRAW_JET"
+    FileName       = ""
+    isVirtual      = False
+    DPDMakerScript = "PrimaryDPDMaker/DRAW_JET.py"
+    pass
+jobproperties.PrimaryDPDFlags.add_JobProperty(WriteDRAW_JET)
+listRAWtoDPD.append(WriteDRAW_JET.StreamName)
+
 class WriteDRAW_EMU(JobProperty):
     """ Produce the primary DPD e-mu in Byte Stream format."""
     statusOn       = True

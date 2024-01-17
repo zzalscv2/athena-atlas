@@ -126,6 +126,12 @@ def fromRunArgs(runArgs):
         flags.Output.doWriteBS = True
         log.info("---------- Configured DRAW_TAULH output")
 
+    if hasattr(runArgs, 'outputDRAW_JETFile'):
+        flagString = 'Output.DRAW_JETFileName'
+        flags.addFlag(flagString, runArgs.outputDRAW_JETFile)
+        flags.Output.doWriteBS = True
+        log.info("---------- Configured DRAW_JET output")
+
     if hasattr(runArgs, 'outputDAOD_L1CALO1File'):
         flagString = 'Output.DAOD_L1CALO1FileName'
         flags.addFlag(flagString, runArgs.outputDAOD_L1CALO1File)
@@ -238,6 +244,12 @@ def fromRunArgs(runArgs):
         from PrimaryDPDMaker.DRAW_TAULH import DRAW_TAULHCfg
         cfg.merge(DRAW_TAULHCfg(flags))
         log.info("---------- Configured DRAW_TAULH perfDPD")
+
+    #DRAW_JET
+    for flag in [key for key in flags._flagdict.keys() if ("Output.DRAW_JETFileName" in key)]:
+        from PrimaryDPDMaker.DRAW_JET import DRAW_JETCfg
+        cfg.merge(DRAW_JETCfg(flags))
+        log.info("---------- Configured DRAW_JET perfDPD")
 
     # L1CALO1/2
     for flag in [key for key in flags._flagdict.keys() if ("Output.DAOD_L1CALO1FileName" in key)]:

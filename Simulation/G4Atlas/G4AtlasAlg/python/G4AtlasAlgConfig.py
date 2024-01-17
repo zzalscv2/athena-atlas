@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from G4AtlasServices.G4AtlasServicesConfig import DetectorGeometrySvcCfg, PhysicsListSvcCfg
 from ISF_Services.ISF_ServicesConfig import TruthServiceCfg, InputConverterCfg
 from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
@@ -91,7 +91,10 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
 
     # Set commands for the G4AtlasAlg
     kwargs.setdefault("G4Commands", flags.Sim.G4Commands)
-
+    from SimulationConfig.SimEnums import CalibrationRun
+    if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
+        # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
+        kwargs.setdefault("ExtraOutputs", [( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitActive_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitDeadMaterial_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitInactive_DEAD' )])
     result.addEventAlgo(CompFactory.G4AtlasAlg(name, **kwargs))
 
     return result

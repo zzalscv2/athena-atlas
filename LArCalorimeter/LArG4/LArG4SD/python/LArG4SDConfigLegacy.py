@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import CfgMgr
 
@@ -117,7 +117,7 @@ def getLArDeadSensitiveDetector(name="LArDeadSensitiveDetector", **kwargs):
     # No effect currently
     outputCollectionName = "LArCalibrationHitDeadMaterial"
     from G4AtlasApps.SimFlags import simFlags
-    if simFlags.CalibrationRun.get_Value() in ['LAr', 'LAr+Tile']:
+    if simFlags.CalibrationRun.get_Value() in ['LAr', 'LAr+Tile', 'LAr+Tile+ZDC']:
         outputCollectionName = "LArCalibrationHitDeadMaterial_DEAD"
     kwargs.setdefault("HitCollectionName", outputCollectionName)
     return CfgMgr.LArG4__DeadSDTool(name, **kwargs)

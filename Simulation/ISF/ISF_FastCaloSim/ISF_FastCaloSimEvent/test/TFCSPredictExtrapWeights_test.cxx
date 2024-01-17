@@ -1,8 +1,6 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-
 // test interface for a wrapper module that can open various kinds of neural
 // network graph file
 

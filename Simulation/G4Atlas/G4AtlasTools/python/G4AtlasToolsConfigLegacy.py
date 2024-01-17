@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from __future__ import print_function
 
 from AthenaCommon import CfgMgr
@@ -23,7 +23,7 @@ def generateFastSimulationList():
     if DetFlags.geometry.LAr_on():
         ## Shower parameterization overrides the calibration hit flag
         if simFlags.LArParameterization.statusOn and simFlags.LArParameterization() > 0 \
-                and simFlags.CalibrationRun.statusOn and simFlags.CalibrationRun.get_Value() in ['LAr','LAr+Tile','DeadLAr']:
+                and simFlags.CalibrationRun.statusOn and simFlags.CalibrationRun.get_Value() in ['LAr','LAr+Tile','LAr+Tile+ZDC','DeadLAr']:
             print ('getFastSimulationMasterTool FATAL :: You requested both calibration hits and frozen showers / parameterization in the LAr.')
             print ('  Such a configuration is not allowed, and would give junk calibration hits where the showers are modified.')
             print ('  Please try again with a different value of simFlags.LArParameterization or simFlags.CalibrationRun ')
@@ -111,14 +111,14 @@ def generateCaloSensitiveDetectorList():
         else:
             SensitiveDetectorList += [ 'MinBiasScintillatorSD' ]
         from G4AtlasApps.SimFlags import simFlags
-        if simFlags.CalibrationRun.get_Value() in ['LAr', 'LAr+Tile']:
+        if simFlags.CalibrationRun.get_Value() in ['LAr', 'LAr+Tile', 'LAr+Tile+ZDC']:
             SensitiveDetectorList += [ 'LArDeadSensitiveDetector','LArInactiveSensitiveDetector','LArActiveSensitiveDetector' ]
         elif simFlags.CalibrationRun.get_Value() == 'DeadLAr':
             SensitiveDetectorList += [ 'LArDeadSensitiveDetector' ]
 
     if DetFlags.simulate.Tile_on():
         from G4AtlasApps.SimFlags import simFlags
-        if simFlags.CalibrationRun.statusOn and (simFlags.CalibrationRun.get_Value() in ['Tile', 'LAr+Tile']):
+        if simFlags.CalibrationRun.statusOn and (simFlags.CalibrationRun.get_Value() in ['Tile', 'LAr+Tile', 'LAr+Tile+ZDC']):
             SensitiveDetectorList += [ 'TileGeoG4CalibSD' ] # mode 1 : With CaloCalibrationHits
         else:
             SensitiveDetectorList += [ 'TileGeoG4SD' ]      # mode 0 : No CaloCalibrationHits
@@ -172,7 +172,7 @@ def generateTestBeamSensitiveDetectorList():
     if "tb_Tile2000_2003" in simFlags.SimLayout():
         if DetFlags.simulate.Tile_on():
             from G4AtlasApps.SimFlags import simFlags
-            if simFlags.CalibrationRun.statusOn and (simFlags.CalibrationRun.get_Value() in ['Tile', 'LAr+Tile']):
+            if simFlags.CalibrationRun.statusOn and (simFlags.CalibrationRun.get_Value() in ['Tile', 'LAr+Tile', 'LAr+Tile+ZDC']):
                 SensitiveDetectorList += [ 'TileCTBGeoG4CalibSD' ] # mode 1 : With CaloCalibrationHits
             else:
                 SensitiveDetectorList += [ 'TileCTBGeoG4SD' ]      # mode 0 : No CaloCalibrationHits
@@ -192,7 +192,7 @@ def generateTestBeamSensitiveDetectorList():
             SensitiveDetectorList += [ 'LArH8CalibSensitiveDetector' ] # mode 1 : With CaloCalibrationHits
     if DetFlags.simulate.Tile_on():
         from G4AtlasApps.SimFlags import simFlags
-        if simFlags.CalibrationRun.statusOn and (simFlags.CalibrationRun.get_Value() in ['Tile', 'LAr+Tile']):
+        if simFlags.CalibrationRun.statusOn and (simFlags.CalibrationRun.get_Value() in ['Tile', 'LAr+Tile', 'LAr+Tile+ZDC']):
             SensitiveDetectorList += [ 'TileCTBGeoG4CalibSD' ] # mode 1 : With CaloCalibrationHits
         else:
             SensitiveDetectorList += [ 'TileCTBGeoG4SD' ]      # mode 0 : No CaloCalibrationHits
